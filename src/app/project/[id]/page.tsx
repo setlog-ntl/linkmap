@@ -1,42 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
+import { useProjectServices } from '@/lib/queries/services';
+import { useEnvVars } from '@/lib/queries/env-vars';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Map, List, Key, ArrowRight } from 'lucide-react';
-import type { ProjectService, Service } from '@/types';
 
 export default function ProjectOverviewPage() {
   const params = useParams();
   const projectId = params.id as string;
-  const supabase = createClient();
-  const [services, setServices] = useState<(ProjectService & { service: Service })[]>([]);
-  const [envCount, setEnvCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const { data: services = [], isLoading: svcLoading } = useProjectServices(projectId);
+  const { data: envVars = [], isLoading: envLoading } = useEnvVars(projectId);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const [{ data: svcData }, { count }] = await Promise.all([
-        supabase
-          .from('project_services')
-          .select('*, service:services(*)')
-          .eq('project_id', projectId),
-        supabase
-          .from('environment_variables')
-          .select('*', { count: 'exact', head: true })
-          .eq('project_id', projectId),
-      ]);
-      setServices((svcData as (ProjectService & { service: Service })[]) || []);
-      setEnvCount(count || 0);
-      setLoading(false);
-    };
-    fetchData();
-  }, [projectId, supabase]);
+  const loading = svcLoading || envLoading;
 
   const connectedCount = services.filter((s) => s.status === 'connected').length;
   const progressPercent = services.length > 0
@@ -61,7 +42,7 @@ export default function ProjectOverviewPage() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-40 rounded-lg bg-muted animate-pulse" />
+          <Skeleton key={i} className="h-40 rounded-lg" />
         ))}
       </div>
     );
@@ -69,7 +50,6 @@ export default function ProjectOverviewPage() {
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader className="pb-2">
@@ -88,7 +68,7 @@ export default function ProjectOverviewPage() {
             <CardTitle className="text-sm font-medium text-muted-foreground">환경변수</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{envCount}</div>
+            <div className="text-3xl font-bold">{envVars.length}</div>
             <p className="text-xs text-muted-foreground mt-1">개의 변수가 저장됨</p>
           </CardContent>
         </Card>
@@ -104,7 +84,6 @@ export default function ProjectOverviewPage() {
         </Card>
       </div>
 
-      {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Button variant="outline" className="h-auto py-4 flex-col items-start" asChild>
           <Link href={`/project/${projectId}/service-map`}>
@@ -129,7 +108,6 @@ export default function ProjectOverviewPage() {
         </Button>
       </div>
 
-      {/* Services Summary */}
       {services.length > 0 && (
         <Card>
           <CardHeader>

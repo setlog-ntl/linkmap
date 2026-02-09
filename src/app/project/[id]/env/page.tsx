@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useEnvVars, useAddEnvVar, useDeleteEnvVar } from '@/lib/queries/env-vars';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,16 +17,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Download, Plus, Trash2, Eye, EyeOff, Copy } from 'lucide-react';
-import type { EnvironmentVariable, Environment } from '@/types';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Download, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
+import type { Environment } from '@/types';
 
 const envLabels: Record<Environment, string> = {
   development: '개발',
@@ -37,74 +31,42 @@ const envLabels: Record<Environment, string> = {
 export default function ProjectEnvPage() {
   const params = useParams();
   const projectId = params.id as string;
-  const supabase = createClient();
-  const [envVars, setEnvVars] = useState<EnvironmentVariable[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: envVars = [], isLoading } = useEnvVars(projectId);
+  const addEnvVar = useAddEnvVar(projectId);
+  const deleteEnvVar = useDeleteEnvVar(projectId);
+
   const [activeEnv, setActiveEnv] = useState<Environment>('development');
   const [showValues, setShowValues] = useState<Record<string, boolean>>({});
-
-  // Add dialog state
   const [addOpen, setAddOpen] = useState(false);
   const [newKey, setNewKey] = useState('');
   const [newValue, setNewValue] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [newIsSecret, setNewIsSecret] = useState(true);
-  const [addLoading, setAddLoading] = useState(false);
-
-  const fetchEnvVars = useCallback(async () => {
-    const { data } = await supabase
-      .from('environment_variables')
-      .select('*')
-      .eq('project_id', projectId)
-      .order('key_name');
-    setEnvVars(data || []);
-    setLoading(false);
-  }, [projectId, supabase]);
-
-  useEffect(() => {
-    fetchEnvVars();
-  }, [fetchEnvVars]);
 
   const filteredVars = envVars.filter((v) => v.environment === activeEnv);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newKey.trim()) return;
-    setAddLoading(true);
 
-    try {
-      const res = await fetch('/api/env', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          project_id: projectId,
-          key_name: newKey.trim(),
-          value: newValue,
-          environment: activeEnv,
-          is_secret: newIsSecret,
-          description: newDesc.trim() || null,
-        }),
-      });
+    await addEnvVar.mutateAsync({
+      key_name: newKey.trim(),
+      value: newValue,
+      environment: activeEnv,
+      is_secret: newIsSecret,
+      description: newDesc.trim() || null,
+    });
 
-      if (res.ok) {
-        setAddOpen(false);
-        setNewKey('');
-        setNewValue('');
-        setNewDesc('');
-        setNewIsSecret(true);
-        await fetchEnvVars();
-      }
-    } finally {
-      setAddLoading(false);
-    }
+    setAddOpen(false);
+    setNewKey('');
+    setNewValue('');
+    setNewDesc('');
+    setNewIsSecret(true);
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('이 환경변수를 삭제하시겠습니까?')) return;
-    const res = await fetch(`/api/env?id=${id}`, { method: 'DELETE' });
-    if (res.ok) {
-      await fetchEnvVars();
-    }
+    await deleteEnvVar.mutateAsync(id);
   };
 
   const handleDownload = () => {
@@ -119,11 +81,11 @@ export default function ProjectEnvPage() {
     return '•'.repeat(Math.min(value.length || 20, 30));
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-16 rounded-lg bg-muted animate-pulse" />
+          <Skeleton key={i} className="h-16 rounded-lg" />
         ))}
       </div>
     );
@@ -194,8 +156,8 @@ export default function ProjectEnvPage() {
                   <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>
                     취소
                   </Button>
-                  <Button type="submit" disabled={addLoading || !newKey.trim()}>
-                    {addLoading ? '추가 중...' : '추가'}
+                  <Button type="submit" disabled={addEnvVar.isPending || !newKey.trim()}>
+                    {addEnvVar.isPending ? '추가 중...' : '추가'}
                   </Button>
                 </DialogFooter>
               </form>

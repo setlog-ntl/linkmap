@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useProjectServices, useAddProjectService, useRemoveProjectService } from '@/lib/queries/services';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,10 +11,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Skeleton } from '@/components/ui/skeleton';
 import { AddServiceDialog } from '@/components/service/add-service-dialog';
 import { ServiceChecklist } from '@/components/service/service-checklist';
 import { Trash2, ExternalLink } from 'lucide-react';
-import type { ProjectService, Service, ServiceCategory } from '@/types';
+import type { ServiceCategory } from '@/types';
 
 const statusLabels: Record<string, string> = {
   not_started: '시작 전',
@@ -46,44 +46,24 @@ const categoryLabels: Partial<Record<ServiceCategory, string>> = {
 export default function ProjectServicesPage() {
   const params = useParams();
   const projectId = params.id as string;
-  const supabase = createClient();
-  const [services, setServices] = useState<(ProjectService & { service: Service })[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchServices = useCallback(async () => {
-    const { data } = await supabase
-      .from('project_services')
-      .select('*, service:services(*)')
-      .eq('project_id', projectId)
-      .order('created_at');
-    setServices((data as (ProjectService & { service: Service })[]) || []);
-    setLoading(false);
-  }, [projectId, supabase]);
-
-  useEffect(() => {
-    fetchServices();
-  }, [fetchServices]);
+  const { data: services = [], isLoading } = useProjectServices(projectId);
+  const addService = useAddProjectService(projectId);
+  const removeService = useRemoveProjectService(projectId);
 
   const handleAddService = async (serviceId: string) => {
-    await supabase.from('project_services').insert({
-      project_id: projectId,
-      service_id: serviceId,
-      status: 'not_started',
-    });
-    await fetchServices();
+    await addService.mutateAsync(serviceId);
   };
 
   const handleRemoveService = async (projectServiceId: string) => {
     if (!confirm('이 서비스를 프로젝트에서 제거하시겠습니까?')) return;
-    await supabase.from('project_services').delete().eq('id', projectServiceId);
-    await fetchServices();
+    await removeService.mutateAsync(projectServiceId);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-24 rounded-lg bg-muted animate-pulse" />
+          <Skeleton key={i} className="h-24 rounded-lg" />
         ))}
       </div>
     );
@@ -166,7 +146,6 @@ export default function ProjectServicesPage() {
                     </Button>
                   </div>
 
-                  {/* Required Env Vars */}
                   {ps.service?.required_env_vars && (ps.service.required_env_vars as { name: string; description_ko?: string; description?: string; public: boolean }[]).length > 0 && (
                     <div>
                       <h4 className="text-sm font-medium mb-2">필요한 환경변수</h4>
@@ -188,7 +167,6 @@ export default function ProjectServicesPage() {
                     </div>
                   )}
 
-                  {/* Checklist */}
                   <div>
                     <h4 className="text-sm font-medium mb-2">연결 체크리스트</h4>
                     <ServiceChecklist

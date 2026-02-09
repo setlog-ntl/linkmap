@@ -1,18 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { encrypt, decrypt } from '@/lib/crypto';
+import { encrypt } from '@/lib/crypto';
+import { createEnvVarSchema, updateEnvVarSchema } from '@/lib/validations/env';
+import { unauthorizedError, notFoundError, validationError, apiError } from '@/lib/api/errors';
+import { rateLimit } from '@/lib/rate-limit';
+import { logAudit } from '@/lib/audit';
+import type { DbEnvVarWithProject } from '@/lib/supabase/types';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  if (!user) return unauthorizedError();
+
+  const { success } = rateLimit(`env:${user.id}`, 30);
+  if (!success) return apiError('요청이 너무 많습니다. 잠시 후 다시 시도해주세요.', 429);
 
   const body = await request.json();
-  const { project_id, service_id, key_name, value, environment, is_secret, description } = body;
+  const parsed = createEnvVarSchema.safeParse(body);
+  if (!parsed.success) return validationError(parsed.error);
 
-  // Verify project ownership
+  const { project_id, service_id, key_name, value, environment, is_secret, description } = parsed.data;
+
   const { data: project } = await supabase
     .from('projects')
     .select('id')
@@ -20,11 +28,9 @@ export async function POST(request: NextRequest) {
     .eq('user_id', user.id)
     .single();
 
-  if (!project) {
-    return NextResponse.json({ error: 'Project not found' }, { status: 404 });
-  }
+  if (!project) return notFoundError('프로젝트');
 
-  const encrypted_value = encrypt(value || '');
+  const encrypted_value = encrypt(value);
 
   const { data, error } = await supabase
     .from('environment_variables')
@@ -33,8 +39,8 @@ export async function POST(request: NextRequest) {
       service_id: service_id || null,
       key_name,
       encrypted_value,
-      environment: environment || 'development',
-      is_secret: is_secret ?? true,
+      environment,
+      is_secret,
       description: description || null,
     })
     .select()
@@ -44,28 +50,36 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
+  await logAudit(user.id, {
+    action: 'env_var.create',
+    resourceType: 'environment_variable',
+    resourceId: data.id,
+    details: { key_name, project_id },
+  });
+
   return NextResponse.json({ ...data, decrypted_value: value });
 }
 
 export async function PATCH(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  if (!user) return unauthorizedError();
 
   const body = await request.json();
-  const { id, key_name, value, environment, is_secret, description } = body;
+  const parsed = updateEnvVarSchema.safeParse(body);
+  if (!parsed.success) return validationError(parsed.error);
 
-  // Verify ownership through project
+  const { id, key_name, value, environment, is_secret, description } = parsed.data;
+
   const { data: envVar } = await supabase
     .from('environment_variables')
     .select('*, project:projects!inner(user_id)')
     .eq('id', id)
     .single();
 
-  if (!envVar || (envVar as { project: { user_id: string } }).project.user_id !== user.id) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  const envVarTyped = envVar as DbEnvVarWithProject | null;
+  if (!envVarTyped || envVarTyped.project.user_id !== user.id) {
+    return notFoundError('환경변수');
   }
 
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
@@ -86,37 +100,49 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
+  await logAudit(user.id, {
+    action: 'env_var.update',
+    resourceType: 'environment_variable',
+    resourceId: id,
+    details: { updated_fields: Object.keys(updates).filter(k => k !== 'updated_at') },
+  });
+
   return NextResponse.json(data);
 }
 
 export async function DELETE(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  if (!user) return unauthorizedError();
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
   if (!id) {
-    return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+    return NextResponse.json({ error: 'ID가 필요합니다' }, { status: 400 });
   }
 
-  // Verify ownership
   const { data: envVar } = await supabase
     .from('environment_variables')
     .select('*, project:projects!inner(user_id)')
     .eq('id', id)
     .single();
 
-  if (!envVar || (envVar as { project: { user_id: string } }).project.user_id !== user.id) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  const envVarDel = envVar as DbEnvVarWithProject | null;
+  if (!envVarDel || envVarDel.project.user_id !== user.id) {
+    return notFoundError('환경변수');
   }
 
   const { error } = await supabase.from('environment_variables').delete().eq('id', id);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
+
+  await logAudit(user.id, {
+    action: 'env_var.delete',
+    resourceType: 'environment_variable',
+    resourceId: id,
+    details: { key_name: envVarDel.key_name },
+  });
 
   return NextResponse.json({ success: true });
 }

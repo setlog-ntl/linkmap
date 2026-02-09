@@ -1,20 +1,23 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useProjects } from '@/hooks/use-projects';
+import { useProjects, useCreateProject, useDeleteProject } from '@/lib/queries/projects';
 import { ProjectCard } from '@/components/project/project-card';
 import { CreateProjectDialog } from '@/components/project/create-project-dialog';
 import { TemplateDialog } from '@/components/project/template-dialog';
 import { createClient } from '@/lib/supabase/client';
 import { FolderOpen } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardPage() {
   const router = useRouter();
   const supabase = createClient();
-  const { projects, loading, createProject, deleteProject } = useProjects();
+  const { data: projects = [], isLoading } = useProjects();
+  const createProject = useCreateProject();
+  const deleteProject = useDeleteProject();
 
   const handleCreateProject = async (name: string, description?: string) => {
-    const project = await createProject(name, description);
+    const project = await createProject.mutateAsync({ name, description });
     if (project) {
       router.push(`/project/${project.id}`);
     }
@@ -24,7 +27,6 @@ export default function DashboardPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Get template data
     const { data: template } = await supabase
       .from('project_templates')
       .select('*')
@@ -33,7 +35,6 @@ export default function DashboardPage() {
 
     if (!template) return;
 
-    // Create project
     const { data: project, error } = await supabase
       .from('projects')
       .insert({
@@ -47,7 +48,6 @@ export default function DashboardPage() {
 
     if (error || !project) return;
 
-    // Add services from template
     const serviceSlugs = template.services as string[];
     if (serviceSlugs.length > 0) {
       const { data: services } = await supabase
@@ -66,15 +66,13 @@ export default function DashboardPage() {
       }
     }
 
-    // Increment template download count
     await supabase.rpc('increment_template_downloads', { template_id: templateId });
-
     router.push(`/project/${project.id}`);
   };
 
   const handleDeleteProject = async (id: string) => {
     if (confirm('프로젝트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-      await deleteProject(id);
+      await deleteProject.mutateAsync(id);
     }
   };
 
@@ -93,10 +91,10 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-48 rounded-lg bg-muted animate-pulse" />
+            <Skeleton key={i} className="h-48 rounded-lg" />
           ))}
         </div>
       ) : projects.length === 0 ? (

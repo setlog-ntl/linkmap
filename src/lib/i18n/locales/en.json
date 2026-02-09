@@ -1,0 +1,66 @@
+{
+  "common": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "login": "Login",
+    "signup": "Get Started",
+    "logout": "Logout",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "back": "Back",
+    "next": "Next",
+    "confirm": "Confirm"
+  },
+  "nav": {
+    "serviceCatalog": "Service Catalog",
+    "pricing": "Pricing"
+  },
+  "dashboard": {
+    "title": "My Projects",
+    "subtitle": "Create and manage your service connections",
+    "noProjects": "No projects yet",
+    "noProjectsDesc": "Create a new project or start from a template to manage your service connections.",
+    "createProject": "New Project",
+    "fromTemplate": "From Template"
+  },
+  "project": {
+    "overview": "Overview",
+    "serviceMap": "Service Map",
+    "services": "Services",
+    "envVars": "Env Variables",
+    "settings": "Settings",
+    "connectedServices": "Connected Services",
+    "envVarCount": "Environment Variables",
+    "progress": "Progress"
+  },
+  "envVar": {
+    "title": "Environment Variables",
+    "addVar": "Add Variable",
+    "download": "Download .env",
+    "varName": "Variable Name",
+    "value": "Value",
+    "description": "Description (optional)",
+    "secret": "Secret Value",
+    "development": "Development",
+    "staging": "Staging",
+    "production": "Production",
+    "deleteConfirm": "Delete this environment variable?"
+  },
+  "catalog": {
+    "title": "Service Catalog",
+    "subtitle": "Explore services for your vibe coding projects"
+  },
+  "error": {
+    "pageNotFound": "Page Not Found",
+    "pageNotFoundDesc": "The page you requested doesn't exist or has been moved.",
+    "unexpected": "An unexpected error occurred",
+    "projectNotFound": "Project not found"
+  }
+}

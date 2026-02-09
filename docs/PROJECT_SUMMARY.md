@@ -112,7 +112,7 @@ setlog/
 │   │   ├── supabase/
 │   │   │   ├── client.ts          # 브라우저용 Supabase 클라이언트
 │   │   │   ├── server.ts          # 서버용 Supabase 클라이언트
-│   │   │   └── middleware.ts      # 세션 관리 미들웨어
+│   │   │   └── session.ts         # Proxy용 세션 갱신 로직
 │   │   ├── crypto/
 │   │   │   └── index.ts           # AES-256-GCM 암호화/복호화
 │   │   └── utils.ts               # cn() 등 유틸리티 함수
@@ -123,7 +123,7 @@ setlog/
 │   ├── data/                      # 시드 데이터
 │   │   ├── services.ts            # 20개 서비스 + 116개 체크리스트
 │   │   └── templates.ts           # 5개 프로젝트 템플릿
-│   └── middleware.ts              # Next.js 미들웨어 (인증 보호)
+├── proxy.ts                       # Next.js Proxy (인증/리다이렉트)
 ├── .env.local.example             # 환경변수 예시 파일
 ├── package.json                   # 패키지 설정
 ├── tsconfig.json                  # TypeScript 설정
@@ -145,7 +145,7 @@ setlog/
 | GitHub OAuth | Supabase Auth 연동 | 완료 |
 | 비밀번호 재설정 | `src/app/(auth)/reset-password/page.tsx` | 완료 |
 | OAuth 콜백 | `src/app/auth/callback/route.ts` | 완료 |
-| 세션 미들웨어 | `src/middleware.ts` + `src/lib/supabase/middleware.ts` | 완료 |
+| 세션(Proxy) | `proxy.ts` + `src/lib/supabase/session.ts` | 완료 |
 | 인증 보호 라우트 | `/dashboard`, `/project/*` 자동 리디렉트 | 완료 |
 
 **주요 특징:**

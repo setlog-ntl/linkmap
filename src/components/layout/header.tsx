@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -11,8 +12,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, Settings, User, LayoutDashboard } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { LogOut, Settings, LayoutDashboard, Menu } from 'lucide-react';
 import type { Profile } from '@/types';
 
 interface HeaderProps {
@@ -22,12 +25,34 @@ interface HeaderProps {
 export function Header({ profile }: HeaderProps) {
   const router = useRouter();
   const supabase = createClient();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push('/');
     router.refresh();
   };
+
+  const navLinks = (
+    <>
+      {profile && (
+        <Link
+          href="/dashboard"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          onClick={() => setMobileOpen(false)}
+        >
+          대시보드
+        </Link>
+      )}
+      <Link
+        href="/services"
+        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        onClick={() => setMobileOpen(false)}
+      >
+        서비스 카탈로그
+      </Link>
+    </>
+  );
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -37,24 +62,14 @@ export function Header({ profile }: HeaderProps) {
           <span>Log</span>
         </Link>
 
+        {/* Desktop nav */}
         <nav className="ml-8 hidden md:flex items-center gap-6">
-          {profile && (
-            <Link
-              href="/dashboard"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              대시보드
-            </Link>
-          )}
-          <Link
-            href="/services"
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            서비스 카탈로그
-          </Link>
+          {navLinks}
         </nav>
 
-        <div className="ml-auto flex items-center gap-4">
+        <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle />
+
           {profile ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -95,7 +110,7 @@ export function Header({ profile }: HeaderProps) {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
               <Button variant="ghost" asChild>
                 <Link href="/login">로그인</Link>
               </Button>
@@ -104,6 +119,38 @@ export function Header({ profile }: HeaderProps) {
               </Button>
             </div>
           )}
+
+          {/* Mobile menu */}
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger asChild className="md:hidden">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72">
+              <nav className="flex flex-col gap-4 mt-8">
+                {navLinks}
+                {!profile && (
+                  <>
+                    <Link href="/login" className="text-sm font-medium" onClick={() => setMobileOpen(false)}>
+                      로그인
+                    </Link>
+                    <Link href="/signup" className="text-sm font-medium" onClick={() => setMobileOpen(false)}>
+                      시작하기
+                    </Link>
+                  </>
+                )}
+                {profile && (
+                  <button
+                    onClick={() => { handleSignOut(); setMobileOpen(false); }}
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground text-left"
+                  >
+                    로그아웃
+                  </button>
+                )}
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>

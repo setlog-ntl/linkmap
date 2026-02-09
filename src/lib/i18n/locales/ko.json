@@ -1,0 +1,66 @@
+{
+  "common": {
+    "home": "홈",
+    "dashboard": "대시보드",
+    "settings": "설정",
+    "login": "로그인",
+    "signup": "시작하기",
+    "logout": "로그아웃",
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "수정",
+    "add": "추가",
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다",
+    "retry": "다시 시도",
+    "back": "뒤로",
+    "next": "다음",
+    "confirm": "확인"
+  },
+  "nav": {
+    "serviceCatalog": "서비스 카탈로그",
+    "pricing": "가격"
+  },
+  "dashboard": {
+    "title": "내 프로젝트",
+    "subtitle": "프로젝트를 생성하고 서비스 연결을 관리하세요",
+    "noProjects": "프로젝트가 없습니다",
+    "noProjectsDesc": "새 프로젝트를 만들거나 템플릿에서 시작하여 서비스 연결을 관리해보세요.",
+    "createProject": "새 프로젝트",
+    "fromTemplate": "템플릿에서"
+  },
+  "project": {
+    "overview": "개요",
+    "serviceMap": "서비스 맵",
+    "services": "서비스 목록",
+    "envVars": "환경변수",
+    "settings": "설정",
+    "connectedServices": "연결된 서비스",
+    "envVarCount": "환경변수",
+    "progress": "진행률"
+  },
+  "envVar": {
+    "title": "환경변수 관리",
+    "addVar": "변수 추가",
+    "download": ".env 다운로드",
+    "varName": "변수 이름",
+    "value": "값",
+    "description": "설명 (선택)",
+    "secret": "민감한 값 (Secret)",
+    "development": "개발",
+    "staging": "스테이징",
+    "production": "프로덕션",
+    "deleteConfirm": "이 환경변수를 삭제하시겠습니까?"
+  },
+  "catalog": {
+    "title": "서비스 카탈로그",
+    "subtitle": "바이브 코딩에 필요한 서비스들을 둘러보세요"
+  },
+  "error": {
+    "pageNotFound": "페이지를 찾을 수 없습니다",
+    "pageNotFoundDesc": "요청하신 페이지가 존재하지 않거나 이동되었습니다.",
+    "unexpected": "예기치 않은 오류가 발생했습니다",
+    "projectNotFound": "프로젝트를 찾을 수 없습니다"
+  }
+}

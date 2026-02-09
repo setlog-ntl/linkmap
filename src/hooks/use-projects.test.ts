@@ -61,9 +61,37 @@ import { useProjects } from './use-projects';
 describe('useProjects', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Re-establish chains after clearAllMocks
+    mockFrom.mockReturnValue({
+      select: mockSelect,
+      insert: mockInsert,
+      update: mockUpdate,
+      delete: mockDelete,
+      eq: mockEq,
+      order: mockOrder,
+      single: mockSingle,
+    });
+    mockSelect.mockReturnValue({
+      order: mockOrder,
+      single: mockSingle,
+      eq: mockEq,
+    });
+    mockInsert.mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        single: mockSingle,
+      }),
+    });
+    mockDelete.mockReturnValue({ eq: mockEq });
+    mockUpdate.mockReturnValue({ eq: mockEq });
+
     mockOrder.mockResolvedValue({ data: [], error: null });
     mockEq.mockResolvedValue({ data: null, error: null });
     mockSingle.mockResolvedValue({ data: { id: 'new-project' }, error: null });
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'test-user-id' } },
+      error: null,
+    });
   });
 
   it('should fetch projects on mount', async () => {
@@ -71,7 +99,9 @@ describe('useProjects', () => {
       { id: '1', name: 'Project 1', project_services: [] },
       { id: '2', name: 'Project 2', project_services: [] },
     ];
-    mockOrder.mockResolvedValueOnce({ data: mockProjects, error: null });
+    // Use mockResolvedValue (not Once) since React strict mode or re-renders
+    // may call fetchProjects multiple times
+    mockOrder.mockResolvedValue({ data: mockProjects, error: null });
 
     const { result } = renderHook(() => useProjects());
 

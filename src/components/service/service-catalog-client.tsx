@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -35,8 +35,15 @@ interface ServiceCatalogClientProps {
 }
 
 export function ServiceCatalogClient({ services, domains }: ServiceCatalogClientProps) {
+  const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [selectedDomain, setSelectedDomain] = useState<ServiceDomain | 'all'>('all');
+
+  useEffect(() => {
+    debounceRef.current = setTimeout(() => setSearch(searchInput), 300);
+    return () => clearTimeout(debounceRef.current);
+  }, [searchInput]);
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | 'all'>('all');
   const [sortBy, setSortBy] = useState<SortOption>('popularity');
   const [freeTierFilter, setFreeTierFilter] = useState<FreeTierQuality | 'all'>('all');
@@ -152,8 +159,8 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="서비스 검색 (이름, 설명, 태그)..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             className="pl-9"
           />
         </div>
