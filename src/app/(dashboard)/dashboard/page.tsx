@@ -8,10 +8,13 @@ import { TemplateDialog } from '@/components/project/template-dialog';
 import { createClient } from '@/lib/supabase/client';
 import { FolderOpen } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 
 export default function DashboardPage() {
   const router = useRouter();
   const supabase = createClient();
+  const { locale } = useLocaleStore();
   const { data: projects = [], isLoading } = useProjects();
   const createProject = useCreateProject();
   const deleteProject = useDeleteProject();
@@ -80,9 +83,9 @@ export default function DashboardPage() {
     <div className="container py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">내 프로젝트</h1>
+          <h1 className="text-3xl font-bold">{t(locale, 'dashboard.title')}</h1>
           <p className="text-muted-foreground mt-1">
-            프로젝트를 생성하고 서비스 연결을 관리하세요
+            {t(locale, 'dashboard.subtitle')}
           </p>
         </div>
         <div className="flex gap-3">
@@ -100,10 +103,9 @@ export default function DashboardPage() {
       ) : projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <FolderOpen className="h-16 w-16 text-muted-foreground/50 mb-4" />
-          <h2 className="text-xl font-semibold mb-2">프로젝트가 없습니다</h2>
+          <h2 className="text-xl font-semibold mb-2">{t(locale, 'dashboard.noProjects')}</h2>
           <p className="text-muted-foreground mb-6 max-w-md">
-            새 프로젝트를 만들거나 템플릿에서 시작하여
-            서비스 연결을 관리해보세요.
+            {t(locale, 'dashboard.noProjectsDesc')}
           </p>
           <div className="flex gap-3">
             <TemplateDialog onSubmit={handleCreateFromTemplate} />

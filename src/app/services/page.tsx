@@ -12,22 +12,28 @@ import { createClient } from '@/lib/supabase/server';
 import { ServiceCatalogClient } from '@/components/service/service-catalog-client';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import type { Profile, ServiceDomainRecord } from '@/types';
+import type { Profile, Service, ServiceDomainRecord } from '@/types';
 
 export default async function ServicesPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
   let profile: Profile | null = null;
-  if (user) {
-    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-    profile = data;
+  let services: Service[] = [];
+  let domains: ServiceDomainRecord[] = [];
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      profile = data ?? null;
+    }
+    const [servicesRes, domainsRes] = await Promise.all([
+      supabase.from('services').select('*').order('name'),
+      supabase.from('service_domains').select('*').order('order_index'),
+    ]);
+    services = (servicesRes.data ?? []) as Service[];
+    domains = (domainsRes.data ?? []) as ServiceDomainRecord[];
+  } catch {
+    profile = null;
   }
-
-  const [{ data: services }, { data: domains }] = await Promise.all([
-    supabase.from('services').select('*').order('name'),
-    supabase.from('service_domains').select('*').order('order_index'),
-  ]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -39,10 +45,7 @@ export default async function ServicesPage() {
             바이브 코딩에 필요한 서비스들을 둘러보세요
           </p>
         </div>
-        <ServiceCatalogClient
-          services={services || []}
-          domains={(domains as ServiceDomainRecord[]) || []}
-        />
+        <ServiceCatalogClient services={services} domains={domains} />
       </main>
       <Footer />
     </div>

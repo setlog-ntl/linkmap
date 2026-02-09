@@ -7,6 +7,9 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    console.error('[GlobalError]', error.message, error.digest, error);
+  }
   return (
     <html lang="ko">
       <body>

@@ -1,9 +1,11 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useProjectServices } from '@/lib/queries/services';
 import { useEnvVars } from '@/lib/queries/env-vars';
+import { useProjectStore } from '@/stores/project-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,6 +16,13 @@ import { Map, List, Key, ArrowRight } from 'lucide-react';
 export default function ProjectOverviewPage() {
   const params = useParams();
   const projectId = params.id as string;
+  const setActiveProjectId = useProjectStore((s) => s.setActiveProjectId);
+
+  useEffect(() => {
+    setActiveProjectId(projectId);
+    return () => setActiveProjectId(null);
+  }, [projectId, setActiveProjectId]);
+
   const { data: services = [], isLoading: svcLoading } = useProjectServices(projectId);
   const { data: envVars = [], isLoading: envLoading } = useEnvVars(projectId);
 

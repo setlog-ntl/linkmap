@@ -5,6 +5,11 @@ export type Locale = 'ko' | 'en';
 
 const messages: Record<Locale, typeof ko> = { ko, en };
 
+export const localeNames: Record<Locale, string> = {
+  ko: '한국어',
+  en: 'English',
+};
+
 export function getMessages(locale: Locale = 'ko') {
   return messages[locale] || messages.ko;
 }

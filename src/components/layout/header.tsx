@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -15,7 +14,11 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { LogOut, Settings, LayoutDashboard, Menu } from 'lucide-react';
+import { LogOut, Settings, LayoutDashboard, Menu, Globe } from 'lucide-react';
+import { useUIStore } from '@/stores/ui-store';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t, localeNames } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
 import type { Profile } from '@/types';
 
 interface HeaderProps {
@@ -25,7 +28,8 @@ interface HeaderProps {
 export function Header({ profile }: HeaderProps) {
   const router = useRouter();
   const supabase = createClient();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const { sidebarOpen, setSidebarOpen } = useUIStore();
+  const { locale, setLocale } = useLocaleStore();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -39,17 +43,17 @@ export function Header({ profile }: HeaderProps) {
         <Link
           href="/dashboard"
           className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          onClick={() => setMobileOpen(false)}
+          onClick={() => setSidebarOpen(false)}
         >
-          대시보드
+          {t(locale, 'common.dashboard')}
         </Link>
       )}
       <Link
         href="/services"
         className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-        onClick={() => setMobileOpen(false)}
+        onClick={() => setSidebarOpen(false)}
       >
-        서비스 카탈로그
+        {t(locale, 'nav.serviceCatalog')}
       </Link>
     </>
   );
@@ -68,6 +72,26 @@ export function Header({ profile }: HeaderProps) {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
+          {/* Language Toggle */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Globe className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {(Object.keys(localeNames) as Locale[]).map((loc) => (
+                <DropdownMenuItem
+                  key={loc}
+                  onClick={() => setLocale(loc)}
+                  className={locale === loc ? 'font-bold' : ''}
+                >
+                  {localeNames[loc]}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <ThemeToggle />
 
           {profile ? (
@@ -85,7 +109,7 @@ export function Header({ profile }: HeaderProps) {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <div className="flex items-center gap-2 p-2">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">{profile.name || '사용자'}</p>
+                    <p className="text-sm font-medium">{profile.name || t(locale, 'common.home')}</p>
                     <p className="text-xs text-muted-foreground">{profile.email}</p>
                   </div>
                 </div>
@@ -93,35 +117,35 @@ export function Header({ profile }: HeaderProps) {
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard">
                     <LayoutDashboard className="mr-2 h-4 w-4" />
-                    대시보드
+                    {t(locale, 'common.dashboard')}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/settings">
                     <Settings className="mr-2 h-4 w-4" />
-                    설정
+                    {t(locale, 'common.settings')}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
-                  로그아웃
+                  {t(locale, 'common.logout')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <div className="hidden md:flex items-center gap-2">
               <Button variant="ghost" asChild>
-                <Link href="/login">로그인</Link>
+                <Link href="/login">{t(locale, 'common.login')}</Link>
               </Button>
               <Button asChild>
-                <Link href="/signup">시작하기</Link>
+                <Link href="/signup">{t(locale, 'common.signup')}</Link>
               </Button>
             </div>
           )}
 
           {/* Mobile menu */}
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon" className="h-8 w-8">
                 <Menu className="h-5 w-5" />
@@ -132,20 +156,20 @@ export function Header({ profile }: HeaderProps) {
                 {navLinks}
                 {!profile && (
                   <>
-                    <Link href="/login" className="text-sm font-medium" onClick={() => setMobileOpen(false)}>
-                      로그인
+                    <Link href="/login" className="text-sm font-medium" onClick={() => setSidebarOpen(false)}>
+                      {t(locale, 'common.login')}
                     </Link>
-                    <Link href="/signup" className="text-sm font-medium" onClick={() => setMobileOpen(false)}>
-                      시작하기
+                    <Link href="/signup" className="text-sm font-medium" onClick={() => setSidebarOpen(false)}>
+                      {t(locale, 'common.signup')}
                     </Link>
                   </>
                 )}
                 {profile && (
                   <button
-                    onClick={() => { handleSignOut(); setMobileOpen(false); }}
+                    onClick={() => { handleSignOut(); setSidebarOpen(false); }}
                     className="text-sm font-medium text-muted-foreground hover:text-foreground text-left"
                   >
-                    로그아웃
+                    {t(locale, 'common.logout')}
                   </button>
                 )}
               </nav>
