@@ -1,11 +1,11 @@
-# SetLog PRD (Product Requirements Document)
+# Linkmap PRD (Product Requirements Document)
 
 ## 1. 프로젝트 개요
 
 ### 1.1 비전
 > "바이브 코딩의 시작과 끝을 연결하는 허브"
 
-SetLog는 바이브 코딩 사용자들이 프로젝트를 시작할 때 겪는 **서비스 연결, API 설정, 환경변수 관리, 인증 구성** 등의 반복적이고 복잡한 설정 작업을 체계적으로 관리하고 자동화하는 플랫폼입니다.
+Linkmap은 바이브 코딩 사용자들이 프로젝트를 시작할 때 겪는 **서비스 연결, API 설정, 환경변수 관리, 인증 구성** 등의 반복적이고 복잡한 설정 작업을 체계적으로 관리하고 자동화하는 플랫폼입니다.
 
 ### 1.2 배경
 - 2026년 기준 **미국 개발자의 92%가 AI 코딩 도구를 매일 사용**하며, 전 세계 코드의 **41%가 AI로 생성**
@@ -26,7 +26,7 @@ SetLog는 바이브 코딩 사용자들이 프로젝트를 시작할 때 겪는 
 
 ### 2.1 유사 서비스 분석
 
-| 카테고리 | 서비스 | 핵심 기능 | SetLog과의 차이 |
+| 카테고리 | 서비스 | 핵심 기능 | Linkmap과의 차이 |
 |---------|--------|----------|----------------|
 | API 관리 | **Postman** | API 테스트/문서화/협업 | 개발자 전문 도구, 바이브 코더에게 복잡 |
 | API 관리 | **Swagger/OpenAPI** | API 스펙 문서화 | 스펙 작성 자체가 전문 지식 필요 |
@@ -205,8 +205,8 @@ SetLog는 바이브 코딩 사용자들이 프로젝트를 시작할 때 겪는 
 - 서비스 연결 코드 스니펫 자동 생성
 
 #### 4.11 CLI 도구 / IDE 확장
-- `setlog pull` - 환경변수를 로컬로 동기화
-- `setlog check` - 누락된 환경변수 확인
+- `linkmap pull` - 환경변수를 로컬로 동기화
+- `linkmap check` - 누락된 환경변수 확인
 - Cursor / VS Code 확장 프로그램
 
 #### 4.12 서비스 상태 모니터링
@@ -220,8 +220,8 @@ SetLog는 바이브 코딩 사용자들이 프로젝트를 시작할 때 겪는 
 - 코드 변경점 안내
 
 #### 4.14 MCP 서버 통합
-- SetLog MCP 서버 제공
-- Claude Code, Cursor 등에서 바이브 코딩 중 직접 SetLog 데이터 참조
+- Linkmap MCP 서버 제공
+- Claude Code, Cursor 등에서 바이브 코딩 중 직접 Linkmap 데이터 참조
 - "이 프로젝트의 Supabase URL은?" → 자동 주입
 
 ---
@@ -473,7 +473,7 @@ project_templates (
 
 2026 Q3-Q4 (7-12월): Phase 3
   - AI 어시스턴트
-  - CLI 도구 (setlog pull/check)
+  - CLI 도구 (linkmap pull/check)
   - IDE 확장 프로그램 (Cursor, VS Code)
   - MCP 서버 통합
   - 서비스 모니터링

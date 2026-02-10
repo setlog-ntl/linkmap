@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SetLog - 바이브 코딩을 위한 서비스 연결 & API 관리 플랫폼",
+  title: "Linkmap - 서비스 연결을 한눈에, 안전하게 관리하는 플랫폼",
   description:
     "서비스 연결, API 키 관리, 환경변수 설정까지. 복잡한 프로젝트 초기 설정을 체계적으로 관리하세요.",
   keywords: [

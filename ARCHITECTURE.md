@@ -1,4 +1,4 @@
-# SetLog Architecture
+# Linkmap Architecture
 
 ## Tech Stack
 - **Framework**: Next.js 16 (App Router)

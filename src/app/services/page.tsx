@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '서비스 카탈로그 | SetLog',
+  title: '서비스 카탈로그 | Linkmap',
   description: '바이브 코딩에 필요한 인증, 데이터베이스, 배포, AI 등 서비스를 비교하고 프로젝트에 연결하세요.',
   keywords: ['서비스 카탈로그', 'API 서비스', 'Supabase', 'Stripe', 'Vercel', '바이브 코딩'],
 };

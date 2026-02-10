@@ -1,4 +1,4 @@
--- SetLog Seed Data
+-- Linkmap Seed Data
 -- Run this after the initial schema migration
 -- This file seeds the services, checklist_items, and project_templates tables
 

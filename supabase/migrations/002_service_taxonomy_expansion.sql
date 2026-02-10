@@ -1,4 +1,4 @@
--- SetLog Service Taxonomy Expansion
+-- Linkmap Service Taxonomy Expansion
 -- Migration 002: 3-level classification + service metadata + guides + costs
 -- Run this in Supabase SQL Editor AFTER 001_initial_schema.sql
 

@@ -1,8 +1,8 @@
 {
-  "name": "@setlog/mcp-server",
+  "name": "@linkmap/mcp-server",
   "version": "0.1.0",
   "private": true,
-  "description": "SetLog MCP Server for Claude Code/Cursor integration",
+  "description": "Linkmap MCP Server for Claude Code/Cursor integration",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {

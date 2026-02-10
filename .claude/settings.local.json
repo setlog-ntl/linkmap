@@ -11,13 +11,28 @@
       "Bash(npx next build:*)",
       "Bash(powershell:*)",
       "Bash(taskkill:*)",
-      "Bash(del \"C:\\\\Users\\\\N100274\\\\OneDrive\\\\2.PJT\\\\setlog\\\\.next\\\\dev\\\\lock\")",
+      "Bash(del \"C:\\\\Users\\\\N100274\\\\OneDrive\\\\2.PJT\\\\linkmap\\\\.next\\\\dev\\\\lock\")",
       "Bash(claude mcp add:*)",
       "Bash(vercel:*)",
       "Bash(npm run test:*)",
       "WebFetch(domain:simpleicons.org)",
       "WebFetch(domain:cdn.simpleicons.org)",
-      "WebFetch(domain:www.npmjs.com)"
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:cdn.jsdelivr.net)",
+      "WebFetch(domain:github.githubassets.com)",
+      "WebFetch(domain:assets.vercel.com)",
+      "Bash(git config:*)",
+      "Bash(git remote:*)",
+      "Bash(npm install:*)",
+      "Bash(ls -la \"E:\\\\OneDrive\\\\2.PJT\\\\setlog\\\\.claude\"\" 2>/dev/null || echo \"No .claude directory found \")"
     ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "supabase"
+  ],
+  "statusLine": {
+    "type": "command",
+    "command": "powershell -NoProfile -File .claude/statusline.ps1"
   }
 }

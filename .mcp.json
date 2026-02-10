@@ -3,6 +3,14 @@
     "supabase": {
       "type": "http",
       "url": "https://mcp.supabase.com/mcp?project_ref=apqydhwahkccxlltacas"
+    },
+    "linkmap": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["tsx", "packages/mcp-server/src/index.ts"],
+      "env": {
+        "LINKMAP_API_TOKEN": "${LINKMAP_API_TOKEN}"
+      }
     }
   }
 }

@@ -1,4 +1,4 @@
-# Contributing to SetLog
+# Contributing to Linkmap
 
 ## Development Setup
 1. Clone the repository

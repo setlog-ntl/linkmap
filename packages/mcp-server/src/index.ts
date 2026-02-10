@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 
 /**
- * SetLog MCP Server
+ * Linkmap MCP Server
  *
- * Provides tools for Claude Code / Cursor to interact with SetLog:
+ * Provides tools for Claude Code / Cursor to interact with Linkmap:
  * - list_services: List available services from the catalog
  * - get_env_vars: Get environment variable names for a project
  * - get_checklist: Get setup checklist for a service
  *
  * Usage:
- *   Set SETLOG_API_URL and SETLOG_API_TOKEN environment variables
+ *   Set LINKMAP_API_URL and LINKMAP_API_TOKEN environment variables
  *   then run this server via MCP configuration.
  */
 
-const API_URL = process.env.SETLOG_API_URL || 'https://setlog-three.vercel.app';
-const API_TOKEN = process.env.SETLOG_API_TOKEN || '';
+const API_URL = process.env.LINKMAP_API_URL || 'https://linkmap.vercel.app';
+const API_TOKEN = process.env.LINKMAP_API_TOKEN || '';
 
 interface Tool {
   name: string;
@@ -29,7 +29,7 @@ interface Tool {
 const tools: Tool[] = [
   {
     name: 'list_services',
-    description: 'List all available services from the SetLog catalog. Returns service names, categories, and descriptions.',
+    description: 'List all available services from the Linkmap catalog. Returns service names, categories, and descriptions.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -133,7 +133,7 @@ async function handleMessage(message: { id?: number; method: string; params?: Re
       respond(id, {
         protocolVersion: '2024-11-05',
         capabilities: { tools: {} },
-        serverInfo: { name: 'setlog-mcp', version: '0.1.0' },
+        serverInfo: { name: 'linkmap-mcp', version: '0.1.0' },
       });
       break;
 
@@ -162,4 +162,4 @@ function respond(id: number | undefined, result: unknown) {
   process.stdout.write(response + '\n');
 }
 
-console.error('SetLog MCP Server started');
+console.error('Linkmap MCP Server started');

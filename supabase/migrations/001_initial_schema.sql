@@ -1,4 +1,4 @@
--- SetLog Initial Schema
+-- Linkmap Initial Schema
 -- Run this in Supabase SQL Editor
 
 -- Enable necessary extensions

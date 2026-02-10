@@ -33,7 +33,7 @@ async function upsert(table: string, rows: Record<string, unknown>[]) {
 }
 
 async function main() {
-  console.log('=== SetLog 시드 데이터 삽입 시작 ===\n');
+  console.log('=== Linkmap 시드 데이터 삽입 시작 ===\n');
 
   // 1. Services (20개)
   console.log('1) 서비스 카탈로그...');

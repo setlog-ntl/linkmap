@@ -7,8 +7,8 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-1 font-bold text-lg mb-3">
-              <span className="text-primary">Set</span>
-              <span>Log</span>
+              <span className="text-primary">Link</span>
+              <span>map</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               바이브 코딩의 시작과 끝을 연결하는 허브
@@ -38,7 +38,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-8 pt-6 border-t text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} SetLog. All rights reserved. | 모든 권리 보유.</p>
+          <p>&copy; {new Date().getFullYear()} Linkmap. All rights reserved. | 모든 권리 보유.</p>
         </div>
       </div>
     </footer>

@@ -9,7 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Github, Mail } from 'lucide-react';
+import { Github, Loader2 } from 'lucide-react';
+import { GoogleIcon } from '@/components/icons/google-icon';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<string | null>(null);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +40,8 @@ export default function LoginPage() {
   };
 
   const handleOAuthLogin = async (provider: 'google' | 'github') => {
+    setOauthLoading(provider);
+    setError(null);
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
@@ -46,6 +50,7 @@ export default function LoginPage() {
     });
     if (error) {
       setError(error.message);
+      setOauthLoading(null);
     }
   };
 
@@ -54,20 +59,38 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <Link href="/" className="inline-flex items-center justify-center gap-1 font-bold text-2xl mb-2">
-            <span className="text-primary">Set</span>
-            <span>Log</span>
+            <span className="text-primary">Link</span>
+            <span>map</span>
           </Link>
           <CardTitle className="text-xl">로그인</CardTitle>
           <CardDescription>계정에 로그인하여 프로젝트를 관리하세요</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" onClick={() => handleOAuthLogin('google')} className="w-full">
-              <Mail className="mr-2 h-4 w-4" />
+            <Button
+              variant="outline"
+              onClick={() => handleOAuthLogin('google')}
+              disabled={oauthLoading !== null}
+              className="w-full"
+            >
+              {oauthLoading === 'google' ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <GoogleIcon className="mr-2 h-4 w-4" />
+              )}
               Google
             </Button>
-            <Button variant="outline" onClick={() => handleOAuthLogin('github')} className="w-full">
-              <Github className="mr-2 h-4 w-4" />
+            <Button
+              variant="outline"
+              onClick={() => handleOAuthLogin('github')}
+              disabled={oauthLoading !== null}
+              className="w-full"
+            >
+              {oauthLoading === 'github' ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Github className="mr-2 h-4 w-4" />
+              )}
               GitHub
             </Button>
           </div>

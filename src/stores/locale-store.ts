@@ -13,6 +13,6 @@ export const useLocaleStore = create<LocaleState>()(
       locale: 'ko',
       setLocale: (locale) => set({ locale }),
     }),
-    { name: 'setlog-locale' }
+    { name: 'linkmap-locale' }
   )
 );

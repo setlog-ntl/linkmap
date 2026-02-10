@@ -1,11 +1,11 @@
 {
-  "name": "@setlog/cli",
+  "name": "@linkmap/cli",
   "version": "0.1.0",
   "private": true,
-  "description": "SetLog CLI - Manage environment variables and service connections",
+  "description": "Linkmap CLI - Manage environment variables and service connections",
   "type": "module",
   "bin": {
-    "setlog": "dist/index.js"
+    "linkmap": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",
