@@ -158,10 +158,19 @@
   animation: dash-flow 1s linear infinite;
 }
 
+@keyframes stagger-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-stagger-fade-in {
+  animation: stagger-fade-in 0.4s ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-pulse-ring,
   .animate-float,
-  .animate-dash-flow {
+  .animate-dash-flow,
+  .animate-stagger-fade-in {
     animation: none;
   }
 }
