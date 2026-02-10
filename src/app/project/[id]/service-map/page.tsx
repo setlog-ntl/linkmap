@@ -7,7 +7,7 @@ const ServiceMapClient = dynamic(
   () => import('@/components/service-map/service-map-client'),
   {
     ssr: false,
-    loading: () => <Skeleton className="h-[600px] rounded-lg" />,
+    loading: () => <Skeleton className="h-[calc(100vh-16rem)] min-h-[500px] max-h-[900px] rounded-lg" />,
   }
 );
 

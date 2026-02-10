@@ -26,7 +26,13 @@
       "Bash(npm install:*)",
       "Bash(ls -la \"E:\\\\OneDrive\\\\2.PJT\\\\setlog\\\\.claude\"\" 2>/dev/null || echo \"No .claude directory found \")",
       "Bash(findstr:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(git rm:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nchore: remove .mcp.json from git tracking for security\n\nMCP 설정 파일에 API 연결 정보가 포함될 수 있으므로\n.gitignore에 추가하고 Git 추적에서 제거\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

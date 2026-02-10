@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import {
   ReactFlow,
+  ReactFlowProvider,
   Controls,
   Background,
   MiniMap,
@@ -16,88 +17,135 @@ import {
   type Node,
   BackgroundVariant,
   Panel,
+  MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import ServiceNode from '@/components/service-map/service-node';
 import AppNode from '@/components/service-map/app-node';
-import { Button } from '@/components/ui/button';
+import GroupNode from '@/components/service-map/group-node';
+import DependencyEdge from '@/components/service-map/dependency-edge';
+import { MapToolbar, type GroupMode, type LayoutDirection, type StatusFilter } from '@/components/service-map/map-toolbar';
+import { ServiceDetailSheet } from '@/components/service-map/service-detail-sheet';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Layers, DollarSign, Download, X } from 'lucide-react';
-import { domainLabels, domainIcons } from '@/lib/constants/service-filters';
-import type { ProjectService, Service, ServiceCategory, ServiceDomain } from '@/types';
+import { DollarSign } from 'lucide-react';
+import { allCategoryLabels, allCategoryEmojis, domainLabels, domainIcons } from '@/lib/constants/service-filters';
+import { getLayoutedElements } from '@/lib/layout/dagre-layout';
+import type { ProjectService, Service, ServiceCategory, ServiceDomain, ServiceDependency, DependencyType } from '@/types';
 
 const nodeTypes = {
   service: ServiceNode,
   app: AppNode,
+  group: GroupNode,
 };
 
-const categoryPositions: Partial<Record<ServiceCategory, { x: number; y: number }>> = {
-  auth: { x: -300, y: -150 },
-  database: { x: -150, y: -250 },
-  deploy: { x: 150, y: -250 },
-  email: { x: 300, y: -150 },
-  payment: { x: 300, y: 100 },
-  storage: { x: 150, y: 200 },
-  monitoring: { x: -150, y: 200 },
-  ai: { x: -300, y: 100 },
-  other: { x: 0, y: 250 },
+const edgeTypes = {
+  dependency: DependencyEdge,
 };
 
-const domainPositions: Record<ServiceDomain, { x: number; y: number }> = {
-  infrastructure: { x: 0, y: -300 },
-  backend: { x: -300, y: -150 },
-  devtools: { x: 300, y: -150 },
-  communication: { x: -300, y: 100 },
-  business: { x: 300, y: 100 },
-  ai_ml: { x: -150, y: 250 },
-  observability: { x: 150, y: 250 },
-  integration: { x: 0, y: 350 },
+// MiniMap color mapping
+const categoryMiniMapColors: Record<string, string> = {
+  auth: '#a855f7',
+  database: '#3b82f6',
+  deploy: '#22c55e',
+  email: '#eab308',
+  payment: '#f97316',
+  storage: '#06b6d4',
+  monitoring: '#ec4899',
+  ai: '#6366f1',
+  cdn: '#14b8a6',
+  cicd: '#64748b',
+  testing: '#84cc16',
+  sms: '#f59e0b',
+  push: '#f43f5e',
+  chat: '#8b5cf6',
+  search: '#0ea5e9',
+  cms: '#d946ef',
+  analytics: '#10b981',
+  media: '#ef4444',
+  queue: '#f97316',
+  cache: '#eab308',
+  logging: '#78716c',
+  feature_flags: '#71717a',
+  scheduling: '#6366f1',
+  ecommerce: '#10b981',
+  serverless: '#0ea5e9',
+  code_quality: '#22c55e',
+  automation: '#8b5cf6',
+  other: '#9ca3af',
 };
 
-type GroupMode = 'category' | 'domain';
-
-export default function ServiceMapClient() {
+function ServiceMapInner() {
   const params = useParams();
   const projectId = params.id as string;
   const supabase = createClient();
+
   const [projectName, setProjectName] = useState('내 앱');
   const [services, setServices] = useState<(ProjectService & { service: Service })[]>([]);
+  const [dependencies, setDependencies] = useState<ServiceDependency[]>([]);
   const [loading, setLoading] = useState(true);
   const [groupMode, setGroupMode] = useState<GroupMode>('category');
+  const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>('TB');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [selectedService, setSelectedService] = useState<(ProjectService & { service: Service }) | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
+  // Fetch data
   useEffect(() => {
     const fetchData = async () => {
-      const [{ data: project }, { data: svcData }] = await Promise.all([
+      const [{ data: project }, { data: svcData }, { data: depData }] = await Promise.all([
         supabase.from('projects').select('name').eq('id', projectId).single(),
         supabase
           .from('project_services')
           .select('*, service:services(*)')
           .eq('project_id', projectId),
+        supabase
+          .from('service_dependencies')
+          .select('*'),
       ]);
       if (project) setProjectName(project.name);
       setServices((svcData as (ProjectService & { service: Service })[]) || []);
+      setDependencies((depData as ServiceDependency[]) || []);
       setLoading(false);
     };
     fetchData();
   }, [projectId, supabase]);
 
-  // Compute total monthly cost estimate
-  const totalCostSummary = useMemo(() => {
-    const costs: string[] = [];
+  // Service name lookup for sheet
+  const serviceNames = useMemo(() => {
+    const map: Record<string, string> = {};
     services.forEach((ps) => {
-      const estimate = ps.service?.monthly_cost_estimate;
-      if (estimate && typeof estimate === 'object') {
-        const vals = Object.values(estimate);
-        if (vals.length > 0) costs.push(vals[0] as string);
-      }
+      if (ps.service) map[ps.service.id] = ps.service.name;
     });
-    if (costs.length === 0) return null;
-    return `${costs.length}개 서비스 비용 정보`;
+    return map;
   }, [services]);
 
-  const initialNodes = useMemo<Node[]>(() => {
+  // Filter services by status
+  const filteredServices = useMemo(() => {
+    if (statusFilter === 'all') return services;
+    return services.filter((ps) => ps.status === statusFilter);
+  }, [services, statusFilter]);
+
+  // Current service IDs for dependency filtering
+  const currentServiceIds = useMemo(() => {
+    return new Set(filteredServices.map((ps) => ps.service_id));
+  }, [filteredServices]);
+
+  // Filter dependencies to only include ones between current project services
+  const relevantDependencies = useMemo(() => {
+    return dependencies.filter(
+      (dep) => currentServiceIds.has(dep.service_id) && currentServiceIds.has(dep.depends_on_service_id)
+    );
+  }, [dependencies, currentServiceIds]);
+
+  // Dependencies for selected service
+  const selectedServiceDeps = useMemo(() => {
+    if (!selectedService?.service) return [];
+    return dependencies.filter((dep) => dep.service_id === selectedService.service_id);
+  }, [selectedService, dependencies]);
+
+  // Build nodes
+  const rawNodes = useMemo<Node[]>(() => {
     const nodes: Node[] = [
       {
         id: 'app',
@@ -107,28 +155,31 @@ export default function ServiceMapClient() {
       },
     ];
 
-    const groupCounts: Record<string, number> = {};
+    // Group nodes
+    const groups = new Map<string, { label: string; emoji: string }>();
 
-    services.forEach((ps) => {
-      const category = ps.service?.category as ServiceCategory || 'other';
+    filteredServices.forEach((ps) => {
+      const category = (ps.service?.category as ServiceCategory) || 'other';
       const domain = ps.service?.domain as ServiceDomain | undefined;
+      const isMatch = searchQuery === '' || ps.service?.name.toLowerCase().includes(searchQuery.toLowerCase());
 
-      let basePos: { x: number; y: number };
       let groupKey: string;
-
       if (groupMode === 'domain' && domain) {
         groupKey = domain;
-        basePos = domainPositions[domain] || domainPositions.integration;
+        if (!groups.has(groupKey)) {
+          groups.set(groupKey, { label: domainLabels[domain], emoji: domainIcons[domain] });
+        }
       } else {
         groupKey = category;
-        basePos = categoryPositions[category] || categoryPositions.other || { x: 0, y: 250 };
+        if (!groups.has(groupKey)) {
+          groups.set(groupKey, {
+            label: allCategoryLabels[category] || category,
+            emoji: allCategoryEmojis[category] || '🔧',
+          });
+        }
       }
 
-      const count = groupCounts[groupKey] || 0;
-      groupCounts[groupKey] = count + 1;
-      const offset = count * 30;
-
-      // Cost estimate summary
+      // Cost estimate
       const estimate = ps.service?.monthly_cost_estimate;
       let costEstimate: string | undefined;
       if (estimate && typeof estimate === 'object') {
@@ -136,46 +187,130 @@ export default function ServiceMapClient() {
         if (vals.length > 0) costEstimate = vals[0] as string;
       }
 
+      // Map service slug to icon slug
+      const iconSlug = ps.service?.slug;
+
       nodes.push({
         id: ps.id,
         type: 'service',
-        position: {
-          x: basePos.x + offset,
-          y: basePos.y + offset,
-        },
+        position: { x: 0, y: 0 },
         data: {
           label: ps.service?.name || 'Unknown',
           category,
           status: ps.status,
           costEstimate,
           freeTierQuality: ps.service?.free_tier_quality,
+          iconSlug,
+          highlighted: isMatch,
+          selected: selectedService?.id === ps.id,
         },
       });
     });
 
+    // Add group background nodes
+    groups.forEach((value, key) => {
+      nodes.push({
+        id: `group-${key}`,
+        type: 'group',
+        position: { x: 0, y: 0 },
+        data: { label: value.label, emoji: value.emoji },
+        style: { zIndex: -1 },
+      });
+    });
+
     return nodes;
-  }, [services, projectName, groupMode]);
+  }, [filteredServices, projectName, groupMode, searchQuery, selectedService]);
 
-  const initialEdges = useMemo<Edge[]>(() => {
-    return services.map((ps) => ({
-      id: `app-${ps.id}`,
-      source: 'app',
-      target: ps.id,
-      animated: ps.status === 'connected',
-      style: {
-        stroke: ps.status === 'connected' ? '#22c55e' : ps.status === 'error' ? '#ef4444' : '#94a3b8',
-        strokeWidth: 2,
-      },
-    }));
-  }, [services]);
+  // Build edges
+  const rawEdges = useMemo<Edge[]>(() => {
+    const edges: Edge[] = [];
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+    // App → service edges
+    filteredServices.forEach((ps) => {
+      edges.push({
+        id: `app-${ps.id}`,
+        source: 'app',
+        target: ps.id,
+        type: 'smoothstep',
+        animated: ps.status === 'connected',
+        style: {
+          stroke: ps.status === 'connected'
+            ? 'var(--chart-2)'
+            : ps.status === 'error'
+              ? 'var(--destructive)'
+              : 'var(--border)',
+          strokeWidth: 2,
+        },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          width: 16,
+          height: 16,
+          color: ps.status === 'connected'
+            ? 'var(--chart-2)'
+            : ps.status === 'error'
+              ? 'var(--destructive)'
+              : 'var(--border)',
+        },
+        label: ps.status === 'connected' ? '연결됨' : ps.status === 'error' ? '오류' : undefined,
+        labelStyle: { fontSize: 10, fill: 'var(--muted-foreground)' },
+        labelBgStyle: { fill: 'var(--background)', fillOpacity: 0.8 },
+        labelBgPadding: [4, 2] as [number, number],
+        labelBgBorderRadius: 4,
+      });
+    });
+
+    // Dependency edges (service → service)
+    // Map service_id to project_service.id
+    const serviceIdToNodeId = new Map<string, string>();
+    filteredServices.forEach((ps) => {
+      serviceIdToNodeId.set(ps.service_id, ps.id);
+    });
+
+    relevantDependencies.forEach((dep) => {
+      const sourceNodeId = serviceIdToNodeId.get(dep.service_id);
+      const targetNodeId = serviceIdToNodeId.get(dep.depends_on_service_id);
+      if (sourceNodeId && targetNodeId) {
+        edges.push({
+          id: `dep-${dep.id}`,
+          source: sourceNodeId,
+          target: targetNodeId,
+          type: 'dependency',
+          data: { dependencyType: dep.dependency_type as DependencyType },
+        });
+      }
+    });
+
+    return edges;
+  }, [filteredServices, relevantDependencies]);
+
+  // Apply dagre layout
+  const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(() => {
+    // Filter out group nodes for layout
+    const nonGroupNodes = rawNodes.filter((n) => n.type !== 'group');
+    const layoutResult = getLayoutedElements(nonGroupNodes, rawEdges, {
+      direction: layoutDirection,
+      rankSep: 120,
+      nodeSep: 50,
+    });
+
+    // Re-add group nodes (position them behind their children)
+    const groupNodes = rawNodes.filter((n) => n.type === 'group');
+    // For now, group nodes are not positioned by dagre; skip them in final render
+    // They would need bounding box calculation which adds complexity
+
+    return {
+      nodes: [...layoutResult.nodes],
+      edges: layoutResult.edges,
+    };
+  }, [rawNodes, rawEdges, layoutDirection]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
 
   useEffect(() => {
-    setNodes(initialNodes);
-    setEdges(initialEdges);
-  }, [initialNodes, initialEdges, setNodes, setEdges]);
+    setNodes(layoutedNodes);
+    setEdges(layoutedEdges);
+  }, [layoutedNodes, layoutedEdges, setNodes, setEdges]);
 
   const onConnect = useCallback(
     (connection: Connection) => setEdges((eds) => addEdge(connection, eds)),
@@ -183,15 +318,17 @@ export default function ServiceMapClient() {
   );
 
   const handleNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
-    if (node.id === 'app') return;
+    if (node.id === 'app' || node.type === 'group') return;
     const svc = services.find((s) => s.id === node.id);
-    setSelectedService(svc || null);
+    if (svc) {
+      setSelectedService(svc);
+      setSheetOpen(true);
+    }
   }, [services]);
 
   const handleExportPng = useCallback(() => {
     const svgEl = document.querySelector('.react-flow__viewport');
     if (!svgEl) return;
-    // Simple approach: use browser print or toBlob
     const canvas = document.createElement('canvas');
     const rect = svgEl.getBoundingClientRect();
     canvas.width = rect.width * 2;
@@ -214,39 +351,57 @@ export default function ServiceMapClient() {
     img.src = url;
   }, [projectName]);
 
+  // MiniMap node color
+  const getNodeColor = useCallback((node: Node) => {
+    if (node.type === 'app') return 'var(--primary)';
+    const d = node.data as Record<string, unknown>;
+    const cat = d.category as string;
+    return categoryMiniMapColors[cat] || '#9ca3af';
+  }, []);
+
   if (loading) {
-    return <div className="h-[600px] rounded-lg bg-muted animate-pulse" />;
+    return <div className="h-[calc(100vh-16rem)] min-h-[500px] max-h-[900px] rounded-lg bg-muted animate-pulse" />;
   }
 
+  // SVG marker definitions for dependency arrows
+  const depMarkerDefs = (
+    <svg style={{ position: 'absolute', width: 0, height: 0 }}>
+      <defs>
+        <marker id="dep-arrow-required" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--destructive)" />
+        </marker>
+        <marker id="dep-arrow-recommended" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--primary)" />
+        </marker>
+        <marker id="dep-arrow-optional" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted-foreground)" />
+        </marker>
+        <marker id="dep-arrow-alternative" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--chart-4)" />
+        </marker>
+      </defs>
+    </svg>
+  );
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">서비스 맵</h2>
-        <div className="flex items-center gap-2">
-          <Button
-            variant={groupMode === 'category' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setGroupMode('category')}
-          >
-            <Layers className="mr-1.5 h-3.5 w-3.5" />
-            카테고리별
-          </Button>
-          <Button
-            variant={groupMode === 'domain' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setGroupMode('domain')}
-          >
-            <Layers className="mr-1.5 h-3.5 w-3.5" />
-            도메인별
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleExportPng}>
-            <Download className="mr-1.5 h-3.5 w-3.5" />
-            PNG
-          </Button>
-        </div>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-lg font-semibold shrink-0">서비스 맵</h2>
+        <MapToolbar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          groupMode={groupMode}
+          onGroupModeChange={setGroupMode}
+          layoutDirection={layoutDirection}
+          onLayoutDirectionChange={setLayoutDirection}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+          onExportPng={handleExportPng}
+        />
       </div>
 
-      <div className="h-[600px] rounded-lg border bg-background">
+      <div className="h-[calc(100vh-16rem)] min-h-[500px] max-h-[900px] rounded-lg border bg-background relative">
+        {depMarkerDefs}
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -255,18 +410,20 @@ export default function ServiceMapClient() {
           onConnect={onConnect}
           onNodeClick={handleNodeClick}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           fitView
           fitViewOptions={{ padding: 0.3 }}
         >
           <Controls />
           <MiniMap
             nodeStrokeWidth={3}
+            nodeColor={getNodeColor}
             zoomable
             pannable
           />
           <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
 
-          {/* Legend panel */}
+          {/* Legend */}
           <Panel position="top-right">
             <div className="flex gap-2 text-xs bg-background/80 backdrop-blur rounded-lg p-2 border">
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block" /> 연결됨</span>
@@ -276,7 +433,7 @@ export default function ServiceMapClient() {
             </div>
           </Panel>
 
-          {/* Monthly cost summary panel */}
+          {/* Cost summary */}
           <Panel position="bottom-left">
             <Card className="w-[220px]">
               <CardContent className="p-3 space-y-2">
@@ -308,44 +465,25 @@ export default function ServiceMapClient() {
         </ReactFlow>
       </div>
 
-      {selectedService && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="font-semibold text-lg">{selectedService.service?.name}</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {selectedService.service?.description_ko || selectedService.service?.description}
-                </p>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => setSelectedService(null)}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-3">
-              <Badge>{selectedService.service?.category}</Badge>
-              {selectedService.service?.domain && (
-                <Badge variant="outline">{domainLabels[selectedService.service.domain]}</Badge>
-              )}
-              {selectedService.service?.free_tier_quality && (
-                <Badge variant="secondary">무료: {selectedService.service.free_tier_quality}</Badge>
-              )}
-            </div>
-            <div className="flex gap-2 mt-3">
-              {selectedService.service?.website_url && (
-                <Button variant="outline" size="sm" asChild>
-                  <a href={selectedService.service.website_url} target="_blank" rel="noopener noreferrer">웹사이트</a>
-                </Button>
-              )}
-              {selectedService.service?.docs_url && (
-                <Button variant="outline" size="sm" asChild>
-                  <a href={selectedService.service.docs_url} target="_blank" rel="noopener noreferrer">문서</a>
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Service detail sidebar */}
+      <ServiceDetailSheet
+        service={selectedService}
+        dependencies={selectedServiceDeps}
+        serviceNames={serviceNames}
+        open={sheetOpen}
+        onOpenChange={(open) => {
+          setSheetOpen(open);
+          if (!open) setSelectedService(null);
+        }}
+      />
     </div>
+  );
+}
+
+export default function ServiceMapClient() {
+  return (
+    <ReactFlowProvider>
+      <ServiceMapInner />
+    </ReactFlowProvider>
   );
 }
