@@ -100,6 +100,7 @@ export function HealthSummaryCard({
           onClick={onRunCheck}
           disabled={isRunning}
           className="shrink-0"
+          aria-label="상태 검증 실행"
         >
           {isRunning ? (
             <Loader2 className="h-4 w-4 animate-spin" />

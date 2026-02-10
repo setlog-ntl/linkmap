@@ -25,7 +25,7 @@ export function HealthSparkline({ data, height = 24, width = 80 }: HealthSparkli
 
   return (
     <div className="inline-flex items-center gap-1.5">
-      <svg width={width} height={height} className="shrink-0">
+      <svg width={width} height={height} className="shrink-0" role="img" aria-label={`응답 시간 추이: 최근 ${data.length}건, 마지막 ${lastValue}ms`}>
         <polyline
           points={points.join(' ')}
           fill="none"

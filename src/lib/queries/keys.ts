@@ -21,5 +21,7 @@ export const queryKeys = {
   healthChecks: {
     byProjectService: (projectServiceId: string) =>
       ['health-checks', projectServiceId] as const,
+    latestByProject: (projectId: string) =>
+      ['health-checks', 'latest', projectId] as const,
   },
 } as const;

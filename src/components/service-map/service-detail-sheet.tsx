@@ -17,9 +17,11 @@ import {
   CostEstimateBadge,
   VendorLockInBadge,
 } from '@/components/service/service-badges';
+import { HealthTimeline } from '@/components/project/health-timeline';
 import { allCategoryLabels } from '@/lib/constants/service-filters';
 import { domainLabels } from '@/lib/constants/service-filters';
-import { ExternalLink, BookOpen, GitFork } from 'lucide-react';
+import { useHealthChecks, useRunHealthCheck } from '@/lib/queries/health-checks';
+import { ExternalLink, BookOpen, GitFork, Activity, Loader2 } from 'lucide-react';
 import type { ProjectService, Service, ServiceDependency, ServiceCategory, ServiceDomain } from '@/types';
 
 interface ServiceDetailSheetProps {
@@ -51,12 +53,24 @@ export function ServiceDetailSheet({
   open,
   onOpenChange,
 }: ServiceDetailSheetProps) {
+  const psId = service?.id || '';
+  const { data: healthChecks = [] } = useHealthChecks(psId);
+  const runHealthCheck = useRunHealthCheck();
+
   if (!service) return null;
 
   const svc = service.service;
   const status = statusLabels[service.status] || statusLabels.not_started;
   const category = svc?.category as ServiceCategory;
   const domain = svc?.domain as ServiceDomain | undefined;
+
+  // Count configured env vars vs required
+  const requiredEnvVars = svc?.required_env_vars || [];
+  const recentChecks = healthChecks.slice(0, 5);
+
+  const handleRunCheck = () => {
+    runHealthCheck.mutate({ project_service_id: service.id });
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -81,6 +95,42 @@ export function ServiceDetailSheet({
               <Badge variant="secondary">
                 {domainLabels[domain]}
               </Badge>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Health Check */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-sm font-medium flex items-center gap-1.5">
+                <Activity className="h-3.5 w-3.5" />
+                연결 검증
+              </h4>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRunCheck}
+                disabled={runHealthCheck.isPending}
+              >
+                {runHealthCheck.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  '검증 실행'
+                )}
+              </Button>
+            </div>
+
+            {requiredEnvVars.length > 0 && (
+              <p className="text-xs text-muted-foreground mb-2">
+                필수 환경변수: {requiredEnvVars.length}개
+              </p>
+            )}
+
+            {recentChecks.length > 0 ? (
+              <HealthTimeline checks={recentChecks} />
+            ) : (
+              <p className="text-xs text-muted-foreground">검증 이력이 없습니다</p>
             )}
           </div>
 
