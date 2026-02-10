@@ -7,6 +7,8 @@ interface LayoutOptions {
   nodeHeight?: number;
   rankSep?: number;
   nodeSep?: number;
+  nodeHeights?: Record<string, number>;
+  collapsedGroups?: Set<string>;
 }
 
 export function getLayoutedElements(
@@ -20,6 +22,7 @@ export function getLayoutedElements(
     nodeHeight = 80,
     rankSep = 100,
     nodeSep = 60,
+    nodeHeights = {},
   } = options;
 
   const g = new dagre.graphlib.Graph();
@@ -28,7 +31,7 @@ export function getLayoutedElements(
 
   nodes.forEach((node) => {
     const w = node.type === 'app' ? 220 : nodeWidth;
-    const h = node.type === 'app' ? 90 : nodeHeight;
+    const h = node.type === 'app' ? 90 : (nodeHeights[node.id] || nodeHeight);
     g.setNode(node.id, { width: w, height: h });
   });
 
@@ -41,7 +44,7 @@ export function getLayoutedElements(
   const layoutedNodes = nodes.map((node) => {
     const nodeWithPosition = g.node(node.id);
     const w = node.type === 'app' ? 220 : nodeWidth;
-    const h = node.type === 'app' ? 90 : nodeHeight;
+    const h = node.type === 'app' ? 90 : (nodeHeights[node.id] || nodeHeight);
 
     return {
       ...node,

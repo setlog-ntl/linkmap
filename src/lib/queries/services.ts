@@ -5,6 +5,21 @@ import type { ProjectService, Service } from '@/types';
 
 const supabase = createClient();
 
+export function useCatalogServices() {
+  return useQuery({
+    queryKey: queryKeys.catalog.all,
+    queryFn: async (): Promise<Service[]> => {
+      const { data, error } = await supabase
+        .from('services')
+        .select('*')
+        .order('name');
+      if (error) throw error;
+      return (data as Service[]) || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5분 캐시
+  });
+}
+
 export function useProjectServices(projectId: string) {
   return useQuery({
     queryKey: queryKeys.services.byProject(projectId),

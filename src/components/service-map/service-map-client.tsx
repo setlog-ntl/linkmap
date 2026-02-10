@@ -1,19 +1,20 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import {
   ReactFlow,
   ReactFlowProvider,
   Controls,
   Background,
   MiniMap,
-  useNodesState,
-  useEdgesState,
+  applyNodeChanges,
+  applyEdgeChanges,
   type Connection,
   type Edge,
   type Node,
+  type NodeChange,
+  type EdgeChange,
   BackgroundVariant,
   Panel,
   MarkerType,
@@ -26,13 +27,23 @@ import DependencyEdge from '@/components/service-map/dependency-edge';
 import UserConnectionEdge from '@/components/service-map/user-connection-edge';
 import { MapToolbar, type GroupMode, type LayoutDirection, type StatusFilter } from '@/components/service-map/map-toolbar';
 import { ServiceDetailSheet } from '@/components/service-map/service-detail-sheet';
+import { CatalogSidebar } from '@/components/service-map/catalog-sidebar';
+import { EmptyMapState } from '@/components/service-map/empty-map-state';
+import { NodeContextMenu } from '@/components/service-map/node-context-menu';
 import { Card, CardContent } from '@/components/ui/card';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { DollarSign } from 'lucide-react';
 import { allCategoryLabels, allCategoryEmojis, domainLabels, domainIcons } from '@/lib/constants/service-filters';
 import { easyCategoryLabels, easyCategoryEmojis, serviceCategoryToEasy } from '@/lib/constants/easy-categories';
 import { getLayoutedElements } from '@/lib/layout/dagre-layout';
+import { getNeighborhood, isNodeHighlighted, isEdgeHighlighted } from '@/lib/layout/graph-utils';
+import { shouldShowEdgeInViewMode } from '@/lib/layout/view-mode-styles';
 import { useProjectConnections, useCreateConnection, useDeleteConnection } from '@/lib/queries/connections';
-import type { ProjectService, Service, ServiceCategory, ServiceDomain, ServiceDependency, DependencyType, UserConnectionType } from '@/types';
+import { useProjectServices, useCatalogServices, useRemoveProjectService } from '@/lib/queries/services';
+import { useLatestHealthChecks, useRunHealthCheck } from '@/lib/queries/health-checks';
+import { useServiceMapStore } from '@/stores/service-map-store';
+import { createClient } from '@/lib/supabase/client';
+import type { ProjectService, Service, ServiceCategory, ServiceDomain, ServiceDependency, DependencyType, UserConnectionType, UserConnection } from '@/types';
 
 const nodeTypes = {
   service: ServiceNode,
@@ -44,6 +55,9 @@ const edgeTypes = {
   dependency: DependencyEdge,
   userConnection: UserConnectionEdge,
 };
+
+// Stable empty array to prevent re-renders from default destructuring
+const EMPTY_CONNECTIONS: UserConnection[] = [];
 
 // MiniMap color mapping
 const categoryMiniMapColors: Record<string, string> = {
@@ -80,12 +94,24 @@ const categoryMiniMapColors: Record<string, string> = {
 function ServiceMapInner() {
   const params = useParams();
   const projectId = params.id as string;
-  const supabase = createClient();
+  const supabaseRef = useRef(createClient());
+
+  // Zustand store
+  const {
+    viewMode,
+    focusedNodeId,
+    setFocusedNodeId,
+    collapsedGroups,
+    toggleGroupCollapsed,
+    contextMenu,
+    setContextMenu,
+    expandedNodeId,
+    setExpandedNodeId,
+    setSidebarOpen,
+  } = useServiceMapStore();
 
   const [projectName, setProjectName] = useState('내 앱');
-  const [services, setServices] = useState<(ProjectService & { service: Service })[]>([]);
   const [dependencies, setDependencies] = useState<ServiceDependency[]>([]);
-  const [loading, setLoading] = useState(true);
   const [groupMode, setGroupMode] = useState<GroupMode>('category');
   const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>('TB');
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,39 +121,39 @@ function ServiceMapInner() {
   const [connectMode, setConnectMode] = useState(false);
   const [connectionType, setConnectionType] = useState<UserConnectionType>('uses');
 
-  // Fetch user connections
-  const { data: userConnections = [] } = useProjectConnections(projectId);
-  const createConnectionMutation = useCreateConnection(projectId);
-  const deleteConnection = useDeleteConnection(projectId);
+  // TanStack Query hooks (Phase 4A)
+  const { data: services = [], isLoading: servicesLoading } = useProjectServices(projectId);
+  const { data: catalogServices = [], isLoading: catalogLoading } = useCatalogServices();
+  const { data: healthChecks = {} } = useLatestHealthChecks(projectId);
+  const runHealthCheck = useRunHealthCheck();
+  const removeService = useRemoveProjectService(projectId);
 
-  // Stable ref for createConnection to avoid unnecessary re-renders
+  // Fetch user connections
+  const { data: userConnections = EMPTY_CONNECTIONS } = useProjectConnections(projectId);
+  const createConnectionMutation = useCreateConnection(projectId);
+  const deleteConnectionMutation = useDeleteConnection(projectId);
+
+  // Stable refs for mutations
   const createConnectionRef = useRef(createConnectionMutation);
   createConnectionRef.current = createConnectionMutation;
+  const deleteConnectionRef = useRef(deleteConnectionMutation);
+  deleteConnectionRef.current = deleteConnectionMutation;
 
-  // Fetch data
+  // Fetch project name & dependencies (still manual - these don't have dedicated hooks)
   useEffect(() => {
-    const fetchData = async () => {
-      const [{ data: project }, { data: svcData }] = await Promise.all([
+    const supabase = supabaseRef.current;
+    const fetchExtra = async () => {
+      const [{ data: project }, { data: depData }] = await Promise.all([
         supabase.from('projects').select('name').eq('id', projectId).single(),
-        supabase
-          .from('project_services')
-          .select('*, service:services(*)')
-          .eq('project_id', projectId),
+        supabase.from('service_dependencies').select('*'),
       ]);
       if (project) setProjectName(project.name);
-      setServices((svcData as (ProjectService & { service: Service })[]) || []);
-
-      // service_dependencies는 카탈로그 테이블 - 존재하지 않을 수 있음
-      const { data: depData } = await supabase
-        .from('service_dependencies')
-        .select('*');
       setDependencies((depData as ServiceDependency[]) || []);
-      setLoading(false);
     };
-    fetchData();
-  }, [projectId, supabase]);
+    fetchExtra();
+  }, [projectId]);
 
-  // Service name lookup for sheet
+  // Service name lookup
   const serviceNames = useMemo(() => {
     const map: Record<string, string> = {};
     services.forEach((ps) => {
@@ -142,19 +168,19 @@ function ServiceMapInner() {
     return services.filter((ps) => ps.status === statusFilter);
   }, [services, statusFilter]);
 
-  // Current service IDs for dependency filtering
+  // Current service IDs
   const currentServiceIds = useMemo(() => {
     return new Set(filteredServices.map((ps) => ps.service_id));
   }, [filteredServices]);
 
-  // Filter dependencies to only include ones between current project services
+  // Relevant dependencies
   const relevantDependencies = useMemo(() => {
     return dependencies.filter(
       (dep) => currentServiceIds.has(dep.service_id) && currentServiceIds.has(dep.depends_on_service_id)
     );
   }, [dependencies, currentServiceIds]);
 
-  // Dependencies for selected service
+  // Selected service deps
   const selectedServiceDeps = useMemo(() => {
     if (!selectedService?.service) return [];
     return dependencies.filter((dep) => dep.service_id === selectedService.service_id);
@@ -169,14 +195,8 @@ function ServiceMapInner() {
     return map;
   }, [filteredServices]);
 
-  // Use ref to stabilize deleteConnection and avoid infinite re-render loop
-  // (useMutation returns a new object reference each render)
-  const deleteConnectionRef = useRef(deleteConnection);
-  deleteConnectionRef.current = deleteConnection;
-
   // Handle delete user connection
   const handleDeleteUserConnection = useCallback((edgeId: string) => {
-    // edgeId format: "uc-{connection.id}"
     const connectionId = edgeId.replace('uc-', '');
     deleteConnectionRef.current.mutate(connectionId);
   }, []);
@@ -192,8 +212,7 @@ function ServiceMapInner() {
       },
     ];
 
-    // Group nodes
-    const groups = new Map<string, { label: string; emoji: string }>();
+    const groups = new Map<string, { label: string; emoji: string; childCount: number }>();
 
     filteredServices.forEach((ps) => {
       const category = (ps.service?.category as ServiceCategory) || 'other';
@@ -208,12 +227,13 @@ function ServiceMapInner() {
           groups.set(groupKey, {
             label: easyCategoryLabels[easyKey],
             emoji: easyCategoryEmojis[easyKey],
+            childCount: 0,
           });
         }
       } else if (groupMode === 'domain' && domain) {
         groupKey = domain;
         if (!groups.has(groupKey)) {
-          groups.set(groupKey, { label: domainLabels[domain], emoji: domainIcons[domain] });
+          groups.set(groupKey, { label: domainLabels[domain], emoji: domainIcons[domain], childCount: 0 });
         }
       } else {
         groupKey = category;
@@ -221,9 +241,17 @@ function ServiceMapInner() {
           groups.set(groupKey, {
             label: allCategoryLabels[category] || category,
             emoji: allCategoryEmojis[category] || '🔧',
+            childCount: 0,
           });
         }
       }
+
+      // Increment child count
+      const g = groups.get(groupKey)!;
+      g.childCount++;
+
+      // Skip nodes in collapsed groups
+      if (collapsedGroups.has(groupKey)) return;
 
       // Cost estimate
       const estimate = ps.service?.monthly_cost_estimate;
@@ -233,8 +261,14 @@ function ServiceMapInner() {
         if (vals.length > 0) costEstimate = vals[0] as string;
       }
 
-      // Map service slug to icon slug
       const iconSlug = ps.service?.slug;
+      const hc = healthChecks[ps.id];
+      const isExpanded = expandedNodeId === ps.id;
+
+      // Connection count for this service
+      const connectionCount = userConnections.filter(
+        (c) => c.source_service_id === ps.service_id || c.target_service_id === ps.service_id
+      ).length;
 
       nodes.push({
         id: ps.id,
@@ -248,24 +282,40 @@ function ServiceMapInner() {
           freeTierQuality: ps.service?.free_tier_quality,
           iconSlug,
           highlighted: isMatch,
-          selected: selectedService?.id === ps.id,
+          // Phase 2A: health data
+          healthStatus: hc?.status,
+          healthCheck: hc,
+          envVarCount: ps.service?.required_env_vars?.length || 0,
+          // Phase 2A: expanded mode
+          expanded: isExpanded,
+          // Phase 2B: view mode
+          viewMode,
+          // Phase 3A: connection count
+          connectionCount,
         },
       });
     });
 
     // Add group background nodes
     groups.forEach((value, key) => {
+      const isCollapsed = collapsedGroups.has(key);
       nodes.push({
         id: `group-${key}`,
         type: 'group',
         position: { x: 0, y: 0 },
-        data: { label: value.label, emoji: value.emoji },
+        data: {
+          label: value.label,
+          emoji: value.emoji,
+          collapsed: isCollapsed,
+          childCount: value.childCount,
+          onToggleCollapse: () => toggleGroupCollapsed(key),
+        },
         style: { zIndex: -1 },
       });
     });
 
     return nodes;
-  }, [filteredServices, projectName, groupMode, searchQuery, selectedService]);
+  }, [filteredServices, projectName, groupMode, searchQuery, healthChecks, expandedNodeId, viewMode, collapsedGroups, toggleGroupCollapsed, userConnections]);
 
   // Build edges
   const rawEdges = useMemo<Edge[]>(() => {
@@ -273,6 +323,18 @@ function ServiceMapInner() {
 
     // App → service edges
     filteredServices.forEach((ps) => {
+      // Skip edges to nodes in collapsed groups
+      const category = (ps.service?.category as ServiceCategory) || 'other';
+      let groupKey: string;
+      if (groupMode === 'easy') {
+        groupKey = serviceCategoryToEasy[category] || 'analytics_other';
+      } else if (groupMode === 'domain' && ps.service?.domain) {
+        groupKey = ps.service.domain;
+      } else {
+        groupKey = category;
+      }
+      if (collapsedGroups.has(groupKey)) return;
+
       edges.push({
         id: `app-${ps.id}`,
         source: 'app',
@@ -305,7 +367,7 @@ function ServiceMapInner() {
       });
     });
 
-    // Dependency edges (service → service)
+    // Dependency edges
     relevantDependencies.forEach((dep) => {
       const sourceNodeId = serviceIdToNodeId.get(dep.service_id);
       const targetNodeId = serviceIdToNodeId.get(dep.depends_on_service_id);
@@ -340,38 +402,96 @@ function ServiceMapInner() {
     });
 
     return edges;
-  }, [filteredServices, relevantDependencies, userConnections, serviceIdToNodeId, connectMode, handleDeleteUserConnection]);
+  }, [filteredServices, relevantDependencies, userConnections, serviceIdToNodeId, connectMode, handleDeleteUserConnection, collapsedGroups, groupMode]);
+
+  // Compute neighbor set for focus mode (Phase 3A)
+  const neighborSet = useMemo(() => {
+    if (!focusedNodeId) return null;
+    return getNeighborhood(focusedNodeId, rawEdges);
+  }, [focusedNodeId, rawEdges]);
+
+  // Apply focus mode opacity to nodes
+  const focusedNodes = useMemo<Node[]>(() => {
+    if (!focusedNodeId) return rawNodes;
+    return rawNodes.map((node) => {
+      if (node.type === 'group' || node.type === 'app') return node;
+      const highlighted = isNodeHighlighted(node.id, focusedNodeId, neighborSet);
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          focusOpacity: highlighted ? 1 : 0.2,
+        },
+      };
+    });
+  }, [rawNodes, focusedNodeId, neighborSet]);
+
+  // Apply view mode edge filtering (Phase 2B)
+  const viewFilteredEdges = useMemo<Edge[]>(() => {
+    let edges = rawEdges.filter((e) => shouldShowEdgeInViewMode(viewMode, e.type));
+
+    // Focus mode edge dimming
+    if (focusedNodeId) {
+      edges = edges.map((edge) => {
+        const highlighted = isEdgeHighlighted(edge, focusedNodeId, neighborSet);
+        return {
+          ...edge,
+          style: {
+            ...edge.style,
+            opacity: highlighted ? 1 : 0.1,
+          },
+        };
+      });
+    }
+
+    return edges;
+  }, [rawEdges, viewMode, focusedNodeId, neighborSet]);
+
+  // Compute node heights for expanded nodes
+  const nodeHeights = useMemo<Record<string, number>>(() => {
+    const heights: Record<string, number> = {};
+    if (expandedNodeId) {
+      heights[expandedNodeId] = 140; // expanded node is taller
+    }
+    return heights;
+  }, [expandedNodeId]);
 
   // Apply dagre layout
   const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(() => {
-    // Filter out group nodes for layout
-    const nonGroupNodes = rawNodes.filter((n) => n.type !== 'group');
-    const layoutResult = getLayoutedElements(nonGroupNodes, rawEdges, {
+    const nonGroupNodes = focusedNodes.filter((n) => n.type !== 'group');
+    const layoutResult = getLayoutedElements(nonGroupNodes, viewFilteredEdges, {
       direction: layoutDirection,
       rankSep: 120,
       nodeSep: 50,
+      nodeHeights,
     });
 
     return {
       nodes: [...layoutResult.nodes],
       edges: layoutResult.edges,
     };
-  }, [rawNodes, rawEdges, layoutDirection]);
+  }, [focusedNodes, viewFilteredEdges, layoutDirection, nodeHeights]);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
+  // React state for nodes/edges
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [edges, setEdges] = useState<Edge[]>([]);
+
+  const onNodesChange = useCallback((changes: NodeChange<Node>[]) => {
+    setNodes((nds) => applyNodeChanges(changes, nds));
+  }, []);
+
+  const onEdgesChange = useCallback((changes: EdgeChange<Edge>[]) => {
+    setEdges((eds) => applyEdgeChanges(changes, eds));
+  }, []);
 
   useEffect(() => {
     setNodes(layoutedNodes);
     setEdges(layoutedEdges);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layoutedNodes, layoutedEdges]);
 
   const onConnect = useCallback(
     (connection: Connection) => {
       if (!connectMode) return;
-
-      // Find the service IDs from the node IDs
       const sourcePS = filteredServices.find((s) => s.id === connection.source);
       const targetPS = filteredServices.find((s) => s.id === connection.target);
 
@@ -387,14 +507,65 @@ function ServiceMapInner() {
     [connectMode, connectionType, filteredServices, projectId]
   );
 
+  // Node click — focus mode + detail sheet
   const handleNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
-    if (node.id === 'app' || node.type === 'group') return;
+    if (node.type === 'group') return;
+    if (node.id === 'app') return;
+
+    // Toggle focus
+    setFocusedNodeId(node.id);
+
+    // Open detail sheet
     const svc = services.find((s) => s.id === node.id);
     if (svc) {
       setSelectedService(svc);
       setSheetOpen(true);
     }
+  }, [services, setFocusedNodeId]);
+
+  // Double-click — expand/collapse node
+  const handleNodeDoubleClick = useCallback((_: React.MouseEvent, node: Node) => {
+    if (node.type === 'group' || node.id === 'app') return;
+    setExpandedNodeId(node.id);
+  }, [setExpandedNodeId]);
+
+  // Pane click — clear focus
+  const handlePaneClick = useCallback(() => {
+    if (focusedNodeId) setFocusedNodeId(null);
+  }, [focusedNodeId, setFocusedNodeId]);
+
+  // Context menu handlers (Phase 1C)
+  const handleNodeContextMenu = useCallback((event: React.MouseEvent, node: Node) => {
+    if (node.type === 'group' || node.id === 'app') return;
+    event.preventDefault();
+    setContextMenu({ x: event.clientX, y: event.clientY, nodeId: node.id });
+  }, [setContextMenu]);
+
+  const handlePaneContextMenu = useCallback((event: React.MouseEvent | MouseEvent) => {
+    event.preventDefault();
+    setContextMenu({ x: event.clientX, y: event.clientY, nodeId: null });
+  }, [setContextMenu]);
+
+  // Context menu action handlers
+  const handleContextViewDetail = useCallback((nodeId: string) => {
+    const svc = services.find((s) => s.id === nodeId);
+    if (svc) {
+      setSelectedService(svc);
+      setSheetOpen(true);
+    }
   }, [services]);
+
+  const handleContextStartConnect = useCallback(() => {
+    setConnectMode(true);
+  }, []);
+
+  const handleContextRunHealthCheck = useCallback((nodeId: string) => {
+    runHealthCheck.mutate({ project_service_id: nodeId });
+  }, [runHealthCheck]);
+
+  const handleContextRemoveService = useCallback((nodeId: string) => {
+    removeService.mutate(nodeId);
+  }, [removeService]);
 
   const handleExportPng = useCallback(() => {
     const svgEl = document.querySelector('.react-flow__viewport');
@@ -429,8 +600,22 @@ function ServiceMapInner() {
     return categoryMiniMapColors[cat] || '#9ca3af';
   }, []);
 
-  if (loading) {
+  if (servicesLoading) {
     return <div className="h-[calc(100vh-16rem)] min-h-[500px] max-h-[900px] rounded-lg bg-muted animate-pulse" />;
+  }
+
+  // Empty state (Phase 1B)
+  if (services.length === 0) {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-lg font-semibold shrink-0">서비스 맵</h2>
+        </div>
+        <div className="h-[calc(100vh-16rem)] min-h-[500px] max-h-[900px]">
+          <EmptyMapState projectId={projectId} />
+        </div>
+      </div>
+    );
   }
 
   // SVG marker definitions for dependency arrows
@@ -454,113 +639,143 @@ function ServiceMapInner() {
   );
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between gap-4">
-        <h2 className="text-lg font-semibold shrink-0">서비스 맵</h2>
-        <MapToolbar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          groupMode={groupMode}
-          onGroupModeChange={setGroupMode}
-          layoutDirection={layoutDirection}
-          onLayoutDirectionChange={setLayoutDirection}
-          statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
-          onExportPng={handleExportPng}
-          connectMode={connectMode}
-          onConnectModeChange={setConnectMode}
-          connectionType={connectionType}
-          onConnectionTypeChange={setConnectionType}
-        />
-      </div>
-
-      <div className="h-[calc(100vh-16rem)] min-h-[500px] max-h-[900px] rounded-lg border bg-background relative">
-        {depMarkerDefs}
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onNodeClick={handleNodeClick}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          fitView
-          fitViewOptions={{ padding: 0.3 }}
-          connectionLineStyle={connectMode ? { stroke: '#3b82f6', strokeWidth: 2 } : undefined}
-        >
-          <Controls />
-          <MiniMap
-            nodeStrokeWidth={3}
-            nodeColor={getNodeColor}
-            zoomable
-            pannable
+    <TooltipProvider>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-lg font-semibold shrink-0">서비스 맵</h2>
+          <MapToolbar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            groupMode={groupMode}
+            onGroupModeChange={setGroupMode}
+            layoutDirection={layoutDirection}
+            onLayoutDirectionChange={setLayoutDirection}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            onExportPng={handleExportPng}
+            connectMode={connectMode}
+            onConnectModeChange={setConnectMode}
+            connectionType={connectionType}
+            onConnectionTypeChange={setConnectionType}
           />
-          <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
+        </div>
 
-          {/* Legend */}
-          <Panel position="top-right">
-            <div className="flex flex-col gap-2 text-xs bg-background/80 backdrop-blur rounded-lg p-2 border">
-              <div className="flex gap-2">
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block" /> 연결됨</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-500 inline-block" /> 진행 중</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-400 inline-block" /> 시작 전</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500 inline-block" /> 오류</span>
-              </div>
-              {userConnections.length > 0 && (
-                <div className="flex gap-2 border-t pt-1.5">
-                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-blue-500 inline-block" /> 사용</span>
-                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-green-500 inline-block" /> 연동</span>
-                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-orange-500 inline-block border-dashed" style={{ borderTop: '2px dashed #f97316', height: 0 }} /> 데이터</span>
-                </div>
-              )}
-            </div>
-          </Panel>
+        <div className="h-[calc(100vh-16rem)] min-h-[500px] max-h-[900px] rounded-lg border bg-background relative flex overflow-hidden">
+          {/* 카탈로그 사이드바 (Phase 1A) */}
+          <CatalogSidebar
+            projectId={projectId}
+            catalogServices={catalogServices}
+            projectServices={services}
+            isLoading={catalogLoading}
+          />
 
-          {/* Cost summary */}
-          <Panel position="bottom-left">
-            <Card className="w-[220px]">
-              <CardContent className="p-3 space-y-2">
-                <div className="flex items-center gap-1.5 text-sm font-medium">
-                  <DollarSign className="h-4 w-4 text-green-600" />
-                  월간 비용 요약
-                </div>
-                <div className="space-y-1">
-                  {services.filter((ps) => ps.service?.monthly_cost_estimate && Object.keys(ps.service.monthly_cost_estimate).length > 0).length > 0 ? (
-                    services
-                      .filter((ps) => ps.service?.monthly_cost_estimate && Object.keys(ps.service.monthly_cost_estimate).length > 0)
-                      .map((ps) => {
-                        const estimate = ps.service?.monthly_cost_estimate;
-                        const firstVal = estimate ? Object.values(estimate)[0] : null;
-                        return (
-                          <div key={ps.id} className="flex items-center justify-between text-xs">
-                            <span className="text-muted-foreground truncate mr-2">{ps.service?.name}</span>
-                            <span className="font-medium shrink-0">{firstVal as string}</span>
-                          </div>
-                        );
-                      })
-                  ) : (
-                    <p className="text-xs text-muted-foreground">비용 정보 없음</p>
+          {/* 맵 영역 */}
+          <div className="flex-1 relative">
+            {depMarkerDefs}
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onNodeClick={handleNodeClick}
+              onNodeDoubleClick={handleNodeDoubleClick}
+              onPaneClick={handlePaneClick}
+              onNodeContextMenu={handleNodeContextMenu}
+              onPaneContextMenu={handlePaneContextMenu}
+              nodeTypes={nodeTypes}
+              edgeTypes={edgeTypes}
+              fitView
+              fitViewOptions={{ padding: 0.3 }}
+              connectionLineStyle={connectMode ? { stroke: '#3b82f6', strokeWidth: 2 } : undefined}
+            >
+              <Controls />
+              <MiniMap
+                nodeStrokeWidth={3}
+                nodeColor={getNodeColor}
+                zoomable
+                pannable
+              />
+              <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
+
+              {/* Legend */}
+              <Panel position="top-right">
+                <div className="flex flex-col gap-2 text-xs bg-background/80 backdrop-blur rounded-lg p-2 border">
+                  <div className="flex gap-2">
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block" /> 연결됨</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-500 inline-block" /> 진행 중</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-400 inline-block" /> 시작 전</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500 inline-block" /> 오류</span>
+                  </div>
+                  {userConnections.length > 0 && (
+                    <div className="flex gap-2 border-t pt-1.5">
+                      <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-blue-500 inline-block" /> 사용</span>
+                      <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-green-500 inline-block" /> 연동</span>
+                      <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-orange-500 inline-block border-dashed" style={{ borderTop: '2px dashed #f97316', height: 0 }} /> 데이터</span>
+                    </div>
+                  )}
+                  {viewMode !== 'default' && (
+                    <div className="border-t pt-1.5 text-muted-foreground">
+                      모드: {viewMode === 'cost' ? '비용' : viewMode === 'health' ? '상태' : '의존성'}
+                    </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          </Panel>
-        </ReactFlow>
-      </div>
+              </Panel>
 
-      {/* Service detail sidebar */}
-      <ServiceDetailSheet
-        service={selectedService}
-        dependencies={selectedServiceDeps}
-        serviceNames={serviceNames}
-        open={sheetOpen}
-        onOpenChange={(open) => {
-          setSheetOpen(open);
-          if (!open) setSelectedService(null);
-        }}
-      />
-    </div>
+              {/* Cost summary */}
+              <Panel position="bottom-left">
+                <Card className="w-[220px]">
+                  <CardContent className="p-3 space-y-2">
+                    <div className="flex items-center gap-1.5 text-sm font-medium">
+                      <DollarSign className="h-4 w-4 text-green-600" />
+                      월간 비용 요약
+                    </div>
+                    <div className="space-y-1">
+                      {services.filter((ps) => ps.service?.monthly_cost_estimate && Object.keys(ps.service.monthly_cost_estimate).length > 0).length > 0 ? (
+                        services
+                          .filter((ps) => ps.service?.monthly_cost_estimate && Object.keys(ps.service.monthly_cost_estimate).length > 0)
+                          .map((ps) => {
+                            const estimate = ps.service?.monthly_cost_estimate;
+                            const firstVal = estimate ? Object.values(estimate)[0] : null;
+                            return (
+                              <div key={ps.id} className="flex items-center justify-between text-xs">
+                                <span className="text-muted-foreground truncate mr-2">{ps.service?.name}</span>
+                                <span className="font-medium shrink-0">{firstVal as string}</span>
+                              </div>
+                            );
+                          })
+                      ) : (
+                        <p className="text-xs text-muted-foreground">비용 정보 없음</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </Panel>
+            </ReactFlow>
+          </div>
+
+          {/* Context menu (Phase 1C) */}
+          <NodeContextMenu
+            onViewDetail={handleContextViewDetail}
+            onStartConnect={handleContextStartConnect}
+            onRunHealthCheck={handleContextRunHealthCheck}
+            onRemoveService={handleContextRemoveService}
+          />
+        </div>
+
+        {/* Service detail sidebar */}
+        <ServiceDetailSheet
+          service={selectedService}
+          dependencies={selectedServiceDeps}
+          serviceNames={serviceNames}
+          open={sheetOpen}
+          onOpenChange={(open) => {
+            setSheetOpen(open);
+            if (!open) setSelectedService(null);
+          }}
+        />
+      </div>
+    </TooltipProvider>
   );
 }
 

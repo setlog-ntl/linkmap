@@ -3,8 +3,12 @@
 import { memo } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { ServiceIcon } from '@/components/landing/service-icon';
-import type { ServiceCategory, FreeTierQuality } from '@/types';
+import { NodeTooltip } from '@/components/service-map/node-tooltip';
+import { Badge } from '@/components/ui/badge';
+import type { ServiceCategory, FreeTierQuality, HealthCheckStatus, HealthCheck } from '@/types';
+import type { ViewMode } from '@/stores/service-map-store';
 import { allCategoryLabels } from '@/lib/constants/service-filters';
+import { getViewModeNodeStyle } from '@/lib/layout/view-mode-styles';
 
 const categoryColors: Record<ServiceCategory, string> = {
   auth: 'bg-purple-50 border-purple-200 dark:bg-purple-950/50 dark:border-purple-800',
@@ -44,6 +48,13 @@ const statusDots: Record<string, string> = {
   error: 'bg-red-500',
 };
 
+const healthDots: Record<HealthCheckStatus, string> = {
+  healthy: 'bg-green-500',
+  degraded: 'bg-yellow-500',
+  unhealthy: 'bg-red-500 animate-pulse',
+  unknown: 'bg-gray-400',
+};
+
 interface ServiceNodeData {
   label: string;
   category: ServiceCategory;
@@ -53,6 +64,14 @@ interface ServiceNodeData {
   iconSlug?: string;
   highlighted?: boolean;
   selected?: boolean;
+  focusOpacity?: number;
+  // Phase 2A additions
+  healthStatus?: HealthCheckStatus;
+  healthCheck?: HealthCheck;
+  envVarCount?: number;
+  expanded?: boolean;
+  viewMode?: ViewMode;
+  connectionCount?: number;
   [key: string]: unknown;
 }
 
@@ -61,19 +80,45 @@ function ServiceNode({ data }: NodeProps) {
   const category = d.category as ServiceCategory;
   const colorClass = categoryColors[category] || categoryColors.other;
   const dotClass = statusDots[d.status] || statusDots.not_started;
+  const viewMode = d.viewMode || 'default';
 
-  const isHighlighted = d.highlighted !== false; // default true when no search
-  const isSelected = d.selected === true;
+  const isHighlighted = d.highlighted !== false;
+  const focusOpacity = d.focusOpacity ?? 1;
+  const isExpanded = d.expanded === true;
 
-  return (
+  // 뷰 모드별 오버레이 스타일
+  const vmStyle = getViewModeNodeStyle(viewMode, {
+    category,
+    costEstimate: d.costEstimate,
+    healthStatus: d.healthStatus,
+    healthCheck: d.healthCheck,
+  });
+
+  const borderOverride = vmStyle.borderColor
+    ? { borderColor: vmStyle.borderColor }
+    : {};
+  const scaleTransform = vmStyle.scale && vmStyle.scale !== 1
+    ? `scale(${vmStyle.scale})`
+    : undefined;
+  const glowShadow = vmStyle.glowColor
+    ? `0 0 12px ${vmStyle.glowColor}`
+    : undefined;
+
+  const nodeContent = (
     <div
       className={`
         px-3.5 py-2.5 rounded-xl border-2 shadow-sm min-w-[160px]
         transition-all duration-200
         ${colorClass}
-        ${isSelected ? 'ring-2 ring-primary/40 shadow-md' : 'hover:shadow-md hover:scale-[1.02]'}
-        ${isHighlighted ? 'opacity-100' : 'opacity-20'}
+        ${d.selected ? 'ring-2 ring-primary/40 shadow-md' : 'hover:shadow-md hover:scale-[1.02]'}
+        ${isHighlighted ? '' : 'opacity-20'}
       `}
+      style={{
+        opacity: isHighlighted ? focusOpacity : 0.2,
+        ...borderOverride,
+        transform: scaleTransform,
+        boxShadow: glowShadow,
+      }}
     >
       <Handle
         type="target"
@@ -85,6 +130,13 @@ function ServiceNode({ data }: NodeProps) {
         position={Position.Left}
         className="!bg-gray-400 dark:!bg-gray-500 !w-2.5 !h-2.5 !border-0"
       />
+
+      {/* 헬스 상태 뱃지 (top-right) */}
+      {d.healthStatus && d.healthStatus !== 'unknown' && (
+        <span
+          className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-background ${healthDots[d.healthStatus]}`}
+        />
+      )}
 
       <div className="flex items-center gap-2">
         <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${dotClass}`} />
@@ -103,9 +155,51 @@ function ServiceNode({ data }: NodeProps) {
                 <span>{d.costEstimate}</span>
               </>
             )}
+            {d.envVarCount != null && d.envVarCount > 0 && (
+              <>
+                <span className="opacity-40">·</span>
+                <span>env {d.envVarCount}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
+
+      {/* 뷰 모드 뱃지 오버레이 */}
+      {vmStyle.badge && viewMode !== 'default' && (
+        <div className="mt-1.5">
+          <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
+            {vmStyle.badge}
+          </Badge>
+        </div>
+      )}
+
+      {/* 확장 모드 상세 정보 */}
+      {isExpanded && (
+        <div className="mt-2 pt-2 border-t border-current/10 space-y-1 text-xs">
+          {d.healthCheck && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">헬스</span>
+              <span className="flex items-center gap-1">
+                <span className={`w-1.5 h-1.5 rounded-full ${healthDots[d.healthCheck.status]}`} />
+                {d.healthCheck.response_time_ms != null && `${d.healthCheck.response_time_ms}ms`}
+              </span>
+            </div>
+          )}
+          {d.envVarCount != null && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">환경변수</span>
+              <span>{d.envVarCount}개</span>
+            </div>
+          )}
+          {d.connectionCount != null && d.connectionCount > 0 && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">연결</span>
+              <span>{d.connectionCount}개</span>
+            </div>
+          )}
+        </div>
+      )}
 
       <Handle
         type="source"
@@ -118,6 +212,19 @@ function ServiceNode({ data }: NodeProps) {
         className="!bg-gray-400 dark:!bg-gray-500 !w-2.5 !h-2.5 !border-0"
       />
     </div>
+  );
+
+  return (
+    <NodeTooltip
+      label={d.label}
+      category={category}
+      status={d.status}
+      costEstimate={d.costEstimate}
+      healthCheck={d.healthCheck}
+      envVarCount={d.envVarCount}
+    >
+      {nodeContent}
+    </NodeTooltip>
   );
 }
 

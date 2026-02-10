@@ -13,6 +13,7 @@ import {
   Filter,
   Link2,
   LayoutGrid,
+  Plus,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -21,6 +22,8 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ViewModeSelector } from '@/components/service-map/view-mode-selector';
+import { useServiceMapStore } from '@/stores/service-map-store';
 import type { UserConnectionType } from '@/types';
 
 export type GroupMode = 'category' | 'domain' | 'easy';
@@ -73,9 +76,21 @@ export function MapToolbar({
   onConnectionTypeChange,
 }: MapToolbarProps) {
   const { fitView } = useReactFlow();
+  const { toggleSidebar, sidebarOpen } = useServiceMapStore();
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
+      {/* 서비스 추가 버튼 */}
+      <Button
+        variant={sidebarOpen ? 'default' : 'outline'}
+        size="sm"
+        onClick={toggleSidebar}
+        className="h-8"
+      >
+        <Plus className="mr-1.5 h-3.5 w-3.5" />
+        서비스 추가
+      </Button>
+
       {/* Search */}
       <div className="relative">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -86,6 +101,9 @@ export function MapToolbar({
           className="pl-8 h-8 w-[180px] text-sm"
         />
       </div>
+
+      {/* View mode selector */}
+      <ViewModeSelector />
 
       {/* Group toggle */}
       <Button
