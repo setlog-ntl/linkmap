@@ -23,8 +23,9 @@ import { allCategoryLabels } from '@/lib/constants/service-filters';
 import { domainLabels } from '@/lib/constants/service-filters';
 import { useHealthChecks, useRunHealthCheck } from '@/lib/queries/health-checks';
 import { ServiceAccountSection } from '@/components/service-map/service-account-section';
+import { ServiceEnvVarsSection } from '@/components/service-map/service-env-vars-section';
 import { ExternalLink, BookOpen, GitFork, Activity, Loader2, Settings } from 'lucide-react';
-import type { ProjectService, Service, ServiceDependency, ServiceCategory, ServiceDomain } from '@/types';
+import type { ProjectService, Service, ServiceDependency, ServiceCategory, ServiceDomain, EnvironmentVariable } from '@/types';
 
 interface ServiceDetailSheetProps {
   service: (ProjectService & { service: Service }) | null;
@@ -33,6 +34,7 @@ interface ServiceDetailSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   projectId?: string;
+  envVars?: EnvironmentVariable[];
 }
 
 const statusLabels: Record<string, { label: string; className: string }> = {
@@ -56,6 +58,7 @@ export function ServiceDetailSheet({
   open,
   onOpenChange,
   projectId,
+  envVars = [],
 }: ServiceDetailSheetProps) {
   const [showAccountSection, setShowAccountSection] = useState(false);
   const psId = service?.id || '';
@@ -160,6 +163,18 @@ export function ServiceDetailSheet({
                 serviceName={svc.name}
               />
             </>
+          )}
+
+          <Separator />
+
+          {/* Environment Variables */}
+          {projectId && (
+            <ServiceEnvVarsSection
+              projectId={projectId}
+              serviceId={service.service_id}
+              requiredEnvVars={requiredEnvVars}
+              envVars={envVars.filter((ev) => ev.service_id === service.service_id)}
+            />
           )}
 
           <Separator />

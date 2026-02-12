@@ -70,6 +70,7 @@ interface ServiceNodeData {
   healthStatus?: HealthCheckStatus;
   healthCheck?: HealthCheck;
   envVarCount?: number;
+  requiredEnvVarCount?: number;
   expanded?: boolean;
   viewMode?: ViewMode;
   connectionCount?: number;
@@ -211,10 +212,20 @@ function ServiceNode({ data }: NodeProps) {
                 <span>{d.costEstimate}</span>
               </>
             )}
-            {d.envVarCount != null && d.envVarCount > 0 && (
+            {(d.envVarCount != null && d.envVarCount > 0 || d.requiredEnvVarCount != null && d.requiredEnvVarCount > 0) && (
               <>
                 <span className="opacity-40">·</span>
-                <span>env {d.envVarCount}</span>
+                <span className={
+                  d.requiredEnvVarCount && d.requiredEnvVarCount > 0
+                    ? d.envVarCount != null && d.envVarCount >= d.requiredEnvVarCount
+                      ? 'text-green-600 dark:text-green-400'
+                      : d.envVarCount && d.envVarCount > 0
+                        ? 'text-yellow-600 dark:text-yellow-400'
+                        : ''
+                    : ''
+                }>
+                  env {d.envVarCount || 0}{d.requiredEnvVarCount ? `/${d.requiredEnvVarCount}` : ''}
+                </span>
               </>
             )}
           </div>
@@ -242,10 +253,10 @@ function ServiceNode({ data }: NodeProps) {
               </span>
             </div>
           )}
-          {d.envVarCount != null && (
+          {(d.envVarCount != null || d.requiredEnvVarCount != null) && (
             <div className="flex justify-between">
               <span className="text-muted-foreground">환경변수</span>
-              <span>{d.envVarCount}개</span>
+              <span>{d.envVarCount || 0}{d.requiredEnvVarCount ? `/${d.requiredEnvVarCount}` : ''}개</span>
             </div>
           )}
           {d.connectionCount != null && d.connectionCount > 0 && (
@@ -278,6 +289,7 @@ function ServiceNode({ data }: NodeProps) {
       costEstimate={d.costEstimate}
       healthCheck={d.healthCheck}
       envVarCount={d.envVarCount}
+      requiredEnvVarCount={d.requiredEnvVarCount}
     >
       {nodeContent}
     </NodeTooltip>

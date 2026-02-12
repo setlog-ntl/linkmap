@@ -48,6 +48,7 @@ import { useProjectServices, useCatalogServices, useRemoveProjectService } from 
 import { useLatestHealthChecks, useRunHealthCheck } from '@/lib/queries/health-checks';
 import { useServiceDependencies } from '@/lib/queries/dependencies';
 import { useServiceAccounts } from '@/lib/queries/service-accounts';
+import { useEnvVars } from '@/lib/queries/env-vars';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import { createClient } from '@/lib/supabase/client';
 import type { ProjectService, Service, ServiceCategory, ServiceDomain, ServiceDependency, DependencyType, UserConnectionType, UserConnection } from '@/types';
@@ -153,6 +154,9 @@ function ServiceMapInner() {
 
   // Service accounts (계정 연결 상태)
   const { data: serviceAccounts = [] } = useServiceAccounts(projectId);
+
+  // Environment variables
+  const { data: envVars = [] } = useEnvVars(projectId);
 
   // Fetch user connections
   const { data: userConnections = EMPTY_CONNECTIONS, isLoading: connectionsLoading } = useProjectConnections(projectId);
@@ -326,7 +330,8 @@ function ServiceMapInner() {
           // Phase 2A: health data
           healthStatus: hc?.status,
           healthCheck: hc,
-          envVarCount: ps.service?.required_env_vars?.length || 0,
+          envVarCount: envVars.filter((ev) => ev.service_id === ps.service_id).length,
+          requiredEnvVarCount: ps.service?.required_env_vars?.length || 0,
           // Phase 2A: expanded mode
           expanded: isExpanded,
           // Phase 2B: view mode
@@ -359,7 +364,7 @@ function ServiceMapInner() {
     });
 
     return nodes;
-  }, [filteredServices, projectName, groupMode, searchQuery, healthChecks, expandedNodeId, viewMode, collapsedGroups, userConnections, serviceAccounts]);
+  }, [filteredServices, projectName, groupMode, searchQuery, healthChecks, expandedNodeId, viewMode, collapsedGroups, userConnections, serviceAccounts, envVars]);
 
   // Build edges
   const rawEdges = useMemo<Edge[]>(() => {
@@ -924,6 +929,7 @@ function ServiceMapInner() {
             if (!open) setSelectedService(null);
           }}
           projectId={projectId}
+          envVars={envVars}
         />
       </div>
     </TooltipProvider>

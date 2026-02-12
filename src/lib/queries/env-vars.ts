@@ -32,6 +32,7 @@ export function useAddEnvVar(projectId: string) {
       environment: string;
       is_secret: boolean;
       description?: string | null;
+      service_id?: string | null;
     }) => {
       const res = await fetch('/api/env', {
         method: 'POST',

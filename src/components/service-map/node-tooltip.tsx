@@ -16,6 +16,7 @@ interface NodeTooltipProps {
   costEstimate?: string;
   healthCheck?: HealthCheck;
   envVarCount?: number;
+  requiredEnvVarCount?: number;
 }
 
 const statusLabels: Record<string, string> = {
@@ -47,6 +48,7 @@ export function NodeTooltip({
   costEstimate,
   healthCheck,
   envVarCount,
+  requiredEnvVarCount,
 }: NodeTooltipProps) {
   return (
     <Tooltip delayDuration={500}>
@@ -81,10 +83,12 @@ export function NodeTooltip({
               <span>{costEstimate}</span>
             </div>
           )}
-          {envVarCount != null && envVarCount > 0 && (
+          {(envVarCount != null && envVarCount > 0 || requiredEnvVarCount != null && requiredEnvVarCount > 0) && (
             <div className="flex justify-between">
               <span className="text-muted-foreground">환경변수</span>
-              <span>{envVarCount}개</span>
+              <span>
+                {envVarCount || 0}{requiredEnvVarCount ? `/${requiredEnvVarCount}` : ''}개 설정됨
+              </span>
             </div>
           )}
         </div>
