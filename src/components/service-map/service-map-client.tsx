@@ -165,6 +165,10 @@ function ServiceMapInner() {
   const deleteConnectionRef = useRef(deleteConnectionMutation);
   deleteConnectionRef.current = deleteConnectionMutation;
 
+  // Stable ref for toggleGroupCollapsed to avoid infinite re-render loop
+  const toggleGroupCollapsedRef = useRef(toggleGroupCollapsed);
+  toggleGroupCollapsedRef.current = toggleGroupCollapsed;
+
   // Fetch project name
   useEffect(() => {
     const supabase = supabaseRef.current;
@@ -348,14 +352,14 @@ function ServiceMapInner() {
           collapsed: isCollapsed,
           childCount: value.childCount,
           groupKey: key,
-          onToggleCollapse: () => toggleGroupCollapsed(key),
+          onToggleCollapse: () => toggleGroupCollapsedRef.current(key),
         },
         style: { zIndex: -1 },
       });
     });
 
     return nodes;
-  }, [filteredServices, projectName, groupMode, searchQuery, healthChecks, expandedNodeId, viewMode, collapsedGroups, toggleGroupCollapsed, userConnections, serviceAccounts]);
+  }, [filteredServices, projectName, groupMode, searchQuery, healthChecks, expandedNodeId, viewMode, collapsedGroups, userConnections, serviceAccounts]);
 
   // Build edges
   const rawEdges = useMemo<Edge[]>(() => {
