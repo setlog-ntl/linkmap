@@ -24,6 +24,14 @@
 .DS_Store
 *.pem
 nul
+Thumbs.db
+desktop.ini
+
+# IDE / editor
+.cursor
+.claude
+.vscode
+.idea
 
 # debug
 npm-debug.log*
@@ -43,5 +51,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-.vercel
