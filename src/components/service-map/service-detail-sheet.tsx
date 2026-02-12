@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   Sheet,
   SheetContent,
@@ -21,7 +22,8 @@ import { HealthTimeline } from '@/components/project/health-timeline';
 import { allCategoryLabels } from '@/lib/constants/service-filters';
 import { domainLabels } from '@/lib/constants/service-filters';
 import { useHealthChecks, useRunHealthCheck } from '@/lib/queries/health-checks';
-import { ExternalLink, BookOpen, GitFork, Activity, Loader2 } from 'lucide-react';
+import { ServiceAccountSection } from '@/components/service-map/service-account-section';
+import { ExternalLink, BookOpen, GitFork, Activity, Loader2, Settings } from 'lucide-react';
 import type { ProjectService, Service, ServiceDependency, ServiceCategory, ServiceDomain } from '@/types';
 
 interface ServiceDetailSheetProps {
@@ -30,6 +32,7 @@ interface ServiceDetailSheetProps {
   serviceNames: Record<string, string>;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  projectId?: string;
 }
 
 const statusLabels: Record<string, { label: string; className: string }> = {
@@ -52,7 +55,9 @@ export function ServiceDetailSheet({
   serviceNames,
   open,
   onOpenChange,
+  projectId,
 }: ServiceDetailSheetProps) {
+  const [showAccountSection, setShowAccountSection] = useState(false);
   const psId = service?.id || '';
   const { data: healthChecks = [] } = useHealthChecks(psId);
   const runHealthCheck = useRunHealthCheck();
@@ -107,18 +112,28 @@ export function ServiceDetailSheet({
                 <Activity className="h-3.5 w-3.5" />
                 연결 검증
               </h4>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRunCheck}
-                disabled={runHealthCheck.isPending}
-              >
-                {runHealthCheck.isPending ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  '검증 실행'
-                )}
-              </Button>
+              <div className="flex gap-1.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRunCheck}
+                  disabled={runHealthCheck.isPending}
+                >
+                  {runHealthCheck.isPending ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    '검증 실행'
+                  )}
+                </Button>
+                <Button
+                  variant={showAccountSection ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setShowAccountSection((v) => !v)}
+                >
+                  <Settings className="h-3.5 w-3.5 mr-1" />
+                  설정
+                </Button>
+              </div>
             </div>
 
             {requiredEnvVars.length > 0 && (
@@ -133,6 +148,19 @@ export function ServiceDetailSheet({
               <p className="text-xs text-muted-foreground">검증 이력이 없습니다</p>
             )}
           </div>
+
+          {/* Service Account Section (설정 버튼 클릭 시 토글) */}
+          {showAccountSection && projectId && svc?.slug && (
+            <>
+              <Separator />
+              <ServiceAccountSection
+                projectId={projectId}
+                serviceId={service.service_id}
+                serviceSlug={svc.slug}
+                serviceName={svc.name}
+              />
+            </>
+          )}
 
           <Separator />
 

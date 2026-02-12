@@ -3,12 +3,11 @@ import { createClient } from '@/lib/supabase/client';
 import { queryKeys } from './keys';
 import type { ProjectService, Service } from '@/types';
 
-const supabase = createClient();
-
 export function useCatalogServices() {
   return useQuery({
     queryKey: queryKeys.catalog.all,
     queryFn: async (): Promise<Service[]> => {
+      const supabase = createClient();
       const { data, error } = await supabase
         .from('services')
         .select('*')
@@ -24,6 +23,7 @@ export function useProjectServices(projectId: string) {
   return useQuery({
     queryKey: queryKeys.services.byProject(projectId),
     queryFn: async (): Promise<(ProjectService & { service: Service })[]> => {
+      const supabase = createClient();
       const { data, error } = await supabase
         .from('project_services')
         .select('*, service:services(*)')
@@ -42,6 +42,7 @@ export function useAddProjectService(projectId: string) {
 
   return useMutation({
     mutationFn: async (serviceId: string) => {
+      const supabase = createClient();
       const { error } = await supabase.from('project_services').insert({
         project_id: projectId,
         service_id: serviceId,
@@ -60,6 +61,7 @@ export function useRemoveProjectService(projectId: string) {
 
   return useMutation({
     mutationFn: async (projectServiceId: string) => {
+      const supabase = createClient();
       const { error } = await supabase
         .from('project_services')
         .delete()

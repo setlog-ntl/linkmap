@@ -11,6 +11,7 @@ export function useProjectConnections(projectId: string) {
       return res.json();
     },
     enabled: !!projectId,
+    staleTime: 30_000, // 30초 캐시 — 불필요한 refetch 방지
   });
 }
 
@@ -38,7 +39,39 @@ export function useCreateConnection(projectId: string) {
       }
       return res.json();
     },
-    onSuccess: () => {
+    // 낙관적 업데이트: 서버 응답 전에 즉시 엣지 표시
+    onMutate: async (params) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.connections.byProject(projectId) });
+      const previous = queryClient.getQueryData<UserConnection[]>(queryKeys.connections.byProject(projectId));
+
+      const now = new Date().toISOString();
+      const optimistic: UserConnection = {
+        id: `temp-${Date.now()}`,
+        project_id: params.project_id,
+        source_service_id: params.source_service_id,
+        target_service_id: params.target_service_id,
+        connection_type: params.connection_type,
+        label: params.label || null,
+        created_by: '',
+        created_at: now,
+        updated_at: now,
+      };
+
+      queryClient.setQueryData<UserConnection[]>(
+        queryKeys.connections.byProject(projectId),
+        (old) => [...(old || []), optimistic],
+      );
+
+      return { previous };
+    },
+    onError: (_err, _params, context) => {
+      // 에러 시 이전 데이터로 롤백
+      if (context?.previous) {
+        queryClient.setQueryData(queryKeys.connections.byProject(projectId), context.previous);
+      }
+    },
+    onSettled: () => {
+      // 성공/실패 후 서버 데이터로 동기화
       queryClient.invalidateQueries({ queryKey: queryKeys.connections.byProject(projectId) });
     },
   });
@@ -85,7 +118,24 @@ export function useDeleteConnection(projectId: string) {
         throw new Error(err.error || '연결 삭제에 실패했습니다');
       }
     },
-    onSuccess: () => {
+    // 낙관적 삭제
+    onMutate: async (connectionId) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.connections.byProject(projectId) });
+      const previous = queryClient.getQueryData<UserConnection[]>(queryKeys.connections.byProject(projectId));
+
+      queryClient.setQueryData<UserConnection[]>(
+        queryKeys.connections.byProject(projectId),
+        (old) => (old || []).filter((c) => c.id !== connectionId),
+      );
+
+      return { previous };
+    },
+    onError: (_err, _connectionId, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(queryKeys.connections.byProject(projectId), context.previous);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.connections.byProject(projectId) });
     },
   });

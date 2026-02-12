@@ -1,12 +1,13 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Activity } from 'lucide-react';
+import { Activity, Link2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import type { ProjectService, Service } from '@/types';
+import type { ProjectService, Service, ServiceAccount } from '@/types';
 
 interface StatusOverviewBarProps {
   services: (ProjectService & { service?: Service })[];
+  serviceAccounts?: ServiceAccount[];
   onServiceClick?: (projectServiceId: string) => void;
 }
 
@@ -17,9 +18,10 @@ const statusColors: Record<string, { ping: string; dot: string }> = {
   error: { ping: 'bg-red-400', dot: 'bg-red-500' },
 };
 
-export function StatusOverviewBar({ services, onServiceClick }: StatusOverviewBarProps) {
+export function StatusOverviewBar({ services, serviceAccounts = [], onServiceClick }: StatusOverviewBarProps) {
   const connectedCount = services.filter((s) => s.status === 'connected').length;
   const totalCount = services.length;
+  const activeAccountCount = serviceAccounts.filter((a) => a.status === 'active').length;
 
   return (
     <Card>
@@ -32,6 +34,12 @@ export function StatusOverviewBar({ services, onServiceClick }: StatusOverviewBa
             <span className="text-xs text-muted-foreground">
               {connectedCount}/{totalCount} 연결됨
             </span>
+            {serviceAccounts.length > 0 && (
+              <span className="text-xs text-muted-foreground flex items-center gap-1 ml-2">
+                <Link2 className="h-3 w-3" />
+                계정 {activeAccountCount}/{totalCount}
+              </span>
+            )}
           </div>
 
           {/* 서비스 목록 */}

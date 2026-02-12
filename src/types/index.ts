@@ -327,6 +327,59 @@ export interface HealthCheck {
 }
 
 // ============================================
+// Service Account Types
+// ============================================
+
+export type ServiceAccountConnectionType = 'oauth' | 'api_key' | 'manual';
+export type ServiceAccountStatus = 'active' | 'expired' | 'revoked' | 'error';
+
+export interface ServiceAccount {
+  id: string;
+  project_id: string;
+  service_id: string;
+  user_id: string;
+  connection_type: ServiceAccountConnectionType;
+  // OAuth fields (encrypted, not returned to client)
+  token_expires_at: string | null;
+  oauth_scopes: string[] | null;
+  oauth_provider_user_id: string | null;
+  oauth_metadata: Record<string, unknown>;
+  // API Key fields
+  api_key_label: string | null;
+  // Status
+  status: ServiceAccountStatus;
+  last_verified_at: string | null;
+  error_message: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ServiceOAuthConfig {
+  provider: string;
+  authorization_url: string;
+  token_url: string;
+  scopes: string[];
+}
+
+export interface ApiKeyFieldConfig {
+  name: string;
+  label: string;
+  label_ko: string;
+  placeholder: string;
+  is_required: boolean;
+  help_url?: string;
+}
+
+export interface ServiceConnectionConfig {
+  capabilities: ServiceAccountConnectionType[];
+  primary: ServiceAccountConnectionType;
+  oauth_config?: ServiceOAuthConfig;
+  api_key_fields?: ApiKeyFieldConfig[];
+  verify_url?: string;
+  description_ko?: string;
+}
+
+// ============================================
 // Package System Types (re-export)
 // ============================================
 export type {

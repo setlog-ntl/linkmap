@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -20,6 +20,7 @@ import {
   MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { toast } from 'sonner';
 import ServiceNode from '@/components/service-map/service-node';
 import AppNode from '@/components/service-map/app-node';
 import GroupNode from '@/components/service-map/group-node';
@@ -45,6 +46,8 @@ import { shouldShowEdgeInViewMode } from '@/lib/layout/view-mode-styles';
 import { useProjectConnections, useCreateConnection, useDeleteConnection } from '@/lib/queries/connections';
 import { useProjectServices, useCatalogServices, useRemoveProjectService } from '@/lib/queries/services';
 import { useLatestHealthChecks, useRunHealthCheck } from '@/lib/queries/health-checks';
+import { useServiceDependencies } from '@/lib/queries/dependencies';
+import { useServiceAccounts } from '@/lib/queries/service-accounts';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import { createClient } from '@/lib/supabase/client';
 import type { ProjectService, Service, ServiceCategory, ServiceDomain, ServiceDependency, DependencyType, UserConnectionType, UserConnection } from '@/types';
@@ -97,8 +100,21 @@ const categoryMiniMapColors: Record<string, string> = {
 
 function ServiceMapInner() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const projectId = params.id as string;
   const supabaseRef = useRef(createClient());
+
+  // OAuth 성공 리다이렉트 처리
+  useEffect(() => {
+    const oauthSuccess = searchParams.get('oauth_success');
+    if (oauthSuccess) {
+      toast.success(`${oauthSuccess} 계정이 연결되었습니다`);
+      // URL에서 파라미터 제거
+      const url = new URL(window.location.href);
+      url.searchParams.delete('oauth_success');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [searchParams]);
 
   // Zustand store
   const {
@@ -117,7 +133,6 @@ function ServiceMapInner() {
   } = useServiceMapStore();
 
   const [projectName, setProjectName] = useState('내 앱');
-  const [dependencies, setDependencies] = useState<ServiceDependency[]>([]);
   const [groupMode, setGroupMode] = useState<GroupMode>('category');
   const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>('TB');
   const [searchQuery, setSearchQuery] = useState('');
@@ -127,15 +142,21 @@ function ServiceMapInner() {
   const [connectMode, setConnectMode] = useState(false);
   const [connectionType, setConnectionType] = useState<UserConnectionType>('uses');
 
-  // TanStack Query hooks (Phase 4A)
+  // TanStack Query hooks
   const { data: services = [], isLoading: servicesLoading } = useProjectServices(projectId);
   const { data: catalogServices = [], isLoading: catalogLoading } = useCatalogServices();
   const { data: healthChecks = {} } = useLatestHealthChecks(projectId);
   const runHealthCheck = useRunHealthCheck();
   const removeService = useRemoveProjectService(projectId);
 
+  // Dependencies via TanStack Query (이전: 수동 useEffect → 레이스 컨디션 원인)
+  const { data: dependencies = [], isLoading: depsLoading } = useServiceDependencies();
+
+  // Service accounts (계정 연결 상태)
+  const { data: serviceAccounts = [] } = useServiceAccounts(projectId);
+
   // Fetch user connections
-  const { data: userConnections = EMPTY_CONNECTIONS } = useProjectConnections(projectId);
+  const { data: userConnections = EMPTY_CONNECTIONS, isLoading: connectionsLoading } = useProjectConnections(projectId);
   const createConnectionMutation = useCreateConnection(projectId);
   const deleteConnectionMutation = useDeleteConnection(projectId);
 
@@ -145,18 +166,18 @@ function ServiceMapInner() {
   const deleteConnectionRef = useRef(deleteConnectionMutation);
   deleteConnectionRef.current = deleteConnectionMutation;
 
-  // Fetch project name & dependencies (still manual - these don't have dedicated hooks)
+  // Fetch project name
   useEffect(() => {
     const supabase = supabaseRef.current;
-    const fetchExtra = async () => {
-      const [{ data: project }, { data: depData }] = await Promise.all([
-        supabase.from('projects').select('name').eq('id', projectId).single(),
-        supabase.from('service_dependencies').select('*'),
-      ]);
+    const fetchProjectName = async () => {
+      const { data: project } = await supabase
+        .from('projects')
+        .select('name')
+        .eq('id', projectId)
+        .single();
       if (project) setProjectName(project.name);
-      setDependencies((depData as ServiceDependency[]) || []);
     };
-    fetchExtra();
+    fetchProjectName();
   }, [projectId]);
 
   // Service name lookup
@@ -204,7 +225,14 @@ function ServiceMapInner() {
   // Handle delete user connection
   const handleDeleteUserConnection = useCallback((edgeId: string) => {
     const connectionId = edgeId.replace('uc-', '');
-    deleteConnectionRef.current.mutate(connectionId);
+    deleteConnectionRef.current.mutate(connectionId, {
+      onSuccess: () => {
+        toast.success('연결이 삭제되었습니다');
+      },
+      onError: (error) => {
+        toast.error(error.message || '연결 삭제에 실패했습니다');
+      },
+    });
   }, []);
 
   // Build nodes
@@ -276,6 +304,10 @@ function ServiceMapInner() {
         (c) => c.source_service_id === ps.service_id || c.target_service_id === ps.service_id
       ).length;
 
+      // Service account status
+      const serviceAccount = serviceAccounts.find((sa) => sa.service_id === ps.service_id);
+      const accountStatus = serviceAccount?.status;
+
       nodes.push({
         id: ps.id,
         type: 'service',
@@ -298,6 +330,8 @@ function ServiceMapInner() {
           viewMode,
           // Phase 3A: connection count
           connectionCount,
+          // Service account status
+          accountStatus,
         },
       });
     });
@@ -322,7 +356,7 @@ function ServiceMapInner() {
     });
 
     return nodes;
-  }, [filteredServices, projectName, groupMode, searchQuery, healthChecks, expandedNodeId, viewMode, collapsedGroups, toggleGroupCollapsed, userConnections]);
+  }, [filteredServices, projectName, groupMode, searchQuery, healthChecks, expandedNodeId, viewMode, collapsedGroups, toggleGroupCollapsed, userConnections, serviceAccounts]);
 
   // Build edges
   const rawEdges = useMemo<Edge[]>(() => {
@@ -511,12 +545,22 @@ function ServiceMapInner() {
       const targetPS = filteredServices.find((s) => s.id === connection.target);
 
       if (sourcePS && targetPS && sourcePS.service_id !== targetPS.service_id) {
-        createConnectionRef.current.mutate({
-          project_id: projectId,
-          source_service_id: sourcePS.service_id,
-          target_service_id: targetPS.service_id,
-          connection_type: connectionType,
-        });
+        createConnectionRef.current.mutate(
+          {
+            project_id: projectId,
+            source_service_id: sourcePS.service_id,
+            target_service_id: targetPS.service_id,
+            connection_type: connectionType,
+          },
+          {
+            onSuccess: () => {
+              toast.success('연결이 생성되었습니다');
+            },
+            onError: (error) => {
+              toast.error(error.message || '연결 생성에 실패했습니다');
+            },
+          },
+        );
       }
     },
     [connectMode, connectionType, filteredServices, projectId]
@@ -615,7 +659,9 @@ function ServiceMapInner() {
     return categoryMiniMapColors[cat] || '#9ca3af';
   }, []);
 
-  if (servicesLoading) {
+  // 모든 핵심 데이터 로드 완료 대기 (서비스 + 의존성 + 연결)
+  const isDataLoading = servicesLoading || depsLoading || connectionsLoading;
+  if (isDataLoading) {
     return <div className="h-[calc(100vh-16rem)] min-h-[500px] max-h-[900px] rounded-lg bg-muted animate-pulse" />;
   }
 
@@ -711,6 +757,7 @@ function ServiceMapInner() {
         {/* Status overview bar */}
         <StatusOverviewBar
           services={services}
+          serviceAccounts={serviceAccounts}
           onServiceClick={(psId) => setFocusedNodeId(psId)}
         />
 
@@ -873,6 +920,7 @@ function ServiceMapInner() {
             setSheetOpen(open);
             if (!open) setSelectedService(null);
           }}
+          projectId={projectId}
         />
       </div>
     </TooltipProvider>

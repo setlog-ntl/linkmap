@@ -15,6 +15,9 @@ export const queryKeys = {
   connections: {
     byProject: (projectId: string) => ['connections', 'project', projectId] as const,
   },
+  dependencies: {
+    all: ['dependencies'] as const,
+  },
   auditLogs: {
     byProject: (projectId: string) => ['audit-logs', 'project', projectId] as const,
   },
@@ -23,6 +26,9 @@ export const queryKeys = {
       ['health-checks', projectServiceId] as const,
     latestByProject: (projectId: string) =>
       ['health-checks', 'latest', projectId] as const,
+  },
+  serviceAccounts: {
+    byProject: (projectId: string) => ['service-accounts', 'project', projectId] as const,
   },
   packages: {
     all: ['packages'] as const,

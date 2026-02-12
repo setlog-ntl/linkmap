@@ -5,7 +5,7 @@ import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { ServiceIcon } from '@/components/landing/service-icon';
 import { NodeTooltip } from '@/components/service-map/node-tooltip';
 import { Badge } from '@/components/ui/badge';
-import type { ServiceCategory, FreeTierQuality, HealthCheckStatus, HealthCheck } from '@/types';
+import type { ServiceCategory, FreeTierQuality, HealthCheckStatus, HealthCheck, ServiceAccountStatus } from '@/types';
 import type { ViewMode } from '@/stores/service-map-store';
 import { allCategoryLabels } from '@/lib/constants/service-filters';
 import { getViewModeNodeStyle } from '@/lib/layout/view-mode-styles';
@@ -73,6 +73,7 @@ interface ServiceNodeData {
   expanded?: boolean;
   viewMode?: ViewMode;
   connectionCount?: number;
+  accountStatus?: ServiceAccountStatus;
   [key: string]: unknown;
 }
 
@@ -137,6 +138,28 @@ function ServiceNode({ data }: NodeProps) {
         <span
           className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-background ${healthDots[d.healthStatus]}`}
         />
+      )}
+
+      {/* 계정 연결 상태 아이콘 (top-left) */}
+      {d.accountStatus && (
+        <span
+          className={`absolute -top-1.5 -left-1.5 w-4 h-4 rounded-full border-2 border-background flex items-center justify-center text-[8px] ${
+            d.accountStatus === 'active'
+              ? 'bg-green-500 text-white'
+              : d.accountStatus === 'expired'
+                ? 'bg-yellow-500 text-white'
+                : 'bg-red-500 text-white'
+          }`}
+          title={
+            d.accountStatus === 'active'
+              ? '계정 연결됨'
+              : d.accountStatus === 'expired'
+                ? '토큰 만료'
+                : '연결 오류'
+          }
+        >
+          {d.accountStatus === 'active' ? '🔗' : '⚠'}
+        </span>
       )}
 
       <div className="flex items-center gap-2">
