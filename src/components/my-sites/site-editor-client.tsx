@@ -90,9 +90,8 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     }
   }, [editorContent, selectedPath]);
 
-  // 미리보기용 HTML 조합: HTML 파일에 CSS를 인라인 주입
+  // 미리보기용 HTML 조합: base URL + CSS 인라인 주입
   const previewHtml = useMemo(() => {
-    // 현재 HTML 파일 편집 중이면 해당 내용 사용
     const htmlPath = isHtmlFile(selectedPath)
       ? selectedPath
       : files?.find((f) => isHtmlFile(f.path))?.path || null;
@@ -103,23 +102,31 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
 
     if (!htmlContent) return '';
 
-    // CSS 파일 내용 수집
+    // 1) <base href> 주입: 상대 경로 이미지/리소스가 실제 사이트에서 로딩되도록
+    const baseTag = liveUrl ? `<base href="${liveUrl}/" target="_blank">` : '';
+
+    // 2) 편집 중인 CSS 파일 내용을 인라인 <style>로 주입
     const cssFiles = files?.filter((f) => isCssFile(f.path)) || [];
     const cssContents = cssFiles
       .map((f) => f.path === selectedPath ? editorContent : (fileCache[f.path] || ''))
       .filter(Boolean);
 
-    if (cssContents.length === 0) return htmlContent;
+    const inlineStyle = cssContents.length > 0
+      ? `<style data-linkmap-preview>\n${cssContents.join('\n')}\n</style>`
+      : '';
 
-    // <link rel="stylesheet"> 태그를 인라인 <style>로 교체
-    const inlineStyle = `<style>\n${cssContents.join('\n')}\n</style>`;
+    // 3) 조합: <head> 태그 안에 base + style 주입
+    const injected = [baseTag, inlineStyle].filter(Boolean).join('\n');
 
-    // </head> 앞에 삽입, 없으면 맨 앞에
-    if (htmlContent.includes('</head>')) {
-      return htmlContent.replace('</head>', `${inlineStyle}\n</head>`);
+    if (htmlContent.includes('<head>')) {
+      return htmlContent.replace('<head>', `<head>\n${injected}`);
     }
-    return inlineStyle + '\n' + htmlContent;
-  }, [editorContent, selectedPath, files, fileCache]);
+    if (htmlContent.includes('</head>')) {
+      return htmlContent.replace('</head>', `${injected}\n</head>`);
+    }
+    // <head> 태그 없으면 맨 앞에
+    return injected + '\n' + htmlContent;
+  }, [editorContent, selectedPath, files, fileCache, liveUrl]);
 
   // iframe에 미리보기 반영
   useEffect(() => {
@@ -347,12 +354,12 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
               </div>
 
               {isLivePreviewable ? (
-                // HTML/CSS → srcdoc 기반 실시간 미리보기
+                // HTML/CSS → 실시간 미리보기 (외부 리소스 로딩 허용)
                 <iframe
                   ref={previewRef}
                   title="미리보기"
                   className="flex-1 w-full bg-white border-0"
-                  sandbox="allow-scripts"
+                  sandbox="allow-scripts allow-same-origin"
                 />
               ) : liveUrl ? (
                 // 기타 파일 → 라이브 사이트 iframe
