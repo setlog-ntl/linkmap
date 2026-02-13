@@ -62,7 +62,10 @@ export async function GET(
     redirect_url: `/project/${projectId}/service-map`,
   });
 
-  if (error) return apiError('OAuth 상태 저장에 실패했습니다', 500);
+  if (error) {
+    console.error('oauth_states insert error:', error);
+    return apiError('OAuth 상태 저장에 실패했습니다', 500);
+  }
 
   // Build authorization URL
   const authUrl = new URL(config.authorization_url);
