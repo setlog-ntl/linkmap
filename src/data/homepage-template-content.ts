@@ -24,29 +24,29 @@ const portfolioIndex = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Portfolio</title>
+  <title>내 포트폴리오</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header class="hero">
     <div class="container">
       <div class="avatar">
-        <div class="avatar-placeholder">P</div>
+        <div class="avatar-placeholder">홍</div>
       </div>
-      <h1>Hong Gildong</h1>
-      <p class="subtitle">Frontend Developer</p>
-      <p class="bio">I build clean, responsive web experiences.</p>
+      <h1>홍길동</h1>
+      <p class="subtitle">프론트엔드 개발자</p>
+      <p class="bio">깔끔하고 반응형인 웹 경험을 만듭니다.</p>
       <div class="social-links">
         <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
         <a href="https://linkedin.com" target="_blank" rel="noopener">LinkedIn</a>
-        <a href="mailto:hello@example.com">Email</a>
+        <a href="mailto:hello@example.com">이메일</a>
       </div>
     </div>
   </header>
 
   <main class="container">
     <section class="section" id="skills">
-      <h2>Skills</h2>
+      <h2>기술 스택</h2>
       <div class="tags">
         <span class="tag">HTML / CSS</span>
         <span class="tag">JavaScript</span>
@@ -58,35 +58,35 @@ const portfolioIndex = `<!DOCTYPE html>
     </section>
 
     <section class="section" id="projects">
-      <h2>Projects</h2>
+      <h2>프로젝트</h2>
       <div class="grid">
         <div class="card">
-          <h3>Project Alpha</h3>
-          <p>A responsive dashboard built with React and Tailwind CSS.</p>
-          <a href="#" class="link">View &rarr;</a>
+          <h3>프로젝트 알파</h3>
+          <p>React와 Tailwind CSS로 만든 반응형 대시보드입니다.</p>
+          <a href="#" class="link">보기 &rarr;</a>
         </div>
         <div class="card">
-          <h3>Project Beta</h3>
-          <p>REST API service with Node.js and PostgreSQL.</p>
-          <a href="#" class="link">View &rarr;</a>
+          <h3>프로젝트 베타</h3>
+          <p>Node.js와 PostgreSQL 기반 REST API 서비스입니다.</p>
+          <a href="#" class="link">보기 &rarr;</a>
         </div>
         <div class="card">
-          <h3>Project Gamma</h3>
-          <p>Mobile-first e-commerce landing page.</p>
-          <a href="#" class="link">View &rarr;</a>
+          <h3>프로젝트 감마</h3>
+          <p>모바일 퍼스트 이커머스 랜딩 페이지입니다.</p>
+          <a href="#" class="link">보기 &rarr;</a>
         </div>
       </div>
     </section>
 
     <section class="section" id="contact">
-      <h2>Contact</h2>
-      <p>Feel free to reach out at <a href="mailto:hello@example.com">hello@example.com</a></p>
+      <h2>연락처</h2>
+      <p>언제든지 <a href="mailto:hello@example.com">hello@example.com</a>으로 연락주세요.</p>
     </section>
   </main>
 
   <footer>
     <div class="container">
-      <p>&copy; 2026 My Portfolio. Built with Linkmap.</p>
+      <p>&copy; 2026 내 포트폴리오. Linkmap으로 제작.</p>
     </div>
   </footer>
 </body>
@@ -126,7 +126,7 @@ const landingIndex = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Landing Page</title>
+  <title>내 랜딩 페이지</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -134,42 +134,42 @@ const landingIndex = `<!DOCTYPE html>
     <div class="container nav-inner">
       <a href="#" class="logo">MyBrand</a>
       <div class="nav-links">
-        <a href="#features">Features</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#cta" class="btn btn-sm">Get Started</a>
+        <a href="#features">주요 기능</a>
+        <a href="#pricing">요금제</a>
+        <a href="#cta" class="btn btn-sm">시작하기</a>
       </div>
     </div>
   </nav>
 
   <header class="hero">
     <div class="container">
-      <h1>Build Something<br/><span class="highlight">Amazing</span></h1>
-      <p class="hero-desc">The simplest way to launch your next project. Fast, reliable, and beautiful.</p>
+      <h1>무언가<br/><span class="highlight">멋진 것</span>을 만들어 보세요</h1>
+      <p class="hero-desc">다음 프로젝트를 시작하는 가장 쉬운 방법. 빠르고, 안정적이고, 아름답습니다.</p>
       <div class="hero-actions">
-        <a href="#cta" class="btn btn-primary">Start Free</a>
-        <a href="#features" class="btn btn-outline">Learn More</a>
+        <a href="#cta" class="btn btn-primary">무료로 시작</a>
+        <a href="#features" class="btn btn-outline">더 알아보기</a>
       </div>
     </div>
   </header>
 
   <section class="section" id="features">
     <div class="container">
-      <h2 class="section-title">Features</h2>
+      <h2 class="section-title">주요 기능</h2>
       <div class="grid-3">
         <div class="feature-card">
           <div class="icon">&#9889;</div>
-          <h3>Lightning Fast</h3>
-          <p>Optimized for speed with zero bloat.</p>
+          <h3>번개처럼 빠른 속도</h3>
+          <p>불필요한 요소 없이 속도에 최적화되었습니다.</p>
         </div>
         <div class="feature-card">
           <div class="icon">&#128274;</div>
-          <h3>Secure</h3>
-          <p>Enterprise-grade security built in.</p>
+          <h3>안전한 보안</h3>
+          <p>엔터프라이즈급 보안이 내장되어 있습니다.</p>
         </div>
         <div class="feature-card">
           <div class="icon">&#128640;</div>
-          <h3>Easy Deploy</h3>
-          <p>One-click deploy to any platform.</p>
+          <h3>간편한 배포</h3>
+          <p>원클릭으로 어떤 플랫폼에든 배포할 수 있습니다.</p>
         </div>
       </div>
     </div>
@@ -177,25 +177,25 @@ const landingIndex = `<!DOCTYPE html>
 
   <section class="section section-alt" id="pricing">
     <div class="container">
-      <h2 class="section-title">Pricing</h2>
+      <h2 class="section-title">요금제</h2>
       <div class="grid-3">
         <div class="price-card">
-          <h3>Free</h3>
-          <div class="price">$0<span>/mo</span></div>
-          <ul><li>1 Project</li><li>Basic Support</li><li>Community Access</li></ul>
-          <a href="#" class="btn btn-outline">Get Started</a>
+          <h3>무료</h3>
+          <div class="price">₩0<span>/월</span></div>
+          <ul><li>프로젝트 1개</li><li>기본 지원</li><li>커뮤니티 접근</li></ul>
+          <a href="#" class="btn btn-outline">시작하기</a>
         </div>
         <div class="price-card featured">
           <h3>Pro</h3>
-          <div class="price">$19<span>/mo</span></div>
-          <ul><li>10 Projects</li><li>Priority Support</li><li>Advanced Features</li></ul>
-          <a href="#" class="btn btn-primary">Get Started</a>
+          <div class="price">₩19,000<span>/월</span></div>
+          <ul><li>프로젝트 10개</li><li>우선 지원</li><li>고급 기능</li></ul>
+          <a href="#" class="btn btn-primary">시작하기</a>
         </div>
         <div class="price-card">
           <h3>Team</h3>
-          <div class="price">$49<span>/mo</span></div>
-          <ul><li>Unlimited Projects</li><li>Team Management</li><li>Custom Integrations</li></ul>
-          <a href="#" class="btn btn-outline">Contact Us</a>
+          <div class="price">₩49,000<span>/월</span></div>
+          <ul><li>무제한 프로젝트</li><li>팀 관리</li><li>커스텀 연동</li></ul>
+          <a href="#" class="btn btn-outline">문의하기</a>
         </div>
       </div>
     </div>
@@ -203,15 +203,15 @@ const landingIndex = `<!DOCTYPE html>
 
   <section class="section" id="cta">
     <div class="container cta-box">
-      <h2>Ready to get started?</h2>
-      <p>Join thousands of users building with MyBrand.</p>
-      <a href="#" class="btn btn-primary btn-lg">Start Free Today</a>
+      <h2>시작할 준비가 되셨나요?</h2>
+      <p>수천 명의 사용자가 MyBrand와 함께 만들고 있습니다.</p>
+      <a href="#" class="btn btn-primary btn-lg">지금 무료로 시작하기</a>
     </div>
   </section>
 
   <footer>
     <div class="container">
-      <p>&copy; 2026 MyBrand. Built with Linkmap.</p>
+      <p>&copy; 2026 MyBrand. Linkmap으로 제작.</p>
     </div>
   </footer>
 </body>
@@ -269,27 +269,27 @@ const resumeIndex = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Online Resume</title>
+  <title>온라인 이력서</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="page">
     <aside class="sidebar">
       <div class="profile">
-        <div class="avatar">H</div>
-        <h1>Hong Gildong</h1>
-        <p class="title">Software Engineer</p>
+        <div class="avatar">홍</div>
+        <h1>홍길동</h1>
+        <p class="title">소프트웨어 엔지니어</p>
       </div>
       <section>
-        <h2>Contact</h2>
+        <h2>연락처</h2>
         <ul class="contact-list">
           <li>hello@example.com</li>
-          <li>Seoul, South Korea</li>
+          <li>서울, 대한민국</li>
           <li>github.com/username</li>
         </ul>
       </section>
       <section>
-        <h2>Skills</h2>
+        <h2>기술 스택</h2>
         <div class="skill-bars">
           <div class="skill"><span>JavaScript</span><div class="bar"><div class="fill" style="width:90%"></div></div></div>
           <div class="skill"><span>TypeScript</span><div class="bar"><div class="fill" style="width:85%"></div></div></div>
@@ -299,59 +299,59 @@ const resumeIndex = `<!DOCTYPE html>
         </div>
       </section>
       <section>
-        <h2>Languages</h2>
+        <h2>언어</h2>
         <ul class="contact-list">
-          <li>Korean (Native)</li>
-          <li>English (Fluent)</li>
+          <li>한국어 (원어민)</li>
+          <li>영어 (유창)</li>
         </ul>
       </section>
     </aside>
 
     <main class="content">
       <section>
-        <h2>About</h2>
-        <p>Passionate software engineer with 5+ years of experience building modern web applications. Focused on creating clean, performant, and user-friendly products.</p>
+        <h2>소개</h2>
+        <p>5년 이상의 경험을 가진 열정적인 소프트웨어 엔지니어입니다. 깔끔하고, 빠르며, 사용자 친화적인 웹 애플리케이션을 만드는 데 집중하고 있습니다.</p>
       </section>
       <section>
-        <h2>Experience</h2>
+        <h2>경력</h2>
         <div class="timeline">
           <div class="timeline-item">
-            <div class="period">2023 &ndash; Present</div>
-            <h3>Senior Frontend Developer</h3>
-            <p class="company">Tech Corp</p>
+            <div class="period">2023 &ndash; 현재</div>
+            <h3>시니어 프론트엔드 개발자</h3>
+            <p class="company">테크 코프</p>
             <ul>
-              <li>Led migration of legacy app to React + TypeScript</li>
-              <li>Improved page load time by 40%</li>
-              <li>Mentored 3 junior developers</li>
+              <li>레거시 앱을 React + TypeScript로 마이그레이션 주도</li>
+              <li>페이지 로드 시간 40% 개선</li>
+              <li>주니어 개발자 3명 멘토링</li>
             </ul>
           </div>
           <div class="timeline-item">
             <div class="period">2021 &ndash; 2023</div>
-            <h3>Frontend Developer</h3>
-            <p class="company">Startup Inc</p>
+            <h3>프론트엔드 개발자</h3>
+            <p class="company">스타트업 주식회사</p>
             <ul>
-              <li>Built customer dashboard from scratch</li>
-              <li>Implemented CI/CD pipeline with GitHub Actions</li>
+              <li>고객 대시보드를 처음부터 개발</li>
+              <li>GitHub Actions로 CI/CD 파이프라인 구축</li>
             </ul>
           </div>
           <div class="timeline-item">
             <div class="period">2019 &ndash; 2021</div>
-            <h3>Junior Developer</h3>
-            <p class="company">Web Agency</p>
+            <h3>주니어 개발자</h3>
+            <p class="company">웹 에이전시</p>
             <ul>
-              <li>Developed 20+ client websites</li>
-              <li>Introduced responsive design standards</li>
+              <li>20개 이상의 클라이언트 웹사이트 개발</li>
+              <li>반응형 디자인 표준 도입</li>
             </ul>
           </div>
         </div>
       </section>
       <section>
-        <h2>Education</h2>
+        <h2>학력</h2>
         <div class="timeline">
           <div class="timeline-item">
             <div class="period">2015 &ndash; 2019</div>
-            <h3>B.S. Computer Science</h3>
-            <p class="company">Seoul National University</p>
+            <h3>컴퓨터공학 학사</h3>
+            <p class="company">서울대학교</p>
           </div>
         </div>
       </section>
@@ -359,7 +359,7 @@ const resumeIndex = `<!DOCTYPE html>
   </div>
 
   <footer>
-    <p>&copy; 2026 Online Resume. Built with Linkmap.</p>
+    <p>&copy; 2026 온라인 이력서. Linkmap으로 제작.</p>
   </footer>
 </body>
 </html>`;
@@ -404,25 +404,25 @@ const blogIndex = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Blog</title>
+  <title>내 블로그</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <nav class="navbar">
     <div class="container nav-inner">
-      <a href="#" class="logo">MyBlog</a>
+      <a href="#" class="logo">내블로그</a>
       <div class="nav-links">
-        <a href="#">Home</a>
-        <a href="#">About</a>
-        <a href="#">Archive</a>
+        <a href="#">홈</a>
+        <a href="#">소개</a>
+        <a href="#">아카이브</a>
       </div>
     </div>
   </nav>
 
   <header class="hero">
     <div class="container">
-      <h1>Welcome to MyBlog</h1>
-      <p>Thoughts on development, design, and technology.</p>
+      <h1>내 블로그에 오신 것을 환영합니다</h1>
+      <p>개발, 디자인, 기술에 대한 생각을 공유합니다.</p>
     </div>
   </header>
 
@@ -431,48 +431,48 @@ const blogIndex = `<!DOCTYPE html>
       <article class="post-card">
         <div class="post-meta">
           <time>2026-02-10</time>
-          <span class="tag">Development</span>
+          <span class="tag">개발</span>
         </div>
-        <h2><a href="#">Getting Started with TypeScript in 2026</a></h2>
-        <p>TypeScript has become the standard for modern web development. Here's everything you need to know to get started...</p>
-        <a href="#" class="read-more">Read more &rarr;</a>
+        <h2><a href="#">2026년 TypeScript 시작 가이드</a></h2>
+        <p>TypeScript는 현대 웹 개발의 표준이 되었습니다. 시작하기 위해 알아야 할 모든 것을 정리했습니다...</p>
+        <a href="#" class="read-more">더 읽기 &rarr;</a>
       </article>
 
       <article class="post-card">
         <div class="post-meta">
           <time>2026-02-05</time>
-          <span class="tag">Design</span>
+          <span class="tag">디자인</span>
         </div>
-        <h2><a href="#">Minimal Design Principles for Developers</a></h2>
-        <p>You don't need to be a designer to create beautiful interfaces. Learn the key principles that make a difference...</p>
-        <a href="#" class="read-more">Read more &rarr;</a>
+        <h2><a href="#">개발자를 위한 미니멀 디자인 원칙</a></h2>
+        <p>아름다운 인터페이스를 만들기 위해 디자이너일 필요는 없습니다. 차이를 만드는 핵심 원칙을 알아보세요...</p>
+        <a href="#" class="read-more">더 읽기 &rarr;</a>
       </article>
 
       <article class="post-card">
         <div class="post-meta">
           <time>2026-01-28</time>
-          <span class="tag">Tools</span>
+          <span class="tag">도구</span>
         </div>
-        <h2><a href="#">My Favorite Developer Tools in 2026</a></h2>
-        <p>A curated list of tools that boost my productivity every day. From code editors to deployment platforms...</p>
-        <a href="#" class="read-more">Read more &rarr;</a>
+        <h2><a href="#">2026년 내가 애용하는 개발자 도구들</a></h2>
+        <p>매일 생산성을 높여주는 도구 모음을 엄선했습니다. 코드 에디터부터 배포 플랫폼까지...</p>
+        <a href="#" class="read-more">더 읽기 &rarr;</a>
       </article>
 
       <article class="post-card">
         <div class="post-meta">
           <time>2026-01-20</time>
-          <span class="tag">Career</span>
+          <span class="tag">커리어</span>
         </div>
-        <h2><a href="#">Lessons from 5 Years of Software Engineering</a></h2>
-        <p>Reflecting on what I've learned after half a decade in the industry. Mistakes, wins, and everything in between...</p>
-        <a href="#" class="read-more">Read more &rarr;</a>
+        <h2><a href="#">소프트웨어 엔지니어 5년차가 배운 것들</a></h2>
+        <p>업계에서 5년을 보내며 배운 것들을 돌아봅니다. 실수, 성과, 그리고 그 사이의 모든 것...</p>
+        <a href="#" class="read-more">더 읽기 &rarr;</a>
       </article>
     </div>
   </main>
 
   <footer>
     <div class="container">
-      <p>&copy; 2026 MyBlog. Built with Linkmap.</p>
+      <p>&copy; 2026 내 블로그. Linkmap으로 제작.</p>
     </div>
   </footer>
 </body>
@@ -514,7 +514,7 @@ const docsIndex = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Documentation</title>
+  <title>문서</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -522,7 +522,7 @@ const docsIndex = `<!DOCTYPE html>
     <div class="topbar-inner">
       <a href="#" class="logo">MyDocs</a>
       <div class="nav-links">
-        <a href="#">Guide</a>
+        <a href="#">가이드</a>
         <a href="#">API</a>
         <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
       </div>
@@ -531,49 +531,49 @@ const docsIndex = `<!DOCTYPE html>
 
   <div class="layout">
     <aside class="sidebar">
-      <h3>Getting Started</h3>
+      <h3>시작하기</h3>
       <ul>
-        <li><a href="#" class="active">Introduction</a></li>
-        <li><a href="#">Installation</a></li>
-        <li><a href="#">Quick Start</a></li>
+        <li><a href="#" class="active">소개</a></li>
+        <li><a href="#">설치</a></li>
+        <li><a href="#">빠른 시작</a></li>
       </ul>
-      <h3>Guides</h3>
+      <h3>가이드</h3>
       <ul>
-        <li><a href="#">Configuration</a></li>
-        <li><a href="#">Authentication</a></li>
-        <li><a href="#">Deployment</a></li>
+        <li><a href="#">설정</a></li>
+        <li><a href="#">인증</a></li>
+        <li><a href="#">배포</a></li>
       </ul>
-      <h3>API Reference</h3>
+      <h3>API 레퍼런스</h3>
       <ul>
         <li><a href="#">REST API</a></li>
-        <li><a href="#">Webhooks</a></li>
+        <li><a href="#">웹훅</a></li>
         <li><a href="#">SDK</a></li>
       </ul>
     </aside>
 
     <main class="doc-content">
-      <div class="breadcrumb">Getting Started &rsaquo; Introduction</div>
+      <div class="breadcrumb">시작하기 &rsaquo; 소개</div>
 
-      <h1>Introduction</h1>
-      <p class="lead">Welcome to the documentation. This guide will help you get up and running quickly.</p>
+      <h1>소개</h1>
+      <p class="lead">문서에 오신 것을 환영합니다. 이 가이드를 통해 빠르게 시작할 수 있습니다.</p>
 
-      <h2>What is MyProject?</h2>
-      <p>MyProject is a modern development tool that simplifies your workflow. It provides a clean API, easy configuration, and seamless integration with your existing tools.</p>
+      <h2>MyProject란?</h2>
+      <p>MyProject는 워크플로를 단순화하는 현대적인 개발 도구입니다. 깔끔한 API, 간편한 설정, 기존 도구와의 원활한 통합을 제공합니다.</p>
 
-      <h2>Key Features</h2>
+      <h2>주요 기능</h2>
       <ul>
-        <li><strong>Simple Setup</strong> &ndash; Get started in under 5 minutes</li>
-        <li><strong>Type Safe</strong> &ndash; Full TypeScript support out of the box</li>
-        <li><strong>Extensible</strong> &ndash; Plugin system for custom functionality</li>
-        <li><strong>Well Documented</strong> &ndash; Comprehensive guides and examples</li>
+        <li><strong>간편한 설정</strong> &ndash; 5분 안에 시작할 수 있습니다</li>
+        <li><strong>타입 안전</strong> &ndash; TypeScript를 기본으로 완벽 지원합니다</li>
+        <li><strong>확장 가능</strong> &ndash; 플러그인 시스템으로 커스텀 기능을 추가합니다</li>
+        <li><strong>풍부한 문서</strong> &ndash; 포괄적인 가이드와 예제를 제공합니다</li>
       </ul>
 
-      <h2>Quick Example</h2>
+      <h2>빠른 예제</h2>
       <div class="code-block">
-        <pre><code>// Install
+        <pre><code>// 설치
 npm install myproject
 
-// Initialize
+// 초기화
 import { init } from 'myproject';
 
 const app = init({
@@ -581,33 +581,33 @@ const app = init({
   environment: 'production',
 });
 
-// Use it
+// 사용하기
 const result = await app.run();
 console.log(result);</code></pre>
       </div>
 
-      <h2>Next Steps</h2>
-      <p>Now that you have an overview, continue with:</p>
+      <h2>다음 단계</h2>
+      <p>개요를 확인했으니, 다음으로 진행해 보세요:</p>
       <div class="next-links">
         <a href="#" class="next-card">
-          <strong>Installation Guide</strong>
-          <span>Set up your development environment</span>
+          <strong>설치 가이드</strong>
+          <span>개발 환경을 설정합니다</span>
         </a>
         <a href="#" class="next-card">
-          <strong>Quick Start</strong>
-          <span>Build your first project in minutes</span>
+          <strong>빠른 시작</strong>
+          <span>몇 분 만에 첫 프로젝트를 만들어 보세요</span>
         </a>
       </div>
 
       <div class="page-nav">
         <div></div>
-        <a href="#" class="nav-next">Installation &rarr;</a>
+        <a href="#" class="nav-next">설치 &rarr;</a>
       </div>
     </main>
   </div>
 
   <footer>
-    <p>&copy; 2026 MyDocs. Built with Linkmap.</p>
+    <p>&copy; 2026 MyDocs. Linkmap으로 제작.</p>
   </footer>
 </body>
 </html>`;
@@ -660,7 +660,7 @@ export const homepageTemplates: HomepageTemplateContent[] = [
   {
     slug: 'portfolio-static',
     repoName: 'portfolio-static',
-    description: 'Clean personal portfolio - Generated by Linkmap',
+    description: '깔끔한 개인 포트폴리오 - Linkmap으로 생성',
     files: [
       { path: 'index.html', content: portfolioIndex },
       { path: 'style.css', content: portfolioStyle },
@@ -669,7 +669,7 @@ export const homepageTemplates: HomepageTemplateContent[] = [
   {
     slug: 'landing-static',
     repoName: 'landing-static',
-    description: 'Business landing page - Generated by Linkmap',
+    description: '비즈니스 랜딩 페이지 - Linkmap으로 생성',
     files: [
       { path: 'index.html', content: landingIndex },
       { path: 'style.css', content: landingStyle },
@@ -678,7 +678,7 @@ export const homepageTemplates: HomepageTemplateContent[] = [
   {
     slug: 'resume-static',
     repoName: 'resume-static',
-    description: 'Professional resume page - Generated by Linkmap',
+    description: '온라인 이력서 페이지 - Linkmap으로 생성',
     files: [
       { path: 'index.html', content: resumeIndex },
       { path: 'style.css', content: resumeStyle },
@@ -687,7 +687,7 @@ export const homepageTemplates: HomepageTemplateContent[] = [
   {
     slug: 'blog-static',
     repoName: 'blog-static',
-    description: 'Simple blog - Generated by Linkmap',
+    description: '심플 블로그 - Linkmap으로 생성',
     files: [
       { path: 'index.html', content: blogIndex },
       { path: 'style.css', content: blogStyle },
@@ -696,7 +696,7 @@ export const homepageTemplates: HomepageTemplateContent[] = [
   {
     slug: 'docs-static',
     repoName: 'docs-static',
-    description: 'Technical documentation site - Generated by Linkmap',
+    description: '기술 문서 사이트 - Linkmap으로 생성',
     files: [
       { path: 'index.html', content: docsIndex },
       { path: 'style.css', content: docsStyle },
