@@ -240,7 +240,7 @@ export async function createRepo(
   token: string,
   name: string,
   description: string,
-  options?: { is_template?: boolean; auto_init?: boolean; has_issues?: boolean }
+  options?: { is_template?: boolean; auto_init?: boolean; has_issues?: boolean; private?: boolean }
 ): Promise<GitHubRepo> {
   return githubFetch<GitHubRepo>('/user/repos', {
     token,
@@ -248,6 +248,7 @@ export async function createRepo(
     body: {
       name,
       description,
+      private: options?.private ?? false,
       auto_init: options?.auto_init ?? false,
       is_template: options?.is_template ?? false,
       has_issues: options?.has_issues ?? false,
