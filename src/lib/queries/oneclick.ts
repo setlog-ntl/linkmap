@@ -18,6 +18,7 @@ export interface HomepageTemplate {
   tags: string[];
   is_premium: boolean;
   display_order: number;
+  deploy_target?: 'vercel' | 'github_pages' | 'both';
 }
 
 export interface DeployStatus {
@@ -28,6 +29,9 @@ export interface DeployStatus {
   deploy_error: string | null;
   vercel_project_url: string | null;
   forked_repo_url: string | null;
+  deploy_method: 'vercel' | 'github_pages';
+  pages_url: string | null;
+  pages_status: 'pending' | 'enabling' | 'building' | 'built' | 'errored' | null;
   steps: Array<{
     name: string;
     status: 'completed' | 'in_progress' | 'pending' | 'error';
@@ -49,13 +53,21 @@ export interface DeployResult {
   deployment_id: string | null;
 }
 
+export interface DeployPagesResult {
+  deploy_id: string;
+  project_id: string;
+  repo_url: string;
+  pages_url: string;
+  pages_status: string;
+}
+
 // ---------- Templates ----------
 
-export function useHomepageTemplates() {
+export function useHomepageTemplates(deployTarget: string = 'github_pages') {
   return useQuery({
-    queryKey: queryKeys.oneclick.templates,
+    queryKey: [...queryKeys.oneclick.templates, deployTarget],
     queryFn: async (): Promise<HomepageTemplate[]> => {
-      const res = await fetch('/api/oneclick/templates');
+      const res = await fetch(`/api/oneclick/templates?deploy_target=${deployTarget}`);
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || '템플릿 목록 조회 실패');
@@ -67,7 +79,7 @@ export function useHomepageTemplates() {
   });
 }
 
-// ---------- Fork ----------
+// ---------- Fork (legacy Vercel flow) ----------
 
 export function useForkTemplate() {
   return useMutation({
@@ -89,7 +101,7 @@ export function useForkTemplate() {
   });
 }
 
-// ---------- Deploy ----------
+// ---------- Deploy to Vercel (legacy) ----------
 
 export function useDeployToVercel() {
   return useMutation({
@@ -99,6 +111,28 @@ export function useDeployToVercel() {
       env_vars?: Record<string, string>;
     }): Promise<DeployResult> => {
       const res = await fetch('/api/oneclick/deploy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '배포 실패');
+      }
+      return res.json();
+    },
+  });
+}
+
+// ---------- Deploy to GitHub Pages ----------
+
+export function useDeployToGitHubPages() {
+  return useMutation({
+    mutationFn: async (input: {
+      template_id: string;
+      site_name: string;
+    }): Promise<DeployPagesResult> => {
+      const res = await fetch('/api/oneclick/deploy-pages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(input),

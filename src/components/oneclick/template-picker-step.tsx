@@ -7,25 +7,22 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CheckCircle2, Lock, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, Lock } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
-import { t } from '@/lib/i18n';
 import type { HomepageTemplate } from '@/lib/queries/oneclick';
 
 interface TemplatePickerStepProps {
   templates: HomepageTemplate[];
   isLoading: boolean;
-  onBack: () => void;
-  onNext: (data: { templateId: string; siteName: string; vercelToken: string }) => void;
+  onNext: (data: { templateId: string; siteName: string }) => void;
 }
 
 const SITE_NAME_REGEX = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
 
-export function TemplatePickerStep({ templates, isLoading, onBack, onNext }: TemplatePickerStepProps) {
+export function TemplatePickerStep({ templates, isLoading, onNext }: TemplatePickerStepProps) {
   const { locale } = useLocaleStore();
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [siteName, setSiteName] = useState('');
-  const [vercelToken, setVercelToken] = useState('');
   const [siteNameError, setSiteNameError] = useState<string | null>(null);
 
   const validateSiteName = (name: string) => {
@@ -53,7 +50,7 @@ export function TemplatePickerStep({ templates, isLoading, onBack, onNext }: Tem
     }
   };
 
-  const canProceed = selectedTemplate && siteName.length >= 2 && !siteNameError && vercelToken.length > 0;
+  const canProceed = selectedTemplate && siteName.length >= 2 && !siteNameError;
 
   const handleNext = () => {
     if (!canProceed) return;
@@ -62,7 +59,7 @@ export function TemplatePickerStep({ templates, isLoading, onBack, onNext }: Tem
       setSiteNameError(error);
       return;
     }
-    onNext({ templateId: selectedTemplate!, siteName, vercelToken });
+    onNext({ templateId: selectedTemplate!, siteName });
   };
 
   if (isLoading) {
@@ -140,40 +137,15 @@ export function TemplatePickerStep({ templates, isLoading, onBack, onNext }: Tem
         )}
         <p className="text-xs text-muted-foreground">
           {locale === 'ko'
-            ? 'GitHub 레포지토리 이름과 Vercel 프로젝트 이름으로 사용됩니다'
-            : 'Used as GitHub repository name and Vercel project name'}
+            ? `https://username.github.io/${siteName || '{사이트이름}'}에 배포됩니다`
+            : `Will be deployed to https://username.github.io/${siteName || '{site-name}'}`}
         </p>
       </div>
 
-      {/* Vercel token input */}
-      <div className="space-y-2">
-        <Label htmlFor="vercel-token" className="text-base font-semibold">
-          {locale === 'ko' ? 'Vercel 토큰' : 'Vercel Token'}
-        </Label>
-        <Input
-          id="vercel-token"
-          type="password"
-          placeholder={locale === 'ko' ? 'Vercel 개인 액세스 토큰 입력' : 'Enter your Vercel personal access token'}
-          value={vercelToken}
-          onChange={(e) => setVercelToken(e.target.value)}
-        />
-        <p className="text-xs text-muted-foreground">
-          {locale === 'ko' ? (
-            <>Vercel Settings → Tokens에서 생성할 수 있습니다. 토큰은 암호화되어 안전하게 저장됩니다.</>
-          ) : (
-            <>Create one at Vercel Settings → Tokens. Your token is encrypted and stored securely.</>
-          )}
-        </p>
-      </div>
-
-      {/* Navigation buttons */}
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onBack} className="gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          {t(locale, 'common.back')}
-        </Button>
-        <Button onClick={handleNext} disabled={!canProceed}>
-          {locale === 'ko' ? '배포 시작' : 'Start Deploy'}
+      {/* Deploy button */}
+      <div className="flex justify-end">
+        <Button onClick={handleNext} disabled={!canProceed} size="lg">
+          {locale === 'ko' ? '이 템플릿으로 배포' : 'Deploy This Template'}
         </Button>
       </div>
     </div>

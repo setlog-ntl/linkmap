@@ -62,6 +62,9 @@ export function DeployStep({ status, isLoading, error, projectId }: DeployStepPr
   const completedSteps = status.steps.filter((s) => s.status === 'completed').length;
   const progressPercent = (completedSteps / status.steps.length) * 100;
 
+  // Use pages_url when available, fall back to deployment_url
+  const liveUrl = status.pages_url || status.deployment_url;
+
   return (
     <div className="space-y-6">
       {/* Progress */}
@@ -126,15 +129,15 @@ export function DeployStep({ status, isLoading, error, projectId }: DeployStepPr
             </div>
 
             {/* Live URL */}
-            {status.deployment_url && (
+            {liveUrl && (
               <div className="text-center">
                 <a
-                  href={status.deployment_url}
+                  href={liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-primary hover:underline text-lg font-mono"
                 >
-                  {status.deployment_url.replace('https://', '')}
+                  {liveUrl.replace('https://', '')}
                   <ExternalLink className="h-4 w-4" />
                 </a>
               </div>
@@ -142,9 +145,9 @@ export function DeployStep({ status, isLoading, error, projectId }: DeployStepPr
 
             {/* Action links */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-              {status.deployment_url && (
+              {liveUrl && (
                 <Button asChild>
-                  <a href={status.deployment_url} target="_blank" rel="noopener noreferrer">
+                  <a href={liveUrl} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="mr-2 h-4 w-4" />
                     {locale === 'ko' ? '사이트 방문' : 'Visit Site'}
                   </a>
@@ -155,14 +158,6 @@ export function DeployStep({ status, isLoading, error, projectId }: DeployStepPr
                   <a href={status.forked_repo_url} target="_blank" rel="noopener noreferrer">
                     <Github className="mr-2 h-4 w-4" />
                     {locale === 'ko' ? 'GitHub 레포' : 'GitHub Repo'}
-                  </a>
-                </Button>
-              )}
-              {status.vercel_project_url && (
-                <Button variant="outline" asChild>
-                  <a href={status.vercel_project_url} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    Vercel
                   </a>
                 </Button>
               )}

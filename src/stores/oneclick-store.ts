@@ -28,7 +28,6 @@ export const useOneclickStore = create<OneclickState>()(
     }),
     {
       name: 'linkmap-oneclick',
-      // Don't persist sensitive data like vercelToken
       partialize: (state) => ({
         selectedTemplateId: state.selectedTemplateId,
         siteName: state.siteName,

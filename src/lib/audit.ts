@@ -23,6 +23,7 @@ export type AuditAction =
   | 'github.auto_sync'
   | 'oneclick.fork'
   | 'oneclick.deploy'
+  | 'oneclick.deploy_pages'
   | 'oneclick.deploy_success'
   | 'oneclick.deploy_error';
 

@@ -17,9 +17,10 @@ interface GitHubConnectStepProps {
   githubAccount: GitHubAccount | null;
   isLoading: boolean;
   onNext: () => void;
+  onConnected?: () => void;
 }
 
-export function GitHubConnectStep({ githubAccount, isLoading, onNext }: GitHubConnectStepProps) {
+export function GitHubConnectStep({ githubAccount, isLoading, onNext, onConnected }: GitHubConnectStepProps) {
   const { locale } = useLocaleStore();
   const isConnected = githubAccount?.status === 'active';
 
@@ -71,8 +72,10 @@ export function GitHubConnectStep({ githubAccount, isLoading, onNext }: GitHubCo
                   {locale === 'ko' ? '연결됨' : 'Connected'}
                 </Badge>
               </div>
-              <Button onClick={onNext} size="lg">
-                {t(locale, 'common.next')}
+              <Button onClick={onConnected || onNext} size="lg">
+                {onConnected
+                  ? (locale === 'ko' ? '배포 진행' : 'Proceed to Deploy')
+                  : t(locale, 'common.next')}
               </Button>
             </div>
           ) : (

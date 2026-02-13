@@ -5,6 +5,7 @@ import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 import { decrypt } from '@/lib/crypto';
 import { getVercelDeployment, listProjectDeployments } from '@/lib/vercel/api';
+import { getGitHubPagesStatus, GitHubApiError } from '@/lib/github/api';
 
 type StepStatus = 'completed' | 'in_progress' | 'pending' | 'error';
 
@@ -34,10 +35,98 @@ export async function GET(request: NextRequest) {
 
   if (!deploy) return notFoundError('배포');
 
-  // If there's a Vercel project but no deployment yet, or deployment is building, poll Vercel
-  if (deploy.vercel_project_id && deploy.deploy_status !== 'ready' && deploy.deploy_status !== 'error') {
+  const deployMethod = deploy.deploy_method || 'vercel';
+
+  // GitHub Pages polling
+  if (deployMethod === 'github_pages' && deploy.deploy_status !== 'ready' && deploy.deploy_status !== 'error') {
     try {
-      // Get the Vercel token from service_accounts (stored as api_key for the project)
+      const { data: githubService } = await supabase
+        .from('services')
+        .select('id')
+        .eq('slug', 'github')
+        .single();
+
+      const { data: ghAccount } = githubService
+        ? await supabase
+            .from('service_accounts')
+            .select('encrypted_access_token')
+            .eq('project_id', deploy.project_id)
+            .eq('service_id', githubService.id)
+            .eq('status', 'active')
+            .single()
+        : { data: null };
+
+      if (ghAccount) {
+        const githubToken = decrypt(ghAccount.encrypted_access_token);
+        const [owner, repo] = (deploy.forked_repo_full_name as string).split('/');
+
+        const pagesInfo = await getGitHubPagesStatus(githubToken, owner, repo);
+        const pagesStatus = pagesInfo.status;
+
+        let newDeployStatus = deploy.deploy_status;
+        let newPagesStatus = deploy.pages_status;
+
+        if (pagesStatus === 'built') {
+          newDeployStatus = 'ready';
+          newPagesStatus = 'built';
+        } else if (pagesStatus === 'building') {
+          newDeployStatus = 'building';
+          newPagesStatus = 'building';
+        } else if (pagesStatus === 'errored') {
+          newDeployStatus = 'error';
+          newPagesStatus = 'errored';
+        }
+
+        if (newDeployStatus !== deploy.deploy_status || newPagesStatus !== deploy.pages_status) {
+          const updateData: Record<string, unknown> = {
+            deploy_status: newDeployStatus,
+            pages_status: newPagesStatus,
+            pages_url: pagesInfo.html_url || deploy.pages_url,
+          };
+
+          if (newDeployStatus === 'ready') {
+            updateData.deployed_at = new Date().toISOString();
+            updateData.deployment_url = pagesInfo.html_url || deploy.pages_url;
+            await logAudit(user.id, {
+              action: 'oneclick.deploy_success',
+              resourceType: 'homepage_deploy',
+              resourceId: deploy.id,
+              details: { pages_url: pagesInfo.html_url || deploy.pages_url },
+            });
+          }
+          if (newDeployStatus === 'error') {
+            await logAudit(user.id, {
+              action: 'oneclick.deploy_error',
+              resourceType: 'homepage_deploy',
+              resourceId: deploy.id,
+            });
+          }
+
+          await supabase
+            .from('homepage_deploys')
+            .update(updateData)
+            .eq('id', deployId);
+
+          deploy.deploy_status = newDeployStatus;
+          deploy.pages_status = newPagesStatus;
+          deploy.pages_url = pagesInfo.html_url || deploy.pages_url;
+          if (newDeployStatus === 'ready') {
+            deploy.deployment_url = pagesInfo.html_url || deploy.pages_url;
+          }
+        }
+      }
+    } catch (err) {
+      // If Pages API returns 404, Pages might not be enabled yet — retry silently
+      if (err instanceof GitHubApiError && err.status === 404) {
+        // Pages not yet enabled, keep current status
+      }
+      // Non-fatal: return whatever we have in the DB
+    }
+  }
+
+  // Vercel polling (existing logic, only for vercel deploys)
+  if (deployMethod === 'vercel' && deploy.vercel_project_id && deploy.deploy_status !== 'ready' && deploy.deploy_status !== 'error') {
+    try {
       const { data: vercelService } = await supabase
         .from('services')
         .select('id')
@@ -58,7 +147,6 @@ export async function GET(request: NextRequest) {
         const vercelToken = decrypt(vercelAccount.encrypted_api_key);
 
         if (deploy.deployment_id) {
-          // Check existing deployment status
           const deployment = await getVercelDeployment(vercelToken, deploy.deployment_id);
           const newStatus = mapVercelState(deployment.readyState);
 
@@ -92,7 +180,6 @@ export async function GET(request: NextRequest) {
             deploy.deployment_url = `https://${deployment.url}`;
           }
         } else {
-          // No deployment ID yet — try to find it
           const { deployments } = await listProjectDeployments(vercelToken, deploy.vercel_project_id, 1);
           if (deployments.length > 0) {
             const d = deployments[0];
@@ -117,7 +204,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const steps = buildSteps(deploy);
+  const steps = buildSteps(deploy, deployMethod);
 
   return NextResponse.json({
     deploy_id: deploy.id,
@@ -127,6 +214,9 @@ export async function GET(request: NextRequest) {
     deploy_error: deploy.deploy_error_message,
     vercel_project_url: deploy.vercel_project_url,
     forked_repo_url: deploy.forked_repo_url,
+    deploy_method: deployMethod,
+    pages_url: deploy.pages_url,
+    pages_status: deploy.pages_status,
     steps,
   });
 }
@@ -143,10 +233,36 @@ function mapVercelState(state: string): string {
   }
 }
 
-function buildSteps(deploy: Record<string, unknown>): DeployStep[] {
+function buildSteps(deploy: Record<string, unknown>, deployMethod: string): DeployStep[] {
   const forkStatus = deploy.fork_status as string;
   const deployStatus = deploy.deploy_status as string;
 
+  if (deployMethod === 'github_pages') {
+    // 3 steps for GitHub Pages
+    const repoStep: StepStatus =
+      forkStatus === 'forked' ? 'completed' :
+      forkStatus === 'forking' ? 'in_progress' :
+      forkStatus === 'failed' ? 'error' : 'pending';
+
+    const pagesStep: StepStatus =
+      repoStep !== 'completed' ? 'pending' :
+      deployStatus === 'building' || deployStatus === 'ready' ? 'completed' :
+      deployStatus === 'error' ? 'error' : 'in_progress';
+
+    const liveStep: StepStatus =
+      deployStatus === 'ready' ? 'completed' :
+      deployStatus === 'error' ? 'error' :
+      pagesStep === 'completed' && deployStatus === 'building' ? 'in_progress' :
+      'pending';
+
+    return [
+      { name: 'repo', status: repoStep, label: '레포지토리 생성' },
+      { name: 'pages', status: pagesStep, label: 'GitHub Pages 활성화' },
+      { name: 'live', status: liveStep, label: '사이트 게시 완료' },
+    ];
+  }
+
+  // Vercel steps (existing)
   const forkStep: StepStatus =
     forkStatus === 'forked' ? 'completed' :
     forkStatus === 'forking' ? 'in_progress' :

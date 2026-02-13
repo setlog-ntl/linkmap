@@ -153,6 +153,75 @@ export async function forkRepo(
   });
 }
 
+// ---------- Template & GitHub Pages APIs ----------
+
+export interface GitHubGenerateResult {
+  id: number;
+  name: string;
+  full_name: string;
+  html_url: string;
+  owner: { login: string };
+  default_branch: string;
+}
+
+export async function generateFromTemplate(
+  token: string,
+  templateOwner: string,
+  templateRepo: string,
+  newName: string,
+  description?: string
+): Promise<GitHubGenerateResult> {
+  return githubFetch<GitHubGenerateResult>(
+    `/repos/${templateOwner}/${templateRepo}/generate`,
+    {
+      token,
+      method: 'POST',
+      body: {
+        name: newName,
+        description: description || `Generated from ${templateOwner}/${templateRepo}`,
+        include_all_branches: false,
+        private: false,
+      },
+    }
+  );
+}
+
+export interface GitHubPagesResult {
+  url: string;
+  status: string | null;
+  html_url: string;
+}
+
+export async function enableGitHubPages(
+  token: string,
+  owner: string,
+  repo: string,
+  branch: string = 'main',
+  path: string = '/'
+): Promise<GitHubPagesResult> {
+  return githubFetch<GitHubPagesResult>(
+    `/repos/${owner}/${repo}/pages`,
+    {
+      token,
+      method: 'POST',
+      body: {
+        source: { branch, path },
+      },
+    }
+  );
+}
+
+export async function getGitHubPagesStatus(
+  token: string,
+  owner: string,
+  repo: string
+): Promise<GitHubPagesResult> {
+  return githubFetch<GitHubPagesResult>(
+    `/repos/${owner}/${repo}/pages`,
+    { token }
+  );
+}
+
 export async function deleteSecret(
   token: string,
   owner: string,
