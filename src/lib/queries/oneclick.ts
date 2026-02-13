@@ -158,7 +158,7 @@ export interface HomepageDeploy {
   deployment_url: string | null;
   forked_repo_url: string | null;
   forked_repo_full_name: string | null;
-  deploy_error: string | null;
+  deploy_error_message: string | null;
   created_at: string;
   template_id: string;
   project_id: string | null;

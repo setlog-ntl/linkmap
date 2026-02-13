@@ -25,7 +25,7 @@ export async function GET() {
       deployment_url,
       forked_repo_url,
       forked_repo_full_name,
-      deploy_error,
+      deploy_error_message,
       created_at,
       template_id,
       project_id,
