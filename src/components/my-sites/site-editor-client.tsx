@@ -58,6 +58,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const [showPreview, setShowPreview] = useState(true);
   const [deployState, setDeployState] = useState<DeployState>('idle');
   const [livePreviewKey, setLivePreviewKey] = useState(0);
+  const [showLiveAfterDeploy, setShowLiveAfterDeploy] = useState(false);
   const previewRef = useRef<HTMLIFrameElement>(null);
   const liveIframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -145,7 +146,9 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const handleContentChange = useCallback((value: string) => {
     setEditorContent(value);
     setHasUnsavedChanges(true);
-  }, []);
+    // 편집 시작하면 라이브 미리보기 → 로컬 미리보기로 전환
+    if (showLiveAfterDeploy) setShowLiveAfterDeploy(false);
+  }, [showLiveAfterDeploy]);
 
   const handleTabSwitch = useCallback(
     (path: string) => {
@@ -243,6 +246,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       // 3단계: 배포 완료 → 라이브 미리보기 새로고침
       setDeployState('deployed');
       setLivePreviewKey((k) => k + 1);
+      setShowLiveAfterDeploy(true);
 
       toast.success(
         locale === 'ko'
@@ -250,7 +254,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           : 'Deployed! Changes are now live.'
       );
 
-      // 3초 후 상태 초기화
+      // 3초 후 배포 버튼 상태만 초기화 (미리보기는 라이브 유지)
       setTimeout(() => setDeployState('idle'), 3000);
     } catch (err) {
       setDeployState('idle');
@@ -451,19 +455,28 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
               <div className="border-b px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground flex-shrink-0">
                 <Eye className="h-3 w-3" />
                 <span>{locale === 'ko' ? '실시간 미리보기' : 'Live Preview'}</span>
-                {isLivePreviewable && (
-                  <Badge variant="secondary" className="text-[10px] px-1 py-0 ml-auto">
-                    LIVE
-                  </Badge>
-                )}
-                {deployState === 'deployed' && (
+                {showLiveAfterDeploy ? (
                   <Badge variant="default" className="text-[10px] px-1 py-0 ml-auto bg-green-600">
                     {locale === 'ko' ? '배포됨' : 'DEPLOYED'}
                   </Badge>
-                )}
+                ) : isLivePreviewable ? (
+                  <Badge variant="secondary" className="text-[10px] px-1 py-0 ml-auto">
+                    LIVE
+                  </Badge>
+                ) : null}
               </div>
 
-              {isLivePreviewable && deployState !== 'deployed' ? (
+              {/* 배포 완료 후 → 라이브 사이트 미리보기, 편집 중 → 로컬 미리보기 */}
+              {showLiveAfterDeploy && liveUrl ? (
+                <iframe
+                  ref={liveIframeRef}
+                  key={`live-${livePreviewKey}`}
+                  src={`${liveUrl}?_t=${livePreviewKey}`}
+                  title="사이트 미리보기"
+                  className="flex-1 w-full bg-white border-0"
+                  sandbox="allow-scripts allow-same-origin"
+                />
+              ) : isLivePreviewable ? (
                 <iframe
                   ref={previewRef}
                   title="미리보기"
@@ -473,7 +486,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
               ) : liveUrl ? (
                 <iframe
                   ref={liveIframeRef}
-                  key={livePreviewKey}
+                  key={`fallback-${livePreviewKey}`}
                   src={`${liveUrl}?_t=${livePreviewKey}`}
                   title="사이트 미리보기"
                   className="flex-1 w-full bg-white border-0"
