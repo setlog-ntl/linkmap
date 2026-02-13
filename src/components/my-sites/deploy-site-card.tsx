@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,7 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ExternalLink, Github, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { ExternalLink, Github, Pencil, Trash2, Loader2, Globe } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { useDeleteDeployment, type HomepageDeploy } from '@/lib/queries/oneclick';
@@ -30,6 +30,8 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
   const { locale } = useLocaleStore();
   const deleteMutation = useDeleteDeployment();
   const [open, setOpen] = useState(false);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [iframeError, setIframeError] = useState(false);
 
   const liveUrl = deploy.pages_url || deploy.deployment_url;
   const templateName = deploy.homepage_templates
@@ -72,41 +74,117 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
   );
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1 min-w-0">
+    <Card className="overflow-hidden">
+      {/* 미리보기 영역 */}
+      {liveUrl && deploy.deploy_status === 'ready' ? (
+        <a
+          href={liveUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block relative w-full bg-muted border-b group cursor-pointer"
+          style={{ height: '200px' }}
+        >
+          {/* 축소 iframe */}
+          <div
+            className="absolute inset-0 overflow-hidden pointer-events-none"
+            style={{ height: '200px' }}
+          >
+            <iframe
+              src={liveUrl}
+              title={`${deploy.site_name} 미리보기`}
+              className="absolute top-0 left-0 border-0"
+              style={{
+                width: '1280px',
+                height: '800px',
+                transform: 'scale(0.25)',
+                transformOrigin: 'top left',
+              }}
+              sandbox="allow-scripts allow-same-origin"
+              loading="lazy"
+              onLoad={() => setIframeLoaded(true)}
+              onError={() => setIframeError(true)}
+            />
+          </div>
+
+          {/* 로딩 표시 */}
+          {!iframeLoaded && !iframeError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-muted">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          )}
+
+          {/* iframe 로드 실패 시 대체 UI */}
+          {iframeError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted gap-2">
+              <Globe className="h-8 w-8 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">
+                {locale === 'ko' ? '미리보기를 불러올 수 없습니다' : 'Preview unavailable'}
+              </span>
+            </div>
+          )}
+
+          {/* 호버 오버레이 */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white bg-black/60 px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-1.5">
+              <ExternalLink className="h-3.5 w-3.5" />
+              {t(locale, 'mySites.visitSite')}
+            </span>
+          </div>
+
+          {/* 상태 뱃지 */}
+          <Badge
+            variant={statusVariant}
+            className="absolute top-2 right-2 z-10"
+          >
+            {statusLabel}
+          </Badge>
+        </a>
+      ) : (
+        <div className="relative w-full bg-muted border-b flex flex-col items-center justify-center gap-2" style={{ height: '200px' }}>
+          <Globe className="h-10 w-10 text-muted-foreground/40" />
+          <span className="text-xs text-muted-foreground">
+            {deploy.deploy_status === 'error'
+              ? (locale === 'ko' ? '배포 오류' : 'Deploy error')
+              : (locale === 'ko' ? '배포 준비 중...' : 'Preparing...')}
+          </span>
+          <Badge
+            variant={statusVariant}
+            className="absolute top-2 right-2"
+          >
+            {statusLabel}
+          </Badge>
+        </div>
+      )}
+
+      {/* 카드 정보 */}
+      <CardContent className="p-4 space-y-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
             <h3 className="font-semibold truncate">{deploy.site_name}</h3>
             {templateName && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {t(locale, 'mySites.template')}: {templateName}
               </p>
             )}
           </div>
-          <Badge variant={statusVariant} className="ml-2 flex-shrink-0">
-            {statusLabel}
-          </Badge>
+          <p className="text-xs text-muted-foreground flex-shrink-0 pt-0.5">
+            {deployDate}
+          </p>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {/* Live URL */}
+
+        {/* URL */}
         {liveUrl && (
           <a
             href={liveUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-primary hover:underline truncate block font-mono"
+            className="text-xs text-primary hover:underline truncate block font-mono"
           >
             {liveUrl.replace('https://', '')}
           </a>
         )}
 
-        {/* Deploy date */}
-        <p className="text-xs text-muted-foreground">
-          {t(locale, 'mySites.deployedAt')}: {deployDate}
-        </p>
-
-        {/* Actions */}
+        {/* 액션 버튼 */}
         <div className="flex flex-wrap gap-2 pt-1">
           {liveUrl && (
             <Button size="sm" variant="outline" asChild>
@@ -133,10 +211,10 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
             </Button>
           )}
 
-          {/* Delete */}
+          {/* 삭제 */}
           <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-              <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive">
+              <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive ml-auto">
                 <Trash2 className="h-3 w-3" />
               </Button>
             </AlertDialogTrigger>
