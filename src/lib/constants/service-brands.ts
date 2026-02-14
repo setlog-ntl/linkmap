@@ -20,7 +20,7 @@ export interface ServiceBrand {
 
 export const SERVICE_BRANDS: Record<string, ServiceBrand> = {
   // --- 기존 28개 서비스 (services.ts 등록 서비스) ---
-  supabase:        { slug: 'supabase',      color: '#3ECF8E', darkColor: '#3ECF8E', emoji: '🗄️' },
+  supabase:        { slug: 'supabase',      color: '#3FCF8E', darkColor: '#3FCF8E', emoji: '🗄️' },
   firebase:        { slug: 'firebase',      color: '#DD2C00', darkColor: '#FFCA28', emoji: '🔥' },
   vercel:          { slug: 'vercel',        color: '#000000', darkColor: '#ffffff', emoji: '▲' },
   netlify:         { slug: 'netlify',       color: '#00C7B7', darkColor: '#00C7B7', emoji: '🌐' },
