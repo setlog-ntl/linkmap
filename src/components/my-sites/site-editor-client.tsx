@@ -10,13 +10,13 @@ import {
   ExternalLink,
   Loader2,
   FileText,
-  PanelRightClose,
-  PanelRightOpen,
   Code,
   Eye,
   Rocket,
   CheckCircle2,
   RefreshCw,
+  FolderOpen,
+  X,
 } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
@@ -44,6 +44,7 @@ function isCssFile(path: string | null): boolean {
 }
 
 type DeployState = 'idle' | 'saving' | 'deploying' | 'deployed';
+type MobileTab = 'code' | 'preview';
 
 export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const { locale } = useLocaleStore();
@@ -59,6 +60,8 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const [deployState, setDeployState] = useState<DeployState>('idle');
   const [livePreviewKey, setLivePreviewKey] = useState(0);
   const [showLiveAfterDeploy, setShowLiveAfterDeploy] = useState(false);
+  const [mobileTab, setMobileTab] = useState<MobileTab>('code');
+  const [showMobileFiles, setShowMobileFiles] = useState(false);
   const previewRef = useRef<HTMLIFrameElement>(null);
   const liveIframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -131,7 +134,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
 
   // iframe 미리보기 반영
   useEffect(() => {
-    if (!showPreview || !previewRef.current) return;
+    if (!previewRef.current) return;
     const isEditingHtmlOrCss = isHtmlFile(selectedPath) || isCssFile(selectedPath);
     if (isEditingHtmlOrCss && previewHtml) {
       const doc = previewRef.current.contentDocument;
@@ -141,12 +144,11 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         doc.close();
       }
     }
-  }, [previewHtml, showPreview, selectedPath]);
+  }, [previewHtml, selectedPath, showPreview, mobileTab]);
 
   const handleContentChange = useCallback((value: string) => {
     setEditorContent(value);
     setHasUnsavedChanges(true);
-    // 편집 시작하면 라이브 미리보기 → 로컬 미리보기로 전환
     if (showLiveAfterDeploy) setShowLiveAfterDeploy(false);
   }, [showLiveAfterDeploy]);
 
@@ -158,11 +160,12 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       }
       setSelectedPath(path);
       setHasUnsavedChanges(false);
+      setShowMobileFiles(false);
     },
     [hasUnsavedChanges, locale]
   );
 
-  // 저장 (GitHub 커밋만)
+  // 저장
   const handleSave = useCallback(async () => {
     if (!selectedPath || !fileDetail) return;
     try {
@@ -181,12 +184,11 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     }
   }, [selectedPath, fileDetail, editorContent, deployId, updateFile, locale]);
 
-  // 배포 (저장 → GitHub Pages 빌드 대기 → 라이브 미리보기 새로고침)
+  // 배포
   const handleDeploy = useCallback(async () => {
     if (!selectedPath || !fileDetail) return;
 
     try {
-      // 1단계: 미저장 변경이 있으면 먼저 저장
       setDeployState('saving');
       if (hasUnsavedChanges) {
         const result = await updateFile.mutateAsync({
@@ -200,7 +202,6 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         fileDetail.sha = result.sha;
       }
 
-      // 2단계: GitHub Pages 빌드 대기 (커밋 후 자동 빌드 트리거됨)
       setDeployState('deploying');
       toast.info(
         locale === 'ko'
@@ -208,29 +209,25 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           : 'Deploying to GitHub Pages... ~30 seconds.'
       );
 
-      // GitHub Pages 빌드 완료 대기 (폴링)
       if (liveUrl) {
         let attempts = 0;
-        const maxAttempts = 12; // 최대 60초
-        const checkInterval = 5000; // 5초마다
+        const maxAttempts = 12;
+        const checkInterval = 5000;
 
         await new Promise<void>((resolve) => {
           const poll = setInterval(async () => {
             attempts++;
             try {
-              // cache-bust로 새 버전 확인
-              const res = await fetch(`${liveUrl}?_t=${Date.now()}`, {
+              await fetch(`${liveUrl}?_t=${Date.now()}`, {
                 method: 'HEAD',
                 mode: 'no-cors',
               });
-              // 응답이 오면 빌드 완료로 간주 (no-cors라 status 확인 불가하지만 네트워크 성공)
               if (attempts >= 6) {
-                // 최소 30초 대기 후 성공 처리
                 clearInterval(poll);
                 resolve();
               }
             } catch {
-              // 네트워크 오류는 무시
+              // ignore
             }
             if (attempts >= maxAttempts) {
               clearInterval(poll);
@@ -239,11 +236,9 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           }, checkInterval);
         });
       } else {
-        // liveUrl 없으면 30초 대기
         await new Promise((r) => setTimeout(r, 30000));
       }
 
-      // 3단계: 배포 완료 → 라이브 미리보기 새로고침
       setDeployState('deployed');
       setLivePreviewKey((k) => k + 1);
       setShowLiveAfterDeploy(true);
@@ -254,7 +249,6 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           : 'Deployed! Changes are now live.'
       );
 
-      // 3초 후 배포 버튼 상태만 초기화 (미리보기는 라이브 유지)
       setTimeout(() => setDeployState('idle'), 3000);
     } catch (err) {
       setDeployState('idle');
@@ -294,162 +288,303 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       case 'saving':
         return (
           <>
-            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-            {locale === 'ko' ? '저장 중...' : 'Saving...'}
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            <span className="hidden sm:inline ml-1">{locale === 'ko' ? '저장 중...' : 'Saving...'}</span>
           </>
         );
       case 'deploying':
         return (
           <>
-            <RefreshCw className="mr-1 h-3 w-3 animate-spin" />
-            {locale === 'ko' ? '배포 중...' : 'Deploying...'}
+            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+            <span className="hidden sm:inline ml-1">{locale === 'ko' ? '배포 중...' : 'Deploying...'}</span>
           </>
         );
       case 'deployed':
         return (
           <>
-            <CheckCircle2 className="mr-1 h-3 w-3" />
-            {locale === 'ko' ? '배포 완료!' : 'Deployed!'}
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline ml-1">{locale === 'ko' ? '완료!' : 'Done!'}</span>
           </>
         );
       default:
         return (
           <>
-            <Rocket className="mr-1 h-3 w-3" />
-            {locale === 'ko' ? '배포' : 'Deploy'}
+            <Rocket className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline ml-1">{locale === 'ko' ? '배포' : 'Deploy'}</span>
           </>
         );
     }
   })();
 
+  // 미리보기 렌더링 (데스크탑/모바일 공용)
+  const renderPreview = () => {
+    if (showLiveAfterDeploy && liveUrl) {
+      return (
+        <iframe
+          ref={liveIframeRef}
+          key={`live-${livePreviewKey}`}
+          src={`${liveUrl}?_t=${livePreviewKey}`}
+          title="사이트 미리보기"
+          className="flex-1 w-full bg-white border-0"
+          sandbox="allow-scripts allow-same-origin"
+        />
+      );
+    }
+    if (isLivePreviewable) {
+      return (
+        <iframe
+          ref={previewRef}
+          title="미리보기"
+          className="flex-1 w-full bg-white border-0"
+          sandbox="allow-scripts allow-same-origin"
+        />
+      );
+    }
+    if (liveUrl) {
+      return (
+        <iframe
+          ref={liveIframeRef}
+          key={`fallback-${livePreviewKey}`}
+          src={`${liveUrl}?_t=${livePreviewKey}`}
+          title="사이트 미리보기"
+          className="flex-1 w-full bg-white border-0"
+          sandbox="allow-scripts allow-same-origin"
+        />
+      );
+    }
+    return (
+      <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+        {locale === 'ko' ? '미리보기할 수 없는 파일입니다' : 'Cannot preview this file'}
+      </div>
+    );
+  };
+
+  // 에디터 렌더링 (데스크탑/모바일 공용)
+  const renderEditor = () => {
+    if (contentLoading) {
+      return (
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      );
+    }
+    if (selectedPath) {
+      return (
+        <textarea
+          value={editorContent}
+          onChange={(e) => handleContentChange(e.target.value)}
+          className="flex-1 w-full p-3 sm:p-4 font-mono text-xs sm:text-sm bg-background resize-none focus:outline-none border-0"
+          spellCheck={false}
+        />
+      );
+    }
+    return (
+      <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+        {t(locale, 'editor.loadingFiles')}
+      </div>
+    );
+  };
+
+  // 파일 리스트 렌더링 (사이드바/오버레이 공용)
+  const renderFileList = () => {
+    if (filesLoading) {
+      return (
+        <div className="p-3 space-y-2">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-8 w-full" />
+          ))}
+        </div>
+      );
+    }
+    if (files && files.length > 0) {
+      return (
+        <div className="py-1">
+          {files.map((file) => (
+            <button
+              key={file.path}
+              onClick={() => handleTabSwitch(file.path)}
+              className={`w-full text-left px-3 py-2.5 text-sm flex items-center gap-2 hover:bg-muted transition-colors ${
+                selectedPath === file.path
+                  ? 'bg-muted font-medium text-foreground'
+                  : 'text-muted-foreground'
+              }`}
+            >
+              <FileText className="h-3.5 w-3.5 flex-shrink-0" />
+              <span className="truncate">{file.name}</span>
+            </button>
+          ))}
+        </div>
+      );
+    }
+    return (
+      <div className="p-3 text-sm text-muted-foreground">
+        {t(locale, 'editor.noFiles')}
+      </div>
+    );
+  };
+
+  const selectedFileName = selectedPath?.split('/').pop() || '';
+
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)]">
-      {/* 툴바 */}
-      <div className="border-b px-4 py-2 flex items-center justify-between bg-background">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" asChild>
+      {/* ===== 툴바 ===== */}
+      <div className="border-b px-2 sm:px-4 py-2 flex items-center justify-between bg-background gap-2">
+        {/* 좌측: 뒤로가기 + 사이트명 */}
+        <div className="flex items-center gap-1 sm:gap-3 min-w-0">
+          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" asChild>
             <Link href="/my-sites">
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              {t(locale, 'editor.backToSites')}
+              <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
           {deploy && (
-            <span className="text-sm font-medium">{deploy.site_name}</span>
+            <span className="text-sm font-medium truncate max-w-[120px] sm:max-w-none">
+              {deploy.site_name}
+            </span>
           )}
           {hasUnsavedChanges && (
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-[10px] shrink-0">
               {locale === 'ko' ? '미저장' : 'Unsaved'}
             </Badge>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          {/* 미리보기 토글 */}
+
+        {/* 우측: 액션 버튼 */}
+        <div className="flex items-center gap-1 sm:gap-2">
+          {/* 모바일: 파일 목록 토글 */}
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 md:hidden"
+            onClick={() => setShowMobileFiles(!showMobileFiles)}
+          >
+            <FolderOpen className="h-3.5 w-3.5" />
+          </Button>
+
+          {/* 데스크탑: 미리보기 토글 */}
           <Button
             variant={showPreview ? 'default' : 'outline'}
             size="sm"
+            className="hidden md:inline-flex"
             onClick={() => setShowPreview(!showPreview)}
           >
-            {showPreview ? (
-              <><PanelRightClose className="mr-1 h-3 w-3" />{locale === 'ko' ? '미리보기' : 'Preview'}</>
-            ) : (
-              <><PanelRightOpen className="mr-1 h-3 w-3" />{locale === 'ko' ? '미리보기' : 'Preview'}</>
-            )}
+            <Eye className="mr-1 h-3 w-3" />
+            {locale === 'ko' ? '미리보기' : 'Preview'}
           </Button>
+
+          {/* 사이트 열기 */}
           {liveUrl && (
-            <Button variant="outline" size="sm" asChild>
-              <a href={liveUrl} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="mr-1 h-3 w-3" />
-                {locale === 'ko' ? '사이트 열기' : 'Open Site'}
+            <Button variant="outline" size="icon" className="h-8 w-8" asChild>
+              <a href={liveUrl} target="_blank" rel="noopener noreferrer" title={locale === 'ko' ? '사이트 열기' : 'Open Site'}>
+                <ExternalLink className="h-3.5 w-3.5" />
               </a>
             </Button>
           )}
-          {/* 저장 버튼 */}
+
+          {/* 저장 */}
           <Button
-            size="sm"
+            size="icon"
             variant="outline"
+            className="h-8 w-8"
             onClick={handleSave}
             disabled={!hasUnsavedChanges || updateFile.isPending || isDeploying}
+            title={t(locale, 'editor.save')}
           >
             {updateFile.isPending ? (
-              <><Loader2 className="mr-1 h-3 w-3 animate-spin" />{t(locale, 'editor.saving')}</>
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              <><Save className="mr-1 h-3 w-3" />{t(locale, 'editor.save')}</>
+              <Save className="h-3.5 w-3.5" />
             )}
           </Button>
-          {/* 배포 버튼 */}
+
+          {/* 배포 */}
           <Button
             size="sm"
+            className={`h-8 px-2 sm:px-3 ${deployState === 'deployed' ? 'bg-green-600 hover:bg-green-700' : ''}`}
             onClick={handleDeploy}
             disabled={isDeploying || (!hasUnsavedChanges && deployState === 'idle' && !lastSavedAt)}
-            className={deployState === 'deployed' ? 'bg-green-600 hover:bg-green-700' : ''}
           >
             {deployButtonContent}
           </Button>
         </div>
       </div>
 
-      {/* 메인 영역 */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* 파일 사이드바 */}
-        <div className="w-48 border-r bg-muted/30 overflow-y-auto flex-shrink-0">
-          {filesLoading ? (
-            <div className="p-3 space-y-2">
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-8 w-full" />
-              ))}
-            </div>
-          ) : files && files.length > 0 ? (
-            <div className="py-1">
-              {files.map((file) => (
-                <button
-                  key={file.path}
-                  onClick={() => handleTabSwitch(file.path)}
-                  className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-muted transition-colors ${
-                    selectedPath === file.path
-                      ? 'bg-muted font-medium text-foreground'
-                      : 'text-muted-foreground'
-                  }`}
-                >
-                  <FileText className="h-3.5 w-3.5 flex-shrink-0" />
-                  <span className="truncate">{file.name}</span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="p-3 text-sm text-muted-foreground">
-              {t(locale, 'editor.noFiles')}
-            </div>
+      {/* ===== 모바일 코드/미리보기 탭 전환 ===== */}
+      <div className="md:hidden border-b flex bg-muted/30">
+        <button
+          onClick={() => setMobileTab('code')}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors ${
+            mobileTab === 'code'
+              ? 'text-foreground border-b-2 border-primary bg-background'
+              : 'text-muted-foreground'
+          }`}
+        >
+          <Code className="h-3 w-3" />
+          {locale === 'ko' ? '코드' : 'Code'}
+          {selectedFileName && (
+            <span className="text-[10px] text-muted-foreground truncate max-w-[80px]">
+              ({selectedFileName})
+            </span>
           )}
+        </button>
+        <button
+          onClick={() => setMobileTab('preview')}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors ${
+            mobileTab === 'preview'
+              ? 'text-foreground border-b-2 border-primary bg-background'
+              : 'text-muted-foreground'
+          }`}
+        >
+          <Eye className="h-3 w-3" />
+          {locale === 'ko' ? '미리보기' : 'Preview'}
+          {showLiveAfterDeploy && (
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+          )}
+        </button>
+      </div>
+
+      {/* ===== 메인 영역 ===== */}
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* 모바일 파일 오버레이 */}
+        {showMobileFiles && (
+          <div className="absolute inset-0 z-30 md:hidden flex">
+            <div className="w-64 bg-background border-r overflow-y-auto shadow-lg">
+              <div className="flex items-center justify-between px-3 py-2 border-b">
+                <span className="text-sm font-medium">{locale === 'ko' ? '파일' : 'Files'}</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setShowMobileFiles(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              {renderFileList()}
+            </div>
+            <div
+              className="flex-1 bg-black/30"
+              onClick={() => setShowMobileFiles(false)}
+            />
+          </div>
+        )}
+
+        {/* 데스크탑 파일 사이드바 */}
+        <div className="hidden md:block w-48 border-r bg-muted/30 overflow-y-auto flex-shrink-0">
+          {renderFileList()}
         </div>
 
-        {/* 코드 에디터 + 미리보기 분할 */}
-        <div className="flex-1 flex overflow-hidden">
+        {/* ===== 데스크탑: 에디터 + 미리보기 가로 분할 ===== */}
+        <div className="hidden md:flex flex-1 overflow-hidden">
           {/* 코드 에디터 */}
           <div className={`flex flex-col overflow-hidden ${showPreview ? 'w-1/2 border-r' : 'w-full'}`}>
             <div className="border-b px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground flex-shrink-0">
               <Code className="h-3 w-3" />
-              <span>{selectedPath || ''}</span>
+              <span className="truncate">{selectedPath || ''}</span>
             </div>
-
-            {contentLoading ? (
-              <div className="flex-1 flex items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : selectedPath ? (
-              <textarea
-                value={editorContent}
-                onChange={(e) => handleContentChange(e.target.value)}
-                className="flex-1 w-full p-4 font-mono text-sm bg-background resize-none focus:outline-none border-0"
-                spellCheck={false}
-              />
-            ) : (
-              <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
-                {t(locale, 'editor.loadingFiles')}
-              </div>
-            )}
+            {renderEditor()}
           </div>
 
-          {/* 실시간 미리보기 */}
+          {/* 미리보기 */}
           {showPreview && (
             <div className="w-1/2 flex flex-col overflow-hidden">
               <div className="border-b px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground flex-shrink-0">
@@ -465,55 +600,56 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                   </Badge>
                 ) : null}
               </div>
+              {renderPreview()}
+            </div>
+          )}
+        </div>
 
-              {/* 배포 완료 후 → 라이브 사이트 미리보기, 편집 중 → 로컬 미리보기 */}
-              {showLiveAfterDeploy && liveUrl ? (
-                <iframe
-                  ref={liveIframeRef}
-                  key={`live-${livePreviewKey}`}
-                  src={`${liveUrl}?_t=${livePreviewKey}`}
-                  title="사이트 미리보기"
-                  className="flex-1 w-full bg-white border-0"
-                  sandbox="allow-scripts allow-same-origin"
-                />
-              ) : isLivePreviewable ? (
-                <iframe
-                  ref={previewRef}
-                  title="미리보기"
-                  className="flex-1 w-full bg-white border-0"
-                  sandbox="allow-scripts allow-same-origin"
-                />
-              ) : liveUrl ? (
-                <iframe
-                  ref={liveIframeRef}
-                  key={`fallback-${livePreviewKey}`}
-                  src={`${liveUrl}?_t=${livePreviewKey}`}
-                  title="사이트 미리보기"
-                  className="flex-1 w-full bg-white border-0"
-                  sandbox="allow-scripts allow-same-origin"
-                />
-              ) : (
-                <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
-                  {locale === 'ko' ? '미리보기할 수 없는 파일입니다' : 'Cannot preview this file'}
-                </div>
-              )}
+        {/* ===== 모바일: 탭 전환 방식 ===== */}
+        <div className="flex md:hidden flex-1 flex-col overflow-hidden">
+          {/* 코드 탭 */}
+          {mobileTab === 'code' && (
+            <div className="flex flex-col flex-1 overflow-hidden">
+              {renderEditor()}
+            </div>
+          )}
+
+          {/* 미리보기 탭 */}
+          {mobileTab === 'preview' && (
+            <div className="flex flex-col flex-1 overflow-hidden">
+              <div className="px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground border-b flex-shrink-0">
+                <Eye className="h-3 w-3" />
+                <span>{locale === 'ko' ? '미리보기' : 'Preview'}</span>
+                {showLiveAfterDeploy ? (
+                  <Badge variant="default" className="text-[10px] px-1 py-0 ml-auto bg-green-600">
+                    {locale === 'ko' ? '배포됨' : 'DEPLOYED'}
+                  </Badge>
+                ) : isLivePreviewable ? (
+                  <Badge variant="secondary" className="text-[10px] px-1 py-0 ml-auto">
+                    LIVE
+                  </Badge>
+                ) : null}
+              </div>
+              {renderPreview()}
             </div>
           )}
         </div>
       </div>
 
-      {/* 상태 바 */}
-      <div className="border-t px-4 py-1.5 flex items-center justify-between text-xs text-muted-foreground bg-muted/30">
-        <div className="flex items-center gap-3">
-          <span>{selectedPath || ''}</span>
-          <span className="text-muted-foreground/60">
+      {/* ===== 상태 바 ===== */}
+      <div className="border-t px-3 sm:px-4 py-1.5 flex items-center justify-between text-xs text-muted-foreground bg-muted/30 gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="truncate">{selectedFileName}</span>
+          <span className="text-muted-foreground/60 hidden sm:inline">
             {locale === 'ko' ? 'Ctrl+S 저장 · 배포 버튼으로 사이트 반영' : 'Ctrl+S save · Deploy to publish'}
           </span>
         </div>
         {lastSavedAt && (
-          <span>
-            {t(locale, 'editor.lastSaved')}:{' '}
-            {lastSavedAt.toLocaleTimeString(locale === 'ko' ? 'ko-KR' : 'en-US')}
+          <span className="shrink-0 text-[10px] sm:text-xs">
+            {lastSavedAt.toLocaleTimeString(locale === 'ko' ? 'ko-KR' : 'en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
           </span>
         )}
       </div>
