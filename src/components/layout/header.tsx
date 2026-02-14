@@ -14,7 +14,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { LogOut, Settings, LayoutDashboard, Menu, Globe, Rocket, Monitor } from 'lucide-react';
+import { LogOut, Settings, LayoutDashboard, Menu, Globe, Rocket, Monitor, Bot } from 'lucide-react';
 import { useUIStore } from '@/stores/ui-store';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t, localeNames } from '@/lib/i18n';
@@ -150,6 +150,17 @@ export function Header({ profile }: HeaderProps) {
                     {t(locale, 'common.settings')}
                   </Link>
                 </DropdownMenuItem>
+                {profile.is_admin && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin/ai-config">
+                        <Bot className="mr-2 h-4 w-4" />
+                        AI 설정 관리
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
