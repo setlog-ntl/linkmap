@@ -43,7 +43,7 @@ export const SERVICE_BRANDS: Record<string, ServiceBrand> = {
   github:          { slug: 'github',        color: '#181717', darkColor: '#e6edf3', emoji: '🐙' },
   'claude-code':   { slug: 'anthropic',     color: '#D4A27F', darkColor: '#D4A27F', emoji: '🤖' },
   'google-gemini': { slug: 'googlegemini',  color: '#8E75B2', darkColor: '#B39DDB', emoji: '✨' },
-  'kakao-login':   { slug: 'kakao',         color: '#FFCD00', darkColor: '#FFCD00', emoji: '💬' },
+  'kakao-login':   { slug: 'kakaotalk',     color: '#FFCD00', darkColor: '#FFCD00', emoji: '💬' },
   'google-oauth':  { localPath: '/icons/google.svg', color: '#4285F4', darkColor: '#8AB4F8', emoji: '🔓', multiColor: true },
   'naver-login':   { slug: 'naver',         color: '#03C75A', darkColor: '#03C75A', emoji: '🟢' },
   'apple-login':   { slug: 'apple',         color: '#000000', darkColor: '#ffffff', emoji: '🍎' },
