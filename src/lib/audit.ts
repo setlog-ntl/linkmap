@@ -27,6 +27,7 @@ export type AuditAction =
   | 'oneclick.deploy_success'
   | 'oneclick.deploy_error'
   | 'admin.setup_templates'
+  | 'admin.ai_config_update'
   | 'oneclick.deploy_delete'
   | 'oneclick.file_edit';
 
