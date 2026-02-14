@@ -341,3 +341,158 @@ export async function updateRepoSettings(
     body: settings,
   });
 }
+
+// ---------- Git Data APIs (for atomic push) ----------
+
+interface GitBlob {
+  sha: string;
+  url: string;
+}
+
+interface GitTreeItem {
+  path: string;
+  mode: '100644' | '100755' | '040000' | '160000' | '120000';
+  type: 'blob' | 'tree' | 'commit';
+  sha: string;
+}
+
+interface GitTree {
+  sha: string;
+  url: string;
+  tree: GitTreeItem[];
+}
+
+interface GitCommit {
+  sha: string;
+  url: string;
+  message: string;
+}
+
+interface GitRef {
+  ref: string;
+  url: string;
+  object: { sha: string; type: string };
+}
+
+export async function createBlob(
+  token: string,
+  owner: string,
+  repo: string,
+  content: string,
+  encoding: 'utf-8' | 'base64' = 'utf-8'
+): Promise<GitBlob> {
+  return githubFetch<GitBlob>(`/repos/${owner}/${repo}/git/blobs`, {
+    token,
+    method: 'POST',
+    body: { content, encoding },
+  });
+}
+
+export async function createTree(
+  token: string,
+  owner: string,
+  repo: string,
+  treeItems: { path: string; mode: string; type: string; sha: string }[]
+): Promise<GitTree> {
+  return githubFetch<GitTree>(`/repos/${owner}/${repo}/git/trees`, {
+    token,
+    method: 'POST',
+    body: { tree: treeItems },
+  });
+}
+
+export async function createCommit(
+  token: string,
+  owner: string,
+  repo: string,
+  message: string,
+  treeSha: string,
+  parents: string[] = []
+): Promise<GitCommit> {
+  return githubFetch<GitCommit>(`/repos/${owner}/${repo}/git/commits`, {
+    token,
+    method: 'POST',
+    body: { message, tree: treeSha, parents },
+  });
+}
+
+export async function createRef(
+  token: string,
+  owner: string,
+  repo: string,
+  ref: string,
+  sha: string
+): Promise<GitRef> {
+  return githubFetch<GitRef>(`/repos/${owner}/${repo}/git/refs`, {
+    token,
+    method: 'POST',
+    body: { ref, sha },
+  });
+}
+
+export async function deleteRepo(
+  token: string,
+  owner: string,
+  repo: string
+): Promise<void> {
+  await githubFetch(`/repos/${owner}/${repo}`, {
+    token,
+    method: 'DELETE',
+  });
+}
+
+/**
+ * Push multiple files to a repo as a single atomic commit.
+ * Works on empty repos (no prior commits).
+ */
+export async function pushFilesAtomically(
+  token: string,
+  owner: string,
+  repo: string,
+  files: { path: string; content: string }[],
+  message: string
+): Promise<{ commitSha: string }> {
+  // 1. Create blobs for all files in parallel
+  const blobResults = await Promise.all(
+    files.map((file) => createBlob(token, owner, repo, file.content, 'utf-8'))
+  );
+
+  // 2. Build tree items
+  const treeItems = files.map((file, i) => ({
+    path: file.path,
+    mode: '100644' as const,
+    type: 'blob' as const,
+    sha: blobResults[i].sha,
+  }));
+
+  // 3. Create tree
+  const tree = await createTree(token, owner, repo, treeItems);
+
+  // 4. Create commit (no parents for initial commit)
+  const commit = await createCommit(token, owner, repo, message, tree.sha, []);
+
+  // 5. Create ref (main branch)
+  await createRef(token, owner, repo, 'refs/heads/main', commit.sha);
+
+  return { commitSha: commit.sha };
+}
+
+/**
+ * Enable GitHub Pages using GitHub Actions as build source.
+ */
+export async function enableGitHubPagesWithActions(
+  token: string,
+  owner: string,
+  repo: string
+): Promise<GitHubPagesResult> {
+  return githubFetch<GitHubPagesResult>(
+    `/repos/${owner}/${repo}/pages`,
+    {
+      token,
+      method: 'POST',
+      body: {
+        build_type: 'workflow',
+      },
+    }
+  );
+}

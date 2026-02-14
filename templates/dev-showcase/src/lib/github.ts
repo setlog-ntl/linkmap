@@ -15,7 +15,7 @@ export async function fetchGitHubRepos(
   try {
     const res = await fetch(
       `https://api.github.com/users/${username}/repos?sort=stars&per_page=6`,
-      { next: { revalidate: 3600 } }
+      { cache: 'force-cache' }
     );
     if (!res.ok) return [];
     const repos: GitHubRepo[] = await res.json();

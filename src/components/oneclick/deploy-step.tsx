@@ -69,6 +69,19 @@ function getErrorDetails(
     };
   }
 
+  // 파일 업로드 실패
+  if (msg.includes('파일 업로드') || msg.includes('file upload') || msg.includes('push')) {
+    return {
+      cause: locale === 'ko'
+        ? '템플릿 파일을 레포지토리에 업로드하는 중 오류가 발생했습니다.'
+        : 'An error occurred while uploading template files to the repository.',
+      solution: locale === 'ko'
+        ? '다시 시도해주세요. 문제가 계속되면 GitHub 연결을 해제 후 다시 연결해보세요.'
+        : 'Please try again. If the issue persists, disconnect and reconnect your GitHub account.',
+      failedStep,
+    };
+  }
+
   // GitHub 권한 부족
   if (msg.includes('권한') || msg.includes('permission') || msg.includes('403')) {
     return {

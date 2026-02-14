@@ -28,6 +28,7 @@ import {
 } from '@/lib/queries/oneclick';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { ChatTerminal } from './chat-terminal';
 
 interface SiteEditorClientProps {
   deployId: string;
@@ -635,6 +636,15 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           )}
         </div>
       </div>
+
+      {/* ===== AI 챗봇 터미널 ===== */}
+      <ChatTerminal
+        fileContent={editorContent}
+        filePath={selectedPath}
+        onApplyCode={(code) => {
+          handleContentChange(code);
+        }}
+      />
 
       {/* ===== 상태 바 ===== */}
       <div className="border-t px-3 sm:px-4 py-1.5 flex items-center justify-between text-xs text-muted-foreground bg-muted/30 gap-2">

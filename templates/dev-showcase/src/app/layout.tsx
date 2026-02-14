@@ -5,6 +5,7 @@ import { LocaleProvider } from '@/lib/i18n';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
   title: `${siteConfig.name} - 개발자 포트폴리오`,
   description: siteConfig.tagline,
   openGraph: {
