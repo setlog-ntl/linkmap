@@ -4,7 +4,7 @@ import { unauthorizedError, validationError, serverError, apiError, notFoundErro
 import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 import { checkHomepageDeployQuota } from '@/lib/quota';
-import { createRepo, pushFilesAtomically, deleteRepo, enableGitHubPagesWithActions, GitHubApiError } from '@/lib/github/api';
+import { createRepo, pushFilesAtomically, deleteRepo, enableGitHubPagesWithActions, triggerWorkflowDispatch, GitHubApiError } from '@/lib/github/api';
 import { homepageTemplates } from '@/data/homepage-template-content';
 import { decrypt } from '@/lib/crypto';
 import { deployPagesRequestSchema } from '@/lib/validations/oneclick';
@@ -21,7 +21,13 @@ export async function POST(request: NextRequest) {
   const parsed = deployPagesRequestSchema.safeParse(body);
   if (!parsed.success) return validationError(parsed.error);
 
-  const { template_id, site_name, github_service_account_id } = parsed.data;
+  const { template_id, site_name: rawSiteName, github_service_account_id } = parsed.data;
+
+  // Sanitize site_name: strip anything not lowercase alphanumeric or hyphens
+  const site_name = rawSiteName.replace(/[^a-z0-9-]/g, '').slice(0, 100);
+  if (site_name.length < 2) {
+    return apiError('사이트 이름이 유효하지 않습니다', 400);
+  }
 
   // 1. Quota check
   const quotaCheck = await checkHomepageDeployQuota(user.id);
@@ -190,6 +196,9 @@ export async function POST(request: NextRequest) {
   }
 
   // 6. Enable GitHub Pages (Actions-based workflow)
+  // IMPORTANT: Pages must be enabled BEFORE the workflow runs.
+  // The push in step 5b triggers a workflow run, but Pages isn't enabled yet → it fails.
+  // Solution: Enable Pages first, then manually trigger the workflow.
   let pagesStatus: 'enabling' | 'built' = 'enabling';
   const pagesUrl = `https://${repoResult.owner.login}.github.io/${repoResult.name}`;
 
@@ -214,6 +223,22 @@ export async function POST(request: NextRequest) {
       const errMsg = err instanceof GitHubApiError ? err.message : 'GitHub Pages 활성화 실패';
       return apiError(`GitHub Pages 활성화 실패: ${errMsg}`, 502);
     }
+  }
+
+  // 6b. Wait for Pages config to propagate, then manually trigger the deploy workflow.
+  // The initial push triggered a workflow run that likely failed because Pages wasn't enabled yet.
+  // This dispatch ensures the workflow runs now that Pages is properly configured.
+  try {
+    await new Promise((r) => setTimeout(r, 1500));
+    await triggerWorkflowDispatch(
+      githubToken,
+      repoResult.owner.login,
+      repoResult.name,
+      'deploy.yml',
+      'main'
+    );
+  } catch {
+    // Non-fatal: the initial push workflow might have succeeded if timing was favorable
   }
 
   // 7. Link repo to project

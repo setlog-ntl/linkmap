@@ -24,10 +24,9 @@ export interface HomepageTemplate {
 export interface DeployStatus {
   deploy_id: string;
   fork_status: 'pending' | 'forking' | 'forked' | 'failed';
-  deploy_status: 'pending' | 'creating' | 'building' | 'ready' | 'error' | 'canceled';
+  deploy_status: 'pending' | 'creating' | 'building' | 'ready' | 'error' | 'canceled' | 'timeout';
   deployment_url: string | null;
   deploy_error: string | null;
-  vercel_project_url: string | null;
   forked_repo_url: string | null;
   deploy_method: 'vercel' | 'github_pages';
   pages_url: string | null;
@@ -354,6 +353,9 @@ export function useBatchApplyFiles() {
 
 // ---------- Status Polling ----------
 
+// Maximum polling duration: 5 minutes (100 polls × 3 seconds)
+const MAX_POLL_COUNT = 100;
+
 export function useDeployStatus(deployId: string | null, enabled: boolean = true) {
   const queryClient = useQueryClient();
 
@@ -371,14 +373,26 @@ export function useDeployStatus(deployId: string | null, enabled: boolean = true
     refetchInterval: (query) => {
       const data = query.state.data;
       if (!data) return 3000;
+
       // Stop polling when deployment is in a terminal state
-      if (['ready', 'error', 'canceled'].includes(data.deploy_status)) {
-        // Invalidate projects list on success
+      if (['ready', 'error', 'canceled', 'timeout'].includes(data.deploy_status)) {
         if (data.deploy_status === 'ready') {
           queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
         }
         return false;
       }
+
+      // Timeout: stop polling after MAX_POLL_COUNT fetches (~5 minutes)
+      const dataUpdatedCount = query.state.dataUpdateCount;
+      if (dataUpdatedCount >= MAX_POLL_COUNT) {
+        // Inject timeout status into the cached data so the UI can show a message
+        queryClient.setQueryData<DeployStatus>(
+          queryKeys.oneclick.status(deployId || ''),
+          (prev) => prev ? { ...prev, deploy_status: 'timeout' } : prev
+        );
+        return false;
+      }
+
       return 3000; // Poll every 3 seconds
     },
   });

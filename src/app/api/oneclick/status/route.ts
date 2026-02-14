@@ -4,7 +4,6 @@ import { unauthorizedError, apiError, notFoundError } from '@/lib/api/errors';
 import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 import { decrypt } from '@/lib/crypto';
-import { getVercelDeployment, listProjectDeployments } from '@/lib/vercel/api';
 import { getGitHubPagesStatus, GitHubApiError } from '@/lib/github/api';
 
 type StepStatus = 'completed' | 'in_progress' | 'pending' | 'error';
@@ -35,7 +34,7 @@ export async function GET(request: NextRequest) {
 
   if (!deploy) return notFoundError('배포');
 
-  const deployMethod = deploy.deploy_method || 'vercel';
+  const deployMethod = deploy.deploy_method || 'github_pages';
 
   // GitHub Pages polling
   if (deployMethod === 'github_pages' && deploy.deploy_status !== 'ready' && deploy.deploy_status !== 'error') {
@@ -75,6 +74,11 @@ export async function GET(request: NextRequest) {
         } else if (pagesStatus === 'errored') {
           newDeployStatus = 'error';
           newPagesStatus = 'errored';
+        } else if (pagesStatus === null) {
+          // GitHub Pages API returns null status when no deployment has completed yet.
+          // This is normal during the initial setup phase — keep as 'building'.
+          newDeployStatus = 'building';
+          newPagesStatus = 'enabling';
         }
 
         if (newDeployStatus !== deploy.deploy_status || newPagesStatus !== deploy.pages_status) {
@@ -124,86 +128,6 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Vercel polling (existing logic, only for vercel deploys)
-  if (deployMethod === 'vercel' && deploy.vercel_project_id && deploy.deploy_status !== 'ready' && deploy.deploy_status !== 'error') {
-    try {
-      const { data: vercelService } = await supabase
-        .from('services')
-        .select('id')
-        .eq('slug', 'vercel')
-        .single();
-
-      const { data: vercelAccount } = vercelService
-        ? await supabase
-            .from('service_accounts')
-            .select('encrypted_api_key')
-            .eq('project_id', deploy.project_id)
-            .eq('service_id', vercelService.id)
-            .eq('status', 'active')
-            .single()
-        : { data: null };
-
-      if (vercelAccount) {
-        const vercelToken = decrypt(vercelAccount.encrypted_api_key);
-
-        if (deploy.deployment_id) {
-          const deployment = await getVercelDeployment(vercelToken, deploy.deployment_id);
-          const newStatus = mapVercelState(deployment.readyState);
-
-          if (newStatus !== deploy.deploy_status) {
-            const updateData: Record<string, unknown> = {
-              deploy_status: newStatus,
-              deployment_url: `https://${deployment.url}`,
-            };
-            if (newStatus === 'ready') {
-              updateData.deployed_at = new Date().toISOString();
-              await logAudit(user.id, {
-                action: 'oneclick.deploy_success',
-                resourceType: 'homepage_deploy',
-                resourceId: deploy.id,
-                details: { deployment_url: `https://${deployment.url}` },
-              });
-            }
-            if (newStatus === 'error') {
-              await logAudit(user.id, {
-                action: 'oneclick.deploy_error',
-                resourceType: 'homepage_deploy',
-                resourceId: deploy.id,
-              });
-            }
-            await supabase
-              .from('homepage_deploys')
-              .update(updateData)
-              .eq('id', deployId);
-
-            deploy.deploy_status = newStatus;
-            deploy.deployment_url = `https://${deployment.url}`;
-          }
-        } else {
-          const { deployments } = await listProjectDeployments(vercelToken, deploy.vercel_project_id, 1);
-          if (deployments.length > 0) {
-            const d = deployments[0];
-            const newStatus = mapVercelState(d.readyState);
-            await supabase
-              .from('homepage_deploys')
-              .update({
-                deployment_id: d.id,
-                deployment_url: `https://${d.url}`,
-                deploy_status: newStatus,
-              })
-              .eq('id', deployId);
-
-            deploy.deployment_id = d.id;
-            deploy.deployment_url = `https://${d.url}`;
-            deploy.deploy_status = newStatus;
-          }
-        }
-      }
-    } catch {
-      // Non-fatal: return whatever we have in the DB
-    }
-  }
-
   const steps = buildSteps(deploy, deployMethod);
 
   return NextResponse.json({
@@ -212,7 +136,6 @@ export async function GET(request: NextRequest) {
     deploy_status: deploy.deploy_status,
     deployment_url: deploy.deployment_url,
     deploy_error: deploy.deploy_error_message,
-    vercel_project_url: deploy.vercel_project_url,
     forked_repo_url: deploy.forked_repo_url,
     deploy_method: deployMethod,
     pages_url: deploy.pages_url,
@@ -221,24 +144,11 @@ export async function GET(request: NextRequest) {
   });
 }
 
-function mapVercelState(state: string): string {
-  switch (state) {
-    case 'READY': return 'ready';
-    case 'ERROR': return 'error';
-    case 'CANCELED': return 'canceled';
-    case 'BUILDING':
-    case 'INITIALIZING':
-    case 'QUEUED': return 'building';
-    default: return 'creating';
-  }
-}
-
 function buildSteps(deploy: Record<string, unknown>, deployMethod: string): DeployStep[] {
   const forkStatus = deploy.fork_status as string;
   const deployStatus = deploy.deploy_status as string;
 
   if (deployMethod === 'github_pages') {
-    // 3 steps for GitHub Pages
     const repoStep: StepStatus =
       forkStatus === 'forked' ? 'completed' :
       forkStatus === 'forking' ? 'in_progress' :
@@ -262,14 +172,14 @@ function buildSteps(deploy: Record<string, unknown>, deployMethod: string): Depl
     ];
   }
 
-  // Vercel steps (existing)
+  // Legacy Vercel steps (kept for backward compatibility with existing deploys)
   const forkStep: StepStatus =
     forkStatus === 'forked' ? 'completed' :
     forkStatus === 'forking' ? 'in_progress' :
     forkStatus === 'failed' ? 'error' : 'pending';
 
   const projectStep: StepStatus =
-    deployStatus === 'pending' ? (forkStep === 'completed' ? 'pending' : 'pending') :
+    deployStatus === 'pending' ? 'pending' :
     deployStatus === 'creating' ? 'in_progress' :
     ['building', 'ready', 'error', 'canceled'].includes(deployStatus) ? 'completed' : 'pending';
 

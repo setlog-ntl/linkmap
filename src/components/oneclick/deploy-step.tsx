@@ -281,6 +281,7 @@ export function DeployStep({ status, isLoading, error, projectId, onRetry }: Dep
 
   const isCompleted = status.deploy_status === 'ready';
   const isError = status.deploy_status === 'error';
+  const isTimeout = status.deploy_status === 'timeout';
   const completedSteps = status.steps.filter((s) => s.status === 'completed').length;
   const progressPercent = (completedSteps / status.steps.length) * 100;
 
@@ -303,9 +304,11 @@ export function DeployStep({ status, isLoading, error, projectId, onRetry }: Dep
                   ? (locale === 'ko' ? '배포 완료!' : 'Deployment Complete!')
                   : isError
                     ? (locale === 'ko' ? '배포 실패' : 'Deployment Failed')
-                    : (locale === 'ko' ? '배포 진행 중...' : 'Deploying...')}
+                    : isTimeout
+                      ? (locale === 'ko' ? '응답 대기 시간 초과' : 'Polling Timeout')
+                      : (locale === 'ko' ? '배포 진행 중...' : 'Deploying...')}
               </h3>
-              {!isCompleted && !isError && (
+              {!isCompleted && !isError && !isTimeout && (
                 <Badge variant="secondary" className="gap-1">
                   <Loader2 className="h-3 w-3 animate-spin" />
                   {locale === 'ko' ? '진행 중' : 'In Progress'}
@@ -315,6 +318,12 @@ export function DeployStep({ status, isLoading, error, projectId, onRetry }: Dep
                 <Badge variant="destructive" className="gap-1">
                   <XCircle className="h-3 w-3" />
                   {locale === 'ko' ? '실패' : 'Failed'}
+                </Badge>
+              )}
+              {isTimeout && (
+                <Badge variant="outline" className="gap-1 border-amber-500 text-amber-600">
+                  <AlertTriangle className="h-3 w-3" />
+                  {locale === 'ko' ? '시간 초과' : 'Timeout'}
                 </Badge>
               )}
             </div>
@@ -417,6 +426,45 @@ export function DeployStep({ status, isLoading, error, projectId, onRetry }: Dep
                   <a href={status.forked_repo_url} target="_blank" rel="noopener noreferrer">
                     <Github className="mr-2 h-4 w-4" />
                     {locale === 'ko' ? 'GitHub에서 확인' : 'Check on GitHub'}
+                  </a>
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Timeout message */}
+      {isTimeout && (
+        <Card className="border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20">
+          <CardContent className="py-6 space-y-4">
+            <div className="text-center space-y-2">
+              <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto" />
+              <h3 className="text-lg font-semibold">
+                {locale === 'ko'
+                  ? '배포 상태 확인 시간이 초과되었습니다'
+                  : 'Deployment status check timed out'}
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                {locale === 'ko'
+                  ? 'GitHub Pages 배포가 아직 진행 중일 수 있습니다. GitHub 레포지토리의 Settings → Pages에서 직접 상태를 확인해주세요.'
+                  : 'GitHub Pages deployment may still be in progress. Please check the status directly in your GitHub repository Settings → Pages.'}
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+              {status.pages_url && (
+                <Button asChild>
+                  <a href={status.pages_url} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    {locale === 'ko' ? '사이트 확인' : 'Check Site'}
+                  </a>
+                </Button>
+              )}
+              {status.forked_repo_url && (
+                <Button variant="outline" asChild>
+                  <a href={`${status.forked_repo_url}/settings/pages`} target="_blank" rel="noopener noreferrer">
+                    <Github className="mr-2 h-4 w-4" />
+                    {locale === 'ko' ? 'Pages 설정 확인' : 'Check Pages Settings'}
                   </a>
                 </Button>
               )}

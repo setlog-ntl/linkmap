@@ -516,6 +516,43 @@ export async function pushFilesAtomically(
 }
 
 /**
+ * Trigger a workflow_dispatch event for a specific workflow file.
+ * Used to manually re-run a workflow after GitHub Pages is enabled.
+ */
+export async function triggerWorkflowDispatch(
+  token: string,
+  owner: string,
+  repo: string,
+  workflowFile: string = 'deploy.yml',
+  ref: string = 'main'
+): Promise<void> {
+  const res = await fetch(
+    `${GITHUB_API_BASE}/repos/${owner}/${repo}/actions/workflows/${workflowFile}/dispatches`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github+json',
+        'User-Agent': USER_AGENT,
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ref }),
+    }
+  );
+
+  // 204 = success, 404 = workflow not found (non-fatal)
+  if (!res.ok && res.status !== 404) {
+    const errorBody = await res.text().catch(() => '');
+    throw new GitHubApiError(
+      `GitHub API error: ${res.status} ${res.statusText}`,
+      res.status,
+      errorBody
+    );
+  }
+}
+
+/**
  * Enable GitHub Pages using GitHub Actions as build source.
  */
 export async function enableGitHubPagesWithActions(
