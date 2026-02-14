@@ -9,37 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ServiceIcon } from '@/components/landing/service-icon';
 import type { ProjectService, Service, ServiceCategory, HealthCheck, ServiceDependency } from '@/types';
 import { allCategoryLabels } from '@/lib/constants/service-filters';
-
-const accentGradients: Record<string, string> = {
-  auth: 'from-purple-400 to-purple-600',
-  database: 'from-blue-400 to-blue-600',
-  deploy: 'from-green-400 to-green-600',
-  email: 'from-yellow-400 to-yellow-600',
-  payment: 'from-orange-400 to-orange-600',
-  storage: 'from-cyan-400 to-cyan-600',
-  monitoring: 'from-pink-400 to-pink-600',
-  ai: 'from-indigo-400 to-indigo-600',
-  other: 'from-gray-400 to-gray-600',
-  cdn: 'from-teal-400 to-teal-600',
-  cicd: 'from-slate-400 to-slate-600',
-  testing: 'from-lime-400 to-lime-600',
-  sms: 'from-amber-400 to-amber-600',
-  push: 'from-rose-400 to-rose-600',
-  chat: 'from-violet-400 to-violet-600',
-  search: 'from-sky-400 to-sky-600',
-  cms: 'from-fuchsia-400 to-fuchsia-600',
-  analytics: 'from-emerald-400 to-emerald-600',
-  media: 'from-red-400 to-red-600',
-  queue: 'from-orange-400 to-orange-600',
-  cache: 'from-yellow-400 to-yellow-600',
-  logging: 'from-stone-400 to-stone-600',
-  feature_flags: 'from-zinc-400 to-zinc-600',
-  scheduling: 'from-indigo-400 to-indigo-600',
-  ecommerce: 'from-emerald-400 to-emerald-600',
-  serverless: 'from-sky-400 to-sky-600',
-  code_quality: 'from-green-400 to-green-600',
-  automation: 'from-violet-400 to-violet-600',
-};
+import { getCategoryStyle } from '@/lib/constants/category-styles';
 
 const statusConfig: Record<string, { label: string; ping: string; dot: string }> = {
   connected: { label: '연결됨', ping: 'bg-green-400', dot: 'bg-green-500' },
@@ -74,7 +44,7 @@ export function ServiceBentoCard({
   const service = projectService.service;
   const category = (service?.category as ServiceCategory) || 'other';
   const status = statusConfig[projectService.status] || statusConfig.not_started;
-  const gradient = accentGradients[category] || accentGradients.other;
+  const gradient = getCategoryStyle(category).accentGradient;
   const hasPing = projectService.status === 'connected' || projectService.status === 'error';
 
   const envVarCount = service?.required_env_vars?.length || 0;

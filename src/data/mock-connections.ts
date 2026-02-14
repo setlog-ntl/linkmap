@@ -1,4 +1,5 @@
 import type { ServiceCategory } from '@/types';
+import { getServiceEmoji } from '@/lib/constants/service-brands';
 
 export type ConnectionStatus = 'connected' | 'in_progress' | 'not_started';
 
@@ -19,7 +20,7 @@ export const MOCK_CONNECTIONS: MockConnection[] = [
     id: 'supabase',
     name: 'Supabase',
     category: 'database',
-    emoji: '🗄️',
+    emoji: getServiceEmoji('supabase'),
     iconSlug: 'supabase',
     status: 'connected',
     envVars: { configured: 3, total: 3 },
@@ -30,7 +31,7 @@ export const MOCK_CONNECTIONS: MockConnection[] = [
     id: 'clerk',
     name: 'Clerk',
     category: 'auth',
-    emoji: '🔐',
+    emoji: getServiceEmoji('clerk'),
     iconSlug: 'clerk',
     status: 'in_progress',
     envVars: { configured: 2, total: 4 },
@@ -41,7 +42,7 @@ export const MOCK_CONNECTIONS: MockConnection[] = [
     id: 'stripe',
     name: 'Stripe',
     category: 'payment',
-    emoji: '💳',
+    emoji: getServiceEmoji('stripe'),
     iconSlug: 'stripe',
     status: 'not_started',
     envVars: { configured: 0, total: 3 },
@@ -52,7 +53,7 @@ export const MOCK_CONNECTIONS: MockConnection[] = [
     id: 'vercel',
     name: 'Vercel',
     category: 'deploy',
-    emoji: '🚀',
+    emoji: getServiceEmoji('vercel'),
     iconSlug: 'vercel',
     status: 'connected',
     envVars: { configured: 2, total: 2 },
@@ -63,7 +64,7 @@ export const MOCK_CONNECTIONS: MockConnection[] = [
     id: 'resend',
     name: 'Resend',
     category: 'email',
-    emoji: '📧',
+    emoji: getServiceEmoji('resend'),
     iconSlug: 'resend',
     status: 'in_progress',
     envVars: { configured: 1, total: 2 },
@@ -74,7 +75,7 @@ export const MOCK_CONNECTIONS: MockConnection[] = [
     id: 'openai',
     name: 'OpenAI',
     category: 'ai',
-    emoji: '🤖',
+    emoji: getServiceEmoji('openai'),
     iconSlug: 'openai',
     status: 'not_started',
     envVars: { configured: 0, total: 1 },

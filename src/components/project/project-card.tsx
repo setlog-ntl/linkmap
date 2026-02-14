@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Trash2, FolderOpen, Layers, Zap, AlertCircle } from 'lucide-react';
 import type { ProjectWithServices } from '@/types';
+import { getCategoryStyle } from '@/lib/constants/category-styles';
 
 interface ProjectCardProps {
   project: ProjectWithServices;
@@ -24,20 +25,6 @@ const statusColors: Record<string, string> = {
   in_progress: 'bg-yellow-500',
   connected: 'bg-green-500',
   error: 'bg-red-500',
-};
-
-const categoryColors: Record<string, string> = {
-  auth: '#6366f1',
-  social_login: '#8b5cf6',
-  database: '#3b82f6',
-  deploy: '#22c55e',
-  email: '#f59e0b',
-  payment: '#ef4444',
-  storage: '#06b6d4',
-  monitoring: '#f97316',
-  ai: '#a855f7',
-  analytics: '#ec4899',
-  other: '#6b7280',
 };
 
 export function ProjectCard({ project, onDelete }: ProjectCardProps) {
@@ -87,7 +74,7 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
                 const radius = total <= 4 ? 44 : 52;
                 const x = Math.cos(angle) * radius;
                 const y = Math.sin(angle) * radius;
-                const color = categoryColors[ps.service?.category || 'other'] || '#6b7280';
+                const color = getCategoryStyle(ps.service?.category || 'other').hexColor;
 
                 return (
                   <div key={ps.id}>
