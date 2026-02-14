@@ -71,11 +71,11 @@ export function ConnectionDashboard() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/30">
-              <th className="text-left px-4 py-2 font-medium text-xs text-muted-foreground">서비스</th>
-              <th className="text-left px-4 py-2 font-medium text-xs text-muted-foreground">상태</th>
-              <th className="text-left px-4 py-2 font-medium text-xs text-muted-foreground">환경변수</th>
-              <th className="text-left px-4 py-2 font-medium text-xs text-muted-foreground">체크리스트</th>
-              <th className="text-left px-4 py-2 font-medium text-xs text-muted-foreground hidden sm:table-cell">마지막 확인</th>
+              <th className="text-left px-3 sm:px-4 py-2 font-medium text-xs text-muted-foreground">서비스</th>
+              <th className="text-left px-3 sm:px-4 py-2 font-medium text-xs text-muted-foreground">상태</th>
+              <th className="text-left px-3 sm:px-4 py-2 font-medium text-xs text-muted-foreground hidden sm:table-cell">환경변수</th>
+              <th className="text-left px-3 sm:px-4 py-2 font-medium text-xs text-muted-foreground hidden sm:table-cell">체크리스트</th>
+              <th className="text-left px-3 sm:px-4 py-2 font-medium text-xs text-muted-foreground hidden md:table-cell">마지막 확인</th>
             </tr>
           </thead>
           <tbody>
@@ -87,34 +87,34 @@ export function ConnectionDashboard() {
                 animate={i < visibleCount ? { opacity: 1, x: 0 } : { opacity: 0, x: -10 }}
                 transition={{ duration: 0.3 }}
               >
-                <td className="px-4 py-2.5">
+                <td className="px-3 sm:px-4 py-2.5">
                   <span className="flex items-center gap-2 font-medium text-xs">
                     {conn.iconSlug ? (
                       <ServiceIcon serviceId={conn.iconSlug} size={18} />
                     ) : (
                       <span>{conn.emoji}</span>
                     )}
-                    {conn.name}
+                    <span className="truncate max-w-[80px] sm:max-w-none">{conn.name}</span>
                   </span>
                 </td>
-                <td className="px-4 py-2.5">
+                <td className="px-3 sm:px-4 py-2.5">
                   <StatusBadge status={conn.status} />
                 </td>
-                <td className="px-4 py-2.5">
+                <td className="px-3 sm:px-4 py-2.5 hidden sm:table-cell">
                   <ProgressBar
                     value={conn.envVars.configured}
                     max={conn.envVars.total}
                     color={conn.envVars.configured === conn.envVars.total ? 'bg-green-500' : 'bg-blue-500'}
                   />
                 </td>
-                <td className="px-4 py-2.5">
+                <td className="px-3 sm:px-4 py-2.5 hidden sm:table-cell">
                   <ProgressBar
                     value={conn.checklist.completed}
                     max={conn.checklist.total}
                     color={conn.checklist.completed === conn.checklist.total ? 'bg-green-500' : 'bg-blue-500'}
                   />
                 </td>
-                <td className="px-4 py-2.5 text-xs text-muted-foreground hidden sm:table-cell">
+                <td className="px-3 sm:px-4 py-2.5 text-xs text-muted-foreground hidden md:table-cell">
                   {conn.lastChecked}
                 </td>
               </motion.tr>

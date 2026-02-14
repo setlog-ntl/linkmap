@@ -85,8 +85,8 @@ export function FlowComparison() {
       <Tabs value={tab} onValueChange={setTab}>
         <div className="px-4 pt-4">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="simple">간단한 흐름 (블로그)</TabsTrigger>
-            <TabsTrigger value="complex">복잡한 흐름 (SaaS)</TabsTrigger>
+            <TabsTrigger value="simple" className="text-xs sm:text-sm">간단한 흐름 (블로그)</TabsTrigger>
+            <TabsTrigger value="complex" className="text-xs sm:text-sm">복잡한 흐름 (SaaS)</TabsTrigger>
           </TabsList>
         </div>
 
@@ -99,7 +99,7 @@ export function FlowComparison() {
       </Tabs>
 
       {/* Stats bar */}
-      <div className="flex items-center justify-center gap-6 px-4 py-3 border-t bg-muted/30 text-sm text-muted-foreground">
+      <div className="flex items-center justify-center gap-3 sm:gap-6 px-4 py-3 border-t bg-muted/30 text-xs sm:text-sm text-muted-foreground">
         <span>📊 {activePreset.stats.services}개 서비스</span>
         <span>📋 {activePreset.stats.envVars}개 환경변수</span>
         <span>⏱ {activePreset.stats.setupTime}</span>

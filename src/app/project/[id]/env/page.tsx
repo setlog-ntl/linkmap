@@ -179,9 +179,9 @@ export default function ProjectEnvPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h2 className="text-lg font-semibold">환경변수 관리</h2>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
             onClick={() => setShowGitHubSync(!showGitHubSync)}
@@ -312,7 +312,7 @@ export default function ProjectEnvPage() {
                 <CardContent className="p-0">
                   <div className="divide-y">
                     {filteredVars.map((envVar) => (
-                      <div key={envVar.id} className="flex items-center gap-4 p-4">
+                      <div key={envVar.id} className="flex items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <code className="text-sm font-mono font-medium">

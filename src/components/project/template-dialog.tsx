@@ -68,7 +68,7 @@ export function TemplateDialog({ onSubmit }: TemplateDialogProps) {
           템플릿에서 시작
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>템플릿에서 프로젝트 시작</DialogTitle>
           <DialogDescription>

@@ -31,7 +31,7 @@ export function HeroSection() {
             <Badge variant="secondary" className="mb-4 text-sm px-4 py-1">
               아키텍처 시각화 플랫폼
             </Badge>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
               개발 인프라 연결을{' '}
               <span className="bg-gradient-to-r from-blue-600 to-violet-600 dark:from-blue-400 dark:to-violet-400 bg-clip-text text-transparent">
                 한눈에 파악
@@ -52,21 +52,21 @@ export function HeroSection() {
         {/* Bottom: CTA + Trust indicators */}
         <ScrollReveal delay={0.3}>
           <div className="text-center mt-10">
-            <div className="flex flex-wrap justify-center gap-3 mb-6">
-              <Button size="lg" asChild>
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 mb-6">
+              <Button size="lg" className="w-full sm:w-auto" asChild>
                 <Link href="/signup">
                   무료로 시작하기
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
+              <Button size="lg" variant="outline" className="w-full sm:w-auto" asChild>
                 <Link href="/oneclick">
                   <Rocket className="mr-2 h-4 w-4" />
                   3분 안에 홈페이지 만들기
                 </Link>
               </Button>
             </div>
-            <div className="flex flex-wrap justify-center items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-1 text-xs sm:text-sm text-muted-foreground">
               <span className="flex items-center gap-1">✓ 무료 플랜</span>
               <span className="flex items-center gap-1">✓ 카드 불필요</span>
               <span className="flex items-center gap-1">✓ AES-256 암호화</span>

@@ -187,27 +187,29 @@ export default function ProjectSettingsPage() {
         <CardContent className="space-y-4">
           {project?.team_id ? (
             <>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Input
                   placeholder="이메일 주소"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   className="flex-1"
                 />
-                <Select value={inviteRole} onValueChange={setInviteRole}>
-                  <SelectTrigger className="w-28">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="admin">관리자</SelectItem>
-                    <SelectItem value="editor">편집자</SelectItem>
-                    <SelectItem value="viewer">뷰어</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button onClick={handleInvite} disabled={inviting || !inviteEmail}>
-                  <UserPlus className="h-4 w-4 mr-1" />
-                  초대
-                </Button>
+                <div className="flex gap-2">
+                  <Select value={inviteRole} onValueChange={setInviteRole}>
+                    <SelectTrigger className="w-28">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="admin">관리자</SelectItem>
+                      <SelectItem value="editor">편집자</SelectItem>
+                      <SelectItem value="viewer">뷰어</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button onClick={handleInvite} disabled={inviting || !inviteEmail}>
+                    <UserPlus className="h-4 w-4 mr-1" />
+                    초대
+                  </Button>
+                </div>
               </div>
 
               {teamMembers.length > 0 ? (

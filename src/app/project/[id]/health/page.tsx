@@ -118,7 +118,7 @@ export default function ProjectHealthPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h2 className="text-lg font-semibold">상태 모니터링</h2>
         <div className="flex items-center gap-2">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -149,7 +149,7 @@ export default function ProjectHealthPage() {
       </div>
 
       {/* Summary bar */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         <Card>
           <CardContent className="py-4 flex items-center gap-3">
             <CheckCircle2 className="h-5 w-5 text-green-600" />
@@ -212,7 +212,7 @@ export default function ProjectHealthPage() {
 
                 {/* Expanded detail with timeline */}
                 {isSelected && (
-                  <Card className="mt-2 ml-4">
+                  <Card className="mt-2 sm:ml-4">
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-sm">검증 이력</CardTitle>

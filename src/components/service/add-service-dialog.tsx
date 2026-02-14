@@ -94,7 +94,7 @@ export function AddServiceDialog({ projectId, existingServiceIds, onAdd }: AddSe
           서비스 추가
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>서비스 카탈로그</DialogTitle>
           <DialogDescription>프로젝트에 추가할 서비스를 선택하세요</DialogDescription>

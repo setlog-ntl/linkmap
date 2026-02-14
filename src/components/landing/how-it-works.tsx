@@ -55,14 +55,14 @@ export function HowItWorks() {
             </svg>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {steps.map((step, i) => {
               const Icon = step.icon;
               return (
                 <ScrollReveal key={i} delay={i * 0.15}>
                   <div className="text-center relative">
                     {/* Number circle */}
-                    <div className="relative mx-auto mb-6 w-[104px] h-[104px]">
+                    <div className="relative mx-auto mb-6 w-20 h-20 sm:w-[104px] sm:h-[104px]">
                       <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 to-primary/5" />
                       <div className="absolute inset-3 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
                         <span className="text-2xl font-bold text-primary-foreground">
