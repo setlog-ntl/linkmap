@@ -4,7 +4,7 @@ import { unauthorizedError, validationError, serverError, apiError, notFoundErro
 import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 import { checkHomepageDeployQuota } from '@/lib/quota';
-import { createRepo, pushFilesAtomically, deleteRepo, enableGitHubPagesWithActions, triggerWorkflowDispatch, GitHubApiError } from '@/lib/github/api';
+import { createRepo, pushFilesAtomically, deleteRepo, enableGitHubPagesWithActions, GitHubApiError } from '@/lib/github/api';
 import { homepageTemplates } from '@/data/homepage-template-content';
 import { decrypt } from '@/lib/crypto';
 import { deployPagesRequestSchema } from '@/lib/validations/oneclick';
@@ -154,13 +154,47 @@ export async function POST(request: NextRequest) {
     return serverError('GitHub 레포지토리 생성 중 오류가 발생했습니다');
   }
 
-  // 5b. Push all template files as a single atomic commit (with retry)
+  // 5b. Enable GitHub Pages BEFORE pushing files.
+  // CRITICAL ORDER: Pages must be enabled before the push triggers the deploy workflow.
+  // If files are pushed first, the workflow fires immediately but deploy-pages@v4 fails
+  // because Pages isn't configured yet. By enabling Pages first, the push-triggered
+  // workflow will find Pages already active and deploy-pages@v4 succeeds.
+  let pagesStatus: 'enabling' | 'built' = 'enabling';
+  const pagesUrl = `https://${repoResult.owner.login}.github.io/${repoResult.name}`;
+
+  try {
+    // Small delay to let GitHub finalize repo creation
+    await new Promise((r) => setTimeout(r, 1000));
+    await enableGitHubPagesWithActions(
+      githubToken,
+      repoResult.owner.login,
+      repoResult.name
+    );
+    pagesStatus = 'enabling';
+  } catch (err) {
+    if (err instanceof GitHubApiError && err.status === 409) {
+      // Pages already enabled
+      pagesStatus = 'enabling';
+    } else {
+      // Pages enablement failed - clean up repo and project
+      try {
+        await deleteRepo(githubToken, repoResult.owner.login, repoResult.name);
+      } catch { /* best effort cleanup */ }
+      await supabase.from('projects').delete().eq('id', project.id);
+
+      const errMsg = err instanceof GitHubApiError ? err.message : 'GitHub Pages 활성화 실패';
+      return apiError(`GitHub Pages 활성화 실패: ${errMsg}`, 502);
+    }
+  }
+
+  // 5c. Push all template files as a single atomic commit (with retry).
+  // This push triggers the deploy workflow, and Pages is already enabled → success!
   const MAX_RETRIES = 2;
   let pushError: unknown = null;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      // Small delay to let GitHub finalize repo init (especially for auto_init repos)
-      if (attempt === 0) await new Promise((r) => setTimeout(r, 1000));
+      // Small delay to let Pages config propagate on GitHub's side
+      if (attempt === 0) await new Promise((r) => setTimeout(r, 500));
       else await new Promise((r) => setTimeout(r, 2000 * attempt));
 
       await pushFilesAtomically(
@@ -193,52 +227,6 @@ export async function POST(request: NextRequest) {
       return apiError(`파일 업로드 실패: ${pushError.message}`, 502);
     }
     return serverError('템플릿 파일 업로드 중 오류가 발생했습니다');
-  }
-
-  // 6. Enable GitHub Pages (Actions-based workflow)
-  // IMPORTANT: Pages must be enabled BEFORE the workflow runs.
-  // The push in step 5b triggers a workflow run, but Pages isn't enabled yet → it fails.
-  // Solution: Enable Pages first, then manually trigger the workflow.
-  let pagesStatus: 'enabling' | 'built' = 'enabling';
-  const pagesUrl = `https://${repoResult.owner.login}.github.io/${repoResult.name}`;
-
-  try {
-    await enableGitHubPagesWithActions(
-      githubToken,
-      repoResult.owner.login,
-      repoResult.name
-    );
-    pagesStatus = 'enabling';
-  } catch (err) {
-    if (err instanceof GitHubApiError && err.status === 409) {
-      // Pages already enabled
-      pagesStatus = 'enabling';
-    } else {
-      // Pages enablement failed - clean up repo and project
-      try {
-        await deleteRepo(githubToken, repoResult.owner.login, repoResult.name);
-      } catch { /* best effort cleanup */ }
-      await supabase.from('projects').delete().eq('id', project.id);
-
-      const errMsg = err instanceof GitHubApiError ? err.message : 'GitHub Pages 활성화 실패';
-      return apiError(`GitHub Pages 활성화 실패: ${errMsg}`, 502);
-    }
-  }
-
-  // 6b. Wait for Pages config to propagate, then manually trigger the deploy workflow.
-  // The initial push triggered a workflow run that likely failed because Pages wasn't enabled yet.
-  // This dispatch ensures the workflow runs now that Pages is properly configured.
-  try {
-    await new Promise((r) => setTimeout(r, 1500));
-    await triggerWorkflowDispatch(
-      githubToken,
-      repoResult.owner.login,
-      repoResult.name,
-      'deploy.yml',
-      'main'
-    );
-  } catch {
-    // Non-fatal: the initial push workflow might have succeeded if timing was favorable
   }
 
   // 7. Link repo to project
