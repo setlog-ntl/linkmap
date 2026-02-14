@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { isAdmin } from '@/lib/admin';
 import { unauthorizedError, apiError, serverError, validationError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
-import { updateGlobalConfigSchema } from '@/lib/validations/ai-config';
+import { updateGuardrailsSchema } from '@/lib/validations/ai-config';
 
 export async function GET() {
   const supabase = await createClient();
@@ -14,18 +14,19 @@ export async function GET() {
   const admin = await isAdmin(supabase, user.id);
   if (!admin) return apiError('관리자 권한이 필요합니다', 403);
 
-  const { data, error } = await supabase
-    .from('ai_assistant_config')
+  const adminSupabase = createAdminClient();
+  const { data, error } = await adminSupabase
+    .from('ai_guardrails')
     .select('*')
-    .order('updated_at', { ascending: false })
+    .order('created_at', { ascending: false })
     .limit(1)
     .single();
 
   if (error && error.code !== 'PGRST116') {
-    return serverError('설정 조회에 실패했습니다');
+    return serverError('가드레일 조회에 실패했습니다');
   }
 
-  return NextResponse.json({ config: data || null });
+  return NextResponse.json({ guardrails: data || null });
 }
 
 export async function PUT(request: NextRequest) {
@@ -37,57 +38,45 @@ export async function PUT(request: NextRequest) {
   if (!admin) return apiError('관리자 권한이 필요합니다', 403);
 
   const body = await request.json();
-  const parsed = updateGlobalConfigSchema.safeParse(body);
+  const parsed = updateGuardrailsSchema.safeParse(body);
   if (!parsed.success) return validationError(parsed.error);
 
-  const input = parsed.data;
   const adminSupabase = createAdminClient();
 
   const { data: existing } = await adminSupabase
-    .from('ai_assistant_config')
+    .from('ai_guardrails')
     .select('id')
-    .order('updated_at', { ascending: false })
+    .order('created_at', { ascending: false })
     .limit(1)
     .single();
-
-  const updateData = {
-    ...input,
-    updated_by: user.id,
-  };
 
   let result;
   if (existing) {
     result = await adminSupabase
-      .from('ai_assistant_config')
-      .update(updateData)
+      .from('ai_guardrails')
+      .update({ ...parsed.data, updated_by: user.id })
       .eq('id', existing.id)
       .select()
       .single();
   } else {
     result = await adminSupabase
-      .from('ai_assistant_config')
-      .insert({
-        system_prompt: input.system_prompt || 'You are a helpful assistant.',
-        model: input.model || 'gpt-4o-mini',
-        temperature: input.temperature ?? 0.3,
-        max_tokens: input.max_tokens ?? 4096,
-        ...updateData,
-      })
+      .from('ai_guardrails')
+      .insert({ ...parsed.data, updated_by: user.id })
       .select()
       .single();
   }
 
   if (result.error) {
-    console.error('AI config save error:', result.error);
-    return serverError('설정 저장에 실패했습니다');
+    console.error('Guardrails save error:', result.error);
+    return serverError('가드레일 저장에 실패했습니다');
   }
 
   await logAudit(user.id, {
-    action: 'admin.ai_config_update',
-    resourceType: 'ai_assistant_config',
+    action: 'admin.ai_guardrails_update',
+    resourceType: 'ai_guardrails',
     resourceId: result.data.id,
-    details: input,
+    details: parsed.data,
   });
 
-  return NextResponse.json({ config: result.data });
+  return NextResponse.json({ guardrails: result.data });
 }

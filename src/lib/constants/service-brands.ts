@@ -15,6 +15,7 @@ export interface ServiceBrand {
   color: string;        // 라이트 모드 브랜드 색상
   darkColor: string;    // 다크 모드 브랜드 색상
   emoji: string;        // 서비스 고유 이모지
+  multiColor?: boolean; // true이면 mask-image 대신 <img>로 렌더링 (다색 SVG용)
 }
 
 export const SERVICE_BRANDS: Record<string, ServiceBrand> = {
@@ -43,7 +44,7 @@ export const SERVICE_BRANDS: Record<string, ServiceBrand> = {
   'claude-code':   { slug: 'anthropic',     color: '#D4A27F', darkColor: '#D4A27F', emoji: '🤖' },
   'google-gemini': { slug: 'googlegemini',  color: '#8E75B2', darkColor: '#B39DDB', emoji: '✨' },
   'kakao-login':   { slug: 'kakao',         color: '#FFCD00', darkColor: '#FFCD00', emoji: '💬' },
-  'google-oauth':  { slug: 'google',        color: '#4285F4', darkColor: '#8AB4F8', emoji: '🔓' },
+  'google-oauth':  { localPath: '/icons/google.svg', color: '#4285F4', darkColor: '#8AB4F8', emoji: '🔓', multiColor: true },
   'naver-login':   { slug: 'naver',         color: '#03C75A', darkColor: '#03C75A', emoji: '🟢' },
   'apple-login':   { slug: 'apple',         color: '#000000', darkColor: '#ffffff', emoji: '🍎' },
   'github-oauth':  { slug: 'github',        color: '#181717', darkColor: '#e6edf3', emoji: '🐙' },

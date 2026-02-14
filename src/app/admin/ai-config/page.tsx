@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { isAdmin } from '@/lib/admin';
-import AiConfigForm from '@/components/admin/ai-config-form';
+import AiAdminConsole from '@/components/admin/ai-admin-console';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,8 +19,8 @@ export default async function AdminAiConfigPage() {
   }
 
   return (
-    <div className="container py-8 max-w-3xl">
-      <AiConfigForm />
+    <div className="container py-8 max-w-6xl">
+      <AiAdminConsole />
     </div>
   );
 }

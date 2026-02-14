@@ -17,6 +17,27 @@ export function ServiceIcon({ serviceId, size = 20, className }: ServiceIconProp
 
   const svgUrl = getServiceIconUrl(serviceId)!;
 
+  // 다색 SVG는 img 태그로 원본 색상 그대로 렌더링
+  if (brand.multiColor) {
+    return (
+      <span
+        role="img"
+        aria-label={serviceId}
+        className={`inline-block shrink-0 ${className ?? ''}`}
+        style={{ width: size, height: size }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={svgUrl}
+          alt={serviceId}
+          width={size}
+          height={size}
+          style={{ width: size, height: size }}
+        />
+      </span>
+    );
+  }
+
   return (
     <span
       role="img"

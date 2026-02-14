@@ -16,16 +16,9 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Bot, Save, RotateCcw } from 'lucide-react';
+import { Save, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import type { AiAssistantConfig } from '@/types';
-
-const AVAILABLE_MODELS = [
-  { value: 'gpt-4o-mini', label: 'GPT-4o Mini', description: '빠르고 경제적' },
-  { value: 'gpt-4o', label: 'GPT-4o', description: '고성능' },
-  { value: 'gpt-4-turbo', label: 'GPT-4 Turbo', description: '이전 세대' },
-  { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo', description: '가장 경제적' },
-];
 
 const DEFAULT_SYSTEM_PROMPT = `You are a helpful code assistant integrated into a web-based code editor.
 The user is editing a website file. Your job is to help them modify their code.
@@ -42,12 +35,17 @@ export default function AiConfigForm() {
   const [saving, setSaving] = useState(false);
   const [config, setConfig] = useState<AiAssistantConfig | null>(null);
 
-  // Form state
   const [systemPrompt, setSystemPrompt] = useState(DEFAULT_SYSTEM_PROMPT);
   const [model, setModel] = useState('gpt-4o-mini');
   const [temperature, setTemperature] = useState(0.3);
   const [maxTokens, setMaxTokens] = useState(4096);
   const [isActive, setIsActive] = useState(true);
+  const [topP, setTopP] = useState<number | ''>('');
+  const [frequencyPenalty, setFrequencyPenalty] = useState(0);
+  const [presencePenalty, setPresencePenalty] = useState(0);
+  const [responseLang, setResponseLang] = useState('auto');
+  const [defaultProvider, setDefaultProvider] = useState('openai');
+  const [customInstructions, setCustomInstructions] = useState('');
 
   const loadConfig = useCallback(async () => {
     try {
@@ -55,12 +53,19 @@ export default function AiConfigForm() {
       if (res.ok) {
         const data = await res.json();
         if (data.config) {
-          setConfig(data.config);
-          setSystemPrompt(data.config.system_prompt);
-          setModel(data.config.model);
-          setTemperature(Number(data.config.temperature));
-          setMaxTokens(data.config.max_tokens);
-          setIsActive(data.config.is_active);
+          const c = data.config;
+          setConfig(c);
+          setSystemPrompt(c.system_prompt);
+          setModel(c.model);
+          setTemperature(Number(c.temperature));
+          setMaxTokens(c.max_tokens);
+          setIsActive(c.is_active);
+          setTopP(c.top_p != null ? Number(c.top_p) : '');
+          setFrequencyPenalty(Number(c.frequency_penalty) || 0);
+          setPresencePenalty(Number(c.presence_penalty) || 0);
+          setResponseLang(c.response_language || 'auto');
+          setDefaultProvider(c.default_provider || 'openai');
+          setCustomInstructions(c.custom_instructions || '');
         }
       } else if (res.status === 403) {
         toast.error('관리자 권한이 필요합니다');
@@ -87,6 +92,12 @@ export default function AiConfigForm() {
           temperature,
           max_tokens: maxTokens,
           is_active: isActive,
+          top_p: topP === '' ? null : topP,
+          frequency_penalty: frequencyPenalty,
+          presence_penalty: presencePenalty,
+          response_language: responseLang,
+          default_provider: defaultProvider,
+          custom_instructions: customInstructions || null,
         }),
       });
 
@@ -112,134 +123,183 @@ export default function AiConfigForm() {
     setTemperature(0.3);
     setMaxTokens(4096);
     setIsActive(true);
+    setTopP('');
+    setFrequencyPenalty(0);
+    setPresencePenalty(0);
+    setResponseLang('auto');
+    setDefaultProvider('openai');
+    setCustomInstructions('');
   };
 
   if (loading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-12 w-64" />
-        <Skeleton className="h-96" />
+        <Skeleton className="h-48" />
+        <Skeleton className="h-64" />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Bot className="h-6 w-6" />
-            AI 어시스턴트 설정
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            사이트 편집기 AI 챗봇의 동작을 설정합니다
-          </p>
+      {config && (
+        <div className="flex justify-end">
+          <Badge variant="outline" className="text-xs">
+            마지막 수정: {new Date(config.updated_at).toLocaleString('ko-KR')}
+          </Badge>
         </div>
-        <div className="flex items-center gap-2">
-          {config && (
-            <Badge variant="outline" className="text-xs">
-              마지막 수정: {new Date(config.updated_at).toLocaleString('ko-KR')}
-            </Badge>
-          )}
-        </div>
-      </div>
+      )}
 
       {/* System Prompt */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">시스템 프롬프트</CardTitle>
           <CardDescription>
-            AI가 응답할 때 따르는 기본 지침입니다. 파일 경로와 내용은 자동으로 추가됩니다.
+            AI가 응답할 때 따르는 기본 지침입니다
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Textarea
             value={systemPrompt}
             onChange={(e) => setSystemPrompt(e.target.value)}
-            rows={12}
+            rows={10}
             className="font-mono text-sm"
             placeholder="시스템 프롬프트를 입력하세요..."
           />
-          <p className="text-xs text-muted-foreground mt-2">
-            {systemPrompt.length}자 / 런타임에 파일 경로·내용이 자동 추가됩니다
-          </p>
+          <p className="text-xs text-muted-foreground mt-2">{systemPrompt.length}자</p>
         </CardContent>
       </Card>
 
-      {/* Model & Parameters */}
+      {/* Custom Instructions */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">모델 설정</CardTitle>
+          <CardTitle className="text-lg">커스텀 지침</CardTitle>
           <CardDescription>
-            사용할 OpenAI 모델과 생성 파라미터를 설정합니다
+            시스템 프롬프트에 추가로 적용할 사용자 지침
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            value={customInstructions}
+            onChange={(e) => setCustomInstructions(e.target.value)}
+            rows={4}
+            className="font-mono text-sm"
+            placeholder="추가 지침을 입력하세요... (선택사항)"
+          />
+        </CardContent>
+      </Card>
+
+      {/* Model & Advanced Parameters */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">기본 모델 설정</CardTitle>
+          <CardDescription>
+            기본 제공자, 모델, 생성 파라미터를 설정합니다
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Model Select */}
-          <div className="space-y-2">
-            <Label htmlFor="model">모델</Label>
-            <Select value={model} onValueChange={setModel}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="모델 선택" />
-              </SelectTrigger>
-              <SelectContent>
-                {AVAILABLE_MODELS.map((m) => (
-                  <SelectItem key={m.value} value={m.value}>
-                    {m.label} — {m.description}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Temperature */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="temperature">온도 (Temperature)</Label>
-              <span className="text-sm font-mono text-muted-foreground">{temperature.toFixed(2)}</span>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>기본 제공자</Label>
+              <Select value={defaultProvider} onValueChange={setDefaultProvider}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="openai">OpenAI</SelectItem>
+                  <SelectItem value="anthropic">Anthropic</SelectItem>
+                  <SelectItem value="google">Google AI</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Input
-              id="temperature"
-              type="range"
-              min={0}
-              max={2}
-              step={0.05}
-              value={temperature}
-              onChange={(e) => setTemperature(parseFloat(e.target.value))}
-              className="cursor-pointer"
-            />
-            <p className="text-xs text-muted-foreground">
-              낮을수록 일관된 응답, 높을수록 창의적 응답 (코드 수정에는 0.1~0.5 권장)
-            </p>
-          </div>
-
-          {/* Max Tokens */}
-          <div className="space-y-2">
-            <Label htmlFor="max-tokens">최대 토큰 수</Label>
-            <Input
-              id="max-tokens"
-              type="number"
-              min={256}
-              max={128000}
-              step={256}
-              value={maxTokens}
-              onChange={(e) => setMaxTokens(parseInt(e.target.value, 10) || 4096)}
-            />
-            <p className="text-xs text-muted-foreground">
-              응답의 최대 길이 (일반적으로 4096~8192 권장)
-            </p>
-          </div>
-
-          {/* Active toggle */}
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div>
-              <Label>설정 활성화</Label>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                비활성화하면 기본 하드코딩된 설정이 사용됩니다
-              </p>
+            <div className="space-y-2">
+              <Label>기본 모델</Label>
+              <Input value={model} onChange={(e) => setModel(e.target.value)} placeholder="gpt-4o-mini" />
             </div>
-            <Switch checked={isActive} onCheckedChange={setIsActive} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>온도 (Temperature)</Label>
+                <span className="text-sm font-mono text-muted-foreground">{temperature.toFixed(2)}</span>
+              </div>
+              <Input
+                type="range" min={0} max={2} step={0.05}
+                value={temperature}
+                onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                className="cursor-pointer"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>최대 토큰 수</Label>
+              <Input
+                type="number" min={256} max={128000} step={256}
+                value={maxTokens}
+                onChange={(e) => setMaxTokens(parseInt(e.target.value, 10) || 4096)}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Top P</Label>
+                <span className="text-sm font-mono text-muted-foreground">{topP === '' ? '-' : topP}</span>
+              </div>
+              <Input
+                type="range" min={0} max={1} step={0.05}
+                value={topP === '' ? 1 : topP}
+                onChange={(e) => setTopP(parseFloat(e.target.value))}
+                className="cursor-pointer"
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Frequency Penalty</Label>
+                <span className="text-sm font-mono text-muted-foreground">{frequencyPenalty.toFixed(1)}</span>
+              </div>
+              <Input
+                type="range" min={-2} max={2} step={0.1}
+                value={frequencyPenalty}
+                onChange={(e) => setFrequencyPenalty(parseFloat(e.target.value))}
+                className="cursor-pointer"
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Presence Penalty</Label>
+                <span className="text-sm font-mono text-muted-foreground">{presencePenalty.toFixed(1)}</span>
+              </div>
+              <Input
+                type="range" min={-2} max={2} step={0.1}
+                value={presencePenalty}
+                onChange={(e) => setPresencePenalty(parseFloat(e.target.value))}
+                className="cursor-pointer"
+              />
+            </div>
+          </div>
+
+          {/* Response Settings */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>응답 언어</Label>
+              <Select value={responseLang} onValueChange={setResponseLang}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="auto">자동 (사용자 언어 따름)</SelectItem>
+                  <SelectItem value="ko">한국어</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border p-4">
+              <div>
+                <Label>설정 활성화</Label>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  비활성화하면 기본 하드코딩된 설정이 사용됩니다
+                </p>
+              </div>
+              <Switch checked={isActive} onCheckedChange={setIsActive} />
+            </div>
           </div>
         </CardContent>
       </Card>

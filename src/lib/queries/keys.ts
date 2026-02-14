@@ -52,4 +52,14 @@ export const queryKeys = {
     files: (deployId: string) => ['oneclick', 'files', deployId] as const,
     fileContent: (deployId: string, path: string) => ['oneclick', 'files', deployId, path] as const,
   },
+  aiConfig: {
+    global: ['ai-config', 'global'] as const,
+    personas: ['ai-config', 'personas'] as const,
+    persona: (id: string) => ['ai-config', 'personas', id] as const,
+    providers: ['ai-config', 'providers'] as const,
+    guardrails: ['ai-config', 'guardrails'] as const,
+    templates: ['ai-config', 'templates'] as const,
+    template: (id: string) => ['ai-config', 'templates', id] as const,
+    usage: (period?: string) => ['ai-config', 'usage', period ?? 'today'] as const,
+  },
 } as const;
