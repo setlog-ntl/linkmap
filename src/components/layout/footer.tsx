@@ -26,7 +26,7 @@ export function Footer() {
             <h4 className="font-semibold text-sm mb-3">지원</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link href="/guides/github" className="hover:text-foreground transition-colors">GitHub 설정 가이드</Link></li>
-              <li><span className="text-muted-foreground/60 cursor-default">문서 (준비 중)</span></li>
+              <li><Link href="/guides/auth" className="hover:text-foreground transition-colors">인증 가이드</Link></li>
               <li><span className="text-muted-foreground/60 cursor-default">문의하기 (준비 중)</span></li>
             </ul>
           </div>
