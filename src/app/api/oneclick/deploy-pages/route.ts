@@ -4,7 +4,7 @@ import { unauthorizedError, validationError, serverError, apiError, notFoundErro
 import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 import { checkHomepageDeployQuota } from '@/lib/quota';
-import { createRepo, pushFilesAtomically, deleteRepo, enableGitHubPages, GitHubApiError } from '@/lib/github/api';
+import { createRepo, pushFilesAtomically, deleteRepo, enableGitHubPagesWithActions, GitHubApiError } from '@/lib/github/api';
 import { homepageTemplates } from '@/data/homepage-template-content';
 import { decrypt } from '@/lib/crypto';
 import { deployPagesRequestSchema } from '@/lib/validations/oneclick';
@@ -162,13 +162,11 @@ export async function POST(request: NextRequest) {
 
   try {
     // Small delay to let GitHub finalize repo creation
-    await new Promise((r) => setTimeout(r, 1000));
-    await enableGitHubPages(
+    await new Promise((r) => setTimeout(r, 2000));
+    await enableGitHubPagesWithActions(
       githubToken,
       repoResult.owner.login,
-      repoResult.name,
-      'main',
-      '/'
+      repoResult.name
     );
     pagesStatus = 'enabling';
   } catch (err) {
