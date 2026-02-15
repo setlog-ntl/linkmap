@@ -375,3 +375,105 @@ INSERT INTO homepage_templates (
 - [ ] JSON-LD Person 구조화 데이터
 - [ ] /api/og 이미지 생성 확인
 - [ ] robots.txt 존재
+
+---
+
+## 9. 디자이너 모드 (Designer Mode) — creative-portfolio 통합
+
+> **변경 이유**: 기존 `creative-portfolio` 템플릿(Phase 3)은 타겟 니치가 좁고,
+> dev-showcase의 포트폴리오 구조를 확장하면 개발자+디자이너 양쪽을 효율적으로 커버할 수 있다.
+> Behance/Dribbble 연동, 이미지 갤러리, 마우스 인터랙션 등 핵심 기능을 "디자이너 모드"로 통합한다.
+
+### 9.1 모드 전환 방식
+
+환경변수 `NEXT_PUBLIC_MODE`로 전환:
+- `"developer"` (기본): 기존 개발자 쇼케이스 레이아웃 (터미널 스타일, GitHub 연동)
+- `"designer"`: 디자이너 모드 활성화 — 아래 변경사항 적용
+
+### 9.2 디자이너 모드 레이아웃 변경
+
+#### 히어로 변경
+- **터미널 스타일 비활성화** → 풀스크린 히어로 이미지/영상 배경
+- **마우스 추적 패럴렉스**: 텍스트가 마우스 반대 방향으로 미세 이동 (translateX/Y 최대 20px)
+- **텍스트 스타일**: `font-light` (기존 `font-bold` 대신), tracking-widest
+- **추가 데이터**: `NEXT_PUBLIC_HERO_IMAGE_URL`, `NEXT_PUBLIC_HERO_VIDEO_URL`
+
+#### 프로젝트 섹션 → Masonry 갤러리
+- **기존 GitHub 카드 그리드** → Masonry 이미지 갤러리 (CSS columns)
+- **열 수**: 모바일 1열, md 2열, lg 3열
+- **hover 효과**: 이미지 `scale-[1.03]` + 프로젝트명 오버레이 (bg-black/60)
+- **데이터**: `NEXT_PUBLIC_PROJECTS` JSON ([{"title":"...", "category":"...", "image_url":"...", "description":"..."}])
+- **GitHub 연동 비활성화** (디자이너에게 불필요)
+
+#### 케이스 스터디 섹션 추가
+- **위치**: Masonry 갤러리 아래
+- **구성**: 좌우 교차 레이아웃 (홀수: 이미지 좌+텍스트 우, 짝수: 반대)
+- **각 항목**: 프로젝트명(3xl) + 카테고리 태그 + 설명 + 이미지
+- **애니메이션**: 스크롤 진입 시 slide-in-left/right
+
+#### About 섹션 변경
+- **기술 스택** → **사용 도구** (Figma, Photoshop, Illustrator, Sketch, After Effects)
+- **데이터**: `NEXT_PUBLIC_TOOLS` JSON ([{"name":"Figma","icon":"figma"}])
+
+#### Awards 섹션 추가
+- **위치**: About 아래
+- **구성**: 수상/언론 타임라인 (iF Design Award, Red Dot, Behance Featured 등)
+- **데이터**: `NEXT_PUBLIC_AWARDS` JSON ([{"title":"...", "org":"...", "year":"2024"}])
+
+#### Contact 변경
+- **SNS 링크**: GitHub/LinkedIn → Behance/Dribbble 추가
+- **CTA 텍스트**: "함께 일하고 싶다면" (큰 텍스트 5xl~7xl, font-light)
+- **추가 데이터**: `NEXT_PUBLIC_BEHANCE_URL`, `NEXT_PUBLIC_DRIBBBLE_URL`
+
+#### 커스텀 커서
+- **디자이너 모드 전용**: dot(8px) + circle(40px) follower, hover 시 확대
+- **모바일 자동 비활성화**
+- **prefers-reduced-motion 존중**
+
+### 9.3 디자이너 모드 추가 환경변수
+
+| Key | 설명 | 필수 | 기본값 |
+|-----|------|:---:|--------|
+| `NEXT_PUBLIC_MODE` | 모드 선택 (developer/designer) | | `'developer'` |
+| `NEXT_PUBLIC_HERO_IMAGE_URL` | 히어로 배경 이미지 URL | | `null` (그라데이션 폴백) |
+| `NEXT_PUBLIC_HERO_VIDEO_URL` | 히어로 배경 영상 URL | | `null` |
+| `NEXT_PUBLIC_PROJECTS` | 프로젝트 목록 JSON (갤러리용) | | 데모 프로젝트 6개 |
+| `NEXT_PUBLIC_TOOLS` | 사용 도구 JSON | | Figma/Photoshop 등 데모 5개 |
+| `NEXT_PUBLIC_AWARDS` | 수상/언론 목록 JSON | | 데모 수상 4개 |
+| `NEXT_PUBLIC_BEHANCE_URL` | Behance 프로필 URL | | `null` (미표시) |
+| `NEXT_PUBLIC_DRIBBBLE_URL` | Dribbble 프로필 URL | | `null` (미표시) |
+
+### 9.4 디자이너 모드 디자인 스펙
+
+- **컬러**: 모노톤 베이스 + 포인트 컬러 1색 (red-500 `#ef4444`)
+- **배경**: `#fafafa` (라이트) / `#0a0a0a` (다크)
+- **타이포**: 이름 5xl~7xl font-light (기존 font-bold 대신), 최소한의 장식
+- **레이아웃**: max-w-7xl (기존 max-w-4xl보다 넓음), 이미지 중심
+- **여백**: 섹션 간 py-24 이상 (큰 여백으로 고급감 연출)
+- **Masonry**: `columns-1 md:columns-2 lg:columns-3 gap-4`
+
+### 9.5 디자이너 모드 추가 컴포넌트
+
+| 컴포넌트 | 타입 | 역할 |
+|----------|------|------|
+| `hero-designer.tsx` | Client | 풀스크린 배경 + 패럴렉스 효과 (framer-motion) |
+| `masonry-gallery.tsx` | Client | Masonry 이미지 갤러리 + hover 오버레이 |
+| `case-study-card.tsx` | Client | 좌우 교차 레이아웃 케이스 스터디 |
+| `awards-section.tsx` | Client | 수상/언론 타임라인 |
+| `custom-cursor.tsx` | Client | dot + circle follower, 모바일 비활성화 |
+
+### 9.6 디자이너 모드 검증 체크리스트
+
+- [ ] `NEXT_PUBLIC_MODE="designer"` 설정 시 디자이너 레이아웃 표시
+- [ ] `NEXT_PUBLIC_MODE="developer"` 또는 미설정 시 기존 개발자 레이아웃 유지
+- [ ] 히어로 풀스크린 배경 이미지/영상 정상 표시
+- [ ] 마우스 추적 패럴렉스 동작 (데스크톱만)
+- [ ] Masonry 갤러리 정상 렌더링 (1~3열 반응형)
+- [ ] 갤러리 hover 시 프로젝트명 오버레이
+- [ ] 케이스 스터디 좌우 교차 레이아웃
+- [ ] 사용 도구 아이콘 + tooltip 동작
+- [ ] Awards 타임라인 렌더링
+- [ ] Behance/Dribbble 링크 동작
+- [ ] 커스텀 커서 동작 (데스크톱) + 모바일 비활성화
+- [ ] 디자이너 모드에서도 Lighthouse 90+ 유지
+- [ ] prefers-reduced-motion 시 모든 애니메이션 비활성화

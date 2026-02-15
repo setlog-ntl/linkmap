@@ -312,3 +312,78 @@ INSERT INTO homepage_templates (
 - [ ] JSON-LD Person 구조화 데이터
 - [ ] /api/og 이미지 생성 확인
 - [ ] robots.txt 존재
+
+---
+
+## 9. 크리에이터 모드 (Creator Mode) — creator-hub 통합
+
+> **변경 이유**: 기존 `creator-hub` 템플릿(Phase 2)이 link-in-bio-pro와 기능 93% 중복.
+> 크리에이터 이코노미 $250억 시장(CAGR 22.7%)에서 95%가 Direct-to-Fan 전환 중이므로,
+> 통합하여 하나의 강력한 Link-in-Bio + Creator Hub를 제공한다.
+
+### 9.1 모드 전환 방식
+
+환경변수 `NEXT_PUBLIC_MODE`로 전환:
+- `"default"` (기본): 기존 링크인바이오 프로 레이아웃
+- `"creator"`: 크리에이터 모드 활성화 — 아래 추가 섹션이 표시됨
+
+### 9.2 크리에이터 모드 추가 섹션
+
+#### 유튜브 그리드 섹션
+- **위치**: 링크 리스트 아래, 소셜 바 위
+- **구성**: 유튜브 영상 임베드 그리드 (모바일 1열, 데스크톱 2x2)
+- **데이터**: `NEXT_PUBLIC_YOUTUBE_VIDEOS` JSON ([{"id":"videoId","title":"제목"}])
+- **성능**: iframe `loading="lazy"` + `srcdoc` 패턴으로 초기 로드 최적화
+- **조건**: `NEXT_PUBLIC_MODE="creator"` 이고 `NEXT_PUBLIC_YOUTUBE_VIDEOS` 설정 시에만 표시
+
+#### 인스타그램 피드 섹션
+- **위치**: 유튜브 그리드 아래
+- **구성**: 인스타그램 이미지 그리드 (3열, aspect-square)
+- **데이터**: `NEXT_PUBLIC_INSTAGRAM_IMAGES` JSON ([{"url":"이미지URL","post_url":"포스트URL"}])
+- **참고**: 인스타 API 없이 정적 이미지 URL 사용 (사용자 직접 설정)
+
+#### 채널 통계 배지
+- **위치**: 프로필 영역 아래 (바이오 다음)
+- **구성**: 플랫폼 로고 + 구독자/팔로워 수 뱃지 (최대 3개)
+- **데이터**: `NEXT_PUBLIC_CHANNEL_STATS` JSON ([{"platform":"youtube","count":"5.2만","label":"구독자"}])
+- **스타일**: 인스타 스토리 링 스타일 아바타 링 (ring-4 그라데이션 보더)
+
+#### 팬 커뮤니티 링크
+- **위치**: 소셜 바 아래, 푸터 위
+- **구성**: 디스코드/카카오 오픈채팅 링크 버튼
+- **데이터**: `NEXT_PUBLIC_COMMUNITY_LINKS` JSON ([{"platform":"discord","url":"...","label":"디스코드 참여"}])
+
+#### 비즈니스 문의 CTA
+- **위치**: 팬 커뮤니티 아래
+- **구성**: 그라데이션 배경 카드 + "비즈니스 문의" CTA 버튼 (mailto:)
+- **데이터**: `NEXT_PUBLIC_COLLAB_EMAIL`
+
+### 9.3 크리에이터 모드 추가 환경변수
+
+| Key | 설명 | 필수 | 기본값 |
+|-----|------|:---:|--------|
+| `NEXT_PUBLIC_MODE` | 모드 선택 (default/creator) | | `'default'` |
+| `NEXT_PUBLIC_YOUTUBE_VIDEOS` | 유튜브 영상 목록 (JSON) | | `null` (미표시) |
+| `NEXT_PUBLIC_INSTAGRAM_IMAGES` | 인스타 이미지 목록 (JSON) | | `null` (미표시) |
+| `NEXT_PUBLIC_CHANNEL_STATS` | 채널 통계 뱃지 (JSON) | | `null` (미표시) |
+| `NEXT_PUBLIC_COMMUNITY_LINKS` | 커뮤니티 링크 (JSON) | | `null` (미표시) |
+| `NEXT_PUBLIC_COLLAB_EMAIL` | 비즈니스 문의 이메일 | | `null` (미표시) |
+
+### 9.4 크리에이터 모드 디자인 스펙
+
+- **배경**: 비비드 컬러 옵션 추가 — 유튜브 레드(#FF0000), 인스타 그라데이션(#E1306C→#F77737) 악센트
+- **아바타**: 160px로 확대 (기본 96px → creator 모드 160px), 인스타 스토리 링 스타일
+- **유튜브 그리드**: 16:9 비율 유지, lazy loading, 다크모드에서 자연스러운 배경 처리
+- **통계 뱃지**: Inter 폰트 24px bold 숫자, 플랫폼 로고 컬러
+
+### 9.5 크리에이터 모드 검증 체크리스트
+
+- [ ] `NEXT_PUBLIC_MODE="creator"` 설정 시 추가 섹션 표시
+- [ ] `NEXT_PUBLIC_MODE="default"` 또는 미설정 시 기존 레이아웃 유지
+- [ ] 유튜브 영상 그리드 lazy loading 동작
+- [ ] 인스타그램 이미지 그리드 정상 렌더링
+- [ ] 채널 통계 뱃지 표시
+- [ ] 팬 커뮤니티 링크 버튼 동작
+- [ ] 비즈니스 문의 CTA mailto: 동작
+- [ ] 크리에이터 모드에서도 Lighthouse 90+ 유지
+- [ ] JSON 환경변수 파싱 실패 시 기본값 폴백
