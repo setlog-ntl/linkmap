@@ -14,21 +14,21 @@ function mapRowToLinkedAccount(row: Record<string, unknown>): LinkedAccount {
   const providerFromMetadata = (metadata.provider as string) || null;
 
   return {
-    id: row.id,
-    project_id: row.project_id,
-    service_id: row.service_id,
-    user_id: row.user_id,
+    id: row.id as string,
+    project_id: row.project_id as string,
+    service_id: row.service_id as string,
+    user_id: row.user_id as string,
     provider: providerFromMetadata,
     external_user_id: (row.oauth_provider_user_id as string | null) ?? null,
     display_name: name || login,
     avatar_url: avatarUrl,
     email,
-    connection_type: row.connection_type,
-    status: row.status,
-    last_verified_at: row.last_verified_at,
-    error_message: row.error_message,
-    created_at: row.created_at,
-    updated_at: row.updated_at,
+    connection_type: row.connection_type as LinkedAccount['connection_type'],
+    status: row.status as LinkedAccount['status'],
+    last_verified_at: row.last_verified_at as string | null,
+    error_message: row.error_message as string | null,
+    created_at: row.created_at as string,
+    updated_at: row.updated_at as string,
   } satisfies LinkedAccount;
 }
 
@@ -111,12 +111,12 @@ export function useLinkedResources(projectId: string, resourceType: string) {
       const data = (await res.json()) as { repos: Record<string, unknown>[] };
       return (data.repos || []).map((row) => {
         return {
-          id: row.id,
-          project_id: row.project_id,
-          service_account_id: row.service_account_id,
+          id: row.id as string,
+          project_id: row.project_id as string,
+          service_account_id: row.service_account_id as string,
           resource_type: 'github_repo',
-          external_id: row.repo_full_name,
-          display_name: row.repo_full_name,
+          external_id: row.repo_full_name as string,
+          display_name: row.repo_full_name as string,
           metadata: {
             owner: row.owner,
             repo_name: row.repo_name,
@@ -125,8 +125,8 @@ export function useLinkedResources(projectId: string, resourceType: string) {
             sync_environment: row.sync_environment,
             last_synced_at: row.last_synced_at,
           },
-          created_at: row.created_at,
-          updated_at: row.updated_at,
+          created_at: row.created_at as string,
+          updated_at: row.updated_at as string,
         } satisfies LinkedResource;
       });
     },

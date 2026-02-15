@@ -42,7 +42,7 @@ export default async function ProjectLayout({
       <div className="container py-6">
         <div className="mb-6">
           <h1 className="text-2xl font-bold">{(project as Record<string, unknown>)?.name as string}</h1>
-          {(project as Record<string, unknown>)?.description && (
+          {!!(project as Record<string, unknown>)?.description && (
             <p className="text-muted-foreground mt-1">{(project as Record<string, unknown>).description as string}</p>
           )}
         </div>
