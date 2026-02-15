@@ -19,6 +19,7 @@ function useTypingAnimation(texts: string[], speed = 80, pause = 2000) {
   });
   const listenersRef = useRef(new Set<() => void>());
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tickRef = useRef<(() => void) | null>(null);
   const startedRef = useRef(false);
 
   const subscribe = useCallback((cb: () => void) => {
@@ -38,21 +39,23 @@ function useTypingAnimation(texts: string[], speed = 80, pause = 2000) {
       s.displayed = current.slice(0, s.charIndex);
       s.charIndex++;
       notify();
-      timerRef.current = setTimeout(tick, speed);
+      timerRef.current = setTimeout(() => tickRef.current?.(), speed);
     } else if (!s.deleting && s.charIndex > current.length) {
       s.deleting = true;
-      timerRef.current = setTimeout(tick, pause);
+      timerRef.current = setTimeout(() => tickRef.current?.(), pause);
     } else if (s.deleting && s.charIndex > 0) {
       s.charIndex--;
       s.displayed = current.slice(0, s.charIndex);
       notify();
-      timerRef.current = setTimeout(tick, speed / 2);
+      timerRef.current = setTimeout(() => tickRef.current?.(), speed / 2);
     } else if (s.deleting && s.charIndex === 0) {
       s.deleting = false;
       s.textIndex = (s.textIndex + 1) % texts.length;
-      timerRef.current = setTimeout(tick, speed);
+      timerRef.current = setTimeout(() => tickRef.current?.(), speed);
     }
   }, [texts, speed, pause, notify]);
+
+  tickRef.current = tick;
 
   // Start animation on first subscribe (client only)
   if (typeof window !== 'undefined' && !startedRef.current) {
@@ -61,7 +64,7 @@ function useTypingAnimation(texts: string[], speed = 80, pause = 2000) {
     if (prefersReduced) {
       stateRef.current.displayed = texts[0];
     } else {
-      setTimeout(tick, speed);
+      setTimeout(() => tickRef.current?.(), speed);
     }
   }
 
