@@ -166,6 +166,20 @@
   animation: stagger-fade-in 0.4s ease-out both;
 }
 
+@keyframes gradient-x {
+  0%, 100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+.animate-gradient-x {
+  animation: gradient-x 3s ease infinite;
+}
+
 /* Hide scrollbar for horizontal nav tabs on mobile */
 .scrollbar-none {
   -ms-overflow-style: none;
