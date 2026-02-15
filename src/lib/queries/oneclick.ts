@@ -18,7 +18,7 @@ export interface HomepageTemplate {
   tags: string[];
   is_premium: boolean;
   display_order: number;
-  deploy_target?: 'vercel' | 'github_pages' | 'both';
+  deploy_target?: 'github_pages';
 }
 
 export interface DeployStatus {
@@ -28,7 +28,7 @@ export interface DeployStatus {
   deployment_url: string | null;
   deploy_error: string | null;
   forked_repo_url: string | null;
-  deploy_method: 'vercel' | 'github_pages';
+  deploy_method: 'github_pages';
   pages_url: string | null;
   pages_status: 'pending' | 'enabling' | 'building' | 'built' | 'errored' | null;
   steps: Array<{
@@ -36,20 +36,6 @@ export interface DeployStatus {
     status: 'completed' | 'in_progress' | 'pending' | 'error';
     label: string;
   }>;
-}
-
-export interface ForkResult {
-  deploy_id: string;
-  project_id: string;
-  forked_repo: string;
-  forked_repo_url: string;
-}
-
-export interface DeployResult {
-  deployment_url: string | null;
-  vercel_project_url: string;
-  vercel_project_id: string;
-  deployment_id: string | null;
 }
 
 export interface DeployPagesResult {
@@ -75,51 +61,6 @@ export function useHomepageTemplates(deployTarget: string = 'github_pages') {
       return data.templates;
     },
     staleTime: 5 * 60_000, // 5 min cache
-  });
-}
-
-// ---------- Fork (legacy Vercel flow) ----------
-
-export function useForkTemplate() {
-  return useMutation({
-    mutationFn: async (input: {
-      template_id: string;
-      site_name: string;
-    }): Promise<ForkResult> => {
-      const res = await fetch('/api/oneclick/fork', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(input),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Fork 실패');
-      }
-      return res.json();
-    },
-  });
-}
-
-// ---------- Deploy to Vercel (legacy) ----------
-
-export function useDeployToVercel() {
-  return useMutation({
-    mutationFn: async (input: {
-      deploy_id: string;
-      vercel_token: string;
-      env_vars?: Record<string, string>;
-    }): Promise<DeployResult> => {
-      const res = await fetch('/api/oneclick/deploy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(input),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || '배포 실패');
-      }
-      return res.json();
-    },
   });
 }
 
@@ -151,7 +92,7 @@ export interface HomepageDeploy {
   id: string;
   site_name: string;
   deploy_status: 'pending' | 'creating' | 'building' | 'ready' | 'error' | 'canceled';
-  deploy_method: 'vercel' | 'github_pages';
+  deploy_method: 'github_pages';
   pages_url: string | null;
   pages_status: string | null;
   deployment_url: string | null;

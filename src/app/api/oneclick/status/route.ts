@@ -172,7 +172,9 @@ function buildSteps(deploy: Record<string, unknown>, deployMethod: string): Depl
     ];
   }
 
-  // Legacy Vercel steps (kept for backward compatibility with existing deploys)
+  // LEGACY: Vercel deploy steps — kept for backward compatibility with
+  // existing homepage_deploys rows where deploy_method = 'vercel'.
+  // Do NOT add new features here. New deploys always use github_pages.
   const forkStep: StepStatus =
     forkStatus === 'forked' ? 'completed' :
     forkStatus === 'forking' ? 'in_progress' :

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { rateLimit } from '@/lib/rate-limit';
 import { callAiProvider } from '@/lib/ai/providers';
 import { checkGuardrails } from '@/lib/ai/guardrails';
 import { decrypt } from '@/lib/crypto';
@@ -33,6 +34,11 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: '인증이 필요합니다' }, { status: 401 });
+  }
+
+  const { success } = rateLimit(`oneclick-ai-chat:${user.id}`, 20, 60_000);
+  if (!success) {
+    return NextResponse.json({ error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' }, { status: 429 });
   }
 
   try {

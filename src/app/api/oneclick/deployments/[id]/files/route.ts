@@ -9,6 +9,16 @@ import { fileUpdateSchema } from '@/lib/validations/oneclick';
 
 const EDITABLE_EXTENSIONS = ['.html', '.css', '.js', '.md', '.json', '.txt', '.yml', '.yaml', '.svg'];
 
+const FORBIDDEN_PATH_PATTERNS = [
+  /^\./,           // 숨김 파일 (.env, .git 등)
+  /\/\./,          // 하위 숨김 파일
+  /\.github\//i,   // GitHub Actions (워크플로우 인젝션 방지)
+];
+
+function isForbiddenPath(path: string): boolean {
+  return FORBIDDEN_PATH_PATTERNS.some((pattern) => pattern.test(path));
+}
+
 function isEditableFile(name: string): boolean {
   return EDITABLE_EXTENSIONS.some((ext) => name.toLowerCase().endsWith(ext));
 }
@@ -97,8 +107,8 @@ export async function GET(
       return NextResponse.json({ files });
     } else {
       // Get file content
-      if (path.includes('..')) {
-        return apiError('잘못된 파일 경로입니다', 400);
+      if (path.includes('..') || isForbiddenPath(path)) {
+        return apiError('허용되지 않는 파일 경로입니다', 400);
       }
       const file = await getFileContent(token, owner, repo, path);
       const decoded = Buffer.from(file.content, 'base64').toString('utf-8');

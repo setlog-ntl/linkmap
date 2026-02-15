@@ -4,7 +4,7 @@ import { unauthorizedError, validationError, serverError, apiError, notFoundErro
 import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 import { checkHomepageDeployQuota } from '@/lib/quota';
-import { createRepo, pushFilesAtomically, deleteRepo, enableGitHubPagesWithActions, GitHubApiError } from '@/lib/github/api';
+import { createRepo, pushFilesAtomically, deleteRepo, enableGitHubPages, GitHubApiError } from '@/lib/github/api';
 import { homepageTemplates } from '@/data/homepage-template-content';
 import { decrypt } from '@/lib/crypto';
 import { deployPagesRequestSchema } from '@/lib/validations/oneclick';
@@ -155,20 +155,20 @@ export async function POST(request: NextRequest) {
   }
 
   // 5b. Enable GitHub Pages BEFORE pushing files.
-  // CRITICAL ORDER: Pages must be enabled before the push triggers the deploy workflow.
-  // If files are pushed first, the workflow fires immediately but deploy-pages@v4 fails
-  // because Pages isn't configured yet. By enabling Pages first, the push-triggered
-  // workflow will find Pages already active and deploy-pages@v4 succeeds.
+  // Uses classic Pages build (source branch) since templates are static HTML/CSS
+  // and don't need a GitHub Actions workflow.
   let pagesStatus: 'enabling' | 'built' = 'enabling';
   const pagesUrl = `https://${repoResult.owner.login}.github.io/${repoResult.name}`;
 
   try {
     // Small delay to let GitHub finalize repo creation
     await new Promise((r) => setTimeout(r, 1000));
-    await enableGitHubPagesWithActions(
+    await enableGitHubPages(
       githubToken,
       repoResult.owner.login,
-      repoResult.name
+      repoResult.name,
+      'main',
+      '/'
     );
     pagesStatus = 'enabling';
   } catch (err) {

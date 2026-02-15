@@ -23,8 +23,6 @@ export type AuditAction =
   | 'github.repo_unlink'
   | 'github.secrets_push'
   | 'github.auto_sync'
-  | 'oneclick.fork'
-  | 'oneclick.deploy'
   | 'oneclick.deploy_pages'
   | 'oneclick.deploy_success'
   | 'oneclick.deploy_error'
