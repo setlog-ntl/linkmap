@@ -5,7 +5,7 @@ import type { LinkedAccount, LinkedResource } from '@/types';
 /**
  * ServiceAccount 응답 row를 LinkedAccount 도메인 타입으로 매핑하는 헬퍼
  */
-function mapRowToLinkedAccount(row: any): LinkedAccount {
+function mapRowToLinkedAccount(row: Record<string, unknown>): LinkedAccount {
   const metadata = (row.oauth_metadata || {}) as Record<string, unknown>;
   const login = (metadata.login as string) || null;
   const name = (metadata.name as string) || null;
@@ -49,7 +49,7 @@ export function useLinkedAccounts(projectId: string) {
         return [];
       }
 
-      const data = (await res.json()) as any[];
+      const data = (await res.json()) as Record<string, unknown>[];
       return data.map(mapRowToLinkedAccount);
     },
     enabled: !!projectId,
@@ -77,7 +77,7 @@ export function useLinkedAccountsByService(projectId: string, _serviceSlug: stri
         return [];
       }
 
-      const data = (await res.json()) as any[];
+      const data = (await res.json()) as Record<string, unknown>[];
       return data.map(mapRowToLinkedAccount);
     },
     enabled: !!projectId,
@@ -108,7 +108,7 @@ export function useLinkedResources(projectId: string, resourceType: string) {
         return [];
       }
 
-      const data = (await res.json()) as { repos: any[] };
+      const data = (await res.json()) as { repos: Record<string, unknown>[] };
       return (data.repos || []).map((row) => {
         return {
           id: row.id,

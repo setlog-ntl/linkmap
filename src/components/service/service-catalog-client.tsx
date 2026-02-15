@@ -109,7 +109,7 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
   }, [services]);
 
   const filteredServices = useMemo(() => {
-    let result = services.filter((s) => {
+    const result = services.filter((s) => {
       // Easy mode category filter
       if (viewMode === 'easy' && selectedEasyCategory) {
         const cats = easyCategoryToServiceCategories[selectedEasyCategory];

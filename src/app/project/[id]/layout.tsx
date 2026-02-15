@@ -14,36 +14,43 @@ export default async function ProjectLayout({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
+  let profile: Profile | null = null;
+  let project: Record<string, unknown> | null = null;
+
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect('/login');
 
-    const [{ data: profile }, { data: project }] = await Promise.all([
+    const [profileResult, projectResult] = await Promise.all([
       supabase.from('profiles').select('*').eq('id', user.id).single(),
       supabase.from('projects').select('*').eq('id', id).eq('user_id', user.id).single(),
     ]);
 
-    if (!project) redirect('/dashboard');
+    profile = profileResult.data as Profile | null;
+    project = projectResult.data;
 
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Header profile={profile as Profile | null} />
-        <div className="container py-6">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold">{project.name}</h1>
-            {project.description && (
-              <p className="text-muted-foreground mt-1">{project.description}</p>
-            )}
-          </div>
-          <ProjectTabs projectId={id} />
-          <div className="mt-6">
-            {children}
-          </div>
-        </div>
-      </div>
-    );
+    if (!project) redirect('/dashboard');
   } catch {
     redirect('/login');
   }
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header profile={profile} />
+      <div className="container py-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold">{(project as Record<string, unknown>)?.name as string}</h1>
+          {(project as Record<string, unknown>)?.description && (
+            <p className="text-muted-foreground mt-1">{(project as Record<string, unknown>).description as string}</p>
+          )}
+        </div>
+        <ProjectTabs projectId={id} />
+        <div className="mt-6">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
 }

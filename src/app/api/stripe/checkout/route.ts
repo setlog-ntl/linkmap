@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   if (!priceId) return apiError('가격 ID가 필요합니다', 400);
 
   // Get or create stripe customer (with race condition handling)
-  let { data: subscription } = await supabase
+  const { data: subscription } = await supabase
     .from('subscriptions')
     .select('stripe_customer_id')
     .eq('user_id', user.id)
