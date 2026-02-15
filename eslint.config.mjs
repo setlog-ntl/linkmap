@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Template projects have their own configs — skip them
+    "templates/**",
+    "packages/**",
   ]),
   {
     rules: {
