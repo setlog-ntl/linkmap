@@ -34,7 +34,20 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
   if (error) return serverError(error.message);
 
-  return NextResponse.json({ members: members || [] });
+  // Strip sensitive raw_user_meta_data, expose only safe fields
+  const safeMembers = (members || []).map((member) => {
+    const { user, ...rest } = member as Record<string, unknown> & { user?: { email?: string; raw_user_meta_data?: Record<string, unknown> } };
+    return {
+      ...rest,
+      user: user ? {
+        email: user.email,
+        avatar_url: user.raw_user_meta_data?.avatar_url ?? null,
+        full_name: user.raw_user_meta_data?.full_name ?? null,
+      } : null,
+    };
+  });
+
+  return NextResponse.json({ members: safeMembers });
 }
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

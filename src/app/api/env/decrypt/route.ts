@@ -16,8 +16,13 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
 
-  const { success } = rateLimit(`decrypt:${user.id}`, 20);
-  if (!success) return apiError('요청이 너무 많습니다.', 429);
+  const { success, resetAt } = rateLimit(`decrypt:${user.id}`, 10);
+  if (!success) {
+    return NextResponse.json(
+      { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+      { status: 429, headers: { 'Retry-After': String(Math.max(1, Math.ceil((resetAt - Date.now()) / 1000))) } }
+    );
+  }
 
   let body: unknown;
   try {

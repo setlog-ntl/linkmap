@@ -9,7 +9,7 @@ interface ContextMenuState {
 }
 
 interface ServiceMapState {
-  sidebarOpen: boolean;
+  catalogSidebarOpen: boolean;
   viewMode: ViewMode;
   focusedNodeId: string | null;
   collapsedGroups: Set<string>;
@@ -17,8 +17,8 @@ interface ServiceMapState {
   expandedNodeId: string | null;
   bottomPanelOpen: boolean;
 
-  setSidebarOpen: (open: boolean) => void;
-  toggleSidebar: () => void;
+  setCatalogSidebarOpen: (open: boolean) => void;
+  toggleCatalogSidebar: () => void;
   setViewMode: (mode: ViewMode) => void;
   setFocusedNodeId: (id: string | null) => void;
   toggleGroupCollapsed: (groupKey: string) => void;
@@ -29,7 +29,7 @@ interface ServiceMapState {
 }
 
 export const useServiceMapStore = create<ServiceMapState>((set) => ({
-  sidebarOpen: false,
+  catalogSidebarOpen: false,
   viewMode: 'default',
   focusedNodeId: null,
   collapsedGroups: new Set<string>(),
@@ -37,8 +37,8 @@ export const useServiceMapStore = create<ServiceMapState>((set) => ({
   expandedNodeId: null,
   bottomPanelOpen: true,
 
-  setSidebarOpen: (open) => set({ sidebarOpen: open }),
-  toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
+  setCatalogSidebarOpen: (open) => set({ catalogSidebarOpen: open }),
+  toggleCatalogSidebar: () => set((s) => ({ catalogSidebarOpen: !s.catalogSidebarOpen })),
   setViewMode: (mode) => set({ viewMode: mode }),
   setFocusedNodeId: (id) => set((s) => ({ focusedNodeId: s.focusedNodeId === id ? null : id })),
   toggleGroupCollapsed: (groupKey) =>

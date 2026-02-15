@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { queryKeys } from './keys';
-import type { EnvironmentVariable } from '@/types';
+import type { EnvironmentVariable, Environment } from '@/types';
 
 const supabase = createClient();
 
@@ -29,7 +29,7 @@ export function useAddEnvVar(projectId: string) {
     mutationFn: async (vars: {
       key_name: string;
       value: string;
-      environment: string;
+      environment: Environment;
       is_secret: boolean;
       description?: string | null;
       service_id?: string | null;
@@ -42,7 +42,33 @@ export function useAddEnvVar(projectId: string) {
       if (!res.ok) throw new Error('환경변수 추가 실패');
       return res.json();
     },
-    onSuccess: () => {
+    onMutate: async (vars) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.envVars.byProject(projectId) });
+      const previous = queryClient.getQueryData<EnvironmentVariable[]>(queryKeys.envVars.byProject(projectId));
+      const optimistic: EnvironmentVariable = {
+        id: `temp-${Date.now()}`,
+        project_id: projectId,
+        key_name: vars.key_name,
+        encrypted_value: '',
+        environment: vars.environment,
+        is_secret: vars.is_secret,
+        description: vars.description || null,
+        service_id: vars.service_id || null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      queryClient.setQueryData<EnvironmentVariable[]>(
+        queryKeys.envVars.byProject(projectId),
+        (old) => [...(old || []), optimistic],
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(queryKeys.envVars.byProject(projectId), context.previous);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.envVars.byProject(projectId) });
     },
   });
@@ -96,7 +122,21 @@ export function useDeleteEnvVar(projectId: string) {
       const res = await fetch(`/api/env?id=${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('환경변수 삭제 실패');
     },
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.envVars.byProject(projectId) });
+      const previous = queryClient.getQueryData<EnvironmentVariable[]>(queryKeys.envVars.byProject(projectId));
+      queryClient.setQueryData<EnvironmentVariable[]>(
+        queryKeys.envVars.byProject(projectId),
+        (old) => (old || []).filter((v) => v.id !== id),
+      );
+      return { previous };
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(queryKeys.envVars.byProject(projectId), context.previous);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.envVars.byProject(projectId) });
     },
   });

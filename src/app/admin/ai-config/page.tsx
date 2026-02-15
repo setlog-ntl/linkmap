@@ -13,7 +13,7 @@ export default async function AdminAiConfigPage() {
     redirect('/login');
   }
 
-  const admin = await isAdmin(supabase, user.id);
+  const admin = await isAdmin(user.id);
   if (!admin) {
     redirect('/dashboard');
   }

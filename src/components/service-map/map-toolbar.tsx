@@ -76,15 +76,15 @@ export function MapToolbar({
   onConnectionTypeChange,
 }: MapToolbarProps) {
   const { fitView } = useReactFlow();
-  const { toggleSidebar, sidebarOpen } = useServiceMapStore();
+  const { toggleCatalogSidebar, catalogSidebarOpen } = useServiceMapStore();
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
       {/* 서비스 추가 버튼 */}
       <Button
-        variant={sidebarOpen ? 'default' : 'outline'}
+        variant={catalogSidebarOpen ? 'default' : 'outline'}
         size="sm"
-        onClick={toggleSidebar}
+        onClick={toggleCatalogSidebar}
         className="h-8"
       >
         <Plus className="mr-1.5 h-3.5 w-3.5" />

@@ -6,6 +6,8 @@ export type AuditAction =
   | 'env_var.delete'
   | 'env_var.decrypt'
   | 'env_var.bulk_create'
+  | 'env_var.bulk_decrypt'
+  | 'env_var.download'
   | 'project.create'
   | 'project.update'
   | 'project.delete'

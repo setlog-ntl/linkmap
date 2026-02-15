@@ -11,7 +11,7 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
 
-  const admin = await isAdmin(supabase, user.id);
+  const admin = await isAdmin(user.id);
   if (!admin) return apiError('관리자 권한이 필요합니다', 403);
 
   const adminSupabase = createAdminClient();
@@ -34,7 +34,7 @@ export async function PUT(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
 
-  const admin = await isAdmin(supabase, user.id);
+  const admin = await isAdmin(user.id);
   if (!admin) return apiError('관리자 권한이 필요합니다', 403);
 
   const body = await request.json();

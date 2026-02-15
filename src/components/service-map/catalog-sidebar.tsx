@@ -37,7 +37,7 @@ export function CatalogSidebar({
   projectServices,
   isLoading,
 }: CatalogSidebarProps) {
-  const { sidebarOpen, setSidebarOpen } = useServiceMapStore();
+  const { catalogSidebarOpen, setCatalogSidebarOpen } = useServiceMapStore();
   const addService = useAddProjectService(projectId);
 
   const addedServiceIds = useMemo(
@@ -66,7 +66,7 @@ export function CatalogSidebar({
 
   return (
     <AnimatePresence>
-      {sidebarOpen && (
+      {catalogSidebarOpen && (
         <motion.div
           initial={{ width: 0, opacity: 0 }}
           animate={{ width: 'min(280px, 85vw)' as unknown as number, opacity: 1 }}
@@ -80,7 +80,7 @@ export function CatalogSidebar({
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={() => setSidebarOpen(false)}
+              onClick={() => setCatalogSidebarOpen(false)}
             >
               <X className="h-4 w-4" />
             </Button>

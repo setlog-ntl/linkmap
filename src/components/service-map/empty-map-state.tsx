@@ -48,7 +48,7 @@ interface EmptyMapStateProps {
 }
 
 export function EmptyMapState({ projectId }: EmptyMapStateProps) {
-  const { setSidebarOpen } = useServiceMapStore();
+  const { setCatalogSidebarOpen } = useServiceMapStore();
   const addService = useAddProjectService(projectId);
   const [loadingPreset, setLoadingPreset] = useState<string | null>(null);
 
@@ -79,7 +79,7 @@ export function EmptyMapState({ projectId }: EmptyMapStateProps) {
           </p>
         </div>
 
-        <Button onClick={() => setSidebarOpen(true)} size="lg">
+        <Button onClick={() => setCatalogSidebarOpen(true)} size="lg">
           <Sparkles className="mr-2 h-4 w-4" />
           서비스 카탈로그 열기
         </Button>

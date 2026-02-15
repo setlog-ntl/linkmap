@@ -18,7 +18,7 @@ export function NodeContextMenu({
   onRunHealthCheck,
   onRemoveService,
 }: NodeContextMenuProps) {
-  const { contextMenu, setContextMenu, setSidebarOpen } = useServiceMapStore();
+  const { contextMenu, setContextMenu, setCatalogSidebarOpen } = useServiceMapStore();
   const { fitView } = useReactFlow();
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +47,7 @@ export function NodeContextMenu({
   ];
 
   const paneMenuItems = [
-    { icon: Plus, label: '서비스 추가', action: () => setSidebarOpen(true) },
+    { icon: Plus, label: '서비스 추가', action: () => setCatalogSidebarOpen(true) },
     { icon: Maximize2, label: '전체 보기', action: () => fitView({ padding: 0.3 }) },
   ];
 

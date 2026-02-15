@@ -1,17 +1,15 @@
+import * as Sentry from '@sentry/nextjs';
 import { logger } from '@/lib/logger';
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    logger.info('Instrumentation registered', {
-      runtime: 'nodejs',
-      env: process.env.NODE_ENV,
-    });
+    await import('../sentry.server.config');
+    logger.info('Instrumentation registered (nodejs)');
   }
 
   if (process.env.NEXT_RUNTIME === 'edge') {
-    logger.info('Instrumentation registered', {
-      runtime: 'edge',
-    });
+    await import('../sentry.edge.config');
+    logger.info('Instrumentation registered (edge)');
   }
 }
 
@@ -20,7 +18,8 @@ export function onRequestError(
   request: { path: string; method: string; headers: Record<string, string> },
   context: { routerKind: string; routePath: string; routeType: string; renderSource: string }
 ) {
-  logger.error('Unhandled request error', {
+  logger.error({
+    msg: 'Unhandled request error',
     error: error.message,
     digest: error.digest,
     path: request.path,
@@ -28,5 +27,18 @@ export function onRequestError(
     routePath: context.routePath,
     routeType: context.routeType,
     renderSource: context.renderSource,
+  });
+
+  Sentry.captureException(error, {
+    tags: {
+      routePath: context.routePath,
+      routeType: context.routeType,
+      method: request.method,
+    },
+    extra: {
+      path: request.path,
+      renderSource: context.renderSource,
+      digest: error.digest,
+    },
   });
 }

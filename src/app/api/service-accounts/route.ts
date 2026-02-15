@@ -14,6 +14,16 @@ export async function GET(request: NextRequest) {
   const projectId = request.nextUrl.searchParams.get('project_id');
   if (!projectId) return apiError('project_id가 필요합니다', 400);
 
+  // Verify project ownership before listing service accounts
+  const { data: project } = await supabase
+    .from('projects')
+    .select('id')
+    .eq('id', projectId)
+    .eq('user_id', user.id)
+    .single();
+
+  if (!project) return apiError('프로젝트를 찾을 수 없습니다', 404);
+
   // 토큰 필드는 제외하고 반환
   const { data, error } = await supabase
     .from('service_accounts')
