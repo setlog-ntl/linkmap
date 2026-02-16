@@ -11,6 +11,8 @@ import '@xyflow/react/dist/style.css';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import FlowServiceNode from './flow-service-node';
 import { SIMPLE_FLOW, COMPLEX_FLOW, type FlowPreset } from '@/data/flow-presets';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 
 const nodeTypes = { service: FlowServiceNode };
 
@@ -79,14 +81,15 @@ function PresetDiagram({ preset }: { preset: FlowPreset }) {
 export function FlowComparison() {
   const [tab, setTab] = useState('simple');
   const activePreset = tab === 'simple' ? SIMPLE_FLOW : COMPLEX_FLOW;
+  const { locale } = useLocaleStore();
 
   return (
     <div className="rounded-xl border bg-card overflow-hidden">
       <Tabs value={tab} onValueChange={setTab}>
         <div className="px-4 pt-4">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="simple" className="text-xs sm:text-sm">간단한 흐름 (블로그)</TabsTrigger>
-            <TabsTrigger value="complex" className="text-xs sm:text-sm">복잡한 흐름 (SaaS)</TabsTrigger>
+            <TabsTrigger value="simple" className="text-xs sm:text-sm">{t(locale, 'landing.tabSimple')}</TabsTrigger>
+            <TabsTrigger value="complex" className="text-xs sm:text-sm">{t(locale, 'landing.tabComplex')}</TabsTrigger>
           </TabsList>
         </div>
 
@@ -100,8 +103,8 @@ export function FlowComparison() {
 
       {/* Stats bar */}
       <div className="flex items-center justify-center gap-3 sm:gap-6 px-4 py-3 border-t bg-muted/30 text-xs sm:text-sm text-muted-foreground">
-        <span>📊 {activePreset.stats.services}개 서비스</span>
-        <span>📋 {activePreset.stats.envVars}개 환경변수</span>
+        <span>📊 {activePreset.stats.services}{t(locale, 'landing.statsServices')}</span>
+        <span>📋 {activePreset.stats.envVars}{t(locale, 'landing.statsEnvVars')}</span>
         <span>⏱ {activePreset.stats.setupTime}</span>
       </div>
     </div>

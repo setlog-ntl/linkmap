@@ -1,40 +1,41 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
 import { ScrollReveal } from './scroll-reveal';
 import { FolderPlus, Puzzle, Download } from 'lucide-react';
-
-const steps = [
-  {
-    number: '1',
-    icon: FolderPlus,
-    title: '프로젝트 생성',
-    description: '새 프로젝트를 만들거나 템플릿에서 시작하세요. SaaS, AI 앱 등 5종 템플릿이 준비되어 있습니다.',
-  },
-  {
-    number: '2',
-    icon: Puzzle,
-    title: '서비스 추가',
-    description: '20개 이상의 서비스 카탈로그에서 선택하고, 단계별 한국어 체크리스트를 따라가세요.',
-  },
-  {
-    number: '3',
-    icon: Download,
-    title: '환경변수 관리',
-    description: 'API 키를 안전하게 저장하고, .env 파일을 한 클릭으로 다운로드하세요.',
-  },
-];
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 
 export function HowItWorks() {
-  const prefersReducedMotion = useReducedMotion();
+  const { locale } = useLocaleStore();
+
+  const steps = [
+    {
+      number: '1',
+      icon: FolderPlus,
+      title: t(locale, 'landing.step1Title'),
+      description: t(locale, 'landing.step1Desc'),
+    },
+    {
+      number: '2',
+      icon: Puzzle,
+      title: t(locale, 'landing.step2Title'),
+      description: t(locale, 'landing.step2Desc'),
+    },
+    {
+      number: '3',
+      icon: Download,
+      title: t(locale, 'landing.step3Title'),
+      description: t(locale, 'landing.step3Desc'),
+    },
+  ];
 
   return (
-    <section className="bg-muted/50 py-20">
+    <section className="bg-muted/50 py-14">
       <div className="container">
         <ScrollReveal>
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">이렇게 사용하세요</h2>
-            <p className="text-muted-foreground text-lg">3단계로 간단하게</p>
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold mb-4">{t(locale, 'landing.howTitle')}</h2>
+            <p className="text-muted-foreground text-lg">{t(locale, 'landing.howDesc')}</p>
           </div>
         </ScrollReveal>
 

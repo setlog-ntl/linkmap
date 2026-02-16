@@ -4,31 +4,39 @@ import dynamic from 'next/dynamic';
 import { ConnectionDashboard } from './connection-dashboard';
 import { ScrollReveal } from './scroll-reveal';
 import { Badge } from '@/components/ui/badge';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
+
+function FlowComparisonLoader() {
+  const { locale } = useLocaleStore();
+  return (
+    <div className="rounded-xl border bg-card h-[380px] animate-pulse flex items-center justify-center">
+      <span className="text-sm text-muted-foreground">{t(locale, 'landing.demoLoading')}</span>
+    </div>
+  );
+}
 
 const FlowComparison = dynamic(
   () => import('./flow-comparison').then((mod) => ({ default: mod.FlowComparison })),
   {
     ssr: false,
-    loading: () => (
-      <div className="rounded-xl border bg-card h-[380px] animate-pulse flex items-center justify-center">
-        <span className="text-sm text-muted-foreground">로딩 중...</span>
-      </div>
-    ),
+    loading: () => <FlowComparisonLoader />,
   }
 );
 
 export function InteractiveDemo() {
+  const { locale } = useLocaleStore();
+
   return (
-    <section id="interactive-demo" className="container py-20">
+    <section id="interactive-demo" className="container py-14">
       <ScrollReveal>
-        <div className="text-center mb-12">
-          <Badge variant="secondary" className="mb-3">인터랙티브 데모</Badge>
+        <div className="text-center mb-8">
+          <Badge variant="secondary" className="mb-3">{t(locale, 'landing.demoBadge')}</Badge>
           <h2 className="text-3xl font-bold mb-4">
-            간단한 블로그부터 복잡한 SaaS까지
+            {t(locale, 'landing.demoSectionTitle')}
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            프로젝트 규모에 따라 달라지는 서비스 연결 구조를 비교하고,
-            연결 상태를 대시보드로 확인하세요.
+            {t(locale, 'landing.demoSectionDesc')}
           </p>
         </div>
       </ScrollReveal>

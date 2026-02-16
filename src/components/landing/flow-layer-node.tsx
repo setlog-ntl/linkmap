@@ -3,6 +3,8 @@
 import { memo } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { ServiceIcon } from './service-icon';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 
 const layerColors: Record<string, { bg: string; border: string; text: string }> = {
   source: {
@@ -43,6 +45,7 @@ interface FlowLayerNodeData {
 function FlowLayerNode({ data }: NodeProps) {
   const d = data as unknown as FlowLayerNodeData;
   const colors = layerColors[d.layer] || layerColors.source;
+  const { locale } = useLocaleStore();
 
   return (
     <div
@@ -66,11 +69,11 @@ function FlowLayerNode({ data }: NodeProps) {
         {d.totalCount != null && d.totalCount > 0 && (
           <div className="mt-1.5 space-y-0.5">
             <div className="text-[10px] text-muted-foreground">
-              {d.connectedCount}/{d.totalCount} 연결됨
+              {d.connectedCount}/{d.totalCount} {t(locale, 'landing.nodeConnected')}
             </div>
             {d.checklistTotal != null && d.checklistTotal > 0 && (
               <div className="text-[10px] text-muted-foreground">
-                {d.checklistDone}/{d.checklistTotal} 완료
+                {d.checklistDone}/{d.checklistTotal} {t(locale, 'landing.nodeCompleted')}
               </div>
             )}
           </div>

@@ -2,17 +2,21 @@
 
 import { ScrollReveal } from './scroll-reveal';
 import { AnimatedCounter } from './animated-counter';
-
-const stats = [
-  { value: 20, suffix: '+', label: '지원 서비스' },
-  { value: 116, suffix: '+', label: '체크리스트 항목' },
-  { value: 5, suffix: '', label: '프로젝트 템플릿' },
-  { value: 256, suffix: '', label: '비트 암호화' },
-];
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 
 export function StatsSection() {
+  const { locale } = useLocaleStore();
+
+  const stats = [
+    { value: 20, suffix: '+', label: t(locale, 'landing.statServices') },
+    { value: 116, suffix: '+', label: t(locale, 'landing.statChecklist') },
+    { value: 5, suffix: '', label: t(locale, 'landing.statTemplates') },
+    { value: 256, suffix: '', label: t(locale, 'landing.statEncryption') },
+  ];
+
   return (
-    <section className="bg-muted/50 py-16">
+    <section className="bg-muted/50 py-10">
       <div className="container">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
           {stats.map((stat, i) => (

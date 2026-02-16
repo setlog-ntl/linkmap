@@ -6,17 +6,9 @@ import { ScrollReveal } from './scroll-reveal';
 import { ServiceIcon } from './service-icon';
 import { services } from '@/data/services';
 import { getCategoryStyle } from '@/lib/constants/category-styles';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 import type { ServiceDomain } from '@/types';
-
-const DOMAIN_FILTERS: { label: string; value: ServiceDomain | 'all' }[] = [
-  { label: '전체', value: 'all' },
-  { label: '인프라', value: 'infrastructure' },
-  { label: '백엔드', value: 'backend' },
-  { label: '개발도구', value: 'devtools' },
-  { label: '커뮤니케이션', value: 'communication' },
-  { label: '비즈니스', value: 'business' },
-  { label: 'AI', value: 'ai_ml' },
-];
 
 /** 상위 20개 인기 서비스를 popularity_score 기준으로 선별 */
 const TOP_SERVICES = services
@@ -27,6 +19,17 @@ const TOP_SERVICES = services
 export function ServicesGrid() {
   const [filter, setFilter] = useState<ServiceDomain | 'all'>('all');
   const prefersReducedMotion = useReducedMotion();
+  const { locale } = useLocaleStore();
+
+  const domainFilters: { label: string; value: ServiceDomain | 'all' }[] = [
+    { label: t(locale, 'landing.filterAll'), value: 'all' },
+    { label: t(locale, 'landing.filterInfra'), value: 'infrastructure' },
+    { label: t(locale, 'landing.filterBackend'), value: 'backend' },
+    { label: t(locale, 'landing.filterDevtools'), value: 'devtools' },
+    { label: t(locale, 'landing.filterComm'), value: 'communication' },
+    { label: t(locale, 'landing.filterBiz'), value: 'business' },
+    { label: t(locale, 'landing.filterAI'), value: 'ai_ml' },
+  ];
 
   const filtered = useMemo(
     () =>
@@ -37,12 +40,12 @@ export function ServicesGrid() {
   );
 
   return (
-    <section className="container py-20">
+    <section className="container py-14">
       <ScrollReveal>
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-4">지원 서비스</h2>
+          <h2 className="text-3xl font-bold mb-4">{t(locale, 'landing.servicesTitle')}</h2>
           <p className="text-muted-foreground text-lg">
-            인기 있는 {TOP_SERVICES.length}개 서비스를 모두 지원합니다
+            {t(locale, 'landing.servicesDesc')}
           </p>
         </div>
       </ScrollReveal>
@@ -50,7 +53,7 @@ export function ServicesGrid() {
       {/* Filter tabs */}
       <ScrollReveal>
         <div className="flex flex-wrap justify-center gap-2 mb-8">
-          {DOMAIN_FILTERS.map((f) => (
+          {domainFilters.map((f) => (
             <button
               key={f.value}
               onClick={() => setFilter(f.value)}

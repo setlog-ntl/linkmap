@@ -3,6 +3,8 @@
 import { Map, Key, CheckCircle2, Layers } from 'lucide-react';
 import { FeatureCard } from './feature-card';
 import { ScrollReveal } from './scroll-reveal';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 
 function ServiceMapVisual() {
   return (
@@ -49,10 +51,16 @@ function EnvVarVisual() {
   );
 }
 
-function ChecklistVisual() {
+function ChecklistVisual({ locale }: { locale: 'ko' | 'en' }) {
+  const items = [
+    t(locale, 'landing.checklistItem1'),
+    t(locale, 'landing.checklistItem2'),
+    t(locale, 'landing.checklistItem3'),
+  ];
+
   return (
     <div className="px-6 space-y-2">
-      {['프로젝트 생성', 'API 키 발급', 'SDK 설치'].map((item, i) => (
+      {items.map((item, i) => (
         <div key={i} className="flex items-center gap-2 text-xs">
           <CheckCircle2 className={`w-4 h-4 ${i < 2 ? 'text-green-500' : 'text-muted-foreground/30'}`} />
           <span className={i < 2 ? 'text-muted-foreground line-through' : ''}>{item}</span>
@@ -65,10 +73,16 @@ function ChecklistVisual() {
   );
 }
 
-function TemplateVisual() {
+function TemplateVisual({ locale }: { locale: 'ko' | 'en' }) {
+  const names = [
+    t(locale, 'landing.templateName1'),
+    t(locale, 'landing.templateName2'),
+    t(locale, 'landing.templateName3'),
+  ];
+
   return (
     <div className="flex justify-center -space-x-4 group-hover:space-x-1 transition-all duration-500">
-      {['SaaS', 'AI 앱', '블로그'].map((name, i) => (
+      {names.map((name, i) => (
         <div
           key={i}
           className="w-20 h-24 rounded-lg border bg-card shadow-sm flex items-center justify-center text-xs font-medium transition-transform duration-300"
@@ -82,13 +96,15 @@ function TemplateVisual() {
 }
 
 export function FeaturesBento() {
+  const { locale } = useLocaleStore();
+
   return (
-    <section className="container py-20">
+    <section className="container py-14">
       <ScrollReveal>
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">핵심 기능</h2>
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold mb-4">{t(locale, 'landing.featuresTitle')}</h2>
           <p className="text-muted-foreground text-lg">
-            프로젝트 설정에 필요한 모든 것을 한 곳에서
+            {t(locale, 'landing.featuresDesc')}
           </p>
         </div>
       </ScrollReveal>
@@ -98,8 +114,8 @@ export function FeaturesBento() {
         <ScrollReveal className="md:col-span-2 md:row-span-2" delay={0.1}>
           <FeatureCard
             icon={<Map className="w-4 h-4 text-primary" />}
-            title="서비스 맵 시각화"
-            description="프로젝트의 서비스 아키텍처를 인터랙티브 다이어그램으로 시각화합니다. 팀원과 쉽게 공유하고, 의존성을 한눈에 파악하세요."
+            title={t(locale, 'landing.featureMapTitle')}
+            description={t(locale, 'landing.featureMapDesc')}
             visual={<ServiceMapVisual />}
             className="h-full"
           />
@@ -109,9 +125,9 @@ export function FeaturesBento() {
         <ScrollReveal delay={0.2}>
           <FeatureCard
             icon={<CheckCircle2 className="w-4 h-4 text-primary" />}
-            title="연결 체크리스트"
-            description="서비스별 단계별 한국어 가이드로 초보자도 쉽게 연결할 수 있습니다."
-            visual={<ChecklistVisual />}
+            title={t(locale, 'landing.featureChecklistTitle')}
+            description={t(locale, 'landing.featureChecklistDesc')}
+            visual={<ChecklistVisual locale={locale} />}
           />
         </ScrollReveal>
 
@@ -119,9 +135,9 @@ export function FeaturesBento() {
         <ScrollReveal delay={0.3}>
           <FeatureCard
             icon={<Layers className="w-4 h-4 text-primary" />}
-            title="프로젝트 템플릿"
-            description="SaaS, AI 앱 등 검증된 템플릿으로 빠르게 시작하세요."
-            visual={<TemplateVisual />}
+            title={t(locale, 'landing.featureTemplateTitle')}
+            description={t(locale, 'landing.featureTemplateDesc')}
+            visual={<TemplateVisual locale={locale} />}
           />
         </ScrollReveal>
 
@@ -129,8 +145,8 @@ export function FeaturesBento() {
         <ScrollReveal className="md:col-span-3" delay={0.4}>
           <FeatureCard
             icon={<Key className="w-4 h-4 text-primary" />}
-            title="환경변수 관리"
-            description="API 키와 시크릿을 AES-256 암호화로 안전하게 저장하고, .env 파일을 한 클릭으로 다운로드하세요. 개발/스테이징/프로덕션 환경별로 분리 관리합니다."
+            title={t(locale, 'landing.featureEnvTitle')}
+            description={t(locale, 'landing.featureEnvDesc')}
             visual={<EnvVarVisual />}
             badge="AES-256"
             className="md:flex-row"

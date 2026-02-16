@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { StatusBadge } from './status-badge';
 import { ServiceIcon } from './service-icon';
 import { MOCK_CONNECTIONS } from '@/data/mock-connections';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 
 function ProgressBar({ value, max, color }: { value: number; max: number; color: string }) {
   const pct = max > 0 ? (value / max) * 100 : 0;
@@ -26,6 +28,7 @@ export function ConnectionDashboard() {
   const [visibleCount, setVisibleCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
+  const { locale } = useLocaleStore();
 
   useEffect(() => {
     const el = ref.current;
@@ -59,10 +62,10 @@ export function ConnectionDashboard() {
       {/* Header */}
       <div className="px-4 py-3 border-b">
         <h4 className="font-semibold text-sm flex items-center gap-2">
-          🔗 연결 상태 대시보드
+          🔗 {t(locale, 'landing.dashboardTitle')}
         </h4>
         <p className="text-xs text-muted-foreground mt-0.5">
-          프로젝트의 모든 서비스 연결을 한눈에 확인
+          {t(locale, 'landing.dashboardDesc')}
         </p>
       </div>
 
@@ -71,11 +74,11 @@ export function ConnectionDashboard() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/30">
-              <th className="text-left px-3 sm:px-4 py-2 font-medium text-xs text-muted-foreground">서비스</th>
-              <th className="text-left px-3 sm:px-4 py-2 font-medium text-xs text-muted-foreground">상태</th>
-              <th className="text-left px-3 sm:px-4 py-2 font-medium text-xs text-muted-foreground hidden sm:table-cell">환경변수</th>
-              <th className="text-left px-3 sm:px-4 py-2 font-medium text-xs text-muted-foreground hidden sm:table-cell">체크리스트</th>
-              <th className="text-left px-3 sm:px-4 py-2 font-medium text-xs text-muted-foreground hidden md:table-cell">마지막 확인</th>
+              <th className="text-left px-3 sm:px-4 py-2 font-medium text-xs text-muted-foreground">{t(locale, 'landing.colService')}</th>
+              <th className="text-left px-3 sm:px-4 py-2 font-medium text-xs text-muted-foreground">{t(locale, 'landing.colStatus')}</th>
+              <th className="text-left px-3 sm:px-4 py-2 font-medium text-xs text-muted-foreground hidden sm:table-cell">{t(locale, 'landing.colEnvVars')}</th>
+              <th className="text-left px-3 sm:px-4 py-2 font-medium text-xs text-muted-foreground hidden sm:table-cell">{t(locale, 'landing.colChecklist')}</th>
+              <th className="text-left px-3 sm:px-4 py-2 font-medium text-xs text-muted-foreground hidden md:table-cell">{t(locale, 'landing.colLastChecked')}</th>
             </tr>
           </thead>
           <tbody>
@@ -128,19 +131,19 @@ export function ConnectionDashboard() {
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-green-500" />
-            {statusCounts.connected} 연결됨
+            {statusCounts.connected} {t(locale, 'landing.statusConnected')}
           </span>
           <span className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-yellow-500" />
-            {statusCounts.in_progress} 진행 중
+            {statusCounts.in_progress} {t(locale, 'landing.statusInProgress')}
           </span>
           <span className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-gray-400" />
-            {statusCounts.not_started} 대기
+            {statusCounts.not_started} {t(locale, 'landing.statusNotStarted')}
           </span>
         </div>
         <Button size="sm" variant="outline" asChild>
-          <Link href="/signup">모든 연결 확인</Link>
+          <Link href="/signup">{t(locale, 'landing.viewAllConnections')}</Link>
         </Button>
       </div>
     </div>
