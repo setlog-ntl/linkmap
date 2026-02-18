@@ -19,6 +19,8 @@
   // 환경변수는 `wrangler secret put` 으로 설정
   // 비밀이 아닌 값만 여기에 작성
   "vars": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "NEXT_PUBLIC_SUPABASE_URL": "https://apqydhwahkccxlltacas.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwcXlkaHdhaGtjY3hsbHRhY2FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0NTMxMjgsImV4cCI6MjA4NjAyOTEyOH0.lnFTU6-5_KpcNlkHgyP64qs_wbgUMeRsCoEOU7znCPc"
   }
 }
