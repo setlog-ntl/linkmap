@@ -62,7 +62,7 @@ https://linkmap.vercel.app/**
 
 ## 5. DB 마이그레이션
 
-마이그레이션 파일은 `supabase/migrations/` 디렉토리에 있습니다 (001~026).
+마이그레이션 파일은 `supabase/migrations/` 디렉토리에 있습니다 (001~027).
 
 ### Supabase CLI 사용 시
 

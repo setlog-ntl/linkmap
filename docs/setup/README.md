@@ -69,6 +69,7 @@ npm run dev
 
 | 문서 | 설명 |
 |------|------|
+| [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) | 전체 배포 체크리스트 (GitHub + Vercel + Supabase) |
 | [ENV_REFERENCE.md](./ENV_REFERENCE.md) | 환경변수 전체 참조표 |
 | [COMMON_MISTAKES.md](./COMMON_MISTAKES.md) | 자주 하는 실수 모음 |
 | [../GOOGLE_OAUTH_SETUP.md](../GOOGLE_OAUTH_SETUP.md) | Google OAuth 상세 설정 |
