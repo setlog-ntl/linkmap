@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Plus, Map } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { SystemStatusBadge } from './system-status-badge';
 import type { Project, DashboardMetrics, ServiceCardData } from '@/types';
 
 interface MyProjectCardProps {
@@ -32,6 +33,9 @@ export function MyProjectCard({ project, metrics, allCards }: MyProjectCardProps
             </p>
           )}
         </div>
+
+        {/* System status */}
+        <SystemStatusBadge projectId={project.id} allCards={allCards} />
 
         {/* Metrics */}
         <div className="grid w-full grid-cols-3 gap-2 text-center">

@@ -14,6 +14,8 @@ import { ConnectionPopover } from './connection-popover';
 import { LayerColumn } from './layer-column';
 import { MyProjectCard } from './my-project-card';
 import { DevtoolsRow } from './devtools-row';
+import { EnvAlertBanner } from './env-alert-banner';
+import { HealthSummaryStrip } from './health-summary-strip';
 import type { DashboardResponse, DashboardLayer, ServiceCardData } from '@/types';
 
 interface DashboardLayoutProps {
@@ -100,6 +102,9 @@ export function DashboardLayout({ data }: DashboardLayoutProps) {
 
   return (
     <div className="space-y-4">
+      {/* Env alert banner */}
+      <EnvAlertBanner projectId={project.id} allCards={allCards} />
+
       {/* Connection toggle */}
       <div className="hidden md:flex justify-end">
         <Button
@@ -168,6 +173,11 @@ export function DashboardLayout({ data }: DashboardLayoutProps) {
         <DevtoolsRow data={devtoolsData} projectId={project.id} />
       </div>
 
+      {/* Health summary strip */}
+      <div className="hidden md:block">
+        <HealthSummaryStrip projectId={project.id} allCards={allCards} />
+      </div>
+
       {/* Mobile layout */}
       <div className="md:hidden">
         {/* Tab bar */}
@@ -190,7 +200,10 @@ export function DashboardLayout({ data }: DashboardLayoutProps) {
 
         {/* Tab content */}
         {activeTab === 'project' && (
-          <MyProjectCard project={project} metrics={metrics} allCards={allCards} />
+          <div className="space-y-4">
+            <MyProjectCard project={project} metrics={metrics} allCards={allCards} />
+            <HealthSummaryStrip projectId={project.id} allCards={allCards} />
+          </div>
         )}
         {activeTab === 'frontend' && (
           <LayerColumn data={frontendData} projectId={project.id} />
