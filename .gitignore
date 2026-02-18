@@ -26,6 +26,7 @@
 nul
 Thumbs.db
 desktop.ini
+tmp_*.json
 
 # IDE / editor
 .cursor
