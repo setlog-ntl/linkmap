@@ -19,8 +19,9 @@
 - Team access via team_members join
 
 ## Rate Limiting
-- In-memory rate limiter (30 req/min per user)
-- Applied to sensitive API routes (env vars, decrypt)
+- Cloudflare Rate Limiting Rules로 처리 (앱 코드에서 제거됨)
+- 이전: in-memory 30 req/min → 현재: Cloudflare 인프라 레벨에서 적용
+- 앱 코드에 rate limiting 로직 추가 금지
 
 ## Security Headers
 - X-Frame-Options: DENY

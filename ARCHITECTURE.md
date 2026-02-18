@@ -50,4 +50,4 @@ packages/
 4. **Zod Validation**: All API inputs validated before processing
 5. **Row-Level Security**: Supabase RLS ensures data isolation
 6. **Audit Logging**: Sensitive operations logged to audit_logs table
-7. **Rate Limiting**: In-memory rate limiter on API routes
+7. **Rate Limiting**: Cloudflare Rate Limiting Rules (앱 코드에서 제거됨)
