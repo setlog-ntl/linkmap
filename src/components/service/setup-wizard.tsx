@@ -20,9 +20,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { CheckCircle2, XCircle, Loader2, ExternalLink, ArrowRight, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, XCircle, ArrowRight, ArrowLeft, ExternalLink } from 'lucide-react';
 import { useAddEnvVar } from '@/lib/queries/env-vars';
 import { useRunHealthCheck } from '@/lib/queries/health-checks';
+import { SetupArchitecturePreview } from './setup-architecture-preview';
+import { SetupLiveLogs } from './setup-live-logs';
 import type { Service, ProjectService, Environment, HealthCheck } from '@/types';
 
 interface SetupWizardProps {
@@ -33,22 +35,22 @@ interface SetupWizardProps {
   projectId: string;
 }
 
-type Step = 'info' | 'environment' | 'credentials' | 'verify' | 'done';
-const steps: Step[] = ['info', 'environment', 'credentials', 'verify', 'done'];
+type Step = 'credentials' | 'config' | 'review';
+const steps: Step[] = ['credentials', 'config', 'review'];
 const stepLabels: Record<Step, string> = {
-  info: '서비스 정보',
-  environment: '환경 선택',
   credentials: '인증값 입력',
-  verify: '연결 검증',
-  done: '완료',
+  config: '설정 확인',
+  review: '검증 및 완료',
 };
 
 export function SetupWizard({ open, onOpenChange, service, projectService, projectId }: SetupWizardProps) {
-  const [currentStep, setCurrentStep] = useState<Step>('info');
+  const [currentStep, setCurrentStep] = useState<Step>('credentials');
   const [selectedEnv, setSelectedEnv] = useState<Environment>('development');
   const [envValues, setEnvValues] = useState<Record<string, string>>({});
   const [verifyResult, setVerifyResult] = useState<HealthCheck | null>(null);
   const [saving, setSaving] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [verifySuccess, setVerifySuccess] = useState<boolean | null>(null);
 
   const addEnvVar = useAddEnvVar(projectId);
   const runHealthCheck = useRunHealthCheck();
@@ -69,6 +71,7 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
 
   const handleSaveAndVerify = async () => {
     setSaving(true);
+    setVerifySuccess(null);
     try {
       // Save all env vars
       for (const varTemplate of requiredVars) {
@@ -83,8 +86,8 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
           });
         }
       }
-
-      setCurrentStep('verify');
+      setSaving(false);
+      setVerifying(true);
 
       // Run health check
       const result = await runHealthCheck.mutateAsync({
@@ -92,25 +95,29 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
         environment: selectedEnv,
       });
       setVerifyResult(result);
-      setCurrentStep('done');
+      setVerifySuccess(result.status === 'healthy');
     } catch {
-      setCurrentStep('done');
+      setVerifySuccess(false);
     } finally {
       setSaving(false);
+      setVerifying(false);
     }
   };
 
   const handleClose = () => {
-    setCurrentStep('info');
+    setCurrentStep('credentials');
     setSelectedEnv('development');
     setEnvValues({});
     setVerifyResult(null);
+    setVerifySuccess(null);
     onOpenChange(false);
   };
 
+  const hasFilledValues = requiredVars.some((v) => envValues[v.name]?.trim());
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[520px]">
+      <DialogContent className="sm:max-w-[560px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {service.name} 연결 설정
@@ -129,9 +136,9 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
           </div>
         </DialogHeader>
 
-        <div className="min-h-[200px]">
-          {/* Step 1: Info */}
-          {currentStep === 'info' && (
+        <div className="min-h-[240px]">
+          {/* Step 1: Credentials (combines Info + Environment + Credentials) */}
+          {currentStep === 'credentials' && (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
                 {service.description_ko || service.description}
@@ -147,17 +154,67 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
                   공식 문서 보기
                 </a>
               )}
-              <div>
-                <h4 className="text-sm font-medium mb-2">필요한 환경변수 ({requiredVars.length}개)</h4>
-                <div className="space-y-1.5">
-                  {requiredVars.map((v) => (
-                    <div key={v.name} className="flex items-center gap-2 text-sm">
-                      <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">
-                        {v.name}
-                      </code>
+
+              <div className="space-y-2">
+                <Label>환경 선택</Label>
+                <Select value={selectedEnv} onValueChange={(v) => setSelectedEnv(v as Environment)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="development">개발 (Development)</SelectItem>
+                    <SelectItem value="staging">스테이징 (Staging)</SelectItem>
+                    <SelectItem value="production">프로덕션 (Production)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-3 max-h-[200px] overflow-y-auto">
+                {requiredVars.map((v) => (
+                  <div key={v.name} className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs font-mono">{v.name}</Label>
                       <Badge variant={v.public ? 'secondary' : 'destructive'} className="text-[10px]">
                         {v.public ? '공개' : '비밀'}
                       </Badge>
+                    </div>
+                    <Input
+                      type={v.public ? 'text' : 'password'}
+                      placeholder={v.description_ko || v.description}
+                      value={envValues[v.name] || ''}
+                      onChange={(e) => setEnvValues((prev) => ({ ...prev, [v.name]: e.target.value }))}
+                      className="font-mono text-sm"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Config (Architecture preview) */}
+          {currentStep === 'config' && (
+            <div className="space-y-4">
+              <SetupArchitecturePreview
+                serviceName={service.name}
+                requiredVars={requiredVars}
+              />
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium">설정 요약</h4>
+                <div className="bg-muted/50 rounded-lg p-3 space-y-1.5">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">환경</span>
+                    <span className="font-medium">{selectedEnv === 'development' ? '개발' : selectedEnv === 'staging' ? '스테이징' : '프로덕션'}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">입력된 변수</span>
+                    <span className="font-medium">{requiredVars.filter((v) => envValues[v.name]?.trim()).length} / {requiredVars.length}</span>
+                  </div>
+                  {requiredVars.map((v) => (
+                    <div key={v.name} className="flex justify-between text-xs">
+                      <code className="font-mono text-muted-foreground">{v.name}</code>
+                      <span className={envValues[v.name]?.trim() ? 'text-green-600' : 'text-yellow-600'}>
+                        {envValues[v.name]?.trim() ? '입력됨' : '미입력'}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -165,114 +222,82 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
             </div>
           )}
 
-          {/* Step 2: Environment */}
-          {currentStep === 'environment' && (
+          {/* Step 3: Review (Verify + Done) */}
+          {currentStep === 'review' && (
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                환경변수를 저장할 환경을 선택하세요.
-              </p>
-              <Select value={selectedEnv} onValueChange={(v) => setSelectedEnv(v as Environment)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="development">개발 (Development)</SelectItem>
-                  <SelectItem value="staging">스테이징 (Staging)</SelectItem>
-                  <SelectItem value="production">프로덕션 (Production)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {/* Step 3: Credentials */}
-          {currentStep === 'credentials' && (
-            <div className="space-y-3 max-h-[300px] overflow-y-auto">
-              <p className="text-sm text-muted-foreground">
-                각 환경변수의 값을 입력하세요.
-              </p>
-              {requiredVars.map((v) => (
-                <div key={v.name} className="space-y-1.5">
-                  <Label className="text-xs font-mono">{v.name}</Label>
-                  <Input
-                    type={v.public ? 'text' : 'password'}
-                    placeholder={v.description_ko || v.description}
-                    value={envValues[v.name] || ''}
-                    onChange={(e) => setEnvValues((prev) => ({ ...prev, [v.name]: e.target.value }))}
-                    className="font-mono text-sm"
-                  />
+              {verifySuccess === null && !saving && !verifying ? (
+                <div className="flex flex-col items-center justify-center py-8">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    저장 및 검증 버튼을 눌러 설정을 완료하세요.
+                  </p>
                 </div>
-              ))}
-            </div>
-          )}
+              ) : verifySuccess !== null ? (
+                <div className="flex flex-col items-center justify-center py-4">
+                  {verifySuccess ? (
+                    <>
+                      <CheckCircle2 className="h-12 w-12 text-green-600 mb-4" />
+                      <h3 className="text-lg font-semibold mb-1">연결 성공!</h3>
+                      <p className="text-sm text-muted-foreground text-center">
+                        {service.name} 서비스가 정상적으로 연결되었습니다.
+                        {verifyResult?.response_time_ms && ` (${verifyResult.response_time_ms}ms)`}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="h-12 w-12 text-yellow-600 mb-4" />
+                      <h3 className="text-lg font-semibold mb-1">설정 완료</h3>
+                      <p className="text-sm text-muted-foreground text-center">
+                        환경변수가 저장되었습니다.
+                        {verifyResult?.message && (
+                          <span className="block mt-1 text-xs">{verifyResult.message}</span>
+                        )}
+                      </p>
+                    </>
+                  )}
+                </div>
+              ) : null}
 
-          {/* Step 4: Verify */}
-          {currentStep === 'verify' && (
-            <div className="flex flex-col items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-              <p className="text-sm text-muted-foreground">연결을 검증하고 있습니다...</p>
-            </div>
-          )}
-
-          {/* Step 5: Done */}
-          {currentStep === 'done' && (
-            <div className="flex flex-col items-center justify-center py-8">
-              {verifyResult?.status === 'healthy' ? (
-                <>
-                  <CheckCircle2 className="h-12 w-12 text-green-600 mb-4" />
-                  <h3 className="text-lg font-semibold mb-1">연결 성공!</h3>
-                  <p className="text-sm text-muted-foreground text-center">
-                    {service.name} 서비스가 정상적으로 연결되었습니다.
-                    {verifyResult.response_time_ms && ` (${verifyResult.response_time_ms}ms)`}
-                  </p>
-                </>
-              ) : (
-                <>
-                  <XCircle className="h-12 w-12 text-yellow-600 mb-4" />
-                  <h3 className="text-lg font-semibold mb-1">설정 완료</h3>
-                  <p className="text-sm text-muted-foreground text-center">
-                    환경변수가 저장되었습니다.
-                    {verifyResult?.message && (
-                      <span className="block mt-1 text-xs">{verifyResult.message}</span>
-                    )}
-                  </p>
-                </>
-              )}
+              {/* Live Logs */}
+              <SetupLiveLogs
+                saving={saving}
+                verifying={verifying}
+                verifySuccess={verifySuccess}
+                envVarCount={requiredVars.filter((v) => envValues[v.name]?.trim()).length}
+                serviceName={service.name}
+              />
             </div>
           )}
         </div>
 
         <DialogFooter>
-          {currentStep !== 'verify' && currentStep !== 'done' && (
+          {verifySuccess !== null ? (
+            <Button onClick={handleClose} className="w-full">
+              완료
+            </Button>
+          ) : (
             <div className="flex justify-between w-full">
               <Button
                 variant="outline"
                 onClick={goBack}
-                disabled={stepIndex === 0}
+                disabled={stepIndex === 0 || saving || verifying}
               >
                 <ArrowLeft className="mr-1.5 h-4 w-4" />
                 이전
               </Button>
-              {currentStep === 'credentials' ? (
-                <Button onClick={handleSaveAndVerify} disabled={!requiredVars.some((v) => envValues[v.name]?.trim()) || saving}>
-                  {saving ? (
-                    <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                  ) : (
-                    <ArrowRight className="mr-1.5 h-4 w-4" />
-                  )}
-                  저장 및 검증
+              {currentStep === 'review' ? (
+                <Button
+                  onClick={handleSaveAndVerify}
+                  disabled={!hasFilledValues || saving || verifying}
+                >
+                  {saving || verifying ? '처리 중...' : '저장 및 검증'}
                 </Button>
               ) : (
-                <Button onClick={goNext}>
+                <Button onClick={goNext} disabled={currentStep === 'credentials' && !hasFilledValues}>
                   다음
                   <ArrowRight className="ml-1.5 h-4 w-4" />
                 </Button>
               )}
             </div>
-          )}
-          {currentStep === 'done' && (
-            <Button onClick={handleClose} className="w-full">
-              완료
-            </Button>
           )}
         </DialogFooter>
       </DialogContent>

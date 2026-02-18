@@ -630,3 +630,9 @@ export interface DashboardResponse {
   metrics: DashboardMetrics;
   connections: UserConnection[];
 }
+
+// ============================================
+// Env Conflict Types (re-exported from lib)
+// ============================================
+
+export type { ConflictType, ConflictSeverity, EnvConflict, EnvConflictEntry } from '@/lib/env/conflict-detector';

@@ -114,6 +114,46 @@ export function useUpdateEnvVar(projectId: string) {
   });
 }
 
+export function useEnvConflicts(projectId: string) {
+  return useQuery({
+    queryKey: queryKeys.envVars.conflicts(projectId),
+    queryFn: async () => {
+      const res = await fetch(`/api/env/conflicts?project_id=${projectId}`);
+      if (!res.ok) throw new Error('충돌 검사 실패');
+      return res.json() as Promise<{
+        conflicts: import('@/lib/env/conflict-detector').EnvConflict[];
+        scanned_at: string;
+      }>;
+    },
+    enabled: !!projectId,
+  });
+}
+
+export function useResolveConflict(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (params: {
+      key_name: string;
+      source_env: string;
+      target_envs: string[];
+      action: 'copy' | 'delete';
+    }) => {
+      const res = await fetch('/api/env/conflicts/resolve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ project_id: projectId, ...params }),
+      });
+      if (!res.ok) throw new Error('충돌 해결 실패');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.envVars.conflicts(projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.envVars.byProject(projectId) });
+    },
+  });
+}
+
 export function useDeleteEnvVar(projectId: string) {
   const queryClient = useQueryClient();
 

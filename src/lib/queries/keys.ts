@@ -8,6 +8,8 @@ export const queryKeys = {
   },
   envVars: {
     byProject: (projectId: string) => ['env-vars', 'project', projectId] as const,
+    stats: (projectId: string) => ['env-vars', 'stats', projectId] as const,
+    conflicts: (projectId: string) => ['env-vars', 'conflicts', projectId] as const,
   },
   catalog: {
     all: ['catalog'] as const,
