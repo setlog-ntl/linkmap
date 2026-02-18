@@ -56,8 +56,6 @@ export default function ProjectEnvPage() {
   const [editValue, setEditValue] = useState('');
   const [editDesc, setEditDesc] = useState('');
   const [editIsSecret, setEditIsSecret] = useState(true);
-  const [importOpen, setImportOpen] = useState(false);
-
   const serviceNameMap = useMemo(() => {
     const map = new Map<string, string>();
     for (const ps of projectServices) {
@@ -218,7 +216,6 @@ export default function ProjectEnvPage() {
         search={search}
         onSearchChange={setSearch}
         onAddClick={() => setAddOpen(true)}
-        onImportClick={() => setImportOpen(true)}
         onExportClick={handleDownload}
         envCounts={envCounts}
       />
@@ -236,21 +233,18 @@ export default function ProjectEnvPage() {
         onCopy={handleCopy}
       />
 
-      {/* Import Dialog */}
-      {importOpen && (
-        <EnvImportDialog
-          onImport={async (vars) => {
-            const res = await fetch('/api/env/bulk', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ project_id: projectId, variables: vars }),
-            });
-            if (!res.ok) throw new Error('일괄 가져오기 실패');
-            await queryClient.invalidateQueries({ queryKey: queryKeys.envVars.byProject(projectId) });
-            setImportOpen(false);
-          }}
-        />
-      )}
+      {/* Import Dialog (self-managed trigger) */}
+      <EnvImportDialog
+        onImport={async (vars) => {
+          const res = await fetch('/api/env/bulk', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ project_id: projectId, variables: vars }),
+          });
+          if (!res.ok) throw new Error('일괄 가져오기 실패');
+          await queryClient.invalidateQueries({ queryKey: queryKeys.envVars.byProject(projectId) });
+        }}
+      />
 
       {/* Add Dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>

@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, ExternalLink, ArrowRight, LayoutGrid, Settings2, X } from 'lucide-react';
+import { Search, ExternalLink, ArrowRight, LayoutGrid, Settings2, X, List, Sparkles } from 'lucide-react';
 import { ServiceIcon } from '@/components/landing/service-icon';
 import { domainLabels, domainIcons, allCategoryLabels, allCategoryEmojis, domainCategoryMap } from '@/lib/constants/service-filters';
 import {
@@ -28,11 +28,13 @@ import {
 import { CategoryProcessDiagram } from './category-process-diagram';
 import { easyCategoryProcessFlows } from '@/lib/constants/easy-categories';
 import { EasyCategoryCard } from './easy-category-card';
+import { ServiceListItem } from './service-list-item';
 import { DifficultyBadge, DxScoreBadge, FreeTierBadge, CostEstimateBadge } from './service-badges';
 import type { Service, ServiceCategory, ServiceDomain, ServiceDomainRecord, FreeTierQuality, EasyCategory } from '@/types';
 
 type SortOption = 'popularity' | 'name' | 'dx_score' | 'difficulty';
 type ViewMode = 'easy' | 'advanced';
+type DisplayMode = 'grid' | 'list';
 
 const sortLabels: Record<SortOption, string> = {
   popularity: '인기순',
@@ -61,6 +63,7 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [selectedDomain, setSelectedDomain] = useState<ServiceDomain | 'all'>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('easy');
+  const [displayMode, setDisplayMode] = useState<DisplayMode>('grid');
   const [selectedEasyCategory, setSelectedEasyCategory] = useState<EasyCategory | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
@@ -77,6 +80,15 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
     if (selectedDomain === 'all') return Object.keys(allCategoryLabels) as ServiceCategory[];
     return domainCategoryMap[selectedDomain] || [];
   }, [selectedDomain]);
+
+  // Category counts for sidebar
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const cat of Object.keys(allCategoryLabels)) {
+      counts[cat] = services.filter((s) => s.category === cat).length;
+    }
+    return counts;
+  }, [services]);
 
   // Reset category when domain changes
   const handleDomainChange = (domain: ServiceDomain | 'all') => {
@@ -207,68 +219,352 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
         </TabsList>
       </Tabs>
 
-      {/* Advanced mode: Domain filter pills */}
+      {/* Advanced mode content */}
       {viewMode === 'advanced' && (
-        <>
-          <div className="flex gap-2 flex-wrap">
-            <Badge
-              variant={selectedDomain === 'all' ? 'default' : 'outline'}
-              className="cursor-pointer text-sm px-3 py-1"
-              onClick={() => handleDomainChange('all')}
-              role="button"
-              tabIndex={0}
-              aria-pressed={selectedDomain === 'all'}
-              onKeyDown={(e) => handleBadgeKeyDown(e, () => handleDomainChange('all'))}
+        <div className="lg:grid lg:grid-cols-[240px_1fr] lg:gap-6">
+          {/* Category sidebar - desktop only */}
+          <div className="hidden lg:block space-y-1">
+            <p className="text-xs font-medium text-muted-foreground mb-2 px-2">카테고리</p>
+            <button
+              className={`w-full text-left text-sm px-3 py-1.5 rounded-md transition-colors ${
+                selectedDomain === 'all' && selectedCategory === 'all'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'hover:bg-muted'
+              }`}
+              onClick={() => { setSelectedDomain('all'); setSelectedCategory('all'); }}
             >
-              전체
-            </Badge>
+              전체 ({services.length})
+            </button>
             {domainKeys.map((domain) => (
-              <Badge
-                key={domain}
-                variant={selectedDomain === domain ? 'default' : 'outline'}
-                className="cursor-pointer text-sm px-3 py-1"
-                onClick={() => handleDomainChange(domain)}
-                role="button"
-                tabIndex={0}
-                aria-pressed={selectedDomain === domain}
-                onKeyDown={(e) => handleBadgeKeyDown(e, () => handleDomainChange(domain))}
-              >
-                {domainIcons[domain]} {domainLabels[domain]}
-              </Badge>
+              <div key={domain}>
+                <button
+                  className={`w-full text-left text-sm px-3 py-1.5 rounded-md transition-colors font-medium ${
+                    selectedDomain === domain && selectedCategory === 'all'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'hover:bg-muted'
+                  }`}
+                  onClick={() => handleDomainChange(domain)}
+                >
+                  {domainIcons[domain]} {domainLabels[domain]}
+                </button>
+                {selectedDomain === domain && (domainCategoryMap[domain] || []).map((cat) => (
+                  <button
+                    key={cat}
+                    className={`w-full text-left text-xs px-5 py-1 rounded-md transition-colors ${
+                      selectedCategory === cat
+                        ? 'bg-primary/80 text-primary-foreground'
+                        : 'hover:bg-muted text-muted-foreground'
+                    }`}
+                    onClick={() => setSelectedCategory(cat)}
+                  >
+                    {allCategoryLabels[cat]} ({categoryCounts[cat] || 0})
+                  </button>
+                ))}
+              </div>
             ))}
           </div>
 
-          {/* Category filter pills (contextual) */}
-          {selectedDomain !== 'all' && availableCategories.length > 0 && (
-            <div className="flex gap-2 flex-wrap">
+          {/* Main content area */}
+          <div className="space-y-4">
+            {/* Mobile domain pills (hidden on lg) */}
+            <div className="flex gap-2 flex-wrap lg:hidden">
               <Badge
-                variant={selectedCategory === 'all' ? 'default' : 'outline'}
-                className="cursor-pointer text-xs px-2 py-0.5"
-                onClick={() => setSelectedCategory('all')}
+                variant={selectedDomain === 'all' ? 'default' : 'outline'}
+                className="cursor-pointer text-sm px-3 py-1"
+                onClick={() => handleDomainChange('all')}
                 role="button"
                 tabIndex={0}
-                aria-pressed={selectedCategory === 'all'}
-                onKeyDown={(e) => handleBadgeKeyDown(e, () => setSelectedCategory('all'))}
+                aria-pressed={selectedDomain === 'all'}
+                onKeyDown={(e) => handleBadgeKeyDown(e, () => handleDomainChange('all'))}
               >
                 전체
               </Badge>
-              {availableCategories.map((cat) => (
+              {domainKeys.map((domain) => (
                 <Badge
-                  key={cat}
-                  variant={selectedCategory === cat ? 'default' : 'outline'}
-                  className="cursor-pointer text-xs px-2 py-0.5"
-                  onClick={() => setSelectedCategory(cat)}
+                  key={domain}
+                  variant={selectedDomain === domain ? 'default' : 'outline'}
+                  className="cursor-pointer text-sm px-3 py-1"
+                  onClick={() => handleDomainChange(domain)}
                   role="button"
                   tabIndex={0}
-                  aria-pressed={selectedCategory === cat}
-                  onKeyDown={(e) => handleBadgeKeyDown(e, () => setSelectedCategory(cat))}
+                  aria-pressed={selectedDomain === domain}
+                  onKeyDown={(e) => handleBadgeKeyDown(e, () => handleDomainChange(domain))}
                 >
-                  {allCategoryEmojis[cat]} {allCategoryLabels[cat]}
+                  {domainIcons[domain]} {domainLabels[domain]}
                 </Badge>
               ))}
             </div>
-          )}
-        </>
+
+            {/* Mobile category pills */}
+            {selectedDomain !== 'all' && availableCategories.length > 0 && (
+              <div className="flex gap-2 flex-wrap lg:hidden">
+                <Badge
+                  variant={selectedCategory === 'all' ? 'default' : 'outline'}
+                  className="cursor-pointer text-xs px-2 py-0.5"
+                  onClick={() => setSelectedCategory('all')}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={selectedCategory === 'all'}
+                  onKeyDown={(e) => handleBadgeKeyDown(e, () => setSelectedCategory('all'))}
+                >
+                  전체
+                </Badge>
+                {availableCategories.map((cat) => (
+                  <Badge
+                    key={cat}
+                    variant={selectedCategory === cat ? 'default' : 'outline'}
+                    className="cursor-pointer text-xs px-2 py-0.5"
+                    onClick={() => setSelectedCategory(cat)}
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={selectedCategory === cat}
+                    onKeyDown={(e) => handleBadgeKeyDown(e, () => setSelectedCategory(cat))}
+                  >
+                    {allCategoryEmojis[cat]} {allCategoryLabels[cat]}
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            {/* Search + Sort + Display toggle */}
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="서비스 검색 (이름, 설명, 태그)..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="pl-9"
+                  aria-label="서비스 검색"
+                />
+              </div>
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(sortLabels).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={freeTierFilter} onValueChange={(v) => setFreeTierFilter(v as FreeTierQuality | 'all')}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="무료 플랜" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">무료 플랜: 전체</SelectItem>
+                  <SelectItem value="excellent">우수</SelectItem>
+                  <SelectItem value="good">양호</SelectItem>
+                  <SelectItem value="limited">제한적</SelectItem>
+                  <SelectItem value="none">없음</SelectItem>
+                </SelectContent>
+              </Select>
+              {/* Display mode toggle */}
+              <div className="flex border rounded-md">
+                <Button
+                  variant={displayMode === 'grid' ? 'default' : 'ghost'}
+                  size="icon"
+                  className="h-9 w-9 rounded-r-none"
+                  onClick={() => setDisplayMode('grid')}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={displayMode === 'list' ? 'default' : 'ghost'}
+                  size="icon"
+                  className="h-9 w-9 rounded-l-none"
+                  onClick={() => setDisplayMode('list')}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Active filters */}
+            {hasActiveFilters && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm text-muted-foreground">
+                  {filteredServices.length}개 서비스
+                </span>
+                {selectedDomain !== 'all' && (
+                  <Badge variant="secondary" className="gap-1 pr-1">
+                    {domainIcons[selectedDomain]} {domainLabels[selectedDomain]}
+                    <button
+                      onClick={() => handleDomainChange('all')}
+                      className="ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
+                      aria-label={`${domainLabels[selectedDomain]} 필터 제거`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+                {selectedCategory !== 'all' && (
+                  <Badge variant="secondary" className="gap-1 pr-1">
+                    {allCategoryEmojis[selectedCategory]} {allCategoryLabels[selectedCategory]}
+                    <button
+                      onClick={() => setSelectedCategory('all')}
+                      className="ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
+                      aria-label={`${allCategoryLabels[selectedCategory]} 필터 제거`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+                {freeTierFilter !== 'all' && (
+                  <Badge variant="secondary" className="gap-1 pr-1">
+                    {freeTierLabels[freeTierFilter]}
+                    <button
+                      onClick={() => setFreeTierFilter('all')}
+                      className="ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
+                      aria-label={`${freeTierLabels[freeTierFilter]} 필터 제거`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+                {search && (
+                  <Badge variant="secondary" className="gap-1 pr-1">
+                    &quot;{search}&quot;
+                    <button
+                      onClick={() => { setSearchInput(''); setSearch(''); }}
+                      className="ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
+                      aria-label={`"${search}" 검색어 제거`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+              </div>
+            )}
+
+            {/* Service list/grid */}
+            {filteredServices.length > 0 ? (
+              displayMode === 'list' ? (
+                <div className="space-y-2">
+                  <AnimatePresence mode="popLayout">
+                    {filteredServices.map((service, index) => (
+                      <motion.div
+                        key={service.id}
+                        initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.98 }}
+                        transition={{ duration: 0.2, delay: Math.min(index * 0.02, 0.2) }}
+                      >
+                        <ServiceListItem service={service} />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  <AnimatePresence mode="popLayout">
+                    {filteredServices.map((service, index) => (
+                      <motion.div
+                        key={service.id}
+                        initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3) }}
+                      >
+                        <Card className="h-full flex flex-col hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 group">
+                          <Link href={`/services/${service.slug}`} className="flex-1">
+                            <CardHeader className="pb-3">
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                                    <ServiceIcon serviceId={service.slug} size={24} />
+                                  </div>
+                                  <div>
+                                    <CardTitle className="text-base group-hover:text-primary transition-colors">
+                                      {service.name}
+                                    </CardTitle>
+                                    <Badge variant="secondary" className="text-xs mt-1">
+                                      {allCategoryLabels[service.category as ServiceCategory] || service.category}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mt-1 shrink-0" />
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                                {service.description_ko || service.description}
+                              </p>
+                              <div className="flex flex-wrap items-center gap-2 mb-2">
+                                <DifficultyBadge level={service.difficulty_level} />
+                                <FreeTierBadge quality={service.free_tier_quality} />
+                              </div>
+                              <div className="flex items-center justify-between gap-2">
+                                <DxScoreBadge score={service.dx_score} />
+                                <CostEstimateBadge estimate={service.monthly_cost_estimate} />
+                              </div>
+                            </CardContent>
+                          </Link>
+                          {(service.website_url || service.docs_url) && (
+                            <div className="px-6 pb-4 pt-2 flex gap-2 border-t border-border/50 mt-auto">
+                              {service.website_url && (
+                                <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
+                                  <a href={service.website_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                                    <ExternalLink className="mr-1 h-3 w-3" />
+                                    웹사이트
+                                  </a>
+                                </Button>
+                              )}
+                              {service.docs_url && (
+                                <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
+                                  <a href={service.docs_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                                    문서
+                                  </a>
+                                </Button>
+                              )}
+                            </div>
+                          )}
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              )
+            ) : (
+              <div className="text-center py-16 space-y-3">
+                <div className="text-4xl" aria-hidden="true">&#x1F50D;</div>
+                <p className="text-muted-foreground font-medium">
+                  {search ? `"${search}"에 대한 검색 결과가 없습니다` : '서비스가 없습니다'}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  필터를 변경하거나 다른 검색어를 시도해보세요
+                </p>
+                {hasActiveFilters && (
+                  <Button variant="outline" size="sm" onClick={clearAllFilters} className="mt-2">
+                    모든 필터 초기화
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {/* Upgrade CTA */}
+            <Card className="border-dashed bg-gradient-to-r from-primary/5 to-primary/10">
+              <CardContent className="p-6 flex flex-col sm:flex-row items-center gap-4">
+                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <Sparkles className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex-1 text-center sm:text-left">
+                  <p className="font-semibold">더 많은 서비스가 필요하신가요?</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    Pro 플랜으로 업그레이드하면 무제한 서비스 연결과 팀 협업을 이용할 수 있습니다.
+                  </p>
+                </div>
+                <Button asChild className="shrink-0">
+                  <Link href="/pricing">
+                    요금제 보기
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       )}
 
       {/* Easy mode: search bar (always visible) */}
@@ -340,8 +636,8 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
         </div>
       )}
 
-      {/* Search + Sort + Free tier filter (show when easy category is selected or advanced mode) */}
-      {(viewMode === 'advanced' || selectedEasyCategory) && (
+      {/* Search + Sort for easy mode when category selected */}
+      {viewMode === 'easy' && selectedEasyCategory && (
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -375,46 +671,41 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
               <SelectItem value="none">없음</SelectItem>
             </SelectContent>
           </Select>
+          {/* Display mode toggle */}
+          <div className="flex border rounded-md">
+            <Button
+              variant={displayMode === 'grid' ? 'default' : 'ghost'}
+              size="icon"
+              className="h-9 w-9 rounded-r-none"
+              onClick={() => setDisplayMode('grid')}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={displayMode === 'list' ? 'default' : 'ghost'}
+              size="icon"
+              className="h-9 w-9 rounded-l-none"
+              onClick={() => setDisplayMode('list')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
 
-      {/* Active filters + result count (skip when easy mode global search — handled above) */}
-      {showServiceGrid && hasActiveFilters && !(viewMode === 'easy' && !selectedEasyCategory && search) && (
+      {/* Easy mode active filters */}
+      {viewMode === 'easy' && showServiceGrid && hasActiveFilters && !(viewMode === 'easy' && !selectedEasyCategory && search) && (
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm text-muted-foreground">
             {filteredServices.length}개 서비스
           </span>
-          {viewMode === 'easy' && selectedEasyCategory && (
+          {selectedEasyCategory && (
             <Badge variant="secondary" className="gap-1 pr-1">
               {easyCategoryEmojis[selectedEasyCategory]} {easyCategoryLabels[selectedEasyCategory]}
               <button
                 onClick={() => setSelectedEasyCategory(null)}
                 className="ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
                 aria-label={`${easyCategoryLabels[selectedEasyCategory]} 필터 제거`}
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          )}
-          {viewMode === 'advanced' && selectedDomain !== 'all' && (
-            <Badge variant="secondary" className="gap-1 pr-1">
-              {domainIcons[selectedDomain]} {domainLabels[selectedDomain]}
-              <button
-                onClick={() => handleDomainChange('all')}
-                className="ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
-                aria-label={`${domainLabels[selectedDomain]} 필터 제거`}
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          )}
-          {viewMode === 'advanced' && selectedCategory !== 'all' && (
-            <Badge variant="secondary" className="gap-1 pr-1">
-              {allCategoryEmojis[selectedCategory]} {allCategoryLabels[selectedCategory]}
-              <button
-                onClick={() => setSelectedCategory('all')}
-                className="ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
-                aria-label={`${allCategoryLabels[selectedCategory]} 필터 제거`}
               >
                 <X className="h-3 w-3" />
               </button>
@@ -447,82 +738,100 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
         </div>
       )}
 
-      {/* Service cards grid */}
-      {showServiceGrid && filteredServices.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <AnimatePresence mode="popLayout">
-            {filteredServices.map((service, index) => (
-              <motion.div
-                key={service.id}
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3) }}
-              >
-                <Card className="h-full flex flex-col hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 group">
-                  <Link href={`/services/${service.slug}`} className="flex-1">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                            <ServiceIcon serviceId={service.slug} size={24} />
+      {/* Easy mode: Service cards grid */}
+      {viewMode === 'easy' && showServiceGrid && filteredServices.length > 0 && (
+        displayMode === 'list' ? (
+          <div className="space-y-2">
+            <AnimatePresence mode="popLayout">
+              {filteredServices.map((service, index) => (
+                <motion.div
+                  key={service.id}
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.2, delay: Math.min(index * 0.02, 0.2) }}
+                >
+                  <ServiceListItem service={service} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <AnimatePresence mode="popLayout">
+              {filteredServices.map((service, index) => (
+                <motion.div
+                  key={service.id}
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3) }}
+                >
+                  <Card className="h-full flex flex-col hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 group">
+                    <Link href={`/services/${service.slug}`} className="flex-1">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                              <ServiceIcon serviceId={service.slug} size={24} />
+                            </div>
+                            <div>
+                              <CardTitle className="text-base group-hover:text-primary transition-colors">
+                                {service.name}
+                              </CardTitle>
+                              <Badge variant="secondary" className="text-xs mt-1">
+                                {allCategoryLabels[service.category as ServiceCategory] || service.category}
+                              </Badge>
+                            </div>
                           </div>
-                          <div>
-                            <CardTitle className="text-base group-hover:text-primary transition-colors">
-                              {service.name}
-                            </CardTitle>
-                            <Badge variant="secondary" className="text-xs mt-1">
-                              {allCategoryLabels[service.category as ServiceCategory] || service.category}
-                            </Badge>
-                          </div>
+                          <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mt-1 shrink-0" />
                         </div>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mt-1 shrink-0" />
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                          {service.description_ko || service.description}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <DifficultyBadge level={service.difficulty_level} />
+                          <FreeTierBadge quality={service.free_tier_quality} />
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <DxScoreBadge score={service.dx_score} />
+                          <CostEstimateBadge estimate={service.monthly_cost_estimate} />
+                        </div>
+                      </CardContent>
+                    </Link>
+                    {(service.website_url || service.docs_url) && (
+                      <div className="px-6 pb-4 pt-2 flex gap-2 border-t border-border/50 mt-auto">
+                        {service.website_url && (
+                          <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
+                            <a href={service.website_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                              <ExternalLink className="mr-1 h-3 w-3" />
+                              웹사이트
+                            </a>
+                          </Button>
+                        )}
+                        {service.docs_url && (
+                          <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
+                            <a href={service.docs_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                              문서
+                            </a>
+                          </Button>
+                        )}
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                        {service.description_ko || service.description}
-                      </p>
-                      <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <DifficultyBadge level={service.difficulty_level} />
-                        <FreeTierBadge quality={service.free_tier_quality} />
-                      </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <DxScoreBadge score={service.dx_score} />
-                        <CostEstimateBadge estimate={service.monthly_cost_estimate} />
-                      </div>
-                    </CardContent>
-                  </Link>
-                  {(service.website_url || service.docs_url) && (
-                    <div className="px-6 pb-4 pt-2 flex gap-2 border-t border-border/50 mt-auto">
-                      {service.website_url && (
-                        <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
-                          <a href={service.website_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                            <ExternalLink className="mr-1 h-3 w-3" />
-                            웹사이트
-                          </a>
-                        </Button>
-                      )}
-                      {service.docs_url && (
-                        <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
-                          <a href={service.docs_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                            문서
-                          </a>
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </Card>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+                    )}
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )
       )}
 
-      {/* Empty state */}
-      {showServiceGrid && filteredServices.length === 0 && (
+      {/* Easy mode: Empty state */}
+      {viewMode === 'easy' && showServiceGrid && filteredServices.length === 0 && (
         <div className="text-center py-16 space-y-3">
-          <div className="text-4xl" aria-hidden="true">🔍</div>
+          <div className="text-4xl" aria-hidden="true">&#x1F50D;</div>
           <p className="text-muted-foreground font-medium">
             {search ? `"${search}"에 대한 검색 결과가 없습니다` : '서비스가 없습니다'}
           </p>

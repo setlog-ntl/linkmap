@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Plus, Download, Upload } from 'lucide-react';
+import { Search, Plus, Download } from 'lucide-react';
 import type { Environment } from '@/types';
 
 const envOptions: { value: Environment; label: string }[] = [
@@ -25,7 +25,6 @@ interface EnvFilterBarProps {
   search: string;
   onSearchChange: (value: string) => void;
   onAddClick: () => void;
-  onImportClick?: () => void;
   onExportClick?: () => void;
   envCounts: Record<Environment, number>;
 }
@@ -36,12 +35,11 @@ export function EnvFilterBar({
   search,
   onSearchChange,
   onAddClick,
-  onImportClick,
   onExportClick,
   envCounts,
 }: EnvFilterBarProps) {
   const [inputValue, setInputValue] = useState(search);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     debounceRef.current = setTimeout(() => onSearchChange(inputValue), 300);
@@ -78,11 +76,6 @@ export function EnvFilterBar({
       </div>
 
       <div className="flex gap-2">
-        {onImportClick && (
-          <Button variant="outline" size="icon" onClick={onImportClick} title="가져오기">
-            <Upload className="h-4 w-4" />
-          </Button>
-        )}
         {onExportClick && (
           <Button variant="outline" size="icon" onClick={onExportClick} title="내보내기">
             <Download className="h-4 w-4" />
