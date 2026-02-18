@@ -3,16 +3,12 @@ import { createClient } from '@/lib/supabase/server';
 import { encrypt } from '@/lib/crypto';
 import { bulkEnvVarSchema } from '@/lib/validations/env-bulk';
 import { unauthorizedError, notFoundError, validationError, apiError } from '@/lib/api/errors';
-import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const { success } = rateLimit(`env-bulk:${user.id}`, 10);
-  if (!success) return apiError('요청이 너무 많습니다. 잠시 후 다시 시도해주세요.', 429);
 
   let body: unknown;
   try {

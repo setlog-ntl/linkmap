@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { decrypt } from '@/lib/crypto';
-import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 
 export async function GET(request: NextRequest) {
@@ -9,14 +8,6 @@ export async function GET(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { success, resetAt } = rateLimit(`env-download:${user.id}`, 5);
-  if (!success) {
-    return NextResponse.json(
-      { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
-      { status: 429, headers: { 'Retry-After': String(Math.max(1, Math.ceil((resetAt - Date.now()) / 1000))) } }
-    );
   }
 
   const { searchParams } = new URL(request.url);

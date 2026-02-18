@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, validationError, serverError, apiError, notFoundError } from '@/lib/api/errors';
-import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 import { checkHomepageDeployQuota } from '@/lib/quota';
 import { createRepo, pushFilesAtomically, deleteRepo, enableGitHubPagesWithActions, GitHubApiError } from '@/lib/github/api';
@@ -13,9 +12,6 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const { success } = rateLimit(`oneclick-deploy-pages:${user.id}`, 5, 60_000); // 5 per 1 min
-  if (!success) return NextResponse.json({ error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' }, { status: 429 });
 
   const body = await request.json();
   const parsed = deployPagesRequestSchema.safeParse(body);

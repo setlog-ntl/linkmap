@@ -1,5 +1,6 @@
 // AES-256-GCM encryption for environment variables
 // This runs on the server side only (API routes)
+// Cloudflare Workers: nodejs_compat 플래그로 crypto 모듈 지원
 
 import { randomBytes, createCipheriv, createDecipheriv } from 'crypto';
 

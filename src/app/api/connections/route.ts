@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createConnectionSchema } from '@/lib/validations/connection';
 import { unauthorizedError, validationError, apiError } from '@/lib/api/errors';
-import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 
 export async function GET(request: NextRequest) {
@@ -27,9 +26,6 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const { success } = rateLimit(`conn:${user.id}`, 30);
-  if (!success) return apiError('요청이 너무 많습니다. 잠시 후 다시 시도해주세요.', 429);
 
   const body = await request.json();
   const parsed = createConnectionSchema.safeParse(body);

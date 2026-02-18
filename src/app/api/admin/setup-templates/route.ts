@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { unauthorizedError, apiError, serverError } from '@/lib/api/errors';
-import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 import { decrypt } from '@/lib/crypto';
 import {
@@ -27,16 +26,7 @@ export async function POST() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
 
-  // 2. Rate limit: 1 per 10 minutes
-  const { success } = rateLimit(`admin-setup-templates:${user.id}`, 1, 600_000);
-  if (!success) {
-    return NextResponse.json(
-      { error: '이 작업은 10분에 1번만 실행할 수 있습니다.' },
-      { status: 429 }
-    );
-  }
-
-  // 3. Get user's GitHub token from service_accounts
+  // 2. Get user's GitHub token from service_accounts
   const { data: githubService } = await supabase
     .from('services')
     .select('id')

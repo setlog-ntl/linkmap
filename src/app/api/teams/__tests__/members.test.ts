@@ -7,9 +7,6 @@ import { NextRequest } from 'next/server';
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(),
 }));
-vi.mock('@/lib/rate-limit', () => ({
-  rateLimit: vi.fn(() => ({ success: true, remaining: 29, resetAt: Date.now() + 60000 })),
-}));
 vi.mock('@/lib/audit', () => ({
   logAudit: vi.fn(),
 }));

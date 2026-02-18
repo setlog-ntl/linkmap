@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, apiError } from '@/lib/api/errors';
-import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 
 export async function DELETE(
@@ -12,9 +11,6 @@ export async function DELETE(
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const { success } = rateLimit(`sa:${user.id}`, 30);
-  if (!success) return apiError('요청이 너무 많습니다.', 429);
 
   // Verify ownership: user must own the service account or the project
   const { data: account } = await supabase

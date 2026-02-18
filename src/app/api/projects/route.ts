@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createProjectSchema } from '@/lib/validations/project';
 import { unauthorizedError, validationError, serverError, apiError } from '@/lib/api/errors';
-import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 import { checkProjectQuota } from '@/lib/quota';
 
@@ -26,9 +25,6 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const { success } = rateLimit(`project:${user.id}`, 20);
-  if (!success) return NextResponse.json({ error: '요청이 너무 많습니다.' }, { status: 429 });
 
   const quotaCheck = await checkProjectQuota(user.id);
   if (!quotaCheck.allowed) {

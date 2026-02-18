@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, apiError, notFoundError } from '@/lib/api/errors';
-import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 import { decrypt } from '@/lib/crypto';
 import { getGitHubPagesStatus, GitHubApiError } from '@/lib/github/api';
@@ -18,9 +17,6 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const { success } = rateLimit(`oneclick-status:${user.id}`, 60);
-  if (!success) return NextResponse.json({ error: '요청이 너무 많습니다.' }, { status: 429 });
 
   const deployId = request.nextUrl.searchParams.get('deploy_id');
   if (!deployId) return apiError('deploy_id는 필수입니다', 400);

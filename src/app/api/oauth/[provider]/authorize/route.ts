@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { unauthorizedError, apiError } from '@/lib/api/errors';
-import { rateLimit } from '@/lib/rate-limit';
 import { randomBytes } from 'crypto';
 
 const OAUTH_CONFIGS: Record<string, {
@@ -25,9 +24,6 @@ export async function GET(
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const { success } = rateLimit(`oauth:${user.id}`, 10);
-  if (!success) return apiError('요청이 너무 많습니다.', 429);
 
   const config = OAUTH_CONFIGS[provider];
   if (!config) return apiError('지원하지 않는 OAuth 프로바이더입니다', 400);

@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "linkmap",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-04-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+
+  // KV namespace for incremental cache (OpenNext 기본 캐시)
+  // 필요 시 Cloudflare 대시보드에서 KV 생성 후 id 입력
+  // "kv_namespaces": [
+  //   { "binding": "NEXT_CACHE_KV", "id": "<KV_NAMESPACE_ID>" }
+  // ],
+
+  // 환경변수는 `wrangler secret put` 으로 설정
+  // 비밀이 아닌 값만 여기에 작성
+  "vars": {
+    "NODE_ENV": "production"
+  }
+}

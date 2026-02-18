@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, apiError } from '@/lib/api/errors';
-import { rateLimit } from '@/lib/rate-limit';
 import { decrypt } from '@/lib/crypto';
 import { listUserRepos, GitHubApiError } from '@/lib/github/api';
 
@@ -13,9 +12,6 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const { success } = rateLimit(`github-repos:${user.id}`, 20);
-  if (!success) return apiError('요청이 너무 많습니다.', 429);
 
   const projectId = request.nextUrl.searchParams.get('project_id');
   if (!projectId) return apiError('project_id가 필요합니다', 400);

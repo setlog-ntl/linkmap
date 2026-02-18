@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError } from '@/lib/api/errors';
-import { rateLimit } from '@/lib/rate-limit';
 import { checkHomepageDeployQuota } from '@/lib/quota';
 
 /**
@@ -14,9 +13,6 @@ export async function GET() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const { success } = rateLimit(`oneclick-gh-check:${user.id}`, 30);
-  if (!success) return NextResponse.json({ error: '요청이 너무 많습니다.' }, { status: 429 });
 
   // Find GitHub service
   const { data: githubService } = await supabase

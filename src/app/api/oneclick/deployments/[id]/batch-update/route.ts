@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, notFoundError, apiError, serverError } from '@/lib/api/errors';
-import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 import { decrypt } from '@/lib/crypto';
 import { pushFilesAtomically, GitHubApiError } from '@/lib/github/api';
@@ -41,11 +40,6 @@ export async function POST(
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const { success } = rateLimit(`oneclick-batch-update:${user.id}`, 10, 60_000);
-  if (!success) {
-    return NextResponse.json({ error: '요청이 너무 많습니다.' }, { status: 429 });
-  }
 
   const body = await request.json();
   const parsed = batchUpdateSchema.safeParse(body);

@@ -7,9 +7,6 @@ import { NextRequest } from 'next/server';
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(),
 }));
-vi.mock('@/lib/rate-limit', () => ({
-  rateLimit: vi.fn(() => ({ success: true, remaining: 29, resetAt: Date.now() + 60000 })),
-}));
 vi.mock('@/lib/audit', () => ({
   logAudit: vi.fn(),
 }));
@@ -21,7 +18,6 @@ vi.mock('@/lib/crypto', () => ({
 // Import route handlers *after* mocks are registered
 import { GET, POST } from '../route';
 import { createClient } from '@/lib/supabase/server';
-import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 
 // Valid v4-format UUIDs for Zod v4 compatibility
@@ -222,25 +218,6 @@ describe('POST /api/service-accounts', () => {
     const res = await POST(req);
 
     expect(res.status).toBe(401);
-  });
-
-  it('returns 429 when rate limited', async () => {
-    const mock = createMockSupabase();
-    vi.mocked(createClient).mockResolvedValue(mock as never);
-    vi.mocked(rateLimit).mockReturnValueOnce({
-      success: false,
-      remaining: 0,
-      resetAt: Date.now() + 60000,
-    });
-
-    const req = createRequest('http://localhost:3000/api/service-accounts', {
-      method: 'POST',
-      body: JSON.stringify(validBody),
-      headers: { 'Content-Type': 'application/json' },
-    });
-    const res = await POST(req);
-
-    expect(res.status).toBe(429);
   });
 
   it('returns 404 when user does not own the project', async () => {

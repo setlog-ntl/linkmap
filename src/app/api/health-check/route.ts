@@ -4,16 +4,12 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { runHealthCheck } from '@/lib/health-check';
 import { runHealthCheckSchema } from '@/lib/validations/health-check';
 import { unauthorizedError, notFoundError, validationError, apiError } from '@/lib/api/errors';
-import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const { success } = rateLimit(`health-check:${user.id}`, 20);
-  if (!success) return apiError('검증 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.', 429);
 
   const body = await request.json();
   const parsed = runHealthCheckSchema.safeParse(body);

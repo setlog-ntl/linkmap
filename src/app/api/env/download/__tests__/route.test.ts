@@ -7,9 +7,6 @@ import { NextRequest } from 'next/server';
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(),
 }));
-vi.mock('@/lib/rate-limit', () => ({
-  rateLimit: vi.fn(() => ({ success: true, remaining: 4, resetAt: Date.now() + 60000 })),
-}));
 vi.mock('@/lib/audit', () => ({
   logAudit: vi.fn(),
 }));
@@ -20,7 +17,6 @@ vi.mock('@/lib/crypto', () => ({
 
 import { GET } from '../../download/route';
 import { createClient } from '@/lib/supabase/server';
-import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 
 // ---------------------------------------------------------------------------
@@ -98,21 +94,6 @@ describe('GET /api/env/download', () => {
     expect(res.status).toBe(401);
     const body = await res.json();
     expect(body.error).toBeDefined();
-  });
-
-  it('returns 429 when rate limited', async () => {
-    const mock = createMockSupabase();
-    vi.mocked(createClient).mockResolvedValue(mock as never);
-    vi.mocked(rateLimit).mockReturnValueOnce({
-      success: false,
-      remaining: 0,
-      resetAt: Date.now() + 60000,
-    });
-
-    const res = await GET(createRequest('/api/env/download?project_id=p1'));
-
-    expect(res.status).toBe(429);
-    expect(res.headers.get('Retry-After')).toBeDefined();
   });
 
   it('returns 400 when project_id is missing', async () => {

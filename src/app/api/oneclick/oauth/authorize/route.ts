@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { unauthorizedError, apiError } from '@/lib/api/errors';
-import { rateLimit } from '@/lib/rate-limit';
 import { randomBytes } from 'crypto';
 
 const GITHUB_SCOPES = ['repo', 'read:org', 'read:user', 'workflow'];
@@ -16,9 +15,6 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const { success } = rateLimit(`oauth:${user.id}`, 10);
-  if (!success) return apiError('요청이 너무 많습니다.', 429);
 
   const clientId = process.env.GITHUB_OAUTH_CLIENT_ID;
   if (!clientId) return apiError('OAuth 설정이 완료되지 않았습니다. 관리자에게 문의하세요.', 503);

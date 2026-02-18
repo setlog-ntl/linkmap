@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, apiError, validationError } from '@/lib/api/errors';
-import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 import { decrypt } from '@/lib/crypto';
 import {
@@ -37,9 +36,6 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const { success } = rateLimit(`github-secrets:${user.id}`, 20);
-  if (!success) return apiError('요청이 너무 많습니다.', 429);
 
   const projectId = request.nextUrl.searchParams.get('project_id');
   const owner = request.nextUrl.searchParams.get('owner');
@@ -77,9 +73,6 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const { success } = rateLimit(`github-push:${user.id}`, 10);
-  if (!success) return apiError('요청이 너무 많습니다.', 429);
 
   const body = await request.json();
   const parsed = pushSecretsSchema.safeParse(body);
@@ -169,9 +162,6 @@ export async function DELETE(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const { success } = rateLimit(`github-secrets-delete:${user.id}`, 20);
-  if (!success) return apiError('요청이 너무 많습니다.', 429);
 
   const projectId = request.nextUrl.searchParams.get('project_id');
   const owner = request.nextUrl.searchParams.get('owner');

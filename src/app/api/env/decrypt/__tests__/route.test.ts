@@ -7,9 +7,6 @@ import { NextRequest } from 'next/server';
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(),
 }));
-vi.mock('@/lib/rate-limit', () => ({
-  rateLimit: vi.fn(() => ({ success: true, remaining: 9, resetAt: Date.now() + 60000 })),
-}));
 vi.mock('@/lib/audit', () => ({
   logAudit: vi.fn(),
 }));
@@ -20,7 +17,6 @@ vi.mock('@/lib/crypto', () => ({
 
 import { POST } from '../../decrypt/route';
 import { createClient } from '@/lib/supabase/server';
-import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 
 // ---------------------------------------------------------------------------
@@ -108,23 +104,6 @@ describe('POST /api/env/decrypt', () => {
     expect(res.status).toBe(401);
     const body = await res.json();
     expect(body.error).toContain('인증');
-  });
-
-  it('returns 429 when rate limited (limit=10)', async () => {
-    const mock = createMockSupabase();
-    vi.mocked(createClient).mockResolvedValue(mock as never);
-    vi.mocked(rateLimit).mockReturnValueOnce({
-      success: false,
-      remaining: 0,
-      resetAt: Date.now() + 60000,
-    });
-
-    const res = await POST(createJsonRequest({ id: validUuid }));
-
-    expect(res.status).toBe(429);
-    expect(res.headers.get('Retry-After')).toBeDefined();
-    const body = await res.json();
-    expect(body.error).toBeDefined();
   });
 
   it('returns 400 for invalid JSON body', async () => {

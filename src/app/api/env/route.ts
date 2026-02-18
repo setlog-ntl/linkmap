@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { encrypt, decrypt } from '@/lib/crypto';
 import { createEnvVarSchema, updateEnvVarSchema } from '@/lib/validations/env';
-import { unauthorizedError, notFoundError, validationError, apiError } from '@/lib/api/errors';
-import { rateLimit } from '@/lib/rate-limit';
+import { unauthorizedError, notFoundError, validationError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 import { triggerAutoSync } from '@/lib/github/auto-sync';
 import type { DbEnvVarWithProject } from '@/lib/supabase/types';
@@ -12,9 +11,6 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const { success } = rateLimit(`env:${user.id}`, 30);
-  if (!success) return apiError('요청이 너무 많습니다. 잠시 후 다시 시도해주세요.', 429);
 
   const body = await request.json();
   const parsed = createEnvVarSchema.safeParse(body);

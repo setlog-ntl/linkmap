@@ -1,17 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError } from '@/lib/api/errors';
-import { rateLimit } from '@/lib/rate-limit';
 
 export async function GET() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const { success } = rateLimit(`oneclick-deployments:${user.id}`, 30, 60_000);
-  if (!success) {
-    return NextResponse.json({ error: '요청이 너무 많습니다.' }, { status: 429 });
-  }
 
   const { data: deployments, error } = await supabase
     .from('homepage_deploys')
