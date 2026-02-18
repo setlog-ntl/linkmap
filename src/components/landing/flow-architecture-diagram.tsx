@@ -19,10 +19,8 @@ const nodeTypes = {
   service: FlowServiceNode,
 };
 
-// Nodes that act as "layer" hubs
 const LAYER_IDS = new Set(['nextjs', 'backend']);
 
-// Highlight paths: each path is a sequence of node IDs
 const HIGHLIGHT_PATHS = [
   ['github', 'nextjs', 'backend', 'supabase'],
   ['github', 'nextjs', 'backend', 'clerk'],
@@ -79,17 +77,17 @@ function buildEdges(highlightedNodeIds: Set<string>): Edge[] {
       labelStyle: {
         fontSize: 10,
         fontWeight: 500,
-        fill: 'var(--muted-foreground)',
+        fill: '#888',
       },
       labelBgStyle: {
-        fill: 'var(--background)',
-        fillOpacity: 0.8,
+        fill: '#0d0d0d',
+        fillOpacity: 1,
       },
       labelBgPadding: [4, 2] as [number, number],
       style: {
-        stroke: isHighlighted ? 'var(--primary)' : 'var(--border)',
+        stroke: isHighlighted ? '#2bee79' : '#333',
         strokeWidth: isHighlighted ? 2.5 : 1.5,
-        opacity: highlightedNodeIds.size > 0 && !isHighlighted ? 0.25 : 1,
+        opacity: highlightedNodeIds.size > 0 && !isHighlighted ? 0.3 : 1,
       },
     };
   });
@@ -116,7 +114,6 @@ export function FlowArchitectureDiagram() {
     setEdges(currentEdges);
   }, [currentNodes, currentEdges, setNodes, setEdges]);
 
-  // Auto-cycle highlight paths
   useEffect(() => {
     if (isHovering) return;
     intervalRef.current = setInterval(() => {
@@ -129,16 +126,6 @@ export function FlowArchitectureDiagram() {
 
   const onNodeMouseEnter = useCallback((_: React.MouseEvent, node: Node) => {
     setIsHovering(true);
-    // Find all paths that include this node
-    const connectedNodes = new Set<string>();
-    for (const path of HIGHLIGHT_PATHS) {
-      if (path.includes(node.id)) {
-        path.forEach((id) => connectedNodes.add(id));
-      }
-    }
-    // If this node is in no highlight path, just highlight itself
-    if (connectedNodes.size === 0) connectedNodes.add(node.id);
-    // Find the first matching path index for consistency
     const pathIdx = HIGHLIGHT_PATHS.findIndex((p) => p.includes(node.id));
     if (pathIdx >= 0) setHighlightedPath(pathIdx);
   }, []);
@@ -148,7 +135,7 @@ export function FlowArchitectureDiagram() {
   }, []);
 
   return (
-    <div className="w-full h-[350px] md:h-[450px] lg:h-[550px] rounded-2xl border bg-card/50 backdrop-blur-sm overflow-hidden">
+    <div className="w-full h-full overflow-hidden">
       <ReactFlow
         nodes={nodes}
         edges={edges}

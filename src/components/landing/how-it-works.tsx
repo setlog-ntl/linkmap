@@ -30,50 +30,37 @@ export function HowItWorks() {
   ];
 
   return (
-    <section className="py-20 border-y border-white/[0.06]">
-      <div className="container">
+    <section className="py-24 bg-[#111] border-y border-zinc-800" id="how-it-works">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <ScrollReveal>
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">{t(locale, 'landing.howTitle')}</h2>
-            <p className="text-muted-foreground text-lg">{t(locale, 'landing.howDesc')}</p>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">{t(locale, 'landing.howTitle')}</h2>
           </div>
         </ScrollReveal>
 
-        <div className="relative max-w-4xl mx-auto">
-          {/* Connection line (desktop) */}
-          <div className="hidden md:block absolute top-[52px] left-[16.67%] right-[16.67%] h-[2px]">
-            <div className="w-full h-full bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
-          </div>
+        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-12 max-w-4xl mx-auto">
+          {/* Connecting Line (Desktop) */}
+          <div className="hidden md:block absolute top-8 left-[16.67%] right-[16.67%] h-0.5 bg-gradient-to-r from-gray-800 via-[#2bee79] to-gray-800 z-0" />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {steps.map((step, i) => {
-              const Icon = step.icon;
-              return (
-                <ScrollReveal key={i} delay={i * 0.15}>
-                  <div className="text-center relative">
-                    {/* Number circle */}
-                    <div className="relative mx-auto mb-6 w-[104px] h-[104px]">
-                      <div className="absolute inset-0 rounded-full bg-emerald-500/[0.08]" />
-                      <div className="absolute inset-3 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                        <span className="text-2xl font-bold text-black">
-                          {step.number}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Icon + Text */}
-                    <div className="flex items-center justify-center gap-2 mb-3">
-                      <Icon className="w-5 h-5 text-emerald-400" />
-                      <h3 className="font-semibold text-lg">{step.title}</h3>
-                    </div>
-                    <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
-                      {step.description}
-                    </p>
+          {steps.map((step, i) => {
+            const Icon = step.icon;
+            return (
+              <ScrollReveal key={i} delay={i * 0.15}>
+                <div className="relative z-10 flex flex-col items-center text-center">
+                  {/* Number circle — Stitch style: border + glow */}
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#111] border-2 border-[#2bee79] shadow-[0_0_15px_rgba(43,238,121,0.3)] mb-6">
+                    <span className="text-xl font-bold text-[#2bee79]">{step.number}</span>
                   </div>
-                </ScrollReveal>
-              );
-            })}
-          </div>
+
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Icon className="w-5 h-5 text-[#2bee79]" />
+                    <h3 className="text-xl font-bold text-white">{step.title}</h3>
+                  </div>
+                  <p className="text-sm text-gray-400 max-w-xs">{step.description}</p>
+                </div>
+              </ScrollReveal>
+            );
+          })}
         </div>
       </div>
     </section>

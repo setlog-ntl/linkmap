@@ -25,7 +25,7 @@ export default async function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="dark min-h-screen flex flex-col bg-[#0a0a0a] text-white">
       <Header profile={profile} />
 
       {/* Section 1: Hero — Architecture Flow Diagram */}

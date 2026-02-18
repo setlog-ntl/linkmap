@@ -5,7 +5,6 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { ScrollReveal } from './scroll-reveal';
 import { ServiceIcon } from './service-icon';
 import { services } from '@/data/services';
-import { getCategoryStyle } from '@/lib/constants/category-styles';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import type { ServiceDomain } from '@/types';
@@ -40,62 +39,52 @@ export function ServicesGrid() {
   );
 
   return (
-    <section className="container py-20">
-      <ScrollReveal>
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t(locale, 'landing.servicesTitle')}</h2>
-          <p className="text-muted-foreground text-lg">
-            {t(locale, 'landing.servicesDesc')}
-          </p>
-        </div>
-      </ScrollReveal>
+    <section className="py-24 bg-[#0a0a0a]">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <ScrollReveal>
+          <h2 className="text-2xl font-bold text-white mb-8">{t(locale, 'landing.servicesTitle')}</h2>
+        </ScrollReveal>
 
-      {/* Filter tabs */}
-      <ScrollReveal>
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {domainFilters.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => setFilter(f.value)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-                filter === f.value
-                  ? 'bg-emerald-500 text-black shadow-[0_0_12px_rgba(43,238,121,0.2)]'
-                  : 'bg-white/[0.05] text-muted-foreground hover:bg-white/[0.08] border border-white/[0.06]'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-      </ScrollReveal>
+        {/* Filter tabs — active tab is white bg (Stitch style) */}
+        <ScrollReveal>
+          <div className="flex flex-wrap gap-2 mb-10">
+            {domainFilters.map((f) => (
+              <button
+                key={f.value}
+                onClick={() => setFilter(f.value)}
+                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                  filter === f.value
+                    ? 'bg-white text-black font-bold'
+                    : 'bg-[#111] border border-zinc-800 text-gray-400 hover:text-white'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </ScrollReveal>
 
-      {/* Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-w-5xl mx-auto">
-        <AnimatePresence mode="popLayout">
-          {filtered.map((svc) => (
-            <motion.div
-              key={svc.slug}
-              layout={!prefersReducedMotion}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.2 }}
-              className={`aspect-square rounded-xl border bg-white/[0.02] border-white/[0.08] p-3 flex flex-col items-center justify-center gap-2 cursor-default hover:-translate-y-1 hover:border-emerald-500/20 hover:shadow-md transition-all ${
-                getCategoryStyle(svc.category).gridBorderClasses
-              }`}
-            >
-              <ServiceIcon serviceId={svc.slug} size={28} />
-              <span className="font-medium text-sm text-center">{svc.name}</span>
-              <div className="flex gap-1">
-                {svc.free_tier_quality && svc.free_tier_quality !== 'none' && (
-                  <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-500/20">
-                    Free
-                  </span>
-                )}
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+        {/* 6-column Grid (Stitch style) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <AnimatePresence mode="popLayout">
+            {filtered.map((svc) => (
+              <motion.div
+                key={svc.slug}
+                layout={!prefersReducedMotion}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col items-center justify-center p-6 rounded bg-[#111] border border-zinc-800 hover:border-gray-500 transition-colors aspect-square cursor-default"
+              >
+                <div className="mb-3">
+                  <ServiceIcon serviceId={svc.slug} size={36} />
+                </div>
+                <span className="text-xs text-gray-400">{svc.name}</span>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
       </div>
     </section>
   );

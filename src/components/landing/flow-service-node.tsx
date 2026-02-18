@@ -3,12 +3,11 @@
 import { memo } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { ServiceIcon } from './service-icon';
-import { getCategoryStyle } from '@/lib/constants/category-styles';
 
 const statusDots: Record<string, string> = {
-  connected: 'bg-green-500',
+  connected: 'bg-[#2bee79]',
   in_progress: 'bg-yellow-500',
-  not_started: 'bg-gray-400',
+  not_started: 'bg-gray-500',
 };
 
 interface FlowServiceNodeData {
@@ -25,31 +24,30 @@ interface FlowServiceNodeData {
 
 function FlowServiceNode({ data }: NodeProps) {
   const d = data as unknown as FlowServiceNodeData;
-  const colorClass = getCategoryStyle(d.category).nodeClasses;
   const dotClass = statusDots[d.status] || statusDots.not_started;
 
   return (
     <div
-      className={`px-3 py-2 rounded-xl border-2 shadow-sm transition-all duration-300 ${colorClass} ${
+      className={`px-3 py-2 rounded-lg border shadow-sm transition-all duration-300 bg-[#111] ${
         d.highlighted
-          ? 'scale-110 shadow-md ring-2 ring-primary/30'
-          : 'hover:scale-105'
+          ? 'scale-110 shadow-md ring-2 ring-[#2bee79]/30 border-[#2bee79]/50'
+          : 'border-zinc-700 hover:border-gray-500'
       }`}
     >
-      <Handle type="target" position={Position.Left} className="!bg-gray-300 !w-2 !h-2 !border-0 dark:!bg-gray-600" />
-      <Handle type="source" position={Position.Right} className="!bg-gray-300 !w-2 !h-2 !border-0 dark:!bg-gray-600" />
+      <Handle type="target" position={Position.Left} className="!bg-gray-600 !w-2 !h-2 !border-0" />
+      <Handle type="source" position={Position.Right} className="!bg-gray-600 !w-2 !h-2 !border-0" />
 
       <div className="flex items-center gap-2">
-        <span className={`w-2 h-2 rounded-full shrink-0 ${dotClass}`} />
+        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass}`} />
         {d.iconSlug ? (
           <ServiceIcon serviceId={d.iconSlug} size={18} />
         ) : (
           <span className="text-base">{d.emoji}</span>
         )}
-        <span className="font-medium text-xs whitespace-nowrap">{d.label}</span>
+        <span className="font-bold text-xs whitespace-nowrap text-white">{d.label}</span>
       </div>
       {d.envTotal != null && d.envTotal > 0 && (
-        <div className="text-[10px] text-muted-foreground mt-0.5 ml-[26px]">
+        <div className="text-[10px] text-gray-500 mt-0.5 ml-[22px]">
           {d.envConfigured}/{d.envTotal} vars
         </div>
       )}
