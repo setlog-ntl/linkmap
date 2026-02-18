@@ -3,7 +3,7 @@
 ## Project Overview
 - **Linkmap**: 프로젝트에 연결된 외부 서비스(API, DB, 결제 등)의 연결 정보를 시각화하고, API 키·환경변수·등록 ID를 안전하게 관리하는 설정 관리 플랫폼
 - **Stack**: Next.js 16 (App Router) + Supabase + TypeScript + Tailwind CSS + shadcn/ui
-- **Deploy**: https://www.linkmap.biz
+- **Deploy**: Cloudflare Workers (https://linkmap.cdhrich.workers.dev)
 
 ## Key Decisions
 - Korean-first UI, global expansion later
@@ -22,7 +22,7 @@
 - RLS policies: users can only access their own projects/data
 - QueryKey factory pattern in `src/lib/queries/keys.ts`
 - Standardized API errors via `src/lib/api/errors.ts`
-- Rate limiting via in-memory limiter (`src/lib/rate-limit.ts`)
+- Rate limiting via Cloudflare Rate Limiting Rules (앱 코드에서 제거됨)
 - Audit logging for sensitive operations (`src/lib/audit.ts`)
 - React Flow loaded via `next/dynamic` with `ssr: false` for performance
 - i18n via Zustand locale-store + t() function (header, dashboard)
@@ -31,9 +31,13 @@
 
 ## Build Notes
 - Next.js 16.1.6 shows "middleware deprecated" warning - will need to migrate to "proxy" convention
+- `next build --webpack` 플래그 필수 (turbopack은 콜론 파일명 생성 → NTFS 미지원)
+- Windows에서 `build:cf` 불가 — WSL 또는 GitHub Actions(Linux)에서 빌드 필요
 - shadcn/ui v4 uses `sonner` instead of deprecated `toast`
-- Vitest + Testing Library for unit tests (16 tests passing)
-- CI/CD via `.github/workflows/ci.yml` (lint, typecheck, test, build)
+- Vitest + Testing Library for unit tests (46 tests passing)
+- CI/CD: `.github/workflows/ci.yml` (lint, typecheck, test, build) + `.github/workflows/deploy-cloudflare.yml` (CF 배포)
+- Sentry 제거됨 — 번들 사이즈 최적화 (17MB → 8.5MB)
+- `@opennextjs/cloudflare` 어댑터로 Cloudflare Workers 배포
 
 ## Testing Notes
 - Mock chaining with Supabase: use `mockResolvedValue` (not `Once`) for fetch tests due to React re-renders

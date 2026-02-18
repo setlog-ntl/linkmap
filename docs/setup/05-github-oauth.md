@@ -57,7 +57,7 @@ GITHUB_OAUTH_CLIENT_ID=Ov23li...
 GITHUB_OAUTH_CLIENT_SECRET=abc123...
 ```
 
-Vercel에서도 동일하게 설정합니다.
+Cloudflare Workers에서는 `npx wrangler secret put`으로 동일하게 설정합니다.
 
 ### 4. 콜백 URL 설정
 
@@ -90,7 +90,7 @@ GitHub OAuth 관련 문제는 아래 문서를 참고하세요:
 
 이 문서에 포함된 내용:
 - `/api/oauth/github/callback` 404 에러 원인 분석
-- Vercel 환경변수 누락 확인
+- Cloudflare Workers 환경변수 누락 확인
 - 캐시 없이 재배포 절차
 - 빌드 로그에서 라우트 확인
 

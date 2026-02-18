@@ -35,17 +35,13 @@ Next.js에서 `NEXT_PUBLIC_` 접두사가 붙은 환경변수는 **클라이언�
 | `STRIPE_SECRET_KEY` | `sk_test_...` / `sk_live_...` | Stripe > Developers > API Keys | `src/app/api/stripe/checkout/route.ts` |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | `pk_test_...` / `pk_live_...` | Stripe > Developers > API Keys | 클라이언트 결제 UI |
 | `STRIPE_WEBHOOK_SECRET` | `whsec_...` | Stripe > Developers > Webhooks | `src/app/api/stripe/webhook/route.ts` |
-| `NEXT_PUBLIC_SENTRY_DSN` | `https://xxx@o123.ingest.sentry.io/456` | Sentry > Project Settings > Client Keys | `sentry.server.config.ts` |
-| `SENTRY_AUTH_TOKEN` | `sntrys_...` | Sentry > Settings > Auth Tokens | `next.config.ts` (빌드 시 소스맵 업로드) |
-| `SENTRY_ORG` | 조직 slug | Sentry URL에서 확인 | `next.config.ts` |
-| `SENTRY_PROJECT` | 프로젝트 slug | Sentry 대시보드에서 확인 | `next.config.ts` |
 
 ## 환경별 설정 위치
 
 | 환경 | 설정 파일/위치 | 비고 |
 |------|---------------|------|
 | 로컬 개발 | `.env.local` | Git에 커밋하지 않음 (`.gitignore` 포함) |
-| Vercel (프로덕션) | Vercel 대시보드 > Settings > Environment Variables | Preview/Production 환경 분리 가능 |
+| Cloudflare Workers (프로덕션) | `npx wrangler secret put` 또는 CF 대시보드 > Workers & Pages > Settings > Variables | |
 | GitHub Actions (CI) | GitHub > Settings > Secrets and variables > Actions | CI 테스트용 |
 
 ## 변수 개수 요약
@@ -54,5 +50,5 @@ Next.js에서 `NEXT_PUBLIC_` 접두사가 붙은 환경변수는 **클라이언�
 |------|---------|-----------|
 | Tier 1 (필수) | 4개 | 필수 |
 | Tier 2 (배포) | 2개 | 배포 시 필수 |
-| Tier 3 (풀기능) | 7개 | 선택 |
-| **합계** | **13개** | |
+| Tier 3 (풀기능) | 3개 | 선택 |
+| **합계** | **9개** | |

@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Linkmap
+
+프로젝트에 연결된 외부 서비스(API, DB, 결제 등)의 연결 정보를 시각화하고, API 키·환경변수·등록 ID를 안전하게 관리하는 설정 관리 플랫폼입니다.
+
+## Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **DB/Auth**: Supabase
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Deploy**: Cloudflare Workers (`@opennextjs/cloudflare`)
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+# 의존성 설치
+npm ci
+
+# 환경변수 설정
+cp .env.local.example .env.local
+# .env.local 파일에 Supabase URL, Key, ENCRYPTION_KEY 입력
+
+# 개발 서버 시작
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build & Deploy
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# 로컬 빌드 (webpack 모드)
+npm run build
+
+# Cloudflare Workers 빌드
+npm run build:cf
+
+# Cloudflare Workers 배포
+npm run deploy:cf
+```
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Supabase Documentation](https://supabase.com/docs)
+- [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
+- [설정 가이드](./docs/setup/README.md)
+- [Cloudflare 마이그레이션 가이드](./docs/cloudflare-migration.md)

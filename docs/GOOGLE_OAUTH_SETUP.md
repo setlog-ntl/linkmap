@@ -45,7 +45,7 @@
 | 환경 | URL |
 |------|-----|
 | 로컬 개발 | `http://localhost:3000` |
-| 프로덕션 (Vercel 등) | `https://본인도메인.vercel.app` (예: `https://www.linkmap.biz`) |
+| 프로덕션 | `https://www.linkmap.biz` (Cloudflare Workers) |
 
 ### 1-3. 코드에서 사용하는 경로 (수정 불필요)
 
@@ -91,7 +91,7 @@
    - **사용자 지원 이메일**: 드롭다운에서 본인 Gmail 선택
    - **앱 로고**: (선택) 업로드 가능, 없어도 동작함
    - **앱 도메인**:
-     - **애플리케이션 홈페이지**: `https://본인프로덕션도메인.vercel.app`  
+     - **애플리케이션 홈페이지**: `https://www.linkmap.biz`
        (로컬만 쓸 경우 `http://localhost:3000` 도 가능)
      - **애플리케이션 개인정보처리방침**, **서비스 약관**: (선택) URL 있으면 입력
    - **개발자 연락처 이메일**: 본인 이메일
@@ -121,8 +121,7 @@
 5. **승인된 JavaScript 원본**:
    - **+ URI 추가** 로 아래를 **한 줄씩** 추가 (끝에 슬래시 없이)
    - `http://localhost:3000`
-   - `https://본인프로덕션도메인.vercel.app`
-     예: `https://www.linkmap.biz`
+   - `https://www.linkmap.biz`
 6. **승인된 리디렉션 URI**:
    - **+ URI 추가** 클릭
    - **반드시 아래 형식으로 입력** (Supabase에서 복사한 값 사용):
@@ -168,12 +167,12 @@
 1. 같은 **Authentication** 메뉴에서 **URL Configuration** 클릭
 2. **Site URL**:
    - 로컬만 쓸 때: `http://localhost:3000`
-   - 프로덕션 사용 시: `https://본인도메인.vercel.app`  
+   - 프로덕션 사용 시: `https://www.linkmap.biz`
    (한 번에 하나만 저장 가능하므로, 배포 후에는 프로덕션 URL로 바꾸는 것이 좋습니다.)
 3. **Redirect URLs**:
    - **Add URL** 로 아래를 **각각** 추가 (끝에 슬래시 없이):
      - `http://localhost:3000/auth/callback`
-     - `https://본인도메인.vercel.app/auth/callback`  
+     - `https://www.linkmap.biz/auth/callback`
    → 로그인 성공 후 Supabase가 사용자를 돌려보낼 **우리 앱** 주소입니다.
 4. **Save** 클릭
 
@@ -284,11 +283,11 @@ npm run dev
 
 - [ ] Google Provider **Enabled**, Client ID/Secret 입력
 - [ ] **Site URL** = 프로덕션 도메인 (예: `https://www.linkmap.biz`)
-- [ ] **Redirect URLs** 에 `https://본인도메인.vercel.app/auth/callback` 포함
+- [ ] **Redirect URLs** 에 `https://www.linkmap.biz/auth/callback` 포함
 
-### Vercel (또는 사용 중인 호스팅)
+### Cloudflare Workers (호스팅)
 
-- [ ] 환경 변수 설정:
+- [ ] 환경 변수 설정 (`wrangler secret put` 또는 CF 대시보드):
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - (필요 시) `SUPABASE_SERVICE_ROLE_KEY`, `ENCRYPTION_KEY`

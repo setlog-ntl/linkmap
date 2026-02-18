@@ -10,7 +10,7 @@ Linkmap을 로컬 또는 프로덕션 환경에서 실행하기 위한 서비스
 | npm 9+ | 패키지 관리 |
 | Git | 소스 관리 |
 | Supabase 계정 | DB, 인증 |
-| Vercel 계정 (배포 시) | 호스팅 |
+| Cloudflare 계정 (배포 시) | 호스팅 (Workers) |
 
 ## 티어별 분류
 
@@ -29,18 +29,17 @@ Linkmap을 로컬 또는 프로덕션 환경에서 실행하기 위한 서비스
 
 | 서비스 | 가이드 | 환경변수 |
 |--------|--------|----------|
-| Vercel | [03-vercel.md](./03-vercel.md) | (Vercel 대시보드에서 설정) |
+| Cloudflare Workers | [../cloudflare-migration.md](../cloudflare-migration.md) | (wrangler secret put 또는 CF 대시보드) |
 | Google OAuth | [04-google-oauth.md](./04-google-oauth.md) | (Supabase 대시보드에서 설정) |
 | GitHub OAuth | [05-github-oauth.md](./05-github-oauth.md) | `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET` |
 
 ### Tier 3 -- 풀기능 (~45분)
 
-결제, 에러 추적 등 부가 기능을 위한 설정입니다.
+결제 등 부가 기능을 위한 설정입니다.
 
 | 서비스 | 가이드 | 환경변수 |
 |--------|--------|----------|
 | Stripe | [06-stripe.md](./06-stripe.md) | `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` |
-| Sentry | [07-sentry.md](./07-sentry.md) | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` |
 
 ## 빠른 시작 (5분)
 
@@ -69,7 +68,7 @@ npm run dev
 
 | 문서 | 설명 |
 |------|------|
-| [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) | 전체 배포 체크리스트 (GitHub + Vercel + Supabase) |
+| [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) | 전체 배포 체크리스트 (GitHub + Cloudflare + Supabase) |
 | [ENV_REFERENCE.md](./ENV_REFERENCE.md) | 환경변수 전체 참조표 |
 | [COMMON_MISTAKES.md](./COMMON_MISTAKES.md) | 자주 하는 실수 모음 |
 | [../GOOGLE_OAUTH_SETUP.md](../GOOGLE_OAUTH_SETUP.md) | Google OAuth 상세 설정 |
@@ -85,5 +84,5 @@ npm run dev
 - [ ] Google/GitHub OAuth 로그인 성공
 - [ ] 프로젝트 생성 후 환경변수 저장/조회 정상
 - [ ] 서비스 맵 시각화 렌더링 정상
-- [ ] (배포 시) Vercel 프로덕션 빌드 성공
+- [ ] (배포 시) Cloudflare Workers 빌드 성공 (`npm run build:cf`)
 - [ ] (배포 시) 프로덕션 URL에서 OAuth 콜백 정상

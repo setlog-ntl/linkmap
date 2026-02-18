@@ -3,7 +3,7 @@
 ## Prerequisites
 - Node.js 20+
 - Supabase project
-- Vercel account (recommended)
+- Cloudflare account
 
 ## Environment Variables
 
@@ -19,6 +19,8 @@ ENCRYPTION_KEY=<64 hex characters>
 ```
 STRIPE_SECRET_KEY=sk_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+GITHUB_OAUTH_CLIENT_ID=...
+GITHUB_OAUTH_CLIENT_SECRET=...
 ```
 
 ## Database Setup
@@ -33,10 +35,33 @@ STRIPE_WEBHOOK_SECRET=whsec_...
    ```
 3. Seed data: POST `/api/seed` (development only)
 
-## Vercel Deployment
-1. Connect GitHub repo to Vercel
-2. Set environment variables in Vercel dashboard
-3. Deploy - CI/CD runs automatically via `.github/workflows/ci.yml`
+## Cloudflare Workers Deployment
+
+### CLI 배포 (권장)
+```bash
+# 1. Cloudflare 로그인
+npx wrangler login
+
+# 2. Cloudflare Workers 빌드
+npm run build:cf
+
+# 3. 배포
+npm run deploy:cf
+
+# 4. 환경변수 설정
+npx wrangler secret put NEXT_PUBLIC_SUPABASE_URL
+npx wrangler secret put NEXT_PUBLIC_SUPABASE_ANON_KEY
+npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+npx wrangler secret put ENCRYPTION_KEY
+```
+
+### CI/CD 자동 배포
+- `.github/workflows/deploy-cloudflare.yml` — main 브랜치 push 시 자동 배포
+- GitHub Secrets 필요: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
+
+### 참고
+- Windows에서 `build:cf` 불가 (NTFS 콜론 파일명) → WSL 또는 CI 사용
+- 상세 가이드: [docs/cloudflare-migration.md](./docs/cloudflare-migration.md)
 
 ## Local Development
 ```bash

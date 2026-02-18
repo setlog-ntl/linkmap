@@ -2,7 +2,7 @@
 
 > Vercel → Cloudflare Workers 배포 전환 문서
 > 작성일: 2026-02-18
-> 상태: 진행 중
+> 상태: 배포 완료 (https://linkmap.cdhrich.workers.dev)
 >
 > **처음 연결만 하려면** → [2.5 처음 연결 단계](#25-처음-연결-단계-vercel--cloudflare)  
 > **Namecheap linkmap.biz 도메인 설정** → [8. Namecheap linkmap.biz → Cloudflare 도메인 설정](#8-namecheap-linkmapbiz--cloudflare-도메인-설정)
@@ -190,19 +190,23 @@ git push origin main
 - [x] Pino `pino/file` transport — 프로덕션에서는 이미 비활성화 상태 확인
 - [x] `process.stdout` 존재 여부 체크 가드 추가
 
-### 단계 5: Sentry 정비 ✅
-- [x] `instrumentation.ts` — `NEXT_RUNTIME === 'edge'` 분기로 Workers 호환 확인
-- [x] `sentry.edge.config.ts` 이미 적절한 설정 확인
-- [x] 코드 변경 불필요
+### 단계 5: Sentry 제거 ✅
+- [x] `@sentry/nextjs` 패키지 완전 제거 (번들 17MB → 8.5MB, gzip 1.97MB)
+- [x] `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts` 삭제
+- [x] `instrumentation.ts` — Sentry import 제거, logger 기반 에러 추적만 유지
+- [x] `error.tsx` — `Sentry.captureException` → `console.error` 변경
+- [x] `next.config.ts` — `withSentryConfig` 래퍼 제거
 
-### 단계 6: 빌드 테스트 및 배포
+### 단계 6: 빌드 테스트 및 배포 ✅
 - [x] TypeScript 타입 체크 통과
-- [x] 49개 테스트 전부 통과
+- [x] 46개 테스트 전부 통과
 - [x] GitHub Actions 배포 워크플로우 추가 (`.github/workflows/deploy-cloudflare.yml`)
-- [ ] Windows 로컬 빌드 제한 — `build:cf`는 Linux/WSL/CI에서 실행 필요
-- [ ] 환경변수 설정 (`wrangler secret put ...`)
+- [x] `next build --webpack` 플래그로 Windows NTFS 콜론 파일명 우회
+- [x] 환경변수 6개 설정 (`wrangler secret put`)
+- [x] `npx wrangler deploy` 배포 성공 → https://linkmap.cdhrich.workers.dev
+- [ ] GitHub Actions secrets 설정 (CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID)
 - [ ] 도메인 연결 (`www.linkmap.biz`)
-- [ ] `npx wrangler deploy` (CI 또는 WSL에서)
+- [ ] Cloudflare Rate Limiting Rules 대시보드 설정
 
 ---
 
@@ -221,16 +225,11 @@ wrangler secret put ENCRYPTION_KEY
 wrangler secret put GITHUB_CLIENT_ID
 wrangler secret put GITHUB_CLIENT_SECRET
 
-# Stripe
+# Stripe (필요 시)
 wrangler secret put STRIPE_SECRET_KEY
 wrangler secret put STRIPE_WEBHOOK_SECRET
 
-# Sentry
-wrangler secret put SENTRY_AUTH_TOKEN
-wrangler secret put SENTRY_ORG
-wrangler secret put SENTRY_PROJECT
-wrangler secret put NEXT_PUBLIC_SENTRY_DSN
-
+# Sentry: 제거됨 (불필요)
 # Rate Limiting: Cloudflare 대시보드에서 설정 (환경변수 불필요)
 ```
 
@@ -244,16 +243,18 @@ wrangler secret put NEXT_PUBLIC_SENTRY_DSN
 - 6단계 마이그레이션 계획 수립
 - 마이그레이션 문서 작성
 
-### 2026-02-18 — 코드 마이그레이션 완료
-- 단계 1~5 코드 변경 완료
-- Rate Limiter: in-memory Map → Upstash Redis (`@upstash/ratelimit`)
-- 28개 API 라우트 `rateLimit()` → `await rateLimit()` 전환
-- 4개 테스트 파일 mock 패턴 업데이트
+### 2026-02-18 — 코드 마이그레이션 및 배포 완료
+- 단계 1~6 전부 완료
+- Rate Limiter: 앱 코드에서 완전 제거 → Cloudflare Rate Limiting Rules로 대체
+  - `src/lib/rate-limit.ts` 삭제, 28개 API route에서 import/호출 제거
+  - 4개 테스트 파일에서 rate-limit mock 및 429 테스트 케이스 제거
 - Crypto: `nodejs_compat` 플래그로 해결 (코드 변경 불필요)
 - Logger: `process.stdout` 가드 추가
-- Sentry: 기존 edge config 호환 확인 (코드 변경 불필요)
+- Sentry(`@sentry/nextjs`) 완전 제거 — 번들 17MB → 8.5MB, gzip 1.97MB
+- `next build --webpack` 플래그로 Windows NTFS 콜론 파일명 우회
 - GitHub Actions `deploy-cloudflare.yml` 워크플로우 추가
-- **Windows 로컬 `build:cf` 불가** — `node:inspector` 파일명 콜론 이슈 → CI/WSL 필요
+- 환경변수 6개 `wrangler secret put`으로 설정 완료
+- **배포 성공**: https://linkmap.cdhrich.workers.dev
 
 ---
 

@@ -1,6 +1,6 @@
 # Linkmap 배포 체크리스트
 
-GitHub + Vercel + Supabase 연동부터 프로덕션 배포까지의 전체 설정 흐름입니다.
+GitHub + Cloudflare Workers + Supabase 연동부터 프로덕션 배포까지의 전체 설정 흐름입니다.
 
 > 이 문서는 사용자 도움말 페이지의 원본 소스로 사용됩니다.
 
@@ -10,20 +10,20 @@ GitHub + Vercel + Supabase 연동부터 프로덕션 배포까지의 전체 설�
 
 ```
 ┌─────────────┐     push      ┌─────────────┐    auto deploy    ┌─────────────┐
-│   GitHub    │ ───────────── │   Vercel    │ ──────────────── │  Production │
-│  Repository │               │   Build     │                  │   App       │
+│   GitHub    │ ───────────── │  Cloudflare  │ ──────────────── │  Production │
+│  Repository │               │   Workers    │                  │   App       │
 └─────────────┘               └──────┬──────┘                  └──────┬──────┘
                                      │                                │
                               env vars from                    API calls to
-                              Vercel Dashboard                 Supabase
+                              wrangler secret                  Supabase
                                      │                                │
                               ┌──────┴──────┐                  ┌──────┴──────┐
-                              │   Vercel    │                  │  Supabase   │
-                              │  Env Vars   │                  │   (DB/Auth) │
+                              │  Cloudflare │                  │  Supabase   │
+                              │  Secrets    │                  │   (DB/Auth) │
                               └─────────────┘                  └─────────────┘
 ```
 
-**배포 흐름**: GitHub push → Vercel 자동 빌드 → 프로덕션 배포
+**배포 흐름**: GitHub push → GitHub Actions → Cloudflare Workers 자동 배포
 **인증 흐름**: 사용자 → Supabase Auth (Google/GitHub OAuth) → 세션 쿠키
 **데이터 흐름**: 클라이언트 → Supabase API (RLS 적용) → PostgreSQL
 
@@ -46,9 +46,7 @@ npm ci
 
 | 브랜치 | 용도 |
 |--------|------|
-| `main` | 프로덕션 (Vercel 자동 배포) |
-
-> PR을 통한 `main` 머지를 권장합니다. Vercel은 PR에 대해 Preview 배포를 자동 생성합니다.
+| `main` | 프로덕션 (Cloudflare Workers 자동 배포) |
 
 ### 1-3. GitHub Actions 확인
 
@@ -60,6 +58,8 @@ npm ci
 - [x] 타입 체크 (TypeScript)
 - [x] 단위 테스트 (Vitest)
 - [x] 프로덕션 빌드
+
+`.github/workflows/deploy-cloudflare.yml`이 main push 시 자동 배포합니다.
 
 ---
 
@@ -158,56 +158,67 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 ---
 
-## Phase 4: Vercel 배포 설정 (~10분)
+## Phase 4: Cloudflare Workers 배포 설정 (~10분)
 
-### 4-1. 프로젝트 Import
+### 4-1. Cloudflare 계정 준비
 
-1. [vercel.com](https://vercel.com) 로그인
-2. **Add New > Project**
-3. GitHub 저장소 Import (`setlog-ntl/linkmap`)
-4. Framework: **Next.js** (자동 감지)
-5. **Deploy** 클릭
+1. [dash.cloudflare.com](https://dash.cloudflare.com) 로그인
+2. **Workers & Pages** 이동
+3. Workers.dev 서브도메인 설정 (최초 1회)
 
 ### 4-2. 환경변수 등록
 
-**Settings > Environment Variables**에서 아래 변수를 등록합니다:
+`wrangler secret put` 명령으로 환경변수를 등록합니다:
 
 #### Tier 1 (필수 — 4개)
 
-```
-NEXT_PUBLIC_SUPABASE_URL      = https://<ref>.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY = eyJhbGci... (Supabase anon key)
-SUPABASE_SERVICE_ROLE_KEY     = eyJhbGci... (Supabase service role key)
-ENCRYPTION_KEY                = <64자 hex> (Phase 3에서 생성)
+```bash
+npx wrangler secret put NEXT_PUBLIC_SUPABASE_URL
+npx wrangler secret put NEXT_PUBLIC_SUPABASE_ANON_KEY
+npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+npx wrangler secret put ENCRYPTION_KEY
 ```
 
 #### Tier 2 (서비스 연동 — 2개)
 
-```
-GITHUB_OAUTH_CLIENT_ID        = Ov23li... (서비스 연동용 OAuth App)
-GITHUB_OAUTH_CLIENT_SECRET    = <secret>
-```
-
-#### Tier 3 (풀기능 — 7개, 선택)
-
-```
-STRIPE_SECRET_KEY                   = sk_test_...
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY  = pk_test_...
-STRIPE_WEBHOOK_SECRET               = whsec_...
-NEXT_PUBLIC_SENTRY_DSN              = https://xxx@o123.ingest.sentry.io/456
-SENTRY_AUTH_TOKEN                   = sntrys_...
-SENTRY_ORG                         = your-org
-SENTRY_PROJECT                     = linkmap
+```bash
+npx wrangler secret put GITHUB_OAUTH_CLIENT_ID
+npx wrangler secret put GITHUB_OAUTH_CLIENT_SECRET
 ```
 
-### 4-3. 첫 배포 확인
+#### Tier 3 (풀기능 — 3개, 선택)
 
-환경변수 등록 후:
+```bash
+npx wrangler secret put STRIPE_SECRET_KEY
+npx wrangler secret put NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+npx wrangler secret put STRIPE_WEBHOOK_SECRET
+```
 
-1. **Deployments** > 최신 배포 > **...** > **Redeploy**
-2. **"Use existing Build Cache" 체크 해제**
-3. **Redeploy** 클릭
-4. 빌드 로그에서 모든 라우트가 생성되는지 확인
+### 4-3. 첫 배포
+
+```bash
+# Cloudflare 로그인
+npx wrangler login
+
+# Cloudflare Workers 빌드 (Linux/WSL/CI 필요)
+npm run build:cf
+
+# 배포
+npx wrangler deploy
+```
+
+> Windows에서 `build:cf`는 불가합니다 (NTFS 콜론 파일명). WSL 또는 GitHub Actions에서 빌드하세요.
+
+### 4-4. GitHub Actions 자동 배포
+
+GitHub repo Settings > Secrets에 아래 값을 추가하면 main push 시 자동 배포됩니다:
+
+| Secret | 출처 |
+|--------|------|
+| `CLOUDFLARE_API_TOKEN` | Cloudflare > My Profile > API Tokens |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare > Workers > Account ID |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase |
 
 ---
 
@@ -226,8 +237,8 @@ SENTRY_PROJECT                     = linkmap
 | Homepage URL | `https://www.linkmap.biz` |
 | Callback URL | `https://www.linkmap.biz/api/oauth/github/callback` |
 
-3. Client ID 복사 → Vercel `GITHUB_OAUTH_CLIENT_ID`
-4. Client Secret 생성 및 복사 → Vercel `GITHUB_OAUTH_CLIENT_SECRET`
+3. Client ID → `npx wrangler secret put GITHUB_OAUTH_CLIENT_ID`
+4. Client Secret 생성 → `npx wrangler secret put GITHUB_OAUTH_CLIENT_SECRET`
 
 ### 5-2. 스코프
 
@@ -247,10 +258,6 @@ SENTRY_PROJECT                     = linkmap
 ### Stripe (결제)
 
 미설정 시 결제 기능만 비활성화됩니다. 상세: [06-stripe.md](./06-stripe.md)
-
-### Sentry (에러 추적)
-
-미설정 시 에러 추적이 비활성화됩니다. 상세: [07-sentry.md](./07-sentry.md)
 
 ---
 
@@ -277,7 +284,7 @@ npm run dev
 
 ### 프로덕션 환경
 
-- [ ] Vercel 빌드 성공 (Build Logs에 에러 없음)
+- [ ] Cloudflare Workers 빌드 성공 (`npm run build:cf`)
 - [ ] `https://www.linkmap.biz` 접근 가능
 - [ ] 프로덕션 URL에서 OAuth 로그인 성공
 - [ ] 환경변수 CRUD 정상 동작
@@ -292,8 +299,8 @@ npm run dev
 |------|------|------|
 | OAuth 로그인 시 404 | Supabase URL Configuration 미설정 | [Phase 2-3](#2-3-url-configuration-필수) 확인 |
 | 환경변수 저장 시 500 | `ENCRYPTION_KEY` 미설정/형식 오류 | [Phase 3](#phase-3-암호화-키-생성-2분) 확인 |
-| 로컬 OK, 프로덕션 에러 | Vercel 환경변수 누락 | [Phase 4-2](#4-2-환경변수-등록) 확인 |
-| 새 라우트 404 | Vercel 빌드 캐시 | 캐시 없이 재배포 |
+| 로컬 OK, 프로덕션 에러 | Cloudflare 환경변수 누락 | [Phase 4-2](#4-2-환경변수-등록) 확인 |
+| 새 라우트 404 | 빌드 캐시 | `.open-next` 삭제 후 재빌드 |
 | GitHub 연동 에러 | OAuth Callback URL 불일치 | [Phase 5-1](#5-1-oauth-app-생성) 확인 |
 | 빌드 시 타입 에러 | 로컬에서 `npm run typecheck` 먼저 확인 | `npx tsc --noEmit` 실행 |
 
@@ -305,17 +312,20 @@ npm run dev
 
 ```
 linkmap/
-├── vercel.json              ← Vercel 빌드/배포 설정
-├── next.config.ts           ← Next.js 설정 (보안 헤더, Sentry)
-├── proxy.ts                 ← Next.js 16 proxy (세션 관리 + 라우트 보호)
-├── .env.local.example       ← 환경변수 템플릿
-├── .github/workflows/ci.yml ← CI 파이프라인
-├── supabase/migrations/     ← DB 스키마 (001~027)
+├── wrangler.jsonc             ← Cloudflare Workers 배포 설정
+├── open-next.config.ts        ← OpenNext Cloudflare 어댑터 설정
+├── next.config.ts             ← Next.js 설정 (보안 헤더)
+├── proxy.ts                   ← Next.js 16 proxy (세션 관리 + 라우트 보호)
+├── .env.local.example         ← 환경변수 템플릿
+├── .github/workflows/
+│   ├── ci.yml                 ← CI 파이프라인
+│   └── deploy-cloudflare.yml  ← Cloudflare Workers 자동 배포
+├── supabase/migrations/       ← DB 스키마 (001~027)
 └── src/lib/supabase/
-    ├── client.ts            ← 브라우저 Supabase 클라이언트
-    ├── server.ts            ← 서버 Supabase 클라이언트
-    ├── admin.ts             ← Service Role 클라이언트 (RLS 바이패스)
-    └── session.ts           ← 세션 갱신 로직 (proxy.ts에서 호출)
+    ├── client.ts              ← 브라우저 Supabase 클라이언트
+    ├── server.ts              ← 서버 Supabase 클라이언트
+    ├── admin.ts               ← Service Role 클라이언트 (RLS 바이패스)
+    └── session.ts             ← 세션 갱신 로직 (proxy.ts에서 호출)
 ```
 
 ---
@@ -326,5 +336,5 @@ linkmap/
 |------|---------|-----------|-----------|
 | Tier 1 (필수) | 4개 | 필수 | ~15분 |
 | Tier 2 (배포) | 2개 | 서비스 연동 시 필수 | ~10분 |
-| Tier 3 (풀기능) | 7개 | 선택 | ~20분 |
-| **합계** | **13개** | | **~45분** |
+| Tier 3 (풀기능) | 3개 | 선택 | ~10분 |
+| **합계** | **9개** | | **~35분** |

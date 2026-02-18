@@ -50,17 +50,17 @@ ENCRYPTION_KEY=생성된_키_붙여넣기
 
 ---
 
-## 3. Vercel 환경변수 누락
+## 3. Cloudflare Workers 환경변수 누락
 
-**증상**: 로컬에서는 정상이지만 Vercel 배포 후 기능 오작동
+**증상**: 로컬에서는 정상이지만 배포 후 기능 오작동
 
-**원인**: Vercel 대시보드에 환경변수를 추가하지 않았습니다. `.env.local`은 로컬 전용이므로 Vercel에는 별도로 설정해야 합니다.
+**원인**: Cloudflare Workers에 환경변수를 추가하지 않았습니다. `.env.local`은 로컬 전용이므로 Workers에는 별도로 설정해야 합니다.
 
 **해결**:
 
-1. Vercel 대시보드 > **Settings > Environment Variables**
+1. `npx wrangler secret put <변수명>` 또는 Cloudflare 대시보드 > Workers & Pages > Settings > Variables
 2. [ENV_REFERENCE.md](./ENV_REFERENCE.md)의 Tier 1~2 변수를 모두 추가
-3. 환경변수 추가 후 **반드시 재배포** (자동 재배포되지 않음)
+3. 환경변수 추가 후 `npx wrangler deploy`로 재배포
 
 ---
 
@@ -78,20 +78,20 @@ ENCRYPTION_KEY=생성된_키_붙여넣기
 
 ---
 
-## 5. Vercel 빌드 캐시로 새 라우트 미반영
+## 5. Cloudflare Workers 빌드 캐시로 새 라우트 미반영
 
-**증상**: 새로 추가한 API 라우트(`/api/...`)가 Vercel에서 404를 반환
+**증상**: 새로 추가한 API 라우트(`/api/...`)가 배포 후 404를 반환
 
-**원인**: Vercel의 빌드 캐시가 이전 빌드 결과를 재사용하여 새 라우트가 포함되지 않았습니다.
+**원인**: 이전 빌드 결과가 캐시되어 새 라우트가 포함되지 않았습니다.
 
 **해결**:
 
-1. Vercel 대시보드 > **Deployments**
-2. 최신 배포 > **...** > **Redeploy**
-3. **"Use existing Build Cache" 체크 해제**
-4. **Redeploy** 클릭
-
-자세한 내용: [03-vercel.md](./03-vercel.md#4-캐시-없이-재배포)
+```bash
+# .open-next 캐시 삭제 후 재빌드
+rm -rf .open-next
+npm run build:cf
+npx wrangler deploy
+```
 
 ---
 
@@ -105,7 +105,7 @@ ENCRYPTION_KEY=생성된_키_붙여넣기
 
 1. Stripe 대시보드 > **Developers > Webhooks**
 2. 엔드포인트의 **Signing secret** (`whsec_...`) 복사
-3. Vercel 환경변수에 `STRIPE_WEBHOOK_SECRET` 추가
+3. `npx wrangler secret put STRIPE_WEBHOOK_SECRET` 으로 설정
 4. 재배포
 
 자세한 내용: [06-stripe.md](./06-stripe.md#3-webhook-설정)
@@ -139,7 +139,7 @@ ENCRYPTION_KEY=생성된_키_붙여넣기
 문제 발생 시 아래 순서로 확인하세요:
 
 1. **`.env.local` 확인**: 필요한 환경변수가 모두 설정되어 있는가?
-2. **Vercel 환경변수 확인**: 로컬에만 설정하고 Vercel에는 빠뜨리지 않았는가?
+2. **Cloudflare 환경변수 확인**: 로컬에만 설정하고 Workers에는 빠뜨리지 않았는가?
 3. **Supabase URL Configuration**: Site URL과 Redirect URLs가 올바른가?
-4. **빌드 캐시**: 새 코드가 배포에 반영되었는가? (캐시 없이 재배포)
-5. **콘솔/로그 확인**: 브라우저 DevTools, Vercel Function Logs에 에러 메시지가 있는가?
+4. **빌드 캐시**: 새 코드가 배포에 반영되었는가? (`.open-next` 삭제 후 재빌드)
+5. **콘솔/로그 확인**: 브라우저 DevTools, `npx wrangler tail`로 로그 확인
