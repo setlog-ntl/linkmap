@@ -60,7 +60,8 @@ export type EasyCategory =
   | 'dev_tools'
   | 'analytics_other';
 
-export type UserConnectionType = 'uses' | 'integrates' | 'data_transfer';
+export type UserConnectionType = 'uses' | 'integrates' | 'data_transfer' | 'api_call' | 'auth_provider' | 'webhook' | 'sdk';
+export type ConnectionStatus = 'active' | 'inactive' | 'error' | 'pending';
 
 export interface UserConnection {
   id: string;
@@ -68,7 +69,11 @@ export interface UserConnection {
   source_service_id: string;
   target_service_id: string;
   connection_type: UserConnectionType;
+  connection_status: ConnectionStatus;
   label: string | null;
+  description: string | null;
+  last_verified_at: string | null;
+  metadata: Record<string, unknown>;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -620,4 +625,5 @@ export interface DashboardResponse {
   project: Project;
   layers: LayerData[];
   metrics: DashboardMetrics;
+  connections: UserConnection[];
 }
