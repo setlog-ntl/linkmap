@@ -6,16 +6,24 @@ type MobileTab = DashboardLayer | 'project';
 interface DashboardState {
   activeTab: MobileTab;
   expandedCardId: string | null;
+  showConnections: boolean;
+  selectedConnectionId: string | null;
   setActiveTab: (tab: MobileTab) => void;
   toggleCard: (id: string) => void;
+  setShowConnections: (show: boolean) => void;
+  setSelectedConnectionId: (id: string | null) => void;
 }
 
 export const useDashboardStore = create<DashboardState>((set) => ({
   activeTab: 'project',
   expandedCardId: null,
+  showConnections: true,
+  selectedConnectionId: null,
   setActiveTab: (tab) => set({ activeTab: tab }),
   toggleCard: (id) =>
     set((state) => ({
       expandedCardId: state.expandedCardId === id ? null : id,
     })),
+  setShowConnections: (show) => set({ showConnections: show, selectedConnectionId: null }),
+  setSelectedConnectionId: (id) => set({ selectedConnectionId: id }),
 }));

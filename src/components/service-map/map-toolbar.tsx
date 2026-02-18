@@ -58,6 +58,10 @@ const connectionTypeLabels: Record<UserConnectionType, string> = {
   uses: '사용',
   integrates: '연동',
   data_transfer: '데이터 전달',
+  api_call: 'API 호출',
+  auth_provider: '인증 제공',
+  webhook: '웹훅',
+  sdk: 'SDK',
 };
 
 export function MapToolbar({

@@ -49,7 +49,7 @@ export function LayerColumn({ data, projectId }: LayerColumnProps) {
 
       {/* Auth group (frontend only) */}
       {layer === 'frontend' && authCards.length > 0 && (
-        <AuthGroup cards={authCards} />
+        <AuthGroup cards={authCards} projectId={projectId} />
       )}
 
       {/* Regular subcategory groups */}
@@ -59,7 +59,7 @@ export function LayerColumn({ data, projectId }: LayerColumnProps) {
             {allCategoryLabels[sub as ServiceCategory] ?? sub}
           </p>
           {cards.map((card) => (
-            <CompactCard key={card.projectServiceId} card={card} />
+            <CompactCard key={card.projectServiceId} card={card} projectId={projectId} />
           ))}
         </div>
       ))}

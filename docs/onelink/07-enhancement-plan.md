@@ -3,7 +3,7 @@
 > **PMO 문서**: [PMO.md](./PMO.md)
 > **상위 문서**: [README.md](./README.md)
 > **작성일**: 2026-02-18
-> **상태**: 🟢 Sprint 6 실행 중
+> **상태**: ✅ Phase 1 완료 (Sprint 1-7)
 
 ---
 
@@ -121,6 +121,9 @@ const aiChatLimiter = createRateLimiter({
   keyPrefix: 'ai-chat',
 });
 ```
+
+> **Implementation Note**: Rate limiting은 Cloudflare Workers 마이그레이션 시 앱 코드에서 제거됨.
+> `createRateLimiter`와 `lib/rate-limit.ts`는 삭제되었으며, Cloudflare Rate Limiting Rules로 인프라 레벨에서 처리.
 
 ### 2.2 파일 경로 보안 강화
 
@@ -367,6 +370,10 @@ src/data/templates/
 └── nonprofit-page.ts
 ```
 
+> **Implementation Note**: 디렉토리 분리(`src/data/templates/`)는 미구현.
+> `getTemplateBySlug()` Map 기반 O(1) 조회로 성능 문제 해결.
+> 디렉토리 분리는 Phase 2 템플릿 콘텐츠 생성 시(Sprint 9-11) 재검토.
+
 ### 5.2 번들 로딩 최적화
 
 **현재:** 배포 시 모든 템플릿 번들을 한 번에 import
@@ -540,3 +547,87 @@ My Sites 대시보드 상단:
 | 2026-02-18 | Sprint 5 | ✅ 완료 — getTemplateBySlug() 추가, deploy-pages 최적화 |
 | 2026-02-18 | Sprint 6 | ✅ 완료 — 배치 커밋 API, AI 프롬프트 확장, 반응형 미리보기 |
 | 2026-02-18 | Sprint 7 | ✅ 완료 — Linkmap 프로젝트 연결 버튼, 배포 현황 대시보드 |
+| 2026-02-18 | Phase 2 | 계획 수립 — Sprint 8-12 로드맵 추가, Phase 1 불일치 정정 |
+
+---
+
+## Phase 2: 확장 & 완성 (Sprint 8-12)
+
+> **상태**: 계획 수립 완료
+> **선행**: Phase 1 (Sprint 1-7) 완료
+
+### Sprint 8: Connections 완성
+
+> **목표**: 개발 중인 Connections 기능의 품질 보증 및 출시 준비
+> **상태**: 계획
+
+**범위:**
+- Connections 관련 API/컴포넌트 테스트 커버리지 확보
+- i18n 키 누락 검증 (47개 키 ko/en 일치 확인)
+- Connections 페이지 서버 컴포넌트 인증 체크 추가
+- `02-api-reference.md`에 Connections API 문서 추가
+- 연결 오버레이 성능 최적화 (다수 연결 시)
+
+**완료 기준:**
+- [ ] Connections API 테스트 (CRUD + auto-connect)
+- [ ] 서버 auth 적용 (`/project/[id]/connections`)
+- [ ] i18n 키 일치 검증
+- [ ] API 문서화 완료
+- [ ] 성능 테스트 (20+ 연결 시나리오)
+
+### Sprint 9: 템플릿 Phase 2
+
+> **목표**: 4개 실용 템플릿 콘텐츠 번들 생성
+> **상태**: 계획
+
+| 템플릿 | 슬러그 | 카테고리 | 복잡도 |
+|--------|--------|----------|--------|
+| 소상공인 홈페이지 | small-biz | 비즈니스 | 중간 |
+| 제품 랜딩 페이지 | product-landing | 마케팅 | 중간 |
+| QR 메뉴 프로 | qr-menu-pro | 요식업 | 높음 |
+| 이력서 사이트 | resume-site | 개인 | 낮음 |
+
+### Sprint 10: 템플릿 Phase 3
+
+> **목표**: 4개 크리에이터/비즈니스 템플릿
+> **의존성**: Sprint 9 완료
+
+| 템플릿 | 슬러그 | 카테고리 | 복잡도 |
+|--------|--------|----------|--------|
+| 퍼스널 브랜드 | personal-brand | 개인 | 중간 |
+| 프리랜서 페이지 | freelancer-page | 개인 | 중간 |
+| SaaS 랜딩 | saas-landing | 비즈니스 | 높음 |
+| 뉴스레터 랜딩 | newsletter-landing | 마케팅 | 낮음 |
+
+### Sprint 11: 템플릿 Phase 4
+
+> **목표**: 4개 커뮤니티/이벤트 템플릿
+> **의존성**: Sprint 10 완료
+
+| 템플릿 | 슬러그 | 카테고리 | 복잡도 |
+|--------|--------|----------|--------|
+| 이벤트 페이지 | event-page | 이벤트 | 중간 |
+| 커뮤니티 허브 | community-hub | 커뮤니티 | 높음 |
+| 스터디 모집 | study-recruit | 교육 | 중간 |
+| 비영리 페이지 | nonprofit-page | 비영리 | 낮음 |
+
+### Sprint 12: 프리뷰 & 품질
+
+> **목표**: 사용자 경험 완성도 확보
+> **의존성**: Sprint 9-11 완료 (모든 템플릿 필요)
+
+**범위:**
+- 15개 템플릿 프리뷰 이미지 생성 (1200x630, OG 이미지 겸용)
+- Lighthouse 성능 감사 (목표 90+)
+- E2E 테스트 (배포 → 편집 → 확인 시나리오)
+- 전체 통합 테스트
+
+### Phase 2 우선순위 매트릭스
+
+| Sprint | 영향도 | 긴급도 | 복잡도 | 우선순위 |
+|--------|--------|--------|--------|----------|
+| 8. Connections 완성 | 높음 | 높음 | 중간 | ★★★★★ |
+| 9. 템플릿 Phase 2 | 높음 | 중간 | 중간 | ★★★★☆ |
+| 10. 템플릿 Phase 3 | 중간 | 중간 | 중간 | ★★★☆☆ |
+| 11. 템플릿 Phase 4 | 중간 | 낮음 | 중간 | ★★★☆☆ |
+| 12. 프리뷰 & 품질 | 높음 | 낮음 | 높음 | ★★★☆☆ |

@@ -592,7 +592,10 @@ export type DashboardSubcategory =
   | 'ai'
   | 'cicd'
   | 'monitoring'
-  | 'ide';
+  | 'ide'
+  | 'cache'
+  | 'queue'
+  | 'testing';
 
 export interface ServiceCardData {
   projectServiceId: string;

@@ -31,7 +31,9 @@ export async function PATCH(
 
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (parsed.data.connection_type !== undefined) updates.connection_type = parsed.data.connection_type;
+  if (parsed.data.connection_status !== undefined) updates.connection_status = parsed.data.connection_status;
   if (parsed.data.label !== undefined) updates.label = parsed.data.label;
+  if (parsed.data.description !== undefined) updates.description = parsed.data.description;
 
   const { data, error } = await supabase
     .from('user_connections')

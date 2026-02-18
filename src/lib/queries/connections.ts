@@ -1,6 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './keys';
-import type { UserConnection, UserConnectionType } from '@/types';
+import type { UserConnection, UserConnectionType, ConnectionStatus } from '@/types';
+
+interface AutoConnectSuggestion {
+  source_service_id: string;
+  target_service_id: string;
+  connection_type: UserConnectionType;
+  reason: string;
+  dependency_type: string;
+}
 
 export function useProjectConnections(projectId: string) {
   return useQuery({
@@ -20,7 +28,9 @@ interface CreateConnectionParams {
   source_service_id: string;
   target_service_id: string;
   connection_type: UserConnectionType;
+  connection_status?: ConnectionStatus;
   label?: string | null;
+  description?: string | null;
 }
 
 export function useCreateConnection(projectId: string) {
@@ -51,7 +61,11 @@ export function useCreateConnection(projectId: string) {
         source_service_id: params.source_service_id,
         target_service_id: params.target_service_id,
         connection_type: params.connection_type,
+        connection_status: params.connection_status ?? 'active',
         label: params.label || null,
+        description: params.description || null,
+        last_verified_at: null,
+        metadata: {},
         created_by: '',
         created_at: now,
         updated_at: now,
@@ -80,7 +94,9 @@ export function useCreateConnection(projectId: string) {
 interface UpdateConnectionParams {
   id: string;
   connection_type?: UserConnectionType;
+  connection_status?: ConnectionStatus;
   label?: string | null;
+  description?: string | null;
 }
 
 export function useUpdateConnection(projectId: string) {
@@ -137,6 +153,45 @@ export function useDeleteConnection(projectId: string) {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.connections.byProject(projectId) });
+    },
+  });
+}
+
+export function useAutoConnectSuggestions(projectId: string) {
+  return useQuery({
+    queryKey: [...queryKeys.connections.byProject(projectId), 'auto-suggestions'] as const,
+    queryFn: async (): Promise<AutoConnectSuggestion[]> => {
+      const res = await fetch(`/api/connections/auto?project_id=${projectId}`);
+      if (!res.ok) throw new Error('자동 연결 제안을 불러올 수 없습니다');
+      const json = await res.json();
+      return json.suggestions;
+    },
+    enabled: !!projectId,
+    staleTime: 60_000,
+  });
+}
+
+export function useAutoConnect(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (
+      suggestions: Array<{ source_service_id: string; target_service_id: string; connection_type: string }>
+    ): Promise<{ created: UserConnection[] }> => {
+      const res = await fetch('/api/connections/auto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ project_id: projectId, suggestions }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || '자동 연결 생성에 실패했습니다');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.connections.byProject(projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all(projectId) });
     },
   });
 }

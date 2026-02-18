@@ -109,6 +109,35 @@ const SERVICE_IDS = {
   naver_login: '10000000-0000-4000-a000-000000000056',
   apple_login: '10000000-0000-4000-a000-000000000057',
   github_oauth: '10000000-0000-4000-a000-000000000058',
+
+  // New Phase 4 services
+  auth0: '10000000-0000-4000-a000-000000000059',
+  convex: '10000000-0000-4000-a000-000000000060',
+  drizzle: '10000000-0000-4000-a000-000000000061',
+  prisma: '10000000-0000-4000-a000-000000000062',
+  turso: '10000000-0000-4000-a000-000000000063',
+  redis_cloud: '10000000-0000-4000-a000-000000000064',
+  vercel_kv: '10000000-0000-4000-a000-000000000065',
+  pinecone: '10000000-0000-4000-a000-000000000066',
+  langchain: '10000000-0000-4000-a000-000000000067',
+  replicate: '10000000-0000-4000-a000-000000000068',
+  huggingface: '10000000-0000-4000-a000-000000000069',
+  stability_ai: '10000000-0000-4000-a000-000000000070',
+  notion_api: '10000000-0000-4000-a000-000000000071',
+  linear_api: '10000000-0000-4000-a000-000000000072',
+  toss_payments: '10000000-0000-4000-a000-000000000073',
+  paypal: '10000000-0000-4000-a000-000000000074',
+  aws_ses: '10000000-0000-4000-a000-000000000075',
+  mailchimp: '10000000-0000-4000-a000-000000000076',
+  imagekit: '10000000-0000-4000-a000-000000000077',
+  r2: '10000000-0000-4000-a000-000000000078',
+  grafana: '10000000-0000-4000-a000-000000000079',
+  new_relic: '10000000-0000-4000-a000-000000000080',
+  github_copilot: '10000000-0000-4000-a000-000000000081',
+  cursor: '10000000-0000-4000-a000-000000000082',
+  vitest: '10000000-0000-4000-a000-000000000083',
+  storybook: '10000000-0000-4000-a000-000000000084',
+  docker: '10000000-0000-4000-a000-000000000085',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -1853,6 +1882,1571 @@ export const services: ServiceSeed[] = [
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$0', enterprise: '$0' },
     dx_score: 9.0,
+  },
+
+  // -----------------------------------------------------------------------
+  // Phase 4 — New Services (59–85)
+  // -----------------------------------------------------------------------
+
+  // 59. Auth0
+  {
+    id: SERVICE_IDS.auth0,
+    name: 'Auth0',
+    slug: 'auth0',
+    category: 'auth',
+    dashboard_layer: 'frontend',
+    dashboard_subcategory: 'auth',
+    description:
+      'Enterprise-grade identity platform with SSO, MFA, and social login support.',
+    description_ko:
+      '기업용 SSO, MFA, 소셜 로그인을 지원하는 인증 플랫폼입니다.',
+    icon_url: null,
+    website_url: 'https://auth0.com',
+    docs_url: 'https://auth0.com/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '7,500 MAU, 소셜 로그인 무제한',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Essential', price: '$35/월' },
+        { name: 'Professional', price: '$240/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'AUTH0_SECRET',
+        public: false,
+        description: 'Auth0 secret for session encryption',
+        description_ko: 'Auth0 세션 암호화 시크릿',
+      },
+      {
+        name: 'AUTH0_BASE_URL',
+        public: true,
+        description: 'Application base URL',
+        description_ko: '앱 기본 URL',
+      },
+      {
+        name: 'AUTH0_ISSUER_BASE_URL',
+        public: true,
+        description: 'Auth0 issuer URL',
+        description_ko: 'Auth0 발급자 URL',
+      },
+      {
+        name: 'AUTH0_CLIENT_ID',
+        public: true,
+        description: 'Auth0 client ID',
+        description_ko: 'Auth0 클라이언트 ID',
+      },
+      {
+        name: 'AUTH0_CLIENT_SECRET',
+        public: false,
+        description: 'Auth0 client secret',
+        description_ko: 'Auth0 클라이언트 시크릿',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 88,
+    difficulty_level: 'intermediate',
+    tags: ['auth', 'sso', 'mfa', 'oauth', 'identity'],
+    alternatives: ['clerk', 'supabase-auth', 'firebase-auth'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'vue', 'angular', 'express'],
+      language: ['typescript', 'javascript', 'python', 'java', 'go'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/@auth0/nextjs-auth0' },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 25,
+    monthly_cost_estimate: { starter: '$0', growth: '$35', enterprise: '$240' },
+    dx_score: 8.5,
+  },
+
+  // 60. Convex
+  {
+    id: SERVICE_IDS.convex,
+    name: 'Convex',
+    slug: 'convex',
+    category: 'database',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'database',
+    description:
+      'Reactive backend-as-a-service with real-time sync, serverless functions, and built-in database.',
+    description_ko:
+      '실시간 동기화, 서버리스 함수, 내장 데이터베이스를 제공하는 반응형 BaaS 플랫폼입니다.',
+    icon_url: null,
+    website_url: 'https://convex.dev',
+    docs_url: 'https://docs.convex.dev',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '1M 함수 호출, 1 GB 저장소',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Pro', price: '$25/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'CONVEX_DEPLOYMENT',
+        public: true,
+        description: 'Convex deployment URL',
+        description_ko: 'Convex 배포 URL',
+      },
+      {
+        name: 'NEXT_PUBLIC_CONVEX_URL',
+        public: true,
+        description: 'Convex public URL for client',
+        description_ko: 'Convex 클라이언트 공개 URL',
+      },
+      {
+        name: 'CONVEX_DEPLOY_KEY',
+        public: false,
+        description: 'Convex deploy key for CI/CD',
+        description_ko: 'Convex CI/CD 배포 키',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 78,
+    difficulty_level: 'beginner',
+    tags: ['database', 'realtime', 'serverless', 'baas', 'reactive'],
+    alternatives: ['supabase', 'firebase', 'neon'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'vue', 'svelte'],
+      language: ['typescript', 'javascript'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/convex' },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'high',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: { starter: '$0', growth: '$25', enterprise: '문의' },
+    dx_score: 9.0,
+  },
+
+  // 61. Drizzle ORM
+  {
+    id: SERVICE_IDS.drizzle,
+    name: 'Drizzle ORM',
+    slug: 'drizzle',
+    category: 'database',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'database',
+    description:
+      'Lightweight TypeScript ORM with SQL-like syntax and zero dependencies.',
+    description_ko:
+      'SQL과 유사한 문법을 제공하는 경량 TypeScript ORM입니다. 의존성이 없어 번들 크기가 작습니다.',
+    icon_url: null,
+    website_url: 'https://orm.drizzle.team',
+    docs_url: 'https://orm.drizzle.team/docs/overview',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '오픈소스, 완전 무료',
+      plans: [{ name: 'Free', price: '무료' }],
+    },
+    required_env_vars: [
+      {
+        name: 'DATABASE_URL',
+        public: false,
+        description: 'Database connection string',
+        description_ko: '데이터베이스 연결 문자열',
+      },
+      {
+        name: 'DATABASE_AUTH_TOKEN',
+        public: false,
+        description: 'Database auth token (for Turso/LibSQL)',
+        description_ko: '데이터베이스 인증 토큰 (Turso/LibSQL용)',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 85,
+    difficulty_level: 'intermediate',
+    tags: ['orm', 'typescript', 'sql', 'postgres', 'mysql', 'sqlite'],
+    alternatives: ['prisma', 'typeorm', 'kysely'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'express', 'fastify', 'hono'],
+      language: ['typescript', 'javascript'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/drizzle-orm' },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 15,
+    monthly_cost_estimate: { starter: '$0', growth: '$0', enterprise: '$0' },
+    dx_score: 9.0,
+  },
+
+  // 62. Prisma
+  {
+    id: SERVICE_IDS.prisma,
+    name: 'Prisma',
+    slug: 'prisma',
+    category: 'database',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'database',
+    description:
+      'Next-generation TypeScript ORM with auto-generated client, migrations, and a visual database browser.',
+    description_ko:
+      '자동 생성 클라이언트, 마이그레이션, 시각적 DB 브라우저를 제공하는 차세대 TypeScript ORM입니다.',
+    icon_url: null,
+    website_url: 'https://www.prisma.io',
+    docs_url: 'https://www.prisma.io/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '오픈소스 ORM 무료, Prisma Accelerate 유료',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Pro', price: '$49/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'DATABASE_URL',
+        public: false,
+        description: 'Database connection string',
+        description_ko: '데이터베이스 연결 문자열',
+      },
+      {
+        name: 'DIRECT_URL',
+        public: false,
+        description: 'Direct DB URL for migrations (bypasses pooler)',
+        description_ko: '마이그레이션용 직접 DB URL (풀러 우회)',
+      },
+      {
+        name: 'PRISMA_ACCELERATE_URL',
+        public: false,
+        description: 'Prisma Accelerate connection URL',
+        description_ko: 'Prisma Accelerate 연결 URL',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 90,
+    difficulty_level: 'beginner',
+    tags: ['orm', 'typescript', 'postgres', 'mysql', 'sqlite', 'migrations'],
+    alternatives: ['drizzle', 'typeorm', 'kysely'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'express', 'fastify', 'nestjs'],
+      language: ['typescript', 'javascript'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/@prisma/client' },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 15,
+    monthly_cost_estimate: { starter: '$0', growth: '$49', enterprise: '문의' },
+    dx_score: 9.2,
+  },
+
+  // 63. Turso
+  {
+    id: SERVICE_IDS.turso,
+    name: 'Turso',
+    slug: 'turso',
+    category: 'database',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'database',
+    description:
+      'Edge-hosted SQLite database built on libSQL with global replication and embedded replicas.',
+    description_ko:
+      'libSQL 기반의 엣지 호스팅 SQLite 데이터베이스입니다. 전역 복제와 임베디드 레플리카를 지원합니다.',
+    icon_url: null,
+    website_url: 'https://turso.tech',
+    docs_url: 'https://docs.turso.tech',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '9 GB 저장소, 500개 데이터베이스, 월 25B 행 읽기',
+      plans: [
+        { name: 'Starter', price: '$0/월' },
+        { name: 'Scaler', price: '$29/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'TURSO_DATABASE_URL',
+        public: false,
+        description: 'Turso database URL (libsql://)',
+        description_ko: 'Turso 데이터베이스 URL (libsql://)',
+      },
+      {
+        name: 'TURSO_AUTH_TOKEN',
+        public: false,
+        description: 'Turso authentication token',
+        description_ko: 'Turso 인증 토큰',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 76,
+    difficulty_level: 'beginner',
+    tags: ['sqlite', 'edge', 'database', 'libsql', 'replication'],
+    alternatives: ['planetscale', 'neon', 'supabase'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'svelte', 'astro', 'hono'],
+      language: ['typescript', 'javascript', 'rust', 'python', 'go'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/@libsql/client' },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: { starter: '$0', growth: '$29', enterprise: '문의' },
+    dx_score: 8.8,
+  },
+
+  // 64. Redis Cloud
+  {
+    id: SERVICE_IDS.redis_cloud,
+    name: 'Redis Cloud',
+    slug: 'redis-cloud',
+    category: 'cache',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'database',
+    description:
+      'Fully managed Redis service with auto-scaling, multi-zone replication, and enterprise security.',
+    description_ko:
+      '자동 스케일링, 다중 가용영역 복제, 기업용 보안을 제공하는 완전관리형 Redis 서비스입니다.',
+    icon_url: null,
+    website_url: 'https://redis.io/cloud',
+    docs_url: 'https://redis.io/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '30 MB 메모리, 30 연결',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Essentials', price: '$5/월부터' },
+        { name: 'Pro', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'REDIS_URL',
+        public: false,
+        description: 'Redis connection URL',
+        description_ko: 'Redis 연결 URL',
+      },
+      {
+        name: 'REDIS_TOKEN',
+        public: false,
+        description: 'Redis authentication token',
+        description_ko: 'Redis 인증 토큰',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 86,
+    difficulty_level: 'intermediate',
+    tags: ['cache', 'redis', 'key-value', 'session', 'pub-sub'],
+    alternatives: ['upstash', 'vercel-kv', 'memcached'],
+    compatibility: {
+      framework: ['nextjs', 'express', 'fastify', 'nestjs', 'django'],
+      language: ['typescript', 'javascript', 'python', 'go', 'java'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/redis' },
+    free_tier_quality: 'limited',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 15,
+    monthly_cost_estimate: { starter: '$0', growth: '$5', enterprise: '문의' },
+    dx_score: 8.0,
+  },
+
+  // 65. Vercel KV
+  {
+    id: SERVICE_IDS.vercel_kv,
+    name: 'Vercel KV',
+    slug: 'vercel-kv',
+    category: 'cache',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'database',
+    description:
+      'Serverless Redis-compatible key-value store by Vercel, powered by Upstash.',
+    description_ko:
+      'Upstash 기반의 Vercel 서버리스 Redis 호환 키-밸류 저장소입니다.',
+    icon_url: null,
+    website_url: 'https://vercel.com/storage/kv',
+    docs_url: 'https://vercel.com/docs/storage/vercel-kv',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '3,000 요청/일, 256 MB 저장소',
+      plans: [
+        { name: 'Hobby', price: '$0/월' },
+        { name: 'Pro', price: '$1/100K 요청' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'KV_URL',
+        public: false,
+        description: 'Vercel KV connection URL',
+        description_ko: 'Vercel KV 연결 URL',
+      },
+      {
+        name: 'KV_REST_API_URL',
+        public: false,
+        description: 'Vercel KV REST API URL',
+        description_ko: 'Vercel KV REST API URL',
+      },
+      {
+        name: 'KV_REST_API_TOKEN',
+        public: false,
+        description: 'Vercel KV REST API token',
+        description_ko: 'Vercel KV REST API 토큰',
+      },
+      {
+        name: 'KV_REST_API_READ_ONLY_TOKEN',
+        public: false,
+        description: 'Vercel KV read-only token',
+        description_ko: 'Vercel KV 읽기 전용 토큰',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 72,
+    difficulty_level: 'beginner',
+    tags: ['cache', 'redis', 'key-value', 'serverless', 'vercel'],
+    alternatives: ['upstash', 'redis-cloud', 'cloudflare-kv'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'svelte'],
+      language: ['typescript', 'javascript'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/@vercel/kv' },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'high',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: { starter: '$0', growth: '$10', enterprise: '문의' },
+    dx_score: 9.0,
+  },
+
+  // 66. Pinecone
+  {
+    id: SERVICE_IDS.pinecone,
+    name: 'Pinecone',
+    slug: 'pinecone',
+    category: 'ai',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'ai',
+    description:
+      'Managed vector database for building high-performance AI applications with similarity search.',
+    description_ko:
+      '유사도 검색을 활용한 고성능 AI 애플리케이션을 위한 관리형 벡터 데이터베이스입니다.',
+    icon_url: null,
+    website_url: 'https://www.pinecone.io',
+    docs_url: 'https://docs.pinecone.io',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '1개 인덱스, 100K 벡터, 무제한 읽기',
+      plans: [
+        { name: 'Starter', price: '$0/월' },
+        { name: 'Standard', price: '$70/월부터' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'PINECONE_API_KEY',
+        public: false,
+        description: 'Pinecone API key',
+        description_ko: 'Pinecone API 키',
+      },
+      {
+        name: 'PINECONE_ENVIRONMENT',
+        public: true,
+        description: 'Pinecone environment (e.g., us-east-1)',
+        description_ko: 'Pinecone 환경 (예: us-east-1)',
+      },
+      {
+        name: 'PINECONE_INDEX_NAME',
+        public: true,
+        description: 'Pinecone index name',
+        description_ko: 'Pinecone 인덱스 이름',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 82,
+    difficulty_level: 'intermediate',
+    tags: ['vector-db', 'ai', 'embeddings', 'similarity-search', 'rag'],
+    alternatives: ['weaviate', 'qdrant', 'chromadb'],
+    compatibility: {
+      framework: ['nextjs', 'express', 'fastify', 'django', 'flask'],
+      language: ['typescript', 'javascript', 'python', 'go', 'java'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/@pinecone-database/pinecone' },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 15,
+    monthly_cost_estimate: { starter: '$0', growth: '$70', enterprise: '문의' },
+    dx_score: 8.5,
+  },
+
+  // 67. LangChain
+  {
+    id: SERVICE_IDS.langchain,
+    name: 'LangChain',
+    slug: 'langchain',
+    category: 'ai',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'ai',
+    description:
+      'Framework for building LLM-powered applications with chains, agents, and retrieval-augmented generation.',
+    description_ko:
+      '체인, 에이전트, RAG를 활용한 LLM 기반 애플리케이션 구축 프레임워크입니다.',
+    icon_url: null,
+    website_url: 'https://www.langchain.com',
+    docs_url: 'https://js.langchain.com/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '오픈소스 프레임워크 무료, LangSmith 유료',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Plus (LangSmith)', price: '$39/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'LANGCHAIN_API_KEY',
+        public: false,
+        description: 'LangSmith API key for tracing',
+        description_ko: 'LangSmith 추적용 API 키',
+      },
+      {
+        name: 'LANGCHAIN_TRACING_V2',
+        public: true,
+        description: 'Enable LangSmith tracing (true/false)',
+        description_ko: 'LangSmith 추적 활성화 (true/false)',
+      },
+      {
+        name: 'LANGCHAIN_PROJECT',
+        public: true,
+        description: 'LangSmith project name',
+        description_ko: 'LangSmith 프로젝트 이름',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 88,
+    difficulty_level: 'advanced',
+    tags: ['llm', 'ai', 'rag', 'agents', 'orchestration', 'langsmith'],
+    alternatives: ['llamaindex', 'semantic-kernel', 'haystack'],
+    compatibility: {
+      framework: ['nextjs', 'express', 'fastify', 'django', 'flask'],
+      language: ['typescript', 'javascript', 'python'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/langchain' },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 20,
+    monthly_cost_estimate: { starter: '$0', growth: '$39', enterprise: '문의' },
+    dx_score: 8.0,
+  },
+
+  // 68. Replicate
+  {
+    id: SERVICE_IDS.replicate,
+    name: 'Replicate',
+    slug: 'replicate',
+    category: 'ai',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'ai',
+    description:
+      'Cloud platform for running open-source AI models with a simple API.',
+    description_ko:
+      '오픈소스 AI 모델을 간단한 API로 실행할 수 있는 클라우드 플랫폼입니다.',
+    icon_url: null,
+    website_url: 'https://replicate.com',
+    docs_url: 'https://replicate.com/docs',
+    pricing_info: {
+      free_tier: false,
+      free_tier_details: '사용량 기반 과금',
+      plans: [{ name: 'Pay-as-you-go', price: '모델별 가격' }],
+    },
+    required_env_vars: [
+      {
+        name: 'REPLICATE_API_TOKEN',
+        public: false,
+        description: 'Replicate API token',
+        description_ko: 'Replicate API 토큰',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 80,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'ml', 'model-hosting', 'inference', 'open-source'],
+    alternatives: ['huggingface', 'aws-sagemaker', 'google-vertex-ai'],
+    compatibility: {
+      framework: ['nextjs', 'express', 'fastify', 'django', 'flask'],
+      language: ['typescript', 'javascript', 'python', 'go', 'swift'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/replicate' },
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: { starter: '$5', growth: '$50', enterprise: '$500+' },
+    dx_score: 9.0,
+  },
+
+  // 69. Hugging Face
+  {
+    id: SERVICE_IDS.huggingface,
+    name: 'Hugging Face',
+    slug: 'huggingface',
+    category: 'ai',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'ai',
+    description:
+      'Open-source AI model hub with Inference API, Spaces, and thousands of pre-trained models.',
+    description_ko:
+      'Inference API, Spaces, 수천 개의 사전 학습 모델을 제공하는 오픈소스 AI 모델 허브입니다.',
+    icon_url: null,
+    website_url: 'https://huggingface.co',
+    docs_url: 'https://huggingface.co/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '무료 Inference API (rate-limited), 무료 Spaces',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Pro', price: '$9/월' },
+        { name: 'Enterprise', price: '$20/사용자/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'HUGGINGFACE_API_KEY',
+        public: false,
+        description: 'Hugging Face API token',
+        description_ko: 'Hugging Face API 토큰',
+      },
+      {
+        name: 'HUGGINGFACE_MODEL_ID',
+        public: true,
+        description: 'Model ID (e.g., meta-llama/Llama-2-7b)',
+        description_ko: '모델 ID (예: meta-llama/Llama-2-7b)',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 90,
+    difficulty_level: 'intermediate',
+    tags: ['ai', 'ml', 'models', 'inference', 'nlp', 'open-source'],
+    alternatives: ['replicate', 'openai', 'anthropic'],
+    compatibility: {
+      framework: ['nextjs', 'express', 'fastify', 'django', 'flask'],
+      language: ['typescript', 'javascript', 'python', 'rust'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/@huggingface/inference' },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: { starter: '$0', growth: '$9', enterprise: '$20+' },
+    dx_score: 8.5,
+  },
+
+  // 70. Stability AI
+  {
+    id: SERVICE_IDS.stability_ai,
+    name: 'Stability AI',
+    slug: 'stability-ai',
+    category: 'ai',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'ai',
+    description:
+      'AI image generation platform powering Stable Diffusion and SDXL models via REST API.',
+    description_ko:
+      'Stable Diffusion, SDXL 모델을 REST API로 제공하는 AI 이미지 생성 플랫폼입니다.',
+    icon_url: null,
+    website_url: 'https://stability.ai',
+    docs_url: 'https://platform.stability.ai/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '25 무료 크레딧',
+      plans: [
+        { name: 'Free', price: '25 크레딧' },
+        { name: 'Pay-as-you-go', price: '크레딧 기반' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'STABILITY_API_KEY',
+        public: false,
+        description: 'Stability AI API key',
+        description_ko: 'Stability AI API 키',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 78,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'image-generation', 'stable-diffusion', 'sdxl', 'generative'],
+    alternatives: ['dall-e', 'midjourney', 'replicate'],
+    compatibility: {
+      framework: ['nextjs', 'express', 'fastify', 'django'],
+      language: ['typescript', 'javascript', 'python', 'go'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/@stability-ai/sdk' },
+    free_tier_quality: 'limited',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: { starter: '$0', growth: '$10', enterprise: '문의' },
+    dx_score: 8.0,
+  },
+
+  // 71. Notion API
+  {
+    id: SERVICE_IDS.notion_api,
+    name: 'Notion API',
+    slug: 'notion-api',
+    category: 'automation',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'ide',
+    description:
+      'Official Notion API for building integrations, managing databases, and automating workflows.',
+    description_ko:
+      '통합 구축, 데이터베이스 관리, 워크플로우 자동화를 위한 Notion 공식 API입니다.',
+    icon_url: null,
+    website_url: 'https://www.notion.so',
+    docs_url: 'https://developers.notion.com',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'API 무료 (Notion 플랜에 따라 기능 제한)',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Plus', price: '$10/월' },
+        { name: 'Business', price: '$18/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'NOTION_API_KEY',
+        public: false,
+        description: 'Notion internal integration token',
+        description_ko: 'Notion 내부 통합 토큰',
+      },
+      {
+        name: 'NOTION_DATABASE_ID',
+        public: false,
+        description: 'Target Notion database ID',
+        description_ko: '대상 Notion 데이터베이스 ID',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 82,
+    difficulty_level: 'beginner',
+    tags: ['automation', 'notion', 'api', 'cms', 'productivity'],
+    alternatives: ['airtable', 'coda', 'google-sheets-api'],
+    compatibility: {
+      framework: ['nextjs', 'express', 'fastify', 'django'],
+      language: ['typescript', 'javascript', 'python', 'go'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/@notionhq/client' },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: { starter: '$0', growth: '$10', enterprise: '$18' },
+    dx_score: 8.5,
+  },
+
+  // 72. Linear API
+  {
+    id: SERVICE_IDS.linear_api,
+    name: 'Linear',
+    slug: 'linear-api',
+    category: 'automation',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'cicd',
+    description:
+      'Issue tracking and project management tool with a powerful GraphQL API for developer workflows.',
+    description_ko:
+      '개발자 워크플로우에 최적화된 강력한 GraphQL API를 제공하는 이슈 트래커 및 프로젝트 관리 도구입니다.',
+    icon_url: null,
+    website_url: 'https://linear.app',
+    docs_url: 'https://developers.linear.app/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '250개 이슈, 무제한 멤버',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Standard', price: '$8/사용자/월' },
+        { name: 'Plus', price: '$14/사용자/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'LINEAR_API_KEY',
+        public: false,
+        description: 'Linear personal API key',
+        description_ko: 'Linear 개인 API 키',
+      },
+      {
+        name: 'LINEAR_WEBHOOK_SECRET',
+        public: false,
+        description: 'Linear webhook signing secret',
+        description_ko: 'Linear 웹훅 서명 시크릿',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 80,
+    difficulty_level: 'beginner',
+    tags: ['project-management', 'issue-tracker', 'graphql', 'devtools', 'automation'],
+    alternatives: ['jira', 'github-issues', 'shortcut'],
+    compatibility: {
+      framework: ['nextjs', 'express', 'fastify'],
+      language: ['typescript', 'javascript', 'python', 'go'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/@linear/sdk' },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: { starter: '$0', growth: '$8', enterprise: '$14' },
+    dx_score: 9.2,
+  },
+
+  // 73. Toss Payments (토스페이먼츠)
+  {
+    id: SERVICE_IDS.toss_payments,
+    name: '토스페이먼츠',
+    slug: 'toss-payments',
+    category: 'payment',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'payment',
+    description:
+      'Korean payment gateway by Toss supporting card, bank transfer, virtual account, and mobile payments.',
+    description_ko:
+      '카드, 계좌이체, 가상계좌, 휴대폰 결제를 지원하는 토스 결제 게이트웨이입니다.',
+    icon_url: null,
+    website_url: 'https://www.tosspayments.com',
+    docs_url: 'https://docs.tosspayments.com',
+    pricing_info: {
+      free_tier: false,
+      free_tier_details: '테스트 모드 무료, 결제당 수수료',
+      plans: [{ name: '수수료 기반', price: '결제금액의 2.5%~3.5%' }],
+    },
+    required_env_vars: [
+      {
+        name: 'TOSS_CLIENT_KEY',
+        public: true,
+        description: 'Toss Payments client key',
+        description_ko: '토스페이먼츠 클라이언트 키',
+      },
+      {
+        name: 'TOSS_SECRET_KEY',
+        public: false,
+        description: 'Toss Payments secret key',
+        description_ko: '토스페이먼츠 시크릿 키',
+      },
+      {
+        name: 'TOSS_WEBHOOK_SECRET',
+        public: false,
+        description: 'Toss Payments webhook secret',
+        description_ko: '토스페이먼츠 웹훅 시크릿',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 85,
+    difficulty_level: 'intermediate',
+    tags: ['payment', 'korean', 'toss', 'pg', 'fintech', '결제'],
+    alternatives: ['iamport', 'nice-payments', 'kakaopay'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'vue', 'express'],
+      language: ['typescript', 'javascript', 'java', 'python', 'php'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/@tosspayments/payment-sdk' },
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 30,
+    monthly_cost_estimate: { starter: '수수료', growth: '수수료', enterprise: '수수료' },
+    dx_score: 8.0,
+  },
+
+  // 74. PayPal
+  {
+    id: SERVICE_IDS.paypal,
+    name: 'PayPal',
+    slug: 'paypal',
+    category: 'payment',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'payment',
+    description:
+      'Global payment platform supporting checkout, subscriptions, and payouts in 200+ countries.',
+    description_ko:
+      '200개국 이상에서 결제, 구독, 정산을 지원하는 글로벌 결제 플랫폼입니다.',
+    icon_url: null,
+    website_url: 'https://www.paypal.com',
+    docs_url: 'https://developer.paypal.com/docs',
+    pricing_info: {
+      free_tier: false,
+      free_tier_details: 'Sandbox 테스트 무료, 트랜잭션당 수수료',
+      plans: [{ name: '수수료 기반', price: '2.9% + $0.30/건' }],
+    },
+    required_env_vars: [
+      {
+        name: 'PAYPAL_CLIENT_ID',
+        public: true,
+        description: 'PayPal client ID',
+        description_ko: 'PayPal 클라이언트 ID',
+      },
+      {
+        name: 'PAYPAL_CLIENT_SECRET',
+        public: false,
+        description: 'PayPal client secret',
+        description_ko: 'PayPal 클라이언트 시크릿',
+      },
+      {
+        name: 'PAYPAL_WEBHOOK_ID',
+        public: false,
+        description: 'PayPal webhook ID',
+        description_ko: 'PayPal 웹훅 ID',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 88,
+    difficulty_level: 'intermediate',
+    tags: ['payment', 'global', 'checkout', 'subscriptions', 'payouts'],
+    alternatives: ['stripe', 'toss-payments', 'adyen'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'vue', 'angular', 'express'],
+      language: ['typescript', 'javascript', 'python', 'java', 'php'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/@paypal/checkout-server-sdk' },
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 25,
+    monthly_cost_estimate: { starter: '수수료', growth: '수수료', enterprise: '수수료' },
+    dx_score: 7.5,
+  },
+
+  // 75. AWS SES
+  {
+    id: SERVICE_IDS.aws_ses,
+    name: 'AWS SES',
+    slug: 'aws-ses',
+    category: 'email',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'email',
+    description:
+      'Scalable email sending service by AWS for transactional and marketing emails.',
+    description_ko:
+      '트랜잭션 및 마케팅 이메일을 위한 AWS의 확장 가능한 이메일 발송 서비스입니다.',
+    icon_url: null,
+    website_url: 'https://aws.amazon.com/ses',
+    docs_url: 'https://docs.aws.amazon.com/ses',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'EC2에서 월 62,000건 무료',
+      plans: [
+        { name: 'Free Tier', price: '$0 (EC2)' },
+        { name: 'Pay-as-you-go', price: '$0.10/1,000건' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'AWS_ACCESS_KEY_ID',
+        public: false,
+        description: 'AWS access key ID',
+        description_ko: 'AWS 접근 키 ID',
+      },
+      {
+        name: 'AWS_SECRET_ACCESS_KEY',
+        public: false,
+        description: 'AWS secret access key',
+        description_ko: 'AWS 시크릿 접근 키',
+      },
+      {
+        name: 'AWS_SES_REGION',
+        public: true,
+        description: 'AWS SES region (e.g., us-east-1)',
+        description_ko: 'AWS SES 리전 (예: us-east-1)',
+      },
+      {
+        name: 'AWS_SES_FROM_EMAIL',
+        public: true,
+        description: 'Verified sender email address',
+        description_ko: '인증된 발신 이메일 주소',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 82,
+    difficulty_level: 'intermediate',
+    tags: ['email', 'aws', 'transactional', 'marketing', 'smtp'],
+    alternatives: ['sendgrid', 'resend', 'mailchimp'],
+    compatibility: {
+      framework: ['nextjs', 'express', 'fastify', 'nestjs', 'django'],
+      language: ['typescript', 'javascript', 'python', 'go', 'java'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/@aws-sdk/client-ses' },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 30,
+    monthly_cost_estimate: { starter: '$0', growth: '$10', enterprise: '$100+' },
+    dx_score: 7.0,
+  },
+
+  // 76. Mailchimp
+  {
+    id: SERVICE_IDS.mailchimp,
+    name: 'Mailchimp',
+    slug: 'mailchimp',
+    category: 'email',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'email',
+    description:
+      'All-in-one email marketing platform with automation, templates, and audience management.',
+    description_ko:
+      '자동화, 템플릿, 구독자 관리를 제공하는 올인원 이메일 마케팅 플랫폼입니다.',
+    icon_url: null,
+    website_url: 'https://mailchimp.com',
+    docs_url: 'https://mailchimp.com/developer',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '500 구독자, 월 1,000건 발송',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Essentials', price: '$13/월' },
+        { name: 'Standard', price: '$20/월' },
+        { name: 'Premium', price: '$350/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'MAILCHIMP_API_KEY',
+        public: false,
+        description: 'Mailchimp API key',
+        description_ko: 'Mailchimp API 키',
+      },
+      {
+        name: 'MAILCHIMP_SERVER_PREFIX',
+        public: true,
+        description: 'Mailchimp data center prefix (e.g., us21)',
+        description_ko: 'Mailchimp 데이터 센터 접두사 (예: us21)',
+      },
+      {
+        name: 'MAILCHIMP_LIST_ID',
+        public: false,
+        description: 'Default audience/list ID',
+        description_ko: '기본 오디언스/리스트 ID',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 84,
+    difficulty_level: 'beginner',
+    tags: ['email', 'marketing', 'automation', 'newsletter', 'crm'],
+    alternatives: ['sendgrid', 'resend', 'aws-ses', 'convertkit'],
+    compatibility: {
+      framework: ['nextjs', 'express', 'fastify', 'django'],
+      language: ['typescript', 'javascript', 'python', 'php', 'ruby'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/@mailchimp/mailchimp_marketing' },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 15,
+    monthly_cost_estimate: { starter: '$0', growth: '$13', enterprise: '$350' },
+    dx_score: 7.5,
+  },
+
+  // 77. ImageKit
+  {
+    id: SERVICE_IDS.imagekit,
+    name: 'ImageKit',
+    slug: 'imagekit',
+    category: 'storage',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'storage',
+    description:
+      'Real-time image and video optimization, transformation, and CDN delivery platform.',
+    description_ko:
+      '실시간 이미지/영상 최적화, 변환, CDN 전송을 제공하는 미디어 관리 플랫폼입니다.',
+    icon_url: null,
+    website_url: 'https://imagekit.io',
+    docs_url: 'https://docs.imagekit.io',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '20 GB 전송, 20 GB 저장소',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Pro', price: '$49/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'IMAGEKIT_PUBLIC_KEY',
+        public: true,
+        description: 'ImageKit public key',
+        description_ko: 'ImageKit 공개 키',
+      },
+      {
+        name: 'IMAGEKIT_PRIVATE_KEY',
+        public: false,
+        description: 'ImageKit private key',
+        description_ko: 'ImageKit 비공개 키',
+      },
+      {
+        name: 'IMAGEKIT_URL_ENDPOINT',
+        public: true,
+        description: 'ImageKit URL endpoint',
+        description_ko: 'ImageKit URL 엔드포인트',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 74,
+    difficulty_level: 'beginner',
+    tags: ['image', 'cdn', 'optimization', 'video', 'media', 'storage'],
+    alternatives: ['cloudinary', 'imgix', 'bunny-cdn'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'vue', 'angular', 'svelte'],
+      language: ['typescript', 'javascript', 'python', 'go', 'java'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/imagekit' },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: { starter: '$0', growth: '$49', enterprise: '문의' },
+    dx_score: 8.5,
+  },
+
+  // 78. Cloudflare R2
+  {
+    id: SERVICE_IDS.r2,
+    name: 'Cloudflare R2',
+    slug: 'r2',
+    category: 'storage',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'storage',
+    description:
+      'S3-compatible object storage by Cloudflare with zero egress fees and global distribution.',
+    description_ko:
+      'S3 호환, 이그레스 비용 없음, 전역 분배를 제공하는 Cloudflare 오브젝트 스토리지입니다.',
+    icon_url: null,
+    website_url: 'https://www.cloudflare.com/r2',
+    docs_url: 'https://developers.cloudflare.com/r2',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '10 GB 저장소, 1M 클래스 A 요청, 10M 클래스 B 요청',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Pay-as-you-go', price: '$0.015/GB' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'R2_ACCESS_KEY_ID',
+        public: false,
+        description: 'R2 access key ID',
+        description_ko: 'R2 접근 키 ID',
+      },
+      {
+        name: 'R2_SECRET_ACCESS_KEY',
+        public: false,
+        description: 'R2 secret access key',
+        description_ko: 'R2 시크릿 접근 키',
+      },
+      {
+        name: 'R2_BUCKET_NAME',
+        public: true,
+        description: 'R2 bucket name',
+        description_ko: 'R2 버킷 이름',
+      },
+      {
+        name: 'R2_ACCOUNT_ID',
+        public: false,
+        description: 'Cloudflare account ID',
+        description_ko: 'Cloudflare 계정 ID',
+      },
+    ],
+    domain: 'backend',
+    popularity_score: 80,
+    difficulty_level: 'intermediate',
+    tags: ['storage', 's3-compatible', 'cloudflare', 'object-storage', 'cdn'],
+    alternatives: ['aws-s3', 'backblaze-b2', 'wasabi'],
+    compatibility: {
+      framework: ['nextjs', 'express', 'fastify', 'hono', 'django'],
+      language: ['typescript', 'javascript', 'python', 'go', 'rust'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/@aws-sdk/client-s3' },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 15,
+    monthly_cost_estimate: { starter: '$0', growth: '$5', enterprise: '$50+' },
+    dx_score: 8.0,
+  },
+
+  // 79. Grafana
+  {
+    id: SERVICE_IDS.grafana,
+    name: 'Grafana',
+    slug: 'grafana',
+    category: 'monitoring',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'monitoring',
+    description:
+      'Open-source observability platform for metrics, logs, and traces visualization with dashboards.',
+    description_ko:
+      '메트릭, 로그, 트레이스 시각화를 제공하는 오픈소스 관찰 가능성 플랫폼입니다.',
+    icon_url: null,
+    website_url: 'https://grafana.com',
+    docs_url: 'https://grafana.com/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Grafana Cloud Free: 10K 메트릭, 50 GB 로그, 50 GB 트레이스',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Pro', price: '$29/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'GRAFANA_URL',
+        public: true,
+        description: 'Grafana instance URL',
+        description_ko: 'Grafana 인스턴스 URL',
+      },
+      {
+        name: 'GRAFANA_API_KEY',
+        public: false,
+        description: 'Grafana API key or service account token',
+        description_ko: 'Grafana API 키 또는 서비스 계정 토큰',
+      },
+      {
+        name: 'GRAFANA_ORG_ID',
+        public: true,
+        description: 'Grafana organization ID',
+        description_ko: 'Grafana 조직 ID',
+      },
+    ],
+    domain: 'devtools',
+    popularity_score: 88,
+    difficulty_level: 'intermediate',
+    tags: ['monitoring', 'observability', 'metrics', 'logs', 'dashboards', 'open-source'],
+    alternatives: ['datadog', 'new-relic', 'prometheus'],
+    compatibility: {
+      framework: ['nextjs', 'express', 'fastify', 'nestjs', 'django'],
+      language: ['typescript', 'javascript', 'python', 'go', 'java'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/@grafana/grafana-foundation-sdk' },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 20,
+    monthly_cost_estimate: { starter: '$0', growth: '$29', enterprise: '문의' },
+    dx_score: 8.0,
+  },
+
+  // 80. New Relic
+  {
+    id: SERVICE_IDS.new_relic,
+    name: 'New Relic',
+    slug: 'new-relic',
+    category: 'monitoring',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'monitoring',
+    description:
+      'Full-stack observability platform with APM, infrastructure monitoring, and real user monitoring.',
+    description_ko:
+      'APM, 인프라 모니터링, 실제 사용자 모니터링을 제공하는 풀스택 관찰 가능성 플랫폼입니다.',
+    icon_url: null,
+    website_url: 'https://newrelic.com',
+    docs_url: 'https://docs.newrelic.com',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '100 GB/월 데이터 수집, 1 전체 사용자',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Standard', price: '$99/사용자/월' },
+        { name: 'Pro', price: '$349/사용자/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'NEW_RELIC_LICENSE_KEY',
+        public: false,
+        description: 'New Relic license key',
+        description_ko: 'New Relic 라이선스 키',
+      },
+      {
+        name: 'NEW_RELIC_APP_NAME',
+        public: true,
+        description: 'Application name in New Relic',
+        description_ko: 'New Relic 애플리케이션 이름',
+      },
+      {
+        name: 'NEW_RELIC_API_KEY',
+        public: false,
+        description: 'New Relic user API key',
+        description_ko: 'New Relic 사용자 API 키',
+      },
+    ],
+    domain: 'devtools',
+    popularity_score: 84,
+    difficulty_level: 'intermediate',
+    tags: ['monitoring', 'apm', 'observability', 'rum', 'infrastructure'],
+    alternatives: ['datadog', 'grafana', 'dynatrace'],
+    compatibility: {
+      framework: ['nextjs', 'express', 'fastify', 'nestjs', 'django'],
+      language: ['typescript', 'javascript', 'python', 'go', 'java', '.net'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/newrelic' },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 20,
+    monthly_cost_estimate: { starter: '$0', growth: '$99', enterprise: '$349+' },
+    dx_score: 7.5,
+  },
+
+  // 81. GitHub Copilot
+  {
+    id: SERVICE_IDS.github_copilot,
+    name: 'GitHub Copilot',
+    slug: 'github-copilot',
+    category: 'ai',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'ide',
+    description:
+      'AI pair programmer by GitHub that suggests code completions and generates functions from comments.',
+    description_ko:
+      '코드 자동 완성과 코멘트 기반 함수 생성을 제공하는 GitHub AI 페어 프로그래머입니다.',
+    icon_url: null,
+    website_url: 'https://github.com/features/copilot',
+    docs_url: 'https://docs.github.com/en/copilot',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '오픈소스 프로젝트 무료, 학생 무료',
+      plans: [
+        { name: 'Free (OSS)', price: '$0/월' },
+        { name: 'Individual', price: '$10/월' },
+        { name: 'Business', price: '$19/사용자/월' },
+        { name: 'Enterprise', price: '$39/사용자/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'GITHUB_COPILOT_TOKEN',
+        public: false,
+        description: 'GitHub Copilot auth token',
+        description_ko: 'GitHub Copilot 인증 토큰',
+      },
+    ],
+    domain: 'devtools',
+    popularity_score: 92,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'code-completion', 'github', 'ide', 'pair-programming'],
+    alternatives: ['cursor', 'codeium', 'tabnine'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'vue', 'angular', 'svelte'],
+      language: ['typescript', 'javascript', 'python', 'go', 'java', 'rust', 'c++'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: { starter: '$0', growth: '$10', enterprise: '$39' },
+    dx_score: 9.5,
+  },
+
+  // 82. Cursor
+  {
+    id: SERVICE_IDS.cursor,
+    name: 'Cursor',
+    slug: 'cursor',
+    category: 'ai',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'ide',
+    description:
+      'AI-first code editor built on VS Code with inline editing, chat, and multi-file generation.',
+    description_ko:
+      'VS Code 기반의 AI 코드 에디터입니다. 인라인 편집, 채팅, 다중 파일 생성을 지원합니다.',
+    icon_url: null,
+    website_url: 'https://cursor.com',
+    docs_url: 'https://docs.cursor.com',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Hobby 플랜: 2,000 자동 완성, 50 프리미엄 요청',
+      plans: [
+        { name: 'Hobby', price: '$0/월' },
+        { name: 'Pro', price: '$20/월' },
+        { name: 'Business', price: '$40/사용자/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'CURSOR_API_KEY',
+        public: false,
+        description: 'Cursor API key for extensions',
+        description_ko: 'Cursor 확장 프로그램용 API 키',
+      },
+    ],
+    domain: 'devtools',
+    popularity_score: 88,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'ide', 'code-editor', 'vscode', 'pair-programming'],
+    alternatives: ['github-copilot', 'codeium', 'windsurf'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'vue', 'angular', 'svelte'],
+      language: ['typescript', 'javascript', 'python', 'go', 'java', 'rust'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: { starter: '$0', growth: '$20', enterprise: '$40' },
+    dx_score: 9.5,
+  },
+
+  // 83. Vitest
+  {
+    id: SERVICE_IDS.vitest,
+    name: 'Vitest',
+    slug: 'vitest',
+    category: 'testing',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'cicd',
+    description:
+      'Blazing fast Vite-native unit test framework with Jest-compatible API and built-in code coverage.',
+    description_ko:
+      'Vite 네이티브 유닛 테스트 프레임워크입니다. Jest 호환 API와 내장 코드 커버리지를 제공합니다.',
+    icon_url: null,
+    website_url: 'https://vitest.dev',
+    docs_url: 'https://vitest.dev/guide',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '오픈소스, 완전 무료',
+      plans: [{ name: 'Free', price: '무료' }],
+    },
+    required_env_vars: [
+      {
+        name: 'CI',
+        public: true,
+        description: 'CI environment flag (true in CI pipelines)',
+        description_ko: 'CI 환경 플래그 (CI 파이프라인에서 true)',
+      },
+      {
+        name: 'VITEST_COVERAGE',
+        public: true,
+        description: 'Enable coverage reporting',
+        description_ko: '커버리지 리포트 활성화',
+      },
+    ],
+    domain: 'devtools',
+    popularity_score: 86,
+    difficulty_level: 'beginner',
+    tags: ['testing', 'unit-test', 'vite', 'jest', 'coverage', 'open-source'],
+    alternatives: ['jest', 'mocha', 'ava'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'vue', 'svelte', 'astro'],
+      language: ['typescript', 'javascript'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/vitest' },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: { starter: '$0', growth: '$0', enterprise: '$0' },
+    dx_score: 9.5,
+  },
+
+  // 84. Storybook
+  {
+    id: SERVICE_IDS.storybook,
+    name: 'Storybook',
+    slug: 'storybook',
+    category: 'testing',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'cicd',
+    description:
+      'UI component workshop for building, testing, and documenting components in isolation.',
+    description_ko:
+      '컴포넌트를 독립적으로 개발, 테스트, 문서화하는 UI 컴포넌트 워크숍입니다.',
+    icon_url: null,
+    website_url: 'https://storybook.js.org',
+    docs_url: 'https://storybook.js.org/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '오픈소스 무료, Chromatic 유료',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Chromatic', price: '$149/월부터' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'CHROMATIC_PROJECT_TOKEN',
+        public: false,
+        description: 'Chromatic project token for visual testing',
+        description_ko: 'Chromatic 비주얼 테스팅 프로젝트 토큰',
+      },
+      {
+        name: 'STORYBOOK_PORT',
+        public: true,
+        description: 'Storybook dev server port (default: 6006)',
+        description_ko: 'Storybook 개발 서버 포트 (기본: 6006)',
+      },
+    ],
+    domain: 'devtools',
+    popularity_score: 84,
+    difficulty_level: 'beginner',
+    tags: ['testing', 'ui', 'components', 'documentation', 'visual-testing', 'open-source'],
+    alternatives: ['ladle', 'histoire', 'playroom'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'vue', 'angular', 'svelte', 'web-components'],
+      language: ['typescript', 'javascript'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/storybook' },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 15,
+    monthly_cost_estimate: { starter: '$0', growth: '$149', enterprise: '문의' },
+    dx_score: 8.5,
+  },
+
+  // 85. Docker
+  {
+    id: SERVICE_IDS.docker,
+    name: 'Docker',
+    slug: 'docker',
+    category: 'deploy',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'cicd',
+    description:
+      'Container platform for building, shipping, and running applications in isolated environments.',
+    description_ko:
+      '애플리케이션을 격리된 환경에서 빌드, 배포, 실행하는 컨테이너 플랫폼입니다.',
+    icon_url: null,
+    website_url: 'https://www.docker.com',
+    docs_url: 'https://docs.docker.com',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Docker Desktop 개인 무료, Docker Hub 1 비공개 레포',
+      plans: [
+        { name: 'Personal', price: '$0/월' },
+        { name: 'Pro', price: '$5/월' },
+        { name: 'Team', price: '$9/사용자/월' },
+        { name: 'Business', price: '$24/사용자/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'DOCKER_REGISTRY_URL',
+        public: true,
+        description: 'Docker registry URL',
+        description_ko: 'Docker 레지스트리 URL',
+      },
+      {
+        name: 'DOCKER_USERNAME',
+        public: false,
+        description: 'Docker Hub username',
+        description_ko: 'Docker Hub 사용자명',
+      },
+      {
+        name: 'DOCKER_PASSWORD',
+        public: false,
+        description: 'Docker Hub password or access token',
+        description_ko: 'Docker Hub 비밀번호 또는 접근 토큰',
+      },
+    ],
+    domain: 'devtools',
+    popularity_score: 94,
+    difficulty_level: 'intermediate',
+    tags: ['container', 'devops', 'deploy', 'docker', 'cicd', 'infrastructure'],
+    alternatives: ['podman', 'containerd', 'lxc'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'express', 'fastify', 'django', 'rails'],
+      language: ['typescript', 'javascript', 'python', 'go', 'java', 'rust', 'c++'],
+    },
+    official_sdks: { npm: 'https://www.npmjs.com/package/dockerode' },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 20,
+    monthly_cost_estimate: { starter: '$0', growth: '$5', enterprise: '$24' },
+    dx_score: 8.0,
   },
 ];
 

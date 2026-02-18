@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Map, List, Key, Settings, ScrollText, Activity } from 'lucide-react';
+import { LayoutDashboard, Map, List, Key, Settings, ScrollText, Activity, Cable } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 interface ProjectTabsProps {
@@ -30,6 +30,7 @@ const tabGroups: Tab[][] = [
   ],
   // Admin
   [
+    { label: '연결 관리', href: '/connections', icon: Cable },
     { label: '감사 로그', href: '/audit', icon: ScrollText },
     { label: '설정', href: '/settings', icon: Settings },
   ],

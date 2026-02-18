@@ -14,6 +14,10 @@ const connectionStyles: Record<UserConnectionType, { color: string; dash: string
   uses:          { color: '#3b82f6', dash: '0',   label: '사용' },
   integrates:    { color: '#22c55e', dash: '0',   label: '연동' },
   data_transfer: { color: '#f97316', dash: '6 3', label: '데이터 전달' },
+  api_call:      { color: '#8b5cf6', dash: '0',   label: 'API 호출' },
+  auth_provider: { color: '#ec4899', dash: '4 2', label: '인증 제공' },
+  webhook:       { color: '#14b8a6', dash: '6 2', label: '웹훅' },
+  sdk:           { color: '#6366f1', dash: '0',   label: 'SDK' },
 };
 
 interface UserConnectionEdgeData {

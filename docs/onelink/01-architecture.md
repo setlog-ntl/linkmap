@@ -15,10 +15,9 @@ src/
 │       ├── deployments/route.ts              # GET: 내 배포 목록
 │       ├── deployments/[id]/route.ts         # DELETE: 배포 삭제
 │       ├── deployments/[id]/files/route.ts   # GET/PUT: 파일 조회/수정
+│       ├── deployments/[id]/batch-update/route.ts  # POST: 배치 파일 적용 (Sprint 6)
 │       ├── ai-chat/route.ts                  # POST: AI 채팅 (사이트 수정)
-│       ├── oauth/authorize/route.ts          # GET: GitHub OAuth 시작
-│       ├── fork/route.ts                     # POST: [레거시] 템플릿 Fork
-│       └── deploy/route.ts                   # POST: [레거시] Vercel 배포
+│       └── oauth/authorize/route.ts          # GET: GitHub OAuth 시작
 │
 ├── components/
 │   ├── oneclick/
@@ -34,15 +33,12 @@ src/
 │       ├── site-editor-client.tsx             # 웹 코드 에디터
 │       └── chat-terminal.tsx                  # AI 채팅 터미널
 │
-├── stores/
-│   └── oneclick-store.ts                      # Zustand (persist)
-│
 ├── lib/
 │   ├── queries/
-│   │   ├── oneclick.ts                        # TanStack Query 훅 (12개)
+│   │   ├── oneclick.ts                        # TanStack Query 훅 (9개)
 │   │   └── keys.ts                            # QueryKey 팩토리
 │   └── validations/
-│       └── oneclick.ts                        # Zod 스키마 (5개)
+│       └── oneclick.ts                        # Zod 스키마 (3개)
 │
 ├── data/
 │   ├── homepage-templates.ts                  # 템플릿 시드 데이터 (5개)
@@ -52,6 +48,9 @@ src/
 supabase/migrations/
 └── 016_oneclick_github_pages.sql              # DB 스키마 (Pages 지원)
 ```
+
+> **참고**: `oneclick-store.ts`는 존재하지 않음. wizard-client.tsx가 React useState로 위저드 상태를 관리.
+> 레거시 API (`fork/route.ts`, `deploy/route.ts`)는 Sprint 1에서 삭제됨.
 
 ---
 
@@ -86,18 +85,11 @@ supabase/migrations/
 
 ## 3. 상태 관리
 
-### 3.1 Zustand Store (oneclick-store.ts)
-```typescript
-interface OneclickState {
-  selectedTemplateId: string | null;
-  siteName: string;
-  currentStep: number;
-  // actions
-  setSelectedTemplateId, setSiteName, setCurrentStep, reset
-}
-```
-- `persist` 미들웨어로 `localStorage`에 저장 (키: `linkmap-oneclick`)
-- **문제**: wizard-client.tsx는 자체 `useState`로 step을 관리 → **store와 중복**
+### 3.1 위저드 상태 (wizard-client.tsx)
+
+위저드 상태는 `wizard-client.tsx` 내부의 React `useState`로 관리:
+- `currentStep`, `deployId`, `projectId`, `isDeploying`, `pendingDeploy`
+- `oneclick-store.ts`는 존재하지 않음 (초기 분석 시 언급되었으나 파일 미존재 확인)
 
 ### 3.2 TanStack Query Hooks (queries/oneclick.ts)
 
@@ -111,13 +103,14 @@ interface OneclickState {
 | `useDeployFiles` | `['oneclick', 'files', id]` | 파일 목록 |
 | `useFileContent` | `['oneclick', 'files', id, path]` | 파일 내용 |
 | `useUpdateFile` | mutation | 파일 수정 |
-| `useBatchApplyFiles` | mutation | 배치 파일 적용 |
-| `useForkTemplate` | mutation | [레거시] Fork |
-| `useDeployToVercel` | mutation | [레거시] Vercel 배포 |
+| `useBatchApplyFiles` | mutation | 배치 파일 적용 (Sprint 6: batch-update API 사용) |
 
-### 3.3 세션 스토리지
-- `sessionStorage` 키: `linkmap-pending-deploy`
-- OAuth 리다이렉트 시 `{ templateId, siteName }` 보존
+> **삭제됨** (Sprint 1): `useForkTemplate`, `useDeployToVercel`
+
+### 3.3 OAuth 상태 보존
+- `localStorage` 키: `linkmap-pending-deploy` (10분 TTL)
+- OAuth 리다이렉트 시 `{ templateId, siteName, savedAt }` 보존
+- Sprint 3에서 `sessionStorage` → `localStorage` 전환 완료
 
 ---
 
@@ -164,8 +157,10 @@ interface OneclickState {
     │◄──────────── { reply } ───────────┤                              │
     │                                   │                              │
     ├─ 코드 블록 파싱 (클라이언트)       │                              │
-    ├─ PUT /deployments/[id]/files ────►│                              │
-    │                                   ├─ GitHub API (파일 업데이트) ─►│ GitHub API
+    ├─ POST /batch-update ────────────►│                              │
+    │  { files: [{path, content}] }    │                              │
+    │                                   ├─ pushFilesAtomically ───────►│ GitHub API
+    │◄──────────── { sha } ────────────┤                              │
 ```
 
 ---
@@ -174,12 +169,12 @@ interface OneclickState {
 
 ```
 [요청] → Rate Limit → Auth Check → Zod Validation → Business Logic → Audit Log
-         (in-memory)   (Supabase)   (스키마 검증)      (RLS 적용)     (fire & forget)
+      (Cloudflare Rules)  (Supabase)   (스키마 검증)      (RLS 적용)     (fire & forget)
 ```
 
 | 레이어 | 구현 | 파일 |
 |--------|------|------|
-| Rate Limit | 인메모리 IP/User 기반 | `lib/rate-limit.ts` |
+| Rate Limit | Cloudflare Rate Limiting Rules | (Cloudflare 대시보드, 외부 인프라) |
 | 인증 | `supabase.auth.getUser()` | 각 route.ts |
 | 입력 검증 | Zod `safeParse` | `lib/validations/oneclick.ts` |
 | 토큰 보안 | AES-256-GCM 암호화 | `lib/crypto/index.ts` |

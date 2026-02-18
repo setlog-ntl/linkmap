@@ -40,7 +40,9 @@ export type AuditAction =
   | 'oneclick.deploy_delete'
   | 'oneclick.file_edit'
   | 'oneclick.file_create'
-  | 'oneclick.batch_update';
+  | 'oneclick.batch_update'
+  | 'connection.auto_create'
+  | 'layer_override.upsert';
 
 interface AuditLogEntry {
   action: AuditAction;

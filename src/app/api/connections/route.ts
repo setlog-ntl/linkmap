@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
   const parsed = createConnectionSchema.safeParse(body);
   if (!parsed.success) return validationError(parsed.error);
 
-  const { project_id, source_service_id, target_service_id, connection_type, label } = parsed.data;
+  const { project_id, source_service_id, target_service_id, connection_type, connection_status, label, description } = parsed.data;
 
   // Verify project ownership
   const { data: project } = await supabase
@@ -50,7 +50,9 @@ export async function POST(request: NextRequest) {
       source_service_id,
       target_service_id,
       connection_type,
+      connection_status: connection_status ?? 'active',
       label: label || null,
+      description: description || null,
       created_by: user.id,
     })
     .select()

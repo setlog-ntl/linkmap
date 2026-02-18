@@ -39,7 +39,7 @@ export function DevtoolsRow({ data, projectId }: DevtoolsRowProps) {
                 {allCategoryLabels[sub as ServiceCategory] ?? sub}
               </p>
               {cards.map((card) => (
-                <CompactCard key={card.projectServiceId} card={card} />
+                <CompactCard key={card.projectServiceId} card={card} projectId={projectId} />
               ))}
             </div>
           ))}

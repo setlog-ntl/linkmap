@@ -49,7 +49,7 @@
            │ handleDeploy() → isAuthenticated ✗
            ▼
 ┌──────────────────────────────────────────┐
-│  localStorage에 pending 저장 (10분 TTL)    │
+│  localStorage에 pending 저장 (10분 TTL)    │  ← sessionStorage에서 변경됨 (Sprint 3)
 │  { templateId, siteName, savedAt }        │
 │  redirect → /login?redirect=/oneclick     │
 └──────────────┬───────────────────────────┘

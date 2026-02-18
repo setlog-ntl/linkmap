@@ -5,25 +5,30 @@ import type { ServiceCardData } from '@/types';
 
 interface AuthGroupProps {
   cards: ServiceCardData[];
+  projectId: string;
 }
 
-export function AuthGroup({ cards }: AuthGroupProps) {
+export function AuthGroup({ cards, projectId }: AuthGroupProps) {
   if (cards.length === 0) return null;
 
   const authCards = cards.filter((c) => c.dashboardSubcategory === 'auth');
   const socialCards = cards.filter((c) => c.dashboardSubcategory === 'social_login');
 
   return (
-    <div className="rounded-lg border border-dashed border-purple-300 dark:border-purple-700 p-2.5 space-y-2">
+    <div
+      className="rounded-lg border border-dashed border-purple-300 dark:border-purple-700 p-2.5 space-y-2"
+      role="group"
+      aria-label="인증 서비스"
+    >
       <p className="text-xs font-medium text-muted-foreground px-0.5">인증</p>
       {authCards.map((card) => (
-        <CompactCard key={card.projectServiceId} card={card} />
+        <CompactCard key={card.projectServiceId} card={card} projectId={projectId} />
       ))}
       {socialCards.length > 0 && (
         <div className="space-y-1.5 pl-2 border-l-2 border-purple-200 dark:border-purple-800">
           <p className="text-[11px] text-muted-foreground">소셜 로그인</p>
           {socialCards.map((card) => (
-            <CompactCard key={card.projectServiceId} card={card} />
+            <CompactCard key={card.projectServiceId} card={card} projectId={projectId} />
           ))}
         </div>
       )}

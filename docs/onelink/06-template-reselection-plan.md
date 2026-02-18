@@ -1,13 +1,16 @@
 # 06. 템플릿 재정비 계획
 
+> 이 문서는 초기 분석 기준입니다. 최신 15개 템플릿 계획은 [템플릿기획.md](../템플릿기획/템플릿기획.md) 참조.
+> Phase 2 템플릿 콘텐츠 생성 계획은 [07-enhancement-plan.md](./07-enhancement-plan.md)의 Sprint 9-11 참조.
+
 ## 현재 상태 (2026-02)
 
 DB에 등록된 활성 템플릿 8개. 모두 `deploy_target = 'github_pages'`.
 
 | slug | name_ko | framework | 상태 |
 |------|---------|-----------|------|
-| homepage-minimal | 미니멀 포트폴리오 | nextjs | 유지 |
-| homepage-links | 링크 모음 | nextjs | 유지 |
+| homepage-minimal | 미니멀 포트폴리오 | nextjs | (migration 023에서 비활성화) |
+| homepage-links | 링크 모음 | nextjs | (migration 023에서 비활성화) |
 | link-in-bio-pro | 링크인바이오 프로 | nextjs | 유지 |
 | digital-namecard | 디지털 명함 | nextjs | 유지 |
 | dev-showcase | 개발자 쇼케이스 | nextjs | 유지 |
@@ -44,7 +47,7 @@ DB에 등록된 활성 템플릿 8개. 모두 `deploy_target = 'github_pages'`.
 ## 번들 구조 개선 방향
 
 ### 현재 구조
-템플릿은 GitHub 레포를 통째로 fork하는 방식. 모든 파일이 하나의 레포에 존재.
+템플릿은 인라인 번들 방식 (`homepage-template-content.ts`). `getTemplateBySlug()` Map 기반 O(1) 조회로 번들 콘텐츠를 가져와 `pushFilesAtomically()`로 GitHub 레포에 직접 생성.
 
 ### 개선 방향
 1. **핵심 파일 분리**: `index.html`, `styles.css`, `config.json` 등 사용자가 편집할 파일만 DB에 저장

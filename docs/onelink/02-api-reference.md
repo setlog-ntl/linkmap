@@ -1,5 +1,9 @@
 # OneLink API 엔드포인트 레퍼런스
 
+> **Rate Limiting**: 모든 엔드포인트의 Rate Limiting은 Cloudflare Rate Limiting Rules로 인프라 레벨에서 적용됩니다.
+> 아래 각 엔드포인트의 "Rate Limit" 값은 Cloudflare 규칙 설정값입니다.
+> 앱 코드의 `lib/rate-limit.ts`는 삭제되었습니다.
+
 ## 활성 엔드포인트 (GitHub Pages)
 
 ### 1. GET `/api/oneclick/templates`
@@ -315,6 +319,47 @@
 ```json
 {
   "reply": "📄 style.css\n```css\nbody { background: blue; }\n```"
+}
+```
+
+---
+
+### 10. POST `/api/oneclick/deployments/[id]/batch-update` (Sprint 6)
+
+**설명**: 여러 파일을 한 번의 Git commit으로 원자적 적용
+
+| 항목 | 값 |
+|------|-----|
+| 인증 | 필수 |
+| Rate Limit | 10/분 |
+| 파일 | `src/app/api/oneclick/deployments/[id]/batch-update/route.ts` |
+
+**Request Body**:
+```json
+{
+  "files": [
+    { "path": "index.html", "content": "<html>...</html>" },
+    { "path": "style.css", "content": "body { ... }" }
+  ],
+  "message": "AI 제안 적용 (선택)"
+}
+```
+
+**동작**:
+1. 배포 소유권 확인 (RLS)
+2. GitHub 서비스 계정 조회 & 토큰 복호화
+3. `pushFilesAtomically()` — Git Data API 기반 원자적 커밋
+   - 현재 HEAD SHA 조회
+   - Git tree 생성 (모든 파일 포함)
+   - Git commit 생성
+   - ref 업데이트
+4. 감사 로그 기록
+
+**Response (200)**:
+```json
+{
+  "sha": "commit-sha",
+  "message": "N개 파일 업데이트 완료"
 }
 ```
 

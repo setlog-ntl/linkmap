@@ -48,8 +48,9 @@ CREATE TABLE homepage_templates (
 | digital-namecard | 디지털 명함 | nextjs | github_pages |
 | dev-showcase | 개발자 쇼케이스 | nextjs | github_pages |
 
-> **이슈**: DB 시드와 TypeScript 시드가 **별도로 존재**하며 슬러그가 다름.
-> 실제 배포 시 `homepage-template-content.ts`의 번들 파일을 사용하므로, DB에 없는 slug는 배포 실패 가능.
+> **해결됨** (migration 023): DB 시드와 TypeScript 시드의 슬러그 불일치는 migration 023에서 해결됨.
+> 구 DB 시드 (portfolio-static 등)는 비활성화되고, TS 시드 기반의 신규 슬러그 (link-in-bio-pro 등)로 통합.
+> 실제 배포 시 `getTemplateBySlug()`로 번들 콘텐츠를 조회.
 
 ---
 
@@ -259,3 +260,37 @@ const DEFAULT_QUOTA = {
 
 > **이슈**: 기본 쿼터가 `999999`로 설정되어 있어 사실상 쿼터 제한이 없음.
 > `plan_quotas` 테이블이 비어있으면 모든 사용자가 무제한 배포 가능.
+
+---
+
+## 5. Connections 관련 테이블 (개발 중)
+
+> 아래 테이블은 Connections 시각화 기능 개발 중 추가됨 (미커밋 상태).
+
+### 5.1 `user_connections` 확장 (migration 028)
+
+기존 `user_connections` 테이블에 4개 컬럼 추가:
+
+| 컬럼 | 타입 | 설명 |
+|------|------|------|
+| `connection_status` | TEXT | active, inactive, error, pending |
+| `description` | TEXT | 연결에 대한 선택적 설명 |
+| `last_verified_at` | TIMESTAMPTZ | 마지막 연결 확인 시각 |
+| `metadata` | JSONB | 추가 메타데이터 |
+
+`connection_type` CHECK 확장: `api_call`, `auth_provider`, `webhook`, `sdk` 추가.
+
+### 5.2 `project_service_overrides` (migration 029)
+
+프로젝트별 대시보드 레이어 커스터마이징 테이블:
+
+| 컬럼 | 타입 | 설명 |
+|------|------|------|
+| `id` | UUID | PK |
+| `project_id` | UUID | FK → projects |
+| `service_id` | UUID | FK → services |
+| `dashboard_layer` | TEXT | frontend, backend, devtools |
+| `dashboard_subcategory` | TEXT | 서브카테고리 |
+
+- Unique constraint: `(project_id, service_id)`
+- RLS: 프로젝트 소유자 전체 권한, 팀 에디터+ 전체 권한, 팀 뷰어 읽기 전용

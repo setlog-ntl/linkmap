@@ -56,16 +56,19 @@
 | 배치 파일 적용 | AI 제안 일괄 적용 | 구현 완료 |
 
 ### 2.3 레거시 기능 (Legacy - Vercel)
+
+> **삭제됨**: Sprint 1에서 제거 (2026-02-18). API 라우트 2개, TanStack Query 훅 2개, Zod 스키마 2개 삭제.
+
 | 기능 | 설명 | 상태 |
 |------|------|------|
-| Fork 템플릿 | linkmap-templates org에서 fork | 미사용 |
-| Vercel 배포 | Vercel API를 통한 배포 | 미사용 |
-| Vercel 상태 폴링 | Vercel 빌드 상태 체크 | 미사용 |
+| ~~Fork 템플릿~~ | ~~linkmap-templates org에서 fork~~ | 삭제됨 |
+| ~~Vercel 배포~~ | ~~Vercel API를 통한 배포~~ | 삭제됨 |
+| ~~Vercel 상태 폴링~~ | ~~Vercel 빌드 상태 체크~~ | 삭제됨 |
 
 ### 2.4 보안 & 인프라 (Security)
 | 기능 | 설명 | 상태 |
 |------|------|------|
-| Rate Limiting | 엔드포인트별 요청 제한 | 구현 완료 |
+| Rate Limiting | Cloudflare Rate Limiting Rules (인프라 레벨) | 구현 완료 |
 | 입력 검증 | Zod 스키마 검증 | 구현 완료 |
 | 감사 로깅 | 배포/삭제/에러 이벤트 기록 | 구현 완료 |
 | 토큰 암호화 | AES-256-GCM으로 GitHub 토큰 암호화 | 구현 완료 |
@@ -92,13 +95,13 @@
 
 | 카테고리 | 파일 수 | 비고 |
 |----------|---------|------|
-| 페이지 | 1 | `/oneclick` |
+| 페이지 | 3 | /oneclick, /my-sites, /my-sites/[id]/edit |
 | 컴포넌트 | 10 | oneclick(6) + my-sites(4) |
-| API 라우트 | 11 | 활성 8 + 레거시 3 |
-| 라이브러리 | 3 | queries, validations, store |
+| API 라우트 | 10 | 활성 (레거시 제거 후 batch-update 추가) |
+| 라이브러리 | 2 | queries, validations |
 | 데이터 | 2 | templates, template-content |
-| DB 마이그레이션 | 1 | 016_oneclick_github_pages |
-| **합계** | **28** | |
+| DB 마이그레이션 | 4+ | 016, 022, 023, 024-026 |
+| **합계** | **31** | |
 
 ---
 
@@ -134,7 +137,7 @@
 │  ├─ lib/github/api.ts (GitHub REST API)          │
 │  ├─ lib/crypto/      (AES-256-GCM)              │
 │  ├─ lib/quota.ts     (플랜 쿼터)                 │
-│  ├─ lib/rate-limit.ts                            │
+│  ├─ (Cloudflare Rate Limiting Rules — 외부)       │
 │  ├─ lib/audit.ts                                 │
 │  └─ lib/ai/          (AI 프로바이더)             │
 └──────────────────────┬──────────────────────────┘

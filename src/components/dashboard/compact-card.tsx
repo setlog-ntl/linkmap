@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { ExternalLink, Copy, FileText, Settings, ChevronDown } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -10,6 +11,7 @@ import type { ServiceCardData } from '@/types';
 
 interface CompactCardProps {
   card: ServiceCardData;
+  projectId?: string;
 }
 
 const STATUS_DOT: Record<string, string> = {
@@ -33,7 +35,7 @@ const STATUS_LABEL: Record<string, string> = {
   not_started: '미시작',
 };
 
-export function CompactCard({ card }: CompactCardProps) {
+export const CompactCard = memo(function CompactCard({ card, projectId }: CompactCardProps) {
   const style = getCategoryStyle(card.category);
   const dotClass = STATUS_DOT[card.status] ?? 'bg-yellow-500';
   const borderClass = STATUS_BORDER[card.status] ?? 'border-border';
@@ -45,6 +47,8 @@ export function CompactCard({ card }: CompactCardProps) {
   return (
     <div
       data-service-id={card.serviceId}
+      role="article"
+      aria-label={`${card.name} - ${STATUS_LABEL[card.status] ?? card.status}`}
       className={cn(
         'group relative rounded-lg border transition-all',
         borderClass,
@@ -55,16 +59,28 @@ export function CompactCard({ card }: CompactCardProps) {
       <div
         className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full"
         style={{ backgroundColor: style.hexColor }}
+        aria-hidden="true"
       />
 
       {/* Header row (clickable) */}
       <button
         type="button"
         onClick={() => toggleCard(card.projectServiceId)}
-        className="flex w-full items-center gap-2.5 p-2.5 text-left"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleCard(card.projectServiceId);
+          }
+        }}
+        aria-expanded={isExpanded}
+        aria-label={`${card.name} ${isExpanded ? '접기' : '펼치기'}`}
+        className="flex w-full items-center gap-2.5 p-2.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 rounded-lg"
       >
         {/* Status dot */}
-        <span className={cn('ml-1.5 h-2 w-2 shrink-0 rounded-full', dotClass)} />
+        <span
+          className={cn('ml-1.5 h-2 w-2 shrink-0 rounded-full', dotClass)}
+          aria-label={STATUS_LABEL[card.status] ?? card.status}
+        />
 
         {/* Service icon */}
         <ServiceIcon serviceId={card.slug} size={18} />
@@ -85,6 +101,7 @@ export function CompactCard({ card }: CompactCardProps) {
             'h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform',
             isExpanded && 'rotate-180'
           )}
+          aria-hidden="true"
         />
       </button>
 
@@ -94,8 +111,10 @@ export function CompactCard({ card }: CompactCardProps) {
           href={card.websiteUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute right-8 top-2.5 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute right-8 top-2.5 opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
           onClick={(e) => e.stopPropagation()}
+          aria-label={`${card.name} 외부 링크`}
+          tabIndex={-1}
         >
           <ExternalLink className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
         </a>
@@ -116,7 +135,7 @@ export function CompactCard({ card }: CompactCardProps) {
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">상태</span>
                 <span className={cn('flex items-center gap-1.5 font-medium', dotClass.replace('bg-', 'text-'))}>
-                  <span className={cn('h-1.5 w-1.5 rounded-full', dotClass)} />
+                  <span className={cn('h-1.5 w-1.5 rounded-full', dotClass)} aria-hidden="true" />
                   {STATUS_LABEL[card.status] ?? card.status}
                 </span>
               </div>
@@ -128,7 +147,14 @@ export function CompactCard({ card }: CompactCardProps) {
                     <span className="text-muted-foreground">환경변수</span>
                     <span className="font-medium">{card.envFilled}/{card.envTotal}</span>
                   </div>
-                  <div className="h-1.5 w-full rounded-full bg-muted">
+                  <div
+                    className="h-1.5 w-full rounded-full bg-muted"
+                    role="progressbar"
+                    aria-valuenow={card.envFilled}
+                    aria-valuemin={0}
+                    aria-valuemax={card.envTotal}
+                    aria-label="환경변수 진행률"
+                  >
                     <div
                       className="h-full rounded-full bg-primary transition-all"
                       style={{ width: `${Math.round((card.envFilled / card.envTotal) * 100)}%` }}
@@ -138,38 +164,41 @@ export function CompactCard({ card }: CompactCardProps) {
               )}
 
               {/* Quick actions */}
-              <div className="flex gap-1.5 pt-1">
+              <div className="flex gap-1.5 pt-1" role="group" aria-label="빠른 작업">
                 {card.websiteUrl && (
                   <a
                     href={card.websiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                    className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <FileText className="h-3 w-3" />
+                    <FileText className="h-3 w-3" aria-hidden="true" />
                     문서
                   </a>
                 )}
                 <button
                   type="button"
-                  className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                  className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   onClick={(e) => {
                     e.stopPropagation();
                     navigator.clipboard.writeText(card.slug);
                   }}
+                  aria-label={`${card.slug} 복사`}
                 >
-                  <Copy className="h-3 w-3" />
+                  <Copy className="h-3 w-3" aria-hidden="true" />
                   복사
                 </button>
-                <a
-                  href={`/project/${card.projectServiceId.split('-')[0]}/../env?service=${card.serviceId}`}
-                  className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Settings className="h-3 w-3" />
-                  설정
-                </a>
+                {projectId && (
+                  <a
+                    href={`/project/${projectId}/env?service=${card.serviceId}`}
+                    className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Settings className="h-3 w-3" aria-hidden="true" />
+                    설정
+                  </a>
+                )}
               </div>
             </div>
           </motion.div>
@@ -177,4 +206,4 @@ export function CompactCard({ card }: CompactCardProps) {
       </AnimatePresence>
     </div>
   );
-}
+});

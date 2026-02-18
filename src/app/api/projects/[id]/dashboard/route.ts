@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, notFoundError, serverError } from '@/lib/api/errors';
-import type { DashboardLayer, DashboardResponse, ServiceCardData, LayerData, DashboardMetrics } from '@/types';
+import type { DashboardLayer, DashboardResponse, ServiceCardData, LayerData, DashboardMetrics, UserConnection } from '@/types';
 
 const LAYER_ORDER: DashboardLayer[] = ['frontend', 'backend', 'devtools'];
 
@@ -21,7 +21,7 @@ export async function GET(
   if (!user) return unauthorizedError();
 
   try {
-    const [projectResult, servicesResult, envResult] = await Promise.all([
+    const [projectResult, servicesResult, envResult, connectionsResult, overridesResult] = await Promise.all([
       supabase
         .from('projects')
         .select('*')
@@ -36,6 +36,15 @@ export async function GET(
       supabase
         .from('environment_variables')
         .select('service_id')
+        .eq('project_id', id),
+      supabase
+        .from('user_connections')
+        .select('*')
+        .eq('project_id', id)
+        .order('created_at'),
+      supabase
+        .from('project_service_overrides')
+        .select('service_id, dashboard_layer, dashboard_subcategory')
         .eq('project_id', id),
     ]);
 
@@ -70,9 +79,17 @@ export async function GET(
       }
     }
 
-    // Build ServiceCardData array
+    // Build override lookup: service_id → { layer, subcategory }
+    interface OverrideRow { service_id: string; dashboard_layer: string | null; dashboard_subcategory: string | null }
+    const overrides = new Map<string, OverrideRow>();
+    for (const o of (overridesResult.data ?? []) as unknown as OverrideRow[]) {
+      overrides.set(o.service_id, o);
+    }
+
+    // Build ServiceCardData array (override > service default > fallback)
     const cards: ServiceCardData[] = projectServices.map((ps) => {
       const svc = ps.service;
+      const ovr = overrides.get(svc.id);
       const envTotal = svc.required_env_vars?.length ?? 0;
       const envFilled = envCountByService.get(svc.id) ?? 0;
       return {
@@ -82,8 +99,8 @@ export async function GET(
         slug: svc.slug,
         category: svc.category as ServiceCardData['category'],
         status: ps.status as ServiceCardData['status'],
-        dashboardLayer: (svc.dashboard_layer ?? 'backend') as DashboardLayer,
-        dashboardSubcategory: svc.dashboard_subcategory ?? svc.category,
+        dashboardLayer: (ovr?.dashboard_layer ?? svc.dashboard_layer ?? 'backend') as DashboardLayer,
+        dashboardSubcategory: ovr?.dashboard_subcategory ?? svc.dashboard_subcategory ?? svc.category,
         envTotal,
         envFilled: Math.min(envFilled, envTotal),
         websiteUrl: svc.website_url,
@@ -118,7 +135,8 @@ export async function GET(
         : 0,
     };
 
-    const response: DashboardResponse = { project, layers, metrics };
+    const connections = (connectionsResult.data as unknown as UserConnection[]) ?? [];
+    const response: DashboardResponse = { project, layers, metrics, connections };
     return NextResponse.json(response);
   } catch (err) {
     console.error('[dashboard] error:', err);
