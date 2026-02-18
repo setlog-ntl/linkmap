@@ -63,11 +63,13 @@ export function DashboardLayout({ data }: DashboardLayoutProps) {
   // Onboarding overlay for empty projects
   if (allCards.length === 0) {
     return (
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_260px_1fr] gap-4">
-          <div />
-          <MyProjectCard project={project} metrics={metrics} allCards={allCards} />
-          <div />
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          <div className="md:col-span-3" />
+          <div className="md:col-span-6">
+            <MyProjectCard project={project} metrics={metrics} allCards={allCards} />
+          </div>
+          <div className="md:col-span-3" />
         </div>
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
@@ -101,29 +103,22 @@ export function DashboardLayout({ data }: DashboardLayoutProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Env alert banner */}
       <EnvAlertBanner projectId={project.id} allCards={allCards} />
 
-      {/* Connection toggle */}
-      <div className="hidden md:flex justify-end">
-        <Button
-          variant={showConnections ? 'default' : 'outline'}
-          size="sm"
-          className="h-7 text-xs gap-1.5"
-          onClick={() => setShowConnections(!showConnections)}
-        >
-          <Cable className="h-3.5 w-3.5" />
-          연결선 {showConnections ? 'ON' : 'OFF'}
-        </Button>
-      </div>
-
       {/* Desktop layout */}
       <div className="hidden md:block relative" ref={containerRef}>
-        <div className="grid grid-cols-[1fr_260px_1fr] gap-4">
-          <LayerColumn data={frontendData} projectId={project.id} />
-          <MyProjectCard project={project} metrics={metrics} allCards={allCards} />
-          <LayerColumn data={backendData} projectId={project.id} />
+        <div className="grid grid-cols-12 gap-6">
+          <div className="col-span-3">
+            <LayerColumn data={frontendData} projectId={project.id} />
+          </div>
+          <div className="col-span-6">
+            <MyProjectCard project={project} metrics={metrics} allCards={allCards} />
+          </div>
+          <div className="col-span-3">
+            <LayerColumn data={backendData} projectId={project.id} />
+          </div>
         </div>
 
         {/* SVG Connection Overlay */}
@@ -169,13 +164,26 @@ export function DashboardLayout({ data }: DashboardLayoutProps) {
       </div>
 
       {/* Desktop devtools row */}
-      <div className="hidden md:block">
+      <div className="hidden md:block pt-6 border-t">
         <DevtoolsRow data={devtoolsData} projectId={project.id} />
       </div>
 
       {/* Health summary strip */}
       <div className="hidden md:block">
         <HealthSummaryStrip projectId={project.id} allCards={allCards} />
+      </div>
+
+      {/* Connection toggle — fixed pill */}
+      <div className="hidden md:block fixed bottom-6 right-6 z-40">
+        <Button
+          variant={showConnections ? 'default' : 'outline'}
+          size="sm"
+          className="h-8 rounded-full text-xs gap-1.5 shadow-lg"
+          onClick={() => setShowConnections(!showConnections)}
+        >
+          <Cable className="h-3.5 w-3.5" />
+          Connect Map {showConnections ? 'ON' : 'OFF'}
+        </Button>
       </div>
 
       {/* Mobile layout */}

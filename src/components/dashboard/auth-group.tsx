@@ -16,11 +16,11 @@ export function AuthGroup({ cards, projectId }: AuthGroupProps) {
 
   return (
     <div
-      className="rounded-lg border border-dashed border-purple-300 dark:border-purple-700 p-2.5 space-y-2"
+      className="rounded-lg border border-dashed border-border p-2.5 space-y-2"
       role="group"
       aria-label="인증 서비스"
     >
-      <p className="text-xs font-medium text-muted-foreground px-0.5">인증</p>
+      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-0.5">인증</p>
       {authCards.map((card) => (
         <CompactCard key={card.projectServiceId} card={card} projectId={projectId} />
       ))}

@@ -38,11 +38,11 @@ export function LayerColumn({ data, projectId }: LayerColumnProps) {
   );
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-6">
       {/* Layer header */}
-      <h3 className={`text-sm font-semibold ${LAYER_COLORS[layer] ?? ''}`}>
+      <h3 className={`text-sm font-bold uppercase tracking-widest ${LAYER_COLORS[layer] ?? ''}`}>
         {label}
-        <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+        <span className="ml-1.5 text-xs font-mono font-normal text-muted-foreground">
           ({services.length})
         </span>
       </h3>
@@ -54,8 +54,8 @@ export function LayerColumn({ data, projectId }: LayerColumnProps) {
 
       {/* Regular subcategory groups */}
       {regularGroups.map(([sub, cards]) => (
-        <div key={sub} className="space-y-1.5">
-          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide px-0.5">
+        <div key={sub} className="space-y-2">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-0.5">
             {allCategoryLabels[sub as ServiceCategory] ?? sub}
           </p>
           {cards.map((card) => (

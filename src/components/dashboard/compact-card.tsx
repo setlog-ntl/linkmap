@@ -4,8 +4,6 @@ import { memo } from 'react';
 import { ExternalLink, Copy, FileText, Settings, ChevronDown } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { getCategoryStyle } from '@/lib/constants/category-styles';
-import { ServiceIcon } from '@/components/landing/service-icon';
 import { useDashboardStore } from '@/stores/dashboard-store';
 import type { ServiceCardData } from '@/types';
 
@@ -36,7 +34,6 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export const CompactCard = memo(function CompactCard({ card, projectId }: CompactCardProps) {
-  const style = getCategoryStyle(card.category);
   const dotClass = STATUS_DOT[card.status] ?? 'bg-yellow-500';
   const borderClass = STATUS_BORDER[card.status] ?? 'border-border';
 
@@ -50,18 +47,11 @@ export const CompactCard = memo(function CompactCard({ card, projectId }: Compac
       role="article"
       aria-label={`${card.name} - ${STATUS_LABEL[card.status] ?? card.status}`}
       className={cn(
-        'group relative rounded-lg border transition-all',
-        borderClass,
+        'group relative rounded-md border transition-all',
+        card.status === 'connected' ? 'border-primary' : borderClass,
         isExpanded ? 'shadow-md' : 'hover:shadow-sm hover:scale-[1.02]'
       )}
     >
-      {/* Left accent bar */}
-      <div
-        className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full"
-        style={{ backgroundColor: style.hexColor }}
-        aria-hidden="true"
-      />
-
       {/* Header row (clickable) */}
       <button
         type="button"
@@ -74,20 +64,17 @@ export const CompactCard = memo(function CompactCard({ card, projectId }: Compac
         }}
         aria-expanded={isExpanded}
         aria-label={`${card.name} ${isExpanded ? '접기' : '펼치기'}`}
-        className="flex w-full items-center gap-2.5 p-2.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 rounded-lg"
+        className="flex w-full items-center gap-2.5 p-2.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 rounded-md"
       >
         {/* Status dot */}
         <span
-          className={cn('ml-1.5 h-2 w-2 shrink-0 rounded-full', dotClass)}
+          className={cn('h-2.5 w-2.5 shrink-0 rounded-full', dotClass)}
           aria-label={STATUS_LABEL[card.status] ?? card.status}
         />
 
-        {/* Service icon */}
-        <ServiceIcon serviceId={card.slug} size={18} />
-
         {/* Name + env progress */}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium leading-tight">{card.name}</p>
+          <p className="truncate text-xs font-mono font-bold leading-tight">{card.name}</p>
           {card.envTotal > 0 && (
             <p className="text-[11px] text-muted-foreground">
               env: {card.envFilled}/{card.envTotal}
