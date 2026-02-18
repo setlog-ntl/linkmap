@@ -25,7 +25,7 @@
 1. [Supabase Dashboard](https://supabase.com/dashboard) 로그인 후 사용 중인 프로젝트 클릭
 2. 좌측 **Project Settings**(톱니바퀴) 클릭
 3. **General** 탭에서 확인:
-   - **Reference ID**: 예) `apqydhwahkccxlltacas`  
+   - **Reference ID**: 예) `<your-project-ref>`  
      → 이 값을 `<project-ref>` 로 사용합니다.
    - **API URL**: `https://<project-ref>.supabase.co`  
      → Google에 등록할 **리디렉션 URI**는 여기에 `/auth/v1/callback` 을 붙인 값입니다.
@@ -34,8 +34,8 @@
 
 | 항목 | 예시 (본인 값으로 교체) |
 |------|-------------------------|
-| Supabase Reference ID | `apqydhwahkccxlltacas` |
-| Supabase Auth Callback URL | `https://apqydhwahkccxlltacas.supabase.co/auth/v1/callback` |
+| Supabase Reference ID | `<your-project-ref>` |
+| Supabase Auth Callback URL | `https://<your-project-ref>.supabase.co/auth/v1/callback` |
 
 > ⚠️ **이 Callback URL을 Google Console에 반드시 그대로 입력해야 합니다.**  
 > 끝에 슬래시(`/`)를 붙이지 마세요.
@@ -128,7 +128,7 @@
      ```
      https://<project-ref>.supabase.co/auth/v1/callback
      ```
-     예: `https://apqydhwahkccxlltacas.supabase.co/auth/v1/callback`
+     예: `https://<your-project-ref>.supabase.co/auth/v1/callback`
    - ⚠️ `https` 유지, 경로 `/auth/v1/callback` 정확히, 끝에 `/` 없음
 7. **만들기** 클릭
 8. **OAuth 클라이언트가 생성되었습니다** 팝업에서:

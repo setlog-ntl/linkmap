@@ -3,7 +3,7 @@
 ## Project Overview
 - **Linkmap**: 프로젝트에 연결된 외부 서비스(API, DB, 결제 등)의 연결 정보를 시각화하고, API 키·환경변수·등록 ID를 안전하게 관리하는 설정 관리 플랫폼
 - **Stack**: Next.js 16 (App Router) + Supabase + TypeScript + Tailwind CSS + shadcn/ui
-- **Deploy**: Cloudflare Workers (https://linkmap.cdhrich2.workers.dev)
+- **Deploy**: Cloudflare Workers
 
 ## Key Decisions
 - Korean-first UI, global expansion later

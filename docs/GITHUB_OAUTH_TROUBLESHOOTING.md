@@ -71,12 +71,12 @@ Vercel Dashboard → Project → **Settings** → **Environment Variables** 에�
 
 | 환경변수 | 값 | 용도 |
 |----------|-----|------|
-| `NEXT_PUBLIC_SUPABASE_URL` | `https://apqydhwahkccxlltacas.supabase.co` | Supabase API |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `eyJhbGciOi...` (긴 JWT) | Supabase 인증 |
-| `SUPABASE_SERVICE_ROLE_KEY` | `eyJhbGciOi...` (긴 JWT) | 서버 측 DB 접근 |
-| `ENCRYPTION_KEY` | 64자리 hex 문자열 | 토큰 암호화 |
-| `GITHUB_OAUTH_CLIENT_ID` | `Ov23lia...` | GitHub OAuth |
-| `GITHUB_OAUTH_CLIENT_SECRET` | `13ffcaf...` | GitHub OAuth |
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://<project-ref>.supabase.co` | Supabase API |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase 대시보드에서 확인 | Supabase 인증 |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase 대시보드에서 확인 | 서버 측 DB 접근 |
+| `ENCRYPTION_KEY` | `openssl rand -hex 32`로 생성 | 토큰 암호화 |
+| `GITHUB_OAUTH_CLIENT_ID` | GitHub Developer Settings에서 확인 | GitHub OAuth |
+| `GITHUB_OAUTH_CLIENT_SECRET` | GitHub Developer Settings에서 확인 | GitHub OAuth |
 
 **중요:** Environment 설정에서 **Production**, **Preview**, **Development** 모두에 적용되는지 확인.
 
