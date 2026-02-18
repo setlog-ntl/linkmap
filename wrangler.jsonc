@@ -3,8 +3,9 @@
   "name": "linkmap",
   // account_id는 환경변수 CLOUDFLARE_ACCOUNT_ID 또는 wrangler login으로 제공
   "main": ".open-next/worker.js",
-  "compatibility_date": "2025-04-01",
+  "compatibility_date": "2025-09-01",
   "compatibility_flags": ["nodejs_compat"],
+  "keep_names": false,
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
