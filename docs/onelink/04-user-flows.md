@@ -48,19 +48,20 @@
            │
            │ handleDeploy() → isAuthenticated ✗
            ▼
-┌─────────────────────────────────┐
-│  sessionStorage에 pending 저장   │
-│  { templateId, siteName }       │
-│  redirect → /login?redirect=... │
-└──────────────┬──────────────────┘
+┌──────────────────────────────────────────┐
+│  localStorage에 pending 저장 (10분 TTL)    │
+│  { templateId, siteName, savedAt }        │
+│  redirect → /login?redirect=/oneclick     │
+└──────────────┬───────────────────────────┘
                │ 로그인 완료
                ▼
-┌─────────────────────────────────┐
-│  /oneclick으로 리다이렉트         │
-│  → GitHub 연결 여부 확인          │
-│  → 미연결이면 Step 1로           │
-│  → 연결이면 executeDeploy()      │
-└─────────────────────────────────┘
+┌──────────────────────────────────────────┐
+│  /oneclick으로 리다이렉트                   │
+│  → localStorage에서 pending 복원           │
+│  → GitHub 연결 여부 확인                    │
+│  → 미연결이면 Step 1로                     │
+│  → 연결이면 executeDeploy()                │
+└──────────────────────────────────────────┘
 ```
 
 ### 1.3 시나리오: 로그인 + GitHub 미연결
@@ -83,12 +84,13 @@
 └──────────────┬──────────────────┘
                │ OAuth 완료
                ▼
-┌─────────────────────────────────┐
-│  /oneclick?oauth_success=github │
-│  - sessionStorage에서 복원       │
-│  - handleGitHubConnected()      │
-│  - pendingDeploy 있으면 자동배포  │
-└─────────────────────────────────┘
+┌──────────────────────────────────────────┐
+│  /oneclick?oauth_success=github          │
+│  - localStorage에서 pending 복원 (TTL 검증) │
+│  - handleGitHubConnected()               │
+│  - pendingDeploy 있으면 자동배포            │
+│  - URL 쿼리 파라미터 정리 (replaceState)    │
+└──────────────────────────────────────────┘
 ```
 
 ---
@@ -268,20 +270,48 @@ refetchInterval: (query) => {
 ### 문제
 GitHub OAuth 리다이렉트 중에 사용자의 선택 (템플릿, 사이트명)을 보존해야 함
 
-### 해결
+### 해결 (Sprint 3에서 개선 완료)
+
+`localStorage` 기반 10분 TTL로 탭 전환/리다이렉트 안전성 확보:
+
+```typescript
+const PENDING_KEY = 'linkmap-pending-deploy';
+const PENDING_TTL = 10 * 60 * 1000; // 10분
+
+function savePendingDeploy(data) {
+  localStorage.setItem(PENDING_KEY, JSON.stringify({ ...data, savedAt: Date.now() }));
+}
+
+function loadPendingDeploy() {
+  const raw = localStorage.getItem(PENDING_KEY);
+  if (!raw) return null;
+  const parsed = JSON.parse(raw);
+  if (Date.now() - parsed.savedAt > PENDING_TTL) {
+    localStorage.removeItem(PENDING_KEY);
+    return null;
+  }
+  return { templateId: parsed.templateId, siteName: parsed.siteName };
+}
+
+function clearPendingDeploy() {
+  localStorage.removeItem(PENDING_KEY);
+  try { sessionStorage.removeItem(PENDING_KEY); } catch {} // 레거시 정리
+}
+```
+
 ```
 [배포 시작]
-    │ sessionStorage.setItem('linkmap-pending-deploy', JSON.stringify({templateId, siteName}))
+    │ savePendingDeploy({ templateId, siteName })
     ▼
-[GitHub OAuth 리다이렉트]
+[GitHub OAuth 리다이렉트] — 탭 전환/새 탭에서도 안전
     │
     ▼
 [/oneclick?oauth_success=github]
-    │ const saved = sessionStorage.getItem('linkmap-pending-deploy')
-    │ sessionStorage.removeItem(...)
+    │ const saved = loadPendingDeploy()  // TTL 검증
+    │ clearPendingDeploy()
     ▼
 [자동 배포 실행]
 ```
 
-> **이슈**: `sessionStorage`는 같은 탭에서만 유효. 새 탭에서 OAuth 콜백이 오면 데이터 소실.
-> Zustand `persist` (localStorage)와 `sessionStorage`가 혼재.
+> **해결됨**: `sessionStorage` → `localStorage` 전환으로 탭 전환 시에도 데이터 보존.
+> 10분 TTL로 오래된 데이터 자동 정리.

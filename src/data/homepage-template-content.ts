@@ -1109,6 +1109,33 @@ export function generateVCard(data: VCardData): string {
 export function generateVCardDataUrl(data: VCardData): string { return generateVCard(data); }`;
 
 // ──────────────────────────────────────────────
+// Template lookup helper (for future dynamic loading)
+// ──────────────────────────────────────────────
+const templateMap = new Map<string, HomepageTemplateContent>();
+
+/**
+ * Find a template by slug. O(1) lookup.
+ * Preferred over homepageTemplates.find() for deploy-pages API.
+ */
+export function getTemplateBySlug(slug: string): HomepageTemplateContent | undefined {
+  // Lazy-init the map on first access
+  if (templateMap.size === 0) {
+    for (const tpl of homepageTemplates) {
+      templateMap.set(tpl.slug, tpl);
+    }
+  }
+  return templateMap.get(slug);
+}
+
+/**
+ * Get deploy workflow YAML (shared across all MVP templates).
+ * Useful for admin/setup-templates and custom template creation.
+ */
+export function getDeployWorkflow(): string {
+  return deployWorkflow;
+}
+
+// ──────────────────────────────────────────────
 // Export all templates
 // ──────────────────────────────────────────────
 export const homepageTemplates: HomepageTemplateContent[] = [

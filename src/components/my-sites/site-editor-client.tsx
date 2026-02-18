@@ -17,6 +17,9 @@ import {
   RefreshCw,
   FolderOpen,
   X,
+  Smartphone,
+  Tablet,
+  Monitor,
 } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
@@ -47,6 +50,13 @@ function isCssFile(path: string | null): boolean {
 
 type DeployState = 'idle' | 'saving' | 'deploying' | 'deployed';
 type MobileTab = 'code' | 'preview';
+type PreviewViewport = 'mobile' | 'tablet' | 'desktop';
+
+const VIEWPORT_SIZES: Record<PreviewViewport, { width: string; label: string }> = {
+  mobile: { width: '375px', label: '375px' },
+  tablet: { width: '768px', label: '768px' },
+  desktop: { width: '100%', label: 'Full' },
+};
 
 export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const { locale } = useLocaleStore();
@@ -65,6 +75,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const [showLiveAfterDeploy, setShowLiveAfterDeploy] = useState(false);
   const [mobileTab, setMobileTab] = useState<MobileTab>('code');
   const [showMobileFiles, setShowMobileFiles] = useState(false);
+  const [previewViewport, setPreviewViewport] = useState<PreviewViewport>('desktop');
   const previewRef = useRef<HTMLIFrameElement>(null);
   const liveIframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -274,19 +285,19 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     return map;
   }, [files]);
 
-  // AI 코드 적용 + 자동 배포
+  // AI 코드 적용 + 자동 배포 (원자적 단일 커밋)
   const handleApplyFiles = useCallback(async (blocks: CodeBlock[]) => {
     try {
       setDeployState('saving');
 
-      // 1. 각 파일 저장 (배치)
+      // 1. 모든 파일을 단일 원자적 커밋으로 저장
       const filesToSave = blocks.map((block) => ({
         path: block.filePath,
         content: block.code,
         sha: block.isNew ? undefined : filesShaMap[block.filePath],
       }));
 
-      const { results } = await batchApply.mutateAsync({
+      const result = await batchApply.mutateAsync({
         deployId,
         files: filesToSave,
       });
@@ -299,18 +310,10 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         }
       }
 
-      // SHA 맵 업데이트 (fileDetail이 있을 때)
-      if (fileDetail) {
-        const match = results.find((r) => r.path === fileDetail.path);
-        if (match) {
-          fileDetail.sha = match.sha;
-        }
-      }
-
       toast.success(
         locale === 'ko'
-          ? `${results.length}개 파일 저장 완료`
-          : `${results.length} file(s) saved`
+          ? `${result.file_count}개 파일 저장 완료 (단일 커밋)`
+          : `${result.file_count} file(s) saved (single commit)`
       );
 
       // 2. 자동 배포 트리거
@@ -701,18 +704,50 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
             <div className="w-1/2 flex flex-col overflow-hidden">
               <div className="border-b px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground flex-shrink-0">
                 <Eye className="h-3 w-3" />
-                <span>{locale === 'ko' ? '실시간 미리보기' : 'Live Preview'}</span>
+                <span>{locale === 'ko' ? '미리보기' : 'Preview'}</span>
+                {/* 반응형 뷰포트 토글 */}
+                <div className="flex items-center gap-0.5 ml-auto mr-2 border rounded-md p-0.5">
+                  {([
+                    { key: 'mobile' as PreviewViewport, icon: Smartphone },
+                    { key: 'tablet' as PreviewViewport, icon: Tablet },
+                    { key: 'desktop' as PreviewViewport, icon: Monitor },
+                  ]).map(({ key, icon: Icon }) => (
+                    <button
+                      key={key}
+                      onClick={() => setPreviewViewport(key)}
+                      className={`p-1 rounded transition-colors ${
+                        previewViewport === key
+                          ? 'bg-primary text-primary-foreground'
+                          : 'hover:bg-muted text-muted-foreground'
+                      }`}
+                      title={`${VIEWPORT_SIZES[key].label}`}
+                    >
+                      <Icon className="h-3 w-3" />
+                    </button>
+                  ))}
+                </div>
                 {showLiveAfterDeploy ? (
-                  <Badge variant="default" className="text-[10px] px-1 py-0 ml-auto bg-green-600">
+                  <Badge variant="default" className="text-[10px] px-1 py-0 bg-green-600">
                     {locale === 'ko' ? '배포됨' : 'DEPLOYED'}
                   </Badge>
                 ) : isLivePreviewable ? (
-                  <Badge variant="secondary" className="text-[10px] px-1 py-0 ml-auto">
+                  <Badge variant="secondary" className="text-[10px] px-1 py-0">
                     LIVE
                   </Badge>
                 ) : null}
               </div>
-              {renderPreview()}
+              {/* 반응형 뷰포트 래퍼 */}
+              <div className={`flex-1 overflow-auto ${previewViewport !== 'desktop' ? 'bg-muted/30 flex justify-center py-4' : ''}`}>
+                <div
+                  className={previewViewport !== 'desktop' ? 'bg-white shadow-lg rounded-lg overflow-hidden border' : 'h-full'}
+                  style={previewViewport !== 'desktop' ? {
+                    width: VIEWPORT_SIZES[previewViewport].width,
+                    height: previewViewport === 'mobile' ? '667px' : '1024px',
+                  } : undefined}
+                >
+                  {renderPreview()}
+                </div>
+              </div>
             </div>
           )}
         </div>

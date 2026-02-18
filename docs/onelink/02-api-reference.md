@@ -94,22 +94,22 @@
 
 **실행 순서**:
 1. 사용자 인증 확인
-2. Rate limit 체크
-3. 입력 검증 (Zod)
-4. 사이트명 추가 sanitize
-5. 홈페이지 배포 쿼터 확인
-6. 템플릿 조회 (DB)
-7. GitHub 서비스 계정 조회 & 토큰 복호화
-8. Linkmap 프로젝트 생성
+2. Rate limit 체크 (5/분)
+3. 입력 검증 (Zod: `deployPagesRequestSchema`)
+4. 사이트명 sanitize (소문자+숫자+하이픈만, 2~100자)
+5. 홈페이지 배포 쿼터 확인 (`checkHomepageDeployQuota`)
+6. 템플릿 조회 (DB: `homepage_templates`)
+7. GitHub 서비스 계정 조회 & 토큰 복호화 (AES-256-GCM)
+8. Linkmap 프로젝트 생성 (`projects` 테이블)
 9. User-level 서비스 계정을 Project-level로 복사
-10. 번들 템플릿 콘텐츠 조회
+10. 번들 템플릿 콘텐츠 조회 (`getTemplateBySlug()` — Map O(1) 조회)
 11. GitHub 레포 생성 (`auto_init: true`)
-12. GitHub Pages 활성화 (1초 대기 후)
-13. 템플릿 파일 atomic push (최대 2회 재시도)
+12. GitHub Pages 활성화 (2초 대기 후, Actions 빌드 모드)
+13. 템플릿 파일 atomic push — `pushFilesAtomically()` (최대 2회 재시도)
 14. `project_github_repos` 연결
-15. `homepage_deploys` 레코드 생성
-16. `project_services` 추가
-17. 감사 로그 기록
+15. `homepage_deploys` 레코드 생성 (`deploy_method: 'github_pages'`)
+16. `project_services` 추가 (GitHub 서비스)
+17. 감사 로그 기록 (`oneclick.deploy_pages`)
 
 **Response (201)**:
 ```json
@@ -292,7 +292,7 @@
 | 항목 | 값 |
 |------|-----|
 | 인증 | 필수 |
-| Rate Limit | 없음 (별도) |
+| Rate Limit | 20/분 (사용자별) |
 | 파일 | `src/app/api/oneclick/ai-chat/route.ts` |
 
 **Request Body**:
@@ -320,13 +320,13 @@
 
 ---
 
-## 레거시 엔드포인트 (미사용)
+## 삭제된 엔드포인트
 
-### POST `/api/oneclick/fork` (Vercel 플로우)
-- linkmap-templates org에서 레포 fork
-- 현재 사용되지 않음
+> Sprint 1 (기반 정리)에서 아래 레거시 Vercel 엔드포인트가 완전 제거되었습니다.
 
-### POST `/api/oneclick/deploy` (Vercel 플로우)
-- Vercel API로 프로젝트 생성 & 배포
-- Vercel 토큰 필요
-- 현재 사용되지 않음
+| 엔드포인트 | 삭제일 | 사유 |
+|-----------|--------|------|
+| `POST /api/oneclick/fork` | 2026-02-18 | Vercel fork 플로우 → GitHub Pages 직접 생성으로 대체 |
+| `POST /api/oneclick/deploy` | 2026-02-18 | Vercel 배포 → GitHub Pages Actions 배포로 대체 |
+
+현재 모든 배포는 `POST /api/oneclick/deploy-pages` 단일 API를 통해 진행됩니다.

@@ -15,7 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ExternalLink, Github, Pencil, Trash2, Loader2, Globe } from 'lucide-react';
+import { ExternalLink, Github, Pencil, Trash2, Loader2, Globe, LayoutDashboard } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { useDeleteDeployment, type HomepageDeploy } from '@/lib/queries/oneclick';
@@ -207,6 +207,14 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
               <Link href={`/my-sites/${deploy.id}/edit`}>
                 <Pencil className="mr-1 h-3 w-3" />
                 {t(locale, 'mySites.editSite')}
+              </Link>
+            </Button>
+          )}
+          {deploy.project_id && (
+            <Button size="sm" variant="outline" asChild>
+              <Link href={`/project/${deploy.project_id}`}>
+                <LayoutDashboard className="mr-1 h-3 w-3" />
+                {locale === 'ko' ? '관리' : 'Manage'}
               </Link>
             </Button>
           )}

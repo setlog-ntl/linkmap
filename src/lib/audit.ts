@@ -39,7 +39,8 @@ export type AuditAction =
   | 'admin.ai_playground_test'
   | 'oneclick.deploy_delete'
   | 'oneclick.file_edit'
-  | 'oneclick.file_create';
+  | 'oneclick.file_create'
+  | 'oneclick.batch_update';
 
 interface AuditLogEntry {
   action: AuditAction;

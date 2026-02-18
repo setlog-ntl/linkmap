@@ -22,7 +22,7 @@ CREATE TABLE homepage_templates (
   is_premium       BOOLEAN DEFAULT false,
   is_active        BOOLEAN DEFAULT true,
   display_order    INTEGER DEFAULT 0,
-  deploy_target    TEXT DEFAULT 'vercel' CHECK (deploy_target IN ('vercel','github_pages','both')),
+  deploy_target    TEXT DEFAULT 'github_pages' CHECK (deploy_target IN ('vercel','github_pages','both')),
   created_at  TIMESTAMPTZ DEFAULT now(),
   updated_at  TIMESTAMPTZ DEFAULT now()
 );
@@ -187,11 +187,11 @@ interface GitHubFileDetail { name, path, sha, content, size }
 
 | 스키마 | 용도 | 필드 |
 |--------|------|------|
-| `forkRequestSchema` | [레거시] Fork 요청 | template_id, site_name |
-| `deployRequestSchema` | [레거시] Vercel 배포 | deploy_id, vercel_token, env_vars? |
-| `deployPagesRequestSchema` | GitHub Pages 배포 | template_id, site_name |
+| `deployPagesRequestSchema` | GitHub Pages 배포 | template_id, site_name, github_service_account_id? |
 | `statusQuerySchema` | 상태 조회 | deploy_id |
 | `fileUpdateSchema` | 파일 수정 | path, content, sha?, message? |
+
+> **참고**: 레거시 스키마 `forkRequestSchema`, `deployRequestSchema`는 Sprint 1에서 삭제됨
 
 **site_name 규칙**:
 - 정규식: `/^[a-z0-9][a-z0-9-]*[a-z0-9]$/`
@@ -219,13 +219,21 @@ interface HomepageTemplateContent {
 }
 ```
 
-**번들 구조**: 각 템플릿은 정적 HTML/CSS 파일을 TypeScript 문자열로 번들링
-- `portfolioIndex`, `portfolioStyle` → portfolio-static
-- `landingIndex`, `landingStyle` → landing-static
-- etc.
+**번들 구조**: 각 템플릿은 Next.js static export 파일을 TypeScript 문자열로 번들링
 
-> **이슈**: 파일 크기가 매우 큼 (27,000+ 토큰). 모든 템플릿 HTML/CSS가 하나의 TS 파일에 인라인.
-> dev-showcase-template만 별도 파일로 분리됨 (`src/data/dev-showcase-template.ts`).
+**현재 구현된 템플릿 (Phase 1 MVP):**
+- `link-in-bio-pro` — 링크인바이오 프로 (19 파일)
+- `digital-namecard` — 디지털 명함 (19 파일)
+- `dev-showcase` — 개발자 쇼케이스 (별도 파일 `dev-showcase-template.ts`)
+
+**조회 방법**: `getTemplateBySlug(slug)` — Map 기반 O(1) 조회
+```typescript
+import { getTemplateBySlug } from '@/data/homepage-template-content';
+const template = getTemplateBySlug('link-in-bio-pro');
+// → { slug, repoName, description, files: TemplateFile[] }
+```
+
+**공유 워크플로우**: `getDeployWorkflow()` — GitHub Actions 배포 YAML 자동 포함
 
 ---
 

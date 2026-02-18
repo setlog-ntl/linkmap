@@ -16,6 +16,10 @@ import {
   Type,
   ImageIcon,
   LayoutGrid,
+  RotateCcw,
+  Moon,
+  Zap,
+  Globe,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -122,6 +126,27 @@ const SUGGESTIONS: SuggestionChip[] = [
     labelEn: 'Full redesign',
     prompt: '전체적으로 더 예쁘고 프로페셔널하게 디자인 개선해줘',
     promptEn: 'Redesign to look prettier and more professional',
+  },
+  {
+    icon: <Moon className="h-3.5 w-3.5" />,
+    label: '다크모드',
+    labelEn: 'Dark mode',
+    prompt: '다크모드 CSS를 추가해줘 (prefers-color-scheme 미디어 쿼리)',
+    promptEn: 'Add dark mode CSS using prefers-color-scheme media query',
+  },
+  {
+    icon: <Zap className="h-3.5 w-3.5" />,
+    label: '애니메이션',
+    labelEn: 'Animations',
+    prompt: '페이지에 부드러운 스크롤 애니메이션을 추가해줘',
+    promptEn: 'Add smooth scroll animations to the page',
+  },
+  {
+    icon: <Globe className="h-3.5 w-3.5" />,
+    label: 'SEO 최적화',
+    labelEn: 'SEO optimize',
+    prompt: 'meta 태그, Open Graph, 시맨틱 HTML을 추가해서 SEO를 최적화해줘',
+    promptEn: 'Add meta tags, Open Graph, and semantic HTML for SEO',
   },
 ];
 
@@ -409,6 +434,17 @@ export function ChatTerminal({
               </div>
             </div>
             <div className="flex items-center gap-1">
+              {messages.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
+                  onClick={() => setMessages([])}
+                  title={locale === 'ko' ? '대화 초기화' : 'Clear chat'}
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"

@@ -5,7 +5,7 @@ import { rateLimit } from '@/lib/rate-limit';
 import { logAudit } from '@/lib/audit';
 import { checkHomepageDeployQuota } from '@/lib/quota';
 import { createRepo, pushFilesAtomically, deleteRepo, enableGitHubPagesWithActions, GitHubApiError } from '@/lib/github/api';
-import { homepageTemplates } from '@/data/homepage-template-content';
+import { getTemplateBySlug } from '@/data/homepage-template-content';
 import { decrypt } from '@/lib/crypto';
 import { deployPagesRequestSchema } from '@/lib/validations/oneclick';
 
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
   }
 
   // 5. Look up bundled template content
-  const templateContent = homepageTemplates.find(t => t.slug === template.slug);
+  const templateContent = getTemplateBySlug(template.slug);
   if (!templateContent) {
     await supabase.from('projects').delete().eq('id', project.id);
     return apiError(`템플릿 번들을 찾을 수 없습니다 (${template.slug}). 관리자에게 문의하세요.`, 404);

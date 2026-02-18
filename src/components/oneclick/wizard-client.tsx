@@ -11,6 +11,36 @@ import { useQuery } from '@tanstack/react-query';
 import { useLocaleStore } from '@/stores/locale-store';
 import { toast } from 'sonner';
 
+// --- Pending deploy: localStorage with 10-min TTL (survives tab/redirect) ---
+const PENDING_KEY = 'linkmap-pending-deploy';
+const PENDING_TTL = 10 * 60 * 1000; // 10 minutes
+
+function savePendingDeploy(data: { templateId: string; siteName: string }) {
+  localStorage.setItem(PENDING_KEY, JSON.stringify({ ...data, savedAt: Date.now() }));
+}
+
+function loadPendingDeploy(): { templateId: string; siteName: string } | null {
+  try {
+    const raw = localStorage.getItem(PENDING_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (Date.now() - parsed.savedAt > PENDING_TTL) {
+      localStorage.removeItem(PENDING_KEY);
+      return null;
+    }
+    return { templateId: parsed.templateId, siteName: parsed.siteName };
+  } catch {
+    localStorage.removeItem(PENDING_KEY);
+    return null;
+  }
+}
+
+function clearPendingDeploy() {
+  localStorage.removeItem(PENDING_KEY);
+  // Also clean legacy sessionStorage key
+  try { sessionStorage.removeItem(PENDING_KEY); } catch { /* ignore */ }
+}
+
 interface OneclickWizardClientProps {
   isAuthenticated: boolean;
 }
@@ -29,16 +59,11 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('oauth_success') === 'github') {
-      // Restore pending deploy data if available
-      const saved = sessionStorage.getItem('linkmap-pending-deploy');
+      // Restore pending deploy from localStorage (survives tab switches)
+      const saved = loadPendingDeploy();
       if (saved) {
-        try {
-          const data = JSON.parse(saved);
-          setPendingDeploy(data);
-        } catch {
-          // ignore
-        }
-        sessionStorage.removeItem('linkmap-pending-deploy');
+        setPendingDeploy(saved);
+        clearPendingDeploy();
       }
       setCurrentStep(1); // show github step (now connected)
       window.history.replaceState({}, '', window.location.pathname);
@@ -87,14 +112,15 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
 
   const handleDeploy = useCallback(async (data: { templateId: string; siteName: string }) => {
     if (!isAuthenticated) {
-      // Save pending deploy and redirect to login
-      sessionStorage.setItem('linkmap-pending-deploy', JSON.stringify(data));
+      // Save pending deploy to localStorage (survives tab switches & redirects)
+      savePendingDeploy(data);
       window.location.href = `/login?redirect=/oneclick&template=${data.templateId}&site=${data.siteName}`;
       return;
     }
 
     if (!isGitHubConnected) {
-      // Show GitHub connect step
+      // Save & show GitHub connect step
+      savePendingDeploy(data);
       setPendingDeploy(data);
       setCurrentStep(1);
       return;
@@ -186,6 +212,9 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
           isLoading={templatesLoading}
           isDeploying={isDeploying}
           onNext={handleDeploy}
+          githubUsername={isGitHubConnected ? githubAccount?.provider_account_id : undefined}
+          isGitHubLoading={githubLoading}
+          isAuthenticated={isAuthenticated}
         />
       )}
 

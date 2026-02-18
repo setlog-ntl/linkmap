@@ -45,6 +45,9 @@ export const queryKeys = {
     byType: (projectId: string, resourceType: string) =>
       ['linked-resources', 'project', projectId, resourceType] as const,
   },
+  dashboard: {
+    all: (projectId: string) => ['dashboard', projectId] as const,
+  },
   oneclick: {
     templates: ['oneclick', 'templates'] as const,
     status: (deployId: string) => ['oneclick', 'status', deployId] as const,

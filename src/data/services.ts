@@ -1,4 +1,4 @@
-import type { ServiceCategory, ServiceDomain, DifficultyLevel, FreeTierQuality, VendorLockInRisk, EnvVarTemplate } from '@/types';
+import type { ServiceCategory, ServiceDomain, DifficultyLevel, FreeTierQuality, VendorLockInRisk, EnvVarTemplate, DashboardLayer, DashboardSubcategory } from '@/types';
 
 // ---------------------------------------------------------------------------
 // Seed-specific types: omit auto-generated fields (created_at, updated_at)
@@ -30,6 +30,9 @@ export interface ServiceSeed {
   setup_time_minutes?: number;
   monthly_cost_estimate?: Record<string, string>;
   dx_score?: number;
+  // Dashboard fields
+  dashboard_layer?: DashboardLayer;
+  dashboard_subcategory?: DashboardSubcategory | string;
 }
 
 export interface ChecklistItemSeed {
@@ -121,6 +124,8 @@ export const services: ServiceSeed[] = [
     name: 'Supabase',
     slug: 'supabase',
     category: 'database',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'database',
     description:
       'Postgres 데이터베이스, 인증, 즉시 API, 엣지 함수, 실시간 구독 및 스토리지를 제공하는 오픈소스 Firebase 대안 플랫폼입니다.',
     description_ko:
@@ -185,6 +190,8 @@ export const services: ServiceSeed[] = [
     name: 'Firebase',
     slug: 'firebase',
     category: 'database',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'database',
     description:
       'Google이 지원하는 플랫폼으로 NoSQL 클라우드 데이터베이스(Firestore), 인증, 호스팅, 클라우드 함수 및 분석 기능을 제공합니다.',
     description_ko:
@@ -265,6 +272,8 @@ export const services: ServiceSeed[] = [
     name: 'Vercel',
     slug: 'vercel',
     category: 'deploy',
+    dashboard_layer: 'frontend',
+    dashboard_subcategory: 'deploy',
     description:
       'Next.js, React 및 기타 웹 프레임워크를 자동 CI/CD, 서버리스 함수, 엣지 네트워크와 함께 배포할 수 있는 프론트엔드 클라우드 플랫폼입니다.',
     description_ko:
@@ -328,6 +337,8 @@ export const services: ServiceSeed[] = [
     name: 'Netlify',
     slug: 'netlify',
     category: 'deploy',
+    dashboard_layer: 'frontend',
+    dashboard_subcategory: 'deploy',
     description:
       '지속적 배포, 서버리스 함수, 폼 처리 및 ID 관리를 제공하는 현대적인 웹 개발 플랫폼입니다.',
     description_ko:
@@ -385,6 +396,8 @@ export const services: ServiceSeed[] = [
     name: 'Stripe',
     slug: 'stripe',
     category: 'payment',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'payment',
     description:
       '구독, 일회성 결제, 인보이스 및 글로벌 결제 수단을 지원하는 인터넷 비즈니스용 결제 처리 플랫폼입니다.',
     description_ko:
@@ -447,6 +460,8 @@ export const services: ServiceSeed[] = [
     name: 'Clerk',
     slug: 'clerk',
     category: 'auth',
+    dashboard_layer: 'frontend',
+    dashboard_subcategory: 'auth',
     description:
       '사전 구축된 UI 컴포넌트, 소셜 로그인, MFA 및 조직 관리를 갖춘 즉시 사용 가능한 인증 및 사용자 관리 솔루션입니다.',
     description_ko:
@@ -516,6 +531,8 @@ export const services: ServiceSeed[] = [
     name: 'NextAuth / Auth.js',
     slug: 'nextauth',
     category: 'auth',
+    dashboard_layer: 'frontend',
+    dashboard_subcategory: 'auth',
     description:
       'OAuth 프로바이더, 이메일/비밀번호, 매직 링크 및 데이터베이스 세션 전략을 지원하는 Next.js용 오픈소스 인증 라이브러리입니다.',
     description_ko:
@@ -593,6 +610,8 @@ export const services: ServiceSeed[] = [
     name: 'Resend',
     slug: 'resend',
     category: 'email',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'email',
     description:
       '신뢰성을 위해 구축된 개발자용 현대적 이메일 API입니다. React Email 템플릿, 트랜잭션 이메일 및 상세 분석을 지원합니다.',
     description_ko:
@@ -644,6 +663,8 @@ export const services: ServiceSeed[] = [
     name: 'SendGrid',
     slug: 'sendgrid',
     category: 'email',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'email',
     description:
       'Twilio이 소유한 이메일 전송 서비스로 트랜잭션 및 마케팅 이메일의 전송률 최적화와 분석 기능을 제공합니다.',
     description_ko:
@@ -702,6 +723,8 @@ export const services: ServiceSeed[] = [
     name: 'OpenAI',
     slug: 'openai',
     category: 'ai',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'ai',
     description:
       'GPT 모델, DALL-E 이미지 생성, Whisper 음성-텍스트 변환 및 임베딩을 REST API로 제공하는 AI 플랫폼입니다.',
     description_ko:
@@ -755,6 +778,8 @@ export const services: ServiceSeed[] = [
     name: 'Anthropic',
     slug: 'anthropic',
     category: 'ai',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'ai',
     description:
       'Claude 모델을 API로 제공하여 텍스트 생성, 분석, 코드 지원 및 멀티모달 이해를 가능하게 하는 AI 안전 기업입니다.',
     description_ko:
@@ -802,6 +827,8 @@ export const services: ServiceSeed[] = [
     name: 'Cloudinary',
     slug: 'cloudinary',
     category: 'storage',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'storage',
     description:
       '실시간 변환, 최적화, CDN 전송 및 AI 기반 태깅을 지원하는 클라우드 기반 이미지 및 비디오 관리 서비스입니다.',
     description_ko:
@@ -866,6 +893,8 @@ export const services: ServiceSeed[] = [
     name: 'Sentry',
     slug: 'sentry',
     category: 'monitoring',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'monitoring',
     description:
       '실시간 알림, 성능 모니터링, 세션 리플레이 및 릴리스 상태 추적을 제공하는 애플리케이션 모니터링 및 오류 추적 플랫폼입니다.',
     description_ko:
@@ -936,6 +965,8 @@ export const services: ServiceSeed[] = [
     name: 'PlanetScale',
     slug: 'planetscale',
     category: 'database',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'database',
     description:
       'Vitess 기반의 브랜칭, 논블로킹 스키마 변경 및 수평 확장을 지원하는 서버리스 MySQL 호환 데이터베이스 플랫폼입니다.',
     description_ko:
@@ -988,6 +1019,8 @@ export const services: ServiceSeed[] = [
     name: 'Neon',
     slug: 'neon',
     category: 'database',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'database',
     description:
       '자동 확장, 브랜칭 및 넉넉한 무료 티어를 제공하는 서버리스 Postgres입니다. 제로까지 축소되는 컴퓨팅과 즉시 데이터베이스 브랜칭을 지원합니다.',
     description_ko:
@@ -1046,6 +1079,8 @@ export const services: ServiceSeed[] = [
     name: 'Railway',
     slug: 'railway',
     category: 'deploy',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'hosting',
     description:
       '데이터베이스, 크론 작업 및 자동 확장을 갖춘 풀스택 애플리케이션 배포를 위한 인프라 플랫폼입니다. GitHub에서 설정 없이 배포할 수 있습니다.',
     description_ko:
@@ -1098,6 +1133,8 @@ export const services: ServiceSeed[] = [
     name: 'Lemon Squeezy',
     slug: 'lemon-squeezy',
     category: 'payment',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'payment',
     description:
       '디지털 제품 및 SaaS 판매를 위한 올인원 플랫폼으로 결제, 구독, 세금 준수 및 사기 방지를 판매 대행(MoR)으로 처리합니다.',
     description_ko:
@@ -1157,6 +1194,8 @@ export const services: ServiceSeed[] = [
     name: 'UploadThing',
     slug: 'uploadthing',
     category: 'storage',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'storage',
     description:
       '타입 안전 API, 내장 UI 컴포넌트 및 S3 호환 스토리지를 갖춘 풀스택 TypeScript 애플리케이션용 파일 업로드 솔루션입니다.',
     description_ko:
@@ -1214,6 +1253,8 @@ export const services: ServiceSeed[] = [
     name: 'PostHog',
     slug: 'posthog',
     category: 'monitoring',
+    dashboard_layer: 'frontend',
+    dashboard_subcategory: 'analytics',
     description:
       '이벤트 추적, 세션 녹화, 기능 플래그, A/B 테스트 및 사용자 설문조사를 제공하는 오픈소스 제품 분석 플랫폼입니다.',
     description_ko:
@@ -1270,6 +1311,8 @@ export const services: ServiceSeed[] = [
     name: 'AWS S3',
     slug: 'aws-s3',
     category: 'storage',
+    dashboard_layer: 'backend',
+    dashboard_subcategory: 'storage',
     description:
       '세밀한 액세스 제어, 버전 관리, 수명 주기 관리 및 CloudFront를 통한 CDN 통합을 제공하는 확장 가능한 객체 스토리지 서비스입니다.',
     description_ko:
@@ -1338,6 +1381,8 @@ export const services: ServiceSeed[] = [
     name: 'GitHub',
     slug: 'github',
     category: 'cicd',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'cicd',
     description:
       'Git-based source code hosting with pull requests, Actions CI/CD, issue tracking, and the world\'s largest developer community.',
     description_ko:
@@ -1400,6 +1445,8 @@ export const services: ServiceSeed[] = [
     name: 'Claude Code',
     slug: 'claude-code',
     category: 'ai',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'ai',
     description:
       'Anthropic\'s agentic coding tool for CLI. Understands codebases, edits files, runs commands, and assists with complex software engineering tasks.',
     description_ko:
@@ -1449,6 +1496,8 @@ export const services: ServiceSeed[] = [
     name: 'Google Gemini',
     slug: 'google-gemini',
     category: 'ai',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'ai',
     description:
       'Google\'s multimodal AI model family supporting text, image, audio, and video understanding with generous free tier and competitive pricing.',
     description_ko:
@@ -1498,6 +1547,8 @@ export const services: ServiceSeed[] = [
     name: 'Kakao Login',
     slug: 'kakao-login',
     category: 'social_login',
+    dashboard_layer: 'frontend',
+    dashboard_subcategory: 'social_login',
     description:
       'Kakao social login SDK for integrating KakaoTalk-based authentication into web and mobile applications.',
     description_ko:
@@ -1561,6 +1612,8 @@ export const services: ServiceSeed[] = [
     name: 'Google OAuth',
     slug: 'google-oauth',
     category: 'social_login',
+    dashboard_layer: 'frontend',
+    dashboard_subcategory: 'social_login',
     description:
       'Google Identity Services for integrating Google Sign-In with OAuth 2.0 and OpenID Connect.',
     description_ko:
@@ -1618,6 +1671,8 @@ export const services: ServiceSeed[] = [
     name: 'Naver Login',
     slug: 'naver-login',
     category: 'social_login',
+    dashboard_layer: 'frontend',
+    dashboard_subcategory: 'social_login',
     description:
       'Naver social login SDK for integrating Naver account-based authentication into web and mobile apps.',
     description_ko:
@@ -1675,6 +1730,8 @@ export const services: ServiceSeed[] = [
     name: 'Apple Login',
     slug: 'apple-login',
     category: 'social_login',
+    dashboard_layer: 'frontend',
+    dashboard_subcategory: 'social_login',
     description:
       'Sign in with Apple for secure, privacy-focused authentication using Apple ID across web and mobile apps.',
     description_ko:
@@ -1747,6 +1804,8 @@ export const services: ServiceSeed[] = [
     name: 'GitHub OAuth',
     slug: 'github-oauth',
     category: 'social_login',
+    dashboard_layer: 'frontend',
+    dashboard_subcategory: 'social_login',
     description:
       'GitHub OAuth Apps for developer-focused authentication using GitHub accounts.',
     description_ko:

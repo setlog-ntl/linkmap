@@ -239,7 +239,7 @@ export function useUpdateFile() {
   });
 }
 
-// ---------- Batch Apply Files ----------
+// ---------- Batch Apply Files (Atomic Commit) ----------
 
 export interface BatchFileInput {
   path: string;
@@ -253,31 +253,21 @@ export function useBatchApplyFiles() {
     mutationFn: async (input: {
       deployId: string;
       files: BatchFileInput[];
-    }): Promise<{ results: Array<{ path: string; sha: string }> }> => {
-      const results: Array<{ path: string; sha: string }> = [];
-      for (const file of input.files) {
-        const body: Record<string, string> = {
-          path: file.path,
-          content: file.content,
-        };
-        if (file.sha) body.sha = file.sha;
-        body.message = file.sha
-          ? `Linkmap AI: ${file.path} 수정`
-          : `Linkmap AI: ${file.path} 생성`;
-
-        const res = await fetch(`/api/oneclick/deployments/${input.deployId}/files`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.error || `${file.path} 저장 실패`);
-        }
-        const result = await res.json();
-        results.push({ path: file.path, sha: result.sha });
+      message?: string;
+    }): Promise<{ commit_sha: string; file_count: number }> => {
+      const res = await fetch(`/api/oneclick/deployments/${input.deployId}/batch-update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          files: input.files.map((f) => ({ path: f.path, content: f.content })),
+          message: input.message,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '일괄 저장 실패');
       }
-      return { results };
+      return res.json();
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
