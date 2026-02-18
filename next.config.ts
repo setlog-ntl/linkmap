@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
@@ -67,12 +66,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-const hasSentry = !!(process.env.SENTRY_AUTH_TOKEN && process.env.SENTRY_ORG && process.env.SENTRY_PROJECT);
-
-export default hasSentry
-  ? withSentryConfig(nextConfig, {
-      org: process.env.SENTRY_ORG,
-      project: process.env.SENTRY_PROJECT,
-      silent: !process.env.CI,
-    })
-  : nextConfig;
+export default nextConfig;
