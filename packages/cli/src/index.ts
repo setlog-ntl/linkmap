@@ -22,7 +22,7 @@ import { homedir } from 'os';
 
 const CONFIG_DIR = join(homedir(), '.linkmap');
 const CONFIG_FILE = join(CONFIG_DIR, 'config.json');
-const API_URL = process.env.LINKMAP_API_URL || 'https://linkmap.vercel.app';
+const API_URL = process.env.LINKMAP_API_URL || 'https://www.linkmap.biz';
 
 interface Config {
   token?: string;
@@ -103,7 +103,7 @@ async function login() {
   console.log('Linkmap Login');
   console.log('============');
   console.log('');
-  console.log('1. Go to https://linkmap.vercel.app/settings/tokens');
+  console.log('1. Go to https://www.linkmap.biz/settings/tokens');
   console.log('2. Create a new API token');
   console.log('3. Set the LINKMAP_TOKEN environment variable:');
   console.log('');

@@ -15,7 +15,7 @@ export function Footer({ theme }: Props) {
       <span>
         Powered by{' '}
         <a
-          href="https://linkmap.vercel.app"
+          href="https://www.linkmap.biz"
           target="_blank"
           rel="noopener noreferrer"
           className="underline underline-offset-2 hover:opacity-80"

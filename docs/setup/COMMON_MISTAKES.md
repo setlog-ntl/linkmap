@@ -15,10 +15,10 @@ Linkmap 설정 중 자주 발생하는 문제와 해결 방법입니다.
 1. Supabase 대시보드 > **Authentication > URL Configuration**
 2. **Site URL** 설정:
    - 로컬: `http://localhost:3000`
-   - 프로덕션: `https://linkmap.vercel.app`
+   - 프로덕션: `https://www.linkmap.biz`
 3. **Redirect URLs** 추가:
    - `http://localhost:3000/**`
-   - `https://linkmap.vercel.app/**`
+   - `https://www.linkmap.biz/**`
 
 자세한 내용: [01-supabase.md](./01-supabase.md#3-url-configuration-중요)
 
@@ -123,7 +123,7 @@ ENCRYPTION_KEY=생성된_키_붙여넣기
 | 환경 | 올바른 Callback URL |
 |------|---------------------|
 | 로컬 | `http://localhost:3000/api/oauth/github/callback` |
-| 프로덕션 | `https://linkmap.vercel.app/api/oauth/github/callback` |
+| 프로덕션 | `https://www.linkmap.biz/api/oauth/github/callback` |
 
 1. GitHub > Developer Settings > OAuth Apps > 해당 앱
 2. **Authorization callback URL** 확인 및 수정

@@ -18,8 +18,8 @@ GitHub **로그인 → 설정입력 → 자동연결** 3대 핵심 기능을 프
 ### GitHub OAuth App 생성 가이드
 1. https://github.com/settings/developers → **New OAuth App**
 2. **Application name**: `Linkmap`
-3. **Homepage URL**: `https://linkmap.vercel.app`
-4. **Authorization callback URL**: `https://linkmap.vercel.app/api/oauth/github/callback`
+3. **Homepage URL**: `https://www.linkmap.biz`
+4. **Authorization callback URL**: `https://www.linkmap.biz/api/oauth/github/callback`
 5. **Register application** 클릭
 6. Client ID 복사 → `GITHUB_OAUTH_CLIENT_ID`
 7. **Generate a new client secret** → `GITHUB_OAUTH_CLIENT_SECRET`

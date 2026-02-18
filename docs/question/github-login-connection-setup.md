@@ -44,7 +44,7 @@ Linkmap의 GitHub 로그인은 **Supabase Auth**의 소셜 로그인(GitHub Prov
    - **Application name**: 예) `Linkmap` 또는 `Linkmap (개발)`  
    - **Homepage URL**:  
      - 로컬: `http://localhost:3000`  
-     - 운영: `https://linkmap.vercel.app` (실제 서비스 도메인으로 변경)  
+     - 운영: `https://www.linkmap.biz` (실제 서비스 도메인으로 변경)  
    - **Authorization callback URL**:  
      - **반드시 Supabase 프로젝트의 콜백 URL**을 넣어야 합니다.  
      - 형식: `https://<프로젝트-ref>.supabase.co/auth/v1/callback`  
@@ -81,12 +81,12 @@ GitHub 인증이 끝나면 Supabase가 사용자를 **우리 앱**으로 보냅�
 
 2. **Redirect URLs** 목록에 다음을 추가  
    - 로컬 개발: `http://localhost:3000/auth/callback`  
-   - 운영: `https://linkmap.vercel.app/auth/callback`  
+   - 운영: `https://www.linkmap.biz/auth/callback`  
    - (실제 서비스 도메인으로 바꿔서 등록)
 
 3. 와일드카드를 지원하는 경우 예시  
    - `http://localhost:3000/*`  
-   - `https://linkmap.vercel.app/*`  
+   - `https://www.linkmap.biz/*`  
    (프로젝트에서 사용하는 도메인이 더 있으면 모두 추가)
 
 로그인 시 `redirectTo`로 `/auth/callback?next=...` 를 쓰고 있으므로, 위 URL이 허용되어 있지 않으면 로그인 후 리다이렉트가 실패해 연결이 안 된 것처럼 보일 수 있습니다.

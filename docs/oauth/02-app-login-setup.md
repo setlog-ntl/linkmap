@@ -40,9 +40,9 @@ Provider를 켜지 않으면 `Unsupported provider: provider is not enabled`(400
 로그인 성공 후 사용자를 돌려보낼 **앱 측 URL**을 등록합니다.
 
 - 로컬: `http://localhost:3000/auth/callback`
-- 운영: `https://linkmap.vercel.app/auth/callback` (실제 도메인으로 변경)
+- 운영: `https://www.linkmap.biz/auth/callback` (실제 도메인으로 변경)
 
-와일드카드 지원 시: `http://localhost:3000/*`, `https://linkmap.vercel.app/*` 등.
+와일드카드 지원 시: `http://localhost:3000/*`, `https://www.linkmap.biz/*` 등.
 
 앱에서 `redirectTo: `${origin}/auth/callback?next=...`` 를 쓰므로, 위 경로가 허용되어 있지 않으면 로그인 후 리다이렉트가 실패합니다.
 

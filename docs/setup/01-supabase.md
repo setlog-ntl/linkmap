@@ -34,7 +34,7 @@ OAuth 로그인이 작동하려면 반드시 설정해야 합니다.
 http://localhost:3000
 
 # 프로덕션
-https://linkmap.vercel.app
+https://www.linkmap.biz
 ```
 
 ### Redirect URLs
@@ -43,7 +43,7 @@ https://linkmap.vercel.app
 
 ```
 http://localhost:3000/**
-https://linkmap.vercel.app/**
+https://www.linkmap.biz/**
 ```
 
 > **이 설정을 빠뜨리면** OAuth 콜백에서 404 에러가 발생합니다. 자세한 내용은 [COMMON_MISTAKES.md](./COMMON_MISTAKES.md#1-supabase-url-configuration-미설정)를 참고하세요.

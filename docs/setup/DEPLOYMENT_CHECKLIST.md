@@ -91,11 +91,11 @@ npm ci
 
 ```
 Site URL:
-  https://linkmap.vercel.app     (프로덕션)
+  https://www.linkmap.biz     (프로덕션)
 
 Redirect URLs:
   http://localhost:3000/**       (로컬 개발)
-  https://linkmap.vercel.app/**  (프로덕션)
+  https://www.linkmap.biz/**  (프로덕션)
 ```
 
 > 이 설정을 빠뜨리면 OAuth 로그인 시 404 에러가 발생합니다.
@@ -115,7 +115,7 @@ Redirect URLs:
 
 1. [GitHub Developer Settings](https://github.com/settings/developers) > OAuth Apps
 2. **New OAuth App** 생성:
-   - Homepage URL: `https://linkmap.vercel.app`
+   - Homepage URL: `https://www.linkmap.biz`
    - Callback URL: `https://<project-ref>.supabase.co/auth/v1/callback`
 3. Supabase > **Authentication > Providers > GitHub** 활성화 후 Client ID/Secret 입력
 
@@ -223,8 +223,8 @@ SENTRY_PROJECT                     = linkmap
 | 필드 | 값 |
 |------|-----|
 | Application name | `Linkmap Service` |
-| Homepage URL | `https://linkmap.vercel.app` |
-| Callback URL | `https://linkmap.vercel.app/api/oauth/github/callback` |
+| Homepage URL | `https://www.linkmap.biz` |
+| Callback URL | `https://www.linkmap.biz/api/oauth/github/callback` |
 
 3. Client ID 복사 → Vercel `GITHUB_OAUTH_CLIENT_ID`
 4. Client Secret 생성 및 복사 → Vercel `GITHUB_OAUTH_CLIENT_SECRET`
@@ -278,7 +278,7 @@ npm run dev
 ### 프로덕션 환경
 
 - [ ] Vercel 빌드 성공 (Build Logs에 에러 없음)
-- [ ] `https://linkmap.vercel.app` 접근 가능
+- [ ] `https://www.linkmap.biz` 접근 가능
 - [ ] 프로덕션 URL에서 OAuth 로그인 성공
 - [ ] 환경변수 CRUD 정상 동작
 - [ ] GitHub Secrets 동기화 정상 (Tier 2 설정 시)

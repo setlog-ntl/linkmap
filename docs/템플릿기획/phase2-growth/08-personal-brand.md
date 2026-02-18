@@ -193,7 +193,7 @@
 |------|------|
 | 위치 | 페이지 최하단 |
 | 구성 | "Powered by Linkmap" 링크 + 저작권 텍스트 (연도 + 이름) |
-| 인터랙션 | Linkmap 링크 클릭 시 linkmap.vercel.app로 이동 |
+| 인터랙션 | Linkmap 링크 클릭 시 www.linkmap.biz로 이동 |
 | 데이터 | `NEXT_PUBLIC_SITE_NAME` |
 | 기본값 | "2026 김서진. Powered by Linkmap" |
 

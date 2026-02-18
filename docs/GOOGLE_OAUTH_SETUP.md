@@ -45,7 +45,7 @@
 | 환경 | URL |
 |------|-----|
 | 로컬 개발 | `http://localhost:3000` |
-| 프로덕션 (Vercel 등) | `https://본인도메인.vercel.app` (예: `https://linkmap.vercel.app`) |
+| 프로덕션 (Vercel 등) | `https://본인도메인.vercel.app` (예: `https://www.linkmap.biz`) |
 
 ### 1-3. 코드에서 사용하는 경로 (수정 불필요)
 
@@ -122,7 +122,7 @@
    - **+ URI 추가** 로 아래를 **한 줄씩** 추가 (끝에 슬래시 없이)
    - `http://localhost:3000`
    - `https://본인프로덕션도메인.vercel.app`
-     예: `https://linkmap.vercel.app`
+     예: `https://www.linkmap.biz`
 6. **승인된 리디렉션 URI**:
    - **+ URI 추가** 클릭
    - **반드시 아래 형식으로 입력** (Supabase에서 복사한 값 사용):
@@ -283,7 +283,7 @@ npm run dev
 ### Supabase
 
 - [ ] Google Provider **Enabled**, Client ID/Secret 입력
-- [ ] **Site URL** = 프로덕션 도메인 (예: `https://linkmap.vercel.app`)
+- [ ] **Site URL** = 프로덕션 도메인 (예: `https://www.linkmap.biz`)
 - [ ] **Redirect URLs** 에 `https://본인도메인.vercel.app/auth/callback` 포함
 
 ### Vercel (또는 사용 중인 호스팅)

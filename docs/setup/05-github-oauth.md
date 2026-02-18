@@ -9,7 +9,7 @@ Linkmap에서 GitHub 관련 기능은 **두 가지 별도 OAuth**로 구성됩�
 | **용도** | GitHub 계정으로 Linkmap 로그인 | GitHub Secrets 동기화, 저장소 연결 |
 | **제공자** | Supabase Auth Provider | 직접 구현한 OAuth App |
 | **설정 위치** | Supabase 대시보드 | GitHub Developer Settings |
-| **콜백 URL** | `<supabase-url>/auth/v1/callback` | `https://linkmap.vercel.app/api/oauth/github/callback` |
+| **콜백 URL** | `<supabase-url>/auth/v1/callback` | `https://www.linkmap.biz/api/oauth/github/callback` |
 | **스코프** | `user:email` (기본) | `repo, read:org, read:user, workflow` |
 | **환경변수** | 없음 (Supabase 관리) | `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET` |
 
@@ -18,7 +18,7 @@ Linkmap에서 GitHub 관련 기능은 **두 가지 별도 OAuth**로 구성됩�
 Supabase 대시보드에서 설정합니다. Google OAuth와 동일한 방식입니다.
 
 1. **GitHub > Developer Settings > OAuth Apps > New OAuth App**
-2. Homepage URL: `https://linkmap.vercel.app`
+2. Homepage URL: `https://www.linkmap.biz`
 3. Authorization callback URL: `https://<project-ref>.supabase.co/auth/v1/callback`
 4. **Supabase 대시보드 > Authentication > Providers > GitHub** 에서 활성화
 5. Client ID / Client Secret 입력
@@ -36,8 +36,8 @@ GitHub Secrets 동기화, 저장소 연결 등 서비스 연동 기능을 위한
 | 필드 | 값 |
 |------|-----|
 | Application name | `Linkmap Service` (구분 가능한 이름) |
-| Homepage URL | `https://linkmap.vercel.app` |
-| Authorization callback URL | `https://linkmap.vercel.app/api/oauth/github/callback` |
+| Homepage URL | `https://www.linkmap.biz` |
+| Authorization callback URL | `https://www.linkmap.biz/api/oauth/github/callback` |
 
 4. **Register application** 클릭
 
@@ -68,7 +68,7 @@ Vercel에서도 동일하게 설정합니다.
 http://localhost:3000/api/oauth/github/callback
 
 # 프로덕션용
-https://linkmap.vercel.app/api/oauth/github/callback
+https://www.linkmap.biz/api/oauth/github/callback
 ```
 
 > 하나의 OAuth App에는 콜백 URL을 하나만 설정할 수 있으므로, 개발/프로덕션용 앱을 분리하는 것을 권장합니다.

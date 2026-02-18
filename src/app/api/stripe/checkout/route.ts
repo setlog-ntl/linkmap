@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Create checkout session
-  const origin = request.headers.get('origin') || 'https://linkmap.vercel.app';
+  const origin = request.headers.get('origin') || 'https://www.linkmap.biz';
   const sessionRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
     method: 'POST',
     headers: {

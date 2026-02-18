@@ -2,7 +2,7 @@
 
 ## 문제 요약
 
-배포된 사이트(`https://linkmap.vercel.app`)에서 GitHub OAuth 연결 시 `/api/oauth/github/callback`이 **404 NOT_FOUND**를 반환한다.
+배포된 사이트(`https://www.linkmap.biz`)에서 GitHub OAuth 연결 시 `/api/oauth/github/callback`이 **404 NOT_FOUND**를 반환한다.
 
 - `/api/oauth/github/authorize` → 정상 동작 (GitHub으로 리디렉트됨)
 - `/api/oauth/github/callback` → **404** (GitHub에서 돌아올 때 실패)
@@ -126,8 +126,8 @@ https://github.com/settings/developers 에서:
 
 | 항목 | 값 |
 |------|-----|
-| Homepage URL | `https://linkmap.vercel.app` |
-| Authorization callback URL | `https://linkmap.vercel.app/api/oauth/github/callback` |
+| Homepage URL | `https://www.linkmap.biz` |
+| Authorization callback URL | `https://www.linkmap.biz/api/oauth/github/callback` |
 
 ---
 

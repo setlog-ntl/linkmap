@@ -7,7 +7,7 @@ export function Footer() {
         <span>
           Powered by{' '}
           <a
-            href="https://linkmap.vercel.app"
+            href="https://www.linkmap.biz"
             target="_blank"
             rel="noopener noreferrer"
             className="underline underline-offset-2 hover:text-gray-300"

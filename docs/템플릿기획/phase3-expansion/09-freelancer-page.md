@@ -27,7 +27,7 @@
 
 ```
 ## 컨텍스트
-Linkmap(https://linkmap.vercel.app)의 원클릭 배포용 홈페이지 템플릿을 구현한다.
+Linkmap(https://www.linkmap.biz)의 원클릭 배포용 홈페이지 템플릿을 구현한다.
 사용자가 GitHub 연결 → 템플릿 선택 → 환경변수 입력 → GitHub Pages 배포 3단계로 프리랜서 홍보 페이지를 생성한다.
 
 ## 템플릿: 프리랜서 페이지 (freelancer-page)

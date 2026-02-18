@@ -16,7 +16,7 @@
  *   then run this server via MCP configuration.
  */
 
-const API_URL = process.env.LINKMAP_API_URL || 'https://linkmap.vercel.app';
+const API_URL = process.env.LINKMAP_API_URL || 'https://www.linkmap.biz';
 const API_TOKEN = process.env.LINKMAP_API_TOKEN || '';
 
 interface Tool {

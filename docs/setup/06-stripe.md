@@ -31,7 +31,7 @@ Stripe 이벤트를 수신하여 구독 상태를 동기화합니다.
 2. Endpoint URL:
 
 ```
-https://linkmap.vercel.app/api/stripe/webhook
+https://www.linkmap.biz/api/stripe/webhook
 ```
 
 3. 수신 이벤트 선택:

@@ -48,7 +48,7 @@ const portfolioHtml = `<!DOCTYPE html>
     <p>이메일: <a href="mailto:you@example.com">you@example.com</a></p>
     <p>GitHub: <a href="https://github.com/username">@username</a></p>
   </section>
-  <footer><p>Powered by <a href="https://linkmap.vercel.app">Linkmap</a></p></footer>
+  <footer><p>Powered by <a href="https://www.linkmap.biz">Linkmap</a></p></footer>
 </body>
 </html>`;
 
@@ -102,7 +102,7 @@ const landingHtml = `<!DOCTYPE html>
     <p>무료 플랜으로 모든 기능을 체험해보세요.</p>
     <a href="mailto:hello@example.com" class="btn-cta">문의하기</a>
   </section>
-  <footer><p>Powered by <a href="https://linkmap.vercel.app">Linkmap</a></p></footer>
+  <footer><p>Powered by <a href="https://www.linkmap.biz">Linkmap</a></p></footer>
 </body>
 </html>`;
 
@@ -186,7 +186,7 @@ const resumeHtml = `<!DOCTYPE html>
       </div>
     </section>
   </div>
-  <footer><p>Powered by <a href="https://linkmap.vercel.app">Linkmap</a></p></footer>
+  <footer><p>Powered by <a href="https://www.linkmap.biz">Linkmap</a></p></footer>
 </body>
 </html>`;
 
@@ -255,7 +255,7 @@ const blogHtml = `<!DOCTYPE html>
       </div>
     </aside>
   </main>
-  <footer><p>Powered by <a href="https://linkmap.vercel.app">Linkmap</a></p></footer>
+  <footer><p>Powered by <a href="https://www.linkmap.biz">Linkmap</a></p></footer>
 </body>
 </html>`;
 
@@ -334,7 +334,7 @@ init({ key: 'YOUR_API_KEY' });</code></pre>
         <details><summary>무료인가요?</summary><p>네, 기본 기능은 무료입니다.</p></details>
         <details><summary>지원하는 브라우저는?</summary><p>Chrome, Firefox, Safari, Edge 최신 버전을 지원합니다.</p></details>
       </section>
-      <footer><p>Powered by <a href="https://linkmap.vercel.app">Linkmap</a></p></footer>
+      <footer><p>Powered by <a href="https://www.linkmap.biz">Linkmap</a></p></footer>
     </main>
   </div>
 </body>
