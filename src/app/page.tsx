@@ -4,11 +4,10 @@ import { createClient } from '@/lib/supabase/server';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { HeroSection } from '@/components/landing/hero-section';
-import { InteractiveDemo } from '@/components/landing/interactive-demo';
+import { StatsSection } from '@/components/landing/stats-section';
 import { FeaturesBento } from '@/components/landing/features-bento';
 import { HowItWorks } from '@/components/landing/how-it-works';
 import { ServicesGrid } from '@/components/landing/services-grid';
-import { StatsSection } from '@/components/landing/stats-section';
 import { CtaSection } from '@/components/landing/cta-section';
 import type { Profile } from '@/types';
 
@@ -26,14 +25,14 @@ export default async function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header profile={profile} />
 
       {/* Section 1: Hero — Architecture Flow Diagram */}
       <HeroSection />
 
-      {/* Section 2: Flow Comparison + Connection Dashboard */}
-      <InteractiveDemo />
+      {/* Section 2: Stats Bar */}
+      <StatsSection />
 
       {/* Section 3: Core Features (Bento Grid) */}
       <FeaturesBento />
@@ -44,10 +43,7 @@ export default async function LandingPage() {
       {/* Section 5: Supported Services */}
       <ServicesGrid />
 
-      {/* Section 6: Stats */}
-      <StatsSection />
-
-      {/* Section 7: Pricing + CTA */}
+      {/* Section 6: Pricing + CTA */}
       <CtaSection />
 
       <Footer />

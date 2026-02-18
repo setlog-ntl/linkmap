@@ -40,10 +40,10 @@ export function ServicesGrid() {
   );
 
   return (
-    <section className="container py-14">
+    <section className="container py-20">
       <ScrollReveal>
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-4">{t(locale, 'landing.servicesTitle')}</h2>
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t(locale, 'landing.servicesTitle')}</h2>
           <p className="text-muted-foreground text-lg">
             {t(locale, 'landing.servicesDesc')}
           </p>
@@ -52,15 +52,15 @@ export function ServicesGrid() {
 
       {/* Filter tabs */}
       <ScrollReveal>
-        <div className="flex flex-wrap justify-center gap-2 mb-8">
+        <div className="flex flex-wrap justify-center gap-2 mb-10">
           {domainFilters.map((f) => (
             <button
               key={f.value}
               onClick={() => setFilter(f.value)}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
                 filter === f.value
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  ? 'bg-emerald-500 text-black shadow-[0_0_12px_rgba(43,238,121,0.2)]'
+                  : 'bg-white/[0.05] text-muted-foreground hover:bg-white/[0.08] border border-white/[0.06]'
               }`}
             >
               {f.label}
@@ -80,7 +80,7 @@ export function ServicesGrid() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.2 }}
-              className={`aspect-square rounded-xl border-2 bg-card p-3 flex flex-col items-center justify-center gap-2 cursor-default hover:-translate-y-1 hover:shadow-md transition-all ${
+              className={`aspect-square rounded-xl border bg-white/[0.02] border-white/[0.08] p-3 flex flex-col items-center justify-center gap-2 cursor-default hover:-translate-y-1 hover:border-emerald-500/20 hover:shadow-md transition-all ${
                 getCategoryStyle(svc.category).gridBorderClasses
               }`}
             >
@@ -88,7 +88,7 @@ export function ServicesGrid() {
               <span className="font-medium text-sm text-center">{svc.name}</span>
               <div className="flex gap-1">
                 {svc.free_tier_quality && svc.free_tier_quality !== 'none' && (
-                  <span className="text-[9px] bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded-full">
+                  <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-500/20">
                     Free
                   </span>
                 )}

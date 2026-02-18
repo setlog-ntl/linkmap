@@ -131,7 +131,7 @@ describe('GET /api/connections/auto', () => {
       {
         source_service_id: 's1',
         target_service_id: 's2',
-        connection_type: 'uses',
+        connection_type: 'uses' as const,
         reason: 'auth 필요',
         dependency_type: 'required',
       },
