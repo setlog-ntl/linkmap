@@ -1,9 +1,7 @@
-import { logger } from '@/lib/logger';
-
 export async function register() {
   const runtime = process.env.NEXT_RUNTIME;
   if (runtime) {
-    logger.info(`Instrumentation registered (${runtime})`);
+    console.log(JSON.stringify({ level: 'info', msg: `Instrumentation registered (${runtime})`, service: 'linkmap' }));
   }
 }
 
@@ -12,7 +10,8 @@ export function onRequestError(
   request: { path: string; method: string; headers: Record<string, string> },
   context: { routerKind: string; routePath: string; routeType: string; renderSource: string }
 ) {
-  logger.error({
+  console.error(JSON.stringify({
+    level: 'error',
     msg: 'Unhandled request error',
     error: error.message,
     digest: error.digest,
@@ -21,5 +20,6 @@ export function onRequestError(
     routePath: context.routePath,
     routeType: context.routeType,
     renderSource: context.renderSource,
-  });
+    service: 'linkmap',
+  }));
 }
