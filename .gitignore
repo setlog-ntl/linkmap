@@ -54,3 +54,6 @@ yarn-error.log*
 next-env.d.ts
 
 .env*.local
+
+# One-time rotation scripts
+scripts/rotate-encryption-key.ts
