@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { isAdmin } from '@/lib/admin';
 import { unauthorizedError, apiError, serverError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 import { safeDecryptToken } from '@/lib/github/token';
@@ -21,10 +22,11 @@ interface TemplateResult {
 }
 
 export async function POST() {
-  // 1. Auth
+  // 1. Auth + admin check
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
+  if (!(await isAdmin(user.id))) return apiError('관리자 권한이 필요합니다', 403);
 
   // 2. Get user's GitHub token from service_accounts
   const { data: githubService } = await supabase

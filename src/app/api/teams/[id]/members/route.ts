@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, notFoundError, serverError, apiError } from '@/lib/api/errors';
+import { logAudit } from '@/lib/audit';
 import { z } from 'zod';
 
 const inviteMemberSchema = z.object({
@@ -112,6 +113,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   if (error) return serverError(error.message);
 
+  await logAudit(user.id, {
+    action: 'team_member.add',
+    resourceType: 'team_member',
+    resourceId: member.id,
+    details: { team_id: teamId, target_user_id: targetUserId, role: parsed.data.role },
+  });
+
   return NextResponse.json(member, { status: 201 });
 }
 
@@ -144,6 +152,13 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     .eq('team_id', teamId);
 
   if (error) return serverError(error.message);
+
+  await logAudit(user.id, {
+    action: 'team_member.remove',
+    resourceType: 'team_member',
+    resourceId: memberId,
+    details: { team_id: teamId },
+  });
 
   return NextResponse.json({ success: true });
 }

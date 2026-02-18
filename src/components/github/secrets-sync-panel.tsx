@@ -28,6 +28,8 @@ import {
   Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 import type { Environment } from '@/types';
 
 interface SecretsSyncPanelProps {
@@ -41,6 +43,7 @@ const envLabels: Record<Environment, string> = {
 };
 
 export function SecretsSyncPanel({ projectId }: SecretsSyncPanelProps) {
+  const { locale } = useLocaleStore();
   const { data: linkedRepos = [], isLoading: reposLoading } = useLinkedRepos(projectId);
   const unlinkRepo = useUnlinkRepo(projectId);
   const [selectedRepoIdx, setSelectedRepoIdx] = useState(0);
@@ -116,7 +119,7 @@ export function SecretsSyncPanel({ projectId }: SecretsSyncPanelProps) {
   };
 
   if (reposLoading) {
-    return <div className="text-sm text-muted-foreground">로딩 중...</div>;
+    return <div className="text-sm text-muted-foreground">{t(locale, 'common.loading')}</div>;
   }
 
   if (linkedRepos.length === 0) {

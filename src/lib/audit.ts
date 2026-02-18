@@ -44,7 +44,9 @@ export type AuditAction =
   | 'connection.auto_create'
   | 'layer_override.upsert'
   | 'env_var.conflict_scan'
-  | 'env_var.conflict_resolve';
+  | 'env_var.conflict_resolve'
+  | 'team_member.add'
+  | 'team_member.remove';
 
 interface AuditLogEntry {
   action: AuditAction;

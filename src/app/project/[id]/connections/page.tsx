@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { Cable, Wand2, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   useProjectConnections,
@@ -15,23 +16,25 @@ import {
   useAutoConnect,
 } from '@/lib/queries/connections';
 import { useProjectServices } from '@/lib/queries/services';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 import type { UserConnectionType, ConnectionStatus } from '@/types';
 
-const TYPE_LABELS: Record<UserConnectionType, string> = {
-  uses: '사용',
-  integrates: '통합',
-  data_transfer: '데이터 전송',
-  api_call: 'API 호출',
-  auth_provider: '인증 제공',
-  webhook: '웹훅',
-  sdk: 'SDK',
+const TYPE_KEYS: Record<UserConnectionType, string> = {
+  uses: 'connections.typeUses',
+  integrates: 'connections.typeIntegrates',
+  data_transfer: 'connections.typeDataTransfer',
+  api_call: 'connections.typeApiCall',
+  auth_provider: 'connections.typeAuthProvider',
+  webhook: 'connections.typeWebhook',
+  sdk: 'connections.typeSdk',
 };
 
-const STATUS_LABELS: Record<ConnectionStatus, string> = {
-  active: '활성',
-  inactive: '비활성',
-  error: '오류',
-  pending: '대기',
+const STATUS_KEYS: Record<ConnectionStatus, string> = {
+  active: 'connections.statusActive',
+  inactive: 'connections.statusInactive',
+  error: 'connections.statusError',
+  pending: 'connections.statusPending',
 };
 
 const STATUS_BADGE: Record<ConnectionStatus, string> = {
@@ -44,6 +47,7 @@ const STATUS_BADGE: Record<ConnectionStatus, string> = {
 export default function ConnectionsPage() {
   const params = useParams();
   const projectId = params.id as string;
+  const { locale } = useLocaleStore();
 
   const { data: connections, isLoading } = useProjectConnections(projectId);
   const { data: services } = useProjectServices(projectId);
@@ -98,10 +102,10 @@ export default function ConnectionsPage() {
         <div>
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <Cable className="h-5 w-5" />
-            연결 관리
+            {t(locale, 'connections.title')}
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            서비스 간 연결을 생성하고 관리합니다
+            {t(locale, 'connections.subtitle')}
           </p>
         </div>
         <div className="flex gap-2">
@@ -113,12 +117,12 @@ export default function ConnectionsPage() {
               disabled={autoConnectMutation.isPending}
             >
               <Wand2 className="mr-1.5 h-4 w-4" />
-              자동 연결 ({suggestions.length}개 제안)
+              {t(locale, 'connections.autoConnect')} ({suggestions.length}{t(locale, 'connections.suggestions')})
             </Button>
           )}
           <Button size="sm" onClick={() => setShowCreate(!showCreate)}>
             <Plus className="mr-1.5 h-4 w-4" />
-            연결 추가
+            {t(locale, 'connections.addConnection')}
           </Button>
         </div>
       </div>
@@ -129,10 +133,10 @@ export default function ConnectionsPage() {
           <CardContent className="p-4">
             <div className="flex flex-wrap items-end gap-3">
               <div className="flex-1 min-w-[160px]">
-                <label className="text-xs text-muted-foreground mb-1 block">소스 서비스</label>
+                <label className="text-xs text-muted-foreground mb-1 block">{t(locale, 'connections.sourceService')}</label>
                 <Select value={newSource} onValueChange={setNewSource}>
                   <SelectTrigger className="h-9 text-sm">
-                    <SelectValue placeholder="선택..." />
+                    <SelectValue placeholder={t(locale, 'connections.select')} />
                   </SelectTrigger>
                   <SelectContent>
                     {[...serviceMap.entries()].map(([id, name]) => (
@@ -142,10 +146,10 @@ export default function ConnectionsPage() {
                 </Select>
               </div>
               <div className="flex-1 min-w-[160px]">
-                <label className="text-xs text-muted-foreground mb-1 block">타겟 서비스</label>
+                <label className="text-xs text-muted-foreground mb-1 block">{t(locale, 'connections.targetService')}</label>
                 <Select value={newTarget} onValueChange={setNewTarget}>
                   <SelectTrigger className="h-9 text-sm">
-                    <SelectValue placeholder="선택..." />
+                    <SelectValue placeholder={t(locale, 'connections.select')} />
                   </SelectTrigger>
                   <SelectContent>
                     {[...serviceMap.entries()].map(([id, name]) => (
@@ -155,20 +159,20 @@ export default function ConnectionsPage() {
                 </Select>
               </div>
               <div className="min-w-[140px]">
-                <label className="text-xs text-muted-foreground mb-1 block">유형</label>
+                <label className="text-xs text-muted-foreground mb-1 block">{t(locale, 'connections.type')}</label>
                 <Select value={newType} onValueChange={(v) => setNewType(v as UserConnectionType)}>
                   <SelectTrigger className="h-9 text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {(Object.entries(TYPE_LABELS) as [UserConnectionType, string][]).map(([k, v]) => (
-                      <SelectItem key={k} value={k} className="text-sm">{v}</SelectItem>
+                    {(Object.entries(TYPE_KEYS) as [UserConnectionType, string][]).map(([k, key]) => (
+                      <SelectItem key={k} value={k} className="text-sm">{t(locale, key)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <Button onClick={handleCreate} disabled={createMutation.isPending || !newSource || !newTarget}>
-                생성
+                {t(locale, 'connections.create')}
               </Button>
             </div>
           </CardContent>
@@ -181,7 +185,7 @@ export default function ConnectionsPage() {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm flex items-center gap-2">
               <Wand2 className="h-4 w-4 text-purple-500" />
-              자동 연결 제안
+              {t(locale, 'connections.autoConnectSuggestions')}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0">
@@ -192,7 +196,7 @@ export default function ConnectionsPage() {
                     <span className="font-medium">{serviceMap.get(s.source_service_id) ?? '?'}</span>
                     <span className="text-muted-foreground">→</span>
                     <span className="font-medium">{serviceMap.get(s.target_service_id) ?? '?'}</span>
-                    <span className="text-xs text-muted-foreground">({TYPE_LABELS[s.connection_type] ?? s.connection_type})</span>
+                    <span className="text-xs text-muted-foreground">({t(locale, TYPE_KEYS[s.connection_type] ?? '')})</span>
                   </div>
                   <span className="text-xs text-muted-foreground">{s.reason}</span>
                 </div>
@@ -206,27 +210,38 @@ export default function ConnectionsPage() {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm">
-            연결 목록 ({connections?.length ?? 0}개)
+            {t(locale, 'connections.connectionList')} ({connections?.length ?? 0}{t(locale, 'connections.count')})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="p-8 text-center text-sm text-muted-foreground">로딩 중...</div>
+            <div className="p-4 space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4 px-4 py-2.5">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-5 w-12 rounded-full" />
+                  <Skeleton className="h-4 w-32 flex-1" />
+                  <Skeleton className="h-7 w-7 rounded" />
+                </div>
+              ))}
+            </div>
           ) : !connections || connections.length === 0 ? (
             <div className="p-8 text-center text-sm text-muted-foreground">
-              연결이 없습니다. 서비스 간 연결을 추가하거나 자동 연결을 사용해보세요.
+              {t(locale, 'connections.empty')}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/50">
-                    <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">소스</th>
-                    <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">타겟</th>
-                    <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">유형</th>
-                    <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">상태</th>
-                    <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">설명</th>
-                    <th className="px-4 py-2.5 text-right font-medium text-muted-foreground">작업</th>
+                    <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">{t(locale, 'connections.source')}</th>
+                    <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">{t(locale, 'connections.target')}</th>
+                    <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">{t(locale, 'connections.type')}</th>
+                    <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">{t(locale, 'connections.status')}</th>
+                    <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">{t(locale, 'connections.description')}</th>
+                    <th className="px-4 py-2.5 text-right font-medium text-muted-foreground">{t(locale, 'connections.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -247,15 +262,15 @@ export default function ConnectionsPage() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {(Object.entries(TYPE_LABELS) as [UserConnectionType, string][]).map(([k, v]) => (
-                              <SelectItem key={k} value={k} className="text-xs">{v}</SelectItem>
+                            {(Object.entries(TYPE_KEYS) as [UserConnectionType, string][]).map(([k, key]) => (
+                              <SelectItem key={k} value={k} className="text-xs">{t(locale, key)}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </td>
                       <td className="px-4 py-2.5">
                         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_BADGE[conn.connection_status] ?? STATUS_BADGE.active}`}>
-                          {STATUS_LABELS[conn.connection_status] ?? conn.connection_status}
+                          {t(locale, STATUS_KEYS[conn.connection_status] ?? 'connections.statusActive')}
                         </span>
                       </td>
                       <td className="px-4 py-2.5 text-muted-foreground text-xs max-w-[200px] truncate">

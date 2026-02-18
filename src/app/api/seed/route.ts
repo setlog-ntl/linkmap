@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { isAdmin } from '@/lib/admin';
+import { unauthorizedError, apiError } from '@/lib/api/errors';
 import { services, checklistItems } from '@/data/services';
 import { templates } from '@/data/templates';
 import { domains } from '@/data/domains';
@@ -17,6 +19,11 @@ export async function POST() {
   }
 
   const supabase = await createClient();
+
+  // Auth + admin check
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return unauthorizedError();
+  if (!(await isAdmin(user.id))) return apiError('관리자 권한이 필요합니다', 403);
 
   try {
     // 1. Seed domains (must be first - services reference domains)

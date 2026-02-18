@@ -27,14 +27,14 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link href="/guides/github" className="hover:text-foreground transition-colors">GitHub 설정 가이드</Link></li>
               <li><Link href="/guides/auth" className="hover:text-foreground transition-colors">인증 가이드</Link></li>
-              <li><span className="text-muted-foreground/60 cursor-default">문의하기 (준비 중)</span></li>
+              <li><a href="mailto:support@linkmap.dev" className="hover:text-foreground transition-colors">문의하기</a></li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold text-sm mb-3">법적 고지</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><span className="text-muted-foreground/60 cursor-default">개인정보처리방침 (준비 중)</span></li>
-              <li><span className="text-muted-foreground/60 cursor-default">이용약관 (준비 중)</span></li>
+              <li><Link href="/privacy" className="hover:text-foreground transition-colors">개인정보처리방침</Link></li>
+              <li><Link href="/terms" className="hover:text-foreground transition-colors">이용약관</Link></li>
             </ul>
           </div>
         </div>
