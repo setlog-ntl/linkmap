@@ -44,7 +44,7 @@ function EnvVarVisual() {
         <p className="pl-4">dbHost: <span className="text-green-400">process.env.SUPABASE_URL</span>,</p>
         <p className="pl-4">region: <span className="text-orange-400">&quot;us-east-1&quot;</span></p>
         <p>{'}'}</p>
-        <p className="text-gray-600 mt-2">// Variables injected securely at runtime</p>
+        <p className="text-gray-600 mt-2">{'// Variables injected securely at runtime'}</p>
       </div>
     </div>
   );
