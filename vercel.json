@@ -1,6 +1,5 @@
 {
   "framework": "nextjs",
   "installCommand": "npm ci",
-  "buildCommand": "npm run build",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':!templates' ':!docs' ':!packages'"
+  "buildCommand": "npm run build"
 }
