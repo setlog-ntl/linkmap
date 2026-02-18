@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, notFoundError, apiError, serverError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
-import { decrypt } from '@/lib/crypto';
+import { safeDecryptToken } from '@/lib/github/token';
 import { listRepoContents, getFileContent, createOrUpdateFileContent, GitHubApiError } from '@/lib/github/api';
 import { fileUpdateSchema } from '@/lib/validations/oneclick';
 
@@ -44,7 +44,7 @@ async function getDeployWithToken(supabase: Awaited<ReturnType<typeof createClie
 
   const { data: ghAccount } = await supabase
     .from('service_accounts')
-    .select('encrypted_access_token')
+    .select('id, encrypted_access_token')
     .eq('user_id', userId)
     .eq('service_id', githubService.id)
     .eq('connection_type', 'oauth')
@@ -55,12 +55,9 @@ async function getDeployWithToken(supabase: Awaited<ReturnType<typeof createClie
 
   if (!ghAccount) return null;
 
-  let token: string;
-  try {
-    token = decrypt(ghAccount.encrypted_access_token);
-  } catch {
-    return null;
-  }
+  const decryptResult = await safeDecryptToken(ghAccount.encrypted_access_token, supabase, ghAccount.id);
+  if ('error' in decryptResult) return null;
+  const token = decryptResult.token;
 
   const [owner, repo] = (deploy.forked_repo_full_name || '').split('/');
   if (!owner || !repo) return null;

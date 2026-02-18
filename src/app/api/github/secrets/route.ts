@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, apiError, validationError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 import { decrypt } from '@/lib/crypto';
+import { safeDecryptToken } from '@/lib/github/token';
 import {
   listRepoSecrets,
   getRepoPublicKey,
@@ -22,14 +23,16 @@ import { pushSecretsSchema } from '@/lib/validations/github';
 async function getGitHubToken(supabase: Awaited<ReturnType<typeof createClient>>, projectId: string) {
   const { data: account } = await supabase
     .from('service_accounts')
-    .select('encrypted_access_token')
+    .select('id, encrypted_access_token')
     .eq('project_id', projectId)
     .eq('connection_type', 'oauth')
     .eq('status', 'active')
     .single();
 
   if (!account) return null;
-  return decrypt(account.encrypted_access_token);
+  const result = await safeDecryptToken(account.encrypted_access_token, supabase, account.id);
+  if ('error' in result) return null;
+  return result.token;
 }
 
 export async function GET(request: NextRequest) {

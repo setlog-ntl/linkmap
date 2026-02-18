@@ -37,10 +37,16 @@ export async function triggerAutoSync(
 
   for (const repo of repos) {
     try {
-      const tokenRecord = repo.service_accounts as { encrypted_access_token: string } | null;
+      const tokenRecord = repo.service_accounts as { id?: string; encrypted_access_token: string } | null;
       if (!tokenRecord) continue;
 
-      const token = decrypt(tokenRecord.encrypted_access_token);
+      let token: string;
+      try {
+        token = decrypt(tokenRecord.encrypted_access_token);
+      } catch {
+        console.error(`Auto-sync: token decryption failed for repo ${repo.repo_full_name} (key rotated?)`);
+        continue;
+      }
       const publicKey = await getRepoPublicKey(token, repo.owner, repo.repo_name);
 
       let syncedCount = 0;

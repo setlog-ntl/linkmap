@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { unauthorizedError, apiError, serverError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
-import { decrypt } from '@/lib/crypto';
+import { safeDecryptToken } from '@/lib/github/token';
 import {
   createRepo,
   pushFilesAtomically,
@@ -52,12 +52,11 @@ export async function POST() {
     return apiError('GitHub 계정이 연결되어 있지 않습니다. 먼저 GitHub를 연결해주세요.', 404);
   }
 
-  let githubToken: string;
-  try {
-    githubToken = decrypt(ghAccount.encrypted_access_token);
-  } catch {
-    return apiError('GitHub 토큰이 유효하지 않습니다. 다시 연결해주세요.', 401);
+  const decryptResult = await safeDecryptToken(ghAccount.encrypted_access_token, supabase, ghAccount.id);
+  if ('error' in decryptResult) {
+    return apiError(decryptResult.error, 401);
   }
+  const githubToken = decryptResult.token;
 
   // 4. Get GitHub username
   let githubUsername: string;

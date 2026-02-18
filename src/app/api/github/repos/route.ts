@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, apiError } from '@/lib/api/errors';
-import { decrypt } from '@/lib/crypto';
+import { safeDecryptToken } from '@/lib/github/token';
 import { listUserRepos, GitHubApiError } from '@/lib/github/api';
 
 /**
@@ -38,9 +38,13 @@ export async function GET(request: NextRequest) {
     return apiError('GitHub 계정이 연결되지 않았습니다. 서비스맵에서 GitHub를 연결해주세요.', 404);
   }
 
+  const decryptResult = await safeDecryptToken(account.encrypted_access_token, supabase, account.id);
+  if ('error' in decryptResult) {
+    return apiError(decryptResult.error, 401);
+  }
+
   try {
-    const token = decrypt(account.encrypted_access_token);
-    const repos = await listUserRepos(token);
+    const repos = await listUserRepos(decryptResult.token);
     return NextResponse.json({ repos });
   } catch (err) {
     if (err instanceof GitHubApiError && err.status === 401) {

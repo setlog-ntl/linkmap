@@ -5,7 +5,7 @@ import { logAudit } from '@/lib/audit';
 import { checkHomepageDeployQuota } from '@/lib/quota';
 import { createRepo, pushFilesAtomically, deleteRepo, enableGitHubPagesWithActions, GitHubApiError } from '@/lib/github/api';
 import { getTemplateBySlug } from '@/data/homepage-template-content';
-import { decrypt } from '@/lib/crypto';
+import { safeDecryptToken } from '@/lib/github/token';
 import { deployPagesRequestSchema } from '@/lib/validations/oneclick';
 
 export async function POST(request: NextRequest) {
@@ -76,12 +76,15 @@ export async function POST(request: NextRequest) {
     return apiError('GitHub 계정이 연결되어 있지 않습니다. 먼저 GitHub를 연결해주세요.', 404);
   }
 
-  let githubToken: string;
-  try {
-    githubToken = decrypt(ghAccount.encrypted_access_token);
-  } catch {
-    return apiError('GitHub 토큰이 유효하지 않습니다. 다시 연결해주세요.', 401);
+  const decryptResult = await safeDecryptToken(
+    ghAccount.encrypted_access_token,
+    supabase,
+    ghAccount.id
+  );
+  if ('error' in decryptResult) {
+    return apiError(decryptResult.error, 401);
   }
+  const githubToken = decryptResult.token;
 
   // 4. Create Linkmap project
   const { data: project, error: projectError } = await supabase

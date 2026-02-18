@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, apiError, notFoundError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
-import { decrypt } from '@/lib/crypto';
+import { safeDecryptToken } from '@/lib/github/token';
 import { getGitHubPagesStatus, GitHubApiError } from '@/lib/github/api';
 
 type StepStatus = 'completed' | 'in_progress' | 'pending' | 'error';
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       const { data: ghAccount } = githubService
         ? await supabase
             .from('service_accounts')
-            .select('encrypted_access_token')
+            .select('id, encrypted_access_token')
             .eq('project_id', deploy.project_id)
             .eq('service_id', githubService.id)
             .eq('status', 'active')
@@ -52,7 +52,11 @@ export async function GET(request: NextRequest) {
         : { data: null };
 
       if (ghAccount) {
-        const githubToken = decrypt(ghAccount.encrypted_access_token);
+        const decryptResult = await safeDecryptToken(ghAccount.encrypted_access_token, supabase, ghAccount.id);
+        if ('error' in decryptResult) {
+          // Token decryption failed (key rotated?) — skip GitHub polling
+        } else {
+        const githubToken = decryptResult.token;
         const [owner, repo] = (deploy.forked_repo_full_name as string).split('/');
 
         const pagesInfo = await getGitHubPagesStatus(githubToken, owner, repo);
@@ -113,6 +117,7 @@ export async function GET(request: NextRequest) {
           if (newDeployStatus === 'ready') {
             deploy.deployment_url = pagesInfo.html_url || deploy.pages_url;
           }
+        }
         }
       }
     } catch (err) {

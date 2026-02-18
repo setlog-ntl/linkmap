@@ -4,6 +4,7 @@ import { verifyAccountSchema } from '@/lib/validations/service-account';
 import { unauthorizedError, validationError, apiError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 import { decrypt } from '@/lib/crypto';
+import { safeDecryptToken } from '@/lib/github/token';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -73,25 +74,31 @@ export async function POST(request: NextRequest) {
         }
       }
     } else if (account.connection_type === 'oauth' && account.encrypted_access_token) {
-      const accessToken = decrypt(account.encrypted_access_token);
-
-      // Check token expiry
-      if (account.token_expires_at && new Date(account.token_expires_at) < new Date()) {
+      const decryptResult = await safeDecryptToken(account.encrypted_access_token, supabase, account.id);
+      if ('error' in decryptResult) {
         verifyStatus = 'error';
-        errorMessage = '토큰이 만료되었습니다';
+        errorMessage = decryptResult.error;
       } else {
-        // Try GitHub user endpoint as default OAuth verification
-        const verifyRes = await fetch('https://api.github.com/user', {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'User-Agent': 'Linkmap/1.0',
-          },
-          signal: AbortSignal.timeout(10000),
-        });
+        const accessToken = decryptResult.token;
 
-        if (!verifyRes.ok) {
+        // Check token expiry
+        if (account.token_expires_at && new Date(account.token_expires_at) < new Date()) {
           verifyStatus = 'error';
-          errorMessage = `OAuth 검증 실패: HTTP ${verifyRes.status}`;
+          errorMessage = '토큰이 만료되었습니다';
+        } else {
+          // Try GitHub user endpoint as default OAuth verification
+          const verifyRes = await fetch('https://api.github.com/user', {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'User-Agent': 'Linkmap/1.0',
+            },
+            signal: AbortSignal.timeout(10000),
+          });
+
+          if (!verifyRes.ok) {
+            verifyStatus = 'error';
+            errorMessage = `OAuth 검증 실패: HTTP ${verifyRes.status}`;
+          }
         }
       }
     }

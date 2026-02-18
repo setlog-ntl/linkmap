@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, notFoundError, apiError, serverError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
-import { decrypt } from '@/lib/crypto';
+import { safeDecryptToken } from '@/lib/github/token';
 import { pushFilesAtomically, GitHubApiError } from '@/lib/github/api';
 import { z } from 'zod';
 
@@ -71,7 +71,7 @@ export async function POST(
 
   const { data: ghAccount } = await supabase
     .from('service_accounts')
-    .select('encrypted_access_token')
+    .select('id, encrypted_access_token')
     .eq('user_id', user.id)
     .eq('service_id', githubService.id)
     .eq('connection_type', 'oauth')
@@ -82,12 +82,11 @@ export async function POST(
 
   if (!ghAccount) return apiError('GitHub 계정이 연결되어 있지 않습니다', 404);
 
-  let token: string;
-  try {
-    token = decrypt(ghAccount.encrypted_access_token);
-  } catch {
-    return apiError('GitHub 토큰이 유효하지 않습니다', 401);
+  const decryptResult = await safeDecryptToken(ghAccount.encrypted_access_token, supabase, ghAccount.id);
+  if ('error' in decryptResult) {
+    return apiError(decryptResult.error, 401);
   }
+  const token = decryptResult.token;
 
   const [owner, repo] = (deploy.forked_repo_full_name || '').split('/');
   if (!owner || !repo) return notFoundError('레포지토리');
