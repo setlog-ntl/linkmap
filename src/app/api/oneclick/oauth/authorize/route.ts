@@ -36,9 +36,17 @@ export async function GET(request: NextRequest) {
 
   // Build authorization URL
   const appOrigin = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
+  const redirectUri = `${appOrigin}/api/oauth/github/callback`;
+  console.error('[OAuth Debug]', JSON.stringify({
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    requestOrigin: request.nextUrl.origin,
+    appOrigin,
+    redirectUri,
+    clientId,
+  }));
   const authUrl = new URL('https://github.com/login/oauth/authorize');
   authUrl.searchParams.set('client_id', clientId);
-  authUrl.searchParams.set('redirect_uri', `${appOrigin}/api/oauth/github/callback`);
+  authUrl.searchParams.set('redirect_uri', redirectUri);
   authUrl.searchParams.set('scope', GITHUB_SCOPES.join(' '));
   authUrl.searchParams.set('state', stateToken);
 
