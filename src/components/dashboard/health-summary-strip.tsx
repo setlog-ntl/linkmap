@@ -62,7 +62,7 @@ export function HealthSummaryStrip({ projectId, allCards }: HealthSummaryStripPr
         </h3>
         <div className="flex items-center gap-2">
           <Link
-            href={`/project/${projectId}/health`}
+            href={`/project/${projectId}/monitoring?tab=health`}
             className="text-xs text-primary hover:underline"
           >
             상세 보기

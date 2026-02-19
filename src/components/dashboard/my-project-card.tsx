@@ -74,7 +74,7 @@ export function MyProjectCard({ project, metrics, allCards }: MyProjectCardProps
         {/* CTA buttons */}
         <div className="flex w-full gap-2 mt-auto">
           <Button variant="default" size="sm" className="flex-1" asChild>
-            <Link href={`/project/${project.id}/services`}>
+            <Link href={`/project/${project.id}/integrations`}>
               <Plus className="mr-1 h-3.5 w-3.5" />
               서비스 추가
             </Link>

@@ -15,7 +15,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { LogOut, Settings, LayoutDashboard, Menu, Globe, Rocket, Monitor, Bot, Link2 } from 'lucide-react';
+import { LogOut, Settings, LayoutDashboard, Menu, Globe, Rocket, Monitor, Bot, Link2, Search } from 'lucide-react';
 import { useUIStore } from '@/stores/ui-store';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t, localeNames } from '@/lib/i18n';
@@ -29,7 +29,7 @@ interface HeaderProps {
 export function Header({ profile }: HeaderProps) {
   const router = useRouter();
   const supabase = createClient();
-  const { sidebarOpen, setSidebarOpen } = useUIStore();
+  const { sidebarOpen, setSidebarOpen, setCommandOpen } = useUIStore();
   const { locale, setLocale } = useLocaleStore();
 
   const handleSignOut = async () => {
@@ -111,6 +111,20 @@ export function Header({ profile }: HeaderProps) {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
+          {/* Command Palette Hint */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="hidden md:flex items-center gap-2 h-8 px-2 text-muted-foreground"
+            onClick={() => setCommandOpen(true)}
+          >
+            <Search className="h-3.5 w-3.5" />
+            <span className="text-xs">{t(locale, 'commandPalette.search')}</span>
+            <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </Button>
+
           {/* Language Toggle */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

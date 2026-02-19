@@ -14,8 +14,9 @@ import { ConnectionPopover } from './connection-popover';
 import { LayerColumn } from './layer-column';
 import { MyProjectCard } from './my-project-card';
 import { DevtoolsRow } from './devtools-row';
-import { EnvAlertBanner } from './env-alert-banner';
+import { ActionNeeded } from './action-needed';
 import { HealthSummaryStrip } from './health-summary-strip';
+import { OnboardingChecklist } from './onboarding-checklist';
 import type { DashboardResponse, DashboardLayer, ServiceCardData } from '@/types';
 
 interface DashboardLayoutProps {
@@ -84,7 +85,7 @@ export function DashboardLayout({ data }: DashboardLayoutProps) {
             </div>
             <div className="flex gap-3">
               <Button asChild>
-                <Link href={`/project/${project.id}/services`}>
+                <Link href={`/project/${project.id}/integrations`}>
                   <Plus className="mr-1.5 h-4 w-4" />
                   서비스 추가하기
                 </Link>
@@ -104,8 +105,8 @@ export function DashboardLayout({ data }: DashboardLayoutProps) {
 
   return (
     <div className="space-y-6">
-      {/* Env alert banner */}
-      <EnvAlertBanner projectId={project.id} allCards={allCards} />
+      {/* Action needed banner */}
+      <ActionNeeded projectId={project.id} allCards={allCards} metrics={metrics} />
 
       {/* Desktop layout */}
       <div className="hidden md:block relative" ref={containerRef}>
@@ -173,6 +174,11 @@ export function DashboardLayout({ data }: DashboardLayoutProps) {
         <HealthSummaryStrip projectId={project.id} allCards={allCards} />
       </div>
 
+      {/* Onboarding checklist */}
+      <div className="hidden md:block">
+        <OnboardingChecklist projectId={project.id} metrics={metrics} />
+      </div>
+
       {/* Connection toggle — fixed pill */}
       <div className="hidden md:block fixed bottom-6 right-6 z-40">
         <Button
@@ -211,6 +217,7 @@ export function DashboardLayout({ data }: DashboardLayoutProps) {
           <div className="space-y-4">
             <MyProjectCard project={project} metrics={metrics} allCards={allCards} />
             <HealthSummaryStrip projectId={project.id} allCards={allCards} />
+            <OnboardingChecklist projectId={project.id} metrics={metrics} />
           </div>
         )}
         {activeTab === 'frontend' && (
