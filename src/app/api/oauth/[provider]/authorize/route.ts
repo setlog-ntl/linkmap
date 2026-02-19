@@ -62,9 +62,10 @@ export async function GET(
   }
 
   // Build authorization URL
+  const appOrigin = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
   const authUrl = new URL(config.authorization_url);
   authUrl.searchParams.set('client_id', clientId);
-  authUrl.searchParams.set('redirect_uri', `${request.nextUrl.origin}/api/oauth/${provider}/callback`);
+  authUrl.searchParams.set('redirect_uri', `${appOrigin}/api/oauth/${provider}/callback`);
   authUrl.searchParams.set('scope', config.scopes.join(' '));
   authUrl.searchParams.set('state', stateToken);
 

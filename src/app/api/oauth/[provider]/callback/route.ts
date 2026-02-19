@@ -63,6 +63,8 @@ export async function GET(
     return NextResponse.redirect(new URL('/dashboard?error=oauth_not_configured', request.nextUrl.origin));
   }
 
+  const appOrigin = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
+
   try {
     // Exchange code for access token
     const tokenRes = await fetch(config.token_url, {
@@ -75,7 +77,7 @@ export async function GET(
         client_id: clientId,
         client_secret: clientSecret,
         code,
-        redirect_uri: `${request.nextUrl.origin}/api/oauth/${provider}/callback`,
+        redirect_uri: `${appOrigin}/api/oauth/${provider}/callback`,
       }),
       signal: AbortSignal.timeout(10000),
     });

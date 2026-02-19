@@ -35,9 +35,10 @@ export async function GET(request: NextRequest) {
   if (error) return apiError('OAuth 상태 저장에 실패했습니다', 500);
 
   // Build authorization URL
+  const appOrigin = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
   const authUrl = new URL('https://github.com/login/oauth/authorize');
   authUrl.searchParams.set('client_id', clientId);
-  authUrl.searchParams.set('redirect_uri', `${request.nextUrl.origin}/api/oauth/github/callback`);
+  authUrl.searchParams.set('redirect_uri', `${appOrigin}/api/oauth/github/callback`);
   authUrl.searchParams.set('scope', GITHUB_SCOPES.join(' '));
   authUrl.searchParams.set('state', stateToken);
 
