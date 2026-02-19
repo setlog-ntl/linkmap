@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
 import { unauthorizedError, apiError } from '@/lib/api/errors';
 import { randomBytes } from 'crypto';
 
@@ -48,9 +47,8 @@ export async function GET(
   // Generate CSRF state token
   const stateToken = randomBytes(32).toString('hex');
 
-  // Store state in DB (uses admin client to bypass RLS for insert)
-  const adminClient = createAdminClient();
-  const { error } = await adminClient.from('oauth_states').insert({
+  // Store state in DB — RLS policy: user_id = auth.uid()
+  const { error } = await supabase.from('oauth_states').insert({
     user_id: user.id,
     project_id: projectId,
     service_slug: serviceSlug,

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
 import { unauthorizedError, apiError } from '@/lib/api/errors';
 import { randomBytes } from 'crypto';
 
@@ -23,8 +22,8 @@ export async function GET(request: NextRequest) {
   const stateToken = randomBytes(32).toString('hex');
 
   // Store state in DB (project_id: null, flow_context: 'oneclick')
-  const adminClient = createAdminClient();
-  const { error } = await adminClient.from('oauth_states').insert({
+  // RLS policy: user_id = auth.uid() — 유저 본인 insert 허용
+  const { error } = await supabase.from('oauth_states').insert({
     user_id: user.id,
     project_id: null,
     service_slug: 'github',
