@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { unauthorizedError, apiError } from '@/lib/api/errors';
+import { apiError } from '@/lib/api/errors';
 import { encrypt } from '@/lib/crypto';
 import { logAudit } from '@/lib/audit';
 
@@ -24,9 +23,6 @@ export async function GET(
   { params }: { params: Promise<{ provider: string }> }
 ) {
   const { provider } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return unauthorizedError();
 
   const config = OAUTH_TOKEN_CONFIGS[provider];
   if (!config) return apiError('지원하지 않는 OAuth 프로바이더입니다', 400);
@@ -35,18 +31,26 @@ export async function GET(
   const state = request.nextUrl.searchParams.get('state');
   if (!code || !state) return apiError('code와 state가 필요합니다', 400);
 
-  // Verify CSRF state token
+  // OAuth callback은 외부 redirect로 인증 쿠키가 유실될 수 있음
+  // state_token으로 사용자를 식별 (32바이트 랜덤 = 추측 불가)
   const adminClient = createAdminClient();
-  const { data: oauthState } = await adminClient
+  const { data: oauthState, error: stateError } = await adminClient
     .from('oauth_states')
     .select('*')
     .eq('state_token', state)
-    .eq('user_id', user.id)
     .single();
 
-  if (!oauthState) {
-    return NextResponse.redirect(new URL('/dashboard?error=invalid_state', request.nextUrl.origin));
+  if (stateError || !oauthState) {
+    // state 조회 실패 시 진단 정보 반환 (admin client 문제 확인용)
+    return NextResponse.json({
+      error: 'OAuth state 조회 실패',
+      stateError: stateError?.message ?? 'no data',
+      hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+      serviceRoleKeyPrefix: process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 10) ?? '(unset)',
+    }, { status: 500 });
   }
+
+  const userId = oauthState.user_id;
 
   // Check expiry
   if (new Date(oauthState.expires_at) < new Date()) {
@@ -121,7 +125,7 @@ export async function GET(
     }
 
     // Look up service ID by slug
-    const { data: service } = await supabase
+    const { data: service } = await adminClient
       .from('services')
       .select('id')
       .eq('slug', oauthState.service_slug)
@@ -146,7 +150,7 @@ export async function GET(
     const isOneclick = oauthState.flow_context === 'oneclick';
     const accountData = {
       service_id: service.id,
-      user_id: user.id,
+      user_id: userId,
       connection_type: 'oauth' as const,
       encrypted_access_token: encryptedAccessToken,
       encrypted_refresh_token: encryptedRefreshToken,
@@ -168,7 +172,7 @@ export async function GET(
       const { data: existing } = await adminClient
         .from('service_accounts')
         .select('id')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .eq('service_id', service.id)
         .is('project_id', null)
         .single();
@@ -211,7 +215,7 @@ export async function GET(
       );
     }
 
-    await logAudit(user.id, {
+    await logAudit(userId, {
       action: 'service_account.connect_oauth',
       resourceType: 'service_account',
       resourceId: account?.id,
