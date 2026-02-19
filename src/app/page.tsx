@@ -6,9 +6,12 @@ import { Footer } from '@/components/layout/footer';
 import { HeroSection } from '@/components/landing/hero-section';
 import { StatsSection } from '@/components/landing/stats-section';
 import { FeaturesBento } from '@/components/landing/features-bento';
+import { AiFeaturesSection } from '@/components/landing/ai-features-section';
 import { HowItWorks } from '@/components/landing/how-it-works';
 import { ServicesGrid } from '@/components/landing/services-grid';
-import { CtaSection } from '@/components/landing/cta-section';
+import { OneclickDeploySection } from '@/components/landing/oneclick-deploy-section';
+import { PricingSection, FinalCtaSection } from '@/components/landing/cta-section';
+import { TestimonialsSection } from '@/components/landing/testimonials-section';
 import type { Profile } from '@/types';
 
 export default async function LandingPage() {
@@ -28,7 +31,7 @@ export default async function LandingPage() {
     <div className="min-h-screen flex flex-col bg-[#0a0a0a] text-white">
       <Header profile={profile} />
 
-      {/* Section 1: Hero — Architecture Flow Diagram */}
+      {/* Section 1: Hero */}
       <HeroSection />
 
       {/* Section 2: Stats Bar */}
@@ -37,14 +40,26 @@ export default async function LandingPage() {
       {/* Section 3: Core Features (Bento Grid) */}
       <FeaturesBento />
 
-      {/* Section 4: How It Works */}
+      {/* Section 4: AI Features */}
+      <AiFeaturesSection />
+
+      {/* Section 5: How It Works (4 steps) */}
       <HowItWorks />
 
-      {/* Section 5: Supported Services */}
+      {/* Section 6: Supported Services */}
       <ServicesGrid />
 
-      {/* Section 6: Pricing + CTA */}
-      <CtaSection />
+      {/* Section 7: One-Click Deploy */}
+      <OneclickDeploySection />
+
+      {/* Section 8: Pricing */}
+      <PricingSection />
+
+      {/* Section 9: Testimonials */}
+      <TestimonialsSection />
+
+      {/* Section 10: Final CTA */}
+      <FinalCtaSection />
 
       <Footer />
     </div>

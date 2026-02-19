@@ -1,7 +1,7 @@
 'use client';
 
 import { ScrollReveal } from './scroll-reveal';
-import { FolderPlus, Puzzle, Download } from 'lucide-react';
+import { FolderPlus, Puzzle, Download, Sparkles } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 
@@ -27,6 +27,12 @@ export function HowItWorks() {
       title: t(locale, 'landing.step3Title'),
       description: t(locale, 'landing.step3Desc'),
     },
+    {
+      number: '4',
+      icon: Sparkles,
+      title: t(locale, 'landing.step4Title'),
+      description: t(locale, 'landing.step4Desc'),
+    },
   ];
 
   return (
@@ -38,9 +44,9 @@ export function HowItWorks() {
           </div>
         </ScrollReveal>
 
-        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-12 max-w-4xl mx-auto">
+        <div className="relative grid grid-cols-1 md:grid-cols-4 gap-10 max-w-5xl mx-auto">
           {/* Connecting Line (Desktop) */}
-          <div className="hidden md:block absolute top-10 left-[16.67%] right-[16.67%] h-px z-0">
+          <div className="hidden md:block absolute top-10 left-[12.5%] right-[12.5%] h-px z-0">
             <div className="h-full bg-gradient-to-r from-zinc-800 via-[#2bee79]/40 to-zinc-800" />
           </div>
 

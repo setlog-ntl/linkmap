@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Play, Lock, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Play, Lock, CheckCircle2, Check } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
@@ -88,6 +88,20 @@ export function HeroSection() {
                 {t(locale, 'landing.heroCtaDemo')}
               </Link>
             </Button>
+          </div>
+
+          {/* Trust Badges */}
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-400">
+            {[
+              t(locale, 'landing.trustFree'),
+              t(locale, 'landing.trustNoCard'),
+              t(locale, 'landing.trustEncryption'),
+            ].map((badge) => (
+              <div key={badge} className="flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-[#2bee79]" />
+                <span>{badge}</span>
+              </div>
+            ))}
           </div>
         </motion.div>
 

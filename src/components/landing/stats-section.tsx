@@ -20,7 +20,10 @@ export function StatsSection() {
     <section className="border-y border-zinc-800/60 bg-zinc-900/50 backdrop-blur-sm">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <ScrollReveal>
-          <div className="grid grid-cols-2 gap-6 py-10 md:grid-cols-4 md:gap-8">
+          <p className="text-center text-sm text-gray-400 pt-8 pb-2 font-medium">
+            {t(locale, 'landing.socialProofTagline')}
+          </p>
+          <div className="grid grid-cols-2 gap-6 py-6 md:grid-cols-4 md:gap-8">
             {stats.map((stat, i) => {
               const Icon = stat.icon;
               return (
