@@ -185,7 +185,16 @@ export default function AccountPage() {
                               className="h-5 w-5 rounded"
                             />
                           )}
-                          <span className="font-medium">{account.service?.name || 'Unknown'}</span>
+                          {account.service?.slug ? (
+                            <Link
+                              href={`/services#${account.service.slug}`}
+                              className="font-medium text-primary hover:underline"
+                            >
+                              {account.service.name}
+                            </Link>
+                          ) : (
+                            <span className="font-medium">Unknown</span>
+                          )}
                         </div>
                       </td>
                       <td className="py-3 pr-4 text-muted-foreground">
