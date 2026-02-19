@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Key, Plus, Trash2, Copy, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { SettingsNav } from '@/components/settings/settings-nav';
 
 interface ApiToken {
   id: string;
@@ -92,6 +93,7 @@ export default function TokensPage() {
   if (loading) {
     return (
       <div className="container py-8 max-w-2xl">
+        <SettingsNav />
         <Skeleton className="h-12 w-48 mb-6" />
         <Skeleton className="h-64" />
       </div>
@@ -100,6 +102,7 @@ export default function TokensPage() {
 
   return (
     <div className="container py-8 max-w-2xl">
+      <SettingsNav />
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">

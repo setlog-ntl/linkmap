@@ -37,7 +37,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     id: 'b2c3d4e5-0003-4000-9000-000000000003',
     slug: 'link-in-bio-pro',
     name: 'Link-in-Bio Pro',
-    name_ko: '링크인바이오 프로',
+    name_ko: 'SNS 링크허브',
     description:
       'SNS profile link hub with animated backgrounds, custom themes, and visitor stats. Linktree alternative with full code ownership.',
     description_ko:
@@ -60,7 +60,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     tags: ['link-in-bio', 'social', 'creator', 'animated', 'themes', 'nextjs'],
     is_premium: false,
     is_active: true,
-    display_order: 1,
+    display_order: 6,
     deploy_target: 'github_pages',
   },
   {
@@ -94,6 +94,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     is_premium: false,
     is_active: true,
     display_order: 2,
+
     deploy_target: 'github_pages',
   },
   {
@@ -127,6 +128,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     is_premium: false,
     is_active: true,
     display_order: 3,
+
     deploy_target: 'github_pages',
   },
 
@@ -137,7 +139,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     id: 'b2c3d4e5-0006-4000-9000-000000000006',
     slug: 'small-biz',
     name: 'Small Business',
-    name_ko: '소상공인 비즈니스',
+    name_ko: '우리가게 홍보',
     description:
       'Simple mobile-optimized business page with menu, hours, Kakao Map, and one-tap call/directions. Perfect for cafes, restaurants, salons, and shops.',
     description_ko:
@@ -164,7 +166,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     tags: ['small-business', 'restaurant', 'cafe', 'shop', 'kakao-map', 'mobile', 'nextjs'],
     is_premium: false,
     is_active: true,
-    display_order: 4,
+    display_order: 5,
     deploy_target: 'github_pages',
   },
   {
@@ -197,8 +199,8 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     ],
     tags: ['product', 'landing', 'saas', 'startup', 'conversion', 'nextjs'],
     is_premium: false,
-    is_active: true,
-    display_order: 5,
+    is_active: false,
+    display_order: 7,
     deploy_target: 'github_pages',
   },
   {
@@ -230,8 +232,8 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     ],
     tags: ['restaurant', 'cafe', 'qr-menu', 'food', 'multilingual', 'business', 'nextjs'],
     is_premium: false,
-    is_active: true,
-    display_order: 6,
+    is_active: false,
+    display_order: 8,
     deploy_target: 'github_pages',
   },
   {
@@ -265,15 +267,15 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     ],
     tags: ['resume', 'cv', 'career', 'job-seeker', 'timeline', 'nextjs'],
     is_premium: false,
-    is_active: true,
-    display_order: 7,
+    is_active: false,
+    display_order: 9,
     deploy_target: 'github_pages',
   },
   {
     id: 'b2c3d4e5-0010-4000-9000-000000000010',
     slug: 'personal-brand',
     name: 'Personal Brand',
-    name_ko: '퍼스널 브랜드',
+    name_ko: '나만의 홈페이지',
     description:
       'Storytelling-driven personal branding page with fullscreen hero, parallax scroll, values showcase, and framer-motion animations. Express your identity.',
     description_ko:
@@ -299,7 +301,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     tags: ['personal-brand', 'storytelling', 'mz-generation', 'identity', 'fullscreen', 'nextjs'],
     is_premium: false,
     is_active: true,
-    display_order: 8,
+    display_order: 1,
     deploy_target: 'github_pages',
   },
 
@@ -310,7 +312,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     id: 'b2c3d4e5-0012-4000-9000-000000000012',
     slug: 'freelancer-page',
     name: 'Freelancer Page',
-    name_ko: '프리랜서 페이지',
+    name_ko: '포트폴리오',
     description:
       'Professional freelancer page with service listings, portfolio grid with category filter, client testimonials with star ratings, work process steps, and contact form. Built for trust and conversion.',
     description_ko:
@@ -337,7 +339,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     tags: ['freelancer', 'services', 'portfolio', 'testimonials', 'business', 'nextjs'],
     is_premium: false,
     is_active: true,
-    display_order: 9,
+    display_order: 4,
     deploy_target: 'github_pages',
   },
   {
@@ -371,7 +373,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     ],
     tags: ['saas', 'landing', 'startup', 'pricing', 'conversion', 'faq', 'nextjs'],
     is_premium: false,
-    is_active: true,
+    is_active: false,
     display_order: 10,
     deploy_target: 'github_pages',
   },
@@ -404,7 +406,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     ],
     tags: ['newsletter', 'creator', 'subscribe', 'archive', 'writing', 'nextjs'],
     is_premium: false,
-    is_active: true,
+    is_active: false,
     display_order: 11,
     deploy_target: 'github_pages',
   },
@@ -438,7 +440,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     ],
     tags: ['event', 'conference', 'meetup', 'countdown', 'timetable', 'speakers', 'nextjs'],
     is_premium: false,
-    is_active: true,
+    is_active: false,
     display_order: 12,
     deploy_target: 'github_pages',
   },
@@ -476,7 +478,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     ],
     tags: ['community', 'study-group', 'club', 'members', 'schedule', 'resources', 'nextjs'],
     is_premium: false,
-    is_active: true,
+    is_active: false,
     display_order: 13,
     deploy_target: 'github_pages',
   },
@@ -513,7 +515,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     ],
     tags: ['study', 'recruit', 'community', 'side-project', 'developer', 'nextjs'],
     is_premium: false,
-    is_active: true,
+    is_active: false,
     display_order: 14,
     deploy_target: 'github_pages',
   },
@@ -549,7 +551,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     ],
     tags: ['nonprofit', 'ngo', 'charity', 'donation', 'mission', 'social-impact', 'nextjs'],
     is_premium: false,
-    is_active: true,
+    is_active: false,
     display_order: 15,
     deploy_target: 'github_pages',
   },

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,20 +13,11 @@ import {
   Github,
   Globe,
   AlertCircle,
-  LayoutGrid,
-  User,
-  Store,
-  Users,
 } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { TemplateCard } from './template-card';
-import {
-  type TemplateCategory,
-  TEMPLATE_CATEGORY_ORDER,
-  templateSlugToCategory,
-} from '@/lib/constants/template-categories';
 import type { HomepageTemplate } from '@/lib/queries/oneclick';
 
 interface TemplatePickerStepProps {
@@ -40,13 +31,6 @@ interface TemplatePickerStepProps {
 }
 
 const SITE_NAME_REGEX = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
-
-const CATEGORY_ICONS: Record<TemplateCategory, typeof LayoutGrid> = {
-  all: LayoutGrid,
-  personal: User,
-  business: Store,
-  community: Users,
-};
 
 export function TemplatePickerStep({
   templates,
@@ -62,23 +46,6 @@ export function TemplatePickerStep({
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [siteName, setSiteName] = useState('');
   const [siteNameError, setSiteNameError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<TemplateCategory>('all');
-
-  // Category counts
-  const categoryCounts = useMemo(() => {
-    const counts: Record<TemplateCategory, number> = { all: templates.length, personal: 0, business: 0, community: 0 };
-    for (const tpl of templates) {
-      const cat = templateSlugToCategory[tpl.slug];
-      if (cat && cat !== 'all') counts[cat]++;
-    }
-    return counts;
-  }, [templates]);
-
-  // Filtered templates
-  const filteredTemplates = useMemo(() => {
-    if (selectedCategory === 'all') return templates;
-    return templates.filter((tpl) => templateSlugToCategory[tpl.slug] === selectedCategory);
-  }, [templates, selectedCategory]);
 
   const validateSiteName = (name: string) => {
     if (name.length < 2) {
@@ -176,56 +143,28 @@ export function TemplatePickerStep({
           {t(locale, 'templatePicker.chooseTemplate')}
         </Label>
 
-        {/* Category filter bar */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {TEMPLATE_CATEGORY_ORDER.map((cat) => {
-            const Icon = CATEGORY_ICONS[cat];
-            const isActive = selectedCategory === cat;
-            return (
-              <Badge
-                key={cat}
-                variant={isActive ? 'default' : 'outline'}
-                className={`cursor-pointer select-none gap-1.5 px-3 py-1.5 text-xs transition-colors ${
-                  isActive ? '' : 'hover:bg-accent'
-                }`}
-                onClick={() => setSelectedCategory(cat)}
-              >
-                <Icon className="h-3.5 w-3.5" />
-                {t(locale, `templatePicker.category${cat.charAt(0).toUpperCase() + cat.slice(1)}`)}
-                <span className="text-[10px] opacity-70">({categoryCounts[cat]})</span>
-              </Badge>
-            );
-          })}
-        </div>
-
         {/* Template grid with animations */}
-        {filteredTemplates.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">
-            {t(locale, 'templatePicker.noTemplates')}
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <AnimatePresence mode="popLayout">
-              {filteredTemplates.map((tpl, index) => (
-                <motion.div
-                  key={tpl.id}
-                  layout
-                  initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.25, delay: Math.min(index * 0.04, 0.3) }}
-                >
-                  <TemplateCard
-                    template={tpl}
-                    isSelected={selectedTemplate === tpl.id}
-                    locale={locale}
-                    onSelect={setSelectedTemplate}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <AnimatePresence mode="popLayout">
+            {templates.map((tpl, index) => (
+              <motion.div
+                key={tpl.id}
+                layout
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.25, delay: Math.min(index * 0.04, 0.3) }}
+              >
+                <TemplateCard
+                  template={tpl}
+                  isSelected={selectedTemplate === tpl.id}
+                  locale={locale}
+                  onSelect={setSelectedTemplate}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* Site name input with live URL preview */}
