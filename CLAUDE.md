@@ -107,7 +107,7 @@ src/
 │   └── validations/  # Zod schemas
 ├── stores/           # Zustand stores (ui-store, project-store, locale-store)
 ├── types/            # TypeScript interfaces
-└── data/             # Seed data (services, templates)
+└── data/             # Seed data, homepage templates x6
 
 packages/
 ├── mcp-server/       # MCP server for Claude Code/Cursor

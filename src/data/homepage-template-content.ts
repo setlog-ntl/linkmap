@@ -5,6 +5,9 @@
  */
 
 import { devShowcaseTemplate } from './dev-showcase-template';
+import { personalBrandTemplate } from './personal-brand-template';
+import { freelancerPageTemplate } from './freelancer-page-template';
+import { smallBizTemplate } from './small-biz-template';
 
 export interface TemplateFile {
   path: string;
@@ -1193,4 +1196,7 @@ export const homepageTemplates: HomepageTemplateContent[] = [
     ],
   },
   devShowcaseTemplate,
+  personalBrandTemplate,
+  freelancerPageTemplate,
+  smallBizTemplate,
 ];

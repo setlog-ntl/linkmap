@@ -36,7 +36,7 @@ src/
 │   └── validations/  # Zod schemas
 ├── stores/           # Zustand stores
 ├── types/            # TypeScript interfaces
-└── data/             # Seed data (services, templates)
+└── data/             # Seed data (services, homepage templates x6)
 
 packages/
 ├── mcp-server/       # MCP server for Claude Code/Cursor
