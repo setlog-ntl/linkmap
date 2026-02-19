@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError } from '@/lib/api/errors';
 import { safeDecryptToken } from '@/lib/github/token';
-import { getGitHubPagesStatus, GitHubApiError } from '@/lib/github/api';
+import { getGitHubPagesStatus, getLatestWorkflowRun, GitHubApiError } from '@/lib/github/api';
 
 export async function GET() {
   const supabase = await createClient();
@@ -119,6 +119,16 @@ async function refreshDeployStatus(
     } else if (pagesStatus === 'errored') {
       newDeployStatus = 'error';
       newPagesStatus = 'errored';
+    } else if (pagesStatus === null) {
+      // Check if Actions workflow failed
+      try {
+        const [owner, repo] = (deploy.forked_repo_full_name as string).split('/');
+        const run = await getLatestWorkflowRun(githubToken, owner, repo);
+        if (run?.status === 'completed' && (run.conclusion === 'failure' || run.conclusion === 'cancelled')) {
+          newDeployStatus = 'error';
+          newPagesStatus = 'errored';
+        }
+      } catch { /* ignore */ }
     }
 
     if (newDeployStatus !== deploy.deploy_status || newPagesStatus !== deploy.pages_status) {

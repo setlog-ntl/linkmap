@@ -571,3 +571,27 @@ export async function enableGitHubPagesWithActions(
     }
   );
 }
+
+/**
+ * Get the latest GitHub Actions workflow run for a repo.
+ * Used to detect failed Pages deploy workflows.
+ */
+export interface WorkflowRun {
+  id: number;
+  status: 'queued' | 'in_progress' | 'completed' | 'waiting';
+  conclusion: 'success' | 'failure' | 'cancelled' | 'timed_out' | 'action_required' | null;
+  html_url: string;
+  created_at: string;
+}
+
+export async function getLatestWorkflowRun(
+  token: string,
+  owner: string,
+  repo: string
+): Promise<WorkflowRun | null> {
+  const result = await githubFetch<{ workflow_runs: WorkflowRun[] }>(
+    `/repos/${owner}/${repo}/actions/runs?per_page=1&branch=main`,
+    { token }
+  );
+  return result.workflow_runs[0] ?? null;
+}

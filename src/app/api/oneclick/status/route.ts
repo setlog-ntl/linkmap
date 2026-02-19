@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, apiError, notFoundError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 import { safeDecryptToken } from '@/lib/github/token';
-import { getGitHubPagesStatus, GitHubApiError } from '@/lib/github/api';
+import { getGitHubPagesStatus, getLatestWorkflowRun, GitHubApiError } from '@/lib/github/api';
 
 type StepStatus = 'completed' | 'in_progress' | 'pending' | 'error';
 
@@ -87,10 +87,27 @@ export async function GET(request: NextRequest) {
           newDeployStatus = 'error';
           newPagesStatus = 'errored';
         } else if (pagesStatus === null) {
-          // GitHub Pages API returns null status when no deployment has completed yet.
-          // This is normal during the initial setup phase — keep as 'building'.
-          newDeployStatus = 'building';
-          newPagesStatus = 'enabling';
+          // Pages status null — check if the Actions workflow failed
+          try {
+            const run = await getLatestWorkflowRun(githubToken, owner, repo);
+            if (run?.status === 'completed' && run.conclusion === 'failure') {
+              newDeployStatus = 'error';
+              newPagesStatus = 'errored';
+              deploy.deploy_error_message = 'GitHub Actions 워크플로우 빌드에 실패했습니다. GitHub 레포지토리의 Actions 탭에서 로그를 확인해주세요.';
+            } else if (run?.status === 'completed' && run.conclusion === 'cancelled') {
+              newDeployStatus = 'error';
+              newPagesStatus = 'errored';
+              deploy.deploy_error_message = 'GitHub Actions 워크플로우가 취소되었습니다.';
+            } else {
+              // Workflow still running or no runs yet — keep as building
+              newDeployStatus = 'building';
+              newPagesStatus = 'enabling';
+            }
+          } catch {
+            // Couldn't check workflow — keep as building
+            newDeployStatus = 'building';
+            newPagesStatus = 'enabling';
+          }
         }
 
         if (newDeployStatus !== deploy.deploy_status || newPagesStatus !== deploy.pages_status) {
@@ -111,6 +128,9 @@ export async function GET(request: NextRequest) {
             });
           }
           if (newDeployStatus === 'error') {
+            if (deploy.deploy_error_message) {
+              updateData.deploy_error_message = deploy.deploy_error_message;
+            }
             await logAudit(user.id, {
               action: 'oneclick.deploy_error',
               resourceType: 'homepage_deploy',
