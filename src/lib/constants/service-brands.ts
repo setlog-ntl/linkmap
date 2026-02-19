@@ -82,9 +82,13 @@ export const SERVICE_BRANDS: Record<string, ServiceBrand> = {
   'shopify-api':    { slug: 'shopify',            color: '#7AB55C', darkColor: '#95BF47', emoji: '🛍️' },
 
   // --- Flow preset 별칭 (flow-presets.ts에서 사용) ---
-  nextjs:  { slug: 'nextdotjs', color: '#000000', darkColor: '#ffffff', emoji: '⚡' },
-  backend: { slug: 'fastapi',   color: '#009688', darkColor: '#4DB6AC', emoji: '🔧' },
-  s3:      { slug: 'amazons3',  color: '#569A31', darkColor: '#7BC74D', emoji: '☁️' },
+  nextjs:       { slug: 'nextdotjs',    color: '#000000', darkColor: '#ffffff', emoji: '⚡' },
+  backend:      { slug: 'fastapi',      color: '#009688', darkColor: '#4DB6AC', emoji: '🔧' },
+  s3:           { slug: 'amazons3',     color: '#569A31', darkColor: '#7BC74D', emoji: '☁️' },
+  'naver-api':  { slug: 'naver',        color: '#03C75A', darkColor: '#03C75A', emoji: '📗' },
+  aladin:       { emoji: '📚', color: '#2E86C1', darkColor: '#5DADE2' },
+  'cloud-run':  { slug: 'googlecloud',  color: '#4285F4', darkColor: '#8AB4F8', emoji: '☁️' },
+  readingtree:  { emoji: '🌳', color: '#2ECC71', darkColor: '#58D68D' },
 };
 
 /** 서비스 브랜드 정보 조회 (없으면 undefined) */

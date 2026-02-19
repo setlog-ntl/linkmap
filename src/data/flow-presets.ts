@@ -51,80 +51,85 @@ export const SIMPLE_FLOW: FlowPreset = {
 };
 
 // ---------------------------------------------------------------------------
-// Complex Flow: SaaS Application
+// Complex Flow: ReadingTree (독서트리)
 // ---------------------------------------------------------------------------
 export const COMPLEX_FLOW: FlowPreset = {
   id: 'complex',
-  name: '복잡한 흐름 (SaaS)',
-  description: 'SaaS 애플리케이션의 복잡한 서비스 연결 구조',
-  nodes: [
-    { id: 'github', label: 'GitHub', category: 'cicd', emoji: getServiceEmoji('github'), iconSlug: 'github', x: 50, y: 180, status: 'connected', envVars: { configured: 1, total: 1 } },
-    { id: 'nextjs', label: 'Next.js', category: 'deploy', emoji: getServiceEmoji('nextjs'), iconSlug: 'nextjs', x: 250, y: 120, status: 'connected', envVars: { configured: 0, total: 0 } },
-    { id: 'vercel', label: 'Vercel', category: 'deploy', emoji: getServiceEmoji('vercel'), iconSlug: 'vercel', x: 250, y: 240, status: 'connected', envVars: { configured: 2, total: 2 } },
-    { id: 'sentry', label: 'Sentry', category: 'monitoring', emoji: getServiceEmoji('sentry'), iconSlug: 'sentry', x: 250, y: 340, status: 'connected', envVars: { configured: 1, total: 1 } },
-    { id: 'posthog', label: 'PostHog', category: 'monitoring', emoji: getServiceEmoji('posthog'), iconSlug: 'posthog', x: 250, y: 430, status: 'in_progress', envVars: { configured: 1, total: 2 } },
-    { id: 'backend', label: 'Backend API', category: 'other', emoji: getServiceEmoji('backend'), iconSlug: 'backend', x: 470, y: 180, status: 'connected', envVars: { configured: 0, total: 0 } },
-    { id: 'supabase', label: 'Supabase', category: 'database', emoji: getServiceEmoji('supabase'), iconSlug: 'supabase', x: 690, y: 60, status: 'connected', envVars: { configured: 3, total: 3 } },
-    { id: 'clerk', label: 'Clerk', category: 'auth', emoji: getServiceEmoji('clerk'), iconSlug: 'clerk', x: 690, y: 160, status: 'in_progress', envVars: { configured: 2, total: 4 } },
-    { id: 's3', label: 'S3', category: 'storage', emoji: getServiceEmoji('s3'), iconSlug: 's3', x: 690, y: 260, status: 'not_started', envVars: { configured: 0, total: 3 } },
-    { id: 'stripe', label: 'Stripe', category: 'payment', emoji: getServiceEmoji('stripe'), iconSlug: 'stripe', x: 690, y: 360, status: 'not_started', envVars: { configured: 0, total: 3 } },
-    { id: 'openai', label: 'OpenAI', category: 'ai', emoji: getServiceEmoji('openai'), iconSlug: 'openai', x: 900, y: 110, status: 'not_started', envVars: { configured: 0, total: 1 } },
-    { id: 'resend', label: 'Resend', category: 'email', emoji: getServiceEmoji('resend'), iconSlug: 'resend', x: 900, y: 260, status: 'in_progress', envVars: { configured: 1, total: 2 } },
-  ],
-  edges: [
-    { source: 'github', target: 'nextjs', label: 'CI/CD' },
-    { source: 'nextjs', target: 'vercel', label: 'Deploy' },
-    { source: 'nextjs', target: 'backend', label: 'API' },
-    { source: 'nextjs', target: 'sentry', label: 'Errors' },
-    { source: 'nextjs', target: 'posthog', label: 'Analytics' },
-    { source: 'backend', target: 'supabase', label: 'Database' },
-    { source: 'backend', target: 'clerk', label: 'Auth' },
-    { source: 'backend', target: 's3', label: 'Storage' },
-    { source: 'backend', target: 'stripe', label: 'Payments' },
-    { source: 'backend', target: 'openai', label: 'AI' },
-    { source: 'backend', target: 'resend', label: 'Email' },
-  ],
-  stats: { services: 10, envVars: 24, setupTime: '2-3시간' },
-};
-
-// ---------------------------------------------------------------------------
-// Hero diagram preset (main architecture flow)
-// ---------------------------------------------------------------------------
-export const HERO_FLOW: FlowPreset = {
-  id: 'hero',
-  name: 'SaaS 아키텍처',
-  description: '전형적인 SaaS 아키텍처 흐름',
+  name: '복잡한 흐름 (ReadingTree)',
+  description: 'ReadingTree(독서트리) 서비스의 실제 연동 구조',
   nodes: [
     // Source
     { id: 'github', label: 'GitHub', category: 'cicd', emoji: getServiceEmoji('github'), iconSlug: 'github', x: 50, y: 200, status: 'connected', envVars: { configured: 1, total: 1 } },
-    // Frontend
-    { id: 'nextjs', label: 'Next.js', category: 'deploy', emoji: getServiceEmoji('nextjs'), iconSlug: 'nextjs', x: 280, y: 130, status: 'connected', envVars: { configured: 2, total: 2 } },
+    // Frontend layer
+    { id: 'nextjs', label: 'Next.js', category: 'deploy', emoji: getServiceEmoji('nextjs'), iconSlug: 'nextjs', x: 280, y: 130, status: 'connected', envVars: { configured: 0, total: 0 } },
     { id: 'vercel', label: 'Vercel', category: 'deploy', emoji: getServiceEmoji('vercel'), iconSlug: 'vercel', x: 280, y: 250, status: 'connected', envVars: { configured: 2, total: 2 } },
-    { id: 'sentry', label: 'Sentry', category: 'monitoring', emoji: getServiceEmoji('sentry'), iconSlug: 'sentry', x: 280, y: 350, status: 'connected', envVars: { configured: 1, total: 1 } },
-    { id: 'posthog', label: 'PostHog', category: 'monitoring', emoji: getServiceEmoji('posthog'), iconSlug: 'posthog', x: 280, y: 440, status: 'in_progress', envVars: { configured: 1, total: 2 } },
+    { id: 'ga4', label: 'GA4', category: 'monitoring', emoji: getServiceEmoji('ga4'), iconSlug: 'ga4', x: 280, y: 350, status: 'connected', envVars: { configured: 1, total: 1 } },
+    { id: 'kakao-login', label: 'Kakao Login', category: 'auth', emoji: getServiceEmoji('kakao-login'), iconSlug: 'kakao-login', x: 280, y: 440, status: 'connected', envVars: { configured: 1, total: 1 } },
     // Backend
     { id: 'backend', label: 'Backend API', category: 'other', emoji: getServiceEmoji('backend'), iconSlug: 'backend', x: 510, y: 200, status: 'connected', envVars: { configured: 0, total: 0 } },
-    // Database / Auth / Storage
+    // Database / External APIs
     { id: 'supabase', label: 'Supabase', category: 'database', emoji: getServiceEmoji('supabase'), iconSlug: 'supabase', x: 740, y: 100, status: 'connected', envVars: { configured: 3, total: 3 } },
-    { id: 'clerk', label: 'Clerk', category: 'auth', emoji: getServiceEmoji('clerk'), iconSlug: 'clerk', x: 740, y: 220, status: 'in_progress', envVars: { configured: 2, total: 4 } },
-    { id: 's3', label: 'S3', category: 'storage', emoji: getServiceEmoji('s3'), iconSlug: 's3', x: 740, y: 330, status: 'not_started', envVars: { configured: 0, total: 3 } },
-    // External Services
-    { id: 'stripe', label: 'Stripe', category: 'payment', emoji: getServiceEmoji('stripe'), iconSlug: 'stripe', x: 970, y: 100, status: 'not_started', envVars: { configured: 0, total: 3 } },
-    { id: 'openai', label: 'OpenAI', category: 'ai', emoji: getServiceEmoji('openai'), iconSlug: 'openai', x: 970, y: 220, status: 'not_started', envVars: { configured: 0, total: 1 } },
-    { id: 'resend', label: 'Resend', category: 'email', emoji: getServiceEmoji('resend'), iconSlug: 'resend', x: 970, y: 330, status: 'in_progress', envVars: { configured: 1, total: 2 } },
+    { id: 'naver-api', label: 'Naver API', category: 'other', emoji: getServiceEmoji('naver-api'), iconSlug: 'naver-api', x: 740, y: 220, status: 'connected', envVars: { configured: 2, total: 2 } },
+    { id: 'cloud-run', label: 'Cloud Run OCR', category: 'other', emoji: getServiceEmoji('cloud-run'), iconSlug: 'cloud-run', x: 740, y: 330, status: 'in_progress', envVars: { configured: 1, total: 2 } },
+    // AI / Metadata
+    { id: 'openai', label: 'OpenAI', category: 'ai', emoji: getServiceEmoji('openai'), iconSlug: 'openai', x: 970, y: 100, status: 'connected', envVars: { configured: 1, total: 1 } },
+    { id: 'google-gemini', label: 'Google Gemini', category: 'ai', emoji: getServiceEmoji('google-gemini'), iconSlug: 'google-gemini', x: 970, y: 220, status: 'connected', envVars: { configured: 1, total: 1 } },
+    { id: 'aladin', label: 'Aladin', category: 'other', emoji: getServiceEmoji('aladin'), iconSlug: 'aladin', x: 970, y: 330, status: 'connected', envVars: { configured: 1, total: 1 } },
   ],
   edges: [
     { source: 'github', target: 'nextjs', label: 'CI/CD' },
     { source: 'nextjs', target: 'vercel', label: 'Deploy' },
+    { source: 'nextjs', target: 'ga4', label: 'Analytics' },
+    { source: 'nextjs', target: 'kakao-login', label: 'OAuth' },
     { source: 'nextjs', target: 'backend', label: 'API Calls' },
-    { source: 'nextjs', target: 'sentry', label: 'Errors' },
-    { source: 'nextjs', target: 'posthog', label: 'Analytics' },
-    { source: 'backend', target: 'supabase', label: 'Database' },
-    { source: 'backend', target: 'clerk', label: 'Auth' },
-    { source: 'backend', target: 's3', label: 'Storage' },
-    { source: 'backend', target: 'stripe', label: 'Payments' },
+    { source: 'backend', target: 'supabase', label: 'DB/Auth' },
+    { source: 'backend', target: 'naver-api', label: '도서 검색' },
+    { source: 'backend', target: 'cloud-run', label: 'OCR' },
     { source: 'backend', target: 'openai', label: 'AI' },
-    { source: 'backend', target: 'resend', label: 'Email' },
+    { source: 'backend', target: 'google-gemini', label: 'AI' },
+    { source: 'backend', target: 'aladin', label: '메타데이터' },
   ],
-  stats: { services: 11, envVars: 22, setupTime: '2-3시간' },
+  stats: { services: 10, envVars: 15, setupTime: '1-2시간' },
+};
+
+// ---------------------------------------------------------------------------
+// Hero diagram preset: ReadingTree (독서트리) architecture
+// ---------------------------------------------------------------------------
+export const HERO_FLOW: FlowPreset = {
+  id: 'hero',
+  name: 'ReadingTree 아키텍처',
+  description: 'ReadingTree(독서트리) 서비스의 실제 연동 구조',
+  nodes: [
+    // Source
+    { id: 'github', label: 'GitHub', category: 'cicd', emoji: getServiceEmoji('github'), iconSlug: 'github', x: 50, y: 200, status: 'connected', envVars: { configured: 1, total: 1 } },
+    // Frontend layer
+    { id: 'nextjs', label: 'Next.js', category: 'deploy', emoji: getServiceEmoji('nextjs'), iconSlug: 'nextjs', x: 280, y: 130, status: 'connected', envVars: { configured: 0, total: 0 } },
+    { id: 'vercel', label: 'Vercel', category: 'deploy', emoji: getServiceEmoji('vercel'), iconSlug: 'vercel', x: 280, y: 250, status: 'connected', envVars: { configured: 2, total: 2 } },
+    { id: 'ga4', label: 'GA4', category: 'monitoring', emoji: getServiceEmoji('ga4'), iconSlug: 'ga4', x: 280, y: 350, status: 'connected', envVars: { configured: 1, total: 1 } },
+    { id: 'kakao-login', label: 'Kakao Login', category: 'auth', emoji: getServiceEmoji('kakao-login'), iconSlug: 'kakao-login', x: 280, y: 440, status: 'connected', envVars: { configured: 1, total: 1 } },
+    // Backend
+    { id: 'backend', label: 'Backend API', category: 'other', emoji: getServiceEmoji('backend'), iconSlug: 'backend', x: 510, y: 200, status: 'connected', envVars: { configured: 0, total: 0 } },
+    // Database / External APIs
+    { id: 'supabase', label: 'Supabase', category: 'database', emoji: getServiceEmoji('supabase'), iconSlug: 'supabase', x: 740, y: 100, status: 'connected', envVars: { configured: 3, total: 3 } },
+    { id: 'naver-api', label: 'Naver API', category: 'other', emoji: getServiceEmoji('naver-api'), iconSlug: 'naver-api', x: 740, y: 220, status: 'connected', envVars: { configured: 2, total: 2 } },
+    { id: 'cloud-run', label: 'Cloud Run OCR', category: 'other', emoji: getServiceEmoji('cloud-run'), iconSlug: 'cloud-run', x: 740, y: 330, status: 'in_progress', envVars: { configured: 1, total: 2 } },
+    // AI / Metadata
+    { id: 'openai', label: 'OpenAI', category: 'ai', emoji: getServiceEmoji('openai'), iconSlug: 'openai', x: 970, y: 100, status: 'connected', envVars: { configured: 1, total: 1 } },
+    { id: 'google-gemini', label: 'Google Gemini', category: 'ai', emoji: getServiceEmoji('google-gemini'), iconSlug: 'google-gemini', x: 970, y: 220, status: 'connected', envVars: { configured: 1, total: 1 } },
+    { id: 'aladin', label: 'Aladin', category: 'other', emoji: getServiceEmoji('aladin'), iconSlug: 'aladin', x: 970, y: 330, status: 'connected', envVars: { configured: 1, total: 1 } },
+  ],
+  edges: [
+    { source: 'github', target: 'nextjs', label: 'CI/CD' },
+    { source: 'nextjs', target: 'vercel', label: 'Deploy' },
+    { source: 'nextjs', target: 'ga4', label: 'Analytics' },
+    { source: 'nextjs', target: 'kakao-login', label: 'OAuth' },
+    { source: 'nextjs', target: 'backend', label: 'API Calls' },
+    { source: 'backend', target: 'supabase', label: 'DB/Auth' },
+    { source: 'backend', target: 'naver-api', label: '도서 검색' },
+    { source: 'backend', target: 'cloud-run', label: 'OCR' },
+    { source: 'backend', target: 'openai', label: 'AI' },
+    { source: 'backend', target: 'google-gemini', label: 'AI' },
+    { source: 'backend', target: 'aladin', label: '메타데이터' },
+  ],
+  stats: { services: 10, envVars: 15, setupTime: '1-2시간' },
 };

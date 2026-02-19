@@ -23,14 +23,14 @@ const LAYER_IDS = new Set(['nextjs', 'backend']);
 
 const HIGHLIGHT_PATHS = [
   ['github', 'nextjs', 'backend', 'supabase'],
-  ['github', 'nextjs', 'backend', 'clerk'],
-  ['github', 'nextjs', 'backend', 'stripe'],
+  ['github', 'nextjs', 'backend', 'naver-api'],
+  ['github', 'nextjs', 'backend', 'cloud-run'],
   ['github', 'nextjs', 'vercel'],
-  ['github', 'nextjs', 'sentry'],
+  ['github', 'nextjs', 'ga4'],
   ['github', 'nextjs', 'backend', 'openai'],
-  ['github', 'nextjs', 'backend', 'resend'],
-  ['github', 'nextjs', 'backend', 's3'],
-  ['github', 'nextjs', 'posthog'],
+  ['github', 'nextjs', 'backend', 'google-gemini'],
+  ['github', 'nextjs', 'backend', 'aladin'],
+  ['github', 'nextjs', 'kakao-login'],
 ];
 
 function buildNodes(highlightedNodeIds: Set<string>): Node[] {

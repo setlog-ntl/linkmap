@@ -21,7 +21,7 @@ function ServiceMapVisual() {
           <rect x="310" y="45" width="70" height="30" rx="4" fill="#111" stroke="#555" strokeWidth="1" />
           <text x="345" y="64" textAnchor="middle" fill="#999" fontSize="9" fontFamily="monospace">Supabase</text>
           <rect x="310" y="85" width="70" height="30" rx="4" fill="#111" stroke="#555" strokeWidth="1" />
-          <text x="345" y="104" textAnchor="middle" fill="#999" fontSize="9" fontFamily="monospace">Stripe</text>
+          <text x="345" y="104" textAnchor="middle" fill="#999" fontSize="9" fontFamily="monospace">Naver API</text>
           <rect x="310" y="125" width="70" height="30" rx="4" fill="#111" stroke="#555" strokeWidth="1" />
           <text x="345" y="144" textAnchor="middle" fill="#999" fontSize="9" fontFamily="monospace">OpenAI</text>
         </svg>
@@ -40,9 +40,9 @@ function EnvVarVisual() {
       </div>
       <div className="space-y-1">
         <p><span className="text-purple-400">export</span> const <span className="text-blue-400">config</span> = {'{'}</p>
-        <p className="pl-4">apiKey: <span className="text-green-400">process.env.OPENAI_KEY</span>,</p>
+        <p className="pl-4">apiKey: <span className="text-green-400">process.env.NAVER_CLIENT_ID</span>,</p>
         <p className="pl-4">dbHost: <span className="text-green-400">process.env.SUPABASE_URL</span>,</p>
-        <p className="pl-4">region: <span className="text-orange-400">&quot;us-east-1&quot;</span></p>
+        <p className="pl-4">aiKey: <span className="text-green-400">process.env.OPENAI_API_KEY</span></p>
         <p>{'}'}</p>
         <p className="text-gray-600 mt-2">{'// Variables injected securely at runtime'}</p>
       </div>
