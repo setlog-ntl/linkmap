@@ -83,7 +83,7 @@ export function HeroSection() {
               </Link>
             </Button>
             <Button variant="outline" className="bg-zinc-900/80 backdrop-blur-sm border-zinc-700 text-white hover:border-zinc-500 hover:bg-zinc-800/80 px-8 py-3.5 h-auto rounded-lg text-base font-bold transition-all" asChild>
-              <Link href="/demo">
+              <Link href="/oneclick">
                 <Play className="mr-2 h-4 w-4 fill-current" />
                 {t(locale, 'landing.heroCtaDemo')}
               </Link>
