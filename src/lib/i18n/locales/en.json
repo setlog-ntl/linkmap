@@ -318,6 +318,19 @@
     "teamF6": "SSO / SAML",
     "teamF7": "Dedicated support"
   },
+  "templatePicker": {
+    "chooseTemplate": "Choose a Template",
+    "siteName": "Site Name",
+    "recommended": "Recommended",
+    "deploy": "Deploy This Template",
+    "deploying": "Deploying...",
+    "preview": "Preview",
+    "noTemplates": "No templates in this category",
+    "categoryAll": "All",
+    "categoryPersonal": "Personal",
+    "categoryBusiness": "Business",
+    "categoryCommunity": "Community"
+  },
   "error": {
     "pageNotFound": "Page Not Found",
     "pageNotFoundDesc": "The page you requested doesn't exist or has been moved.",

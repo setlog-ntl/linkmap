@@ -318,6 +318,19 @@
     "teamF6": "SSO / SAML",
     "teamF7": "전담 지원"
   },
+  "templatePicker": {
+    "chooseTemplate": "템플릿 선택",
+    "siteName": "사이트 이름",
+    "recommended": "추천",
+    "deploy": "이 템플릿으로 배포",
+    "deploying": "배포 진행 중...",
+    "preview": "미리보기",
+    "noTemplates": "이 카테고리에 템플릿이 없습니다",
+    "categoryAll": "전체",
+    "categoryPersonal": "개인",
+    "categoryBusiness": "비즈니스",
+    "categoryCommunity": "커뮤니티"
+  },
   "error": {
     "pageNotFound": "페이지를 찾을 수 없습니다",
     "pageNotFoundDesc": "요청하신 페이지가 존재하지 않거나 이동되었습니다.",

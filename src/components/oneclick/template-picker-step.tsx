@@ -1,22 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   CheckCircle2,
-  Lock,
   Loader2,
   Rocket,
   Github,
   Globe,
   AlertCircle,
+  LayoutGrid,
+  User,
+  Store,
+  Users,
 } from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
+import { TemplateCard } from './template-card';
+import {
+  type TemplateCategory,
+  TEMPLATE_CATEGORY_ORDER,
+  templateSlugToCategory,
+} from '@/lib/constants/template-categories';
 import type { HomepageTemplate } from '@/lib/queries/oneclick';
 
 interface TemplatePickerStepProps {
@@ -31,20 +41,12 @@ interface TemplatePickerStepProps {
 
 const SITE_NAME_REGEX = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
 
-// Template category icons/colors
-const TEMPLATE_COLORS: Record<string, string> = {
-  'link-in-bio': 'from-pink-500/10 to-purple-500/10 border-pink-200 dark:border-pink-800',
-  professional: 'from-blue-500/10 to-cyan-500/10 border-blue-200 dark:border-blue-800',
-  business: 'from-amber-500/10 to-orange-500/10 border-amber-200 dark:border-amber-800',
-  community: 'from-green-500/10 to-emerald-500/10 border-green-200 dark:border-green-800',
+const CATEGORY_ICONS: Record<TemplateCategory, typeof LayoutGrid> = {
+  all: LayoutGrid,
+  personal: User,
+  business: Store,
+  community: Users,
 };
-
-function getTemplateGradient(tags: string[]): string {
-  for (const [key, value] of Object.entries(TEMPLATE_COLORS)) {
-    if (tags.some((t) => t.includes(key))) return value;
-  }
-  return 'from-primary/5 to-primary/10 border-border';
-}
 
 export function TemplatePickerStep({
   templates,
@@ -56,9 +58,27 @@ export function TemplatePickerStep({
   isAuthenticated = true,
 }: TemplatePickerStepProps) {
   const { locale } = useLocaleStore();
+  const prefersReducedMotion = useReducedMotion();
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [siteName, setSiteName] = useState('');
   const [siteNameError, setSiteNameError] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<TemplateCategory>('all');
+
+  // Category counts
+  const categoryCounts = useMemo(() => {
+    const counts: Record<TemplateCategory, number> = { all: templates.length, personal: 0, business: 0, community: 0 };
+    for (const tpl of templates) {
+      const cat = templateSlugToCategory[tpl.slug];
+      if (cat && cat !== 'all') counts[cat]++;
+    }
+    return counts;
+  }, [templates]);
+
+  // Filtered templates
+  const filteredTemplates = useMemo(() => {
+    if (selectedCategory === 'all') return templates;
+    return templates.filter((tpl) => templateSlugToCategory[tpl.slug] === selectedCategory);
+  }, [templates, selectedCategory]);
 
   const validateSiteName = (name: string) => {
     if (name.length < 2) {
@@ -153,75 +173,65 @@ export function TemplatePickerStep({
       {/* Template selection */}
       <div>
         <Label className="text-base font-semibold mb-3 block">
-          {locale === 'ko' ? '템플릿 선택' : 'Choose a Template'}
+          {t(locale, 'templatePicker.chooseTemplate')}
         </Label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {templates.map((tpl) => {
-            const isSelected = selectedTemplate === tpl.id;
-            const gradient = getTemplateGradient(tpl.tags);
+
+        {/* Category filter bar */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {TEMPLATE_CATEGORY_ORDER.map((cat) => {
+            const Icon = CATEGORY_ICONS[cat];
+            const isActive = selectedCategory === cat;
             return (
-              <Card
-                key={tpl.id}
-                className={`cursor-pointer transition-all hover:shadow-md hover:scale-[1.02] ${
-                  isSelected ? 'ring-2 ring-primary shadow-md' : ''
-                } ${tpl.is_premium ? 'opacity-60 cursor-not-allowed' : ''}`}
-                onClick={() => !tpl.is_premium && setSelectedTemplate(tpl.id)}
+              <Badge
+                key={cat}
+                variant={isActive ? 'default' : 'outline'}
+                className={`cursor-pointer select-none gap-1.5 px-3 py-1.5 text-xs transition-colors ${
+                  isActive ? '' : 'hover:bg-accent'
+                }`}
+                onClick={() => setSelectedCategory(cat)}
               >
-                <CardContent className="p-0">
-                  {/* Preview area */}
-                  <div className={`h-24 rounded-t-xl bg-gradient-to-br ${gradient} flex items-center justify-center relative overflow-hidden`}>
-                    {tpl.preview_image_url ? (
-                      <img
-                        src={tpl.preview_image_url}
-                        alt={locale === 'ko' ? tpl.name_ko : tpl.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="text-center">
-                        <Globe className="h-8 w-8 mx-auto text-muted-foreground/30" />
-                        <span className="text-[10px] text-muted-foreground/40 mt-1 block">
-                          {locale === 'ko' ? '미리보기' : 'Preview'}
-                        </span>
-                      </div>
-                    )}
-                    {isSelected && (
-                      <div className="absolute top-2 right-2">
-                        <CheckCircle2 className="h-6 w-6 text-primary drop-shadow" />
-                      </div>
-                    )}
-                    {tpl.is_premium && (
-                      <Badge variant="secondary" className="absolute top-2 right-2 gap-1">
-                        <Lock className="h-3 w-3" /> Pro
-                      </Badge>
-                    )}
-                  </div>
-                  {/* Info */}
-                  <div className="p-4 pt-3">
-                    <h4 className="font-semibold text-sm">
-                      {locale === 'ko' ? tpl.name_ko : tpl.name}
-                    </h4>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {locale === 'ko' ? tpl.description_ko : tpl.description}
-                    </p>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {tpl.tags.slice(0, 3).map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-[10px] px-1.5 py-0 h-4">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                <Icon className="h-3.5 w-3.5" />
+                {t(locale, `templatePicker.category${cat.charAt(0).toUpperCase() + cat.slice(1)}`)}
+                <span className="text-[10px] opacity-70">({categoryCounts[cat]})</span>
+              </Badge>
             );
           })}
         </div>
+
+        {/* Template grid with animations */}
+        {filteredTemplates.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-8">
+            {t(locale, 'templatePicker.noTemplates')}
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <AnimatePresence mode="popLayout">
+              {filteredTemplates.map((tpl, index) => (
+                <motion.div
+                  key={tpl.id}
+                  layout
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.25, delay: Math.min(index * 0.04, 0.3) }}
+                >
+                  <TemplateCard
+                    template={tpl}
+                    isSelected={selectedTemplate === tpl.id}
+                    locale={locale}
+                    onSelect={setSelectedTemplate}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
       </div>
 
       {/* Site name input with live URL preview */}
       <div className="space-y-2">
         <Label htmlFor="site-name" className="text-base font-semibold">
-          {locale === 'ko' ? '사이트 이름' : 'Site Name'}
+          {t(locale, 'templatePicker.siteName')}
         </Label>
         <Input
           id="site-name"
@@ -248,12 +258,12 @@ export function TemplatePickerStep({
           {isDeploying ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              {locale === 'ko' ? '배포 진행 중...' : 'Deploying...'}
+              {t(locale, 'templatePicker.deploying')}
             </>
           ) : (
             <>
               <Rocket className="h-4 w-4" />
-              {locale === 'ko' ? '이 템플릿으로 배포' : 'Deploy This Template'}
+              {t(locale, 'templatePicker.deploy')}
             </>
           )}
         </Button>
