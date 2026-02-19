@@ -1131,6 +1131,19 @@ export function getTemplateBySlug(slug: string): HomepageTemplateContent | undef
 }
 
 /**
+ * Get the set of template slugs that have code bundles available.
+ * Used by the templates API to filter out stale DB entries.
+ */
+export function getAvailableSlugs(): Set<string> {
+  if (templateMap.size === 0) {
+    for (const tpl of homepageTemplates) {
+      templateMap.set(tpl.slug, tpl);
+    }
+  }
+  return new Set(templateMap.keys());
+}
+
+/**
  * Get deploy workflow YAML (shared across all MVP templates).
  * Useful for admin/setup-templates and custom template creation.
  */
