@@ -42,11 +42,15 @@ export async function GET(
 
   if (stateError || !oauthState) {
     // state 조회 실패 시 진단 정보 반환 (admin client 문제 확인용)
+    const srkKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
     return NextResponse.json({
       error: 'OAuth state 조회 실패',
       stateError: stateError?.message ?? 'no data',
-      hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-      serviceRoleKeyPrefix: process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 10) ?? '(unset)',
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? '(unset)',
+      serviceRoleKeyLength: srkKey.length,
+      serviceRoleKeyPrefix: srkKey.slice(0, 20),
+      serviceRoleKeySuffix: srkKey.slice(-10),
+      anonKeyPrefix: (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '').slice(0, 20),
     }, { status: 500 });
   }
 
