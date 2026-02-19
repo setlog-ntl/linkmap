@@ -60,12 +60,12 @@ export function PricingSection() {
   ];
 
   return (
-    <section className="py-24 bg-zinc-900/50 border-t border-zinc-800/60" id="pricing">
+    <section className="py-24 bg-[#f1f5f3] dark:bg-zinc-900/50 border-t border-[#e7efe9] dark:border-zinc-800/60" id="pricing">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <ScrollReveal>
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">{t(locale, 'landing.pricingTitle')}</h2>
-            <p className="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">{t(locale, 'landing.pricingDesc')}</p>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t(locale, 'landing.pricingTitle')}</h2>
+            <p className="mt-4 text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">{t(locale, 'landing.pricingDesc')}</p>
           </div>
         </ScrollReveal>
 
@@ -75,8 +75,8 @@ export function PricingSection() {
               <div
                 className={`rounded-2xl p-8 flex flex-col h-full transition-all ${
                   plan.highlighted
-                    ? 'bg-zinc-900/80 backdrop-blur-sm border-2 border-[#2bee79] relative transform md:scale-105 shadow-[0_0_30px_rgba(43,238,121,0.15)]'
-                    : 'bg-zinc-900/60 backdrop-blur-sm border border-zinc-800 hover:border-zinc-700'
+                    ? 'bg-white dark:bg-zinc-900/80 backdrop-blur-sm border-2 border-[#2bee79] relative transform md:scale-105 shadow-lg dark:shadow-[0_0_30px_rgba(43,238,121,0.15)]'
+                    : 'bg-white dark:bg-zinc-900/60 backdrop-blur-sm border border-[#e7efe9] dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700'
                 }`}
               >
                 {plan.highlighted && (
@@ -84,15 +84,15 @@ export function PricingSection() {
                     {t(locale, 'landing.planPopular')}
                   </div>
                 )}
-                <h3 className="text-lg font-bold text-white">{plan.name}</h3>
-                <p className="text-4xl font-bold text-white mt-4">
+                <h3 className="text-lg font-bold">{plan.name}</h3>
+                <p className="text-4xl font-bold mt-4">
                   {plan.price}
-                  {plan.period && <span className="text-lg font-normal text-gray-400">{plan.period}</span>}
+                  {plan.period && <span className="text-lg font-normal text-gray-500 dark:text-gray-400">{plan.period}</span>}
                 </p>
-                <p className="text-sm text-gray-400 mt-2">{plan.description}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{plan.description}</p>
                 <ul className="mt-8 space-y-4 flex-1">
                   {plan.features.map((feature) => (
-                    <li key={feature} className={`flex items-center text-sm ${plan.highlighted ? 'text-white' : 'text-gray-300'}`}>
+                    <li key={feature} className={`flex items-center text-sm ${plan.highlighted ? '' : 'text-gray-600 dark:text-gray-300'}`}>
                       <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#2bee79]/10 mr-3">
                         <Check className="w-3 h-3 text-[#2bee79]" />
                       </div>
@@ -104,7 +104,7 @@ export function PricingSection() {
                   className={`mt-8 w-full rounded-lg py-3 h-auto text-sm font-bold transition-all ${
                     plan.highlighted
                       ? 'bg-[#2bee79] text-black hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(43,238,121,0.3)]'
-                      : 'bg-zinc-800 border border-zinc-700 text-white hover:bg-zinc-700'
+                      : 'bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-zinc-700'
                   }`}
                   asChild
                 >
@@ -123,19 +123,19 @@ export function FinalCtaSection() {
   const { locale } = useLocaleStore();
 
   return (
-    <section className="py-24 bg-[#0a0a0a] relative overflow-hidden">
+    <section className="py-24 bg-white dark:bg-[#0a0a0a] relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(43,238,121,0.08)_0%,transparent_70%)]" />
       <ScrollReveal>
         <div className="relative mx-auto max-w-4xl px-6 text-center">
           {/* Social proof */}
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/80 px-4 py-1.5 text-sm text-gray-300">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#e7efe9] dark:border-zinc-800 bg-[#f1f5f3] dark:bg-zinc-900/80 px-4 py-1.5 text-sm text-gray-600 dark:text-gray-300">
             <Users className="w-4 h-4 text-[#2bee79]" />
             {t(locale, 'landing.finalCtaSocialProof')}
           </div>
 
-          <h2 className="text-4xl font-bold tracking-tight text-white mb-6 sm:text-5xl">{t(locale, 'landing.finalCtaTitle')}</h2>
-          <p className="text-lg text-gray-400 mb-10 max-w-xl mx-auto">{t(locale, 'landing.finalCtaDesc')}</p>
+          <h2 className="text-4xl font-bold tracking-tight mb-6 sm:text-5xl">{t(locale, 'landing.finalCtaTitle')}</h2>
+          <p className="text-lg text-gray-500 dark:text-gray-400 mb-10 max-w-xl mx-auto">{t(locale, 'landing.finalCtaDesc')}</p>
           <Button className="bg-[#2bee79] text-black hover:bg-emerald-400 px-10 py-4 h-auto rounded-lg text-base font-bold transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(43,238,121,0.3)]" asChild>
             <Link href="/signup">
               {t(locale, 'landing.ctaStart')}

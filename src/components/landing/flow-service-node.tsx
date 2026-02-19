@@ -28,14 +28,14 @@ function FlowServiceNode({ data }: NodeProps) {
 
   return (
     <div
-      className={`px-3 py-2 rounded-lg border shadow-sm transition-all duration-300 bg-[#111] ${
+      className={`px-3 py-2 rounded-lg border shadow-sm transition-all duration-300 bg-white dark:bg-[#111] ${
         d.highlighted
           ? 'scale-110 shadow-md ring-2 ring-[#2bee79]/30 border-[#2bee79]/50'
-          : 'border-zinc-700 hover:border-gray-500'
+          : 'border-gray-300 dark:border-zinc-700 hover:border-gray-400 dark:hover:border-gray-500'
       }`}
     >
-      <Handle type="target" position={Position.Left} className="!bg-gray-600 !w-2 !h-2 !border-0" />
-      <Handle type="source" position={Position.Right} className="!bg-gray-600 !w-2 !h-2 !border-0" />
+      <Handle type="target" position={Position.Left} className="!bg-gray-400 dark:!bg-gray-600 !w-2 !h-2 !border-0" />
+      <Handle type="source" position={Position.Right} className="!bg-gray-400 dark:!bg-gray-600 !w-2 !h-2 !border-0" />
 
       <div className="flex items-center gap-2">
         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass}`} />
@@ -44,7 +44,7 @@ function FlowServiceNode({ data }: NodeProps) {
         ) : (
           <span className="text-base">{d.emoji}</span>
         )}
-        <span className="font-bold text-xs whitespace-nowrap text-white">{d.label}</span>
+        <span className="font-bold text-xs whitespace-nowrap">{d.label}</span>
       </div>
       {d.envTotal != null && d.envTotal > 0 && (
         <div className="text-[10px] text-gray-500 mt-0.5 ml-[22px]">

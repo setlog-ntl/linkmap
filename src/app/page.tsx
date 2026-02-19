@@ -28,7 +28,7 @@ export default async function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0a0a0a] text-white">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-white">
       <Header profile={profile} />
 
       {/* Section 1: Hero */}

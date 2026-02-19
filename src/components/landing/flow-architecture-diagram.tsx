@@ -80,12 +80,12 @@ function buildEdges(highlightedNodeIds: Set<string>): Edge[] {
         fill: '#888',
       },
       labelBgStyle: {
-        fill: '#0d0d0d',
+        fill: 'var(--flow-label-bg, #f1f5f3)',
         fillOpacity: 1,
       },
       labelBgPadding: [4, 2] as [number, number],
       style: {
-        stroke: isHighlighted ? '#2bee79' : '#333',
+        stroke: isHighlighted ? '#2bee79' : 'var(--flow-edge-color, #d1d5db)',
         strokeWidth: isHighlighted ? 2.5 : 1.5,
         opacity: highlightedNodeIds.size > 0 && !isHighlighted ? 0.3 : 1,
       },
