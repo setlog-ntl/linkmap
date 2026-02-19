@@ -93,9 +93,13 @@ export async function GET(
     const tokenData = await tokenRes.json();
 
     if (tokenData.error || !tokenData.access_token) {
-      return NextResponse.redirect(
-        new URL(`${oauthState.redirect_url}?error=token_exchange_failed`, request.nextUrl.origin)
-      );
+      // TODO: 디버그 완료 후 제거
+      return NextResponse.json({
+        error: 'token_exchange_failed',
+        tokenResponse: tokenData,
+        clientIdUsed: clientId,
+        redirectUriUsed: `${appOrigin}/api/oauth/${provider}/callback`,
+      }, { status: 500 });
     }
 
     const accessToken = tokenData.access_token;
