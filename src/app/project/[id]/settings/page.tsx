@@ -14,6 +14,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useProject, useUpdateProject, useDeleteProject } from '@/lib/queries/projects';
 import { Save, Trash2, Users, UserPlus, Shield, Edit, Eye, GitBranch, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 import { useLinkedRepos, useUnlinkRepo } from '@/lib/queries/github';
 import { RepoSelector } from '@/components/github/repo-selector';
 
@@ -44,6 +47,7 @@ export default function ProjectSettingsPage() {
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
 
+  const { locale } = useLocaleStore();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [nameInitialized, setNameInitialized] = useState(false);
@@ -86,12 +90,12 @@ export default function ProjectSettingsPage() {
     );
   };
 
-  const handleDelete = () => {
-    if (!confirm('프로젝트를 삭제하시겠습니까?\n모든 서비스 연결과 환경변수가 삭제됩니다.')) return;
-    if (!confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
-    deleteProject.mutate(projectId, {
-      onSuccess: () => router.push('/dashboard'),
-      onError: () => toast.error('삭제에 실패했습니다'),
+  const handleDelete = async () => {
+    return new Promise<void>((resolve, reject) => {
+      deleteProject.mutate(projectId, {
+        onSuccess: () => { router.push('/dashboard'); resolve(); },
+        onError: () => { toast.error('삭제에 실패했습니다'); reject(); },
+      });
     });
   };
 
@@ -276,10 +280,20 @@ export default function ProjectSettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button variant="destructive" onClick={handleDelete} disabled={deleteProject.isPending}>
-            <Trash2 className="mr-2 h-4 w-4" />
-            {deleteProject.isPending ? '삭제 중...' : '프로젝트 삭제'}
-          </Button>
+          <ConfirmDialog
+            trigger={
+              <Button variant="destructive" disabled={deleteProject.isPending}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                {deleteProject.isPending ? t(locale, 'common.deleting') : '프로젝트 삭제'}
+              </Button>
+            }
+            title={t(locale, 'common.deleteConfirmTitle')}
+            description="프로젝트를 삭제하면 모든 서비스 연결, 체크리스트 진행도, 환경변수가 영구적으로 삭제됩니다."
+            confirmLabel={t(locale, 'common.delete')}
+            cancelLabel={t(locale, 'common.cancel')}
+            variant="destructive"
+            onConfirm={handleDelete}
+          />
         </CardContent>
       </Card>
     </div>
@@ -289,6 +303,7 @@ export default function ProjectSettingsPage() {
 // ---------- GitHub Settings ----------
 
 function GitHubSettingsCard({ projectId }: { projectId: string }) {
+  const { locale } = useLocaleStore();
   const { data: linkedRepos = [], isLoading } = useLinkedRepos(projectId);
   const unlinkRepo = useUnlinkRepo(projectId);
 
@@ -335,22 +350,31 @@ function GitHubSettingsCard({ projectId }: { projectId: string }) {
                       )}
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                    onClick={() => {
-                      if (confirm(`${repo.repo_full_name} 연결을 해제하시겠습니까?`)) {
+                  <ConfirmDialog
+                    trigger={
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        disabled={unlinkRepo.isPending}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    }
+                    title={t(locale, 'common.unlinkConfirmTitle')}
+                    description={`${repo.repo_full_name} 연결을 해제하시겠습니까?`}
+                    confirmLabel={t(locale, 'common.delete')}
+                    cancelLabel={t(locale, 'common.cancel')}
+                    variant="destructive"
+                    onConfirm={() => {
+                      return new Promise<void>((resolve, reject) => {
                         unlinkRepo.mutate(repo.id, {
-                          onSuccess: () => toast.success('레포 연결 해제됨'),
-                          onError: () => toast.error('연결 해제 실패'),
+                          onSuccess: () => { toast.success('레포 연결 해제됨'); resolve(); },
+                          onError: () => { toast.error('연결 해제 실패'); reject(); },
                         });
-                      }
+                      });
                     }}
-                    disabled={unlinkRepo.isPending}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  />
                 </div>
               ))}
             </div>

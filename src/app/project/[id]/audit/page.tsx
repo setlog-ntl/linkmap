@@ -26,6 +26,9 @@ import {
   Clock,
   Filter,
 } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 
 const actionConfig: Record<string, { label: string; icon: typeof Key; color: string }> = {
   'env_var.create': { label: '환경변수 생성', icon: FolderPlus, color: 'text-green-600' },
@@ -69,6 +72,7 @@ export default function ProjectAuditPage() {
   const [actionFilter, setActionFilter] = useState('all');
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
+  const { locale } = useLocaleStore();
   const filterParam = actionFilter === 'all' ? undefined : actionFilter;
   const { data: logs = [], isLoading } = useAuditLogs(projectId, { action: filterParam });
 
@@ -122,12 +126,12 @@ export default function ProjectAuditPage() {
 
       {filteredLogs.length === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center">
-            <Clock className="mx-auto h-12 w-12 text-muted-foreground/30 mb-4" />
-            <p className="text-muted-foreground">감사 로그가 없습니다</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              환경변수 조회·수정, 프로젝트 변경 등의 활동이 기록됩니다
-            </p>
+          <CardContent>
+            <EmptyState
+              icon={Clock}
+              title={t(locale, 'project.emptyAudit')}
+              description={t(locale, 'project.emptyAuditDesc')}
+            />
           </CardContent>
         </Card>
       ) : (

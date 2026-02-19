@@ -21,6 +21,16 @@ import {
   Tablet,
   Monitor,
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import {
@@ -166,18 +176,29 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     if (showLiveAfterDeploy) setShowLiveAfterDeploy(false);
   }, [showLiveAfterDeploy]);
 
+  const [pendingTabPath, setPendingTabPath] = useState<string | null>(null);
+
   const handleTabSwitch = useCallback(
     (path: string) => {
       if (hasUnsavedChanges) {
-        const msg = t(locale, 'editor.unsavedChanges');
-        if (!window.confirm(msg)) return;
+        setPendingTabPath(path);
+        return;
       }
       setSelectedPath(path);
       setHasUnsavedChanges(false);
       setShowMobileFiles(false);
     },
-    [hasUnsavedChanges, locale]
+    [hasUnsavedChanges]
   );
+
+  const confirmTabSwitch = useCallback(() => {
+    if (pendingTabPath) {
+      setSelectedPath(pendingTabPath);
+      setHasUnsavedChanges(false);
+      setShowMobileFiles(false);
+      setPendingTabPath(null);
+    }
+  }, [pendingTabPath]);
 
   // 저장
   const handleSave = useCallback(async () => {
@@ -800,6 +821,24 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           </span>
         )}
       </div>
+
+      {/* ===== 미저장 변경 경고 다이얼로그 ===== */}
+      <AlertDialog open={!!pendingTabPath} onOpenChange={(open) => { if (!open) setPendingTabPath(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t(locale, 'editor.unsavedChanges')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {locale === 'ko' ? '저장하지 않은 변경사항이 사라집니다.' : 'Unsaved changes will be lost.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t(locale, 'common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={confirmTabSwitch}>
+              {locale === 'ko' ? '이동' : 'Leave'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* ===== AI 코드 도우미 (플로팅 위젯) ===== */}
       <ChatTerminal

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +12,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Trash2, FolderOpen, Layers, Zap, AlertCircle } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { MoreHorizontal, Trash2, FolderOpen, Layers, Zap, AlertCircle, Loader2 } from 'lucide-react';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 import type { ProjectWithServices } from '@/types';
 import { getCategoryStyle } from '@/lib/constants/category-styles';
 
@@ -29,6 +42,9 @@ const statusColors: Record<string, string> = {
 
 export function ProjectCard({ project, onDelete }: ProjectCardProps) {
   const router = useRouter();
+  const { locale } = useLocaleStore();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const services = project.project_services || [];
   const connectedCount = services.filter((s) => s.status === 'connected').length;
   const errorCount = services.filter((s) => s.status === 'error').length;
@@ -191,7 +207,7 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
                 className="text-destructive"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onDelete(project.id);
+                  setConfirmOpen(true);
                 }}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
@@ -199,6 +215,35 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+            <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t(locale, 'common.deleteConfirmTitle')}</AlertDialogTitle>
+                <AlertDialogDescription>{t(locale, 'common.deleteConfirmDesc')}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t(locale, 'common.cancel')}</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    setIsDeleting(true);
+                    try {
+                      await onDelete(project.id);
+                    } finally {
+                      setIsDeleting(false);
+                      setConfirmOpen(false);
+                    }
+                  }}
+                  disabled={isDeleting}
+                >
+                  {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {t(locale, 'common.delete')}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </CardHeader>
 

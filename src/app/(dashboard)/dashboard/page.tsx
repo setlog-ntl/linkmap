@@ -74,9 +74,7 @@ export default function DashboardPage() {
   };
 
   const handleDeleteProject = async (id: string) => {
-    if (confirm('프로젝트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-      await deleteProject.mutateAsync(id);
-    }
+    await deleteProject.mutateAsync(id);
   };
 
   return (

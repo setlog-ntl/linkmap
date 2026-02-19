@@ -19,7 +19,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { GitBranch } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { GitBranch, Loader2 } from 'lucide-react';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 import { EnvImportDialog } from '@/components/service/env-import-dialog';
 import { SecretsSyncPanel } from '@/components/github/secrets-sync-panel';
 import { useLinkedRepos } from '@/lib/queries/github';
@@ -39,6 +51,7 @@ export default function ProjectEnvPage() {
   const decryptEnvVar = useDecryptEnvVar();
   const updateEnvVar = useUpdateEnvVar(projectId);
 
+  const { locale } = useLocaleStore();
   const { data: linkedRepos = [] } = useLinkedRepos(projectId);
   const [showGitHubSync, setShowGitHubSync] = useState(false);
   const [activeEnv, setActiveEnv] = useState<Environment>('development');
@@ -101,9 +114,16 @@ export default function ProjectEnvPage() {
     setNewIsSecret(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('이 환경변수를 삭제하시겠습니까?')) return;
-    await deleteEnvVar.mutateAsync(id);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
+  const handleDelete = (id: string) => {
+    setPendingDeleteId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    await deleteEnvVar.mutateAsync(pendingDeleteId);
+    setPendingDeleteId(null);
   };
 
   const handleDownload = () => {
@@ -304,6 +324,30 @@ export default function ProjectEnvPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirm Dialog */}
+      <AlertDialog open={!!pendingDeleteId} onOpenChange={(open) => { if (!open) setPendingDeleteId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t(locale, 'common.deleteConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>{t(locale, 'common.deleteConfirmDesc')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t(locale, 'common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={(e) => {
+                e.preventDefault();
+                confirmDelete();
+              }}
+              disabled={deleteEnvVar.isPending}
+            >
+              {deleteEnvVar.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t(locale, 'common.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Edit Dialog */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>

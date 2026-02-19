@@ -9,7 +9,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Eye, EyeOff, Pencil, Trash2, Copy, MoreHorizontal } from 'lucide-react';
+import { Eye, EyeOff, Pencil, Trash2, Copy, MoreHorizontal, Key as KeyIcon } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 import type { EnvironmentVariable } from '@/types';
 
 interface EnvDataTableProps {
@@ -44,13 +47,17 @@ export function EnvDataTable({
     return d.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
   };
 
+  const { locale } = useLocaleStore();
+
   if (envVars.length === 0) {
     return (
       <Card>
-        <CardContent className="py-12 text-center">
-          <p className="text-muted-foreground">
-            이 환경에 등록된 변수가 없습니다
-          </p>
+        <CardContent>
+          <EmptyState
+            icon={KeyIcon}
+            title={t(locale, 'project.emptyEnvVars')}
+            description={t(locale, 'project.emptyEnvVarsDesc')}
+          />
         </CardContent>
       </Card>
     );

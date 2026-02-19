@@ -25,6 +25,9 @@ import {
 } from '@/components/ui/dialog';
 import { Plus, Pencil, Trash2, Save, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 import { useAiTemplates, useCreateAiTemplate, useUpdateAiTemplate, useDeleteAiTemplate } from '@/lib/queries/ai-config';
 import type { AiPromptTemplate } from '@/types';
 
@@ -69,6 +72,7 @@ export default function AiTemplatesTab() {
   const updateMutation = useUpdateAiTemplate();
   const deleteMutation = useDeleteAiTemplate();
 
+  const { locale } = useLocaleStore();
   const [filter, setFilter] = useState('all');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -76,7 +80,7 @@ export default function AiTemplatesTab() {
 
   const filtered = filter === 'all'
     ? templates
-    : templates?.filter((t) => t.category === filter);
+    : templates?.filter((tmpl) => tmpl.category === filter);
 
   const openCreate = () => {
     setEditingId(null);
@@ -84,19 +88,19 @@ export default function AiTemplatesTab() {
     setDialogOpen(true);
   };
 
-  const openEdit = (t: AiPromptTemplate) => {
-    setEditingId(t.id);
+  const openEdit = (tmpl: AiPromptTemplate) => {
+    setEditingId(tmpl.id);
     setForm({
-      name: t.name,
-      name_ko: t.name_ko || '',
-      description: t.description || '',
-      description_ko: t.description_ko || '',
-      category: t.category,
-      prompt_text: t.prompt_text,
-      prompt_text_ko: t.prompt_text_ko || '',
-      icon: t.icon,
-      sort_order: t.sort_order,
-      is_active: t.is_active,
+      name: tmpl.name,
+      name_ko: tmpl.name_ko || '',
+      description: tmpl.description || '',
+      description_ko: tmpl.description_ko || '',
+      category: tmpl.category,
+      prompt_text: tmpl.prompt_text,
+      prompt_text_ko: tmpl.prompt_text_ko || '',
+      icon: tmpl.icon,
+      sort_order: tmpl.sort_order,
+      is_active: tmpl.is_active,
     });
     setDialogOpen(true);
   };
@@ -131,13 +135,8 @@ export default function AiTemplatesTab() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('이 템플릿을 삭제하시겠습니까?')) return;
-    try {
-      await deleteMutation.mutateAsync(id);
-      toast.success('템플릿이 삭제되었습니다');
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : '삭제에 실패했습니다');
-    }
+    await deleteMutation.mutateAsync(id);
+    toast.success('템플릿이 삭제되었습니다');
   };
 
   if (isLoading) {
@@ -255,28 +254,38 @@ export default function AiTemplatesTab() {
         </Card>
       ) : (
         <div className="grid grid-cols-2 gap-4">
-          {filtered.map((t) => (
-            <Card key={t.id} className={!t.is_active ? 'opacity-60' : ''}>
+          {filtered.map((tmpl) => (
+            <Card key={tmpl.id} className={!tmpl.is_active ? 'opacity-60' : ''}>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm">{t.name_ko || t.name}</CardTitle>
+                  <CardTitle className="text-sm">{tmpl.name_ko || tmpl.name}</CardTitle>
                   <div className="flex items-center gap-1">
-                    <Badge variant="secondary" className="text-xs">{t.category}</Badge>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(t)}>
+                    <Badge variant="secondary" className="text-xs">{tmpl.category}</Badge>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(tmpl)}>
                       <Pencil className="h-3 w-3" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(t.id)}>
-                      <Trash2 className="h-3 w-3 text-destructive" />
-                    </Button>
+                    <ConfirmDialog
+                      trigger={
+                        <Button variant="ghost" size="icon" className="h-7 w-7">
+                          <Trash2 className="h-3 w-3 text-destructive" />
+                        </Button>
+                      }
+                      title={t(locale, 'common.deleteConfirmTitle')}
+                      description={t(locale, 'common.deleteConfirmDesc')}
+                      confirmLabel={t(locale, 'common.delete')}
+                      cancelLabel={t(locale, 'common.cancel')}
+                      variant="destructive"
+                      onConfirm={() => handleDelete(tmpl.id)}
+                    />
                   </div>
                 </div>
                 <CardDescription className="text-xs">
-                  {t.description_ko || t.description}
+                  {tmpl.description_ko || tmpl.description}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-xs text-muted-foreground font-mono line-clamp-2">
-                  {t.prompt_text_ko || t.prompt_text}
+                  {tmpl.prompt_text_ko || tmpl.prompt_text}
                 </p>
               </CardContent>
             </Card>

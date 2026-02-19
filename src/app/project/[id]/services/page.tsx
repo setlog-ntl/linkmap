@@ -16,8 +16,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AddServiceDialog } from '@/components/service/add-service-dialog';
 import { ServiceChecklist } from '@/components/service/service-checklist';
 import { SetupWizard } from '@/components/service/setup-wizard';
-import { Trash2, ExternalLink, Wand2 } from 'lucide-react';
+import { Trash2, ExternalLink, Wand2, List as ListIcon } from 'lucide-react';
 import { ServiceIcon } from '@/components/landing/service-icon';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 import { allCategoryLabels } from '@/lib/constants/service-filters';
 import type { ServiceCategory, ProjectService, Service } from '@/types';
 
@@ -38,6 +42,7 @@ const statusVariants: Record<string, 'default' | 'secondary' | 'destructive' | '
 export default function ProjectServicesPage() {
   const params = useParams();
   const projectId = params.id as string;
+  const { locale } = useLocaleStore();
   const { data: services = [], isLoading } = useProjectServices(projectId);
   const addService = useAddProjectService(projectId);
   const removeService = useRemoveProjectService(projectId);
@@ -48,7 +53,6 @@ export default function ProjectServicesPage() {
   };
 
   const handleRemoveService = async (projectServiceId: string) => {
-    if (!confirm('이 서비스를 프로젝트에서 제거하시겠습니까?')) return;
     await removeService.mutateAsync(projectServiceId);
   };
 
@@ -75,13 +79,18 @@ export default function ProjectServicesPage() {
 
       {services.length === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground mb-4">아직 추가된 서비스가 없습니다</p>
-            <AddServiceDialog
-              projectId={projectId}
-              existingServiceIds={[]}
-              onAdd={handleAddService}
-            />
+          <CardContent>
+            <EmptyState
+              icon={ListIcon}
+              title={t(locale, 'project.emptyServices')}
+              description={t(locale, 'project.emptyServicesDesc')}
+            >
+              <AddServiceDialog
+                projectId={projectId}
+                existingServiceIds={[]}
+                onAdd={handleAddService}
+              />
+            </EmptyState>
           </CardContent>
         </Card>
       ) : (
@@ -138,15 +147,24 @@ export default function ProjectServicesPage() {
                         </a>
                       </Button>
                     )}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-destructive hover:text-destructive ml-auto"
-                      onClick={() => handleRemoveService(ps.id)}
-                    >
-                      <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                      제거
-                    </Button>
+                    <ConfirmDialog
+                      trigger={
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-destructive hover:text-destructive ml-auto"
+                        >
+                          <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                          제거
+                        </Button>
+                      }
+                      title={t(locale, 'common.deleteConfirmTitle')}
+                      description={t(locale, 'common.deleteConfirmDesc')}
+                      confirmLabel={t(locale, 'common.delete')}
+                      cancelLabel={t(locale, 'common.cancel')}
+                      variant="destructive"
+                      onConfirm={() => handleRemoveService(ps.id)}
+                    />
                   </div>
 
                   {ps.service?.required_env_vars && (ps.service.required_env_vars as { name: string; description_ko?: string; description?: string; public: boolean }[]).length > 0 && (

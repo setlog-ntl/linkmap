@@ -26,6 +26,9 @@ import {
 } from '@/components/ui/dialog';
 import { Plus, Pencil, Trash2, Save, Star } from 'lucide-react';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 import { useAiPersonas, useCreateAiPersona, useUpdateAiPersona, useDeleteAiPersona } from '@/lib/queries/ai-config';
 import type { AiPersona } from '@/types';
 
@@ -75,6 +78,7 @@ export default function AiPersonasTab() {
   const updateMutation = useUpdateAiPersona();
   const deleteMutation = useDeleteAiPersona();
 
+  const { locale } = useLocaleStore();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<PersonaFormData>(emptyForm);
@@ -141,13 +145,8 @@ export default function AiPersonasTab() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('이 페르소나를 삭제하시겠습니까?')) return;
-    try {
-      await deleteMutation.mutateAsync(id);
-      toast.success('페르소나가 삭제되었습니다');
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : '삭제에 실패했습니다');
-    }
+    await deleteMutation.mutateAsync(id);
+    toast.success('페르소나가 삭제되었습니다');
   };
 
   if (isLoading) {
@@ -326,9 +325,19 @@ export default function AiPersonasTab() {
                     <Button variant="ghost" size="icon" onClick={() => openEditDialog(p)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(p.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    <ConfirmDialog
+                      trigger={
+                        <Button variant="ghost" size="icon">
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      }
+                      title={t(locale, 'common.deleteConfirmTitle')}
+                      description={t(locale, 'common.deleteConfirmDesc')}
+                      confirmLabel={t(locale, 'common.delete')}
+                      cancelLabel={t(locale, 'common.cancel')}
+                      variant="destructive"
+                      onConfirm={() => handleDelete(p.id)}
+                    />
                   </div>
                 </div>
               </CardHeader>

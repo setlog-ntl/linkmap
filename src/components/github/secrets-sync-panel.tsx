@@ -30,6 +30,7 @@ import {
 import { toast } from 'sonner';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import type { Environment } from '@/types';
 
 interface SecretsSyncPanelProps {
@@ -170,26 +171,37 @@ export function SecretsSyncPanel({ projectId }: SecretsSyncPanelProps) {
                 </p>
               )}
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-muted-foreground hover:text-destructive"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (confirm(`${repo.repo_full_name} 연결을 해제하시겠습니까?`)) {
-                  unlinkRepo.mutate(repo.id, {
-                    onSuccess: () => {
-                      toast.success('레포 연결 해제됨');
-                      if (selectedRepoIdx >= linkedRepos.length - 1) {
-                        setSelectedRepoIdx(Math.max(0, selectedRepoIdx - 1));
-                      }
-                    },
-                  });
+            <div onClick={(e) => e.stopPropagation()}>
+              <ConfirmDialog
+                trigger={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
                 }
-              }}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
+                title={t(locale, 'common.unlinkConfirmTitle')}
+                description={`${repo.repo_full_name} 연결을 해제하시겠습니까?`}
+                confirmLabel={t(locale, 'common.delete')}
+                cancelLabel={t(locale, 'common.cancel')}
+                variant="destructive"
+                onConfirm={() => {
+                  return new Promise<void>((resolve) => {
+                    unlinkRepo.mutate(repo.id, {
+                      onSuccess: () => {
+                        toast.success('레포 연결 해제됨');
+                        if (selectedRepoIdx >= linkedRepos.length - 1) {
+                          setSelectedRepoIdx(Math.max(0, selectedRepoIdx - 1));
+                        }
+                        resolve();
+                      },
+                    });
+                  });
+                }}
+              />
+            </div>
           </div>
         ))}
       </div>

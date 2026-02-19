@@ -19,11 +19,15 @@ import { HealthSummaryCard } from '@/components/project/health-summary-card';
 import { HealthTimeline } from '@/components/project/health-timeline';
 import { HealthSparkline } from '@/components/project/health-sparkline';
 import { Activity, Loader2, CheckCircle2, XCircle, HelpCircle } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 import type { HealthCheckStatus, HealthCheck } from '@/types';
 
 export default function ProjectHealthPage() {
   const params = useParams();
   const projectId = params.id as string;
+  const { locale } = useLocaleStore();
   const { data: services = [], isLoading } = useProjectServices(projectId);
   const { data: serverLatestChecks } = useLatestHealthChecks(projectId);
   const runHealthCheck = useRunHealthCheck();
@@ -182,9 +186,11 @@ export default function ProjectHealthPage() {
       {/* Service health cards */}
       {filteredServices.length === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center">
-            <Activity className="mx-auto h-12 w-12 text-muted-foreground/30 mb-4" />
-            <p className="text-muted-foreground">연결된 서비스가 없습니다</p>
+          <CardContent>
+            <EmptyState
+              icon={Activity}
+              title={t(locale, 'project.emptyHealth')}
+            />
           </CardContent>
         </Card>
       ) : (

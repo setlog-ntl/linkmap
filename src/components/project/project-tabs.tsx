@@ -5,13 +5,15 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { LayoutDashboard, Map, List, Key, Settings, ScrollText, Activity, Cable } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 
 interface ProjectTabsProps {
   projectId: string;
 }
 
 interface Tab {
-  label: string;
+  labelKey: string;
   href: string;
   icon: LucideIcon;
 }
@@ -19,26 +21,27 @@ interface Tab {
 const tabGroups: Tab[][] = [
   // Main
   [
-    { label: '대시보드', href: '', icon: LayoutDashboard },
-    { label: '서비스 맵', href: '/service-map', icon: Map },
-    { label: '서비스 목록', href: '/services', icon: List },
+    { labelKey: 'project.overview', href: '', icon: LayoutDashboard },
+    { labelKey: 'project.serviceMap', href: '/service-map', icon: Map },
+    { labelKey: 'project.services', href: '/services', icon: List },
   ],
   // Sub
   [
-    { label: '환경변수', href: '/env', icon: Key },
-    { label: '상태 모니터링', href: '/health', icon: Activity },
+    { labelKey: 'project.envVars', href: '/env', icon: Key },
+    { labelKey: 'project.health', href: '/health', icon: Activity },
   ],
   // Admin
   [
-    { label: '연결 관리', href: '/connections', icon: Cable },
-    { label: '감사 로그', href: '/audit', icon: ScrollText },
-    { label: '설정', href: '/settings', icon: Settings },
+    { labelKey: 'project.connections', href: '/connections', icon: Cable },
+    { labelKey: 'project.audit', href: '/audit', icon: ScrollText },
+    { labelKey: 'project.settings', href: '/settings', icon: Settings },
   ],
 ];
 
 export function ProjectTabs({ projectId }: ProjectTabsProps) {
   const pathname = usePathname();
   const basePath = `/project/${projectId}`;
+  const { locale } = useLocaleStore();
 
   return (
     <nav className="flex border-b overflow-x-auto scrollbar-none -mx-1 sm:mx-0">
@@ -54,6 +57,7 @@ export function ProjectTabs({ projectId }: ProjectTabsProps) {
             const isActive = tab.href === ''
               ? pathname === basePath
               : pathname.startsWith(tabPath);
+            const label = t(locale, tab.labelKey);
 
             return (
               <Link
@@ -65,10 +69,10 @@ export function ProjectTabs({ projectId }: ProjectTabsProps) {
                     ? 'border-primary text-primary'
                     : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/30'
                 )}
-                title={tab.label}
+                title={label}
               >
                 <tab.icon className="h-4 w-4 shrink-0" />
-                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="hidden sm:inline">{label}</span>
               </Link>
             );
           })}

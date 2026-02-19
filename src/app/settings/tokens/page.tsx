@@ -9,6 +9,9 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Key, Plus, Trash2, Copy, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 import { SettingsNav } from '@/components/settings/settings-nav';
 
 interface ApiToken {
@@ -28,6 +31,7 @@ export default function TokensPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newlyCreatedToken, setNewlyCreatedToken] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const { locale } = useLocaleStore();
 
   const loadTokens = useCallback(async () => {
     try {
@@ -72,15 +76,12 @@ export default function TokensPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('이 API 토큰을 삭제하시겠습니까?')) return;
-    try {
-      const res = await fetch(`/api/tokens?id=${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        toast.success('토큰이 삭제되었습니다');
-        loadTokens();
-      }
-    } catch {
-      toast.error('삭제에 실패했습니다');
+    const res = await fetch(`/api/tokens?id=${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      toast.success('토큰이 삭제되었습니다');
+      loadTokens();
+    } else {
+      throw new Error('삭제 실패');
     }
   };
 
@@ -208,14 +209,23 @@ export default function TokensPage() {
                       )}
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                    onClick={() => handleDelete(token.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <ConfirmDialog
+                    trigger={
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    }
+                    title={t(locale, 'common.deleteConfirmTitle')}
+                    description={t(locale, 'common.deleteConfirmDesc')}
+                    confirmLabel={t(locale, 'common.delete')}
+                    cancelLabel={t(locale, 'common.cancel')}
+                    variant="destructive"
+                    onConfirm={() => handleDelete(token.id)}
+                  />
                 </div>
               ))}
             </div>
