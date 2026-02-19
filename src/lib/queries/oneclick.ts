@@ -144,6 +144,15 @@ export function useMyDeployments() {
       const data = await res.json();
       return data.deployments;
     },
+    // Auto-refetch every 5s while any deployment is still building
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data) return false;
+      const hasBuilding = data.some((d) =>
+        ['building', 'creating', 'pending'].includes(d.deploy_status)
+      );
+      return hasBuilding ? 5000 : false;
+    },
   });
 }
 
