@@ -4,8 +4,9 @@ import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useDashboard } from '@/lib/queries/dashboard';
 import { useProjectStore } from '@/stores/project-store';
-import { DashboardSkeleton } from '@/components/dashboard/dashboard-skeleton';
-import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
+import { BentoDashboardSkeleton } from '@/components/dashboard/bento-dashboard-skeleton';
+import { BentoDashboardLayout } from '@/components/dashboard/bento-dashboard-layout';
+import { StackArchitectDialog } from '@/components/ai/stack-architect-dialog';
 
 export default function ProjectDashboardPage() {
   const params = useParams();
@@ -19,7 +20,7 @@ export default function ProjectDashboardPage() {
 
   const { data, isLoading, error } = useDashboard(projectId);
 
-  if (isLoading) return <DashboardSkeleton />;
+  if (isLoading) return <BentoDashboardSkeleton />;
 
   if (error || !data) {
     return (
@@ -29,5 +30,12 @@ export default function ProjectDashboardPage() {
     );
   }
 
-  return <DashboardLayout data={data} />;
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <StackArchitectDialog />
+      </div>
+      <BentoDashboardLayout data={data} />
+    </div>
+  );
 }

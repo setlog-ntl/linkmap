@@ -38,6 +38,7 @@ import { useLinkedRepos } from '@/lib/queries/github';
 import { EnvStatsHeader } from '@/components/env/env-stats-header';
 import { EnvFilterBar } from '@/components/env/env-filter-bar';
 import { EnvDataTable } from '@/components/env/env-data-table';
+import { EnvDoctorPanel } from '@/components/ai/env-doctor-panel';
 import type { Environment, EnvironmentVariable } from '@/types';
 
 export default function ProjectEnvPage() {
@@ -209,8 +210,9 @@ export default function ProjectEnvPage() {
       {/* Stats Header */}
       <EnvStatsHeader projectId={projectId} envVars={envVars} />
 
-      {/* GitHub Sync Toggle */}
+      {/* AI + GitHub Sync */}
       <div className="flex items-center gap-2">
+        <EnvDoctorPanel projectId={projectId} />
         <Button
           variant="outline"
           size="sm"

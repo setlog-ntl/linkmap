@@ -42,20 +42,22 @@ export function ServicesGrid() {
     <section className="py-24 bg-[#0a0a0a]">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <ScrollReveal>
-          <h2 className="text-2xl font-bold text-white mb-8">{t(locale, 'landing.servicesTitle')}</h2>
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-white sm:text-4xl">{t(locale, 'landing.servicesTitle')}</h2>
+          </div>
         </ScrollReveal>
 
-        {/* Filter tabs — active tab is white bg (Stitch style) */}
+        {/* Filter tabs */}
         <ScrollReveal>
-          <div className="flex flex-wrap gap-2 mb-10">
+          <div className="flex flex-wrap justify-center gap-2 mb-10">
             {domainFilters.map((f) => (
               <button
                 key={f.value}
                 onClick={() => setFilter(f.value)}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                   filter === f.value
-                    ? 'bg-white text-black font-bold'
-                    : 'bg-[#111] border border-zinc-800 text-gray-400 hover:text-white'
+                    ? 'bg-[#2bee79] text-black font-bold shadow-[0_0_15px_rgba(43,238,121,0.2)]'
+                    : 'bg-zinc-900 border border-zinc-800 text-gray-400 hover:text-white hover:border-zinc-700'
                 }`}
               >
                 {f.label}
@@ -64,7 +66,7 @@ export function ServicesGrid() {
           </div>
         </ScrollReveal>
 
-        {/* 6-column Grid (Stitch style) */}
+        {/* 6-column Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           <AnimatePresence mode="popLayout">
             {filtered.map((svc) => (
@@ -75,12 +77,12 @@ export function ServicesGrid() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.2 }}
-                className="flex flex-col items-center justify-center p-6 rounded bg-[#111] border border-zinc-800 hover:border-gray-500 transition-colors aspect-square cursor-default"
+                className="group flex flex-col items-center justify-center p-6 rounded-xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800/60 transition-all hover:shadow-lg hover:shadow-[#2bee79]/5 hover:scale-105 aspect-square cursor-default"
               >
-                <div className="mb-3">
+                <div className="mb-3 transition-transform group-hover:scale-110">
                   <ServiceIcon serviceId={svc.slug} size={36} />
                 </div>
-                <span className="text-xs text-gray-400">{svc.name}</span>
+                <span className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">{svc.name}</span>
               </motion.div>
             ))}
           </AnimatePresence>
