@@ -2,7 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { Scale } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -13,6 +16,7 @@ import {
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { allCategoryLabels, allCategoryEmojis } from '@/lib/constants/service-filters';
+import { ServiceComparisonSheet } from '@/components/ai/service-comparison-sheet';
 import type { ServiceComparison, Service, ServiceCategory } from '@/types';
 
 interface CompareClientProps {
@@ -28,6 +32,14 @@ export function CompareClient({ comparisons, services }: CompareClientProps) {
   }, [comparisons]);
 
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | 'all'>('all');
+  const [aiCompareSlugs, setAiCompareSlugs] = useState<string[]>([]);
+  const [aiSheetOpen, setAiSheetOpen] = useState(false);
+
+  const toggleAiCompare = (slug: string) => {
+    setAiCompareSlugs((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : prev.length < 4 ? [...prev, slug] : prev
+    );
+  };
 
   const filtered = useMemo(() => {
     if (selectedCategory === 'all') return comparisons;
@@ -51,20 +63,57 @@ export function CompareClient({ comparisons, services }: CompareClientProps) {
 
   return (
     <div className="space-y-8">
-      {/* Category filter */}
-      <Select value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as ServiceCategory | 'all')}>
-        <SelectTrigger className="w-[200px]">
-          <SelectValue placeholder="카테고리 선택" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">전체 카테고리</SelectItem>
-          {categories.map((cat) => (
-            <SelectItem key={cat} value={cat}>
-              {allCategoryEmojis[cat]} {allCategoryLabels[cat] || cat}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      {/* Category filter + AI Compare */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <Select value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as ServiceCategory | 'all')}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="카테고리 선택" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">전체 카테고리</SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat} value={cat}>
+                {allCategoryEmojis[cat]} {allCategoryLabels[cat] || cat}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* AI Compare selector */}
+        <div className="flex items-center gap-2">
+          <div className="flex flex-wrap gap-1">
+            {services.map((s) => {
+              const selected = aiCompareSlugs.includes(s.slug);
+              return (
+                <Badge
+                  key={s.slug}
+                  variant={selected ? 'default' : 'outline'}
+                  className="cursor-pointer text-xs"
+                  onClick={() => toggleAiCompare(s.slug)}
+                >
+                  <Checkbox checked={selected} className="mr-1 h-3 w-3" />
+                  {s.name}
+                </Badge>
+              );
+            })}
+          </div>
+          <Button
+            size="sm"
+            onClick={() => setAiSheetOpen(true)}
+            disabled={aiCompareSlugs.length < 2}
+            className="gap-1.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
+          >
+            <Scale className="h-3.5 w-3.5" />
+            AI 비교 ({aiCompareSlugs.length})
+          </Button>
+        </div>
+      </div>
+
+      <ServiceComparisonSheet
+        open={aiSheetOpen}
+        onOpenChange={setAiSheetOpen}
+        selectedSlugs={aiCompareSlugs}
+      />
 
       {/* Comparison matrices */}
       {filtered.map((comparison) => {

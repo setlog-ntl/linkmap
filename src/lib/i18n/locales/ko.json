@@ -405,6 +405,69 @@
     "systemTheme": "시스템 기본",
     "search": "검색"
   },
+  "ai": {
+    "stackArchitect": {
+      "title": "AI 스택 아키텍트",
+      "description": "프로젝트 설명을 입력하면 AI가 최적의 서비스 스택을 추천합니다",
+      "placeholder": "예: 한국 이커머스 SaaS, 소셜 로그인, 구독 결제, 실시간 알림",
+      "recommend": "AI 추천",
+      "analyzing": "AI가 분석 중...",
+      "apply": "프로젝트에 적용",
+      "applying": "적용 중...",
+      "applied": "적용 완료",
+      "result": "추천 결과",
+      "services": "추천 서비스",
+      "connections": "서비스 연결",
+      "monthlyCost": "월 예상 비용",
+      "complexity": "복잡도",
+      "summary": "요약",
+      "layer": "레이어",
+      "reason": "추천 이유",
+      "noResults": "추천 결과가 없습니다"
+    },
+    "envDoctor": {
+      "title": "AI 환경변수 닥터",
+      "description": "AI가 프로젝트 설정을 진단하고 누락/오류를 찾습니다",
+      "diagnose": "AI 진단",
+      "diagnosing": "AI가 진단 중...",
+      "result": "진단 결과",
+      "issues": "발견된 문제",
+      "noIssues": "문제가 발견되지 않았습니다",
+      "severity": "심각도",
+      "high": "높음",
+      "medium": "보통",
+      "low": "낮음",
+      "fix": "수정 제안",
+      "category": "카테고리",
+      "missing": "누락된 변수",
+      "orphan": "고아 변수",
+      "security": "보안 문제",
+      "naming": "네이밍 규칙"
+    },
+    "mapNarrator": {
+      "title": "AI 아키텍처 분석",
+      "description": "AI가 서비스맵을 분석하여 인사이트를 제공합니다",
+      "analyze": "AI 분석",
+      "analyzing": "AI가 분석 중...",
+      "stop": "중지"
+    },
+    "compare": {
+      "title": "AI 서비스 비교",
+      "description": "AI가 데이터 기반으로 서비스를 비교 분석합니다",
+      "compare": "AI 비교",
+      "comparing": "AI가 비교 분석 중...",
+      "selectServices": "비교할 서비스를 2~4개 선택하세요",
+      "result": "비교 결과"
+    },
+    "command": {
+      "title": "AI 커맨드",
+      "placeholder": "AI에게 명령하세요... 예: Stripe 추가해줘",
+      "mode": "AI 모드",
+      "thinking": "AI가 처리 중...",
+      "executed": "명령 실행 완료",
+      "error": "명령 처리 실패"
+    }
+  },
   "error": {
     "pageNotFound": "페이지를 찾을 수 없습니다",
     "pageNotFoundDesc": "요청하신 페이지가 존재하지 않거나 이동되었습니다.",

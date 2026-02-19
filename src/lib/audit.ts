@@ -46,7 +46,12 @@ export type AuditAction =
   | 'env_var.conflict_scan'
   | 'env_var.conflict_resolve'
   | 'team_member.add'
-  | 'team_member.remove';
+  | 'team_member.remove'
+  | 'ai.stack_recommend'
+  | 'ai.env_doctor'
+  | 'ai.map_narrate'
+  | 'ai.compare_services'
+  | 'ai.command';
 
 interface AuditLogEntry {
   action: AuditAction;

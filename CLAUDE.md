@@ -113,3 +113,21 @@ packages/
 ├── mcp-server/       # MCP server for Claude Code/Cursor
 └── cli/              # CLI tool for env management
 ```
+
+---
+
+## Completion Summary (Task Report)
+
+Every task completion MUST end with the following summary format:
+
+---
+### Task Summary
+
+**Request:** (what the user asked for - 1~2 sentences)
+
+**Completed:**
+- (list of completed items as bullet points)
+
+**Changed Files:**
+- (list of modified/created/deleted files, if any)
+---

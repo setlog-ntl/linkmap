@@ -405,6 +405,69 @@
     "systemTheme": "System Default",
     "search": "Search"
   },
+  "ai": {
+    "stackArchitect": {
+      "title": "AI Stack Architect",
+      "description": "Describe your project and AI will recommend the optimal service stack",
+      "placeholder": "e.g. Korean e-commerce SaaS, social login, subscription payments, real-time notifications",
+      "recommend": "AI Recommend",
+      "analyzing": "AI is analyzing...",
+      "apply": "Apply to Project",
+      "applying": "Applying...",
+      "applied": "Applied",
+      "result": "Recommendation Result",
+      "services": "Recommended Services",
+      "connections": "Service Connections",
+      "monthlyCost": "Estimated Monthly Cost",
+      "complexity": "Complexity",
+      "summary": "Summary",
+      "layer": "Layer",
+      "reason": "Reason",
+      "noResults": "No recommendations"
+    },
+    "envDoctor": {
+      "title": "AI Env Doctor",
+      "description": "AI diagnoses your project configuration and finds issues",
+      "diagnose": "AI Diagnose",
+      "diagnosing": "AI is diagnosing...",
+      "result": "Diagnosis Result",
+      "issues": "Issues Found",
+      "noIssues": "No issues found",
+      "severity": "Severity",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low",
+      "fix": "Suggested Fix",
+      "category": "Category",
+      "missing": "Missing Variable",
+      "orphan": "Orphan Variable",
+      "security": "Security Issue",
+      "naming": "Naming Convention"
+    },
+    "mapNarrator": {
+      "title": "AI Architecture Analysis",
+      "description": "AI analyzes your service map and provides insights",
+      "analyze": "AI Analyze",
+      "analyzing": "AI is analyzing...",
+      "stop": "Stop"
+    },
+    "compare": {
+      "title": "AI Service Comparison",
+      "description": "AI compares services based on real data",
+      "compare": "AI Compare",
+      "comparing": "AI is comparing...",
+      "selectServices": "Select 2-4 services to compare",
+      "result": "Comparison Result"
+    },
+    "command": {
+      "title": "AI Command",
+      "placeholder": "Command AI... e.g. Add Stripe",
+      "mode": "AI Mode",
+      "thinking": "AI is processing...",
+      "executed": "Command executed",
+      "error": "Command failed"
+    }
+  },
   "error": {
     "pageNotFound": "Page Not Found",
     "pageNotFoundDesc": "The page you requested doesn't exist or has been moved.",

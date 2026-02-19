@@ -14,6 +14,7 @@ import {
   Link2,
   LayoutGrid,
   Plus,
+  Brain,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -44,6 +45,7 @@ interface MapToolbarProps {
   onConnectModeChange: (enabled: boolean) => void;
   connectionType: UserConnectionType;
   onConnectionTypeChange: (type: UserConnectionType) => void;
+  onAiAnalyze?: () => void;
 }
 
 const statusLabels: Record<StatusFilter, string> = {
@@ -78,6 +80,7 @@ export function MapToolbar({
   onConnectModeChange,
   connectionType,
   onConnectionTypeChange,
+  onAiAnalyze,
 }: MapToolbarProps) {
   const { fitView } = useReactFlow();
   const { toggleCatalogSidebar, catalogSidebarOpen } = useServiceMapStore();
@@ -214,6 +217,19 @@ export function MapToolbar({
       <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => fitView({ padding: 0.3 })} title="맵 전체 보기">
         <Maximize2 className="h-3.5 w-3.5" />
       </Button>
+
+      {/* AI Analyze */}
+      {onAiAnalyze && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onAiAnalyze}
+          className="h-8 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border-blue-500/20 hover:border-blue-500/40 text-blue-700 dark:text-blue-300"
+        >
+          <Brain className="mr-1.5 h-3.5 w-3.5" />
+          AI 분석
+        </Button>
+      )}
 
       {/* Export */}
       <Button variant="outline" size="sm" className="h-8" onClick={onExportPng}>

@@ -36,6 +36,7 @@ import { HealthStatsPanel } from '@/components/service-map/health-stats-panel';
 import { Card, CardContent } from '@/components/ui/card';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { DollarSign, ChevronDown as ChevronDownIcon, ChevronUp as ChevronUpIcon } from 'lucide-react';
+import { MapNarratorPanel } from '@/components/ai/map-narrator-panel';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import { useServiceMapData } from './hooks/useServiceMapData';
 import { useServiceMapNodes } from './hooks/useServiceMapNodes';
@@ -142,6 +143,7 @@ function ServiceMapInner() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [connectMode, setConnectMode] = useState(false);
   const [connectionType, setConnectionType] = useState<UserConnectionType>('uses');
+  const [showAiPanel, setShowAiPanel] = useState(false);
 
   // --- Hook 1: Data fetching ---
   const data = useServiceMapData(projectId);
@@ -269,6 +271,7 @@ function ServiceMapInner() {
             onConnectModeChange={setConnectMode}
             connectionType={connectionType}
             onConnectionTypeChange={setConnectionType}
+            onAiAnalyze={() => setShowAiPanel(!showAiPanel)}
           />
         </div>
 
@@ -422,6 +425,27 @@ function ServiceMapInner() {
               </>
             )}
           </div>
+        )}
+
+        {/* AI Narrator Panel */}
+        {showAiPanel && (
+          <MapNarratorPanel
+            projectId={projectId}
+            nodes={data.services.map((ps) => ({
+              slug: ps.service?.slug,
+              name: ps.service?.name,
+              category: ps.service?.category,
+            }))}
+            edges={data.userConnections.map((c) => ({
+              source: c.source_service_id,
+              target: c.target_service_id,
+              type: c.connection_type,
+            }))}
+            health={Object.entries(data.healthChecks).map(([psId, hc]) => ({
+              service_name: psId,
+              status: (hc as { status?: string })?.status || 'unknown',
+            }))}
+          />
         )}
 
         <ServiceDetailSheet

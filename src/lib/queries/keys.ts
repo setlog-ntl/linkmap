@@ -60,6 +60,11 @@ export const queryKeys = {
   account: {
     connectedAccounts: ['account', 'connected-accounts'] as const,
   },
+  ai: {
+    stackRecommend: ['ai', 'stack-recommend'] as const,
+    envDoctor: (projectId: string) => ['ai', 'env-doctor', projectId] as const,
+    compare: (slugs: string[]) => ['ai', 'compare', ...slugs] as const,
+  },
   aiConfig: {
     global: ['ai-config', 'global'] as const,
     personas: ['ai-config', 'personas'] as const,
