@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { User, Link2 } from 'lucide-react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { SettingsNav } from '@/components/settings/settings-nav';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -196,9 +197,16 @@ export default function AccountPage() {
                         {getConnectionLabel(account.connection_type, locale)}
                       </td>
                       <td className="py-3 pr-4 text-muted-foreground">
-                        {account.project_id && account.project
-                          ? account.project.name
-                          : t(locale, 'account.userAccount')}
+                        {account.project_id && account.project ? (
+                          <Link
+                            href={`/project/${account.project_id}/services`}
+                            className="text-primary hover:underline"
+                          >
+                            {account.project.name}
+                          </Link>
+                        ) : (
+                          t(locale, 'account.userAccount')
+                        )}
                       </td>
                       <td className="py-3">
                         <Badge variant={getStatusVariant(account.status)}>
