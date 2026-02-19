@@ -15,7 +15,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { LogOut, Settings, LayoutDashboard, Menu, Globe, Rocket, Monitor, Bot } from 'lucide-react';
+import { LogOut, Settings, LayoutDashboard, Menu, Globe, Rocket, Monitor, Bot, Link2 } from 'lucide-react';
 import { useUIStore } from '@/stores/ui-store';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t, localeNames } from '@/lib/i18n';
@@ -72,6 +72,16 @@ export function Header({ profile }: HeaderProps) {
         >
           <Monitor className="h-3.5 w-3.5" />
           {t(locale, 'nav.mySites')}
+        </Link>
+      )}
+      {profile && (
+        <Link
+          href="/settings/account"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+          onClick={() => setSidebarOpen(false)}
+        >
+          <Link2 className="h-3.5 w-3.5" />
+          {t(locale, 'nav.connectedInfo')}
         </Link>
       )}
     </>
@@ -153,6 +163,12 @@ export function Header({ profile }: HeaderProps) {
                   <Link href="/my-sites">
                     <Monitor className="mr-2 h-4 w-4" />
                     {t(locale, 'nav.mySites')}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings/account">
+                    <Link2 className="mr-2 h-4 w-4" />
+                    {t(locale, 'nav.connectedInfo')}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

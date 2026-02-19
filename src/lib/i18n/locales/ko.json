@@ -22,7 +22,8 @@
     "serviceCatalog": "서비스 카탈로그",
     "pricing": "가격",
     "oneclick": "원클릭 배포",
-    "mySites": "내 사이트"
+    "mySites": "내 사이트",
+    "connectedInfo": "연결 정보"
   },
   "dashboard": {
     "title": "내 프로젝트",
@@ -345,7 +346,12 @@
     "statusError": "오류",
     "connectionOAuth": "OAuth",
     "connectionApiKey": "API Key",
-    "connectionManual": "수동"
+    "connectionManual": "수동",
+    "colService": "서비스",
+    "colAccount": "계정",
+    "colConnectionType": "연결 방식",
+    "colProject": "프로젝트",
+    "colStatus": "상태"
   },
   "error": {
     "pageNotFound": "페이지를 찾을 수 없습니다",

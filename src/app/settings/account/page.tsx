@@ -98,7 +98,7 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div className="container py-8 max-w-2xl">
+      <div className="container py-8 max-w-4xl">
         <SettingsNav />
         <Skeleton className="h-10 w-48 mb-4" />
         <Skeleton className="h-32 mb-6" />
@@ -109,7 +109,7 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="container py-8 max-w-2xl">
+    <div className="container py-8 max-w-4xl">
       <SettingsNav />
 
       {/* Profile Info */}
@@ -161,45 +161,54 @@ export default function AccountPage() {
               <p className="text-xs mt-1">{t(locale, 'account.noAccountsDesc')}</p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {accounts.map((account) => (
-                <div key={account.id} className="p-3 rounded-lg border space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 min-w-0">
-                      {account.service?.icon_url && (
-                        <img
-                          src={account.service.icon_url}
-                          alt={account.service.name}
-                          className="h-5 w-5 rounded"
-                        />
-                      )}
-                      <span className="font-medium text-sm">{account.service?.name || 'Unknown'}</span>
-                      {account.oauth_provider_user_id && (
-                        <span className="text-xs text-muted-foreground">
-                          @{account.oauth_metadata?.login || account.oauth_provider_user_id}
-                        </span>
-                      )}
-                    </div>
-                    <Badge variant={getStatusVariant(account.status)}>
-                      {getStatusLabel(account.status, locale)}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>{getConnectionLabel(account.connection_type, locale)}</span>
-                    {account.oauth_scopes && account.oauth_scopes.length > 0 && (
-                      <>
-                        <span>·</span>
-                        <span className="truncate">{account.oauth_scopes.join(', ')}</span>
-                      </>
-                    )}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {account.project_id && account.project
-                      ? `${t(locale, 'account.projectLabel')}: ${account.project.name}`
-                      : t(locale, 'account.userAccount')}
-                  </div>
-                </div>
-              ))}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-muted-foreground">
+                    <th className="pb-2 pr-4 font-medium">{t(locale, 'account.colService')}</th>
+                    <th className="pb-2 pr-4 font-medium">{t(locale, 'account.colAccount')}</th>
+                    <th className="pb-2 pr-4 font-medium">{t(locale, 'account.colConnectionType')}</th>
+                    <th className="pb-2 pr-4 font-medium">{t(locale, 'account.colProject')}</th>
+                    <th className="pb-2 font-medium">{t(locale, 'account.colStatus')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {accounts.map((account) => (
+                    <tr key={account.id} className="border-b last:border-0">
+                      <td className="py-3 pr-4">
+                        <div className="flex items-center gap-2">
+                          {account.service?.icon_url && (
+                            <img
+                              src={account.service.icon_url}
+                              alt={account.service.name}
+                              className="h-5 w-5 rounded"
+                            />
+                          )}
+                          <span className="font-medium">{account.service?.name || 'Unknown'}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 pr-4 text-muted-foreground">
+                        {account.oauth_provider_user_id
+                          ? `@${account.oauth_metadata?.login || account.oauth_provider_user_id}`
+                          : '-'}
+                      </td>
+                      <td className="py-3 pr-4 text-muted-foreground">
+                        {getConnectionLabel(account.connection_type, locale)}
+                      </td>
+                      <td className="py-3 pr-4 text-muted-foreground">
+                        {account.project_id && account.project
+                          ? account.project.name
+                          : t(locale, 'account.userAccount')}
+                      </td>
+                      <td className="py-3">
+                        <Badge variant={getStatusVariant(account.status)}>
+                          {getStatusLabel(account.status, locale)}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </CardContent>

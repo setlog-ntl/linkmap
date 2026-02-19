@@ -22,7 +22,8 @@
     "serviceCatalog": "Service Catalog",
     "pricing": "Pricing",
     "oneclick": "One-Click Deploy",
-    "mySites": "My Sites"
+    "mySites": "My Sites",
+    "connectedInfo": "Connections"
   },
   "dashboard": {
     "title": "My Projects",
@@ -345,7 +346,12 @@
     "statusError": "Error",
     "connectionOAuth": "OAuth",
     "connectionApiKey": "API Key",
-    "connectionManual": "Manual"
+    "connectionManual": "Manual",
+    "colService": "Service",
+    "colAccount": "Account",
+    "colConnectionType": "Type",
+    "colProject": "Project",
+    "colStatus": "Status"
   },
   "error": {
     "pageNotFound": "Page Not Found",
