@@ -87,10 +87,14 @@ export async function GET(request: NextRequest) {
           newDeployStatus = 'error';
           newPagesStatus = 'errored';
         } else if (pagesStatus === null) {
-          // Pages status null — check if the Actions workflow failed
+          // build_type: 'workflow' — Pages API always returns status: null.
+          // Must check Actions workflow run to determine actual deploy state.
           try {
             const run = await getLatestWorkflowRun(githubToken, owner, repo);
-            if (run?.status === 'completed' && run.conclusion === 'failure') {
+            if (run?.status === 'completed' && run.conclusion === 'success') {
+              newDeployStatus = 'ready';
+              newPagesStatus = 'built';
+            } else if (run?.status === 'completed' && run.conclusion === 'failure') {
               newDeployStatus = 'error';
               newPagesStatus = 'errored';
               deploy.deploy_error_message = 'GitHub Actions 워크플로우 빌드에 실패했습니다. GitHub 레포지토리의 Actions 탭에서 로그를 확인해주세요.';

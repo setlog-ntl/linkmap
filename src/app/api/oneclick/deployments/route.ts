@@ -120,11 +120,15 @@ async function refreshDeployStatus(
       newDeployStatus = 'error';
       newPagesStatus = 'errored';
     } else if (pagesStatus === null) {
-      // Check if Actions workflow failed
+      // build_type: 'workflow' — Pages API always returns status: null.
+      // Check Actions workflow to determine actual state.
       try {
         const [owner, repo] = (deploy.forked_repo_full_name as string).split('/');
         const run = await getLatestWorkflowRun(githubToken, owner, repo);
-        if (run?.status === 'completed' && (run.conclusion === 'failure' || run.conclusion === 'cancelled')) {
+        if (run?.status === 'completed' && run.conclusion === 'success') {
+          newDeployStatus = 'ready';
+          newPagesStatus = 'built';
+        } else if (run?.status === 'completed' && (run.conclusion === 'failure' || run.conclusion === 'cancelled')) {
           newDeployStatus = 'error';
           newPagesStatus = 'errored';
         }
