@@ -45,16 +45,28 @@ export async function GET(request: NextRequest) {
         ? await supabase
             .from('service_accounts')
             .select('id, encrypted_access_token')
-            .eq('project_id', deploy.project_id)
+            .eq('user_id', user.id)
             .eq('service_id', githubService.id)
+            .eq('connection_type', 'oauth')
             .eq('status', 'active')
+            .order('project_id', { ascending: false, nullsFirst: false })
+            .limit(1)
             .single()
         : { data: null };
 
       if (ghAccount) {
         const decryptResult = await safeDecryptToken(ghAccount.encrypted_access_token, supabase, ghAccount.id);
         if ('error' in decryptResult) {
-          // Token decryption failed (key rotated?) — skip GitHub polling
+          // Token decryption failed — mark deploy as error so UI can show it
+          await supabase
+            .from('homepage_deploys')
+            .update({
+              deploy_status: 'error',
+              deploy_error_message: 'GitHub 토큰 복호화 실패. GitHub를 다시 연결해주세요.',
+            })
+            .eq('id', deployId);
+          deploy.deploy_status = 'error';
+          deploy.deploy_error_message = 'GitHub 토큰 복호화 실패. GitHub를 다시 연결해주세요.';
         } else {
         const githubToken = decryptResult.token;
         const [owner, repo] = (deploy.forked_repo_full_name as string).split('/');
@@ -150,6 +162,8 @@ function buildSteps(deploy: Record<string, unknown>, deployMethod: string): Depl
   const deployStatus = deploy.deploy_status as string;
 
   if (deployMethod === 'github_pages') {
+    const pagesStatus = deploy.pages_status as string;
+
     const repoStep: StepStatus =
       forkStatus === 'forked' ? 'completed' :
       forkStatus === 'forking' ? 'in_progress' :
@@ -157,13 +171,15 @@ function buildSteps(deploy: Record<string, unknown>, deployMethod: string): Depl
 
     const pagesStep: StepStatus =
       repoStep !== 'completed' ? 'pending' :
-      deployStatus === 'building' || deployStatus === 'ready' ? 'completed' :
-      deployStatus === 'error' ? 'error' : 'in_progress';
+      pagesStatus === 'built' ? 'completed' :
+      pagesStatus === 'errored' ? 'error' :
+      pagesStatus === 'enabling' || pagesStatus === 'building' ? 'in_progress' :
+      'pending';
 
     const liveStep: StepStatus =
       deployStatus === 'ready' ? 'completed' :
       deployStatus === 'error' ? 'error' :
-      pagesStep === 'completed' && deployStatus === 'building' ? 'in_progress' :
+      pagesStep === 'completed' ? 'in_progress' :
       'pending';
 
     return [

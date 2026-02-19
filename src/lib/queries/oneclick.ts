@@ -284,8 +284,8 @@ export function useBatchApplyFiles() {
 
 // ---------- Status Polling ----------
 
-// Maximum polling duration: 5 minutes (100 polls × 3 seconds)
-const MAX_POLL_COUNT = 100;
+// Maximum polling duration: 10 minutes (200 polls × 3 seconds)
+const MAX_POLL_COUNT = 200;
 
 export function useDeployStatus(deployId: string | null, enabled: boolean = true) {
   const queryClient = useQueryClient();

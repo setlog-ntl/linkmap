@@ -41,17 +41,10 @@ export async function GET(
     .single();
 
   if (stateError || !oauthState) {
-    // state 조회 실패 시 진단 정보 반환 (admin client 문제 확인용)
-    const srkKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
-    return NextResponse.json({
-      error: 'OAuth state 조회 실패',
-      stateError: stateError?.message ?? 'no data',
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? '(unset)',
-      serviceRoleKeyLength: srkKey.length,
-      serviceRoleKeyPrefix: srkKey.slice(0, 20),
-      serviceRoleKeySuffix: srkKey.slice(-10),
-      anonKeyPrefix: (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '').slice(0, 20),
-    }, { status: 500 });
+    console.error('OAuth state lookup failed:', stateError?.message ?? 'no data');
+    return NextResponse.redirect(
+      new URL('/dashboard?error=oauth_state_invalid', request.nextUrl.origin)
+    );
   }
 
   const userId = oauthState.user_id;
@@ -93,13 +86,10 @@ export async function GET(
     const tokenData = await tokenRes.json();
 
     if (tokenData.error || !tokenData.access_token) {
-      // TODO: 디버그 완료 후 제거
-      return NextResponse.json({
-        error: 'token_exchange_failed',
-        tokenResponse: tokenData,
-        clientIdUsed: clientId,
-        redirectUriUsed: `${appOrigin}/api/oauth/${provider}/callback`,
-      }, { status: 500 });
+      console.error('OAuth token exchange failed:', tokenData.error ?? 'no access_token');
+      return NextResponse.redirect(
+        new URL(`${oauthState.redirect_url}?error=token_exchange_failed`, request.nextUrl.origin)
+      );
     }
 
     const accessToken = tokenData.access_token;
