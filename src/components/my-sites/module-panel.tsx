@@ -17,12 +17,11 @@ import {
   FileCode2,
 } from 'lucide-react';
 import type {
-  ModuleDef,
   TemplateModuleSchema,
   ModuleConfigState,
 } from '@/lib/module-schema';
 import { ModuleForm } from './module-form';
-import { t } from '@/lib/i18n';
+import { t, type Locale } from '@/lib/i18n';
 
 // 아이콘 매핑
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -40,7 +39,7 @@ interface ModulePanelProps {
   onStateChange: (state: ModuleConfigState) => void;
   onApply: () => void;
   isApplying: boolean;
-  locale: string;
+  locale: Locale;
 }
 
 export function ModulePanel({
