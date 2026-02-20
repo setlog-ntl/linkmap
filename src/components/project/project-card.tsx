@@ -21,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { MoreHorizontal, Trash2, FolderOpen, Layers, Zap, AlertCircle, Loader2 } from 'lucide-react';
+import { MoreHorizontal, Trash2, FolderOpen, Layers, Zap, AlertCircle, Loader2, GitBranch } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import type { ProjectWithServices } from '@/types';
@@ -41,6 +41,7 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
   const connectedCount = services.filter((s) => s.status === 'connected').length;
   const errorCount = services.filter((s) => s.status === 'error').length;
   const totalCount = services.length;
+  const githubRepoCount = project.project_github_repos?.length ?? 0;
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -261,6 +262,12 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
             </div>
           ) : (
             <span className="text-[11px] text-muted-foreground">서비스 없음</span>
+          )}
+          {githubRepoCount > 0 && (
+            <span className="flex items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap ml-1">
+              <GitBranch className="h-3 w-3" />
+              {githubRepoCount}
+            </span>
           )}
           <span className="text-[10px] text-muted-foreground/50 ml-2 whitespace-nowrap">
             {formatDate(project.updated_at)}

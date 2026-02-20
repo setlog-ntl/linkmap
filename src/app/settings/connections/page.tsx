@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,11 +12,21 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { SettingsNav } from '@/components/settings/settings-nav';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
   useGitHubConnections,
   useDeleteGitHubConnection,
+  useDisconnectGitHubConnection,
   useRenameGitHubConnection,
 } from '@/lib/queries/github-connections';
-import { GitBranch, Trash2, Pencil, Plus, Check, X, ShieldCheck, AlertTriangle } from 'lucide-react';
+import {
+  GitBranch, Trash2, Pencil, Plus, Check, X, ShieldCheck,
+  AlertTriangle, ExternalLink, FolderOpen, Unlink,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
@@ -32,6 +43,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'destru
 function ConnectionCard({ connection }: { connection: GitHubConnection }) {
   const { locale } = useLocaleStore();
   const deleteMutation = useDeleteGitHubConnection();
+  const disconnectMutation = useDisconnectGitHubConnection();
   const renameMutation = useRenameGitHubConnection();
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState(connection.display_name || '');
@@ -40,6 +52,7 @@ function ConnectionCard({ connection }: { connection: GitHubConnection }) {
   const login = metadata?.login || connection.oauth_provider_user_id || 'unknown';
   const avatarUrl = metadata?.avatar_url;
   const status = statusConfig[connection.status] || statusConfig.error;
+  const hasLinkedRepos = (connection.linked_repos_count ?? 0) > 0;
 
   const handleRename = async () => {
     if (!editName.trim()) return;
@@ -112,7 +125,16 @@ function ConnectionCard({ connection }: { connection: GitHubConnection }) {
                 </>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">@{login}</p>
+
+            <a
+              href={`https://github.com/${login}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              @{login}
+              <ExternalLink className="h-3 w-3" />
+            </a>
 
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               <Badge variant={status.variant} className="gap-1 text-[10px]">
@@ -133,32 +155,112 @@ function ConnectionCard({ connection }: { connection: GitHubConnection }) {
             <p className="text-[10px] text-muted-foreground mt-1">
               {new Date(connection.created_at).toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}
             </p>
+
+            {/* Linked projects section */}
+            {connection.linked_projects && connection.linked_projects.length > 0 && (
+              <div className="mt-3 pt-3 border-t">
+                <p className="text-[10px] font-medium text-muted-foreground mb-1.5">
+                  {t(locale, 'account.linkedProjects')}
+                </p>
+                <div className="flex flex-col gap-1">
+                  {connection.linked_projects.map((proj) => (
+                    <Link
+                      key={proj.project_id}
+                      href={`/project/${proj.project_id}`}
+                      className="inline-flex items-center gap-1.5 text-xs text-foreground hover:text-primary transition-colors group/proj"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <FolderOpen className="h-3 w-3 text-muted-foreground group-hover/proj:text-primary" />
+                      <span>{proj.project_name}</span>
+                      <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4">
+                        {proj.repo_count} {t(locale, 'account.repoCount')}
+                      </Badge>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          <ConfirmDialog
-            trigger={
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
-            }
-            title={t(locale, 'account.deleteConnection')}
-            description={t(locale, 'account.deleteConnectionConfirm')}
-            confirmLabel={t(locale, 'common.delete')}
-            cancelLabel={t(locale, 'common.cancel')}
-            variant="destructive"
-            onConfirm={async () => {
-              try {
-                await deleteMutation.mutateAsync(connection.id);
-                toast.success(t(locale, 'account.connectionDeleted'));
-              } catch (err) {
-                toast.error(err instanceof Error ? err.message : 'Failed');
-              }
-            }}
-          />
+          <div className="flex items-center gap-1 shrink-0">
+            {/* Disconnect button */}
+            {hasLinkedRepos && (
+              <ConfirmDialog
+                trigger={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-muted-foreground hover:text-orange-500"
+                  >
+                    <Unlink className="h-3.5 w-3.5" />
+                  </Button>
+                }
+                title={t(locale, 'account.disconnect')}
+                description={t(locale, 'account.disconnectConfirm')}
+                confirmLabel={t(locale, 'account.disconnect')}
+                cancelLabel={t(locale, 'common.cancel')}
+                variant="destructive"
+                onConfirm={async () => {
+                  try {
+                    await disconnectMutation.mutateAsync(connection.id);
+                    toast.success(t(locale, 'account.disconnectSuccess'));
+                  } catch (err) {
+                    toast.error(err instanceof Error ? err.message : 'Failed');
+                  }
+                }}
+              />
+            )}
+
+            {/* Delete button */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    {hasLinkedRepos ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground opacity-40 cursor-not-allowed"
+                        disabled
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    ) : (
+                      <ConfirmDialog
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        }
+                        title={t(locale, 'account.deleteConnection')}
+                        description={t(locale, 'account.deleteConnectionConfirm')}
+                        confirmLabel={t(locale, 'common.delete')}
+                        cancelLabel={t(locale, 'common.cancel')}
+                        variant="destructive"
+                        onConfirm={async () => {
+                          try {
+                            await deleteMutation.mutateAsync(connection.id);
+                            toast.success(t(locale, 'account.connectionDeleted'));
+                          } catch (err) {
+                            toast.error(err instanceof Error ? err.message : 'Failed');
+                          }
+                        }}
+                      />
+                    )}
+                  </span>
+                </TooltipTrigger>
+                {hasLinkedRepos && (
+                  <TooltipContent>
+                    <p>{t(locale, 'account.deleteBlocked')}</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </div>
       </CardContent>
     </Card>
