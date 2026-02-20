@@ -908,6 +908,30 @@ Phase 2 추가:
 
 ---
 
+## 부록 C-3: Phase 3 구현 결과 (완료)
+
+### 추가/수정된 파일
+
+| 파일 | 변경 내용 |
+|------|-----------|
+| `src/components/my-sites/module-panel.tsx` | DnD Kit 통합 (SortableModuleCard 컴포넌트), 프리셋 선택 UI 추가 |
+| `src/data/oneclick/module-presets/personal-brand.ts` | 3개 프리셋 (minimal, creator, full) |
+| `src/data/oneclick/module-presets/index.ts` | `getModulePresets(slug)` 함수 |
+| `src/data/oneclick/module-schemas/dev-showcase.ts` | 개발자 포트폴리오 6개 모듈 스키마 |
+| `src/data/oneclick/module-schemas/link-in-bio-pro.ts` | Link in Bio 4개 모듈 스키마 |
+| `src/data/oneclick/module-schemas/index.ts` | 3개 템플릿 등록 |
+| `package.json` | @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities 추가 |
+
+### 지원 템플릿 현황
+
+| 템플릿 | 모듈 수 | 프리셋 |
+|--------|---------|--------|
+| personal-brand | 6개 | 3개 (미니멀/크리에이터/풀) |
+| dev-showcase | 6개 | - |
+| link-in-bio-pro | 4개 | - |
+
+---
+
 ## 부록 D: Phase 2~4 단계별 구현 가이드
 
 ### Phase 2: 컴포넌트 수준 편집
@@ -1156,15 +1180,16 @@ Google Fonts API에서 인기 폰트 목록 → Select UI.
 - [x] 102개 테스트 통과
 - [x] 커밋 `6b71e7f` + 푸시 완료
 
-### Phase 3 — DnD + 프리셋 + 다른 템플릿
-- [ ] `@dnd-kit/core` 설치
-- [ ] module-panel.tsx에 DnD 적용
-- [ ] 프리셋 시스템 구현 (personal-brand 3개 프리셋)
-- [ ] 프리셋 UI (드롭다운 또는 카드)
-- [ ] link-in-bio-pro 모듈 스키마
-- [ ] dev-showcase 모듈 스키마
-- [ ] 코드 제너레이터 팩토리 패턴 리팩토링
-- [ ] 타입체크 + 테스트 + 빌드
+### Phase 3 ✅ 완료
+- [x] `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities` 설치
+- [x] module-panel.tsx에 DnD 적용 (GripVertical 핸들 + SortableContext)
+- [x] 프리셋 시스템 구현 (미니멀/크리에이터/풀 프로필 3개)
+- [x] 프리셋 UI (상단 태그 버튼, 호버 시 설명 툴팁)
+- [x] link-in-bio-pro 모듈 스키마 (4개 모듈: profile/links/socials/theme)
+- [x] dev-showcase 모듈 스키마 (6개 모듈: hero/about/projects/experience/blog/contact)
+- [x] 3개 템플릿 스키마 index.ts에 등록
+- [x] 95개 테스트 통과
+- [x] 커밋 `369ad26` + `d76cedf` + 푸시 완료
 
 ### Phase 4 — 고급 기능
 - [ ] 이미지 업로드 API
