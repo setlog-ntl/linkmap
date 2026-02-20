@@ -22,14 +22,14 @@ Linkmap은 Next.js 16 + Supabase + TypeScript 기반 설정 관리 플랫폼이�
 
 ## 페이즈별 지시
 
-### Phase 1: 문서 생성
+### 1단계: 문서 생성
 docs/instructions/ 폴더에 4개 문서 생성 (코드 변경 없음)
 - 01-module-specification.md: 전체 모듈 아키텍처 명세
 - 02-refactoring-criteria.md: 유지/제거/리팩토링 판단 기준
 - 03-master-prompt.md: 이 문서 (자급자족형 프롬프트)
 - 04-file-manifest.md: 변경 전후 파일 경로 매핑
 
-### Phase 2: Types 분할
+### 2단계: Types 분할
 src/types/index.ts (638줄) → 8개 도메인 파일 + barrel
 - core.ts: ServiceCategory, Environment, TeamRole, Profile, enums
 - service.ts: Service, EnvVarTemplate, guides, comparisons, cost tiers
@@ -41,7 +41,7 @@ src/types/index.ts (638줄) → 8개 도메인 파일 + barrel
 - dashboard.ts: DashboardLayer, ServiceCardData, LayerData, Metrics, Response
 - index.ts: barrel re-export (export * from './xxx')
 
-### Phase 3: GitHub API 분할
+### 3단계: GitHub API 분할
 src/lib/github/api.ts (598줄) → 7개 서브모듈 + barrel
 - client.ts: githubFetch, GitHubApiError, 공통 타입/상수
 - repos.ts: listUserRepos, getRepo, createRepo, deleteRepo, updateRepoSettings
@@ -52,15 +52,15 @@ src/lib/github/api.ts (598줄) → 7개 서브모듈 + barrel
 - forks.ts: forkRepo, generateFromTemplate
 - api.ts: barrel re-export
 
-### Phase 4: 중복 코드 추출
+### 4단계: 중복 코드 추출
 4-1. GitHub 토큰 해결 통합: resolveUserGitHubToken(supabase, userId) → src/lib/github/token.ts
 4-2. Deploy 상태 머신 추출: resolveDeployStatus, buildDeploySteps → src/lib/oneclick/deploy-status.ts
 4-3. AI 키 해결 일반화: resolveAIProviderKey(providerSlug) (선택적)
 
-### Phase 5: 데이터 파일 정리
+### 5단계: 데이터 파일 정리
 src/data/ → seed/, oneclick/, ui/ 서브디렉토리 + barrel index.ts
 
-## 검증 체크리스트 (매 Phase 완료 후)
+## 검증 체크리스트 (각 단계 완료 후)
 ```bash
 npm run typecheck   # tsc --noEmit
 npm run test        # 84개 테스트 통과

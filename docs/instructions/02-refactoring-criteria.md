@@ -1,4 +1,4 @@
-# Refactoring Criteria
+# 리팩토링 기준
 
 ## KEEP 기준 (유지)
 - 인증(getUser) + Zod 검증(safeParse) + 비즈니스 로직 + 감사 로그(logAudit)를 갖춘 API 라우트
@@ -29,7 +29,7 @@
 
 ## 리팩토링 패턴
 
-### Barrel Re-export 패턴
+### Barrel 재내보내기 패턴
 대형 파일 분할 시 기존 import 호환을 위해 barrel index.ts 유지:
 ```typescript
 // src/types/index.ts (after split)

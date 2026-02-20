@@ -1,21 +1,21 @@
-# File Manifest: 변경 전후 파일 경로 매핑
+# 파일 매니페스트: 변경 전후 경로 매핑
 
 ## Phase 1: 문서 생성 (코드 변경 없음)
 
-| Action | Path |
-|--------|------|
-| CREATE | `docs/instructions/01-module-specification.md` |
-| CREATE | `docs/instructions/02-refactoring-criteria.md` |
-| CREATE | `docs/instructions/03-master-prompt.md` |
-| CREATE | `docs/instructions/04-file-manifest.md` |
+| 작업 | 경로 |
+|------|------|
+| 생성 | `docs/instructions/01-module-specification.md` |
+| 생성 | `docs/instructions/02-refactoring-criteria.md` |
+| 생성 | `docs/instructions/03-master-prompt.md` |
+| 생성 | `docs/instructions/04-file-manifest.md` |
 
 ---
 
 ## Phase 2: Types 분할
 
-### 생성 파일
+### 생성할 파일
 
-| Before | After | 내용 |
+| 변경 전 | 변경 후 | 내용 |
 |--------|-------|------|
 | `src/types/index.ts` (line 1-65) | `src/types/core.ts` | ServiceCategory, ServiceDomain, enums, Profile, EasyCategory |
 | `src/types/index.ts` (line 235-454) | `src/types/service.ts` | Service, EnvVarTemplate, ServiceDomain*, Subcategory, Guide, Comparison, CostTier, Changelog |
@@ -26,19 +26,19 @@
 | `src/types/index.ts` (line 467-574) | `src/types/service-account.ts` | ServiceAccount, LinkedAccount, LinkedResource, OAuth/APIKey configs |
 | `src/types/index.ts` (line 576-632) | `src/types/dashboard.ts` | DashboardLayer, ServiceCardData, LayerData, DashboardMetrics, DashboardResponse |
 
-### 수정 파일
+### 수정할 파일
 
-| File | Change |
-|------|--------|
-| `src/types/index.ts` | 638줄 → barrel re-export (~15줄) |
+| 파일 | 변경 내용 |
+|------|-----------|
+| `src/types/index.ts` | 638줄 → barrel 재내보내기 (~15줄) |
 
 ---
 
 ## Phase 3: GitHub API 분할
 
-### 생성 파일
+### 생성할 파일
 
-| Before | After | 내용 |
+| 변경 전 | 변경 후 | 내용 |
 |--------|-------|------|
 | `src/lib/github/api.ts` (line 1-52) | `src/lib/github/client.ts` | githubFetch, GitHubApiError, GITHUB_API_BASE, USER_AGENT, GitHubRequestOptions |
 | `src/lib/github/api.ts` (line 56-91, 237-343) | `src/lib/github/repos.ts` | GitHubRepo, listUserRepos, getRepo, createRepo, deleteRepo, updateRepoSettings |
@@ -48,26 +48,26 @@
 | `src/lib/github/api.ts` (line 345-516) | `src/lib/github/git-data.ts` | GitBlob, GitTree, GitCommit, GitRef, createBlob, createTree, createCommit, createRef, getRef, updateRef, pushFilesAtomically |
 | `src/lib/github/api.ts` (line 131-187) | `src/lib/github/forks.ts` | GitHubForkResult, GitHubGenerateResult, forkRepo, generateFromTemplate |
 
-### 수정 파일
+### 수정할 파일
 
-| File | Change |
-|------|--------|
-| `src/lib/github/api.ts` | 598줄 → barrel re-export (~20줄) |
+| 파일 | 변경 내용 |
+|------|-----------|
+| `src/lib/github/api.ts` | 598줄 → barrel 재내보내기 (~20줄) |
 
 ---
 
 ## Phase 4: 중복 코드 추출
 
-### 생성 파일
+### 생성할 파일
 
-| File | 내용 |
+| 파일 | 내용 |
 |------|------|
 | `src/lib/oneclick/deploy-status.ts` | resolveDeployStatus(), buildDeploySteps(), DeployStep/StepStatus 타입 |
 
-### 수정 파일
+### 수정할 파일
 
-| File | Change |
-|------|--------|
+| 파일 | 변경 내용 |
+|------|-----------|
 | `src/lib/github/token.ts` | resolveUserGitHubToken(supabase, userId) 함수 추가 |
 | `src/app/api/oneclick/status/route.ts` | 인라인 토큰 해결 → resolveUserGitHubToken 사용, buildSteps → import from deploy-status.ts |
 | `src/app/api/oneclick/deployments/route.ts` | 인라인 토큰 해결 → resolveUserGitHubToken 사용, refreshDeployStatus → resolveDeployStatus 사용 |
@@ -76,9 +76,9 @@
 
 ## Phase 5: 데이터 파일 정리
 
-### 이동 파일
+### 이동할 파일
 
-| Before | After |
+| 변경 전 | 변경 후 |
 |--------|-------|
 | `src/data/services.ts` | `src/data/seed/services.ts` |
 | `src/data/services-v2.ts` | `src/data/seed/services-v2.ts` |
@@ -100,23 +100,23 @@
 | `src/data/mock-connections.ts` | `src/data/ui/mock-connections.ts` |
 | `src/data/presets.ts` | `src/data/ui/presets.ts` |
 
-### 생성 파일
+### 생성할 파일
 
-| File | 내용 |
+| 파일 | 내용 |
 |------|------|
-| `src/data/seed/index.ts` | barrel re-export |
-| `src/data/oneclick/index.ts` | barrel re-export |
-| `src/data/ui/index.ts` | barrel re-export |
+| `src/data/seed/index.ts` | barrel 재내보내기 |
+| `src/data/oneclick/index.ts` | barrel 재내보내기 |
+| `src/data/ui/index.ts` | barrel 재내보내기 |
 
-### 유지 파일
+### 유지할 파일
 
-| File | 이유 |
+| 파일 | 이유 |
 |------|------|
 | `src/data/service-connections.ts` | 컴포넌트에서 직접 참조, 단독 도메인 |
 
-### 수정 파일 (import 경로 업데이트)
+### 수정할 파일 (import 경로 업데이트)
 
-| File | Change |
+| 파일 | 변경 내용 |
 |------|--------|
 | `src/app/api/seed/route.ts` | `@/data/xxx` → `@/data/seed/xxx` (or `@/data/seed`) |
 | `src/app/api/oneclick/templates/route.ts` | `@/data/homepage-template-content` → `@/data/oneclick/homepage-template-content` |
@@ -133,13 +133,13 @@
 
 ---
 
-## Summary
+## 요약
 
-| Phase | 생성 | 수정 | 삭제 |
-|-------|------|------|------|
-| Phase 1 (Docs) | 4 | 0 | 0 |
+| 단계 | 생성 | 수정 | 삭제 |
+|------|------|------|------|
+| Phase 1 (문서) | 4 | 0 | 0 |
 | Phase 2 (Types) | 8 | 1 | 0 |
 | Phase 3 (GitHub) | 7 | 1 | 0 |
-| Phase 4 (Dedup) | 1 | 3 | 0 |
-| Phase 5 (Data) | 3 barrels | ~12 imports | 0 (move) |
-| **Total** | **~23** | **~17** | **0** |
+| Phase 4 (중복 제거) | 1 | 3 | 0 |
+| Phase 5 (Data) | barrel 3개 | import ~12곳 | 0 (이동) |
+| **합계** | **~23** | **~17** | **0** |
