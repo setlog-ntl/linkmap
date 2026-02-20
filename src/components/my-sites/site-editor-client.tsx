@@ -503,6 +503,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   })();
 
   // 미리보기 렌더링 (데스크탑/모바일 공용)
+  // 부모가 block(h-full) 또는 명시적 높이 컨테이너이므로 h-full 사용 (flex-1은 flex 부모 필요)
   const renderPreview = () => {
     if (showLiveAfterDeploy && liveUrl) {
       return (
@@ -511,7 +512,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           key={`live-${livePreviewKey}`}
           src={`${liveUrl}?_t=${livePreviewKey}`}
           title="사이트 미리보기"
-          className="flex-1 w-full bg-white border-0"
+          className="h-full w-full bg-white border-0"
           sandbox="allow-scripts allow-same-origin"
         />
       );
@@ -521,7 +522,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         <iframe
           ref={previewRef}
           title="미리보기"
-          className="flex-1 w-full bg-white border-0"
+          className="h-full w-full bg-white border-0"
           sandbox="allow-scripts allow-same-origin"
         />
       );
@@ -533,13 +534,13 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           key={`fallback-${livePreviewKey}`}
           src={`${liveUrl}?_t=${livePreviewKey}`}
           title="사이트 미리보기"
-          className="flex-1 w-full bg-white border-0"
+          className="h-full w-full bg-white border-0"
           sandbox="allow-scripts allow-same-origin"
         />
       );
     }
     return (
-      <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+      <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm">
         {locale === 'ko' ? '미리보기할 수 없는 파일입니다' : 'Cannot preview this file'}
       </div>
     );
@@ -977,7 +978,9 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                   </Badge>
                 ) : null}
               </div>
-              {renderPreview()}
+              <div className="flex-1 overflow-hidden">
+                {renderPreview()}
+              </div>
             </div>
           )}
         </div>
