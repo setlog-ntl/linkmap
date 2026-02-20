@@ -14,6 +14,7 @@ export const updateProjectSchema = z.object({
   description: z.string().max(500).nullable().optional(),
   tech_stack: z.record(z.string(), z.string()).optional(),
   main_service_id: z.string().uuid().nullable().optional(),
+  icon_slug: z.string().max(50).nullable().optional(),
 });
 
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;

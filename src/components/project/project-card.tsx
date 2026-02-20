@@ -26,6 +26,8 @@ import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import type { ProjectWithServices } from '@/types';
 import { getCategoryStyle } from '@/lib/constants/category-styles';
+import { ServiceIcon } from '@/components/landing/service-icon';
+import { getServiceIconUrl } from '@/lib/constants/service-brands';
 
 interface ProjectCardProps {
   project: ProjectWithServices;
@@ -72,7 +74,11 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
             <div className="relative">
               {/* Central project node */}
               <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/30 flex items-center justify-center z-10 relative shadow-sm">
-                <Layers className="h-4.5 w-4.5 text-primary" />
+                {project.icon_slug && getServiceIconUrl(project.icon_slug) ? (
+                  <ServiceIcon serviceId={project.icon_slug} size={22} />
+                ) : (
+                  <Layers className="h-4.5 w-4.5 text-primary" />
+                )}
               </div>
 
               {/* Connected service nodes */}

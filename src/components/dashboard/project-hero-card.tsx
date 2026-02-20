@@ -2,9 +2,12 @@
 
 import Link from 'next/link';
 import { Plus, Map, Boxes, Key, TrendingUp } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { SystemStatusBadge } from './system-status-badge';
 import { MetricPill } from './metric-pill';
+import { ProjectIconPicker } from '@/components/project/project-icon-picker';
+import { useUpdateProject } from '@/lib/queries/projects';
 import type { Project, DashboardMetrics, ServiceCardData } from '@/types';
 
 interface ProjectHeroCardProps {
@@ -14,15 +17,29 @@ interface ProjectHeroCardProps {
 }
 
 export function ProjectHeroCard({ project, metrics, allCards }: ProjectHeroCardProps) {
-  const initial = project.name.charAt(0).toUpperCase();
+  const updateProject = useUpdateProject();
+
+  const handleIconSelect = (slug: string | null) => {
+    updateProject.mutate(
+      { id: project.id, icon_slug: slug },
+      {
+        onError: () => {
+          toast.error('아이콘 변경에 실패했습니다');
+        },
+      },
+    );
+  };
 
   return (
     <div className="rounded-2xl border bg-card/80 dark:bg-zinc-900/80 backdrop-blur-sm shadow-sm p-6 h-full">
       <div className="flex flex-col sm:flex-row items-start gap-5">
-        {/* Project avatar */}
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 text-2xl font-bold text-primary">
-          {initial}
-        </div>
+        {/* Project avatar with icon picker */}
+        <ProjectIconPicker
+          projectName={project.name}
+          currentIconSlug={project.icon_slug}
+          onSelect={handleIconSelect}
+          disabled={updateProject.isPending}
+        />
 
         <div className="flex-1 min-w-0 space-y-3">
           {/* Name + status */}

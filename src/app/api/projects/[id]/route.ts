@@ -51,13 +51,20 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (error) return serverError(error.message);
 
   const updatedFields = Object.keys(parsed.data);
+  const auditAction = updatedFields.includes('main_service_id')
+    ? 'project.set_main_service'
+    : updatedFields.includes('icon_slug')
+      ? 'project.set_icon'
+      : 'project.update';
   await logAudit(user.id, {
-    action: updatedFields.includes('main_service_id') ? 'project.set_main_service' : 'project.update',
+    action: auditAction,
     resourceType: 'project',
     resourceId: id,
     details: updatedFields.includes('main_service_id')
       ? { main_service_id: parsed.data.main_service_id }
-      : { updated_fields: updatedFields },
+      : updatedFields.includes('icon_slug')
+        ? { icon_slug: parsed.data.icon_slug }
+        : { updated_fields: updatedFields },
   });
 
   return NextResponse.json(data);
