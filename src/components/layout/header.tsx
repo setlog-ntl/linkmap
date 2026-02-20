@@ -40,25 +40,10 @@ export function Header({ profile }: HeaderProps) {
 
   const navLinks = (
     <>
-      {profile && (
-        <Link
-          href="/dashboard"
-          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          onClick={() => setSidebarOpen(false)}
-        >
-          {t(locale, 'common.dashboard')}
-        </Link>
-      )}
-      <Link
-        href="/services"
-        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-        onClick={() => setSidebarOpen(false)}
-      >
-        {t(locale, 'nav.serviceCatalog')}
-      </Link>
+      {/* Beginner-friendly: 원클릭 배포, 내 사이트 */}
       <Link
         href="/oneclick"
-        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+        className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors flex items-center gap-1.5 bg-primary/5 px-2.5 py-1 rounded-full"
         onClick={() => setSidebarOpen(false)}
       >
         <Rocket className="h-3.5 w-3.5" />
@@ -67,11 +52,25 @@ export function Header({ profile }: HeaderProps) {
       {profile && (
         <Link
           href="/my-sites"
-          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+          className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors flex items-center gap-1.5 bg-primary/5 px-2.5 py-1 rounded-full"
           onClick={() => setSidebarOpen(false)}
         >
           <Monitor className="h-3.5 w-3.5" />
           {t(locale, 'nav.mySites')}
+        </Link>
+      )}
+
+      {/* Separator */}
+      <div className="hidden md:block w-px h-4 bg-border" />
+
+      {/* Advanced: 대시보드, 연결 정보, 서비스 카탈로그 */}
+      {profile && (
+        <Link
+          href="/dashboard"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          onClick={() => setSidebarOpen(false)}
+        >
+          {t(locale, 'common.dashboard')}
         </Link>
       )}
       {profile && (
@@ -84,6 +83,13 @@ export function Header({ profile }: HeaderProps) {
           {t(locale, 'nav.connectedInfo')}
         </Link>
       )}
+      <Link
+        href="/services"
+        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        onClick={() => setSidebarOpen(false)}
+      >
+        {t(locale, 'nav.serviceCatalog')}
+      </Link>
     </>
   );
 
@@ -234,8 +240,61 @@ export function Header({ profile }: HeaderProps) {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
-              <nav className="flex flex-col gap-4 mt-8">
-                {navLinks}
+              <nav className="flex flex-col gap-2 mt-8">
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold px-2.5 mb-1">
+                  {t(locale, 'nav.beginnerLabel')}
+                </p>
+                <Link
+                  href="/oneclick"
+                  className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors flex items-center gap-1.5 bg-primary/5 px-2.5 py-1.5 rounded-lg"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <Rocket className="h-3.5 w-3.5" />
+                  {t(locale, 'nav.oneclick')}
+                </Link>
+                {profile && (
+                  <Link
+                    href="/my-sites"
+                    className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors flex items-center gap-1.5 bg-primary/5 px-2.5 py-1.5 rounded-lg"
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    <Monitor className="h-3.5 w-3.5" />
+                    {t(locale, 'nav.mySites')}
+                  </Link>
+                )}
+
+                <div className="border-t my-2" />
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold px-2.5 mb-1">
+                  {t(locale, 'nav.advancedLabel')}
+                </p>
+                {profile && (
+                  <Link
+                    href="/dashboard"
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5"
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    {t(locale, 'common.dashboard')}
+                  </Link>
+                )}
+                {profile && (
+                  <Link
+                    href="/settings/account"
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 px-2.5 py-1.5"
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    <Link2 className="h-3.5 w-3.5" />
+                    {t(locale, 'nav.connectedInfo')}
+                  </Link>
+                )}
+                <Link
+                  href="/services"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  {t(locale, 'nav.serviceCatalog')}
+                </Link>
+
+                <div className="border-t my-2" />
                 {!profile && (
                   <>
                     <Link href="/login" className="text-sm font-medium" onClick={() => setSidebarOpen(false)}>

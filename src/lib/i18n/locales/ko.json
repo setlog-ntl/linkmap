@@ -27,7 +27,9 @@
     "pricing": "가격",
     "oneclick": "원클릭 배포",
     "mySites": "내 사이트",
-    "connectedInfo": "연결 정보"
+    "connectedInfo": "연결 정보",
+    "beginnerLabel": "시작하기",
+    "advancedLabel": "고급 관리"
   },
   "dashboard": {
     "title": "내 프로젝트",
