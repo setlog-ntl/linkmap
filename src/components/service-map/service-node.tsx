@@ -44,10 +44,13 @@ function ServiceNode({ data }: NodeProps) {
         transition-all duration-200
         ${colorClass}
         ${isHighlighted ? '' : 'opacity-20'}
-        hover:shadow-md hover:scale-[1.02]
+        hover:shadow-lg hover:scale-[1.03] hover:-translate-y-0.5
         ${isMain ? 'w-[176px] h-[52px] ring-2 ring-amber-400 ring-offset-1 ring-offset-background' : 'w-[160px] h-[48px]'}
       `}
-      style={{ opacity: isHighlighted ? focusOpacity : 0.2 }}
+      style={{
+        opacity: isHighlighted ? focusOpacity : 0.2,
+        ...(isMain ? { boxShadow: '0 0 20px rgba(251, 191, 36, 0.25)' } : {}),
+      }}
     >
       <Handle
         type="target"
@@ -73,7 +76,7 @@ function ServiceNode({ data }: NodeProps) {
           <span className="text-sm">&#9881;&#65039;</span>
         )}
         <span className="font-medium text-sm truncate flex-1 min-w-0">{d.label}</span>
-        <span className={`w-2 h-2 rounded-full shrink-0 ${dotClass}`} />
+        <span className={`w-2 h-2 rounded-full shrink-0 ${dotStyle.bg} ${dotStyle.pulse ? 'animate-status-pulse' : ''}`} />
       </div>
 
       <Handle

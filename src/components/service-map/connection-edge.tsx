@@ -4,7 +4,7 @@ import { memo, useState } from 'react';
 import {
   BaseEdge,
   EdgeLabelRenderer,
-  getBezierPath,
+  getSmoothStepPath,
   MarkerType,
   type EdgeProps,
 } from '@xyflow/react';
@@ -51,16 +51,21 @@ function ConnectionEdge({
   const connType = edgeData?.connectionType || 'uses';
   const s = styles[connType] || styles.uses;
 
-  const [edgePath, labelX, labelY] = getBezierPath({
+  const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,
     sourceY,
     targetX,
     targetY,
     sourcePosition,
     targetPosition,
+    borderRadius: 12,
   });
 
   const showLabel = hovered || editMode;
+
+  // Marching ants on hover: override dash to animated pattern
+  const isStaticDashed = s.dash !== '0';
+  const strokeDasharray = hovered && !isStaticDashed ? '5 5' : (isStaticDashed ? s.dash : undefined);
 
   return (
     <>
@@ -80,9 +85,11 @@ function ConnectionEdge({
         markerEnd={MarkerType.ArrowClosed}
         style={{
           stroke: s.color,
-          strokeWidth: 2,
-          strokeDasharray: s.dash !== '0' ? s.dash : undefined,
+          strokeWidth: hovered ? 3 : 2,
+          strokeDasharray,
+          transition: 'stroke-width 0.2s ease',
         }}
+        className={hovered && !isStaticDashed ? 'animate-edge-march' : ''}
       />
       {showLabel && (
         <EdgeLabelRenderer>
