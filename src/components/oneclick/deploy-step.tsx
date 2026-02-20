@@ -23,18 +23,16 @@ import { t, type Locale } from '@/lib/i18n';
 import type { DeployStatus, HomepageTemplate } from '@/lib/queries/oneclick';
 import { getErrorDetails } from '@/lib/deploy-error-map';
 import { DeployProgress } from './deploy-progress';
-import { DeploySuccess } from './deploy-success';
 
 interface DeployStepProps {
   status: DeployStatus | null;
   isLoading: boolean;
   error: Error | null;
-  projectId: string | null;
   template?: HomepageTemplate | null;
   onRetry?: () => void;
 }
 
-export function DeployStep({ status, isLoading, error, projectId, template, onRetry }: DeployStepProps) {
+export function DeployStep({ status, isLoading, error, template, onRetry }: DeployStepProps) {
   const { locale } = useLocaleStore();
   const [showDetails, setShowDetails] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -69,7 +67,6 @@ export function DeployStep({ status, isLoading, error, projectId, template, onRe
 
   if (!status) return null;
 
-  const isCompleted = status.deploy_status === 'ready';
   const isError = status.deploy_status === 'error';
   const isTimeout = status.deploy_status === 'timeout';
   const errorMessage = status.deploy_error || error?.message || '';
@@ -134,8 +131,6 @@ export function DeployStep({ status, isLoading, error, projectId, template, onRe
         </Card>
       )}
 
-      {/* Success */}
-      {isCompleted && <DeploySuccess status={status} projectId={projectId} template={template} />}
     </div>
   );
 }

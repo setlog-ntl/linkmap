@@ -4,12 +4,14 @@ import { useCallback, useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { TemplatePickerStep } from './template-picker-step';
 import { DeployStep } from './deploy-step';
+import { DeploySuccess } from './deploy-success';
 import { AuthModal } from './auth-modal';
 import { GitHubConnectModal } from './github-connect-modal';
 import { useHomepageTemplates } from '@/lib/queries/oneclick';
 import { useGitHubConnections } from '@/lib/queries/github-connections';
 import { useDeployMachine } from '@/hooks/use-deploy-machine';
 import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 
 interface OneclickWizardClientProps {
   isAuthenticated: boolean;
@@ -52,17 +54,21 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
 
   // Determine what to show
   const isStep1 = state.phase === 'selecting';
-  const isStep2 = ['deploying', 'polling', 'success', 'error'].includes(state.phase);
+  const isStep2 = ['deploying', 'polling', 'error'].includes(state.phase);
+  const isStep3 = state.phase === 'success';
   const showAuthModal = state.phase === 'authenticating';
   const showGitHubModal = state.phase === 'connecting_github';
 
-  // Step labels
-  const step1Label = locale === 'ko' ? '선택' : 'Choose';
-  const step2Label = locale === 'ko' ? '완료' : 'Done';
+  // Step labels (i18n)
+  const stepLabels = [
+    t(locale, 'wizard.step1'),
+    t(locale, 'wizard.step2'),
+    t(locale, 'wizard.step3'),
+  ];
 
-  const currentStepIndex = isStep2 ? 1 : 0;
+  const currentStepIndex = isStep3 ? 2 : isStep2 ? 1 : 0;
 
-  // Get projectId from state for deploy step
+  // Get projectId from state for deploy success
   const projectId =
     state.phase === 'polling' || state.phase === 'success' ? state.projectId :
     state.phase === 'error' ? state.projectId :
@@ -73,7 +79,7 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
     state.phase === 'deploying' ? state.template :
     state.phase === 'polling' || state.phase === 'success' ? state.template :
     null;
-  const activeTemplate = templateId ? templates.find((t) => t.id === templateId) ?? null : null;
+  const activeTemplate = templateId ? templates.find((tmpl) => tmpl.id === templateId) ?? null : null;
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
@@ -92,10 +98,10 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
         </p>
       </div>
 
-      {/* 2-Step Indicator */}
+      {/* 3-Step Indicator */}
       <div className="flex items-center justify-center gap-2">
-        {[step1Label, step2Label].map((label, idx) => (
-          <div key={label} className="flex items-center">
+        {stepLabels.map((label, idx) => (
+          <div key={idx} className="flex items-center">
             <div
               className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 idx === currentStepIndex
@@ -110,7 +116,7 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
               </span>
               <span>{label}</span>
             </div>
-            {idx < 1 && (
+            {idx < stepLabels.length - 1 && (
               <div className={`w-8 h-0.5 mx-1 ${idx < currentStepIndex ? 'bg-primary' : 'bg-muted'}`} />
             )}
           </div>
@@ -135,7 +141,7 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
         />
       )}
 
-      {/* Step 2: Deploy progress / success / error */}
+      {/* Step 2: Deploy progress / error */}
       {isStep2 && (
         <DeployStep
           status={deployStatus ?? null}
@@ -144,10 +150,14 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
             state.phase === 'error' ? state.error :
             (deployMutation.error as Error) || null
           }
-          projectId={projectId}
           template={activeTemplate}
           onRetry={handleRetry}
         />
+      )}
+
+      {/* Step 3: Success */}
+      {isStep3 && deployStatus && (
+        <DeploySuccess status={deployStatus} projectId={projectId} template={activeTemplate} />
       )}
 
       {/* Auth Modal — overlay (no page navigation) */}

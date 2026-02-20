@@ -534,6 +534,11 @@
     "addAccount": "Add another account",
     "selectAccount": "Select GitHub account"
   },
+  "wizard": {
+    "step1": "Choose",
+    "step2": "Creating",
+    "step3": "Complete"
+  },
   "account": {
     "tab": "Account",
     "apiTokensTab": "API Tokens",
@@ -656,6 +661,31 @@
       "executed": "Command executed",
       "error": "Command failed"
     }
+  },
+  "serviceMap": {
+    "editMode": "Edit Mode",
+    "editing": "Editing",
+    "edit": "Edit",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "pendingChanges": "{count} changes",
+    "moveToZone": "Move to Zone",
+    "setMainService": "Set as Main Service",
+    "removeMainService": "Remove Main Service",
+    "mainService": "Main Service",
+    "zoneFrontend": "FRONTEND",
+    "zoneBackend": "BACKEND",
+    "zoneDevtools": "DEVTOOLS",
+    "zoneFrontendDesc": "UI & Client",
+    "zoneBackendDesc": "Server & API",
+    "zoneDevtoolsDesc": "Build & Test",
+    "legend": "Legend",
+    "legendStatus": "Status",
+    "legendConnections": "Connection Types",
+    "editTooltip": "Edit service map",
+    "saveSuccess": "Changes saved successfully",
+    "saveFailed": "Failed to save changes"
   },
   "error": {
     "pageNotFound": "Page Not Found",

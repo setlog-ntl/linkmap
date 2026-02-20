@@ -534,6 +534,11 @@
     "addAccount": "다른 계정 추가",
     "selectAccount": "배포할 GitHub 계정 선택"
   },
+  "wizard": {
+    "step1": "선택",
+    "step2": "생성",
+    "step3": "완료"
+  },
   "account": {
     "tab": "계정",
     "apiTokensTab": "API 토큰",
@@ -656,6 +661,31 @@
       "executed": "명령 실행 완료",
       "error": "명령 처리 실패"
     }
+  },
+  "serviceMap": {
+    "editMode": "편집 모드",
+    "editing": "편집 중",
+    "edit": "편집",
+    "save": "저장",
+    "saving": "저장 중...",
+    "cancel": "취소",
+    "pendingChanges": "변경 {count}건",
+    "moveToZone": "Zone 이동",
+    "setMainService": "메인 서비스로 설정",
+    "removeMainService": "메인 서비스 해제",
+    "mainService": "메인 서비스",
+    "zoneFrontend": "FRONTEND",
+    "zoneBackend": "BACKEND",
+    "zoneDevtools": "DEVTOOLS",
+    "zoneFrontendDesc": "UI & 클라이언트",
+    "zoneBackendDesc": "서버 & API",
+    "zoneDevtoolsDesc": "빌드 & 테스트",
+    "legend": "범례",
+    "legendStatus": "상태",
+    "legendConnections": "연결 타입",
+    "editTooltip": "서비스 맵 편집",
+    "saveSuccess": "변경사항이 저장되었습니다",
+    "saveFailed": "저장에 실패했습니다"
   },
   "error": {
     "pageNotFound": "페이지를 찾을 수 없습니다",
