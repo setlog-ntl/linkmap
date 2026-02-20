@@ -3,10 +3,10 @@ import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, notFoundError, apiError, serverError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 import { safeDecryptToken } from '@/lib/github/token';
-import { listRepoContents, getFileContent, createOrUpdateFileContent, GitHubApiError } from '@/lib/github/api';
+import { getGitTreeRecursive, getFileContent, createOrUpdateFileContent, GitHubApiError } from '@/lib/github/api';
 import { fileUpdateSchema } from '@/lib/validations/oneclick';
 
-const EDITABLE_EXTENSIONS = ['.html', '.css', '.js', '.md', '.json', '.txt', '.yml', '.yaml', '.svg'];
+const EDITABLE_EXTENSIONS = ['.html', '.css', '.js', '.ts', '.tsx', '.jsx', '.mjs', '.md', '.json', '.txt', '.yml', '.yaml', '.svg'];
 
 const FORBIDDEN_PATH_PATTERNS = [
   /^\./,           // 숨김 파일 (.env, .git 등)
@@ -84,14 +84,17 @@ export async function GET(
 
   try {
     if (!path) {
-      // List files
-      const contents = await listRepoContents(token, owner, repo);
-      const files = contents
-        .filter((item) => item.type === 'file' && isEditableFile(item.name))
+      // List all files recursively via Git Trees API (single API call)
+      const treeItems = await getGitTreeRecursive(token, owner, repo);
+      const files = treeItems
+        .filter((item) => {
+          const name = item.path.split('/').pop() || '';
+          return isEditableFile(name) && !isForbiddenPath(item.path);
+        })
         .map((item) => ({
-          name: item.name,
+          name: item.path.split('/').pop() || item.path,
           path: item.path,
-          type: item.type,
+          type: 'file' as const,
           size: item.size,
           sha: item.sha,
         }));

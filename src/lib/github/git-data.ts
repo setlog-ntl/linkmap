@@ -116,6 +116,33 @@ export async function updateRef(
 }
 
 /**
+ * Fetch the full recursive file tree for a repo branch (single API call).
+ * Returns only blob (file) entries, not tree (directory) entries.
+ */
+export async function getGitTreeRecursive(
+  token: string,
+  owner: string,
+  repo: string,
+  branch: string = 'main'
+): Promise<{ path: string; sha: string; size: number }[]> {
+  const ref = await getRef(token, owner, repo, `heads/${branch}`);
+  if (!ref) return [];
+
+  const tree = await githubFetch<{ sha: string; tree: { path: string; mode: string; type: string; sha: string; size?: number }[]; truncated: boolean }>(
+    `/repos/${owner}/${repo}/git/trees/${ref.object.sha}?recursive=1`,
+    { token }
+  );
+
+  return tree.tree
+    .filter((item) => item.type === 'blob')
+    .map((item) => ({
+      path: item.path,
+      sha: item.sha,
+      size: item.size ?? 0,
+    }));
+}
+
+/**
  * Push multiple files to a repo as a single atomic commit.
  * Handles both empty repos (no prior commits) and non-empty repos (auto_init: true).
  */

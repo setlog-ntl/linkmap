@@ -26,6 +26,8 @@ import {
   Monitor,
   Circle,
   RotateCw,
+  ChevronRight,
+  Folder,
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -64,10 +66,16 @@ function isCssFile(path: string | null): boolean {
   return path.toLowerCase().endsWith('.css');
 }
 
+function isTsxFile(path: string | null): boolean {
+  if (!path) return false;
+  const l = path.toLowerCase();
+  return l.endsWith('.tsx') || l.endsWith('.jsx');
+}
+
 function isJsFile(path: string | null): boolean {
   if (!path) return false;
   const l = path.toLowerCase();
-  return l.endsWith('.js') || l.endsWith('.ts') || l.endsWith('.mjs');
+  return l.endsWith('.js') || l.endsWith('.ts') || l.endsWith('.mjs') || l.endsWith('.tsx') || l.endsWith('.jsx');
 }
 
 function isJsonFile(path: string | null): boolean {
@@ -84,19 +92,85 @@ function isImageFile(path: string | null): boolean {
 function getFileIcon(path: string) {
   if (isHtmlFile(path)) return FileCode2;
   if (isCssFile(path)) return FileType;
+  if (isTsxFile(path)) return FileCode2;
   if (isJsFile(path)) return FileJson;
   if (isJsonFile(path)) return FileJson;
   if (isImageFile(path)) return FileImage;
   return File;
 }
 
+function getFileColor(path: string): string {
+  if (isHtmlFile(path)) return 'text-orange-400';
+  if (isCssFile(path)) return 'text-blue-400';
+  if (isTsxFile(path)) return 'text-sky-400';
+  if (isJsFile(path)) return 'text-yellow-400';
+  if (isJsonFile(path)) return 'text-green-400';
+  return 'text-muted-foreground';
+}
+
 function getLanguageBadge(path: string | null): { label: string; color: string } | null {
   if (!path) return null;
   if (isHtmlFile(path)) return { label: 'HTML', color: 'bg-orange-500/20 text-orange-400' };
   if (isCssFile(path)) return { label: 'CSS', color: 'bg-blue-500/20 text-blue-400' };
+  if (isTsxFile(path)) return { label: 'TSX', color: 'bg-sky-500/20 text-sky-400' };
   if (isJsFile(path)) return { label: 'JS', color: 'bg-yellow-500/20 text-yellow-400' };
   if (isJsonFile(path)) return { label: 'JSON', color: 'bg-green-500/20 text-green-400' };
   return null;
+}
+
+// 파일 트리 구조 헬퍼
+interface FileTreeNode {
+  name: string;
+  path: string; // full path for files, dir path for dirs
+  type: 'file' | 'dir';
+  children?: FileTreeNode[];
+  // file-specific fields
+  sha?: string;
+  size?: number;
+}
+
+function buildFileTree(files: { name: string; path: string; sha: string; size: number }[]): FileTreeNode[] {
+  const root: FileTreeNode[] = [];
+
+  for (const file of files) {
+    const parts = file.path.split('/');
+    let current = root;
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      const isFile = i === parts.length - 1;
+
+      if (isFile) {
+        current.push({
+          name: part,
+          path: file.path,
+          type: 'file',
+          sha: file.sha,
+          size: file.size,
+        });
+      } else {
+        let dir = current.find((n) => n.type === 'dir' && n.name === part);
+        if (!dir) {
+          dir = { name: part, path: parts.slice(0, i + 1).join('/'), type: 'dir', children: [] };
+          current.push(dir);
+        }
+        current = dir.children!;
+      }
+    }
+  }
+
+  // Sort: dirs first, then files, alphabetically
+  const sortTree = (nodes: FileTreeNode[]) => {
+    nodes.sort((a, b) => {
+      if (a.type !== b.type) return a.type === 'dir' ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+    for (const node of nodes) {
+      if (node.children) sortTree(node.children);
+    }
+  };
+  sortTree(root);
+  return root;
 }
 
 function formatRelativeTime(date: Date, locale: string): string {
@@ -149,11 +223,15 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const deploy = deployments?.find((d) => d.id === deployId);
   const liveUrl = deploy?.pages_url || deploy?.deployment_url;
 
-  // index.html 자동 선택
+  // 자동 파일 선택 (우선순위: src/app/page.tsx → src/lib/config.ts → index.html → 첫 번째 파일)
   useEffect(() => {
     if (files && files.length > 0 && !selectedPath) {
-      const indexFile = files.find((f) => f.name.toLowerCase() === 'index.html');
-      setSelectedPath(indexFile ? indexFile.path : files[0].path);
+      const pageTsx = files.find((f) => f.path === 'src/app/page.tsx');
+      const configTs = files.find((f) => f.path === 'src/lib/config.ts');
+      const indexHtml = files.find((f) => f.name.toLowerCase() === 'index.html');
+      setSelectedPath(
+        pageTsx?.path || configTs?.path || indexHtml?.path || files[0].path
+      );
     }
   }, [files, selectedPath]);
 
@@ -606,47 +684,83 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     );
   };
 
+  // 파일 트리 빌드
+  const fileTree = useMemo(() => {
+    if (!files || files.length === 0) return [];
+    return buildFileTree(files);
+  }, [files]);
+
+  // 디렉토리 접기/펼치기 상태 (src/app, src/components 등 기본 펼침)
+  const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set(['src', 'src/app', 'src/components', 'src/lib']));
+
+  const toggleDir = useCallback((dirPath: string) => {
+    setExpandedDirs((prev) => {
+      const next = new Set(prev);
+      if (next.has(dirPath)) next.delete(dirPath);
+      else next.add(dirPath);
+      return next;
+    });
+  }, []);
+
+  // 트리 노드 렌더링 (재귀)
+  const renderTreeNode = useCallback((node: FileTreeNode, depth: number) => {
+    if (node.type === 'dir') {
+      const isExpanded = expandedDirs.has(node.path);
+      return (
+        <div key={node.path}>
+          <button
+            onClick={() => toggleDir(node.path)}
+            className="w-full text-left py-1 text-[13px] flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-muted"
+            style={{ paddingLeft: `${depth * 12 + 8}px` }}
+          >
+            <ChevronRight className={`h-3 w-3 shrink-0 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+            <Folder className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
+            <span className="truncate">{node.name}</span>
+          </button>
+          {isExpanded && node.children?.map((child) => renderTreeNode(child, depth + 1))}
+        </div>
+      );
+    }
+
+    const Icon = getFileIcon(node.path);
+    const isSelected = selectedPath === node.path;
+    const isModified = isSelected && hasUnsavedChanges;
+
+    return (
+      <button
+        key={node.path}
+        onClick={() => handleTabSwitch(node.path)}
+        className={`w-full text-left py-1.5 text-[13px] flex items-center gap-2 rounded-md transition-colors ${
+          isSelected
+            ? 'bg-accent font-semibold text-foreground'
+            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+        }`}
+        style={{ paddingLeft: `${depth * 12 + 8}px` }}
+      >
+        <Icon className={`h-3.5 w-3.5 flex-shrink-0 ${getFileColor(node.path)}`} />
+        <span className="truncate flex-1">{node.name}</span>
+        {isModified && (
+          <Circle className="h-2 w-2 shrink-0 fill-amber-400 text-amber-400 mr-1" />
+        )}
+      </button>
+    );
+  }, [selectedPath, hasUnsavedChanges, expandedDirs, toggleDir, handleTabSwitch]);
+
   // 파일 리스트 렌더링 (사이드바/오버레이 공용)
   const renderFileList = () => {
     if (filesLoading) {
       return (
         <div className="p-3 space-y-2">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-9 w-full rounded-md" />
+            <Skeleton key={i} className="h-7 w-full rounded-md" />
           ))}
         </div>
       );
     }
-    if (files && files.length > 0) {
+    if (fileTree.length > 0) {
       return (
-        <div className="py-1.5 px-2 space-y-0.5">
-          {files.map((file) => {
-            const Icon = getFileIcon(file.path);
-            const isSelected = selectedPath === file.path;
-            const isModified = isSelected && hasUnsavedChanges;
-            return (
-              <button
-                key={file.path}
-                onClick={() => handleTabSwitch(file.path)}
-                className={`w-full text-left px-2.5 py-2 text-[13px] flex items-center gap-2.5 rounded-md transition-colors ${
-                  isSelected
-                    ? 'bg-accent font-semibold text-foreground'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                }`}
-              >
-                <Icon className={`h-4 w-4 flex-shrink-0 ${
-                  isHtmlFile(file.path) ? 'text-orange-400' :
-                  isCssFile(file.path) ? 'text-blue-400' :
-                  isJsFile(file.path) ? 'text-yellow-400' :
-                  'text-muted-foreground'
-                }`} />
-                <span className="truncate flex-1">{file.name}</span>
-                {isModified && (
-                  <Circle className="h-2 w-2 shrink-0 fill-amber-400 text-amber-400" />
-                )}
-              </button>
-            );
-          })}
+        <div className="py-1.5 px-1">
+          {fileTree.map((node) => renderTreeNode(node, 0))}
         </div>
       );
     }

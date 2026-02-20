@@ -17,7 +17,7 @@ export type { GitHubPagesResult, WorkflowRun } from './pages';
 export { listRepoContents, getFileContent, createOrUpdateFileContent } from './content';
 export type { GitHubContentItem, GitHubFileContentResponse, GitHubFileContentResult } from './content';
 
-export { createBlob, createTree, createCommit, createRef, getRef, updateRef, pushFilesAtomically } from './git-data';
+export { createBlob, createTree, createCommit, createRef, getRef, updateRef, pushFilesAtomically, getGitTreeRecursive } from './git-data';
 
 export { forkRepo, generateFromTemplate } from './forks';
 export type { GitHubForkResult, GitHubGenerateResult } from './forks';
