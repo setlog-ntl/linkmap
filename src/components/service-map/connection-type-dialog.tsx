@@ -9,8 +9,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 import type { UserConnectionType } from '@/types';
 
 const connectionTypes: { value: UserConnectionType; label: string; desc: string }[] = [
@@ -47,22 +46,27 @@ export function ConnectionTypeDialog({
           <DialogTitle className="text-base">연결 타입 선택</DialogTitle>
           {sourceLabel && targetLabel && (
             <p className="text-sm text-muted-foreground">
-              {sourceLabel} → {targetLabel}
+              {sourceLabel} &rarr; {targetLabel}
             </p>
           )}
         </DialogHeader>
 
-        <RadioGroup value={selected} onValueChange={(v) => setSelected(v as UserConnectionType)} className="space-y-2">
+        <div className="space-y-1.5">
           {connectionTypes.map((ct) => (
-            <div key={ct.value} className="flex items-center space-x-3 rounded-md border p-2.5 hover:bg-accent/50 transition-colors">
-              <RadioGroupItem value={ct.value} id={ct.value} />
-              <Label htmlFor={ct.value} className="flex-1 cursor-pointer">
-                <div className="text-sm font-medium">{ct.label}</div>
-                <div className="text-xs text-muted-foreground">{ct.desc}</div>
-              </Label>
-            </div>
+            <button
+              key={ct.value}
+              type="button"
+              onClick={() => setSelected(ct.value)}
+              className={cn(
+                'w-full flex flex-col items-start rounded-md border p-2.5 text-left transition-colors hover:bg-accent/50',
+                selected === ct.value && 'border-primary bg-primary/5'
+              )}
+            >
+              <div className="text-sm font-medium">{ct.label}</div>
+              <div className="text-xs text-muted-foreground">{ct.desc}</div>
+            </button>
           ))}
-        </RadioGroup>
+        </div>
 
         <DialogFooter>
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
