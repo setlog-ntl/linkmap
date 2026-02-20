@@ -241,6 +241,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const [moduleState, setModuleState] = useState<ModuleConfigState | null>(null);
   const [moduleInitialized, setModuleInitialized] = useState(false);
   const [isApplyingModules, setIsApplyingModules] = useState(false);
+  const [isDeployingModules, setIsDeployingModules] = useState(false);
 
   // 자동 파일 선택 (우선순위: src/app/page.tsx → src/lib/config.ts → index.html → 첫 번째 파일)
   useEffect(() => {
@@ -562,8 +563,8 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     }
   }, [batchApply, deployId, selectedPath, fileDetail, filesShaMap, liveUrl, locale]);
 
-  // ── 모듈 → 코드 적용 ──
-  const handleApplyModules = useCallback(async () => {
+  // ── 모듈 → 코드에만 적용 (배포 대기 없이) ──
+  const handleApplyModulesToCode = useCallback(async () => {
     if (!moduleState || !moduleSchema) return;
     try {
       setIsApplyingModules(true);
@@ -574,7 +575,6 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         setFileCache((prev) => ({ ...prev, [gf.path]: gf.content }));
         if (gf.path === selectedPath) {
           setEditorContent(gf.content);
-          setHasUnsavedChanges(true);
         }
       }
 
@@ -598,8 +598,67 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           : `${result.file_count} file(s) applied to code`
       );
 
-      // 자동 배포 트리거 (간소화)
+      // 라이브 미리보기 즉시 새로고침 (배포 대기 없이 현재 상태 표시)
+      setLivePreviewKey((k) => k + 1);
+      if (liveUrl) {
+        setShowLiveAfterDeploy(true);
+        toast.info(
+          locale === 'ko'
+            ? '미리보기는 배포 완료 후 반영됩니다 (약 30초)'
+            : 'Preview will update after deployment (~30s)'
+        );
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '적용 실패');
+    } finally {
+      setIsApplyingModules(false);
+    }
+  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, locale, fileCache, templateSlug]);
+
+  // ── 모듈 → 코드 적용 + 배포 동시 ──
+  const handleApplyModulesAndDeploy = useCallback(async () => {
+    if (!moduleState || !moduleSchema) return;
+    try {
+      setIsDeployingModules(true);
+      setDeployState('saving');
+      const generatedFiles = generateFiles(moduleState, fileCache, templateSlug ?? undefined);
+
+      // 에디터 캐시 업데이트
+      for (const gf of generatedFiles) {
+        setFileCache((prev) => ({ ...prev, [gf.path]: gf.content }));
+        if (gf.path === selectedPath) {
+          setEditorContent(gf.content);
+        }
+      }
+
+      // Batch update로 GitHub 커밋
+      const filesToSave = generatedFiles.map((gf) => ({
+        path: gf.path,
+        content: gf.content,
+      }));
+
+      const result = await batchApply.mutateAsync({
+        deployId,
+        files: filesToSave,
+      });
+
+      setHasUnsavedChanges(false);
+      setLastSavedAt(new Date());
+
+      toast.success(
+        locale === 'ko'
+          ? `${result.file_count}개 파일 저장 완료`
+          : `${result.file_count} file(s) saved`
+      );
+
+      // 배포 대기
       setDeployState('deploying');
+      toast.info(
+        locale === 'ko'
+          ? 'GitHub Pages 배포 중... 약 30초 소요됩니다.'
+          : 'Deploying to GitHub Pages... ~30 seconds.'
+      );
+
       if (liveUrl) {
         let attempts = 0;
         await new Promise<void>((resolve) => {
@@ -629,11 +688,12 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       );
       setTimeout(() => setDeployState('idle'), 3000);
     } catch (err) {
+      setDeployState('idle');
       toast.error(err instanceof Error ? err.message : '적용 실패');
     } finally {
-      setIsApplyingModules(false);
+      setIsDeployingModules(false);
     }
-  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, locale, fileCache]);
+  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, locale, fileCache, templateSlug]);
 
   // Ctrl+S 단축키
   useEffect(() => {
@@ -1221,8 +1281,10 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           schema={moduleSchema}
           state={moduleState}
           onStateChange={setModuleState}
-          onApply={handleApplyModules}
+          onApplyToCode={handleApplyModulesToCode}
+          onApplyAndDeploy={handleApplyModulesAndDeploy}
           isApplying={isApplyingModules}
+          isDeploying={isDeployingModules || isDeploying}
           locale={locale}
           deployId={deployId}
         />

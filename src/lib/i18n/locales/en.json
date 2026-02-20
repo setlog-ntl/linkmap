@@ -447,6 +447,7 @@
   "modulePanel": {
     "title": "Module Editor",
     "applyToCode": "Apply to Code",
+    "applyAndDeploy": "Apply & Deploy",
     "moduleDisabled": "This module is disabled. Turn the switch on to enable it.",
     "selectModule": "Select a module to edit"
   },

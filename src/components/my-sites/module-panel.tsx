@@ -35,6 +35,7 @@ import {
   FileCode2,
   GripVertical,
   Wand2,
+  Rocket,
 } from 'lucide-react';
 import type {
   TemplateModuleSchema,
@@ -165,8 +166,10 @@ interface ModulePanelProps {
   schema: TemplateModuleSchema;
   state: ModuleConfigState;
   onStateChange: (state: ModuleConfigState) => void;
-  onApply: () => void;
+  onApplyToCode: () => void;
+  onApplyAndDeploy: () => void;
   isApplying: boolean;
+  isDeploying: boolean;
   locale: Locale;
   deployId?: string;
 }
@@ -175,8 +178,10 @@ export function ModulePanel({
   schema,
   state,
   onStateChange,
-  onApply,
+  onApplyToCode,
+  onApplyAndDeploy,
   isApplying,
+  isDeploying,
   locale,
   deployId,
 }: ModulePanelProps) {
@@ -475,12 +480,13 @@ export function ModulePanel({
                   </div>
                 </div>
 
-                <div className="mt-3 pt-3 border-t">
+                <div className="mt-3 pt-3 border-t flex gap-2">
                   <Button
                     size="sm"
-                    className="w-full h-8 gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white"
-                    onClick={onApply}
-                    disabled={isApplying}
+                    variant="outline"
+                    className="flex-1 h-8 gap-1.5"
+                    onClick={onApplyToCode}
+                    disabled={isApplying || isDeploying}
                   >
                     {isApplying ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -489,6 +495,21 @@ export function ModulePanel({
                     )}
                     <span className="text-xs">
                       {t(locale, 'modulePanel.applyToCode')}
+                    </span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="flex-1 h-8 gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white"
+                    onClick={onApplyAndDeploy}
+                    disabled={isApplying || isDeploying}
+                  >
+                    {isDeploying ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Rocket className="h-3.5 w-3.5" />
+                    )}
+                    <span className="text-xs">
+                      {t(locale, 'modulePanel.applyAndDeploy')}
                     </span>
                   </Button>
                 </div>
