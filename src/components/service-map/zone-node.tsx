@@ -46,8 +46,8 @@ function ZoneNode({ data }: NodeProps) {
   const headerClass = headerColors[d.domain] || 'text-foreground/80';
 
   return (
-    <div className={`w-full h-full rounded-2xl border transition-colors ${
-      editMode ? 'border-dashed border-primary/40' : borderClass
+    <div className={`w-full h-full rounded-2xl border border-dashed transition-colors ${
+      editMode ? 'border-primary/40' : borderClass
     }`}>
       {/* Zone header */}
       <div className="flex items-center gap-2 px-4 pt-3 pb-1">

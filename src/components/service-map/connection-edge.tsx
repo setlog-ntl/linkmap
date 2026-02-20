@@ -12,21 +12,22 @@ import { X } from 'lucide-react';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import type { DependencyType, UserConnectionType } from '@/types';
 
-/** All connection styles - dependencies + user connections */
-const styles: Record<string, { color: string; dash: string; label: string }> = {
+/** All connection styles - dependencies + user connections
+ *  weight: 1=lightweight, 2=normal, 3=critical */
+const styles: Record<string, { color: string; dash: string; label: string; weight: number }> = {
   // Dependency types
-  required:    { color: 'var(--destructive)', dash: '0',   label: '필수' },
-  recommended: { color: 'var(--primary)',     dash: '0',   label: '권장' },
-  optional:    { color: 'var(--muted-foreground)', dash: '6 3', label: '선택' },
-  alternative: { color: 'var(--chart-4)',     dash: '6 3', label: '대체' },
+  required:    { color: 'var(--destructive)', dash: '0',   label: '필수',   weight: 3 },
+  recommended: { color: 'var(--primary)',     dash: '0',   label: '권장',   weight: 2 },
+  optional:    { color: 'var(--muted-foreground)', dash: '6 3', label: '선택', weight: 1 },
+  alternative: { color: 'var(--chart-4)',     dash: '6 3', label: '대체',   weight: 1 },
   // User connection types
-  uses:          { color: '#3b82f6', dash: '0',   label: '사용' },
-  integrates:    { color: '#22c55e', dash: '0',   label: '연동' },
-  data_transfer: { color: '#f97316', dash: '6 3', label: '데이터 전달' },
-  api_call:      { color: '#8b5cf6', dash: '0',   label: 'API 호출' },
-  auth_provider: { color: '#ec4899', dash: '4 2', label: '인증 제공' },
-  webhook:       { color: '#14b8a6', dash: '6 2', label: '웹훅' },
-  sdk:           { color: '#6366f1', dash: '0',   label: 'SDK' },
+  uses:          { color: '#3b82f6', dash: '0',   label: '사용',       weight: 2 },
+  integrates:    { color: '#22c55e', dash: '0',   label: '연동',       weight: 3 },
+  data_transfer: { color: '#f97316', dash: '6 3', label: '데이터 전달', weight: 2 },
+  api_call:      { color: '#8b5cf6', dash: '0',   label: 'API 호출',   weight: 3 },
+  auth_provider: { color: '#ec4899', dash: '4 2', label: '인증 제공',   weight: 2 },
+  webhook:       { color: '#14b8a6', dash: '6 2', label: '웹훅',       weight: 1 },
+  sdk:           { color: '#6366f1', dash: '0',   label: 'SDK',        weight: 1 },
 };
 
 interface ConnectionEdgeData {
@@ -85,7 +86,7 @@ function ConnectionEdge({
         markerEnd={MarkerType.ArrowClosed}
         style={{
           stroke: s.color,
-          strokeWidth: hovered ? 3 : 2,
+          strokeWidth: hovered ? s.weight + 1 : s.weight,
           strokeDasharray,
           transition: 'stroke-width 0.2s ease',
         }}

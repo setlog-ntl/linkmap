@@ -8,11 +8,11 @@ import { NodeTooltip } from '@/components/service-map/node-tooltip';
 import type { ServiceCategory } from '@/types';
 import { getCategoryStyle } from '@/lib/constants/category-styles';
 
-const statusDots: Record<string, { bg: string; pulse: boolean }> = {
-  connected:   { bg: 'bg-green-500 text-green-500',   pulse: false },
-  in_progress: { bg: 'bg-yellow-500 text-yellow-500', pulse: true },
-  not_started: { bg: 'bg-gray-400 dark:bg-gray-500 text-gray-400', pulse: false },
-  error:       { bg: 'bg-red-500 text-red-500',       pulse: true },
+const statusDots: Record<string, { bg: string; pulse: boolean; label: string }> = {
+  connected:   { bg: 'bg-green-500 text-green-500',   pulse: false, label: '연결됨' },
+  in_progress: { bg: 'bg-yellow-500 text-yellow-500', pulse: true,  label: '진행 중' },
+  not_started: { bg: 'bg-gray-400 dark:bg-gray-500 text-gray-400', pulse: false, label: '시작 전' },
+  error:       { bg: 'bg-red-500 text-red-500',       pulse: true,  label: '오류' },
 };
 
 interface ServiceNodeData {
@@ -40,12 +40,12 @@ function ServiceNode({ data }: NodeProps) {
   const nodeContent = (
     <div
       className={`
-        relative px-3 py-2.5 rounded-xl border-2 shadow-sm
+        relative px-3 py-2 rounded-xl border-2 shadow-sm
         transition-all duration-200
         ${colorClass}
         ${isHighlighted ? '' : 'opacity-20'}
         hover:shadow-lg hover:scale-[1.03] hover:-translate-y-0.5
-        ${isMain ? 'w-[176px] h-[52px] ring-2 ring-amber-400 ring-offset-1 ring-offset-background' : 'w-[160px] h-[48px]'}
+        ${isMain ? 'w-[176px] h-[68px] ring-2 ring-amber-400 ring-offset-1 ring-offset-background' : 'w-[160px] h-[64px]'}
       `}
       style={{
         opacity: isHighlighted ? focusOpacity : 0.2,
@@ -69,14 +69,20 @@ function ServiceNode({ data }: NodeProps) {
         </div>
       )}
 
+      {/* Row 1: Icon + Name */}
       <div className="flex items-center gap-2">
         {d.iconSlug ? (
-          <ServiceIcon serviceId={d.iconSlug} size={16} />
+          <ServiceIcon serviceId={d.iconSlug} size={18} />
         ) : (
           <span className="text-sm">&#9881;&#65039;</span>
         )}
         <span className="font-medium text-sm truncate flex-1 min-w-0">{d.label}</span>
+      </div>
+
+      {/* Row 2: Status dot + label */}
+      <div className="flex items-center gap-1.5 mt-1">
         <span className={`w-2 h-2 rounded-full shrink-0 ${dotStyle.bg} ${dotStyle.pulse ? 'animate-status-pulse' : ''}`} />
+        <span className="text-[10px] text-muted-foreground truncate">{dotStyle.label}</span>
       </div>
 
       <Handle
@@ -93,7 +99,7 @@ function ServiceNode({ data }: NodeProps) {
   );
 
   return (
-    <NodeTooltip label={d.label} status={d.status} domain={d.domain} isMainService={isMain}>
+    <NodeTooltip label={d.label} status={d.status} domain={d.domain} category={d.category} isMainService={isMain}>
       {nodeContent}
     </NodeTooltip>
   );
