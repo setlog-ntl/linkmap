@@ -444,6 +444,12 @@
     "loadingFiles": "Loading files...",
     "noFiles": "No editable files found"
   },
+  "modulePanel": {
+    "title": "Module Editor",
+    "applyToCode": "Apply to Code",
+    "moduleDisabled": "This module is disabled. Turn the switch on to enable it.",
+    "selectModule": "Select a module to edit"
+  },
   "connections": {
     "title": "Connections",
     "subtitle": "Create and manage connections between services",

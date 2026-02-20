@@ -332,6 +332,7 @@
 | 이슈/리팩토링 | `docs/onelink/05-issues-and-refactor-plan.md` | 문제점 & 해결 상태 추적 | 현행화 완료 |
 | 템플릿 재정비 | `docs/onelink/06-template-reselection-plan.md` | 템플릿 계획 | 현행화 완료 |
 | 템플릿 마스터 | `docs/템플릿기획/템플릿기획.md` | 15개 템플릿 마스터 기획 | 완료 |
+| 모듈형 에디터 | `docs/onelink/08-modular-template-editor.md` | 모듈 단위 비주얼 편집 기능 기획 | 기획 검토 중 |
 
 ---
 
@@ -342,3 +343,4 @@
 | 2026-02-18 | v1.0 | PMO 문서 초기 생성. 프로젝트 차터, 현황 분석, 7-Sprint 계획, 리스크 레지스터 |
 | 2026-02-18 | v2.0 | 7-Sprint 전체 완료. Sprint 6(편집기/AI) + Sprint 7(플랫폼 연결) 구현. 문서 전체 보완 완료 |
 | 2026-02-18 | v3.0 | 문서 전체 현행화. 8건 불일치 해결, AS-IS 갱신, KPI 현행화, Phase 2 로드맵(Sprint 8-12), Connections 기능 Session #3, 리스크 R6-R9 추가, 의사결정 4건 추가 |
+| 2026-02-20 | v3.1 | 모듈형 템플릿 에디터 기획 문서 추가 (08-modular-template-editor.md). Personal Brand 파일럿 기준 6개 콘텐츠 모듈 + 2개 레이아웃 모듈 정의, 4-Phase 구현 로드맵 |

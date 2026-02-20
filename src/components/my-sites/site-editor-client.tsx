@@ -51,6 +51,15 @@ import {
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { ChatTerminal, type CodeBlock } from './chat-terminal';
+import { ModulePanel } from './module-panel';
+import { getModuleSchema } from '@/data/oneclick/module-schemas';
+import type { ModuleConfigState } from '@/lib/module-schema';
+import {
+  generateFiles,
+  buildInitialState,
+  parseConfigToState,
+  parsePageToEnabledModules,
+} from '@/lib/oneclick/code-generator';
 
 interface SiteEditorClientProps {
   deployId: string;
@@ -223,6 +232,16 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const deploy = deployments?.find((d) => d.id === deployId);
   const liveUrl = deploy?.pages_url || deploy?.deployment_url;
 
+  // ── 모듈 에디터 상태 ──
+  const templateSlug = deploy?.homepage_templates?.slug ?? null;
+  const moduleSchema = useMemo(
+    () => (templateSlug ? getModuleSchema(templateSlug) : null),
+    [templateSlug]
+  );
+  const [moduleState, setModuleState] = useState<ModuleConfigState | null>(null);
+  const [moduleInitialized, setModuleInitialized] = useState(false);
+  const [isApplyingModules, setIsApplyingModules] = useState(false);
+
   // 자동 파일 선택 (우선순위: src/app/page.tsx → src/lib/config.ts → index.html → 첫 번째 파일)
   useEffect(() => {
     if (files && files.length > 0 && !selectedPath) {
@@ -249,6 +268,29 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       setFileCache((prev) => ({ ...prev, [selectedPath]: editorContent }));
     }
   }, [editorContent, selectedPath]);
+
+  // ── 모듈 상태 초기화 (config.ts 파싱) ──
+  useEffect(() => {
+    if (!moduleSchema || moduleInitialized) return;
+    const configContent = fileCache['src/lib/config.ts'];
+    const pageContent = fileCache['src/app/page.tsx'];
+    if (configContent) {
+      const parsed = parseConfigToState(configContent, moduleSchema);
+      if (pageContent) {
+        const { enabled, order } = parsePageToEnabledModules(pageContent);
+        if (enabled.length > 0) {
+          parsed.enabled = enabled;
+          parsed.order = order;
+        }
+      }
+      setModuleState(parsed);
+      setModuleInitialized(true);
+    } else if (files && files.length > 0) {
+      // config.ts 아직 캐시에 없으면 기본값으로 초기화
+      setModuleState(buildInitialState(moduleSchema));
+      setModuleInitialized(true);
+    }
+  }, [moduleSchema, moduleInitialized, fileCache, files]);
 
   // 미리보기 HTML 조합
   const previewHtml = useMemo(() => {
@@ -519,6 +561,79 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       toast.error(err instanceof Error ? err.message : '적용 실패');
     }
   }, [batchApply, deployId, selectedPath, fileDetail, filesShaMap, liveUrl, locale]);
+
+  // ── 모듈 → 코드 적용 ──
+  const handleApplyModules = useCallback(async () => {
+    if (!moduleState || !moduleSchema) return;
+    try {
+      setIsApplyingModules(true);
+      const generatedFiles = generateFiles(moduleState);
+
+      // 에디터 캐시 업데이트 (현재 열린 파일이면 에디터 내용도 갱신)
+      for (const gf of generatedFiles) {
+        setFileCache((prev) => ({ ...prev, [gf.path]: gf.content }));
+        if (gf.path === selectedPath) {
+          setEditorContent(gf.content);
+          setHasUnsavedChanges(true);
+        }
+      }
+
+      // Batch update로 GitHub 커밋
+      const filesToSave = generatedFiles.map((gf) => ({
+        path: gf.path,
+        content: gf.content,
+      }));
+
+      const result = await batchApply.mutateAsync({
+        deployId,
+        files: filesToSave,
+      });
+
+      setHasUnsavedChanges(false);
+      setLastSavedAt(new Date());
+
+      toast.success(
+        locale === 'ko'
+          ? `${result.file_count}개 파일이 코드에 적용되었습니다`
+          : `${result.file_count} file(s) applied to code`
+      );
+
+      // 자동 배포 트리거 (간소화)
+      setDeployState('deploying');
+      if (liveUrl) {
+        let attempts = 0;
+        await new Promise<void>((resolve) => {
+          const poll = setInterval(async () => {
+            attempts++;
+            try {
+              await fetch(`${liveUrl}?_t=${Date.now()}`, {
+                method: 'HEAD',
+                mode: 'no-cors',
+              });
+              if (attempts >= 6) { clearInterval(poll); resolve(); }
+            } catch { /* ignore */ }
+            if (attempts >= 12) { clearInterval(poll); resolve(); }
+          }, 5000);
+        });
+      } else {
+        await new Promise((r) => setTimeout(r, 30000));
+      }
+
+      setDeployState('deployed');
+      setLivePreviewKey((k) => k + 1);
+      setShowLiveAfterDeploy(true);
+      toast.success(
+        locale === 'ko'
+          ? '배포 완료! 사이트에 반영되었습니다.'
+          : 'Deployed! Changes are now live.'
+      );
+      setTimeout(() => setDeployState('idle'), 3000);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '적용 실패');
+    } finally {
+      setIsApplyingModules(false);
+    }
+  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, locale]);
 
   // Ctrl+S 단축키
   useEffect(() => {
@@ -1099,6 +1214,18 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           )}
         </div>
       </div>
+
+      {/* ===== 모듈 패널 ===== */}
+      {moduleSchema && moduleState && (
+        <ModulePanel
+          schema={moduleSchema}
+          state={moduleState}
+          onStateChange={setModuleState}
+          onApply={handleApplyModules}
+          isApplying={isApplyingModules}
+          locale={locale}
+        />
+      )}
 
       {/* ===== 상태 바 ===== */}
       <div className="border-t px-3 sm:px-4 h-8 flex items-center justify-between text-xs text-muted-foreground bg-muted/30 gap-4">
