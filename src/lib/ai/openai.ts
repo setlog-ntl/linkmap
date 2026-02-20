@@ -91,7 +91,7 @@ export async function callOpenAIWithTools(
   maxIterations = 5,
 ): Promise<{ content: string; usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number } }> {
   const model = params.model || 'gpt-4o';
-  let totalUsage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+  const totalUsage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
   const conversationMessages: Array<Record<string, unknown>> = [
     { role: 'system', content: systemPrompt },
     ...messages,

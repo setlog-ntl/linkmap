@@ -30,7 +30,7 @@ const TIP_INTERVAL_MS = 8000;
 
 function useElapsedTime(isActive: boolean) {
   const [elapsed, setElapsed] = useState(0);
-  const startRef = useRef(Date.now());
+  const startRef = useRef(0);
 
   useEffect(() => {
     if (!isActive) return;

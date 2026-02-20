@@ -27,7 +27,7 @@ type MobileTab = DashboardLayer | 'project';
 
 const MOBILE_TABS: { key: MobileTab; label: string }[] = [
   { key: 'frontend', label: 'Frontend' },
-  { key: 'project', label: '프로젝트' },
+  { key: 'project', label: 'Project' },
   { key: 'backend', label: 'Backend' },
   { key: 'devtools', label: 'DevTools' },
 ];
