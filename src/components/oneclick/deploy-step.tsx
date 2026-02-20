@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -15,8 +15,11 @@ import {
   Github,
   ExternalLink,
   CheckCircle2,
+  Rocket,
 } from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLocaleStore } from '@/stores/locale-store';
+import { t, type Locale } from '@/lib/i18n';
 import type { DeployStatus } from '@/lib/queries/oneclick';
 import { getErrorDetails } from '@/lib/deploy-error-map';
 import { DeployProgress } from './deploy-progress';
@@ -60,16 +63,7 @@ export function DeployStep({ status, isLoading, error, projectId, onRetry }: Dep
 
   // Loading (deploying, no status yet)
   if (isLoading && !status) {
-    return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-muted-foreground">
-            {locale === 'ko' ? '사이트를 준비하고 있습니다...' : 'Preparing your site...'}
-          </p>
-        </CardContent>
-      </Card>
-    );
+    return <InitialLoadingCard locale={locale} />;
   }
 
   if (!status) return null;
@@ -142,6 +136,58 @@ export function DeployStep({ status, isLoading, error, projectId, onRetry }: Dep
       {/* Success */}
       {isCompleted && <DeploySuccess status={status} projectId={projectId} />}
     </div>
+  );
+}
+
+// ── Internal Initial Loading Card ──
+
+const PREPARING_TIPS_KEYS = ['tip1', 'tip2', 'tip3'] as const;
+
+function InitialLoadingCard({ locale }: { locale: Locale }) {
+  const prefersReducedMotion = useReducedMotion();
+  const [tipIndex, setTipIndex] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setTipIndex((prev) => (prev + 1) % PREPARING_TIPS_KEYS.length);
+    }, 6000);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <Card>
+      <CardContent className="py-12 text-center space-y-4">
+        <motion.div
+          animate={prefersReducedMotion ? {} : { scale: [1, 1.1, 1] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <Rocket className="h-10 w-10 mx-auto text-primary" />
+        </motion.div>
+        <div className="space-y-1">
+          <p className="font-medium">
+            {t(locale, 'deployProgress.preparing')}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {t(locale, 'deployProgress.preparingDesc')}
+          </p>
+        </div>
+        <div className="h-6">
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={tipIndex}
+              initial={prefersReducedMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="text-xs text-muted-foreground/60"
+            >
+              {t(locale, `deployProgress.${PREPARING_TIPS_KEYS[tipIndex]}`)}
+            </motion.p>
+          </AnimatePresence>
+        </div>
+        <Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" />
+      </CardContent>
+    </Card>
   );
 }
 

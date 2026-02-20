@@ -496,6 +496,26 @@
     "teamF6": "SSO / SAML",
     "teamF7": "전담 지원"
   },
+  "deployProgress": {
+    "elapsed": "경과",
+    "tipPrefix": "💡 알고 계셨나요?",
+    "doNotClose": "페이지를 닫지 마세요 — 배포가 진행 중입니다",
+    "preparing": "사이트를 준비하고 있습니다",
+    "preparingDesc": "GitHub 계정과 템플릿을 확인하고 있어요",
+    "completed": "배포 완료!",
+    "failed": "배포 실패",
+    "timeout": "응답 대기 시간 초과",
+    "preparingSite": "사이트 준비 중...",
+    "inProgress": "진행 중",
+    "repoDesc": "GitHub에 템플릿 레포지토리를 복사하고 있어요. 파일 구조와 설정을 함께 가져옵니다.",
+    "pagesDesc": "GitHub Pages를 활성화하고 빌드 설정을 구성하고 있어요. 첫 빌드가 시작됩니다.",
+    "liveDesc": "빌드가 완료되었어요! 사이트가 전세계 CDN에 배포되고 있습니다.",
+    "tip1": "GitHub Pages는 무료로 정적 사이트를 호스팅합니다",
+    "tip2": "배포 후 코드는 GitHub 레포에서 자유롭게 수정할 수 있어요",
+    "tip3": "커스텀 도메인도 나중에 연결할 수 있어요",
+    "tip4": "사이트가 배포되면 Linkmap 대시보드에서 관리할 수 있어요",
+    "tip5": "GitHub Actions가 자동으로 빌드와 배포를 처리합니다"
+  },
   "templatePicker": {
     "chooseTemplate": "템플릿 선택",
     "siteName": "사이트 이름",

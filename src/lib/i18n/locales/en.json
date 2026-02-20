@@ -496,6 +496,26 @@
     "teamF6": "SSO / SAML",
     "teamF7": "Dedicated support"
   },
+  "deployProgress": {
+    "elapsed": "elapsed",
+    "tipPrefix": "💡 Did you know?",
+    "doNotClose": "Don't close this page — deployment is in progress",
+    "preparing": "Preparing your site",
+    "preparingDesc": "Verifying your GitHub account and template",
+    "completed": "Deployment Complete!",
+    "failed": "Deployment Failed",
+    "timeout": "Polling Timeout",
+    "preparingSite": "Preparing your site...",
+    "inProgress": "In Progress",
+    "repoDesc": "Copying the template repository to your GitHub. Bringing over file structure and configuration.",
+    "pagesDesc": "Activating GitHub Pages and configuring build settings. The first build is starting.",
+    "liveDesc": "Build complete! Your site is being deployed to a global CDN.",
+    "tip1": "GitHub Pages hosts static sites completely free",
+    "tip2": "After deploy, you can freely edit the code in your GitHub repo",
+    "tip3": "You can connect a custom domain later",
+    "tip4": "Once deployed, manage your site from the Linkmap dashboard",
+    "tip5": "GitHub Actions automatically handles builds and deploys"
+  },
   "templatePicker": {
     "chooseTemplate": "Choose a Template",
     "siteName": "Site Name",
