@@ -882,6 +882,32 @@ Phase 2 추가:
 
 ---
 
+## 부록 C-2: Phase 2 구현 결과 (완료)
+
+### 추가/수정된 파일
+
+| 파일 | 변경 내용 |
+|------|-----------|
+| `src/data/oneclick/module-schemas/personal-brand.ts` | Hero에 gradientFrom/gradientTo/parallaxEnabled 필드, Gallery에 columns 필드 추가, affectedFiles 확장 |
+| `src/lib/oneclick/code-generator.ts` | `generateHeroSection`, `generateValuesSection`, `generateGallerySection`, `generateGlobalsCss` 함수 추가. `generateFiles` 시그니처 확장 (`currentFiles?` 파라미터) |
+| `src/components/my-sites/site-editor-client.tsx` | `generateFiles(moduleState)` → `generateFiles(moduleState, fileCache)` |
+
+### 동작 방식
+
+```
+1. 사용자가 Hero 모듈에서 그래디언트 색상 변경
+2. [코드에 적용] 클릭
+3. generateFiles(state, fileCache) 호출
+4. gradientFrom이 기본값(#ee5b2b)과 다르면:
+   - hero-section.tsx의 from-[#hex], to-[#hex] 패턴 교체
+   - globals.css의 --color-primary 교체
+5. Gallery columns가 기본값(3)과 다르면:
+   - gallery-section.tsx의 lg:grid-cols-N 교체
+6. Batch Update → GitHub 커밋 → 배포
+```
+
+---
+
 ## 부록 D: Phase 2~4 단계별 구현 가이드
 
 ### Phase 2: 컴포넌트 수준 편집
@@ -1117,17 +1143,18 @@ Google Fonts API에서 인기 폰트 목록 → Select UI.
 - [x] 빌드 성공
 - [x] 커밋 + 푸시 완료
 
-### Phase 2 — 컴포넌트 수준 편집
-- [ ] Hero: gradientFrom/gradientTo/parallaxEnabled 스키마 추가
-- [ ] Values: columns 스키마 추가
-- [ ] Gallery: columns 스키마 추가
-- [ ] `generateHeroSection()` 함수 구현
-- [ ] `generateValuesSection()` 함수 구현
-- [ ] `generateGallerySection()` 함수 구현
-- [ ] `generateFiles()` 확장 — currentFiles 파라미터
-- [ ] `handleApplyModules` 수정 — fileCache 전달
-- [ ] globals.css 테마 색상 생성기
-- [ ] 타입체크 + 테스트 + 빌드
+### Phase 2 ✅ 완료
+- [x] Hero: gradientFrom/gradientTo/parallaxEnabled 스키마 추가
+- [x] Gallery: columns 스키마 추가 (2/3/4열)
+- [x] `generateHeroSection()` 함수 구현 (Tailwind from/to + linear-gradient + opacity 패턴)
+- [x] `generateValuesSection()` 함수 구현 (md:grid-cols-N)
+- [x] `generateGallerySection()` 함수 구현 (lg:grid-cols-N)
+- [x] `generateGlobalsCss()` 함수 구현 (--color-primary)
+- [x] `generateFiles()` 확장 — currentFiles 파라미터, 조건부 컴포넌트 생성
+- [x] `handleApplyModules` 수정 — fileCache 전달
+- [x] 타입체크 통과 (Phase 2 관련 에러 0개)
+- [x] 102개 테스트 통과
+- [x] 커밋 `6b71e7f` + 푸시 완료
 
 ### Phase 3 — DnD + 프리셋 + 다른 템플릿
 - [ ] `@dnd-kit/core` 설치
