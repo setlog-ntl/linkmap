@@ -9,7 +9,11 @@ import {
   Save,
   ExternalLink,
   Loader2,
-  FileText,
+  FileCode2,
+  FileType,
+  FileJson,
+  FileImage,
+  File,
   Code,
   Eye,
   Rocket,
@@ -20,6 +24,8 @@ import {
   Smartphone,
   Tablet,
   Monitor,
+  Circle,
+  RotateCw,
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -56,6 +62,50 @@ function isHtmlFile(path: string | null): boolean {
 function isCssFile(path: string | null): boolean {
   if (!path) return false;
   return path.toLowerCase().endsWith('.css');
+}
+
+function isJsFile(path: string | null): boolean {
+  if (!path) return false;
+  const l = path.toLowerCase();
+  return l.endsWith('.js') || l.endsWith('.ts') || l.endsWith('.mjs');
+}
+
+function isJsonFile(path: string | null): boolean {
+  if (!path) return false;
+  return path.toLowerCase().endsWith('.json');
+}
+
+function isImageFile(path: string | null): boolean {
+  if (!path) return false;
+  const l = path.toLowerCase();
+  return l.endsWith('.png') || l.endsWith('.jpg') || l.endsWith('.jpeg') || l.endsWith('.gif') || l.endsWith('.svg') || l.endsWith('.webp');
+}
+
+function getFileIcon(path: string) {
+  if (isHtmlFile(path)) return FileCode2;
+  if (isCssFile(path)) return FileType;
+  if (isJsFile(path)) return FileJson;
+  if (isJsonFile(path)) return FileJson;
+  if (isImageFile(path)) return FileImage;
+  return File;
+}
+
+function getLanguageBadge(path: string | null): { label: string; color: string } | null {
+  if (!path) return null;
+  if (isHtmlFile(path)) return { label: 'HTML', color: 'bg-orange-500/20 text-orange-400' };
+  if (isCssFile(path)) return { label: 'CSS', color: 'bg-blue-500/20 text-blue-400' };
+  if (isJsFile(path)) return { label: 'JS', color: 'bg-yellow-500/20 text-yellow-400' };
+  if (isJsonFile(path)) return { label: 'JSON', color: 'bg-green-500/20 text-green-400' };
+  return null;
+}
+
+function formatRelativeTime(date: Date, locale: string): string {
+  const diff = Date.now() - date.getTime();
+  const seconds = Math.floor(diff / 1000);
+  if (seconds < 60) return locale === 'ko' ? '방금 전' : 'just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return locale === 'ko' ? `${minutes}분 전` : `${minutes}m ago`;
+  return date.toLocaleTimeString(locale === 'ko' ? 'ko-KR' : 'en-US', { hour: '2-digit', minute: '2-digit' });
 }
 
 type DeployState = 'idle' | 'saving' | 'deploying' | 'deployed';
@@ -527,33 +577,46 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       return (
         <div className="p-3 space-y-2">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-8 w-full" />
+            <Skeleton key={i} className="h-9 w-full rounded-md" />
           ))}
         </div>
       );
     }
     if (files && files.length > 0) {
       return (
-        <div className="py-1">
-          {files.map((file) => (
-            <button
-              key={file.path}
-              onClick={() => handleTabSwitch(file.path)}
-              className={`w-full text-left px-3 py-2.5 text-sm flex items-center gap-2 hover:bg-muted transition-colors ${
-                selectedPath === file.path
-                  ? 'bg-muted font-medium text-foreground'
-                  : 'text-muted-foreground'
-              }`}
-            >
-              <FileText className="h-3.5 w-3.5 flex-shrink-0" />
-              <span className="truncate">{file.name}</span>
-            </button>
-          ))}
+        <div className="py-1.5 px-2 space-y-0.5">
+          {files.map((file) => {
+            const Icon = getFileIcon(file.path);
+            const isSelected = selectedPath === file.path;
+            const isModified = isSelected && hasUnsavedChanges;
+            return (
+              <button
+                key={file.path}
+                onClick={() => handleTabSwitch(file.path)}
+                className={`w-full text-left px-2.5 py-2 text-[13px] flex items-center gap-2.5 rounded-md transition-colors ${
+                  isSelected
+                    ? 'bg-accent font-semibold text-foreground'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
+              >
+                <Icon className={`h-4 w-4 flex-shrink-0 ${
+                  isHtmlFile(file.path) ? 'text-orange-400' :
+                  isCssFile(file.path) ? 'text-blue-400' :
+                  isJsFile(file.path) ? 'text-yellow-400' :
+                  'text-muted-foreground'
+                }`} />
+                <span className="truncate flex-1">{file.name}</span>
+                {isModified && (
+                  <Circle className="h-2 w-2 shrink-0 fill-amber-400 text-amber-400" />
+                )}
+              </button>
+            );
+          })}
         </div>
       );
     }
     return (
-      <div className="p-3 text-sm text-muted-foreground">
+      <div className="p-4 text-sm text-muted-foreground text-center">
         {t(locale, 'editor.noFiles')}
       </div>
     );
@@ -564,28 +627,35 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)]">
       {/* ===== 툴바 ===== */}
-      <div className="border-b px-2 sm:px-4 py-2 flex items-center justify-between bg-background gap-2">
-        {/* 좌측: 뒤로가기 + 사이트명 */}
-        <div className="flex items-center gap-1 sm:gap-3 min-w-0">
-          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" asChild>
+      <div className="border-b px-3 sm:px-4 h-14 flex items-center justify-between bg-background/95 backdrop-blur-sm gap-3">
+        {/* 좌측: 뒤로가기 + 사이트 정보 */}
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <Button variant="ghost" size="sm" className="shrink-0 gap-1.5 text-muted-foreground hover:text-foreground" asChild>
             <Link href="/my-sites">
               <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline text-xs">{locale === 'ko' ? '내 사이트' : 'My Sites'}</span>
             </Link>
           </Button>
+          <div className="h-5 w-px bg-border hidden sm:block" />
           {deploy && (
-            <span className="text-sm font-medium truncate max-w-[120px] sm:max-w-none">
-              {deploy.site_name}
-            </span>
-          )}
-          {hasUnsavedChanges && (
-            <Badge variant="secondary" className="text-[10px] shrink-0">
-              {locale === 'ko' ? '미저장' : 'Unsaved'}
-            </Badge>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold truncate max-w-[140px] sm:max-w-[220px]">
+                  {deploy.site_name}
+                </span>
+                <Circle className={`h-2 w-2 shrink-0 ${hasUnsavedChanges ? 'fill-amber-400 text-amber-400' : 'fill-green-400 text-green-400'}`} />
+              </div>
+              {liveUrl && (
+                <p className="text-[10px] text-muted-foreground truncate max-w-[200px] hidden sm:block">
+                  {liveUrl.replace('https://', '')}
+                </p>
+              )}
+            </div>
           )}
         </div>
 
         {/* 우측: 액션 버튼 */}
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* 모바일: 파일 목록 토글 */}
           <Button
             variant="outline"
@@ -600,17 +670,17 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           <Button
             variant={showPreview ? 'default' : 'outline'}
             size="sm"
-            className="hidden md:inline-flex"
+            className="hidden md:inline-flex h-8"
             onClick={() => setShowPreview(!showPreview)}
           >
-            <Eye className="mr-1 h-3 w-3" />
+            <Eye className="mr-1.5 h-3.5 w-3.5" />
             {locale === 'ko' ? '미리보기' : 'Preview'}
           </Button>
 
           {/* 사이트 열기 */}
           {liveUrl && (
             <Button variant="outline" size="icon" className="h-8 w-8" asChild>
-              <a href={liveUrl} target="_blank" rel="noopener noreferrer" title={locale === 'ko' ? '사이트 열기' : 'Open Site'}>
+              <a href={liveUrl} target="_blank" rel="noopener noreferrer" title={locale === 'ko' ? '새 탭에서 열기' : 'Open in new tab'}>
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>
             </Button>
@@ -618,9 +688,9 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
 
           {/* 저장 */}
           <Button
-            size="icon"
+            size="sm"
             variant="outline"
-            className="h-8 w-8"
+            className="h-8 gap-1.5"
             onClick={handleSave}
             disabled={!hasUnsavedChanges || updateFile.isPending || isDeploying}
             title={t(locale, 'editor.save')}
@@ -630,12 +700,22 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
             ) : (
               <Save className="h-3.5 w-3.5" />
             )}
+            <span className="hidden sm:inline text-xs">
+              {locale === 'ko' ? '저장' : 'Save'}
+            </span>
+            <kbd className="hidden lg:inline-flex h-5 items-center rounded border bg-muted px-1 text-[10px] text-muted-foreground ml-1">
+              {navigator?.platform?.includes('Mac') ? '⌘S' : 'Ctrl+S'}
+            </kbd>
           </Button>
 
           {/* 배포 */}
           <Button
             size="sm"
-            className={`h-8 px-2 sm:px-3 ${deployState === 'deployed' ? 'bg-green-600 hover:bg-green-700' : ''}`}
+            className={`h-8 px-3 sm:px-4 gap-1.5 font-medium ${
+              deployState === 'deployed'
+                ? 'bg-green-600 hover:bg-green-700'
+                : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+            }`}
             onClick={handleDeploy}
             disabled={isDeploying || (!hasUnsavedChanges && deployState === 'idle' && !lastSavedAt)}
           >
