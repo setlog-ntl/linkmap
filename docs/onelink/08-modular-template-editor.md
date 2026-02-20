@@ -849,3 +849,301 @@ Phase 2 추가:
 | `src/components/values-section.tsx` | 컬럼 수 변경 | Values 레이아웃 변경 시 |
 | `src/components/gallery-section.tsx` | 컬럼 수, 비율 변경 | Gallery 레이아웃 변경 시 |
 | `src/app/globals.css` | 커스텀 색상 변수 | 글로벌 테마 변경 시 |
+
+---
+
+## 부록 C: Phase 1 구현 결과 (완료)
+
+### 구현된 파일 목록
+
+| 파일 | 역할 | 상태 |
+|------|------|------|
+| `src/lib/module-schema.ts` | 스키마 타입 정의 (ModuleDef, ModuleFieldDef, TemplateModuleSchema, ModuleConfigState) | ✅ 완료 |
+| `src/data/oneclick/module-schemas/index.ts` | 스키마 조회 함수 (getModuleSchema) | ✅ 완료 |
+| `src/data/oneclick/module-schemas/personal-brand.ts` | PB 6개 콘텐츠 모듈 스키마 | ✅ 완료 |
+| `src/lib/oneclick/code-generator.ts` | config.ts/page.tsx 생성, 기존 코드 파싱 | ✅ 완료 |
+| `src/components/my-sites/module-form.tsx` | 스키마 기반 동적 폼 렌더러 (7가지 필드 타입) | ✅ 완료 |
+| `src/components/my-sites/module-panel.tsx` | 모듈 카드 리스트 + 토글 + 순서 변경 + 폼 | ✅ 완료 |
+| `src/components/my-sites/site-editor-client.tsx` | 모듈 패널 통합 (파싱→폼→코드 생성→batch commit) | ✅ 수정 |
+| `src/lib/i18n/locales/ko.json` | modulePanel 키 4개 | ✅ 수정 |
+| `src/lib/i18n/locales/en.json` | modulePanel 키 4개 | ✅ 수정 |
+
+### 현재 동작 흐름
+
+```
+1. 사이트 에디터 진입 → deploy.homepage_templates.slug로 모듈 스키마 조회
+2. 스키마 있으면 (personal-brand) → 하단에 모듈 패널 표시
+3. 기존 config.ts 내용을 파싱하여 폼 초기값 설정
+4. 사용자가 폼에서 값 수정
+5. [코드에 적용] 클릭 → generateConfigTs() + generatePageTsx() 실행
+6. Batch Update API → GitHub 원자적 커밋
+7. 자동 배포 → 30초 후 라이브 미리보기 갱신
+```
+
+---
+
+## 부록 D: Phase 2~4 단계별 구현 가이드
+
+### Phase 2: 컴포넌트 수준 편집
+
+> **목표**: 개별 컴포넌트 파일의 스타일/레이아웃 값 변경
+> **선행**: Phase 1 완료 ✅
+> **예상 작업량**: 중간~높음
+
+#### Step 2-1: 모듈 스키마에 스타일 필드 추가
+
+**파일**: `src/data/oneclick/module-schemas/personal-brand.ts`
+
+Hero 모듈에 추가할 필드:
+```typescript
+{ key: 'gradientFrom', type: 'color', label: '그래디언트 시작색', defaultValue: '#ee5b2b' },
+{ key: 'gradientTo', type: 'color', label: '그래디언트 끝색', defaultValue: '#f59e0b' },
+{ key: 'parallaxEnabled', type: 'boolean', label: '패럴렉스 효과', defaultValue: true },
+```
+
+Values 모듈에 추가할 필드:
+```typescript
+{ key: 'columns', type: 'select', label: '컬럼 수', defaultValue: '3',
+  options: [{ value: '2', label: '2열' }, { value: '3', label: '3열' }] },
+```
+
+Gallery 모듈에 추가할 필드:
+```typescript
+{ key: 'columns', type: 'select', label: '컬럼 수', defaultValue: '3',
+  options: [{ value: '2', label: '2열' }, { value: '3', label: '3열' }, { value: '4', label: '4열' }] },
+```
+
+#### Step 2-2: 컴포넌트 코드 생성기 추가
+
+**파일**: `src/lib/oneclick/code-generator.ts`에 함수 추가
+
+```typescript
+// 필요한 새 함수:
+export function generateHeroSection(state: ModuleConfigState, baseCode: string): string
+export function generateValuesSection(state: ModuleConfigState, baseCode: string): string
+export function generateGallerySection(state: ModuleConfigState, baseCode: string): string
+```
+
+**구현 방식**: 정규식 기반 값 치환
+- `from-[#ee5b2b]` → `from-[${gradientFrom}]`
+- `to-[#f59e0b]` → `to-[${gradientTo}]`
+- `grid-cols-3` → `grid-cols-${columns}`
+
+#### Step 2-3: generateFiles() 확장
+
+**파일**: `src/lib/oneclick/code-generator.ts`
+
+```typescript
+export function generateFiles(state: ModuleConfigState, currentFiles?: Record<string, string>): GeneratedFile[] {
+  const files = [
+    { path: 'src/lib/config.ts', content: generateConfigTs(state) },
+    { path: 'src/app/page.tsx', content: generatePageTsx(state) },
+  ];
+
+  // Phase 2: 컴포넌트 파일 변경이 필요한 경우
+  if (currentFiles) {
+    const heroBase = currentFiles['src/components/hero-section.tsx'];
+    if (heroBase && state.values.hero.gradientFrom) {
+      files.push({
+        path: 'src/components/hero-section.tsx',
+        content: generateHeroSection(state, heroBase),
+      });
+    }
+    // ... values, gallery 동일
+  }
+
+  return files;
+}
+```
+
+#### Step 2-4: 에디터에서 기존 컴포넌트 코드 전달
+
+**파일**: `src/components/my-sites/site-editor-client.tsx`
+
+`handleApplyModules`에서 `fileCache`를 `generateFiles()`에 전달하도록 수정.
+
+#### Step 2-5: globals.css 테마 색상 생성기
+
+`src/app/globals.css`의 `--color-primary` CSS 변수를 사용자 선택 색상으로 변경:
+```css
+@theme {
+  --color-primary: ${gradientFrom};
+}
+```
+
+---
+
+### Phase 3: 드래그 앤 드롭 + 프리셋
+
+> **목표**: 모듈 순서를 드래그로 변경, 사전 설정 조합 제공
+> **선행**: Phase 2 완료
+> **예상 작업량**: 중간
+
+#### Step 3-1: DnD Kit 설치 및 통합
+
+```bash
+npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+```
+
+**파일**: `src/components/my-sites/module-panel.tsx`
+
+모듈 카드 리스트를 `SortableContext`로 래핑:
+```typescript
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+```
+
+기존 `ChevronUp/ChevronDown` 버튼은 DnD 비활성화 환경(모바일 등)에서 폴백으로 유지.
+
+#### Step 3-2: 모듈 프리셋 시스템
+
+**새 파일**: `src/data/oneclick/module-presets/personal-brand.ts`
+
+```typescript
+export interface ModulePreset {
+  id: string;
+  name: string;
+  nameEn: string;
+  description: string;
+  thumbnail?: string;
+  state: Partial<ModuleConfigState>;
+}
+
+export const personalBrandPresets: ModulePreset[] = [
+  {
+    id: 'minimal',
+    name: '미니멀',
+    nameEn: 'Minimal',
+    description: 'Hero + Contact만 활성화한 깔끔한 레이아웃',
+    state: {
+      enabled: ['hero', 'contact'],
+      order: ['hero', 'contact'],
+    },
+  },
+  {
+    id: 'full',
+    name: '풀 프로필',
+    nameEn: 'Full Profile',
+    description: '모든 모듈 활성화',
+    state: {
+      enabled: ['hero', 'about', 'values', 'highlights', 'gallery', 'contact'],
+    },
+  },
+  {
+    id: 'creator',
+    name: '크리에이터',
+    nameEn: 'Creator',
+    description: '히어로 + 소개 + 하이라이트 + 갤러리 + 연락처',
+    state: {
+      enabled: ['hero', 'about', 'highlights', 'gallery', 'contact'],
+      order: ['hero', 'about', 'highlights', 'gallery', 'contact'],
+    },
+  },
+];
+```
+
+**UI**: 모듈 패널 상단에 프리셋 드롭다운 추가. 선택 시 `onStateChange(mergePreset(currentState, preset.state))`.
+
+#### Step 3-3: 다른 템플릿 스키마 확장
+
+각 템플릿별 모듈 스키마 파일 추가:
+- `src/data/oneclick/module-schemas/link-in-bio-pro.ts`
+- `src/data/oneclick/module-schemas/dev-showcase.ts`
+- `src/data/oneclick/module-schemas/index.ts` 에 등록
+
+각 스키마는 해당 템플릿의 섹션을 분석하여 모듈 정의.
+코드 제너레이터도 템플릿별로 분기 필요 → `generateConfigTs` 함수를 팩토리 패턴으로 리팩토링.
+
+---
+
+### Phase 4: 고급 기능
+
+> **목표**: 이미지 업로드, 폰트 선택, AI 자동 설정
+> **선행**: Phase 3 완료
+> **예상 작업량**: 높음
+
+#### Step 4-1: 이미지 업로드
+
+**새 API**: `POST /api/oneclick/deployments/[id]/upload`
+
+```typescript
+// 이미지를 GitHub 레포의 public/ 디렉토리에 업로드
+// 1. Base64 → GitHub blob API로 업로드
+// 2. Git tree에 추가
+// 3. 커밋
+// 4. 반환: 이미지 경로 (/public/images/uploaded-xxx.jpg)
+```
+
+**UI**: 모듈 폼의 `url` 필드에 "업로드" 버튼 추가.
+파일 선택 → 리사이즈(max 1200px) → API 호출 → URL 자동 입력.
+
+#### Step 4-2: 폰트 선택기
+
+**새 컴포넌트**: `src/components/my-sites/font-picker.tsx`
+
+Google Fonts API에서 인기 폰트 목록 → Select UI.
+선택 시:
+1. `layout.tsx`의 `<link>` 태그에 폰트 CDN 추가
+2. `globals.css`의 `--font-sans` 변수 변경
+
+#### Step 4-3: AI 모듈 설정
+
+기존 ChatTerminal 확장:
+- "전문적인 느낌으로 설정해줘" → AI가 ModuleConfigState 생성
+- 생성된 상태를 `onStateChange()`로 적용
+- `/api/oneclick/ai-chat`에 모듈 스키마 컨텍스트 전달
+
+#### Step 4-4: 반응형 실시간 미리보기 (Sandpack 검토)
+
+> **리스크 높음** — 번들 사이즈 1MB+, 빌드 시간 5초+
+
+검토 후 채택 여부 결정. 대안: 배포 후 라이브 URL 갱신으로 충분할 수 있음.
+
+---
+
+## 부록 E: Phase별 체크리스트
+
+### Phase 1 ✅ 완료
+- [x] `src/lib/module-schema.ts` — 타입 정의
+- [x] `src/data/oneclick/module-schemas/personal-brand.ts` — PB 스키마
+- [x] `src/data/oneclick/module-schemas/index.ts` — 스키마 조회
+- [x] `src/lib/oneclick/code-generator.ts` — config.ts + page.tsx 생성
+- [x] `src/components/my-sites/module-form.tsx` — 동적 폼 렌더러
+- [x] `src/components/my-sites/module-panel.tsx` — 모듈 패널 UI
+- [x] `site-editor-client.tsx` 통합 — 모듈 패널 + 코드 적용
+- [x] i18n 키 추가 (ko/en 4개)
+- [x] 타입체크 통과
+- [x] 95개 테스트 통과
+- [x] 빌드 성공
+- [x] 커밋 + 푸시 완료
+
+### Phase 2 — 컴포넌트 수준 편집
+- [ ] Hero: gradientFrom/gradientTo/parallaxEnabled 스키마 추가
+- [ ] Values: columns 스키마 추가
+- [ ] Gallery: columns 스키마 추가
+- [ ] `generateHeroSection()` 함수 구현
+- [ ] `generateValuesSection()` 함수 구현
+- [ ] `generateGallerySection()` 함수 구현
+- [ ] `generateFiles()` 확장 — currentFiles 파라미터
+- [ ] `handleApplyModules` 수정 — fileCache 전달
+- [ ] globals.css 테마 색상 생성기
+- [ ] 타입체크 + 테스트 + 빌드
+
+### Phase 3 — DnD + 프리셋 + 다른 템플릿
+- [ ] `@dnd-kit/core` 설치
+- [ ] module-panel.tsx에 DnD 적용
+- [ ] 프리셋 시스템 구현 (personal-brand 3개 프리셋)
+- [ ] 프리셋 UI (드롭다운 또는 카드)
+- [ ] link-in-bio-pro 모듈 스키마
+- [ ] dev-showcase 모듈 스키마
+- [ ] 코드 제너레이터 팩토리 패턴 리팩토링
+- [ ] 타입체크 + 테스트 + 빌드
+
+### Phase 4 — 고급 기능
+- [ ] 이미지 업로드 API
+- [ ] 이미지 업로드 UI (리사이즈 포함)
+- [ ] 폰트 선택기 컴포넌트
+- [ ] 폰트 → layout.tsx/globals.css 코드 생성
+- [ ] AI 모듈 설정 통합
+- [ ] Sandpack 실시간 미리보기 검토/구현
+- [ ] 타입체크 + 테스트 + 빌드
