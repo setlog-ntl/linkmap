@@ -99,6 +99,7 @@ export function useUpdateEnvVar(projectId: string) {
       value?: string;
       is_secret?: boolean;
       description?: string | null;
+      service_id?: string | null;
     }) => {
       const res = await fetch('/api/env', {
         method: 'PATCH',
@@ -178,6 +179,32 @@ export function useDeleteEnvVar(projectId: string) {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.envVars.byProject(projectId) });
+    },
+  });
+}
+
+export function useSyncEnvServices(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (): Promise<{
+      added_services: number;
+      updated_statuses: number;
+      auto_connections: number;
+    }> => {
+      const res = await fetch('/api/env/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ project_id: projectId }),
+      });
+      if (!res.ok) throw new Error('동기화 실패');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.services.byProject(projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.envVars.byProject(projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.connections.byProject(projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all(projectId) });
     },
   });
 }

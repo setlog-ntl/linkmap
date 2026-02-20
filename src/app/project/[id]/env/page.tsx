@@ -4,8 +4,8 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queries/keys';
 import { useParams } from 'next/navigation';
-import { useEnvVars, useAddEnvVar, useDeleteEnvVar, useDecryptEnvVar, useUpdateEnvVar } from '@/lib/queries/env-vars';
-import { useProjectServices } from '@/lib/queries/services';
+import { useEnvVars, useAddEnvVar, useDeleteEnvVar, useDecryptEnvVar, useUpdateEnvVar, useSyncEnvServices } from '@/lib/queries/env-vars';
+import { useProjectServices, useCatalogServices } from '@/lib/queries/services';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,7 +29,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { GitBranch, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  buildEnvKeyServiceMap,
+  buildEnvPrefixServiceMap,
+  matchEnvKeyToServiceFuzzy,
+} from '@/lib/utils/env-service-matcher';
+import type { EnvServiceMatch } from '@/lib/utils/env-service-matcher';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { EnvImportDialog } from '@/components/service/env-import-dialog';
@@ -49,10 +63,12 @@ export default function ProjectEnvPage() {
   const queryClient = useQueryClient();
   const { data: envVars = [], isLoading } = useEnvVars(projectId);
   const { data: projectServices = [] } = useProjectServices(projectId);
+  const { data: catalogServices = [] } = useCatalogServices();
   const addEnvVar = useAddEnvVar(projectId);
   const deleteEnvVar = useDeleteEnvVar(projectId);
   const decryptEnvVar = useDecryptEnvVar();
   const updateEnvVar = useUpdateEnvVar(projectId);
+  const syncEnvServices = useSyncEnvServices(projectId);
 
   const { locale } = useLocaleStore();
   const { data: linkedRepos = [] } = useLinkedRepos(projectId);
@@ -73,6 +89,20 @@ export default function ProjectEnvPage() {
   const [editValue, setEditValue] = useState('');
   const [editDesc, setEditDesc] = useState('');
   const [editIsSecret, setEditIsSecret] = useState(true);
+  const [newServiceId, setNewServiceId] = useState<string | null>(null);
+  const [autoDetectedService, setAutoDetectedService] = useState<EnvServiceMatch | null>(null);
+  const [manualServiceSelect, setManualServiceSelect] = useState(false);
+  const [editServiceId, setEditServiceId] = useState<string | null>(null);
+
+  const envKeyServiceMap = useMemo(
+    () => buildEnvKeyServiceMap(catalogServices),
+    [catalogServices]
+  );
+  const envPrefixServiceMap = useMemo(
+    () => buildEnvPrefixServiceMap(catalogServices),
+    [catalogServices]
+  );
+
   const serviceNameMap = useMemo(() => {
     const map = new Map<string, string>();
     for (const ps of projectServices) {
@@ -110,12 +140,16 @@ export default function ProjectEnvPage() {
       environment: activeEnv,
       is_secret: newIsSecret,
       description: newDesc.trim() || null,
+      service_id: newServiceId,
     });
     setAddOpen(false);
     setNewKey('');
     setNewValue('');
     setNewDesc('');
     setNewIsSecret(true);
+    setNewServiceId(null);
+    setAutoDetectedService(null);
+    setManualServiceSelect(false);
   };
 
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
@@ -159,6 +193,7 @@ export default function ProjectEnvPage() {
     setEditKey(envVar.key_name);
     setEditDesc(envVar.description || '');
     setEditIsSecret(envVar.is_secret);
+    setEditServiceId(envVar.service_id ?? null);
     setEditValue('');
     try {
       const value = await decryptEnvVar.mutateAsync(envVar.id);
@@ -178,6 +213,7 @@ export default function ProjectEnvPage() {
       value: editValue || undefined,
       is_secret: editIsSecret,
       description: editDesc.trim() || null,
+      service_id: editServiceId,
     });
     setDecryptedValues((prev) => {
       const next = { ...prev };
@@ -211,7 +247,23 @@ export default function ProjectEnvPage() {
   return (
     <div className="space-y-6">
       {/* Stats Header */}
-      <EnvStatsHeader projectId={projectId} envVars={envVars} />
+      <EnvStatsHeader
+        projectId={projectId}
+        envVars={envVars}
+        onSync={async () => {
+          try {
+            const result = await syncEnvServices.mutateAsync();
+            toast.success(
+              t(locale, 'envVar.syncSuccess')
+                .replace('{services}', String(result.added_services))
+                .replace('{connections}', String(result.auto_connections))
+            );
+          } catch {
+            toast.error(t(locale, 'envVar.syncFailed'));
+          }
+        }}
+        isSyncing={syncEnvServices.isPending}
+      />
 
       {/* AI + GitHub Sync */}
       <div className="flex items-center gap-2">
@@ -293,7 +345,18 @@ export default function ProjectEnvPage() {
                 id="env-key"
                 placeholder="NEXT_PUBLIC_EXAMPLE_KEY"
                 value={newKey}
-                onChange={(e) => setNewKey(e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '_'))}
+                onChange={(e) => {
+                  const key = e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '_');
+                  setNewKey(key);
+                  const match = matchEnvKeyToServiceFuzzy(key, envKeyServiceMap, envPrefixServiceMap);
+                  setAutoDetectedService(match);
+                  if (match) {
+                    setNewServiceId(match.serviceId);
+                    setManualServiceSelect(false);
+                  } else {
+                    setNewServiceId(null);
+                  }
+                }}
                 onPaste={(e) => {
                   const text = e.clipboardData.getData('text');
                   const parsed = parseEnvLine(text);
@@ -301,6 +364,12 @@ export default function ProjectEnvPage() {
                     e.preventDefault();
                     setNewKey(parsed.key);
                     setNewValue(parsed.value);
+                    const match = matchEnvKeyToServiceFuzzy(parsed.key, envKeyServiceMap, envPrefixServiceMap);
+                    setAutoDetectedService(match);
+                    if (match) {
+                      setNewServiceId(match.serviceId);
+                      setManualServiceSelect(false);
+                    }
                   }
                 }}
                 className="font-mono"
@@ -335,6 +404,50 @@ export default function ProjectEnvPage() {
                 value={newDesc}
                 onChange={(e) => setNewDesc(e.target.value)}
               />
+            </div>
+            {/* Service Selection */}
+            <div className="space-y-2">
+              <Label>{t(locale, 'envVar.service')}</Label>
+              {autoDetectedService && !manualServiceSelect ? (
+                <div className="flex items-center gap-2">
+                  <Badge variant={autoDetectedService.confidence === 'exact' ? 'default' : 'secondary'}
+                    className={autoDetectedService.confidence === 'exact'
+                      ? 'bg-green-500/10 text-green-700 border-green-300 dark:text-green-400'
+                      : 'bg-yellow-500/10 text-yellow-700 border-yellow-300 dark:text-yellow-400'
+                    }
+                  >
+                    {autoDetectedService.serviceName}
+                    {' · '}
+                    {autoDetectedService.confidence === 'exact'
+                      ? t(locale, 'envVar.autoDetected')
+                      : t(locale, 'envVar.prefixDetected')}
+                  </Badge>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 text-xs"
+                    onClick={() => setManualServiceSelect(true)}
+                  >
+                    {t(locale, 'envVar.changeService')}
+                  </Button>
+                </div>
+              ) : (
+                <Select
+                  value={newServiceId ?? '__none__'}
+                  onValueChange={(val) => setNewServiceId(val === '__none__' ? null : val)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t(locale, 'envVar.selectService')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">{t(locale, 'envVar.noServiceLinked')}</SelectItem>
+                    {catalogServices.map((svc) => (
+                      <SelectItem key={svc.id} value={svc.id}>{svc.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -435,6 +548,24 @@ export default function ProjectEnvPage() {
                 value={editDesc}
                 onChange={(e) => setEditDesc(e.target.value)}
               />
+            </div>
+            {/* Edit Service Selection */}
+            <div className="space-y-2">
+              <Label>{t(locale, 'envVar.service')}</Label>
+              <Select
+                value={editServiceId ?? '__none__'}
+                onValueChange={(val) => setEditServiceId(val === '__none__' ? null : val)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t(locale, 'envVar.selectService')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">{t(locale, 'envVar.noServiceLinked')}</SelectItem>
+                  {catalogServices.map((svc) => (
+                    <SelectItem key={svc.id} value={svc.id}>{svc.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox

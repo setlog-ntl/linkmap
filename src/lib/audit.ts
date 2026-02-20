@@ -46,6 +46,7 @@ export type AuditAction =
   | 'layer_override.upsert'
   | 'env_var.conflict_scan'
   | 'env_var.conflict_resolve'
+  | 'env_var.sync_services'
   | 'team_member.add'
   | 'team_member.remove'
   | 'ai.stack_recommend'
@@ -62,7 +63,9 @@ export type AuditAction =
   | 'project.set_icon'
   | 'profile.update'
   | 'github_connection.toggle_status'
-  | 'service_account.toggle_status';
+  | 'service_account.toggle_status'
+  | 'ai.chat'
+  | 'admin.ai_feature_persona_update';
 
 interface AuditLogEntry {
   action: AuditAction;

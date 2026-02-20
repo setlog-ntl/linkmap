@@ -26,7 +26,13 @@ export const updateEnvVarSchema = z.object({
   environment: z.enum(['development', 'staging', 'production']).optional(),
   is_secret: z.boolean().optional(),
   description: z.string().max(500).nullable().optional(),
+  service_id: z.string().uuid().nullable().optional(),
+});
+
+export const syncEnvServicesSchema = z.object({
+  project_id: z.string().uuid('유효하지 않은 프로젝트 ID'),
 });
 
 export type CreateEnvVarInput = z.infer<typeof createEnvVarSchema>;
 export type UpdateEnvVarInput = z.infer<typeof updateEnvVarSchema>;
+export type SyncEnvServicesInput = z.infer<typeof syncEnvServicesSchema>;

@@ -69,7 +69,7 @@ export async function PATCH(request: NextRequest) {
   const parsed = updateEnvVarSchema.safeParse(body);
   if (!parsed.success) return validationError(parsed.error);
 
-  const { id, key_name, value, environment, is_secret, description } = parsed.data;
+  const { id, key_name, value, environment, is_secret, description, service_id } = parsed.data;
 
   const { data: envVar } = await supabase
     .from('environment_variables')
@@ -88,6 +88,7 @@ export async function PATCH(request: NextRequest) {
   if (environment !== undefined) updates.environment = environment;
   if (is_secret !== undefined) updates.is_secret = is_secret;
   if (description !== undefined) updates.description = description;
+  if (service_id !== undefined) updates.service_id = service_id;
 
   const { data, error } = await supabase
     .from('environment_variables')
