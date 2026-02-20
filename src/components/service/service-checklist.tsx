@@ -21,25 +21,27 @@ export function ServiceChecklist({ projectServiceId, serviceId }: ServiceCheckli
 
   useEffect(() => {
     const fetchData = async () => {
-      const [{ data: checklistItems }, { data: progressData }] = await Promise.all([
-        supabase
-          .from('checklist_items')
-          .select('*')
-          .eq('service_id', serviceId)
-          .order('order_index'),
-        supabase
-          .from('user_checklist_progress')
-          .select('*')
-          .eq('project_service_id', projectServiceId),
-      ]);
+      const { data: checklistItems } = await supabase
+        .from('checklist_items')
+        .select('*')
+        .eq('service_id', serviceId)
+        .order('order_index');
 
       setItems(checklistItems || []);
 
-      const progressMap: Record<string, boolean> = {};
-      (progressData || []).forEach((p: UserChecklistProgress) => {
-        progressMap[p.checklist_item_id] = p.completed;
-      });
-      setProgress(progressMap);
+      // user_checklist_progress may not exist yet (migration pending) — fail gracefully
+      const { data: progressData, error: progressError } = await supabase
+        .from('user_checklist_progress')
+        .select('*')
+        .eq('project_service_id', projectServiceId);
+
+      if (!progressError && progressData) {
+        const progressMap: Record<string, boolean> = {};
+        progressData.forEach((p: UserChecklistProgress) => {
+          progressMap[p.checklist_item_id] = p.completed;
+        });
+        setProgress(progressMap);
+      }
       setLoading(false);
     };
     fetchData();
@@ -48,28 +50,32 @@ export function ServiceChecklist({ projectServiceId, serviceId }: ServiceCheckli
   const handleToggle = async (itemId: string, checked: boolean) => {
     setProgress((prev) => ({ ...prev, [itemId]: checked }));
 
-    const { data: existing } = await supabase
-      .from('user_checklist_progress')
-      .select('id')
-      .eq('project_service_id', projectServiceId)
-      .eq('checklist_item_id', itemId)
-      .single();
-
-    if (existing) {
-      await supabase
+    try {
+      const { data: existing } = await supabase
         .from('user_checklist_progress')
-        .update({
+        .select('id')
+        .eq('project_service_id', projectServiceId)
+        .eq('checklist_item_id', itemId)
+        .single();
+
+      if (existing) {
+        await supabase
+          .from('user_checklist_progress')
+          .update({
+            completed: checked,
+            completed_at: checked ? new Date().toISOString() : null,
+          })
+          .eq('id', existing.id);
+      } else {
+        await supabase.from('user_checklist_progress').insert({
+          project_service_id: projectServiceId,
+          checklist_item_id: itemId,
           completed: checked,
           completed_at: checked ? new Date().toISOString() : null,
-        })
-        .eq('id', existing.id);
-    } else {
-      await supabase.from('user_checklist_progress').insert({
-        project_service_id: projectServiceId,
-        checklist_item_id: itemId,
-        completed: checked,
-        completed_at: checked ? new Date().toISOString() : null,
-      });
+        });
+      }
+    } catch {
+      // user_checklist_progress table may not exist yet — silently skip
     }
 
     // Update project_service status based on progress

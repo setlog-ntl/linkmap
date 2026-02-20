@@ -32,8 +32,9 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-sm mb-3">{t(locale, 'landing.footerSupport')}</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/guides/github" className="hover:text-foreground transition-colors">GitHub Guide</Link></li>
-              <li><Link href="/guides/auth" className="hover:text-foreground transition-colors">Auth Guide</Link></li>
+              <li><Link href="/guides/github" className="hover:text-foreground transition-colors">{t(locale, 'landing.guideGitHub')}</Link></li>
+              <li><Link href="/guides/auth" className="hover:text-foreground transition-colors">{t(locale, 'landing.guideAuth')}</Link></li>
+              <li><Link href="/guides/cloudflare" className="hover:text-foreground transition-colors">{t(locale, 'landing.guideCloudflare')}</Link></li>
               <li><a href="mailto:support@linkmap.dev" className="hover:text-foreground transition-colors">Contact</a></li>
             </ul>
           </div>

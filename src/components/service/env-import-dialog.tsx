@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -97,6 +98,7 @@ export function EnvImportDialog({ onImport }: EnvImportDialogProps) {
       <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
           <DialogTitle>.env 파일 일괄 가져오기</DialogTitle>
+          <DialogDescription>.env 파일 내용을 붙여넣어 환경변수를 일괄 등록합니다.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -122,6 +123,7 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
           <DialogTitle className="flex items-center gap-2">
             {service.name} 연결 설정
           </DialogTitle>
+          <DialogDescription>인증 정보를 입력하고 서비스 연결을 설정합니다.</DialogDescription>
           <Progress value={progressPercent} className="mt-2" />
           <div className="flex gap-1 mt-1">
             {steps.map((step, i) => (

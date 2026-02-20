@@ -168,11 +168,11 @@ export function ServicesContent({ projectId }: ServicesContentProps) {
                     />
                   </div>
 
-                  {ps.service?.required_env_vars && (ps.service.required_env_vars as { name: string; description_ko?: string; description?: string; public: boolean }[]).length > 0 && (
+                  {Array.isArray(ps.service?.required_env_vars) && ps.service.required_env_vars.length > 0 && (
                     <div>
                       <h4 className="text-sm font-medium mb-2">필요한 환경변수</h4>
                       <div className="space-y-1">
-                        {(ps.service.required_env_vars as { name: string; description_ko?: string; description?: string; public: boolean }[]).map((env) => (
+                        {ps.service.required_env_vars.map((env) => (
                           <div key={env.name} className="flex items-center gap-2 text-xs">
                             <code className="bg-muted px-1.5 py-0.5 rounded font-mono">
                               {env.name}
@@ -181,7 +181,7 @@ export function ServicesContent({ projectId }: ServicesContentProps) {
                               {env.public ? '공개' : '비밀'}
                             </Badge>
                             <span className="text-muted-foreground">
-                              {env.description_ko || env.description}
+                              {String(env.description_ko || env.description || '')}
                             </span>
                           </div>
                         ))}

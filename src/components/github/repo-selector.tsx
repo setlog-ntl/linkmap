@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -84,6 +85,7 @@ export function RepoSelector({ projectId, trigger, onLinked }: RepoSelectorProps
       <DialogContent className="max-w-lg max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>GitHub 레포지토리 선택</DialogTitle>
+          <DialogDescription>프로젝트에 연결할 GitHub 레포지토리를 선택하세요.</DialogDescription>
         </DialogHeader>
 
         {/* Account selector — shown when multiple accounts */}
