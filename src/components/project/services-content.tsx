@@ -16,7 +16,7 @@ import { AddServiceDialog } from '@/components/service/add-service-dialog';
 import { ServiceChecklist } from '@/components/service/service-checklist';
 import { SetupWizard } from '@/components/service/setup-wizard';
 import { Trash2, ExternalLink, Wand2, List as ListIcon } from 'lucide-react';
-import { ServiceIcon } from '@/components/landing/service-icon';
+import { ServiceIcon } from '@/components/ui/service-icon';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useLocaleStore } from '@/stores/locale-store';

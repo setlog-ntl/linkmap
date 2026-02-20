@@ -3,7 +3,7 @@
 import { memo } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { Crown } from 'lucide-react';
-import { ServiceIcon } from '@/components/landing/service-icon';
+import { ServiceIcon } from '@/components/ui/service-icon';
 import { NodeTooltip } from '@/components/service-map/node-tooltip';
 import type { ServiceCategory } from '@/types';
 import { getCategoryStyle } from '@/lib/constants/category-styles';

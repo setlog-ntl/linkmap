@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, ArrowRight } from 'lucide-react';
-import { ServiceIcon } from '@/components/landing/service-icon';
+import { ServiceIcon } from '@/components/ui/service-icon';
 import { DifficultyBadge, DxScoreBadge, FreeTierBadge } from './service-badges';
 import { allCategoryLabels } from '@/lib/constants/service-filters';
 import type { Service, ServiceCategory } from '@/types';

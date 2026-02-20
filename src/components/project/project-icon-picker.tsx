@@ -5,7 +5,7 @@ import { Pencil, X, Search, Upload, Loader2, Smile, Boxes, ImageIcon } from 'luc
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ServiceIcon } from '@/components/landing/service-icon';
+import { ServiceIcon } from '@/components/ui/service-icon';
 import { SERVICE_BRANDS, getServiceIconUrl } from '@/lib/constants/service-brands';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';

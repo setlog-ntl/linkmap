@@ -26,7 +26,7 @@ import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import type { ProjectWithServices } from '@/types';
 import { getCategoryStyle } from '@/lib/constants/category-styles';
-import { ServiceIcon } from '@/components/landing/service-icon';
+import { ServiceIcon } from '@/components/ui/service-icon';
 import { getServiceIconUrl } from '@/lib/constants/service-brands';
 
 interface ProjectCardProps {

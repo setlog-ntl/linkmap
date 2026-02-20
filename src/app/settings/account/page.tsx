@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ServiceIcon } from '@/components/ui/service-icon';
 import {
   Tooltip,
   TooltipContent,
@@ -28,7 +29,7 @@ import { useProjects } from '@/lib/queries/projects';
 import {
   GitBranch, Pencil, Plus, Check, X,
   ExternalLink, FolderOpen,
-  ArrowLeft, Link2, Calendar, LogOut, AlertTriangle,
+  ArrowLeft, Calendar, LogOut, AlertTriangle,
   Layers,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -662,17 +663,9 @@ function ServiceRow({
     >
       {/* Service info with icon */}
       <div className="flex items-center gap-3 min-w-0">
-        {svc.service?.icon_url ? (
-          <img
-            src={svc.service.icon_url}
-            alt={svc.service.name}
-            className="h-8 w-8 rounded-lg object-contain bg-white/5 p-0.5"
-          />
-        ) : (
-          <div className="h-8 w-8 rounded-lg bg-zinc-800 flex items-center justify-center border border-zinc-700">
-            <Link2 className="h-4 w-4 text-zinc-500" />
-          </div>
-        )}
+        <div className="h-8 w-8 rounded-lg bg-zinc-800/60 flex items-center justify-center shrink-0">
+          <ServiceIcon serviceId={svc.service?.slug || ''} size={22} />
+        </div>
         <span className="text-[14px] font-medium text-zinc-100 truncate">{svc.service?.name || 'Unknown'}</span>
       </div>
 

@@ -12,7 +12,7 @@ import {
   CommandGroup,
   CommandItem,
 } from '@/components/ui/command';
-import { ServiceIcon } from '@/components/landing/service-icon';
+import { ServiceIcon } from '@/components/ui/service-icon';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import { useAddProjectService } from '@/lib/queries/services';
 import {

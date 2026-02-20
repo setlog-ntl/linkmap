@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/accordion';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, ExternalLink, Globe, BookOpen, Github, Clock, Copy, Check } from 'lucide-react';
-import { ServiceIcon } from '@/components/landing/service-icon';
+import { ServiceIcon } from '@/components/ui/service-icon';
 import { allCategoryLabels, allCategoryEmojis, domainLabels, domainIcons } from '@/lib/constants/service-filters';
 import { DifficultyBadge, DxScoreBadge, FreeTierBadge, VendorLockInBadge, CostEstimateBadge } from './service-badges';
 import type {

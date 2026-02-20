@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Search, ExternalLink, ArrowRight, LayoutGrid, Settings2, X, List, Sparkles } from 'lucide-react';
-import { ServiceIcon } from '@/components/landing/service-icon';
+import { ServiceIcon } from '@/components/ui/service-icon';
 import { domainLabels, domainIcons, allCategoryLabels, allCategoryEmojis, domainCategoryMap } from '@/lib/constants/service-filters';
 import {
   EASY_CATEGORY_ORDER,
