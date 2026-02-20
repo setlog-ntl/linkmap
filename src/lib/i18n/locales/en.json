@@ -592,7 +592,8 @@
     "viewOnGitHub": "View on GitHub",
     "backToDashboard": "Back to Dashboard",
     "otherServices": "Other Connected Services",
-    "otherServicesDesc": "Service accounts connected via OAuth from your projects."
+    "otherServicesDesc": "Service accounts connected via OAuth from your projects.",
+    "addService": "Connect New Service"
   },
   "commandPalette": {
     "placeholder": "Search commands...",
