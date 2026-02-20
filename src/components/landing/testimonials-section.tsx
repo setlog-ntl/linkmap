@@ -15,14 +15,14 @@ export function TestimonialsSection() {
   const { locale } = useLocaleStore();
 
   return (
-    <section className="py-24 bg-white dark:bg-[#0a0a0a]" id="testimonials">
+    <section className="py-24 bg-[#f4f5f8]" id="testimonials">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <ScrollReveal>
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-[#1a2740]">
               {t(locale, 'landing.testimonialTitle')}
             </h2>
-            <p className="mt-4 text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+            <p className="mt-4 text-lg text-[#63738a] max-w-2xl mx-auto">
               {t(locale, 'landing.testimonialDesc')}
             </p>
           </div>
@@ -31,10 +31,10 @@ export function TestimonialsSection() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {testimonials.map((item, i) => (
             <ScrollReveal key={item.nameKey} delay={i * 0.1}>
-              <div className="rounded-2xl border border-[#e7efe9] dark:border-zinc-800 bg-white dark:bg-zinc-900/60 backdrop-blur-sm p-6 h-full flex flex-col transition-all hover:border-gray-300 dark:hover:border-zinc-700">
-                <Quote className="w-8 h-8 text-[#2bee79]/30 mb-4" />
+              <div className="rounded-2xl border border-[#dde0e7] bg-white p-6 h-full flex flex-col transition-all hover:shadow-md hover:-translate-y-0.5">
+                <Quote className="w-8 h-8 text-[hsl(220,60%,35%)]/20 mb-4" />
 
-                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed flex-1 mb-6">
+                <p className="text-sm text-[#1a2740]/80 leading-relaxed flex-1 mb-6">
                   &ldquo;{t(locale, item.quoteKey)}&rdquo;
                 </p>
 
@@ -45,8 +45,8 @@ export function TestimonialsSection() {
                 </div>
 
                 <div>
-                  <p className="text-sm font-bold">{t(locale, item.nameKey)}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{t(locale, item.roleKey)}</p>
+                  <p className="text-sm font-bold text-[#1a2740]">{t(locale, item.nameKey)}</p>
+                  <p className="text-xs text-[#63738a]">{t(locale, item.roleKey)}</p>
                 </div>
               </div>
             </ScrollReveal>
