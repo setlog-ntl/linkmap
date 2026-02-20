@@ -133,7 +133,7 @@ export function TemplatePickerStep({
 
   const selectedAccount = accounts.find((a) => a.id === selectedAccountId);
   const urlUsername = selectedAccount ? getAccountLogin(selectedAccount) : githubUsername || 'username';
-  const hasMultipleAccounts = accounts.length > 1;
+  const hasAccounts = accounts.length >= 1;
 
   const handleAccountSelect = (value: string) => {
     if (value === '__add__') {
@@ -150,7 +150,7 @@ export function TemplatePickerStep({
         <div className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm ${
           isGitHubLoading
             ? 'bg-muted/50 border-border'
-            : githubUsername
+            : (hasAccounts || githubUsername)
               ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800'
               : 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800'
         }`}>
@@ -161,7 +161,7 @@ export function TemplatePickerStep({
                 {locale === 'ko' ? 'GitHub 연결 확인 중...' : 'Checking GitHub connection...'}
               </span>
             </>
-          ) : hasMultipleAccounts ? (
+          ) : hasAccounts ? (
             <>
               <Github className="h-4 w-4 text-green-700 dark:text-green-300 flex-shrink-0" />
               <Select value={selectedAccountId || ''} onValueChange={handleAccountSelect}>
