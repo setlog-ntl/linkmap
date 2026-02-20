@@ -243,8 +243,8 @@ export function useDeployMachine({ isAuthenticated }: UseDeployMachineOptions) {
   const githubAccount = preflightData?.github?.account ?? null;
   const isGitHubConnected = preflightData?.github?.connected === true;
 
-  // Deploy status polling — only active in polling phase
-  const deployId = state.phase === 'polling' ? state.deployId : null;
+  // Deploy status polling — active in polling phase, cached data retained in success phase
+  const deployId = (state.phase === 'polling' || state.phase === 'success') ? state.deployId : null;
   const { data: deployStatus, error: statusError } = useDeployStatus(
     deployId,
     state.phase === 'polling'
