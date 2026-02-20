@@ -8,11 +8,11 @@ import { NodeTooltip } from '@/components/service-map/node-tooltip';
 import type { ServiceCategory } from '@/types';
 import { getCategoryStyle } from '@/lib/constants/category-styles';
 
-const statusDots: Record<string, string> = {
-  connected: 'bg-green-500',
-  in_progress: 'bg-yellow-500',
-  not_started: 'bg-gray-400 dark:bg-gray-500',
-  error: 'bg-red-500',
+const statusDots: Record<string, { bg: string; pulse: boolean }> = {
+  connected:   { bg: 'bg-green-500 text-green-500',   pulse: false },
+  in_progress: { bg: 'bg-yellow-500 text-yellow-500', pulse: true },
+  not_started: { bg: 'bg-gray-400 dark:bg-gray-500 text-gray-400', pulse: false },
+  error:       { bg: 'bg-red-500 text-red-500',       pulse: true },
 };
 
 interface ServiceNodeData {
@@ -31,7 +31,7 @@ function ServiceNode({ data }: NodeProps) {
   const d = data as unknown as ServiceNodeData;
   const category = d.category as ServiceCategory;
   const colorClass = getCategoryStyle(category).nodeClasses;
-  const dotClass = statusDots[d.status] || statusDots.not_started;
+  const dotStyle = statusDots[d.status] || statusDots.not_started;
 
   const isHighlighted = d.highlighted !== false;
   const focusOpacity = d.focusOpacity ?? 1;

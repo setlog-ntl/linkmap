@@ -326,8 +326,9 @@ export default function AccountPage() {
     loadData();
   }, [loadData]);
 
-  const handleAddGitHub = () => {
-    window.location.href = '/api/oauth/github/authorize?flow_context=settings';
+  const handleAddGitHub = (forceLogin = false) => {
+    const url = `/api/oauth/github/authorize?flow_context=settings${forceLogin ? '&force_login=true' : ''}`;
+    window.location.href = url;
   };
 
   const isLoading = loading || connectionsLoading;
@@ -395,7 +396,7 @@ export default function AccountPage() {
               {t(locale, 'account.githubConnectionsDesc')}
             </p>
           </div>
-          <Button onClick={handleAddGitHub} size="sm" variant="outline">
+          <Button onClick={() => handleAddGitHub(connections && connections.length > 0)} size="sm" variant="outline">
             <Plus className="mr-1.5 h-3.5 w-3.5" />
             {t(locale, 'account.addGitHub')}
           </Button>
@@ -406,7 +407,7 @@ export default function AccountPage() {
             icon={GitBranch}
             title={t(locale, 'account.noGitHubConnections')}
             description={t(locale, 'account.noGitHubConnectionsDesc')}
-            action={{ label: t(locale, 'account.addGitHub'), onClick: handleAddGitHub }}
+            action={{ label: t(locale, 'account.addGitHub'), onClick: () => handleAddGitHub(false) }}
           />
         ) : (
           <div className="space-y-3">

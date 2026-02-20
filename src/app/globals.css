@@ -189,11 +189,31 @@
   display: none;
 }
 
+/* Service map: status dot pulse */
+@keyframes status-pulse {
+  0% { box-shadow: 0 0 0 0 currentColor; }
+  70% { box-shadow: 0 0 0 6px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.animate-status-pulse {
+  animation: status-pulse 2s ease-out infinite;
+}
+
+/* Service map: edge marching ants on hover */
+@keyframes edge-march {
+  to { stroke-dashoffset: -20; }
+}
+.animate-edge-march {
+  animation: edge-march 0.8s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-pulse-ring,
   .animate-float,
   .animate-dash-flow,
-  .animate-stagger-fade-in {
+  .animate-stagger-fade-in,
+  .animate-status-pulse,
+  .animate-edge-march {
     animation: none;
   }
 }

@@ -85,5 +85,11 @@ export async function GET(
   authUrl.searchParams.set('scope', config.scopes.join(' '));
   authUrl.searchParams.set('state', stateToken);
 
+  // force_login=true → GitHub 계정 선택/로그인 화면 강제 표시
+  const forceLogin = request.nextUrl.searchParams.get('force_login');
+  if (forceLogin === 'true') {
+    authUrl.searchParams.set('login', '');
+  }
+
   return NextResponse.redirect(authUrl.toString());
 }
