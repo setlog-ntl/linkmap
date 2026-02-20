@@ -18,6 +18,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { TemplateCard } from './template-card';
+import { RECOMMENDED_SLUGS } from '@/lib/constants/template-categories';
 import type { HomepageTemplate } from '@/lib/queries/oneclick';
 
 interface TemplatePickerStepProps {
@@ -28,6 +29,8 @@ interface TemplatePickerStepProps {
   githubUsername?: string;
   isGitHubLoading?: boolean;
   isAuthenticated?: boolean;
+  defaultSiteName?: string;
+  defaultTemplate?: string | null;
 }
 
 const SITE_NAME_REGEX = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
@@ -40,12 +43,27 @@ export function TemplatePickerStep({
   githubUsername,
   isGitHubLoading = false,
   isAuthenticated = true,
+  defaultSiteName = '',
+  defaultTemplate = null,
 }: TemplatePickerStepProps) {
   const { locale } = useLocaleStore();
   const prefersReducedMotion = useReducedMotion();
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
-  const [siteName, setSiteName] = useState('');
+
+  // Auto-select recommended template if none selected
+  const recommendedTemplateId = templates.find(
+    (t) => RECOMMENDED_SLUGS.has(t.slug)
+  )?.id ?? null;
+
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(
+    defaultTemplate ?? recommendedTemplateId
+  );
+  const [siteName, setSiteName] = useState(defaultSiteName);
   const [siteNameError, setSiteNameError] = useState<string | null>(null);
+
+  // Re-apply recommended template when templates load
+  if (!selectedTemplate && recommendedTemplateId && templates.length > 0) {
+    setSelectedTemplate(recommendedTemplateId);
+  }
 
   const validateSiteName = (name: string) => {
     if (name.length < 2) {

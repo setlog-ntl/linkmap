@@ -116,7 +116,11 @@ export async function GET(request: NextRequest) {
           }
         }
       }
-    } catch {
+    } catch (err) {
+      console.error('[oneclick/status] GitHub polling error:', {
+        deployId,
+        error: err instanceof Error ? err.message : String(err),
+      });
       // Non-fatal: return whatever we have in the DB
     }
   }
@@ -125,7 +129,6 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     deploy_id: deploy.id,
-    fork_status: deploy.fork_status,
     deploy_status: deploy.deploy_status,
     deployment_url: deploy.deployment_url,
     deploy_error: deploy.deploy_error_message,

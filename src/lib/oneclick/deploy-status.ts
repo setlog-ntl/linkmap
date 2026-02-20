@@ -134,9 +134,9 @@ export function buildDeploySteps(
       'pending';
 
     return [
-      { name: 'repo', status: repoStep, label: '레포지토리 생성' },
-      { name: 'pages', status: pagesStep, label: 'GitHub Pages 활성화' },
-      { name: 'live', status: liveStep, label: '사이트 게시 완료' },
+      { name: 'repo', status: repoStep, label: '준비 중' },
+      { name: 'pages', status: pagesStep, label: '설정 중' },
+      { name: 'live', status: liveStep, label: '게시 완료' },
     ];
   }
 

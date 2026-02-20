@@ -23,7 +23,6 @@ export interface HomepageTemplate {
 
 export interface DeployStatus {
   deploy_id: string;
-  fork_status: 'pending' | 'forking' | 'forked' | 'failed';
   deploy_status: 'pending' | 'creating' | 'building' | 'ready' | 'error' | 'canceled' | 'timeout';
   deployment_url: string | null;
   deploy_error: string | null;
@@ -46,21 +45,33 @@ export interface DeployPagesResult {
   pages_status: string;
 }
 
-// ---------- Templates ----------
+// ---------- Templates (bundle-sourced, no API call) ----------
 
-export function useHomepageTemplates(deployTarget: string = 'github_pages') {
+export function useHomepageTemplates(_deployTarget: string = 'github_pages') {
   return useQuery({
-    queryKey: [...queryKeys.oneclick.templates, deployTarget],
+    queryKey: queryKeys.oneclick.templates,
     queryFn: async (): Promise<HomepageTemplate[]> => {
-      const res = await fetch(`/api/oneclick/templates?deploy_target=${deployTarget}`);
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || '템플릿 목록 조회 실패');
-      }
-      const data = await res.json();
-      return data.templates;
+      // Dynamic import to keep templates out of the initial bundle
+      const { TEMPLATES } = await import('@/data/templates/index');
+      return TEMPLATES.map((t) => ({
+        id: t.id,
+        slug: t.slug,
+        name: t.name,
+        name_ko: t.nameKo,
+        description: t.description,
+        description_ko: t.descriptionKo,
+        preview_image_url: t.previewImageUrl,
+        github_owner: 'linkmap-templates',
+        github_repo: t.slug,
+        framework: t.framework,
+        required_env_vars: t.requiredEnvVars,
+        tags: t.tags,
+        is_premium: t.isPremium,
+        display_order: t.displayOrder,
+        deploy_target: 'github_pages' as const,
+      }));
     },
-    staleTime: 5 * 60_000, // 5 min cache
+    staleTime: Infinity, // Bundle data never goes stale
   });
 }
 
@@ -72,7 +83,7 @@ export function useDeployToGitHubPages() {
       template_id: string;
       site_name: string;
     }): Promise<DeployPagesResult> => {
-      const res = await fetch('/api/oneclick/deploy-pages', {
+      const res = await fetch('/api/oneclick/deploy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(input),
@@ -291,10 +302,16 @@ export function useBatchApplyFiles() {
   });
 }
 
-// ---------- Status Polling ----------
+// ---------- Status Polling (exponential backoff) ----------
 
-// Maximum polling duration: 10 minutes (200 polls × 3 seconds)
-const MAX_POLL_COUNT = 200;
+// 5-minute timeout (based on elapsed time, not poll count)
+const POLL_TIMEOUT_MS = 5 * 60 * 1000;
+
+// Backoff: 1s → 2s → 3s → 5s → 8s → 10s (capped)
+function getBackoffInterval(pollCount: number): number {
+  const intervals = [1000, 2000, 3000, 5000, 8000, 10000];
+  return intervals[Math.min(pollCount, intervals.length - 1)];
+}
 
 export function useDeployStatus(deployId: string | null, enabled: boolean = true) {
   const queryClient = useQueryClient();
@@ -312,7 +329,7 @@ export function useDeployStatus(deployId: string | null, enabled: boolean = true
     enabled: !!deployId && enabled,
     refetchInterval: (query) => {
       const data = query.state.data;
-      if (!data) return 3000;
+      if (!data) return 1000; // Fast initial poll
 
       // Stop polling when deployment is in a terminal state
       if (['ready', 'error', 'canceled', 'timeout'].includes(data.deploy_status)) {
@@ -322,10 +339,10 @@ export function useDeployStatus(deployId: string | null, enabled: boolean = true
         return false;
       }
 
-      // Timeout: stop polling after MAX_POLL_COUNT fetches (~5 minutes)
-      const dataUpdatedCount = query.state.dataUpdateCount;
-      if (dataUpdatedCount >= MAX_POLL_COUNT) {
-        // Inject timeout status into the cached data so the UI can show a message
+      // Timeout: stop polling after POLL_TIMEOUT_MS
+      const dataUpdatedAt = query.state.dataUpdatedAt;
+      const firstFetchAt = dataUpdatedAt - (query.state.dataUpdateCount * 3000); // approximate
+      if (Date.now() - firstFetchAt > POLL_TIMEOUT_MS) {
         queryClient.setQueryData<DeployStatus>(
           queryKeys.oneclick.status(deployId || ''),
           (prev) => prev ? { ...prev, deploy_status: 'timeout' } : prev
@@ -333,7 +350,7 @@ export function useDeployStatus(deployId: string | null, enabled: boolean = true
         return false;
       }
 
-      return 3000; // Poll every 3 seconds
+      return getBackoffInterval(query.state.dataUpdateCount);
     },
   });
 }

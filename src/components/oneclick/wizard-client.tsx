@@ -1,45 +1,14 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { AuthGateStep } from './auth-gate-step';
-import { GitHubConnectStep } from './github-connect-step';
 import { TemplatePickerStep } from './template-picker-step';
 import { DeployStep } from './deploy-step';
-import { useHomepageTemplates, useDeployToGitHubPages, useDeployStatus } from '@/lib/queries/oneclick';
-import { useQuery } from '@tanstack/react-query';
+import { AuthModal } from './auth-modal';
+import { GitHubConnectModal } from './github-connect-modal';
+import { useHomepageTemplates } from '@/lib/queries/oneclick';
+import { useDeployMachine } from '@/hooks/use-deploy-machine';
 import { useLocaleStore } from '@/stores/locale-store';
-import { toast } from 'sonner';
-
-// --- Pending deploy: localStorage with 10-min TTL (survives tab/redirect) ---
-const PENDING_KEY = 'linkmap-pending-deploy';
-const PENDING_TTL = 10 * 60 * 1000; // 10 minutes
-
-function savePendingDeploy(data: { templateId: string; siteName: string }) {
-  localStorage.setItem(PENDING_KEY, JSON.stringify({ ...data, savedAt: Date.now() }));
-}
-
-function loadPendingDeploy(): { templateId: string; siteName: string } | null {
-  try {
-    const raw = localStorage.getItem(PENDING_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (Date.now() - parsed.savedAt > PENDING_TTL) {
-      localStorage.removeItem(PENDING_KEY);
-      return null;
-    }
-    return { templateId: parsed.templateId, siteName: parsed.siteName };
-  } catch {
-    localStorage.removeItem(PENDING_KEY);
-    return null;
-  }
-}
-
-function clearPendingDeploy() {
-  localStorage.removeItem(PENDING_KEY);
-  // Also clean legacy sessionStorage key
-  try { sessionStorage.removeItem(PENDING_KEY); } catch { /* ignore */ }
-}
 
 interface OneclickWizardClientProps {
   isAuthenticated: boolean;
@@ -47,121 +16,42 @@ interface OneclickWizardClientProps {
 
 export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientProps) {
   const { locale } = useLocaleStore();
-
-  // Steps: template(0) → github(1) → deploy(2)
-  const [currentStep, setCurrentStep] = useState(0);
-  const [deployId, setDeployId] = useState<string | null>(null);
-  const [projectId, setProjectId] = useState<string | null>(null);
-  const [isDeploying, setIsDeploying] = useState(false);
-  const [pendingDeploy, setPendingDeploy] = useState<{ templateId: string; siteName: string } | null>(null);
-
-  // Detect ?oauth_success=github from URL → auto-advance past GitHub step
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('oauth_success') === 'github') {
-      // Restore pending deploy from localStorage (survives tab switches)
-      const saved = loadPendingDeploy();
-      if (saved) {
-        setPendingDeploy(saved);
-        clearPendingDeploy();
-      }
-      setCurrentStep(1); // show github step (now connected)
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-  }, []);
-
-  // Data fetching
   const { data: templates = [], isLoading: templatesLoading } = useHomepageTemplates('github_pages');
-  const deployPagesMutation = useDeployToGitHubPages();
-  const { data: deployStatus, isLoading: statusLoading, error: statusError } = useDeployStatus(
-    deployId,
-    currentStep === 2
-  );
 
-  // Check GitHub connection (only when authenticated)
-  const { data: githubAccount, isLoading: githubLoading } = useQuery({
-    queryKey: ['github-account-check'],
-    queryFn: async () => {
-      const res = await fetch('/api/oneclick/github-check');
-      if (!res.ok) return null;
-      const data = await res.json();
-      return data.account || null;
-    },
-    enabled: isAuthenticated,
-  });
+  const {
+    state,
+    handleDeploy,
+    handleGitHubConnected,
+    handleRetry,
+    deployStatus,
+    deployMutation,
+    githubAccount,
+    githubLoading,
+    isGitHubConnected,
+  } = useDeployMachine({ isAuthenticated });
 
-  const isGitHubConnected = githubAccount?.status === 'active';
+  // Step 1 → deploy
+  const onDeployClick = useCallback((data: { templateId: string; siteName: string }) => {
+    handleDeploy(data.templateId, data.siteName);
+  }, [handleDeploy]);
 
-  const executeDeploy = useCallback(async (data: { templateId: string; siteName: string }) => {
-    setIsDeploying(true);
-    try {
-      const result = await deployPagesMutation.mutateAsync({
-        template_id: data.templateId,
-        site_name: data.siteName,
-      });
+  // Determine what to show
+  const isStep1 = state.phase === 'selecting';
+  const isStep2 = ['deploying', 'polling', 'success', 'error'].includes(state.phase);
+  const showAuthModal = state.phase === 'authenticating';
+  const showGitHubModal = state.phase === 'connecting_github';
 
-      setDeployId(result.deploy_id);
-      setProjectId(result.project_id);
-      setCurrentStep(2);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : '배포 중 오류가 발생했습니다';
-      toast.error(message);
-      setIsDeploying(false);
-    }
-  }, [deployPagesMutation]);
+  // Step labels
+  const step1Label = locale === 'ko' ? '선택' : 'Choose';
+  const step2Label = locale === 'ko' ? '완료' : 'Done';
 
-  const handleDeploy = useCallback(async (data: { templateId: string; siteName: string }) => {
-    if (!isAuthenticated) {
-      // Save pending deploy to localStorage (survives tab switches & redirects)
-      savePendingDeploy(data);
-      window.location.href = `/login?redirect=/oneclick&template=${data.templateId}&site=${data.siteName}`;
-      return;
-    }
+  const currentStepIndex = isStep2 ? 1 : 0;
 
-    if (!isGitHubConnected) {
-      // Save & show GitHub connect step
-      savePendingDeploy(data);
-      setPendingDeploy(data);
-      setCurrentStep(1);
-      return;
-    }
-
-    // Connected — deploy directly
-    await executeDeploy(data);
-  }, [isAuthenticated, isGitHubConnected, executeDeploy]);
-
-  // 에러 발생 시 재시도 (처음으로 돌아가기)
-  const handleRetry = useCallback(() => {
-    setCurrentStep(0);
-    setDeployId(null);
-    setProjectId(null);
-    setIsDeploying(false);
-    setPendingDeploy(null);
-    deployPagesMutation.reset();
-  }, [deployPagesMutation]);
-
-  // Auto-deploy after GitHub connection if we have pending data
-  const handleGitHubConnected = useCallback(async () => {
-    if (pendingDeploy) {
-      await executeDeploy(pendingDeploy);
-      setPendingDeploy(null);
-    } else {
-      setCurrentStep(0); // Go back to template picker
-    }
-  }, [pendingDeploy, executeDeploy]);
-
-  // Step definitions
-  const steps = [
-    { key: 'template', number: 0 },
-    { key: 'github', number: 1 },
-    { key: 'deploy', number: 2 },
-  ];
-
-  const stepLabels = locale === 'ko'
-    ? ['템플릿 선택', 'GitHub 연결', '배포']
-    : ['Choose Template', 'Connect GitHub', 'Deploy'];
-
-  const visibleStepIndex = steps.findIndex((s) => s.number === currentStep);
+  // Get projectId from state for deploy step
+  const projectId =
+    state.phase === 'polling' || state.phase === 'success' ? state.projectId :
+    state.phase === 'error' ? state.projectId :
+    null;
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
@@ -175,20 +65,20 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
         </h1>
         <p className="text-muted-foreground">
           {locale === 'ko'
-            ? '템플릿 선택 → GitHub Pages 배포. GitHub 계정 하나로 끝.'
-            : 'Pick a template → Deploy to GitHub Pages. Just one GitHub account.'}
+            ? '템플릿을 고르고 배포 버튼을 누르세요. 그게 전부입니다.'
+            : 'Pick a template and hit deploy. That\'s all.'}
         </p>
       </div>
 
-      {/* Step indicator */}
+      {/* 2-Step Indicator */}
       <div className="flex items-center justify-center gap-2">
-        {steps.map((step, idx) => (
-          <div key={step.key} className="flex items-center">
+        {[step1Label, step2Label].map((label, idx) => (
+          <div key={label} className="flex items-center">
             <div
               className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                idx === visibleStepIndex
+                idx === currentStepIndex
                   ? 'bg-primary text-primary-foreground'
-                  : idx < visibleStepIndex
+                  : idx < currentStepIndex
                     ? 'bg-primary/10 text-primary'
                     : 'bg-muted text-muted-foreground'
               }`}
@@ -196,48 +86,60 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
               <span className="w-5 h-5 rounded-full bg-background/20 flex items-center justify-center text-xs font-bold">
                 {idx + 1}
               </span>
-              <span className="hidden sm:inline">{stepLabels[idx]}</span>
+              <span>{label}</span>
             </div>
-            {idx < steps.length - 1 && (
-              <div className={`w-8 h-0.5 mx-1 ${idx < visibleStepIndex ? 'bg-primary' : 'bg-muted'}`} />
+            {idx < 1 && (
+              <div className={`w-8 h-0.5 mx-1 ${idx < currentStepIndex ? 'bg-primary' : 'bg-muted'}`} />
             )}
           </div>
         ))}
       </div>
 
-      {/* Step content */}
-      {currentStep === 0 && (
+      {/* Step 1: Template + site name selection */}
+      {isStep1 && (
         <TemplatePickerStep
           templates={templates}
           isLoading={templatesLoading}
-          isDeploying={isDeploying}
-          onNext={handleDeploy}
+          isDeploying={deployMutation.isPending}
+          onNext={onDeployClick}
           githubUsername={isGitHubConnected ? githubAccount?.provider_account_id : undefined}
           isGitHubLoading={githubLoading}
           isAuthenticated={isAuthenticated}
+          defaultSiteName={state.siteName}
+          defaultTemplate={state.template}
         />
       )}
 
-      {currentStep === 1 && !isAuthenticated && (
-        <AuthGateStep />
-      )}
-
-      {currentStep === 1 && isAuthenticated && (
-        <GitHubConnectStep
-          githubAccount={githubAccount}
-          isLoading={githubLoading}
-          onNext={() => setCurrentStep(0)}
-          onConnected={handleGitHubConnected}
-        />
-      )}
-
-      {currentStep === 2 && (
+      {/* Step 2: Deploy progress / success / error */}
+      {isStep2 && (
         <DeployStep
           status={deployStatus ?? null}
-          isLoading={isDeploying && statusLoading}
-          error={statusError || (deployPagesMutation.error as Error) || null}
+          isLoading={state.phase === 'deploying' && !deployStatus}
+          error={
+            state.phase === 'error' ? state.error :
+            (deployMutation.error as Error) || null
+          }
           projectId={projectId}
           onRetry={handleRetry}
+        />
+      )}
+
+      {/* Auth Modal — overlay (no page navigation) */}
+      {showAuthModal && (
+        <AuthModal
+          open={true}
+          onClose={handleRetry}
+        />
+      )}
+
+      {/* GitHub Connect Modal — overlay (no page navigation) */}
+      {showGitHubModal && (
+        <GitHubConnectModal
+          open={true}
+          onClose={handleRetry}
+          githubAccount={githubAccount}
+          isLoading={githubLoading}
+          onConnected={handleGitHubConnected}
         />
       )}
     </div>
