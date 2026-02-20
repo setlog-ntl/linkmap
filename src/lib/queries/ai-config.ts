@@ -3,6 +3,7 @@ import { queryKeys } from './keys';
 import type {
   AiAssistantConfig, AiPersona, AiProvider, AiGuardrails,
   AiPromptTemplate, AiUsageLog, AiUsageSummary,
+  AiFeaturePersona,
 } from '@/types';
 import type {
   CreatePersonaInput, UpdatePersonaInput,
@@ -10,6 +11,7 @@ import type {
   CreateTemplateInput, UpdateTemplateInput,
   UpdateGlobalConfigInput, PlaygroundInput,
 } from '@/lib/validations/ai-config';
+import type { AiFeaturePersonaUpdateInput } from '@/lib/validations/ai-chat';
 
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, {
@@ -207,5 +209,28 @@ export function useAiPlayground() {
         method: 'POST',
         body: JSON.stringify(input),
       }),
+  });
+}
+
+// ============================================
+// Feature Personas (Admin)
+// ============================================
+export function useAiFeaturePersonas() {
+  return useQuery({
+    queryKey: queryKeys.aiConfig.featurePersonas,
+    queryFn: () => apiFetch<{ features: AiFeaturePersona[] }>('/api/admin/ai-feature-personas'),
+    select: (data) => data.features,
+  });
+}
+
+export function useUpdateAiFeaturePersona() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: AiFeaturePersonaUpdateInput) =>
+      apiFetch<{ feature: AiFeaturePersona }>('/api/admin/ai-feature-personas', {
+        method: 'PUT',
+        body: JSON.stringify(input),
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.aiConfig.featurePersonas }),
   });
 }

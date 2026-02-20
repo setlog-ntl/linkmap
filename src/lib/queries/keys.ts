@@ -78,5 +78,7 @@ export const queryKeys = {
     templates: ['ai-config', 'templates'] as const,
     template: (id: string) => ['ai-config', 'templates', id] as const,
     usage: (period?: string) => ['ai-config', 'usage', period ?? 'today'] as const,
+    featurePersonas: ['ai-config', 'feature-personas'] as const,
+    featurePersona: (slug: string) => ['ai-config', 'feature-persona', slug] as const,
   },
 } as const;

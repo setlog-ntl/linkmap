@@ -9,6 +9,7 @@ import AiGuardrailsTab from './ai-guardrails-tab';
 import AiTemplatesTab from './ai-templates-tab';
 import AiUsageTab from './ai-usage-tab';
 import AiPlaygroundTab from './ai-playground-tab';
+import AiFeatureMappingTab from './ai-feature-mapping-tab';
 
 export default function AiAdminConsole() {
   return (
@@ -24,7 +25,7 @@ export default function AiAdminConsole() {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="general">일반</TabsTrigger>
           <TabsTrigger value="personas">페르소나</TabsTrigger>
           <TabsTrigger value="models">모델</TabsTrigger>
@@ -32,6 +33,7 @@ export default function AiAdminConsole() {
           <TabsTrigger value="templates">템플릿</TabsTrigger>
           <TabsTrigger value="usage">사용량</TabsTrigger>
           <TabsTrigger value="playground">테스트</TabsTrigger>
+          <TabsTrigger value="feature-mapping">기능 매핑</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general">
@@ -60,6 +62,10 @@ export default function AiAdminConsole() {
 
         <TabsContent value="playground">
           <AiPlaygroundTab />
+        </TabsContent>
+
+        <TabsContent value="feature-mapping">
+          <AiFeatureMappingTab />
         </TabsContent>
       </Tabs>
     </div>

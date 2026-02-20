@@ -6,7 +6,7 @@ import { useDashboard } from '@/lib/queries/dashboard';
 import { useProjectStore } from '@/stores/project-store';
 import { BentoDashboardSkeleton } from '@/components/dashboard/bento-dashboard-skeleton';
 import { BentoDashboardLayout } from '@/components/dashboard/bento-dashboard-layout';
-import { StackArchitectDialog } from '@/components/ai/stack-architect-dialog';
+import { AiChatPanel } from '@/components/ai/ai-chat-panel';
 
 export default function ProjectDashboardPage() {
   const params = useParams();
@@ -33,7 +33,7 @@ export default function ProjectDashboardPage() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <StackArchitectDialog />
+        <AiChatPanel data={data} />
       </div>
       <BentoDashboardLayout data={data} />
     </div>

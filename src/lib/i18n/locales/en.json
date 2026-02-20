@@ -726,6 +726,28 @@
       "thinking": "AI is processing...",
       "executed": "Command executed",
       "error": "Command failed"
+    },
+    "chat": {
+      "title": "AI Assistant",
+      "open": "AI Assistant",
+      "placeholder": "Ask about your project or get service recommendations",
+      "inputPlaceholder": "Type a message...",
+      "applyAll": "Apply All",
+      "applying": "Applying...",
+      "applied": "Applied",
+      "stopStreaming": "Stop Streaming",
+      "clearChat": "Clear Chat",
+      "quickActions": "Quick Questions",
+      "featureMapping": "Feature Mapping",
+      "assignPersona": "Assign Persona",
+      "assignTemplates": "Assign Templates",
+      "promptOverride": "Prompt Override",
+      "overviewChat": "Overview Chat",
+      "envDoctor": "AI Env Doctor",
+      "mapNarrator": "AI Architecture Analysis",
+      "compareServices": "AI Service Comparison",
+      "command": "AI Command",
+      "moduleSuggest": "AI Module Suggest"
     }
   },
   "serviceMap": {

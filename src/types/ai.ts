@@ -129,3 +129,38 @@ export interface AiUsageSummary {
   avg_response_time: number;
   error_rate: number;
 }
+
+// ─── AI Chat & Feature Mapping ──────────────────────────────────────
+
+export type AiFeatureSlug =
+  | 'overview_chat'
+  | 'env_doctor'
+  | 'map_narrator'
+  | 'compare_services'
+  | 'command'
+  | 'module_suggest';
+
+export interface AiFeaturePersona {
+  id: string;
+  feature_slug: AiFeatureSlug;
+  persona_id: string | null;
+  system_prompt_override: string | null;
+  template_ids: string[];
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  persona_name?: string;
+}
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  recommendations?: ServiceRecommendation[];
+}
+
+export interface ServiceRecommendation {
+  slug: string;
+  name: string;
+  layer: string;
+  reason: string;
+}
