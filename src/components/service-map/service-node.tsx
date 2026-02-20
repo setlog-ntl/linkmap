@@ -2,6 +2,7 @@
 
 import { memo } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { Crown } from 'lucide-react';
 import { ServiceIcon } from '@/components/landing/service-icon';
 import { NodeTooltip } from '@/components/service-map/node-tooltip';
 import type { ServiceCategory } from '@/types';
@@ -22,6 +23,7 @@ interface ServiceNodeData {
   highlighted?: boolean;
   focusOpacity?: number;
   domain?: string;
+  isMainService?: boolean;
   [key: string]: unknown;
 }
 
@@ -33,15 +35,17 @@ function ServiceNode({ data }: NodeProps) {
 
   const isHighlighted = d.highlighted !== false;
   const focusOpacity = d.focusOpacity ?? 1;
+  const isMain = d.isMainService === true;
 
   const nodeContent = (
     <div
       className={`
-        px-3 py-2.5 rounded-xl border-2 shadow-sm w-[160px] h-[48px]
+        relative px-3 py-2.5 rounded-xl border-2 shadow-sm
         transition-all duration-200
         ${colorClass}
         ${isHighlighted ? '' : 'opacity-20'}
         hover:shadow-md hover:scale-[1.02]
+        ${isMain ? 'w-[176px] h-[52px] ring-2 ring-amber-400 ring-offset-1 ring-offset-background' : 'w-[160px] h-[48px]'}
       `}
       style={{ opacity: isHighlighted ? focusOpacity : 0.2 }}
     >
@@ -55,6 +59,12 @@ function ServiceNode({ data }: NodeProps) {
         position={Position.Left}
         className="!bg-gray-400 dark:!bg-gray-500 !w-2 !h-2 !border-0"
       />
+
+      {isMain && (
+        <div className="absolute -top-2 -right-2 bg-amber-400 text-amber-900 rounded-full p-0.5 shadow-sm z-10">
+          <Crown className="h-3 w-3" />
+        </div>
+      )}
 
       <div className="flex items-center gap-2">
         {d.iconSlug ? (
@@ -80,7 +90,7 @@ function ServiceNode({ data }: NodeProps) {
   );
 
   return (
-    <NodeTooltip label={d.label} status={d.status} domain={d.domain}>
+    <NodeTooltip label={d.label} status={d.status} domain={d.domain} isMainService={isMain}>
       {nodeContent}
     </NodeTooltip>
   );

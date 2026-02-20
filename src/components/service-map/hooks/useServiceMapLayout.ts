@@ -11,6 +11,7 @@ export interface UseServiceMapLayoutParams {
   rawEdges: Edge[];
   focusedNodeId: string | null;
   getDomain: (nodeId: string) => ServiceDomain | null;
+  mainServiceId?: string | null;
 }
 
 export interface UseServiceMapLayoutReturn {
@@ -20,17 +21,27 @@ export interface UseServiceMapLayoutReturn {
 }
 
 export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServiceMapLayoutReturn {
-  const { serviceNodes, rawEdges, focusedNodeId, getDomain } = params;
+  const { serviceNodes, rawEdges, focusedNodeId, getDomain, mainServiceId } = params;
 
   const neighborSet = useMemo(() => {
     if (!focusedNodeId) return null;
     return getNeighborhood(focusedNodeId, rawEdges);
   }, [focusedNodeId, rawEdges]);
 
+  // Sort: main service first in its zone
+  const sortedServiceNodes = useMemo(() => {
+    if (!mainServiceId) return serviceNodes;
+    return [...serviceNodes].sort((a, b) => {
+      if (a.id === mainServiceId) return -1;
+      if (b.id === mainServiceId) return 1;
+      return 0;
+    });
+  }, [serviceNodes, mainServiceId]);
+
   // Zone-based layout
   const zoneResult = useMemo(() => {
-    return computeZoneLayout(serviceNodes, getDomain);
-  }, [serviceNodes, getDomain]);
+    return computeZoneLayout(sortedServiceNodes, getDomain);
+  }, [sortedServiceNodes, getDomain]);
 
   // Apply focus mode opacity
   const layoutedNodes = useMemo<Node[]>(() => {

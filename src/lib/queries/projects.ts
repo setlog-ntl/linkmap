@@ -93,16 +93,20 @@ export function useUpdateProject() {
   return useMutation({
     mutationFn: async ({
       id,
-      updates,
+      ...updates
     }: {
       id: string;
-      updates: Partial<Pick<Project, 'name' | 'description' | 'tech_stack'>>;
-    }) => {
-      const { error } = await supabase
-        .from('projects')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', id);
-      if (error) throw error;
+    } & Partial<Pick<Project, 'name' | 'description' | 'tech_stack' | 'main_service_id'>>) => {
+      const res = await fetch(`/api/projects/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to update project');
+      }
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });

@@ -5,9 +5,11 @@ import {
   BaseEdge,
   EdgeLabelRenderer,
   getBezierPath,
+  MarkerType,
   type EdgeProps,
 } from '@xyflow/react';
 import { X } from 'lucide-react';
+import { useServiceMapStore } from '@/stores/service-map-store';
 import type { DependencyType, UserConnectionType } from '@/types';
 
 /** All connection styles - dependencies + user connections */
@@ -44,6 +46,7 @@ function ConnectionEdge({
   data,
 }: EdgeProps) {
   const [hovered, setHovered] = useState(false);
+  const editMode = useServiceMapStore((s) => s.editMode);
   const edgeData = data as unknown as ConnectionEdgeData;
   const connType = edgeData?.connectionType || 'uses';
   const s = styles[connType] || styles.uses;
@@ -56,6 +59,8 @@ function ConnectionEdge({
     sourcePosition,
     targetPosition,
   });
+
+  const showLabel = hovered || editMode;
 
   return (
     <>
@@ -72,13 +77,14 @@ function ConnectionEdge({
       <BaseEdge
         id={id}
         path={edgePath}
+        markerEnd={MarkerType.ArrowClosed}
         style={{
           stroke: s.color,
           strokeWidth: 2,
           strokeDasharray: s.dash !== '0' ? s.dash : undefined,
         }}
       />
-      {hovered && (
+      {showLabel && (
         <EdgeLabelRenderer>
           <div
             className="nodrag nopan pointer-events-auto"
@@ -100,7 +106,7 @@ function ConnectionEdge({
               >
                 {s.label}
               </span>
-              {edgeData?.onDelete && (
+              {edgeData?.onDelete && (hovered || editMode) && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();

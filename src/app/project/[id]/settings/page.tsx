@@ -82,7 +82,7 @@ export default function ProjectSettingsPage() {
   const handleSave = () => {
     if (!name.trim()) return;
     updateProject.mutate(
-      { id: projectId, updates: { name: name.trim(), description: description.trim() || null } },
+      { id: projectId, name: name.trim(), description: description.trim() || null },
       {
         onSuccess: () => toast.success('프로젝트가 업데이트되었습니다'),
         onError: () => toast.error('업데이트에 실패했습니다'),

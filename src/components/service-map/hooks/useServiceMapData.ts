@@ -7,6 +7,7 @@ import { useLatestHealthChecks, useRunHealthCheck } from '@/lib/queries/health-c
 import { useServiceDependencies } from '@/lib/queries/dependencies';
 import { useServiceAccounts } from '@/lib/queries/service-accounts';
 import { useEnvVars } from '@/lib/queries/env-vars';
+import { useLayerOverrides } from '@/lib/queries/layer-overrides';
 import { createClient } from '@/lib/supabase/client';
 import type {
   ProjectService,
@@ -23,6 +24,7 @@ const EMPTY_CONNECTIONS: UserConnection[] = [];
 export interface ServiceMapData {
   // Project
   projectName: string;
+  mainServiceId: string | null;
 
   // Services
   services: (ProjectService & { service: Service })[];
@@ -50,25 +52,32 @@ export interface ServiceMapData {
   connectionsLoading: boolean;
   createConnectionRef: React.RefObject<ReturnType<typeof useCreateConnection>>;
   deleteConnectionRef: React.RefObject<ReturnType<typeof useDeleteConnection>>;
+
+  // Layer overrides
+  layerOverrides: Record<string, string>; // service_id → dashboard_layer
 }
 
 export function useServiceMapData(projectId: string): ServiceMapData {
   const supabaseRef = useRef(createClient());
 
-  // Project name
+  // Project name + main_service_id
   const [projectName, setProjectName] = useState('내 앱');
+  const [mainServiceId, setMainServiceId] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = supabaseRef.current;
-    const fetchProjectName = async () => {
+    const fetchProject = async () => {
       const { data: project } = await supabase
         .from('projects')
-        .select('name')
+        .select('name, main_service_id')
         .eq('id', projectId)
         .single();
-      if (project) setProjectName(project.name);
+      if (project) {
+        setProjectName(project.name);
+        setMainServiceId(project.main_service_id ?? null);
+      }
     };
-    fetchProjectName();
+    fetchProject();
   }, [projectId]);
 
   // TanStack Query hooks
@@ -92,6 +101,13 @@ export function useServiceMapData(projectId: string): ServiceMapData {
   const createConnectionMutation = useCreateConnection(projectId);
   const deleteConnectionMutation = useDeleteConnection(projectId);
 
+  // Layer overrides
+  const { data: layerOverridesRaw = [] } = useLayerOverrides(projectId);
+  const layerOverrides: Record<string, string> = {};
+  for (const o of layerOverridesRaw) {
+    if (o.dashboard_layer) layerOverrides[o.service_id] = o.dashboard_layer;
+  }
+
   // Stable refs for mutations
   const createConnectionRef = useRef(createConnectionMutation);
   createConnectionRef.current = createConnectionMutation;
@@ -100,6 +116,7 @@ export function useServiceMapData(projectId: string): ServiceMapData {
 
   return {
     projectName,
+    mainServiceId,
     services,
     servicesLoading,
     catalogServices,
@@ -115,5 +132,6 @@ export function useServiceMapData(projectId: string): ServiceMapData {
     connectionsLoading,
     createConnectionRef,
     deleteConnectionRef,
+    layerOverrides,
   };
 }

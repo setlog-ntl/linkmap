@@ -66,6 +66,9 @@ export const queryKeys = {
     envDoctor: (projectId: string) => ['ai', 'env-doctor', projectId] as const,
     compare: (slugs: string[]) => ['ai', 'compare', ...slugs] as const,
   },
+  layerOverrides: {
+    byProject: (projectId: string) => ['layer-overrides', 'project', projectId] as const,
+  },
   aiConfig: {
     global: ['ai-config', 'global'] as const,
     personas: ['ai-config', 'personas'] as const,

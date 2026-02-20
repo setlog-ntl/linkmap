@@ -1,5 +1,6 @@
 'use client';
 
+import { Crown } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -13,6 +14,7 @@ interface NodeTooltipProps {
   label: string;
   status: string;
   domain?: string;
+  isMainService?: boolean;
 }
 
 const statusLabels: Record<string, string> = {
@@ -22,13 +24,25 @@ const statusLabels: Record<string, string> = {
   error: '오류',
 };
 
-export function NodeTooltip({ children, label, status, domain }: NodeTooltipProps) {
+export function NodeTooltip({ children, label, status, domain, isMainService }: NodeTooltipProps) {
   return (
     <Tooltip delayDuration={500}>
       <TooltipTrigger asChild>{children}</TooltipTrigger>
       <TooltipContent side="bottom" className="max-w-[180px] space-y-1 p-2.5">
-        <div className="font-medium text-sm">{label}</div>
+        <div className="flex items-center gap-1.5 font-medium text-sm">
+          {label}
+          {isMainService && (
+            <span className="inline-flex items-center gap-0.5 text-amber-500 text-[10px]">
+              <Crown className="h-3 w-3" />
+            </span>
+          )}
+        </div>
         <div className="flex flex-col gap-0.5 text-xs">
+          {isMainService && (
+            <div className="flex justify-between">
+              <span className="text-amber-500 font-medium">메인 서비스</span>
+            </div>
+          )}
           <div className="flex justify-between">
             <span className="text-muted-foreground">상태</span>
             <span>{statusLabels[status] || status}</span>

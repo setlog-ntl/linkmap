@@ -27,14 +27,19 @@ import { CatalogSidebar } from '@/components/service-map/catalog-sidebar';
 import { EmptyMapState } from '@/components/service-map/empty-map-state';
 import { NodeContextMenu } from '@/components/service-map/node-context-menu';
 import { ConnectionTypeDialog } from '@/components/service-map/connection-type-dialog';
+import { EditSaveBar } from '@/components/service-map/edit-save-bar';
+import { MapLegend } from '@/components/service-map/map-legend';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { MapNarratorPanel } from '@/components/ai/map-narrator-panel';
 import { useServiceMapStore } from '@/stores/service-map-store';
+import { useUpsertLayerOverride } from '@/lib/queries/layer-overrides';
+import { useUpdateProject } from '@/lib/queries/projects';
+import { domainToZone, type ZoneKey } from '@/lib/layout/zone-layout';
 import { useServiceMapData } from './hooks/useServiceMapData';
 import { useServiceMapNodes } from './hooks/useServiceMapNodes';
 import { useServiceMapLayout } from './hooks/useServiceMapLayout';
 import { useServiceMapInteractions } from './hooks/useServiceMapInteractions';
-import type { ProjectService, Service, UserConnectionType } from '@/types';
+import type { ProjectService, Service, UserConnectionType, ServiceDomain } from '@/types';
 
 const nodeTypes = {
   service: ServiceNode,
@@ -69,6 +74,12 @@ function ServiceMapInner() {
     setContextMenu,
     connectingFrom,
     setConnectingFrom,
+    editMode,
+    pendingOverrides,
+    pendingMainServiceId,
+    setPendingMainServiceId,
+    clearPendingChanges,
+    setEditMode,
   } = useServiceMapStore();
 
   // Local UI state
@@ -76,11 +87,20 @@ function ServiceMapInner() {
   const [selectedService, setSelectedService] = useState<(ProjectService & { service: Service }) | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [showAiPanel, setShowAiPanel] = useState(false);
+  const [showLegend, setShowLegend] = useState(false);
+  const [saving, setSaving] = useState(false);
   // Connection dialog state
   const [connectionDialog, setConnectionDialog] = useState<{ sourceId: string; targetId: string } | null>(null);
 
   // --- Hook 1: Data fetching ---
   const data = useServiceMapData(projectId);
+
+  // Mutations for saving
+  const upsertLayerOverride = useUpsertLayerOverride(projectId);
+  const updateProject = useUpdateProject();
+
+  // Resolve effective main service id (pending > data)
+  const effectiveMainServiceId = pendingMainServiceId !== undefined ? pendingMainServiceId : data.mainServiceId;
 
   // Standalone delete handler
   const deleteConnectionRef = data.deleteConnectionRef;
@@ -102,6 +122,9 @@ function ServiceMapInner() {
     userConnections: data.userConnections,
     searchQuery,
     handleDeleteUserConnection,
+    mainServiceId: effectiveMainServiceId,
+    layerOverrides: data.layerOverrides,
+    pendingOverrides,
   });
 
   // --- Hook 3: Interactions ---
@@ -134,6 +157,7 @@ function ServiceMapInner() {
     rawEdges: nodesResult.rawEdges,
     focusedNodeId,
     getDomain: nodesResult.getDomain,
+    mainServiceId: effectiveMainServiceId,
   });
 
   // Selected service deps
@@ -171,6 +195,56 @@ function ServiceMapInner() {
   const dialogSourceLabel = connectionDialog ? data.services.find((s) => s.id === connectionDialog.sourceId)?.service?.name : undefined;
   const dialogTargetLabel = connectionDialog ? data.services.find((s) => s.id === connectionDialog.targetId)?.service?.name : undefined;
 
+  // Get current zone for a node id (for context menu)
+  const getCurrentZone = useCallback((nodeId: string): ZoneKey | null => {
+    const domain = nodesResult.getDomain(nodeId);
+    if (!domain) return null;
+    return domainToZone(domain as ServiceDomain);
+  }, [nodesResult]);
+
+  // Edit mode: set/unset main service via context menu
+  const handleSetMainService = useCallback((nodeId: string) => {
+    setPendingMainServiceId(nodeId);
+  }, [setPendingMainServiceId]);
+
+  const handleUnsetMainService = useCallback(() => {
+    setPendingMainServiceId(null);
+  }, [setPendingMainServiceId]);
+
+  // Save all pending changes
+  const handleSaveChanges = useCallback(async () => {
+    setSaving(true);
+    try {
+      // Save zone overrides
+      const overrideEntries = Object.entries(pendingOverrides);
+      for (const [nodeId, zone] of overrideEntries) {
+        const svc = data.services.find((s) => s.id === nodeId);
+        if (svc) {
+          await upsertLayerOverride.mutateAsync({
+            service_id: svc.service_id,
+            dashboard_layer: zone,
+          });
+        }
+      }
+
+      // Save main service
+      if (pendingMainServiceId !== undefined) {
+        await updateProject.mutateAsync({
+          id: projectId,
+          main_service_id: pendingMainServiceId,
+        });
+      }
+
+      toast.success('변경사항이 저장되었습니다');
+      clearPendingChanges();
+      setEditMode(false);
+    } catch {
+      toast.error('저장에 실패했습니다');
+    } finally {
+      setSaving(false);
+    }
+  }, [pendingOverrides, pendingMainServiceId, data.services, projectId, upsertLayerOverride, updateProject, clearPendingChanges, setEditMode]);
+
   // Loading state
   const isDataLoading = data.servicesLoading || data.depsLoading || data.connectionsLoading;
   if (isDataLoading) {
@@ -201,6 +275,7 @@ function ServiceMapInner() {
             onSearchChange={setSearchQuery}
             onExportPng={interactions.handleExportPng}
             onAiAnalyze={() => setShowAiPanel(!showAiPanel)}
+            onToggleLegend={() => setShowLegend(!showLegend)}
           />
         </div>
 
@@ -241,6 +316,12 @@ function ServiceMapInner() {
               />
               <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
             </ReactFlow>
+
+            {/* Edit save bar */}
+            <EditSaveBar onSave={handleSaveChanges} saving={saving} />
+
+            {/* Legend panel */}
+            {showLegend && <MapLegend onClose={() => setShowLegend(false)} />}
           </div>
 
           <NodeContextMenu
@@ -248,6 +329,10 @@ function ServiceMapInner() {
             onStartConnect={interactions.handleContextStartConnect}
             onRunHealthCheck={interactions.handleContextRunHealthCheck}
             onRemoveService={interactions.handleContextRemoveService}
+            onSetMainService={handleSetMainService}
+            onUnsetMainService={handleUnsetMainService}
+            mainServiceId={effectiveMainServiceId}
+            currentZone={getCurrentZone}
           />
         </div>
 

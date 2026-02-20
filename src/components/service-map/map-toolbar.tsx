@@ -3,7 +3,7 @@
 import { useReactFlow } from '@xyflow/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Download, Maximize2, Search, Plus, Brain } from 'lucide-react';
+import { Download, Maximize2, Search, Plus, Brain, Pencil, HelpCircle } from 'lucide-react';
 import { useServiceMapStore } from '@/stores/service-map-store';
 
 interface MapToolbarProps {
@@ -11,6 +11,7 @@ interface MapToolbarProps {
   onSearchChange: (query: string) => void;
   onExportPng: () => void;
   onAiAnalyze?: () => void;
+  onToggleLegend?: () => void;
 }
 
 export function MapToolbar({
@@ -18,9 +19,10 @@ export function MapToolbar({
   onSearchChange,
   onExportPng,
   onAiAnalyze,
+  onToggleLegend,
 }: MapToolbarProps) {
   const { fitView } = useReactFlow();
-  const { toggleCatalogSidebar, catalogSidebarOpen } = useServiceMapStore();
+  const { toggleCatalogSidebar, catalogSidebarOpen, editMode, setEditMode } = useServiceMapStore();
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
@@ -64,6 +66,22 @@ export function MapToolbar({
         <Download className="mr-1.5 h-3.5 w-3.5" />
         PNG
       </Button>
+
+      <Button
+        variant={editMode ? 'default' : 'outline'}
+        size="sm"
+        className="h-8"
+        onClick={() => setEditMode(!editMode)}
+      >
+        <Pencil className="mr-1.5 h-3.5 w-3.5" />
+        {editMode ? '편집 중' : '편집'}
+      </Button>
+
+      {onToggleLegend && (
+        <Button variant="outline" size="icon" className="h-8 w-8" onClick={onToggleLegend} title="범례">
+          <HelpCircle className="h-3.5 w-3.5" />
+        </Button>
+      )}
     </div>
   );
 }

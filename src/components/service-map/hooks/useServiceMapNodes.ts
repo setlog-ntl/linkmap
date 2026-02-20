@@ -2,6 +2,7 @@
 
 import { useMemo, useCallback } from 'react';
 import { type Edge, type Node } from '@xyflow/react';
+import { domainToZone, type ZoneKey } from '@/lib/layout/zone-layout';
 import type {
   ProjectService,
   Service,
@@ -24,6 +25,9 @@ export interface UseServiceMapNodesParams {
   userConnections: UserConnection[];
   searchQuery: string;
   handleDeleteUserConnection: (edgeId: string) => void;
+  mainServiceId: string | null;
+  layerOverrides: Record<string, string>;
+  pendingOverrides: Record<string, ZoneKey>;
 }
 
 export interface UseServiceMapNodesReturn {
@@ -48,6 +52,9 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
     userConnections,
     searchQuery,
     handleDeleteUserConnection,
+    mainServiceId,
+    layerOverrides,
+    pendingOverrides,
   } = params;
 
   const serviceNames = useMemo(() => {
@@ -86,15 +93,37 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
     return map;
   }, [filteredServices]);
 
-  // Map nodeId -> domain for zone layout
+  // nodeId → service_id lookup
+  const nodeIdToServiceId = useMemo(() => {
+    const map = new Map<string, string>();
+    filteredServices.forEach((ps) => {
+      map.set(ps.id, ps.service_id);
+    });
+    return map;
+  }, [filteredServices]);
+
+  // Map nodeId -> domain, respecting pendingOverrides → layerOverrides → service.domain
   const nodeDomainMap = useMemo(() => {
     const map = new Map<string, ServiceDomain>();
     filteredServices.forEach((ps) => {
+      // Check pending override first (nodeId-keyed)
+      const pendingZone = pendingOverrides[ps.id];
+      if (pendingZone) {
+        map.set(ps.id, pendingZone as unknown as ServiceDomain);
+        return;
+      }
+      // Check layer override (service_id-keyed)
+      const overrideLayer = layerOverrides[ps.service_id];
+      if (overrideLayer) {
+        map.set(ps.id, overrideLayer as unknown as ServiceDomain);
+        return;
+      }
+      // Default: service domain
       const domain = ps.service?.domain as ServiceDomain | undefined;
       if (domain) map.set(ps.id, domain);
     });
     return map;
-  }, [filteredServices]);
+  }, [filteredServices, pendingOverrides, layerOverrides]);
 
   const getDomain = useCallback(
     (nodeId: string): ServiceDomain | null => nodeDomainMap.get(nodeId) ?? null,
@@ -105,9 +134,10 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
   const serviceNodes = useMemo<Node[]>(() => {
     return filteredServices.map((ps) => {
       const category = (ps.service?.category as ServiceCategory) || 'other';
-      const domain = ps.service?.domain as ServiceDomain | undefined;
+      const domain = nodeDomainMap.get(ps.id) || (ps.service?.domain as ServiceDomain | undefined);
       const isMatch = searchQuery === '' || ps.service?.name.toLowerCase().includes(searchQuery.toLowerCase());
       const iconSlug = ps.service?.slug;
+      const isMainService = mainServiceId === ps.id;
 
       return {
         id: ps.id,
@@ -120,10 +150,11 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
           iconSlug,
           highlighted: isMatch,
           domain: domain || 'integration',
+          isMainService,
         },
       };
     });
-  }, [filteredServices, searchQuery]);
+  }, [filteredServices, searchQuery, mainServiceId, nodeDomainMap]);
 
   // Build edges
   const rawEdges = useMemo<Edge[]>(() => {
