@@ -750,6 +750,21 @@
       "compareServices": "AI Service Comparison",
       "command": "AI Command",
       "moduleSuggest": "AI Module Suggest"
+    },
+    "qna": {
+      "title": "Quick Q&A",
+      "add": "Add Q&A",
+      "edit": "Edit Q&A",
+      "delete": "Delete Q&A",
+      "deleteConfirm": "Are you sure you want to delete this Q&A?",
+      "question": "Question",
+      "questionKo": "Question (Korean)",
+      "answerGuide": "Answer Guide",
+      "answerGuidePlaceholder": "Instructions for AI to follow",
+      "noItems": "No Q&A items",
+      "created": "Q&A created",
+      "updated": "Q&A updated",
+      "deleted": "Q&A deleted"
     }
   },
   "serviceMap": {

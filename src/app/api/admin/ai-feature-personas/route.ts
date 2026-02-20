@@ -67,7 +67,7 @@ export async function PUT(request: NextRequest) {
   const parsed = aiFeaturePersonaUpdateSchema.safeParse(body);
   if (!parsed.success) return validationError(parsed.error);
 
-  const { feature_slug, persona_id, system_prompt_override, template_ids, is_active } = parsed.data;
+  const { feature_slug, persona_id, system_prompt_override, is_active } = parsed.data;
 
   try {
     const adminSupabase = createAdminClient();
@@ -75,7 +75,6 @@ export async function PUT(request: NextRequest) {
     const updateData: Record<string, unknown> = {
       persona_id,
       system_prompt_override,
-      template_ids,
       updated_at: new Date().toISOString(),
     };
     if (is_active !== undefined) {
@@ -96,7 +95,7 @@ export async function PUT(request: NextRequest) {
       action: 'admin.ai_feature_persona_update',
       resourceType: 'ai_feature_persona',
       resourceId: feature_slug,
-      details: { persona_id, template_ids_count: template_ids.length },
+      details: { persona_id },
     });
 
     return NextResponse.json({ feature: updated });

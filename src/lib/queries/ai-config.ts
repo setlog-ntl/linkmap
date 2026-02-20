@@ -3,7 +3,7 @@ import { queryKeys } from './keys';
 import type {
   AiAssistantConfig, AiPersona, AiProvider, AiGuardrails,
   AiPromptTemplate, AiUsageLog, AiUsageSummary,
-  AiFeaturePersona,
+  AiFeaturePersona, AiFeatureQna,
 } from '@/types';
 import type {
   CreatePersonaInput, UpdatePersonaInput,
@@ -11,7 +11,7 @@ import type {
   CreateTemplateInput, UpdateTemplateInput,
   UpdateGlobalConfigInput, PlaygroundInput,
 } from '@/lib/validations/ai-config';
-import type { AiFeaturePersonaUpdateInput } from '@/lib/validations/ai-chat';
+import type { AiFeaturePersonaUpdateInput, CreateFeatureQnaInput, UpdateFeatureQnaInput } from '@/lib/validations/ai-chat';
 
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, {
@@ -232,5 +232,52 @@ export function useUpdateAiFeaturePersona() {
         body: JSON.stringify(input),
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.aiConfig.featurePersonas }),
+  });
+}
+
+// ============================================
+// Feature Q&A (Admin)
+// ============================================
+export function useAiFeatureQna(slug: string) {
+  return useQuery({
+    queryKey: queryKeys.aiConfig.featureQna(slug),
+    queryFn: () =>
+      apiFetch<{ qna: AiFeatureQna[] }>(`/api/admin/ai-feature-qna?feature_slug=${slug}`),
+    select: (data) => data.qna,
+    enabled: !!slug,
+  });
+}
+
+export function useCreateAiFeatureQna() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateFeatureQnaInput) =>
+      apiFetch<{ qna: AiFeatureQna }>('/api/admin/ai-feature-qna', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      }),
+    onSuccess: (_data, variables) =>
+      qc.invalidateQueries({ queryKey: queryKeys.aiConfig.featureQna(variables.feature_slug) }),
+  });
+}
+
+export function useUpdateAiFeatureQna(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...input }: UpdateFeatureQnaInput & { id: string }) =>
+      apiFetch<{ qna: AiFeatureQna }>(`/api/admin/ai-feature-qna/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(input),
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.aiConfig.featureQna(slug) }),
+  });
+}
+
+export function useDeleteAiFeatureQna(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiFetch<{ success: boolean }>(`/api/admin/ai-feature-qna/${id}`, { method: 'DELETE' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.aiConfig.featureQna(slug) }),
   });
 }

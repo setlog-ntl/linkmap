@@ -750,6 +750,21 @@
       "compareServices": "AI 서비스 비교",
       "command": "AI 커맨드",
       "moduleSuggest": "AI 모듈 추천"
+    },
+    "qna": {
+      "title": "빠른 Q&A",
+      "add": "Q&A 추가",
+      "edit": "Q&A 수정",
+      "delete": "Q&A 삭제",
+      "deleteConfirm": "이 Q&A를 삭제하시겠습니까?",
+      "question": "질문",
+      "questionKo": "질문 (한국어)",
+      "answerGuide": "답변 가이드",
+      "answerGuidePlaceholder": "AI가 참고할 지시사항",
+      "noItems": "등록된 Q&A가 없습니다",
+      "created": "Q&A가 추가되었습니다",
+      "updated": "Q&A가 수정되었습니다",
+      "deleted": "Q&A가 삭제되었습니다"
     }
   },
   "serviceMap": {

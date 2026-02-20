@@ -65,7 +65,10 @@ export type AuditAction =
   | 'github_connection.toggle_status'
   | 'service_account.toggle_status'
   | 'ai.chat'
-  | 'admin.ai_feature_persona_update';
+  | 'admin.ai_feature_persona_update'
+  | 'admin.ai_feature_qna_create'
+  | 'admin.ai_feature_qna_update'
+  | 'admin.ai_feature_qna_delete';
 
 interface AuditLogEntry {
   action: AuditAction;

@@ -33,8 +33,30 @@ export const aiFeaturePersonaUpdateSchema = z.object({
   feature_slug: z.string().min(1),
   persona_id: z.string().uuid().nullable(),
   system_prompt_override: z.string().max(5000).nullable(),
-  template_ids: z.array(z.string().uuid()).max(10),
   is_active: z.boolean().optional(),
 });
 
 export type AiFeaturePersonaUpdateInput = z.infer<typeof aiFeaturePersonaUpdateSchema>;
+
+// ─── Q&A Schemas ────────────────────────────────────────────────────
+
+export const createFeatureQnaSchema = z.object({
+  feature_slug: z.string().min(1),
+  question: z.string().min(1).max(500),
+  question_ko: z.string().max(500).nullable().optional(),
+  answer_guide: z.string().min(1).max(5000),
+  sort_order: z.number().int().min(0).max(100).optional(),
+  is_active: z.boolean().optional(),
+});
+
+export type CreateFeatureQnaInput = z.infer<typeof createFeatureQnaSchema>;
+
+export const updateFeatureQnaSchema = z.object({
+  question: z.string().min(1).max(500).optional(),
+  question_ko: z.string().max(500).nullable().optional(),
+  answer_guide: z.string().min(1).max(5000).optional(),
+  sort_order: z.number().int().min(0).max(100).optional(),
+  is_active: z.boolean().optional(),
+});
+
+export type UpdateFeatureQnaInput = z.infer<typeof updateFeatureQnaSchema>;

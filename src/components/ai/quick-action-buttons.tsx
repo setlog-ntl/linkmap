@@ -7,12 +7,12 @@ import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import type { AiFeatureSlug } from '@/types';
 
-interface TemplateItem {
+interface QnaItem {
   id: string;
-  name: string;
-  name_ko: string | null;
-  prompt_text: string;
-  icon: string;
+  question: string;
+  question_ko: string | null;
+  answer_guide: string;
+  sort_order: number;
 }
 
 interface QuickActionButtonsProps {
@@ -22,20 +22,20 @@ interface QuickActionButtonsProps {
 
 export function QuickActionButtons({ featureSlug, onAction }: QuickActionButtonsProps) {
   const { locale } = useLocaleStore();
-  const [templates, setTemplates] = useState<TemplateItem[]>([]);
+  const [qnaList, setQnaList] = useState<QnaItem[]>([]);
 
   useEffect(() => {
     fetch(`/api/ai/feature-config?feature_slug=${featureSlug}`)
       .then((r) => r.ok ? r.json() : null)
       .then((data) => {
-        if (data?.templates?.length) {
-          setTemplates(data.templates);
+        if (data?.qna?.length) {
+          setQnaList(data.qna);
         }
       })
       .catch(() => {});
   }, [featureSlug]);
 
-  if (!templates.length) return null;
+  if (!qnaList.length) return null;
 
   return (
     <div className="space-y-2">
@@ -44,15 +44,15 @@ export function QuickActionButtons({ featureSlug, onAction }: QuickActionButtons
         {t(locale, 'ai.chat.quickActions')}
       </p>
       <div className="flex flex-wrap gap-1.5">
-        {templates.map((tmpl) => (
+        {qnaList.map((qna) => (
           <Button
-            key={tmpl.id}
+            key={qna.id}
             variant="outline"
             size="sm"
             className="text-xs h-7"
-            onClick={() => onAction(tmpl.prompt_text)}
+            onClick={() => onAction(locale === 'ko' ? (qna.question_ko || qna.question) : qna.question)}
           >
-            {locale === 'ko' ? (tmpl.name_ko || tmpl.name) : tmpl.name}
+            {locale === 'ko' ? (qna.question_ko || qna.question) : qna.question}
           </Button>
         ))}
       </div>

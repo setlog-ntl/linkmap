@@ -26,6 +26,7 @@ function buildSystemPrompt(
   contextInfo: { services?: string[]; env_count?: number; connections_count?: number } | undefined,
   overridePrompt: string | null,
   personaPrompt: string | null,
+  answerGuide: string | null,
 ): string {
   const base = personaPrompt || `당신은 Linkmap 프로젝트의 AI 스택 아키텍트입니다.
 사용자의 프로젝트에 적합한 서비스와 아키텍처를 추천하고, 기술적인 질문에 답변합니다.
@@ -58,7 +59,9 @@ ${catalog}`;
 
   const override = overridePrompt ? `\n\n## 추가 지시사항\n${overridePrompt}` : '';
 
-  return base + context + recommendFormat + override;
+  const guide = answerGuide ? `\n\n## 답변 가이드\n이번 질문에 대해 다음 가이드라인을 따르세요:\n${answerGuide}` : '';
+
+  return base + context + recommendFormat + override + guide;
 }
 
 export async function POST(request: NextRequest) {
@@ -134,6 +137,28 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Check if last user message matches a Q&A question → inject answer_guide
+    let answerGuide: string | null = null;
+    if (lastUserMsg) {
+      const { data: qnaList } = await adminSupabase
+        .from('ai_feature_qna')
+        .select('question, question_ko, answer_guide')
+        .eq('feature_slug', feature_slug)
+        .eq('is_active', true);
+
+      if (qnaList?.length) {
+        const userMsg = lastUserMsg.content.trim().toLowerCase();
+        const matched = qnaList.find(
+          (q) =>
+            q.question.toLowerCase() === userMsg ||
+            (q.question_ko && q.question_ko.toLowerCase() === userMsg),
+        );
+        if (matched) {
+          answerGuide = matched.answer_guide;
+        }
+      }
+    }
+
     // Resolve API key
     const { apiKey, baseUrl } = await resolveOpenAIKey();
 
@@ -142,6 +167,7 @@ export async function POST(request: NextRequest) {
       ctx,
       featureConfig?.system_prompt_override || null,
       personaPrompt,
+      answerGuide,
     );
 
     const openaiMessages = messages.map((m) => ({

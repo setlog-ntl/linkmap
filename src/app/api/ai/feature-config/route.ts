@@ -27,20 +27,16 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (!config) {
-      return NextResponse.json({ config: null, templates: [] });
+      return NextResponse.json({ config: null, qna: [] });
     }
 
-    // Load assigned templates
-    let templates: Array<{ id: string; name: string; name_ko: string | null; prompt_text: string; icon: string }> = [];
-    if (config.template_ids?.length) {
-      const { data: tmplData } = await adminSupabase
-        .from('ai_prompt_templates')
-        .select('id, name, name_ko, prompt_text, icon')
-        .in('id', config.template_ids)
-        .eq('is_active', true);
-
-      templates = tmplData || [];
-    }
+    // Load Q&A for this feature
+    const { data: qnaData } = await adminSupabase
+      .from('ai_feature_qna')
+      .select('id, question, question_ko, answer_guide, sort_order')
+      .eq('feature_slug', featureSlug)
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
 
     // Load persona name if assigned
     let personaName: string | null = null;
@@ -55,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       config: { ...config, persona_name: personaName },
-      templates,
+      qna: qnaData || [],
     });
   } catch (err) {
     console.error('Feature config error:', err);

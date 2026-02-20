@@ -1,19 +1,36 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Save, Loader2, Link2 } from 'lucide-react';
+import { useState } from 'react';
+import { Save, Loader2, Link2, Plus, Pencil, Trash2, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useAiPersonas } from '@/lib/queries/ai-config';
-import { useAiTemplates } from '@/lib/queries/ai-config';
-import { useAiFeaturePersonas, useUpdateAiFeaturePersona } from '@/lib/queries/ai-config';
-import type { AiFeaturePersona } from '@/types';
+import {
+  useAiFeaturePersonas,
+  useUpdateAiFeaturePersona,
+  useAiFeatureQna,
+  useCreateAiFeatureQna,
+  useUpdateAiFeatureQna,
+  useDeleteAiFeatureQna,
+} from '@/lib/queries/ai-config';
+import type { AiFeaturePersona, AiFeatureQna } from '@/types';
 
 const FEATURE_LABELS: Record<string, { ko: string; en: string; desc: string }> = {
   overview_chat: { ko: '개요 AI 채팅', en: 'Overview Chat', desc: '프로젝트 개요에서 사용되는 AI 대화' },
@@ -24,23 +41,191 @@ const FEATURE_LABELS: Record<string, { ko: string; en: string; desc: string }> =
   module_suggest: { ko: 'AI 모듈 추천', en: 'Module Suggest', desc: '모듈 구성 추천' },
 };
 
+// ─── Q&A Inline Editor ──────────────────────────────────────────────
+
+interface QnaFormState {
+  question: string;
+  question_ko: string;
+  answer_guide: string;
+}
+
+const emptyQnaForm: QnaFormState = { question: '', question_ko: '', answer_guide: '' };
+
+function QnaSection({ featureSlug }: { featureSlug: string }) {
+  const { data: qnaList, isLoading } = useAiFeatureQna(featureSlug);
+  const createMutation = useCreateAiFeatureQna();
+  const updateMutation = useUpdateAiFeatureQna(featureSlug);
+  const deleteMutation = useDeleteAiFeatureQna(featureSlug);
+
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState<QnaFormState>(emptyQnaForm);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
+  const startEdit = (qna: AiFeatureQna) => {
+    setEditingId(qna.id);
+    setForm({ question: qna.question, question_ko: qna.question_ko || '', answer_guide: qna.answer_guide });
+    setShowForm(true);
+  };
+
+  const startCreate = () => {
+    setEditingId(null);
+    setForm(emptyQnaForm);
+    setShowForm(true);
+  };
+
+  const handleSubmit = async () => {
+    if (!form.question.trim() || !form.answer_guide.trim()) {
+      toast.error('질문과 답변 가이드를 모두 입력해주세요');
+      return;
+    }
+
+    try {
+      if (editingId) {
+        await updateMutation.mutateAsync({
+          id: editingId,
+          question: form.question,
+          question_ko: form.question_ko || null,
+          answer_guide: form.answer_guide,
+        });
+        toast.success('Q&A가 수정되었습니다');
+      } else {
+        await createMutation.mutateAsync({
+          feature_slug: featureSlug,
+          question: form.question,
+          question_ko: form.question_ko || null,
+          answer_guide: form.answer_guide,
+          sort_order: (qnaList?.length || 0) + 1,
+        });
+        toast.success('Q&A가 추가되었습니다');
+      }
+      setShowForm(false);
+      setEditingId(null);
+      setForm(emptyQnaForm);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '저장 실패');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!pendingDeleteId) return;
+    try {
+      await deleteMutation.mutateAsync(pendingDeleteId);
+      toast.success('Q&A가 삭제되었습니다');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '삭제 실패');
+    } finally {
+      setPendingDeleteId(null);
+    }
+  };
+
+  const isMutating = createMutation.isPending || updateMutation.isPending;
+
+  return (
+    <div className="space-y-2 border-t pt-3">
+      <div className="flex items-center justify-between">
+        <Label className="text-xs flex items-center gap-1">
+          <MessageSquare className="h-3 w-3" />
+          빠른 Q&A
+        </Label>
+        <Button variant="ghost" size="sm" className="h-6 text-xs gap-1" onClick={startCreate}>
+          <Plus className="h-3 w-3" />
+          추가
+        </Button>
+      </div>
+
+      {isLoading && <p className="text-xs text-muted-foreground">불러오는 중...</p>}
+
+      {/* Q&A List */}
+      {qnaList?.map((qna) => (
+        <div key={qna.id} className="flex items-start gap-2 p-2 rounded-md bg-muted/50 text-xs">
+          <div className="flex-1 min-w-0">
+            <p className="font-medium truncate">{qna.question_ko || qna.question}</p>
+            <p className="text-muted-foreground truncate mt-0.5">{qna.answer_guide.slice(0, 80)}...</p>
+          </div>
+          <div className="flex gap-0.5 shrink-0">
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => startEdit(qna)}>
+              <Pencil className="h-3 w-3" />
+            </Button>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-destructive" onClick={() => setPendingDeleteId(qna.id)}>
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      ))}
+
+      {!isLoading && (!qnaList || qnaList.length === 0) && !showForm && (
+        <p className="text-xs text-muted-foreground">등록된 Q&A가 없습니다</p>
+      )}
+
+      {/* Add/Edit Form */}
+      {showForm && (
+        <div className="space-y-2 p-2 rounded-md border bg-background">
+          <Input
+            placeholder="질문 (English)"
+            value={form.question}
+            onChange={(e) => setForm((p) => ({ ...p, question: e.target.value }))}
+            className="h-7 text-xs"
+          />
+          <Input
+            placeholder="질문 (한국어, 선택)"
+            value={form.question_ko}
+            onChange={(e) => setForm((p) => ({ ...p, question_ko: e.target.value }))}
+            className="h-7 text-xs"
+          />
+          <Textarea
+            placeholder="답변 가이드 (AI가 참고할 지시사항)"
+            value={form.answer_guide}
+            onChange={(e) => setForm((p) => ({ ...p, answer_guide: e.target.value }))}
+            rows={3}
+            className="text-xs resize-none"
+          />
+          <div className="flex gap-1.5">
+            <Button size="sm" className="h-7 text-xs flex-1" onClick={handleSubmit} disabled={isMutating}>
+              {isMutating && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
+              {editingId ? '수정' : '추가'}
+            </Button>
+            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => { setShowForm(false); setEditingId(null); }}>
+              취소
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <AlertDialog open={!!pendingDeleteId} onOpenChange={(open) => { if (!open) setPendingDeleteId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Q&A 삭제</AlertDialogTitle>
+            <AlertDialogDescription>이 Q&A를 삭제하시겠습니까?</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={(e) => { e.preventDefault(); handleDelete(); }}>
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
+
+// ─── Feature Card ───────────────────────────────────────────────────
+
 interface FeatureFormState {
   persona_id: string | null;
   system_prompt_override: string;
-  template_ids: string[];
   is_active: boolean;
 }
 
 function FeatureCard({ feature }: { feature: AiFeaturePersona }) {
   const { data: personas } = useAiPersonas();
-  const { data: templates } = useAiTemplates();
   const updateMutation = useUpdateAiFeaturePersona();
   const label = FEATURE_LABELS[feature.feature_slug];
 
   const [form, setForm] = useState<FeatureFormState>({
     persona_id: feature.persona_id,
     system_prompt_override: feature.system_prompt_override || '',
-    template_ids: feature.template_ids || [],
     is_active: feature.is_active,
   });
 
@@ -50,22 +235,12 @@ function FeatureCard({ feature }: { feature: AiFeaturePersona }) {
         feature_slug: feature.feature_slug,
         persona_id: form.persona_id,
         system_prompt_override: form.system_prompt_override || null,
-        template_ids: form.template_ids,
         is_active: form.is_active,
       });
       toast.success('저장되었습니다');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '저장 실패');
     }
-  };
-
-  const toggleTemplate = (id: string) => {
-    setForm((prev) => ({
-      ...prev,
-      template_ids: prev.template_ids.includes(id)
-        ? prev.template_ids.filter((t) => t !== id)
-        : [...prev.template_ids, id],
-    }));
   };
 
   return (
@@ -82,6 +257,9 @@ function FeatureCard({ feature }: { feature: AiFeaturePersona }) {
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
+            <Badge variant={form.is_active ? 'default' : 'secondary'} className="text-[10px]">
+              {form.is_active ? '활성' : '비활성'}
+            </Badge>
             <Switch
               checked={form.is_active}
               onCheckedChange={(checked) => setForm((p) => ({ ...p, is_active: checked }))}
@@ -111,26 +289,6 @@ function FeatureCard({ feature }: { feature: AiFeaturePersona }) {
           </Select>
         </div>
 
-        {/* Template multi-select */}
-        <div className="space-y-1.5">
-          <Label className="text-xs">빠른 액션 템플릿</Label>
-          <div className="flex flex-wrap gap-1.5">
-            {templates?.map((tmpl) => (
-              <Badge
-                key={tmpl.id}
-                variant={form.template_ids.includes(tmpl.id) ? 'default' : 'outline'}
-                className="cursor-pointer text-xs"
-                onClick={() => toggleTemplate(tmpl.id)}
-              >
-                {tmpl.name}
-              </Badge>
-            ))}
-            {(!templates || templates.length === 0) && (
-              <p className="text-xs text-muted-foreground">템플릿이 없습니다</p>
-            )}
-          </div>
-        </div>
-
         {/* System prompt override */}
         <div className="space-y-1.5">
           <Label className="text-xs">시스템 프롬프트 오버라이드</Label>
@@ -156,10 +314,15 @@ function FeatureCard({ feature }: { feature: AiFeaturePersona }) {
           )}
           저장
         </Button>
+
+        {/* Inline Q&A section */}
+        <QnaSection featureSlug={feature.feature_slug} />
       </CardContent>
     </Card>
   );
 }
+
+// ─── Main Tab ───────────────────────────────────────────────────────
 
 export default function AiFeatureMappingTab() {
   const { data: features, isLoading } = useAiFeaturePersonas();
@@ -175,9 +338,9 @@ export default function AiFeatureMappingTab() {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold">기능별 AI 매핑</h3>
+        <h3 className="text-lg font-semibold">기능별 AI 설정</h3>
         <p className="text-sm text-muted-foreground">
-          각 AI 기능에 페르소나와 템플릿을 할당하여 동작을 커스터마이징합니다
+          각 AI 기능에 페르소나와 빠른 Q&A를 설정하여 동작을 커스터마이징합니다
         </p>
       </div>
 

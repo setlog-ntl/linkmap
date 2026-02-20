@@ -152,6 +152,18 @@ export interface AiFeaturePersona {
   persona_name?: string;
 }
 
+export interface AiFeatureQna {
+  id: string;
+  feature_slug: AiFeatureSlug;
+  question: string;
+  question_ko: string | null;
+  answer_guide: string;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
