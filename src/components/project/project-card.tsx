@@ -74,8 +74,12 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
             <div className="relative">
               {/* Central project node */}
               <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/30 flex items-center justify-center z-10 relative shadow-sm">
-                {project.icon_slug && getServiceIconUrl(project.icon_slug) ? (
-                  <ServiceIcon serviceId={project.icon_slug} size={22} />
+                {project.icon_type === 'brand' && project.icon_value && getServiceIconUrl(project.icon_value) ? (
+                  <ServiceIcon serviceId={project.icon_value} size={22} />
+                ) : project.icon_type === 'emoji' && project.icon_value ? (
+                  <span className="text-lg leading-none">{project.icon_value}</span>
+                ) : project.icon_type === 'custom' && project.icon_value ? (
+                  <img src={project.icon_value} alt="" className="h-6 w-6 rounded object-cover" />
                 ) : (
                   <Layers className="h-4.5 w-4.5 text-primary" />
                 )}

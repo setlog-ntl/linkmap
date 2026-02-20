@@ -8,6 +8,8 @@ import { SystemStatusBadge } from './system-status-badge';
 import { MetricPill } from './metric-pill';
 import { ProjectIconPicker } from '@/components/project/project-icon-picker';
 import { useUpdateProject } from '@/lib/queries/projects';
+import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/queries/keys';
 import type { Project, DashboardMetrics, ServiceCardData } from '@/types';
 
 interface ProjectHeroCardProps {
@@ -18,10 +20,17 @@ interface ProjectHeroCardProps {
 
 export function ProjectHeroCard({ project, metrics, allCards }: ProjectHeroCardProps) {
   const updateProject = useUpdateProject();
+  const queryClient = useQueryClient();
 
-  const handleIconSelect = (slug: string | null) => {
+  const handleIconSelect = (iconType: 'brand' | 'emoji' | 'custom' | null, iconValue: string | null) => {
+    // Custom uploads are handled by the icon API and already saved
+    if (iconType === 'custom') {
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+      return;
+    }
+
     updateProject.mutate(
-      { id: project.id, icon_slug: slug },
+      { id: project.id, icon_type: iconType, icon_value: iconValue },
       {
         onError: () => {
           toast.error('아이콘 변경에 실패했습니다');
@@ -35,8 +44,10 @@ export function ProjectHeroCard({ project, metrics, allCards }: ProjectHeroCardP
       <div className="flex flex-col sm:flex-row items-start gap-5">
         {/* Project avatar with icon picker */}
         <ProjectIconPicker
+          projectId={project.id}
           projectName={project.name}
-          currentIconSlug={project.icon_slug}
+          currentIconType={project.icon_type}
+          currentIconValue={project.icon_value}
           onSelect={handleIconSelect}
           disabled={updateProject.isPending}
         />

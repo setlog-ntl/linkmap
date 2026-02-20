@@ -96,7 +96,7 @@ export function useUpdateProject() {
       ...updates
     }: {
       id: string;
-    } & Partial<Pick<Project, 'name' | 'description' | 'tech_stack' | 'main_service_id' | 'icon_slug'>>) => {
+    } & Partial<Pick<Project, 'name' | 'description' | 'tech_stack' | 'main_service_id' | 'icon_type' | 'icon_value'>>) => {
       const res = await fetch(`/api/projects/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
