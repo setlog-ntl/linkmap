@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -23,15 +24,19 @@ import {
   useDisconnectGitHubConnection,
   useRenameGitHubConnection,
 } from '@/lib/queries/github-connections';
+import { useProjects } from '@/lib/queries/projects';
 import {
   GitBranch, Trash2, Pencil, Plus, Check, X,
   ExternalLink, FolderOpen, Unlink,
-  ArrowLeft, Link2, Calendar,
+  ArrowLeft, Link2, Calendar, LogOut, AlertTriangle,
+  Layers,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
+import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/queries/keys';
 import type { GitHubConnection } from '@/types';
 
 // ─── Types ──────────────────────────────────────────────
@@ -45,24 +50,8 @@ interface UserProfile {
   createdAt: string;
 }
 
-interface ConnectedAccount {
-  id: string;
-  connection_type: string;
-  oauth_metadata: Record<string, string> | null;
-  oauth_scopes: string[] | null;
-  oauth_provider_user_id: string | null;
-  status: string;
-  last_verified_at: string | null;
-  error_message: string | null;
-  created_at: string;
-  project_id: string | null;
-  service: { name: string; slug: string; icon_url: string | null; category: string } | null;
-  project: { name: string } | null;
-}
+// ─── Status & Connection helpers ────────────────────────
 
-// ─── Status & Connection helpers (Stitch design) ────────
-
-/** Status dot color matching Stitch palette */
 function statusDotColor(status: string): string {
   switch (status) {
     case 'active': return 'bg-emerald-500';
@@ -73,7 +62,6 @@ function statusDotColor(status: string): string {
   }
 }
 
-/** Stitch-style pill badge with status dot */
 function StatusBadge({ status, locale }: { status: string; locale: 'ko' | 'en' }) {
   const colors: Record<string, string> = {
     active: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
@@ -92,7 +80,6 @@ function StatusBadge({ status, locale }: { status: string; locale: 'ko' | 'en' }
   );
 }
 
-/** Stitch-style connection type badge (violet=OAuth, amber=API Key, zinc=Manual/Webhook) */
 function ConnectionTypeBadge({ type, locale }: { type: string; locale: 'ko' | 'en' }) {
   const colors: Record<string, string> = {
     oauth: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
@@ -114,20 +101,23 @@ function ConnectionTypeBadge({ type, locale }: { type: string; locale: 'ko' | 'e
   );
 }
 
-// ─── GitHubConnectionCard (Stitch card style) ───────────
+// ─── GitHubConnectionCard ───────────────────────────────
 
 function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) {
   const { locale } = useLocaleStore();
   const deleteMutation = useDeleteGitHubConnection();
   const disconnectMutation = useDisconnectGitHubConnection();
   const renameMutation = useRenameGitHubConnection();
+  const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState(connection.display_name || '');
+  const [toggling, setToggling] = useState(false);
 
   const metadata = connection.oauth_metadata as Record<string, string>;
   const login = metadata?.login || connection.oauth_provider_user_id || 'unknown';
   const avatarUrl = metadata?.avatar_url;
   const hasLinkedRepos = (connection.linked_repos_count ?? 0) > 0;
+  const isActive = connection.status === 'active';
 
   const handleRename = async () => {
     if (!editName.trim()) return;
@@ -140,9 +130,30 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
     }
   };
 
+  const handleToggleStatus = async (checked: boolean) => {
+    setToggling(true);
+    try {
+      const res = await fetch(`/api/account/github-connections/${connection.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: checked ? 'active' : 'revoked' }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed');
+      }
+      queryClient.invalidateQueries({ queryKey: queryKeys.github.connections });
+      toast.success(t(locale, checked ? 'account.statusActive' : 'account.deactivated'));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed');
+    } finally {
+      setToggling(false);
+    }
+  };
+
   return (
-    <div className="rounded-lg border bg-card/50 p-5">
-      {/* Header: avatar + name + status badge */}
+    <div className={`rounded-lg border bg-card/50 p-5 transition-opacity ${!isActive ? 'opacity-50' : ''}`}>
+      {/* Header: avatar + name + toggle + status badge */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <Avatar className="h-10 w-10">
@@ -195,10 +206,18 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
             </a>
           </div>
         </div>
-        <StatusBadge status={connection.status} locale={locale} />
+        <div className="flex items-center gap-3">
+          <Switch
+            checked={isActive}
+            onCheckedChange={handleToggleStatus}
+            disabled={toggling}
+            aria-label={t(locale, 'account.toggleActive')}
+          />
+          <StatusBadge status={connection.status} locale={locale} />
+        </div>
       </div>
 
-      {/* SCOPES: monospace tags like Stitch design */}
+      {/* SCOPES */}
       {connection.oauth_scopes && connection.oauth_scopes.length > 0 && (
         <div className="mt-4 flex items-center gap-2 flex-wrap">
           <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
@@ -219,7 +238,7 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
         <p className="text-xs text-red-400 mt-3">{connection.error_message}</p>
       )}
 
-      {/* PROJECTS: folder list like Stitch design */}
+      {/* PROJECTS */}
       {connection.linked_projects && connection.linked_projects.length > 0 && (
         <div className="mt-4 flex items-start gap-2">
           <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase pt-0.5">
@@ -243,7 +262,7 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
         </div>
       )}
 
-      {/* Action row: Unlink / Delete Data (text links like Stitch) */}
+      {/* Action row: Unlink / Delete Data */}
       <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-end gap-4">
         {hasLinkedRepos && (
           <ConfirmDialog
@@ -316,11 +335,16 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
 
 export default function AccountPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [allAccounts, setAllAccounts] = useState<ConnectedAccount[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingName, setEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState('');
+  const [savingName, setSavingName] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const { locale } = useLocaleStore();
   const { data: connections, isLoading: connectionsLoading } = useGitHubConnections();
+  const { data: projects, isLoading: projectsLoading } = useProjects();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     if (searchParams.get('oauth_success') === 'github') {
@@ -344,13 +368,6 @@ export default function AccountPage() {
       });
     }
 
-    // Fetch ALL connected service accounts
-    const res = await fetch('/api/account/connected-accounts');
-    if (res.ok) {
-      const data = await res.json();
-      setAllAccounts(data.accounts || []);
-    }
-
     setLoading(false);
   }, []);
 
@@ -362,7 +379,45 @@ export default function AccountPage() {
     window.location.href = '/api/oauth/github/authorize?flow_context=settings';
   };
 
-  const isLoading = loading || connectionsLoading;
+  const handleSaveName = async () => {
+    if (!nameValue.trim() || !profile) return;
+    setSavingName(true);
+    try {
+      const res = await fetch('/api/account/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: nameValue.trim() }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed');
+      }
+      setProfile((prev) => prev ? { ...prev, name: nameValue.trim() } : prev);
+      toast.success(t(locale, 'account.nameUpdated'));
+      setEditingName(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed');
+    } finally {
+      setSavingName(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
+
+  // Flatten all project_services across all projects
+  const allServices = (projects || []).flatMap((project) =>
+    (project.project_services || []).map((ps) => ({
+      ...ps,
+      projectId: project.id,
+      projectName: project.name,
+    }))
+  );
+
+  const isLoading = loading || connectionsLoading || projectsLoading;
 
   if (isLoading) {
     return (
@@ -388,7 +443,7 @@ export default function AccountPage() {
         {t(locale, 'account.backToDashboard')}
       </Link>
 
-      {/* ── 1. Profile Card (Stitch style) ── */}
+      {/* ── 1. Profile Card ── */}
       {profile && (
         <Card className="mb-10 bg-card/50">
           <CardContent className="p-6">
@@ -399,7 +454,40 @@ export default function AccountPage() {
               </Avatar>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <h1 className="text-lg font-semibold">{profile.name}</h1>
+                  {editingName ? (
+                    <div className="flex items-center gap-1">
+                      <Input
+                        ref={nameInputRef}
+                        value={nameValue}
+                        onChange={(e) => setNameValue(e.target.value)}
+                        className="h-8 text-sm w-48"
+                        placeholder={t(locale, 'account.namePlaceholder')}
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSaveName();
+                          if (e.key === 'Escape') setEditingName(false);
+                        }}
+                      />
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleSaveName} disabled={savingName}>
+                        <Check className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditingName(false)}>
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <h1 className="text-lg font-semibold">{profile.name}</h1>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                        onClick={() => { setNameValue(profile.name); setEditingName(true); }}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  )}
                   <Badge variant="outline" className="text-[11px] font-normal px-2 py-0.5">
                     {profile.provider}
                   </Badge>
@@ -415,7 +503,7 @@ export default function AccountPage() {
         </Card>
       )}
 
-      {/* ── 2. GitHub Accounts (Stitch card style) ── */}
+      {/* ── 2. GitHub Accounts ── */}
       <section className="mb-10">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-base font-bold">
@@ -442,95 +530,172 @@ export default function AccountPage() {
         )}
       </section>
 
-      {/* ── 3. Connected Service Accounts (Stitch 3-column table) ── */}
+      {/* ── 3. Connected Services (all projects) ── */}
       <section className="mb-10">
-        <h2 className="text-base font-bold mb-4">
-          {t(locale, 'account.connectedAccounts')}
-        </h2>
+        <div className="mb-4">
+          <h2 className="text-base font-bold">{t(locale, 'account.allServices')}</h2>
+          <p className="text-xs text-muted-foreground mt-1">{t(locale, 'account.allServicesDesc')}</p>
+        </div>
 
-        {allAccounts.length === 0 ? (
-          <div className="rounded-lg border border-dashed p-8 text-center">
-            <Link2 className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">{t(locale, 'account.noAccounts')}</p>
-            <p className="text-xs text-muted-foreground/70 mt-1">{t(locale, 'account.noAccountsDesc')}</p>
-          </div>
+        {allServices.length === 0 ? (
+          <EmptyState
+            icon={Layers}
+            title={t(locale, 'account.noServices')}
+            description={t(locale, 'account.noServicesDesc')}
+          />
         ) : (
           <div className="rounded-lg border bg-card/50 overflow-hidden">
             {/* Table Header */}
-            <div className="grid grid-cols-[1fr_auto_auto] gap-4 px-5 py-3 border-b bg-muted/20">
+            <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 px-5 py-3 border-b bg-muted/20">
               <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
                 {t(locale, 'account.colService')}
               </span>
               <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase w-28 text-center">
+                {t(locale, 'account.colProject')}
+              </span>
+              <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase w-24 text-center">
                 {t(locale, 'account.colConnectionType')}
               </span>
-              <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase w-28 text-right">
+              <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase w-20 text-center">
                 {t(locale, 'account.colStatus')}
+              </span>
+              <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase w-14 text-center">
+                {t(locale, 'account.colToggle')}
               </span>
             </div>
 
             {/* Table Rows */}
-            {allAccounts.map((account) => (
-              <div
-                key={account.id}
-                className="grid grid-cols-[1fr_auto_auto] gap-4 items-center px-5 py-3.5 border-b last:border-0 hover:bg-muted/10 transition-colors"
-              >
-                {/* Service info */}
-                <div className="flex items-center gap-3 min-w-0">
-                  {account.service?.icon_url ? (
-                    <img src={account.service.icon_url} alt="" className="h-8 w-8 rounded-lg" />
-                  ) : (
-                    <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center">
-                      <Link2 className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      {account.service?.slug ? (
-                        <Link href={`/services#${account.service.slug}`} className="text-sm font-medium hover:text-primary transition-colors truncate">
-                          {account.service.name}
-                        </Link>
-                      ) : (
-                        <span className="text-sm font-medium truncate">Unknown</span>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-muted-foreground truncate">
-                      {account.project_id && account.project ? (
-                        <Link href={`/project/${account.project_id}`} className="hover:text-primary transition-colors">
-                          {account.project.name}
-                        </Link>
-                      ) : (
-                        account.oauth_provider_user_id
-                          ? `@${(account.oauth_metadata as Record<string, string>)?.login || account.oauth_provider_user_id}`
-                          : t(locale, 'account.userAccount')
-                      )}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Connection type badge */}
-                <div className="w-28 flex justify-center">
-                  <ConnectionTypeBadge type={account.connection_type} locale={locale} />
-                </div>
-
-                {/* Status badge */}
-                <div className="w-28 flex justify-end">
-                  <StatusBadge status={account.status} locale={locale} />
-                </div>
-              </div>
+            {allServices.map((svc) => (
+              <ServiceRow key={svc.id} svc={svc} locale={locale} />
             ))}
-
-            {/* Add service CTA */}
-            <Link
-              href="/services"
-              className="flex items-center justify-center gap-2 px-5 py-3 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/10 transition-colors"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              {t(locale, 'account.addService')}
-            </Link>
           </div>
         )}
       </section>
+
+      {/* ── 4. Danger Zone ── */}
+      <section className="mb-10">
+        <h2 className="text-base font-bold mb-4 text-red-400">
+          {t(locale, 'account.dangerZone')}
+        </h2>
+        <div className="rounded-lg border border-red-500/30 bg-red-500/5 divide-y divide-red-500/20">
+          {/* Logout */}
+          <div className="flex items-center justify-between px-5 py-4">
+            <div>
+              <p className="text-sm font-medium">{t(locale, 'account.logout')}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t(locale, 'account.logoutDesc')}</p>
+            </div>
+            <Button variant="outline" size="sm" className="border-red-500/30 text-red-400 hover:bg-red-500/10" onClick={handleLogout}>
+              <LogOut className="h-3.5 w-3.5 mr-1.5" />
+              {t(locale, 'account.logout')}
+            </Button>
+          </div>
+
+          {/* Delete Account */}
+          <div className="flex items-center justify-between px-5 py-4">
+            <div>
+              <p className="text-sm font-medium">{t(locale, 'account.deleteAccount')}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t(locale, 'account.deleteAccountDesc')}</p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+              onClick={() => toast.info(t(locale, 'account.comingSoon'))}
+            >
+              <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />
+              {t(locale, 'account.deleteAccount')}
+            </Button>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// ─── Service Row (separated for toggle state) ───────────
+
+function ServiceRow({
+  svc,
+  locale,
+}: {
+  svc: {
+    id: string;
+    status: string;
+    service?: { name: string; slug: string; icon_url: string | null; category: string };
+    projectId: string;
+    projectName: string;
+  };
+  locale: 'ko' | 'en';
+}) {
+  const [toggling, setToggling] = useState(false);
+  const [localStatus, setLocalStatus] = useState(svc.status);
+  const queryClient = useQueryClient();
+
+  const isActive = localStatus === 'active';
+
+  const handleToggle = async (checked: boolean) => {
+    setToggling(true);
+    try {
+      const res = await fetch(`/api/account/service-accounts/${svc.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: checked ? 'active' : 'revoked' }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed');
+      }
+      setLocalStatus(checked ? 'active' : 'revoked');
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+    } catch {
+      // Toggle failed — status stays as is
+    } finally {
+      setToggling(false);
+    }
+  };
+
+  return (
+    <div
+      className={`grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 items-center px-5 py-3.5 border-b last:border-0 hover:bg-muted/10 transition-colors ${!isActive ? 'opacity-50' : ''}`}
+    >
+      {/* Service info */}
+      <div className="flex items-center gap-3 min-w-0">
+        {svc.service?.icon_url ? (
+          <img src={svc.service.icon_url} alt="" className="h-8 w-8 rounded-lg" />
+        ) : (
+          <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center">
+            <Link2 className="h-4 w-4 text-muted-foreground" />
+          </div>
+        )}
+        <span className="text-sm font-medium truncate">{svc.service?.name || 'Unknown'}</span>
+      </div>
+
+      {/* Project */}
+      <div className="w-28 text-center">
+        <Link href={`/project/${svc.projectId}`} className="text-xs text-muted-foreground hover:text-primary transition-colors truncate">
+          {svc.projectName}
+        </Link>
+      </div>
+
+      {/* Connection type — project_services don't have connection_type, show category */}
+      <div className="w-24 flex justify-center">
+        <ConnectionTypeBadge type="manual" locale={locale} />
+      </div>
+
+      {/* Status */}
+      <div className="w-20 flex justify-center">
+        <StatusBadge status={localStatus} locale={locale} />
+      </div>
+
+      {/* Toggle */}
+      <div className="w-14 flex justify-center">
+        <Switch
+          checked={isActive}
+          onCheckedChange={handleToggle}
+          disabled={toggling}
+          aria-label={t(locale, 'account.toggleActive')}
+        />
+      </div>
     </div>
   );
 }

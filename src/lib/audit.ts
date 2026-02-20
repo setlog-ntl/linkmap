@@ -57,7 +57,10 @@ export type AuditAction =
   | 'github_connection.rename'
   | 'github_connection.disconnect'
   | 'project.set_main_service'
-  | 'project.set_icon';
+  | 'project.set_icon'
+  | 'profile.update'
+  | 'github_connection.toggle_status'
+  | 'service_account.toggle_status';
 
 interface AuditLogEntry {
   action: AuditAction;
