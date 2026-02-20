@@ -1,61 +1,25 @@
 'use client';
 
-import { useRef } from 'react';
 import Link from 'next/link';
 import { Cable, Plus, LayoutTemplate } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useDashboardStore } from '@/stores/dashboard-store';
-import { useProjectConnections, useUpdateConnection, useDeleteConnection } from '@/lib/queries/connections';
-import { useCardPositions } from './hooks/use-card-positions';
-import { ConnectionOverlay } from './connection-overlay';
-import { ConnectionPopover } from './connection-popover';
+import { useProjectConnections } from '@/lib/queries/connections';
 import { ProjectHeroCard } from './project-hero-card';
 import { HealthRingCard } from './health-ring-card';
 import { ConnectionFlowMap } from './connection-flow-map';
-import { LayerCard } from './layer-card';
 import { ActionNeeded } from './action-needed';
 import { OnboardingChecklist } from './onboarding-checklist';
-import type { DashboardResponse, DashboardLayer, ServiceCardData } from '@/types';
+import type { DashboardResponse, ServiceCardData } from '@/types';
 
 interface BentoDashboardLayoutProps {
   data: DashboardResponse;
 }
 
-type MobileTab = DashboardLayer | 'project';
-
-const MOBILE_TABS: { key: MobileTab; label: string }[] = [
-  { key: 'frontend', label: 'Frontend' },
-  { key: 'project', label: 'Project' },
-  { key: 'backend', label: 'Backend' },
-  { key: 'devtools', label: 'DevTools' },
-];
-
 export function BentoDashboardLayout({ data }: BentoDashboardLayoutProps) {
   const { project, layers, metrics, connections: initialConnections } = data;
-  const activeTab = useDashboardStore((s) => s.activeTab);
-  const setActiveTab = useDashboardStore((s) => s.setActiveTab);
-  const selectedConnectionId = useDashboardStore((s) => s.selectedConnectionId);
-  const setSelectedConnectionId = useDashboardStore((s) => s.setSelectedConnectionId);
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { positions } = useCardPositions(containerRef);
-
   const { data: liveConnections } = useProjectConnections(project.id);
   const connections = liveConnections ?? initialConnections ?? [];
-
-  const updateMutation = useUpdateConnection(project.id);
-  const deleteMutation = useDeleteConnection(project.id);
-
-  const selectedConnection = selectedConnectionId
-    ? connections.find((c) => c.id === selectedConnectionId) ?? null
-    : null;
-
-  const frontendData = layers.find((l) => l.layer === 'frontend')!;
-  const backendData = layers.find((l) => l.layer === 'backend')!;
-  const devtoolsData = layers.find((l) => l.layer === 'devtools')!;
-
   const allCards: ServiceCardData[] = layers.flatMap((l) => l.services);
 
   // Empty project onboarding
@@ -103,115 +67,23 @@ export function BentoDashboardLayout({ data }: BentoDashboardLayoutProps) {
 
   return (
     <div className="space-y-5">
-      {/* Desktop Bento Layout */}
-      <div className="hidden md:block space-y-5" ref={containerRef}>
-        {/* Row 1: Hero (8 col) + Health Ring (4 col) */}
-        <div className="grid grid-cols-12 gap-5">
-          <div className="col-span-8">
-            <ProjectHeroCard project={project} metrics={metrics} allCards={allCards} />
-          </div>
-          <div className="col-span-4">
-            <HealthRingCard projectId={project.id} allCards={allCards} />
-          </div>
+      {/* Row 1: Hero (8 col) + Health Ring (4 col) */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+        <div className="md:col-span-8">
+          <ProjectHeroCard project={project} metrics={metrics} allCards={allCards} />
         </div>
-
-        {/* Row 2: Connection Flow Map */}
-        {allCards.length > 0 && (
-          <ConnectionFlowMap allCards={allCards} connections={connections} />
-        )}
-
-        {/* Row 3: Layer Cards (3 columns) */}
-        <div className="grid grid-cols-3 gap-5 relative">
-          <LayerCard data={frontendData} projectId={project.id} />
-          <LayerCard data={backendData} projectId={project.id} />
-          <LayerCard data={devtoolsData} projectId={project.id} />
-
-          {/* SVG Connection Overlay */}
-          {connections.length > 0 && (
-            <ConnectionOverlay
-              connections={connections}
-              positions={positions}
-              selectedConnectionId={selectedConnectionId}
-              onSelectConnection={setSelectedConnectionId}
-              allCards={allCards}
-            />
-          )}
-
-          {/* Connection popover */}
-          {selectedConnection && (
-            <div
-              className="absolute z-50"
-              style={{
-                top: (() => {
-                  const src = positions.get(selectedConnection.source_service_id);
-                  const tgt = positions.get(selectedConnection.target_service_id);
-                  if (src && tgt) return (src.centerY + tgt.centerY) / 2 - 80;
-                  return 100;
-                })(),
-                left: (() => {
-                  const src = positions.get(selectedConnection.source_service_id);
-                  const tgt = positions.get(selectedConnection.target_service_id);
-                  if (src && tgt) return (src.centerX + tgt.centerX) / 2 - 144;
-                  return 100;
-                })(),
-              }}
-            >
-              <ConnectionPopover
-                connection={selectedConnection}
-                onUpdate={(params) => updateMutation.mutate(params)}
-                onDelete={(id) => {
-                  deleteMutation.mutate(id);
-                  setSelectedConnectionId(null);
-                }}
-                onClose={() => setSelectedConnectionId(null)}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Row 4: Action Needed + Onboarding */}
-        <div className="grid grid-cols-2 gap-5">
-          <ActionNeeded projectId={project.id} allCards={allCards} metrics={metrics} />
-          <OnboardingChecklist projectId={project.id} metrics={metrics} />
+        <div className="md:col-span-4">
+          <HealthRingCard projectId={project.id} allCards={allCards} />
         </div>
       </div>
 
-      {/* Mobile layout */}
-      <div className="md:hidden">
-        <div className="flex gap-1 mb-4 overflow-x-auto scrollbar-none">
-          {MOBILE_TABS.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={cn(
-                'flex-1 min-w-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap',
-                activeTab === tab.key
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:text-foreground'
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      {/* Row 2: Architecture Flow */}
+      <ConnectionFlowMap allCards={allCards} connections={connections} projectId={project.id} />
 
-        {activeTab === 'project' && (
-          <div className="space-y-4">
-            <ProjectHeroCard project={project} metrics={metrics} allCards={allCards} />
-            <HealthRingCard projectId={project.id} allCards={allCards} />
-            <OnboardingChecklist projectId={project.id} metrics={metrics} />
-            <ActionNeeded projectId={project.id} allCards={allCards} metrics={metrics} />
-          </div>
-        )}
-        {activeTab === 'frontend' && (
-          <LayerCard data={frontendData} projectId={project.id} />
-        )}
-        {activeTab === 'backend' && (
-          <LayerCard data={backendData} projectId={project.id} />
-        )}
-        {activeTab === 'devtools' && (
-          <LayerCard data={devtoolsData} projectId={project.id} />
-        )}
+      {/* Row 3: Action Needed + Onboarding */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <ActionNeeded projectId={project.id} allCards={allCards} metrics={metrics} />
+        <OnboardingChecklist projectId={project.id} metrics={metrics} />
       </div>
     </div>
   );

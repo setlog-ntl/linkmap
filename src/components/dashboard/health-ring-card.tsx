@@ -125,8 +125,8 @@ export function HealthRingCard({ projectId, allCards }: HealthRingCardProps) {
   };
 
   return (
-    <div className="rounded-2xl border bg-card/80 dark:bg-zinc-900/60 backdrop-blur-md shadow-sm p-5 h-full flex flex-col items-center justify-center gap-4">
-      <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.12em] self-start">
+    <div className="rounded-2xl border bg-card/80 dark:bg-zinc-900/60 backdrop-blur-md shadow-sm p-5 h-full flex flex-col items-center justify-center gap-3">
+      <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest self-start">
         Health Check
       </h3>
 
@@ -167,9 +167,9 @@ export function HealthRingCard({ projectId, allCards }: HealthRingCardProps) {
       )}
 
       <Button
-        variant="outline"
+        variant="ghost"
         size="sm"
-        className="w-full h-8 text-xs gap-1.5"
+        className="w-full h-8 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
         onClick={handleRunAll}
         disabled={isRunningAll || allCards.length === 0}
       >

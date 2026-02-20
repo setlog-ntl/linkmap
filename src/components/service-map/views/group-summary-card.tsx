@@ -41,29 +41,29 @@ export function GroupSummaryCard({ meta, services, onClick }: GroupSummaryCardPr
 
   return (
     <Card
-      className={`${meta.bgColor} border ${meta.color} cursor-pointer hover:shadow-md transition-shadow`}
+      className={`${meta.bgColor} border ${meta.color} cursor-pointer hover:shadow-md transition-all rounded-2xl`}
       onClick={() => onClick?.(meta.key)}
     >
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-          <Icon className="h-4 w-4" />
+      <CardHeader className="pb-2 px-4 pt-4">
+        <CardTitle className="flex items-center gap-2 text-[13px] font-semibold">
+          <Icon className="h-4 w-4 opacity-70" />
           {meta.label}
-          <Badge variant="secondary" className="ml-auto text-xs">
+          <Badge variant="secondary" className="ml-auto text-[10px] font-mono">
             {services.length}
           </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent className="pt-0 px-4 pb-4">
         {services.length === 0 ? (
-          <p className="text-xs text-muted-foreground">서비스 없음</p>
+          <p className="text-[11px] text-muted-foreground/60">서비스 없음</p>
         ) : (
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             {services.map((svc) => {
               const badge = STATUS_BADGE[svc.status] ?? STATUS_BADGE.not_started;
               return (
                 <div key={svc.id} className="flex items-center gap-2">
                   <ServiceIcon serviceId={svc.slug} size={14} />
-                  <span className="text-sm truncate flex-1 min-w-0">{svc.name}</span>
+                  <span className="text-[13px] truncate flex-1 min-w-0">{svc.name}</span>
                   <Badge variant={badge.variant} className={`text-[10px] h-5 px-1.5 ${badge.className ?? ''}`}>
                     {badge.label}
                   </Badge>

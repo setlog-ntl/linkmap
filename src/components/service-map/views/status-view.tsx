@@ -48,15 +48,16 @@ export function StatusView({ data, projectId }: StatusViewProps) {
   }, [data.services]);
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="rounded-xl border bg-card p-6">
-          <h3 className="text-sm font-medium text-muted-foreground mb-4">
+    <div className="space-y-5">
+      {/* Health score + Alerts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="rounded-2xl border bg-card/80 dark:bg-zinc-900/60 backdrop-blur-sm p-6">
+          <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">
             {t(locale, 'serviceMap.healthScore.title')}
           </h3>
           <HealthScoreRing score={healthScore} />
         </div>
-        <div className="rounded-xl border bg-card p-6">
+        <div className="rounded-2xl border bg-card/80 dark:bg-zinc-900/60 backdrop-blur-sm p-6">
           <AlertsList services={data.services} healthChecks={data.healthChecks} envVars={data.envVars} />
           {Object.values(data.healthChecks).filter((hc) => hc.status === 'unhealthy').length === 0 &&
            data.envVars.filter((e) => !e.encrypted_value).length === 0 &&
@@ -66,7 +67,8 @@ export function StatusView({ data, projectId }: StatusViewProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      {/* Group summary cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {VIEW_GROUP_ORDER.map((group) => (
           <GroupSummaryCard
             key={group}
@@ -77,23 +79,24 @@ export function StatusView({ data, projectId }: StatusViewProps) {
         ))}
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl border bg-card p-4">
+      {/* Quick actions bar */}
+      <div className="flex items-center gap-3 rounded-2xl border bg-card/60 dark:bg-zinc-900/40 backdrop-blur-sm p-4">
         <span className="text-sm text-muted-foreground flex-1">
           {data.services.filter((s) => s.status === 'not_started').length > 0
             ? `${data.services.filter((s) => s.status === 'not_started').length}${t(locale, 'serviceMap.actions.notConnectedCount')}`
             : t(locale, 'serviceMap.status.allConnected')}
         </span>
-        <Button variant="outline" size="sm" onClick={() => setViewLevel('map')}>
+        <Button variant="ghost" size="sm" className="text-xs" onClick={() => setViewLevel('map')}>
           <MapIcon className="mr-1.5 h-3.5 w-3.5" />
           {t(locale, 'serviceMap.actions.viewMap')}
         </Button>
-        <Button variant="outline" size="sm" asChild>
+        <Button variant="ghost" size="sm" className="text-xs" asChild>
           <a href={`/project/${projectId}/env`}>
             <Settings className="mr-1.5 h-3.5 w-3.5" />
             {t(locale, 'serviceMap.actions.setEnvVars')}
           </a>
         </Button>
-        <Button variant="outline" size="sm" asChild>
+        <Button variant="ghost" size="sm" className="text-xs" asChild>
           <a href={`/project/${projectId}/integrations`}>
             <Plus className="mr-1.5 h-3.5 w-3.5" />
             {t(locale, 'serviceMap.actions.addService')}

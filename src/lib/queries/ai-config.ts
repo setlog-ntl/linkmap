@@ -281,3 +281,41 @@ export function useDeleteAiFeatureQna(slug: string) {
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.aiConfig.featureQna(slug) }),
   });
 }
+
+// ============================================
+// Feature Presets (Admin)
+// ============================================
+
+interface PresetSummary {
+  key: string;
+  name_ko: string;
+  name_en: string;
+  description_ko: string;
+  description_en: string;
+  feature_count: number;
+  qna_count: number;
+}
+
+export function useAiFeaturePresets() {
+  return useQuery({
+    queryKey: queryKeys.aiConfig.featurePresets,
+    queryFn: () => apiFetch<{ presets: PresetSummary[] }>('/api/admin/ai-feature-presets'),
+    select: (data) => data.presets,
+  });
+}
+
+export function useApplyAiFeaturePreset() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (preset: string) =>
+      apiFetch<{ success: boolean; preset: string; features_updated: number; qna_inserted: number }>(
+        '/api/admin/ai-feature-presets',
+        { method: 'POST', body: JSON.stringify({ preset }) }
+      ),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.aiConfig.featurePersonas });
+      // Invalidate all feature Q&A queries
+      qc.invalidateQueries({ queryKey: ['ai-config', 'feature-qna'] });
+    },
+  });
+}

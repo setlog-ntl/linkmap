@@ -1,300 +1,240 @@
 'use client';
 
 import { useMemo } from 'react';
+import Link from 'next/link';
+import { Monitor, Server, Wrench, ChevronRight, Plus } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { groupConnectionsByLayer } from './utils/dashboard-transforms';
-import type { ServiceCardData, UserConnection, ConnectionStatus } from '@/types';
+import type { ServiceCardData, UserConnection } from '@/types';
 
 interface ConnectionFlowMapProps {
   allCards: ServiceCardData[];
   connections: UserConnection[];
+  projectId: string;
 }
 
-const STATUS_COLORS: Record<ConnectionStatus, string> = {
-  active: '#22c55e',
-  inactive: '#71717a',
-  error: '#ef4444',
-  pending: '#eab308',
+const STATUS_DOT: Record<string, string> = {
+  connected: 'bg-emerald-500',
+  error: 'bg-red-500',
+  in_progress: 'bg-amber-500',
+  not_started: 'bg-zinc-400 dark:bg-zinc-600',
 };
 
-const STATUS_DOT_COLOR: Record<string, string> = {
-  connected: '#22c55e',
-  error: '#ef4444',
-  in_progress: '#eab308',
-  not_started: '#52525b',
-};
+const LAYER_CFG = {
+  frontend: {
+    icon: Monitor,
+    label: 'Frontend',
+    textCls: 'text-emerald-600 dark:text-emerald-400',
+    badgeCls: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  },
+  backend: {
+    icon: Server,
+    label: 'Backend',
+    textCls: 'text-blue-600 dark:text-blue-400',
+    badgeCls: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  },
+  devtools: {
+    icon: Wrench,
+    label: 'DevTools',
+    textCls: 'text-orange-600 dark:text-orange-400',
+    badgeCls: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+  },
+} as const;
 
-const LAYER_META: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  frontend: { label: 'Frontend', color: '#10b981', bg: 'rgba(16,185,129,0.06)', border: 'rgba(16,185,129,0.18)' },
-  backend:  { label: 'Backend',  color: '#3b82f6', bg: 'rgba(59,130,246,0.06)', border: 'rgba(59,130,246,0.18)' },
-  devtools: { label: 'DevTools', color: '#f97316', bg: 'rgba(249,115,22,0.06)', border: 'rgba(249,115,22,0.18)' },
-};
+type LayerKey = keyof typeof LAYER_CFG;
 
-/* ---------- Sub-components ---------- */
+/* ---- Sub-components ---- */
 
-function ServicePill({ svc }: { svc: ServiceCardData }) {
-  const dotColor = STATUS_DOT_COLOR[svc.status] ?? '#52525b';
-  const meta = LAYER_META[svc.dashboardLayer];
+function FlowPill({ svc }: { svc: ServiceCardData }) {
+  const dotCls = STATUS_DOT[svc.status] ?? 'bg-zinc-400';
+  const envPct = svc.envTotal > 0 ? Math.round((svc.envFilled / svc.envTotal) * 100) : null;
 
   return (
-    <div
-      data-service-id={svc.serviceId}
-      className="flex items-center gap-2 rounded-xl px-3 py-2 transition-all duration-200 hover:brightness-110 hover:shadow-lg cursor-default select-none"
-      style={{
-        background: meta?.bg ?? 'rgba(39,39,42,0.5)',
-        border: `1px solid ${meta?.border ?? 'rgba(255,255,255,0.06)'}`,
-        backdropFilter: 'blur(8px)',
-      }}
-    >
-      <ServiceIcon serviceId={svc.slug} size={18} className="shrink-0" />
-      <span className="text-[12px] font-semibold truncate max-w-[90px] text-foreground/90">{svc.name}</span>
-      <span
-        className="h-2.5 w-2.5 shrink-0 rounded-full ring-2 ring-background"
-        style={{ backgroundColor: dotColor }}
-      />
+    <div className="flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors hover:bg-accent/50 dark:hover:bg-white/[0.04]">
+      <ServiceIcon serviceId={svc.slug} size={16} className="shrink-0 opacity-80" />
+      <span className="text-[13px] font-medium truncate flex-1">{svc.name}</span>
+      {envPct !== null && (
+        <div className="w-8 h-1 rounded-full bg-muted overflow-hidden shrink-0">
+          <div
+            className="h-full rounded-full bg-primary/60 transition-all"
+            style={{ width: `${envPct}%` }}
+          />
+        </div>
+      )}
+      <span className={cn('h-2 w-2 rounded-full shrink-0', dotCls)} />
     </div>
   );
 }
 
-function LayerColumn({ services, layer }: { services: ServiceCardData[]; layer: string }) {
-  const meta = LAYER_META[layer];
-  if (!meta || services.length === 0) return null;
-  const visible = services.slice(0, 6);
+function LayerSection({
+  services,
+  layerKey,
+}: {
+  services: ServiceCardData[];
+  layerKey: LayerKey;
+}) {
+  const cfg = LAYER_CFG[layerKey];
+  const Icon = cfg.icon;
+  const visible = services.slice(0, 8);
   const overflow = services.length - visible.length;
 
   return (
-    <div className="flex flex-col items-stretch gap-1.5">
-      {/* Layer label */}
-      <div className="flex items-center gap-2 mb-1">
-        <span
-          className="h-1.5 w-1.5 rounded-full"
-          style={{ backgroundColor: meta.color }}
-        />
-        <span
-          className="text-[10px] font-bold uppercase tracking-[0.15em]"
-          style={{ color: meta.color }}
-        >
-          {meta.label}
+    <div className="flex flex-col min-w-0">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-2 px-1">
+        <Icon className={cn('h-3.5 w-3.5 shrink-0', cfg.textCls)} />
+        <span className={cn('text-[11px] font-semibold uppercase tracking-wider', cfg.textCls)}>
+          {cfg.label}
         </span>
-        <span className="text-[10px] text-muted-foreground font-mono">{services.length}</span>
+        {services.length > 0 && (
+          <span className={cn('text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md ml-auto', cfg.badgeCls)}>
+            {services.length}
+          </span>
+        )}
       </div>
-      {/* Pills */}
-      {visible.map((svc) => (
-        <ServicePill key={svc.projectServiceId} svc={svc} />
-      ))}
-      {overflow > 0 && (
-        <span className="text-[10px] text-muted-foreground text-center mt-0.5">+{overflow} more</span>
+
+      {/* Services */}
+      {services.length === 0 ? (
+        <div className="flex items-center justify-center rounded-xl border border-dashed border-muted-foreground/15 py-8">
+          <span className="text-[11px] text-muted-foreground/50">서비스 없음</span>
+        </div>
+      ) : (
+        <div className="space-y-0.5 rounded-xl bg-muted/30 dark:bg-white/[0.02] p-1.5 border border-border/40">
+          {visible.map((svc) => (
+            <FlowPill key={svc.projectServiceId} svc={svc} />
+          ))}
+          {overflow > 0 && (
+            <p className="text-[11px] text-muted-foreground/50 text-center py-1">
+              +{overflow} more
+            </p>
+          )}
+        </div>
       )}
     </div>
   );
 }
 
-/* ---------- Main component ---------- */
+function FlowArrow({ direction = 'right' }: { direction?: 'right' | 'down' }) {
+  if (direction === 'down') {
+    return (
+      <div className="flex flex-col items-center py-1">
+        <div className="w-px h-4 bg-gradient-to-b from-border/40 to-border/20" />
+        <ChevronRight className="h-3 w-3 text-muted-foreground/30 rotate-90" />
+      </div>
+    );
+  }
 
-export function ConnectionFlowMap({ allCards, connections }: ConnectionFlowMapProps) {
+  return (
+    <div className="flex items-center px-1 self-center mt-8">
+      <div className="h-px w-3 bg-border/40" />
+      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30" />
+    </div>
+  );
+}
+
+/* ---- Main ---- */
+
+export function ConnectionFlowMap({
+  allCards,
+  connections,
+  projectId,
+}: ConnectionFlowMapProps) {
   const layers = useMemo(() => groupConnectionsByLayer(allCards), [allCards]);
 
   if (allCards.length === 0) return null;
 
-  const frontendServices = layers.find((l) => l.layer === 'frontend')?.services ?? [];
-  const backendServices = layers.find((l) => l.layer === 'backend')?.services ?? [];
-  const devtoolsServices = layers.find((l) => l.layer === 'devtools')?.services ?? [];
+  const fe = layers.find((l) => l.layer === 'frontend')?.services ?? [];
+  const be = layers.find((l) => l.layer === 'backend')?.services ?? [];
+  const dt = layers.find((l) => l.layer === 'devtools')?.services ?? [];
 
-  // Build quick lookup for connection color per service
-  const serviceConnColor = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const card of allCards) {
-      const conn = connections.find(
-        (c) => c.source_service_id === card.serviceId || c.target_service_id === card.serviceId,
-      );
-      map.set(card.serviceId, conn ? STATUS_COLORS[conn.connection_status] ?? '#52525b' : '#52525b');
+  const connectedCount = useMemo(() => {
+    const ids = new Set<string>();
+    for (const c of connections) {
+      ids.add(c.source_service_id);
+      ids.add(c.target_service_id);
     }
-    return map;
-  }, [allCards, connections]);
-
-  const hasConnected = (svc: ServiceCardData) =>
-    connections.some(
-      (c) => c.source_service_id === svc.serviceId || c.target_service_id === svc.serviceId,
-    );
-
-  /* ---- SVG geometry ---- */
-  const svgW = 800;
-  const maxSide = Math.max(frontendServices.length, backendServices.length, 1);
-  const rowH = 44;
-  const svgH = Math.max(180, maxSide * rowH + 60 + (devtoolsServices.length > 0 ? 60 : 0));
-  const cx = svgW / 2;
-  const cy = (maxSide * rowH + 60) / 2;
-  const leftX = 170;
-  const rightX = svgW - 170;
-
-  const nodeY = (i: number, total: number) => {
-    const n = Math.min(total, 6);
-    return cy - ((n - 1) * rowH) / 2 + i * rowH;
-  };
+    return ids.size;
+  }, [connections]);
 
   return (
-    <div
-      className="rounded-2xl overflow-hidden dark:glass-panel bg-card/80 dark:bg-transparent border dark:border-white/[0.05] shadow-sm"
-    >
-      {/* Header row */}
-      <div className="flex items-center justify-between px-5 pt-4 pb-1">
-        <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.12em]">
-          Connection Flow
+    <div className="rounded-2xl border bg-card/60 dark:bg-zinc-900/40 backdrop-blur-sm overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 py-3 border-b border-border/40">
+        <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
+          Architecture Flow
         </h3>
         <div className="flex items-center gap-4 text-[10px] text-muted-foreground">
           {[
-            { label: '연결됨', color: '#22c55e' },
-            { label: '대기중', color: '#eab308' },
-            { label: '오류', color: '#ef4444' },
-            { label: '미연결', color: '#52525b' },
+            { label: '연결됨', cls: 'bg-emerald-500' },
+            { label: '대기중', cls: 'bg-amber-500' },
+            { label: '오류', cls: 'bg-red-500' },
+            { label: '미연결', cls: 'bg-zinc-500' },
           ].map((s) => (
             <span key={s.label} className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
+              <span className={cn('h-1.5 w-1.5 rounded-full', s.cls)} />
               {s.label}
             </span>
           ))}
         </div>
       </div>
 
-      {/* Flow body: 3-column layout with SVG underlay */}
-      <div className="relative px-5 pb-5">
-        {/* SVG lines */}
-        <svg
-          viewBox={`0 0 ${svgW} ${svgH}`}
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          preserveAspectRatio="xMidYMid meet"
-          aria-hidden
-        >
-          <defs>
-            {/* Hub glow */}
-            <radialGradient id="hub-glow-g" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.2" />
-              <stop offset="70%" stopColor="hsl(var(--primary))" stopOpacity="0.05" />
-              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
-            </radialGradient>
-            {/* Arrow markers */}
-            {Object.entries(STATUS_COLORS).map(([s, c]) => (
-              <marker key={s} id={`fa-${s}`} markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
-                <polygon points="0 0,7 2.5,0 5" fill={c} opacity="0.8" />
-              </marker>
-            ))}
-            <marker id="fa-default" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
-              <polygon points="0 0,7 2.5,0 5" fill="#52525b" opacity="0.5" />
-            </marker>
-          </defs>
+      {/* Flow body */}
+      <div className="p-5">
+        {/* Desktop: 5-column pipeline grid */}
+        <div className="hidden md:grid grid-cols-[1fr_auto_auto_auto_1fr] gap-0">
+          <LayerSection services={fe} layerKey="frontend" />
+          <FlowArrow />
 
-          {/* Hub glow circle */}
-          <circle cx={cx} cy={cy} r={60} fill="url(#hub-glow-g)" className="animate-hub-glow" />
-
-          {/* Hub node */}
-          <rect x={cx - 44} y={cy - 24} width={88} height={48} rx={14}
-            fill="hsl(var(--primary))" fillOpacity="0.08"
-            stroke="hsl(var(--primary))" strokeOpacity="0.35" strokeWidth="1.5"
-          />
-          <text x={cx} y={cy - 2} textAnchor="middle" className="text-[11px] font-bold fill-foreground">
-            Project
-          </text>
-          <text x={cx} y={cy + 12} textAnchor="middle" className="text-[9px] fill-muted-foreground">
-            Hub
-          </text>
-
-          {/* Frontend → Hub lines */}
-          {frontendServices.slice(0, 6).map((svc, i) => {
-            const y = nodeY(i, frontendServices.length);
-            const color = serviceConnColor.get(svc.serviceId) ?? '#52525b';
-            const connected = hasConnected(svc);
-            const connStatus = connections.find(
-              (c) => c.source_service_id === svc.serviceId || c.target_service_id === svc.serviceId,
-            )?.connection_status;
-            return (
-              <g key={svc.projectServiceId}>
-                <path
-                  d={`M${leftX},${y} C${leftX + 80},${y} ${cx - 90},${cy} ${cx - 44},${cy}`}
-                  fill="none" stroke={color}
-                  strokeWidth={connected ? 1.8 : 1}
-                  strokeDasharray={connected ? '' : '5 4'}
-                  className={connected ? 'animate-flow-pulse' : ''}
-                  strokeOpacity={connected ? 0.55 : 0.2}
-                  markerEnd={`url(#fa-${connStatus ?? 'default'})`}
-                />
-              </g>
-            );
-          })}
-
-          {/* Hub → Backend lines */}
-          {backendServices.slice(0, 6).map((svc, i) => {
-            const y = nodeY(i, backendServices.length);
-            const color = serviceConnColor.get(svc.serviceId) ?? '#52525b';
-            const connected = hasConnected(svc);
-            const connStatus = connections.find(
-              (c) => c.source_service_id === svc.serviceId || c.target_service_id === svc.serviceId,
-            )?.connection_status;
-            return (
-              <g key={svc.projectServiceId}>
-                <path
-                  d={`M${cx + 44},${cy} C${cx + 90},${cy} ${rightX - 80},${y} ${rightX},${y}`}
-                  fill="none" stroke={color}
-                  strokeWidth={connected ? 1.8 : 1}
-                  strokeDasharray={connected ? '' : '5 4'}
-                  className={connected ? 'animate-flow-pulse' : ''}
-                  strokeOpacity={connected ? 0.55 : 0.2}
-                  markerEnd={`url(#fa-${connStatus ?? 'default'})`}
-                />
-              </g>
-            );
-          })}
-
-          {/* Hub → DevTools lines */}
-          {devtoolsServices.slice(0, 5).map((svc, idx) => {
-            const count = Math.min(devtoolsServices.length, 5);
-            const devSpacing = Math.min(160, (svgW - 300) / Math.max(count, 1));
-            const x = cx - ((count - 1) * devSpacing) / 2 + idx * devSpacing;
-            const devY = svgH - 28;
-            return (
-              <g key={svc.projectServiceId}>
-                <path
-                  d={`M${cx},${cy + 24} C${cx},${cy + 60} ${x},${devY - 30} ${x},${devY}`}
-                  fill="none" stroke="#52525b"
-                  strokeWidth={1} strokeDasharray="5 4" strokeOpacity={0.2}
-                />
-              </g>
-            );
-          })}
-        </svg>
-
-        {/* HTML 3-column grid over SVG */}
-        <div className="relative grid grid-cols-[1fr_auto_1fr] gap-4 items-start" style={{ minHeight: svgH * 0.8 }}>
-          {/* Left: Frontend */}
-          <div className="pt-2">
-            <LayerColumn services={frontendServices} layer="frontend" />
+          {/* Hub center */}
+          <div className="flex flex-col items-center self-center px-3 min-w-[120px]">
+            <div className="relative">
+              <div className="absolute inset-0 rounded-2xl bg-primary/8 blur-xl scale-150" />
+              <div className="relative rounded-2xl border-2 border-primary/15 bg-card dark:bg-zinc-800/80 px-5 py-3.5 text-center shadow-sm">
+                <p className="text-[13px] font-bold">Project</p>
+                <p className="text-[10px] text-muted-foreground">Hub</p>
+                <p className="text-[10px] text-muted-foreground/60 mt-1 font-mono tabular-nums">
+                  {connectedCount}/{allCards.length}
+                </p>
+              </div>
+            </div>
           </div>
 
-          {/* Center: spacer for hub */}
-          <div style={{ width: 120 }} />
-
-          {/* Right: Backend */}
-          <div className="pt-2">
-            <LayerColumn services={backendServices} layer="backend" />
-          </div>
+          <FlowArrow />
+          <LayerSection services={be} layerKey="backend" />
         </div>
 
-        {/* DevTools row below */}
-        {devtoolsServices.length > 0 && (
-          <div className="relative mt-3 flex flex-col items-center gap-1.5">
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: '#f97316' }} />
-              <span className="text-[10px] font-bold uppercase tracking-[0.15em]" style={{ color: '#f97316' }}>
-                DevTools
-              </span>
-              <span className="text-[10px] text-muted-foreground font-mono">{devtoolsServices.length}</span>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap justify-center">
-              {devtoolsServices.slice(0, 5).map((svc) => (
-                <ServicePill key={svc.projectServiceId} svc={svc} />
-              ))}
+        {/* DevTools below hub (desktop) */}
+        {dt.length > 0 && (
+          <div className="hidden md:flex flex-col items-center mt-1">
+            <FlowArrow direction="down" />
+            <div className="w-full max-w-xs">
+              <LayerSection services={dt} layerKey="devtools" />
             </div>
           </div>
         )}
+
+        {/* Mobile: stacked vertically */}
+        <div className="md:hidden space-y-3">
+          <LayerSection services={fe} layerKey="frontend" />
+          {fe.length > 0 && (be.length > 0 || dt.length > 0) && (
+            <FlowArrow direction="down" />
+          )}
+          {be.length > 0 && <LayerSection services={be} layerKey="backend" />}
+          {be.length > 0 && dt.length > 0 && <FlowArrow direction="down" />}
+          {dt.length > 0 && <LayerSection services={dt} layerKey="devtools" />}
+        </div>
+      </div>
+
+      {/* Footer CTA */}
+      <div className="flex justify-center pb-4">
+        <Link
+          href={`/project/${projectId}/integrations`}
+          className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          서비스 추가
+        </Link>
       </div>
     </div>
   );

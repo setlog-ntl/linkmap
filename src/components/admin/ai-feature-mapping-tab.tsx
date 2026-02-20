@@ -29,6 +29,8 @@ import {
   useCreateAiFeatureQna,
   useUpdateAiFeatureQna,
   useDeleteAiFeatureQna,
+  useAiFeaturePresets,
+  useApplyAiFeaturePreset,
 } from '@/lib/queries/ai-config';
 import type { AiFeaturePersona, AiFeatureQna } from '@/types';
 
@@ -322,6 +324,80 @@ function FeatureCard({ feature }: { feature: AiFeaturePersona }) {
   );
 }
 
+// ─── Preset Bar ─────────────────────────────────────────────────────
+
+function PresetBar() {
+  const { data: presets } = useAiFeaturePresets();
+  const applyMutation = useApplyAiFeaturePreset();
+  const [selectedPreset, setSelectedPreset] = useState<string>('');
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const selected = presets?.find((p) => p.key === selectedPreset);
+
+  const handleApply = async () => {
+    if (!selectedPreset) return;
+    try {
+      const result = await applyMutation.mutateAsync(selectedPreset);
+      toast.success(`프리셋 "${selected?.name_ko}"이(가) 적용되었습니다 (Q&A ${result.qna_inserted}개)`);
+      setSelectedPreset('');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '프리셋 적용 실패');
+    } finally {
+      setConfirmOpen(false);
+    }
+  };
+
+  if (!presets || presets.length === 0) return null;
+
+  return (
+    <>
+      <div className="flex items-center gap-2">
+        <Select value={selectedPreset} onValueChange={setSelectedPreset}>
+          <SelectTrigger className="h-8 w-[200px] text-sm">
+            <SelectValue placeholder="프리셋 선택..." />
+          </SelectTrigger>
+          <SelectContent>
+            {presets.map((p) => (
+              <SelectItem key={p.key} value={p.key}>
+                {p.name_ko} ({p.qna_count}개 Q&A)
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-8 gap-1.5"
+          disabled={!selectedPreset || applyMutation.isPending}
+          onClick={() => setConfirmOpen(true)}
+        >
+          {applyMutation.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+          적용
+        </Button>
+      </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>프리셋 적용</AlertDialogTitle>
+            <AlertDialogDescription>
+              &quot;{selected?.name_ko}&quot; 프리셋을 적용하면 모든 기능의 시스템 프롬프트와 Q&A가 교체됩니다.
+              기존 Q&A는 삭제됩니다. 계속하시겠습니까?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction onClick={(e) => { e.preventDefault(); handleApply(); }}>
+              {applyMutation.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />}
+              적용
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+
 // ─── Main Tab ───────────────────────────────────────────────────────
 
 export default function AiFeatureMappingTab() {
@@ -331,17 +407,21 @@ export default function AiFeatureMappingTab() {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <span className="ml-2 text-sm text-muted-foreground">초기화 중...</span>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div>
-        <h3 className="text-lg font-semibold">기능별 AI 설정</h3>
-        <p className="text-sm text-muted-foreground">
-          각 AI 기능에 페르소나와 빠른 Q&A를 설정하여 동작을 커스터마이징합니다
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h3 className="text-lg font-semibold">기능별 AI 설정</h3>
+          <p className="text-sm text-muted-foreground">
+            각 AI 기능에 페르소나와 빠른 Q&A를 설정하여 동작을 커스터마이징합니다
+          </p>
+        </div>
+        <PresetBar />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

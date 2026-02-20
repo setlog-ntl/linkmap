@@ -5,6 +5,33 @@
  * 3. Streaming (SSE)
  */
 
+// ─── Error handling ─────────────────────────────────────────────────
+
+function parseOpenAIError(status: number, errText: string): Error {
+  try {
+    const parsed = JSON.parse(errText);
+    const code = parsed?.error?.code;
+    if (code === 'unsupported_country_region_territory') {
+      return new Error(
+        'OpenAI API가 현재 지역을 지원하지 않습니다. ' +
+          'OPENAI_BASE_URL 환경변수로 프록시(예: Cloudflare AI Gateway)를 설정하세요.',
+      );
+    }
+    if (code === 'invalid_api_key') {
+      return new Error('OpenAI API 키가 유효하지 않습니다. 키를 확인하세요.');
+    }
+    if (code === 'insufficient_quota') {
+      return new Error('OpenAI API 할당량이 초과되었습니다. 결제 정보를 확인하세요.');
+    }
+    if (code === 'model_not_found') {
+      return new Error(`요청한 모델을 사용할 수 없습니다. 모델명을 확인하세요.`);
+    }
+  } catch {
+    // JSON parse failed — use raw text
+  }
+  return new Error(`OpenAI API 오류 (${status}): ${errText}`);
+}
+
 interface OpenAIMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
@@ -52,7 +79,7 @@ export async function callOpenAIStructured<T>(
 
   if (!response.ok) {
     const errText = await response.text().catch(() => '');
-    throw new Error(`OpenAI API 오류 (${response.status}): ${errText}`);
+    throw parseOpenAIError(response.status, errText);
   }
 
   const result = await response.json();
@@ -118,7 +145,7 @@ export async function callOpenAIWithTools(
 
     if (!response.ok) {
       const errText = await response.text().catch(() => '');
-      throw new Error(`OpenAI API 오류 (${response.status}): ${errText}`);
+      throw parseOpenAIError(response.status, errText);
     }
 
     const result = await response.json();
@@ -190,7 +217,8 @@ export function callOpenAIStream(
 
         if (!response.ok) {
           const errText = await response.text().catch(() => '');
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: `OpenAI 오류: ${errText}` })}\n\n`));
+          const parsed = parseOpenAIError(response.status, errText);
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: parsed.message })}\n\n`));
           controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           controller.close();
           return;

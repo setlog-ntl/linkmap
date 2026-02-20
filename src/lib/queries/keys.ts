@@ -81,5 +81,6 @@ export const queryKeys = {
     featurePersonas: ['ai-config', 'feature-personas'] as const,
     featurePersona: (slug: string) => ['ai-config', 'feature-persona', slug] as const,
     featureQna: (slug: string) => ['ai-config', 'feature-qna', slug] as const,
+    featurePresets: ['ai-config', 'feature-presets'] as const,
   },
 } as const;

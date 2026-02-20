@@ -5,6 +5,7 @@ import { unauthorizedError, validationError, serverError } from '@/lib/api/error
 import { isAdmin } from '@/lib/admin';
 import { aiFeaturePersonaUpdateSchema } from '@/lib/validations/ai-chat';
 import { logAudit } from '@/lib/audit';
+import { FEATURE_DEFINITIONS, DEFAULT_QNA } from '@/data/seed/ai-feature-defaults';
 
 export async function GET() {
   // 1. Auth
@@ -17,10 +18,45 @@ export async function GET() {
 
   try {
     const adminSupabase = createAdminClient();
-    const { data: features } = await adminSupabase
+    let { data: features } = await adminSupabase
       .from('ai_feature_personas')
       .select('*')
       .order('feature_slug');
+
+    // Auto-seed when no features exist
+    if (!features || features.length === 0) {
+      const rows = FEATURE_DEFINITIONS.map((f) => ({
+        feature_slug: f.slug,
+        system_prompt_override: f.default_prompt_override,
+        is_active: true,
+      }));
+
+      await adminSupabase
+        .from('ai_feature_personas')
+        .upsert(rows, { onConflict: 'feature_slug' });
+
+      // Seed default Q&A
+      const qnaRows = DEFAULT_QNA.map((q) => ({
+        feature_slug: q.feature_slug,
+        question: q.question,
+        question_ko: q.question_ko,
+        answer_guide: q.answer_guide,
+        sort_order: q.sort_order,
+        is_active: true,
+      }));
+
+      await adminSupabase
+        .from('ai_feature_qna')
+        .insert(qnaRows);
+
+      // Re-fetch
+      const { data: seeded } = await adminSupabase
+        .from('ai_feature_personas')
+        .select('*')
+        .order('feature_slug');
+
+      features = seeded;
+    }
 
     // Join persona names
     const personaIds = (features || [])

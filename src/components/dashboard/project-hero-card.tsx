@@ -23,11 +23,11 @@ interface ProjectHeroCardProps {
   allCards: ServiceCardData[];
 }
 
-const STATUS_RING: Record<string, string> = {
-  connected: 'ring-green-500/40',
-  error: 'ring-red-500/40',
-  in_progress: 'ring-yellow-500/40',
-  not_started: 'ring-zinc-500/20',
+const STATUS_BG: Record<string, string> = {
+  connected: 'bg-emerald-500/10 dark:bg-emerald-500/15',
+  error: 'bg-red-500/10 dark:bg-red-500/15',
+  in_progress: 'bg-amber-500/10 dark:bg-amber-500/15',
+  not_started: 'bg-muted/50 dark:bg-zinc-800/50',
 };
 
 export function ProjectHeroCard({ project, metrics, allCards }: ProjectHeroCardProps) {
@@ -87,8 +87,8 @@ export function ProjectHeroCard({ project, metrics, allCards }: ProjectHeroCardP
   };
 
   return (
-    <div className="rounded-2xl border bg-card/80 dark:bg-zinc-900/60 backdrop-blur-md shadow-sm p-6 h-full">
-      <div className="flex flex-col sm:flex-row items-start gap-5">
+    <div className="rounded-2xl border bg-card/80 dark:bg-zinc-900/60 backdrop-blur-md shadow-sm p-5 sm:p-6 h-full">
+      <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
         {/* Project avatar with icon picker */}
         <ProjectIconPicker
           projectId={project.id}
@@ -170,25 +170,21 @@ export function ProjectHeroCard({ project, metrics, allCards }: ProjectHeroCardP
             <MetricPill icon={TrendingUp} value={`${metrics.progressPercent}%`} label="진행률" />
           </div>
 
-          {/* Service icon grid with status rings */}
+          {/* Service icon grid */}
           {allCards.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {allCards.slice(0, 16).map((c) => (
+            <div className="flex flex-wrap gap-1">
+              {allCards.slice(0, 10).map((c) => (
                 <div
                   key={c.projectServiceId}
-                  className={`
-                    rounded-md p-1 ring-1 transition-colors
-                    ${STATUS_RING[c.status] ?? 'ring-zinc-500/20'}
-                    bg-muted/30 dark:bg-zinc-800/40
-                  `}
+                  className={`rounded-md p-1.5 transition-colors ${STATUS_BG[c.status] ?? 'bg-muted/30'}`}
                   title={`${c.name}: ${c.status}`}
                 >
-                  <ServiceIcon serviceId={c.slug} size={14} />
+                  <ServiceIcon serviceId={c.slug} size={16} />
                 </div>
               ))}
-              {allCards.length > 16 && (
+              {allCards.length > 10 && (
                 <span className="text-[10px] text-muted-foreground self-center ml-1">
-                  +{allCards.length - 16}
+                  +{allCards.length - 10}
                 </span>
               )}
             </div>

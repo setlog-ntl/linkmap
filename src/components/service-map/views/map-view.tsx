@@ -95,25 +95,25 @@ function MapViewInner({ data }: MapViewProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <div className="relative">
+        <div className="relative flex-1 max-w-[200px]">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             placeholder={t(locale, 'serviceMap.actions.search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 h-8 w-[180px] text-sm"
+            className="pl-8 h-8 text-sm"
           />
         </div>
-        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => fitView({ padding: 0.3 })} title={t(locale, 'serviceMap.actions.fitView')}>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => fitView({ padding: 0.3 })} title={t(locale, 'serviceMap.actions.fitView')}>
           <Maximize2 className="h-3.5 w-3.5" />
         </Button>
-        <Button variant="outline" size="sm" className="h-8" onClick={handleExportPng}>
+        <Button variant="ghost" size="sm" className="h-8 text-muted-foreground" onClick={handleExportPng}>
           <Download className="mr-1.5 h-3.5 w-3.5" />
           PNG
         </Button>
       </div>
 
-      <div className="h-[calc(100vh-20rem)] min-h-[400px] max-h-[800px] rounded-lg border bg-background">
+      <div className="h-[calc(100vh-20rem)] min-h-[400px] max-h-[800px] rounded-2xl border bg-card/40 dark:bg-zinc-900/30 overflow-hidden">
         <ReactFlow
           nodes={nodes}
           edges={edges}

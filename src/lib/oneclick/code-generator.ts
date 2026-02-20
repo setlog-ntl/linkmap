@@ -1534,21 +1534,22 @@ function parsePersonalBrandConfigToState(
   schema: TemplateModuleSchema
 ): ModuleConfigState {
   const state = buildInitialState(schema);
+  const siteBlock = configContent.match(/export const siteConfig\s*=\s*\{([\s\S]*?)\n\};/)?.[1] ?? configContent;
 
   const extractString = (key: string): string | null => {
     const re = new RegExp(
-      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'([^']*)'`
+      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'((?:[^'\\\\]|\\\\.)*)'`
     );
-    const m = configContent.match(re);
-    return m ? m[1] : null;
+    const m = siteBlock.match(re);
+    return m ? m[1].replace(/\\(.)/g, '$1') : null;
   };
 
   const extractNullable = (key: string): string | null => {
     const re = new RegExp(
-      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?(?:'([^']*)'|null)`
+      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?(?:'((?:[^'\\\\]|\\\\.)*)'|null)`
     );
-    const m = configContent.match(re);
-    return m ? m[1] ?? '' : null;
+    const m = siteBlock.match(re);
+    return m ? (m[1] ?? '').replace(/\\(.)/g, '$1') : null;
   };
 
   // Hero
@@ -1682,21 +1683,22 @@ function parseDevShowcaseConfigToState(
   schema: TemplateModuleSchema
 ): ModuleConfigState {
   const state = buildInitialState(schema);
+  const siteBlock = configContent.match(/export const siteConfig\s*=\s*\{([\s\S]*?)\n\};/)?.[1] ?? configContent;
 
   const extractString = (key: string): string | null => {
     const re = new RegExp(
-      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'([^']*)'`
+      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'((?:[^'\\\\]|\\\\.)*)'`
     );
-    const m = configContent.match(re);
-    return m ? m[1] : null;
+    const m = siteBlock.match(re);
+    return m ? m[1].replace(/\\(.)/g, '$1') : null;
   };
 
   const extractNullable = (key: string): string | null => {
     const re = new RegExp(
-      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?(?:'([^']*)'|null)`
+      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?(?:'((?:[^'\\\\]|\\\\.)*)'|null)`
     );
-    const m = configContent.match(re);
-    return m ? m[1] ?? '' : null;
+    const m = siteBlock.match(re);
+    return m ? (m[1] ?? '').replace(/\\(.)/g, '$1') : null;
   };
 
   // Hero
@@ -1819,21 +1821,22 @@ function parseLinkInBioProConfigToState(
   schema: TemplateModuleSchema
 ): ModuleConfigState {
   const state = buildInitialState(schema);
+  const siteBlock = configContent.match(/export const siteConfig\s*=\s*\{([\s\S]*?)\n\};/)?.[1] ?? configContent;
 
   const extractString = (key: string): string | null => {
     const re = new RegExp(
-      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'([^']*)'`
+      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'((?:[^'\\\\]|\\\\.)*)'`
     );
-    const m = configContent.match(re);
-    return m ? m[1] : null;
+    const m = siteBlock.match(re);
+    return m ? m[1].replace(/\\(.)/g, '$1') : null;
   };
 
   const extractNullable = (key: string): string | null => {
     const re = new RegExp(
-      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?(?:'([^']*)'|null)`
+      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?(?:'((?:[^'\\\\]|\\\\.)*)'|null)`
     );
-    const m = configContent.match(re);
-    return m ? m[1] ?? '' : null;
+    const m = siteBlock.match(re);
+    return m ? (m[1] ?? '').replace(/\\(.)/g, '$1') : null;
   };
 
   // Profile
@@ -1920,21 +1923,22 @@ function parseDigitalNamecardConfigToState(
   schema: TemplateModuleSchema
 ): ModuleConfigState {
   const state = buildInitialState(schema);
+  const siteBlock = configContent.match(/export const siteConfig\s*=\s*\{([\s\S]*?)\n\};/)?.[1] ?? configContent;
 
   const extractString = (key: string): string | null => {
     const re = new RegExp(
-      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'([^']*)'`
+      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'((?:[^'\\\\]|\\\\.)*)'`
     );
-    const m = configContent.match(re);
-    return m ? m[1] : null;
+    const m = siteBlock.match(re);
+    return m ? m[1].replace(/\\(.)/g, '$1') : null;
   };
 
   const extractNullable = (key: string): string | null => {
     const re = new RegExp(
-      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?(?:'([^']*)'|null)`
+      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?(?:'((?:[^'\\\\]|\\\\.)*)'|null)`
     );
-    const m = configContent.match(re);
-    return m ? m[1] ?? '' : null;
+    const m = siteBlock.match(re);
+    return m ? (m[1] ?? '').replace(/\\(.)/g, '$1') : null;
   };
 
   // Profile
@@ -2002,21 +2006,22 @@ function parseFreelancerConfigToState(
   schema: TemplateModuleSchema
 ): ModuleConfigState {
   const state = buildInitialState(schema);
+  const siteBlock = configContent.match(/export const siteConfig\s*=\s*\{([\s\S]*?)\n\};/)?.[1] ?? configContent;
 
   const extractString = (key: string): string | null => {
     const re = new RegExp(
-      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'([^']*)'`
+      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'((?:[^'\\\\]|\\\\.)*)'`
     );
-    const m = configContent.match(re);
-    return m ? m[1] : null;
+    const m = siteBlock.match(re);
+    return m ? m[1].replace(/\\(.)/g, '$1') : null;
   };
 
   const extractNullable = (key: string): string | null => {
     const re = new RegExp(
-      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?(?:'([^']*)'|null)`
+      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?(?:'((?:[^'\\\\]|\\\\.)*)'|null)`
     );
-    const m = configContent.match(re);
-    return m ? m[1] ?? '' : null;
+    const m = siteBlock.match(re);
+    return m ? (m[1] ?? '').replace(/\\(.)/g, '$1') : null;
   };
 
   // Hero
@@ -2190,21 +2195,22 @@ function parseSmallBizConfigToState(
   schema: TemplateModuleSchema
 ): ModuleConfigState {
   const state = buildInitialState(schema);
+  const siteBlock = configContent.match(/export const siteConfig\s*=\s*\{([\s\S]*?)\n\};/)?.[1] ?? configContent;
 
   const extractString = (key: string): string | null => {
     const re = new RegExp(
-      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'([^']*)'`
+      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'((?:[^'\\\\]|\\\\.)*)'`
     );
-    const m = configContent.match(re);
-    return m ? m[1] : null;
+    const m = siteBlock.match(re);
+    return m ? m[1].replace(/\\(.)/g, '$1') : null;
   };
 
   const extractNullable = (key: string): string | null => {
     const re = new RegExp(
-      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?(?:'([^']*)'|null)`
+      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?(?:'((?:[^'\\\\]|\\\\.)*)'|null)`
     );
-    const m = configContent.match(re);
-    return m ? m[1] ?? '' : null;
+    const m = siteBlock.match(re);
+    return m ? (m[1] ?? '').replace(/\\(.)/g, '$1') : null;
   };
 
   // Hero

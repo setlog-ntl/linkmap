@@ -38,15 +38,15 @@ function ServiceMapInner() {
   // Loading state
   const isDataLoading = data.servicesLoading || data.depsLoading || data.connectionsLoading;
   if (isDataLoading) {
-    return <div className="h-[calc(100vh-16rem)] min-h-[500px] max-h-[900px] rounded-lg bg-muted animate-pulse" />;
+    return <div className="h-[calc(100vh-16rem)] min-h-[500px] max-h-[900px] rounded-2xl bg-muted/50 animate-pulse" />;
   }
 
   // Empty state
   if (data.services.length === 0) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold shrink-0">서비스 맵</h2>
+          <h2 className="text-lg font-bold tracking-tight shrink-0">서비스 맵</h2>
           <ViewLevelSwitcher />
         </div>
         <div className="h-[calc(100vh-16rem)] min-h-[500px] max-h-[900px]">
@@ -58,9 +58,9 @@ function ServiceMapInner() {
 
   return (
     <TooltipProvider>
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold shrink-0">서비스 맵</h2>
+          <h2 className="text-lg font-bold tracking-tight shrink-0">서비스 맵</h2>
           <ViewLevelSwitcher />
         </div>
 
