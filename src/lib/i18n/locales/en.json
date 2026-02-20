@@ -69,6 +69,9 @@
     "emptyHealth": "No connected services",
     "emptyEnvVars": "No variables in this environment",
     "emptyEnvVarsDesc": "Add environment variables to manage your project configuration.",
+    "addDescription": "Add a description",
+    "addLink": "Add project link",
+    "linkUrl": "Project Link",
     "onboarding": {
       "title": "Getting Started",
       "step1": "Add a Service",
@@ -139,6 +142,7 @@
     "title": "Environment Variables",
     "addVar": "Add Variable",
     "download": "Download .env",
+    "import": "Import .env",
     "varName": "Variable Name",
     "value": "Value",
     "description": "Description (optional)",
@@ -146,7 +150,20 @@
     "development": "Development",
     "staging": "Staging",
     "production": "Production",
-    "deleteConfirm": "Delete this environment variable?"
+    "deleteConfirm": "Delete this environment variable?",
+    "importDialog": {
+      "title": "Bulk Import .env File",
+      "desc": "Paste .env file content to bulk-register environment variables.",
+      "detected": "{count} variables detected",
+      "public": "Public",
+      "secret": "Secret",
+      "importBtn": "Import {count}",
+      "noService": "No service",
+      "serviceMatches": "{count} services auto-detected",
+      "failed": "Bulk import failed",
+      "selectEnv": "Select environment",
+      "placeholder": "# Paste your .env file content here\nNEXT_PUBLIC_API_URL=https://api.example.com\nAPI_SECRET_KEY=sk_live_..."
+    }
   },
   "catalog": {
     "title": "Service Catalog",

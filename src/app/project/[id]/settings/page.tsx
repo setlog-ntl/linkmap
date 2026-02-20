@@ -50,6 +50,7 @@ export default function ProjectSettingsPage() {
   const { locale } = useLocaleStore();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [linkUrl, setLinkUrl] = useState('');
   const [nameInitialized, setNameInitialized] = useState(false);
 
   // Team state
@@ -61,6 +62,7 @@ export default function ProjectSettingsPage() {
   if (!nameInitialized && project) {
     setName(project.name);
     setDescription(project.description || '');
+    setLinkUrl(project.link_url || '');
     setNameInitialized(true);
   }
 
@@ -81,8 +83,13 @@ export default function ProjectSettingsPage() {
 
   const handleSave = () => {
     if (!name.trim()) return;
+    const trimmedLink = linkUrl.trim() || null;
+    if (trimmedLink && !/^https?:\/\/.+/.test(trimmedLink)) {
+      toast.error('올바른 URL을 입력하세요 (https://...)');
+      return;
+    }
     updateProject.mutate(
-      { id: projectId, name: name.trim(), description: description.trim() || null },
+      { id: projectId, name: name.trim(), description: description.trim() || null, link_url: trimmedLink },
       {
         onSuccess: () => toast.success('프로젝트가 업데이트되었습니다'),
         onError: () => toast.error('업데이트에 실패했습니다'),
@@ -170,6 +177,15 @@ export default function ProjectSettingsPage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="project-link">{t(locale, 'project.linkUrl')}</Label>
+            <Input
+              id="project-link"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              placeholder="https://..."
             />
           </div>
           <Button onClick={handleSave} disabled={updateProject.isPending || !name.trim()}>

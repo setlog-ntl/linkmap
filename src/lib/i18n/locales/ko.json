@@ -69,6 +69,9 @@
     "emptyHealth": "연결된 서비스가 없습니다",
     "emptyEnvVars": "이 환경에 등록된 변수가 없습니다",
     "emptyEnvVarsDesc": "환경변수를 추가하여 프로젝트 설정을 관리하세요.",
+    "addDescription": "프로젝트 소개를 입력하세요",
+    "addLink": "프로젝트 링크 추가",
+    "linkUrl": "프로젝트 링크",
     "onboarding": {
       "title": "시작 가이드",
       "step1": "서비스 추가",
@@ -139,6 +142,7 @@
     "title": "환경변수 관리",
     "addVar": "변수 추가",
     "download": ".env 다운로드",
+    "import": ".env 가져오기",
     "varName": "변수 이름",
     "value": "값",
     "description": "설명 (선택)",
@@ -146,7 +150,20 @@
     "development": "개발",
     "staging": "스테이징",
     "production": "프로덕션",
-    "deleteConfirm": "이 환경변수를 삭제하시겠습니까?"
+    "deleteConfirm": "이 환경변수를 삭제하시겠습니까?",
+    "importDialog": {
+      "title": ".env 파일 일괄 가져오기",
+      "desc": ".env 파일 내용을 붙여넣어 환경변수를 일괄 등록합니다.",
+      "detected": "{count}개 변수 감지됨",
+      "public": "공개",
+      "secret": "비밀",
+      "importBtn": "{count}개 가져오기",
+      "noService": "서비스 없음",
+      "serviceMatches": "{count}개 서비스 자동 감지",
+      "failed": "일괄 가져오기 실패",
+      "selectEnv": "환경 선택",
+      "placeholder": "# .env 파일 내용을 붙여넣으세요\nNEXT_PUBLIC_API_URL=https://api.example.com\nAPI_SECRET_KEY=sk_live_..."
+    }
   },
   "catalog": {
     "title": "서비스 카탈로그",

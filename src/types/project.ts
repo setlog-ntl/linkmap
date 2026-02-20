@@ -11,6 +11,7 @@ export interface Project {
   main_service_id: string | null;
   icon_type: 'brand' | 'emoji' | 'custom' | null;
   icon_value: string | null;
+  link_url: string | null;
   created_at: string;
   updated_at: string;
 }
