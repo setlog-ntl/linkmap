@@ -21,44 +21,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Upload, Loader2 } from 'lucide-react';
+import { parseEnvContent } from '@/lib/utils/parse-env';
 import type { Environment } from '@/types';
-
-interface ParsedEnvVar {
-  key: string;
-  value: string;
-}
 
 interface EnvImportDialogProps {
   onImport: (vars: { key_name: string; value: string; environment: string; is_secret: boolean }[]) => Promise<void>;
-}
-
-function parseEnvContent(content: string): ParsedEnvVar[] {
-  const lines = content.split('\n');
-  const vars: ParsedEnvVar[] = [];
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    // Skip empty lines and comments
-    if (!trimmed || trimmed.startsWith('#')) continue;
-
-    const eqIndex = trimmed.indexOf('=');
-    if (eqIndex === -1) continue;
-
-    const key = trimmed.substring(0, eqIndex).trim();
-    let value = trimmed.substring(eqIndex + 1).trim();
-
-    // Remove surrounding quotes
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-      value = value.slice(1, -1);
-    }
-
-    // Validate key format
-    if (/^[A-Z][A-Z0-9_]*$/.test(key)) {
-      vars.push({ key, value });
-    }
-  }
-
-  return vars;
 }
 
 export function EnvImportDialog({ onImport }: EnvImportDialogProps) {

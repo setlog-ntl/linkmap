@@ -34,6 +34,7 @@ import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { EnvImportDialog } from '@/components/service/env-import-dialog';
 import { SecretsSyncPanel } from '@/components/github/secrets-sync-panel';
+import { parseEnvLine } from '@/lib/utils/parse-env';
 import { useLinkedRepos } from '@/lib/queries/github';
 import { EnvStatsHeader } from '@/components/env/env-stats-header';
 import { EnvFilterBar } from '@/components/env/env-filter-bar';
@@ -282,6 +283,15 @@ export default function ProjectEnvPage() {
                 placeholder="NEXT_PUBLIC_EXAMPLE_KEY"
                 value={newKey}
                 onChange={(e) => setNewKey(e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '_'))}
+                onPaste={(e) => {
+                  const text = e.clipboardData.getData('text');
+                  const parsed = parseEnvLine(text);
+                  if (parsed) {
+                    e.preventDefault();
+                    setNewKey(parsed.key);
+                    setNewValue(parsed.value);
+                  }
+                }}
                 className="font-mono"
                 required
               />
@@ -293,6 +303,16 @@ export default function ProjectEnvPage() {
                 placeholder="sk_live_..."
                 value={newValue}
                 onChange={(e) => setNewValue(e.target.value)}
+                onPaste={(e) => {
+                  const text = e.clipboardData.getData('text').trim();
+                  const unquoted = (text.startsWith('"') && text.endsWith('"')) || (text.startsWith("'") && text.endsWith("'"))
+                    ? text.slice(1, -1)
+                    : text;
+                  if (unquoted !== text) {
+                    e.preventDefault();
+                    setNewValue(unquoted);
+                  }
+                }}
                 className="font-mono"
               />
             </div>
@@ -364,6 +384,15 @@ export default function ProjectEnvPage() {
                 id="edit-key"
                 value={editKey}
                 onChange={(e) => setEditKey(e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '_'))}
+                onPaste={(e) => {
+                  const text = e.clipboardData.getData('text');
+                  const parsed = parseEnvLine(text);
+                  if (parsed) {
+                    e.preventDefault();
+                    setEditKey(parsed.key);
+                    setEditValue(parsed.value);
+                  }
+                }}
                 className="font-mono"
                 required
               />
@@ -374,6 +403,16 @@ export default function ProjectEnvPage() {
                 id="edit-value"
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
+                onPaste={(e) => {
+                  const text = e.clipboardData.getData('text').trim();
+                  const unquoted = (text.startsWith('"') && text.endsWith('"')) || (text.startsWith("'") && text.endsWith("'"))
+                    ? text.slice(1, -1)
+                    : text;
+                  if (unquoted !== text) {
+                    e.preventDefault();
+                    setEditValue(unquoted);
+                  }
+                }}
                 className="font-mono"
                 placeholder={decryptEnvVar.isPending ? '복호화 중...' : ''}
               />

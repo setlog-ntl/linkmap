@@ -23,6 +23,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { parseEnvLine } from '@/lib/utils/parse-env';
 import type { EnvironmentVariable, EnvVarTemplate, Environment } from '@/types';
 
 interface ServiceEnvVarsSectionProps {
@@ -434,6 +435,15 @@ export function ServiceEnvVarsSection({
               placeholder="KEY_NAME"
               value={formKey}
               onChange={(e) => setFormKey(e.target.value.toUpperCase())}
+              onPaste={(e) => {
+                const text = e.clipboardData.getData('text');
+                const parsed = parseEnvLine(text);
+                if (parsed) {
+                  e.preventDefault();
+                  setFormKey(parsed.key);
+                  setFormValue(parsed.value);
+                }
+              }}
               autoFocus
             />
             <Input
@@ -442,6 +452,16 @@ export function ServiceEnvVarsSection({
               type="password"
               value={formValue}
               onChange={(e) => setFormValue(e.target.value)}
+              onPaste={(e) => {
+                const text = e.clipboardData.getData('text').trim();
+                const unquoted = (text.startsWith('"') && text.endsWith('"')) || (text.startsWith("'") && text.endsWith("'"))
+                  ? text.slice(1, -1)
+                  : text;
+                if (unquoted !== text) {
+                  e.preventDefault();
+                  setFormValue(unquoted);
+                }
+              }}
             />
             <div className="flex gap-1.5">
               <Button
