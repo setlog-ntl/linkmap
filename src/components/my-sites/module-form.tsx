@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -13,7 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Upload, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import type { ModuleFieldDef } from '@/lib/module-schema';
 
 interface ModuleFormProps {
@@ -21,9 +22,10 @@ interface ModuleFormProps {
   values: Record<string, unknown>;
   onChange: (key: string, value: unknown) => void;
   locale: string;
+  deployId?: string;
 }
 
-export function ModuleForm({ fields, values, onChange, locale }: ModuleFormProps) {
+export function ModuleForm({ fields, values, onChange, locale, deployId }: ModuleFormProps) {
   return (
     <div className="space-y-4">
       {fields.map((field) => (
@@ -33,6 +35,7 @@ export function ModuleForm({ fields, values, onChange, locale }: ModuleFormProps
           value={values[field.key]}
           onChange={(val) => onChange(field.key, val)}
           locale={locale}
+          deployId={deployId}
         />
       ))}
     </div>
@@ -48,25 +51,37 @@ interface FieldRendererProps {
   value: unknown;
   onChange: (value: unknown) => void;
   locale: string;
+  deployId?: string;
 }
 
-function FieldRenderer({ field, value, onChange, locale }: FieldRendererProps) {
+function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRendererProps) {
   const label = locale === 'en' && field.labelEn ? field.labelEn : field.label;
 
   switch (field.type) {
     case 'text':
-    case 'url':
       return (
         <div className="space-y-1.5">
           <Label className="text-xs font-medium">{label}</Label>
           <Input
-            type={field.type === 'url' ? 'url' : 'text'}
+            type="text"
             value={(value as string) ?? ''}
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder}
             className="h-8 text-sm"
           />
         </div>
+      );
+
+    case 'url':
+      return (
+        <ImageUrlField
+          label={label}
+          value={(value as string) ?? ''}
+          onChange={onChange}
+          placeholder={field.placeholder}
+          deployId={deployId}
+          locale={locale}
+        />
       );
 
     case 'textarea':
@@ -264,6 +279,139 @@ function ArrayFieldRenderer({
           {locale === 'ko' ? '추가' : 'Add'}
         </Button>
       )}
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────
+// 이미지 URL 필드 (업로드 지원)
+// ──────────────────────────────────────────────
+
+const MAX_IMAGE_DIMENSION = 1200;
+
+function resizeImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+
+        if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+          const ratio = Math.min(MAX_IMAGE_DIMENSION / width, MAX_IMAGE_DIMENSION / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('Canvas not supported'));
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Output as webp for smaller size, fallback to original type
+        const dataUrl = canvas.toDataURL('image/webp', 0.85);
+        const base64 = dataUrl.split(',')[1];
+        resolve(base64);
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = reader.result as string;
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+interface ImageUrlFieldProps {
+  label: string;
+  value: string;
+  onChange: (value: unknown) => void;
+  placeholder?: string;
+  deployId?: string;
+  locale: string;
+}
+
+function ImageUrlField({ label, value, onChange, placeholder, deployId, locale }: ImageUrlFieldProps) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !deployId) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(locale === 'ko' ? '5MB 이하의 이미지만 업로드 가능합니다' : 'Max 5MB image allowed');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const base64 = await resizeImage(file);
+      const ext = file.name.match(/\.\w+$/)?.[0] || '.webp';
+      const filename = `upload${ext === '.webp' ? '.webp' : ext}`;
+
+      const res = await fetch(`/api/oneclick/deployments/${deployId}/upload`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: base64,
+          filename,
+          mimeType: ext === '.webp' ? 'image/webp' : file.type,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Upload failed');
+      }
+
+      const { path } = await res.json();
+      onChange(path);
+      toast.success(locale === 'ko' ? '이미지 업로드 완료' : 'Image uploaded');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  }, [deployId, locale, onChange]);
+
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium">{label}</Label>
+      <div className="flex items-center gap-1.5">
+        <Input
+          type="url"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="h-8 text-sm flex-1"
+        />
+        {deployId && (
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 flex-shrink-0"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            title={locale === 'ko' ? '이미지 업로드' : 'Upload image'}
+          >
+            {uploading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Upload className="h-3.5 w-3.5" />
+            )}
+          </Button>
+        )}
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+          className="hidden"
+          onChange={handleUpload}
+        />
+      </div>
     </div>
   );
 }

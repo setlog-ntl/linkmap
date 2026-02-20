@@ -1224,6 +1224,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           onApply={handleApplyModules}
           isApplying={isApplyingModules}
           locale={locale}
+          deployId={deployId}
         />
       )}
 

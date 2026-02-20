@@ -2,8 +2,10 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
 import {
   DndContext,
   closestCenter,
@@ -32,6 +34,7 @@ import {
   Loader2,
   FileCode2,
   GripVertical,
+  Wand2,
 } from 'lucide-react';
 import type {
   TemplateModuleSchema,
@@ -165,6 +168,7 @@ interface ModulePanelProps {
   onApply: () => void;
   isApplying: boolean;
   locale: Locale;
+  deployId?: string;
 }
 
 export function ModulePanel({
@@ -174,11 +178,14 @@ export function ModulePanel({
   onApply,
   isApplying,
   locale,
+  deployId,
 }: ModulePanelProps) {
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(
     schema.modules[0]?.id ?? null
   );
   const [isExpanded, setIsExpanded] = useState(true);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
 
   const selectedModule = useMemo(
     () => schema.modules.find((m) => m.id === selectedModuleId) ?? null,
@@ -284,6 +291,46 @@ export function ModulePanel({
     },
     [state, onStateChange]
   );
+
+  const handleAiSuggest = useCallback(async () => {
+    if (!aiPrompt.trim()) return;
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/ai/module-suggest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: aiPrompt,
+          templateSlug: schema.templateSlug,
+          currentEnabled: state.enabled,
+          moduleNames: schema.modules.map((m) => m.id),
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'AI 추천 실패');
+      }
+      const { state: suggested, reasoning } = await res.json();
+      const next = { ...state };
+      if (suggested.enabled) next.enabled = suggested.enabled;
+      if (suggested.order) next.order = suggested.order;
+      if (suggested.values) {
+        for (const [modId, fields] of Object.entries(suggested.values)) {
+          next.values = {
+            ...next.values,
+            [modId]: { ...next.values[modId], ...(fields as Record<string, unknown>) },
+          };
+        }
+      }
+      onStateChange(next);
+      setAiPrompt('');
+      if (reasoning) toast.success(reasoning);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'AI 추천 실패');
+    } finally {
+      setAiLoading(false);
+    }
+  }, [aiPrompt, schema, state, onStateChange]);
 
   return (
     <div className="border-t bg-background flex flex-col">
@@ -395,8 +442,40 @@ export function ModulePanel({
                     handleFieldChange(selectedModule.id, key, value)
                   }
                   locale={locale}
+                  deployId={deployId}
                 />
-                <div className="mt-4 pt-3 border-t">
+                {/* AI 추천 */}
+                <div className="mt-3 pt-3 border-t">
+                  <div className="flex items-center gap-1.5">
+                    <Input
+                      value={aiPrompt}
+                      onChange={(e) => setAiPrompt(e.target.value)}
+                      placeholder={locale === 'ko' ? 'AI에게 설정 요청...' : 'Ask AI to configure...'}
+                      className="h-7 text-xs flex-1"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleAiSuggest();
+                        }
+                      }}
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-7 w-7 flex-shrink-0"
+                      onClick={handleAiSuggest}
+                      disabled={aiLoading || !aiPrompt.trim()}
+                    >
+                      {aiLoading ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Wand2 className="h-3 w-3" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="mt-3 pt-3 border-t">
                   <Button
                     size="sm"
                     className="w-full h-8 gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white"

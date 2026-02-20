@@ -300,6 +300,42 @@ export function generateGlobalsCss(
   );
 }
 
+/** layout.tsx 내 Google Fonts CDN 링크와 font-family 치환 */
+export function generateLayoutTsx(
+  state: ModuleConfigState,
+  baseCode: string
+): string {
+  const hero = state.values.hero || {};
+  const font = (hero.fontFamily as string) || 'Pretendard';
+  if (font === 'Pretendard') return baseCode; // 기본값이면 변경 불필요
+
+  let code = baseCode;
+
+  // Google Fonts CDN 링크 교체/추가
+  const googleFontUrl = `https://fonts.googleapis.com/css2?family=${font.replace(/\s+/g, '+')}:wght@300;400;500;600;700&display=swap`;
+  const linkTag = `<link rel="stylesheet" href="${googleFontUrl}" />`;
+
+  // 기존 google fonts link 교체
+  const existingFontLink = /(<link[^>]*fonts\.googleapis\.com[^>]*\/>)/;
+  if (existingFontLink.test(code)) {
+    code = code.replace(existingFontLink, linkTag);
+  } else if (code.includes('</head>')) {
+    code = code.replace('</head>', `    ${linkTag}\n  </head>`);
+  }
+
+  // font-family CSS 또는 Tailwind 변수 치환
+  code = code.replace(
+    /fontFamily:\s*['"][^'"]+['"]/g,
+    `fontFamily: '${font}'`
+  );
+  code = code.replace(
+    /font-family:\s*[^;]+;/g,
+    `font-family: '${font}', sans-serif;`
+  );
+
+  return code;
+}
+
 // ──────────────────────────────────────────────
 // 종합: 변경된 파일 목록 생성
 // ──────────────────────────────────────────────
@@ -368,6 +404,18 @@ export function generateFiles(
         files.push({
           path: 'src/components/gallery-section.tsx',
           content: generateGallerySection(state, galleryBase),
+        });
+      }
+    }
+
+    // Layout: 폰트가 기본값(Pretendard)과 다르면 생성
+    const fontFamily = (hero.fontFamily as string) || 'Pretendard';
+    if (fontFamily !== 'Pretendard') {
+      const layoutBase = currentFiles['src/app/layout.tsx'];
+      if (layoutBase) {
+        files.push({
+          path: 'src/app/layout.tsx',
+          content: generateLayoutTsx(state, layoutBase),
         });
       }
     }
