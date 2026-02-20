@@ -19,9 +19,9 @@ const ZONE_EMOJIS: Record<ZoneKey, string> = {
 };
 
 const ZONE_COLORS: Record<ZoneKey, string> = {
-  frontend: 'rgba(59, 130, 246, 0.08)',  // blue
-  backend: 'rgba(139, 92, 246, 0.08)',   // violet
-  devtools: 'rgba(234, 179, 8, 0.08)',   // yellow
+  frontend: 'rgba(59, 130, 246, 0.04)',  // blue - subtle tint
+  backend: 'rgba(139, 92, 246, 0.04)',   // violet - subtle tint
+  devtools: 'rgba(234, 179, 8, 0.04)',   // yellow - subtle tint
 };
 
 /** Map 8 ServiceDomains → 3 zones */
@@ -41,7 +41,7 @@ const ZONE_GAP = 32;
 const ZONE_PADDING = 24;
 const ZONE_HEADER_HEIGHT = 44;
 const NODE_WIDTH = 160;
-const NODE_HEIGHT = 48;
+const NODE_HEIGHT = 64;
 const NODE_GAP_X = 16;
 const NODE_GAP_Y = 12;
 const INNER_COLS = 3;

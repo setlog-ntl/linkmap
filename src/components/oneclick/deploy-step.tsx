@@ -16,8 +16,12 @@ import {
   ExternalLink,
   CheckCircle2,
   Rocket,
+  ArrowUpCircle,
+  LayoutDashboard,
 } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { toast } from 'sonner';
+import Link from 'next/link';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t, type Locale } from '@/lib/i18n';
 import type { DeployStatus, HomepageTemplate } from '@/lib/queries/oneclick';
@@ -285,6 +289,26 @@ function ErrorCard({
               {locale === 'ko' ? '다시 시도' : 'Try Again'}
             </Button>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              toast.info(
+                locale === 'ko'
+                  ? '결제 업데이트 시 반영됩니다.'
+                  : 'Will be reflected upon payment update.'
+              );
+            }}
+          >
+            <ArrowUpCircle className="mr-2 h-4 w-4" />
+            {locale === 'ko' ? '플랜 업그레이드' : 'Upgrade Plan'}
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/my-sites">
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              {locale === 'ko' ? '사이트 관리' : 'Manage Sites'}
+            </Link>
+          </Button>
           {repoUrl && (
             <Button variant="outline" size="sm" asChild>
               <a href={repoUrl} target="_blank" rel="noopener noreferrer">
