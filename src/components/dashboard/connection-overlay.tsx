@@ -1,14 +1,16 @@
 'use client';
 
 import { memo, useCallback, useMemo } from 'react';
+import { getServiceEmoji } from '@/lib/constants/service-brands';
 import type { CardRect } from './hooks/use-card-positions';
-import type { UserConnection, ConnectionStatus } from '@/types';
+import type { UserConnection, ConnectionStatus, ServiceCardData } from '@/types';
 
 interface ConnectionOverlayProps {
   connections: UserConnection[];
   positions: Map<string, CardRect>;
   selectedConnectionId: string | null;
   onSelectConnection: (id: string | null) => void;
+  allCards?: ServiceCardData[];
 }
 
 const STATUS_COLORS: Record<ConnectionStatus, string> = {
@@ -26,6 +28,16 @@ const TYPE_DASH: Record<string, string> = {
   auth_provider: '12 4',
   webhook: '6 2',
   sdk: '',
+};
+
+const TYPE_LABELS: Record<string, string> = {
+  uses: 'Uses',
+  integrates: 'Integrates',
+  data_transfer: 'Data',
+  api_call: 'API',
+  auth_provider: 'Auth',
+  webhook: 'Webhook',
+  sdk: 'SDK',
 };
 
 function getBezierPath(
@@ -51,12 +63,38 @@ function getBezierPath(
   return `M${sx},${sy} C${midX},${sy} ${midX},${ty} ${tx},${ty}`;
 }
 
+function getBezierMidpoint(source: CardRect, target: CardRect): { x: number; y: number } {
+  const sx = source.x + source.width;
+  const sy = source.centerY;
+  const tx = target.x;
+  const ty = target.centerY;
+
+  if (tx < sx) {
+    const s2x = source.centerX;
+    const s2y = source.y + source.height;
+    const t2x = target.centerX;
+    const t2y = target.y;
+    return { x: (s2x + t2x) / 2, y: (s2y + t2y) / 2 };
+  }
+
+  return { x: (sx + tx) / 2, y: (sy + ty) / 2 };
+}
+
 export const ConnectionOverlay = memo(function ConnectionOverlay({
   connections,
   positions,
   selectedConnectionId,
   onSelectConnection,
+  allCards = [],
 }: ConnectionOverlayProps) {
+  const serviceMap = useMemo(() => {
+    const map = new Map<string, ServiceCardData>();
+    for (const card of allCards) {
+      map.set(card.serviceId, card);
+    }
+    return map;
+  }, [allCards]);
+
   const lines = useMemo(() => {
     return connections
       .map((conn) => {
@@ -112,6 +150,14 @@ export const ConnectionOverlay = memo(function ConnectionOverlay({
             <polygon points="0 0, 8 3, 0 6" fill={color} />
           </marker>
         ))}
+        {/* Glow filter for selected connections */}
+        <filter id="conn-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
       </defs>
 
       {lines.map(({ conn, source, target }) => {
@@ -119,6 +165,10 @@ export const ConnectionOverlay = memo(function ConnectionOverlay({
         const color = STATUS_COLORS[conn.connection_status] ?? STATUS_COLORS.active;
         const dash = TYPE_DASH[conn.connection_type] ?? '';
         const isSelected = selectedConnectionId === conn.id;
+        const mid = getBezierMidpoint(source, target);
+        const sourceCard = serviceMap.get(conn.source_service_id);
+        const targetCard = serviceMap.get(conn.target_service_id);
+        const typeLabel = TYPE_LABELS[conn.connection_type] ?? conn.connection_type;
 
         return (
           <g key={conn.id}>
@@ -127,7 +177,7 @@ export const ConnectionOverlay = memo(function ConnectionOverlay({
               d={path}
               fill="none"
               stroke="transparent"
-              strokeWidth={12}
+              strokeWidth={14}
               className="pointer-events-auto cursor-pointer"
               onClick={(e) => handleClick(e, conn.id)}
             />
@@ -141,19 +191,69 @@ export const ConnectionOverlay = memo(function ConnectionOverlay({
               strokeOpacity={isSelected ? 1 : 0.6}
               markerEnd={`url(#arrow-${conn.connection_status})`}
               className="transition-all duration-200"
+              filter={isSelected ? 'url(#conn-glow)' : undefined}
             />
-            {/* Label on path */}
-            {conn.label && isSelected && (
-              <text
-                className="pointer-events-none fill-foreground text-[10px]"
-                dy={-6}
-              >
-                <textPath href={`#path-${conn.id}`} startOffset="50%" textAnchor="middle">
-                  {conn.label}
-                </textPath>
-              </text>
+
+            {/* Midpoint badge with connection type + service emojis */}
+            {isSelected && (
+              <g>
+                {/* Badge background */}
+                <rect
+                  x={mid.x - 40}
+                  y={mid.y - 12}
+                  width={80}
+                  height={24}
+                  rx={6}
+                  fill="hsl(var(--card))"
+                  stroke={color}
+                  strokeWidth={1}
+                  opacity={0.95}
+                />
+                {/* Source emoji */}
+                {sourceCard && (
+                  <text x={mid.x - 32} y={mid.y + 4} className="text-[10px]" textAnchor="middle">
+                    {getServiceEmoji(sourceCard.slug)}
+                  </text>
+                )}
+                {/* Type label */}
+                <text
+                  x={mid.x}
+                  y={mid.y + 3}
+                  textAnchor="middle"
+                  className="text-[9px] font-medium fill-foreground"
+                >
+                  {conn.label || typeLabel}
+                </text>
+                {/* Target emoji */}
+                {targetCard && (
+                  <text x={mid.x + 32} y={mid.y + 4} className="text-[10px]" textAnchor="middle">
+                    {getServiceEmoji(targetCard.slug)}
+                  </text>
+                )}
+              </g>
             )}
-            {/* Hidden path with ID for textPath */}
+
+            {/* Source/Target endpoint indicators (always visible, subtle) */}
+            {!isSelected && (
+              <>
+                <circle
+                  cx={source.x + source.width}
+                  cy={source.centerY}
+                  r={3}
+                  fill={color}
+                  opacity={0.4}
+                />
+                <circle
+                  cx={target.x}
+                  cy={target.centerY}
+                  r={3}
+                  fill={color}
+                  opacity={0.4}
+                />
+              </>
+            )}
+
+            {/* Hidden path with ID for textPath fallback */}
             {conn.label && isSelected && (
               <path id={`path-${conn.id}`} d={path} fill="none" stroke="none" />
             )}

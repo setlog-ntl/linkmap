@@ -2,10 +2,11 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { Plus, Map, Boxes, Key, TrendingUp, ExternalLink, Link as LinkIcon } from 'lucide-react';
+import { Plus, Map as MapIcon, Boxes, Key, TrendingUp, ExternalLink, Link as LinkIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ServiceIcon } from '@/components/ui/service-icon';
 import { SystemStatusBadge } from './system-status-badge';
 import { MetricPill } from './metric-pill';
 import { ProjectIconPicker } from '@/components/project/project-icon-picker';
@@ -21,6 +22,13 @@ interface ProjectHeroCardProps {
   metrics: DashboardMetrics;
   allCards: ServiceCardData[];
 }
+
+const STATUS_RING: Record<string, string> = {
+  connected: 'ring-green-500/40',
+  error: 'ring-red-500/40',
+  in_progress: 'ring-yellow-500/40',
+  not_started: 'ring-zinc-500/20',
+};
 
 export function ProjectHeroCard({ project, metrics, allCards }: ProjectHeroCardProps) {
   const updateProject = useUpdateProject();
@@ -40,19 +48,15 @@ export function ProjectHeroCard({ project, metrics, allCards }: ProjectHeroCardP
   };
 
   const handleIconSelect = (iconType: 'brand' | 'emoji' | 'custom' | null, iconValue: string | null) => {
-    // Custom uploads are handled by the icon API and already saved
     if (iconType === 'custom') {
       invalidateAll();
       return;
     }
-
     updateProject.mutate(
       { id: project.id, icon_type: iconType, icon_value: iconValue },
       {
         onSuccess: () => invalidateAll(),
-        onError: () => {
-          toast.error('아이콘 변경에 실패했습니다');
-        },
+        onError: () => { toast.error('아이콘 변경에 실패했습니다'); },
       },
     );
   };
@@ -83,7 +87,7 @@ export function ProjectHeroCard({ project, metrics, allCards }: ProjectHeroCardP
   };
 
   return (
-    <div className="rounded-2xl border bg-card/80 dark:bg-zinc-900/80 backdrop-blur-sm shadow-sm p-6 h-full">
+    <div className="rounded-2xl border bg-card/80 dark:bg-zinc-900/60 backdrop-blur-md shadow-sm p-6 h-full">
       <div className="flex flex-col sm:flex-row items-start gap-5">
         {/* Project avatar with icon picker */}
         <ProjectIconPicker
@@ -166,24 +170,27 @@ export function ProjectHeroCard({ project, metrics, allCards }: ProjectHeroCardP
             <MetricPill icon={TrendingUp} value={`${metrics.progressPercent}%`} label="진행률" />
           </div>
 
-          {/* Connection status dots */}
+          {/* Service icon grid with status rings */}
           {allCards.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {allCards.map((c) => (
-                <span
+            <div className="flex flex-wrap gap-1.5">
+              {allCards.slice(0, 16).map((c) => (
+                <div
                   key={c.projectServiceId}
-                  className={`h-2 w-2 rounded-full transition-colors ${
-                    c.status === 'connected'
-                      ? 'bg-green-500'
-                      : c.status === 'error'
-                        ? 'bg-red-500'
-                        : c.status === 'in_progress'
-                          ? 'bg-yellow-500'
-                          : 'bg-muted-foreground/20'
-                  }`}
+                  className={`
+                    rounded-md p-1 ring-1 transition-colors
+                    ${STATUS_RING[c.status] ?? 'ring-zinc-500/20'}
+                    bg-muted/30 dark:bg-zinc-800/40
+                  `}
                   title={`${c.name}: ${c.status}`}
-                />
+                >
+                  <ServiceIcon serviceId={c.slug} size={14} />
+                </div>
               ))}
+              {allCards.length > 16 && (
+                <span className="text-[10px] text-muted-foreground self-center ml-1">
+                  +{allCards.length - 16}
+                </span>
+              )}
             </div>
           )}
 
@@ -197,7 +204,7 @@ export function ProjectHeroCard({ project, metrics, allCards }: ProjectHeroCardP
             </Button>
             <Button variant="outline" size="sm" className="h-8 text-xs" asChild>
               <Link href={`/project/${project.id}/service-map`}>
-                <Map className="mr-1 h-3.5 w-3.5" />
+                <MapIcon className="mr-1 h-3.5 w-3.5" />
                 맵 보기
               </Link>
             </Button>

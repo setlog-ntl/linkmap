@@ -3,6 +3,7 @@
 import { memo } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ServiceIcon } from '@/components/ui/service-icon';
 import type { ServiceCardData } from '@/types';
 
 interface ServiceItemProps {
@@ -26,6 +27,9 @@ export const ServiceItem = memo(function ServiceItem({ card }: ServiceItemProps)
       data-service-id={card.serviceId}
       className="group flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors hover:bg-muted/50 dark:hover:bg-zinc-800/50"
     >
+      {/* Service brand icon */}
+      <ServiceIcon serviceId={card.slug} size={16} className="shrink-0" />
+
       {/* Status dot */}
       <span className={cn('h-2 w-2 shrink-0 rounded-full', dotClass)} />
 

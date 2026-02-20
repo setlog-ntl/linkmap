@@ -116,7 +116,7 @@ export function BentoDashboardLayout({ data }: BentoDashboardLayoutProps) {
         </div>
 
         {/* Row 2: Connection Flow Map */}
-        {connections.length > 0 && (
+        {allCards.length > 0 && (
           <ConnectionFlowMap allCards={allCards} connections={connections} />
         )}
 
@@ -133,6 +133,7 @@ export function BentoDashboardLayout({ data }: BentoDashboardLayoutProps) {
               positions={positions}
               selectedConnectionId={selectedConnectionId}
               onSelectConnection={setSelectedConnectionId}
+              allCards={allCards}
             />
           )}
 
