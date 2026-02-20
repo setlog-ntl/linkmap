@@ -1,4 +1,4 @@
-import type { ServiceCategory, ServiceStatus } from './core';
+import type { ServiceCategory, ServiceStatus, ViewGroup } from './core';
 import type { Project } from './project';
 import type { UserConnection } from './connection';
 
@@ -54,4 +54,20 @@ export interface DashboardResponse {
   layers: LayerData[];
   metrics: DashboardMetrics;
   connections: UserConnection[];
+}
+
+export interface ViewGroupData {
+  group: ViewGroup;
+  label: string;
+  icon: string;
+  services: ServiceCardData[];
+}
+
+export interface HealthScore {
+  overall: number;
+  breakdown: {
+    connected: number;
+    healthy: number;
+    envComplete: number;
+  };
 }

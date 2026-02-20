@@ -725,7 +725,14 @@
     "legendConnections": "Connection Types",
     "editTooltip": "Edit service map",
     "saveSuccess": "Changes saved successfully",
-    "saveFailed": "Failed to save changes"
+    "saveFailed": "Failed to save changes",
+    "viewLevel": { "status": "Status", "map": "Map", "dependency": "Dependencies" },
+    "viewGroup": { "core": "Core", "runtime": "Runtime", "growth": "Growth", "intelligence": "Intelligence", "infra": "Infra" },
+    "healthScore": { "title": "Project Health", "good": "Good", "warning": "Warning", "critical": "Critical", "connected": "Connected", "healthy": "Healthy", "envComplete": "Env Complete" },
+    "status": { "ok": "OK", "inProgress": "In Progress", "error": "Error", "notSetUp": "Not Set Up", "allGood": "All services are healthy", "allConnected": "All services are connected" },
+    "alerts": { "title": "Needs Attention", "missingEnv": "Missing env vars", "unhealthy": "Unhealthy service", "notConnected": "Not connected" },
+    "actions": { "addService": "Add Service", "setEnvVars": "Set Env Vars", "viewMap": "View Map", "notConnectedCount": " services not connected", "search": "Search services...", "fitView": "Fit View" },
+    "dependency": { "impactAnalysis": "Impact Analysis", "environment": "Environment" }
   },
   "error": {
     "pageNotFound": "Page Not Found",

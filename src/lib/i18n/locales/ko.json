@@ -725,7 +725,14 @@
     "legendConnections": "연결 타입",
     "editTooltip": "서비스 맵 편집",
     "saveSuccess": "변경사항이 저장되었습니다",
-    "saveFailed": "저장에 실패했습니다"
+    "saveFailed": "저장에 실패했습니다",
+    "viewLevel": { "status": "상태 보기", "map": "맵 보기", "dependency": "의존성 보기" },
+    "viewGroup": { "core": "핵심", "runtime": "런타임", "growth": "그로스", "intelligence": "인텔리전스", "infra": "인프라" },
+    "healthScore": { "title": "프로젝트 건강도", "good": "양호", "warning": "주의", "critical": "위험", "connected": "연결 완료", "healthy": "정상 작동", "envComplete": "환경변수 완성" },
+    "status": { "ok": "정상", "inProgress": "진행중", "error": "오류", "notSetUp": "미설정", "allGood": "모든 서비스가 정상입니다", "allConnected": "모든 서비스가 연결되었습니다" },
+    "alerts": { "title": "주의 필요", "missingEnv": "환경변수 누락", "unhealthy": "서비스 이상", "notConnected": "미연결 서비스" },
+    "actions": { "addService": "서비스 추가", "setEnvVars": "환경변수 설정", "viewMap": "맵 보기", "notConnectedCount": "개 서비스 미연결", "search": "서비스 검색...", "fitView": "전체 보기" },
+    "dependency": { "impactAnalysis": "영향 분석", "environment": "환경" }
   },
   "error": {
     "pageNotFound": "페이지를 찾을 수 없습니다",
