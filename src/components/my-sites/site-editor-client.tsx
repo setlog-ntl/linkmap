@@ -243,6 +243,16 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const [isApplyingModules, setIsApplyingModules] = useState(false);
   const [isDeployingModules, setIsDeployingModules] = useState(false);
 
+  // config.ts 사전 fetch (모듈 초기화용 — selectedPath와 별도로 fetch)
+  const { data: configFileForInit, isError: configInitError } = useFileContent(
+    moduleSchema && !moduleInitialized ? deployId : null,
+    moduleSchema && !moduleInitialized ? 'src/lib/config.ts' : null
+  );
+  const { data: pageFileForInit } = useFileContent(
+    moduleSchema && !moduleInitialized ? deployId : null,
+    moduleSchema && !moduleInitialized ? 'src/app/page.tsx' : null
+  );
+
   // 자동 파일 선택 (우선순위: src/app/page.tsx → src/lib/config.ts → index.html → 첫 번째 파일)
   useEffect(() => {
     if (files && files.length > 0 && !selectedPath) {
@@ -273,8 +283,11 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   // ── 모듈 상태 초기화 (config.ts 파싱) ──
   useEffect(() => {
     if (!moduleSchema || moduleInitialized) return;
-    const configContent = fileCache['src/lib/config.ts'];
-    const pageContent = fileCache['src/app/page.tsx'];
+
+    // 사전 fetch된 config.ts 우선, fileCache fallback
+    const configContent = configFileForInit?.content ?? fileCache['src/lib/config.ts'];
+    const pageContent = pageFileForInit?.content ?? fileCache['src/app/page.tsx'];
+
     if (configContent) {
       const parsed = parseConfigToState(configContent, moduleSchema);
       if (pageContent) {
@@ -284,14 +297,23 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           parsed.order = order;
         }
       }
+      // config.ts, page.tsx를 fileCache에도 동기화
+      if (configFileForInit?.content) {
+        setFileCache((prev) => ({ ...prev, 'src/lib/config.ts': configFileForInit.content }));
+      }
+      if (pageFileForInit?.content) {
+        setFileCache((prev) => ({ ...prev, 'src/app/page.tsx': pageFileForInit.content }));
+      }
       setModuleState(parsed);
       setModuleInitialized(true);
-    } else if (files && files.length > 0) {
-      // config.ts 아직 캐시에 없으면 기본값으로 초기화
+    }
+    // config.ts fetch 실패(신규 배포 등) → 기본값으로 초기화
+    if (configInitError) {
       setModuleState(buildInitialState(moduleSchema));
       setModuleInitialized(true);
     }
-  }, [moduleSchema, moduleInitialized, fileCache, files]);
+    // config.ts를 아직 못 가져왔으면 대기
+  }, [moduleSchema, moduleInitialized, fileCache, configFileForInit, pageFileForInit, configInitError, templateSlug]);
 
   // 미리보기 HTML 조합
   const previewHtml = useMemo(() => {

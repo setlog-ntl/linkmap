@@ -1,5 +1,32 @@
 # Linkmap PRD (Product Requirements Document)
 
+> **문서 위치**: `docs/PRD.md`  
+> **참고**: 아키텍처·보안은 `ARCHITECTURE.md`, `SECURITY.md` 참고.
+
+---
+
+## 현재 구현 상태 (2026년 기준)
+
+| 구분 | 구현 여부 | 비고 |
+|------|-----------|------|
+| **인증** | ✅ | Supabase Auth, Google/GitHub OAuth, 비밀번호 재설정 |
+| **프로젝트** | ✅ | CRUD, 대시보드(3-Column 레이어), 연결선 시각화 |
+| **서비스 카탈로그** | ✅ | 카테고리·검색, 프로젝트에 추가 |
+| **서비스 연결·체크리스트** | ✅ | 서비스별 체크리스트, 진행도 저장 |
+| **환경변수** | ✅ | AES-256-GCM 암호화, 환경별, .env 다운로드, 일괄 가져오기 |
+| **서비스 맵** | ✅ | React Flow, 3단계 뷰(상태/맵/의존성), PNG 내보내기 |
+| **프로젝트 템플릿** | ✅ | 5종+ (SaaS, AI 앱, 블로그 등) |
+| **원클릭 배포** | ✅ | GitHub OAuth → 템플릿 선택 → 빌드/배포, 모듈 에디터, 내 사이트 관리 |
+| **AI 기능** | ✅ | 스택 아키텍트, 환경변수 닥터, 맵 내레이터, 서비스 비교, 자연어 커맨드 |
+| **GitHub** | ✅ | OAuth 연결, 리포 선택, Secrets 동기화, 연결 정보(계정) |
+| **감사 로그** | ✅ | 민감 작업 로깅 |
+| **팀 협업** | 🔲 | Phase 2 |
+| **비용 추적** | 🔲 | Phase 2 |
+| **CLI / MCP** | ✅ | packages/cli, packages/mcp-server (env 동기화·MCP) |
+| **배포** | ✅ | Cloudflare Workers (`@opennextjs/cloudflare`) |
+
+---
+
 ## 1. 프로젝트 개요
 
 ### 1.1 비전
@@ -230,16 +257,18 @@ Linkmap은 바이브 코딩 사용자들이 프로젝트를 시작할 때 겪는
 
 | 영역 | 기술 | 선정 이유 |
 |-----|------|----------|
-| **프론트엔드** | Next.js 15 (App Router) | 바이브 코딩 생태계 표준, SSR/SSG 지원 |
-| **UI** | Tailwind CSS + shadcn/ui | 빠른 개발, 일관된 디자인 |
+| **프론트엔드** | Next.js 16 (App Router) | 바이브 코딩 생태계 표준, SSR/SSG 지원 |
+| **UI** | Tailwind CSS v4 + shadcn/ui | 빠른 개발, 일관된 디자인 |
 | **언어** | TypeScript | 타입 안전성, 바이브 코딩 도구 호환 |
 | **백엔드/DB** | Supabase (PostgreSQL) | Auth + DB + Storage 통합, 무료 티어 |
-| **인증** | Supabase Auth | DB와 통합, RLS, 50K MAU 무료 |
-| **배포** | Vercel | Next.js 최적화, 간편 배포 |
+| **인증** | Supabase Auth | DB와 통합, RLS, Google/GitHub OAuth |
+| **배포** | Cloudflare Workers (@opennextjs/cloudflare) | 엣지 배포, Next 호환 |
 | **상태관리** | Zustand + TanStack Query | 경량, 서버 상태 관리 |
+| **검증** | Zod v4 | API 입력 검증 (safeParse) |
 | **암호화** | AES-256-GCM | 환경변수/시크릿 암호화 저장 |
-| **시각화** | React Flow | 서비스 맵 다이어그램 |
+| **시각화** | React Flow (@xyflow/react) | 서비스 맵 다이어그램 |
 | **아이콘** | Lucide Icons | shadcn/ui 호환 |
+| **i18n** | ko/en (Zustand locale-store + t()) | 한국어 우선, 글로벌 확장 |
 
 ---
 
@@ -452,30 +481,32 @@ project_templates (
 ## 11. 로드맵
 
 ```
-2026 Q1 (1-3월): MVP 개발 ← 현재 단계
-  - 회원가입/로그인 (Supabase Auth + OAuth)
-  - 프로젝트 CRUD + 대시보드
-  - 서비스 카탈로그 (20개 서비스)
+2026 Q1 (1-3월): MVP ← 완료
+  - 회원가입/로그인 (Supabase Auth + Google/GitHub OAuth)
+  - 프로젝트 CRUD + 3-Column 레이어 대시보드 + 연결선 시각화
+  - 서비스 카탈로그 (20개+ 서비스)
   - 서비스 연결 체크리스트 (한국어)
-  - 환경변수 관리 (암호화, .env 다운로드)
-  - 서비스 맵 시각화 (React Flow)
-  - 프로젝트 템플릿 (5개)
-  - 랜딩 페이지 (한국어)
-  → 베타 출시 & 사용자 피드백 수집
+  - 환경변수 관리 (AES-256-GCM, .env 다운로드, 일괄 가져오기)
+  - 서비스 맵 시각화 (React Flow, 3단계 뷰)
+  - 프로젝트 템플릿 (5종+)
+  - 원클릭 배포 (GitHub → 템플릿 → 빌드/배포, 모듈 에디터)
+  - AI 기능 (스택 추천, env 닥터, 맵 내레이터, 서비스 비교, 자연어 커맨드)
+  - GitHub 연결·Secrets 동기화·설정/계정 페이지
+  - Cloudflare Workers 배포
+  → 베타 운영 중
 
 2026 Q2 (4-6월): Phase 2
   - 팀 협업 (워크스페이스, 역할 관리)
   - 비용 추적
   - 커뮤니티 템플릿 공유
   - 서비스 카탈로그 확장 (50개)
-  - 영어 지원 추가
+  - 영어 지원 강화
   → 정식 출시 + Pro 요금제
 
 2026 Q3-Q4 (7-12월): Phase 3
-  - AI 어시스턴트
-  - CLI 도구 (linkmap pull/check)
+  - CLI 도구 고도화 (linkmap pull/check)
   - IDE 확장 프로그램 (Cursor, VS Code)
-  - MCP 서버 통합
+  - MCP 서버 고도화
   - 서비스 모니터링
   - 마이그레이션 가이드
   - 템플릿 마켓플레이스

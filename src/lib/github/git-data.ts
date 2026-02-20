@@ -48,12 +48,15 @@ export async function createTree(
   token: string,
   owner: string,
   repo: string,
-  treeItems: { path: string; mode: string; type: string; sha: string }[]
+  treeItems: { path: string; mode: string; type: string; sha: string }[],
+  baseTree?: string
 ): Promise<GitTree> {
+  const body: Record<string, unknown> = { tree: treeItems };
+  if (baseTree) body.base_tree = baseTree;
   return githubFetch<GitTree>(`/repos/${owner}/${repo}/git/trees`, {
     token,
     method: 'POST',
-    body: { tree: treeItems },
+    body,
   });
 }
 
@@ -157,6 +160,16 @@ export async function pushFilesAtomically(
   const existingRef = await getRef(token, owner, repo, 'heads/main');
   const parentSha = existingRef?.object?.sha ?? null;
 
+  // 0.5. Get parent commit's tree SHA for base_tree (partial updates)
+  let baseTreeSha: string | undefined;
+  if (parentSha) {
+    const parentCommit = await githubFetch<{ tree: { sha: string } }>(
+      `/repos/${owner}/${repo}/git/commits/${parentSha}`,
+      { token }
+    );
+    baseTreeSha = parentCommit.tree.sha;
+  }
+
   // 1. Create blobs for all files in parallel
   const blobResults = await Promise.all(
     files.map((file) => createBlob(token, owner, repo, file.content, 'utf-8'))
@@ -170,8 +183,8 @@ export async function pushFilesAtomically(
     sha: blobResults[i].sha,
   }));
 
-  // 3. Create tree
-  const tree = await createTree(token, owner, repo, treeItems);
+  // 3. Create tree (with base_tree to preserve existing files)
+  const tree = await createTree(token, owner, repo, treeItems, baseTreeSha);
 
   // 4. Create commit (with parent if non-empty repo)
   const parents = parentSha ? [parentSha] : [];

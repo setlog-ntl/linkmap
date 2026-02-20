@@ -98,9 +98,14 @@ export function generateConfigTs(state: ModuleConfigState): string {
   const tagline = (hero.tagline as string) || '콘텐츠로 세상을 연결하는 크리에이터';
   const taglineEn = (hero.taglineEn as string) || 'Creator who connects the world through content';
   const heroImageUrl = (hero.heroImageUrl as string) || '';
+  const gradientFrom = (hero.gradientFrom as string) || '#ee5b2b';
+  const gradientTo = (hero.gradientTo as string) || '#f59e0b';
+  const parallaxEnabled = hero.parallaxEnabled !== undefined ? !!hero.parallaxEnabled : false;
+  const fontFamily = (hero.fontFamily as string) || 'Noto Sans KR';
   const story = (about.story as string) || '';
   const storyEn = (about.storyEn as string) || '';
   const email = (contact.email as string) || 'hello@example.com';
+  const galleryColumns = (gallery.columns as string) || '3';
 
   const valuesItems = (values.items as unknown[]) || [];
   const highlightsItems = (highlights.items as unknown[]) || [];
@@ -157,6 +162,11 @@ export const siteConfig = {
   galleryImages: parseJSON<string[]>(process.env.NEXT_PUBLIC_GALLERY_IMAGES, ${buildGalleryArray(galleryImages)}),
   email: process.env.NEXT_PUBLIC_EMAIL || '${esc(email)}',
   socials: parseJSON<SocialItem[]>(process.env.NEXT_PUBLIC_SOCIALS, ${buildSocialsArray(socials)}),
+  gradientFrom: '${esc(gradientFrom)}',
+  gradientTo: '${esc(gradientTo)}',
+  parallaxEnabled: ${parallaxEnabled},
+  fontFamily: '${esc(fontFamily)}',
+  galleryColumns: '${esc(galleryColumns)}',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 
@@ -221,6 +231,8 @@ export function generateDevShowcaseConfigTs(state: ModuleConfigState): string {
   const aboutText = (about.story as string) || '';
   const aboutEn = (about.storyEn as string) || '';
   const githubUsername = (projects.githubUsername as string) || '';
+  const typingWords = (hero.typingWords as string) || '';
+  const maxRepos = (projects.maxRepos as number) ?? 6;
   const email = (contact.email as string) || '';
   const githubUrl = (contact.github as string) || '';
   const linkedinUrl = (contact.linkedin as string) || '';
@@ -352,6 +364,8 @@ export const siteConfig = {
   resumeUrl: process.env.NEXT_PUBLIC_RESUME_URL || null,
   email: process.env.NEXT_PUBLIC_EMAIL || ${email ? `'${esc(email)}'` : 'null'},
   linkedinUrl: process.env.NEXT_PUBLIC_LINKEDIN_URL || ${linkedinUrl ? `'${esc(linkedinUrl)}'` : 'null'},
+  typingWords: ${typingWords ? `'${esc(typingWords)}'` : 'null'},
+  maxRepos: ${maxRepos},
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 
@@ -390,6 +404,8 @@ export function generateLinkInBioProConfigTs(state: ModuleConfigState): string {
   const bioEn = (profile.bioEn as string) || 'Hello! Check out all my links here.';
   const avatarUrl = (profile.avatarUrl as string) || '';
   const bgStyle = (theme.bgStyle as string) || 'gradient';
+  const primaryColor = (theme.primaryColor as string) || '#8b5cf6';
+  const cardStyle = (theme.cardStyle as string) || 'rounded';
   const linkItems = (links.items as unknown[]) || [];
   const socialItems = (socials.items as unknown[]) || [];
 
@@ -423,6 +439,8 @@ export const siteConfig = {
   bioEn: process.env.NEXT_PUBLIC_BIO_EN || '${esc(bioEn)}',
   avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || ${avatarUrl ? `'${esc(avatarUrl)}'` : 'null'},
   theme: process.env.NEXT_PUBLIC_THEME || '${esc(bgStyle)}',
+  primaryColor: '${esc(primaryColor)}',
+  cardStyle: '${esc(cardStyle)}',
   links: parseJSON<LinkItem[]>(process.env.NEXT_PUBLIC_LINKS, DEMO_LINKS),
   socials: parseJSON<SocialItem[]>(process.env.NEXT_PUBLIC_SOCIALS, ${buildSocialsArray(socialItems)}),
   youtubeUrl: process.env.NEXT_PUBLIC_YOUTUBE_URL || null,
@@ -539,6 +557,7 @@ export function generateSmallBizConfigTs(state: ModuleConfigState): string {
   const descriptionEn = (hero.descriptionEn as string) || 'Start your day with a freshly baked loaf every morning.';
   const phone = (hero.phone as string) || '02-334-5870';
   const primaryColor = (hero.primaryColor as string) || '#d47311';
+  const fontFamily = (hero.fontFamily as string) || 'Noto Sans KR';
 
   const address = (location.address as string) || '서울 마포구 연남동 239-10';
   const addressEn = (location.addressEn as string) || '239-10, Yeonnam-dong, Mapo-gu, Seoul';
@@ -601,6 +620,7 @@ export const siteConfig = {
   instagramUrl: process.env.NEXT_PUBLIC_INSTAGRAM_URL || ${instagramUrl ? `'${esc(instagramUrl)}'` : `''`},
   naverBlogUrl: process.env.NEXT_PUBLIC_NAVER_BLOG_URL || ${naverBlogUrl ? `'${esc(naverBlogUrl)}'` : `''`},
   kakaoChannelUrl: process.env.NEXT_PUBLIC_KAKAO_CHANNEL_URL || ${kakaoChannelUrl ? `'${esc(kakaoChannelUrl)}'` : `''`},
+  fontFamily: '${esc(fontFamily)}',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 
@@ -705,7 +725,11 @@ export function generateFreelancerConfigTs(state: ModuleConfigState): string {
   const tagline = (hero.tagline as string) || '브랜드의 이야기를 시각으로 풀어내는 그래픽 디자이너';
   const taglineEn = (hero.taglineEn as string) || 'Graphic designer who tells brand stories through visuals';
   const avatarUrl = (hero.avatarUrl as string) || '';
+  const gradientFrom = (hero.gradientFrom as string) || '#5b13ec';
+  const gradientTo = (hero.gradientTo as string) || '#06b6d4';
+  const fontFamily = (hero.fontFamily as string) || 'Noto Sans KR';
   const email = (contact.email as string) || 'haeun@jung-design.kr';
+  const portfolioColumns = (portfolio.columns as string) || '3';
 
   const serviceItems = (services.items as unknown[]) || [];
   const portfolioItems = (portfolio.items as unknown[]) || [];
@@ -790,6 +814,10 @@ export const siteConfig = {
   process: parseJSON<ProcessStep[]>(process.env.NEXT_PUBLIC_PROCESS, DEMO_PROCESS),
   email: process.env.NEXT_PUBLIC_EMAIL || '${esc(email)}',
   socials: parseJSON<SocialItem[]>(process.env.NEXT_PUBLIC_SOCIALS, ${buildSocialsArray(socials)}),
+  gradientFrom: '${esc(gradientFrom)}',
+  gradientTo: '${esc(gradientTo)}',
+  fontFamily: '${esc(fontFamily)}',
+  portfolioColumns: '${esc(portfolioColumns)}',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 
@@ -1534,6 +1562,14 @@ function parsePersonalBrandConfigToState(
   if (taglineEn !== null) state.values.hero.taglineEn = taglineEn;
   const heroImg = extractNullable('heroImageUrl');
   if (heroImg !== null) state.values.hero.heroImageUrl = heroImg;
+  const gradientFrom = extractString('gradientFrom');
+  if (gradientFrom !== null) state.values.hero.gradientFrom = gradientFrom;
+  const gradientTo = extractString('gradientTo');
+  if (gradientTo !== null) state.values.hero.gradientTo = gradientTo;
+  const parallaxMatch = configContent.match(/parallaxEnabled:\s*(true|false)/);
+  if (parallaxMatch) state.values.hero.parallaxEnabled = parallaxMatch[1] === 'true';
+  const fontFamily = extractString('fontFamily');
+  if (fontFamily !== null) state.values.hero.fontFamily = fontFamily;
 
   // About
   const story = extractString('story');
@@ -1634,6 +1670,8 @@ function parsePersonalBrandConfigToState(
   } catch {
     // 기본값 유지
   }
+  const galleryColumns = extractString('galleryColumns');
+  if (galleryColumns !== null) state.values.gallery.columns = galleryColumns;
 
   return state;
 }
@@ -1670,6 +1708,8 @@ function parseDevShowcaseConfigToState(
   if (tagline !== null) state.values.hero.tagline = tagline;
   const taglineEn = extractString('taglineEn');
   if (taglineEn !== null) state.values.hero.taglineEn = taglineEn;
+  const typingWords = extractNullable('typingWords');
+  if (typingWords !== null) state.values.hero.typingWords = typingWords;
 
   // About
   const about = extractString('about');
@@ -1709,6 +1749,8 @@ function parseDevShowcaseConfigToState(
   // Projects
   const githubUsername = extractNullable('githubUsername');
   if (githubUsername !== null) state.values.projects.githubUsername = githubUsername;
+  const maxReposMatch = configContent.match(/maxRepos:\s*(\d+)/);
+  if (maxReposMatch) state.values.projects.maxRepos = Number(maxReposMatch[1]);
 
   // Experience — DEMO_EXPERIENCE 배열에서 파싱
   try {
@@ -1864,6 +1906,10 @@ function parseLinkInBioProConfigToState(
   // Theme
   const themeVal = extractString('theme');
   if (themeVal !== null) state.values.theme.bgStyle = themeVal;
+  const primaryColor = extractString('primaryColor');
+  if (primaryColor !== null) state.values.theme.primaryColor = primaryColor;
+  const cardStyle = extractString('cardStyle');
+  if (cardStyle !== null) state.values.theme.cardStyle = cardStyle;
 
   return state;
 }
@@ -1988,6 +2034,12 @@ function parseFreelancerConfigToState(
   if (taglineEn !== null) state.values.hero.taglineEn = taglineEn;
   const avatarUrl = extractNullable('avatarUrl');
   if (avatarUrl !== null) state.values.hero.avatarUrl = avatarUrl;
+  const gradientFrom = extractString('gradientFrom');
+  if (gradientFrom !== null) state.values.hero.gradientFrom = gradientFrom;
+  const gradientTo = extractString('gradientTo');
+  if (gradientTo !== null) state.values.hero.gradientTo = gradientTo;
+  const fontFamily = extractString('fontFamily');
+  if (fontFamily !== null) state.values.hero.fontFamily = fontFamily;
 
   // Contact
   const email = extractString('email');
@@ -2126,6 +2178,8 @@ function parseFreelancerConfigToState(
   } catch {
     // 기본값 유지
   }
+  const portfolioColumns = extractString('portfolioColumns');
+  if (portfolioColumns !== null) state.values.portfolio.columns = portfolioColumns;
 
   return state;
 }
@@ -2164,6 +2218,10 @@ function parseSmallBizConfigToState(
   if (descriptionEn !== null) state.values.hero.descriptionEn = descriptionEn;
   const phone = extractNullable('phone');
   if (phone !== null) state.values.hero.phone = phone;
+  const primaryColor = extractString('primaryColor');
+  if (primaryColor !== null) state.values.hero.primaryColor = primaryColor;
+  const fontFamily = extractString('fontFamily');
+  if (fontFamily !== null) state.values.hero.fontFamily = fontFamily;
 
   // Location
   const address = extractString('address');
