@@ -36,8 +36,6 @@ export function BentoDashboardLayout({ data }: BentoDashboardLayoutProps) {
   const { project, layers, metrics, connections: initialConnections } = data;
   const activeTab = useDashboardStore((s) => s.activeTab);
   const setActiveTab = useDashboardStore((s) => s.setActiveTab);
-  const showConnections = useDashboardStore((s) => s.showConnections);
-  const setShowConnections = useDashboardStore((s) => s.setShowConnections);
   const selectedConnectionId = useDashboardStore((s) => s.selectedConnectionId);
   const setSelectedConnectionId = useDashboardStore((s) => s.setSelectedConnectionId);
 
@@ -129,7 +127,7 @@ export function BentoDashboardLayout({ data }: BentoDashboardLayoutProps) {
           <LayerCard data={devtoolsData} projectId={project.id} />
 
           {/* SVG Connection Overlay */}
-          {showConnections && connections.length > 0 && (
+          {connections.length > 0 && (
             <ConnectionOverlay
               connections={connections}
               positions={positions}
@@ -175,19 +173,6 @@ export function BentoDashboardLayout({ data }: BentoDashboardLayoutProps) {
           <ActionNeeded projectId={project.id} allCards={allCards} metrics={metrics} />
           <OnboardingChecklist projectId={project.id} metrics={metrics} />
         </div>
-      </div>
-
-      {/* Connection toggle — fixed pill */}
-      <div className="hidden md:block fixed bottom-6 right-6 z-40">
-        <Button
-          variant={showConnections ? 'default' : 'outline'}
-          size="sm"
-          className="h-8 rounded-full text-xs gap-1.5 shadow-lg"
-          onClick={() => setShowConnections(!showConnections)}
-        >
-          <Cable className="h-3.5 w-3.5" />
-          Connect Map {showConnections ? 'ON' : 'OFF'}
-        </Button>
       </div>
 
       {/* Mobile layout */}

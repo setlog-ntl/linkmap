@@ -28,7 +28,7 @@ export default async function SettingsLayout({
   return (
     <div className="min-h-screen flex flex-col">
       <Header profile={profile} />
-      <main className="flex-1">
+      <main className="flex-1 bg-background">
         {children}
       </main>
     </div>

@@ -277,7 +277,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     if (configContent) {
       const parsed = parseConfigToState(configContent, moduleSchema);
       if (pageContent) {
-        const { enabled, order } = parsePageToEnabledModules(pageContent);
+        const { enabled, order } = parsePageToEnabledModules(pageContent, templateSlug ?? undefined);
         if (enabled.length > 0) {
           parsed.enabled = enabled;
           parsed.order = order;
@@ -567,7 +567,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     if (!moduleState || !moduleSchema) return;
     try {
       setIsApplyingModules(true);
-      const generatedFiles = generateFiles(moduleState, fileCache);
+      const generatedFiles = generateFiles(moduleState, fileCache, templateSlug ?? undefined);
 
       // 에디터 캐시 업데이트 (현재 열린 파일이면 에디터 내용도 갱신)
       for (const gf of generatedFiles) {

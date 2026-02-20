@@ -96,7 +96,13 @@ export function Header({ profile }: HeaderProps) {
               src="/logo.png"
               alt="Linkmap Logo"
               fill
-              className="object-contain"
+              className="object-contain dark:hidden"
+            />
+            <Image
+              src="/logo-dark.png"
+              alt="Linkmap Logo"
+              fill
+              className="object-contain hidden dark:block"
             />
           </div>
           <div className="flex items-center">

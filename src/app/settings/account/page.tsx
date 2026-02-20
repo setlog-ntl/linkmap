@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
@@ -65,10 +65,10 @@ function statusDotColor(status: string): string {
 
 function StatusBadge({ status, locale }: { status: string; locale: 'ko' | 'en' }) {
   const colors: Record<string, string> = {
-    active: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/25',
-    expired: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/25',
-    error: 'bg-red-500/15 text-red-300 border-red-500/25',
-    revoked: 'bg-zinc-500/15 text-zinc-300 border-zinc-500/25',
+    active: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/25',
+    expired: 'bg-yellow-500/15 text-yellow-700 dark:text-yellow-300 border-yellow-500/25',
+    error: 'bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/25',
+    revoked: 'bg-zinc-500/15 text-zinc-600 dark:text-zinc-300 border-zinc-500/25',
   };
   const color = colors[status] || colors.revoked;
   const label = t(locale, `account.status${status.charAt(0).toUpperCase() + status.slice(1)}`);
@@ -83,9 +83,9 @@ function StatusBadge({ status, locale }: { status: string; locale: 'ko' | 'en' }
 
 function ConnectionTypeBadge({ type, locale }: { type: string; locale: 'ko' | 'en' }) {
   const colors: Record<string, string> = {
-    oauth: 'bg-violet-500/15 text-violet-300 border-violet-500/25',
-    api_key: 'bg-amber-500/15 text-amber-300 border-amber-500/25',
-    manual: 'bg-zinc-500/15 text-zinc-300 border-zinc-500/25',
+    oauth: 'bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-500/25',
+    api_key: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/25',
+    manual: 'bg-zinc-500/15 text-zinc-600 dark:text-zinc-300 border-zinc-500/25',
   };
   const labels: Record<string, string> = {
     oauth: 'account.connectionOAuth',
@@ -153,11 +153,11 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
   };
 
   return (
-    <div className={`rounded-xl border border-zinc-800 bg-zinc-900 p-5 transition-opacity ${!isActive ? 'opacity-40' : ''}`}>
+    <div className={`rounded-xl border border-border bg-card text-card-foreground p-5 transition-opacity ${!isActive ? 'opacity-40' : ''}`}>
       {/* Header: avatar + name + toggle + status badge */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3.5">
-          <Avatar className="h-11 w-11 ring-2 ring-zinc-700">
+          <Avatar className="h-11 w-11 ring-2 ring-border">
             <AvatarImage src={avatarUrl} alt={login} />
             <AvatarFallback className="text-base font-semibold">{login.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
@@ -184,11 +184,11 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
                 </div>
               ) : (
                 <>
-                  <span className="font-semibold text-[15px] text-zinc-100">{connection.display_name || login}</span>
+                  <span className="font-semibold text-[15px] text-foreground">{connection.display_name || login}</span>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 text-zinc-500 hover:text-zinc-200"
+                    className="h-6 w-6 text-muted-foreground hover:text-foreground"
                     onClick={() => { setEditName(connection.display_name || login); setEditing(true); }}
                   >
                     <Pencil className="h-3.5 w-3.5" />
@@ -200,7 +200,7 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
               href={`https://github.com/${login}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[13px] text-zinc-400 hover:text-zinc-200 transition-colors mt-0.5"
+              className="inline-flex items-center gap-1 text-[13px] text-muted-foreground hover:text-foreground transition-colors mt-0.5"
             >
               @{login}
               <ExternalLink className="h-3 w-3" />
@@ -221,13 +221,13 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
       {/* SCOPES */}
       {connection.oauth_scopes && connection.oauth_scopes.length > 0 && (
         <div className="mt-4 flex items-center gap-2 flex-wrap">
-          <span className="text-[11px] font-semibold tracking-wider text-zinc-500 uppercase">
+          <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
             {t(locale, 'account.scopes')}
           </span>
           {connection.oauth_scopes.map((scope) => (
             <span
               key={scope}
-              className="inline-flex text-xs px-2.5 py-0.5 rounded-md bg-zinc-800 text-zinc-300 font-mono border border-zinc-700"
+              className="inline-flex text-xs px-2.5 py-0.5 rounded-md bg-muted text-muted-foreground font-mono border border-border"
             >
               {scope}
             </span>
@@ -242,7 +242,7 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
       {/* PROJECTS */}
       {connection.linked_projects && connection.linked_projects.length > 0 && (
         <div className="mt-4 flex items-start gap-2.5">
-          <span className="text-[11px] font-semibold tracking-wider text-zinc-500 uppercase pt-0.5">
+          <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase pt-0.5">
             Projects
           </span>
           <div className="flex flex-col gap-1.5">
@@ -250,11 +250,11 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
               <Link
                 key={proj.project_id}
                 href={`/project/${proj.project_id}`}
-                className="inline-flex items-center gap-1.5 text-[13px] text-zinc-200 hover:text-violet-400 transition-colors"
+                className="inline-flex items-center gap-1.5 text-[13px] text-foreground/80 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
               >
-                <FolderOpen className="h-3.5 w-3.5 text-zinc-500" />
+                <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
                 <span>{proj.project_name}</span>
-                <span className="text-zinc-500">
+                <span className="text-muted-foreground">
                   ({proj.repo_count} {t(locale, 'account.repoCount')})
                 </span>
               </Link>
@@ -264,11 +264,11 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
       )}
 
       {/* Action row: Unlink / Delete Data */}
-      <div className="mt-4 pt-3 border-t border-zinc-800 flex items-center justify-end gap-5">
+      <div className="mt-4 pt-3 border-t border-border flex items-center justify-end gap-5">
         {hasLinkedRepos && (
           <ConfirmDialog
             trigger={
-              <button className="text-[13px] text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer">
+              <button className="text-[13px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                 Unlink
               </button>
             }
@@ -293,7 +293,7 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
             <TooltipTrigger asChild>
               <span>
                 {hasLinkedRepos ? (
-                  <span className="text-[13px] text-zinc-600 cursor-not-allowed">
+                  <span className="text-[13px] text-muted-foreground/50 cursor-not-allowed">
                     Delete Data
                   </span>
                 ) : (
@@ -418,6 +418,22 @@ export default function AccountPage() {
     }))
   );
 
+  // Map projectId → linked GitHub account(s) for account info display
+  const projectAccountMap = useMemo(() => {
+    const map: Record<string, { login: string; avatarUrl: string }[]> = {};
+    (connections || []).forEach((conn) => {
+      if (conn.status !== 'active') return;
+      const metadata = conn.oauth_metadata as Record<string, string>;
+      const login = metadata?.login || conn.oauth_provider_user_id || '';
+      const avatarUrl = metadata?.avatar_url || '';
+      (conn.linked_projects || []).forEach((proj) => {
+        if (!map[proj.project_id]) map[proj.project_id] = [];
+        map[proj.project_id].push({ login, avatarUrl });
+      });
+    });
+    return map;
+  }, [connections]);
+
   const isLoading = loading || connectionsLoading || projectsLoading;
 
   if (isLoading) {
@@ -434,11 +450,12 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="container py-10 max-w-3xl mx-auto">
+    <div className="min-h-full bg-background">
+      <div className="container py-10 max-w-3xl mx-auto">
       {/* ── Back Navigation ── */}
       <Link
         href="/dashboard"
-        className="inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-100 transition-colors mb-10"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-10"
       >
         <ArrowLeft className="h-4 w-4" />
         {t(locale, 'account.backToDashboard')}
@@ -446,13 +463,13 @@ export default function AccountPage() {
 
       {/* ── 1. Profile Card ── */}
       {profile && (
-        <Card className="mb-12 bg-zinc-900 border-zinc-800">
+        <Card className="mb-12 bg-card border-border text-card-foreground">
           <CardContent className="p-7">
             <div className="flex items-center gap-5">
               <div className="relative">
-                <Avatar size="lg" className="ring-2 ring-zinc-700">
+                <Avatar size="lg" className="ring-2 ring-border">
                   <AvatarImage src={profile.avatarUrl} alt={profile.name} />
-                  <AvatarFallback className="text-xl font-bold bg-zinc-800 text-zinc-200">{profile.name.charAt(0).toUpperCase()}</AvatarFallback>
+                  <AvatarFallback className="text-xl font-bold bg-muted text-foreground">{profile.name.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <Badge className="absolute -bottom-1 -right-1 text-[9px] px-1.5 py-0 bg-violet-600 border-0 text-white">
                   {profile.provider}
@@ -466,7 +483,7 @@ export default function AccountPage() {
                         ref={nameInputRef}
                         value={nameValue}
                         onChange={(e) => setNameValue(e.target.value)}
-                        className="h-9 text-base w-52 bg-zinc-800 border-zinc-700"
+                        className="h-9 text-base w-52 bg-muted border-border"
                         placeholder={t(locale, 'account.namePlaceholder')}
                         autoFocus
                         onKeyDown={(e) => {
@@ -474,20 +491,20 @@ export default function AccountPage() {
                           if (e.key === 'Escape') setEditingName(false);
                         }}
                       />
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-300 hover:text-zinc-100" onClick={handleSaveName} disabled={savingName}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={handleSaveName} disabled={savingName}>
                         <Check className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-300 hover:text-zinc-100" onClick={() => setEditingName(false)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => setEditingName(false)}>
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
                   ) : (
                     <>
-                      <h1 className="text-xl font-bold text-zinc-50">{profile.name}</h1>
+                      <h1 className="text-xl font-bold text-foreground">{profile.name}</h1>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-zinc-500 hover:text-zinc-200"
+                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
                         onClick={() => { setNameValue(profile.name); setEditingName(true); }}
                       >
                         <Pencil className="h-3.5 w-3.5" />
@@ -495,8 +512,8 @@ export default function AccountPage() {
                     </>
                   )}
                 </div>
-                <p className="text-[15px] text-zinc-400 mt-1">{profile.email}</p>
-                <p className="text-[13px] text-zinc-500 mt-2 flex items-center gap-1.5">
+                <p className="text-[15px] text-muted-foreground mt-1">{profile.email}</p>
+                <p className="text-[13px] text-muted-foreground/70 mt-2 flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5" />
                   {new Date(profile.createdAt).toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}
                 </p>
@@ -509,10 +526,10 @@ export default function AccountPage() {
       {/* ── 2. GitHub Accounts ── */}
       <section className="mb-12">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold text-zinc-100">
+          <h2 className="text-lg font-bold text-foreground">
             GitHub {t(locale, 'account.tab')}
           </h2>
-          <Button onClick={handleAddGitHub} size="sm" variant="ghost" className="h-8 w-8 p-0 text-zinc-400 hover:text-zinc-100">
+          <Button onClick={handleAddGitHub} size="sm" variant="ghost" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground">
             <Plus className="h-4 w-4" />
           </Button>
         </div>
@@ -536,8 +553,8 @@ export default function AccountPage() {
       {/* ── 3. Connected Services (all projects) ── */}
       <section className="mb-12">
         <div className="mb-5">
-          <h2 className="text-lg font-bold text-zinc-100">{t(locale, 'account.allServices')}</h2>
-          <p className="text-[13px] text-zinc-500 mt-1">{t(locale, 'account.allServicesDesc')}</p>
+          <h2 className="text-lg font-bold text-foreground">{t(locale, 'account.allServices')}</h2>
+          <p className="text-[13px] text-muted-foreground mt-1">{t(locale, 'account.allServicesDesc')}</p>
         </div>
 
         {allServices.length === 0 ? (
@@ -547,29 +564,32 @@ export default function AccountPage() {
             description={t(locale, 'account.noServicesDesc')}
           />
         ) : (
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900 overflow-hidden">
+          <div className="rounded-xl border border-border bg-card text-card-foreground overflow-hidden">
             {/* Table Header */}
-            <div className="grid grid-cols-[1fr_120px_100px_90px_56px] gap-3 px-5 py-3.5 border-b border-zinc-800 bg-zinc-900/80">
-              <span className="text-[11px] font-semibold tracking-wider text-zinc-500 uppercase">
+            <div className="grid grid-cols-[1fr_110px_100px_100px_90px_56px] gap-3 px-5 py-3.5 border-b border-border bg-muted/80 text-foreground">
+              <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
                 {t(locale, 'account.colService')}
               </span>
-              <span className="text-[11px] font-semibold tracking-wider text-zinc-500 uppercase text-center">
+              <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase text-center">
+                {t(locale, 'account.colAccount')}
+              </span>
+              <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase text-center">
                 {t(locale, 'account.colProject')}
               </span>
-              <span className="text-[11px] font-semibold tracking-wider text-zinc-500 uppercase text-center">
+              <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase text-center">
                 {t(locale, 'account.colConnectionType')}
               </span>
-              <span className="text-[11px] font-semibold tracking-wider text-zinc-500 uppercase text-center">
+              <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase text-center">
                 {t(locale, 'account.colStatus')}
               </span>
-              <span className="text-[11px] font-semibold tracking-wider text-zinc-500 uppercase text-center">
+              <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase text-center">
                 {t(locale, 'account.colToggle')}
               </span>
             </div>
 
             {/* Table Rows */}
             {allServices.map((svc) => (
-              <ServiceRow key={svc.id} svc={svc} locale={locale} />
+              <ServiceRow key={svc.id} svc={svc} locale={locale} accounts={projectAccountMap[svc.projectId]} />
             ))}
           </div>
         )}
@@ -577,17 +597,17 @@ export default function AccountPage() {
 
       {/* ── 4. Danger Zone ── */}
       <section className="mb-12">
-        <h2 className="text-lg font-bold mb-5 text-red-400">
+        <h2 className="text-lg font-bold mb-5 text-red-600 dark:text-red-400">
           {t(locale, 'account.dangerZone')}
         </h2>
-        <div className="rounded-xl border border-red-500/30 bg-red-950/20 divide-y divide-red-500/20">
+        <div className="rounded-xl border border-red-300/40 dark:border-red-500/30 bg-red-50/50 dark:bg-red-950/20 divide-y divide-red-200/40 dark:divide-red-500/20">
           {/* Logout */}
           <div className="flex items-center justify-between px-6 py-5">
             <div>
-              <p className="text-[15px] font-semibold text-zinc-100">{t(locale, 'account.logout')}</p>
-              <p className="text-[13px] text-zinc-400 mt-0.5">{t(locale, 'account.logoutDesc')}</p>
+              <p className="text-[15px] font-semibold text-foreground">{t(locale, 'account.logout')}</p>
+              <p className="text-[13px] text-muted-foreground mt-0.5">{t(locale, 'account.logoutDesc')}</p>
             </div>
-            <Button variant="outline" size="sm" className="border-red-500/40 text-red-400 hover:bg-red-500/15 hover:text-red-300" onClick={handleLogout}>
+            <Button variant="outline" size="sm" className="border-red-300/60 dark:border-red-500/40 text-red-600 dark:text-red-400 hover:bg-red-500/15 hover:text-red-500 dark:hover:text-red-300" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
               {t(locale, 'account.logout')}
             </Button>
@@ -596,13 +616,13 @@ export default function AccountPage() {
           {/* Delete Account */}
           <div className="flex items-center justify-between px-6 py-5">
             <div>
-              <p className="text-[15px] font-semibold text-zinc-100">{t(locale, 'account.deleteAccount')}</p>
-              <p className="text-[13px] text-zinc-400 mt-0.5">{t(locale, 'account.deleteAccountDesc')}</p>
+              <p className="text-[15px] font-semibold text-foreground">{t(locale, 'account.deleteAccount')}</p>
+              <p className="text-[13px] text-muted-foreground mt-0.5">{t(locale, 'account.deleteAccountDesc')}</p>
             </div>
             <Button
               variant="outline"
               size="sm"
-              className="border-red-500/40 text-red-400 hover:bg-red-500/15 hover:text-red-300"
+              className="border-red-300/60 dark:border-red-500/40 text-red-600 dark:text-red-400 hover:bg-red-500/15 hover:text-red-500 dark:hover:text-red-300"
               onClick={() => toast.info(t(locale, 'account.comingSoon'))}
             >
               <AlertTriangle className="h-4 w-4 mr-2" />
@@ -611,6 +631,7 @@ export default function AccountPage() {
           </div>
         </div>
       </section>
+      </div>
     </div>
   );
 }
@@ -620,6 +641,7 @@ export default function AccountPage() {
 function ServiceRow({
   svc,
   locale,
+  accounts,
 }: {
   svc: {
     id: string;
@@ -629,6 +651,7 @@ function ServiceRow({
     projectName: string;
   };
   locale: 'ko' | 'en';
+  accounts?: { login: string; avatarUrl: string }[];
 }) {
   const [toggling, setToggling] = useState(false);
   const [localStatus, setLocalStatus] = useState(svc.status);
@@ -659,19 +682,36 @@ function ServiceRow({
 
   return (
     <div
-      className={`grid grid-cols-[1fr_120px_100px_90px_56px] gap-3 items-center px-5 py-4 border-b border-zinc-800 last:border-0 hover:bg-zinc-800/40 transition-colors ${!isActive ? 'opacity-40' : ''}`}
+      className={`grid grid-cols-[1fr_110px_100px_100px_90px_56px] gap-3 items-center px-5 py-4 border-b border-border last:border-0 hover:bg-muted/40 transition-colors ${!isActive ? 'opacity-40' : ''}`}
     >
       {/* Service info with icon */}
       <div className="flex items-center gap-3 min-w-0">
-        <div className="h-8 w-8 rounded-lg bg-zinc-800/60 flex items-center justify-center shrink-0">
+        <div className="h-8 w-8 rounded-lg bg-muted/60 flex items-center justify-center shrink-0">
           <ServiceIcon serviceId={svc.service?.slug || ''} size={22} />
         </div>
-        <span className="text-[14px] font-medium text-zinc-100 truncate">{svc.service?.name || 'Unknown'}</span>
+        <span className="text-[14px] font-medium text-foreground truncate">{svc.service?.name || 'Unknown'}</span>
+      </div>
+
+      {/* Account */}
+      <div className="flex justify-center">
+        {accounts && accounts.length > 0 ? (
+          <div className="flex items-center gap-1.5">
+            <Avatar className="h-5 w-5">
+              <AvatarImage src={accounts[0].avatarUrl} alt={accounts[0].login} />
+              <AvatarFallback className="text-[9px]">{accounts[0].login.charAt(0).toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <span className="text-[12px] text-muted-foreground truncate max-w-[80px]">
+              @{accounts[0].login}
+            </span>
+          </div>
+        ) : (
+          <span className="text-[12px] text-muted-foreground/50">—</span>
+        )}
       </div>
 
       {/* Project */}
       <div className="text-center">
-        <Link href={`/project/${svc.projectId}`} className="text-[13px] text-zinc-400 hover:text-violet-400 transition-colors truncate">
+        <Link href={`/project/${svc.projectId}`} className="text-[13px] text-muted-foreground hover:text-violet-600 dark:hover:text-violet-400 transition-colors truncate">
           {svc.projectName}
         </Link>
       </div>

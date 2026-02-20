@@ -488,6 +488,127 @@ export type SiteConfig = typeof siteConfig;
 }
 
 // ──────────────────────────────────────────────
+// small-biz config.ts 생성
+// ──────────────────────────────────────────────
+
+function buildMenuItemsArray(items: unknown[]): string {
+  if (!Array.isArray(items) || items.length === 0) return '[]';
+  const entries = items.map((item) => {
+    const v = item as Record<string, string>;
+    const lines: string[] = [
+      `    name: '${esc(v.name || '')}',`,
+    ];
+    if (v.nameEn) lines.push(`    nameEn: '${esc(v.nameEn)}',`);
+    lines.push(`    desc: '${esc(v.desc || '')}',`);
+    if (v.descEn) lines.push(`    descEn: '${esc(v.descEn)}',`);
+    lines.push(`    price: '${esc(v.price || '')}',`);
+    lines.push(`    category: '${esc(v.category || '')}',`);
+    lines.push(`    emoji: '${esc(v.emoji || '🍽️')}',`);
+    return `  {\n${lines.join('\n')}\n  }`;
+  });
+  return `[\n${entries.join(',\n')}\n]`;
+}
+
+function buildBusinessHoursArray(items: unknown[]): string {
+  if (!Array.isArray(items) || items.length === 0) return '[]';
+  const entries = items.map((item) => {
+    const v = item as Record<string, string>;
+    const lines: string[] = [
+      `    day: '${esc(v.day || '')}',`,
+    ];
+    if (v.dayEn) lines.push(`    dayEn: '${esc(v.dayEn)}',`);
+    lines.push(`    hours: '${esc(v.hours || '')}',`);
+    if (v.hoursEn) lines.push(`    hoursEn: '${esc(v.hoursEn)}',`);
+    if ((item as Record<string, unknown>).isHoliday) lines.push('    isHoliday: true,');
+    return `  {\n${lines.join('\n')}\n  }`;
+  });
+  return `[\n${entries.join(',\n')}\n]`;
+}
+
+export function generateSmallBizConfigTs(state: ModuleConfigState): string {
+  const hero = state.values.hero || {};
+  const menu = state.values.menu || {};
+  const hours = state.values.hours || {};
+  const location = state.values.location || {};
+  const gallery = state.values.gallery || {};
+  const sns = state.values.sns || {};
+
+  const name = (hero.name as string) || '온기 베이커리';
+  const nameEn = (hero.nameEn as string) || 'Ongi Bakery';
+  const description = (hero.description as string) || '매일 아침 직접 구운 빵 한 조각으로 하루를 시작하세요.';
+  const descriptionEn = (hero.descriptionEn as string) || 'Start your day with a freshly baked loaf every morning.';
+  const phone = (hero.phone as string) || '02-334-5870';
+  const primaryColor = (hero.primaryColor as string) || '#d47311';
+
+  const address = (location.address as string) || '서울 마포구 연남동 239-10';
+  const addressEn = (location.addressEn as string) || '239-10, Yeonnam-dong, Mapo-gu, Seoul';
+  const kakaoMapId = (location.kakaoMapId as string) || '';
+
+  const menuItems = (menu.items as unknown[]) || [];
+  const hoursItems = (hours.items as unknown[]) || [];
+  const galleryImages = (gallery.images as { url: string }[]) || [];
+
+  const instagramUrl = (sns.instagramUrl as string) || '';
+  const naverBlogUrl = (sns.naverBlogUrl as string) || '';
+  const kakaoChannelUrl = (sns.kakaoChannelUrl as string) || '';
+
+  const galleryArr = buildGalleryArray(galleryImages);
+
+  return `export interface MenuItem {
+  name: string;
+  nameEn?: string;
+  desc: string;
+  descEn?: string;
+  price: string;
+  category: string;
+  emoji: string;
+}
+
+export interface BusinessHour {
+  day: string;
+  dayEn?: string;
+  hours: string;
+  hoursEn?: string;
+  isHoliday?: boolean;
+}
+
+const DEMO_MENU: MenuItem[] = ${buildMenuItemsArray(menuItems)};
+
+const DEMO_HOURS: BusinessHour[] = ${buildBusinessHoursArray(hoursItems)};
+
+function parseJSON<T>(raw: string | undefined, fallback: T): T {
+  if (!raw) return fallback;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+export const siteConfig = {
+  name: process.env.NEXT_PUBLIC_SITE_NAME || '${esc(name)}',
+  nameEn: process.env.NEXT_PUBLIC_SITE_NAME_EN || '${esc(nameEn)}',
+  description: process.env.NEXT_PUBLIC_DESCRIPTION || '${esc(description)}',
+  descriptionEn: process.env.NEXT_PUBLIC_DESCRIPTION_EN || '${esc(descriptionEn)}',
+  phone: process.env.NEXT_PUBLIC_PHONE || ${phone ? `'${esc(phone)}'` : 'null'},
+  primaryColor: process.env.NEXT_PUBLIC_PRIMARY_COLOR || '${esc(primaryColor)}',
+  address: process.env.NEXT_PUBLIC_ADDRESS || '${esc(address)}',
+  addressEn: process.env.NEXT_PUBLIC_ADDRESS_EN || '${esc(addressEn)}',
+  kakaoMapId: process.env.NEXT_PUBLIC_KAKAO_MAP_ID || ${kakaoMapId ? `'${esc(kakaoMapId)}'` : `''`},
+  menuItems: parseJSON<MenuItem[]>(process.env.NEXT_PUBLIC_MENU_ITEMS, DEMO_MENU),
+  businessHours: parseJSON<BusinessHour[]>(process.env.NEXT_PUBLIC_BUSINESS_HOURS, DEMO_HOURS),
+  galleryImages: parseJSON<string[]>(process.env.NEXT_PUBLIC_GALLERY_IMAGES, ${galleryArr}),
+  instagramUrl: process.env.NEXT_PUBLIC_INSTAGRAM_URL || ${instagramUrl ? `'${esc(instagramUrl)}'` : `''`},
+  naverBlogUrl: process.env.NEXT_PUBLIC_NAVER_BLOG_URL || ${naverBlogUrl ? `'${esc(naverBlogUrl)}'` : `''`},
+  kakaoChannelUrl: process.env.NEXT_PUBLIC_KAKAO_CHANNEL_URL || ${kakaoChannelUrl ? `'${esc(kakaoChannelUrl)}'` : `''`},
+  gaId: process.env.NEXT_PUBLIC_GA_ID || null,
+};
+
+export type SiteConfig = typeof siteConfig;
+`;
+}
+
+// ──────────────────────────────────────────────
 // freelancer-page config.ts 생성
 // ──────────────────────────────────────────────
 
@@ -895,6 +1016,45 @@ const FREELANCER_MODULE_COMPONENTS: Record<
   },
 };
 
+/** small-biz 모듈 ID → import/렌더 매핑 */
+const SMALL_BIZ_MODULE_COMPONENTS: Record<
+  string,
+  { importName: string; importPath: string; render: string }
+> = {
+  hero: {
+    importName: 'HeroSection',
+    importPath: '@/components/hero-section',
+    render: '        <HeroSection config={siteConfig} />',
+  },
+  menu: {
+    importName: 'MenuSection',
+    importPath: '@/components/menu-section',
+    render: '        <MenuSection items={siteConfig.menuItems} />',
+  },
+  hours: {
+    importName: 'HoursSection',
+    importPath: '@/components/hours-section',
+    render: '        <HoursSection hours={siteConfig.businessHours} />',
+  },
+  location: {
+    importName: 'LocationSection',
+    importPath: '@/components/location-section',
+    render: '        <LocationSection config={siteConfig} />',
+  },
+  gallery: {
+    importName: 'GallerySection',
+    importPath: '@/components/gallery-section',
+    render: `        {siteConfig.galleryImages.length > 0 && (
+          <GallerySection images={siteConfig.galleryImages} />
+        )}`,
+  },
+  sns: {
+    importName: 'SnsSection',
+    importPath: '@/components/sns-section',
+    render: '        <SnsSection config={siteConfig} />',
+  },
+};
+
 function generateDigitalNamecardPageTsx(state: ModuleConfigState): string {
   const activeModules = state.order.filter((id) => state.enabled.includes(id));
 
@@ -954,11 +1114,14 @@ export function generatePageTsx(state: ModuleConfigState, templateSlug?: string)
   }
   const isDevShowcase = templateSlug === 'dev-showcase';
   const isFreelancer = templateSlug === 'freelancer-page';
-  const componentMap = isFreelancer
-    ? FREELANCER_MODULE_COMPONENTS
-    : isDevShowcase
-      ? DEV_SHOWCASE_MODULE_COMPONENTS
-      : MODULE_COMPONENTS;
+  const isSmallBiz = templateSlug === 'small-biz';
+  const componentMap = isSmallBiz
+    ? SMALL_BIZ_MODULE_COMPONENTS
+    : isFreelancer
+      ? FREELANCER_MODULE_COMPONENTS
+      : isDevShowcase
+        ? DEV_SHOWCASE_MODULE_COMPONENTS
+        : MODULE_COMPONENTS;
   const activeModules = state.order.filter((id) => state.enabled.includes(id));
 
   const imports: string[] = [
@@ -984,6 +1147,16 @@ export function generatePageTsx(state: ModuleConfigState, templateSlug?: string)
 
   if (needsGithubGraph) {
     imports.push("import { GithubGraph } from '@/components/github-graph';");
+  }
+
+  // small-biz: QuickActions 자동 포함
+  if (isSmallBiz && state.enabled.includes('hero')) {
+    imports.push("import { QuickActions } from '@/components/quick-actions';");
+    // QuickActions를 hero 바로 뒤에 삽입
+    const heroIdx = renders.findIndex(r => r.includes('HeroSection'));
+    if (heroIdx >= 0) {
+      renders.splice(heroIdx + 1, 0, '        <QuickActions config={siteConfig} />');
+    }
   }
 
   imports.push("import { Footer } from '@/components/footer';");
@@ -1137,15 +1310,19 @@ export function generateFiles(
   const isFreelancer = templateSlug === 'freelancer-page';
   const isLinkInBio = templateSlug === 'link-in-bio-pro';
 
-  const configContent = isLinkInBio
-    ? generateLinkInBioProConfigTs(state)
-    : isFreelancer
-      ? generateFreelancerConfigTs(state)
-      : isDigitalNamecard
-        ? generateDigitalNamecardConfigTs(state)
-        : isDevShowcase
-          ? generateDevShowcaseConfigTs(state)
-          : generateConfigTs(state);
+  const isSmallBiz = templateSlug === 'small-biz';
+
+  const configContent = isSmallBiz
+    ? generateSmallBizConfigTs(state)
+    : isLinkInBio
+      ? generateLinkInBioProConfigTs(state)
+      : isFreelancer
+        ? generateFreelancerConfigTs(state)
+        : isDigitalNamecard
+          ? generateDigitalNamecardConfigTs(state)
+          : isDevShowcase
+            ? generateDevShowcaseConfigTs(state)
+            : generateConfigTs(state);
 
   const files: GeneratedFile[] = [
     { path: 'src/lib/config.ts', content: configContent },
@@ -1153,7 +1330,7 @@ export function generateFiles(
   ];
 
   // Phase 2: 컴포넌트 파일 변경 (personal-brand + freelancer-page)
-  if (currentFiles && !isDevShowcase && !isDigitalNamecard && !isLinkInBio) {
+  if (currentFiles && !isDevShowcase && !isDigitalNamecard && !isLinkInBio && !isSmallBiz) {
     const hero = state.values.hero || {};
 
     // Hero: 그래디언트 색상이 기본값과 다르면 생성
@@ -1234,6 +1411,38 @@ export function generateFiles(
     }
   }
 
+  // Phase 2: small-biz 컴포넌트 파일 변경
+  if (currentFiles && isSmallBiz) {
+    const hero = state.values.hero || {};
+    const primaryColor = (hero.primaryColor as string) || '#d47311';
+
+    // primary 색상이 기본값과 다르면 globals.css 치환
+    if (primaryColor !== '#d47311') {
+      const cssBase = currentFiles['src/app/globals.css'];
+      if (cssBase) {
+        files.push({
+          path: 'src/app/globals.css',
+          content: cssBase.replace(
+            /--color-primary:\s*#[a-fA-F0-9]{6}/g,
+            `--color-primary: ${primaryColor}`
+          ),
+        });
+      }
+    }
+
+    // Layout: 폰트 치환
+    const fontFamily = (hero.fontFamily as string) || 'Pretendard';
+    if (fontFamily !== 'Pretendard') {
+      const layoutBase = currentFiles['src/app/layout.tsx'];
+      if (layoutBase) {
+        files.push({
+          path: 'src/app/layout.tsx',
+          content: generateLayoutTsx(state, layoutBase),
+        });
+      }
+    }
+  }
+
   return files;
 }
 
@@ -1284,6 +1493,9 @@ export function parseConfigToState(
   }
   if (schema.templateSlug === 'freelancer-page') {
     return parseFreelancerConfigToState(configContent, schema);
+  }
+  if (schema.templateSlug === 'small-biz') {
+    return parseSmallBizConfigToState(configContent, schema);
   }
   return parsePersonalBrandConfigToState(configContent, schema);
 }
@@ -1918,6 +2130,128 @@ function parseFreelancerConfigToState(
   return state;
 }
 
+/** small-biz config.ts 파싱 */
+function parseSmallBizConfigToState(
+  configContent: string,
+  schema: TemplateModuleSchema
+): ModuleConfigState {
+  const state = buildInitialState(schema);
+
+  const extractString = (key: string): string | null => {
+    const re = new RegExp(
+      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'([^']*)'`
+    );
+    const m = configContent.match(re);
+    return m ? m[1] : null;
+  };
+
+  const extractNullable = (key: string): string | null => {
+    const re = new RegExp(
+      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?(?:'([^']*)'|null)`
+    );
+    const m = configContent.match(re);
+    return m ? m[1] ?? '' : null;
+  };
+
+  // Hero
+  const name = extractString('name');
+  if (name !== null) state.values.hero.name = name;
+  const nameEn = extractString('nameEn');
+  if (nameEn !== null) state.values.hero.nameEn = nameEn;
+  const description = extractString('description');
+  if (description !== null) state.values.hero.description = description;
+  const descriptionEn = extractString('descriptionEn');
+  if (descriptionEn !== null) state.values.hero.descriptionEn = descriptionEn;
+  const phone = extractNullable('phone');
+  if (phone !== null) state.values.hero.phone = phone;
+
+  // Location
+  const address = extractString('address');
+  if (address !== null) state.values.location.address = address;
+  const addressEn = extractString('addressEn');
+  if (addressEn !== null) state.values.location.addressEn = addressEn;
+  const kakaoMapId = extractNullable('kakaoMapId');
+  if (kakaoMapId !== null) state.values.location.kakaoMapId = kakaoMapId;
+
+  // Menu — DEMO_MENU 배열에서 파싱
+  try {
+    const menuMatch = configContent.match(
+      /const DEMO_MENU:.*?=\s*(\[[\s\S]*?\n\]);/
+    );
+    if (menuMatch) {
+      const items: Record<string, string>[] = [];
+      const objRe = /\{([\s\S]*?)\n  \}/g;
+      let m;
+      while ((m = objRe.exec(menuMatch[1])) !== null) {
+        const obj: Record<string, string> = {};
+        const fieldRe = /(\w+):\s*'([^']*)'/g;
+        let fm;
+        while ((fm = fieldRe.exec(m[1])) !== null) {
+          obj[fm[1]] = fm[2];
+        }
+        if (obj.name) items.push(obj);
+      }
+      if (items.length > 0) state.values.menu.items = items;
+    }
+  } catch {
+    // 기본값 유지
+  }
+
+  // Hours — DEMO_HOURS 배열에서 파싱
+  try {
+    const hoursMatch = configContent.match(
+      /const DEMO_HOURS:.*?=\s*(\[[\s\S]*?\n\]);/
+    );
+    if (hoursMatch) {
+      const items: Record<string, unknown>[] = [];
+      const objRe = /\{([\s\S]*?)\n  \}/g;
+      let m;
+      while ((m = objRe.exec(hoursMatch[1])) !== null) {
+        const obj: Record<string, unknown> = {};
+        const fieldRe = /(\w+):\s*'([^']*)'/g;
+        let fm;
+        while ((fm = fieldRe.exec(m[1])) !== null) {
+          obj[fm[1]] = fm[2];
+        }
+        // isHoliday boolean 파싱
+        if (m[1].includes('isHoliday: true')) obj.isHoliday = true;
+        if (obj.day) items.push(obj);
+      }
+      if (items.length > 0) state.values.hours.items = items;
+    }
+  } catch {
+    // 기본값 유지
+  }
+
+  // Gallery images
+  try {
+    const galMatch = configContent.match(
+      /galleryImages:\s*parseJSON<string\[\]>\([^,]+,\s*(\[[\s\S]*?\])\s*\)/
+    );
+    if (galMatch) {
+      const items: Record<string, string>[] = [];
+      const urlRe = /'([^']+)'/g;
+      let m;
+      while ((m = urlRe.exec(galMatch[1])) !== null) {
+        items.push({ url: m[1] });
+      }
+      if (items.length > 0) state.values.gallery.images = items;
+    }
+  } catch {
+    // 기본값 유지
+  }
+
+  // SNS
+  const instagramUrl = extractNullable('instagramUrl');
+  if (instagramUrl !== null) state.values.sns.instagramUrl = instagramUrl;
+  const naverBlogUrl = extractNullable('naverBlogUrl');
+  if (naverBlogUrl !== null) state.values.sns.naverBlogUrl = naverBlogUrl;
+  const kakaoChannelUrl = extractNullable('kakaoChannelUrl');
+  if (kakaoChannelUrl !== null) state.values.sns.kakaoChannelUrl = kakaoChannelUrl;
+
+  return state;
+}
+
 /**
  * 배포된 page.tsx에서 활성 모듈과 순서를 파싱.
  */
@@ -1971,15 +2305,27 @@ export function parsePageToEnabledModules(
     ContactSection: 'contact',
   };
 
-  const importToModule = templateSlug === 'dev-showcase'
-    ? devShowcaseMap
-    : templateSlug === 'link-in-bio-pro'
-      ? linkInBioProMap
-      : templateSlug === 'digital-namecard'
-        ? digitalNamecardMap
-        : templateSlug === 'freelancer-page'
-          ? freelancerPageMap
-          : personalBrandMap;
+  // small-biz 매핑
+  const smallBizMap: Record<string, string> = {
+    HeroSection: 'hero',
+    MenuSection: 'menu',
+    HoursSection: 'hours',
+    LocationSection: 'location',
+    GallerySection: 'gallery',
+    SnsSection: 'sns',
+  };
+
+  const importToModule = templateSlug === 'small-biz'
+    ? smallBizMap
+    : templateSlug === 'dev-showcase'
+      ? devShowcaseMap
+      : templateSlug === 'link-in-bio-pro'
+        ? linkInBioProMap
+        : templateSlug === 'digital-namecard'
+          ? digitalNamecardMap
+          : templateSlug === 'freelancer-page'
+            ? freelancerPageMap
+            : personalBrandMap;
 
   // import 문에서 컴포넌트 이름 추출
   const importRe = /import\s*\{\s*(\w+)\s*\}/g;
