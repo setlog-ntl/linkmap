@@ -102,7 +102,7 @@ export function Header({ profile }: HeaderProps) {
               src="/logo-dark.png"
               alt="Linkmap Logo"
               fill
-              className="object-contain hidden dark:block"
+              className="object-contain hidden dark:block dark:mix-blend-multiply"
             />
           </div>
           <div className="flex items-center">
