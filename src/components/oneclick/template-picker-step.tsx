@@ -7,12 +7,21 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   CheckCircle2,
   Loader2,
   Rocket,
   Github,
   Globe,
   AlertCircle,
+  Plus,
 } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -20,17 +29,21 @@ import { t } from '@/lib/i18n';
 import { TemplateCard } from './template-card';
 import { RECOMMENDED_SLUGS } from '@/lib/constants/template-categories';
 import type { HomepageTemplate } from '@/lib/queries/oneclick';
+import type { GitHubConnection } from '@/types';
 
 interface TemplatePickerStepProps {
   templates: HomepageTemplate[];
   isLoading: boolean;
   isDeploying?: boolean;
-  onNext: (data: { templateId: string; siteName: string }) => void;
+  onNext: (data: { templateId: string; siteName: string; accountId?: string }) => void;
   githubUsername?: string;
   isGitHubLoading?: boolean;
   isAuthenticated?: boolean;
   defaultSiteName?: string;
   defaultTemplate?: string | null;
+  accounts?: GitHubConnection[];
+  selectedAccountId?: string | null;
+  onAccountChange?: (id: string) => void;
 }
 
 const SITE_NAME_REGEX = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
@@ -45,6 +58,9 @@ export function TemplatePickerStep({
   isAuthenticated = true,
   defaultSiteName = '',
   defaultTemplate = null,
+  accounts = [],
+  selectedAccountId = null,
+  onAccountChange,
 }: TemplatePickerStepProps) {
   const { locale } = useLocaleStore();
   const prefersReducedMotion = useReducedMotion();
@@ -99,7 +115,7 @@ export function TemplatePickerStep({
       setSiteNameError(error);
       return;
     }
-    onNext({ templateId: selectedTemplate!, siteName });
+    onNext({ templateId: selectedTemplate!, siteName, accountId: selectedAccountId || undefined });
   };
 
   if (isLoading) {
@@ -111,7 +127,21 @@ export function TemplatePickerStep({
     );
   }
 
-  const urlUsername = githubUsername || 'username';
+  // Derive the display username from selected account or fallback
+  const getAccountLogin = (conn: GitHubConnection) =>
+    (conn.oauth_metadata as { login?: string })?.login || conn.oauth_provider_user_id || 'GitHub User';
+
+  const selectedAccount = accounts.find((a) => a.id === selectedAccountId);
+  const urlUsername = selectedAccount ? getAccountLogin(selectedAccount) : githubUsername || 'username';
+  const hasMultipleAccounts = accounts.length > 1;
+
+  const handleAccountSelect = (value: string) => {
+    if (value === '__add__') {
+      window.location.href = '/api/oauth/github/authorize?flow_context=oneclick';
+      return;
+    }
+    onAccountChange?.(value);
+  };
 
   return (
     <div className="space-y-6">
@@ -130,6 +160,35 @@ export function TemplatePickerStep({
               <span className="text-muted-foreground">
                 {locale === 'ko' ? 'GitHub 연결 확인 중...' : 'Checking GitHub connection...'}
               </span>
+            </>
+          ) : hasMultipleAccounts ? (
+            <>
+              <Github className="h-4 w-4 text-green-700 dark:text-green-300 flex-shrink-0" />
+              <Select value={selectedAccountId || ''} onValueChange={handleAccountSelect}>
+                <SelectTrigger className="h-7 w-auto min-w-[160px] border-green-300 dark:border-green-700 bg-transparent text-green-700 dark:text-green-300 text-sm font-medium">
+                  <SelectValue placeholder={t(locale, 'templatePicker.selectAccount')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {accounts.map((acc) => (
+                    <SelectItem key={acc.id} value={acc.id}>
+                      <span className="flex items-center gap-2">
+                        <Github className="h-3.5 w-3.5" />
+                        @{getAccountLogin(acc)}
+                      </span>
+                    </SelectItem>
+                  ))}
+                  <SelectSeparator />
+                  <SelectItem value="__add__">
+                    <span className="flex items-center gap-2 text-muted-foreground">
+                      <Plus className="h-3.5 w-3.5" />
+                      {t(locale, 'templatePicker.addAccount')}
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
+                {locale === 'ko' ? '연결됨' : 'Connected'}
+              </Badge>
             </>
           ) : githubUsername ? (
             <>

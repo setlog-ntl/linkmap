@@ -170,11 +170,11 @@ function deployReducer(state: DeployState, action: DeployAction): DeployState {
 const PENDING_KEY = 'linkmap-pending-deploy';
 const PENDING_TTL = 10 * 60 * 1000;
 
-function savePendingDeploy(data: { template: string; siteName: string }) {
+function savePendingDeploy(data: { template: string; siteName: string; accountId?: string }) {
   localStorage.setItem(PENDING_KEY, JSON.stringify({ ...data, savedAt: Date.now() }));
 }
 
-function loadPendingDeploy(): { template: string; siteName: string } | null {
+function loadPendingDeploy(): { template: string; siteName: string; accountId?: string } | null {
   try {
     const raw = localStorage.getItem(PENDING_KEY);
     if (!raw) return null;
@@ -183,7 +183,11 @@ function loadPendingDeploy(): { template: string; siteName: string } | null {
       localStorage.removeItem(PENDING_KEY);
       return null;
     }
-    return { template: parsed.template || parsed.templateId, siteName: parsed.siteName };
+    return {
+      template: parsed.template || parsed.templateId,
+      siteName: parsed.siteName,
+      ...(parsed.accountId ? { accountId: parsed.accountId } : {}),
+    };
   } catch {
     localStorage.removeItem(PENDING_KEY);
     return null;
@@ -284,12 +288,13 @@ export function useDeployMachine({ isAuthenticated }: UseDeployMachineOptions) {
   }, []);
 
   // Execute deploy API call
-  const executeDeploy = useCallback(async (template: string, siteName: string) => {
+  const executeDeploy = useCallback(async (template: string, siteName: string, accountId?: string) => {
     dispatch({ type: 'START_DEPLOY', template, siteName });
     try {
       const result = await deployMutation.mutateAsync({
         template_id: template,
         site_name: siteName,
+        ...(accountId ? { github_service_account_id: accountId } : {}),
       });
       dispatch({
         type: 'DEPLOY_SUCCESS',
@@ -304,20 +309,20 @@ export function useDeployMachine({ isAuthenticated }: UseDeployMachineOptions) {
   }, [deployMutation]);
 
   // Main deploy handler — determines what to do based on auth/GitHub state
-  const handleDeploy = useCallback(async (template: string, siteName: string) => {
+  const handleDeploy = useCallback(async (template: string, siteName: string, accountId?: string) => {
     if (!isAuthenticated) {
-      savePendingDeploy({ template, siteName });
+      savePendingDeploy({ template, siteName, accountId });
       dispatch({ type: 'NEEDS_AUTH', template, siteName });
       return;
     }
 
     if (!isGitHubConnected) {
-      savePendingDeploy({ template, siteName });
+      savePendingDeploy({ template, siteName, accountId });
       dispatch({ type: 'NEEDS_GITHUB', template, siteName });
       return;
     }
 
-    await executeDeploy(template, siteName);
+    await executeDeploy(template, siteName, accountId);
   }, [isAuthenticated, isGitHubConnected, executeDeploy]);
 
   // After GitHub connected — auto-deploy if we have pending data

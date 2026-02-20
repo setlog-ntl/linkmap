@@ -1,12 +1,13 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { TemplatePickerStep } from './template-picker-step';
 import { DeployStep } from './deploy-step';
 import { AuthModal } from './auth-modal';
 import { GitHubConnectModal } from './github-connect-modal';
 import { useHomepageTemplates } from '@/lib/queries/oneclick';
+import { useGitHubConnections } from '@/lib/queries/github-connections';
 import { useDeployMachine } from '@/hooks/use-deploy-machine';
 import { useLocaleStore } from '@/stores/locale-store';
 
@@ -30,9 +31,23 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
     isGitHubConnected,
   } = useDeployMachine({ isAuthenticated });
 
+  // Load all GitHub connections for account selector
+  const { data: accounts = [] } = useGitHubConnections();
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
+
+  // Auto-select first account when accounts load (or match preflight account)
+  useEffect(() => {
+    if (selectedAccountId || accounts.length === 0) return;
+    if (githubAccount?.id) {
+      setSelectedAccountId(githubAccount.id);
+    } else {
+      setSelectedAccountId(accounts[0].id);
+    }
+  }, [accounts, githubAccount, selectedAccountId]);
+
   // Step 1 → deploy
-  const onDeployClick = useCallback((data: { templateId: string; siteName: string }) => {
-    handleDeploy(data.templateId, data.siteName);
+  const onDeployClick = useCallback((data: { templateId: string; siteName: string; accountId?: string }) => {
+    handleDeploy(data.templateId, data.siteName, data.accountId);
   }, [handleDeploy]);
 
   // Determine what to show
@@ -107,6 +122,9 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
           isAuthenticated={isAuthenticated}
           defaultSiteName={state.siteName}
           defaultTemplate={state.template}
+          accounts={accounts}
+          selectedAccountId={selectedAccountId}
+          onAccountChange={setSelectedAccountId}
         />
       )}
 

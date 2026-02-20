@@ -82,6 +82,7 @@ export function useDeployToGitHubPages() {
     mutationFn: async (input: {
       template_id: string;
       site_name: string;
+      github_service_account_id?: string;
     }): Promise<DeployPagesResult> => {
       const res = await fetch('/api/oneclick/deploy', {
         method: 'POST',

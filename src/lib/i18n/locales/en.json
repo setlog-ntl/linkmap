@@ -502,7 +502,10 @@
     "recommended": "Recommended",
     "deploy": "Deploy This Template",
     "deploying": "Deploying...",
-    "preview": "Preview"
+    "preview": "Preview",
+    "switchAccount": "Switch account",
+    "addAccount": "Add another account",
+    "selectAccount": "Select GitHub account"
   },
   "account": {
     "tab": "Account",

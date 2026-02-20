@@ -502,7 +502,10 @@
     "recommended": "추천",
     "deploy": "이 템플릿으로 배포",
     "deploying": "배포 진행 중...",
-    "preview": "미리보기"
+    "preview": "미리보기",
+    "switchAccount": "계정 변경",
+    "addAccount": "다른 계정 추가",
+    "selectAccount": "배포할 GitHub 계정 선택"
   },
   "account": {
     "tab": "계정",
