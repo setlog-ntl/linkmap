@@ -51,7 +51,10 @@ export type AuditAction =
   | 'ai.env_doctor'
   | 'ai.map_narrate'
   | 'ai.compare_services'
-  | 'ai.command';
+  | 'ai.command'
+  | 'github_connection.add'
+  | 'github_connection.delete'
+  | 'github_connection.rename';
 
 interface AuditLogEntry {
   action: AuditAction;

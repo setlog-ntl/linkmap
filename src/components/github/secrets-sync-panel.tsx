@@ -164,12 +164,19 @@ export function SecretsSyncPanel({ projectId }: SecretsSyncPanelProps) {
                   <Badge variant="secondary" className="text-[10px]">자동 동기화</Badge>
                 )}
               </div>
-              {repo.last_synced_at && (
-                <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                  <Clock className="h-3 w-3" />
-                  마지막 동기화: {new Date(repo.last_synced_at).toLocaleString('ko-KR')}
-                </p>
-              )}
+              <div className="flex items-center gap-2 mt-0.5">
+                {repo.service_account && (
+                  <span className="text-[10px] text-muted-foreground">
+                    @{(repo.service_account.oauth_metadata as Record<string, string>)?.login || repo.service_account.display_name || '?'}
+                  </span>
+                )}
+                {repo.last_synced_at && (
+                  <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {new Date(repo.last_synced_at).toLocaleString('ko-KR')}
+                  </span>
+                )}
+              </div>
             </div>
             <div onClick={(e) => e.stopPropagation()}>
               <ConfirmDialog

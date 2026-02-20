@@ -1,9 +1,10 @@
 export type ServiceAccountConnectionType = 'oauth' | 'api_key' | 'manual';
 export type ServiceAccountStatus = 'active' | 'expired' | 'revoked' | 'error';
+export type ServiceAccountAuthMethod = 'oauth' | 'pat' | 'github_app' | 'deploy_key';
 
 export interface ServiceAccount {
   id: string;
-  project_id: string;
+  project_id: string | null;
   service_id: string;
   user_id: string;
   connection_type: ServiceAccountConnectionType;
@@ -14,7 +15,27 @@ export interface ServiceAccount {
   oauth_metadata: Record<string, unknown>;
   // API Key fields
   api_key_label: string | null;
+  // Multi-account support
+  display_name: string | null;
+  auth_method: ServiceAccountAuthMethod;
+  multi_account_provider: boolean;
   // Status
+  status: ServiceAccountStatus;
+  last_verified_at: string | null;
+  error_message: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** GitHub connection summary for settings page (no encrypted fields) */
+export interface GitHubConnection {
+  id: string;
+  user_id: string;
+  display_name: string | null;
+  auth_method: ServiceAccountAuthMethod;
+  oauth_provider_user_id: string | null;
+  oauth_metadata: Record<string, unknown>;
+  oauth_scopes: string[] | null;
   status: ServiceAccountStatus;
   last_verified_at: string | null;
   error_message: string | null;
@@ -34,7 +55,7 @@ export interface ServiceAccount {
  */
 export interface LinkedAccount {
   id: string;
-  project_id: string;
+  project_id: string | null;
   service_id: string;
   user_id: string;
   /** 예: 'github', 'vercel' 등 (service slug 또는 provider) */

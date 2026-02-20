@@ -45,6 +45,7 @@ interface ServiceNodeData {
   connectionCount?: number;
   accountStatus?: ServiceAccountStatus;
   githubSyncStatus?: 'synced' | 'syncing' | 'error' | null;
+  githubLogin?: string | null;
   [key: string]: unknown;
 }
 
@@ -259,6 +260,7 @@ function ServiceNode({ data }: NodeProps) {
       healthCheck={d.healthCheck}
       envVarCount={d.envVarCount}
       requiredEnvVarCount={d.requiredEnvVarCount}
+      githubLogin={d.githubLogin}
     >
       {nodeContent}
     </NodeTooltip>

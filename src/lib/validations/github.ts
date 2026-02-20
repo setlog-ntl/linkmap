@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const linkRepoSchema = z.object({
   project_id: z.string().uuid('유효하지 않은 프로젝트 ID'),
+  service_account_id: z.string().uuid('유효하지 않은 계정 ID').optional(),
   owner: z.string().min(1, '레포 owner는 필수입니다'),
   repo_name: z.string().min(1, '레포 이름은 필수입니다'),
   repo_full_name: z.string().min(1, '전체 레포 이름은 필수입니다'),

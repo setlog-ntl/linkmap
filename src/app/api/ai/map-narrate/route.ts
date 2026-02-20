@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { resolveOpenAIKey } from '@/lib/ai/resolve-key';
+import { resolveOpenAIKey, AIKeyNotConfiguredError } from '@/lib/ai/resolve-key';
 import { callOpenAIStream } from '@/lib/ai/openai';
 import { logAudit } from '@/lib/audit';
 
@@ -73,6 +73,12 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (err) {
+    if (err instanceof AIKeyNotConfiguredError) {
+      return new Response(
+        JSON.stringify({ error: err.message, code: 'ai_key_not_configured' }),
+        { status: 422 },
+      );
+    }
     return new Response(
       JSON.stringify({ error: err instanceof Error ? err.message : '분석 실패' }),
       { status: 500 },

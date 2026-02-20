@@ -41,6 +41,14 @@ Linkmap을 로컬 또는 프로덕션 환경에서 실행하기 위한 서비스
 |--------|--------|----------|
 | Stripe | [06-stripe.md](./06-stripe.md) | `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` |
 
+### Tier 4 -- AI 기능 (~5분)
+
+AI 분석 기능을 위한 설정입니다. 미설정 시 AI 기능만 비활성화됩니다.
+
+| 서비스 | 가이드 | 환경변수 |
+|--------|--------|----------|
+| AI Providers | [08-ai-features.md](./08-ai-features.md) | `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_AI_API_KEY` |
+
 ## 빠른 시작 (5분)
 
 이미 Supabase 프로젝트가 있다면:
@@ -84,5 +92,6 @@ npm run dev
 - [ ] Google/GitHub OAuth 로그인 성공
 - [ ] 프로젝트 생성 후 환경변수 저장/조회 정상
 - [ ] 서비스 맵 시각화 렌더링 정상
+- [ ] (AI 설정 시) AI 스택 추천 기능 응답 정상
 - [ ] (배포 시) Cloudflare Workers 빌드 성공 (`npm run build:cf`)
 - [ ] (배포 시) 프로덕션 URL에서 OAuth 콜백 정상

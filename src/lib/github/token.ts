@@ -62,3 +62,29 @@ export async function resolveUserGitHubToken(
 
   return result.token;
 }
+
+/**
+ * Resolve a GitHub token for a specific service account.
+ * Used when the caller knows exactly which account to use.
+ */
+export async function resolveGitHubTokenForAccount(
+  supabase: SupabaseClient,
+  serviceAccountId: string,
+  userId: string
+): Promise<string | null> {
+  const { data: ghAccount } = await supabase
+    .from('service_accounts')
+    .select('id, encrypted_access_token')
+    .eq('id', serviceAccountId)
+    .eq('user_id', userId)
+    .eq('connection_type', 'oauth')
+    .eq('status', 'active')
+    .single();
+
+  if (!ghAccount) return null;
+
+  const result = await safeDecryptToken(ghAccount.encrypted_access_token, supabase, ghAccount.id);
+  if ('error' in result) return null;
+
+  return result.token;
+}

@@ -2,10 +2,13 @@
 
 import { useState, useMemo } from 'react';
 import { useGitHubRepos, useLinkRepo, useLinkedRepos } from '@/lib/queries/github';
+import { useGitHubConnections } from '@/lib/queries/github-connections';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -15,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { Search, GitBranch, Lock, Globe, Check, Plus, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import type { GitHubConnection } from '@/types';
 
 interface RepoSelectorProps {
   projectId: string;
@@ -25,9 +29,15 @@ interface RepoSelectorProps {
 export function RepoSelector({ projectId, trigger, onLinked }: RepoSelectorProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const { data: repos, isLoading, error } = useGitHubRepos(projectId);
+  const [selectedAccountId, setSelectedAccountId] = useState<string | undefined>();
+  const { data: connections } = useGitHubConnections();
+  const { data: repos, isLoading, error } = useGitHubRepos(projectId, selectedAccountId);
   const { data: linkedRepos = [] } = useLinkedRepos(projectId);
   const linkRepo = useLinkRepo(projectId);
+
+  // Auto-select first account
+  const accounts = connections || [];
+  const currentAccountId = selectedAccountId || accounts[0]?.id;
 
   const linkedFullNames = useMemo(
     () => new Set(linkedRepos.map((r) => r.repo_full_name)),
@@ -52,6 +62,7 @@ export function RepoSelector({ projectId, trigger, onLinked }: RepoSelectorProps
         repo_name: repo.name,
         repo_full_name: repo.full_name,
         default_branch: repo.default_branch,
+        service_account_id: currentAccountId,
       });
       toast.success(`${repo.full_name} 연결 완료`);
       onLinked?.();
@@ -74,6 +85,36 @@ export function RepoSelector({ projectId, trigger, onLinked }: RepoSelectorProps
         <DialogHeader>
           <DialogTitle>GitHub 레포지토리 선택</DialogTitle>
         </DialogHeader>
+
+        {/* Account selector — shown when multiple accounts */}
+        {accounts.length > 1 && (
+          <Select
+            value={currentAccountId}
+            onValueChange={setSelectedAccountId}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="GitHub 계정 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              {accounts.map((acc: GitHubConnection) => {
+                const meta = acc.oauth_metadata as Record<string, string>;
+                return (
+                  <SelectItem key={acc.id} value={acc.id}>
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-5 w-5">
+                        <AvatarImage src={meta?.avatar_url} />
+                        <AvatarFallback className="text-[9px]">
+                          {(meta?.login || '?').charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span>@{meta?.login || acc.display_name || 'unknown'}</span>
+                    </div>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        )}
 
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

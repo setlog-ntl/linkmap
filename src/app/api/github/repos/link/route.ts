@@ -20,7 +20,12 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await supabase
     .from('project_github_repos')
-    .select('*')
+    .select(`
+      *,
+      service_account:service_account_id(
+        id, oauth_metadata, display_name, status, oauth_provider_user_id
+      )
+    `)
     .eq('project_id', projectId)
     .order('created_at', { ascending: false });
 
@@ -37,7 +42,7 @@ export async function POST(request: NextRequest) {
   const parsed = linkRepoSchema.safeParse(body);
   if (!parsed.success) return validationError(parsed.error);
 
-  const { project_id, owner, repo_name, repo_full_name, default_branch } = parsed.data;
+  const { project_id, service_account_id, owner, repo_name, repo_full_name, default_branch } = parsed.data;
 
   // Verify project ownership
   const { data: project } = await supabase
@@ -48,23 +53,41 @@ export async function POST(request: NextRequest) {
     .single();
   if (!project) return apiError('프로젝트를 찾을 수 없습니다', 404);
 
-  // Find GitHub service account
-  const { data: account } = await supabase
-    .from('service_accounts')
-    .select('id')
-    .eq('project_id', project_id)
-    .eq('connection_type', 'oauth')
-    .eq('status', 'active')
-    .single();
-
-  if (!account) return apiError('GitHub 계정이 연결되지 않았습니다', 404);
+  // Find GitHub service account — use explicit ID if provided, otherwise auto-detect
+  let accountId: string;
+  if (service_account_id) {
+    // Verify user owns this service account
+    const { data: account } = await supabase
+      .from('service_accounts')
+      .select('id')
+      .eq('id', service_account_id)
+      .eq('user_id', user.id)
+      .eq('connection_type', 'oauth')
+      .eq('status', 'active')
+      .single();
+    if (!account) return apiError('GitHub 계정을 찾을 수 없습니다', 404);
+    accountId = account.id;
+  } else {
+    // Fallback: find project-level or user-level account
+    const { data: account } = await supabase
+      .from('service_accounts')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('connection_type', 'oauth')
+      .eq('status', 'active')
+      .order('project_id', { ascending: false, nullsFirst: false })
+      .limit(1)
+      .single();
+    if (!account) return apiError('GitHub 계정이 연결되지 않았습니다', 404);
+    accountId = account.id;
+  }
 
   const { data, error } = await supabase
     .from('project_github_repos')
     .upsert(
       {
         project_id,
-        service_account_id: account.id,
+        service_account_id: accountId,
         owner,
         repo_name,
         repo_full_name,

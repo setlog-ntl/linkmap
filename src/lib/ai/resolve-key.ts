@@ -5,6 +5,16 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { decrypt } from '@/lib/crypto';
 import type { AiProviderSlug } from '@/types';
 
+/** Thrown when an AI provider API key is not configured. */
+export class AIKeyNotConfiguredError extends Error {
+  public readonly provider: string;
+  constructor(provider: string) {
+    super(`${provider} API 키가 설정되지 않았습니다. 환경변수 또는 AI 설정에서 등록하세요.`);
+    this.name = 'AIKeyNotConfiguredError';
+    this.provider = provider;
+  }
+}
+
 const ENV_KEY_MAP: Record<string, string> = {
   openai: 'OPENAI_API_KEY',
   anthropic: 'ANTHROPIC_API_KEY',
@@ -39,7 +49,7 @@ export async function resolveAIProviderKey(
     };
   }
 
-  throw new Error(`${providerSlug} API 키가 설정되지 않았습니다. 환경변수 또는 AI 설정에서 등록하세요.`);
+  throw new AIKeyNotConfiguredError(providerSlug);
 }
 
 /** Backward-compatible wrapper for OpenAI key resolution. */

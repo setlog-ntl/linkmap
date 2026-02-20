@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { unauthorizedError, validationError, serverError } from '@/lib/api/errors';
+import { unauthorizedError, validationError, serverError, configurationError } from '@/lib/api/errors';
 import { compareServicesSchema } from '@/lib/validations/ai-compare';
-import { resolveOpenAIKey } from '@/lib/ai/resolve-key';
+import { resolveOpenAIKey, AIKeyNotConfiguredError } from '@/lib/ai/resolve-key';
 import { logAudit } from '@/lib/audit';
 import { services as serviceCatalog } from '@/data/seed/services';
 
@@ -109,6 +109,9 @@ export async function POST(request: NextRequest) {
 
     return Response.json({ comparison: content, services: selectedServices.map((s) => s.name) });
   } catch (err) {
+    if (err instanceof AIKeyNotConfiguredError) {
+      return configurationError(err.message, 'ai_key_not_configured');
+    }
     return serverError(err instanceof Error ? err.message : '서비스 비교 실패');
   }
 }

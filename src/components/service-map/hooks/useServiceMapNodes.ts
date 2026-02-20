@@ -197,6 +197,10 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
       // Service account status
       const serviceAccount = serviceAccounts.find((sa) => sa.service_id === ps.service_id);
       const accountStatus = serviceAccount?.status;
+      // GitHub login for identity display
+      const githubLogin = serviceAccount?.oauth_metadata
+        ? (serviceAccount.oauth_metadata as Record<string, string>).login || null
+        : null;
 
       nodes.push({
         id: ps.id,
@@ -221,8 +225,9 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
           viewMode,
           // Phase 3A: connection count
           connectionCount,
-          // Service account status
+          // Service account status + identity
           accountStatus,
+          githubLogin,
         },
       });
     });

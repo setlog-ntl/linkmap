@@ -194,6 +194,15 @@ npx wrangler secret put NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 npx wrangler secret put STRIPE_WEBHOOK_SECRET
 ```
 
+#### Tier 4 (AI 기능 — 최대 3개, 선택)
+
+```bash
+npx wrangler secret put OPENAI_API_KEY
+# 필요 시 추가:
+# npx wrangler secret put ANTHROPIC_API_KEY
+# npx wrangler secret put GOOGLE_AI_API_KEY
+```
+
 ### 4-3. 첫 배포
 
 ```bash
@@ -261,6 +270,44 @@ GitHub repo Settings > Secrets에 아래 값을 추가하면 main push 시 자�
 
 ---
 
+## Phase 7: AI 기능 설정 (~5분, 선택)
+
+AI 분석 기능(스택 추천, 환경변수 진단, 서비스맵 내레이션 등)을 활성화합니다. 미설정 시 AI 기능만 비활성화되며 나머지는 정상 동작합니다.
+
+> 상세 가이드: [08-ai-features.md](./08-ai-features.md)
+
+### 7-1. API 키 발급
+
+최소 1개의 AI 프로바이더 키가 필요합니다.
+
+| 프로바이더 | 환경변수 | 발급처 |
+|-----------|----------|--------|
+| OpenAI (권장) | `OPENAI_API_KEY` | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
+| Anthropic | `ANTHROPIC_API_KEY` | [console.anthropic.com](https://console.anthropic.com/) |
+| Google AI | `GOOGLE_AI_API_KEY` | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
+
+### 7-2. 환경변수 등록
+
+```bash
+# 로컬 — .env.local에 추가
+OPENAI_API_KEY=sk-...
+
+# Cloudflare Workers
+npx wrangler secret put OPENAI_API_KEY
+```
+
+### 7-3. 검증
+
+```bash
+# 프로덕션 로그 확인
+npx wrangler tail
+# 다른 터미널에서 AI 기능 사용 → 로그에서 200 응답 확인
+```
+
+> **키 우선순위**: 환경변수 → DB fallback (AI 관리 콘솔). 환경변수가 있으면 DB 설정은 무시됩니다.
+
+---
+
 ## 최종 검증 체크리스트
 
 ### 로컬 환경
@@ -281,6 +328,7 @@ npm run dev
 - [ ] 프로젝트 생성 가능
 - [ ] 환경변수 저장/조회 정상 (암호화/복호화)
 - [ ] 서비스 맵 시각화 렌더링
+- [ ] AI 스택 추천 응답 정상 (Tier 4 설정 시)
 
 ### 프로덕션 환경
 
@@ -290,6 +338,7 @@ npm run dev
 - [ ] 환경변수 CRUD 정상 동작
 - [ ] GitHub Secrets 동기화 정상 (Tier 2 설정 시)
 - [ ] Stripe 결제 플로우 정상 (Tier 3 설정 시)
+- [ ] AI 기능 호출 시 200 응답 (Tier 4 설정 시)
 
 ---
 
@@ -303,6 +352,7 @@ npm run dev
 | 새 라우트 404 | 빌드 캐시 | `.open-next` 삭제 후 재빌드 |
 | GitHub 연동 에러 | OAuth Callback URL 불일치 | [Phase 5-1](#5-1-oauth-app-생성) 확인 |
 | 빌드 시 타입 에러 | 로컬에서 `npm run typecheck` 먼저 확인 | `npx tsc --noEmit` 실행 |
+| AI 기능 500 에러 | `OPENAI_API_KEY` 미설정 | [Phase 7](#phase-7-ai-기능-설정-5분-선택) 확인 |
 
 > 상세 트러블슈팅: [COMMON_MISTAKES.md](./COMMON_MISTAKES.md)
 
@@ -337,4 +387,5 @@ linkmap/
 | Tier 1 (필수) | 4개 | 필수 | ~15분 |
 | Tier 2 (배포) | 2개 | 서비스 연동 시 필수 | ~10분 |
 | Tier 3 (풀기능) | 3개 | 선택 | ~10분 |
-| **합계** | **9개** | | **~35분** |
+| Tier 4 (AI 기능) | 3개 | 선택 | ~5분 |
+| **합계** | **12개** | | **~40분** |

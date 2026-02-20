@@ -37,6 +37,7 @@ export const queryKeys = {
     linkedRepos: (projectId: string) => ['github', 'linked-repos', projectId] as const,
     secrets: (projectId: string, owner: string, repo: string) =>
       ['github', 'secrets', projectId, owner, repo] as const,
+    connections: ['github', 'connections'] as const,
   },
   linkedAccounts: {
     byProject: (projectId: string) => ['linked-accounts', 'project', projectId] as const,

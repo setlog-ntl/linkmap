@@ -4,6 +4,14 @@ import type { GitHubRepo, GitHubSecret } from '@/lib/github/api';
 
 // ---------- Types ----------
 
+export interface LinkedRepoServiceAccount {
+  id: string;
+  oauth_metadata: Record<string, unknown>;
+  display_name: string | null;
+  status: string;
+  oauth_provider_user_id: string | null;
+}
+
 export interface LinkedRepo {
   id: string;
   project_id: string;
@@ -14,9 +22,12 @@ export interface LinkedRepo {
   default_branch: string;
   auto_sync_enabled: boolean;
   sync_environment: string;
+  sync_branch?: string;
+  sync_directory?: string | null;
   last_synced_at: string | null;
   created_at: string;
   updated_at: string;
+  service_account?: LinkedRepoServiceAccount | null;
 }
 
 interface PushSecretItem {
@@ -32,11 +43,13 @@ interface PushResult {
 
 // ---------- Repos ----------
 
-export function useGitHubRepos(projectId: string) {
+export function useGitHubRepos(projectId: string, serviceAccountId?: string) {
   return useQuery({
-    queryKey: queryKeys.github.repos(projectId),
+    queryKey: [...queryKeys.github.repos(projectId), serviceAccountId ?? 'default'],
     queryFn: async (): Promise<GitHubRepo[]> => {
-      const res = await fetch(`/api/github/repos?project_id=${projectId}`);
+      const params = new URLSearchParams({ project_id: projectId });
+      if (serviceAccountId) params.set('service_account_id', serviceAccountId);
+      const res = await fetch(`/api/github/repos?${params}`);
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || 'GitHub 레포 목록 조회 실패');
@@ -72,6 +85,7 @@ export function useLinkRepo(projectId: string) {
       repo_name: string;
       repo_full_name: string;
       default_branch: string;
+      service_account_id?: string;
     }) => {
       const res = await fetch('/api/github/repos/link', {
         method: 'POST',

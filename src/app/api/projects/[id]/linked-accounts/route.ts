@@ -38,7 +38,7 @@ export async function GET(
   const { data, error } = await supabase
     .from('service_accounts')
     .select(
-      'id, project_id, service_id, user_id, connection_type, token_expires_at, oauth_scopes, oauth_provider_user_id, oauth_metadata, api_key_label, status, last_verified_at, error_message, created_at, updated_at',
+      'id, project_id, service_id, user_id, connection_type, token_expires_at, oauth_scopes, oauth_provider_user_id, oauth_metadata, api_key_label, display_name, auth_method, multi_account_provider, status, last_verified_at, error_message, created_at, updated_at',
     )
     .eq('project_id', projectId)
     .order('created_at', { ascending: true });

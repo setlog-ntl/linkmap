@@ -25,14 +25,25 @@ export async function GET(request: NextRequest) {
     .single();
   if (!project) return apiError('프로젝트를 찾을 수 없습니다', 404);
 
-  // Find GitHub service account for this project
-  const { data: account } = await supabase
+  // Find GitHub service account — explicit ID or auto-detect
+  const serviceAccountId = request.nextUrl.searchParams.get('service_account_id');
+  let accountQuery = supabase
     .from('service_accounts')
     .select('id, encrypted_access_token, status')
-    .eq('project_id', projectId)
     .eq('connection_type', 'oauth')
-    .eq('status', 'active')
-    .single();
+    .eq('status', 'active');
+
+  if (serviceAccountId) {
+    accountQuery = accountQuery.eq('id', serviceAccountId).eq('user_id', user.id);
+  } else {
+    // Fallback: project-level first, then user-level
+    accountQuery = accountQuery
+      .eq('user_id', user.id)
+      .order('project_id', { ascending: false, nullsFirst: false })
+      .limit(1);
+  }
+
+  const { data: account } = await accountQuery.single();
 
   if (!account) {
     return apiError('GitHub 계정이 연결되지 않았습니다. 서비스맵에서 GitHub를 연결해주세요.', 404);

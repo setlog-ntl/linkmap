@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { RepoSelector } from '@/components/github/repo-selector';
+import { GitHubConnectionInfo } from '@/components/github/github-connection-info';
 import { useLinkedRepos } from '@/lib/queries/github';
 import type { ServiceAccount } from '@/types';
 
@@ -195,9 +196,10 @@ export function ServiceAccountSection({
             </Button>
           </div>
 
-          {/* GitHub: one-click repo linking after OAuth */}
+          {/* GitHub: connection info + repo linking */}
           {isGitHub && account.status === 'active' && (
-            <div className="mt-2 pt-2 border-t border-border/50">
+            <div className="mt-2 pt-2 border-t border-border/50 space-y-2">
+              <GitHubConnectionInfo projectId={projectId} />
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
                   <GitBranch className="h-3 w-3" />

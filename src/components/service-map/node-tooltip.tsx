@@ -17,6 +17,7 @@ interface NodeTooltipProps {
   healthCheck?: HealthCheck;
   envVarCount?: number;
   requiredEnvVarCount?: number;
+  githubLogin?: string | null;
 }
 
 const statusLabels: Record<string, string> = {
@@ -49,6 +50,7 @@ export function NodeTooltip({
   healthCheck,
   envVarCount,
   requiredEnvVarCount,
+  githubLogin,
 }: NodeTooltipProps) {
   return (
     <Tooltip delayDuration={500}>
@@ -75,6 +77,12 @@ export function NodeTooltip({
                   </span>
                 )}
               </span>
+            </div>
+          )}
+          {githubLogin && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">GitHub</span>
+              <span>@{githubLogin}</span>
             </div>
           )}
           {costEstimate && (

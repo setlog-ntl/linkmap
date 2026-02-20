@@ -446,7 +446,21 @@
     "colAccount": "Account",
     "colConnectionType": "Type",
     "colProject": "Project",
-    "colStatus": "Status"
+    "colStatus": "Status",
+    "connectionsTab": "GitHub Connections",
+    "githubConnections": "GitHub Account Management",
+    "githubConnectionsDesc": "Connect multiple GitHub accounts and use them per project.",
+    "addGitHub": "Add GitHub Account",
+    "noGitHubConnections": "No GitHub accounts connected",
+    "noGitHubConnectionsDesc": "Connect a GitHub account to access repositories, sync secrets, and more.",
+    "deleteConnection": "Delete Connection",
+    "deleteConnectionConfirm": "Are you sure you want to delete this GitHub connection?",
+    "deleteConnectionLinkedWarning": "This account has linked repositories. Unlink them first before deleting.",
+    "renameConnection": "Rename",
+    "connectionAdded": "GitHub account connected",
+    "connectionDeleted": "GitHub connection deleted",
+    "connectionRenamed": "Connection renamed",
+    "scopes": "Scopes"
   },
   "commandPalette": {
     "placeholder": "Search commands...",

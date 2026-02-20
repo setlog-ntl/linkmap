@@ -8,6 +8,7 @@ import { t } from '@/lib/i18n';
 
 const tabs = [
   { href: '/settings/account', labelKey: 'account.tab' },
+  { href: '/settings/connections', labelKey: 'account.connectionsTab' },
   { href: '/settings/tokens', labelKey: 'account.apiTokensTab' },
 ] as const;
 

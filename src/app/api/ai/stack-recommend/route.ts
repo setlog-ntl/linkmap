@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { unauthorizedError, validationError, serverError } from '@/lib/api/errors';
+import { unauthorizedError, validationError, serverError, configurationError } from '@/lib/api/errors';
 import { stackRecommendSchema } from '@/lib/validations/ai-stack';
-import { resolveOpenAIKey } from '@/lib/ai/resolve-key';
+import { resolveOpenAIKey, AIKeyNotConfiguredError } from '@/lib/ai/resolve-key';
 import { callOpenAIStructured } from '@/lib/ai/openai';
 import { logAudit } from '@/lib/audit';
 import { services as serviceCatalog } from '@/data/seed/services';
@@ -112,6 +112,9 @@ ${JSON.stringify(catalogContext)}
 
     return Response.json(data);
   } catch (err) {
+    if (err instanceof AIKeyNotConfiguredError) {
+      return configurationError(err.message, 'ai_key_not_configured');
+    }
     return serverError(err instanceof Error ? err.message : '스택 추천 실패');
   }
 }

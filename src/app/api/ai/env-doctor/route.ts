@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { unauthorizedError, validationError, serverError } from '@/lib/api/errors';
+import { unauthorizedError, validationError, serverError, configurationError } from '@/lib/api/errors';
 import { envDoctorSchema } from '@/lib/validations/ai-env';
-import { resolveOpenAIKey } from '@/lib/ai/resolve-key';
+import { resolveOpenAIKey, AIKeyNotConfiguredError } from '@/lib/ai/resolve-key';
 import { callOpenAIWithTools, type ToolDefinition } from '@/lib/ai/openai';
 import { logAudit } from '@/lib/audit';
 import { services as serviceCatalog } from '@/data/seed/services';
@@ -186,6 +186,9 @@ ${JSON.stringify(envSummary)}
       return Response.json({ issues: [], summary: content });
     }
   } catch (err) {
+    if (err instanceof AIKeyNotConfiguredError) {
+      return configurationError(err.message, 'ai_key_not_configured');
+    }
     return serverError(err instanceof Error ? err.message : '환경변수 진단 실패');
   }
 }

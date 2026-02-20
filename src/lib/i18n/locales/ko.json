@@ -446,7 +446,21 @@
     "colAccount": "계정",
     "colConnectionType": "연결 방식",
     "colProject": "프로젝트",
-    "colStatus": "상태"
+    "colStatus": "상태",
+    "connectionsTab": "GitHub 연결",
+    "githubConnections": "GitHub 계정 관리",
+    "githubConnectionsDesc": "여러 GitHub 계정을 연결하여 프로젝트별로 사용할 수 있습니다.",
+    "addGitHub": "GitHub 계정 추가",
+    "noGitHubConnections": "연결된 GitHub 계정이 없습니다",
+    "noGitHubConnectionsDesc": "GitHub 계정을 연결하면 레포지토리 접근, Secrets 동기화 등을 사용할 수 있습니다.",
+    "deleteConnection": "연결 삭제",
+    "deleteConnectionConfirm": "이 GitHub 계정 연결을 삭제하시겠습니까?",
+    "deleteConnectionLinkedWarning": "이 계정에 연결된 레포지토리가 있어 삭제할 수 없습니다. 먼저 레포 연결을 해제하세요.",
+    "renameConnection": "이름 변경",
+    "connectionAdded": "GitHub 계정이 연결되었습니다",
+    "connectionDeleted": "GitHub 계정 연결이 삭제되었습니다",
+    "connectionRenamed": "이름이 변경되었습니다",
+    "scopes": "권한"
   },
   "commandPalette": {
     "placeholder": "명령어 검색...",

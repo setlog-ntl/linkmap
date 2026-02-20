@@ -36,6 +36,18 @@ Next.js에서 `NEXT_PUBLIC_` 접두사가 붙은 환경변수는 **클라이언�
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | `pk_test_...` / `pk_live_...` | Stripe > Developers > API Keys | 클라이언트 결제 UI |
 | `STRIPE_WEBHOOK_SECRET` | `whsec_...` | Stripe > Developers > Webhooks | `src/app/api/stripe/webhook/route.ts` |
 
+## Tier 4 -- AI 기능
+
+AI 분석 기능을 위한 변수입니다. 모두 선택 사항이며, 최소 1개의 API 키가 있으면 해당 AI 기능이 활성화됩니다.
+
+| 변수명 | 값 형식 | 출처 | 코드 위치 |
+|--------|---------|------|-----------|
+| `OPENAI_API_KEY` | `sk-...` | [OpenAI Platform](https://platform.openai.com/api-keys) | `src/lib/ai/resolve-key.ts` |
+| `ANTHROPIC_API_KEY` | `sk-ant-...` | [Anthropic Console](https://console.anthropic.com/) | `src/lib/ai/resolve-key.ts` |
+| `GOOGLE_AI_API_KEY` | `AIza...` | [Google AI Studio](https://aistudio.google.com/apikey) | `src/lib/ai/resolve-key.ts` |
+
+> **키 해석 우선순위**: 환경변수 → DB fallback (AI 관리 콘솔에서 등록한 키). 환경변수가 설정되어 있으면 DB 값보다 우선합니다. 상세: [08-ai-features.md](./08-ai-features.md#키-해석-우선순위)
+
 ## 환경별 설정 위치
 
 | 환경 | 설정 파일/위치 | 비고 |
@@ -51,4 +63,5 @@ Next.js에서 `NEXT_PUBLIC_` 접두사가 붙은 환경변수는 **클라이언�
 | Tier 1 (필수) | 4개 | 필수 |
 | Tier 2 (배포) | 2개 | 배포 시 필수 |
 | Tier 3 (풀기능) | 3개 | 선택 |
-| **합계** | **9개** | |
+| Tier 4 (AI 기능) | 3개 | 선택 |
+| **합계** | **12개** | |

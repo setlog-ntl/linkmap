@@ -134,6 +134,63 @@ npx wrangler deploy
 
 ---
 
+## 8. AI 기능 500 에러 — API 키 미설정
+
+**증상**: AI 기능(스택 추천, 환경변수 진단 등) 호출 시 500 Internal Server Error
+
+**에러 메시지** (`npx wrangler tail`로 확인):
+```
+Error: OpenAI API 키가 설정되지 않았습니다. 환경변수 또는 AI 관리 콘솔에서 키를 등록해주세요.
+```
+
+**원인**: `OPENAI_API_KEY`가 `.env.local`에만 있고 Cloudflare Workers에는 설정되지 않았습니다. `.env.local`은 로컬 전용이므로 Workers에 별도 등록이 필요합니다.
+
+**해결**:
+
+```bash
+# Cloudflare Workers에 키 등록
+npx wrangler secret put OPENAI_API_KEY
+# 프롬프트에 키 값 입력
+
+# 재배포 (GitHub Actions 자동 배포 미사용 시)
+npx wrangler deploy
+```
+
+또는 대시보드 > AI 설정 > Providers 탭에서 키를 등록합니다 (DB 저장 방식).
+
+**예방**: [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md#phase-7-ai-기능-설정-5분-선택)의 Phase 7을 배포 시 반드시 확인하세요.
+
+---
+
+## 9. AI 키 우선순위 혼동 — 환경변수 vs DB 설정
+
+**증상**: AI 관리 콘솔에서 키를 등록했는데 AI 기능이 동작하지 않음
+
+**원인**: 키 해석 우선순위를 모르고 설정이 꼬인 경우입니다.
+
+```
+우선순위: 환경변수 (OPENAI_API_KEY) > DB (ai_providers 테이블)
+```
+
+**주요 시나리오**:
+
+| 상황 | 사용되는 키 |
+|------|-----------|
+| 환경변수 O, DB O | 환경변수 |
+| 환경변수 O, DB X | 환경변수 |
+| 환경변수 X, DB O | DB (복호화 후 사용) |
+| 환경변수 X, DB X | 에러 (500) |
+
+**해결**:
+
+1. **환경변수만 사용할 경우**: `.env.local` 또는 `wrangler secret put`으로 설정
+2. **DB만 사용할 경우**: 환경변수를 제거하고, AI 관리 콘솔에서 등록 + `ENCRYPTION_KEY`가 프로덕션에 설정되어 있는지 확인
+3. **DB 키가 동작하지 않는 경우**: `ENCRYPTION_KEY`가 로컬과 프로덕션에서 동일한지 확인 (다르면 복호화 실패)
+
+자세한 내용: [08-ai-features.md](./08-ai-features.md)
+
+---
+
 ## 빠른 진단 체크리스트
 
 문제 발생 시 아래 순서로 확인하세요:
@@ -142,4 +199,5 @@ npx wrangler deploy
 2. **Cloudflare 환경변수 확인**: 로컬에만 설정하고 Workers에는 빠뜨리지 않았는가?
 3. **Supabase URL Configuration**: Site URL과 Redirect URLs가 올바른가?
 4. **빌드 캐시**: 새 코드가 배포에 반영되었는가? (`.open-next` 삭제 후 재빌드)
-5. **콘솔/로그 확인**: 브라우저 DevTools, `npx wrangler tail`로 로그 확인
+5. **AI 키 확인**: `OPENAI_API_KEY`가 Workers에도 설정되어 있는가? (로컬 전용 `.env.local` ≠ 프로덕션)
+6. **콘솔/로그 확인**: 브라우저 DevTools, `npx wrangler tail`로 로그 확인

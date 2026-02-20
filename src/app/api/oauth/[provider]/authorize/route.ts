@@ -30,30 +30,42 @@ export async function GET(
   const clientId = process.env[config.client_id_env];
   if (!clientId) return apiError('OAuth 설정이 완료되지 않았습니다. 관리자에게 문의하세요.', 503);
 
+  const flowContext = request.nextUrl.searchParams.get('flow_context');
   const projectId = request.nextUrl.searchParams.get('project_id');
-  const serviceSlug = request.nextUrl.searchParams.get('service_slug');
-  if (!projectId || !serviceSlug) return apiError('project_id와 service_slug가 필요합니다', 400);
+  const serviceSlug = request.nextUrl.searchParams.get('service_slug') || provider;
 
-  // Verify project ownership
-  const { data: project } = await supabase
-    .from('projects')
-    .select('id')
-    .eq('id', projectId)
-    .eq('user_id', user.id)
-    .single();
+  if (flowContext === 'settings') {
+    // Settings flow: no project_id required, user-level connection
+  } else {
+    // Project flow: project_id + service_slug required
+    if (!projectId || !serviceSlug) return apiError('project_id와 service_slug가 필요합니다', 400);
 
-  if (!project) return apiError('프로젝트를 찾을 수 없습니다', 404);
+    // Verify project ownership
+    const { data: project } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('id', projectId)
+      .eq('user_id', user.id)
+      .single();
+
+    if (!project) return apiError('프로젝트를 찾을 수 없습니다', 404);
+  }
 
   // Generate CSRF state token
   const stateToken = randomBytes(32).toString('hex');
 
+  const redirectUrl = flowContext === 'settings'
+    ? '/settings/connections'
+    : `/project/${projectId}/service-map`;
+
   // Store state in DB — RLS policy: user_id = auth.uid()
   const { error } = await supabase.from('oauth_states').insert({
     user_id: user.id,
-    project_id: projectId,
+    project_id: projectId || null,
     service_slug: serviceSlug,
     state_token: stateToken,
-    redirect_url: `/project/${projectId}/service-map`,
+    redirect_url: redirectUrl,
+    flow_context: flowContext || 'project',
   });
 
   if (error) {

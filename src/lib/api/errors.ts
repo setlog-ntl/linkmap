@@ -18,6 +18,10 @@ export function validationError(error: z.ZodError) {
   return apiError(messages, 400);
 }
 
+export function configurationError(message: string, code: string) {
+  return NextResponse.json({ error: message, code }, { status: 422 });
+}
+
 export function serverError(message = '서버 오류가 발생했습니다') {
   return apiError(message, 500);
 }

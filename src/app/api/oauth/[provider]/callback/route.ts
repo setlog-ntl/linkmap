@@ -145,7 +145,7 @@ export async function GET(
       : null;
 
     // Save service account
-    const isOneclick = oauthState.flow_context === 'oneclick';
+    const isUserLevel = oauthState.flow_context === 'oneclick' || oauthState.flow_context === 'settings';
     const accountData = {
       service_id: service.id,
       user_id: userId,
@@ -156,6 +156,8 @@ export async function GET(
       oauth_scopes: scopes,
       oauth_provider_user_id: providerUserId,
       oauth_metadata: oauthMetadata,
+      display_name: (oauthMetadata.login as string) || null,
+      auth_method: 'oauth' as const,
       status: 'active' as const,
       last_verified_at: new Date().toISOString(),
       error_message: null,
@@ -165,15 +167,21 @@ export async function GET(
     let account: { id: string } | null = null;
     let error: unknown = null;
 
-    if (isOneclick) {
-      // User-level account (project_id = NULL): can't use upsert with NULL in onConflict
-      const { data: existing } = await adminClient
+    if (isUserLevel) {
+      // User-level account (project_id = NULL): identity-based matching via oauth_provider_user_id
+      const existingQuery = adminClient
         .from('service_accounts')
         .select('id')
         .eq('user_id', userId)
         .eq('service_id', service.id)
-        .is('project_id', null)
-        .single();
+        .is('project_id', null);
+
+      // Match by provider user ID (same GitHub user = update, new GitHub user = insert)
+      if (providerUserId) {
+        existingQuery.eq('oauth_provider_user_id', providerUserId);
+      }
+
+      const { data: existing } = await existingQuery.single();
 
       if (existing) {
         const { data, error: updateErr } = await adminClient
@@ -227,7 +235,9 @@ export async function GET(
 
     // Redirect based on flow context
     let redirectUrl: string;
-    if (isOneclick) {
+    if (oauthState.flow_context === 'settings') {
+      redirectUrl = `/settings/connections?oauth_success=${provider}`;
+    } else if (oauthState.flow_context === 'oneclick') {
       redirectUrl = `/oneclick?oauth_success=${provider}`;
     } else if (oauthState.redirect_url.includes('/service-map')) {
       redirectUrl = `${oauthState.redirect_url}?oauth_success=${provider}&show_repo_selector=true`;
