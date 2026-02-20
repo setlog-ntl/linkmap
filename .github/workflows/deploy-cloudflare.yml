@@ -1,3 +1,7 @@
+# Git 배포 적용: main 푸시 시 Cloudflare Workers로 자동 배포
+# 필수 GitHub Secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID,
+#   NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
+# 설정: Repository → Settings → Secrets and variables → Actions
 name: Deploy to Cloudflare Workers
 
 on:

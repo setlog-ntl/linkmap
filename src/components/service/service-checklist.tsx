@@ -56,7 +56,7 @@ export function ServiceChecklist({ projectServiceId, serviceId }: ServiceCheckli
         .select('id')
         .eq('project_service_id', projectServiceId)
         .eq('checklist_item_id', itemId)
-        .single();
+        .maybeSingle();
 
       if (existing) {
         await supabase
