@@ -26,8 +26,8 @@ import {
 } from '@/lib/queries/github-connections';
 import { useProjects } from '@/lib/queries/projects';
 import {
-  GitBranch, Trash2, Pencil, Plus, Check, X,
-  ExternalLink, FolderOpen, Unlink,
+  GitBranch, Pencil, Plus, Check, X,
+  ExternalLink, FolderOpen,
   ArrowLeft, Link2, Calendar, LogOut, AlertTriangle,
   Layers,
 } from 'lucide-react';
@@ -50,31 +50,31 @@ interface UserProfile {
   createdAt: string;
 }
 
-// ─── Status & Connection helpers ────────────────────────
+// ─── Status & Connection helpers (Stitch palette) ───────
 
 function statusDotColor(status: string): string {
   switch (status) {
-    case 'active': return 'bg-emerald-500';
-    case 'expired': return 'bg-yellow-500';
-    case 'error': return 'bg-red-500';
-    case 'revoked': return 'bg-zinc-500';
-    default: return 'bg-zinc-500';
+    case 'active': return 'bg-emerald-400';
+    case 'expired': return 'bg-yellow-400';
+    case 'error': return 'bg-red-400';
+    case 'revoked': return 'bg-zinc-400';
+    default: return 'bg-zinc-400';
   }
 }
 
 function StatusBadge({ status, locale }: { status: string; locale: 'ko' | 'en' }) {
   const colors: Record<string, string> = {
-    active: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    expired: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-    error: 'bg-red-500/10 text-red-400 border-red-500/20',
-    revoked: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
+    active: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/25',
+    expired: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/25',
+    error: 'bg-red-500/15 text-red-300 border-red-500/25',
+    revoked: 'bg-zinc-500/15 text-zinc-300 border-zinc-500/25',
   };
   const color = colors[status] || colors.revoked;
   const label = t(locale, `account.status${status.charAt(0).toUpperCase() + status.slice(1)}`);
 
   return (
-    <span className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border ${color}`}>
-      <span className={`h-1.5 w-1.5 rounded-full ${statusDotColor(status)}`} />
+    <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${color}`}>
+      <span className={`h-2 w-2 rounded-full ${statusDotColor(status)}`} />
       {label}
     </span>
   );
@@ -82,9 +82,9 @@ function StatusBadge({ status, locale }: { status: string; locale: 'ko' | 'en' }
 
 function ConnectionTypeBadge({ type, locale }: { type: string; locale: 'ko' | 'en' }) {
   const colors: Record<string, string> = {
-    oauth: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
-    api_key: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    manual: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
+    oauth: 'bg-violet-500/15 text-violet-300 border-violet-500/25',
+    api_key: 'bg-amber-500/15 text-amber-300 border-amber-500/25',
+    manual: 'bg-zinc-500/15 text-zinc-300 border-zinc-500/25',
   };
   const labels: Record<string, string> = {
     oauth: 'account.connectionOAuth',
@@ -95,7 +95,7 @@ function ConnectionTypeBadge({ type, locale }: { type: string; locale: 'ko' | 'e
   const label = labels[type] ? t(locale, labels[type]) : type;
 
   return (
-    <span className={`inline-flex items-center text-[11px] font-medium px-2.5 py-1 rounded-full border ${color}`}>
+    <span className={`inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full border ${color}`}>
       {label}
     </span>
   );
@@ -152,45 +152,45 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
   };
 
   return (
-    <div className={`rounded-lg border bg-card/50 p-5 transition-opacity ${!isActive ? 'opacity-50' : ''}`}>
+    <div className={`rounded-xl border border-zinc-800 bg-zinc-900 p-5 transition-opacity ${!isActive ? 'opacity-40' : ''}`}>
       {/* Header: avatar + name + toggle + status badge */}
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <Avatar className="h-10 w-10">
+        <div className="flex items-start gap-3.5">
+          <Avatar className="h-11 w-11 ring-2 ring-zinc-700">
             <AvatarImage src={avatarUrl} alt={login} />
-            <AvatarFallback>{login.charAt(0).toUpperCase()}</AvatarFallback>
+            <AvatarFallback className="text-base font-semibold">{login.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               {editing ? (
                 <div className="flex items-center gap-1">
                   <Input
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="h-7 text-sm w-40"
+                    className="h-8 text-sm w-44"
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleRename();
                       if (e.key === 'Escape') setEditing(false);
                     }}
                   />
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleRename} disabled={renameMutation.isPending}>
-                    <Check className="h-3.5 w-3.5" />
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleRename} disabled={renameMutation.isPending}>
+                    <Check className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditing(false)}>
-                    <X className="h-3.5 w-3.5" />
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditing(false)}>
+                    <X className="h-4 w-4" />
                   </Button>
                 </div>
               ) : (
                 <>
-                  <span className="font-semibold text-sm">{connection.display_name || login}</span>
+                  <span className="font-semibold text-[15px] text-zinc-100">{connection.display_name || login}</span>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-5 w-5 text-muted-foreground hover:text-foreground"
+                    className="h-6 w-6 text-zinc-500 hover:text-zinc-200"
                     onClick={() => { setEditName(connection.display_name || login); setEditing(true); }}
                   >
-                    <Pencil className="h-3 w-3" />
+                    <Pencil className="h-3.5 w-3.5" />
                   </Button>
                 </>
               )}
@@ -199,7 +199,7 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
               href={`https://github.com/${login}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mt-0.5"
+              className="inline-flex items-center gap-1 text-[13px] text-zinc-400 hover:text-zinc-200 transition-colors mt-0.5"
             >
               @{login}
               <ExternalLink className="h-3 w-3" />
@@ -220,13 +220,13 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
       {/* SCOPES */}
       {connection.oauth_scopes && connection.oauth_scopes.length > 0 && (
         <div className="mt-4 flex items-center gap-2 flex-wrap">
-          <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+          <span className="text-[11px] font-semibold tracking-wider text-zinc-500 uppercase">
             {t(locale, 'account.scopes')}
           </span>
           {connection.oauth_scopes.map((scope) => (
             <span
               key={scope}
-              className="inline-flex text-[11px] px-2 py-0.5 rounded bg-muted/50 text-muted-foreground font-mono"
+              className="inline-flex text-xs px-2.5 py-0.5 rounded-md bg-zinc-800 text-zinc-300 font-mono border border-zinc-700"
             >
               {scope}
             </span>
@@ -235,25 +235,25 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
       )}
 
       {connection.error_message && (
-        <p className="text-xs text-red-400 mt-3">{connection.error_message}</p>
+        <p className="text-sm text-red-400 mt-3">{connection.error_message}</p>
       )}
 
       {/* PROJECTS */}
       {connection.linked_projects && connection.linked_projects.length > 0 && (
-        <div className="mt-4 flex items-start gap-2">
-          <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase pt-0.5">
+        <div className="mt-4 flex items-start gap-2.5">
+          <span className="text-[11px] font-semibold tracking-wider text-zinc-500 uppercase pt-0.5">
             Projects
           </span>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1.5">
             {connection.linked_projects.map((proj) => (
               <Link
                 key={proj.project_id}
                 href={`/project/${proj.project_id}`}
-                className="inline-flex items-center gap-1.5 text-xs text-foreground hover:text-primary transition-colors"
+                className="inline-flex items-center gap-1.5 text-[13px] text-zinc-200 hover:text-violet-400 transition-colors"
               >
-                <FolderOpen className="h-3 w-3 text-muted-foreground" />
+                <FolderOpen className="h-3.5 w-3.5 text-zinc-500" />
                 <span>{proj.project_name}</span>
-                <span className="text-muted-foreground">
+                <span className="text-zinc-500">
                   ({proj.repo_count} {t(locale, 'account.repoCount')})
                 </span>
               </Link>
@@ -263,11 +263,11 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
       )}
 
       {/* Action row: Unlink / Delete Data */}
-      <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-end gap-4">
+      <div className="mt-4 pt-3 border-t border-zinc-800 flex items-center justify-end gap-5">
         {hasLinkedRepos && (
           <ConfirmDialog
             trigger={
-              <button className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+              <button className="text-[13px] text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer">
                 Unlink
               </button>
             }
@@ -292,13 +292,13 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
             <TooltipTrigger asChild>
               <span>
                 {hasLinkedRepos ? (
-                  <span className="text-xs text-muted-foreground/40 cursor-not-allowed">
+                  <span className="text-[13px] text-zinc-600 cursor-not-allowed">
                     Delete Data
                   </span>
                 ) : (
                   <ConfirmDialog
                     trigger={
-                      <button className="text-xs text-red-400 hover:text-red-300 transition-colors cursor-pointer">
+                      <button className="text-[13px] text-red-400 hover:text-red-300 transition-colors cursor-pointer">
                         Delete Data
                       </button>
                     }
@@ -421,23 +421,23 @@ export default function AccountPage() {
 
   if (isLoading) {
     return (
-      <div className="container py-8 max-w-3xl mx-auto">
+      <div className="container py-10 max-w-3xl mx-auto">
         <Skeleton className="h-5 w-48 mb-8" />
-        <Skeleton className="h-24 mb-10 rounded-lg" />
-        <Skeleton className="h-5 w-32 mb-4" />
-        <Skeleton className="h-40 rounded-lg mb-10" />
-        <Skeleton className="h-5 w-40 mb-4" />
-        <Skeleton className="h-32 rounded-lg" />
+        <Skeleton className="h-28 mb-12 rounded-xl" />
+        <Skeleton className="h-5 w-36 mb-5" />
+        <Skeleton className="h-44 rounded-xl mb-12" />
+        <Skeleton className="h-5 w-40 mb-5" />
+        <Skeleton className="h-36 rounded-xl" />
       </div>
     );
   }
 
   return (
-    <div className="container py-8 max-w-3xl mx-auto">
+    <div className="container py-10 max-w-3xl mx-auto">
       {/* ── Back Navigation ── */}
       <Link
         href="/dashboard"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+        className="inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-100 transition-colors mb-10"
       >
         <ArrowLeft className="h-4 w-4" />
         {t(locale, 'account.backToDashboard')}
@@ -445,22 +445,27 @@ export default function AccountPage() {
 
       {/* ── 1. Profile Card ── */}
       {profile && (
-        <Card className="mb-10 bg-card/50">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <Avatar size="lg">
-                <AvatarImage src={profile.avatarUrl} alt={profile.name} />
-                <AvatarFallback className="text-lg">{profile.name.charAt(0).toUpperCase()}</AvatarFallback>
-              </Avatar>
+        <Card className="mb-12 bg-zinc-900 border-zinc-800">
+          <CardContent className="p-7">
+            <div className="flex items-center gap-5">
+              <div className="relative">
+                <Avatar size="lg" className="ring-2 ring-zinc-700">
+                  <AvatarImage src={profile.avatarUrl} alt={profile.name} />
+                  <AvatarFallback className="text-xl font-bold bg-zinc-800 text-zinc-200">{profile.name.charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <Badge className="absolute -bottom-1 -right-1 text-[9px] px-1.5 py-0 bg-violet-600 border-0 text-white">
+                  {profile.provider}
+                </Badge>
+              </div>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   {editingName ? (
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5">
                       <Input
                         ref={nameInputRef}
                         value={nameValue}
                         onChange={(e) => setNameValue(e.target.value)}
-                        className="h-8 text-sm w-48"
+                        className="h-9 text-base w-52 bg-zinc-800 border-zinc-700"
                         placeholder={t(locale, 'account.namePlaceholder')}
                         autoFocus
                         onKeyDown={(e) => {
@@ -468,33 +473,30 @@ export default function AccountPage() {
                           if (e.key === 'Escape') setEditingName(false);
                         }}
                       />
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleSaveName} disabled={savingName}>
-                        <Check className="h-3.5 w-3.5" />
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-300 hover:text-zinc-100" onClick={handleSaveName} disabled={savingName}>
+                        <Check className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditingName(false)}>
-                        <X className="h-3.5 w-3.5" />
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-300 hover:text-zinc-100" onClick={() => setEditingName(false)}>
+                        <X className="h-4 w-4" />
                       </Button>
                     </div>
                   ) : (
                     <>
-                      <h1 className="text-lg font-semibold">{profile.name}</h1>
+                      <h1 className="text-xl font-bold text-zinc-50">{profile.name}</h1>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                        className="h-7 w-7 text-zinc-500 hover:text-zinc-200"
                         onClick={() => { setNameValue(profile.name); setEditingName(true); }}
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
                     </>
                   )}
-                  <Badge variant="outline" className="text-[11px] font-normal px-2 py-0.5">
-                    {profile.provider}
-                  </Badge>
                 </div>
-                <p className="text-sm text-muted-foreground mt-0.5">{profile.email}</p>
-                <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
+                <p className="text-[15px] text-zinc-400 mt-1">{profile.email}</p>
+                <p className="text-[13px] text-zinc-500 mt-2 flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5" />
                   {new Date(profile.createdAt).toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}
                 </p>
               </div>
@@ -504,12 +506,12 @@ export default function AccountPage() {
       )}
 
       {/* ── 2. GitHub Accounts ── */}
-      <section className="mb-10">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-bold">
+      <section className="mb-12">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-lg font-bold text-zinc-100">
             GitHub {t(locale, 'account.tab')}
           </h2>
-          <Button onClick={handleAddGitHub} size="sm" variant="ghost" className="h-8 w-8 p-0">
+          <Button onClick={handleAddGitHub} size="sm" variant="ghost" className="h-8 w-8 p-0 text-zinc-400 hover:text-zinc-100">
             <Plus className="h-4 w-4" />
           </Button>
         </div>
@@ -531,10 +533,10 @@ export default function AccountPage() {
       </section>
 
       {/* ── 3. Connected Services (all projects) ── */}
-      <section className="mb-10">
-        <div className="mb-4">
-          <h2 className="text-base font-bold">{t(locale, 'account.allServices')}</h2>
-          <p className="text-xs text-muted-foreground mt-1">{t(locale, 'account.allServicesDesc')}</p>
+      <section className="mb-12">
+        <div className="mb-5">
+          <h2 className="text-lg font-bold text-zinc-100">{t(locale, 'account.allServices')}</h2>
+          <p className="text-[13px] text-zinc-500 mt-1">{t(locale, 'account.allServicesDesc')}</p>
         </div>
 
         {allServices.length === 0 ? (
@@ -544,22 +546,22 @@ export default function AccountPage() {
             description={t(locale, 'account.noServicesDesc')}
           />
         ) : (
-          <div className="rounded-lg border bg-card/50 overflow-hidden">
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900 overflow-hidden">
             {/* Table Header */}
-            <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 px-5 py-3 border-b bg-muted/20">
-              <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
+            <div className="grid grid-cols-[1fr_120px_100px_90px_56px] gap-3 px-5 py-3.5 border-b border-zinc-800 bg-zinc-900/80">
+              <span className="text-[11px] font-semibold tracking-wider text-zinc-500 uppercase">
                 {t(locale, 'account.colService')}
               </span>
-              <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase w-28 text-center">
+              <span className="text-[11px] font-semibold tracking-wider text-zinc-500 uppercase text-center">
                 {t(locale, 'account.colProject')}
               </span>
-              <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase w-24 text-center">
+              <span className="text-[11px] font-semibold tracking-wider text-zinc-500 uppercase text-center">
                 {t(locale, 'account.colConnectionType')}
               </span>
-              <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase w-20 text-center">
+              <span className="text-[11px] font-semibold tracking-wider text-zinc-500 uppercase text-center">
                 {t(locale, 'account.colStatus')}
               </span>
-              <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase w-14 text-center">
+              <span className="text-[11px] font-semibold tracking-wider text-zinc-500 uppercase text-center">
                 {t(locale, 'account.colToggle')}
               </span>
             </div>
@@ -573,36 +575,36 @@ export default function AccountPage() {
       </section>
 
       {/* ── 4. Danger Zone ── */}
-      <section className="mb-10">
-        <h2 className="text-base font-bold mb-4 text-red-400">
+      <section className="mb-12">
+        <h2 className="text-lg font-bold mb-5 text-red-400">
           {t(locale, 'account.dangerZone')}
         </h2>
-        <div className="rounded-lg border border-red-500/30 bg-red-500/5 divide-y divide-red-500/20">
+        <div className="rounded-xl border border-red-500/30 bg-red-950/20 divide-y divide-red-500/20">
           {/* Logout */}
-          <div className="flex items-center justify-between px-5 py-4">
+          <div className="flex items-center justify-between px-6 py-5">
             <div>
-              <p className="text-sm font-medium">{t(locale, 'account.logout')}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{t(locale, 'account.logoutDesc')}</p>
+              <p className="text-[15px] font-semibold text-zinc-100">{t(locale, 'account.logout')}</p>
+              <p className="text-[13px] text-zinc-400 mt-0.5">{t(locale, 'account.logoutDesc')}</p>
             </div>
-            <Button variant="outline" size="sm" className="border-red-500/30 text-red-400 hover:bg-red-500/10" onClick={handleLogout}>
-              <LogOut className="h-3.5 w-3.5 mr-1.5" />
+            <Button variant="outline" size="sm" className="border-red-500/40 text-red-400 hover:bg-red-500/15 hover:text-red-300" onClick={handleLogout}>
+              <LogOut className="h-4 w-4 mr-2" />
               {t(locale, 'account.logout')}
             </Button>
           </div>
 
           {/* Delete Account */}
-          <div className="flex items-center justify-between px-5 py-4">
+          <div className="flex items-center justify-between px-6 py-5">
             <div>
-              <p className="text-sm font-medium">{t(locale, 'account.deleteAccount')}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{t(locale, 'account.deleteAccountDesc')}</p>
+              <p className="text-[15px] font-semibold text-zinc-100">{t(locale, 'account.deleteAccount')}</p>
+              <p className="text-[13px] text-zinc-400 mt-0.5">{t(locale, 'account.deleteAccountDesc')}</p>
             </div>
             <Button
               variant="outline"
               size="sm"
-              className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+              className="border-red-500/40 text-red-400 hover:bg-red-500/15 hover:text-red-300"
               onClick={() => toast.info(t(locale, 'account.comingSoon'))}
             >
-              <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />
+              <AlertTriangle className="h-4 w-4 mr-2" />
               {t(locale, 'account.deleteAccount')}
             </Button>
           </div>
@@ -656,39 +658,43 @@ function ServiceRow({
 
   return (
     <div
-      className={`grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 items-center px-5 py-3.5 border-b last:border-0 hover:bg-muted/10 transition-colors ${!isActive ? 'opacity-50' : ''}`}
+      className={`grid grid-cols-[1fr_120px_100px_90px_56px] gap-3 items-center px-5 py-4 border-b border-zinc-800 last:border-0 hover:bg-zinc-800/40 transition-colors ${!isActive ? 'opacity-40' : ''}`}
     >
-      {/* Service info */}
+      {/* Service info with icon */}
       <div className="flex items-center gap-3 min-w-0">
         {svc.service?.icon_url ? (
-          <img src={svc.service.icon_url} alt="" className="h-8 w-8 rounded-lg" />
+          <img
+            src={svc.service.icon_url}
+            alt={svc.service.name}
+            className="h-8 w-8 rounded-lg object-contain bg-white/5 p-0.5"
+          />
         ) : (
-          <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center">
-            <Link2 className="h-4 w-4 text-muted-foreground" />
+          <div className="h-8 w-8 rounded-lg bg-zinc-800 flex items-center justify-center border border-zinc-700">
+            <Link2 className="h-4 w-4 text-zinc-500" />
           </div>
         )}
-        <span className="text-sm font-medium truncate">{svc.service?.name || 'Unknown'}</span>
+        <span className="text-[14px] font-medium text-zinc-100 truncate">{svc.service?.name || 'Unknown'}</span>
       </div>
 
       {/* Project */}
-      <div className="w-28 text-center">
-        <Link href={`/project/${svc.projectId}`} className="text-xs text-muted-foreground hover:text-primary transition-colors truncate">
+      <div className="text-center">
+        <Link href={`/project/${svc.projectId}`} className="text-[13px] text-zinc-400 hover:text-violet-400 transition-colors truncate">
           {svc.projectName}
         </Link>
       </div>
 
-      {/* Connection type — project_services don't have connection_type, show category */}
-      <div className="w-24 flex justify-center">
+      {/* Connection type */}
+      <div className="flex justify-center">
         <ConnectionTypeBadge type="manual" locale={locale} />
       </div>
 
       {/* Status */}
-      <div className="w-20 flex justify-center">
+      <div className="flex justify-center">
         <StatusBadge status={localStatus} locale={locale} />
       </div>
 
       {/* Toggle */}
-      <div className="w-14 flex justify-center">
+      <div className="flex justify-center">
         <Switch
           checked={isActive}
           onCheckedChange={handleToggle}
