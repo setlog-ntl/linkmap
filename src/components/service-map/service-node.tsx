@@ -4,12 +4,8 @@ import { memo } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { ServiceIcon } from '@/components/landing/service-icon';
 import { NodeTooltip } from '@/components/service-map/node-tooltip';
-import { Badge } from '@/components/ui/badge';
-import type { ServiceCategory, FreeTierQuality, HealthCheckStatus, HealthCheck, ServiceAccountStatus } from '@/types';
-import type { ViewMode } from '@/stores/service-map-store';
-import { allCategoryLabels } from '@/lib/constants/service-filters';
+import type { ServiceCategory } from '@/types';
 import { getCategoryStyle } from '@/lib/constants/category-styles';
-import { getViewModeNodeStyle } from '@/lib/layout/view-mode-styles';
 
 const statusDots: Record<string, string> = {
   connected: 'bg-green-500',
@@ -18,34 +14,14 @@ const statusDots: Record<string, string> = {
   error: 'bg-red-500',
 };
 
-const healthDots: Record<HealthCheckStatus, string> = {
-  healthy: 'bg-green-500',
-  degraded: 'bg-yellow-500',
-  unhealthy: 'bg-red-500 animate-pulse',
-  unknown: 'bg-gray-400',
-};
-
 interface ServiceNodeData {
   label: string;
   category: ServiceCategory;
   status: string;
-  costEstimate?: string;
-  freeTierQuality?: FreeTierQuality;
   iconSlug?: string;
   highlighted?: boolean;
-  selected?: boolean;
   focusOpacity?: number;
-  // Phase 2A additions
-  healthStatus?: HealthCheckStatus;
-  healthCheck?: HealthCheck;
-  envVarCount?: number;
-  requiredEnvVarCount?: number;
-  expanded?: boolean;
-  viewMode?: ViewMode;
-  connectionCount?: number;
-  accountStatus?: ServiceAccountStatus;
-  githubSyncStatus?: 'synced' | 'syncing' | 'error' | null;
-  githubLogin?: string | null;
+  domain?: string;
   [key: string]: unknown;
 }
 
@@ -54,214 +30,57 @@ function ServiceNode({ data }: NodeProps) {
   const category = d.category as ServiceCategory;
   const colorClass = getCategoryStyle(category).nodeClasses;
   const dotClass = statusDots[d.status] || statusDots.not_started;
-  const viewMode = d.viewMode || 'default';
 
   const isHighlighted = d.highlighted !== false;
   const focusOpacity = d.focusOpacity ?? 1;
-  const isExpanded = d.expanded === true;
-
-  // 뷰 모드별 오버레이 스타일
-  const vmStyle = getViewModeNodeStyle(viewMode, {
-    category,
-    costEstimate: d.costEstimate,
-    healthStatus: d.healthStatus,
-    healthCheck: d.healthCheck,
-  });
-
-  const borderOverride = vmStyle.borderColor
-    ? { borderColor: vmStyle.borderColor }
-    : {};
-  const scaleTransform = vmStyle.scale && vmStyle.scale !== 1
-    ? `scale(${vmStyle.scale})`
-    : undefined;
-  const glowShadow = vmStyle.glowColor
-    ? `0 0 12px ${vmStyle.glowColor}`
-    : undefined;
 
   const nodeContent = (
     <div
       className={`
-        px-3.5 py-2.5 rounded-xl border-2 shadow-sm min-w-[160px]
+        px-3 py-2.5 rounded-xl border-2 shadow-sm w-[160px] h-[48px]
         transition-all duration-200
         ${colorClass}
-        ${d.selected ? 'ring-2 ring-primary/40 shadow-md' : 'hover:shadow-md hover:scale-[1.02]'}
         ${isHighlighted ? '' : 'opacity-20'}
+        hover:shadow-md hover:scale-[1.02]
       `}
-      style={{
-        opacity: isHighlighted ? focusOpacity : 0.2,
-        ...borderOverride,
-        transform: scaleTransform,
-        boxShadow: glowShadow,
-      }}
+      style={{ opacity: isHighlighted ? focusOpacity : 0.2 }}
     >
       <Handle
         type="target"
         position={Position.Top}
-        className="!bg-gray-400 dark:!bg-gray-500 !w-2.5 !h-2.5 !border-0"
+        className="!bg-gray-400 dark:!bg-gray-500 !w-2 !h-2 !border-0"
       />
       <Handle
         type="target"
         position={Position.Left}
-        className="!bg-gray-400 dark:!bg-gray-500 !w-2.5 !h-2.5 !border-0"
+        className="!bg-gray-400 dark:!bg-gray-500 !w-2 !h-2 !border-0"
       />
 
-      {/* 헬스 상태 뱃지 (top-right) */}
-      {d.healthStatus && d.healthStatus !== 'unknown' && (
-        <span
-          className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-background ${healthDots[d.healthStatus]}`}
-        />
-      )}
-
-      {/* 계정 연결 상태 아이콘 (top-left) */}
-      {d.accountStatus && (
-        <span
-          className={`absolute -top-1.5 -left-1.5 w-4 h-4 rounded-full border-2 border-background flex items-center justify-center text-[8px] ${
-            d.accountStatus === 'active'
-              ? 'bg-green-500 text-white'
-              : d.accountStatus === 'expired'
-                ? 'bg-yellow-500 text-white'
-                : 'bg-red-500 text-white'
-          }`}
-          title={
-            d.accountStatus === 'active'
-              ? '계정 연결됨'
-              : d.accountStatus === 'expired'
-                ? '토큰 만료'
-                : '연결 오류'
-          }
-        >
-          {d.accountStatus === 'active' ? '🔗' : '⚠'}
-        </span>
-      )}
-
-      {/* GitHub 동기화 상태 (bottom-right) */}
-      {d.githubSyncStatus && (
-        <span
-          className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-background flex items-center justify-center text-[7px] ${
-            d.githubSyncStatus === 'synced'
-              ? 'bg-blue-500 text-white'
-              : d.githubSyncStatus === 'syncing'
-                ? 'bg-yellow-500 text-white animate-pulse'
-                : 'bg-red-500 text-white'
-          }`}
-          title={
-            d.githubSyncStatus === 'synced'
-              ? 'GitHub 동기화 완료'
-              : d.githubSyncStatus === 'syncing'
-                ? '동기화 중...'
-                : '동기화 오류'
-          }
-        >
-          {d.githubSyncStatus === 'synced' ? '⇄' : d.githubSyncStatus === 'syncing' ? '⟳' : '!'}
-        </span>
-      )}
-
       <div className="flex items-center gap-2">
-        <span className="relative flex h-2.5 w-2.5 shrink-0">
-          {(d.status === 'connected' || d.status === 'error') && (
-            <span
-              className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${
-                d.status === 'connected' ? 'bg-green-400' : 'bg-red-400'
-              }`}
-            />
-          )}
-          <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${dotClass}`} />
-        </span>
         {d.iconSlug ? (
-          <ServiceIcon serviceId={d.iconSlug} size={18} />
+          <ServiceIcon serviceId={d.iconSlug} size={16} />
         ) : (
-          <span className="text-base">⚙️</span>
+          <span className="text-sm">&#9881;&#65039;</span>
         )}
-        <div className="min-w-0">
-          <div className="font-medium text-sm truncate">{d.label}</div>
-          <div className="text-[10px] text-muted-foreground flex items-center gap-1">
-            <span>{allCategoryLabels[category] || category}</span>
-            {d.costEstimate && (
-              <>
-                <span className="opacity-40">·</span>
-                <span>{d.costEstimate}</span>
-              </>
-            )}
-            {(d.envVarCount != null && d.envVarCount > 0 || d.requiredEnvVarCount != null && d.requiredEnvVarCount > 0) && (
-              <>
-                <span className="opacity-40">·</span>
-                <span className={
-                  d.requiredEnvVarCount && d.requiredEnvVarCount > 0
-                    ? d.envVarCount != null && d.envVarCount >= d.requiredEnvVarCount
-                      ? 'text-green-600 dark:text-green-400'
-                      : d.envVarCount && d.envVarCount > 0
-                        ? 'text-yellow-600 dark:text-yellow-400'
-                        : ''
-                    : ''
-                }>
-                  env {d.envVarCount || 0}{d.requiredEnvVarCount ? `/${d.requiredEnvVarCount}` : ''}
-                </span>
-              </>
-            )}
-          </div>
-        </div>
+        <span className="font-medium text-sm truncate flex-1 min-w-0">{d.label}</span>
+        <span className={`w-2 h-2 rounded-full shrink-0 ${dotClass}`} />
       </div>
-
-      {/* 뷰 모드 뱃지 오버레이 */}
-      {vmStyle.badge && viewMode !== 'default' && (
-        <div className="mt-1.5">
-          <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
-            {vmStyle.badge}
-          </Badge>
-        </div>
-      )}
-
-      {/* 확장 모드 상세 정보 */}
-      {isExpanded && (
-        <div className="mt-2 pt-2 border-t border-current/10 space-y-1 text-xs">
-          {d.healthCheck && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">헬스</span>
-              <span className="flex items-center gap-1">
-                <span className={`w-1.5 h-1.5 rounded-full ${healthDots[d.healthCheck.status]}`} />
-                {d.healthCheck.response_time_ms != null && `${d.healthCheck.response_time_ms}ms`}
-              </span>
-            </div>
-          )}
-          {(d.envVarCount != null || d.requiredEnvVarCount != null) && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">환경변수</span>
-              <span>{d.envVarCount || 0}{d.requiredEnvVarCount ? `/${d.requiredEnvVarCount}` : ''}개</span>
-            </div>
-          )}
-          {d.connectionCount != null && d.connectionCount > 0 && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">연결</span>
-              <span>{d.connectionCount}개</span>
-            </div>
-          )}
-        </div>
-      )}
 
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!bg-gray-400 dark:!bg-gray-500 !w-2.5 !h-2.5 !border-0"
+        className="!bg-gray-400 dark:!bg-gray-500 !w-2 !h-2 !border-0"
       />
       <Handle
         type="source"
         position={Position.Right}
-        className="!bg-gray-400 dark:!bg-gray-500 !w-2.5 !h-2.5 !border-0"
+        className="!bg-gray-400 dark:!bg-gray-500 !w-2 !h-2 !border-0"
       />
     </div>
   );
 
   return (
-    <NodeTooltip
-      label={d.label}
-      category={category}
-      status={d.status}
-      costEstimate={d.costEstimate}
-      healthCheck={d.healthCheck}
-      envVarCount={d.envVarCount}
-      requiredEnvVarCount={d.requiredEnvVarCount}
-      githubLogin={d.githubLogin}
-    >
+    <NodeTooltip label={d.label} status={d.status} domain={d.domain}>
       {nodeContent}
     </NodeTooltip>
   );

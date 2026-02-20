@@ -2,19 +2,15 @@
 
 import { useMemo } from 'react';
 import type { Node, Edge } from '@xyflow/react';
-import { getLayoutedElements } from '@/lib/layout/dagre-layout';
+import { computeZoneLayout } from '@/lib/layout/zone-layout';
 import { getNeighborhood, isNodeHighlighted, isEdgeHighlighted } from '@/lib/layout/graph-utils';
-import { shouldShowEdgeInViewMode } from '@/lib/layout/view-mode-styles';
-import type { ViewMode } from '@/stores/service-map-store';
-import type { LayoutDirection } from '@/components/service-map/map-toolbar';
+import type { ServiceDomain } from '@/types';
 
 export interface UseServiceMapLayoutParams {
-  rawNodes: Node[];
+  serviceNodes: Node[];
   rawEdges: Edge[];
   focusedNodeId: string | null;
-  viewMode: ViewMode;
-  layoutDirection: LayoutDirection;
-  expandedNodeId: string | null;
+  getDomain: (nodeId: string) => ServiceDomain | null;
 }
 
 export interface UseServiceMapLayoutReturn {
@@ -24,26 +20,23 @@ export interface UseServiceMapLayoutReturn {
 }
 
 export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServiceMapLayoutReturn {
-  const {
-    rawNodes,
-    rawEdges,
-    focusedNodeId,
-    viewMode,
-    layoutDirection,
-    expandedNodeId,
-  } = params;
+  const { serviceNodes, rawEdges, focusedNodeId, getDomain } = params;
 
-  // Compute neighbor set for focus mode
   const neighborSet = useMemo(() => {
     if (!focusedNodeId) return null;
     return getNeighborhood(focusedNodeId, rawEdges);
   }, [focusedNodeId, rawEdges]);
 
-  // Apply focus mode opacity to nodes
-  const focusedNodes = useMemo<Node[]>(() => {
-    if (!focusedNodeId) return rawNodes;
-    return rawNodes.map((node) => {
-      if (node.type === 'group' || node.type === 'app') return node;
+  // Zone-based layout
+  const zoneResult = useMemo(() => {
+    return computeZoneLayout(serviceNodes, getDomain);
+  }, [serviceNodes, getDomain]);
+
+  // Apply focus mode opacity
+  const layoutedNodes = useMemo<Node[]>(() => {
+    if (!focusedNodeId) return zoneResult.nodes;
+    return zoneResult.nodes.map((node) => {
+      if (node.type === 'zone') return node;
       const highlighted = isNodeHighlighted(node.id, focusedNodeId, neighborSet);
       return {
         ...node,
@@ -53,53 +46,22 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
         },
       };
     });
-  }, [rawNodes, focusedNodeId, neighborSet]);
+  }, [zoneResult.nodes, focusedNodeId, neighborSet]);
 
-  // Apply view mode edge filtering
-  const viewFilteredEdges = useMemo<Edge[]>(() => {
-    let edges = rawEdges.filter((e) => shouldShowEdgeInViewMode(viewMode, e.type));
-
-    // Focus mode edge dimming
-    if (focusedNodeId) {
-      edges = edges.map((edge) => {
-        const highlighted = isEdgeHighlighted(edge, focusedNodeId, neighborSet);
-        return {
-          ...edge,
-          style: {
-            ...edge.style,
-            opacity: highlighted ? 1 : 0.1,
-          },
-        };
-      });
-    }
-
-    return edges;
-  }, [rawEdges, viewMode, focusedNodeId, neighborSet]);
-
-  // Compute node heights for expanded nodes
-  const nodeHeights = useMemo<Record<string, number>>(() => {
-    const heights: Record<string, number> = {};
-    if (expandedNodeId) {
-      heights[expandedNodeId] = 140; // expanded node is taller
-    }
-    return heights;
-  }, [expandedNodeId]);
-
-  // Apply dagre layout
-  const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(() => {
-    const nonGroupNodes = focusedNodes.filter((n) => n.type !== 'group');
-    const layoutResult = getLayoutedElements(nonGroupNodes, viewFilteredEdges, {
-      direction: layoutDirection,
-      rankSep: 120,
-      nodeSep: 50,
-      nodeHeights,
+  // Apply focus mode edge dimming
+  const layoutedEdges = useMemo<Edge[]>(() => {
+    if (!focusedNodeId) return rawEdges;
+    return rawEdges.map((edge) => {
+      const highlighted = isEdgeHighlighted(edge, focusedNodeId, neighborSet);
+      return {
+        ...edge,
+        style: {
+          ...edge.style,
+          opacity: highlighted ? 1 : 0.1,
+        },
+      };
     });
-
-    return {
-      nodes: [...layoutResult.nodes],
-      edges: layoutResult.edges,
-    };
-  }, [focusedNodes, viewFilteredEdges, layoutDirection, nodeHeights]);
+  }, [rawEdges, focusedNodeId, neighborSet]);
 
   return {
     layoutedNodes,

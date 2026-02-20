@@ -7,7 +7,7 @@ import { useReactFlow } from '@xyflow/react';
 
 interface NodeContextMenuProps {
   onViewDetail: (nodeId: string) => void;
-  onStartConnect: () => void;
+  onStartConnect: (nodeId: string) => void;
   onRunHealthCheck: (nodeId: string) => void;
   onRemoveService: (nodeId: string) => void;
 }
@@ -41,7 +41,7 @@ export function NodeContextMenu({
 
   const nodeMenuItems = [
     { icon: Eye, label: '상세 보기', action: () => onViewDetail(contextMenu.nodeId!) },
-    { icon: Link2, label: '연결 시작', action: onStartConnect },
+    { icon: Link2, label: '연결 시작', action: () => onStartConnect(contextMenu.nodeId!) },
     { icon: Activity, label: '헬스체크 실행', action: () => onRunHealthCheck(contextMenu.nodeId!) },
     { icon: Trash2, label: '서비스 제거', action: () => onRemoveService(contextMenu.nodeId!), danger: true },
   ];
