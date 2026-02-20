@@ -14,12 +14,9 @@ import type { UserConnectionType } from '@/types';
 
 const connectionTypes: { value: UserConnectionType; label: string; desc: string }[] = [
   { value: 'uses',          label: '사용',       desc: '이 서비스를 사용합니다' },
-  { value: 'integrates',    label: '연동',       desc: '양방향으로 통합됩니다' },
-  { value: 'data_transfer', label: '데이터 전달', desc: '데이터를 전송합니다' },
   { value: 'api_call',      label: 'API 호출',   desc: 'API를 호출합니다' },
-  { value: 'auth_provider', label: '인증 제공',   desc: '인증을 위임합니다' },
-  { value: 'webhook',       label: '웹훅',       desc: '이벤트를 전달합니다' },
-  { value: 'sdk',           label: 'SDK',        desc: 'SDK를 통해 연결합니다' },
+  { value: 'data_transfer', label: '데이터 전달', desc: '데이터를 전송합니다' },
+  { value: 'integrates',    label: '연동',       desc: '양방향으로 통합됩니다' },
 ];
 
 interface ConnectionTypeDialogProps {

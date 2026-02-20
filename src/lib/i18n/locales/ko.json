@@ -518,9 +518,13 @@
     "selectedTemplate": "선택한 템플릿",
     "siteReady": "사이트가 준비되었습니다!",
     "visitSite": "사이트 방문",
+    "visitSiteDesc": "배포된 사이트를 확인하세요",
     "editSite": "사이트 편집",
+    "editSiteDesc": "HTML/CSS를 직접 수정하세요",
     "githubRepo": "GitHub 레포",
+    "githubRepoDesc": "소스 코드를 확인하세요",
     "dashboard": "대시보드",
+    "dashboardDesc": "프로젝트를 관리하세요",
     "manageSites": "내 사이트에서 관리하기"
   },
   "templatePicker": {
@@ -585,7 +589,10 @@
     "disconnectConfirm": "이 GitHub 계정의 모든 레포지토리 연결을 해제하시겠습니까?",
     "disconnectSuccess": "연결이 해제되었습니다",
     "deleteBlocked": "먼저 연결을 해제하세요",
-    "viewOnGitHub": "GitHub에서 보기"
+    "viewOnGitHub": "GitHub에서 보기",
+    "backToDashboard": "대시보드로 돌아가기",
+    "otherServices": "기타 연결된 서비스",
+    "otherServicesDesc": "프로젝트에서 OAuth로 연결한 서비스 계정입니다."
   },
   "commandPalette": {
     "placeholder": "명령어 검색...",

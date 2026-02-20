@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -25,8 +25,9 @@ import {
   useRenameGitHubConnection,
 } from '@/lib/queries/github-connections';
 import {
-  User, GitBranch, Trash2, Pencil, Plus, Check, X, ShieldCheck,
-  AlertTriangle, ExternalLink, FolderOpen, Unlink, Settings,
+  GitBranch, Trash2, Pencil, Plus, Check, X, ShieldCheck,
+  AlertTriangle, ExternalLink, FolderOpen, Unlink,
+  ArrowLeft, Link2, Calendar,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
@@ -45,6 +46,21 @@ interface UserProfile {
   createdAt: string;
 }
 
+interface ConnectedAccount {
+  id: string;
+  connection_type: string;
+  oauth_metadata: Record<string, string> | null;
+  oauth_scopes: string[] | null;
+  oauth_provider_user_id: string | null;
+  status: string;
+  last_verified_at: string | null;
+  error_message: string | null;
+  created_at: string;
+  project_id: string | null;
+  service: { name: string; slug: string; icon_url: string | null; category: string } | null;
+  project: { name: string } | null;
+}
+
 // ─── Status config ──────────────────────────────────────
 
 const statusConfig: Record<string, { variant: 'default' | 'destructive' | 'secondary' | 'outline'; icon: React.ReactNode }> = {
@@ -54,9 +70,19 @@ const statusConfig: Record<string, { variant: 'default' | 'destructive' | 'secon
   error: { variant: 'destructive', icon: <AlertTriangle className="h-3.5 w-3.5" /> },
 };
 
-// ─── ConnectionCard ─────────────────────────────────────
+function getConnectionLabel(type: string, locale: 'ko' | 'en'): string {
+  const map: Record<string, string> = {
+    oauth: 'account.connectionOAuth',
+    api_key: 'account.connectionApiKey',
+    manual: 'account.connectionManual',
+  };
+  const key = map[type];
+  return key ? t(locale, key) : type;
+}
 
-function ConnectionCard({ connection }: { connection: GitHubConnection }) {
+// ─── GitHubConnectionCard ───────────────────────────────
+
+function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) {
   const { locale } = useLocaleStore();
   const deleteMutation = useDeleteGitHubConnection();
   const disconnectMutation = useDisconnectGitHubConnection();
@@ -82,204 +108,171 @@ function ConnectionCard({ connection }: { connection: GitHubConnection }) {
   };
 
   return (
-    <Card>
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
-          <Avatar>
-            <AvatarImage src={avatarUrl} alt={login} />
-            <AvatarFallback>{login.charAt(0).toUpperCase()}</AvatarFallback>
-          </Avatar>
+    <div className="group rounded-lg border bg-card p-4 transition-colors hover:border-primary/20">
+      <div className="flex items-start gap-3">
+        <Avatar className="ring-2 ring-background">
+          <AvatarImage src={avatarUrl} alt={login} />
+          <AvatarFallback>{login.charAt(0).toUpperCase()}</AvatarFallback>
+        </Avatar>
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              {editing ? (
-                <div className="flex items-center gap-1">
-                  <Input
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    className="h-7 text-sm w-40"
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleRename();
-                      if (e.key === 'Escape') setEditing(false);
-                    }}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={handleRename}
-                    disabled={renameMutation.isPending}
-                  >
-                    <Check className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => setEditing(false)}
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  <span className="font-medium text-sm">
-                    {connection.display_name || login}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-5 w-5"
-                    onClick={() => {
-                      setEditName(connection.display_name || login);
-                      setEditing(true);
-                    }}
-                  >
-                    <Pencil className="h-3 w-3" />
-                  </Button>
-                </>
-              )}
-            </div>
-
-            <a
-              href={`https://github.com/${login}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              @{login}
-              <ExternalLink className="h-3 w-3" />
-            </a>
-
-            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-              <Badge variant={status.variant} className="gap-1 text-[10px]">
-                {status.icon}
-                {t(locale, `account.status${connection.status.charAt(0).toUpperCase() + connection.status.slice(1)}`)}
-              </Badge>
-              {connection.oauth_scopes && connection.oauth_scopes.length > 0 && (
-                <span className="text-[10px] text-muted-foreground">
-                  {t(locale, 'account.scopes')}: {connection.oauth_scopes.join(', ')}
-                </span>
-              )}
-            </div>
-
-            {connection.error_message && (
-              <p className="text-xs text-destructive mt-1">{connection.error_message}</p>
-            )}
-
-            <p className="text-[10px] text-muted-foreground mt-1">
-              {new Date(connection.created_at).toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}
-            </p>
-
-            {/* Linked projects section */}
-            {connection.linked_projects && connection.linked_projects.length > 0 && (
-              <div className="mt-3 pt-3 border-t">
-                <p className="text-[10px] font-medium text-muted-foreground mb-1.5">
-                  {t(locale, 'account.linkedProjects')}
-                </p>
-                <div className="flex flex-col gap-1">
-                  {connection.linked_projects.map((proj) => (
-                    <Link
-                      key={proj.project_id}
-                      href={`/project/${proj.project_id}`}
-                      className="inline-flex items-center gap-1.5 text-xs text-foreground hover:text-primary transition-colors group/proj"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <FolderOpen className="h-3 w-3 text-muted-foreground group-hover/proj:text-primary" />
-                      <span>{proj.project_name}</span>
-                      <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4">
-                        {proj.repo_count} {t(locale, 'account.repoCount')}
-                      </Badge>
-                    </Link>
-                  ))}
-                </div>
+        <div className="flex-1 min-w-0">
+          {/* Name + edit */}
+          <div className="flex items-center gap-2">
+            {editing ? (
+              <div className="flex items-center gap-1">
+                <Input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="h-7 text-sm w-40"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleRename();
+                    if (e.key === 'Escape') setEditing(false);
+                  }}
+                />
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleRename} disabled={renameMutation.isPending}>
+                  <Check className="h-3.5 w-3.5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditing(false)}>
+                  <X className="h-3.5 w-3.5" />
+                </Button>
               </div>
+            ) : (
+              <>
+                <span className="font-medium text-sm">{connection.display_name || login}</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => { setEditName(connection.display_name || login); setEditing(true); }}
+                >
+                  <Pencil className="h-3 w-3" />
+                </Button>
+              </>
             )}
           </div>
 
-          <div className="flex items-center gap-1 shrink-0">
-            {/* Disconnect button */}
-            {hasLinkedRepos && (
-              <ConfirmDialog
-                trigger={
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-muted-foreground hover:text-orange-500"
+          {/* GitHub link */}
+          <a
+            href={`https://github.com/${login}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            @{login}
+            <ExternalLink className="h-3 w-3" />
+          </a>
+
+          {/* Status + scopes + date row */}
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            <Badge variant={status.variant} className="gap-1 text-[10px]">
+              {status.icon}
+              {t(locale, `account.status${connection.status.charAt(0).toUpperCase() + connection.status.slice(1)}`)}
+            </Badge>
+            {connection.oauth_scopes && connection.oauth_scopes.length > 0 && (
+              <span className="text-[10px] text-muted-foreground">
+                {connection.oauth_scopes.join(', ')}
+              </span>
+            )}
+            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              {new Date(connection.created_at).toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}
+            </span>
+          </div>
+
+          {connection.error_message && (
+            <p className="text-xs text-destructive mt-1.5">{connection.error_message}</p>
+          )}
+
+          {/* Linked projects */}
+          {connection.linked_projects && connection.linked_projects.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-dashed">
+              <div className="flex flex-col gap-1.5">
+                {connection.linked_projects.map((proj) => (
+                  <Link
+                    key={proj.project_id}
+                    href={`/project/${proj.project_id}`}
+                    className="inline-flex items-center gap-1.5 text-xs text-foreground hover:text-primary transition-colors group/proj"
                   >
-                    <Unlink className="h-3.5 w-3.5" />
-                  </Button>
-                }
-                title={t(locale, 'account.disconnect')}
-                description={t(locale, 'account.disconnectConfirm')}
-                confirmLabel={t(locale, 'account.disconnect')}
-                cancelLabel={t(locale, 'common.cancel')}
-                variant="destructive"
-                onConfirm={async () => {
-                  try {
-                    await disconnectMutation.mutateAsync(connection.id);
-                    toast.success(t(locale, 'account.disconnectSuccess'));
-                  } catch (err) {
-                    toast.error(err instanceof Error ? err.message : 'Failed');
-                  }
-                }}
-              />
-            )}
-
-            {/* Delete button */}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span>
-                    {hasLinkedRepos ? (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-muted-foreground opacity-40 cursor-not-allowed"
-                        disabled
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    ) : (
-                      <ConfirmDialog
-                        trigger={
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        }
-                        title={t(locale, 'account.deleteConnection')}
-                        description={t(locale, 'account.deleteConnectionConfirm')}
-                        confirmLabel={t(locale, 'common.delete')}
-                        cancelLabel={t(locale, 'common.cancel')}
-                        variant="destructive"
-                        onConfirm={async () => {
-                          try {
-                            await deleteMutation.mutateAsync(connection.id);
-                            toast.success(t(locale, 'account.connectionDeleted'));
-                          } catch (err) {
-                            toast.error(err instanceof Error ? err.message : 'Failed');
-                          }
-                        }}
-                      />
-                    )}
-                  </span>
-                </TooltipTrigger>
-                {hasLinkedRepos && (
-                  <TooltipContent>
-                    <p>{t(locale, 'account.deleteBlocked')}</p>
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            </TooltipProvider>
-          </div>
+                    <FolderOpen className="h-3 w-3 text-muted-foreground group-hover/proj:text-primary" />
+                    <span>{proj.project_name}</span>
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
+                      {proj.repo_count} {t(locale, 'account.repoCount')}
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Actions */}
+        <div className="flex items-center gap-1 shrink-0">
+          {hasLinkedRepos && (
+            <ConfirmDialog
+              trigger={
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-orange-500">
+                  <Unlink className="h-3.5 w-3.5" />
+                </Button>
+              }
+              title={t(locale, 'account.disconnect')}
+              description={t(locale, 'account.disconnectConfirm')}
+              confirmLabel={t(locale, 'account.disconnect')}
+              cancelLabel={t(locale, 'common.cancel')}
+              variant="destructive"
+              onConfirm={async () => {
+                try {
+                  await disconnectMutation.mutateAsync(connection.id);
+                  toast.success(t(locale, 'account.disconnectSuccess'));
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : 'Failed');
+                }
+              }}
+            />
+          )}
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  {hasLinkedRepos ? (
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground opacity-40 cursor-not-allowed" disabled>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  ) : (
+                    <ConfirmDialog
+                      trigger={
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      }
+                      title={t(locale, 'account.deleteConnection')}
+                      description={t(locale, 'account.deleteConnectionConfirm')}
+                      confirmLabel={t(locale, 'common.delete')}
+                      cancelLabel={t(locale, 'common.cancel')}
+                      variant="destructive"
+                      onConfirm={async () => {
+                        try {
+                          await deleteMutation.mutateAsync(connection.id);
+                          toast.success(t(locale, 'account.connectionDeleted'));
+                        } catch (err) {
+                          toast.error(err instanceof Error ? err.message : 'Failed');
+                        }
+                      }}
+                    />
+                  )}
+                </span>
+              </TooltipTrigger>
+              {hasLinkedRepos && (
+                <TooltipContent>
+                  <p>{t(locale, 'account.deleteBlocked')}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -287,6 +280,7 @@ function ConnectionCard({ connection }: { connection: GitHubConnection }) {
 
 export default function AccountPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [otherAccounts, setOtherAccounts] = useState<ConnectedAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const { locale } = useLocaleStore();
   const { data: connections, isLoading: connectionsLoading } = useGitHubConnections();
@@ -298,7 +292,7 @@ export default function AccountPage() {
     }
   }, [searchParams, locale]);
 
-  const loadProfile = useCallback(async () => {
+  const loadData = useCallback(async () => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -314,12 +308,23 @@ export default function AccountPage() {
       });
     }
 
+    // Fetch non-GitHub connected service accounts
+    const res = await fetch('/api/account/connected-accounts');
+    if (res.ok) {
+      const data = await res.json();
+      // Filter out GitHub accounts (already shown in dedicated section)
+      const nonGithub = (data.accounts || []).filter(
+        (a: ConnectedAccount) => a.service?.slug !== 'github'
+      );
+      setOtherAccounts(nonGithub);
+    }
+
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    loadProfile();
-  }, [loadProfile]);
+    loadData();
+  }, [loadData]);
 
   const handleAddGitHub = () => {
     window.location.href = '/api/oauth/github/authorize?flow_context=settings';
@@ -329,68 +334,69 @@ export default function AccountPage() {
 
   if (isLoading) {
     return (
-      <div className="container py-8 max-w-3xl">
-        <h1 className="text-2xl font-bold flex items-center gap-2 mb-6">
-          <Settings className="h-6 w-6" />
-          {t(locale, 'account.tab')}
-        </h1>
-        <Skeleton className="h-28 mb-6" />
-        <Skeleton className="h-10 w-48 mb-4" />
+      <div className="container py-8 max-w-3xl mx-auto">
+        <Skeleton className="h-5 w-48 mb-8" />
+        <Skeleton className="h-24 mb-8 rounded-lg" />
+        <Skeleton className="h-6 w-40 mb-4" />
         <div className="space-y-3">
-          {[1, 2].map((i) => <Skeleton key={i} className="h-24" />)}
+          {[1, 2].map((i) => <Skeleton key={i} className="h-28 rounded-lg" />)}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container py-8 max-w-3xl">
-      <h1 className="text-2xl font-bold flex items-center gap-2 mb-6">
-        <Settings className="h-6 w-6" />
-        {t(locale, 'account.tab')}
-      </h1>
+    <div className="container py-8 max-w-3xl mx-auto">
+      {/* Back to Dashboard */}
+      <Link
+        href="/dashboard"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        {t(locale, 'account.backToDashboard')}
+      </Link>
 
-      {/* 1. Profile Section */}
-      <Card className="mb-8">
-        <CardContent className="p-6">
-          {profile && (
-            <div className="flex items-start gap-4">
-              <Avatar size="lg">
+      {/* ── 1. Profile Section ── */}
+      {profile && (
+        <Card className="mb-8">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <Avatar size="lg" className="ring-2 ring-primary/10">
                 <AvatarImage src={profile.avatarUrl} alt={profile.name} />
-                <AvatarFallback>{profile.name.charAt(0).toUpperCase()}</AvatarFallback>
+                <AvatarFallback className="text-lg">{profile.name.charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
-              <div className="space-y-1 min-w-0">
-                <p className="font-semibold text-lg">{profile.name}</p>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl font-semibold tracking-tight">{profile.name}</h1>
                 <p className="text-sm text-muted-foreground">{profile.email}</p>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground pt-1">
-                  <span>
-                    {t(locale, 'account.loginMethod')}: {profile.provider}
-                  </span>
-                  <Separator orientation="vertical" className="h-3" />
-                  <span>
-                    {t(locale, 'account.joinedAt')}: {new Date(profile.createdAt).toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}
+                <div className="flex items-center gap-3 mt-2">
+                  <Badge variant="outline" className="text-xs font-normal">
+                    {profile.provider}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {new Date(profile.createdAt).toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}
                   </span>
                 </div>
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* 2. GitHub Connections Section */}
-      <section>
+      {/* ── 2. GitHub Connections ── */}
+      <section className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <GitBranch className="h-5 w-5" />
+            <h2 className="text-base font-semibold flex items-center gap-2">
+              <GitBranch className="h-4 w-4" />
               {t(locale, 'account.githubConnections')}
             </h2>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               {t(locale, 'account.githubConnectionsDesc')}
             </p>
           </div>
-          <Button onClick={handleAddGitHub} size="sm">
-            <Plus className="mr-2 h-4 w-4" />
+          <Button onClick={handleAddGitHub} size="sm" variant="outline">
+            <Plus className="mr-1.5 h-3.5 w-3.5" />
             {t(locale, 'account.addGitHub')}
           </Button>
         </div>
@@ -405,8 +411,91 @@ export default function AccountPage() {
         ) : (
           <div className="space-y-3">
             {connections.map((conn) => (
-              <ConnectionCard key={conn.id} connection={conn} />
+              <GitHubConnectionCard key={conn.id} connection={conn} />
             ))}
+          </div>
+        )}
+      </section>
+
+      {/* ── 3. Other Connected Services ── */}
+      <section>
+        <div className="mb-4">
+          <h2 className="text-base font-semibold flex items-center gap-2">
+            <Link2 className="h-4 w-4" />
+            {t(locale, 'account.otherServices')}
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {t(locale, 'account.otherServicesDesc')}
+          </p>
+        </div>
+
+        {otherAccounts.length === 0 ? (
+          <div className="rounded-lg border border-dashed p-8 text-center">
+            <Link2 className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
+            <p className="text-sm text-muted-foreground">{t(locale, 'account.noAccounts')}</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">{t(locale, 'account.noAccountsDesc')}</p>
+          </div>
+        ) : (
+          <div className="rounded-lg border overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-muted/30">
+                  <th className="text-left py-2.5 px-4 text-xs font-medium text-muted-foreground">{t(locale, 'account.colService')}</th>
+                  <th className="text-left py-2.5 px-4 text-xs font-medium text-muted-foreground">{t(locale, 'account.colAccount')}</th>
+                  <th className="text-left py-2.5 px-4 text-xs font-medium text-muted-foreground">{t(locale, 'account.colConnectionType')}</th>
+                  <th className="text-left py-2.5 px-4 text-xs font-medium text-muted-foreground">{t(locale, 'account.colProject')}</th>
+                  <th className="text-left py-2.5 px-4 text-xs font-medium text-muted-foreground">{t(locale, 'account.colStatus')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {otherAccounts.map((account) => {
+                  const acctStatus = statusConfig[account.status] || statusConfig.error;
+                  return (
+                    <tr key={account.id} className="border-b last:border-0 hover:bg-muted/10 transition-colors">
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          {account.service?.icon_url && (
+                            <img src={account.service.icon_url} alt={account.service.name} className="h-5 w-5 rounded" />
+                          )}
+                          {account.service?.slug ? (
+                            <Link href={`/services#${account.service.slug}`} className="font-medium text-sm hover:text-primary transition-colors">
+                              {account.service.name}
+                            </Link>
+                          ) : (
+                            <span className="font-medium text-sm">Unknown</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-muted-foreground text-xs">
+                        {account.oauth_provider_user_id
+                          ? `@${(account.oauth_metadata as Record<string, string>)?.login || account.oauth_provider_user_id}`
+                          : '-'}
+                      </td>
+                      <td className="py-3 px-4">
+                        <Badge variant="outline" className="text-[10px] font-normal">
+                          {getConnectionLabel(account.connection_type, locale)}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-4 text-xs">
+                        {account.project_id && account.project ? (
+                          <Link href={`/project/${account.project_id}/services`} className="text-primary hover:underline">
+                            {account.project.name}
+                          </Link>
+                        ) : (
+                          <span className="text-muted-foreground">{t(locale, 'account.userAccount')}</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4">
+                        <Badge variant={acctStatus.variant} className="gap-1 text-[10px]">
+                          {acctStatus.icon}
+                          {t(locale, `account.status${account.status.charAt(0).toUpperCase() + account.status.slice(1)}`)}
+                        </Badge>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </section>

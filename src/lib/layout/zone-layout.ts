@@ -19,9 +19,9 @@ const ZONE_EMOJIS: Record<ZoneKey, string> = {
 };
 
 const ZONE_COLORS: Record<ZoneKey, string> = {
-  frontend: 'rgba(59, 130, 246, 0.04)',  // blue
-  backend: 'rgba(139, 92, 246, 0.04)',   // violet
-  devtools: 'rgba(234, 179, 8, 0.04)',   // yellow
+  frontend: 'rgba(59, 130, 246, 0.08)',  // blue
+  backend: 'rgba(139, 92, 246, 0.08)',   // violet
+  devtools: 'rgba(234, 179, 8, 0.08)',   // yellow
 };
 
 /** Map 8 ServiceDomains → 3 zones */

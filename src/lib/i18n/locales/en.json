@@ -518,9 +518,13 @@
     "selectedTemplate": "Selected Template",
     "siteReady": "Your site is ready!",
     "visitSite": "Visit Site",
+    "visitSiteDesc": "View your deployed site",
     "editSite": "Edit Site",
+    "editSiteDesc": "Edit HTML/CSS directly",
     "githubRepo": "GitHub Repo",
+    "githubRepoDesc": "View the source code",
     "dashboard": "Dashboard",
+    "dashboardDesc": "Manage your project",
     "manageSites": "Manage in My Sites"
   },
   "templatePicker": {
@@ -585,7 +589,10 @@
     "disconnectConfirm": "Disconnect all repositories linked to this GitHub account?",
     "disconnectSuccess": "Disconnected successfully",
     "deleteBlocked": "Disconnect repos first",
-    "viewOnGitHub": "View on GitHub"
+    "viewOnGitHub": "View on GitHub",
+    "backToDashboard": "Back to Dashboard",
+    "otherServices": "Other Connected Services",
+    "otherServicesDesc": "Service accounts connected via OAuth from your projects."
   },
   "commandPalette": {
     "placeholder": "Search commands...",

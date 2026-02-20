@@ -52,12 +52,12 @@ function ServiceNode({ data }: NodeProps) {
       <Handle
         type="target"
         position={Position.Top}
-        className="!bg-gray-400 dark:!bg-gray-500 !w-2 !h-2 !border-0"
+        className="!bg-blue-400/60 hover:!bg-blue-500 !w-2.5 !h-2.5 !border-0 !transition-all hover:!w-3 hover:!h-3"
       />
       <Handle
         type="target"
         position={Position.Left}
-        className="!bg-gray-400 dark:!bg-gray-500 !w-2 !h-2 !border-0"
+        className="!bg-blue-400/60 hover:!bg-blue-500 !w-2.5 !h-2.5 !border-0 !transition-all hover:!w-3 hover:!h-3"
       />
 
       {isMain && (
@@ -79,12 +79,12 @@ function ServiceNode({ data }: NodeProps) {
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!bg-gray-400 dark:!bg-gray-500 !w-2 !h-2 !border-0"
+        className="!bg-blue-400/60 hover:!bg-blue-500 !w-2.5 !h-2.5 !border-0 !transition-all hover:!w-3 hover:!h-3"
       />
       <Handle
         type="source"
         position={Position.Right}
-        className="!bg-gray-400 dark:!bg-gray-500 !w-2 !h-2 !border-0"
+        className="!bg-blue-400/60 hover:!bg-blue-500 !w-2.5 !h-2.5 !border-0 !transition-all hover:!w-3 hover:!h-3"
       />
     </div>
   );

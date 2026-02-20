@@ -14,6 +14,7 @@ import {
   type Node,
   type NodeChange,
   type EdgeChange,
+  type Connection,
   BackgroundVariant,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -180,6 +181,17 @@ function ServiceMapInner() {
     setEdges(layoutedEdges);
   }, [layoutedNodes, layoutedEdges]);
 
+  // Native drag-to-connect: auto-create "uses" connection
+  const handleNativeConnect = useCallback((connection: Connection) => {
+    if (!connection.source || !connection.target) return;
+    if (connection.source === connection.target) return;
+    const sourceSvc = data.services.find((s) => s.id === connection.source);
+    const targetSvc = data.services.find((s) => s.id === connection.target);
+    if (sourceSvc && targetSvc) {
+      interactions.createConnection(sourceSvc.service_id, targetSvc.service_id, 'uses');
+    }
+  }, [data.services, interactions]);
+
   // Connection dialog handlers
   const handleConnectionConfirm = useCallback((type: UserConnectionType) => {
     if (!connectionDialog) return;
@@ -298,6 +310,7 @@ function ServiceMapInner() {
               edges={edges}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
+              onConnect={handleNativeConnect}
               onNodeClick={interactions.handleNodeClick}
               onPaneClick={interactions.handlePaneClick}
               onNodeContextMenu={interactions.handleNodeContextMenu}
