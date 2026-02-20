@@ -24,10 +24,10 @@ UPDATE services SET supports_multi_account = true WHERE slug = 'github';
 UPDATE service_accounts sa SET multi_account_provider = true
 FROM services svc WHERE sa.service_id = svc.id AND svc.slug = 'github';
 
--- 7. GitHub 계정 유니크: (user_id, service_id, oauth_provider_user_id)
+-- 7. GitHub 계정 유니크: user-level (project_id IS NULL)에서만 identity 중복 방지
 CREATE UNIQUE INDEX idx_sa_github_identity
   ON service_accounts(user_id, service_id, oauth_provider_user_id)
-  WHERE oauth_provider_user_id IS NOT NULL AND multi_account_provider = true;
+  WHERE oauth_provider_user_id IS NOT NULL AND multi_account_provider = true AND project_id IS NULL;
 
 -- 8. 비GitHub 서비스는 기존 1-per-project 유지
 CREATE UNIQUE INDEX idx_sa_project_service_single
