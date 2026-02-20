@@ -3,7 +3,7 @@
 > **문서 코드**: ONELINK-MOD
 > **상위 문서**: [PMO.md](./PMO.md) | [07-enhancement-plan.md](./07-enhancement-plan.md)
 > **작성일**: 2026-02-20
-> **상태**: 기획 검토 중
+> **상태**: Phase 1~4 구현 완료
 > **대상 템플릿**: Personal Brand (나만의 홈페이지) — 1차 파일럿
 
 ---
@@ -932,6 +932,44 @@ Phase 2 추가:
 
 ---
 
+## 부록 C-4: Phase 4 구현 결과 (완료)
+
+### 추가/수정된 파일
+
+| 파일 | 변경 내용 |
+|------|-----------|
+| `src/app/api/oneclick/deployments/[id]/upload/route.ts` | 이미지 업로드 API (base64 → GitHub blob → commit) |
+| `src/app/api/ai/module-suggest/route.ts` | AI 모듈 설정 추천 API (OpenAI Structured Output) |
+| `src/components/my-sites/module-form.tsx` | `ImageUrlField` 컴포넌트 (리사이즈 + 업로드), `deployId` prop |
+| `src/components/my-sites/module-panel.tsx` | AI 추천 입력 UI, `deployId` prop 전달 |
+| `src/components/my-sites/site-editor-client.tsx` | `deployId` → ModulePanel 전달 |
+| `src/data/oneclick/module-schemas/personal-brand.ts` | `fontFamily` select 필드 (8개 폰트) |
+| `src/lib/oneclick/code-generator.ts` | `generateLayoutTsx()` 함수, layout.tsx 폰트 생성 |
+| `src/lib/audit.ts` | `oneclick.image_upload`, `ai.module_suggest` 액션 |
+
+### 이미지 업로드 흐름
+
+```
+1. 사용자가 URL 필드 옆 Upload 버튼 클릭
+2. 파일 선택 (max 5MB)
+3. 클라이언트에서 max 1200px 리사이즈 → WebP 변환
+4. base64 → POST /api/oneclick/deployments/[id]/upload
+5. GitHub Git Data API: blob(base64) → tree → commit → ref update
+6. 반환된 경로를 URL 필드에 자동 입력
+```
+
+### AI 모듈 추천 흐름
+
+```
+1. 사용자가 "전문적인 느낌으로 설정해줘" 입력
+2. POST /api/ai/module-suggest (templateSlug + currentEnabled + moduleNames)
+3. OpenAI gpt-4o Structured Output → { enabled, order, values, reasoning }
+4. 반환된 state를 onStateChange로 적용
+5. reasoning을 toast로 표시
+```
+
+---
+
 ## 부록 D: Phase 2~4 단계별 구현 가이드
 
 ### Phase 2: 컴포넌트 수준 편집
@@ -1191,11 +1229,14 @@ Google Fonts API에서 인기 폰트 목록 → Select UI.
 - [x] 95개 테스트 통과
 - [x] 커밋 `369ad26` + `d76cedf` + 푸시 완료
 
-### Phase 4 — 고급 기능
-- [ ] 이미지 업로드 API
-- [ ] 이미지 업로드 UI (리사이즈 포함)
-- [ ] 폰트 선택기 컴포넌트
-- [ ] 폰트 → layout.tsx/globals.css 코드 생성
-- [ ] AI 모듈 설정 통합
-- [ ] Sandpack 실시간 미리보기 검토/구현
-- [ ] 타입체크 + 테스트 + 빌드
+### Phase 4 ✅ 완료
+- [x] 이미지 업로드 API (`POST /api/oneclick/deployments/[id]/upload`)
+- [x] 이미지 업로드 UI (클라이언트 리사이즈 max 1200px → WebP → base64 업로드)
+- [x] 폰트 선택기 (Hero 모듈 select 필드, 8개 한/영 폰트)
+- [x] 폰트 → layout.tsx Google Fonts CDN + font-family 코드 생성
+- [x] AI 모듈 설정 (`POST /api/ai/module-suggest`, OpenAI Structured Output)
+- [x] AI 추천 입력 UI (모듈 패널 내 텍스트 입력 + Wand2 버튼)
+- [x] 감사 로그: `oneclick.image_upload`, `ai.module_suggest` 추가
+- [x] 102개 테스트 통과
+- [x] 커밋 `335cf76` + 푸시 완료
+- [ ] Sandpack 실시간 미리보기 — 향후 검토 (번들 사이즈 1MB+ 리스크)
