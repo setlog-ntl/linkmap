@@ -2,15 +2,15 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { isAdmin } from '@/lib/admin';
 import { unauthorizedError, apiError } from '@/lib/api/errors';
-import { services, checklistItems } from '@/data/services';
-import { templates } from '@/data/templates';
-import { domains } from '@/data/domains';
-import { subcategories } from '@/data/subcategories';
-import { servicesV2 } from '@/data/services-v2';
-import { serviceGuides } from '@/data/service-guides';
-import { costTiers } from '@/data/cost-tiers';
-import { dependencies } from '@/data/dependencies';
-import { comparisons } from '@/data/comparisons';
+import { services, checklistItems } from '@/data/seed/services';
+import { templates } from '@/data/seed/templates';
+import { domains } from '@/data/seed/domains';
+import { subcategories } from '@/data/seed/subcategories';
+import { servicesV2 } from '@/data/seed/services-v2';
+import { serviceGuides } from '@/data/seed/service-guides';
+import { costTiers } from '@/data/seed/cost-tiers';
+import { dependencies } from '@/data/seed/dependencies';
+import { comparisons } from '@/data/seed/comparisons';
 
 export async function POST() {
   // Only allow in development

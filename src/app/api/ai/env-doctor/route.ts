@@ -5,7 +5,7 @@ import { envDoctorSchema } from '@/lib/validations/ai-env';
 import { resolveOpenAIKey } from '@/lib/ai/resolve-key';
 import { callOpenAIWithTools, type ToolDefinition } from '@/lib/ai/openai';
 import { logAudit } from '@/lib/audit';
-import { services as serviceCatalog } from '@/data/services';
+import { services as serviceCatalog } from '@/data/seed/services';
 
 const tools: ToolDefinition[] = [
   {

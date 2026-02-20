@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { ScrollReveal } from './scroll-reveal';
 import { ServiceIcon } from './service-icon';
-import { services } from '@/data/services';
+import { services } from '@/data/seed/services';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import type { ServiceDomain } from '@/types';

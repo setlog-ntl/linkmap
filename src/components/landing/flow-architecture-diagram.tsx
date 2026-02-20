@@ -12,7 +12,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import FlowLayerNode from './flow-layer-node';
 import FlowServiceNode from './flow-service-node';
-import { HERO_FLOW } from '@/data/flow-presets';
+import { HERO_FLOW } from '@/data/ui/flow-presets';
 
 const nodeTypes = {
   layer: FlowLayerNode,

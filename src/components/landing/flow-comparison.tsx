@@ -10,7 +10,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import FlowServiceNode from './flow-service-node';
-import { SIMPLE_FLOW, COMPLEX_FLOW, type FlowPreset } from '@/data/flow-presets';
+import { SIMPLE_FLOW, COMPLEX_FLOW, type FlowPreset } from '@/data/ui/flow-presets';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 

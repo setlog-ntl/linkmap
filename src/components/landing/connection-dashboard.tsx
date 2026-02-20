@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from './status-badge';
 import { ServiceIcon } from './service-icon';
-import { MOCK_CONNECTIONS } from '@/data/mock-connections';
+import { MOCK_CONNECTIONS } from '@/data/ui/mock-connections';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 

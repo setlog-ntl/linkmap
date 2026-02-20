@@ -4,7 +4,7 @@ import { unauthorizedError, validationError, serverError } from '@/lib/api/error
 import { compareServicesSchema } from '@/lib/validations/ai-compare';
 import { resolveOpenAIKey } from '@/lib/ai/resolve-key';
 import { logAudit } from '@/lib/audit';
-import { services as serviceCatalog } from '@/data/services';
+import { services as serviceCatalog } from '@/data/seed/services';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();

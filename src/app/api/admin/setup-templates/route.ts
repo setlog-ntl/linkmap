@@ -11,7 +11,7 @@ import {
   updateRepoSettings,
   GitHubApiError,
 } from '@/lib/github/api';
-import { homepageTemplates } from '@/data/homepage-template-content';
+import { homepageTemplates } from '@/data/oneclick/homepage-template-content';
 
 interface TemplateResult {
   slug: string;

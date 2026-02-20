@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { serverError } from '@/lib/api/errors';
-import { getAvailableSlugs } from '@/data/homepage-template-content';
+import { getAvailableSlugs } from '@/data/oneclick/homepage-template-content';
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();

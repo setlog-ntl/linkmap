@@ -26,3 +26,39 @@ export async function safeDecryptToken(
     };
   }
 }
+
+/**
+ * Resolve the user's active GitHub OAuth token.
+ * Looks up the service_accounts table, decrypts the token, and returns it.
+ * Returns null if no active GitHub account or decryption fails.
+ */
+export async function resolveUserGitHubToken(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<string | null> {
+  const { data: githubService } = await supabase
+    .from('services')
+    .select('id')
+    .eq('slug', 'github')
+    .single();
+
+  if (!githubService) return null;
+
+  const { data: ghAccount } = await supabase
+    .from('service_accounts')
+    .select('id, encrypted_access_token')
+    .eq('user_id', userId)
+    .eq('service_id', githubService.id)
+    .eq('connection_type', 'oauth')
+    .eq('status', 'active')
+    .order('project_id', { ascending: false, nullsFirst: false })
+    .limit(1)
+    .single();
+
+  if (!ghAccount) return null;
+
+  const result = await safeDecryptToken(ghAccount.encrypted_access_token, supabase, ghAccount.id);
+  if ('error' in result) return null;
+
+  return result.token;
+}

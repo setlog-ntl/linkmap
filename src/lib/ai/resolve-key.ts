@@ -1,13 +1,26 @@
 /**
- * Resolves OpenAI API key from env or DB ai_providers table.
+ * Resolves AI provider API keys from env or DB ai_providers table.
  */
 import { createAdminClient } from '@/lib/supabase/admin';
 import { decrypt } from '@/lib/crypto';
+import type { AiProviderSlug } from '@/types';
 
-export async function resolveOpenAIKey(): Promise<{ apiKey: string; baseUrl?: string }> {
+const ENV_KEY_MAP: Record<string, string> = {
+  openai: 'OPENAI_API_KEY',
+  anthropic: 'ANTHROPIC_API_KEY',
+  google: 'GOOGLE_AI_API_KEY',
+};
+
+/**
+ * Resolve an AI provider's API key. Checks environment variable first, then DB.
+ */
+export async function resolveAIProviderKey(
+  providerSlug: AiProviderSlug
+): Promise<{ apiKey: string; baseUrl?: string }> {
   // 1. Check environment variable
-  if (process.env.OPENAI_API_KEY) {
-    return { apiKey: process.env.OPENAI_API_KEY };
+  const envKey = ENV_KEY_MAP[providerSlug];
+  if (envKey && process.env[envKey]) {
+    return { apiKey: process.env[envKey]! };
   }
 
   // 2. Check DB ai_providers table
@@ -15,7 +28,7 @@ export async function resolveOpenAIKey(): Promise<{ apiKey: string; baseUrl?: st
   const { data: providerRow } = await adminSupabase
     .from('ai_providers')
     .select('*')
-    .eq('slug', 'openai')
+    .eq('slug', providerSlug)
     .eq('is_enabled', true)
     .single();
 
@@ -26,5 +39,10 @@ export async function resolveOpenAIKey(): Promise<{ apiKey: string; baseUrl?: st
     };
   }
 
-  throw new Error('OpenAI API 키가 설정되지 않았습니다. 환경변수 또는 AI 설정에서 등록하세요.');
+  throw new Error(`${providerSlug} API 키가 설정되지 않았습니다. 환경변수 또는 AI 설정에서 등록하세요.`);
+}
+
+/** Backward-compatible wrapper for OpenAI key resolution. */
+export async function resolveOpenAIKey(): Promise<{ apiKey: string; baseUrl?: string }> {
+  return resolveAIProviderKey('openai');
 }

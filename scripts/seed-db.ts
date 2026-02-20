@@ -3,15 +3,15 @@
  * Bypasses Next.js server, connects directly to Supabase
  */
 import { createClient } from '@supabase/supabase-js';
-import { services, checklistItems } from '../src/data/services';
-import { templates } from '../src/data/templates';
-import { domains } from '../src/data/domains';
-import { subcategories } from '../src/data/subcategories';
-import { servicesV2 } from '../src/data/services-v2';
-import { serviceGuides } from '../src/data/service-guides';
-import { costTiers } from '../src/data/cost-tiers';
-import { dependencies } from '../src/data/dependencies';
-import { comparisons } from '../src/data/comparisons';
+import { services, checklistItems } from '../src/data/seed/services';
+import { templates } from '../src/data/seed/templates';
+import { domains } from '../src/data/seed/domains';
+import { subcategories } from '../src/data/seed/subcategories';
+import { servicesV2 } from '../src/data/seed/services-v2';
+import { serviceGuides } from '../src/data/seed/service-guides';
+import { costTiers } from '../src/data/seed/cost-tiers';
+import { dependencies } from '../src/data/seed/dependencies';
+import { comparisons } from '../src/data/seed/comparisons';
 import * as dotenv from 'dotenv';
 import { resolve } from 'path';
 

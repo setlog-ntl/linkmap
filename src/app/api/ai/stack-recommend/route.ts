@@ -5,7 +5,7 @@ import { stackRecommendSchema } from '@/lib/validations/ai-stack';
 import { resolveOpenAIKey } from '@/lib/ai/resolve-key';
 import { callOpenAIStructured } from '@/lib/ai/openai';
 import { logAudit } from '@/lib/audit';
-import { services as serviceCatalog } from '@/data/services';
+import { services as serviceCatalog } from '@/data/seed/services';
 
 const STACK_JSON_SCHEMA = {
   type: 'object' as const,

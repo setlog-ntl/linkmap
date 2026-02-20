@@ -4,7 +4,7 @@ import { unauthorizedError, validationError, serverError, apiError, notFoundErro
 import { logAudit } from '@/lib/audit';
 import { checkHomepageDeployQuota } from '@/lib/quota';
 import { createRepo, pushFilesAtomically, deleteRepo, enableGitHubPagesWithActions, GitHubApiError } from '@/lib/github/api';
-import { getTemplateBySlug } from '@/data/homepage-template-content';
+import { getTemplateBySlug } from '@/data/oneclick/homepage-template-content';
 import { safeDecryptToken } from '@/lib/github/token';
 import { deployPagesRequestSchema } from '@/lib/validations/oneclick';
 

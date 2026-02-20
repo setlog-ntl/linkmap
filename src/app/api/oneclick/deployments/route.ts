@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError } from '@/lib/api/errors';
-import { safeDecryptToken } from '@/lib/github/token';
-import { getGitHubPagesStatus, getLatestWorkflowRun, GitHubApiError } from '@/lib/github/api';
+import { resolveUserGitHubToken } from '@/lib/github/token';
+import { resolveDeployStatus } from '@/lib/oneclick/deploy-status';
 
 export async function GET() {
   const supabase = await createClient();
@@ -51,8 +51,7 @@ export async function GET() {
   );
 
   if (stuckDeploys.length > 0) {
-    // Resolve GitHub token once for all checks
-    const githubToken = await resolveGitHubToken(supabase, user.id);
+    const githubToken = await resolveUserGitHubToken(supabase, user.id);
 
     if (githubToken) {
       await Promise.allSettled(
@@ -64,38 +63,6 @@ export async function GET() {
   return NextResponse.json({ deployments: list });
 }
 
-/** Resolve the user's GitHub OAuth token */
-async function resolveGitHubToken(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string
-): Promise<string | null> {
-  const { data: githubService } = await supabase
-    .from('services')
-    .select('id')
-    .eq('slug', 'github')
-    .single();
-
-  if (!githubService) return null;
-
-  const { data: ghAccount } = await supabase
-    .from('service_accounts')
-    .select('id, encrypted_access_token')
-    .eq('user_id', userId)
-    .eq('service_id', githubService.id)
-    .eq('connection_type', 'oauth')
-    .eq('status', 'active')
-    .order('project_id', { ascending: false, nullsFirst: false })
-    .limit(1)
-    .single();
-
-  if (!ghAccount) return null;
-
-  const result = await safeDecryptToken(ghAccount.encrypted_access_token, supabase, ghAccount.id);
-  if ('error' in result) return null;
-
-  return result.token;
-}
-
 /** Check GitHub Pages status and update DB + in-memory object */
 async function refreshDeployStatus(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -103,48 +70,24 @@ async function refreshDeployStatus(
   githubToken: string
 ): Promise<void> {
   try {
-    const [owner, repo] = (deploy.forked_repo_full_name as string).split('/');
-    const pagesInfo = await getGitHubPagesStatus(githubToken, owner, repo);
-    const pagesStatus = pagesInfo.status;
+    const result = await resolveDeployStatus(
+      githubToken,
+      deploy.forked_repo_full_name as string,
+      deploy.deploy_status as string,
+      deploy.pages_status as string,
+      deploy.pages_url as string | null
+    );
 
-    let newDeployStatus = deploy.deploy_status as string;
-    let newPagesStatus = deploy.pages_status as string;
-
-    if (pagesStatus === 'built') {
-      newDeployStatus = 'ready';
-      newPagesStatus = 'built';
-    } else if (pagesStatus === 'building') {
-      newDeployStatus = 'building';
-      newPagesStatus = 'building';
-    } else if (pagesStatus === 'errored') {
-      newDeployStatus = 'error';
-      newPagesStatus = 'errored';
-    } else if (pagesStatus === null) {
-      // build_type: 'workflow' — Pages API always returns status: null.
-      // Check Actions workflow to determine actual state.
-      try {
-        const [owner, repo] = (deploy.forked_repo_full_name as string).split('/');
-        const run = await getLatestWorkflowRun(githubToken, owner, repo);
-        if (run?.status === 'completed' && run.conclusion === 'success') {
-          newDeployStatus = 'ready';
-          newPagesStatus = 'built';
-        } else if (run?.status === 'completed' && (run.conclusion === 'failure' || run.conclusion === 'cancelled')) {
-          newDeployStatus = 'error';
-          newPagesStatus = 'errored';
-        }
-      } catch { /* ignore */ }
-    }
-
-    if (newDeployStatus !== deploy.deploy_status || newPagesStatus !== deploy.pages_status) {
+    if (result.changed) {
       const updateData: Record<string, unknown> = {
-        deploy_status: newDeployStatus,
-        pages_status: newPagesStatus,
-        pages_url: pagesInfo.html_url || deploy.pages_url,
+        deploy_status: result.deployStatus,
+        pages_status: result.pagesStatus,
+        pages_url: result.pagesUrl,
       };
 
-      if (newDeployStatus === 'ready') {
+      if (result.deployStatus === 'ready') {
         updateData.deployed_at = new Date().toISOString();
-        updateData.deployment_url = pagesInfo.html_url || deploy.pages_url;
+        updateData.deployment_url = result.deploymentUrl;
       }
 
       await supabase
@@ -153,18 +96,14 @@ async function refreshDeployStatus(
         .eq('id', deploy.id as string);
 
       // Update in-memory so the response reflects the new status
-      deploy.deploy_status = newDeployStatus;
-      deploy.pages_status = newPagesStatus;
-      deploy.pages_url = pagesInfo.html_url || deploy.pages_url;
-      if (newDeployStatus === 'ready') {
-        deploy.deployment_url = pagesInfo.html_url || deploy.pages_url;
+      deploy.deploy_status = result.deployStatus;
+      deploy.pages_status = result.pagesStatus;
+      deploy.pages_url = result.pagesUrl;
+      if (result.deployStatus === 'ready') {
+        deploy.deployment_url = result.deploymentUrl;
       }
     }
-  } catch (err) {
-    if (err instanceof GitHubApiError && err.status === 404) {
-      // Pages not yet enabled — keep current status
-      return;
-    }
+  } catch {
     // Non-fatal: silently ignore
   }
 }
