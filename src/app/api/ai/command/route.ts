@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) return validationError(parsed.error);
 
     const { command, project_id } = parsed.data;
-    const { apiKey } = await resolveOpenAIKey();
+    const { apiKey, baseUrl } = await resolveOpenAIKey();
 
     // Load project services if project context exists
     let projectServices: Array<{ service_id: string; slug: string; name: string }> = [];
@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
       systemPrompt,
       tools,
       toolExecutor,
-      { model: 'gpt-4o-mini', temperature: 0.2, max_tokens: 1024 },
+      { model: 'gpt-4o-mini', temperature: 0.2, max_tokens: 1024, baseUrl },
       3,
     );
 

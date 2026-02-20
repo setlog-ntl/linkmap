@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     const { description } = parsed.data;
 
-    const { apiKey } = await resolveOpenAIKey();
+    const { apiKey, baseUrl } = await resolveOpenAIKey();
 
     // Build service catalog context (compact)
     const catalogContext = serviceCatalog.map((s) => ({
@@ -97,7 +97,7 @@ ${JSON.stringify(catalogContext)}
       [{ role: 'user', content: description }],
       systemPrompt,
       STACK_JSON_SCHEMA,
-      { model: 'gpt-4o', temperature: 0.4, max_tokens: 4096 },
+      { model: 'gpt-4o', temperature: 0.4, max_tokens: 4096, baseUrl },
     );
 
     logAudit(user.id, {

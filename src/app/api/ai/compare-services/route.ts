@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     const { slugs } = parsed.data;
 
-    const { apiKey } = await resolveOpenAIKey();
+    const { apiKey, baseUrl } = await resolveOpenAIKey();
 
     // Gather full service data for comparison
     const selectedServices = slugs
@@ -76,7 +76,8 @@ export async function POST(request: NextRequest) {
 - 데이터 기반 객관적 비교
 - 장단점 균형 있게 제시`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const base = (baseUrl || 'https://api.openai.com/v1').replace(/\/+$/, '');
+    const response = await fetch(`${base}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

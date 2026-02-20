@@ -54,5 +54,10 @@ export async function resolveAIProviderKey(
 
 /** Backward-compatible wrapper for OpenAI key resolution. */
 export async function resolveOpenAIKey(): Promise<{ apiKey: string; baseUrl?: string }> {
-  return resolveAIProviderKey('openai');
+  const result = await resolveAIProviderKey('openai');
+  // Allow OPENAI_BASE_URL env override (e.g. Cloudflare AI Gateway proxy)
+  if (!result.baseUrl && process.env.OPENAI_BASE_URL) {
+    result.baseUrl = process.env.OPENAI_BASE_URL;
+  }
+  return result;
 }

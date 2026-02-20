@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ error: '프로젝트 ID와 노드 정보가 필요합니다' }), { status: 400 });
     }
 
-    const { apiKey } = await resolveOpenAIKey();
+    const { apiKey, baseUrl } = await resolveOpenAIKey();
 
     const systemPrompt = `당신은 소프트웨어 아키텍처 분석 전문가입니다. 서비스맵 데이터를 분석하여 인사이트를 제공합니다.
 
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       apiKey,
       [{ role: 'user', content: userMessage }],
       systemPrompt,
-      { model: 'gpt-4o', temperature: 0.4, max_tokens: 2048 },
+      { model: 'gpt-4o', temperature: 0.4, max_tokens: 2048, baseUrl },
     );
 
     logAudit(user.id, {

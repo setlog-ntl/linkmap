@@ -14,6 +14,7 @@ interface OpenAIParams {
   temperature?: number;
   max_tokens?: number;
   model?: string;
+  baseUrl?: string;
 }
 
 // ─── 1. Structured Output ───────────────────────────────────────────
@@ -26,7 +27,8 @@ export async function callOpenAIStructured<T>(
   params: OpenAIParams = {},
 ): Promise<{ data: T; usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number } }> {
   const model = params.model || 'gpt-4o';
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  const base = (params.baseUrl || 'https://api.openai.com/v1').replace(/\/+$/, '');
+  const response = await fetch(`${base}/chat/completions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -91,6 +93,7 @@ export async function callOpenAIWithTools(
   maxIterations = 5,
 ): Promise<{ content: string; usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number } }> {
   const model = params.model || 'gpt-4o';
+  const base = (params.baseUrl || 'https://api.openai.com/v1').replace(/\/+$/, '');
   const totalUsage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
   const conversationMessages: Array<Record<string, unknown>> = [
     { role: 'system', content: systemPrompt },
@@ -98,7 +101,7 @@ export async function callOpenAIWithTools(
   ];
 
   for (let i = 0; i < maxIterations; i++) {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch(`${base}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -164,12 +167,13 @@ export function callOpenAIStream(
   params: OpenAIParams = {},
 ): ReadableStream {
   const model = params.model || 'gpt-4o';
+  const base = (params.baseUrl || 'https://api.openai.com/v1').replace(/\/+$/, '');
 
   return new ReadableStream({
     async start(controller) {
       const encoder = new TextEncoder();
       try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        const response = await fetch(`${base}/chat/completions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

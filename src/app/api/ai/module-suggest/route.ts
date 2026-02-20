@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
   const { prompt, templateSlug, currentEnabled, moduleNames } = parsed.data;
 
   try {
-    const { apiKey } = await resolveOpenAIKey();
+    const { apiKey, baseUrl } = await resolveOpenAIKey();
 
     const systemPrompt = `You are an AI assistant that configures website template modules.
 The user has a "${templateSlug}" template with these available modules: ${moduleNames.join(', ')}.
@@ -72,7 +72,7 @@ Keep existing values unless the user specifically asks to change them.`;
       [{ role: 'user', content: prompt }],
       systemPrompt,
       JSON_SCHEMA,
-      { temperature: 0.5 },
+      { temperature: 0.5, baseUrl },
     );
 
     await logAudit(user.id, {

@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
 
     if (!project) return unauthorizedError();
 
-    const { apiKey } = await resolveOpenAIKey();
+    const { apiKey, baseUrl } = await resolveOpenAIKey();
 
     // Load project data for tool execution
     const { data: rawEnvVars } = await supabase
@@ -167,7 +167,7 @@ ${JSON.stringify(envSummary)}
       systemPrompt,
       tools,
       toolExecutor,
-      { model: 'gpt-4o', temperature: 0.2, max_tokens: 4096 },
+      { model: 'gpt-4o', temperature: 0.2, max_tokens: 4096, baseUrl },
     );
 
     logAudit(user.id, {
