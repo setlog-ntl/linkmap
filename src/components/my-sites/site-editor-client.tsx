@@ -545,6 +545,21 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     );
   };
 
+  // 라인 넘버 계산
+  const lineCount = useMemo(() => {
+    return editorContent.split('\n').length;
+  }, [editorContent]);
+
+  const editorRef = useRef<HTMLTextAreaElement>(null);
+  const lineNumberRef = useRef<HTMLDivElement>(null);
+
+  // 에디터 스크롤 동기화
+  const handleEditorScroll = useCallback(() => {
+    if (editorRef.current && lineNumberRef.current) {
+      lineNumberRef.current.scrollTop = editorRef.current.scrollTop;
+    }
+  }, []);
+
   // 에디터 렌더링 (데스크탑/모바일 공용)
   const renderEditor = () => {
     if (contentLoading) {
@@ -556,12 +571,31 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     }
     if (selectedPath) {
       return (
-        <textarea
-          value={editorContent}
-          onChange={(e) => handleContentChange(e.target.value)}
-          className="flex-1 w-full p-3 sm:p-4 font-mono text-xs sm:text-sm bg-background resize-none focus:outline-none border-0"
-          spellCheck={false}
-        />
+        <div className="flex-1 flex overflow-hidden">
+          {/* 라인 넘버 거터 */}
+          <div
+            ref={lineNumberRef}
+            className="flex-shrink-0 overflow-hidden select-none bg-muted/30 border-r text-right py-3 sm:py-4"
+          >
+            {Array.from({ length: lineCount }, (_, i) => (
+              <div
+                key={i}
+                className="px-3 text-xs leading-[1.625rem] text-muted-foreground/50 font-mono"
+              >
+                {i + 1}
+              </div>
+            ))}
+          </div>
+          {/* 코드 에디터 */}
+          <textarea
+            ref={editorRef}
+            value={editorContent}
+            onChange={(e) => handleContentChange(e.target.value)}
+            onScroll={handleEditorScroll}
+            className="flex-1 w-full py-3 sm:py-4 px-3 sm:px-4 font-mono text-xs sm:text-sm bg-background resize-none focus:outline-none border-0 leading-[1.625rem]"
+            spellCheck={false}
+          />
+        </div>
       );
     }
     return (
@@ -763,13 +797,22 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         {/* 모바일 파일 오버레이 */}
         {showMobileFiles && (
           <div className="absolute inset-0 z-30 md:hidden flex">
-            <div className="w-64 bg-background border-r overflow-y-auto shadow-lg">
-              <div className="flex items-center justify-between px-3 py-2 border-b">
-                <span className="text-sm font-medium">{locale === 'ko' ? '파일' : 'Files'}</span>
+            <div className="w-72 bg-background border-r overflow-y-auto shadow-2xl">
+              <div className="flex items-center justify-between px-3 py-2.5 border-b">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    {locale === 'ko' ? '파일' : 'Files'}
+                  </span>
+                  {files && (
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
+                      {files.length}
+                    </Badge>
+                  )}
+                </div>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  className="h-7 w-7"
                   onClick={() => setShowMobileFiles(false)}
                 >
                   <X className="h-4 w-4" />
@@ -778,24 +821,48 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
               {renderFileList()}
             </div>
             <div
-              className="flex-1 bg-black/30"
+              className="flex-1 bg-black/40 backdrop-blur-sm"
               onClick={() => setShowMobileFiles(false)}
             />
           </div>
         )}
 
         {/* 데스크탑 파일 사이드바 */}
-        <div className="hidden md:block w-48 border-r bg-muted/30 overflow-y-auto flex-shrink-0">
-          {renderFileList()}
+        <div className="hidden md:flex md:flex-col w-56 border-r bg-muted/20 flex-shrink-0">
+          <div className="px-3 py-2.5 border-b flex items-center justify-between">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              {locale === 'ko' ? '파일' : 'Files'}
+            </span>
+            {files && (
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
+                {files.length}
+              </Badge>
+            )}
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            {renderFileList()}
+          </div>
         </div>
 
         {/* ===== 데스크탑: 에디터 + 미리보기 가로 분할 ===== */}
         <div className="hidden md:flex flex-1 overflow-hidden">
           {/* 코드 에디터 */}
           <div className={`flex flex-col overflow-hidden ${showPreview ? 'w-1/2 border-r' : 'w-full'}`}>
-            <div className="border-b px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground flex-shrink-0">
-              <Code className="h-3 w-3" />
-              <span className="truncate">{selectedPath || ''}</span>
+            <div className="border-b px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground flex-shrink-0 h-9">
+              <Code className="h-3.5 w-3.5" />
+              <span className="truncate font-medium">{selectedFileName || ''}</span>
+              {(() => {
+                const langBadge = getLanguageBadge(selectedPath);
+                if (!langBadge) return null;
+                return (
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-medium ${langBadge.color}`}>
+                    {langBadge.label}
+                  </span>
+                );
+              })()}
+              {hasUnsavedChanges && (
+                <Circle className="h-1.5 w-1.5 fill-amber-400 text-amber-400 ml-1" />
+              )}
             </div>
             {renderEditor()}
           </div>
@@ -803,44 +870,76 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           {/* 미리보기 */}
           {showPreview && (
             <div className="w-1/2 flex flex-col overflow-hidden">
-              <div className="border-b px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground flex-shrink-0">
-                <Eye className="h-3 w-3" />
-                <span>{locale === 'ko' ? '미리보기' : 'Preview'}</span>
-                {/* 반응형 뷰포트 토글 */}
-                <div className="flex items-center gap-0.5 ml-auto mr-2 border rounded-md p-0.5">
-                  {([
-                    { key: 'mobile' as PreviewViewport, icon: Smartphone },
-                    { key: 'tablet' as PreviewViewport, icon: Tablet },
-                    { key: 'desktop' as PreviewViewport, icon: Monitor },
-                  ]).map(({ key, icon: Icon }) => (
-                    <button
-                      key={key}
-                      onClick={() => setPreviewViewport(key)}
-                      className={`p-1 rounded transition-colors ${
-                        previewViewport === key
-                          ? 'bg-primary text-primary-foreground'
-                          : 'hover:bg-muted text-muted-foreground'
-                      }`}
-                      title={`${VIEWPORT_SIZES[key].label}`}
-                    >
-                      <Icon className="h-3 w-3" />
-                    </button>
-                  ))}
-                </div>
+              <div className="border-b px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground flex-shrink-0 h-9">
+                <Eye className="h-3.5 w-3.5" />
+                <span className="font-medium">{locale === 'ko' ? '미리보기' : 'Preview'}</span>
                 {showLiveAfterDeploy ? (
-                  <Badge variant="default" className="text-[10px] px-1 py-0 bg-green-600">
+                  <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-green-600">
                     {locale === 'ko' ? '배포됨' : 'DEPLOYED'}
                   </Badge>
                 ) : isLivePreviewable ? (
-                  <Badge variant="secondary" className="text-[10px] px-1 py-0">
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
                     LIVE
                   </Badge>
                 ) : null}
+                {/* 반응형 뷰포트 토글 */}
+                <div className="flex items-center gap-0.5 ml-auto border rounded-full p-0.5 bg-muted/50">
+                  {([
+                    { key: 'mobile' as PreviewViewport, icon: Smartphone, label: '375px' },
+                    { key: 'tablet' as PreviewViewport, icon: Tablet, label: '768px' },
+                    { key: 'desktop' as PreviewViewport, icon: Monitor, label: 'Full' },
+                  ]).map(({ key, icon: Icon, label }) => (
+                    <button
+                      key={key}
+                      onClick={() => setPreviewViewport(key)}
+                      className={`px-2 py-0.5 rounded-full transition-all flex items-center gap-1 ${
+                        previewViewport === key
+                          ? 'bg-background text-foreground shadow-sm font-medium'
+                          : 'hover:bg-muted text-muted-foreground'
+                      }`}
+                      title={label}
+                    >
+                      <Icon className="h-3 w-3" />
+                      {previewViewport === key && (
+                        <span className="text-[10px]">{label}</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {/* 새로고침 */}
+                <button
+                  onClick={() => {
+                    setLivePreviewKey((k) => k + 1);
+                    if (previewRef.current && previewHtml) {
+                      const doc = previewRef.current.contentDocument;
+                      if (doc) { doc.open(); doc.write(previewHtml); doc.close(); }
+                    }
+                  }}
+                  className="p-1 rounded-md hover:bg-muted transition-colors"
+                  title={locale === 'ko' ? '새로고침' : 'Refresh'}
+                >
+                  <RotateCw className="h-3 w-3" />
+                </button>
+                {/* 새 탭에서 열기 */}
+                {liveUrl && (
+                  <a
+                    href={liveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1 rounded-md hover:bg-muted transition-colors"
+                    title={locale === 'ko' ? '새 탭에서 열기' : 'Open in new tab'}
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
               </div>
               {/* 반응형 뷰포트 래퍼 */}
-              <div className={`flex-1 overflow-auto ${previewViewport !== 'desktop' ? 'bg-muted/30 flex justify-center py-4' : ''}`}>
+              <div className={`flex-1 overflow-auto ${previewViewport !== 'desktop' ? 'bg-muted/20 flex justify-center items-start py-6' : ''}`}>
                 <div
-                  className={previewViewport !== 'desktop' ? 'bg-white shadow-lg rounded-lg overflow-hidden border' : 'h-full'}
+                  className={previewViewport !== 'desktop'
+                    ? 'bg-white shadow-xl rounded-xl overflow-hidden border-2 border-border/50'
+                    : 'h-full'
+                  }
                   style={previewViewport !== 'desktop' ? {
                     width: VIEWPORT_SIZES[previewViewport].width,
                     height: previewViewport === 'mobile' ? '667px' : '1024px',
@@ -885,21 +984,34 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       </div>
 
       {/* ===== 상태 바 ===== */}
-      <div className="border-t px-3 sm:px-4 py-1.5 flex items-center justify-between text-xs text-muted-foreground bg-muted/30 gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="truncate">{selectedFileName}</span>
-          <span className="text-muted-foreground/60 hidden sm:inline">
-            {locale === 'ko' ? 'Ctrl+S 저장 · 배포 버튼으로 사이트 반영' : 'Ctrl+S save · Deploy to publish'}
-          </span>
+      <div className="border-t px-3 sm:px-4 h-8 flex items-center justify-between text-xs text-muted-foreground bg-muted/30 gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="font-mono text-[11px] truncate">{selectedFileName}</span>
+          {(() => {
+            const langBadge = getLanguageBadge(selectedPath);
+            if (!langBadge) return null;
+            return (
+              <span className={`text-[9px] px-1 py-0 rounded font-mono ${langBadge.color}`}>
+                {langBadge.label}
+              </span>
+            );
+          })()}
         </div>
-        {lastSavedAt && (
-          <span className="shrink-0 text-[10px] sm:text-xs">
-            {lastSavedAt.toLocaleTimeString(locale === 'ko' ? 'ko-KR' : 'en-US', {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-          </span>
-        )}
+        <span className="text-muted-foreground/50 hidden sm:inline text-[11px]">
+          {locale === 'ko' ? 'Ctrl+S 저장 · 배포하여 게시' : 'Ctrl+S save · Deploy to publish'}
+        </span>
+        <div className="flex items-center gap-2 shrink-0">
+          {lastSavedAt ? (
+            <span className="text-[11px]">
+              {locale === 'ko' ? '마지막 저장: ' : 'Last saved: '}
+              {formatRelativeTime(lastSavedAt, locale)}
+            </span>
+          ) : (
+            <span className="text-[11px] text-muted-foreground/40">
+              {locale === 'ko' ? '저장 기록 없음' : 'Not saved yet'}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* ===== 미저장 변경 경고 다이얼로그 ===== */}
