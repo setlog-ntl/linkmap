@@ -13,6 +13,7 @@ export const bulkEnvVarSchema = z.object({
       environment: z.enum(['development', 'staging', 'production']).default('development'),
       is_secret: z.boolean().default(true),
       description: z.string().max(500).nullable().optional(),
+      service_id: z.string().uuid().nullable().optional(),
     })
   ).min(1, '최소 1개의 변수가 필요합니다').max(50, '최대 50개까지 일괄 추가 가능합니다'),
 }).refine(

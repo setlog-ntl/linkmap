@@ -33,6 +33,7 @@ import { GitBranch, Loader2 } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { EnvImportDialog } from '@/components/service/env-import-dialog';
+import type { ImportVariable } from '@/components/service/env-import-dialog';
 import { SecretsSyncPanel } from '@/components/github/secrets-sync-panel';
 import { parseEnvLine } from '@/lib/utils/parse-env';
 import { useLinkedRepos } from '@/lib/queries/github';
@@ -56,6 +57,7 @@ export default function ProjectEnvPage() {
   const { locale } = useLocaleStore();
   const { data: linkedRepos = [] } = useLinkedRepos(projectId);
   const [showGitHubSync, setShowGitHubSync] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [activeEnv, setActiveEnv] = useState<Environment>('development');
   const [search, setSearch] = useState('');
   const [decryptedValues, setDecryptedValues] = useState<Record<string, string>>({});
@@ -240,6 +242,7 @@ export default function ProjectEnvPage() {
         onSearchChange={setSearch}
         onAddClick={() => setAddOpen(true)}
         onExportClick={handleDownload}
+        onImportClick={() => setImportOpen(true)}
         envCounts={envCounts}
       />
 
@@ -256,16 +259,24 @@ export default function ProjectEnvPage() {
         onCopy={handleCopy}
       />
 
-      {/* Import Dialog (self-managed trigger) */}
+      {/* Import Dialog (externally controlled) */}
       <EnvImportDialog
-        onImport={async (vars) => {
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        projectServices={projectServices}
+        onImport={async (vars: ImportVariable[]) => {
           const res = await fetch('/api/env/bulk', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ project_id: projectId, variables: vars }),
           });
-          if (!res.ok) throw new Error('일괄 가져오기 실패');
-          await queryClient.invalidateQueries({ queryKey: queryKeys.envVars.byProject(projectId) });
+          if (!res.ok) throw new Error(t(locale, 'envVar.importDialog.failed'));
+          await Promise.all([
+            queryClient.invalidateQueries({ queryKey: queryKeys.envVars.byProject(projectId) }),
+            queryClient.invalidateQueries({ queryKey: queryKeys.envVars.conflicts(projectId) }),
+            queryClient.invalidateQueries({ queryKey: queryKeys.healthChecks.latestByProject(projectId) }),
+            queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all(projectId) }),
+          ]);
         }}
       />
 

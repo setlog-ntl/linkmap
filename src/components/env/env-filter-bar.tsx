@@ -10,7 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Plus, Download } from 'lucide-react';
+import { Search, Plus, Download, Upload } from 'lucide-react';
+import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 import type { Environment } from '@/types';
 
 const envOptions: { value: Environment; label: string }[] = [
@@ -26,6 +28,7 @@ interface EnvFilterBarProps {
   onSearchChange: (value: string) => void;
   onAddClick: () => void;
   onExportClick?: () => void;
+  onImportClick?: () => void;
   envCounts: Record<Environment, number>;
 }
 
@@ -36,8 +39,10 @@ export function EnvFilterBar({
   onSearchChange,
   onAddClick,
   onExportClick,
+  onImportClick,
   envCounts,
 }: EnvFilterBarProps) {
+  const { locale } = useLocaleStore();
   const [inputValue, setInputValue] = useState(search);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -76,14 +81,19 @@ export function EnvFilterBar({
       </div>
 
       <div className="flex gap-2">
+        {onImportClick && (
+          <Button variant="outline" size="icon" onClick={onImportClick} title={t(locale, 'envVar.import')}>
+            <Upload className="h-4 w-4" />
+          </Button>
+        )}
         {onExportClick && (
-          <Button variant="outline" size="icon" onClick={onExportClick} title="내보내기">
+          <Button variant="outline" size="icon" onClick={onExportClick} title={t(locale, 'envVar.download')}>
             <Download className="h-4 w-4" />
           </Button>
         )}
         <Button onClick={onAddClick}>
           <Plus className="mr-2 h-4 w-4" />
-          변수 추가
+          {t(locale, 'envVar.addVar')}
         </Button>
       </div>
     </div>

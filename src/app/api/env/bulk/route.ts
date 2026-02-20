@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
   // Insert all variables
   const records = variables.map((v) => ({
     project_id,
-    service_id: null,
+    service_id: v.service_id ?? null,
     key_name: v.key_name,
     encrypted_value: encrypt(v.value),
     environment: v.environment,
@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
       project_id,
       count: variables.length,
       key_names: variables.map((v) => v.key_name),
+      service_assignments: variables.filter((v) => v.service_id).length,
     },
   });
 

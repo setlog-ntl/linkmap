@@ -29,8 +29,8 @@ const GROUP_ICONS: Record<ViewGroup, typeof Database> = {
   infra: Server,
 };
 
-const STATUS_BADGE: Record<ServiceStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  connected: { label: '정상', variant: 'default' },
+const STATUS_BADGE: Record<ServiceStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }> = {
+  connected: { label: '정상', variant: 'default', className: 'bg-green-600 hover:bg-green-600/80 text-white' },
   in_progress: { label: '진행중', variant: 'secondary' },
   error: { label: '오류', variant: 'destructive' },
   not_started: { label: '미설정', variant: 'outline' },
@@ -64,7 +64,7 @@ export function GroupSummaryCard({ meta, services, onClick }: GroupSummaryCardPr
                 <div key={svc.id} className="flex items-center gap-2">
                   <ServiceIcon serviceId={svc.slug} size={14} />
                   <span className="text-sm truncate flex-1 min-w-0">{svc.name}</span>
-                  <Badge variant={badge.variant} className="text-[10px] h-5 px-1.5">
+                  <Badge variant={badge.variant} className={`text-[10px] h-5 px-1.5 ${badge.className ?? ''}`}>
                     {badge.label}
                   </Badge>
                 </div>
