@@ -39,7 +39,7 @@ interface GuideStepTip {
 
 interface GuideStep {
   id: number;
-  navLabelKey: keyof typeof import('@/lib/i18n/locales/ko.json') extends `cloudflareGuide.${infer K}` ? K : never;
+  navLabelKey: 'navOverview' | 'navAccount' | 'navBuildDeploy' | 'navEnvVars' | 'navGitBuild' | 'navGitActions' | 'navSummary';
   titleKey: string;
   subtitleKey: string;
   icon: LucideIcon;
@@ -47,19 +47,8 @@ interface GuideStep {
   actionUrl?: string;
   estimatedMinutes: number;
   tips: GuideStepTip[];
-  /** Step별 추가 콘텐츠 렌더 (카드 본문) */
   renderContent?: (locale: 'ko' | 'en') => React.ReactNode;
 }
-
-const STEP_KEYS = [
-  'navOverview',
-  'navAccount',
-  'navBuildDeploy',
-  'navEnvVars',
-  'navGitBuild',
-  'navGitActions',
-  'navSummary',
-] as const;
 
 function createSteps(): GuideStep[] {
   return [
@@ -102,10 +91,18 @@ function createSteps(): GuideStep[] {
       estimatedMinutes: 3,
       tips: [
         { textKey: 'cloudflareGuide.buildLogin' },
-        { textKey: 'cloudflareGuide.buildCmd', isCode: true },
-        { textKey: 'cloudflareGuide.deployCmd', isCode: true },
+        { textKey: 'cloudflareGuide.tipCodeWranglerLogin', isCode: true },
+        { textKey: 'cloudflareGuide.tipCodeBuildCf', isCode: true },
+        { textKey: 'cloudflareGuide.tipCodeWranglerDeploy', isCode: true },
         { textKey: 'cloudflareGuide.buildNote' },
       ],
+      renderContent: (locale) => (
+        <div className="space-y-3 mt-2">
+          <pre className="rounded-lg bg-muted p-4 text-sm overflow-x-auto"><code>npx wrangler login</code></pre>
+          <pre className="rounded-lg bg-muted p-4 text-sm overflow-x-auto"><code>npm run build:cf</code></pre>
+          <pre className="rounded-lg bg-muted p-4 text-sm overflow-x-auto"><code>npx wrangler deploy</code></pre>
+        </div>
+      ),
     },
     {
       id: 3,
@@ -116,7 +113,6 @@ function createSteps(): GuideStep[] {
       estimatedMinutes: 5,
       tips: [
         { textKey: 'cloudflareGuide.envSource' },
-        { textKey: 'cloudflareGuide.envCodeBlock', isCode: true },
       ],
       renderContent: (locale) => (
         <pre className="rounded-lg bg-muted p-4 text-sm overflow-x-auto mt-2">
@@ -194,7 +190,7 @@ npx wrangler secret put ENCRYPTION_KEY`}</code>
       id: 6,
       navLabelKey: 'navSummary',
       titleKey: 'cloudflareGuide.summaryTitle',
-      subtitleKey: 'cloudflareGuide.summary1',
+      subtitleKey: 'cloudflareGuide.summarySubtitle',
       icon: CheckCircle2,
       estimatedMinutes: 0,
       tips: [
@@ -275,7 +271,6 @@ export function CloudflareGuide() {
   const allDone = completedSteps.size === STEPS.length;
   const step = STEPS[currentStep];
   const StepIcon = step.icon;
-  const navLabelKey = `cloudflareGuide.${step.navLabelKey}` as const;
 
   const motionProps = prefersReducedMotion
     ? {}
@@ -381,11 +376,11 @@ export function CloudflareGuide() {
               <CardHeader>
                 <div className="flex items-start gap-4">
                   <div className="h-12 w-12 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <StepIcon className="h-6 w-6 text-primary" style={step.icon === Cloud ? { color: '#f38020' } : undefined} />
+                    <StepIcon className="h-6 w-6 text-primary" style={step.id <= 1 ? { color: '#f38020' } : undefined} />
                   </div>
                   <div>
                     <CardTitle className="text-xl mb-1">
-                      {t(locale, 'cloudflareGuide.stepLabel', { n: step.id + 1 })} {t(locale, step.titleKey)}
+                      {t(locale, 'cloudflareGuide.stepLabel')} {step.id + 1}. {t(locale, step.titleKey)}
                     </CardTitle>
                     <p className="text-sm text-muted-foreground">{t(locale, step.subtitleKey)}</p>
                   </div>
@@ -416,7 +411,7 @@ export function CloudflareGuide() {
                       {t(locale, 'cloudflareGuide.stepDoneLabel')}
                     </label>
                     <Badge variant="secondary" className="ml-auto text-xs">
-                      {step.estimatedMinutes === 0 ? '—' : `${t(locale, 'cloudflareGuide.minutesEst')} ${step.estimatedMinutes}`}
+                      {step.estimatedMinutes === 0 ? '—' : `${t(locale, 'cloudflareGuide.minutesEst')} ${step.estimatedMinutes}${locale === 'ko' ? '분' : ' min'}`}
                     </Badge>
                   </div>
                 )}
