@@ -567,7 +567,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     if (!moduleState || !moduleSchema) return;
     try {
       setIsApplyingModules(true);
-      const generatedFiles = generateFiles(moduleState);
+      const generatedFiles = generateFiles(moduleState, fileCache);
 
       // 에디터 캐시 업데이트 (현재 열린 파일이면 에디터 내용도 갱신)
       for (const gf of generatedFiles) {
@@ -633,7 +633,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     } finally {
       setIsApplyingModules(false);
     }
-  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, locale]);
+  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, locale, fileCache]);
 
   // Ctrl+S 단축키
   useEffect(() => {

@@ -229,6 +229,78 @@ ${renders.join('\n')}
 }
 
 // ──────────────────────────────────────────────
+// Phase 2: 컴포넌트 수준 코드 생성기
+// ──────────────────────────────────────────────
+
+/** Hero 컴포넌트의 그래디언트 색상 치환 */
+export function generateHeroSection(
+  state: ModuleConfigState,
+  baseCode: string
+): string {
+  const hero = state.values.hero || {};
+  const from = (hero.gradientFrom as string) || '#ee5b2b';
+  const to = (hero.gradientTo as string) || '#f59e0b';
+
+  let code = baseCode;
+  // Tailwind 클래스 내 색상 치환: from-[#xxxxxx] → from-[#newColor]
+  code = code.replace(/from-\[#[a-fA-F0-9]{6}\]/g, `from-[${from}]`);
+  code = code.replace(/to-\[#[a-fA-F0-9]{6}\]/g, `to-[${to}]`);
+  // inline gradient 치환: linear-gradient(..., #old1, #old2)
+  code = code.replace(
+    /linear-gradient\(90deg,\s*#[a-fA-F0-9]{6},\s*#[a-fA-F0-9]{6}\)/g,
+    `linear-gradient(90deg, ${from}, ${to})`
+  );
+  // from-[#xxx]/10 패턴 (반투명 배경)
+  code = code.replace(
+    /from-\[#[a-fA-F0-9]{6}\]\/10/g,
+    `from-[${from}]/10`
+  );
+  return code;
+}
+
+/** Values 컴포넌트의 컬럼 수 치환 */
+export function generateValuesSection(
+  state: ModuleConfigState,
+  baseCode: string
+): string {
+  const values = state.values.values || {};
+  const cols = (values.columns as string) || '3';
+
+  let code = baseCode;
+  // md:grid-cols-X 치환
+  code = code.replace(/md:grid-cols-\d/g, `md:grid-cols-${cols}`);
+  return code;
+}
+
+/** Gallery 컴포넌트의 컬럼 수 치환 */
+export function generateGallerySection(
+  state: ModuleConfigState,
+  baseCode: string
+): string {
+  const gallery = state.values.gallery || {};
+  const cols = (gallery.columns as string) || '3';
+
+  let code = baseCode;
+  // lg:grid-cols-X 치환
+  code = code.replace(/lg:grid-cols-\d/g, `lg:grid-cols-${cols}`);
+  return code;
+}
+
+/** globals.css 내 primary 색상 변수 치환 */
+export function generateGlobalsCss(
+  state: ModuleConfigState,
+  baseCode: string
+): string {
+  const hero = state.values.hero || {};
+  const from = (hero.gradientFrom as string) || '#ee5b2b';
+
+  return baseCode.replace(
+    /--color-primary:\s*#[a-fA-F0-9]{6}/g,
+    `--color-primary: ${from}`
+  );
+}
+
+// ──────────────────────────────────────────────
 // 종합: 변경된 파일 목록 생성
 // ──────────────────────────────────────────────
 
@@ -237,11 +309,71 @@ export interface GeneratedFile {
   content: string;
 }
 
-export function generateFiles(state: ModuleConfigState): GeneratedFile[] {
-  return [
+/**
+ * 모듈 설정에서 변경된 파일 목록을 생성합니다.
+ * @param state 현재 모듈 설정 상태
+ * @param currentFiles 기존 파일 내용 캐시 (Phase 2 컴포넌트 수준 편집용)
+ */
+export function generateFiles(
+  state: ModuleConfigState,
+  currentFiles?: Record<string, string>
+): GeneratedFile[] {
+  const files: GeneratedFile[] = [
     { path: 'src/lib/config.ts', content: generateConfigTs(state) },
     { path: 'src/app/page.tsx', content: generatePageTsx(state) },
   ];
+
+  // Phase 2: 컴포넌트 파일 변경
+  if (currentFiles) {
+    const hero = state.values.hero || {};
+    const values = state.values.values || {};
+    const gallery = state.values.gallery || {};
+
+    // Hero: 그래디언트 색상이 기본값과 다르면 생성
+    if (hero.gradientFrom && hero.gradientFrom !== '#ee5b2b' ||
+        hero.gradientTo && hero.gradientTo !== '#f59e0b') {
+      const heroBase = currentFiles['src/components/hero-section.tsx'];
+      if (heroBase) {
+        files.push({
+          path: 'src/components/hero-section.tsx',
+          content: generateHeroSection(state, heroBase),
+        });
+      }
+
+      // globals.css도 primary 색상 변경
+      const cssBase = currentFiles['src/app/globals.css'];
+      if (cssBase) {
+        files.push({
+          path: 'src/app/globals.css',
+          content: generateGlobalsCss(state, cssBase),
+        });
+      }
+    }
+
+    // Values: 컬럼 수가 기본값(3)과 다르면 생성
+    if (values.columns && values.columns !== '3') {
+      const valuesBase = currentFiles['src/components/values-section.tsx'];
+      if (valuesBase) {
+        files.push({
+          path: 'src/components/values-section.tsx',
+          content: generateValuesSection(state, valuesBase),
+        });
+      }
+    }
+
+    // Gallery: 컬럼 수가 기본값(3)과 다르면 생성
+    if (gallery.columns && gallery.columns !== '3') {
+      const galleryBase = currentFiles['src/components/gallery-section.tsx'];
+      if (galleryBase) {
+        files.push({
+          path: 'src/components/gallery-section.tsx',
+          content: generateGallerySection(state, galleryBase),
+        });
+      }
+    }
+  }
+
+  return files;
 }
 
 // ──────────────────────────────────────────────
