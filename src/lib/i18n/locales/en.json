@@ -514,7 +514,14 @@
     "tip2": "After deploy, you can freely edit the code in your GitHub repo",
     "tip3": "You can connect a custom domain later",
     "tip4": "Once deployed, manage your site from the Linkmap dashboard",
-    "tip5": "GitHub Actions automatically handles builds and deploys"
+    "tip5": "GitHub Actions automatically handles builds and deploys",
+    "selectedTemplate": "Selected Template",
+    "siteReady": "Your site is ready!",
+    "visitSite": "Visit Site",
+    "editSite": "Edit Site",
+    "githubRepo": "GitHub Repo",
+    "dashboard": "Dashboard",
+    "manageSites": "Manage in My Sites"
   },
   "templatePicker": {
     "chooseTemplate": "Choose a Template",

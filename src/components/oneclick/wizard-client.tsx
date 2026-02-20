@@ -68,6 +68,13 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
     state.phase === 'error' ? state.projectId :
     null;
 
+  // Resolve template object for deploy step display
+  const templateId =
+    state.phase === 'deploying' ? state.template :
+    state.phase === 'polling' || state.phase === 'success' ? state.template :
+    null;
+  const activeTemplate = templateId ? templates.find((t) => t.id === templateId) ?? null : null;
+
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       {/* Header */}
@@ -138,6 +145,7 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
             (deployMutation.error as Error) || null
           }
           projectId={projectId}
+          template={activeTemplate}
           onRetry={handleRetry}
         />
       )}

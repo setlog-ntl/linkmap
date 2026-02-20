@@ -514,7 +514,14 @@
     "tip2": "배포 후 코드는 GitHub 레포에서 자유롭게 수정할 수 있어요",
     "tip3": "커스텀 도메인도 나중에 연결할 수 있어요",
     "tip4": "사이트가 배포되면 Linkmap 대시보드에서 관리할 수 있어요",
-    "tip5": "GitHub Actions가 자동으로 빌드와 배포를 처리합니다"
+    "tip5": "GitHub Actions가 자동으로 빌드와 배포를 처리합니다",
+    "selectedTemplate": "선택한 템플릿",
+    "siteReady": "사이트가 준비되었습니다!",
+    "visitSite": "사이트 방문",
+    "editSite": "사이트 편집",
+    "githubRepo": "GitHub 레포",
+    "dashboard": "대시보드",
+    "manageSites": "내 사이트에서 관리하기"
   },
   "templatePicker": {
     "chooseTemplate": "템플릿 선택",

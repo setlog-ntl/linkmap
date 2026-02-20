@@ -20,7 +20,7 @@ interface TemplateCardProps {
 // Uses currentColor + opacity so it auto-adapts to light/dark mode
 // ---------------------------------------------------------------------------
 
-function WireframeSVG({ slug }: { slug: string }) {
+export function WireframeSVG({ slug }: { slug: string }) {
   const common = 'w-full h-full';
 
   switch (slug) {

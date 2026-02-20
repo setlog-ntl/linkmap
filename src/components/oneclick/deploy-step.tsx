@@ -20,7 +20,7 @@ import {
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t, type Locale } from '@/lib/i18n';
-import type { DeployStatus } from '@/lib/queries/oneclick';
+import type { DeployStatus, HomepageTemplate } from '@/lib/queries/oneclick';
 import { getErrorDetails } from '@/lib/deploy-error-map';
 import { DeployProgress } from './deploy-progress';
 import { DeploySuccess } from './deploy-success';
@@ -30,10 +30,11 @@ interface DeployStepProps {
   isLoading: boolean;
   error: Error | null;
   projectId: string | null;
+  template?: HomepageTemplate | null;
   onRetry?: () => void;
 }
 
-export function DeployStep({ status, isLoading, error, projectId, onRetry }: DeployStepProps) {
+export function DeployStep({ status, isLoading, error, projectId, template, onRetry }: DeployStepProps) {
   const { locale } = useLocaleStore();
   const [showDetails, setShowDetails] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -63,7 +64,7 @@ export function DeployStep({ status, isLoading, error, projectId, onRetry }: Dep
 
   // Loading (deploying, no status yet)
   if (isLoading && !status) {
-    return <InitialLoadingCard locale={locale} />;
+    return <InitialLoadingCard locale={locale} template={template} />;
   }
 
   if (!status) return null;
@@ -77,7 +78,7 @@ export function DeployStep({ status, isLoading, error, projectId, onRetry }: Dep
   return (
     <div className="space-y-6">
       {/* Progress card */}
-      <DeployProgress status={status} />
+      <DeployProgress status={status} template={template} />
 
       {/* Error details */}
       {isError && errorDetails && (
@@ -134,7 +135,7 @@ export function DeployStep({ status, isLoading, error, projectId, onRetry }: Dep
       )}
 
       {/* Success */}
-      {isCompleted && <DeploySuccess status={status} projectId={projectId} />}
+      {isCompleted && <DeploySuccess status={status} projectId={projectId} template={template} />}
     </div>
   );
 }
@@ -143,7 +144,7 @@ export function DeployStep({ status, isLoading, error, projectId, onRetry }: Dep
 
 const PREPARING_TIPS_KEYS = ['tip1', 'tip2', 'tip3'] as const;
 
-function InitialLoadingCard({ locale }: { locale: Locale }) {
+function InitialLoadingCard({ locale, template }: { locale: Locale; template?: HomepageTemplate | null }) {
   const prefersReducedMotion = useReducedMotion();
   const [tipIndex, setTipIndex] = useState(0);
 
@@ -163,6 +164,11 @@ function InitialLoadingCard({ locale }: { locale: Locale }) {
         >
           <Rocket className="h-10 w-10 mx-auto text-primary" />
         </motion.div>
+        {template && (
+          <p className="text-sm text-muted-foreground">
+            {locale === 'ko' ? template.name_ko : template.name}
+          </p>
+        )}
         <div className="space-y-1">
           <p className="font-medium">
             {t(locale, 'deployProgress.preparing')}

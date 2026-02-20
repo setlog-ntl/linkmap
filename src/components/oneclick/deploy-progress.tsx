@@ -19,10 +19,12 @@ import {
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t, type Locale } from '@/lib/i18n';
-import type { DeployStatus } from '@/lib/queries/oneclick';
+import type { DeployStatus, HomepageTemplate } from '@/lib/queries/oneclick';
+import { WireframeSVG } from './template-card';
 
 interface DeployProgressProps {
   status: DeployStatus;
+  template?: HomepageTemplate | null;
 }
 
 const TIPS_KEYS = ['tip1', 'tip2', 'tip3', 'tip4', 'tip5'] as const;
@@ -80,7 +82,7 @@ function getStepIcon(stepName: string) {
   return Circle;
 }
 
-export function DeployProgress({ status }: DeployProgressProps) {
+export function DeployProgress({ status, template }: DeployProgressProps) {
   const { locale } = useLocaleStore();
   const prefersReducedMotion = useReducedMotion();
 
@@ -102,6 +104,26 @@ export function DeployProgress({ status }: DeployProgressProps) {
     <Card>
       <CardContent className="py-6">
         <div className="space-y-5">
+          {/* Template mini preview */}
+          {template && (
+            <div className="flex items-center gap-3 pb-3 border-b">
+              <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <WireframeSVG slug={template.slug} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">
+                  {t(locale, 'deployProgress.selectedTemplate')}
+                </p>
+                <p className="text-sm font-semibold truncate">
+                  {locale === 'ko' ? template.name_ko : template.name}
+                </p>
+                <p className="text-xs text-muted-foreground line-clamp-1">
+                  {locale === 'ko' ? template.description_ko : template.description}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Header */}
           <div className="flex items-center justify-between">
             <h3 className="font-semibold">

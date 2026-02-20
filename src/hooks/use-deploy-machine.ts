@@ -35,12 +35,14 @@ interface PollingState {
   phase: 'polling';
   deployId: string;
   projectId: string;
+  template: string;
 }
 
 interface SuccessState {
   phase: 'success';
   deployId: string;
   projectId: string;
+  template: string;
 }
 
 interface ErrorState {
@@ -71,7 +73,7 @@ type DeployAction =
   | { type: 'AUTH_COMPLETE' }
   | { type: 'GITHUB_CONNECTED' }
   | { type: 'START_DEPLOY'; template: string; siteName: string }
-  | { type: 'DEPLOY_SUCCESS'; deployId: string; projectId: string }
+  | { type: 'DEPLOY_SUCCESS'; deployId: string; projectId: string; template: string }
   | { type: 'DEPLOY_READY' }
   | { type: 'DEPLOY_ERROR'; error: Error; deployId?: string; projectId?: string }
   | { type: 'RETRY' };
@@ -136,6 +138,7 @@ function deployReducer(state: DeployState, action: DeployAction): DeployState {
         phase: 'polling',
         deployId: action.deployId,
         projectId: action.projectId,
+        template: action.template,
       };
 
     case 'DEPLOY_READY':
@@ -144,6 +147,7 @@ function deployReducer(state: DeployState, action: DeployAction): DeployState {
           phase: 'success',
           deployId: state.deployId,
           projectId: state.projectId,
+          template: state.template,
         };
       }
       return state;
@@ -300,6 +304,7 @@ export function useDeployMachine({ isAuthenticated }: UseDeployMachineOptions) {
         type: 'DEPLOY_SUCCESS',
         deployId: result.deploy_id,
         projectId: result.project_id,
+        template,
       });
     } catch (err) {
       const error = err instanceof Error ? err : new Error('배포 중 오류가 발생했습니다');
