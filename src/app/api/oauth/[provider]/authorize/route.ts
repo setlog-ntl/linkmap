@@ -34,8 +34,10 @@ export async function GET(
   const projectId = request.nextUrl.searchParams.get('project_id');
   const serviceSlug = request.nextUrl.searchParams.get('service_slug') || provider;
 
-  if (flowContext === 'settings') {
-    // Settings flow: no project_id required, user-level connection
+  const isUserLevel = flowContext === 'settings' || flowContext === 'oneclick';
+
+  if (isUserLevel) {
+    // Settings/oneclick flow: no project_id required, user-level connection
   } else {
     // Project flow: project_id + service_slug required
     if (!projectId || !serviceSlug) return apiError('project_id와 service_slug가 필요합니다', 400);
@@ -56,7 +58,9 @@ export async function GET(
 
   const redirectUrl = flowContext === 'settings'
     ? '/settings/connections'
-    : `/project/${projectId}/service-map`;
+    : flowContext === 'oneclick'
+      ? '/oneclick'
+      : `/project/${projectId}/service-map`;
 
   // Store state in DB — RLS policy: user_id = auth.uid()
   const { error } = await supabase.from('oauth_states').insert({
