@@ -37,6 +37,30 @@ export function useDeleteGitHubConnection() {
   });
 }
 
+export function useDisconnectGitHubConnection() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch('/api/account/github-connections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'disconnect', id }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'GitHub 연결 해제 실패');
+      }
+      return res.json() as Promise<{ success: boolean; unlinked_count: number }>;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.github.connections });
+      queryClient.invalidateQueries({ queryKey: queryKeys.account.connectedAccounts });
+      // Invalidate all linked-repos queries (any project)
+      queryClient.invalidateQueries({ queryKey: ['github', 'linked-repos'] });
+    },
+  });
+}
+
 export function useRenameGitHubConnection() {
   const queryClient = useQueryClient();
   return useMutation({

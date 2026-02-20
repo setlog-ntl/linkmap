@@ -27,6 +27,12 @@ export interface ServiceAccount {
   updated_at: string;
 }
 
+export interface GitHubConnectionLinkedProject {
+  project_id: string;
+  project_name: string;
+  repo_count: number;
+}
+
 /** GitHub connection summary for settings page (no encrypted fields) */
 export interface GitHubConnection {
   id: string;
@@ -41,6 +47,8 @@ export interface GitHubConnection {
   error_message: string | null;
   created_at: string;
   updated_at: string;
+  linked_projects?: GitHubConnectionLinkedProject[];
+  linked_repos_count?: number;
 }
 
 // ============================================

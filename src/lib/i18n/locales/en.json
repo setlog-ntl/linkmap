@@ -572,7 +572,15 @@
     "connectionAdded": "GitHub account connected",
     "connectionDeleted": "GitHub connection deleted",
     "connectionRenamed": "Connection renamed",
-    "scopes": "Scopes"
+    "scopes": "Scopes",
+    "linkedProjects": "Linked Projects",
+    "repoCount": "repos",
+    "noLinkedProjects": "No linked projects",
+    "disconnect": "Disconnect",
+    "disconnectConfirm": "Disconnect all repositories linked to this GitHub account?",
+    "disconnectSuccess": "Disconnected successfully",
+    "deleteBlocked": "Disconnect repos first",
+    "viewOnGitHub": "View on GitHub"
   },
   "commandPalette": {
     "placeholder": "Search commands...",

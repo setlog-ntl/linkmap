@@ -25,7 +25,7 @@ function createRequest(url: string, options?: RequestInit) {
 
 function makeChain(result: { data: unknown; error: unknown; count?: number | null }) {
   const chain: Record<string, unknown> = {};
-  const methods = ['select', 'eq', 'is', 'insert', 'update', 'delete', 'limit', 'filter'];
+  const methods = ['select', 'eq', 'is', 'in', 'insert', 'update', 'delete', 'limit', 'filter'];
   for (const m of methods) {
     chain[m] = vi.fn().mockReturnValue(chain);
   }
@@ -90,12 +90,20 @@ describe('GET /api/account/github-connections', () => {
     });
     vi.mocked(createClient).mockResolvedValue(mock as never);
 
+    // Admin client for linked repos/projects enrichment
+    const adminMock = {
+      from: vi.fn(() => makeChain({ data: [], error: null })),
+    };
+    vi.mocked(createAdminClient).mockReturnValue(adminMock as never);
+
     const res = await GET();
     expect(res.status).toBe(200);
 
     const body = await res.json();
     expect(body.connections).toHaveLength(1);
     expect(body.connections[0].id).toBe(UUID_1);
+    expect(body.connections[0].linked_projects).toEqual([]);
+    expect(body.connections[0].linked_repos_count).toBe(0);
     // Encrypted fields should not be present
     expect(body.connections[0].encrypted_access_token).toBeUndefined();
     // service nested object should be stripped

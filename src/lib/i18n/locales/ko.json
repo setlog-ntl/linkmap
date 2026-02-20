@@ -572,7 +572,15 @@
     "connectionAdded": "GitHub 계정이 연결되었습니다",
     "connectionDeleted": "GitHub 계정 연결이 삭제되었습니다",
     "connectionRenamed": "이름이 변경되었습니다",
-    "scopes": "권한"
+    "scopes": "권한",
+    "linkedProjects": "연결된 프로젝트",
+    "repoCount": "개 레포",
+    "noLinkedProjects": "연결된 프로젝트 없음",
+    "disconnect": "연결 해제",
+    "disconnectConfirm": "이 GitHub 계정의 모든 레포지토리 연결을 해제하시겠습니까?",
+    "disconnectSuccess": "연결이 해제되었습니다",
+    "deleteBlocked": "먼저 연결을 해제하세요",
+    "viewOnGitHub": "GitHub에서 보기"
   },
   "commandPalette": {
     "placeholder": "명령어 검색...",

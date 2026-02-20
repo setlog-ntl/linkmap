@@ -54,7 +54,8 @@ export type AuditAction =
   | 'ai.command'
   | 'github_connection.add'
   | 'github_connection.delete'
-  | 'github_connection.rename';
+  | 'github_connection.rename'
+  | 'github_connection.disconnect';
 
 interface AuditLogEntry {
   action: AuditAction;

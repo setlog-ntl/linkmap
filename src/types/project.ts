@@ -59,4 +59,5 @@ export interface ProjectTemplate {
 
 export interface ProjectWithServices extends Project {
   project_services: (ProjectService & { service: Service })[];
+  project_github_repos?: { id: string }[];
 }
