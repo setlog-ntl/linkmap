@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { useProjectConnections, useCreateConnection, useDeleteConnection } from '@/lib/queries/connections';
 import { useProjectServices, useCatalogServices, useRemoveProjectService } from '@/lib/queries/services';
 import { useLatestHealthChecks, useRunHealthCheck } from '@/lib/queries/health-checks';
@@ -69,12 +69,12 @@ export function useServiceMapData(projectId: string): ServiceMapData {
     const fetchProject = async () => {
       const { data: project } = await supabase
         .from('projects')
-        .select('name, main_service_id')
+        .select('*')
         .eq('id', projectId)
         .single();
       if (project) {
         setProjectName(project.name);
-        setMainServiceId(project.main_service_id ?? null);
+        setMainServiceId((project as Record<string, unknown>).main_service_id as string | null ?? null);
       }
     };
     fetchProject();
@@ -101,12 +101,15 @@ export function useServiceMapData(projectId: string): ServiceMapData {
   const createConnectionMutation = useCreateConnection(projectId);
   const deleteConnectionMutation = useDeleteConnection(projectId);
 
-  // Layer overrides
+  // Layer overrides (memoized to prevent infinite re-render)
   const { data: layerOverridesRaw = [] } = useLayerOverrides(projectId);
-  const layerOverrides: Record<string, string> = {};
-  for (const o of layerOverridesRaw) {
-    if (o.dashboard_layer) layerOverrides[o.service_id] = o.dashboard_layer;
-  }
+  const layerOverrides = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const o of layerOverridesRaw) {
+      if (o.dashboard_layer) map[o.service_id] = o.dashboard_layer;
+    }
+    return map;
+  }, [layerOverridesRaw]);
 
   // Stable refs for mutations
   const createConnectionRef = useRef(createConnectionMutation);
