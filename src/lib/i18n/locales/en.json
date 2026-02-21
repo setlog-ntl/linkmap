@@ -800,6 +800,11 @@
     "actions": { "addService": "Add Service", "setEnvVars": "Set Env Vars", "viewMap": "View Map", "notConnectedCount": " services not connected", "search": "Search services...", "fitView": "Fit View" },
     "dependency": { "impactAnalysis": "Impact Analysis", "environment": "Environment" }
   },
+  "serviceDetail": {
+    "loading": "Loading service details...",
+    "viewDetails": "View Details",
+    "clickToView": "Click to view details"
+  },
   "error": {
     "pageNotFound": "Page Not Found",
     "pageNotFoundDesc": "The page you requested doesn't exist or has been moved.",

@@ -2,6 +2,8 @@ export const dynamic = 'force-dynamic';
 
 import { createClient } from '@/lib/supabase/server';
 import { Header } from '@/components/layout/header';
+import { ServiceDetailSheetGlobal } from '@/components/service-map/service-detail-sheet-global';
+import { ServiceDetailResolver } from '@/components/service-map/service-detail-resolver';
 import type { Profile } from '@/types';
 
 export default async function DashboardLayout({
@@ -31,6 +33,8 @@ export default async function DashboardLayout({
       <main className="flex-1">
         {children}
       </main>
+      <ServiceDetailSheetGlobal />
+      <ServiceDetailResolver />
     </div>
   );
 }

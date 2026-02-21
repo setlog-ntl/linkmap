@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { Plus, Settings, Map as MapIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { HealthScoreRing } from '@/components/service-map/views/health-score-ring';
@@ -9,6 +9,7 @@ import { AlertsList } from '@/components/service-map/views/alerts-list';
 import { computeHealthScore } from '@/lib/utils/health-score';
 import { categoryToViewGroup, VIEW_GROUP_META, VIEW_GROUP_ORDER } from '@/lib/layout/view-group';
 import { useServiceMapStore } from '@/stores/service-map-store';
+import { useServiceDetailStore } from '@/stores/service-detail-store';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import type { ServiceMapData } from '@/components/service-map/hooks/useServiceMapData';
@@ -22,6 +23,16 @@ interface StatusViewProps {
 export function StatusView({ data, projectId }: StatusViewProps) {
   const { locale } = useLocaleStore();
   const { setViewLevel } = useServiceMapStore();
+  const openSheet = useServiceDetailStore((s) => s.openSheet);
+
+  const handleServiceClick = useCallback((projectServiceId: string) => {
+    const svc = data.services.find((s) => s.id === projectServiceId);
+    if (!svc) return;
+    const serviceNames: Record<string, string> = {};
+    for (const s of data.services) serviceNames[s.service_id] = s.service?.name || 'Unknown';
+    const deps = data.dependencies?.filter((d) => d.service_id === svc.service_id) ?? [];
+    openSheet({ service: svc, dependencies: deps, serviceNames, projectId, envVars: data.envVars });
+  }, [data.services, data.dependencies, data.envVars, projectId, openSheet]);
 
   const healthScore = useMemo(
     () => computeHealthScore(data.services, data.healthChecks, data.envVars),
@@ -75,6 +86,7 @@ export function StatusView({ data, projectId }: StatusViewProps) {
             meta={VIEW_GROUP_META[group]}
             services={groupedServices.get(group) || []}
             onClick={() => setViewLevel('map')}
+            onServiceClick={handleServiceClick}
           />
         ))}
       </div>

@@ -12,6 +12,7 @@ interface ConnectionFlowMapProps {
   allCards: ServiceCardData[];
   connections: UserConnection[];
   projectId: string;
+  onServiceClick?: (projectServiceId: string, serviceId: string) => void;
 }
 
 const STATUS_DOT: Record<string, string> = {
@@ -46,12 +47,12 @@ type LayerKey = keyof typeof LAYER_CFG;
 
 /* ---- Sub-components ---- */
 
-function FlowPill({ svc }: { svc: ServiceCardData }) {
+function FlowPill({ svc, onClick }: { svc: ServiceCardData; onClick?: () => void }) {
   const dotCls = STATUS_DOT[svc.status] ?? 'bg-zinc-400';
   const envPct = svc.envTotal > 0 ? Math.round((svc.envFilled / svc.envTotal) * 100) : null;
 
   return (
-    <div className="flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors hover:bg-accent/50 dark:hover:bg-white/[0.04]">
+    <div className={`flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors hover:bg-accent/50 dark:hover:bg-white/[0.04] ${onClick ? 'cursor-pointer' : ''}`} onClick={onClick}>
       <ServiceIcon serviceId={svc.slug} size={16} className="shrink-0 opacity-80" />
       <span className="text-[13px] font-medium truncate flex-1">{svc.name}</span>
       {envPct !== null && (
@@ -70,9 +71,11 @@ function FlowPill({ svc }: { svc: ServiceCardData }) {
 function LayerSection({
   services,
   layerKey,
+  onServiceClick,
 }: {
   services: ServiceCardData[];
   layerKey: LayerKey;
+  onServiceClick?: (projectServiceId: string, serviceId: string) => void;
 }) {
   const cfg = LAYER_CFG[layerKey];
   const Icon = cfg.icon;
@@ -102,7 +105,7 @@ function LayerSection({
       ) : (
         <div className="space-y-0.5 rounded-xl bg-muted/30 dark:bg-white/[0.02] p-1.5 border border-border/40">
           {visible.map((svc) => (
-            <FlowPill key={svc.projectServiceId} svc={svc} />
+            <FlowPill key={svc.projectServiceId} svc={svc} onClick={onServiceClick ? () => onServiceClick(svc.projectServiceId, svc.serviceId) : undefined} />
           ))}
           {overflow > 0 && (
             <p className="text-[11px] text-muted-foreground/50 text-center py-1">
@@ -139,6 +142,7 @@ export function ConnectionFlowMap({
   allCards,
   connections,
   projectId,
+  onServiceClick,
 }: ConnectionFlowMapProps) {
   const layers = useMemo(() => groupConnectionsByLayer(allCards), [allCards]);
 
@@ -183,7 +187,7 @@ export function ConnectionFlowMap({
       <div className="p-5">
         {/* Desktop: 5-column pipeline grid */}
         <div className="hidden md:grid grid-cols-[1fr_auto_auto_auto_1fr] gap-0">
-          <LayerSection services={fe} layerKey="frontend" />
+          <LayerSection services={fe} layerKey="frontend" onServiceClick={onServiceClick} />
           <FlowArrow />
 
           {/* Hub center */}
@@ -201,7 +205,7 @@ export function ConnectionFlowMap({
           </div>
 
           <FlowArrow />
-          <LayerSection services={be} layerKey="backend" />
+          <LayerSection services={be} layerKey="backend" onServiceClick={onServiceClick} />
         </div>
 
         {/* DevTools below hub (desktop) */}
@@ -209,20 +213,20 @@ export function ConnectionFlowMap({
           <div className="hidden md:flex flex-col items-center mt-1">
             <FlowArrow direction="down" />
             <div className="w-full max-w-xs">
-              <LayerSection services={dt} layerKey="devtools" />
+              <LayerSection services={dt} layerKey="devtools" onServiceClick={onServiceClick} />
             </div>
           </div>
         )}
 
         {/* Mobile: stacked vertically */}
         <div className="md:hidden space-y-3">
-          <LayerSection services={fe} layerKey="frontend" />
+          <LayerSection services={fe} layerKey="frontend" onServiceClick={onServiceClick} />
           {fe.length > 0 && (be.length > 0 || dt.length > 0) && (
             <FlowArrow direction="down" />
           )}
-          {be.length > 0 && <LayerSection services={be} layerKey="backend" />}
+          {be.length > 0 && <LayerSection services={be} layerKey="backend" onServiceClick={onServiceClick} />}
           {be.length > 0 && dt.length > 0 && <FlowArrow direction="down" />}
-          {dt.length > 0 && <LayerSection services={dt} layerKey="devtools" />}
+          {dt.length > 0 && <LayerSection services={dt} layerKey="devtools" onServiceClick={onServiceClick} />}
         </div>
       </div>
 

@@ -1,10 +1,12 @@
 'use client';
 
+import { useCallback } from 'react';
 import Link from 'next/link';
 import { Cable, Plus, LayoutTemplate } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useProjectConnections } from '@/lib/queries/connections';
+import { useServiceDetailStore } from '@/stores/service-detail-store';
 import { ProjectHeroCard } from './project-hero-card';
 import { HealthRingCard } from './health-ring-card';
 import { ConnectionFlowMap } from './connection-flow-map';
@@ -21,6 +23,11 @@ export function BentoDashboardLayout({ data }: BentoDashboardLayoutProps) {
   const { data: liveConnections } = useProjectConnections(project.id);
   const connections = liveConnections ?? initialConnections ?? [];
   const allCards: ServiceCardData[] = layers.flatMap((l) => l.services);
+  const openSheetById = useServiceDetailStore((s) => s.openSheetById);
+
+  const handleServiceClick = useCallback((projectServiceId: string, serviceId: string) => {
+    openSheetById({ projectServiceId, serviceId, projectId: project.id });
+  }, [project.id, openSheetById]);
 
   // Empty project onboarding
   if (allCards.length === 0) {
@@ -70,7 +77,7 @@ export function BentoDashboardLayout({ data }: BentoDashboardLayoutProps) {
       {/* Row 1: Hero (8 col) + Health Ring (4 col) */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
         <div className="md:col-span-8">
-          <ProjectHeroCard project={project} metrics={metrics} allCards={allCards} />
+          <ProjectHeroCard project={project} metrics={metrics} allCards={allCards} onServiceClick={handleServiceClick} />
         </div>
         <div className="md:col-span-4">
           <HealthRingCard projectId={project.id} allCards={allCards} />
@@ -78,7 +85,7 @@ export function BentoDashboardLayout({ data }: BentoDashboardLayoutProps) {
       </div>
 
       {/* Row 2: Architecture Flow */}
-      <ConnectionFlowMap allCards={allCards} connections={connections} projectId={project.id} />
+      <ConnectionFlowMap allCards={allCards} connections={connections} projectId={project.id} onServiceClick={handleServiceClick} />
 
       {/* Row 3: Action Needed + Onboarding */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

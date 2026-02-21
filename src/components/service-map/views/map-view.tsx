@@ -23,6 +23,7 @@ import ProjectNode from '@/components/service-map/project-node';
 import RadialEdge from '@/components/service-map/radial-edge';
 import { useRadialMapNodes } from '@/components/service-map/hooks/useRadialMapNodes';
 import { useLocaleStore } from '@/stores/locale-store';
+import { useServiceDetailStore } from '@/stores/service-detail-store';
 import { t } from '@/lib/i18n';
 import type { ServiceMapData } from '@/components/service-map/hooks/useServiceMapData';
 
@@ -37,11 +38,13 @@ const edgeTypes = {
 
 interface MapViewProps {
   data: ServiceMapData;
+  projectId: string;
 }
 
-function MapViewInner({ data }: MapViewProps) {
+function MapViewInner({ data, projectId }: MapViewProps) {
   const { locale } = useLocaleStore();
   const { fitView } = useReactFlow();
+  const openSheet = useServiceDetailStore((s) => s.openSheet);
   const [searchQuery, setSearchQuery] = useState('');
 
   const { nodes: layoutNodes, edges: layoutEdges } = useRadialMapNodes({
@@ -66,6 +69,16 @@ function MapViewInner({ data }: MapViewProps) {
   const onEdgesChange = useCallback((changes: EdgeChange<Edge>[]) => {
     setEdges((eds) => applyEdgeChanges(changes, eds));
   }, []);
+
+  const handleNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
+    if (node.type === 'project') return;
+    const svc = data.services.find((s) => s.id === node.id);
+    if (!svc) return;
+    const serviceNames: Record<string, string> = {};
+    for (const s of data.services) serviceNames[s.service_id] = s.service?.name || 'Unknown';
+    const deps = data.dependencies.filter((d) => d.service_id === svc.service_id);
+    openSheet({ service: svc, dependencies: deps, serviceNames, projectId, envVars: data.envVars });
+  }, [data, projectId, openSheet]);
 
   const handleExportPng = useCallback(() => {
     const svgEl = document.querySelector('.react-flow__viewport');
@@ -119,6 +132,7 @@ function MapViewInner({ data }: MapViewProps) {
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          onNodeClick={handleNodeClick}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           fitView

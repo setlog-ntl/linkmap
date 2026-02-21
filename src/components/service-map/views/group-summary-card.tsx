@@ -19,6 +19,7 @@ interface GroupSummaryCardProps {
   meta: ViewGroupMeta;
   services: ServiceItem[];
   onClick?: (group: ViewGroup) => void;
+  onServiceClick?: (serviceId: string) => void;
 }
 
 const GROUP_ICONS: Record<ViewGroup, typeof Database> = {
@@ -36,7 +37,7 @@ const STATUS_BADGE: Record<ServiceStatus, { label: string; variant: 'default' | 
   not_started: { label: '미설정', variant: 'outline' },
 };
 
-export function GroupSummaryCard({ meta, services, onClick }: GroupSummaryCardProps) {
+export function GroupSummaryCard({ meta, services, onClick, onServiceClick }: GroupSummaryCardProps) {
   const Icon = GROUP_ICONS[meta.key];
 
   return (
@@ -61,7 +62,11 @@ export function GroupSummaryCard({ meta, services, onClick }: GroupSummaryCardPr
             {services.map((svc) => {
               const badge = STATUS_BADGE[svc.status] ?? STATUS_BADGE.not_started;
               return (
-                <div key={svc.id} className="flex items-center gap-2">
+                <div
+                  key={svc.id}
+                  className={`flex items-center gap-2 ${onServiceClick ? 'cursor-pointer rounded-md px-1 -mx-1 hover:bg-accent/50 transition-colors' : ''}`}
+                  onClick={(e) => { if (onServiceClick) { e.stopPropagation(); onServiceClick(svc.id); } }}
+                >
                   <ServiceIcon serviceId={svc.slug} size={14} />
                   <span className="text-[13px] truncate flex-1 min-w-0">{svc.name}</span>
                   <Badge variant={badge.variant} className={`text-[10px] h-5 px-1.5 ${badge.className ?? ''}`}>

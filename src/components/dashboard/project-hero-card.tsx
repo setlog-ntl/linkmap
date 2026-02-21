@@ -21,6 +21,7 @@ interface ProjectHeroCardProps {
   project: Project;
   metrics: DashboardMetrics;
   allCards: ServiceCardData[];
+  onServiceClick?: (projectServiceId: string, serviceId: string) => void;
 }
 
 const STATUS_BG: Record<string, string> = {
@@ -30,7 +31,7 @@ const STATUS_BG: Record<string, string> = {
   not_started: 'bg-muted/50 dark:bg-zinc-800/50',
 };
 
-export function ProjectHeroCard({ project, metrics, allCards }: ProjectHeroCardProps) {
+export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: ProjectHeroCardProps) {
   const updateProject = useUpdateProject();
   const queryClient = useQueryClient();
   const { locale } = useLocaleStore();
@@ -176,8 +177,9 @@ export function ProjectHeroCard({ project, metrics, allCards }: ProjectHeroCardP
               {allCards.slice(0, 10).map((c) => (
                 <div
                   key={c.projectServiceId}
-                  className={`rounded-md p-1.5 transition-colors ${STATUS_BG[c.status] ?? 'bg-muted/30'}`}
+                  className={`rounded-md p-1.5 transition-colors ${STATUS_BG[c.status] ?? 'bg-muted/30'} ${onServiceClick ? 'cursor-pointer hover:ring-1 hover:ring-primary/30' : ''}`}
                   title={`${c.name}: ${c.status}`}
+                  onClick={onServiceClick ? () => onServiceClick(c.projectServiceId, c.serviceId) : undefined}
                 >
                   <ServiceIcon serviceId={c.slug} size={16} />
                 </div>

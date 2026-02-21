@@ -65,7 +65,7 @@ function ServiceMapInner() {
         </div>
 
         {viewLevel === 'status' && <StatusView data={data} projectId={projectId} />}
-        {viewLevel === 'map' && <MapView data={data} />}
+        {viewLevel === 'map' && <MapView data={data} projectId={projectId} />}
         {viewLevel === 'dependency' && <DependencyView data={data} projectId={projectId} />}
       </div>
     </TooltipProvider>

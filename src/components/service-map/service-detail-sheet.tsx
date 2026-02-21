@@ -25,6 +25,7 @@ import { useHealthChecks, useRunHealthCheck } from '@/lib/queries/health-checks'
 import { ServiceAccountSection } from '@/components/service-map/service-account-section';
 import { ServiceEnvVarsSection } from '@/components/service-map/service-env-vars-section';
 import { ExternalLink, BookOpen, GitFork, Activity, Loader2, Settings } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { ProjectService, Service, ServiceDependency, ServiceCategory, ServiceDomain, EnvironmentVariable } from '@/types';
 
 interface ServiceDetailSheetProps {
@@ -35,6 +36,7 @@ interface ServiceDetailSheetProps {
   onOpenChange: (open: boolean) => void;
   projectId?: string;
   envVars?: EnvironmentVariable[];
+  loading?: boolean;
 }
 
 const statusLabels: Record<string, { label: string; className: string }> = {
@@ -59,11 +61,32 @@ export function ServiceDetailSheet({
   onOpenChange,
   projectId,
   envVars = [],
+  loading = false,
 }: ServiceDetailSheetProps) {
   const [showAccountSection, setShowAccountSection] = useState(false);
   const psId = service?.id || '';
   const { data: healthChecks = [] } = useHealthChecks(psId);
   const runHealthCheck = useRunHealthCheck();
+
+  if (loading) {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent side="right" className="overflow-y-auto w-[380px] sm:max-w-[380px]">
+          <SheetHeader>
+            <SheetTitle><Skeleton className="h-5 w-40" /></SheetTitle>
+            <SheetDescription><Skeleton className="h-4 w-60" /></SheetDescription>
+          </SheetHeader>
+          <div className="space-y-4 px-4 pb-4">
+            <div className="flex gap-2"><Skeleton className="h-5 w-16" /><Skeleton className="h-5 w-20" /></div>
+            <Separator />
+            <Skeleton className="h-24 w-full" />
+            <Separator />
+            <Skeleton className="h-16 w-full" />
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
 
   if (!service) return null;
 

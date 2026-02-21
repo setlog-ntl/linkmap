@@ -4,16 +4,19 @@ import { useCallback } from 'react';
 import type { Node } from '@xyflow/react';
 import { toast } from 'sonner';
 import { getCategoryStyle } from '@/lib/constants/category-styles';
+import { useServiceDetailStore } from '@/stores/service-detail-store';
 import type { useCreateConnection, useDeleteConnection } from '@/lib/queries/connections';
 import type { useRunHealthCheck } from '@/lib/queries/health-checks';
 import type { useRemoveProjectService } from '@/lib/queries/services';
-import type { ProjectService, Service, UserConnectionType } from '@/types';
+import type { ProjectService, Service, ServiceDependency, EnvironmentVariable, UserConnectionType } from '@/types';
 
 export interface UseServiceMapInteractionsParams {
   projectId: string;
   projectName: string;
   services: (ProjectService & { service: Service })[];
   filteredServices: (ProjectService & { service: Service })[];
+  dependencies: ServiceDependency[];
+  envVars: EnvironmentVariable[];
   createConnectionRef: React.RefObject<ReturnType<typeof useCreateConnection>>;
   deleteConnectionRef: React.RefObject<ReturnType<typeof useDeleteConnection>>;
   runHealthCheck: ReturnType<typeof useRunHealthCheck>;
@@ -21,8 +24,6 @@ export interface UseServiceMapInteractionsParams {
   setFocusedNodeId: (id: string | null) => void;
   setContextMenu: (menu: { x: number; y: number; nodeId: string | null } | null) => void;
   focusedNodeId: string | null;
-  setSelectedService: (svc: (ProjectService & { service: Service }) | null) => void;
-  setSheetOpen: (open: boolean) => void;
   setConnectingFrom: (id: string | null) => void;
   connectingFrom: string | null;
   onShowConnectionDialog: (sourceId: string, targetId: string) => void;
@@ -49,6 +50,8 @@ export function useServiceMapInteractions(params: UseServiceMapInteractionsParam
     projectName,
     services,
     filteredServices,
+    dependencies,
+    envVars,
     createConnectionRef,
     deleteConnectionRef,
     runHealthCheck,
@@ -56,12 +59,12 @@ export function useServiceMapInteractions(params: UseServiceMapInteractionsParam
     setFocusedNodeId,
     setContextMenu,
     focusedNodeId,
-    setSelectedService,
-    setSheetOpen,
     setConnectingFrom,
     connectingFrom,
     onShowConnectionDialog,
   } = params;
+
+  const openSheet = useServiceDetailStore((s) => s.openSheet);
 
   const handleDeleteUserConnection = useCallback((edgeId: string) => {
     const connectionId = edgeId.replace('uc-', '');
@@ -89,6 +92,13 @@ export function useServiceMapInteractions(params: UseServiceMapInteractionsParam
     [projectId, createConnectionRef]
   );
 
+  const buildFullData = useCallback((svc: ProjectService & { service: Service }) => {
+    const serviceNames: Record<string, string> = {};
+    for (const s of services) serviceNames[s.service_id] = s.service?.name || 'Unknown';
+    const deps = dependencies.filter((d) => d.service_id === svc.service_id);
+    return { service: svc, dependencies: deps, serviceNames, projectId, envVars };
+  }, [services, dependencies, projectId, envVars]);
+
   // Node click: focus + detail OR complete connection
   const handleNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     if (node.type === 'zone') return;
@@ -107,11 +117,8 @@ export function useServiceMapInteractions(params: UseServiceMapInteractionsParam
     // Normal click: toggle focus + open detail sheet
     setFocusedNodeId(node.id);
     const svc = services.find((s) => s.id === node.id);
-    if (svc) {
-      setSelectedService(svc);
-      setSheetOpen(true);
-    }
-  }, [services, setFocusedNodeId, setSelectedService, setSheetOpen, connectingFrom, setConnectingFrom, onShowConnectionDialog]);
+    if (svc) openSheet(buildFullData(svc));
+  }, [services, setFocusedNodeId, openSheet, buildFullData, connectingFrom, setConnectingFrom, onShowConnectionDialog]);
 
   const handlePaneClick = useCallback(() => {
     if (connectingFrom) {
@@ -134,11 +141,8 @@ export function useServiceMapInteractions(params: UseServiceMapInteractionsParam
 
   const handleContextViewDetail = useCallback((nodeId: string) => {
     const svc = services.find((s) => s.id === nodeId);
-    if (svc) {
-      setSelectedService(svc);
-      setSheetOpen(true);
-    }
-  }, [services, setSelectedService, setSheetOpen]);
+    if (svc) openSheet(buildFullData(svc));
+  }, [services, openSheet, buildFullData]);
 
   const handleContextStartConnect = useCallback((nodeId: string) => {
     setConnectingFrom(nodeId);

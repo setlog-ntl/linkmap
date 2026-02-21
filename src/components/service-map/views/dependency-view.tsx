@@ -20,7 +20,6 @@ import ServiceNode from '@/components/service-map/service-node';
 import ZoneNode from '@/components/service-map/zone-node';
 import ConnectionEdge from '@/components/service-map/connection-edge';
 import { MapToolbar } from '@/components/service-map/map-toolbar';
-import { ServiceDetailSheet } from '@/components/service-map/service-detail-sheet';
 import { CatalogSidebar } from '@/components/service-map/catalog-sidebar';
 import { NodeContextMenu } from '@/components/service-map/node-context-menu';
 import { ConnectionTypeDialog } from '@/components/service-map/connection-type-dialog';
@@ -35,7 +34,7 @@ import { useServiceMapNodes } from '@/components/service-map/hooks/useServiceMap
 import { useServiceMapLayout } from '@/components/service-map/hooks/useServiceMapLayout';
 import { useServiceMapInteractions } from '@/components/service-map/hooks/useServiceMapInteractions';
 import type { ServiceMapData } from '@/components/service-map/hooks/useServiceMapData';
-import type { ProjectService, Service, UserConnectionType, ServiceDomain } from '@/types';
+import type { UserConnectionType, ServiceDomain } from '@/types';
 
 const nodeTypes = { service: ServiceNode, zone: ZoneNode };
 const edgeTypes = { connection: ConnectionEdge };
@@ -54,8 +53,6 @@ export function DependencyView({ data, projectId }: DependencyViewProps) {
   } = useServiceMapStore();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedService, setSelectedService] = useState<(ProjectService & { service: Service }) | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
   const [showAiPanel, setShowAiPanel] = useState(false);
   const [showLegend, setShowLegend] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -90,10 +87,11 @@ export function DependencyView({ data, projectId }: DependencyViewProps) {
   const interactions = useServiceMapInteractions({
     projectId, projectName: data.projectName,
     services: data.services, filteredServices: nodesResult.filteredServices,
+    dependencies: data.dependencies, envVars: data.envVars,
     createConnectionRef: data.createConnectionRef, deleteConnectionRef: data.deleteConnectionRef,
     runHealthCheck: data.runHealthCheck, removeService: data.removeService,
     setFocusedNodeId, setContextMenu, focusedNodeId,
-    setSelectedService, setSheetOpen, setConnectingFrom, connectingFrom,
+    setConnectingFrom, connectingFrom,
     onShowConnectionDialog,
   });
 
@@ -102,7 +100,6 @@ export function DependencyView({ data, projectId }: DependencyViewProps) {
     focusedNodeId, getDomain: nodesResult.getDomain, mainServiceId: effectiveMainServiceId,
   });
 
-  const selectedServiceDeps = nodesResult.selectedServiceDeps(selectedService?.service_id);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
 
@@ -194,11 +191,6 @@ export function DependencyView({ data, projectId }: DependencyViewProps) {
         />
       )}
       <ConnectionTypeDialog open={connectionDialog !== null} onOpenChange={(open) => { if (!open) setConnectionDialog(null); }} onConfirm={handleConnectionConfirm} sourceLabel={dialogSourceLabel} targetLabel={dialogTargetLabel} />
-      <ServiceDetailSheet
-        service={selectedService} dependencies={selectedServiceDeps} serviceNames={nodesResult.serviceNames}
-        open={sheetOpen} onOpenChange={(open) => { setSheetOpen(open); if (!open) setSelectedService(null); }}
-        projectId={projectId} envVars={data.envVars}
-      />
     </div>
   );
 }
