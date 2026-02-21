@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { ProjectTabs } from '@/components/project/project-tabs';
+import { ServiceDetailSheetGlobal } from '@/components/service-map/service-detail-sheet-global';
+import { ServiceDetailResolver } from '@/components/service-map/service-detail-resolver';
 import type { Profile } from '@/types';
 
 export default async function ProjectLayout({
@@ -51,6 +53,8 @@ export default async function ProjectLayout({
           {children}
         </div>
       </div>
+      <ServiceDetailSheetGlobal />
+      <ServiceDetailResolver />
     </div>
   );
 }

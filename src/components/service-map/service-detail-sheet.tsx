@@ -68,7 +68,9 @@ export function ServiceDetailSheet({
   const { data: healthChecks = [] } = useHealthChecks(psId);
   const runHealthCheck = useRunHealthCheck();
 
-  if (loading) {
+  const showLoading = loading || (open && !service);
+
+  if (showLoading) {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent side="right" className="overflow-y-auto w-[380px] sm:max-w-[380px]">
@@ -88,7 +90,9 @@ export function ServiceDetailSheet({
     );
   }
 
-  if (!service) return null;
+  if (!service) {
+    return <Sheet open={false} onOpenChange={onOpenChange}><SheetContent side="right"><SheetHeader><SheetTitle /></SheetHeader></SheetContent></Sheet>;
+  }
 
   const svc = service.service;
   const status = statusLabels[service.status] || statusLabels.not_started;
