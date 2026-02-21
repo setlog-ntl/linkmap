@@ -5,6 +5,20 @@
  * 3. Streaming (SSE)
  */
 
+// ─── Common headers ─────────────────────────────────────────────────
+
+export function buildHeaders(apiKey: string): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${apiKey}`,
+  };
+  const aigToken = process.env.CF_AIG_TOKEN;
+  if (aigToken) {
+    headers['cf-aig-authorization'] = `Bearer ${aigToken}`;
+  }
+  return headers;
+}
+
 // ─── Error handling ─────────────────────────────────────────────────
 
 function parseOpenAIError(status: number, errText: string): Error {
@@ -57,10 +71,7 @@ export async function callOpenAIStructured<T>(
   const base = (params.baseUrl || 'https://api.openai.com/v1').replace(/\/+$/, '');
   const response = await fetch(`${base}/chat/completions`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
+    headers: buildHeaders(apiKey),
     body: JSON.stringify({
       model,
       messages: [{ role: 'system', content: systemPrompt }, ...messages],
@@ -130,10 +141,7 @@ export async function callOpenAIWithTools(
   for (let i = 0; i < maxIterations; i++) {
     const response = await fetch(`${base}/chat/completions`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers: buildHeaders(apiKey),
       body: JSON.stringify({
         model,
         messages: conversationMessages,
@@ -202,10 +210,7 @@ export function callOpenAIStream(
       try {
         const response = await fetch(`${base}/chat/completions`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiKey}`,
-          },
+          headers: buildHeaders(apiKey),
           body: JSON.stringify({
             model,
             messages: [{ role: 'system', content: systemPrompt }, ...messages],

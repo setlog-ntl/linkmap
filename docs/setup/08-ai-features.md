@@ -124,6 +124,7 @@ npx wrangler tail
 | 응답이 매우 느림 | 429 | OpenAI rate limit 초과 | 잠시 대기 후 재시도, 또는 상위 플랜 업그레이드 |
 | 로컬 OK, 프로덕션 에러 | 500 | Workers에 키 미설정 | `npx wrangler secret put OPENAI_API_KEY` |
 | 스트리밍 중 끊김 | - | 네트워크 타임아웃 | 재시도, Cloudflare timeout 설정 확인 |
+| AI Gateway 401 (code 2009) | 401 | `CF_AIG_TOKEN` 미설정 | Authenticated Gateway 토큰 등록 — [09-ai-gateway.md](09-ai-gateway.md) 참고 |
 
 ### 자주 하는 실수
 

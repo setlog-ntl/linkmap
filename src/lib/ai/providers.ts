@@ -1,3 +1,5 @@
+import { buildHeaders } from './openai';
+
 export type AiProviderSlug = 'openai' | 'anthropic' | 'google';
 
 export interface AiChatRequest {
@@ -63,10 +65,7 @@ async function callOpenAI(req: AiChatRequest): Promise<AiChatResponse> {
 
   const response = await fetch(`${baseUrl}/chat/completions`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${req.apiKey}`,
-    },
+    headers: buildHeaders(req.apiKey),
     body: JSON.stringify(body),
   });
 
