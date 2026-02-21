@@ -146,6 +146,7 @@ export async function POST(request: NextRequest) {
 
     if (configProvider === 'openai' && process.env.OPENAI_API_KEY) {
       apiKey = process.env.OPENAI_API_KEY;
+      baseUrl = process.env.OPENAI_BASE_URL;
     } else {
       const { data: providerRow } = await adminSupabase
         .from('ai_providers')
