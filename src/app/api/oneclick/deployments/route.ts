@@ -23,6 +23,7 @@ export async function GET() {
       forked_repo_full_name,
       deploy_error_message,
       created_at,
+      deployed_at,
       template_id,
       project_id,
       homepage_templates (
@@ -101,6 +102,7 @@ async function refreshDeployStatus(
       deploy.pages_url = result.pagesUrl;
       if (result.deployStatus === 'ready') {
         deploy.deployment_url = result.deploymentUrl;
+        deploy.deployed_at = updateData.deployed_at;
       }
     }
   } catch {

@@ -34,6 +34,9 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
   const [iframeError, setIframeError] = useState(false);
 
   const liveUrl = deploy.pages_url || deploy.deployment_url;
+  const cacheBuster = deploy.deployed_at
+    ? new Date(deploy.deployed_at).getTime()
+    : Date.now();
   const templateName = deploy.homepage_templates
     ? (locale === 'ko' ? deploy.homepage_templates.name_ko : deploy.homepage_templates.name)
     : null;
@@ -90,7 +93,7 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
             style={{ height: '200px' }}
           >
             <iframe
-              src={liveUrl}
+              src={`${liveUrl}?_t=${cacheBuster}`}
               title={`${deploy.site_name} 미리보기`}
               className="absolute top-0 left-0 border-0"
               style={{

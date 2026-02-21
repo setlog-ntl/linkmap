@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { createClient } from '@/lib/supabase/server';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
+import { PitchBanner } from '@/components/landing/pitch-banner';
 import { HeroSection } from '@/components/landing/hero-section';
 import { StatsSection } from '@/components/landing/stats-section';
 import { FeaturesBento } from '@/components/landing/features-bento';
@@ -29,6 +30,7 @@ export default async function LandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f4f5f8] text-[#1a2740]">
+      <PitchBanner />
       <Header profile={profile} />
 
       {/* Section 1: Hero */}

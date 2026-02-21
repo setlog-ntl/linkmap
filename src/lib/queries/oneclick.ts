@@ -112,6 +112,7 @@ export interface HomepageDeploy {
   forked_repo_full_name: string | null;
   deploy_error_message: string | null;
   created_at: string;
+  deployed_at: string | null;
   template_id: string;
   project_id: string | null;
   homepage_templates: {
@@ -156,6 +157,8 @@ export function useMyDeployments() {
       const data = await res.json();
       return data.deployments;
     },
+    staleTime: 0,
+    refetchOnWindowFocus: true,
     // Auto-refetch every 5s while any deployment is still building
     refetchInterval: (query) => {
       const data = query.state.data;

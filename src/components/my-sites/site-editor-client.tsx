@@ -585,7 +585,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     }
   }, [batchApply, deployId, selectedPath, fileDetail, filesShaMap, liveUrl, locale]);
 
-  // ── 모듈 → 코드에만 적용 (배포 대기 없이) ──
+  // ── 모듈 → 코드에 적용 + 빌드 대기 ──
   const handleApplyModulesToCode = useCallback(async () => {
     if (!moduleState || !moduleSchema) return;
     try {
@@ -620,17 +620,44 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           : `${result.file_count} file(s) applied to code`
       );
 
-      // 라이브 미리보기 즉시 새로고침 (배포 대기 없이 현재 상태 표시)
-      setLivePreviewKey((k) => k + 1);
+      // 빌드 완료 대기 → 미리보기 자동 갱신
       if (liveUrl) {
         setShowLiveAfterDeploy(true);
+        setDeployState('deploying');
         toast.info(
           locale === 'ko'
-            ? '미리보기는 배포 완료 후 반영됩니다 (약 30초)'
-            : 'Preview will update after deployment (~30s)'
+            ? '미리보기 갱신 중... 약 30초 소요됩니다.'
+            : 'Updating preview... ~30 seconds.'
         );
+
+        let attempts = 0;
+        await new Promise<void>((resolve) => {
+          const poll = setInterval(async () => {
+            attempts++;
+            try {
+              await fetch(`${liveUrl}?_t=${Date.now()}`, {
+                method: 'HEAD',
+                mode: 'no-cors',
+              });
+              if (attempts >= 6) { clearInterval(poll); resolve(); }
+            } catch { /* ignore */ }
+            if (attempts >= 12) { clearInterval(poll); resolve(); }
+          }, 5000);
+        });
+
+        setDeployState('deployed');
+        setLivePreviewKey((k) => k + 1);
+        toast.success(
+          locale === 'ko'
+            ? '미리보기가 갱신되었습니다!'
+            : 'Preview updated!'
+        );
+        setTimeout(() => setDeployState('idle'), 3000);
+      } else {
+        setLivePreviewKey((k) => k + 1);
       }
     } catch (err) {
+      setDeployState('idle');
       toast.error(err instanceof Error ? err.message : '적용 실패');
     } finally {
       setIsApplyingModules(false);
