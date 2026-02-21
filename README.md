@@ -41,19 +41,19 @@ npm run deploy:cf
 
 ### 깃 배포 적용 (GitHub Actions)
 
-`main` 브랜치에 푸시할 때마다 Cloudflare Workers로 자동 배포하려면, GitHub 저장소에 아래 4개 **Secrets**를 설정하세요.
+`main` 브랜치에 푸시할 때마다 Cloudflare Workers로 자동 배포됩니다.
 
-| Secret | 설명 |
-|--------|------|
-| `CLOUDFLARE_API_TOKEN` | Cloudflare API 토큰 (Workers 편집 권한) |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare 계정 ID (대시보드 URL 또는 Overview에서 확인) |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase 프로젝트 URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon(public) 키 |
+1. **GitHub Secrets 4개 설정** (Repository → Settings → Secrets and variables → Actions)
+   - `CLOUDFLARE_API_TOKEN` — Cloudflare API 토큰 (Workers 편집 권한)
+   - `CLOUDFLARE_ACCOUNT_ID` — Cloudflare 계정 ID
+   - `NEXT_PUBLIC_SUPABASE_URL` — Supabase 프로젝트 URL
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase anon 키
+2. **배포:** `main`에 푸시하거나 Actions에서 "Deploy to Cloudflare Workers" 수동 실행
+3. **런타임 시크릿:** 배포 후 Cloudflare에서 `ENCRYPTION_KEY` 등 `wrangler secret put` 설정
 
-**설정 위치:** Repository → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
-
+**상세:** [docs/setup/git-deploy.md](docs/setup/git-deploy.md)  
 워크플로: [.github/workflows/deploy-cloudflare.yml](.github/workflows/deploy-cloudflare.yml)  
-상세 단계: [Cloudflare 연결 가이드](/guides/cloudflare) 또는 [docs/cloudflare-migration.md](./docs/cloudflare-migration.md)
+Cloudflare 가이드: [docs/cloudflare-migration.md](docs/cloudflare-migration.md)
 
 ## Learn More
 
