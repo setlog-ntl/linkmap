@@ -1,10 +1,9 @@
 'use client';
 
 import { ScrollReveal } from './scroll-reveal';
-import { FolderPlus, Puzzle, Rocket } from 'lucide-react';
+import { GitBranch, Layout, Pencil, Globe, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 
@@ -14,23 +13,27 @@ export function HowItWorks() {
   const steps = [
     {
       number: '1',
-      icon: FolderPlus,
-      title: t(locale, 'landing.step1Title'),
-      description: t(locale, 'landing.step1Desc'),
+      icon: GitBranch,
+      title: t(locale, 'landing.oneclickStep1Title'),
+      description: t(locale, 'landing.oneclickStep1Desc'),
     },
     {
       number: '2',
-      icon: Puzzle,
-      title: t(locale, 'landing.step2Title'),
-      description: t(locale, 'landing.step2Desc'),
+      icon: Layout,
+      title: t(locale, 'landing.oneclickStep2Title'),
+      description: t(locale, 'landing.oneclickStep2Desc'),
     },
     {
       number: '3',
-      icon: Rocket,
-      title: locale === 'ko' ? '배포 & 관리' : 'Deploy & Manage',
-      description: locale === 'ko'
-        ? '원클릭 배포로 3분 만에 사이트를 라이브하거나, 환경변수를 안전하게 저장하고 .env를 다운로드하세요.'
-        : 'Go live in 3 minutes with one-click deploy, or securely store env vars and download .env files.',
+      icon: Pencil,
+      title: t(locale, 'landing.oneclickStep3Title'),
+      description: t(locale, 'landing.oneclickStep3Desc'),
+    },
+    {
+      number: '4',
+      icon: Globe,
+      title: t(locale, 'landing.oneclickStep4Title'),
+      description: t(locale, 'landing.oneclickStep4Desc'),
     },
   ];
 
@@ -44,14 +47,14 @@ export function HowItWorks() {
               HOW IT WORKS
             </p>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-[#1a2740] dark:text-[#e2e8f0]">
-              {locale === 'ko' ? '3단계로 시작하세요' : 'Get Started in 3 Steps'}
+              {locale === 'ko' ? '4\uB2E8\uACC4\uB85C \uB0B4 \uD648\uD398\uC774\uC9C0 \uB9CC\uB4E4\uAE30' : 'Build Your Homepage in 4 Steps'}
             </h2>
           </div>
         </ScrollReveal>
 
-        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-10 max-w-4xl mx-auto">
+        <div className="relative grid grid-cols-1 md:grid-cols-4 gap-10 max-w-5xl mx-auto">
           {/* Connecting Line (Desktop) */}
-          <div className="hidden md:block absolute top-10 left-[16%] right-[16%] h-px z-0">
+          <div className="hidden md:block absolute top-10 left-[12%] right-[12%] h-px z-0">
             <div className="h-full bg-gradient-to-r from-[#dde0e7] via-[hsl(220,60%,35%)]/40 to-[#dde0e7] dark:from-[#475569] dark:via-[hsl(220,60%,50%)]/40 dark:to-[#475569]" />
           </div>
 
@@ -80,7 +83,7 @@ export function HowItWorks() {
             className="bg-[hsl(220,60%,35%)] text-white hover:bg-[hsl(220,60%,30%)] px-6 py-2.5 h-auto rounded-lg font-bold"
             asChild
           >
-            <Link href="/oneclick">
+            <Link href="/sites">
               {t(locale, 'landing.ctaOneclick')}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
