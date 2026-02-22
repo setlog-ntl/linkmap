@@ -8,7 +8,7 @@ import {
   Lock,
   Sparkles,
   ArrowRight,
-  Github,
+  LogIn,
   Layout,
   Pencil,
   Globe,
@@ -28,7 +28,7 @@ export function HowItWorks() {
   const beginnerSteps = [
     {
       number: '1',
-      icon: Github,
+      icon: LogIn,
       title: t(locale, 'landing.oneclickStep1Title'),
       description: t(locale, 'landing.oneclickStep1Desc'),
     },
