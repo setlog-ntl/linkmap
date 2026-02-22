@@ -371,7 +371,7 @@
     "templateTagFree": "무료",
     "templateTagPopular": "인기",
     "oneclickStep1Title": "Google 로그인",
-    "oneclickStep1Desc": "Google 계정으로 로그인하면 GitHub 연결까지 자동 완료. 별도 가입 필요 없어요.",
+    "oneclickStep1Desc": "Google 계정으로 로그인하면 GitHub 계정 생성과 연결까지 자동 처리. 별도 가입 필요 없어요.",
     "oneclickStep2Title": "템플릿 선택",
     "oneclickStep2Desc": "포트폴리오, 명함, 쇼케이스 등 6가지 중 내게 맞는 걸 고르세요.",
     "oneclickStep3Title": "내용 편집",
