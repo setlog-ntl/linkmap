@@ -599,7 +599,13 @@
     "githubRepoDesc": "View the source code",
     "dashboard": "Dashboard",
     "dashboardDesc": "Manage your project",
-    "manageSites": "Manage in My Sites"
+    "manageSites": "Manage in My Sites",
+    "shareTitle": "Share with friends",
+    "shareCopyLink": "Copy link",
+    "shareCopied": "Copied!",
+    "shareNative": "Share",
+    "shareTwitter": "Share on X",
+    "shareText": "My site is live! Check it out ✨"
   },
   "moduleDeployDialog": {
     "titleApplyOnly": "Applying to Code",

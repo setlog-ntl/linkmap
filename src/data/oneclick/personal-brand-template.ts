@@ -195,6 +195,13 @@ const globalsCss = `@import "tailwindcss";
 @theme {
   --font-sans: 'Pretendard Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
   --color-primary: #ee5b2b;
+  --color-secondary: #f59e0b;
+}
+
+:root {
+  --brand-primary: #ee5b2b;
+  --brand-secondary: #f59e0b;
+  --brand-glow: rgba(238, 91, 43, 0.15);
 }
 
 html {
@@ -202,14 +209,68 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+  html { scroll-behavior: auto; }
+  .floating-orb { animation: none !important; }
+}
+
+/* Floating orbs */
+@keyframes float-orb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -40px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+.floating-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  animation: float-orb 20s ease-in-out infinite;
+}
+
+/* Section alternating backgrounds */
+.section-alt {
+  background: rgba(255, 255, 255, 0.01);
 }
 
 *:focus-visible {
   outline: 2px solid var(--color-primary, #3b82f6);
   outline-offset: 2px;
+}
+
+/* Reveal animation */
+.reveal-fade {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-fade.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-fade { opacity: 1; transform: none; transition: none; }
+}
+
+/* Card hover */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+/* Scroll progress */
+.scroll-progress {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  height: 2px;
+  background: var(--color-primary, #ee5b2b);
+  z-index: 100;
+  transition: width 0.1s linear;
+  pointer-events: none;
 }
 `;
 
@@ -362,35 +423,40 @@ export function HeroSection({ config }: Props) {
       )}
 
       {!config.heroImageUrl && (
-        <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#ee5b2b]/10 to-transparent" />
+        <>
+          <div className="absolute inset-0 z-0" style={{ background: 'radial-gradient(ellipse at 30% 20%, rgba(238,91,43,0.12) 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, rgba(245,158,11,0.08) 0%, transparent 60%)' }} />
+          <div className="floating-orb" style={{ width: 400, height: 400, top: '10%', left: '5%', background: 'rgba(238,91,43,0.06)', animationDelay: '0s' }} />
+          <div className="floating-orb" style={{ width: 300, height: 300, bottom: '15%', right: '10%', background: 'rgba(245,158,11,0.05)', animationDelay: '-7s' }} />
+          <div className="floating-orb" style={{ width: 200, height: 200, top: '50%', left: '60%', background: 'rgba(238,91,43,0.04)', animationDelay: '-13s' }} />
+        </>
       )}
 
       <motion.div
-        className="relative z-10 text-center px-4 sm:px-6 max-w-3xl"
+        className="relative z-10 text-center px-4 sm:px-6 max-w-4xl"
         style={{ opacity }}
       >
         <motion.h1
-          className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
+          className="text-5xl sm:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-[#ee5b2b] via-[#f59e0b] to-[#ee5b2b] bg-[length:200%_auto] bg-clip-text text-transparent"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
           {name}
         </motion.h1>
         <motion.p
-          className="text-xl sm:text-2xl text-gray-300 mb-8"
+          className="text-xl sm:text-2xl lg:text-3xl text-gray-300 mb-10 max-w-2xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
         >
           {tagline}
         </motion.p>
         <motion.a
           href="#about"
-          className="inline-block px-8 py-3 rounded-full bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] text-white font-medium hover:opacity-90 transition-opacity"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
+          className="inline-block px-10 py-4 rounded-full bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] text-white font-semibold text-lg shadow-lg shadow-[#ee5b2b]/20 hover:shadow-[#ee5b2b]/30 hover:scale-105 transition-all duration-300"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
           {t('hero.cta')}
         </motion.a>
@@ -418,10 +484,10 @@ export function AboutSection({ config }: Props) {
   const story = locale === 'en' && config.storyEn ? config.storyEn : config.story;
 
   return (
-    <section id="about" className="py-20 sm:py-28 px-4 sm:px-6">
+    <section id="about" className="py-20 sm:py-28 px-4 sm:px-6 section-alt">
       <div className="max-w-3xl mx-auto">
         <motion.h2
-          className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
+          className="text-3xl sm:text-4xl font-bold mb-8 text-center bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
@@ -463,9 +529,9 @@ export function ValuesSection({ values }: Props) {
 
   return (
     <section id="values" className="py-20 sm:py-28 px-4 sm:px-6">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <motion.h2
-          className="text-3xl font-bold mb-12 text-center bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
+          className="text-3xl sm:text-4xl font-bold mb-12 text-center bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
@@ -481,13 +547,13 @@ export function ValuesSection({ values }: Props) {
             return (
               <motion.div
                 key={i}
-                className="p-6 rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-sm"
+                className="p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:bg-white/[0.06] hover:border-white/15 transition-all duration-300 group"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
+                transition={{ duration: 0.5, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
               >
-                <span className="text-2xl mb-3 block">{value.emoji}</span>
+                <span className="text-3xl mb-4 block group-hover:scale-110 transition-transform duration-300">{value.emoji}</span>
                 <h3 className="text-lg font-semibold text-gray-100 mb-2">{title}</h3>
                 <p className="text-sm text-gray-400 leading-relaxed">{desc}</p>
               </motion.div>
@@ -536,13 +602,13 @@ export function HighlightsSection({ highlights }: Props) {
             return (
               <motion.div
                 key={i}
-                className="text-center p-8 rounded-2xl border border-white/5 bg-white/[0.02]"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                className="text-center p-8 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:border-[#ee5b2b]/20 transition-all duration-300"
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
+                transition={{ duration: 0.5, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
               >
-                <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent mb-2">
+                <p className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent mb-2">
                   {value}
                 </p>
                 <p className="text-sm text-gray-400">{label}</p>
@@ -588,16 +654,16 @@ export function GallerySection({ images }: Props) {
           {images.map((src, i) => (
             <motion.div
               key={i}
-              className="aspect-square rounded-xl overflow-hidden"
+              className="aspect-square rounded-xl overflow-hidden group border border-white/5 hover:border-[#ee5b2b]/20 transition-colors duration-300"
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.4, delay: i * 0.05 }}
+              transition={{ duration: 0.5, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
             >
               <img
                 src={src}
                 alt=""
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
                 loading="lazy"
               />
             </motion.div>
@@ -693,6 +759,90 @@ export function ContactSection({ config }: Props) {
 // ──────────────────────────────────────────────
 // src/components/footer.tsx
 // ──────────────────────────────────────────────
+// ──────────────────────────────────────────────
+// src/components/animated-reveal.tsx
+// ──────────────────────────────────────────────
+const animatedReveal = `'use client';
+
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+
+interface Props {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}
+
+export function AnimatedReveal({ children, className = '', delay = 0 }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) { setVisible(true); return; }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (delay > 0) { setTimeout(() => setVisible(true), delay); }
+          else { setVisible(true); }
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.15 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
+
+  return (
+    <div ref={ref} className={\`reveal-fade \${visible ? 'revealed' : ''} \${className}\`}>
+      {children}
+    </div>
+  );
+}
+`;
+
+// ──────────────────────────────────────────────
+// src/components/section-wrapper.tsx
+// ──────────────────────────────────────────────
+const sectionWrapper = `import type { ReactNode } from 'react';
+import { AnimatedReveal } from './animated-reveal';
+
+interface Props {
+  id?: string;
+  ariaLabel?: string;
+  className?: string;
+  animate?: boolean;
+  delay?: number;
+  children: ReactNode;
+}
+
+export function SectionWrapper({
+  id,
+  ariaLabel,
+  className = '',
+  animate = true,
+  delay = 0,
+  children,
+}: Props) {
+  const section = (
+    <section id={id} aria-label={ariaLabel} className={\`py-16 md:py-24 px-4 sm:px-6 \${className}\`}>
+      <div className="max-w-5xl mx-auto">{children}</div>
+    </section>
+  );
+
+  if (!animate) return section;
+  return <AnimatedReveal delay={delay}>{section}</AnimatedReveal>;
+}
+`;
+
+// ──────────────────────────────────────────────
+// src/components/footer.tsx
+// ──────────────────────────────────────────────
 const footerComponent = `import { ThemeToggle } from './theme-toggle';
 
 export function Footer() {
@@ -739,6 +889,7 @@ const sectionKeys: Record<string, string> = {
 export function NavHeader() {
   const [active, setActive] = useState('hero');
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [progress, setProgress] = useState(0);
   const { t } = useLocale();
 
   useEffect(() => {
@@ -758,10 +909,20 @@ export function NavHeader() {
       if (el) observer.observe(el);
     });
 
-    return () => observer.disconnect();
+    const handleScroll = () => {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      if (h > 0) setProgress((window.scrollY / h) * 100);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   return (
+    <>
     <header className="fixed top-0 w-full z-50 backdrop-blur-md bg-[#0f0f0f]/80 border-b border-white/5">
       <nav className="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         <div className="hidden sm:flex items-center gap-1">
@@ -809,6 +970,8 @@ export function NavHeader() {
         </div>
       )}
     </header>
+    <div className="scroll-progress" style={{ width: \`\${progress}%\` }} />
+    </>
   );
 }
 `;
@@ -1078,6 +1241,8 @@ export const personalBrandTemplate: HomepageTemplateContent = {
     { path: 'src/app/globals.css', content: globalsCss },
     { path: 'src/app/layout.tsx', content: layoutTsx },
     { path: 'src/app/page.tsx', content: pageTsx },
+    { path: 'src/components/animated-reveal.tsx', content: animatedReveal },
+    { path: 'src/components/section-wrapper.tsx', content: sectionWrapper },
     { path: 'src/components/hero-section.tsx', content: heroSection },
     { path: 'src/components/about-section.tsx', content: aboutSection },
     { path: 'src/components/values-section.tsx', content: valuesSection },

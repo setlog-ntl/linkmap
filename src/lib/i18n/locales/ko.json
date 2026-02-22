@@ -599,7 +599,13 @@
     "githubRepoDesc": "소스 코드를 확인하세요",
     "dashboard": "대시보드",
     "dashboardDesc": "프로젝트를 관리하세요",
-    "manageSites": "내 사이트에서 관리하기"
+    "manageSites": "내 사이트에서 관리하기",
+    "shareTitle": "친구에게 공유하기",
+    "shareCopyLink": "링크 복사",
+    "shareCopied": "복사됨!",
+    "shareNative": "공유",
+    "shareTwitter": "X에 공유",
+    "shareText": "내 사이트가 완성됐어요! 한번 방문해 보세요 ✨"
   },
   "moduleDeployDialog": {
     "titleApplyOnly": "코드에 적용 중",

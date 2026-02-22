@@ -1,11 +1,12 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Rocket, Lock, CheckCircle2, Check } from 'lucide-react';
+import { ArrowRight, Rocket, Lock, CheckCircle2, Check, LayoutDashboard } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { createClient } from '@/lib/supabase/client';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { TypewriterHeadline } from './typewriter-headline';
@@ -33,6 +34,10 @@ const FlowArchitectureDiagram = dynamic(
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { locale } = useLocaleStore();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user));
+  }, []);
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end start"],
@@ -86,12 +91,21 @@ export function HeroSection() {
                 {t(locale, 'landing.ctaOneclickHero')}
               </Link>
             </Button>
-            <Button variant="outline" className="bg-white border-[#dde0e7] text-[#1a2740] hover:border-[hsl(220,60%,35%)]/40 hover:bg-[#f4f5f8] dark:bg-white/5 dark:border-white/10 dark:text-[#e2e8f0] dark:hover:bg-white/10 px-8 py-3.5 h-auto rounded-lg text-base font-bold transition-all" asChild>
-              <Link href="/signup">
-                {t(locale, 'landing.ctaStart')}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+            {isLoggedIn ? (
+              <Button variant="outline" className="bg-white border-[#dde0e7] text-[#1a2740] hover:border-[hsl(220,60%,35%)]/40 hover:bg-[#f4f5f8] dark:bg-white/5 dark:border-white/10 dark:text-[#e2e8f0] dark:hover:bg-white/10 px-8 py-3.5 h-auto rounded-lg text-base font-bold transition-all" asChild>
+                <Link href="/dashboard">
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  {t(locale, 'common.dashboard')}
+                </Link>
+              </Button>
+            ) : (
+              <Button variant="outline" className="bg-white border-[#dde0e7] text-[#1a2740] hover:border-[hsl(220,60%,35%)]/40 hover:bg-[#f4f5f8] dark:bg-white/5 dark:border-white/10 dark:text-[#e2e8f0] dark:hover:bg-white/10 px-8 py-3.5 h-auto rounded-lg text-base font-bold transition-all" asChild>
+                <Link href="/signup">
+                  {t(locale, 'landing.ctaStart')}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            )}
           </div>
 
           {/* Trust Badges */}

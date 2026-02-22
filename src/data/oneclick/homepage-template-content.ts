@@ -230,6 +230,29 @@ const linkInBioGlobalsCss = `@import "tailwindcss";
 *:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
+}
+
+/* Reveal animation */
+.reveal-fade {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-fade.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-fade { opacity: 1; transform: none; transition: none; }
+}
+
+/* Card hover */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }`;
 
 const linkInBioLayout = `import type { Metadata } from 'next';
@@ -316,7 +339,7 @@ export default function Home() {
       className={\`min-h-screen flex flex-col items-center justify-center p-4\${bgStyle === 'gradient' ? ' animate-gradient' : ''}\`}
       style={getBackground(theme, bgStyle)}
     >
-      <div className="w-full max-w-md mx-auto flex flex-col items-center gap-6 py-12">
+      <div className="w-full max-w-md sm:max-w-lg mx-auto flex flex-col items-center gap-6 py-12">
         <ProfileSection config={siteConfig} theme={theme} />
         <LinkList links={siteConfig.links} theme={theme} />
         {siteConfig.socials.length > 0 && (
@@ -330,6 +353,53 @@ export default function Home() {
     </main>
   );
 }`;
+
+// ──────────────────────────────────────────────
+// Shared: animated-reveal (Link-in-Bio + Namecard)
+// ──────────────────────────────────────────────
+const sharedAnimatedReveal = `'use client';
+
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+
+interface Props {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}
+
+export function AnimatedReveal({ children, className = '', delay = 0 }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) { setVisible(true); return; }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (delay > 0) { setTimeout(() => setVisible(true), delay); }
+          else { setVisible(true); }
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.15 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
+
+  return (
+    <div ref={ref} className={\`reveal-fade \${visible ? 'revealed' : ''} \${className}\`}>
+      {children}
+    </div>
+  );
+}
+`;
 
 const linkInBioContentEmbed = `'use client';
 
@@ -857,6 +927,20 @@ const namecardGlobalsCss = `@import "tailwindcss";
 *:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
+}
+
+/* Reveal animation */
+.reveal-fade {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-fade.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-fade { opacity: 1; transform: none; transition: none; }
 }`;
 
 const namecardLayout = `import type { Metadata } from 'next';
@@ -1215,6 +1299,7 @@ export const homepageTemplates: HomepageTemplateContent[] = [
       { path: 'src/app/globals.css', content: linkInBioGlobalsCss },
       { path: 'src/app/layout.tsx', content: linkInBioLayout },
       { path: 'src/app/page.tsx', content: linkInBioPage },
+      { path: 'src/components/animated-reveal.tsx', content: sharedAnimatedReveal },
       { path: 'src/components/content-embed.tsx', content: linkInBioContentEmbed },
       { path: 'src/components/footer.tsx', content: linkInBioFooter },
       { path: 'src/components/language-toggle.tsx', content: linkInBioLanguageToggle },
@@ -1241,6 +1326,7 @@ export const homepageTemplates: HomepageTemplateContent[] = [
       { path: 'src/app/globals.css', content: namecardGlobalsCss },
       { path: 'src/app/layout.tsx', content: namecardLayout },
       { path: 'src/app/page.tsx', content: namecardPage },
+      { path: 'src/components/animated-reveal.tsx', content: sharedAnimatedReveal },
       { path: 'src/components/contact-info.tsx', content: namecardContactInfo },
       { path: 'src/components/footer.tsx', content: namecardFooter },
       { path: 'src/components/language-toggle.tsx', content: namecardLanguageToggle },

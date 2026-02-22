@@ -210,6 +210,41 @@ html {
   outline: 2px solid var(--color-primary, #3b82f6);
   outline-offset: 2px;
 }
+
+/* Reveal animation */
+.reveal-fade {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-fade.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-fade { opacity: 1; transform: none; transition: none; }
+}
+
+/* Card hover */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+/* Scroll progress */
+.scroll-progress {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  height: 2px;
+  background: var(--color-primary, #f97316);
+  z-index: 100;
+  transition: width 0.1s linear;
+  pointer-events: none;
+}
 `;
 
 // ──────────────────────────────────────────────
@@ -300,6 +335,7 @@ import { LocationSection } from '@/components/location-section';
 import { GallerySection } from '@/components/gallery-section';
 import { SnsSection } from '@/components/sns-section';
 import { Footer } from '@/components/footer';
+import { MobileBottomBar } from '@/components/mobile-bottom-bar';
 
 export default function Home() {
   return (
@@ -317,6 +353,7 @@ export default function Home() {
         <SnsSection config={siteConfig} />
       </main>
       <Footer />
+      <MobileBottomBar config={siteConfig} />
     </>
   );
 }
@@ -434,8 +471,9 @@ export function QuickActions({ config }: Props) {
 // ──────────────────────────────────────────────
 const menuSection = `'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown } from 'lucide-react';
 import type { MenuItem } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
 
@@ -446,9 +484,49 @@ interface Props {
 export function MenuSection({ items }: Props) {
   const { locale, t } = useLocale();
   const categories = [...new Set(items.map((item) => item.category))];
+  const grouped = categories.reduce<Record<string, MenuItem[]>>((acc, cat) => {
+    acc[cat] = items.filter((item) => item.category === cat);
+    return acc;
+  }, {});
+
+  /* Tab mode for desktop, accordion for mobile */
   const [activeCategory, setActiveCategory] = useState(categories[0] || '');
+  const [openCategories, setOpenCategories] = useState<Set<string>>(new Set(categories.slice(0, 1)));
+
+  const toggleAccordion = useCallback((cat: string) => {
+    setOpenCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(cat)) next.delete(cat);
+      else next.add(cat);
+      return next;
+    });
+  }, []);
 
   const filtered = items.filter((item) => item.category === activeCategory);
+
+  const renderItem = (item: MenuItem, i: number) => {
+    const name = locale === 'en' && item.nameEn ? item.nameEn : item.name;
+    const desc = locale === 'en' && item.descEn ? item.descEn : item.desc;
+    return (
+      <div
+        key={i}
+        className="flex items-start gap-3 p-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-[#d47311]/30 transition-colors"
+      >
+        <span className="text-2xl shrink-0">{item.emoji}</span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{name}</h3>
+              {item.isNew && <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-red-500 text-white leading-none">NEW</span>}
+              {item.isPopular && <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-[#d47311] text-white leading-none">{t('menu.popular')}</span>}
+            </div>
+            <span className="text-sm font-medium text-[#d47311] shrink-0">{item.price}</span>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{desc}</p>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <section id="menu" className="py-12 px-4 sm:px-6">
@@ -457,7 +535,8 @@ export function MenuSection({ items }: Props) {
           {t('menu.title')}
         </h2>
 
-        <div className="flex gap-2 justify-center mb-6 flex-wrap">
+        {/* Desktop: Tab pills */}
+        <div className="hidden sm:flex gap-2 justify-center mb-6 flex-wrap">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -473,36 +552,57 @@ export function MenuSection({ items }: Props) {
           ))}
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeCategory}
-            className="space-y-3"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-          >
-            {filtered.map((item, i) => {
-              const name = locale === 'en' && item.nameEn ? item.nameEn : item.name;
-              const desc = locale === 'en' && item.descEn ? item.descEn : item.desc;
-              return (
-                <div
-                  key={i}
-                  className="flex items-start gap-3 p-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800"
+        <div className="hidden sm:block">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeCategory}
+              className="space-y-3"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {filtered.map(renderItem)}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Mobile: Accordion by category */}
+        <div className="sm:hidden space-y-3">
+          {categories.map((cat) => {
+            const isOpen = openCategories.has(cat);
+            const catItems = grouped[cat] || [];
+            return (
+              <div key={cat} className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+                <button
+                  onClick={() => toggleAccordion(cat)}
+                  className="w-full flex items-center justify-between p-4 text-left bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors min-h-[44px]"
                 >
-                  <span className="text-2xl shrink-0">{item.emoji}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{name}</h3>
-                      <span className="text-sm font-medium text-[#d47311] shrink-0">{item.price}</span>
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{desc}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </motion.div>
-        </AnimatePresence>
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">
+                    {cat}
+                    <span className="ml-2 text-xs font-normal text-gray-500">({catItems.length})</span>
+                  </span>
+                  <ChevronDown className={\`w-4 h-4 text-gray-400 transition-transform duration-200 \${isOpen ? 'rotate-180' : ''}\`} />
+                </button>
+                <AnimatePresence>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: 'easeInOut' }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-3 pb-3 space-y-2">
+                        {catItems.map(renderItem)}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
@@ -731,6 +831,136 @@ export function SnsSection({ config }: Props) {
 // ──────────────────────────────────────────────
 // src/components/footer.tsx
 // ──────────────────────────────────────────────
+// ──────────────────────────────────────────────
+// src/components/mobile-bottom-bar.tsx
+// ──────────────────────────────────────────────
+const mobileBottomBar = `'use client';
+
+import { Phone, MessageCircle } from 'lucide-react';
+import type { SiteConfig } from '@/lib/config';
+import { useLocale } from '@/lib/i18n';
+
+interface Props {
+  config: SiteConfig;
+}
+
+export function MobileBottomBar({ config }: Props) {
+  const { t } = useLocale();
+  if (!config.phone && !config.kakaoChannelUrl) return null;
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-40 sm:hidden">
+      <div className="flex border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-lg shadow-black/10">
+        {config.phone && (
+          <a
+            href={\`tel:\${config.phone.replace(/[^\\+\\d]/g, '')}\`}
+            className="flex-1 flex items-center justify-center gap-2 py-3.5 text-white font-semibold bg-[#d47311] active:bg-[#b56210]"
+          >
+            <Phone className="w-5 h-5" />
+            {t('bottom.call')}
+          </a>
+        )}
+        {config.kakaoChannelUrl && (
+          <a
+            href={config.kakaoChannelUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 flex items-center justify-center gap-2 py-3.5 text-[#391b1b] font-semibold bg-[#fee500] active:bg-[#e6cf00]"
+          >
+            <MessageCircle className="w-5 h-5" />
+            {t('bottom.kakao')}
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+`;
+
+// ──────────────────────────────────────────────
+// src/components/animated-reveal.tsx
+// ──────────────────────────────────────────────
+const animatedReveal = `'use client';
+
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+
+interface Props {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}
+
+export function AnimatedReveal({ children, className = '', delay = 0 }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) { setVisible(true); return; }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (delay > 0) { setTimeout(() => setVisible(true), delay); }
+          else { setVisible(true); }
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.15 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
+
+  return (
+    <div ref={ref} className={\`reveal-fade \${visible ? 'revealed' : ''} \${className}\`}>
+      {children}
+    </div>
+  );
+}
+`;
+
+// ──────────────────────────────────────────────
+// src/components/section-wrapper.tsx
+// ──────────────────────────────────────────────
+const sectionWrapper = `import type { ReactNode } from 'react';
+import { AnimatedReveal } from './animated-reveal';
+
+interface Props {
+  id?: string;
+  ariaLabel?: string;
+  className?: string;
+  animate?: boolean;
+  delay?: number;
+  children: ReactNode;
+}
+
+export function SectionWrapper({
+  id,
+  ariaLabel,
+  className = '',
+  animate = true,
+  delay = 0,
+  children,
+}: Props) {
+  const section = (
+    <section id={id} aria-label={ariaLabel} className={\`py-16 md:py-24 px-4 sm:px-6 \${className}\`}>
+      <div className="max-w-5xl mx-auto">{children}</div>
+    </section>
+  );
+
+  if (!animate) return section;
+  return <AnimatedReveal delay={delay}>{section}</AnimatedReveal>;
+}
+`;
+
+// ──────────────────────────────────────────────
+// src/components/footer.tsx
+// ──────────────────────────────────────────────
 const footerComponent = `import { ThemeToggle } from './theme-toggle';
 
 export function Footer() {
@@ -776,6 +1006,7 @@ const sectionKeys: Record<string, string> = {
 export function NavHeader() {
   const [active, setActive] = useState('hero');
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [progress, setProgress] = useState(0);
   const { t } = useLocale();
 
   useEffect(() => {
@@ -795,10 +1026,20 @@ export function NavHeader() {
       if (el) observer.observe(el);
     });
 
-    return () => observer.disconnect();
+    const handleScroll = () => {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      if (h > 0) setProgress((window.scrollY / h) * 100);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   return (
+    <>
     <header className="fixed top-0 w-full z-50 backdrop-blur-md bg-[#fdf4e7]/80 dark:bg-gray-950/80 border-b border-gray-200/50 dark:border-gray-800/50">
       <nav className="max-w-lg mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         <div className="hidden sm:flex items-center gap-1">
@@ -846,6 +1087,8 @@ export function NavHeader() {
         </div>
       )}
     </header>
+    <div className="scroll-progress" style={{ width: \`\${progress}%\` }} />
+    </>
   );
 }
 `;
@@ -1060,6 +1303,9 @@ const translations: Record<Locale, Record<string, string>> = {
     'quick.directions': '길찾기',
     'quick.hours': '영업시간',
     'menu.title': '메뉴',
+    'menu.popular': '인기',
+    'bottom.call': '전화하기',
+    'bottom.kakao': '카카오 상담',
     'hours.title': '영업시간',
     'hours.today': '오늘',
     'location.title': '오시는 길',
@@ -1080,6 +1326,9 @@ const translations: Record<Locale, Record<string, string>> = {
     'quick.directions': 'Directions',
     'quick.hours': 'Hours',
     'menu.title': 'Menu',
+    'menu.popular': 'Popular',
+    'bottom.call': 'Call Now',
+    'bottom.kakao': 'KakaoTalk',
     'hours.title': 'Business Hours',
     'hours.today': 'Today',
     'location.title': 'Location',
@@ -1155,6 +1404,8 @@ export const smallBizTemplate: HomepageTemplateContent = {
     { path: 'src/app/globals.css', content: globalsCss },
     { path: 'src/app/layout.tsx', content: layoutTsx },
     { path: 'src/app/page.tsx', content: pageTsx },
+    { path: 'src/components/animated-reveal.tsx', content: animatedReveal },
+    { path: 'src/components/section-wrapper.tsx', content: sectionWrapper },
     { path: 'src/components/hero-section.tsx', content: heroSection },
     { path: 'src/components/quick-actions.tsx', content: quickActions },
     { path: 'src/components/menu-section.tsx', content: menuSection },
@@ -1162,6 +1413,7 @@ export const smallBizTemplate: HomepageTemplateContent = {
     { path: 'src/components/location-section.tsx', content: locationSection },
     { path: 'src/components/gallery-section.tsx', content: gallerySection },
     { path: 'src/components/sns-section.tsx', content: snsSection },
+    { path: 'src/components/mobile-bottom-bar.tsx', content: mobileBottomBar },
     { path: 'src/components/footer.tsx', content: footerComponent },
     { path: 'src/components/nav-header.tsx', content: navHeader },
     { path: 'src/components/theme-toggle.tsx', content: themeToggle },

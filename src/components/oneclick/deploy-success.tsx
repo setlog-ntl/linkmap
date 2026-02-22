@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,9 +11,12 @@ import {
   LayoutDashboard,
   Loader2,
   Pencil,
+  Share2,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
-import { t } from '@/lib/i18n';
+import { t, type Locale } from '@/lib/i18n';
 import Link from 'next/link';
 import type { DeployStatus, HomepageTemplate } from '@/lib/queries/oneclick';
 
@@ -150,6 +153,11 @@ export function DeploySuccess({ status, projectId, template }: DeploySuccessProp
               />
             )}
           </div>
+
+          {/* Share section */}
+          {liveUrl && (
+            <ShareSection url={liveUrl} locale={locale} />
+          )}
         </CardContent>
       </Card>
 
@@ -198,4 +206,96 @@ function ActionCard({
   }
 
   return <Link href={href}>{inner}</Link>;
+}
+
+function ShareSection({ url, locale }: { url: string; locale: Locale }) {
+  const [copied, setCopied] = useState(false);
+  const [canNativeShare] = useState(() =>
+    typeof window !== 'undefined' && 'share' in navigator
+  );
+
+  const shareText = t(locale, 'deployProgress.shareText');
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback for older browsers
+      const textarea = document.createElement('textarea');
+      textarea.value = url;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }, [url]);
+
+  const handleNativeShare = useCallback(async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareText,
+          url,
+        });
+      } catch {
+        // User cancelled or share failed — ignore
+      }
+    }
+  }, [url, shareText]);
+
+  const handleTwitterShare = useCallback(() => {
+    const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`;
+    window.open(twitterUrl, '_blank', 'noopener,noreferrer,width=550,height=420');
+  }, [url, shareText]);
+
+  return (
+    <div className="pt-4 border-t">
+      <p className="text-sm font-medium text-center mb-3">
+        {t(locale, 'deployProgress.shareTitle')}
+      </p>
+      <div className="flex items-center justify-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleCopy}
+          className="gap-1.5"
+        >
+          {copied ? (
+            <Check className="h-3.5 w-3.5 text-green-500" />
+          ) : (
+            <Copy className="h-3.5 w-3.5" />
+          )}
+          {copied
+            ? t(locale, 'deployProgress.shareCopied')
+            : t(locale, 'deployProgress.shareCopyLink')}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleTwitterShare}
+          className="gap-1.5"
+        >
+          <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current" aria-hidden="true">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+          </svg>
+          {t(locale, 'deployProgress.shareTwitter')}
+        </Button>
+        {canNativeShare && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNativeShare}
+            className="gap-1.5"
+          >
+            <Share2 className="h-3.5 w-3.5" />
+            {t(locale, 'deployProgress.shareNative')}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
 }

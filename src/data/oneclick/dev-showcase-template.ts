@@ -197,7 +197,20 @@ const globalsCss = `@import "tailwindcss";
 
 @theme {
   --font-sans: 'Pretendard Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  --color-primary: #58a6ff;
+}
+
+:root {
+  --gh-bg: #0d1117;
+  --gh-surface: #161b22;
+  --gh-border: #30363d;
+  --gh-blue: #58a6ff;
+  --gh-green: #7ee787;
+  --gh-purple: #d2a8ff;
+  --gh-orange: #d29922;
+  --gh-text: #e6edf3;
+  --gh-muted: #7d8590;
 }
 
 html {
@@ -205,14 +218,92 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+  html { scroll-behavior: auto; }
+  .cursor-blink { animation: none !important; opacity: 1; }
+}
+
+/* Terminal cursor blink */
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.cursor-blink {
+  animation: blink-cursor 1s step-end infinite;
+}
+
+/* Terminal window frame */
+.terminal-frame {
+  background: var(--gh-surface);
+  border: 1px solid var(--gh-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.terminal-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--gh-border);
+}
+.terminal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* Language color line for project cards */
+.lang-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 0 0 12px 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.group:hover .lang-line {
+  opacity: 1;
 }
 
 *:focus-visible {
-  outline: 2px solid var(--color-primary, #3b82f6);
+  outline: 2px solid var(--color-primary, #58a6ff);
   outline-offset: 2px;
+}
+
+/* Reveal animation */
+.reveal-fade {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-fade.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-fade { opacity: 1; transform: none; transition: none; }
+}
+
+/* Card hover */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+/* Scroll progress */
+.scroll-progress {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  height: 2px;
+  background: var(--color-primary, #58a6ff);
+  z-index: 100;
+  transition: width 0.1s linear;
+  pointer-events: none;
 }
 `;
 
@@ -256,6 +347,10 @@ export default function RootLayout({
           as="style"
           crossOrigin="anonymous"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
         />
         <script
           type="application/ld+json"
@@ -391,9 +486,10 @@ export function AboutSection({ config }: Props) {
                     {t(\`level.\${skill.level}\`)}
                   </span>
                 </div>
-                <div className="h-1.5 bg-gray-800 dark:bg-gray-800 rounded-full overflow-hidden">
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--gh-border)' }}>
                   <div
-                    className={\`h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full \${levelWidth[skill.level]}\`}
+                    className={\`h-full rounded-full \${levelWidth[skill.level]}\`}
+                    style={{ background: 'linear-gradient(90deg, var(--gh-blue), var(--gh-purple))' }}
                   />
                 </div>
               </div>
@@ -584,7 +680,7 @@ export function ExperienceTimeline({ experience }: Props) {
 
         <div className="relative ml-4 sm:ml-8">
           {/* Timeline line */}
-          <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500/30" />
+          <div className="absolute left-0 top-0 bottom-0 w-0.5" style={{ background: 'var(--gh-blue)', opacity: 0.3 }} />
 
           <div className="space-y-8">
             {experience.map((item, i) => {
@@ -603,9 +699,9 @@ export function ExperienceTimeline({ experience }: Props) {
                   transition={{ duration: 0.4, delay: i * 0.1 }}
                 >
                   {/* Node dot */}
-                  <div className="absolute left-0 top-1.5 w-3 h-3 rounded-full bg-blue-500 -translate-x-[5px] ring-4 ring-gray-950 dark:ring-gray-950" />
+                  <div className="absolute left-0 top-1.5 w-3 h-3 rounded-full -translate-x-[5px] ring-4" style={{ background: 'var(--gh-blue)', '--tw-ring-color': 'var(--gh-bg)' } as Record<string, string>} />
 
-                  <div className="p-4 rounded-xl border border-gray-800 dark:border-gray-800 bg-gray-900/50 dark:bg-gray-900/50">
+                  <div className="p-4 rounded-xl" style={{ border: '1px solid var(--gh-border)', background: 'var(--gh-surface)' }}>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-2">
                       <h3 className="font-semibold text-gray-100">
                         {title}
@@ -629,6 +725,90 @@ export function ExperienceTimeline({ experience }: Props) {
       </div>
     </section>
   );
+}
+`;
+
+// ──────────────────────────────────────────────
+// src/components/footer.tsx
+// ──────────────────────────────────────────────
+// ──────────────────────────────────────────────
+// src/components/animated-reveal.tsx
+// ──────────────────────────────────────────────
+const animatedReveal = `'use client';
+
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+
+interface Props {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}
+
+export function AnimatedReveal({ children, className = '', delay = 0 }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) { setVisible(true); return; }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (delay > 0) { setTimeout(() => setVisible(true), delay); }
+          else { setVisible(true); }
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.15 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
+
+  return (
+    <div ref={ref} className={\`reveal-fade \${visible ? 'revealed' : ''} \${className}\`}>
+      {children}
+    </div>
+  );
+}
+`;
+
+// ──────────────────────────────────────────────
+// src/components/section-wrapper.tsx
+// ──────────────────────────────────────────────
+const sectionWrapper = `import type { ReactNode } from 'react';
+import { AnimatedReveal } from './animated-reveal';
+
+interface Props {
+  id?: string;
+  ariaLabel?: string;
+  className?: string;
+  animate?: boolean;
+  delay?: number;
+  children: ReactNode;
+}
+
+export function SectionWrapper({
+  id,
+  ariaLabel,
+  className = '',
+  animate = true,
+  delay = 0,
+  children,
+}: Props) {
+  const section = (
+    <section id={id} aria-label={ariaLabel} className={\`py-16 md:py-24 px-4 sm:px-6 \${className}\`}>
+      <div className="max-w-5xl mx-auto">{children}</div>
+    </section>
+  );
+
+  if (!animate) return section;
+  return <AnimatedReveal delay={delay}>{section}</AnimatedReveal>;
 }
 `;
 
@@ -677,14 +857,15 @@ export function GithubGraph({ username }: Props) {
     <section className="py-10 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
         <motion.div
-          className="rounded-xl border border-gray-800 dark:border-gray-800 p-4 bg-gray-900/50 overflow-x-auto"
+          className="rounded-xl p-4 overflow-x-auto"
+          style={{ border: '1px solid var(--gh-border)', background: 'var(--gh-surface)' }}
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.5 }}
         >
           <img
-            src={\`https://ghchart.rshah.org/3b82f6/\${username}\`}
+            src={\`https://ghchart.rshah.org/58a6ff/\${username}\`}
             alt={\`\${username} \${t('github.alt')}\`}
             className="w-full max-w-full"
             loading="lazy"
@@ -787,31 +968,40 @@ export function HeroSection({ config }: Props) {
       id="hero"
       className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 relative"
       style={{
+        background: 'var(--gh-bg)',
         backgroundImage:
-          'radial-gradient(circle at 1px 1px, rgba(75,85,99,0.15) 1px, transparent 0)',
+          'radial-gradient(circle at 1px 1px, var(--gh-border) 1px, transparent 0)',
         backgroundSize: '40px 40px',
       }}
     >
       <motion.div
-        className="text-center max-w-3xl"
+        className="w-full max-w-2xl terminal-frame"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <p className="font-mono text-green-400 dark:text-green-400 text-sm mb-4">
-          $ whoami
-        </p>
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-          {name}
-        </h1>
-        <p className="text-xl text-gray-400 dark:text-gray-400 mb-2 h-8">
-          {typed}
-          <span className="animate-pulse ml-0.5">|</span>
-        </p>
+        <div className="terminal-titlebar">
+          <div className="terminal-dot" style={{ background: '#ff5f57' }} />
+          <div className="terminal-dot" style={{ background: '#febc2e' }} />
+          <div className="terminal-dot" style={{ background: '#28c840' }} />
+          <span className="font-mono text-xs ml-2" style={{ color: 'var(--gh-muted)' }}>~/{name.toLowerCase().replace(/\\s+/g, '-')}</span>
+        </div>
+        <div className="p-6 sm:p-8 text-center">
+          <p className="font-mono text-sm mb-4" style={{ color: 'var(--gh-green)' }}>
+            <span style={{ color: 'var(--gh-blue)' }}>~$</span> whoami
+          </p>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, var(--gh-blue), var(--gh-purple))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            {name}
+          </h1>
+          <p className="font-mono text-lg mb-2 h-8" style={{ color: 'var(--gh-muted)' }}>
+            {typed}
+            <span className="cursor-blink ml-0.5" style={{ color: 'var(--gh-green)' }}>▌</span>
+          </p>
+        </div>
       </motion.div>
 
       <motion.div
-        className="flex items-center gap-4 mt-8"
+        className="flex items-center gap-3 mt-8"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.6 }}
@@ -822,7 +1012,10 @@ export function HeroSection({ config }: Props) {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="GitHub"
-            className="p-2 rounded-full text-gray-400 hover:text-white transition-colors"
+            className="p-2.5 rounded-lg border transition-all duration-200 hover:scale-105"
+            style={{ borderColor: 'var(--gh-border)', color: 'var(--gh-muted)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--gh-blue)'; e.currentTarget.style.color = 'var(--gh-blue)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--gh-border)'; e.currentTarget.style.color = 'var(--gh-muted)'; }}
           >
             <Github className="w-5 h-5" />
           </a>
@@ -833,7 +1026,10 @@ export function HeroSection({ config }: Props) {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="LinkedIn"
-            className="p-2 rounded-full text-gray-400 hover:text-white transition-colors"
+            className="p-2.5 rounded-lg border transition-all duration-200 hover:scale-105"
+            style={{ borderColor: 'var(--gh-border)', color: 'var(--gh-muted)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--gh-blue)'; e.currentTarget.style.color = 'var(--gh-blue)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--gh-border)'; e.currentTarget.style.color = 'var(--gh-muted)'; }}
           >
             <Linkedin className="w-5 h-5" />
           </a>
@@ -842,7 +1038,10 @@ export function HeroSection({ config }: Props) {
           <a
             href={\`mailto:\${config.email}\`}
             aria-label="Email"
-            className="p-2 rounded-full text-gray-400 hover:text-white transition-colors"
+            className="p-2.5 rounded-lg border transition-all duration-200 hover:scale-105"
+            style={{ borderColor: 'var(--gh-border)', color: 'var(--gh-muted)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--gh-green)'; e.currentTarget.style.color = 'var(--gh-green)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--gh-border)'; e.currentTarget.style.color = 'var(--gh-muted)'; }}
           >
             <Mail className="w-5 h-5" />
           </a>
@@ -852,7 +1051,8 @@ export function HeroSection({ config }: Props) {
             href={config.resumeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-mono text-sm font-medium transition-all duration-200 hover:scale-105"
+            style={{ background: 'linear-gradient(135deg, var(--gh-blue), var(--gh-purple))', color: '#fff' }}
           >
             <Download className="w-4 h-4" />
             {t('hero.resume')}
@@ -909,6 +1109,7 @@ const sectionKeys: Record<string, string> = {
 
 export function NavHeader() {
   const [active, setActive] = useState('hero');
+  const [progress, setProgress] = useState(0);
   const { t } = useLocale();
 
   useEffect(() => {
@@ -928,10 +1129,20 @@ export function NavHeader() {
       if (el) observer.observe(el);
     });
 
-    return () => observer.disconnect();
+    const handleScroll = () => {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      if (h > 0) setProgress((window.scrollY / h) * 100);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   return (
+    <>
     <header className="fixed top-0 w-full z-50 backdrop-blur-md bg-gray-950/80 dark:bg-gray-950/80 border-b border-gray-800/50">
       <nav className="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-center gap-1">
         {sectionIds.map((id) => (
@@ -950,6 +1161,8 @@ export function NavHeader() {
         <LanguageToggle />
       </nav>
     </header>
+    <div className="scroll-progress" style={{ width: \`\${progress}%\` }} />
+    </>
   );
 }
 `;
@@ -1005,22 +1218,24 @@ export function ProjectsSection({ projects }: Props) {
                 href={project.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block p-4 rounded-xl border border-gray-800 dark:border-gray-800 bg-gray-900 dark:bg-gray-900 hover:border-blue-500/50 transition-colors group"
+                className="relative block p-4 rounded-xl border transition-all duration-200 group hover:scale-[1.02]"
+                style={{ borderColor: 'var(--gh-border)', background: 'var(--gh-surface)' }}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
+                transition={{ duration: 0.4, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
               >
+                <div className="lang-line" style={{ background: languageColors[project.language] || '#6b7280' }} />
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-mono text-sm font-semibold text-blue-400 group-hover:text-blue-300 truncate">
+                  <h3 className="font-mono text-sm font-semibold truncate" style={{ color: 'var(--gh-blue)' }}>
                     {project.name}
                   </h3>
-                  <ExternalLink className="w-3.5 h-3.5 text-gray-600 shrink-0 ml-2" />
+                  <ExternalLink className="w-3.5 h-3.5 shrink-0 ml-2" style={{ color: 'var(--gh-muted)' }} />
                 </div>
-                <p className="text-xs text-gray-400 dark:text-gray-400 mb-3 line-clamp-2">
+                <p className="text-xs mb-3 line-clamp-2" style={{ color: 'var(--gh-muted)' }}>
                   {desc}
                 </p>
-                <div className="flex items-center gap-3 text-xs text-gray-500">
+                <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--gh-muted)' }}>
                   <span className="flex items-center gap-1">
                     <span
                       className="w-2.5 h-2.5 rounded-full"
@@ -1029,10 +1244,10 @@ export function ProjectsSection({ projects }: Props) {
                           languageColors[project.language] || '#6b7280',
                       }}
                     />
-                    {project.language}
+                    <span className="font-mono">{project.language}</span>
                   </span>
                   <span className="flex items-center gap-1">
-                    <Star className="w-3 h-3" />
+                    <Star className="w-3 h-3" style={{ color: 'var(--gh-orange)' }} />
                     {project.stars}
                   </span>
                   <span className="flex items-center gap-1">
@@ -1425,6 +1640,8 @@ export const devShowcaseTemplate: HomepageTemplateContent = {
     { path: 'src/app/globals.css', content: globalsCss },
     { path: 'src/app/layout.tsx', content: layoutTsx },
     { path: 'src/app/page.tsx', content: pageTsx },
+    { path: 'src/components/animated-reveal.tsx', content: animatedReveal },
+    { path: 'src/components/section-wrapper.tsx', content: sectionWrapper },
     { path: 'src/components/about-section.tsx', content: aboutSection },
     { path: 'src/components/blog-section.tsx', content: blogSection },
     { path: 'src/components/contact-section.tsx', content: contactSection },

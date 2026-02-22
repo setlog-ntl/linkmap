@@ -212,6 +212,69 @@ html {
   outline: 2px solid var(--color-primary, #3b82f6);
   outline-offset: 2px;
 }
+
+/* Reveal animation */
+.reveal-fade {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-fade.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-fade { opacity: 1; transform: none; transition: none; }
+}
+
+/* Card hover */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+/* Scroll progress */
+.scroll-progress {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  height: 2px;
+  background: var(--color-primary, #6366f1);
+  z-index: 100;
+  transition: width 0.1s linear;
+  pointer-events: none;
+}
+
+/* Lightbox dialog */
+dialog.lightbox {
+  max-width: 90vw;
+  max-height: 90vh;
+  border: none;
+  border-radius: 1rem;
+  background: transparent;
+  padding: 0;
+  overflow: visible;
+}
+dialog.lightbox::backdrop {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+}
+dialog.lightbox img {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 0.75rem;
+}
+
+/* Process stepper connector */
+.process-connector {
+  position: absolute;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  opacity: 0.3;
+}
 `;
 
 // ──────────────────────────────────────────────
@@ -435,18 +498,29 @@ export function ServicesSection({ services }: Props) {
             return (
               <motion.div
                 key={i}
-                className="p-6 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-[#5b13ec]/30 transition-colors"
+                className="relative p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm group overflow-hidden"
+                style={{ transition: 'border-color 0.3s ease, box-shadow 0.3s ease' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(91,19,236,0.4)';
+                  e.currentTarget.style.boxShadow = '0 0 20px rgba(91,19,236,0.1), inset 0 0 20px rgba(6,182,212,0.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
+                transition={{ duration: 0.5, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
               >
-                <div className="w-10 h-10 rounded-xl bg-[#5b13ec]/10 flex items-center justify-center mb-4">
-                  <Icon className="w-5 h-5 text-[#5b13ec]" />
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#5b13ec]/20 to-[#06b6d4]/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <Icon className="w-5 h-5 text-[#5b13ec]" />
+                  </div>
+                  <span className="text-sm font-semibold text-[#06b6d4]">{price}</span>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-100 mb-2">{title}</h3>
-                <p className="text-sm text-gray-400 mb-4 leading-relaxed">{desc}</p>
-                <p className="text-sm font-medium text-[#06b6d4]">{price}</p>
+                <p className="text-sm text-gray-400 leading-relaxed">{desc}</p>
               </motion.div>
             );
           })}
@@ -462,8 +536,9 @@ export function ServicesSection({ services }: Props) {
 // ──────────────────────────────────────────────
 const portfolioSection = `'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
 import type { PortfolioItem } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
 
@@ -473,6 +548,8 @@ interface Props {
 
 export function PortfolioSection({ portfolio }: Props) {
   const { locale, t } = useLocale();
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [lightboxItem, setLightboxItem] = useState<{ src: string; alt: string; desc: string } | null>(null);
   const categories = ['all', ...new Set(portfolio.map((p) => locale === 'en' && p.categoryEn ? p.categoryEn : p.category))];
   const [activeCategory, setActiveCategory] = useState('all');
 
@@ -482,6 +559,16 @@ export function PortfolioSection({ portfolio }: Props) {
         const cat = locale === 'en' && p.categoryEn ? p.categoryEn : p.category;
         return cat === activeCategory;
       });
+
+  const openLightbox = useCallback((src: string, alt: string, desc: string) => {
+    setLightboxItem({ src, alt, desc });
+    dialogRef.current?.showModal();
+  }, []);
+
+  const closeLightbox = useCallback(() => {
+    dialogRef.current?.close();
+    setLightboxItem(null);
+  }, []);
 
   return (
     <section id="portfolio" className="py-20 sm:py-28 px-4 sm:px-6">
@@ -527,23 +614,24 @@ export function PortfolioSection({ portfolio }: Props) {
               return (
                 <motion.div
                   key={i}
-                  className="group rounded-2xl overflow-hidden border border-white/5 bg-white/[0.02]"
+                  className="group rounded-2xl overflow-hidden border border-white/5 bg-white/[0.02] cursor-pointer"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.2 }}
                   transition={{ duration: 0.4, delay: i * 0.05 }}
+                  onClick={() => openLightbox(item.imageUrl, title, desc)}
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <img
                       src={item.imageUrl}
                       alt={title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
                       <div className="flex gap-1.5 flex-wrap">
                         {item.tags.map((tag, j) => (
-                          <span key={j} className="px-2 py-0.5 rounded-full text-xs bg-white/20 text-white">
+                          <span key={j} className="px-2 py-0.5 rounded-full text-xs bg-white/20 text-white backdrop-blur-sm">
                             {tag}
                           </span>
                         ))}
@@ -560,6 +648,35 @@ export function PortfolioSection({ portfolio }: Props) {
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {/* Lightbox dialog */}
+      <dialog
+        ref={dialogRef}
+        className="lightbox"
+        onClick={(e) => { if (e.target === dialogRef.current) closeLightbox(); }}
+        onKeyDown={(e) => { if (e.key === 'Escape') closeLightbox(); }}
+      >
+        {lightboxItem && (
+          <div className="relative">
+            <button
+              onClick={closeLightbox}
+              className="absolute -top-3 -right-3 z-10 w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+              aria-label="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <img
+              src={lightboxItem.src}
+              alt={lightboxItem.alt}
+              className="rounded-xl"
+            />
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent rounded-b-xl">
+              <h3 className="text-white font-semibold">{lightboxItem.alt}</h3>
+              <p className="text-gray-300 text-sm mt-1">{lightboxItem.desc}</p>
+            </div>
+          </div>
+        )}
+      </dialog>
     </section>
   );
 }
@@ -650,9 +767,9 @@ export function ProcessSection({ process }: Props) {
 
   return (
     <section id="process" className="py-20 sm:py-28 px-4 sm:px-6">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <motion.h2
-          className="text-3xl font-bold mb-12 text-center bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent"
+          className="text-3xl font-bold mb-16 text-center bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
@@ -661,27 +778,68 @@ export function ProcessSection({ process }: Props) {
           {t('process.title')}
         </motion.h2>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {process.map((step, i) => {
-            const title = locale === 'en' && step.titleEn ? step.titleEn : step.title;
-            const desc = locale === 'en' && step.descEn ? step.descEn : step.desc;
-            return (
-              <motion.div
-                key={i}
-                className="relative p-6 rounded-2xl border border-white/5 bg-white/[0.02]"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
-              >
-                <span className="text-3xl font-bold text-[#5b13ec]/30 mb-3 block">
-                  {step.number}
-                </span>
-                <h3 className="text-lg font-semibold text-gray-100 mb-2">{title}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{desc}</p>
-              </motion.div>
-            );
-          })}
+        {/* Desktop: horizontal stepper */}
+        <div className="hidden lg:block">
+          <div className="relative flex items-start justify-between">
+            {/* Connector line */}
+            <div className="absolute top-6 left-[calc(12.5%+16px)] right-[calc(12.5%+16px)] h-px bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] opacity-30" />
+
+            {process.map((step, i) => {
+              const title = locale === 'en' && step.titleEn ? step.titleEn : step.title;
+              const desc = locale === 'en' && step.descEn ? step.descEn : step.desc;
+              return (
+                <motion.div
+                  key={i}
+                  className="relative flex flex-col items-center text-center flex-1 px-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.4, delay: i * 0.15 }}
+                >
+                  {/* Step circle */}
+                  <div className="relative z-10 w-12 h-12 rounded-full bg-gradient-to-br from-[#5b13ec] to-[#06b6d4] flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-[#5b13ec]/20 mb-4">
+                    {step.number}
+                  </div>
+                  <h3 className="text-base font-semibold text-gray-100 mb-2">{title}</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed max-w-[200px]">{desc}</p>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Mobile + Tablet: vertical stepper */}
+        <div className="lg:hidden">
+          <div className="relative pl-8 sm:pl-12">
+            {/* Vertical connector line */}
+            <div className="absolute left-[15px] sm:left-[23px] top-6 bottom-6 w-px bg-gradient-to-b from-[#5b13ec] to-[#06b6d4] opacity-30" />
+
+            <div className="space-y-10">
+              {process.map((step, i) => {
+                const title = locale === 'en' && step.titleEn ? step.titleEn : step.title;
+                const desc = locale === 'en' && step.descEn ? step.descEn : step.desc;
+                return (
+                  <motion.div
+                    key={i}
+                    className="relative flex items-start gap-4 sm:gap-6"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 0.4, delay: i * 0.1 }}
+                  >
+                    {/* Step circle (positioned on the line) */}
+                    <div className="absolute -left-8 sm:-left-12 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-[#5b13ec] to-[#06b6d4] flex items-center justify-center text-white font-bold text-sm sm:text-base shadow-lg shadow-[#5b13ec]/20 flex-shrink-0">
+                      {step.number}
+                    </div>
+                    <div className="pt-0.5">
+                      <h3 className="text-lg font-semibold text-gray-100 mb-1">{title}</h3>
+                      <p className="text-sm text-gray-400 leading-relaxed">{desc}</p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -773,6 +931,90 @@ export function ContactSection({ config }: Props) {
 // ──────────────────────────────────────────────
 // src/components/footer.tsx
 // ──────────────────────────────────────────────
+// ──────────────────────────────────────────────
+// src/components/animated-reveal.tsx
+// ──────────────────────────────────────────────
+const animatedReveal = `'use client';
+
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+
+interface Props {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}
+
+export function AnimatedReveal({ children, className = '', delay = 0 }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) { setVisible(true); return; }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (delay > 0) { setTimeout(() => setVisible(true), delay); }
+          else { setVisible(true); }
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.15 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
+
+  return (
+    <div ref={ref} className={\`reveal-fade \${visible ? 'revealed' : ''} \${className}\`}>
+      {children}
+    </div>
+  );
+}
+`;
+
+// ──────────────────────────────────────────────
+// src/components/section-wrapper.tsx
+// ──────────────────────────────────────────────
+const sectionWrapper = `import type { ReactNode } from 'react';
+import { AnimatedReveal } from './animated-reveal';
+
+interface Props {
+  id?: string;
+  ariaLabel?: string;
+  className?: string;
+  animate?: boolean;
+  delay?: number;
+  children: ReactNode;
+}
+
+export function SectionWrapper({
+  id,
+  ariaLabel,
+  className = '',
+  animate = true,
+  delay = 0,
+  children,
+}: Props) {
+  const section = (
+    <section id={id} aria-label={ariaLabel} className={\`py-16 md:py-24 px-4 sm:px-6 \${className}\`}>
+      <div className="max-w-5xl mx-auto">{children}</div>
+    </section>
+  );
+
+  if (!animate) return section;
+  return <AnimatedReveal delay={delay}>{section}</AnimatedReveal>;
+}
+`;
+
+// ──────────────────────────────────────────────
+// src/components/footer.tsx
+// ──────────────────────────────────────────────
 const footerComponent = `import { ThemeToggle } from './theme-toggle';
 
 export function Footer() {
@@ -819,6 +1061,7 @@ const sectionKeys: Record<string, string> = {
 export function NavHeader() {
   const [active, setActive] = useState('hero');
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [progress, setProgress] = useState(0);
   const { t } = useLocale();
 
   useEffect(() => {
@@ -838,10 +1081,20 @@ export function NavHeader() {
       if (el) observer.observe(el);
     });
 
-    return () => observer.disconnect();
+    const handleScroll = () => {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      if (h > 0) setProgress((window.scrollY / h) * 100);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   return (
+    <>
     <header className="fixed top-0 w-full z-50 backdrop-blur-md bg-gray-950/80 border-b border-gray-800/50">
       <nav className="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         <div className="hidden sm:flex items-center gap-1">
@@ -889,6 +1142,8 @@ export function NavHeader() {
         </div>
       )}
     </header>
+    <div className="scroll-progress" style={{ width: \`\${progress}%\` }} />
+    </>
   );
 }
 `;
@@ -1272,6 +1527,8 @@ export const freelancerPageTemplate: HomepageTemplateContent = {
     { path: 'src/app/globals.css', content: globalsCss },
     { path: 'src/app/layout.tsx', content: layoutTsx },
     { path: 'src/app/page.tsx', content: pageTsx },
+    { path: 'src/components/animated-reveal.tsx', content: animatedReveal },
+    { path: 'src/components/section-wrapper.tsx', content: sectionWrapper },
     { path: 'src/components/hero-section.tsx', content: heroSection },
     { path: 'src/components/services-section.tsx', content: servicesSection },
     { path: 'src/components/portfolio-section.tsx', content: portfolioSection },

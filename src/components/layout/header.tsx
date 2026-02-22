@@ -160,11 +160,7 @@ export function Header({ profile }: HeaderProps) {
           {/* Auth buttons */}
           <div className="hidden md:flex items-center gap-2">
             {profile ? (
-              <>
-                <Button variant="default" size="sm" asChild>
-                  <Link href="/dashboard">{t(locale, 'common.dashboard')}</Link>
-                </Button>
-                <DropdownMenu>
+              <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
                       <Avatar className="h-7 w-7">
@@ -208,7 +204,6 @@ export function Header({ profile }: HeaderProps) {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </>
             ) : (
               <>
                 <Button variant="ghost" asChild>
