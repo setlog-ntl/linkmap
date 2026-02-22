@@ -233,6 +233,24 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+/* AI chat: thinking phrase fade */
+@keyframes ai-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-ai-fade-in {
+  animation: ai-fade-in 0.4s ease-out both;
+}
+
+/* AI chat: message reveal */
+@keyframes ai-reveal {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-ai-reveal {
+  animation: ai-reveal 0.35s ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-pulse-ring,
   .animate-float,
@@ -241,7 +259,9 @@
   .animate-status-pulse,
   .animate-edge-march,
   .animate-flow-pulse,
-  .animate-hub-glow {
+  .animate-hub-glow,
+  .animate-ai-fade-in,
+  .animate-ai-reveal {
     animation: none;
   }
 }

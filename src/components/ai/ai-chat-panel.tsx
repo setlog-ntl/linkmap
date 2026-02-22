@@ -19,6 +19,27 @@ import type { ServiceRecommendation } from '@/types';
 const PANEL_WIDTH = 400;
 const PANEL_MAX_HEIGHT = 500;
 
+const THINKING_PHRASES: Record<string, string[]> = {
+  ko: [
+    '프로젝트 구조를 분석하고 있어요...',
+    '연결된 서비스 정보를 확인 중이에요...',
+    '최적의 답변을 준비하고 있어요...',
+    '관련 문서를 참고하고 있어요...',
+    '인사이트를 정리하고 있어요...',
+    '서비스 간 연결을 파악하고 있어요...',
+  ],
+  en: [
+    'Analyzing your project structure...',
+    'Reviewing connected services...',
+    'Preparing the best answer...',
+    'Consulting relevant documentation...',
+    'Organizing insights for you...',
+    'Mapping service connections...',
+  ],
+};
+
+const PHRASE_INTERVAL = 2800;
+
 interface AiChatPanelProps {
   data: DashboardResponse;
 }
@@ -34,6 +55,10 @@ export function AiChatPanel({ data }: AiChatPanelProps) {
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
 
+  // Thinking phrase cycling
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const phrases = THINKING_PHRASES[locale] || THINKING_PHRASES.ko;
+
   const context = useMemo(() => {
     const allServices = data.layers?.flatMap((l) => l.services) || [];
     return {
@@ -45,7 +70,6 @@ export function AiChatPanel({ data }: AiChatPanelProps) {
 
   const {
     messages,
-    streamingText,
     isStreaming,
     error,
     sendMessage,
@@ -53,10 +77,22 @@ export function AiChatPanel({ data }: AiChatPanelProps) {
     reset,
   } = useAiChat({ projectId, context });
 
-  // Auto-scroll on new content
+  // Auto-scroll
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, streamingText]);
+  }, [messages, isStreaming]);
+
+  // Cycle thinking phrases
+  useEffect(() => {
+    if (!isStreaming) {
+      setPhraseIndex(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setPhraseIndex((i) => (i + 1) % phrases.length);
+    }, PHRASE_INTERVAL);
+    return () => clearInterval(interval);
+  }, [isStreaming, phrases.length]);
 
   // Set default position on first open
   useEffect(() => {
@@ -181,7 +217,7 @@ export function AiChatPanel({ data }: AiChatPanelProps) {
       {/* Messages area */}
       <ScrollArea className="flex-1 p-4" style={{ maxHeight: PANEL_MAX_HEIGHT - 110 }}>
         <div className="space-y-3">
-          {messages.length === 0 && !streamingText && (
+          {messages.length === 0 && !isStreaming && (
             <div className="space-y-4">
               <div className="text-center py-6">
                 <Bot className="h-8 w-8 text-violet-500/50 mx-auto mb-2" />
@@ -194,7 +230,14 @@ export function AiChatPanel({ data }: AiChatPanelProps) {
           )}
 
           {messages.map((msg, i) => (
-            <div key={i} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div
+              key={i}
+              className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'} ${
+                msg.role === 'assistant' && i === messages.length - 1
+                  ? 'animate-ai-reveal'
+                  : ''
+              }`}
+            >
               {msg.role === 'assistant' && (
                 <div className="shrink-0 h-6 w-6 rounded-full bg-violet-500/10 flex items-center justify-center">
                   <Bot className="h-3.5 w-3.5 text-violet-500" />
@@ -226,28 +269,19 @@ export function AiChatPanel({ data }: AiChatPanelProps) {
             </div>
           ))}
 
-          {/* Streaming message */}
-          {streamingText && (
-            <div className="flex gap-2 justify-start">
+          {/* Thinking indicator */}
+          {isStreaming && (
+            <div className="flex gap-2 justify-start animate-ai-fade-in">
               <div className="shrink-0 h-6 w-6 rounded-full bg-violet-500/10 flex items-center justify-center">
-                <Bot className="h-3.5 w-3.5 text-violet-500" />
+                <Bot className="h-3.5 w-3.5 text-violet-500 animate-pulse" />
               </div>
-              <div className="max-w-[85%] bg-muted rounded-2xl rounded-bl-sm px-3 py-2">
-                <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:m-0 [&>ul]:my-1 [&>ol]:my-1">
-                  <ReactMarkdown>{streamingText}</ReactMarkdown>
-                  <span className="inline-block w-1.5 h-4 bg-violet-500 animate-pulse ml-0.5" />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Loading indicator */}
-          {isStreaming && !streamingText && (
-            <div className="flex gap-2 justify-start">
-              <div className="shrink-0 h-6 w-6 rounded-full bg-violet-500/10 flex items-center justify-center">
-                <Bot className="h-3.5 w-3.5 text-violet-500" />
-              </div>
-              <div className="bg-muted rounded-2xl rounded-bl-sm px-3 py-2">
+              <div className="bg-muted rounded-2xl rounded-bl-sm px-3 py-2.5 space-y-2 max-w-[85%]">
+                <p
+                  key={phraseIndex}
+                  className="text-sm text-muted-foreground animate-ai-fade-in"
+                >
+                  {phrases[phraseIndex]}
+                </p>
                 <div className="flex gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-bounce" style={{ animationDelay: '0ms' }} />
                   <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-bounce" style={{ animationDelay: '150ms' }} />

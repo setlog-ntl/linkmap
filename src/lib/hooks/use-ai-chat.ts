@@ -36,19 +36,19 @@ function stripRecommendationBlocks(text: string): string {
 
 export function useAiChat({ projectId, featureSlug = 'overview_chat', context }: UseAiChatOptions) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [streamingText, setStreamingText] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const accumulatedRef = useRef('');
 
   const sendMessage = useCallback(async (content: string) => {
     const userMessage: ChatMessage = { role: 'user', content };
     const updatedMessages = [...messages, userMessage];
 
     setMessages(updatedMessages);
-    setStreamingText('');
     setError(null);
     setIsStreaming(true);
+    accumulatedRef.current = '';
 
     abortRef.current?.abort();
     const controller = new AbortController();
@@ -76,7 +76,6 @@ export function useAiChat({ projectId, featureSlug = 'overview_chat', context }:
       if (!reader) throw new Error('No reader');
 
       const decoder = new TextDecoder();
-      let fullText = '';
       let buffer = '';
 
       while (true) {
@@ -100,8 +99,7 @@ export function useAiChat({ projectId, featureSlug = 'overview_chat', context }:
               continue;
             }
             if (parsed.chunk) {
-              fullText += parsed.chunk;
-              setStreamingText(fullText);
+              accumulatedRef.current += parsed.chunk;
             }
           } catch {
             // skip
@@ -109,7 +107,7 @@ export function useAiChat({ projectId, featureSlug = 'overview_chat', context }:
         }
       }
 
-      // Parse recommendations from full text
+      const fullText = accumulatedRef.current;
       const recommendations = parseRecommendations(fullText);
       const cleanContent = stripRecommendationBlocks(fullText);
 
@@ -120,7 +118,7 @@ export function useAiChat({ projectId, featureSlug = 'overview_chat', context }:
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
-      setStreamingText('');
+      accumulatedRef.current = '';
     } catch (err) {
       if ((err as Error).name === 'AbortError') return;
       const msg = err instanceof Error ? err.message : 'Streaming failed';
@@ -133,33 +131,33 @@ export function useAiChat({ projectId, featureSlug = 'overview_chat', context }:
 
   const stop = useCallback(() => {
     abortRef.current?.abort();
-    if (streamingText) {
-      const recommendations = parseRecommendations(streamingText);
-      const cleanContent = stripRecommendationBlocks(streamingText);
+    const text = accumulatedRef.current;
+    if (text) {
+      const recommendations = parseRecommendations(text);
+      const cleanContent = stripRecommendationBlocks(text);
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: cleanContent || streamingText,
+          content: cleanContent || text,
           recommendations: recommendations.length > 0 ? recommendations : undefined,
         },
       ]);
-      setStreamingText('');
+      accumulatedRef.current = '';
     }
     setIsStreaming(false);
-  }, [streamingText]);
+  }, []);
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
     setMessages([]);
-    setStreamingText('');
     setError(null);
     setIsStreaming(false);
+    accumulatedRef.current = '';
   }, []);
 
   return {
     messages,
-    streamingText,
     isStreaming,
     error,
     sendMessage,
