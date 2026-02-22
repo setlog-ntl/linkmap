@@ -47,12 +47,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install
+          cache: npm
+      - run: npm ci
       - name: Build
         run: npm run build
         env:
           NEXT_PUBLIC_REPO_NAME: \${{ github.event.repository.name }}
           NEXT_PUBLIC_BASE_URL: https://\${{ github.repository_owner }}.github.io/\${{ github.event.repository.name }}
+      - run: touch out/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out
@@ -100,6 +102,7 @@ const repoName = process.env.NEXT_PUBLIC_REPO_NAME || '';
 
 const nextConfig: NextConfig = {
   output: 'export',
+  trailingSlash: true,
   basePath: repoName ? \`/\${repoName}\` : '',
   images: {
     unoptimized: true,
@@ -222,6 +225,11 @@ const linkInBioGlobalsCss = `@import "tailwindcss";
   .animate-gradient {
     animation: none;
   }
+}
+
+*:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
 }`;
 
 const linkInBioLayout = `import type { Metadata } from 'next';
@@ -267,15 +275,20 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',
-              '@type': 'Person',
-              name: siteConfig.siteName,
-              description: siteConfig.bio,
-              ...(siteConfig.avatarUrl ? { image: siteConfig.avatarUrl } : {}),
+              '@type': 'ProfilePage',
+              mainEntity: {
+                '@type': 'Person',
+                name: siteConfig.siteName,
+                description: siteConfig.bio,
+                ...(siteConfig.avatarUrl ? { image: siteConfig.avatarUrl } : {}),
+                ...(siteConfig.links?.length ? { sameAs: siteConfig.links.map((l: { url: string }) => l.url) } : {}),
+              },
             }),
           }}
         />
       </head>
       <body className="antialiased">
+        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:shadow-lg focus:text-sm">본문으로 바로가기</a>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <LocaleProvider>
             {children}
@@ -287,7 +300,7 @@ export default function RootLayout({
 }`;
 
 const linkInBioPage = `import { siteConfig } from '@/lib/config';
-import { getTheme } from '@/lib/themes';
+import { getTheme, getBackground } from '@/lib/themes';
 import { ProfileSection } from '@/components/profile-section';
 import { LinkList } from '@/components/link-list';
 import { SocialBar } from '@/components/social-bar';
@@ -296,14 +309,12 @@ import { Footer } from '@/components/footer';
 
 export default function Home() {
   const theme = getTheme(siteConfig.theme);
+  const bgStyle = siteConfig.bgStyle || 'gradient';
 
   return (
-    <main
-      className="min-h-screen flex flex-col items-center justify-center p-4 animate-gradient"
-      style={{
-        background: \`linear-gradient(135deg, \${theme.backgroundFrom}, \${theme.primary}, \${theme.backgroundTo})\`,
-        backgroundSize: '200% 200%',
-      }}
+    <main id="main"
+      className={\`min-h-screen flex flex-col items-center justify-center p-4\${bgStyle === 'gradient' ? ' animate-gradient' : ''}\`}
+      style={getBackground(theme, bgStyle)}
     >
       <div className="w-full max-w-md mx-auto flex flex-col items-center gap-6 py-12">
         <ProfileSection config={siteConfig} theme={theme} />
@@ -366,17 +377,17 @@ export function Footer({ theme }: Props) {
       className="flex items-center gap-2 pt-8 text-xs"
       style={{ color: theme.textMuted }}
     >
-      <span>
-        Powered by{' '}
-        <a
-          href="https://www.linkmap.biz"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline underline-offset-2 hover:opacity-80"
-        >
-          Linkmap
-        </a>
-      </span>
+      <a
+        href="https://www.linkmap.biz/sites?utm_source=badge&utm_medium=referral&utm_campaign=link-in-bio-pro"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-[11px] font-medium hover:opacity-80"
+        style={{ borderWidth: 1, borderStyle: 'solid', borderColor: theme.textMuted + '33', color: theme.textMuted }}
+        aria-label="Made with Linkmap"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Made with Linkmap
+      </a>
       <LanguageToggle theme={theme} />
       <ThemeToggle />
     </footer>
@@ -419,8 +430,8 @@ import {
   ExternalLink,
   type LucideIcon,
 } from 'lucide-react';
-import type { LinkItem } from '@/lib/config';
-import type { ThemePreset } from '@/lib/themes';
+import { siteConfig, type LinkItem } from '@/lib/config';
+import { getCardRadius, type ThemePreset } from '@/lib/themes';
 import { useLocale } from '@/lib/i18n';
 
 const iconMap: Record<string, LucideIcon> = {
@@ -449,11 +460,12 @@ export function LinkList({ links, theme }: Props) {
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-5 py-3.5 rounded-xl backdrop-blur-sm transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            className="flex items-center gap-3 px-5 py-3.5 backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] hover:-translate-y-0.5 active:scale-[0.98] shadow-sm hover:shadow-lg"
             style={{
               backgroundColor: theme.cardBg,
               border: \`1px solid \${theme.cardBorder}\`,
               color: theme.text,
+              borderRadius: getCardRadius(siteConfig.cardStyle || 'rounded'),
             }}
           >
             <Icon className="w-5 h-5 shrink-0" />
@@ -500,11 +512,12 @@ export function ProfileSection({ config, theme }: Props) {
           width={96}
           height={96}
           className="w-24 h-24 rounded-full object-cover ring-2 ring-white/30"
+          style={{ boxShadow: \`0 0 30px \${theme.primary}66\` }}
         />
       ) : (
         <div
           className="w-24 h-24 rounded-full flex items-center justify-center text-2xl font-bold ring-2 ring-white/30"
-          style={{ backgroundColor: theme.primary, color: '#fff' }}
+          style={{ backgroundColor: theme.primary, color: '#fff', boxShadow: \`0 0 30px \${theme.primary}66\` }}
           aria-label={name}
         >
           {initials}
@@ -640,6 +653,9 @@ export const siteConfig = {
   bioEn: process.env.NEXT_PUBLIC_BIO_EN || 'Hello! Check out all my links here.',
   avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || null,
   theme: process.env.NEXT_PUBLIC_THEME || 'gradient',
+  bgStyle: process.env.NEXT_PUBLIC_BG_STYLE || 'gradient',
+  cardStyle: process.env.NEXT_PUBLIC_CARD_STYLE || 'rounded',
+  primaryColor: '#6366f1',
   links: parseJSON<LinkItem[]>(process.env.NEXT_PUBLIC_LINKS, DEMO_LINKS),
   socials: parseJSON<SocialItem[]>(process.env.NEXT_PUBLIC_SOCIALS, []),
   youtubeUrl: process.env.NEXT_PUBLIC_YOUTUBE_URL || null,
@@ -746,6 +762,30 @@ export const themes: Record<string, ThemePreset> = {
 
 export function getTheme(name: string): ThemePreset {
   return themes[name] || themes.gradient;
+}
+
+export function getBackground(theme: ThemePreset, bgStyle: string): Record<string, string> {
+  switch (bgStyle) {
+    case 'solid':
+      return { background: theme.primary };
+    case 'mesh':
+      return {
+        background: \`radial-gradient(at 40% 20%, \${theme.backgroundFrom} 0px, transparent 50%), radial-gradient(at 80% 0%, \${theme.primary} 0px, transparent 50%), radial-gradient(at 0% 50%, \${theme.backgroundTo} 0px, transparent 50%), radial-gradient(at 80% 50%, \${theme.primary}44 0px, transparent 50%), radial-gradient(at 0% 100%, \${theme.backgroundFrom} 0px, transparent 50%), \${theme.backgroundTo}\`,
+      };
+    default:
+      return {
+        background: \`linear-gradient(135deg, \${theme.backgroundFrom}, \${theme.primary}, \${theme.backgroundTo})\`,
+        backgroundSize: '200% 200%',
+      };
+  }
+}
+
+export function getCardRadius(cardStyle: string): string {
+  switch (cardStyle) {
+    case 'pill': return '9999px';
+    case 'square': return '0px';
+    default: return '12px';
+  }
 }`;
 
 // ──────────────────────────────────────────────
@@ -812,6 +852,11 @@ const namecardGlobalsCss = `@import "tailwindcss";
   body { background: white !important; margin: 0; padding: 0; }
   .print-card { width: 90mm; height: 55mm; box-shadow: none !important; border-radius: 0 !important; margin: 0 auto; overflow: hidden; }
   .print-hide { display: none !important; }
+}
+
+*:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
 }`;
 
 const namecardLayout = `import type { Metadata } from 'next';
@@ -834,9 +879,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko" suppressHydrationWarning>
       <head>
         <link rel="stylesheet" as="style" crossOrigin="anonymous" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Person', name: siteConfig.name, jobTitle: siteConfig.title, ...(siteConfig.company ? { worksFor: { '@type': 'Organization', name: siteConfig.company } } : {}), ...(siteConfig.email ? { email: siteConfig.email } : {}), ...(siteConfig.phone ? { telephone: siteConfig.phone } : {}), ...(siteConfig.website ? { url: siteConfig.website } : {}) }) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Person', name: siteConfig.name, jobTitle: siteConfig.title, ...(siteConfig.company ? { worksFor: { '@type': 'Organization', name: siteConfig.company } } : {}), ...(siteConfig.email || siteConfig.phone ? { contactPoint: { '@type': 'ContactPoint', ...(siteConfig.email ? { email: siteConfig.email } : {}), ...(siteConfig.phone ? { telephone: siteConfig.phone } : {}) } } : {}), ...(siteConfig.website ? { url: siteConfig.website } : {}), ...(siteConfig.socials?.length ? { sameAs: siteConfig.socials.map((s: { url: string }) => s.url) } : {}) }) }} />
       </head>
       <body className="antialiased bg-gray-50 dark:bg-gray-900">
+        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:shadow-lg focus:text-sm">본문으로 바로가기</a>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <LocaleProvider>{children}</LocaleProvider>
         </ThemeProvider>
@@ -855,7 +901,7 @@ import { Footer } from '@/components/footer';
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4">
+    <main id="main" className="min-h-screen flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-sm mx-auto">
         <div className="print-card rounded-2xl shadow-lg overflow-hidden bg-white dark:bg-gray-800">
           <div className="h-2" style={{ background: \`linear-gradient(90deg, \${siteConfig.accentColor}, \${siteConfig.accentColor}dd)\` }} />
@@ -909,7 +955,7 @@ import { LanguageToggle } from './language-toggle';
 export function Footer() {
   return (
     <footer className="print-hide flex items-center justify-center gap-2 text-gray-400 text-xs mt-8 pb-4">
-      <span>Powered by{' '}<a href="https://www.linkmap.biz" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-gray-600 dark:hover:text-gray-300">Linkmap</a></span>
+      <a href="https://www.linkmap.biz/sites?utm_source=badge&utm_medium=referral&utm_campaign=digital-namecard" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all text-[11px] font-medium" aria-label="Made with Linkmap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Made with Linkmap</a>
       <LanguageToggle />
       <ThemeToggle />
     </footer>

@@ -26,12 +26,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install
+          cache: npm
+      - run: npm ci
       - name: Build
         run: npm run build
         env:
           NEXT_PUBLIC_REPO_NAME: \${{ github.event.repository.name }}
           NEXT_PUBLIC_BASE_URL: https://\${{ github.repository_owner }}.github.io/\${{ github.event.repository.name }}
+      - run: touch out/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out
@@ -120,6 +122,7 @@ const repoName = process.env.NEXT_PUBLIC_REPO_NAME || '';
 
 const nextConfig: NextConfig = {
   output: 'export',
+  trailingSlash: true,
   basePath: repoName ? \`/\${repoName}\` : '',
   images: {
     unoptimized: true,
@@ -203,6 +206,11 @@ html {
     scroll-behavior: auto;
   }
 }
+
+*:focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 2px;
+}
 `;
 
 // ──────────────────────────────────────────────
@@ -255,11 +263,13 @@ export default function RootLayout({
               name: siteConfig.name,
               description: siteConfig.tagline,
               ...(siteConfig.email ? { email: siteConfig.email } : {}),
+              ...(siteConfig.socials?.length ? { sameAs: siteConfig.socials.map((s: { url: string }) => s.url) } : {}),
             }),
           }}
         />
       </head>
       <body className="antialiased bg-[#0f0f0f] text-gray-50 dark:bg-[#0f0f0f] dark:text-gray-50">
+        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:shadow-lg focus:text-sm">본문으로 바로가기</a>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <LocaleProvider>
             {children}
@@ -689,17 +699,16 @@ export function Footer() {
   return (
     <footer className="border-t border-white/5 py-8 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto flex items-center justify-center gap-2 text-gray-500 text-xs">
-        <span>
-          Powered by{' '}
-          <a
-            href="https://www.linkmap.biz"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline underline-offset-2 hover:text-gray-300"
-          >
-            Linkmap
-          </a>
-        </span>
+        <a
+          href="https://www.linkmap.biz/sites?utm_source=badge&utm_medium=referral&utm_campaign=personal-brand"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-gray-400 hover:text-gray-200 hover:bg-white/10 transition-all text-[11px] font-medium"
+          aria-label="Made with Linkmap"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Made with Linkmap
+        </a>
         <ThemeToggle />
       </div>
     </footer>
