@@ -117,6 +117,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const email = (contact.email as string) || '';
   const githubUrl = (contact.github as string) || '';
   const linkedinUrl = (contact.linkedin as string) || '';
+  const designPreset = (hero.designPreset as string) || 'github-dark';
 
   const skillItems = (about.skills as unknown[]) || [];
   const experienceItems = (experience.items as unknown[]) || [];
@@ -247,6 +248,7 @@ export const siteConfig = {
   linkedinUrl: process.env.NEXT_PUBLIC_LINKEDIN_URL || ${linkedinUrl ? `'${esc(linkedinUrl)}'` : 'null'},
   typingWords: ${typingWords ? `'${esc(typingWords)}'` : 'null'},
   maxRepos: ${maxRepos},
+  designPreset: '${esc(designPreset)}',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 
@@ -315,6 +317,8 @@ function parseConfigToState(
   if (taglineEn !== null) state.values.hero.taglineEn = taglineEn;
   const typingWords = extractNullable('typingWords');
   if (typingWords !== null) state.values.hero.typingWords = typingWords;
+  const designPreset = extractString('designPreset');
+  if (designPreset !== null) state.values.hero.designPreset = designPreset;
 
   // About
   const about = extractString('about');

@@ -870,6 +870,7 @@ export const siteConfig = {
     { platform: 'youtube', url: 'https://youtube.com' },
     { platform: 'instagram', url: 'https://instagram.com' },
   ]),
+  designPreset: 'creator',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 

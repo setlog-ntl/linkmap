@@ -97,6 +97,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const gradientTo = (hero.gradientTo as string) || '#f59e0b';
   const parallaxEnabled = hero.parallaxEnabled !== undefined ? !!hero.parallaxEnabled : false;
   const fontFamily = (hero.fontFamily as string) || 'Noto Sans KR';
+  const designPreset = (hero.designPreset as string) || 'creator';
   const story = (about.story as string) || '';
   const storyEn = (about.storyEn as string) || '';
   const email = (contact.email as string) || 'hello@example.com';
@@ -162,6 +163,7 @@ export const siteConfig = {
   parallaxEnabled: ${parallaxEnabled},
   fontFamily: '${esc(fontFamily)}',
   galleryColumns: '${esc(galleryColumns)}',
+  designPreset: '${esc(designPreset)}',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 
@@ -233,6 +235,8 @@ function parseConfigToState(
   if (parallaxMatch) state.values.hero.parallaxEnabled = parallaxMatch[1] === 'true';
   const fontFamily = extractString('fontFamily');
   if (fontFamily !== null) state.values.hero.fontFamily = fontFamily;
+  const designPreset = extractString('designPreset');
+  if (designPreset !== null) state.values.hero.designPreset = designPreset;
 
   // About
   const story = extractString('story');
