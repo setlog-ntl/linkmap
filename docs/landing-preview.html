@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Linkmap 랜딩 미리보기</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { primary: '#0a0a0a', accent: '#2bee79' } } }
+    };
+  </script>
+  <style>
+    .gradient-text { background: linear-gradient(to right, #2bee79, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .dot-grid { background-image: radial-gradient(#e5e7eb 1px, transparent 1px); background-size: 24px 24px; }
+    .img-placeholder { background: #f3f4f6; border: 2px dashed #d1d5db; color: #6b7280; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-gray-900 antialiased">
+  <!-- Header -->
+  <header class="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur">
+    <div class="container mx-auto flex h-14 items-center px-4 max-w-7xl">
+      <a href="#" class="flex items-center gap-2 font-bold text-xl">
+        <span class="text-primary">Link</span><span>map</span>
+      </a>
+      <nav class="ml-8 hidden md:flex items-center gap-6">
+        <a href="#oneclick" class="text-sm font-semibold text-primary/80 hover:text-primary">원클릭 배포</a>
+        <a href="#features" class="text-sm text-gray-500 hover:text-gray-900">핵심 기능</a>
+        <a href="#pricing" class="text-sm text-gray-500 hover:text-gray-900">가격</a>
+        <a href="/services" class="text-sm text-gray-500 hover:text-gray-900">서비스 카탈로그</a>
+      </nav>
+      <div class="ml-auto flex items-center gap-2">
+        <a href="#login" class="text-sm text-gray-600 hover:text-gray-900">로그인</a>
+        <a href="#signup" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">시작하기</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1">
+    <!-- Hero -->
+    <section class="relative min-h-screen pt-32 pb-20 lg:pt-40 flex flex-col justify-center overflow-hidden">
+      <div class="absolute inset-0 -z-10 dot-grid opacity-40 [mask-image:radial-gradient(ellipse_80%_60%_at_50%_40%,black_40%,transparent_100%)]"></div>
+      <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] -z-10 bg-[radial-gradient(ellipse_at_center,rgba(43,238,121,0.06)_0%,transparent_70%)]"></div>
+      <div class="relative z-10 mx-auto max-w-7xl px-6 text-center">
+        <div class="mb-8 flex justify-center">
+          <span class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-1.5 text-xs font-medium text-[#2bee79]">
+            <span class="relative flex h-2 w-2"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#2bee79] opacity-75"></span><span class="relative inline-flex h-2 w-2 rounded-full bg-[#2bee79]"></span></span>
+            설정 관리 플랫폼
+          </span>
+        </div>
+        <h1 class="mx-auto max-w-4xl text-5xl font-extrabold tracking-tight sm:text-7xl mb-6 leading-tight">
+          서비스 인프라를<br class="hidden sm:block" /> <span class="gradient-text">시각화하세요</span>
+        </h1>
+        <p class="mx-auto max-w-2xl text-lg text-gray-500 mb-10">
+          GitHub부터 데이터베이스까지, 복잡한 서비스 연결을 한눈에 시각화하세요. 팀 전체가 이해하는 실시간 인프라 지도를 자동으로 생성합니다.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+          <a href="#signup" class="inline-flex items-center justify-center rounded-lg bg-[#2bee79] px-8 py-3.5 text-base font-bold text-black hover:bg-emerald-400">무료로 시작하기</a>
+          <a href="#demo" class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-8 py-3.5 text-base font-medium hover:bg-gray-50">데모 영상 보기</a>
+        </div>
+        <div class="img-placeholder rounded-xl w-full max-w-4xl mx-auto aspect-video" style="min-height: 280px;">[ 이미지: 히어로 · 서비스 아키텍처 다이어그램 / 데모 화면 ]</div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="border-y bg-gray-50/50 py-8">
+      <div class="container mx-auto max-w-7xl px-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div><div class="text-2xl font-bold text-[#2bee79]">20+</div><div class="text-sm text-gray-600">지원 서비스</div></div>
+          <div><div class="text-2xl font-bold text-[#2bee79]">50+</div><div class="text-sm text-gray-600">체크리스트 항목</div></div>
+          <div><div class="text-2xl font-bold text-[#2bee79]">6</div><div class="text-sm text-gray-600">프로젝트 템플릿</div></div>
+          <div><div class="text-2xl font-bold text-[#2bee79]">256</div><div class="text-sm text-gray-600">비트 암호화</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="py-20 lg:py-28">
+      <div class="container mx-auto max-w-7xl px-6">
+        <h2 class="text-3xl font-bold text-center mb-4">핵심 기능</h2>
+        <p class="text-center text-gray-500 max-w-xl mx-auto mb-12">프로젝트 설정에 필요한 모든 것을 한 곳에서</p>
+        <div class="grid md:grid-cols-3 gap-6 mb-8">
+          <div class="img-placeholder rounded-xl aspect-[4/3]">[ 이미지: 서비스 맵 시각화 스크린샷 ]</div>
+          <div class="img-placeholder rounded-xl aspect-[4/3]">[ 이미지: 연결 체크리스트 UI ]</div>
+          <div class="img-placeholder rounded-xl aspect-[4/3]">[ 이미지: 환경변수 / .env 다운로드 ]</div>
+        </div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="rounded-xl border border-gray-200 p-6 hover:border-[#2bee79]/40 transition-colors">
+            <h3 class="font-semibold text-lg mb-2">서비스 맵 시각화</h3>
+            <p class="text-sm text-gray-500">프로젝트의 서비스 아키텍처를 인터랙티브 다이어그램으로 시각화합니다.</p>
+          </div>
+          <div class="rounded-xl border border-gray-200 p-6 hover:border-[#2bee79]/40 transition-colors">
+            <h3 class="font-semibold text-lg mb-2">연결 체크리스트</h3>
+            <p class="text-sm text-gray-500">서비스별 단계별 가이드로 초보자도 쉽게 연결할 수 있습니다.</p>
+          </div>
+          <div class="rounded-xl border border-gray-200 p-6 hover:border-[#2bee79]/40 transition-colors">
+            <h3 class="font-semibold text-lg mb-2">환경변수 관리</h3>
+            <p class="text-sm text-gray-500">API 키와 시크릿을 AES-256 암호화로 안전하게 저장하고 .env 한 클릭 다운로드.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="py-20 bg-gray-50/50">
+      <div class="container mx-auto max-w-7xl px-6">
+        <h2 class="text-3xl font-bold text-center mb-4">4단계로 시작하세요</h2>
+        <p class="text-center text-gray-500 mb-12">간단한 4단계로 프로젝트 설정 완료</p>
+        <div class="img-placeholder rounded-xl w-full max-w-4xl mx-auto aspect-[2/1] mb-10">[ 이미지: 4단계 플로우 (프로젝트 생성 → 서비스 추가 → 환경변수 → AI 분석) ]</div>
+        <div class="grid md:grid-cols-4 gap-6">
+          <div class="text-center"><div class="w-12 h-12 rounded-full bg-[#2bee79]/20 text-[#2bee79] font-bold flex items-center justify-center mx-auto mb-3">1</div><h3 class="font-semibold mb-1">프로젝트 생성</h3><p class="text-sm text-gray-500">템플릿에서 시작</p></div>
+          <div class="text-center"><div class="w-12 h-12 rounded-full bg-[#2bee79]/20 text-[#2bee79] font-bold flex items-center justify-center mx-auto mb-3">2</div><h3 class="font-semibold mb-1">서비스 추가</h3><p class="text-sm text-gray-500">카탈로그에서 선택</p></div>
+          <div class="text-center"><div class="w-12 h-12 rounded-full bg-[#2bee79]/20 text-[#2bee79] font-bold flex items-center justify-center mx-auto mb-3">3</div><h3 class="font-semibold mb-1">환경변수 관리</h3><p class="text-sm text-gray-500">.env 다운로드</p></div>
+          <div class="text-center"><div class="w-12 h-12 rounded-full bg-[#2bee79]/20 text-[#2bee79] font-bold flex items-center justify-center mx-auto mb-3">4</div><h3 class="font-semibold mb-1">AI 분석</h3><p class="text-sm text-gray-500">최적화 제안</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Supported services (image area) -->
+    <section class="py-16 border-t border-b bg-white">
+      <div class="container mx-auto max-w-7xl px-6">
+        <h2 class="text-3xl font-bold text-center mb-4">지원 서비스</h2>
+        <p class="text-center text-gray-500 mb-8">인기 있는 20개 서비스를 모두 지원합니다</p>
+        <div class="img-placeholder rounded-xl w-full aspect-[3/1] max-w-4xl mx-auto">[ 이미지: 서비스 로고 그리드 (GitHub, Supabase, Vercel, Stripe 등) ]</div>
+      </div>
+    </section>
+
+    <!-- One-click deploy (image area) -->
+    <section class="py-20 bg-gray-50/50">
+      <div class="container mx-auto max-w-7xl px-6">
+        <h2 class="text-3xl font-bold text-center mb-4">원클릭 배포</h2>
+        <p class="text-center text-gray-500 mb-8">GitHub OAuth 한 번이면 3분 만에 홈페이지가 라이브됩니다</p>
+        <div class="img-placeholder rounded-xl w-full max-w-3xl mx-auto aspect-video">[ 이미지: 원클릭 배포 스텝 (GitHub 연결 → 템플릿 선택 → 빌드 → 사이트 라이브) ]</div>
+      </div>
+    </section>
+
+    <!-- Testimonials (image area) -->
+    <section class="py-20 border-t">
+      <div class="container mx-auto max-w-7xl px-6">
+        <h2 class="text-3xl font-bold text-center mb-4">개발자들의 이야기</h2>
+        <p class="text-center text-gray-500 mb-8">Linkmap을 사용하는 개발자들의 실제 후기</p>
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="img-placeholder rounded-xl aspect-[3/4]">[ 이미지: 후기 1 — 프로필/인용 ]</div>
+          <div class="img-placeholder rounded-xl aspect-[3/4]">[ 이미지: 후기 2 — 프로필/인용 ]</div>
+          <div class="img-placeholder rounded-xl aspect-[3/4]">[ 이미지: 후기 3 — 프로필/인용 ]</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="py-20">
+      <div class="container mx-auto max-w-7xl px-6">
+        <h2 class="text-3xl font-bold text-center mb-4">합리적인 가격</h2>
+        <p class="text-center text-gray-500 mb-12">무료로 시작하고, 필요할 때 업그레이드하세요</p>
+        <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div class="rounded-xl border border-gray-200 p-6">
+            <h3 class="font-bold text-lg">Free</h3>
+            <p class="text-2xl font-bold mt-2">₩0 <span class="text-sm font-normal text-gray-500">/월</span></p>
+            <p class="text-sm text-gray-500 mt-1">프로젝트 3개, 서비스 무제한</p>
+            <a href="#signup" class="mt-4 block w-full rounded-lg border border-gray-300 py-2 text-center text-sm font-medium hover:bg-gray-50">시작하기</a>
+          </div>
+          <div class="rounded-xl border-2 border-[#2bee79] p-6 relative">
+            <span class="absolute -top-2.5 left-4 bg-[#2bee79] text-black text-xs font-medium px-2 py-0.5 rounded">인기</span>
+            <h3 class="font-bold text-lg">Pro</h3>
+            <p class="text-2xl font-bold mt-2">₩29,000 <span class="text-sm font-normal text-gray-500">/월</span></p>
+            <p class="text-sm text-gray-500 mt-1">프로젝트 무제한, 팀 협업, AI Suite</p>
+            <a href="#signup" class="mt-4 block w-full rounded-lg bg-[#2bee79] py-2 text-center text-sm font-bold text-black hover:bg-emerald-400">시작하기</a>
+          </div>
+          <div class="rounded-xl border border-gray-200 p-6">
+            <h3 class="font-bold text-lg">Team</h3>
+            <p class="text-2xl font-bold mt-2">문의</p>
+            <p class="text-sm text-gray-500 mt-1">팀원 무제한, RBAC, SSO</p>
+            <a href="#contact" class="mt-4 block w-full rounded-lg border border-gray-300 py-2 text-center text-sm font-medium hover:bg-gray-50">문의하기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="py-20 bg-gray-900 text-white">
+      <div class="container mx-auto max-w-3xl px-6 text-center">
+        <h2 class="text-3xl font-bold mb-4">지금 바로 시작하세요</h2>
+        <p class="text-gray-300 mb-8">무료로 3개 프로젝트까지 관리할 수 있습니다. 신용카드 없이 바로 시작하세요.</p>
+        <a href="#signup" class="inline-flex items-center justify-center rounded-lg bg-[#2bee79] px-8 py-3.5 text-base font-bold text-black hover:bg-emerald-400">무료로 시작하기</a>
+        <p class="mt-4 text-sm text-gray-400">10,000+ 개발자와 함께하세요</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t bg-gray-100 py-8 md:py-12">
+    <div class="container mx-auto max-w-7xl px-6">
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-8">
+        <div class="col-span-2 md:col-span-1">
+          <a href="#" class="flex items-center gap-1 font-bold text-lg"><span class="text-primary">Link</span><span>map</span></a>
+          <p class="text-sm text-gray-500 mt-1">바이브 코딩의 시작과 끝을 연결하는 허브</p>
+        </div>
+        <div>
+          <h4 class="font-semibold text-sm mb-3">제품</h4>
+          <ul class="space-y-2 text-sm text-gray-500"><li><a href="#services" class="hover:text-gray-900">서비스 카탈로그</a></li><li><a href="#features" class="hover:text-gray-900">핵심 기능</a></li><li><a href="#pricing" class="hover:text-gray-900">가격</a></li></ul>
+        </div>
+        <div>
+          <h4 class="font-semibold text-sm mb-3">지원</h4>
+          <ul class="space-y-2 text-sm text-gray-500"><li><a href="#" class="hover:text-gray-900">GitHub 가이드</a></li><li><a href="#" class="hover:text-gray-900">인증 가이드</a></li><li><a href="#" class="hover:text-gray-900">Cloudflare 가이드</a></li></ul>
+        </div>
+        <div>
+          <h4 class="font-semibold text-sm mb-3">법적 고지</h4>
+          <ul class="space-y-2 text-sm text-gray-500"><li><a href="#" class="hover:text-gray-900">Privacy</a></li><li><a href="#" class="hover:text-gray-900">Terms</a></li></ul>
+        </div>
+      </div>
+      <div class="mt-8 pt-6 border-t text-center text-sm text-gray-500">
+        <p>&copy; 2025 Linkmap. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
