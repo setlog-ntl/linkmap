@@ -13,7 +13,7 @@ export function PricingSection() {
   const plans = [
     {
       name: 'Free',
-      price: '\u20A90',
+      price: '$0',
       period: '',
       description: t(locale, 'landing.planFreeDesc'),
       features: [
@@ -27,7 +27,7 @@ export function PricingSection() {
     },
     {
       name: 'Pro',
-      price: '\u20A99,900',
+      price: '$9.9',
       period: t(locale, 'landing.planPeriod'),
       description: t(locale, 'landing.planProDesc'),
       features: [
@@ -44,7 +44,7 @@ export function PricingSection() {
     },
     {
       name: 'Team',
-      price: '\u20A929,900',
+      price: '$29',
       period: t(locale, 'landing.planPeriod'),
       description: t(locale, 'landing.planTeamDesc'),
       features: [

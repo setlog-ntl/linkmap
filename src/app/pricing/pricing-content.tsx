@@ -18,21 +18,21 @@ interface Plan {
 const plans: Plan[] = [
   {
     nameKey: 'pricing.planFree',
-    price: '0',
+    price: '$0',
     featureKeys: ['pricing.freeF1', 'pricing.freeF2', 'pricing.freeF3', 'pricing.freeF4', 'pricing.freeF5'],
     isFree: true,
     popular: false,
   },
   {
     nameKey: 'pricing.planPro',
-    price: '9,900',
+    price: '$9.9',
     featureKeys: ['pricing.proF1', 'pricing.proF2', 'pricing.proF3', 'pricing.proF4', 'pricing.proF5', 'pricing.proF6'],
     isFree: false,
     popular: true,
   },
   {
     nameKey: 'pricing.planTeam',
-    price: '29,900',
+    price: '$29',
     featureKeys: ['pricing.teamF1', 'pricing.teamF2', 'pricing.teamF3', 'pricing.teamF4', 'pricing.teamF5', 'pricing.teamF6', 'pricing.teamF7'],
     isFree: false,
     popular: false,
@@ -60,7 +60,7 @@ export function PricingContent() {
             <CardHeader className="text-center pb-2">
               <CardTitle className="text-lg">{t(locale, plan.nameKey)}</CardTitle>
               <div className="mt-4">
-                <span className="text-4xl font-bold">{plan.price}{t(locale, 'pricing.currency')}</span>
+                <span className="text-4xl font-bold">{plan.price}</span>
                 {!plan.isFree && <span className="text-muted-foreground">{t(locale, 'pricing.perMonth')}</span>}
               </div>
             </CardHeader>
