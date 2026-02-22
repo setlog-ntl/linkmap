@@ -1,14 +1,25 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Check, ArrowRight, Users } from 'lucide-react';
 import { ScrollReveal } from './scroll-reveal';
+import { createClient } from '@/lib/supabase/client';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 
+function useSignupHref() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user));
+  }, []);
+  return isLoggedIn ? '/dashboard' : '/signup';
+}
+
 export function PricingSection() {
   const { locale } = useLocaleStore();
+  const signupHref = useSignupHref();
 
   const plans = [
     {
@@ -112,7 +123,7 @@ export function PricingSection() {
                   }`}
                   asChild
                 >
-                  <Link href="/signup">{plan.cta}</Link>
+                  <Link href={signupHref}>{plan.cta}</Link>
                 </Button>
               </div>
             </ScrollReveal>
@@ -125,6 +136,7 @@ export function PricingSection() {
 
 export function FinalCtaSection() {
   const { locale } = useLocaleStore();
+  const signupHref = useSignupHref();
 
   return (
     <section className="py-24 bg-[hsl(220,60%,35%)] relative overflow-hidden">
@@ -141,7 +153,7 @@ export function FinalCtaSection() {
           <h2 className="text-4xl font-bold tracking-tight mb-6 sm:text-5xl text-white">{t(locale, 'landing.finalCtaTitle')}</h2>
           <p className="text-lg text-white/70 mb-10 max-w-xl mx-auto">{t(locale, 'landing.finalCtaDesc')}</p>
           <Button className="bg-[#2bee79] text-black hover:bg-emerald-400 px-10 py-4 h-auto rounded-lg text-base font-bold transition-all hover:scale-105 hover:shadow-lg" asChild>
-            <Link href="/signup">
+            <Link href={signupHref}>
               {t(locale, 'landing.ctaStart')}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>

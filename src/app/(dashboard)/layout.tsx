@@ -33,7 +33,7 @@ export default async function DashboardLayout({
     <SidebarProvider>
       <AppSidebar profile={profile} />
       <div className="flex flex-1 flex-col min-h-screen w-full">
-        <AppHeader />
+        <AppHeader profile={profile} />
         <main className="flex-1">
           {children}
         </main>

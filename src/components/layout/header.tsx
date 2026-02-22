@@ -9,11 +9,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { Menu, Globe, Search, BookOpen, ChevronDown } from 'lucide-react';
+import { Menu, Globe, Search, BookOpen, ChevronDown, Settings, LogOut, Bot } from 'lucide-react';
 import { useUIStore } from '@/stores/ui-store';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t, localeNames } from '@/lib/i18n';
@@ -158,9 +160,55 @@ export function Header({ profile }: HeaderProps) {
           {/* Auth buttons */}
           <div className="hidden md:flex items-center gap-2">
             {profile ? (
-              <Button variant="default" size="sm" asChild>
-                <Link href="/dashboard">{t(locale, 'common.dashboard')}</Link>
-              </Button>
+              <>
+                <Button variant="default" size="sm" asChild>
+                  <Link href="/dashboard">{t(locale, 'common.dashboard')}</Link>
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                      <Avatar className="h-7 w-7">
+                        <AvatarImage src={profile.avatar_url || undefined} alt={profile.name || ''} />
+                        <AvatarFallback className="text-xs">
+                          {profile.name?.charAt(0)?.toUpperCase() || profile.email.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end">
+                    <div className="flex items-center gap-2 p-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={profile.avatar_url || undefined} alt={profile.name || ''} />
+                        <AvatarFallback>{profile.name?.charAt(0)?.toUpperCase() || 'U'}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">{profile.name || t(locale, 'common.home')}</span>
+                        <span className="text-xs text-muted-foreground">{profile.email}</span>
+                      </div>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings">
+                        <Settings className="mr-2 h-4 w-4" />
+                        {t(locale, 'common.settings')}
+                      </Link>
+                    </DropdownMenuItem>
+                    {profile.is_admin && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/ai-config">
+                          <Bot className="mr-2 h-4 w-4" />
+                          AI 설정 관리
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      {t(locale, 'common.logout')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
               <>
                 <Button variant="ghost" asChild>
@@ -183,13 +231,28 @@ export function Header({ profile }: HeaderProps) {
             <SheetContent side="right" className="w-72">
               <nav className="flex flex-col gap-2 mt-8">
                 {profile && (
-                  <Link
-                    href="/dashboard"
-                    className="text-sm font-medium text-foreground px-2.5 py-1.5"
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    {t(locale, 'common.dashboard')}
-                  </Link>
+                  <>
+                    <div className="flex items-center gap-2 px-2.5 py-1.5 mb-1">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={profile.avatar_url || undefined} alt={profile.name || ''} />
+                        <AvatarFallback className="text-xs">
+                          {profile.name?.charAt(0)?.toUpperCase() || profile.email.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">{profile.name || t(locale, 'common.home')}</span>
+                        <span className="text-xs text-muted-foreground">{profile.email}</span>
+                      </div>
+                    </div>
+                    <div className="border-t my-1" />
+                    <Link
+                      href="/dashboard"
+                      className="text-sm font-medium text-foreground px-2.5 py-1.5"
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      {t(locale, 'common.dashboard')}
+                    </Link>
+                  </>
                 )}
                 <Link
                   href="/pricing"
@@ -234,12 +297,23 @@ export function Header({ profile }: HeaderProps) {
                     </Link>
                   </>
                 ) : (
-                  <button
-                    onClick={() => { handleSignOut(); setSidebarOpen(false); }}
-                    className="text-sm font-medium text-muted-foreground hover:text-foreground text-left px-2.5 py-1.5"
-                  >
-                    {t(locale, 'common.logout')}
-                  </button>
+                  <>
+                    <Link
+                      href="/settings"
+                      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2"
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      <Settings className="h-4 w-4" />
+                      {t(locale, 'common.settings')}
+                    </Link>
+                    <button
+                      onClick={() => { handleSignOut(); setSidebarOpen(false); }}
+                      className="text-sm font-medium text-muted-foreground hover:text-foreground text-left px-2.5 py-1.5 flex items-center gap-2"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      {t(locale, 'common.logout')}
+                    </button>
+                  </>
                 )}
               </nav>
             </SheetContent>
