@@ -75,6 +75,15 @@ export function getErrorDetails(
     };
   }
 
+  // Workflow build failure (lock file / dependency install)
+  if (msg.includes('lock file') || msg.includes('npm err') || msg.includes('워크플로우 빌드')) {
+    return {
+      cause: t(loc, 'deployError.workflowBuild.cause'),
+      solution: t(loc, 'deployError.workflowBuild.solution'),
+      failedStep,
+    };
+  }
+
   // Pages error
   if (msg.includes('pages') || msg.includes('errored') || (failedStep && failedStep.includes('설정'))) {
     return {

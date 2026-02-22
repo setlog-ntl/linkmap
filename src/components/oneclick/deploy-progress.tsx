@@ -130,7 +130,7 @@ export function DeployProgress({ status, template }: DeployProgressProps) {
               {isCompleted
                 ? t(locale, 'deployProgress.completed')
                 : isError
-                  ? t(locale, 'deployProgress.failed')
+                  ? t(locale, 'deployStep.maintenanceTitle')
                   : isTimeout
                     ? t(locale, 'deployProgress.timeout')
                     : t(locale, 'deployProgress.preparingSite')}
@@ -149,9 +149,9 @@ export function DeployProgress({ status, template }: DeployProgressProps) {
                 </Badge>
               )}
               {isError && (
-                <Badge variant="destructive" className="gap-1">
-                  <XCircle className="h-3 w-3" />
-                  {t(locale, 'deployProgress.failed')}
+                <Badge variant="outline" className="gap-1 border-amber-500 text-amber-600">
+                  <AlertTriangle className="h-3 w-3" />
+                  {t(locale, 'deployStep.maintenanceTitle')}
                 </Badge>
               )}
               {isTimeout && (
@@ -167,7 +167,7 @@ export function DeployProgress({ status, template }: DeployProgressProps) {
           <div className={isRunning ? 'animate-pulse' : ''}>
             <Progress
               value={progressPercent}
-              className={`h-2 ${isError ? '[&>div]:bg-red-500' : ''}`}
+              className={`h-2 ${isError ? '[&>div]:bg-amber-500' : ''}`}
             />
           </div>
 
@@ -198,7 +198,7 @@ export function DeployProgress({ status, template }: DeployProgressProps) {
                     ) : isActive ? (
                       <Loader2 className="h-5 w-5 text-primary animate-spin flex-shrink-0" />
                     ) : step.status === 'error' ? (
-                      <XCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                      <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0" />
                     ) : (
                       <IconComponent className="h-5 w-5 text-muted-foreground/40 flex-shrink-0" />
                     )}
@@ -206,7 +206,7 @@ export function DeployProgress({ status, template }: DeployProgressProps) {
                     <span className={`text-sm ${
                       isStepCompleted ? 'text-foreground' :
                       isActive ? 'text-primary font-medium' :
-                      step.status === 'error' ? 'text-red-500 font-medium' :
+                      step.status === 'error' ? 'text-amber-600 dark:text-amber-400 font-medium' :
                       'text-muted-foreground'
                     }`}>
                       {step.label}

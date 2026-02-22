@@ -1058,6 +1058,10 @@
       "cause": "Deployment quota has been reached.",
       "solution": "Upgrade to Pro plan or delete existing sites and try again."
     },
+    "workflowBuild": {
+      "cause": "A dependency installation error occurred during GitHub Actions build.",
+      "solution": "Delete the site and redeploy. If the issue persists, contact the administrator."
+    },
     "default": {
       "cause": "An unexpected error occurred during deployment.",
       "solution": "Please try again. If the issue persists, try a different site name or contact the administrator."
@@ -1132,7 +1136,10 @@
     "upgradeToast": "Will be reflected upon payment update.",
     "upgradePlan": "Upgrade Plan",
     "manageSites": "Manage Sites",
-    "checkOnGitHub": "Check on GitHub"
+    "checkOnGitHub": "Check on GitHub",
+    "maintenanceTitle": "Template Update in Progress",
+    "maintenanceDesc": "We're currently updating templates for a better experience. Please try again shortly.",
+    "maintenanceNotice": "Preparing a better experience for you"
   },
   "authModal": {
     "title": "Sign In Required",

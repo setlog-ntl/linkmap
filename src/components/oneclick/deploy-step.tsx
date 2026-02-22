@@ -1,31 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  XCircle,
   Loader2,
   RefreshCw,
-  ChevronDown,
-  ChevronUp,
   AlertTriangle,
-  Copy,
-  Check,
   Github,
   ExternalLink,
-  CheckCircle2,
   Rocket,
-  ArrowUpCircle,
   LayoutDashboard,
 } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { toast } from 'sonner';
 import Link from 'next/link';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t, type Locale } from '@/lib/i18n';
 import type { DeployStatus, HomepageTemplate } from '@/lib/queries/oneclick';
-import { getErrorDetails } from '@/lib/deploy-error-map';
 import { DeployProgress } from './deploy-progress';
 
 interface DeployStepProps {
@@ -38,26 +29,11 @@ interface DeployStepProps {
 
 export function DeployStep({ status, isLoading, error, template, onRetry }: DeployStepProps) {
   const { locale } = useLocaleStore();
-  const [showDetails, setShowDetails] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  const handleCopyError = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   // Initial API error (mutation failure, no status yet)
   if (error && !status) {
-    const details = getErrorDetails(error.message, null, locale);
     return (
       <ErrorCard
-        details={details}
-        errorMessage={error.message}
-        showDetails={showDetails}
-        onToggleDetails={() => setShowDetails(!showDetails)}
-        copied={copied}
-        onCopy={handleCopyError}
         onRetry={onRetry}
         locale={locale}
       />
@@ -73,8 +49,6 @@ export function DeployStep({ status, isLoading, error, template, onRetry }: Depl
 
   const isError = status.deploy_status === 'error';
   const isTimeout = status.deploy_status === 'timeout';
-  const errorMessage = status.deploy_error || error?.message || '';
-  const errorDetails = isError ? getErrorDetails(errorMessage, status, locale) : null;
 
   return (
     <div className="space-y-6">
@@ -82,16 +56,9 @@ export function DeployStep({ status, isLoading, error, template, onRetry }: Depl
       <DeployProgress status={status} template={template} />
 
       {/* Error details */}
-      {isError && errorDetails && (
+      {isError && (
         <ErrorCard
-          details={errorDetails}
-          errorMessage={errorMessage}
-          showDetails={showDetails}
-          onToggleDetails={() => setShowDetails(!showDetails)}
-          copied={copied}
-          onCopy={handleCopyError}
           onRetry={onRetry}
-          repoUrl={status.forked_repo_url}
           locale={locale}
         />
       )}
@@ -195,120 +162,49 @@ function InitialLoadingCard({ locale, template }: { locale: Locale; template?: H
 // ── Internal Error Card ──
 
 interface ErrorCardProps {
-  details: { cause: string; solution: string };
-  errorMessage: string;
-  showDetails: boolean;
-  onToggleDetails: () => void;
-  copied: boolean;
-  onCopy: (text: string) => void;
   onRetry?: () => void;
-  repoUrl?: string | null;
   locale: Locale;
 }
 
 function ErrorCard({
-  details,
-  errorMessage,
-  showDetails,
-  onToggleDetails,
-  copied,
-  onCopy,
   onRetry,
-  repoUrl,
   locale,
 }: ErrorCardProps) {
   return (
-    <Card className="border-red-200 dark:border-red-800">
-      <CardContent className="py-6 space-y-4">
-        <div className="text-center space-y-2">
-          <XCircle className="h-12 w-12 text-red-500 mx-auto" />
-          <h3 className="text-lg font-semibold text-red-500">
-            {t(locale, 'deployStep.errorTitle')}
+    <Card className="border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20">
+      <CardContent className="py-8 space-y-5">
+        <div className="text-center space-y-3">
+          <div className="mx-auto w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+            <AlertTriangle className="h-8 w-8 text-amber-500" />
+          </div>
+          <h3 className="text-lg font-semibold">
+            {t(locale, 'deployStep.maintenanceTitle')}
           </h3>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            {t(locale, 'deployStep.maintenanceDesc')}
+          </p>
         </div>
 
-        <div className="space-y-3 bg-red-50 dark:bg-red-950/20 rounded-lg p-4">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="text-sm font-medium text-red-700 dark:text-red-400">
-                {t(locale, 'deployStep.cause')}
-              </p>
-              <p className="text-sm text-red-600 dark:text-red-400/80">{details.cause}</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
-                {t(locale, 'deployStep.solution')}
-              </p>
-              <p className="text-sm text-amber-600 dark:text-amber-400/80">{details.solution}</p>
-            </div>
-          </div>
+        <div className="flex items-center justify-center gap-2 py-2">
+          <div className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+          <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+            {t(locale, 'deployStep.maintenanceNotice')}
+          </span>
         </div>
 
-        {errorMessage && (
-          <div>
-            <button
-              onClick={onToggleDetails}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {showDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-              {t(locale, 'deployStep.technicalDetails')}
-            </button>
-            {showDetails && (
-              <div className="mt-2 bg-muted rounded-md p-3 relative">
-                <pre className="text-xs text-muted-foreground whitespace-pre-wrap break-all font-mono pr-8">
-                  {errorMessage}
-                </pre>
-                <button
-                  onClick={() => onCopy(errorMessage)}
-                  className="absolute top-2 right-2 p-1 rounded hover:bg-background transition-colors"
-                  title={t(locale, 'deployStep.copy')}
-                >
-                  {copied ? (
-                    <Check className="h-3.5 w-3.5 text-green-500" />
-                  ) : (
-                    <Copy className="h-3.5 w-3.5 text-muted-foreground" />
-                  )}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="flex flex-wrap gap-3 pt-1">
+        <div className="flex flex-wrap gap-3 justify-center pt-1">
           {onRetry && (
             <Button onClick={onRetry} size="sm">
               <RefreshCw className="mr-2 h-4 w-4" />
               {t(locale, 'deployStep.tryAgain')}
             </Button>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              toast.info(t(locale, 'deployStep.upgradeToast'));
-            }}
-          >
-            <ArrowUpCircle className="mr-2 h-4 w-4" />
-            {t(locale, 'deployStep.upgradePlan')}
-          </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link href="/my-sites">
+            <Link href="/sites">
               <LayoutDashboard className="mr-2 h-4 w-4" />
               {t(locale, 'deployStep.manageSites')}
             </Link>
           </Button>
-          {repoUrl && (
-            <Button variant="outline" size="sm" asChild>
-              <a href={repoUrl} target="_blank" rel="noopener noreferrer">
-                <Github className="mr-2 h-4 w-4" />
-                {t(locale, 'deployStep.checkOnGitHub')}
-              </a>
-            </Button>
-          )}
         </div>
       </CardContent>
     </Card>

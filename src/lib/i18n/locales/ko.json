@@ -1058,6 +1058,10 @@
       "cause": "배포 한도에 도달했습니다.",
       "solution": "Pro 플랜으로 업그레이드하거나, 기존 사이트를 삭제한 후 다시 시도해주세요."
     },
+    "workflowBuild": {
+      "cause": "GitHub Actions 빌드 중 의존성 설치 오류가 발생했습니다.",
+      "solution": "사이트를 삭제하고 다시 배포해주세요. 문제가 계속되면 관리자에게 문의하세요."
+    },
     "default": {
       "cause": "배포 중 예기치 않은 오류가 발생했습니다.",
       "solution": "다시 시도해주세요. 문제가 계속되면 다른 사이트 이름으로 시도하거나 관리자에게 문의하세요."
@@ -1158,6 +1162,9 @@
     "upgradeToast": "결제 업데이트 시 반영됩니다.",
     "upgradePlan": "플랜 업그레이드",
     "manageSites": "사이트 관리",
-    "checkOnGitHub": "GitHub에서 확인"
+    "checkOnGitHub": "GitHub에서 확인",
+    "maintenanceTitle": "템플릿 업데이트 중",
+    "maintenanceDesc": "현재 템플릿 양식 수정으로 배포 기능을 업데이트하고 있습니다. 잠시 후 다시 시도해 주세요.",
+    "maintenanceNotice": "더 나은 경험을 위해 준비 중입니다"
   }
 }
