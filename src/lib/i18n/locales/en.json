@@ -29,7 +29,11 @@
     "oneclick": "One-Click Deploy",
     "mySites": "My Sites",
     "sites": "Deploy Sites",
-    "connectedInfo": "Connections"
+    "connectedInfo": "Connections",
+    "adminAi": "AI Config",
+    "settingsAccount": "My Account",
+    "settingsGithub": "GitHub Connections",
+    "settingsDeveloper": "Developer Tools"
   },
   "dashboard": {
     "title": "My Projects",
@@ -677,6 +681,7 @@
     "colProject": "Project",
     "colStatus": "Status",
     "connectionsTab": "GitHub Connections",
+    "githubTab": "GitHub Connections",
     "githubConnections": "GitHub Account Management",
     "githubConnectionsDesc": "Connect multiple GitHub accounts and use them per project.",
     "addGitHub": "Add GitHub Account",

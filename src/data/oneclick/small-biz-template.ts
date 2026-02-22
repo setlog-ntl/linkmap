@@ -1,139 +1,17 @@
 import type { HomepageTemplateContent } from './homepage-template-content';
+import {
+  sharedDeployYml as deployYml,
+  sharedTsconfigJson as tsconfigJson,
+  sharedPostcssConfig as postcssConfig,
+  sharedNextConfig as nextConfig,
+  sharedAnimatedReveal as animatedReveal,
+  sharedSectionWrapper as sectionWrapper,
+  sharedThemeToggle as themeToggle,
+  sharedLanguageToggle as languageToggle,
+  makePackageJson,
+} from './shared-template-files';
 
-// ──────────────────────────────────────────────
-// Deploy workflow
-// ──────────────────────────────────────────────
-const deployYml = `name: Deploy to GitHub Pages
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-concurrency:
-  group: pages
-  cancel-in-progress: false
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: \${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
-      - name: Build
-        run: npm run build
-        env:
-          NEXT_PUBLIC_REPO_NAME: \${{ github.event.repository.name }}
-          NEXT_PUBLIC_BASE_URL: https://\${{ github.repository_owner }}.github.io/\${{ github.event.repository.name }}
-      - run: touch out/.nojekyll
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: out
-      - id: deployment
-        uses: actions/deploy-pages@v4
-`;
-
-// ──────────────────────────────────────────────
-// package.json
-// ──────────────────────────────────────────────
-const packageJson = `{
-  "name": "small-biz",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "next": "^15.1.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next-themes": "^0.4.4",
-    "lucide-react": "^0.468.0",
-    "framer-motion": "^12.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^22.0.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "typescript": "^5.7.0",
-    "tailwindcss": "^4.0.0",
-    "@tailwindcss/postcss": "^4.0.0",
-    "postcss": "^8.5.0"
-  }
-}
-`;
-
-// ──────────────────────────────────────────────
-// tsconfig.json
-// ──────────────────────────────────────────────
-const tsconfigJson = `{
-  "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [{ "name": "next" }],
-    "paths": { "@/*": ["./src/*"] }
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
-}
-`;
-
-// ──────────────────────────────────────────────
-// postcss.config.mjs
-// ──────────────────────────────────────────────
-const postcssConfig = `/** @type {import('postcss-load-config').Config} */
-const config = {
-  plugins: {
-    '@tailwindcss/postcss': {},
-  },
-};
-
-export default config;
-`;
-
-// ──────────────────────────────────────────────
-// next.config.ts
-// ──────────────────────────────────────────────
-const nextConfig = `import type { NextConfig } from 'next';
-
-const repoName = process.env.NEXT_PUBLIC_REPO_NAME || '';
-
-const nextConfig: NextConfig = {
-  output: 'export',
-  trailingSlash: true,
-  basePath: repoName ? \`/\${repoName}\` : '',
-  images: {
-    unoptimized: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-};
-
-export default nextConfig;
-`;
+const packageJson = makePackageJson('small-biz');
 
 // ──────────────────────────────────────────────
 // src/app/api/og/route.tsx
@@ -878,87 +756,6 @@ export function MobileBottomBar({ config }: Props) {
 `;
 
 // ──────────────────────────────────────────────
-// src/components/animated-reveal.tsx
-// ──────────────────────────────────────────────
-const animatedReveal = `'use client';
-
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-
-interface Props {
-  children: ReactNode;
-  className?: string;
-  delay?: number;
-}
-
-export function AnimatedReveal({ children, className = '', delay = 0 }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) { setVisible(true); return; }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          if (delay > 0) { setTimeout(() => setVisible(true), delay); }
-          else { setVisible(true); }
-          observer.unobserve(el);
-        }
-      },
-      { threshold: 0.15 }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [delay]);
-
-  return (
-    <div ref={ref} className={\`reveal-fade \${visible ? 'revealed' : ''} \${className}\`}>
-      {children}
-    </div>
-  );
-}
-`;
-
-// ──────────────────────────────────────────────
-// src/components/section-wrapper.tsx
-// ──────────────────────────────────────────────
-const sectionWrapper = `import type { ReactNode } from 'react';
-import { AnimatedReveal } from './animated-reveal';
-
-interface Props {
-  id?: string;
-  ariaLabel?: string;
-  className?: string;
-  animate?: boolean;
-  delay?: number;
-  children: ReactNode;
-}
-
-export function SectionWrapper({
-  id,
-  ariaLabel,
-  className = '',
-  animate = true,
-  delay = 0,
-  children,
-}: Props) {
-  const section = (
-    <section id={id} aria-label={ariaLabel} className={\`py-16 md:py-24 px-4 sm:px-6 \${className}\`}>
-      <div className="max-w-5xl mx-auto">{children}</div>
-    </section>
-  );
-
-  if (!animate) return section;
-  return <AnimatedReveal delay={delay}>{section}</AnimatedReveal>;
-}
-`;
-
-// ──────────────────────────────────────────────
 // src/components/footer.tsx
 // ──────────────────────────────────────────────
 const footerComponent = `import { ThemeToggle } from './theme-toggle';
@@ -1089,67 +886,6 @@ export function NavHeader() {
     </header>
     <div className="scroll-progress" style={{ width: \`\${progress}%\` }} />
     </>
-  );
-}
-`;
-
-// ──────────────────────────────────────────────
-// src/components/theme-toggle.tsx
-// ──────────────────────────────────────────────
-const themeToggle = `'use client';
-
-import { useTheme } from 'next-themes';
-import { Sun, Moon } from 'lucide-react';
-import { useSyncExternalStore } from 'react';
-import { useLocale } from '@/lib/i18n';
-
-const subscribe = () => () => {};
-const getSnapshot = () => true;
-const getServerSnapshot = () => false;
-
-export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const { t } = useLocale();
-  const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-
-  if (!mounted) return <div className="w-8 h-8" />;
-
-  return (
-    <button
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="p-1.5 rounded-full transition-colors duration-200 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-      aria-label={theme === 'dark' ? t('theme.light') : t('theme.dark')}
-    >
-      {theme === 'dark' ? (
-        <Sun className="w-4 h-4" />
-      ) : (
-        <Moon className="w-4 h-4" />
-      )}
-    </button>
-  );
-}
-`;
-
-// ──────────────────────────────────────────────
-// src/components/language-toggle.tsx
-// ──────────────────────────────────────────────
-const languageToggle = `'use client';
-
-import { useLocale } from '@/lib/i18n';
-import { Globe } from 'lucide-react';
-
-export function LanguageToggle() {
-  const { locale, setLocale } = useLocale();
-
-  return (
-    <button
-      onClick={() => setLocale(locale === 'ko' ? 'en' : 'ko')}
-      className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors"
-      aria-label={locale === 'ko' ? 'Switch to English' : '한국어로 전환'}
-    >
-      <Globe className="w-3.5 h-3.5" />
-      {locale === 'ko' ? 'EN' : '한국어'}
-    </button>
   );
 }
 `;

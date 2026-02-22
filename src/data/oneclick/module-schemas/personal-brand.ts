@@ -16,6 +16,18 @@ export const personalBrandModuleSchema: TemplateModuleSchema = {
       defaultEnabled: true,
       fields: [
         {
+          key: 'designPreset',
+          type: 'select',
+          label: '디자인 프리셋',
+          labelEn: 'Design Preset',
+          defaultValue: 'creator',
+          options: [
+            { value: 'minimal', label: '미니멀 (Minimal)' },
+            { value: 'creator', label: '크리에이터 (Creator)' },
+            { value: 'storyteller', label: '풀 프로필 (Storyteller)' },
+          ],
+        },
+        {
           key: 'name',
           type: 'text',
           label: '이름',

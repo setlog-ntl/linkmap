@@ -15,6 +15,18 @@ export const devShowcaseModuleSchema: TemplateModuleSchema = {
       defaultEnabled: true,
       fields: [
         {
+          key: 'designPreset',
+          type: 'select',
+          label: '디자인 프리셋',
+          labelEn: 'Design Preset',
+          defaultValue: 'github-dark',
+          options: [
+            { value: 'github-dark', label: 'GitHub Dark (기본)' },
+            { value: 'vscode', label: 'VS Code Dark' },
+            { value: 'dracula', label: 'Dracula' },
+          ],
+        },
+        {
           key: 'name',
           type: 'text',
           label: '이름',

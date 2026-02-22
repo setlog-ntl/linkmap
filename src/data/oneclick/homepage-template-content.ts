@@ -8,6 +8,14 @@ import { devShowcaseTemplate } from './dev-showcase-template';
 import { personalBrandTemplate } from './personal-brand-template';
 import { freelancerPageTemplate } from './freelancer-page-template';
 import { smallBizTemplate } from './small-biz-template';
+import {
+  sharedDeployYml as deployWorkflow,
+  sharedTsconfigJson as sharedTsConfig,
+  sharedPostcssConfig,
+  sharedNextConfig,
+  sharedAnimatedReveal,
+  makePackageJson,
+} from './shared-template-files';
 
 export interface TemplateFile {
   path: string;
@@ -22,128 +30,9 @@ export interface HomepageTemplateContent {
 }
 
 // ──────────────────────────────────────────────
-// GitHub Actions Workflow (shared by MVP templates)
-// ──────────────────────────────────────────────
-const deployWorkflow = `name: Deploy to GitHub Pages
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-concurrency:
-  group: pages
-  cancel-in-progress: false
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: \${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
-      - name: Build
-        run: npm run build
-        env:
-          NEXT_PUBLIC_REPO_NAME: \${{ github.event.repository.name }}
-          NEXT_PUBLIC_BASE_URL: https://\${{ github.repository_owner }}.github.io/\${{ github.event.repository.name }}
-      - run: touch out/.nojekyll
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: out
-      - id: deployment
-        uses: actions/deploy-pages@v4
-`;
-
-// ──────────────────────────────────────────────
-// Shared config files for MVP templates
-// ──────────────────────────────────────────────
-const sharedTsConfig = `{
-  "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [{ "name": "next" }],
-    "paths": { "@/*": ["./src/*"] }
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
-}`;
-
-const sharedPostcssConfig = `/** @type {import('postcss-load-config').Config} */
-const config = {
-  plugins: {
-    '@tailwindcss/postcss': {},
-  },
-};
-
-export default config;`;
-
-const sharedNextConfig = `import type { NextConfig } from 'next';
-
-const repoName = process.env.NEXT_PUBLIC_REPO_NAME || '';
-
-const nextConfig: NextConfig = {
-  output: 'export',
-  trailingSlash: true,
-  basePath: repoName ? \`/\${repoName}\` : '',
-  images: {
-    unoptimized: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-};
-
-export default nextConfig;`;
-
-// ──────────────────────────────────────────────
 // 6. Link-in-Bio Pro (MVP)
 // ──────────────────────────────────────────────
-const linkInBioPackageJson = `{
-  "name": "link-in-bio-pro",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "next": "^15.1.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next-themes": "^0.4.4",
-    "lucide-react": "^0.468.0"
-  },
-  "devDependencies": {
-    "@types/node": "^22.0.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "typescript": "^5.7.0",
-    "tailwindcss": "^4.0.0",
-    "@tailwindcss/postcss": "^4.0.0",
-    "postcss": "^8.5.0"
-  }
-}`;
+const linkInBioPackageJson = makePackageJson('link-in-bio-pro', { withFramerMotion: false });
 
 const linkInBioOgRoute = `import { ImageResponse } from 'next/og';
 import { siteConfig } from '@/lib/config';
@@ -353,53 +242,6 @@ export default function Home() {
     </main>
   );
 }`;
-
-// ──────────────────────────────────────────────
-// Shared: animated-reveal (Link-in-Bio + Namecard)
-// ──────────────────────────────────────────────
-const sharedAnimatedReveal = `'use client';
-
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-
-interface Props {
-  children: ReactNode;
-  className?: string;
-  delay?: number;
-}
-
-export function AnimatedReveal({ children, className = '', delay = 0 }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) { setVisible(true); return; }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          if (delay > 0) { setTimeout(() => setVisible(true), delay); }
-          else { setVisible(true); }
-          observer.unobserve(el);
-        }
-      },
-      { threshold: 0.15 }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [delay]);
-
-  return (
-    <div ref={ref} className={\`reveal-fade \${visible ? 'revealed' : ''} \${className}\`}>
-      {children}
-    </div>
-  );
-}
-`;
 
 const linkInBioContentEmbed = `'use client';
 

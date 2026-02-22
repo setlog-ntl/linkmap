@@ -29,7 +29,11 @@
     "oneclick": "원클릭 배포",
     "mySites": "내 사이트",
     "sites": "사이트 배포",
-    "connectedInfo": "연결 정보"
+    "connectedInfo": "연결 정보",
+    "adminAi": "AI 설정 관리",
+    "settingsAccount": "내 계정",
+    "settingsGithub": "GitHub 연결",
+    "settingsDeveloper": "개발자 도구"
   },
   "dashboard": {
     "title": "내 프로젝트",
@@ -677,6 +681,7 @@
     "colProject": "프로젝트",
     "colStatus": "상태",
     "connectionsTab": "GitHub 연결",
+    "githubTab": "GitHub 연결",
     "githubConnections": "GitHub 계정 관리",
     "githubConnectionsDesc": "여러 GitHub 계정을 연결하여 프로젝트별로 사용할 수 있습니다.",
     "addGitHub": "GitHub 계정 추가",

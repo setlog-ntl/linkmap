@@ -1,139 +1,17 @@
 import type { HomepageTemplateContent, TemplateFile } from './homepage-template-content';
+import {
+  sharedDeployYml as deployYml,
+  sharedTsconfigJson as tsconfigJson,
+  sharedPostcssConfig as postcssConfig,
+  sharedNextConfig as nextConfig,
+  sharedAnimatedReveal as animatedReveal,
+  sharedSectionWrapper as sectionWrapper,
+  sharedThemeToggle as themeToggle,
+  sharedLanguageToggle as languageToggle,
+  makePackageJson,
+} from './shared-template-files';
 
-// ──────────────────────────────────────────────
-// Deploy workflow
-// ──────────────────────────────────────────────
-const deployYml = `name: Deploy to GitHub Pages
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-concurrency:
-  group: pages
-  cancel-in-progress: false
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: \${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
-      - name: Build
-        run: npm run build
-        env:
-          NEXT_PUBLIC_REPO_NAME: \${{ github.event.repository.name }}
-          NEXT_PUBLIC_BASE_URL: https://\${{ github.repository_owner }}.github.io/\${{ github.event.repository.name }}
-      - run: touch out/.nojekyll
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: out
-      - id: deployment
-        uses: actions/deploy-pages@v4
-`;
-
-// ──────────────────────────────────────────────
-// package.json
-// ──────────────────────────────────────────────
-const packageJson = `{
-  "name": "dev-showcase",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "next": "^15.1.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next-themes": "^0.4.4",
-    "lucide-react": "^0.468.0",
-    "framer-motion": "^12.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^22.0.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "typescript": "^5.7.0",
-    "tailwindcss": "^4.0.0",
-    "@tailwindcss/postcss": "^4.0.0",
-    "postcss": "^8.5.0"
-  }
-}
-`;
-
-// ──────────────────────────────────────────────
-// tsconfig.json
-// ──────────────────────────────────────────────
-const tsconfigJson = `{
-  "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [{ "name": "next" }],
-    "paths": { "@/*": ["./src/*"] }
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
-}
-`;
-
-// ──────────────────────────────────────────────
-// postcss.config.mjs
-// ──────────────────────────────────────────────
-const postcssConfig = `/** @type {import('postcss-load-config').Config} */
-const config = {
-  plugins: {
-    '@tailwindcss/postcss': {},
-  },
-};
-
-export default config;
-`;
-
-// ──────────────────────────────────────────────
-// next.config.ts
-// ──────────────────────────────────────────────
-const nextConfig = `import type { NextConfig } from 'next';
-
-const repoName = process.env.NEXT_PUBLIC_REPO_NAME || '';
-
-const nextConfig: NextConfig = {
-  output: 'export',
-  trailingSlash: true,
-  basePath: repoName ? \`/\${repoName}\` : '',
-  images: {
-    unoptimized: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-};
-
-export default nextConfig;
-`;
+const packageJson = makePackageJson('dev-showcase');
 
 // ──────────────────────────────────────────────
 // src/app/api/og/route.tsx
@@ -201,7 +79,8 @@ const globalsCss = `@import "tailwindcss";
   --color-primary: #58a6ff;
 }
 
-:root {
+/* ── Preset: GitHub Dark (default) ── */
+:root, [data-preset="github-dark"] {
   --gh-bg: #0d1117;
   --gh-surface: #161b22;
   --gh-border: #30363d;
@@ -211,6 +90,32 @@ const globalsCss = `@import "tailwindcss";
   --gh-orange: #d29922;
   --gh-text: #e6edf3;
   --gh-muted: #7d8590;
+}
+
+/* ── Preset: VS Code Dark ── */
+[data-preset="vscode"] {
+  --gh-bg: #1e1e1e;
+  --gh-surface: #252526;
+  --gh-border: #3c3c3c;
+  --gh-blue: #569cd6;
+  --gh-green: #6a9955;
+  --gh-purple: #c586c0;
+  --gh-orange: #ce9178;
+  --gh-text: #d4d4d4;
+  --gh-muted: #808080;
+}
+
+/* ── Preset: Dracula ── */
+[data-preset="dracula"] {
+  --gh-bg: #282a36;
+  --gh-surface: #343746;
+  --gh-border: #44475a;
+  --gh-blue: #8be9fd;
+  --gh-green: #50fa7b;
+  --gh-purple: #ff79c6;
+  --gh-orange: #ffb86c;
+  --gh-text: #f8f8f2;
+  --gh-muted: #6272a4;
 }
 
 html {
@@ -312,9 +217,17 @@ html {
 // ──────────────────────────────────────────────
 const layoutTsx = `import type { Metadata } from 'next';
 import { ThemeProvider } from 'next-themes';
+import { JetBrains_Mono } from 'next/font/google';
 import { siteConfig } from '@/lib/config';
 import { LocaleProvider } from '@/lib/i18n';
 import './globals.css';
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+  weight: ['400', '500', '700'],
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
@@ -340,17 +253,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang="ko" data-preset={siteConfig.designPreset || 'github-dark'} suppressHydrationWarning>
       <head>
         <link
           rel="stylesheet"
           as="style"
           crossOrigin="anonymous"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
         />
         <script
           type="application/ld+json"
@@ -372,7 +281,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased bg-gray-950 text-gray-50 dark:bg-gray-950 dark:text-gray-50">
+      <body className={\`antialiased bg-gray-950 text-gray-50 dark:bg-gray-950 dark:text-gray-50 \${jetbrainsMono.variable}\`}>
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:shadow-lg focus:text-sm">본문으로 바로가기</a>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <LocaleProvider>
@@ -731,90 +640,6 @@ export function ExperienceTimeline({ experience }: Props) {
 // ──────────────────────────────────────────────
 // src/components/footer.tsx
 // ──────────────────────────────────────────────
-// ──────────────────────────────────────────────
-// src/components/animated-reveal.tsx
-// ──────────────────────────────────────────────
-const animatedReveal = `'use client';
-
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-
-interface Props {
-  children: ReactNode;
-  className?: string;
-  delay?: number;
-}
-
-export function AnimatedReveal({ children, className = '', delay = 0 }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) { setVisible(true); return; }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          if (delay > 0) { setTimeout(() => setVisible(true), delay); }
-          else { setVisible(true); }
-          observer.unobserve(el);
-        }
-      },
-      { threshold: 0.15 }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [delay]);
-
-  return (
-    <div ref={ref} className={\`reveal-fade \${visible ? 'revealed' : ''} \${className}\`}>
-      {children}
-    </div>
-  );
-}
-`;
-
-// ──────────────────────────────────────────────
-// src/components/section-wrapper.tsx
-// ──────────────────────────────────────────────
-const sectionWrapper = `import type { ReactNode } from 'react';
-import { AnimatedReveal } from './animated-reveal';
-
-interface Props {
-  id?: string;
-  ariaLabel?: string;
-  className?: string;
-  animate?: boolean;
-  delay?: number;
-  children: ReactNode;
-}
-
-export function SectionWrapper({
-  id,
-  ariaLabel,
-  className = '',
-  animate = true,
-  delay = 0,
-  children,
-}: Props) {
-  const section = (
-    <section id={id} aria-label={ariaLabel} className={\`py-16 md:py-24 px-4 sm:px-6 \${className}\`}>
-      <div className="max-w-5xl mx-auto">{children}</div>
-    </section>
-  );
-
-  if (!animate) return section;
-  return <AnimatedReveal delay={delay}>{section}</AnimatedReveal>;
-}
-`;
-
-// ──────────────────────────────────────────────
-// src/components/footer.tsx
-// ──────────────────────────────────────────────
 const footerComponent = `import { ThemeToggle } from './theme-toggle';
 
 export function Footer() {
@@ -1065,30 +890,6 @@ export function HeroSection({ config }: Props) {
 `;
 
 // ──────────────────────────────────────────────
-// src/components/language-toggle.tsx
-// ──────────────────────────────────────────────
-const languageToggle = `'use client';
-
-import { useLocale } from '@/lib/i18n';
-import { Globe } from 'lucide-react';
-
-export function LanguageToggle() {
-  const { locale, setLocale } = useLocale();
-
-  return (
-    <button
-      onClick={() => setLocale(locale === 'ko' ? 'en' : 'ko')}
-      className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-gray-400 hover:text-white transition-colors"
-      aria-label={locale === 'ko' ? 'Switch to English' : '한국어로 전환'}
-    >
-      <Globe className="w-3.5 h-3.5" />
-      {locale === 'ko' ? 'EN' : '한국어'}
-    </button>
-  );
-}
-`;
-
-// ──────────────────────────────────────────────
 // src/components/nav-header.tsx
 // ──────────────────────────────────────────────
 const navHeader = `'use client';
@@ -1261,43 +1062,6 @@ export function ProjectsSection({ projects }: Props) {
         </div>
       </div>
     </section>
-  );
-}
-`;
-
-// ──────────────────────────────────────────────
-// src/components/theme-toggle.tsx
-// ──────────────────────────────────────────────
-const themeToggle = `'use client';
-
-import { useTheme } from 'next-themes';
-import { Sun, Moon } from 'lucide-react';
-import { useSyncExternalStore } from 'react';
-import { useLocale } from '@/lib/i18n';
-
-const subscribe = () => () => {};
-const getSnapshot = () => true;
-const getServerSnapshot = () => false;
-
-export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const { t } = useLocale();
-  const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-
-  if (!mounted) return <div className="w-8 h-8" />;
-
-  return (
-    <button
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="p-1.5 rounded-full transition-colors duration-200 text-gray-500 hover:text-gray-300"
-      aria-label={theme === 'dark' ? t('theme.light') : t('theme.dark')}
-    >
-      {theme === 'dark' ? (
-        <Sun className="w-4 h-4" />
-      ) : (
-        <Moon className="w-4 h-4" />
-      )}
-    </button>
   );
 }
 `;

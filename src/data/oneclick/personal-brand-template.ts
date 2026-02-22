@@ -1,139 +1,17 @@
 import type { HomepageTemplateContent } from './homepage-template-content';
+import {
+  sharedDeployYml as deployYml,
+  sharedTsconfigJson as tsconfigJson,
+  sharedPostcssConfig as postcssConfig,
+  sharedNextConfig as nextConfig,
+  sharedAnimatedReveal as animatedReveal,
+  sharedSectionWrapper as sectionWrapper,
+  sharedThemeToggle as themeToggle,
+  sharedLanguageToggle as languageToggle,
+  makePackageJson,
+} from './shared-template-files';
 
-// ──────────────────────────────────────────────
-// Deploy workflow
-// ──────────────────────────────────────────────
-const deployYml = `name: Deploy to GitHub Pages
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-concurrency:
-  group: pages
-  cancel-in-progress: false
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: \${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
-      - name: Build
-        run: npm run build
-        env:
-          NEXT_PUBLIC_REPO_NAME: \${{ github.event.repository.name }}
-          NEXT_PUBLIC_BASE_URL: https://\${{ github.repository_owner }}.github.io/\${{ github.event.repository.name }}
-      - run: touch out/.nojekyll
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: out
-      - id: deployment
-        uses: actions/deploy-pages@v4
-`;
-
-// ──────────────────────────────────────────────
-// package.json
-// ──────────────────────────────────────────────
-const packageJson = `{
-  "name": "personal-brand",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "next": "^15.1.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next-themes": "^0.4.4",
-    "lucide-react": "^0.468.0",
-    "framer-motion": "^12.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^22.0.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "typescript": "^5.7.0",
-    "tailwindcss": "^4.0.0",
-    "@tailwindcss/postcss": "^4.0.0",
-    "postcss": "^8.5.0"
-  }
-}
-`;
-
-// ──────────────────────────────────────────────
-// tsconfig.json
-// ──────────────────────────────────────────────
-const tsconfigJson = `{
-  "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [{ "name": "next" }],
-    "paths": { "@/*": ["./src/*"] }
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
-}
-`;
-
-// ──────────────────────────────────────────────
-// postcss.config.mjs
-// ──────────────────────────────────────────────
-const postcssConfig = `/** @type {import('postcss-load-config').Config} */
-const config = {
-  plugins: {
-    '@tailwindcss/postcss': {},
-  },
-};
-
-export default config;
-`;
-
-// ──────────────────────────────────────────────
-// next.config.ts
-// ──────────────────────────────────────────────
-const nextConfig = `import type { NextConfig } from 'next';
-
-const repoName = process.env.NEXT_PUBLIC_REPO_NAME || '';
-
-const nextConfig: NextConfig = {
-  output: 'export',
-  trailingSlash: true,
-  basePath: repoName ? \`/\${repoName}\` : '',
-  images: {
-    unoptimized: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-};
-
-export default nextConfig;
-`;
+const packageJson = makePackageJson('personal-brand');
 
 // ──────────────────────────────────────────────
 // src/app/api/og/route.tsx
@@ -198,10 +76,46 @@ const globalsCss = `@import "tailwindcss";
   --color-secondary: #f59e0b;
 }
 
-:root {
+/* ── Preset: Minimal ── */
+[data-preset="minimal"] {
+  --brand-primary: #18181b;
+  --brand-secondary: #52525b;
+  --brand-glow: rgba(24, 24, 27, 0.1);
+  --color-primary: #18181b;
+  --color-secondary: #52525b;
+}
+
+/* ── Preset: Creator (default) ── */
+:root, [data-preset="creator"] {
   --brand-primary: #ee5b2b;
   --brand-secondary: #f59e0b;
   --brand-glow: rgba(238, 91, 43, 0.15);
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-surface: rgba(0, 0, 0, 0.02);
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-muted: #a1a1aa;
+  --border-color: rgba(0, 0, 0, 0.08);
+}
+
+/* ── Preset: Storyteller ── */
+[data-preset="storyteller"] {
+  --brand-primary: #6366f1;
+  --brand-secondary: #8b5cf6;
+  --brand-glow: rgba(99, 102, 241, 0.15);
+  --color-primary: #6366f1;
+  --color-secondary: #8b5cf6;
+}
+
+.dark {
+  --bg-primary: #0f0f0f;
+  --bg-secondary: #1a1a1a;
+  --bg-surface: rgba(255, 255, 255, 0.02);
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --border-color: rgba(255, 255, 255, 0.05);
 }
 
 html {
@@ -230,7 +144,7 @@ html {
 
 /* Section alternating backgrounds */
 .section-alt {
-  background: rgba(255, 255, 255, 0.01);
+  background: var(--bg-surface);
 }
 
 *:focus-visible {
@@ -258,7 +172,10 @@ html {
 }
 .card-hover:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+.dark .card-hover:hover {
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
 }
 
 /* Scroll progress */
@@ -307,7 +224,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang="ko" data-preset={siteConfig.designPreset || 'creator'} suppressHydrationWarning>
       <head>
         <link
           rel="stylesheet"
@@ -329,7 +246,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased bg-[#0f0f0f] text-gray-50 dark:bg-[#0f0f0f] dark:text-gray-50">
+      <body className="antialiased bg-white text-gray-900 dark:bg-[#0f0f0f] dark:text-gray-50">
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:shadow-lg focus:text-sm">본문으로 바로가기</a>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <LocaleProvider>
@@ -444,7 +361,7 @@ export function HeroSection({ config }: Props) {
           {name}
         </motion.h1>
         <motion.p
-          className="text-xl sm:text-2xl lg:text-3xl text-gray-300 mb-10 max-w-2xl mx-auto"
+          className="text-xl sm:text-2xl lg:text-3xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
@@ -497,7 +414,7 @@ export function AboutSection({ config }: Props) {
         </motion.h2>
 
         <motion.p
-          className="text-lg text-gray-400 leading-relaxed whitespace-pre-line"
+          className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
@@ -547,15 +464,15 @@ export function ValuesSection({ values }: Props) {
             return (
               <motion.div
                 key={i}
-                className="p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:bg-white/[0.06] hover:border-white/15 transition-all duration-300 group"
+                className="p-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] hover:border-black/10 dark:hover:border-white/15 transition-all duration-300 group"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.5, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
               >
                 <span className="text-3xl mb-4 block group-hover:scale-110 transition-transform duration-300">{value.emoji}</span>
-                <h3 className="text-lg font-semibold text-gray-100 mb-2">{title}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{desc}</p>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">{title}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{desc}</p>
               </motion.div>
             );
           })}
@@ -602,7 +519,7 @@ export function HighlightsSection({ highlights }: Props) {
             return (
               <motion.div
                 key={i}
-                className="text-center p-8 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:border-[#ee5b2b]/20 transition-all duration-300"
+                className="text-center p-8 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl hover:border-[#ee5b2b]/20 transition-all duration-300"
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, amount: 0.2 }}
@@ -611,7 +528,7 @@ export function HighlightsSection({ highlights }: Props) {
                 <p className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent mb-2">
                   {value}
                 </p>
-                <p className="text-sm text-gray-400">{label}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
               </motion.div>
             );
           })}
@@ -654,7 +571,7 @@ export function GallerySection({ images }: Props) {
           {images.map((src, i) => (
             <motion.div
               key={i}
-              className="aspect-square rounded-xl overflow-hidden group border border-white/5 hover:border-[#ee5b2b]/20 transition-colors duration-300"
+              className="aspect-square rounded-xl overflow-hidden group border border-black/5 dark:border-white/5 hover:border-[#ee5b2b]/20 transition-colors duration-300"
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true, amount: 0.2 }}
@@ -706,7 +623,7 @@ export function ContactSection({ config }: Props) {
         </motion.h2>
 
         <motion.p
-          className="text-gray-400 mb-8 max-w-md mx-auto"
+          className="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
@@ -743,7 +660,7 @@ export function ContactSection({ config }: Props) {
                 href={social.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 rounded-full border border-white/10 text-sm text-gray-400 hover:text-white hover:border-white/30 transition-colors capitalize"
+                className="px-4 py-2 rounded-full border border-black/10 dark:border-white/10 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-black/30 dark:hover:border-white/30 transition-colors capitalize"
               >
                 {social.platform}
               </a>
@@ -760,100 +677,19 @@ export function ContactSection({ config }: Props) {
 // src/components/footer.tsx
 // ──────────────────────────────────────────────
 // ──────────────────────────────────────────────
-// src/components/animated-reveal.tsx
-// ──────────────────────────────────────────────
-const animatedReveal = `'use client';
-
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-
-interface Props {
-  children: ReactNode;
-  className?: string;
-  delay?: number;
-}
-
-export function AnimatedReveal({ children, className = '', delay = 0 }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) { setVisible(true); return; }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          if (delay > 0) { setTimeout(() => setVisible(true), delay); }
-          else { setVisible(true); }
-          observer.unobserve(el);
-        }
-      },
-      { threshold: 0.15 }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [delay]);
-
-  return (
-    <div ref={ref} className={\`reveal-fade \${visible ? 'revealed' : ''} \${className}\`}>
-      {children}
-    </div>
-  );
-}
-`;
-
-// ──────────────────────────────────────────────
-// src/components/section-wrapper.tsx
-// ──────────────────────────────────────────────
-const sectionWrapper = `import type { ReactNode } from 'react';
-import { AnimatedReveal } from './animated-reveal';
-
-interface Props {
-  id?: string;
-  ariaLabel?: string;
-  className?: string;
-  animate?: boolean;
-  delay?: number;
-  children: ReactNode;
-}
-
-export function SectionWrapper({
-  id,
-  ariaLabel,
-  className = '',
-  animate = true,
-  delay = 0,
-  children,
-}: Props) {
-  const section = (
-    <section id={id} aria-label={ariaLabel} className={\`py-16 md:py-24 px-4 sm:px-6 \${className}\`}>
-      <div className="max-w-5xl mx-auto">{children}</div>
-    </section>
-  );
-
-  if (!animate) return section;
-  return <AnimatedReveal delay={delay}>{section}</AnimatedReveal>;
-}
-`;
-
-// ──────────────────────────────────────────────
 // src/components/footer.tsx
 // ──────────────────────────────────────────────
 const footerComponent = `import { ThemeToggle } from './theme-toggle';
 
 export function Footer() {
   return (
-    <footer className="border-t border-white/5 py-8 px-4 sm:px-6">
-      <div className="max-w-4xl mx-auto flex items-center justify-center gap-2 text-gray-500 text-xs">
+    <footer className="border-t border-black/5 dark:border-white/5 py-8 px-4 sm:px-6">
+      <div className="max-w-4xl mx-auto flex items-center justify-center gap-2 text-gray-400 dark:text-gray-500 text-xs">
         <a
           href="https://www.linkmap.biz/sites?utm_source=badge&utm_medium=referral&utm_campaign=personal-brand"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-gray-400 hover:text-gray-200 hover:bg-white/10 transition-all text-[11px] font-medium"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/10 dark:hover:bg-white/10 transition-all text-[11px] font-medium"
           aria-label="Made with Linkmap"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
@@ -923,7 +759,7 @@ export function NavHeader() {
 
   return (
     <>
-    <header className="fixed top-0 w-full z-50 backdrop-blur-md bg-[#0f0f0f]/80 border-b border-white/5">
+    <header className="fixed top-0 w-full z-50 backdrop-blur-md bg-white/80 dark:bg-[#0f0f0f]/80 border-b border-black/5 dark:border-white/5">
       <nav className="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         <div className="hidden sm:flex items-center gap-1">
           {sectionIds.map((id) => (
@@ -932,8 +768,8 @@ export function NavHeader() {
               href={\`#\${id}\`}
               className={\`px-3 py-1.5 rounded-full text-sm transition-colors \${
                 active === id
-                  ? 'text-white bg-white/10'
-                  : 'text-gray-400 hover:text-gray-200'
+                  ? 'text-gray-900 dark:text-white bg-black/5 dark:bg-white/10'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
               }\`}
             >
               {t(sectionKeys[id])}
@@ -944,7 +780,7 @@ export function NavHeader() {
         <div className="flex items-center gap-2">
           <LanguageToggle />
           <button
-            className="sm:hidden p-2 text-gray-400"
+            className="sm:hidden p-2 text-gray-600 dark:text-gray-400"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle menu"
           >
@@ -954,14 +790,14 @@ export function NavHeader() {
       </nav>
 
       {mobileOpen && (
-        <div className="sm:hidden border-t border-white/5 bg-[#0f0f0f]/95 backdrop-blur-md">
+        <div className="sm:hidden border-t border-black/5 dark:border-white/5 bg-white/95 dark:bg-[#0f0f0f]/95 backdrop-blur-md">
           {sectionIds.map((id) => (
             <a
               key={id}
               href={\`#\${id}\`}
               onClick={() => setMobileOpen(false)}
               className={\`block px-6 py-3 text-sm \${
-                active === id ? 'text-white' : 'text-gray-400'
+                active === id ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'
               }\`}
             >
               {t(sectionKeys[id])}
@@ -972,67 +808,6 @@ export function NavHeader() {
     </header>
     <div className="scroll-progress" style={{ width: \`\${progress}%\` }} />
     </>
-  );
-}
-`;
-
-// ──────────────────────────────────────────────
-// src/components/theme-toggle.tsx
-// ──────────────────────────────────────────────
-const themeToggle = `'use client';
-
-import { useTheme } from 'next-themes';
-import { Sun, Moon } from 'lucide-react';
-import { useSyncExternalStore } from 'react';
-import { useLocale } from '@/lib/i18n';
-
-const subscribe = () => () => {};
-const getSnapshot = () => true;
-const getServerSnapshot = () => false;
-
-export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const { t } = useLocale();
-  const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-
-  if (!mounted) return <div className="w-8 h-8" />;
-
-  return (
-    <button
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="p-1.5 rounded-full transition-colors duration-200 text-gray-500 hover:text-gray-300"
-      aria-label={theme === 'dark' ? t('theme.light') : t('theme.dark')}
-    >
-      {theme === 'dark' ? (
-        <Sun className="w-4 h-4" />
-      ) : (
-        <Moon className="w-4 h-4" />
-      )}
-    </button>
-  );
-}
-`;
-
-// ──────────────────────────────────────────────
-// src/components/language-toggle.tsx
-// ──────────────────────────────────────────────
-const languageToggle = `'use client';
-
-import { useLocale } from '@/lib/i18n';
-import { Globe } from 'lucide-react';
-
-export function LanguageToggle() {
-  const { locale, setLocale } = useLocale();
-
-  return (
-    <button
-      onClick={() => setLocale(locale === 'ko' ? 'en' : 'ko')}
-      className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-gray-400 hover:text-white transition-colors"
-      aria-label={locale === 'ko' ? 'Switch to English' : '한국어로 전환'}
-    >
-      <Globe className="w-3.5 h-3.5" />
-      {locale === 'ko' ? 'EN' : '한국어'}
-    </button>
   );
 }
 `;
