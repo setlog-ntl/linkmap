@@ -167,3 +167,4 @@ packages/
 | 대시보드 PMO | `docs/dashboard-pmo.md` |
 | 모듈 에디터 기획 | `docs/onelink/08-modular-template-editor.md` |
 | 모듈화 가이드 | `docs/instructions/` |
+| **AI 서비스 모듈 맵** | **`docs/ai-module-map.md`** |
