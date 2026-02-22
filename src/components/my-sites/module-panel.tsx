@@ -455,7 +455,7 @@ export function ModulePanel({
                     <Input
                       value={aiPrompt}
                       onChange={(e) => setAiPrompt(e.target.value)}
-                      placeholder={locale === 'ko' ? 'AI에게 설정 요청...' : 'Ask AI to configure...'}
+                      placeholder={t(locale, 'modulePanel.aiPlaceholder')}
                       className="h-7 text-xs flex-1"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {

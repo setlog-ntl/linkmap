@@ -15,7 +15,7 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { Menu, Globe, Search, BookOpen, ChevronDown, Settings, LogOut, Bot } from 'lucide-react';
+import { Menu, Globe, Search, BookOpen, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench } from 'lucide-react';
 import { useUIStore } from '@/stores/ui-store';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t, localeNames } from '@/lib/i18n';
@@ -184,16 +184,28 @@ export function Header({ profile }: HeaderProps) {
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/settings">
-                        <Settings className="mr-2 h-4 w-4" />
-                        {t(locale, 'common.settings')}
+                      <Link href="/settings/account">
+                        <User className="mr-2 h-4 w-4" />
+                        {t(locale, 'nav.settingsAccount')}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings/github">
+                        <GitBranch className="mr-2 h-4 w-4" />
+                        {t(locale, 'nav.settingsGithub')}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings/developer">
+                        <Wrench className="mr-2 h-4 w-4" />
+                        {t(locale, 'nav.settingsDeveloper')}
                       </Link>
                     </DropdownMenuItem>
                     {profile.is_admin && (
                       <DropdownMenuItem asChild>
                         <Link href="/admin/ai-config">
                           <Bot className="mr-2 h-4 w-4" />
-                          AI 설정 관리
+                          {t(locale, 'nav.adminAi')}
                         </Link>
                       </DropdownMenuItem>
                     )}

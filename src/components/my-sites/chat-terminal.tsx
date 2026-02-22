@@ -24,6 +24,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLocaleStore } from '@/stores/locale-store';
+import { t, type Locale } from '@/lib/i18n';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -78,75 +79,55 @@ function hasCodeBlock(content: string): boolean {
 
 interface SuggestionChip {
   icon: React.ReactNode;
-  label: string;
-  labelEn: string;
-  prompt: string;
-  promptEn: string;
+  labelKey: string;
+  promptKey: string;
 }
 
 const SUGGESTIONS: SuggestionChip[] = [
   {
     icon: <Palette className="h-3.5 w-3.5" />,
-    label: '색상 변경',
-    labelEn: 'Change colors',
-    prompt: '배경색을 부드러운 그라데이션으로 바꿔줘',
-    promptEn: 'Change the background to a soft gradient',
+    labelKey: 'chatTerminal.suggestionChangeColors',
+    promptKey: 'chatTerminal.promptChangeColors',
   },
   {
     icon: <Plus className="h-3.5 w-3.5" />,
-    label: '페이지 추가',
-    labelEn: 'Add page',
-    prompt: 'about 페이지를 새로 만들어줘',
-    promptEn: 'Create a new about page',
+    labelKey: 'chatTerminal.suggestionAddPage',
+    promptKey: 'chatTerminal.promptAddPage',
   },
   {
     icon: <Type className="h-3.5 w-3.5" />,
-    label: '폰트 변경',
-    labelEn: 'Change font',
-    prompt: '모든 텍스트의 폰트를 깔끔한 산세리프로 바꿔줘',
-    promptEn: 'Change all text to a clean sans-serif font',
+    labelKey: 'chatTerminal.suggestionChangeFont',
+    promptKey: 'chatTerminal.promptChangeFont',
   },
   {
     icon: <ImageIcon className="h-3.5 w-3.5" />,
-    label: '이미지 추가',
-    labelEn: 'Add image',
-    prompt: '히어로 섹션에 멋진 배경 이미지를 추가해줘',
-    promptEn: 'Add a nice hero background image',
+    labelKey: 'chatTerminal.suggestionAddImage',
+    promptKey: 'chatTerminal.promptAddImage',
   },
   {
     icon: <LayoutGrid className="h-3.5 w-3.5" />,
-    label: '레이아웃 개선',
-    labelEn: 'Improve layout',
-    prompt: '전체 레이아웃을 모던하게 개선해줘',
-    promptEn: 'Improve the overall layout to look modern',
+    labelKey: 'chatTerminal.suggestionImproveLayout',
+    promptKey: 'chatTerminal.promptImproveLayout',
   },
   {
     icon: <Wand2 className="h-3.5 w-3.5" />,
-    label: '전체 디자인',
-    labelEn: 'Full redesign',
-    prompt: '전체적으로 더 예쁘고 프로페셔널하게 디자인 개선해줘',
-    promptEn: 'Redesign to look prettier and more professional',
+    labelKey: 'chatTerminal.suggestionFullRedesign',
+    promptKey: 'chatTerminal.promptFullRedesign',
   },
   {
     icon: <Moon className="h-3.5 w-3.5" />,
-    label: '다크모드',
-    labelEn: 'Dark mode',
-    prompt: '다크모드 CSS를 추가해줘 (prefers-color-scheme 미디어 쿼리)',
-    promptEn: 'Add dark mode CSS using prefers-color-scheme media query',
+    labelKey: 'chatTerminal.suggestionDarkMode',
+    promptKey: 'chatTerminal.promptDarkMode',
   },
   {
     icon: <Zap className="h-3.5 w-3.5" />,
-    label: '애니메이션',
-    labelEn: 'Animations',
-    prompt: '페이지에 부드러운 스크롤 애니메이션을 추가해줘',
-    promptEn: 'Add smooth scroll animations to the page',
+    labelKey: 'chatTerminal.suggestionAnimations',
+    promptKey: 'chatTerminal.promptAnimations',
   },
   {
     icon: <Globe className="h-3.5 w-3.5" />,
-    label: 'SEO 최적화',
-    labelEn: 'SEO optimize',
-    prompt: 'meta 태그, Open Graph, 시맨틱 HTML을 추가해서 SEO를 최적화해줘',
-    promptEn: 'Add meta tags, Open Graph, and semantic HTML for SEO',
+    labelKey: 'chatTerminal.suggestionSeo',
+    promptKey: 'chatTerminal.promptSeo',
   },
 ];
 
@@ -158,6 +139,7 @@ export function ChatTerminal({
   onApplyFiles,
 }: ChatTerminalProps) {
   const { locale } = useLocaleStore();
+  const loc = locale as Locale;
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -216,15 +198,13 @@ export function ChatTerminal({
         ...prev,
         {
           role: 'assistant',
-          content: locale === 'ko'
-            ? `문제가 발생했어요: ${err instanceof Error ? err.message : '알 수 없는 오류'}`
-            : `Something went wrong: ${err instanceof Error ? err.message : 'Unknown error'}`,
+          content: `${t(loc, 'chatTerminal.errorPrefix')}${err instanceof Error ? err.message : t(loc, 'chatTerminal.unknownError')}`,
         },
       ]);
     } finally {
       setIsLoading(false);
     }
-  }, [input, messages, isLoading, fileContent, filePath, allFiles, locale]);
+  }, [input, messages, isLoading, fileContent, filePath, allFiles, loc]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -274,7 +254,7 @@ export function ChatTerminal({
   );
 
   const handleSuggestionClick = (suggestion: SuggestionChip) => {
-    const prompt = locale === 'ko' ? suggestion.prompt : suggestion.promptEn;
+    const prompt = t(loc, suggestion.promptKey);
     sendMessage(prompt);
   };
 
@@ -326,7 +306,7 @@ export function ChatTerminal({
                   <span className="font-mono font-medium">{block.filePath}</span>
                   {block.isNew && (
                     <Badge className="text-[10px] px-1.5 py-0 h-4 bg-emerald-500 text-white">
-                      {locale === 'ko' ? '새 파일' : 'NEW'}
+                      {t(loc, 'chatTerminal.newFile')}
                     </Badge>
                   )}
                 </div>
@@ -342,7 +322,7 @@ export function ChatTerminal({
                   ) : (
                     <Check className="h-3 w-3 mr-1" />
                   )}
-                  {locale === 'ko' ? '적용' : 'Apply'}
+                  {t(loc, 'chatTerminal.apply')}
                 </Button>
               </div>
               {/* 코드 미리보기 */}
@@ -350,7 +330,7 @@ export function ChatTerminal({
                 {block.code.split('\n').slice(0, 6).join('\n')}
                 {block.code.split('\n').length > 6 && (
                   <span className="text-muted-foreground/50">
-                    {`\n... ${locale === 'ko' ? `총 ${block.code.split('\n').length}줄` : `${block.code.split('\n').length} lines total`}`}
+                    {`\n... ${t(loc, 'chatTerminal.linesTotal').replace('{count}', String(block.code.split('\n').length))}`}
                   </span>
                 )}
               </pre>
@@ -368,7 +348,7 @@ export function ChatTerminal({
                   onClick={() => handleApplySingle(msg.content)}
                 >
                   <Check className="h-3 w-3 mr-1.5" />
-                  {locale === 'ko' ? '코드 적용' : 'Apply Code'}
+                  {t(loc, 'chatTerminal.applyCode')}
                 </Button>
               )}
               <Button
@@ -382,9 +362,9 @@ export function ChatTerminal({
                 ) : (
                   <Rocket className="h-3 w-3 mr-1.5" />
                 )}
-                {locale === 'ko'
-                  ? applyingAll ? '적용 중...' : '전체 적용 & 배포'
-                  : applyingAll ? 'Applying...' : 'Apply All & Deploy'}
+                {applyingAll
+                  ? t(loc, 'chatTerminal.applyingAll')
+                  : t(loc, 'chatTerminal.applyAllDeploy')}
               </Button>
             </div>
           )}
@@ -403,7 +383,7 @@ export function ChatTerminal({
         >
           <Sparkles className="h-4 w-4" />
           <span className="text-sm font-medium">
-            {locale === 'ko' ? 'AI 도우미' : 'AI Helper'}
+            {t(loc, 'chatTerminal.aiHelper')}
           </span>
           {messages.length > 0 && (
             <span className="bg-white/20 text-[10px] px-1.5 py-0.5 rounded-full font-medium">
@@ -424,12 +404,10 @@ export function ChatTerminal({
               </div>
               <div>
                 <h3 className="text-sm font-semibold">
-                  {locale === 'ko' ? 'AI 코드 도우미' : 'AI Code Helper'}
+                  {t(loc, 'chatTerminal.title')}
                 </h3>
                 <p className="text-[11px] text-muted-foreground">
-                  {locale === 'ko'
-                    ? '원하는 변경사항을 말씀해주세요'
-                    : 'Tell me what you want to change'}
+                  {t(loc, 'chatTerminal.subtitle')}
                 </p>
               </div>
             </div>
@@ -440,7 +418,7 @@ export function ChatTerminal({
                   size="icon"
                   className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
                   onClick={() => setMessages([])}
-                  title={locale === 'ko' ? '대화 초기화' : 'Clear chat'}
+                  title={t(loc, 'chatTerminal.clearChat')}
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
                 </Button>
@@ -466,16 +444,14 @@ export function ChatTerminal({
                     <Sparkles className="h-3.5 w-3.5 text-white" />
                   </div>
                   <div className="bg-muted/60 rounded-2xl rounded-tl-md px-3.5 py-2.5 text-sm leading-relaxed">
-                    {locale === 'ko'
-                      ? '안녕하세요! 사이트 코드를 수정하거나 새 페이지를 만들 수 있어요. 아래에서 원하는 작업을 선택하거나, 직접 입력해보세요!'
-                      : "Hi! I can modify your site's code or create new pages. Choose a suggestion below or type your own request!"}
+                    {t(loc, 'chatTerminal.welcome')}
                   </div>
                 </div>
 
                 {/* 추천 칩 */}
                 <div className="pl-9">
                   <p className="text-xs text-muted-foreground mb-2 font-medium">
-                    {locale === 'ko' ? '이런 것들을 해보세요' : 'Try these'}
+                    {t(loc, 'chatTerminal.trySuggestions')}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {SUGGESTIONS.map((s, i) => (
@@ -486,7 +462,7 @@ export function ChatTerminal({
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-muted/80 hover:bg-muted text-foreground/80 hover:text-foreground transition-colors border border-transparent hover:border-border disabled:opacity-50"
                       >
                         {s.icon}
-                        {locale === 'ko' ? s.label : s.labelEn}
+                        {t(loc, s.labelKey)}
                       </button>
                     ))}
                   </div>
@@ -532,7 +508,7 @@ export function ChatTerminal({
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
                     <span>
-                      {locale === 'ko' ? '코드를 분석하고 있어요...' : 'Analyzing your code...'}
+                      {t(loc, 'chatTerminal.analyzing')}
                     </span>
                   </div>
                 </div>
@@ -549,7 +525,7 @@ export function ChatTerminal({
               <div className="flex items-center gap-1.5 mb-2 px-1">
                 <FileText className="h-3 w-3 text-muted-foreground" />
                 <span className="text-[11px] text-muted-foreground">
-                  {locale === 'ko' ? '편집 중: ' : 'Editing: '}
+                  {t(loc, 'chatTerminal.editing')}
                   <span className="font-mono">{filePath.split('/').pop()}</span>
                 </span>
               </div>
@@ -560,11 +536,7 @@ export function ChatTerminal({
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
-                placeholder={
-                  locale === 'ko'
-                    ? '예: "헤더 색상을 파란색으로 바꿔줘"'
-                    : 'e.g., "Change header color to blue"'
-                }
+                placeholder={t(loc, 'chatTerminal.placeholder')}
                 disabled={isLoading}
                 rows={1}
                 className="flex-1 bg-transparent text-sm placeholder:text-muted-foreground/60 focus:outline-none disabled:opacity-50 resize-none min-h-[24px] max-h-[120px] py-0.5 leading-relaxed"
@@ -579,7 +551,7 @@ export function ChatTerminal({
               </Button>
             </div>
             <p className="text-[10px] text-muted-foreground/60 text-center mt-1.5">
-              {locale === 'ko' ? 'Enter로 전송 · Shift+Enter로 줄바꿈' : 'Enter to send · Shift+Enter for new line'}
+              {t(loc, 'chatTerminal.inputHint')}
             </p>
           </div>
         </div>

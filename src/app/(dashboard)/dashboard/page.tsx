@@ -8,8 +8,7 @@ import { CreateProjectDialog } from '@/components/project/create-project-dialog'
 import { TemplateDialog } from '@/components/project/template-dialog';
 import { QuickActions } from '@/components/dashboard/quick-actions';
 import { createClient } from '@/lib/supabase/client';
-import { FolderOpen, Plus, Layers, Puzzle, GitBranch } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { FolderOpen, Layers, Puzzle, GitBranch } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
@@ -107,17 +106,17 @@ export default function DashboardPage() {
           <StatCard
             icon={Layers}
             value={projects.length}
-            label={locale === 'ko' ? '프로젝트' : 'Projects'}
+            label={t(locale, 'dashboard.statProjects')}
           />
           <StatCard
             icon={Puzzle}
             value={projects.reduce((sum, p) => sum + (p.project_services?.length || 0), 0)}
-            label={locale === 'ko' ? '연결된 서비스' : 'Services'}
+            label={t(locale, 'dashboard.statServices')}
           />
           <StatCard
             icon={GitBranch}
             value={projects.reduce((sum, p) => sum + (p.project_github_repos?.length || 0), 0)}
-            label={locale === 'ko' ? 'GitHub 레포' : 'GitHub Repos'}
+            label={t(locale, 'dashboard.statGithubRepos')}
           />
         </div>
       )}

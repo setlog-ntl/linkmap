@@ -76,7 +76,7 @@ export function DeploySuccess({ status, projectId, template }: DeploySuccessProp
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted gap-2">
                       <Globe className="h-8 w-8 text-muted-foreground" />
                       <span className="text-xs text-muted-foreground">
-                        {locale === 'ko' ? '미리보기를 불러올 수 없습니다' : 'Preview unavailable'}
+                        {t(locale, 'deploySuccess.previewUnavailable')}
                       </span>
                     </div>
                   )}

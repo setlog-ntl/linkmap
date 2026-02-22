@@ -52,19 +52,19 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
 
   const statusLabel = (() => {
     switch (deploy.deploy_status) {
-      case 'ready': return locale === 'ko' ? '활성' : 'Active';
-      case 'building': return locale === 'ko' ? '빌드 중' : 'Building';
-      case 'creating': return locale === 'ko' ? '생성 중' : 'Creating';
-      case 'error': return locale === 'ko' ? '오류' : 'Error';
-      case 'canceled': return locale === 'ko' ? '취소됨' : 'Canceled';
-      default: return locale === 'ko' ? '대기 중' : 'Pending';
+      case 'ready': return t(locale, 'deploySiteCard.statusActive');
+      case 'building': return t(locale, 'deploySiteCard.statusBuilding');
+      case 'creating': return t(locale, 'deploySiteCard.statusCreating');
+      case 'error': return t(locale, 'deploySiteCard.statusError');
+      case 'canceled': return t(locale, 'deploySiteCard.statusCanceled');
+      default: return t(locale, 'deploySiteCard.statusPending');
     }
   })();
 
   const handleDelete = async () => {
     try {
       await deleteMutation.mutateAsync(deploy.id);
-      toast.success(locale === 'ko' ? '사이트가 삭제되었습니다.' : 'Site deleted.');
+      toast.success(t(locale, 'deploySiteCard.siteDeleted'));
       setOpen(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '삭제 실패');
@@ -121,7 +121,7 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted gap-2">
               <Globe className="h-8 w-8 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">
-                {locale === 'ko' ? '미리보기를 불러올 수 없습니다' : 'Preview unavailable'}
+                {t(locale, 'deploySiteCard.previewUnavailable')}
               </span>
             </div>
           )}
@@ -147,8 +147,8 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
           <Globe className="h-10 w-10 text-muted-foreground/40" />
           <span className="text-xs text-muted-foreground">
             {deploy.deploy_status === 'error'
-              ? (locale === 'ko' ? '배포 오류' : 'Deploy error')
-              : (locale === 'ko' ? '배포 준비 중...' : 'Preparing...')}
+              ? t(locale, 'deploySiteCard.deployError')
+              : t(locale, 'deploySiteCard.preparing')}
           </span>
           <Badge
             variant={statusVariant}
@@ -217,7 +217,7 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
             <Button size="sm" variant="outline" asChild>
               <Link href={`/project/${deploy.project_id}`}>
                 <LayoutDashboard className="mr-1 h-3 w-3" />
-                {locale === 'ko' ? '관리' : 'Manage'}
+                {t(locale, 'deploySiteCard.manage')}
               </Link>
             </Button>
           )}

@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/select';
 import { Plus, Trash2, Upload, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { t, type Locale } from '@/lib/i18n';
 import type { ModuleFieldDef } from '@/lib/module-schema';
 
 interface ModuleFormProps {
@@ -276,7 +277,7 @@ function ArrayFieldRenderer({
           onClick={handleAdd}
         >
           <Plus className="h-3 w-3" />
-          {locale === 'ko' ? '추가' : 'Add'}
+          {t(locale as Locale, 'moduleForm.add')}
         </Button>
       )}
     </div>
@@ -341,7 +342,7 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale }
     if (!file || !deployId) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error(locale === 'ko' ? '5MB 이하의 이미지만 업로드 가능합니다' : 'Max 5MB image allowed');
+      toast.error(t(locale as Locale, 'moduleForm.maxSizeError'));
       return;
     }
 
@@ -368,7 +369,7 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale }
 
       const { path } = await res.json();
       onChange(path);
-      toast.success(locale === 'ko' ? '이미지 업로드 완료' : 'Image uploaded');
+      toast.success(t(locale as Locale, 'moduleForm.imageUploaded'));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Upload failed');
     } finally {
@@ -395,7 +396,7 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale }
             className="h-8 w-8 flex-shrink-0"
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            title={locale === 'ko' ? '이미지 업로드' : 'Upload image'}
+            title={t(locale as Locale, 'moduleForm.uploadImage')}
           >
             {uploading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />

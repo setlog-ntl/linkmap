@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { ServiceIcon } from '@/components/ui/service-icon';
 import {
   useMyCustomServices,
   useDeleteCustomService,
@@ -40,14 +39,14 @@ export default function DeveloperPage() {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    try { await deleteMutation.mutateAsync(id); toast.success(`"${name}" ${locale === 'ko' ? '서비스가 삭제되었습니다' : 'service deleted'}`); } catch { toast.error(locale === 'ko' ? '삭제에 실패했습니다' : 'Delete failed'); }
+    try { await deleteMutation.mutateAsync(id); toast.success(`"${name}" ${t(locale, 'developer.deleteSuccess')}`); } catch { toast.error(t(locale, 'developer.deleteFailed')); }
   };
 
   const handleMigrate = async (customId: string, globalId: string, globalName: string) => {
     try {
       await migrateMutation.mutateAsync({ customServiceId: customId, globalServiceId: globalId });
-      toast.success(locale === 'ko' ? `"${globalName}" 글로벌 서비스로 전환되었습니다` : `Migrated to global service "${globalName}"`);
-    } catch (err) { toast.error(err instanceof Error ? err.message : locale === 'ko' ? '전환에 실패했습니다' : 'Migration failed'); }
+      toast.success(`"${globalName}" ${t(locale, 'developer.migrateSuccess')}`);
+    } catch (err) { toast.error(err instanceof Error ? err.message : t(locale, 'developer.migrateFailed')); }
   };
 
   if (customLoading) {
@@ -62,7 +61,7 @@ export default function DeveloperPage() {
         <p className="text-[13px] text-muted-foreground mb-5">{t(locale, 'account.developerDesc')}</p>
         <EmptyState
           icon={Key}
-          title={locale === 'ko' ? 'API 토큰 관리' : 'API Token Management'}
+          title={t(locale, 'developer.apiTokenTitle')}
           description={t(locale, 'account.comingSoon')}
         />
       </section>
@@ -70,16 +69,16 @@ export default function DeveloperPage() {
       {/* Custom Services */}
       <section>
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-bold">{locale === 'ko' ? '내 커스텀 서비스' : 'My Custom Services'}</h2>
+          <h2 className="text-lg font-bold">{t(locale, 'developer.customServicesTitle')}</h2>
           <CreateCustomServiceDialog mode="create" trigger={<Button size="sm" variant="ghost" className="h-8 w-8 p-0"><Plus className="h-4 w-4" /></Button>} />
         </div>
         <p className="text-[13px] text-muted-foreground mb-5">
-          {locale === 'ko' ? '카탈로그에 없는 서비스를 직접 등록하여 프로젝트에 연결할 수 있습니다' : 'Register services not in the catalog and connect them to projects'}
+          {t(locale, 'developer.customServicesDesc')}
         </p>
 
         {!customServices || customServices.length === 0 ? (
-          <EmptyState icon={Wrench} title={locale === 'ko' ? '등록한 커스텀 서비스가 없습니다' : 'No custom services yet'}
-            description={locale === 'ko' ? '서비스 추가 시 카탈로그에 없는 서비스를 직접 등록할 수 있습니다' : 'You can register custom services when adding services to a project'} />
+          <EmptyState icon={Wrench} title={t(locale, 'developer.emptyTitle')}
+            description={t(locale, 'developer.emptyDesc')} />
         ) : (
           <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
             {customServices.map((svc) => {
@@ -91,16 +90,16 @@ export default function DeveloperPage() {
                       <div className="flex items-center gap-2 min-w-0">
                         <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
                         <span className="text-[13px] text-amber-700 dark:text-amber-300 truncate">
-                          {locale === 'ko' ? `"${matched.name}"과(와) 유사한 글로벌 서비스가 카탈로그에 있습니다` : `A similar global service "${matched.name}" exists in the catalog`}
+                          {`"${matched.name}" ${t(locale, 'developer.matchBanner')}`}
                         </span>
                       </div>
                       <ConfirmDialog
-                        title={locale === 'ko' ? '글로벌 서비스로 전환' : 'Migrate to Global Service'}
-                        description={locale === 'ko' ? `"${svc.name}" 커스텀 서비스를 "${matched.name}" 글로벌 서비스로 전환합니다.` : `Migrate custom service "${svc.name}" to global service "${matched.name}".`}
-                        confirmLabel={locale === 'ko' ? '전환' : 'Migrate'} cancelLabel={locale === 'ko' ? '취소' : 'Cancel'}
+                        title={t(locale, 'developer.migrateTitle')}
+                        description={`"${svc.name}" → "${matched.name}" — ${t(locale, 'developer.migrateDesc')}`}
+                        confirmLabel={t(locale, 'developer.migrateConfirm')} cancelLabel={t(locale, 'common.cancel')}
                         onConfirm={() => handleMigrate(svc.id, matched.id, matched.name)}
                         trigger={<Button variant="outline" size="sm" className="h-7 text-xs border-amber-500/30 text-amber-700 dark:text-amber-300 hover:bg-amber-500/15 shrink-0" disabled={migrateMutation.isPending}>
-                          <ArrowRightLeft className="h-3 w-3 mr-1.5" />{locale === 'ko' ? '전환' : 'Migrate'}
+                          <ArrowRightLeft className="h-3 w-3 mr-1.5" />{t(locale, 'developer.migrateConfirm')}
                         </Button>}
                       />
                     </div>
@@ -119,9 +118,9 @@ export default function DeveloperPage() {
                     <div className="flex items-center gap-1 shrink-0">
                       <CreateCustomServiceDialog mode="edit" service={svc} trigger={<Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground"><Pencil className="h-3.5 w-3.5" /></Button>} />
                       <ConfirmDialog
-                        title={locale === 'ko' ? '커스텀 서비스 삭제' : 'Delete Custom Service'}
-                        description={locale === 'ko' ? `"${svc.name}" 서비스를 삭제하시겠습니까?` : `Delete "${svc.name}"?`}
-                        confirmLabel={locale === 'ko' ? '삭제' : 'Delete'} cancelLabel={locale === 'ko' ? '취소' : 'Cancel'} variant="destructive"
+                        title={t(locale, 'developer.deleteTitle')}
+                        description={`"${svc.name}" — ${t(locale, 'developer.deleteConfirmDesc')}`}
+                        confirmLabel={t(locale, 'common.delete')} cancelLabel={t(locale, 'common.cancel')} variant="destructive"
                         onConfirm={() => handleDelete(svc.id, svc.name)}
                         trigger={<Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>}
                       />

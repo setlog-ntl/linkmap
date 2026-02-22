@@ -411,7 +411,7 @@ export function CloudflareGuide() {
                       {t(locale, 'cloudflareGuide.stepDoneLabel')}
                     </label>
                     <Badge variant="secondary" className="ml-auto text-xs">
-                      {step.estimatedMinutes === 0 ? '—' : `${t(locale, 'cloudflareGuide.minutesEst')} ${step.estimatedMinutes}${locale === 'ko' ? '분' : ' min'}`}
+                      {step.estimatedMinutes === 0 ? '—' : `${t(locale, 'cloudflareGuide.minutesEst')} ${step.estimatedMinutes}${t(locale, 'cloudflareGuide.minutesSuffix')}`}
                     </Badge>
                   </div>
                 )}

@@ -86,15 +86,13 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
       {/* Header */}
       <div className="text-center space-y-2">
         <Badge variant="secondary" className="mb-2">
-          {locale === 'ko' ? '원클릭 배포' : 'One-Click Deploy'}
+          {t(locale, 'wizard.badge')}
         </Badge>
         <h1 className="text-3xl font-bold">
-          {locale === 'ko' ? '3분 안에 내 홈페이지 만들기' : 'Create Your Homepage in 3 Minutes'}
+          {t(locale, 'wizard.title')}
         </h1>
         <p className="text-muted-foreground">
-          {locale === 'ko'
-            ? '템플릿을 고르고 배포 버튼을 누르세요. 그게 전부입니다.'
-            : 'Pick a template and hit deploy. That\'s all.'}
+          {t(locale, 'wizard.subtitle')}
         </p>
       </div>
 

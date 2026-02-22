@@ -9,7 +9,7 @@ import { t } from '@/lib/i18n';
 
 const settingsLinks = [
   { key: 'account.myAccount', href: '/settings/account', icon: User },
-  { key: 'account.connectionsTab', href: '/settings/accounts', icon: GitBranch },
+  { key: 'account.githubTab', href: '/settings/github', icon: GitBranch },
   { key: 'account.developer', href: '/settings/developer', icon: Wrench },
 ];
 

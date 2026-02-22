@@ -5,8 +5,8 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Rocket, Search, Map as MapIcon,
-  Puzzle, Key, Settings, BookOpen, ChevronDown,
-  LogOut, Bot,
+  List, Link2, Key, Settings, BookOpen, ChevronDown,
+  LogOut, Bot, User, GitBranch, Wrench,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -71,7 +71,8 @@ export function AppSidebar({ profile, projectId, projectName }: AppSidebarProps)
 
   const projectNav = projectId ? [
     { labelKey: 'project.overview', href: `/project/${projectId}`, icon: LayoutDashboard, exact: true },
-    { labelKey: 'project.integrations', href: `/project/${projectId}/integrations`, icon: Puzzle },
+    { labelKey: 'project.services', href: `/project/${projectId}/services`, icon: List },
+    { labelKey: 'project.connections', href: `/project/${projectId}/connections`, icon: Link2 },
     { labelKey: 'project.envVars', href: `/project/${projectId}/env`, icon: Key },
     { labelKey: 'project.serviceMap', href: `/project/${projectId}/service-map`, icon: MapIcon },
     { labelKey: 'project.settings', href: `/project/${projectId}/settings`, icon: Settings },
@@ -200,23 +201,8 @@ export function AppSidebar({ profile, projectId, projectName }: AppSidebarProps)
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer: Settings + User */}
+      {/* Footer: User */}
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              isActive={isActive('/settings')}
-              tooltip={t(locale, 'common.settings')}
-            >
-              <Link href="/settings">
-                <Settings className="h-4 w-4" />
-                <span>{t(locale, 'common.settings')}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-
         {profile && (
           <SidebarMenu>
             <SidebarMenuItem>
@@ -257,16 +243,28 @@ export function AppSidebar({ profile, projectId, projectName }: AppSidebarProps)
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/settings">
-                      <Settings className="mr-2 h-4 w-4" />
-                      {t(locale, 'common.settings')}
+                    <Link href="/settings/account">
+                      <User className="mr-2 h-4 w-4" />
+                      {t(locale, 'nav.settingsAccount')}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings/github">
+                      <GitBranch className="mr-2 h-4 w-4" />
+                      {t(locale, 'nav.settingsGithub')}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings/developer">
+                      <Wrench className="mr-2 h-4 w-4" />
+                      {t(locale, 'nav.settingsDeveloper')}
                     </Link>
                   </DropdownMenuItem>
                   {profile.is_admin && (
                     <DropdownMenuItem asChild>
                       <Link href="/admin/ai-config">
                         <Bot className="mr-2 h-4 w-4" />
-                        AI 설정 관리
+                        {t(locale, 'nav.adminAi')}
                       </Link>
                     </DropdownMenuItem>
                   )}

@@ -21,16 +21,16 @@ import { useLinkedRepos, useUnlinkRepo } from '@/lib/queries/github';
 import { RepoSelector } from '@/components/github/repo-selector';
 import { AuditContent } from '@/components/project/audit-content';
 
-const roleLabels: Record<string, string> = {
-  admin: '관리자',
-  editor: '편집자',
-  viewer: '뷰어',
-};
-
 const roleIcons: Record<string, React.ReactNode> = {
   admin: <Shield className="h-4 w-4" />,
   editor: <Edit className="h-4 w-4" />,
   viewer: <Eye className="h-4 w-4" />,
+};
+
+const roleLabelKeys: Record<string, string> = {
+  admin: 'project.teamRoleAdmin',
+  editor: 'project.teamRoleEditor',
+  viewer: 'project.teamRoleViewer',
 };
 
 interface TeamMember {
@@ -86,14 +86,14 @@ export default function ProjectSettingsPage() {
     if (!name.trim()) return;
     const trimmedLink = linkUrl.trim() || null;
     if (trimmedLink && !/^https?:\/\/.+/.test(trimmedLink)) {
-      toast.error('올바른 URL을 입력하세요 (https://...)');
+      toast.error(t(locale, 'project.settingsInvalidUrl'));
       return;
     }
     updateProject.mutate(
       { id: projectId, name: name.trim(), description: description.trim() || null, link_url: trimmedLink },
       {
-        onSuccess: () => toast.success('프로젝트가 업데이트되었습니다'),
-        onError: () => toast.error('업데이트에 실패했습니다'),
+        onSuccess: () => toast.success(t(locale, 'project.settingsUpdated')),
+        onError: () => toast.error(t(locale, 'project.settingsUpdateFailed')),
       }
     );
   };
@@ -102,7 +102,7 @@ export default function ProjectSettingsPage() {
     return new Promise<void>((resolve, reject) => {
       deleteProject.mutate(projectId, {
         onSuccess: () => { router.push('/dashboard'); resolve(); },
-        onError: () => { toast.error('삭제에 실패했습니다'); reject(); },
+        onError: () => { toast.error(t(locale, 'project.settingsDeleteFailed')); reject(); },
       });
     });
   };
@@ -118,14 +118,14 @@ export default function ProjectSettingsPage() {
       });
       if (!res.ok) {
         const data = await res.json();
-        toast.error(data.error || '초대에 실패했습니다');
+        toast.error(data.error || t(locale, 'project.teamInviteFailed'));
         return;
       }
-      toast.success(`${inviteEmail}을 초대했습니다`);
+      toast.success(`${inviteEmail}${t(locale, 'project.teamInviteSuccess')}`);
       setInviteEmail('');
       loadMembers();
     } catch {
-      toast.error('초대에 실패했습니다');
+      toast.error(t(locale, 'project.teamInviteFailed'));
     } finally {
       setInviting(false);
     }
@@ -139,13 +139,13 @@ export default function ProjectSettingsPage() {
       });
       if (!res.ok) {
         const data = await res.json();
-        toast.error(data.error || '멤버 제거에 실패했습니다');
+        toast.error(data.error || t(locale, 'project.teamRemoveFailed'));
         return;
       }
-      toast.success('멤버가 제거되었습니다');
+      toast.success(t(locale, 'project.teamRemoveSuccess'));
       loadMembers();
     } catch {
-      toast.error('멤버 제거에 실패했습니다');
+      toast.error(t(locale, 'project.teamRemoveFailed'));
     }
   };
 
@@ -161,18 +161,18 @@ export default function ProjectSettingsPage() {
   return (
     <div className="space-y-6 max-w-2xl">
       {/* Project Info */}
-      <Card>
+      <Card id="project-info">
         <CardHeader>
-          <CardTitle>프로젝트 정보</CardTitle>
-          <CardDescription>프로젝트의 기본 정보를 수정합니다</CardDescription>
+          <CardTitle>{t(locale, 'project.settingsTitle')}</CardTitle>
+          <CardDescription>{t(locale, 'project.settingsDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="project-name">프로젝트 이름</Label>
+            <Label htmlFor="project-name">{t(locale, 'project.settingsName')}</Label>
             <Input id="project-name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="project-description">설명</Label>
+            <Label htmlFor="project-description">{t(locale, 'project.settingsDescription')}</Label>
             <Textarea
               id="project-description"
               value={description}
@@ -191,26 +191,26 @@ export default function ProjectSettingsPage() {
           </div>
           <Button onClick={handleSave} disabled={updateProject.isPending || !name.trim()}>
             <Save className="mr-2 h-4 w-4" />
-            {updateProject.isPending ? '저장 중...' : '저장'}
+            {updateProject.isPending ? t(locale, 'project.settingsSaving') : t(locale, 'project.settingsSave')}
           </Button>
         </CardContent>
       </Card>
 
       {/* Team Management */}
-      <Card>
+      <Card id="team">
         <CardHeader>
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            <CardTitle>팀 관리</CardTitle>
+            <CardTitle>{t(locale, 'project.teamTitle')}</CardTitle>
           </div>
-          <CardDescription>팀 멤버를 초대하고 역할을 관리합니다</CardDescription>
+          <CardDescription>{t(locale, 'project.teamDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {project?.team_id ? (
             <>
               <div className="flex flex-col sm:flex-row gap-2">
                 <Input
-                  placeholder="이메일 주소"
+                  placeholder={t(locale, 'project.teamEmailPlaceholder')}
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   className="flex-1"
@@ -221,14 +221,14 @@ export default function ProjectSettingsPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="admin">관리자</SelectItem>
-                      <SelectItem value="editor">편집자</SelectItem>
-                      <SelectItem value="viewer">뷰어</SelectItem>
+                      <SelectItem value="admin">{t(locale, 'project.teamRoleAdmin')}</SelectItem>
+                      <SelectItem value="editor">{t(locale, 'project.teamRoleEditor')}</SelectItem>
+                      <SelectItem value="viewer">{t(locale, 'project.teamRoleViewer')}</SelectItem>
                     </SelectContent>
                   </Select>
                   <Button onClick={handleInvite} disabled={inviting || !inviteEmail}>
                     <UserPlus className="h-4 w-4 mr-1" />
-                    초대
+                    {t(locale, 'project.teamInvite')}
                   </Button>
                 </div>
               </div>
@@ -251,7 +251,7 @@ export default function ProjectSettingsPage() {
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="gap-1">
                           {roleIcons[member.role]}
-                          {roleLabels[member.role]}
+                          {t(locale, roleLabelKeys[member.role] || 'project.teamRoleViewer')}
                         </Badge>
                         <Button
                           variant="ghost"
@@ -268,16 +268,16 @@ export default function ProjectSettingsPage() {
               ) : (
                 <div className="text-center py-6 text-muted-foreground">
                   <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">아직 팀 멤버가 없습니다</p>
-                  <p className="text-xs">이메일로 팀원을 초대해보세요</p>
+                  <p className="text-sm">{t(locale, 'project.teamEmpty')}</p>
+                  <p className="text-xs">{t(locale, 'project.teamEmptyDesc')}</p>
                 </div>
               )}
             </>
           ) : (
             <div className="text-center py-6 text-muted-foreground">
               <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">이 프로젝트는 개인 프로젝트입니다</p>
-              <p className="text-xs">팀 플랜으로 업그레이드하면 팀원을 초대할 수 있습니다</p>
+              <p className="text-sm">{t(locale, 'project.teamPersonal')}</p>
+              <p className="text-xs">{t(locale, 'project.teamPersonalDesc')}</p>
             </div>
           )}
         </CardContent>
@@ -287,17 +287,13 @@ export default function ProjectSettingsPage() {
       <GitHubSettingsCard projectId={projectId} />
 
       {/* Change History (Audit Log) */}
-      <Card>
+      <Card id="audit">
         <CardHeader>
           <div className="flex items-center gap-2">
             <History className="h-5 w-5" />
             <CardTitle>{t(locale, 'project.changeHistory')}</CardTitle>
           </div>
-          <CardDescription>
-            {locale === 'ko'
-              ? '환경변수 조회·수정, 프로젝트 변경 등의 활동 기록입니다'
-              : 'Activity log for env var access, project changes, and more'}
-          </CardDescription>
+          <CardDescription>{t(locale, 'project.auditDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <AuditContent projectId={projectId} />
@@ -307,23 +303,21 @@ export default function ProjectSettingsPage() {
       <Separator />
 
       {/* Danger Zone */}
-      <Card className="border-destructive/50">
+      <Card id="danger" className="border-destructive/50">
         <CardHeader>
-          <CardTitle className="text-destructive">위험 구역</CardTitle>
-          <CardDescription>
-            프로젝트를 삭제하면 모든 서비스 연결, 체크리스트 진행도, 환경변수가 영구적으로 삭제됩니다.
-          </CardDescription>
+          <CardTitle className="text-destructive">{t(locale, 'project.dangerZone')}</CardTitle>
+          <CardDescription>{t(locale, 'project.dangerDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <ConfirmDialog
             trigger={
               <Button variant="destructive" disabled={deleteProject.isPending}>
                 <Trash2 className="mr-2 h-4 w-4" />
-                {deleteProject.isPending ? t(locale, 'common.deleting') : '프로젝트 삭제'}
+                {deleteProject.isPending ? t(locale, 'common.deleting') : t(locale, 'project.deleteProject')}
               </Button>
             }
             title={t(locale, 'common.deleteConfirmTitle')}
-            description="프로젝트를 삭제하면 모든 서비스 연결, 체크리스트 진행도, 환경변수가 영구적으로 삭제됩니다."
+            description={t(locale, 'project.dangerDesc')}
             confirmLabel={t(locale, 'common.delete')}
             cancelLabel={t(locale, 'common.cancel')}
             variant="destructive"
@@ -343,13 +337,13 @@ function GitHubSettingsCard({ projectId }: { projectId: string }) {
   const unlinkRepo = useUnlinkRepo(projectId);
 
   return (
-    <Card>
+    <Card id="github">
       <CardHeader>
         <div className="flex items-center gap-2">
           <GitBranch className="h-5 w-5" />
-          <CardTitle>GitHub 연결</CardTitle>
+          <CardTitle>{t(locale, 'project.githubTitle')}</CardTitle>
         </div>
-        <CardDescription>프로젝트에 연결된 GitHub 레포를 관리합니다</CardDescription>
+        <CardDescription>{t(locale, 'project.githubDesc')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
@@ -357,8 +351,8 @@ function GitHubSettingsCard({ projectId }: { projectId: string }) {
         ) : linkedRepos.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <GitBranch className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">연결된 GitHub 레포가 없습니다</p>
-            <p className="text-xs mb-3">레포를 연결하면 환경변수를 GitHub Secrets로 동기화할 수 있습니다</p>
+            <p className="text-sm">{t(locale, 'project.githubEmpty')}</p>
+            <p className="text-xs mb-3">{t(locale, 'project.githubEmptyDesc')}</p>
             <RepoSelector projectId={projectId} />
           </div>
         ) : (
@@ -375,12 +369,12 @@ function GitHubSettingsCard({ projectId }: { projectId: string }) {
                       {repo.auto_sync_enabled && (
                         <Badge variant="secondary" className="text-[10px]">
                           <RefreshCw className="h-2.5 w-2.5 mr-1" />
-                          자동 동기화
+                          {t(locale, 'project.githubAutoSync')}
                         </Badge>
                       )}
                       {repo.last_synced_at && (
                         <span className="text-[10px] text-muted-foreground">
-                          마지막: {new Date(repo.last_synced_at).toLocaleString('ko-KR')}
+                          {t(locale, 'project.githubLastSync')}: {new Date(repo.last_synced_at).toLocaleString(locale === 'ko' ? 'ko-KR' : 'en-US')}
                         </span>
                       )}
                     </div>
@@ -397,15 +391,15 @@ function GitHubSettingsCard({ projectId }: { projectId: string }) {
                       </Button>
                     }
                     title={t(locale, 'common.unlinkConfirmTitle')}
-                    description={`${repo.repo_full_name} 연결을 해제하시겠습니까?`}
+                    description={`${repo.repo_full_name} ${t(locale, 'project.githubUnlinkConfirm')}`}
                     confirmLabel={t(locale, 'common.delete')}
                     cancelLabel={t(locale, 'common.cancel')}
                     variant="destructive"
                     onConfirm={() => {
                       return new Promise<void>((resolve, reject) => {
                         unlinkRepo.mutate(repo.id, {
-                          onSuccess: () => { toast.success('레포 연결 해제됨'); resolve(); },
-                          onError: () => { toast.error('연결 해제 실패'); reject(); },
+                          onSuccess: () => { toast.success(t(locale, 'project.githubUnlinked')); resolve(); },
+                          onError: () => { toast.error(t(locale, 'project.githubUnlinkFailed')); reject(); },
                         });
                       });
                     }}

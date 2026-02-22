@@ -103,14 +103,10 @@ export function DeployStep({ status, isLoading, error, template, onRetry }: Depl
             <div className="text-center space-y-2">
               <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto" />
               <h3 className="text-lg font-semibold">
-                {locale === 'ko'
-                  ? '배포 상태 확인 시간이 초과되었습니다'
-                  : 'Deployment status check timed out'}
+                {t(locale, 'deployStep.timeoutTitle')}
               </h3>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                {locale === 'ko'
-                  ? '배포가 아직 진행 중일 수 있습니다. 잠시 후 사이트를 확인해보세요.'
-                  : 'Deployment may still be in progress. Check your site in a moment.'}
+                {t(locale, 'deployStep.timeoutDesc')}
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
@@ -118,7 +114,7 @@ export function DeployStep({ status, isLoading, error, template, onRetry }: Depl
                 <Button asChild>
                   <a href={status.pages_url} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="mr-2 h-4 w-4" />
-                    {locale === 'ko' ? '사이트 확인' : 'Check Site'}
+                    {t(locale, 'deployStep.checkSite')}
                   </a>
                 </Button>
               )}
@@ -126,7 +122,7 @@ export function DeployStep({ status, isLoading, error, template, onRetry }: Depl
                 <Button variant="outline" asChild>
                   <a href={`${status.forked_repo_url}/settings/pages`} target="_blank" rel="noopener noreferrer">
                     <Github className="mr-2 h-4 w-4" />
-                    {locale === 'ko' ? 'Pages 설정 확인' : 'Check Pages Settings'}
+                    {t(locale, 'deployStep.checkPages')}
                   </a>
                 </Button>
               )}
@@ -207,7 +203,7 @@ interface ErrorCardProps {
   onCopy: (text: string) => void;
   onRetry?: () => void;
   repoUrl?: string | null;
-  locale: string;
+  locale: Locale;
 }
 
 function ErrorCard({
@@ -227,7 +223,7 @@ function ErrorCard({
         <div className="text-center space-y-2">
           <XCircle className="h-12 w-12 text-red-500 mx-auto" />
           <h3 className="text-lg font-semibold text-red-500">
-            {locale === 'ko' ? '배포 오류' : 'Deployment Error'}
+            {t(locale, 'deployStep.errorTitle')}
           </h3>
         </div>
 
@@ -236,7 +232,7 @@ function ErrorCard({
             <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
             <div>
               <p className="text-sm font-medium text-red-700 dark:text-red-400">
-                {locale === 'ko' ? '원인' : 'Cause'}
+                {t(locale, 'deployStep.cause')}
               </p>
               <p className="text-sm text-red-600 dark:text-red-400/80">{details.cause}</p>
             </div>
@@ -245,7 +241,7 @@ function ErrorCard({
             <CheckCircle2 className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
             <div>
               <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
-                {locale === 'ko' ? '해결 방법' : 'Solution'}
+                {t(locale, 'deployStep.solution')}
               </p>
               <p className="text-sm text-amber-600 dark:text-amber-400/80">{details.solution}</p>
             </div>
@@ -259,7 +255,7 @@ function ErrorCard({
               className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               {showDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-              {locale === 'ko' ? '기술적 상세 정보' : 'Technical Details'}
+              {t(locale, 'deployStep.technicalDetails')}
             </button>
             {showDetails && (
               <div className="mt-2 bg-muted rounded-md p-3 relative">
@@ -269,7 +265,7 @@ function ErrorCard({
                 <button
                   onClick={() => onCopy(errorMessage)}
                   className="absolute top-2 right-2 p-1 rounded hover:bg-background transition-colors"
-                  title={locale === 'ko' ? '복사' : 'Copy'}
+                  title={t(locale, 'deployStep.copy')}
                 >
                   {copied ? (
                     <Check className="h-3.5 w-3.5 text-green-500" />
@@ -286,34 +282,30 @@ function ErrorCard({
           {onRetry && (
             <Button onClick={onRetry} size="sm">
               <RefreshCw className="mr-2 h-4 w-4" />
-              {locale === 'ko' ? '다시 시도' : 'Try Again'}
+              {t(locale, 'deployStep.tryAgain')}
             </Button>
           )}
           <Button
             variant="outline"
             size="sm"
             onClick={() => {
-              toast.info(
-                locale === 'ko'
-                  ? '결제 업데이트 시 반영됩니다.'
-                  : 'Will be reflected upon payment update.'
-              );
+              toast.info(t(locale, 'deployStep.upgradeToast'));
             }}
           >
             <ArrowUpCircle className="mr-2 h-4 w-4" />
-            {locale === 'ko' ? '플랜 업그레이드' : 'Upgrade Plan'}
+            {t(locale, 'deployStep.upgradePlan')}
           </Button>
           <Button variant="outline" size="sm" asChild>
             <Link href="/my-sites">
               <LayoutDashboard className="mr-2 h-4 w-4" />
-              {locale === 'ko' ? '사이트 관리' : 'Manage Sites'}
+              {t(locale, 'deployStep.manageSites')}
             </Link>
           </Button>
           {repoUrl && (
             <Button variant="outline" size="sm" asChild>
               <a href={repoUrl} target="_blank" rel="noopener noreferrer">
                 <Github className="mr-2 h-4 w-4" />
-                {locale === 'ko' ? 'GitHub에서 확인' : 'Check on GitHub'}
+                {t(locale, 'deployStep.checkOnGitHub')}
               </a>
             </Button>
           )}

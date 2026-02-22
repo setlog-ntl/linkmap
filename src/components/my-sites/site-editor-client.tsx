@@ -211,9 +211,9 @@ function computeDiffStats(
 function formatRelativeTime(date: Date, locale: string): string {
   const diff = Date.now() - date.getTime();
   const seconds = Math.floor(diff / 1000);
-  if (seconds < 60) return locale === 'ko' ? '방금 전' : 'just now';
+  if (seconds < 60) return t(locale as 'ko' | 'en', 'editor.justNow');
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return locale === 'ko' ? `${minutes}분 전` : `${minutes}m ago`;
+  if (minutes < 60) return `${minutes}${t(locale as 'ko' | 'en', 'editor.minutesAgo')}`;
   return date.toLocaleTimeString(locale === 'ko' ? 'ko-KR' : 'en-US', { hour: '2-digit', minute: '2-digit' });
 }
 
@@ -435,7 +435,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       fileDetail.sha = result.sha;
       toast.success(t(locale, 'editor.saved'));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : '저장 실패');
+      toast.error(err instanceof Error ? err.message : t(locale, 'editor.saveFailed'));
     }
   }, [selectedPath, fileDetail, editorContent, deployId, updateFile, locale]);
 
@@ -458,11 +458,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       }
 
       setDeployState('deploying');
-      toast.info(
-        locale === 'ko'
-          ? 'GitHub Pages 배포 중... 약 30초 소요됩니다.'
-          : 'Deploying to GitHub Pages... ~30 seconds.'
-      );
+      toast.info(t(locale, 'editor.deploying'));
 
       if (liveUrl) {
         let attempts = 0;
@@ -498,16 +494,12 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       setLivePreviewKey((k) => k + 1);
       setShowLiveAfterDeploy(true);
 
-      toast.success(
-        locale === 'ko'
-          ? '배포 완료! 사이트에 변경사항이 반영되었습니다.'
-          : 'Deployed! Changes are now live.'
-      );
+      toast.success(t(locale, 'editor.deployed'));
 
       setTimeout(() => setDeployState('idle'), 3000);
     } catch (err) {
       setDeployState('idle');
-      toast.error(err instanceof Error ? err.message : '배포 실패');
+      toast.error(err instanceof Error ? err.message : t(locale, 'editor.deployFailed'));
     }
   }, [selectedPath, fileDetail, hasUnsavedChanges, editorContent, deployId, updateFile, locale, liveUrl]);
 
@@ -551,19 +543,11 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         }
       }
 
-      toast.success(
-        locale === 'ko'
-          ? `${result.file_count}개 파일 저장 완료 (단일 커밋)`
-          : `${result.file_count} file(s) saved (single commit)`
-      );
+      toast.success(`${result.file_count}${t(locale, 'editor.filesSaved')}`);
 
       // 2. 자동 배포 트리거
       setDeployState('deploying');
-      toast.info(
-        locale === 'ko'
-          ? 'GitHub Pages 배포 중... 약 30초 소요됩니다.'
-          : 'Deploying to GitHub Pages... ~30 seconds.'
-      );
+      toast.info(t(locale, 'editor.deploying'));
 
       if (liveUrl) {
         let attempts = 0;
@@ -599,16 +583,12 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       setLivePreviewKey((k) => k + 1);
       setShowLiveAfterDeploy(true);
 
-      toast.success(
-        locale === 'ko'
-          ? '배포 완료! 사이트에 변경사항이 반영되었습니다.'
-          : 'Deployed! Changes are now live.'
-      );
+      toast.success(t(locale, 'editor.deployed'));
 
       setTimeout(() => setDeployState('idle'), 3000);
     } catch (err) {
       setDeployState('idle');
-      toast.error(err instanceof Error ? err.message : '적용 실패');
+      toast.error(err instanceof Error ? err.message : t(locale, 'editor.applyFailed'));
     }
   }, [batchApply, deployId, selectedPath, fileDetail, filesShaMap, liveUrl, locale]);
 
@@ -670,10 +650,10 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     } catch (err) {
       dispatchDialog({
         type: 'ERROR',
-        message: err instanceof Error ? err.message : '적용 실패',
+        message: err instanceof Error ? err.message : t(locale, 'editor.applyFailed'),
       });
     }
-  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, fileCache, templateSlug]);
+  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, fileCache, templateSlug, locale]);
 
   // ── 모듈 → 코드 적용 + 배포 (다이얼로그 통합) ──
   const handleApplyModulesAndDeploy = useCallback(async () => {
@@ -753,10 +733,10 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     } catch (err) {
       dispatchDialog({
         type: 'ERROR',
-        message: err instanceof Error ? err.message : '적용 실패',
+        message: err instanceof Error ? err.message : t(locale, 'editor.applyFailed'),
       });
     }
-  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, fileCache, templateSlug]);
+  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, fileCache, templateSlug, locale]);
 
   // Ctrl+S 단축키
   useEffect(() => {
@@ -791,28 +771,28 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         return (
           <>
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            <span className="hidden sm:inline ml-1">{locale === 'ko' ? '저장 중...' : 'Saving...'}</span>
+            <span className="hidden sm:inline ml-1">{t(locale, 'editor.stateSaving')}</span>
           </>
         );
       case 'deploying':
         return (
           <>
             <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-            <span className="hidden sm:inline ml-1">{locale === 'ko' ? '배포 중...' : 'Deploying...'}</span>
+            <span className="hidden sm:inline ml-1">{t(locale, 'editor.stateDeploying')}</span>
           </>
         );
       case 'deployed':
         return (
           <>
             <CheckCircle2 className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline ml-1">{locale === 'ko' ? '완료!' : 'Done!'}</span>
+            <span className="hidden sm:inline ml-1">{t(locale, 'editor.stateDone')}</span>
           </>
         );
       default:
         return (
           <>
             <Rocket className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline ml-1">{locale === 'ko' ? '배포' : 'Deploy'}</span>
+            <span className="hidden sm:inline ml-1">{t(locale, 'editor.stateDeploy')}</span>
           </>
         );
     }
@@ -857,7 +837,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     }
     return (
       <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm">
-        {locale === 'ko' ? '미리보기할 수 없는 파일입니다' : 'Cannot preview this file'}
+        {t(locale, 'editor.cannotPreview')}
       </div>
     );
   };
@@ -1020,7 +1000,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           <Button variant="ghost" size="sm" className="shrink-0 gap-1.5 text-muted-foreground hover:text-foreground" asChild>
             <Link href="/my-sites">
               <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs">{locale === 'ko' ? '내 사이트' : 'My Sites'}</span>
+              <span className="hidden sm:inline text-xs">{t(locale, 'editor.backToSites')}</span>
             </Link>
           </Button>
           <div className="h-5 w-px bg-border hidden sm:block" />
@@ -1061,13 +1041,13 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
             onClick={() => setShowPreview(!showPreview)}
           >
             <Eye className="mr-1.5 h-3.5 w-3.5" />
-            {locale === 'ko' ? '미리보기' : 'Preview'}
+            {t(locale, 'editor.preview')}
           </Button>
 
           {/* 사이트 열기 */}
           {liveUrl && (
             <Button variant="outline" size="icon" className="h-8 w-8" asChild>
-              <a href={liveUrl} target="_blank" rel="noopener noreferrer" title={locale === 'ko' ? '새 탭에서 열기' : 'Open in new tab'}>
+              <a href={liveUrl} target="_blank" rel="noopener noreferrer" title={t(locale, 'editor.openNewTab')}>
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>
             </Button>
@@ -1088,7 +1068,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
               <Save className="h-3.5 w-3.5" />
             )}
             <span className="hidden sm:inline text-xs">
-              {locale === 'ko' ? '저장' : 'Save'}
+              {t(locale, 'editor.save')}
             </span>
             <kbd className="hidden lg:inline-flex h-5 items-center rounded border bg-muted px-1 text-[10px] text-muted-foreground ml-1">
               {navigator?.platform?.includes('Mac') ? '⌘S' : 'Ctrl+S'}
@@ -1122,7 +1102,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           }`}
         >
           <Code className="h-3 w-3" />
-          {locale === 'ko' ? '코드' : 'Code'}
+          {t(locale, 'editor.code')}
           {selectedFileName && (
             <span className="text-[10px] text-muted-foreground truncate max-w-[80px]">
               ({selectedFileName})
@@ -1138,7 +1118,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           }`}
         >
           <Eye className="h-3 w-3" />
-          {locale === 'ko' ? '미리보기' : 'Preview'}
+          {t(locale, 'editor.preview')}
           {showLiveAfterDeploy && (
             <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
           )}
@@ -1154,7 +1134,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
               <div className="flex items-center justify-between px-3 py-2.5 border-b">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    {locale === 'ko' ? '파일' : 'Files'}
+                    {t(locale, 'editor.files')}
                   </span>
                   {files && (
                     <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
@@ -1184,7 +1164,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         <div className="hidden md:flex md:flex-col w-56 border-r bg-muted/20 flex-shrink-0">
           <div className="px-3 py-2.5 border-b flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              {locale === 'ko' ? '파일' : 'Files'}
+              {t(locale, 'editor.files')}
             </span>
             {files && (
               <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
@@ -1225,10 +1205,10 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
             <div className="w-1/2 flex flex-col overflow-hidden">
               <div className="border-b px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground flex-shrink-0 h-9">
                 <Eye className="h-3.5 w-3.5" />
-                <span className="font-medium">{locale === 'ko' ? '미리보기' : 'Preview'}</span>
+                <span className="font-medium">{t(locale, 'editor.preview')}</span>
                 {showLiveAfterDeploy ? (
                   <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-green-600">
-                    {locale === 'ko' ? '배포됨' : 'DEPLOYED'}
+                    {t(locale, 'editor.deployedBadge')}
                   </Badge>
                 ) : isLivePreviewable ? (
                   <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
@@ -1269,7 +1249,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                     }
                   }}
                   className="p-1 rounded-md hover:bg-muted transition-colors"
-                  title={locale === 'ko' ? '새로고침' : 'Refresh'}
+                  title={t(locale, 'editor.refresh')}
                 >
                   <RotateCw className="h-3 w-3" />
                 </button>
@@ -1280,7 +1260,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-1 rounded-md hover:bg-muted transition-colors"
-                    title={locale === 'ko' ? '새 탭에서 열기' : 'Open in new tab'}
+                    title={t(locale, 'editor.openNewTab')}
                   >
                     <ExternalLink className="h-3 w-3" />
                   </a>
@@ -1319,10 +1299,10 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
             <div className="flex flex-col flex-1 overflow-hidden">
               <div className="px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground border-b flex-shrink-0">
                 <Eye className="h-3 w-3" />
-                <span>{locale === 'ko' ? '미리보기' : 'Preview'}</span>
+                <span>{t(locale, 'editor.preview')}</span>
                 {showLiveAfterDeploy ? (
                   <Badge variant="default" className="text-[10px] px-1 py-0 ml-auto bg-green-600">
-                    {locale === 'ko' ? '배포됨' : 'DEPLOYED'}
+                    {t(locale, 'editor.deployedBadge')}
                   </Badge>
                 ) : isLivePreviewable ? (
                   <Badge variant="secondary" className="text-[10px] px-1 py-0 ml-auto">
@@ -1368,17 +1348,17 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           })()}
         </div>
         <span className="text-muted-foreground/50 hidden sm:inline text-[11px]">
-          {locale === 'ko' ? 'Ctrl+S 저장 · 배포하여 게시' : 'Ctrl+S save · Deploy to publish'}
+          {t(locale, 'editor.statusBarHint')}
         </span>
         <div className="flex items-center gap-2 shrink-0">
           {lastSavedAt ? (
             <span className="text-[11px]">
-              {locale === 'ko' ? '마지막 저장: ' : 'Last saved: '}
+              {t(locale, 'editor.lastSavedAt')}
               {formatRelativeTime(lastSavedAt, locale)}
             </span>
           ) : (
             <span className="text-[11px] text-muted-foreground/40">
-              {locale === 'ko' ? '저장 기록 없음' : 'Not saved yet'}
+              {t(locale, 'editor.notSavedYet')}
             </span>
           )}
         </div>
@@ -1390,13 +1370,13 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>{t(locale, 'editor.unsavedChanges')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {locale === 'ko' ? '저장하지 않은 변경사항이 사라집니다.' : 'Unsaved changes will be lost.'}
+              {t(locale, 'editor.unsavedWillLost')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t(locale, 'common.cancel')}</AlertDialogCancel>
             <AlertDialogAction variant="destructive" onClick={confirmTabSwitch}>
-              {locale === 'ko' ? '이동' : 'Leave'}
+              {t(locale, 'editor.leave')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

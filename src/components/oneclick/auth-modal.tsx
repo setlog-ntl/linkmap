@@ -18,6 +18,7 @@ import {
 import { Github, Loader2, LogIn } from 'lucide-react';
 import { GoogleIcon } from '@/components/icons/google-icon';
 import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 
 interface AuthModalProps {
   open: boolean;
@@ -43,9 +44,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
     if (error) {
       setError(
         error.message === 'Invalid login credentials'
-          ? locale === 'ko'
-            ? '이메일 또는 비밀번호가 올바르지 않습니다.'
-            : 'Invalid email or password.'
+          ? t(locale, 'authModal.invalidCredentials')
           : error.message
       );
       setLoading(false);
@@ -78,12 +77,10 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
             <LogIn className="h-6 w-6" />
           </div>
           <DialogTitle>
-            {locale === 'ko' ? '로그인이 필요합니다' : 'Sign In Required'}
+            {t(locale, 'authModal.title')}
           </DialogTitle>
           <DialogDescription>
-            {locale === 'ko'
-              ? '홈페이지를 배포하려면 먼저 로그인하세요.'
-              : 'Sign in to deploy your homepage.'}
+            {t(locale, 'authModal.description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -123,7 +120,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-background px-2 text-muted-foreground">
-                {locale === 'ko' ? '또는' : 'or'}
+                {t(locale, 'authModal.or')}
               </span>
             </div>
           </div>
@@ -131,7 +128,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
           <form onSubmit={handleEmailLogin} className="space-y-3">
             <div className="space-y-1.5">
               <Label htmlFor="auth-modal-email">
-                {locale === 'ko' ? '이메일' : 'Email'}
+                {t(locale, 'authModal.email')}
               </Label>
               <Input
                 id="auth-modal-email"
@@ -144,12 +141,12 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="auth-modal-password">
-                {locale === 'ko' ? '비밀번호' : 'Password'}
+                {t(locale, 'authModal.password')}
               </Label>
               <Input
                 id="auth-modal-password"
                 type="password"
-                placeholder={locale === 'ko' ? '비밀번호를 입력하세요' : 'Enter your password'}
+                placeholder={t(locale, 'authModal.passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -162,15 +159,15 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
 
             <Button type="submit" className="w-full" disabled={loading || oauthLoading !== null}>
               {loading
-                ? locale === 'ko' ? '로그인 중...' : 'Signing in...'
-                : locale === 'ko' ? '로그인' : 'Sign In'}
+                ? t(locale, 'authModal.signingIn')
+                : t(locale, 'authModal.signIn')}
             </Button>
           </form>
 
           <p className="text-sm text-muted-foreground text-center">
-            {locale === 'ko' ? '계정이 없으신가요?' : "Don't have an account?"}{' '}
+            {t(locale, 'authModal.noAccount')}{' '}
             <Link href="/signup?redirect=/oneclick" className="text-primary hover:underline font-medium">
-              {locale === 'ko' ? '회원가입' : 'Sign Up'}
+              {t(locale, 'authModal.signUp')}
             </Link>
           </p>
         </div>

@@ -31,10 +31,10 @@ export function MySitesClient() {
     const diffDay = Math.floor(diffHour / 24);
 
     let lastDeployText: string;
-    if (diffMin < 1) lastDeployText = locale === 'ko' ? '방금 전' : 'Just now';
-    else if (diffMin < 60) lastDeployText = locale === 'ko' ? `${diffMin}분 전` : `${diffMin}m ago`;
-    else if (diffHour < 24) lastDeployText = locale === 'ko' ? `${diffHour}시간 전` : `${diffHour}h ago`;
-    else lastDeployText = locale === 'ko' ? `${diffDay}일 전` : `${diffDay}d ago`;
+    if (diffMin < 1) lastDeployText = t(locale, 'mySites.justNow');
+    else if (diffMin < 60) lastDeployText = `${diffMin}${t(locale, 'mySites.minutesAgo')}`;
+    else if (diffHour < 24) lastDeployText = `${diffHour}${t(locale, 'mySites.hoursAgo')}`;
+    else lastDeployText = `${diffDay}${t(locale, 'mySites.daysAgo')}`;
 
     return { total, active, errors, lastDeployText };
   }, [deployments, locale]);
@@ -70,7 +70,7 @@ export function MySitesClient() {
             <div>
               <p className="text-2xl font-bold">{stats.total}</p>
               <p className="text-xs text-muted-foreground">
-                {locale === 'ko' ? '전체 사이트' : 'Total Sites'}
+                {t(locale, 'mySites.totalSites')}
               </p>
             </div>
           </div>
@@ -81,7 +81,7 @@ export function MySitesClient() {
             <div>
               <p className="text-2xl font-bold">{stats.active}</p>
               <p className="text-xs text-muted-foreground">
-                {locale === 'ko' ? '활성' : 'Active'}
+                {t(locale, 'mySites.active')}
               </p>
             </div>
           </div>
@@ -92,7 +92,7 @@ export function MySitesClient() {
             <div>
               <p className="text-2xl font-bold">{stats.errors}</p>
               <p className="text-xs text-muted-foreground">
-                {locale === 'ko' ? '오류' : 'Errors'}
+                {t(locale, 'mySites.errors')}
               </p>
             </div>
           </div>
@@ -103,7 +103,7 @@ export function MySitesClient() {
             <div>
               <p className="text-sm font-semibold">{stats.lastDeployText}</p>
               <p className="text-xs text-muted-foreground">
-                {locale === 'ko' ? '마지막 배포' : 'Last Deploy'}
+                {t(locale, 'mySites.lastDeploy')}
               </p>
             </div>
           </div>

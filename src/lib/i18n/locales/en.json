@@ -29,6 +29,9 @@
     "oneclick": "One-Click Deploy",
     "mySites": "My Sites",
     "sites": "Deploy Sites",
+    "sitesDesc": "Deploy sites from templates and manage your deployed sites.",
+    "sitesNew": "Create New Site",
+    "sitesManage": "My Sites",
     "connectedInfo": "Connections",
     "adminAi": "AI Config",
     "settingsAccount": "My Account",
@@ -45,7 +48,10 @@
     "quickNewProject": "New Project",
     "quickOneclick": "One-Click Deploy",
     "quickCatalog": "Service Catalog",
-    "quickGuide": "Env Guide"
+    "quickGuide": "Env Guide",
+    "statProjects": "Projects",
+    "statServices": "Services",
+    "statGithubRepos": "GitHub Repos"
   },
   "project": {
     "overview": "At a Glance",
@@ -97,6 +103,44 @@
       "complete": "All steps completed!",
       "progress": "Progress"
     },
+    "settingsTitle": "Project Info",
+    "settingsDesc": "Edit your project's basic information",
+    "settingsName": "Project Name",
+    "settingsDescription": "Description",
+    "settingsSaving": "Saving...",
+    "settingsSave": "Save",
+    "settingsUpdated": "Project updated",
+    "settingsUpdateFailed": "Update failed",
+    "settingsInvalidUrl": "Enter a valid URL (https://...)",
+    "settingsDeleteFailed": "Delete failed",
+    "teamTitle": "Team Management",
+    "teamDesc": "Invite team members and manage roles",
+    "teamEmailPlaceholder": "Email address",
+    "teamRoleAdmin": "Admin",
+    "teamRoleEditor": "Editor",
+    "teamRoleViewer": "Viewer",
+    "teamInvite": "Invite",
+    "teamInviteFailed": "Invite failed",
+    "teamInviteSuccess": " has been invited",
+    "teamRemoveFailed": "Failed to remove member",
+    "teamRemoveSuccess": "Member removed",
+    "teamEmpty": "No team members yet",
+    "teamEmptyDesc": "Invite team members by email",
+    "teamPersonal": "This is a personal project",
+    "teamPersonalDesc": "Upgrade to a team plan to invite members",
+    "githubTitle": "GitHub Connection",
+    "githubDesc": "Manage GitHub repos linked to this project",
+    "githubEmpty": "No GitHub repos linked",
+    "githubEmptyDesc": "Link a repo to sync env vars as GitHub Secrets",
+    "githubAutoSync": "Auto Sync",
+    "githubLastSync": "Last",
+    "githubUnlinkConfirm": "Unlink this repo?",
+    "githubUnlinked": "Repo unlinked",
+    "githubUnlinkFailed": "Failed to unlink",
+    "auditDesc": "Activity log for env var access, project changes, and more",
+    "dangerZone": "Danger Zone",
+    "dangerDesc": "Deleting a project permanently removes all service connections, checklist progress, and environment variables.",
+    "deleteProject": "Delete Project",
     "actionNeeded": {
       "title": "Action Needed",
       "count": "",
@@ -213,7 +257,6 @@
     "finalCtaTitle": "Get Started Now",
     "finalCtaDesc": "Manage up to 3 projects for free. No credit card required.",
     "ctaOneclick": "Create Your Homepage in 3 Min",
-
     "heroHeadline": "Visualize Your",
     "heroHeadlineHighlight": "Infrastructure",
     "heroPrefix": "One Platform to",
@@ -228,11 +271,9 @@
     "statusLabel": "Status",
     "allSystemsOperational": "All Systems Operational",
     "poweredBy": "Powered by modern technologies",
-
     "demoSectionTitle": "From Simple Blogs to Complex SaaS",
     "demoSectionDesc": "Compare service connection structures by project scale, and monitor connection status on a dashboard.",
     "demoLoading": "Loading...",
-
     "featureMapTitle": "Service Map Visualization",
     "featureMapDesc": "Visualize your project's service architecture as an interactive diagram. Share easily with teammates and grasp dependencies at a glance.",
     "featureChecklistTitle": "Connection Checklist",
@@ -247,14 +288,12 @@
     "templateName1": "SaaS",
     "templateName2": "AI App",
     "templateName3": "Blog",
-
     "step1Title": "Create Project",
     "step1Desc": "Create a new project or start from a template. 5 templates including SaaS, AI apps, and more.",
     "step2Title": "Add Services",
     "step2Desc": "Choose from 20+ services in the catalog and follow the step-by-step checklist.",
     "step3Title": "Manage Env Vars",
     "step3Desc": "Store API keys securely and download .env files in one click.",
-
     "filterAll": "All",
     "filterInfra": "Infrastructure",
     "filterBackend": "Backend",
@@ -262,12 +301,10 @@
     "filterComm": "Communication",
     "filterBiz": "Business",
     "filterAI": "AI",
-
     "statServices": "Supported Services",
     "statChecklist": "Checklist Items",
     "statTemplates": "Project Templates",
     "statEncryption": "-bit Encryption",
-
     "planFreeDesc": "Perfect for personal projects",
     "planProDesc": "For professional developers",
     "planTeamDesc": "For teams and organizations",
@@ -288,7 +325,6 @@
     "planTeamF3": "RBAC Access Control",
     "planTeamF4": "SSO",
     "planTeamF5": "Dedicated Support",
-
     "dashboardTitle": "Connection Status Dashboard",
     "dashboardDesc": "Monitor all service connections at a glance",
     "colService": "Service",
@@ -300,20 +336,15 @@
     "statusInProgress": "In Progress",
     "statusNotStarted": "Pending",
     "viewAllConnections": "View All Connections",
-
     "tabSimple": "Simple Flow (Blog)",
     "tabComplex": "Complex Flow (SaaS)",
     "statsServices": " services",
     "statsEnvVars": " env vars",
-
     "nodeConnected": "connected",
     "nodeCompleted": "completed",
-
     "socialProofTagline": "Trusted by 2,000+ development teams",
-
     "step4Title": "AI Analysis",
     "step4Desc": "AI analyzes your architecture, diagnoses missing configurations, and recommends the optimal stack.",
-
     "aiSectionTitle": "Smarter with AI",
     "aiSectionDesc": "5 AI features automate everything from project setup to operations",
     "aiFeature1Title": "Stack Architect",
@@ -326,7 +357,6 @@
     "aiFeature4Desc": "Supabase vs Firebase? AI compares pricing, features, and scalability with data-driven analysis.",
     "aiFeature5Title": "NLP Commands",
     "aiFeature5Desc": "Say \"Add Stripe\" and AI automatically adds services and configures connections for you.",
-
     "deployTitle": "One-Click Deploy",
     "deployDesc": "One GitHub OAuth and your homepage goes live in 3 minutes",
     "deployStep1": "Connect GitHub",
@@ -337,7 +367,6 @@
     "deployStep3Desc": "GitHub Actions auto-builds and deploys your site",
     "deployStep4": "Site is Live",
     "deployStep4Desc": "Instantly available on your github.io domain",
-
     "testimonialTitle": "Developer Stories",
     "testimonialDesc": "Real reviews from developers using Linkmap",
     "testimonial1Name": "Minsoo Kim",
@@ -349,11 +378,9 @@
     "testimonial3Name": "Junho Park",
     "testimonial3Role": "DevOps Engineer",
     "testimonial3Quote": "The AI Env Doctor catches missing configs automatically, which drastically reduced our deployment failures. Team productivity is way up.",
-
     "finalCtaSocialProof": "Join 10,000+ developers",
     "planProF6": "Full AI Suite",
     "planProF7": "GitHub Secrets Sync",
-
     "guideGitHub": "GitHub Guide",
     "guideAuth": "Auth Guide",
     "guideCloudflare": "Cloudflare Guide",
@@ -367,7 +394,6 @@
     "footerGitHub": "GitHub",
     "footerDiscord": "Discord",
     "footerTwitter": "Twitter / X",
-
     "ctaOneclickHero": "Build My Homepage in 3 Min",
     "templateShowcaseTitle": "What will you build?",
     "templateShowcaseDesc": "Pick a template and launch with one click",
@@ -462,7 +488,8 @@
     "ctaOtherGuide": "Other guides",
     "tipCodeWranglerLogin": "npx wrangler login",
     "tipCodeBuildCf": "npm run build:cf",
-    "tipCodeWranglerDeploy": "npx wrangler deploy"
+    "tipCodeWranglerDeploy": "npx wrangler deploy",
+    "minutesSuffix": " min"
   },
   "authGate": {
     "title": "Sign In Required",
@@ -474,7 +501,8 @@
     "noAccount": "Don't have an account?",
     "signUp": "Sign Up",
     "or": "or",
-    "invalidCredentials": "Invalid email or password."
+    "invalidCredentials": "Invalid email or password.",
+    "passwordPlaceholder": "Enter your password"
   },
   "mySites": {
     "title": "My Sites",
@@ -491,26 +519,58 @@
     "deleting": "Deleting...",
     "template": "Template",
     "deployedAt": "Deployed",
-    "status": "Status"
+    "status": "Status",
+    "justNow": "Just now",
+    "minutesAgo": "m ago",
+    "hoursAgo": "h ago",
+    "daysAgo": "d ago",
+    "totalSites": "Total Sites",
+    "active": "Active",
+    "errors": "Errors",
+    "lastDeploy": "Last Deploy"
   },
   "editor": {
     "title": "Edit Site",
     "save": "Save",
     "saving": "Saving...",
     "saved": "Saved",
+    "saveFailed": "Save failed",
     "unsavedChanges": "You have unsaved changes. Leave anyway?",
+    "unsavedWillLost": "Unsaved changes will be lost.",
     "preview": "Preview",
     "backToSites": "My Sites",
     "lastSaved": "Last saved",
     "loadingFiles": "Loading files...",
-    "noFiles": "No editable files found"
+    "noFiles": "No editable files found",
+    "deploying": "Deploying to GitHub Pages... ~30 seconds.",
+    "deployed": "Deployed! Changes are now live.",
+    "deployFailed": "Deploy failed",
+    "applyFailed": "Apply failed",
+    "filesSaved": " file(s) saved (single commit)",
+    "stateSaving": "Saving...",
+    "stateDeploying": "Deploying...",
+    "stateDone": "Done!",
+    "stateDeploy": "Deploy",
+    "cannotPreview": "Cannot preview this file",
+    "openNewTab": "Open in new tab",
+    "code": "Code",
+    "files": "Files",
+    "deployedBadge": "DEPLOYED",
+    "refresh": "Refresh",
+    "statusBarHint": "Ctrl+S save · Deploy to publish",
+    "lastSavedAt": "Last saved: ",
+    "notSavedYet": "Not saved yet",
+    "leave": "Leave",
+    "justNow": "just now",
+    "minutesAgo": "m ago"
   },
   "modulePanel": {
     "title": "Module Editor",
     "applyToCode": "Apply to Code",
     "applyAndDeploy": "Apply & Deploy",
     "moduleDisabled": "This module is disabled. Turn the switch on to enable it.",
-    "selectModule": "Select a module to edit"
+    "selectModule": "Select a module to edit",
+    "aiPlaceholder": "Ask AI to configure..."
   },
   "connections": {
     "title": "Connections",
@@ -648,12 +708,23 @@
     "preview": "Preview",
     "switchAccount": "Switch account",
     "addAccount": "Add another account",
-    "selectAccount": "Select GitHub account"
+    "selectAccount": "Select GitHub account",
+    "minLength": "Must be at least 2 characters",
+    "maxLength": "Must be 100 characters or less",
+    "invalidChars": "Only lowercase letters, numbers, and hyphens allowed (e.g., my-site-1)",
+    "checkingGitHub": "Checking GitHub connection...",
+    "connected": "Connected",
+    "githubNotConnected": "GitHub not connected — will connect automatically on deploy",
+    "siteNamePlaceholder": "my-portfolio",
+    "urlPlaceholder": "{site-name}"
   },
   "wizard": {
     "step1": "Choose",
     "step2": "Creating",
-    "step3": "Complete"
+    "step3": "Complete",
+    "badge": "One-Click Deploy",
+    "title": "Create Your Homepage in 3 Minutes",
+    "subtitle": "Pick a template and hit deploy. That's all."
   },
   "account": {
     "tab": "Account",
@@ -863,13 +934,53 @@
     "editTooltip": "Edit service map",
     "saveSuccess": "Changes saved successfully",
     "saveFailed": "Failed to save changes",
-    "viewLevel": { "status": "Status", "map": "Map", "dependency": "Dependencies" },
-    "viewGroup": { "core": "Core", "runtime": "Runtime", "growth": "Growth", "intelligence": "Intelligence", "infra": "Infra" },
-    "healthScore": { "title": "Project Health", "good": "Good", "warning": "Warning", "critical": "Critical", "connected": "Connected", "healthy": "Healthy", "envComplete": "Env Complete" },
-    "status": { "ok": "OK", "inProgress": "In Progress", "error": "Error", "notSetUp": "Not Set Up", "allGood": "All services are healthy", "allConnected": "All services are connected" },
-    "alerts": { "title": "Needs Attention", "missingEnv": "Missing env vars", "unhealthy": "Unhealthy service", "notConnected": "Not connected" },
-    "actions": { "addService": "Add Service", "setEnvVars": "Set Env Vars", "viewMap": "View Map", "notConnectedCount": " services not connected", "search": "Search services...", "fitView": "Fit View" },
-    "dependency": { "impactAnalysis": "Impact Analysis", "environment": "Environment" }
+    "viewLevel": {
+      "status": "Status",
+      "map": "Map",
+      "dependency": "Dependencies"
+    },
+    "viewGroup": {
+      "core": "Core",
+      "runtime": "Runtime",
+      "growth": "Growth",
+      "intelligence": "Intelligence",
+      "infra": "Infra"
+    },
+    "healthScore": {
+      "title": "Project Health",
+      "good": "Good",
+      "warning": "Warning",
+      "critical": "Critical",
+      "connected": "Connected",
+      "healthy": "Healthy",
+      "envComplete": "Env Complete"
+    },
+    "status": {
+      "ok": "OK",
+      "inProgress": "In Progress",
+      "error": "Error",
+      "notSetUp": "Not Set Up",
+      "allGood": "All services are healthy",
+      "allConnected": "All services are connected"
+    },
+    "alerts": {
+      "title": "Needs Attention",
+      "missingEnv": "Missing env vars",
+      "unhealthy": "Unhealthy service",
+      "notConnected": "Not connected"
+    },
+    "actions": {
+      "addService": "Add Service",
+      "setEnvVars": "Set Env Vars",
+      "viewMap": "View Map",
+      "notConnectedCount": " services not connected",
+      "search": "Search services...",
+      "fitView": "Fit View"
+    },
+    "dependency": {
+      "impactAnalysis": "Impact Analysis",
+      "environment": "Environment"
+    }
   },
   "serviceDetail": {
     "loading": "Loading service details...",
@@ -881,5 +992,168 @@
     "pageNotFoundDesc": "The page you requested doesn't exist or has been moved.",
     "unexpected": "An unexpected error occurred",
     "projectNotFound": "Project not found"
+  },
+  "githubConnect": {
+    "title": "Connect GitHub",
+    "desc": "Your homepage code will be stored in your GitHub account. You keep full ownership of the code.",
+    "modalDesc": "Your code will be stored in your GitHub account. You keep full ownership.",
+    "connected": "Connected",
+    "proceedDeploy": "Proceed to Deploy",
+    "connectButton": "Connect GitHub",
+    "redirectNotice": "You will be redirected to GitHub login"
+  },
+  "myProjectCard": {
+    "services": "Services",
+    "progress": "Progress",
+    "addService": "Add Service",
+    "viewMap": "View Map"
+  },
+  "moduleForm": {
+    "add": "Add",
+    "maxSizeError": "Max 5MB image allowed",
+    "imageUploaded": "Image uploaded",
+    "uploadImage": "Upload image"
+  },
+  "deploySuccess": {
+    "previewUnavailable": "Preview unavailable"
+  },
+  "deployError": {
+    "repoExists": {
+      "cause": "A repository with the same name already exists on GitHub.",
+      "solution": "Use a different site name, or delete the existing repository on GitHub and try again."
+    },
+    "templateNotFound": {
+      "cause": "The source repository for the selected template was not found.",
+      "solution": "Choose a different template or contact the administrator."
+    },
+    "fileUpload": {
+      "cause": "An error occurred while uploading template files to the repository.",
+      "solution": "Please try again. If the issue persists, disconnect and reconnect your GitHub account."
+    },
+    "permission": {
+      "cause": "Insufficient GitHub permissions or expired token.",
+      "solution": "Disconnect and reconnect your GitHub account. (Settings → Disconnect GitHub)"
+    },
+    "token": {
+      "cause": "GitHub authentication token has expired or is invalid.",
+      "solution": "Please reconnect your GitHub account."
+    },
+    "rateLimit": {
+      "cause": "Too many requests in a short period.",
+      "solution": "Please wait 1 minute and try again."
+    },
+    "pages": {
+      "cause": "An error occurred while enabling or building GitHub Pages.",
+      "solution": "Enable Pages manually in your GitHub repo Settings → Pages, or retry."
+    },
+    "network": {
+      "cause": "A server or network error occurred.",
+      "solution": "Please try again later. If the issue persists, contact the administrator."
+    },
+    "quota": {
+      "cause": "Deployment quota has been reached.",
+      "solution": "Upgrade to Pro plan or delete existing sites and try again."
+    },
+    "default": {
+      "cause": "An unexpected error occurred during deployment.",
+      "solution": "Please try again. If the issue persists, try a different site name or contact the administrator."
+    }
+  },
+  "chatTerminal": {
+    "errorPrefix": "Something went wrong: ",
+    "unknownError": "Unknown error",
+    "newFile": "NEW",
+    "apply": "Apply",
+    "linesTotal": "{count} lines total",
+    "applyCode": "Apply Code",
+    "applyingAll": "Applying...",
+    "applyAllDeploy": "Apply All & Deploy",
+    "aiHelper": "AI Helper",
+    "title": "AI Code Helper",
+    "subtitle": "Tell me what you want to change",
+    "clearChat": "Clear chat",
+    "welcome": "Hi! I can modify your site's code or create new pages. Choose a suggestion below or type your own request!",
+    "trySuggestions": "Try these",
+    "analyzing": "Analyzing your code...",
+    "editing": "Editing: ",
+    "placeholder": "e.g., \"Change header color to blue\"",
+    "inputHint": "Enter to send · Shift+Enter for new line",
+    "suggestionChangeColors": "Change colors",
+    "suggestionAddPage": "Add page",
+    "suggestionChangeFont": "Change font",
+    "suggestionAddImage": "Add image",
+    "suggestionImproveLayout": "Improve layout",
+    "suggestionFullRedesign": "Full redesign",
+    "suggestionDarkMode": "Dark mode",
+    "suggestionAnimations": "Animations",
+    "suggestionSeo": "SEO optimize",
+    "promptChangeColors": "Change the background to a soft gradient",
+    "promptAddPage": "Create a new about page",
+    "promptChangeFont": "Change all text to a clean sans-serif font",
+    "promptAddImage": "Add a nice hero background image",
+    "promptImproveLayout": "Improve the overall layout to look modern",
+    "promptFullRedesign": "Redesign to look prettier and more professional",
+    "promptDarkMode": "Add dark mode CSS using prefers-color-scheme media query",
+    "promptAnimations": "Add smooth scroll animations to the page",
+    "promptSeo": "Add meta tags, Open Graph, and semantic HTML for SEO"
+  },
+  "developer": {
+    "apiTokenTitle": "API Token Management",
+    "customServicesTitle": "My Custom Services",
+    "customServicesDesc": "Register services not in the catalog and connect them to projects",
+    "emptyTitle": "No custom services yet",
+    "emptyDesc": "You can register custom services when adding services to a project",
+    "deleteSuccess": "service deleted",
+    "deleteFailed": "Delete failed",
+    "migrateSuccess": "Migrated to global service",
+    "migrateFailed": "Migration failed",
+    "matchBanner": "A similar global service exists in the catalog",
+    "migrateTitle": "Migrate to Global Service",
+    "migrateDesc": "Migrate custom service to global service.",
+    "migrateConfirm": "Migrate",
+    "deleteTitle": "Delete Custom Service",
+    "deleteConfirmDesc": "Delete this service?"
+  },
+  "deployStep": {
+    "timeoutTitle": "Deployment status check timed out",
+    "timeoutDesc": "Deployment may still be in progress. Check your site in a moment.",
+    "checkSite": "Check Site",
+    "checkPages": "Check Pages Settings",
+    "errorTitle": "Deployment Error",
+    "cause": "Cause",
+    "solution": "Solution",
+    "technicalDetails": "Technical Details",
+    "copy": "Copy",
+    "tryAgain": "Try Again",
+    "upgradeToast": "Will be reflected upon payment update.",
+    "upgradePlan": "Upgrade Plan",
+    "manageSites": "Manage Sites",
+    "checkOnGitHub": "Check on GitHub"
+  },
+  "authModal": {
+    "title": "Sign In Required",
+    "description": "Sign in to deploy your homepage.",
+    "email": "Email",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "signIn": "Sign In",
+    "signingIn": "Signing in...",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign Up",
+    "or": "or",
+    "invalidCredentials": "Invalid email or password."
+  },
+  "deploySiteCard": {
+    "statusActive": "Active",
+    "statusBuilding": "Building",
+    "statusCreating": "Creating",
+    "statusError": "Error",
+    "statusCanceled": "Canceled",
+    "statusPending": "Pending",
+    "siteDeleted": "Site deleted.",
+    "previewUnavailable": "Preview unavailable",
+    "deployError": "Deploy error",
+    "preparing": "Preparing...",
+    "manage": "Manage"
   }
 }

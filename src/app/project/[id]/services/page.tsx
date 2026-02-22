@@ -1,6 +1,11 @@
-import { redirect } from 'next/navigation';
+'use client';
 
-export default async function ServicesRedirect({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  redirect(`/project/${id}/integrations`);
+import { useParams } from 'next/navigation';
+import { ServicesContent } from '@/components/project/services-content';
+
+export default function ServicesPage() {
+  const params = useParams();
+  const projectId = params.id as string;
+
+  return <ServicesContent projectId={projectId} />;
 }

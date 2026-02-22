@@ -83,15 +83,13 @@ export function TemplatePickerStep({
 
   const validateSiteName = (name: string) => {
     if (name.length < 2) {
-      return locale === 'ko' ? '최소 2자 이상이어야 합니다' : 'Must be at least 2 characters';
+      return t(locale, 'templatePicker.minLength');
     }
     if (name.length > 100) {
-      return locale === 'ko' ? '100자 이하여야 합니다' : 'Must be 100 characters or less';
+      return t(locale, 'templatePicker.maxLength');
     }
     if (!SITE_NAME_REGEX.test(name)) {
-      return locale === 'ko'
-        ? '소문자, 숫자, 하이픈만 사용 가능합니다 (예: my-site-1)'
-        : 'Only lowercase letters, numbers, and hyphens allowed (e.g., my-site-1)';
+      return t(locale, 'templatePicker.invalidChars');
     }
     return null;
   };
@@ -158,7 +156,7 @@ export function TemplatePickerStep({
             <>
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               <span className="text-muted-foreground">
-                {locale === 'ko' ? 'GitHub 연결 확인 중...' : 'Checking GitHub connection...'}
+                {t(locale, 'templatePicker.checkingGitHub')}
               </span>
             </>
           ) : hasAccounts ? (
@@ -187,7 +185,7 @@ export function TemplatePickerStep({
                 </SelectContent>
               </Select>
               <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
-                {locale === 'ko' ? '연결됨' : 'Connected'}
+                {t(locale, 'templatePicker.connected')}
               </Badge>
             </>
           ) : githubUsername ? (
@@ -198,16 +196,14 @@ export function TemplatePickerStep({
                 @{githubUsername}
               </span>
               <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
-                {locale === 'ko' ? '연결됨' : 'Connected'}
+                {t(locale, 'templatePicker.connected')}
               </Badge>
             </>
           ) : (
             <>
               <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
               <span className="text-amber-700 dark:text-amber-300">
-                {locale === 'ko'
-                  ? 'GitHub 미연결 — 배포 시 자동으로 연결됩니다'
-                  : 'GitHub not connected — will connect automatically on deploy'}
+                {t(locale, 'templatePicker.githubNotConnected')}
               </span>
             </>
           )}
@@ -251,7 +247,7 @@ export function TemplatePickerStep({
         </Label>
         <Input
           id="site-name"
-          placeholder={locale === 'ko' ? 'my-portfolio' : 'my-portfolio'}
+          placeholder={t(locale, 'templatePicker.siteNamePlaceholder')}
           value={siteName}
           onChange={(e) => handleSiteNameChange(e.target.value)}
           className={siteNameError ? 'border-red-500' : ''}
@@ -263,7 +259,7 @@ export function TemplatePickerStep({
         <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
           <Globe className="h-3.5 w-3.5 flex-shrink-0" />
           <span className="font-mono truncate">
-            https://{urlUsername}.github.io/{siteName || (locale === 'ko' ? '{사이트이름}' : '{site-name}')}
+            https://{urlUsername}.github.io/{siteName || t(locale, 'templatePicker.urlPlaceholder')}
           </span>
         </div>
       </div>

@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Github, Loader2, LogIn } from 'lucide-react';
 import { GoogleIcon } from '@/components/icons/google-icon';
 import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 
 export function AuthGateStep() {
   const { locale } = useLocaleStore();
@@ -32,9 +33,7 @@ export function AuthGateStep() {
     if (error) {
       setError(
         error.message === 'Invalid login credentials'
-          ? locale === 'ko'
-            ? '이메일 또는 비밀번호가 올바르지 않습니다.'
-            : 'Invalid email or password.'
+          ? t(locale, 'authGate.invalidCredentials')
           : error.message
       );
       setLoading(false);
@@ -70,12 +69,10 @@ export function AuthGateStep() {
 
           <div>
             <h3 className="text-xl font-semibold mb-2">
-              {locale === 'ko' ? '로그인이 필요합니다' : 'Sign In Required'}
+              {t(locale, 'authGate.title')}
             </h3>
             <p className="text-sm text-muted-foreground max-w-md mx-auto">
-              {locale === 'ko'
-                ? '홈페이지를 배포하려면 먼저 로그인하세요. 계정이 없으면 자동으로 생성됩니다.'
-                : 'Sign in to deploy your homepage. An account will be created automatically if needed.'}
+              {t(locale, 'authGate.description')}
             </p>
           </div>
 
@@ -115,7 +112,7 @@ export function AuthGateStep() {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-card px-2 text-muted-foreground">
-                  {locale === 'ko' ? '또는' : 'or'}
+                  {t(locale, 'authGate.or')}
                 </span>
               </div>
             </div>
@@ -123,7 +120,7 @@ export function AuthGateStep() {
             <form onSubmit={handleEmailLogin} className="space-y-3">
               <div className="space-y-1.5">
                 <Label htmlFor="oneclick-email" className="text-left block">
-                  {locale === 'ko' ? '이메일' : 'Email'}
+                  {t(locale, 'authGate.email')}
                 </Label>
                 <Input
                   id="oneclick-email"
@@ -136,12 +133,12 @@ export function AuthGateStep() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="oneclick-password" className="text-left block">
-                  {locale === 'ko' ? '비밀번호' : 'Password'}
+                  {t(locale, 'authGate.password')}
                 </Label>
                 <Input
                   id="oneclick-password"
                   type="password"
-                  placeholder={locale === 'ko' ? '비밀번호를 입력하세요' : 'Enter your password'}
+                  placeholder={t(locale, 'authGate.passwordPlaceholder')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -154,15 +151,15 @@ export function AuthGateStep() {
 
               <Button type="submit" className="w-full" disabled={loading || oauthLoading !== null}>
                 {loading
-                  ? locale === 'ko' ? '로그인 중...' : 'Signing in...'
-                  : locale === 'ko' ? '로그인' : 'Sign In'}
+                  ? t(locale, 'authGate.signingIn')
+                  : t(locale, 'authGate.signIn')}
               </Button>
             </form>
 
             <p className="text-sm text-muted-foreground">
-              {locale === 'ko' ? '계정이 없으신가요?' : "Don't have an account?"}{' '}
+              {t(locale, 'authGate.noAccount')}{' '}
               <Link href="/signup?redirect=/oneclick" className="text-primary hover:underline font-medium">
-                {locale === 'ko' ? '회원가입' : 'Sign Up'}
+                {t(locale, 'authGate.signUp')}
               </Link>
             </p>
           </div>

@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { CheckCircle2, Github, ExternalLink, Loader2 } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 
 interface GitHubAccount {
   id: string;
@@ -48,12 +49,10 @@ export function GitHubConnectModal({
             <Github className="h-6 w-6" />
           </div>
           <DialogTitle>
-            {locale === 'ko' ? 'GitHub 연결' : 'Connect GitHub'}
+            {t(locale, 'githubConnect.title')}
           </DialogTitle>
           <DialogDescription>
-            {locale === 'ko'
-              ? '코드를 내 GitHub 계정에 저장합니다. 완전한 소유권을 가집니다.'
-              : 'Your code will be stored in your GitHub account. You keep full ownership.'}
+            {t(locale, 'githubConnect.modalDesc')}
           </DialogDescription>
         </DialogHeader>
 
@@ -70,24 +69,22 @@ export function GitHubConnectModal({
                   {githubAccount.provider_account_id}
                 </span>
                 <Badge variant="secondary">
-                  {locale === 'ko' ? '연결됨' : 'Connected'}
+                  {t(locale, 'githubConnect.connected')}
                 </Badge>
               </div>
               <Button onClick={onConnected} size="lg" className="w-full">
-                {locale === 'ko' ? '배포 진행' : 'Proceed to Deploy'}
+                {t(locale, 'githubConnect.proceedDeploy')}
               </Button>
             </div>
           ) : (
             <div className="space-y-3">
               <Button onClick={handleConnect} size="lg" className="w-full gap-2">
                 <Github className="h-4 w-4" />
-                {locale === 'ko' ? 'GitHub 연결하기' : 'Connect GitHub'}
+                {t(locale, 'githubConnect.connectButton')}
               </Button>
               <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
                 <ExternalLink className="h-3 w-3" />
-                {locale === 'ko'
-                  ? 'GitHub 로그인 페이지로 이동합니다'
-                  : 'You will be redirected to GitHub login'}
+                {t(locale, 'githubConnect.redirectNotice')}
               </p>
             </div>
           )}

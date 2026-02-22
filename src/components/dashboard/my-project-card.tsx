@@ -5,6 +5,7 @@ import { Plus, Map as MapIcon, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SystemStatusBadge } from './system-status-badge';
 import { useLocaleStore } from '@/stores/locale-store';
+import { t } from '@/lib/i18n';
 import type { Project, DashboardMetrics, ServiceCardData } from '@/types';
 
 interface MyProjectCardProps {
@@ -70,7 +71,7 @@ export function MyProjectCard({ project, metrics, allCards }: MyProjectCardProps
           <div className="border-r">
             <p className="text-xl font-mono font-bold">{metrics.totalServices}</p>
             <p className="text-[11px] text-muted-foreground">
-              {locale === 'ko' ? '서비스' : 'Services'}
+              {t(locale, 'myProjectCard.services')}
             </p>
           </div>
           <div className="border-r">
@@ -80,7 +81,7 @@ export function MyProjectCard({ project, metrics, allCards }: MyProjectCardProps
           <div>
             <p className="text-xl font-mono font-bold">{metrics.progressPercent}%</p>
             <p className="text-[11px] text-muted-foreground">
-              {locale === 'ko' ? '진행률' : 'Progress'}
+              {t(locale, 'myProjectCard.progress')}
             </p>
           </div>
         </div>
@@ -109,13 +110,13 @@ export function MyProjectCard({ project, metrics, allCards }: MyProjectCardProps
           <Button variant="default" size="sm" className="flex-1" asChild>
             <Link href={`/project/${project.id}/integrations`}>
               <Plus className="mr-1 h-3.5 w-3.5" />
-              {locale === 'ko' ? '서비스 추가' : 'Add Service'}
+              {t(locale, 'myProjectCard.addService')}
             </Link>
           </Button>
           <Button variant="outline" size="sm" className="flex-1" asChild>
             <Link href={`/project/${project.id}/service-map`}>
               <MapIcon className="mr-1 h-3.5 w-3.5" />
-              {locale === 'ko' ? '맵 보기' : 'View Map'}
+              {t(locale, 'myProjectCard.viewMap')}
             </Link>
           </Button>
         </div>
