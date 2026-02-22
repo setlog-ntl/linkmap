@@ -1,5 +1,7 @@
 # OneLink 현재 문제점 & 리팩토링 방향
 
+> **최종 수정일**: 2026-02-22
+
 ## 1. 현재 문제점 분석
 
 ### 1.1 아키텍처 이슈
@@ -170,10 +172,13 @@
 
 | 메트릭 | 현재 값 | 비고 |
 |--------|---------|------|
-| 총 파일 수 | 28개 | oneclick 관련 |
-| 활성 API 라우트 | 10개 | 레거시 제거, batch-update 추가 |
+| 총 파일 수 | 70+ | oneclick 관련 (컴포넌트, API, 스키마, 프리셋 포함) |
+| 활성 API 라우트 | 13개 | deploy, preflight, upload 등 (레거시 제거 완료) |
+| 컴포넌트 | 18개 | oneclick(11) + my-sites(7) |
 | TanStack Query 훅 | 9개 | 레거시 2개 삭제 완료 |
 | Zod 스키마 | 3개 | 레거시 2개 삭제 완료 |
-| 템플릿 수 (DB) | 15개 | migration 023 기준 |
-| 번들 템플릿 (실제 배포 가능) | 3개 | Phase 1 MVP (link-in-bio-pro, digital-namecard, dev-showcase) |
+| 번들 템플릿 (실제 배포 가능) | 6개 | link-in-bio-pro, digital-namecard, dev-showcase, personal-brand, freelancer-page, small-biz |
+| 모듈 스키마 | 6개 | 각 배포 가능 템플릿별 편집 모듈 정의 |
+| 모듈 프리셋 | 6개 | 각 템플릿별 프리셋 |
 | 레거시 코드 비율 | 0% | Sprint 1 완료 |
+| IA Redesign | 완료 | /oneclick + /my-sites → /sites 통합 (2026-02-22) |

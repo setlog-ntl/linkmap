@@ -3,20 +3,18 @@
 > 이 문서는 초기 분석 기준입니다. 최신 15개 템플릿 계획은 [템플릿기획.md](../템플릿기획/템플릿기획.md) 참조.
 > Phase 2 템플릿 콘텐츠 생성 계획은 [07-enhancement-plan.md](./07-enhancement-plan.md)의 Sprint 9-11 참조.
 
-## 현재 상태 (2026-02)
+## 현재 상태 (2026-02-22)
 
-DB에 등록된 활성 템플릿 8개. 모두 `deploy_target = 'github_pages'`.
+**배포 가능 템플릿 6개** — 번들 콘텐츠 + 모듈 스키마 + 프리셋 완비.
 
-| slug | name_ko | framework | 상태 |
-|------|---------|-----------|------|
-| homepage-minimal | 미니멀 포트폴리오 | nextjs | (migration 023에서 비활성화) |
-| homepage-links | 링크 모음 | nextjs | (migration 023에서 비활성화) |
-| link-in-bio-pro | 링크인바이오 프로 | nextjs | 유지 |
-| digital-namecard | 디지털 명함 | nextjs | 유지 |
-| dev-showcase | 개발자 쇼케이스 | nextjs | 유지 |
-| startup-landing | 스타트업 랜딩 | nextjs | 평가 필요 |
-| blog-starter | 블로그 스타터 | nextjs | 평가 필요 |
-| saas-landing | SaaS 랜딩 | nextjs | 평가 필요 |
+| slug | name_ko | framework | 번들 | 모듈 스키마 | 프리셋 |
+|------|---------|-----------|------|-----------|--------|
+| link-in-bio-pro | 링크인바이오 프로 | nextjs | ✅ | ✅ (4개 모듈) | ✅ |
+| digital-namecard | 디지털 명함 | nextjs | ✅ | ✅ | ✅ |
+| dev-showcase | 개발자 쇼케이스 | nextjs | ✅ | ✅ (6개 모듈) | ✅ |
+| personal-brand | 퍼스널 브랜드 | nextjs | ✅ | ✅ (6개 모듈) | ✅ (3개: 미니멀/크리에이터/풀) |
+| freelancer-page | 프리랜서 페이지 | nextjs | ✅ | ✅ | ✅ |
+| small-biz | 소상공인 홈페이지 | nextjs | ✅ | ✅ | ✅ |
 
 ## 평가 기준
 

@@ -922,13 +922,16 @@ Phase 2 추가:
 | `src/data/oneclick/module-schemas/index.ts` | 3개 템플릿 등록 |
 | `package.json` | @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities 추가 |
 
-### 지원 템플릿 현황
+### 지원 템플릿 현황 (2026-02-22 기준)
 
-| 템플릿 | 모듈 수 | 프리셋 |
-|--------|---------|--------|
-| personal-brand | 6개 | 3개 (미니멀/크리에이터/풀) |
-| dev-showcase | 6개 | - |
-| link-in-bio-pro | 4개 | - |
+| 템플릿 | 모듈 수 | 프리셋 | 상태 |
+|--------|---------|--------|------|
+| personal-brand | 6개 | 3개 (미니멀/크리에이터/풀) | ✅ 완료 |
+| dev-showcase | 6개 | ✅ | ✅ 완료 |
+| link-in-bio-pro | 4개 | ✅ | ✅ 완료 |
+| digital-namecard | 4개+ | ✅ | ✅ 완료 |
+| freelancer-page | 6개+ | ✅ | ✅ 완료 |
+| small-biz | 7개+ | ✅ | ✅ 완료 |
 
 ---
 

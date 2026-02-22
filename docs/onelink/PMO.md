@@ -2,9 +2,9 @@
 
 > **프로젝트 코드**: ONELINK-ENH (OneLink Enhancement)
 > **시작일**: 2026-02-18
-> **상태**: ✅ Phase 1 완료 / Phase 2 계획 수립
+> **상태**: ✅ Phase 1 완료 + 모듈 에디터 Phase 1~4 완료 + IA Redesign 완료
 > **PMO 담당**: Claude Code AI Agent
-> **최종 수정**: 2026-02-18
+> **최종 수정**: 2026-02-22
 
 ---
 
@@ -57,7 +57,7 @@
 
 | KPI | Post-Sprint 현재 | 목표 | 측정 방법 |
 |-----|-------------------|------|----------|
-| 배포 가능 템플릿 수 | 3/15 (콘텐츠 번들 미생성) | 15/15 | homepage_template_content 번들 수 |
+| 배포 가능 템플릿 수 | 6/15 (콘텐츠 번들 생성) | 15/15 | homepage_template_content 번들 수 |
 | 배포 소요 시간 | ~2분 | ~1분 | deploy-pages API 응답시간 |
 | 레거시 코드 비율 | 0% (Sprint 1에서 제거) | 0% | 미사용 파일/코드 수 |
 | Lighthouse 성능 점수 | 미측정 | 90+ | 템플릿별 Lighthouse 감사 |
@@ -85,13 +85,18 @@
 │  [완료] ✅ 배치 파일 적용 최적화 (Sprint 6 batch-update)                 │
 │  [완료] ✅ OAuth localStorage 전환 (Sprint 3)                            │
 │                                                                           │
-│  [진행 중] 🔄 Connections 시각화 기능 (개발 중, 미커밋)                  │
-│    - SVG 오버레이 기반 서비스 연결 시각화                                  │
-│    - 자동 연결 추천 (auto-connect)                                        │
-│    - 프로젝트별 레이어 오버라이드                                          │
-│    - DB migration 028, 029 준비                                           │
+│  [완료] ✅ 모듈 에디터 Phase 1~4 완료 (6개 템플릿 지원)                  │
+│    - 스키마 기반 동적 폼, 코드 제너레이터                                  │
+│    - DnD 순서 변경, 프리셋, AI 추천                                       │
+│    - 이미지 업로드, 폰트 선택기                                           │
+│  [완료] ✅ IA Redesign — /oneclick+/my-sites → /sites 통합               │
+│  [완료] ✅ 배포 가능 템플릿 3→6개 확장                                   │
+│    - personal-brand, freelancer-page, small-biz 추가                      │
+│  [완료] ✅ 배포 진행 모달 UX (토스트→단계별 모달)                         │
+│  [완료] ✅ 인증/GitHub 연결 모달 UX                                      │
+│  [완료] ✅ preflight API (배포 사전 검사)                                 │
 │                                                                           │
-│  [미완] ⬜ Phase 2-4 템플릿 12개 (DB seed만 완료, 콘텐츠 없음)          │
+│  [미완] ⬜ 나머지 9개 템플릿 콘텐츠 번들                                 │
 │  [미완] ⬜ 프리뷰 이미지 시스템                                          │
 │  [미완] ⬜ 커스텀 도메인 지원                                            │
 │                                                                           │
@@ -107,13 +112,14 @@
 
 | 카테고리 | 파일 수 | 비고 |
 |----------|---------|------|
-| 페이지 | 3 | /oneclick, /my-sites, /my-sites/[id]/edit |
-| 컴포넌트 | 10 | oneclick(6) + my-sites(4) |
-| API 라우트 | 10 활성 | deploy-pages, status, templates, batch-update 등 (레거시 제거 완료) |
-| TanStack Query 훅 | 9 oneclick + 6 connections | 레거시 2개 삭제 완료 |
-| Zod 스키마 | 3 oneclick + 2 connections | 레거시 2개 삭제 완료 |
-| 번들 템플릿 | 3/15 완료 | Phase 1 MVP만 |
-| DB 마이그레이션 | 6 관련 | 016, 022, 023, 024-026, 028, 029 |
+| 페이지 | 3 | /sites (탭: new/manage), /sites/[id]/edit, 레거시 리다이렉트 2개 |
+| 컴포넌트 | 18 | oneclick(11) + my-sites(7) |
+| API 라우트 | 13 활성 | deploy, preflight, status, templates, upload, batch-update 등 |
+| TanStack Query 훅 | 9 | 레거시 2개 삭제 완료 |
+| Zod 스키마 | 3 | 레거시 2개 삭제 완료 |
+| 번들 템플릿 | 6개 배포 가능 | link-in-bio-pro, digital-namecard, dev-showcase, personal-brand, freelancer-page, small-biz |
+| 모듈 스키마/프리셋 | 6개 + 6개 | 각 배포 가능 템플릿별 |
+| DB 마이그레이션 | 3 관련 | 014, 016, 022 |
 
 ---
 
@@ -316,6 +322,34 @@
 - Connections 페이지 서버 auth 적용
 - Connections API 문서화
 
+### Session #4 — 2026-02-20 (모듈 에디터 Phase 1~4 구현)
+
+**수행 작업:**
+1. **모듈 에디터 Phase 1**: 스키마 타입, Personal Brand 모듈 스키마, config.ts/page.tsx 코드 제너레이터, 동적 폼 렌더러, 모듈 패널, 에디터 통합
+2. **모듈 에디터 Phase 2**: 컴포넌트 수준 편집 (그래디언트 색상, 컬럼 수, globals.css 테마)
+3. **모듈 에디터 Phase 3**: DnD Kit 통합, 3개 프리셋 (미니멀/크리에이터/풀), dev-showcase + link-in-bio-pro 스키마 추가
+4. **모듈 에디터 Phase 4**: 이미지 업로드 API, 폰트 선택기, AI 모듈 추천
+5. **문서**: `08-modular-template-editor.md` 생성 및 Phase별 구현 결과 기록
+
+### Session #5 — 2026-02-22 (IA Redesign + 추가 템플릿)
+
+**수행 작업:**
+1. **IA Redesign**: `/oneclick` + `/my-sites` → `/sites` 통합 (탭: new/manage)
+2. **모달 UX**: 인증/GitHub 연결/배포 진행을 모달 방식으로 변경
+3. **추가 템플릿**: personal-brand, freelancer-page, small-biz 번들 + 모듈 스키마 + 프리셋 추가
+4. **preflight API**: 배포 사전 검사 (계정+쿼터+사이트명 중복) 신규 엔드포인트
+5. **deploy API 통합**: `deploy-pages` → `deploy`로 통합 (하위 호환 리다이렉트)
+
+### Session #6 — 2026-02-22 (문서 현행화)
+
+**수행 작업:**
+1. `docs/onelink/` 전체 문서 9개 현행화
+2. IA Redesign 반영 (/sites 통합, 레거시 리다이렉트)
+3. 모듈 에디터 Phase 1~4 완료 반영
+4. API 라우트 13개, 컴포넌트 18개, 템플릿 6개 수치 갱신
+5. 모달 UX (auth-modal, github-connect-modal, deploy-progress) 반영
+6. deploy → deploy-pages 하위 호환, preflight/upload API 추가 반영
+
 ---
 
 ## 7. 문서 인덱스
@@ -344,3 +378,5 @@
 | 2026-02-18 | v2.0 | 7-Sprint 전체 완료. Sprint 6(편집기/AI) + Sprint 7(플랫폼 연결) 구현. 문서 전체 보완 완료 |
 | 2026-02-18 | v3.0 | 문서 전체 현행화. 8건 불일치 해결, AS-IS 갱신, KPI 현행화, Phase 2 로드맵(Sprint 8-12), Connections 기능 Session #3, 리스크 R6-R9 추가, 의사결정 4건 추가 |
 | 2026-02-20 | v3.1 | 모듈형 템플릿 에디터 기획 문서 추가 (08-modular-template-editor.md). Personal Brand 파일럿 기준 6개 콘텐츠 모듈 + 2개 레이아웃 모듈 정의, 4-Phase 구현 로드맵 |
+| 2026-02-20 | v4.0 | 모듈 에디터 Phase 1~4 전체 구현 완료. 6개 템플릿 모듈 스키마/프리셋, DnD, 이미지 업로드, AI 추천, 폰트 선택기 |
+| 2026-02-22 | v5.0 | IA Redesign 반영. /oneclick+/my-sites→/sites 통합, 모달 UX(인증/GitHub/배포 진행), preflight/upload API, deploy API 통합, 템플릿 3→6개. 문서 전체 현행화 |

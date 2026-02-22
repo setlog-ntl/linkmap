@@ -1,5 +1,7 @@
 # OneLink 데이터 모델 & DB 스키마
 
+> **최종 수정일**: 2026-02-22
+
 ## 1. 데이터베이스 테이블
 
 ### 1.1 `homepage_templates` (템플릿 정의)
@@ -222,10 +224,13 @@ interface HomepageTemplateContent {
 
 **번들 구조**: 각 템플릿은 Next.js static export 파일을 TypeScript 문자열로 번들링
 
-**현재 구현된 템플릿 (Phase 1 MVP):**
-- `link-in-bio-pro` — 링크인바이오 프로 (19 파일)
-- `digital-namecard` — 디지털 명함 (19 파일)
+**현재 구현된 템플릿 (6개 배포 가능):**
+- `link-in-bio-pro` — 링크인바이오 프로
+- `digital-namecard` — 디지털 명함
 - `dev-showcase` — 개발자 쇼케이스 (별도 파일 `dev-showcase-template.ts`)
+- `personal-brand` — 퍼스널 브랜드 (별도 파일 `personal-brand-template.ts`)
+- `freelancer-page` — 프리랜서 페이지 (별도 파일 `freelancer-page-template.ts`)
+- `small-biz` — 소상공인 홈페이지 (별도 파일 `small-biz-template.ts`)
 
 **조회 방법**: `getTemplateBySlug(slug)` — Map 기반 O(1) 조회
 ```typescript
@@ -263,34 +268,39 @@ const DEFAULT_QUOTA = {
 
 ---
 
-## 5. Connections 관련 테이블 (개발 중)
+## 5. 모듈 에디터 데이터 구조
 
-> 아래 테이블은 Connections 시각화 기능 개발 중 추가됨 (미커밋 상태).
+### 5.1 모듈 스키마 (`src/data/oneclick/module-schemas/`)
 
-### 5.1 `user_connections` 확장 (migration 028)
+6개 템플릿별 모듈 스키마 정의:
 
-기존 `user_connections` 테이블에 4개 컬럼 추가:
+| 템플릿 | 모듈 수 | 파일 |
+|--------|---------|------|
+| personal-brand | 6개 (hero, about, values, highlights, gallery, contact) | `personal-brand.ts` |
+| dev-showcase | 6개 (hero, about, projects, experience, blog, contact) | `dev-showcase.ts` |
+| link-in-bio-pro | 4개 (profile, links, socials, theme) | `link-in-bio-pro.ts` |
+| digital-namecard | 4개+ | `digital-namecard.ts` |
+| freelancer-page | 6개+ | `freelancer-page.ts` |
+| small-biz | 7개+ | `small-biz.ts` |
 
-| 컬럼 | 타입 | 설명 |
-|------|------|------|
-| `connection_status` | TEXT | active, inactive, error, pending |
-| `description` | TEXT | 연결에 대한 선택적 설명 |
-| `last_verified_at` | TIMESTAMPTZ | 마지막 연결 확인 시각 |
-| `metadata` | JSONB | 추가 메타데이터 |
+### 5.2 모듈 프리셋 (`src/data/oneclick/module-presets/`)
 
-`connection_type` CHECK 확장: `api_call`, `auth_provider`, `webhook`, `sdk` 추가.
+| 템플릿 | 프리셋 |
+|--------|--------|
+| personal-brand | 3개 (미니멀, 크리에이터, 풀 프로필) |
+| 기타 5개 | 각 템플릿별 프리셋 제공 |
 
-### 5.2 `project_service_overrides` (migration 029)
+### 5.3 코드 제너레이터 (`src/lib/oneclick/code-generator.ts`)
 
-프로젝트별 대시보드 레이어 커스터마이징 테이블:
+모듈 설정 → 실제 코드 파일 생성:
 
-| 컬럼 | 타입 | 설명 |
-|------|------|------|
-| `id` | UUID | PK |
-| `project_id` | UUID | FK → projects |
-| `service_id` | UUID | FK → services |
-| `dashboard_layer` | TEXT | frontend, backend, devtools |
-| `dashboard_subcategory` | TEXT | 서브카테고리 |
-
-- Unique constraint: `(project_id, service_id)`
-- RLS: 프로젝트 소유자 전체 권한, 팀 에디터+ 전체 권한, 팀 뷰어 읽기 전용
+| 함수 | 생성 대상 |
+|------|----------|
+| `generateConfigTs()` | `src/lib/config.ts` |
+| `generatePageTsx()` | `src/app/page.tsx` |
+| `generateHeroSection()` | `src/components/hero-section.tsx` (그래디언트 색상 치환) |
+| `generateValuesSection()` | `src/components/values-section.tsx` (컬럼 수 변경) |
+| `generateGallerySection()` | `src/components/gallery-section.tsx` (컬럼 수 변경) |
+| `generateGlobalsCss()` | `src/app/globals.css` (--color-primary 변수) |
+| `generateLayoutTsx()` | `src/app/layout.tsx` (Google Fonts CDN) |
+| `generateFiles()` | 위 함수들 통합 호출, 변경 파일만 반환 |
