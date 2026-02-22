@@ -7,6 +7,7 @@ import type {
   DependencyType,
   ChangeType,
 } from './core';
+import type { DashboardLayer } from './dashboard';
 
 export interface EnvVarTemplate {
   name: string;
@@ -43,6 +44,11 @@ export interface Service {
   monthly_cost_estimate?: Record<string, string>;
   dx_score?: number | null;
   last_updated?: string;
+  // Dashboard layer (M027)
+  dashboard_layer?: DashboardLayer | null;
+  dashboard_subcategory?: string | null;
+  // Multi-account support (M031)
+  supports_multi_account?: boolean;
 }
 
 // ============================================

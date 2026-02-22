@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, validationError, serverError, configurationError } from '@/lib/api/errors';
 import { compareServicesSchema } from '@/lib/validations/ai-compare';
 import { resolveOpenAIKey, AIKeyNotConfiguredError } from '@/lib/ai/resolve-key';
+import { callOpenAIStructured } from '@/lib/ai/openai';
 import { logAudit } from '@/lib/audit';
 import { services as serviceCatalog } from '@/data/seed/services';
 
@@ -76,36 +77,27 @@ export async function POST(request: NextRequest) {
 - 데이터 기반 객관적 비교
 - 장단점 균형 있게 제시`;
 
-    const base = (baseUrl || 'https://api.openai.com/v1').replace(/\/+$/, '');
-    const response = await fetch(`${base}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
+    const { data: comparisonData } = await callOpenAIStructured<{ comparison: string }>(
+      apiKey,
+      [{ role: 'user', content: `다음 서비스들을 비교해주세요:\n${JSON.stringify(selectedServices, null, 2)}` }],
+      systemPrompt,
+      {
+        type: 'object',
+        properties: {
+          comparison: { type: 'string', description: '마크다운 형식의 비교 분석 결과' },
+        },
+        required: ['comparison'],
+        additionalProperties: false,
       },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `다음 서비스들을 비교해주세요:\n${JSON.stringify(selectedServices, null, 2)}` },
-        ],
-        temperature: 0.3,
-        max_tokens: 4096,
-      }),
-    });
+      { model: 'gpt-4o', temperature: 0.3, max_tokens: 4096, baseUrl },
+    );
 
-    if (!response.ok) {
-      const errText = await response.text().catch(() => '');
-      throw new Error(`OpenAI API 오류: ${errText}`);
-    }
-
-    const result = await response.json();
-    const content = result.choices?.[0]?.message?.content || '';
+    const content = comparisonData.comparison;
 
     logAudit(user.id, {
       action: 'ai.compare_services',
       resourceType: 'ai',
-      details: { slugs, tokens: result.usage?.total_tokens || 0 },
+      details: { slugs },
     });
 
     return Response.json({ comparison: content, services: selectedServices.map((s) => s.name) });

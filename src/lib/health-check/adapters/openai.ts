@@ -1,4 +1,5 @@
 import type { HealthCheckAdapter, HealthCheckResult } from '../types';
+import { buildHeaders } from '@/lib/ai/openai';
 
 export const openaiAdapter: HealthCheckAdapter = {
   serviceSlug: 'openai',
@@ -6,11 +7,10 @@ export const openaiAdapter: HealthCheckAdapter = {
   async check(envVars): Promise<HealthCheckResult> {
     const start = Date.now();
     try {
-      const res = await fetch('https://api.openai.com/v1/models', {
+      const baseUrl = (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1').replace(/\/+$/, '');
+      const res = await fetch(`${baseUrl}/models`, {
         method: 'GET',
-        headers: {
-          Authorization: `Bearer ${envVars.OPENAI_API_KEY}`,
-        },
+        headers: buildHeaders(envVars.OPENAI_API_KEY),
         signal: AbortSignal.timeout(10000),
       });
 

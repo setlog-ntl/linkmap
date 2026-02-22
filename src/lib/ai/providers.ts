@@ -1,4 +1,4 @@
-import { buildHeaders } from './openai';
+import { buildHeaders, parseOpenAIError } from './openai';
 
 export type AiProviderSlug = 'openai' | 'anthropic' | 'google';
 
@@ -71,7 +71,7 @@ async function callOpenAI(req: AiChatRequest): Promise<AiChatResponse> {
 
   if (!response.ok) {
     const errText = await response.text().catch(() => '');
-    throw new Error(`OpenAI API 오류 (${response.status}): ${errText}`);
+    throw parseOpenAIError(response.status, errText);
   }
 
   const data = await response.json();

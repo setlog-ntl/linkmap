@@ -11,7 +11,7 @@ export function useProjects() {
     queryFn: async (): Promise<ProjectWithServices[]> => {
       const { data, error } = await supabase
         .from('projects')
-        .select(`*, project_services (*, service:services (*)), project_github_repos (id)`)
+        .select(`*, project_services!project_services_project_id_fkey (*, service:services (*)), project_github_repos (id)`)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;

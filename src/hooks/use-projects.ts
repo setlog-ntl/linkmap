@@ -16,7 +16,7 @@ export function useProjects() {
       .from('projects')
       .select(`
         *,
-        project_services (
+        project_services!project_services_project_id_fkey (
           *,
           service:services (*)
         )

@@ -55,6 +55,14 @@ npm run test:coverage # 커버리지 리포트
 - Sentry 제거됨 — 번들 사이즈 최적화 완료 (17MB → 8.5MB)
 - lucide-react `Map` import 시 전역 `Map` 섀도잉 → `Map as MapIcon` 필수
 
+## Database Rules (DB 작업 시 필수)
+- **스키마 레퍼런스**: `docs/db-schema.md` — 모든 테이블, 컬럼, RLS, 타입 매핑
+- **마이그레이션**: `supabase/migrations/NNN_*.sql` (현재 040, 다음 041)
+- **마이그레이션 후 3-step**: ① `src/types/` 타입 동기화 → ② `src/lib/queries/` 쿼리 반영 → ③ `docs/db-schema.md` 업데이트
+- **새 테이블 필수**: RLS 활성화 + 정책 추가 + created_at 컬럼
+- **타입 매핑**: core.ts(profiles/subscriptions/tokens), service.ts(services/catalog), project.ts(projects/bindings), env.ts(env_vars/health), connection.ts(user_connections), service-account.ts(service_accounts), ai.ts(ai_*), dashboard.ts(view models)
+- DB CHECK 제약조건 변경 시 TS union type도 반드시 동기화
+
 ## Anti-Patterns — NEVER Do These
 - `createAdminClient()`를 일반 CRUD에 사용 (감사 로그 전용)
 - `NEXT_PUBLIC_` 접두사로 서버 전용 키 노출
@@ -62,6 +70,9 @@ npm run test:coverage # 커버리지 리포트
 - `any` 타입 사용 (`unknown` + 타입 가드로 대체)
 - 인증 로직 반전: `if (user) return unauthorizedError()` ← 치명적 버그
 - 복호화된 값 로깅 또는 API 응답에 포함
+- 마이그레이션 없이 DB 스키마 변경
+- TS 타입 동기화 없이 마이그레이션 적용
+- 기존 마이그레이션 파일 수정 (새 파일로 ALTER)
 
 ## Testing Notes
 - `mockResolvedValue` 사용 필수 (`Once` 금지 — React 리렌더링으로 실패)
@@ -149,7 +160,8 @@ packages/
 |---------|------|
 | 아키텍처 개요 | `ARCHITECTURE.md` |
 | 보안 정책 | `SECURITY.md` |
-| DB 스키마/마이그레이션 | `supabase/migrations/` |
+| **DB 스키마 레퍼런스** | **`docs/db-schema.md`** |
+| DB 마이그레이션 파일 | `supabase/migrations/` |
 | Cloudflare 배포 가이드 | `docs/cloudflare-migration.md` |
 | 서비스맵 V2 설계 | `docs/service-map-v2.md` |
 | 대시보드 PMO | `docs/dashboard-pmo.md` |

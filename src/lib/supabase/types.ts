@@ -7,6 +7,11 @@ export interface DbProject {
   name: string;
   description: string | null;
   tech_stack: Record<string, string>;
+  team_id: string | null;
+  main_service_id: string | null;
+  icon_type: string | null;
+  icon_value: string | null;
+  link_url: string | null;
   created_at: string;
   updated_at: string;
 }

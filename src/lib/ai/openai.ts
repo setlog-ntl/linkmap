@@ -21,7 +21,7 @@ export function buildHeaders(apiKey: string): Record<string, string> {
 
 // ─── Error handling ─────────────────────────────────────────────────
 
-function parseOpenAIError(status: number, errText: string): Error {
+export function parseOpenAIError(status: number, errText: string): Error {
   try {
     const parsed = JSON.parse(errText);
     const code = parsed?.error?.code;

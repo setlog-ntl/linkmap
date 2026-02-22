@@ -31,18 +31,25 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const ext = file.name.split('.').pop() || 'png';
   const filePath = `${user.id}/${id}.${ext}`;
 
+  // Convert File to ArrayBuffer for Cloudflare Workers compatibility
+  const arrayBuffer = await file.arrayBuffer();
+
   // Upload to Supabase Storage
   const { error: uploadError } = await supabase.storage
     .from('project-icons')
-    .upload(filePath, file, { upsert: true });
+    .upload(filePath, arrayBuffer, {
+      upsert: true,
+      contentType: file.type,
+    });
 
-  if (uploadError) return serverError(uploadError.message);
+  if (uploadError) return apiError(`아이콘 업로드에 실패했습니다: ${uploadError.message}`, 500);
 
   const { data: urlData } = supabase.storage
     .from('project-icons')
     .getPublicUrl(filePath);
 
-  const publicUrl = urlData.publicUrl;
+  const publicUrl = urlData?.publicUrl;
+  if (!publicUrl) return apiError('아이콘 URL 생성에 실패했습니다', 500);
 
   // Update project
   const { data, error } = await supabase
@@ -56,7 +63,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     .select()
     .single();
 
-  if (error) return serverError(error.message);
+  if (error) return apiError('아이콘 정보 저장에 실패했습니다', 500);
 
   await logAudit(user.id, {
     action: 'project.set_icon',
@@ -65,7 +72,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     details: { icon_type: 'custom' },
   });
 
-  return NextResponse.json(data);
+  return NextResponse.json({ ...data, icon_value: publicUrl });
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

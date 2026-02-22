@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef } from 'react';
 import { Pencil, X, Search, Upload, Loader2, Smile, Boxes, ImageIcon } from 'lucide-react';
+import { toast } from 'sonner';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -111,8 +112,8 @@ export function ProjectIconPicker({
       setOpen(false);
       setPreview(null);
       previewFileRef.current = null;
-    } catch {
-      // Error is visible in UI through failed state
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '아이콘 업로드에 실패했습니다');
     } finally {
       setUploading(false);
     }
