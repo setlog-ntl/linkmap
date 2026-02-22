@@ -4,10 +4,10 @@ import { createClient } from '@/lib/supabase/server';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { HeroSection } from '@/components/landing/hero-section';
-import { TemplateShowcase } from '@/components/landing/template-showcase';
 import { SocialProofSection } from '@/components/landing/social-proof-section';
 import { FeaturesBento } from '@/components/landing/features-bento';
 import { HowItWorks } from '@/components/landing/how-it-works';
+import { TemplateShowcase } from '@/components/landing/template-showcase';
 import { ServicesGrid } from '@/components/landing/services-grid';
 import { PricingSection, FinalCtaSection } from '@/components/landing/cta-section';
 import type { Profile } from '@/types';
@@ -29,20 +29,20 @@ export default async function LandingPage() {
     <div className="min-h-screen flex flex-col bg-[#f4f5f8] text-[#1a2740] dark:bg-[#0b1120] dark:text-[#e2e8f0]">
       <Header profile={profile} />
 
-      {/* Section 1: Hero */}
+      {/* Section 1: Hero — 서비스 인프라 메인 */}
       <HeroSection />
 
-      {/* Section 2: Template Showcase */}
-      <TemplateShowcase />
-
-      {/* Section 3: Social Proof (Stats + Testimonials) */}
+      {/* Section 2: Social Proof (Stats + Testimonials) */}
       <SocialProofSection />
 
-      {/* Section 4: How It Works (4 Steps) */}
+      {/* Section 3: Core Features (Bento Grid + AI) */}
+      <FeaturesBento />
+
+      {/* Section 4: How It Works (4 Steps — 서비스 인프라) */}
       <HowItWorks />
 
-      {/* Section 5: Core Features (Bento Grid + AI) */}
-      <FeaturesBento />
+      {/* Section 5: Template Showcase (원클릭배포 서브) */}
+      <TemplateShowcase />
 
       {/* Section 6: Supported Services */}
       <ServicesGrid />

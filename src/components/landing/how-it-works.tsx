@@ -1,7 +1,7 @@
 'use client';
 
 import { ScrollReveal } from './scroll-reveal';
-import { GitBranch, Layout, Pencil, Globe, ArrowRight } from 'lucide-react';
+import { FolderPlus, Puzzle, Lock, Sparkles, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -13,27 +13,27 @@ export function HowItWorks() {
   const steps = [
     {
       number: '1',
-      icon: GitBranch,
-      title: t(locale, 'landing.oneclickStep1Title'),
-      description: t(locale, 'landing.oneclickStep1Desc'),
+      icon: FolderPlus,
+      title: t(locale, 'landing.step1Title'),
+      description: t(locale, 'landing.step1Desc'),
     },
     {
       number: '2',
-      icon: Layout,
-      title: t(locale, 'landing.oneclickStep2Title'),
-      description: t(locale, 'landing.oneclickStep2Desc'),
+      icon: Puzzle,
+      title: t(locale, 'landing.step2Title'),
+      description: t(locale, 'landing.step2Desc'),
     },
     {
       number: '3',
-      icon: Pencil,
-      title: t(locale, 'landing.oneclickStep3Title'),
-      description: t(locale, 'landing.oneclickStep3Desc'),
+      icon: Lock,
+      title: t(locale, 'landing.step3Title'),
+      description: t(locale, 'landing.step3Desc'),
     },
     {
       number: '4',
-      icon: Globe,
-      title: t(locale, 'landing.oneclickStep4Title'),
-      description: t(locale, 'landing.oneclickStep4Desc'),
+      icon: Sparkles,
+      title: t(locale, 'landing.step4Title'),
+      description: t(locale, 'landing.step4Desc'),
     },
   ];
 
@@ -47,7 +47,7 @@ export function HowItWorks() {
               HOW IT WORKS
             </p>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-[#1a2740] dark:text-[#e2e8f0]">
-              {locale === 'ko' ? '4\uB2E8\uACC4\uB85C \uB0B4 \uD648\uD398\uC774\uC9C0 \uB9CC\uB4E4\uAE30' : 'Build Your Homepage in 4 Steps'}
+              {t(locale, 'landing.howTitle')}
             </h2>
           </div>
         </ScrollReveal>

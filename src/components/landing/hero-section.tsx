@@ -2,18 +2,33 @@
 
 import { useRef } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Rocket, Check } from 'lucide-react';
+import { ArrowRight, Rocket, Lock, CheckCircle2, Check } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { TypewriterHeadline } from './typewriter-headline';
 
-const TEMPLATE_PREVIEW_CARDS = [
-  { emoji: '\u{1F3E0}', nameKo: '\uB098\uB9CC\uC758 \uD648\uD398\uC774\uC9C0', nameEn: 'Personal Brand', gradient: 'from-blue-500 to-cyan-500' },
-  { emoji: '\u{1F4BC}', nameKo: '\uD3EC\uD2B8\uD3F4\uB9AC\uC624', nameEn: 'Portfolio', gradient: 'from-indigo-500 to-violet-500' },
-  { emoji: '\u{1F517}', nameKo: 'SNS \uB9C1\uD06C\uD5C8\uBE0C', nameEn: 'Link Hub', gradient: 'from-purple-500 to-pink-500' },
-];
+function DiagramLoader() {
+  const { locale } = useLocaleStore();
+  return (
+    <div className="w-full h-full flex items-center justify-center">
+      <div className="flex flex-col items-center gap-2">
+        <div className="w-8 h-8 rounded-full border-2 border-[hsl(220,60%,35%)] border-t-transparent animate-spin" />
+        <span className="text-sm text-[#63738a] dark:text-[#94a3b8] font-medium">{t(locale, 'landing.loadingArchitecture')}</span>
+      </div>
+    </div>
+  );
+}
+
+const FlowArchitectureDiagram = dynamic(
+  () => import('./flow-architecture-diagram').then((mod) => ({ default: mod.FlowArchitectureDiagram })),
+  {
+    ssr: false,
+    loading: () => <DiagramLoader />,
+  }
+);
 
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -60,18 +75,18 @@ export function HeroSection() {
             {t(locale, 'landing.heroSubtitle')}
           </p>
 
-          {/* CTA Buttons — Primary: oneclick, Secondary: signup */}
+          {/* CTA Buttons — Primary: signup, Secondary: oneclick */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Button className="bg-[#2bee79] text-black hover:bg-[#25d96d] px-8 py-3.5 h-auto rounded-lg text-base font-bold transition-all hover:scale-105 hover:shadow-lg" asChild>
-              <Link href="/sites">
-                <Rocket className="mr-2 h-4 w-4" />
-                {t(locale, 'landing.ctaOneclickHero')}
+            <Button className="bg-[hsl(220,60%,35%)] text-white hover:bg-[hsl(220,60%,30%)] px-8 py-3.5 h-auto rounded-lg text-base font-bold transition-all hover:scale-105 hover:shadow-lg" asChild>
+              <Link href="/signup">
+                {t(locale, 'landing.ctaStart')}
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button variant="outline" className="bg-white border-[#dde0e7] text-[#1a2740] hover:border-[hsl(220,60%,35%)]/40 hover:bg-[#f4f5f8] dark:bg-white/5 dark:border-white/10 dark:text-[#e2e8f0] dark:hover:bg-white/10 px-8 py-3.5 h-auto rounded-lg text-base font-bold transition-all" asChild>
-              <Link href="/signup">
+              <Link href="/sites">
+                <Rocket className="mr-2 h-4 w-4" />
                 {t(locale, 'landing.heroCtaDemo')}
-                <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -84,14 +99,14 @@ export function HeroSection() {
               t(locale, 'landing.trustEncryption'),
             ].map((badge) => (
               <div key={badge} className="flex items-center gap-1.5">
-                <Check className="w-4 h-4 text-[#2bee79]" />
+                <Check className="w-4 h-4 text-[hsl(220,60%,35%)]" />
                 <span>{badge}</span>
               </div>
             ))}
           </div>
         </motion.div>
 
-        {/* Template Preview Cards */}
+        {/* Visualization Card */}
         <motion.div style={{ y }} className="relative mx-auto max-w-5xl mt-16">
           {/* Glow effect behind card */}
           <div className="absolute -inset-4 bg-gradient-to-r from-[hsl(220,60%,35%)]/5 via-transparent to-[#2bee79]/5 rounded-2xl blur-xl -z-10" />
@@ -103,33 +118,25 @@ export function HeroSection() {
               <div className="h-3 w-3 rounded-full bg-[#FFBD2E]" />
               <div className="h-3 w-3 rounded-full bg-[#27C93F]" />
               <div className="ml-4 flex h-6 w-full max-w-[400px] items-center rounded-md bg-white px-3 text-xs text-[#63738a] dark:bg-white/10 dark:text-[#94a3b8] font-mono">
-                linkmap.site/templates
+                linkmap-infrastructure-map
               </div>
             </div>
 
-            {/* Template Preview Area */}
-            <div className="p-8 md:p-12 bg-[#fafbfc] dark:bg-[#0f172a]">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {TEMPLATE_PREVIEW_CARDS.map((card, i) => (
-                  <Link
-                    key={i}
-                    href="/sites"
-                    className="group flex flex-col rounded-xl border border-[#dde0e7] bg-white dark:border-white/10 dark:bg-[#111827] overflow-hidden transition-all hover:-translate-y-2 hover:shadow-lg"
-                  >
-                    <div className={`h-[140px] bg-gradient-to-br ${card.gradient} flex items-center justify-center`}>
-                      <span className="text-5xl">{card.emoji}</span>
-                    </div>
-                    <div className="p-4 text-center">
-                      <p className="font-bold text-[#1a2740] dark:text-[#e2e8f0]">
-                        {locale === 'ko' ? card.nameKo : card.nameEn}
-                      </p>
-                      <p className="text-xs text-[#2bee79] font-medium mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {t(locale, 'landing.templateShowcaseCta')} &rarr;
-                      </p>
-                    </div>
-                  </Link>
-                ))}
+            {/* Diagram Area */}
+            <div className="relative h-[400px] md:h-[480px] lg:h-[520px] w-full bg-[#fafbfc] dark:bg-[#0f172a] overflow-hidden" style={{ backgroundImage: 'radial-gradient(var(--dot-color, #dde0e7) 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
+              {/* Floating Badges inside diagram */}
+              <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
+                <div className="flex items-center gap-2 rounded-lg bg-white/90 backdrop-blur-sm border border-[#dde0e7] dark:bg-[#111827]/90 dark:border-white/10 px-3 py-2 text-xs text-[hsl(220,60%,35%)] shadow-lg">
+                  <Lock className="w-3.5 h-3.5" />
+                  {t(locale, 'landing.trustEncryption')}
+                </div>
+                <div className="flex items-center gap-2 rounded-lg bg-white/90 backdrop-blur-sm border border-[#dde0e7] dark:bg-[#111827]/90 dark:border-white/10 px-3 py-2 text-xs text-green-600 shadow-lg">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  {t(locale, 'landing.allSystemsOperational')}
+                </div>
               </div>
+
+              <FlowArchitectureDiagram />
             </div>
           </div>
         </motion.div>
