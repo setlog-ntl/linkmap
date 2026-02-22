@@ -15,7 +15,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { LogOut, Settings, LayoutDashboard, Menu, Globe, Rocket, Monitor, Bot, Link2, Search } from 'lucide-react';
+import { LogOut, Settings, LayoutDashboard, Menu, Globe, Rocket, Monitor, Bot, Link2, Search, BookOpen, ChevronDown } from 'lucide-react';
 import { useUIStore } from '@/stores/ui-store';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t, localeNames } from '@/lib/i18n';
@@ -90,6 +90,37 @@ export function Header({ profile }: HeaderProps) {
       >
         {t(locale, 'nav.serviceCatalog')}
       </Link>
+
+      {/* Guides dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 outline-none">
+          <BookOpen className="h-3.5 w-3.5" />
+          {t(locale, 'nav.guides')}
+          <ChevronDown className="h-3 w-3" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          <DropdownMenuItem asChild>
+            <Link href="/guides/github" onClick={() => setSidebarOpen(false)}>
+              {t(locale, 'landing.guideGitHub')}
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/guides/auth" onClick={() => setSidebarOpen(false)}>
+              {t(locale, 'landing.guideAuth')}
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/guides/env" onClick={() => setSidebarOpen(false)}>
+              {t(locale, 'landing.guideEnv')}
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/guides/cloudflare" onClick={() => setSidebarOpen(false)}>
+              {t(locale, 'landing.guideCloudflare')}
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </>
   );
 
@@ -292,6 +323,39 @@ export function Header({ profile }: HeaderProps) {
                   onClick={() => setSidebarOpen(false)}
                 >
                   {t(locale, 'nav.serviceCatalog')}
+                </Link>
+
+                <div className="border-t my-2" />
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold px-2.5 mb-1">
+                  {t(locale, 'nav.guides')}
+                </p>
+                <Link
+                  href="/guides/github"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  {t(locale, 'landing.guideGitHub')}
+                </Link>
+                <Link
+                  href="/guides/auth"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  {t(locale, 'landing.guideAuth')}
+                </Link>
+                <Link
+                  href="/guides/env"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  {t(locale, 'landing.guideEnv')}
+                </Link>
+                <Link
+                  href="/guides/cloudflare"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  {t(locale, 'landing.guideCloudflare')}
                 </Link>
 
                 <div className="border-t my-2" />

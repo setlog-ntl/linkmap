@@ -24,6 +24,7 @@
   },
   "nav": {
     "serviceCatalog": "Service Catalog",
+    "guides": "Guides",
     "pricing": "Pricing",
     "oneclick": "One-Click Deploy",
     "mySites": "My Sites",
@@ -342,6 +343,7 @@
     "guideGitHub": "GitHub Guide",
     "guideAuth": "Auth Guide",
     "guideCloudflare": "Cloudflare Guide",
+    "guideEnv": "Env Guide",
     "footerProduct": "Product",
     "footerSupport": "Support",
     "footerLegal": "Legal",

@@ -24,6 +24,7 @@
   },
   "nav": {
     "serviceCatalog": "서비스 카탈로그",
+    "guides": "가이드",
     "pricing": "가격",
     "oneclick": "원클릭 배포",
     "mySites": "내 사이트",
@@ -342,6 +343,7 @@
     "guideGitHub": "GitHub 가이드",
     "guideAuth": "인증 가이드",
     "guideCloudflare": "Cloudflare 가이드",
+    "guideEnv": "환경변수 가이드",
     "footerProduct": "제품",
     "footerSupport": "지원",
     "footerLegal": "법적 고지",
