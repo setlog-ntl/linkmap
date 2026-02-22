@@ -95,8 +95,11 @@ export function ServiceAccountSection({
   };
 
   const handleOAuthConnect = () => {
-    // Redirect to OAuth authorize endpoint
-    window.location.href = `/api/oauth/${config.oauth_config?.provider}/authorize?project_id=${projectId}&service_id=${serviceId}&service_slug=${serviceSlug}`;
+    if (!config.oauth_config?.provider) {
+      toast.error('OAuth 설정이 없습니다');
+      return;
+    }
+    window.location.href = `/api/oauth/${config.oauth_config.provider}/authorize?project_id=${projectId}&service_id=${serviceId}&service_slug=${serviceSlug}`;
   };
 
   // Manual-only services

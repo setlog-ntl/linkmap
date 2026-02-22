@@ -11,11 +11,11 @@ interface ServiceIconProps {
 export function ServiceIcon({ serviceId, size = 20, className }: ServiceIconProps) {
   const brand = SERVICE_BRANDS[serviceId];
 
-  if (!brand) {
-    return <span className={className}>⚙️</span>;
-  }
+  const svgUrl = brand ? getServiceIconUrl(serviceId) : undefined;
 
-  const svgUrl = getServiceIconUrl(serviceId)!;
+  if (!brand || !svgUrl) {
+    return <span className={className}>{brand?.emoji ?? '⚙️'}</span>;
+  }
 
   // 다색 SVG는 img 태그로 원본 색상 그대로 렌더링
   if (brand.multiColor) {
