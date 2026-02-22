@@ -56,7 +56,7 @@ export function AddServiceDialog({ projectId, existingServiceIds, onAdd }: AddSe
   const [loading, setLoading] = useState(false);
   const [adding, setAdding] = useState<string | null>(null);
   const deleteMutation = useDeleteCustomService();
-  const { data: matches } = useCustomServiceMatches();
+  const { data: matches } = useCustomServiceMatches(open);
   const migrateMutation = useMigrateCustomService();
 
   // 커스텀 서비스 ID → 매칭된 글로벌 서비스

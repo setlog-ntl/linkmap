@@ -123,7 +123,7 @@ interface CustomServiceMatch {
   globalService: Service;
 }
 
-export function useCustomServiceMatches() {
+export function useCustomServiceMatches(enabled = true) {
   return useQuery({
     queryKey: queryKeys.catalog.matches,
     queryFn: async (): Promise<CustomServiceMatch[]> => {
@@ -132,6 +132,7 @@ export function useCustomServiceMatches() {
       const json = await res.json();
       return json.matches as CustomServiceMatch[];
     },
+    enabled,
   });
 }
 
