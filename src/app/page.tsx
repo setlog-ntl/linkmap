@@ -29,23 +29,23 @@ export default async function LandingPage() {
     <div className="min-h-screen flex flex-col bg-[#f4f5f8] text-[#1a2740] dark:bg-[#0b1120] dark:text-[#e2e8f0]">
       <Header profile={profile} />
 
-      {/* Section 1: Hero — 서비스 인프라 메인 */}
+      {/* Section 1: Hero — 듀얼 메시지 */}
       <HeroSection />
 
-      {/* Section 2: Social Proof (Stats + Testimonials) */}
-      <SocialProofSection />
-
-      {/* Section 3: Core Features (Bento Grid + AI) */}
-      <FeaturesBento />
-
-      {/* Section 4: How It Works (4 Steps — 서비스 인프라) */}
+      {/* Section 2: How It Works — 경로 선택 (초보자/개발자 탭) */}
       <HowItWorks />
 
-      {/* Section 5: Template Showcase (원클릭배포 서브) */}
+      {/* Section 3: Template Showcase — 초보자 deep-dive */}
       <TemplateShowcase />
 
-      {/* Section 6: Supported Services */}
+      {/* Section 4: Core Features — 개발자 deep-dive */}
+      <FeaturesBento />
+
+      {/* Section 5: Supported Services */}
       <ServicesGrid />
+
+      {/* Section 6: Social Proof — 구매 전 신뢰 */}
+      <SocialProofSection />
 
       {/* Section 7: Pricing */}
       <PricingSection />

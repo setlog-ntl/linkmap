@@ -66,8 +66,11 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Headline with typewriter effect */}
+          {/* Headline with static line + typewriter effect */}
           <h1 className="mx-auto max-w-4xl text-5xl font-extrabold tracking-tight sm:text-7xl mb-6 leading-[1.1] text-[#1a2740] dark:text-[#e2e8f0]">
+            <span className="block text-3xl sm:text-5xl font-bold mb-2">
+              {t(locale, 'landing.heroHeadlineStatic')}
+            </span>
             <TypewriterHeadline />
           </h1>
 
@@ -75,18 +78,18 @@ export function HeroSection() {
             {t(locale, 'landing.heroSubtitle')}
           </p>
 
-          {/* CTA Buttons — Primary: signup, Secondary: oneclick */}
+          {/* CTA Buttons — Primary: 초보자(green), Secondary: 개발자(outline) */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Button className="bg-[hsl(220,60%,35%)] text-white hover:bg-[hsl(220,60%,30%)] px-8 py-3.5 h-auto rounded-lg text-base font-bold transition-all hover:scale-105 hover:shadow-lg" asChild>
-              <Link href="/signup">
-                {t(locale, 'landing.ctaStart')}
-                <ArrowRight className="ml-2 h-4 w-4" />
+            <Button className="bg-[#2bee79] text-black hover:bg-[#25d96d] px-8 py-3.5 h-auto rounded-lg text-base font-bold transition-all hover:scale-105 hover:shadow-lg" asChild>
+              <Link href="/sites">
+                <Rocket className="mr-2 h-4 w-4" />
+                {t(locale, 'landing.ctaOneclickHero')}
               </Link>
             </Button>
             <Button variant="outline" className="bg-white border-[#dde0e7] text-[#1a2740] hover:border-[hsl(220,60%,35%)]/40 hover:bg-[#f4f5f8] dark:bg-white/5 dark:border-white/10 dark:text-[#e2e8f0] dark:hover:bg-white/10 px-8 py-3.5 h-auto rounded-lg text-base font-bold transition-all" asChild>
-              <Link href="/sites">
-                <Rocket className="mr-2 h-4 w-4" />
-                {t(locale, 'landing.heroCtaDemo')}
+              <Link href="/signup">
+                {t(locale, 'landing.ctaStart')}
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
