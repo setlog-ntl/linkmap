@@ -31,11 +31,9 @@ export default function ProjectDashboardPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end">
-        <AiChatPanel data={data} />
-      </div>
+    <>
       <BentoDashboardLayout data={data} />
-    </div>
+      <AiChatPanel data={data} />
+    </>
   );
 }
