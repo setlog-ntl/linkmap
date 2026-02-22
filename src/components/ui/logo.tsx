@@ -9,15 +9,7 @@ export const SetlogLogo = ({ className, width = 32, height = 32, ...props }: { c
                 alt="Linkmap Logo"
                 width={width}
                 height={height}
-                className={`${className ?? ''} dark:hidden`}
-                {...props}
-            />
-            <Image
-                src="/logo-dark.png"
-                alt="Linkmap Logo"
-                width={width}
-                height={height}
-                className={`${className ?? ''} hidden dark:block absolute inset-0`}
+                className={`${className ?? ''} dark:brightness-0 dark:invert`}
                 {...props}
             />
         </span>

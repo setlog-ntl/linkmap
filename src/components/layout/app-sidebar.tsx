@@ -101,13 +101,7 @@ export function AppSidebar({ profile, projectId, projectName }: AppSidebarProps)
               src="/logo.png"
               alt="Linkmap"
               fill
-              className="object-contain dark:hidden"
-            />
-            <Image
-              src="/logo-dark.png"
-              alt="Linkmap"
-              fill
-              className="object-contain hidden dark:block"
+              className="object-contain dark:brightness-0 dark:invert"
             />
           </div>
           {!isCollapsed && (
