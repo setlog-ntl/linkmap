@@ -210,16 +210,23 @@ html {
   transition: width 0.1s linear;
   pointer-events: none;
 }
+
+/* Hero load animation */
+@keyframes fade-up { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+.animate-fade-up { animation: fade-up 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
+.animate-fade-up-d1 { animation-delay:150ms; opacity:0; }
+.animate-fade-up-d2 { animation-delay:300ms; opacity:0; }
+@media (prefers-reduced-motion:reduce) {
+  .animate-fade-up { animation:none; opacity:1; transform:none; }
+}
 `;
 
 // ──────────────────────────────────────────────
 // src/app/layout.tsx
 // ──────────────────────────────────────────────
 const layoutTsx = `import type { Metadata } from 'next';
-import { ThemeProvider } from 'next-themes';
 import { JetBrains_Mono } from 'next/font/google';
 import { siteConfig } from '@/lib/config';
-import { LocaleProvider } from '@/lib/i18n';
 import './globals.css';
 
 const jetbrainsMono = JetBrains_Mono({
@@ -261,6 +268,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
+        <script dangerouslySetInnerHTML={{ __html: "(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}})()" }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -283,11 +291,7 @@ export default function RootLayout({
       </head>
       <body className={\`antialiased bg-gray-950 text-gray-50 dark:bg-gray-950 dark:text-gray-50 \${jetbrainsMono.variable}\`}>
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:shadow-lg focus:text-sm">본문으로 바로가기</a>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <LocaleProvider>
-            {children}
-          </LocaleProvider>
-        </ThemeProvider>
+        {children}
       </body>
     </html>
   );
@@ -336,7 +340,7 @@ export default function Home() {
 // ──────────────────────────────────────────────
 const aboutSection = `'use client';
 
-import { motion } from 'framer-motion';
+import { AnimatedReveal } from './animated-reveal';
 import type { SiteConfig } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
 
@@ -357,53 +361,40 @@ export function AboutSection({ config }: Props) {
   return (
     <section id="about" className="py-20 sm:py-24 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
-        <motion.h2
-          className="text-3xl font-bold mb-12 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          {t('about.title')}
-        </motion.h2>
+        <AnimatedReveal>
+          <h2 className="text-3xl font-bold mb-12 text-center">
+            {t('about.title')}
+          </h2>
+        </AnimatedReveal>
 
         <div className="grid md:grid-cols-2 gap-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.5 }}
-          >
+          <AnimatedReveal>
             <p className="text-gray-400 dark:text-gray-400 leading-relaxed whitespace-pre-line">
               {about}
             </p>
-          </motion.div>
+          </AnimatedReveal>
 
-          <motion.div
-            className="space-y-3"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <h3 className="text-lg font-semibold mb-4">{t('about.skills')}</h3>
-            {config.skills.map((skill, i) => (
-              <div key={i} className="group">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-mono text-sm">{skill.name}</span>
-                  <span className="text-xs text-gray-500">
-                    {t(\`level.\${skill.level}\`)}
-                  </span>
+          <AnimatedReveal delay={100}>
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold mb-4">{t('about.skills')}</h3>
+              {config.skills.map((skill, i) => (
+                <div key={i} className="group">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-mono text-sm">{skill.name}</span>
+                    <span className="text-xs text-gray-500">
+                      {t(\`level.\${skill.level}\`)}
+                    </span>
+                  </div>
+                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--gh-border)' }}>
+                    <div
+                      className={\`h-full rounded-full \${levelWidth[skill.level]}\`}
+                      style={{ background: 'linear-gradient(90deg, var(--gh-blue), var(--gh-purple))' }}
+                    />
+                  </div>
                 </div>
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--gh-border)' }}>
-                  <div
-                    className={\`h-full rounded-full \${levelWidth[skill.level]}\`}
-                    style={{ background: 'linear-gradient(90deg, var(--gh-blue), var(--gh-purple))' }}
-                  />
-                </div>
-              </div>
-            ))}
-          </motion.div>
+              ))}
+            </div>
+          </AnimatedReveal>
         </div>
       </div>
     </section>
@@ -416,7 +407,7 @@ export function AboutSection({ config }: Props) {
 // ──────────────────────────────────────────────
 const blogSection = `'use client';
 
-import { motion } from 'framer-motion';
+import { AnimatedReveal } from './animated-reveal';
 import { ExternalLink } from 'lucide-react';
 import type { BlogPost } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
@@ -431,39 +422,32 @@ export function BlogSection({ posts }: Props) {
   return (
     <section className="py-20 sm:py-24 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
-        <motion.h2
-          className="text-3xl font-bold mb-12 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          {t('blog.title')}
-        </motion.h2>
+        <AnimatedReveal>
+          <h2 className="text-3xl font-bold mb-12 text-center">
+            {t('blog.title')}
+          </h2>
+        </AnimatedReveal>
 
         <div className="space-y-3">
           {posts.map((post, i) => {
             const title = locale === 'en' && post.titleEn ? post.titleEn : post.title;
             return (
-              <motion.a
-                key={i}
-                href={post.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between p-4 rounded-xl border border-gray-800 dark:border-gray-800 hover:bg-gray-800/50 transition-colors group"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
-              >
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-gray-200 group-hover:text-white truncate">
-                    {title}
-                  </h3>
-                  <p className="text-xs text-gray-500 mt-1">{post.date}</p>
-                </div>
-                <ExternalLink className="w-4 h-4 text-gray-600 shrink-0 ml-4" />
-              </motion.a>
+              <AnimatedReveal key={i} delay={i * 50}>
+                <a
+                  href={post.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-4 rounded-xl border border-gray-800 dark:border-gray-800 hover:bg-gray-800/50 transition-colors group"
+                >
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-gray-200 group-hover:text-white truncate">
+                      {title}
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-1">{post.date}</p>
+                  </div>
+                  <ExternalLink className="w-4 h-4 text-gray-600 shrink-0 ml-4" />
+                </a>
+              </AnimatedReveal>
             );
           })}
         </div>
@@ -478,7 +462,7 @@ export function BlogSection({ posts }: Props) {
 // ──────────────────────────────────────────────
 const contactSection = `'use client';
 
-import { motion } from 'framer-motion';
+import { AnimatedReveal } from './animated-reveal';
 import { Mail, Github, Linkedin } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
@@ -493,65 +477,53 @@ export function ContactSection({ config }: Props) {
   return (
     <section id="contact" className="py-20 sm:py-24 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto text-center">
-        <motion.h2
-          className="text-3xl font-bold mb-4"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          {t('contact.title')}
-        </motion.h2>
+        <AnimatedReveal>
+          <h2 className="text-3xl font-bold mb-4">
+            {t('contact.title')}
+          </h2>
+        </AnimatedReveal>
 
-        <motion.p
-          className="text-gray-400 dark:text-gray-400 mb-8 max-w-md mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          {t('contact.desc')}
-        </motion.p>
+        <AnimatedReveal delay={100}>
+          <p className="text-gray-400 dark:text-gray-400 mb-8 max-w-md mx-auto">
+            {t('contact.desc')}
+          </p>
+        </AnimatedReveal>
 
-        <motion.div
-          className="flex items-center justify-center gap-4"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          {config.email && (
-            <a
-              href={\`mailto:\${config.email}\`}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium hover:opacity-90 transition-opacity"
-            >
-              <Mail className="w-4 h-4" />
-              {t('contact.email')}
-            </a>
-          )}
-          {config.githubUsername && (
-            <a
-              href={\`https://github.com/\${config.githubUsername}\`}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="GitHub"
-              className="p-3 rounded-xl border border-gray-800 text-gray-400 hover:text-white hover:border-gray-600 transition-colors"
-            >
-              <Github className="w-5 h-5" />
-            </a>
-          )}
-          {config.linkedinUrl && (
-            <a
-              href={config.linkedinUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="LinkedIn"
-              className="p-3 rounded-xl border border-gray-800 text-gray-400 hover:text-white hover:border-gray-600 transition-colors"
-            >
-              <Linkedin className="w-5 h-5" />
-            </a>
-          )}
-        </motion.div>
+        <AnimatedReveal delay={200}>
+          <div className="flex items-center justify-center gap-4">
+            {config.email && (
+              <a
+                href={\`mailto:\${config.email}\`}
+                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium hover:opacity-90 transition-opacity"
+              >
+                <Mail className="w-4 h-4" />
+                {t('contact.email')}
+              </a>
+            )}
+            {config.githubUsername && (
+              <a
+                href={\`https://github.com/\${config.githubUsername}\`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+                className="p-3 rounded-xl border border-gray-800 text-gray-400 hover:text-white hover:border-gray-600 transition-colors"
+              >
+                <Github className="w-5 h-5" />
+              </a>
+            )}
+            {config.linkedinUrl && (
+              <a
+                href={config.linkedinUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                className="p-3 rounded-xl border border-gray-800 text-gray-400 hover:text-white hover:border-gray-600 transition-colors"
+              >
+                <Linkedin className="w-5 h-5" />
+              </a>
+            )}
+          </div>
+        </AnimatedReveal>
       </div>
     </section>
   );
@@ -563,7 +535,7 @@ export function ContactSection({ config }: Props) {
 // ──────────────────────────────────────────────
 const experienceTimeline = `'use client';
 
-import { motion } from 'framer-motion';
+import { AnimatedReveal } from './animated-reveal';
 import type { ExperienceItem } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
 
@@ -577,15 +549,11 @@ export function ExperienceTimeline({ experience }: Props) {
   return (
     <section id="experience" className="py-20 sm:py-24 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
-        <motion.h2
-          className="text-3xl font-bold mb-12 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          {t('experience.title')}
-        </motion.h2>
+        <AnimatedReveal>
+          <h2 className="text-3xl font-bold mb-12 text-center">
+            {t('experience.title')}
+          </h2>
+        </AnimatedReveal>
 
         <div className="relative ml-4 sm:ml-8">
           {/* Timeline line */}
@@ -599,34 +567,29 @@ export function ExperienceTimeline({ experience }: Props) {
               const description = locale === 'en' && item.descriptionEn ? item.descriptionEn : item.description;
 
               return (
-                <motion.div
-                  key={i}
-                  className="relative pl-8"
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  transition={{ duration: 0.4, delay: i * 0.1 }}
-                >
-                  {/* Node dot */}
-                  <div className="absolute left-0 top-1.5 w-3 h-3 rounded-full -translate-x-[5px] ring-4" style={{ background: 'var(--gh-blue)', '--tw-ring-color': 'var(--gh-bg)' } as Record<string, string>} />
+                <AnimatedReveal key={i} delay={i * 100}>
+                  <div className="relative pl-8">
+                    {/* Node dot */}
+                    <div className="absolute left-0 top-1.5 w-3 h-3 rounded-full -translate-x-[5px] ring-4" style={{ background: 'var(--gh-blue)', '--tw-ring-color': 'var(--gh-bg)' } as Record<string, string>} />
 
-                  <div className="p-4 rounded-xl" style={{ border: '1px solid var(--gh-border)', background: 'var(--gh-surface)' }}>
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-2">
-                      <h3 className="font-semibold text-gray-100">
-                        {title}
-                      </h3>
-                      <span className="font-mono text-xs text-gray-500">
-                        {period}
-                      </span>
+                    <div className="p-4 rounded-xl" style={{ border: '1px solid var(--gh-border)', background: 'var(--gh-surface)' }}>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-2">
+                        <h3 className="font-semibold text-gray-100">
+                          {title}
+                        </h3>
+                        <span className="font-mono text-xs text-gray-500">
+                          {period}
+                        </span>
+                      </div>
+                      <p className="text-sm text-blue-400/80 mb-2">
+                        {company}
+                      </p>
+                      <p className="text-sm text-gray-400 dark:text-gray-400">
+                        {description}
+                      </p>
                     </div>
-                    <p className="text-sm text-blue-400/80 mb-2">
-                      {company}
-                    </p>
-                    <p className="text-sm text-gray-400 dark:text-gray-400">
-                      {description}
-                    </p>
                   </div>
-                </motion.div>
+                </AnimatedReveal>
               );
             })}
           </div>
@@ -668,7 +631,7 @@ export function Footer() {
 // ──────────────────────────────────────────────
 const githubGraph = `'use client';
 
-import { motion } from 'framer-motion';
+import { AnimatedReveal } from './animated-reveal';
 import { useLocale } from '@/lib/i18n';
 
 interface Props {
@@ -681,21 +644,19 @@ export function GithubGraph({ username }: Props) {
   return (
     <section className="py-10 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
-        <motion.div
-          className="rounded-xl p-4 overflow-x-auto"
-          style={{ border: '1px solid var(--gh-border)', background: 'var(--gh-surface)' }}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          <img
-            src={\`https://ghchart.rshah.org/58a6ff/\${username}\`}
-            alt={\`\${username} \${t('github.alt')}\`}
-            className="w-full max-w-full"
-            loading="lazy"
-          />
-        </motion.div>
+        <AnimatedReveal>
+          <div
+            className="rounded-xl p-4 overflow-x-auto"
+            style={{ border: '1px solid var(--gh-border)', background: 'var(--gh-surface)' }}
+          >
+            <img
+              src={\`https://ghchart.rshah.org/58a6ff/\${username}\`}
+              alt={\`\${username} \${t('github.alt')}\`}
+              className="w-full max-w-full"
+              loading="lazy"
+            />
+          </div>
+        </AnimatedReveal>
       </div>
     </section>
   );
@@ -708,7 +669,6 @@ export function GithubGraph({ username }: Props) {
 const heroSection = `'use client';
 
 import { useCallback, useRef, useSyncExternalStore } from 'react';
-import { motion } from 'framer-motion';
 import { Github, Linkedin, Mail, Download } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
@@ -799,12 +759,7 @@ export function HeroSection({ config }: Props) {
         backgroundSize: '40px 40px',
       }}
     >
-      <motion.div
-        className="w-full max-w-2xl terminal-frame"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      >
+      <div className="w-full max-w-2xl terminal-frame animate-fade-up">
         <div className="terminal-titlebar">
           <div className="terminal-dot" style={{ background: '#ff5f57' }} />
           <div className="terminal-dot" style={{ background: '#febc2e' }} />
@@ -823,14 +778,9 @@ export function HeroSection({ config }: Props) {
             <span className="cursor-blink ml-0.5" style={{ color: 'var(--gh-green)' }}>▌</span>
           </p>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
-        className="flex items-center gap-3 mt-8"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4, duration: 0.6 }}
-      >
+      <div className="flex items-center gap-3 mt-8 animate-fade-up animate-fade-up-d1">
         {config.githubUsername && (
           <a
             href={\`https://github.com/\${config.githubUsername}\`}
@@ -883,7 +833,7 @@ export function HeroSection({ config }: Props) {
             {t('hero.resume')}
           </a>
         )}
-      </motion.div>
+      </div>
     </section>
   );
 }
@@ -973,7 +923,7 @@ export function NavHeader() {
 // ──────────────────────────────────────────────
 const projectsSection = `'use client';
 
-import { motion } from 'framer-motion';
+import { AnimatedReveal } from './animated-reveal';
 import { Star, GitFork, ExternalLink } from 'lucide-react';
 import type { ProjectItem } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
@@ -1000,63 +950,56 @@ export function ProjectsSection({ projects }: Props) {
   return (
     <section id="projects" className="py-20 sm:py-24 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
-        <motion.h2
-          className="text-3xl font-bold mb-12 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          {t('projects.title')}
-        </motion.h2>
+        <AnimatedReveal>
+          <h2 className="text-3xl font-bold mb-12 text-center">
+            {t('projects.title')}
+          </h2>
+        </AnimatedReveal>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {projects.map((project, i) => {
             const desc = locale === 'en' && project.descriptionEn ? project.descriptionEn : project.description;
             return (
-              <motion.a
-                key={i}
-                href={project.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative block p-4 rounded-xl border transition-all duration-200 group hover:scale-[1.02]"
-                style={{ borderColor: 'var(--gh-border)', background: 'var(--gh-surface)' }}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.4, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <div className="lang-line" style={{ background: languageColors[project.language] || '#6b7280' }} />
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-mono text-sm font-semibold truncate" style={{ color: 'var(--gh-blue)' }}>
-                    {project.name}
-                  </h3>
-                  <ExternalLink className="w-3.5 h-3.5 shrink-0 ml-2" style={{ color: 'var(--gh-muted)' }} />
-                </div>
-                <p className="text-xs mb-3 line-clamp-2" style={{ color: 'var(--gh-muted)' }}>
-                  {desc}
-                </p>
-                <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--gh-muted)' }}>
-                  <span className="flex items-center gap-1">
-                    <span
-                      className="w-2.5 h-2.5 rounded-full"
-                      style={{
-                        backgroundColor:
-                          languageColors[project.language] || '#6b7280',
-                      }}
-                    />
-                    <span className="font-mono">{project.language}</span>
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Star className="w-3 h-3" style={{ color: 'var(--gh-orange)' }} />
-                    {project.stars}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <GitFork className="w-3 h-3" />
-                    {project.forks}
-                  </span>
-                </div>
-              </motion.a>
+              <AnimatedReveal key={i} delay={i * 50}>
+                <a
+                  href={project.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative block p-4 rounded-xl border transition-all duration-200 group hover:scale-[1.02]"
+                  style={{ borderColor: 'var(--gh-border)', background: 'var(--gh-surface)' }}
+                >
+                  <div className="lang-line" style={{ background: languageColors[project.language] || '#6b7280' }} />
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-mono text-sm font-semibold truncate" style={{ color: 'var(--gh-blue)' }}>
+                      {project.name}
+                    </h3>
+                    <ExternalLink className="w-3.5 h-3.5 shrink-0 ml-2" style={{ color: 'var(--gh-muted)' }} />
+                  </div>
+                  <p className="text-xs mb-3 line-clamp-2" style={{ color: 'var(--gh-muted)' }}>
+                    {desc}
+                  </p>
+                  <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--gh-muted)' }}>
+                    <span className="flex items-center gap-1">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{
+                          backgroundColor:
+                            languageColors[project.language] || '#6b7280',
+                        }}
+                      />
+                      <span className="font-mono">{project.language}</span>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Star className="w-3 h-3" style={{ color: 'var(--gh-orange)' }} />
+                      {project.stars}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <GitFork className="w-3 h-3" />
+                      {project.forks}
+                    </span>
+                  </div>
+                </a>
+              </AnimatedReveal>
             );
           })}
         </div>
@@ -1281,14 +1224,7 @@ export async function fetchGitHubRepos(
 // ──────────────────────────────────────────────
 const libI18n = `'use client';
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-  type ReactNode,
-} from 'react';
+import { useSyncExternalStore } from 'react';
 
 export type Locale = 'ko' | 'en';
 
@@ -1315,6 +1251,8 @@ const translations: Record<Locale, Record<string, string>> = {
     'theme.light': '라이트 모드로 전환',
     'theme.dark': '다크 모드로 전환',
     'footer.powered': 'Powered by',
+    'lang.switchLabel': 'Switch to English',
+    'lang.toggle': 'EN',
   },
   en: {
     'nav.home': 'Home',
@@ -1338,52 +1276,32 @@ const translations: Record<Locale, Record<string, string>> = {
     'theme.light': 'Switch to light mode',
     'theme.dark': 'Switch to dark mode',
     'footer.powered': 'Powered by',
+    'lang.switchLabel': '한국어로 전환',
+    'lang.toggle': '한국어',
   },
 };
 
-interface LocaleContextValue {
-  locale: Locale;
-  setLocale: (l: Locale) => void;
-  t: (key: string) => string;
-}
+let _locale: Locale = 'ko';
+const _listeners = new Set<() => void>();
+function subscribe(cb: () => void) { _listeners.add(cb); return () => { _listeners.delete(cb); }; }
+function getSnapshot() { return _locale; }
+function getServerSnapshot() { return 'ko' as Locale; }
 
-const LocaleContext = createContext<LocaleContextValue>({
-  locale: 'ko',
-  setLocale: () => {},
-  t: (k) => k,
-});
-
-export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('ko');
-
-  useEffect(() => {
-    const saved = localStorage.getItem('locale') as Locale | null;
-    if (saved === 'ko' || saved === 'en') {
-      setLocaleState(saved);
-      document.documentElement.lang = saved;
-    }
-  }, []);
-
-  const setLocale = useCallback((l: Locale) => {
-    setLocaleState(l);
-    localStorage.setItem('locale', l);
-    document.documentElement.lang = l;
-  }, []);
-
-  const t = useCallback(
-    (key: string) => translations[locale]?.[key] ?? key,
-    [locale]
-  );
-
-  return (
-    <LocaleContext.Provider value={{ locale, setLocale, t }}>
-      {children}
-    </LocaleContext.Provider>
-  );
+if (typeof window !== 'undefined') {
+  const saved = localStorage.getItem('locale');
+  if (saved === 'ko' || saved === 'en') { _locale = saved; document.documentElement.lang = saved; }
 }
 
 export function useLocale() {
-  return useContext(LocaleContext);
+  const locale = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const setLocale = (l: Locale) => {
+    _locale = l;
+    localStorage.setItem('locale', l);
+    document.documentElement.lang = l;
+    _listeners.forEach((cb) => cb());
+  };
+  const t = (key: string) => translations[locale]?.[key] ?? key;
+  return { locale, setLocale, t };
 }
 `;
 

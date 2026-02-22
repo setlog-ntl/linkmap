@@ -173,15 +173,22 @@ dialog.lightbox img {
   background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
   opacity: 0.3;
 }
+
+/* Hero load animation */
+@keyframes fade-up { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+.animate-fade-up { animation: fade-up 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
+.animate-fade-up-d1 { animation: fade-up 0.6s cubic-bezier(0.16,1,0.3,1) forwards; animation-delay:150ms; opacity:0; }
+.animate-fade-up-d2 { animation: fade-up 0.6s cubic-bezier(0.16,1,0.3,1) forwards; animation-delay:300ms; opacity:0; }
+@media (prefers-reduced-motion:reduce) {
+  .animate-fade-up, .animate-fade-up-d1, .animate-fade-up-d2 { animation:none; opacity:1; transform:none; }
+}
 `;
 
 // ──────────────────────────────────────────────
 // src/app/layout.tsx
 // ──────────────────────────────────────────────
 const layoutTsx = `import type { Metadata } from 'next';
-import { ThemeProvider } from 'next-themes';
 import { siteConfig } from '@/lib/config';
-import { LocaleProvider } from '@/lib/i18n';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -216,6 +223,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
+        <script dangerouslySetInnerHTML={{ __html: "(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}})()" }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -242,11 +250,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-white text-gray-900 dark:bg-[#0f0f0f] dark:text-gray-50">
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:shadow-lg focus:text-sm">본문으로 바로가기</a>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <LocaleProvider>
-            {children}
-          </LocaleProvider>
-        </ThemeProvider>
+        {children}
       </body>
     </html>
   );
@@ -291,7 +295,6 @@ export default function Home() {
 // ──────────────────────────────────────────────
 const heroSection = `'use client';
 
-import { motion } from 'framer-motion';
 import { ArrowDown } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
@@ -313,12 +316,7 @@ export function HeroSection({ config }: Props) {
     >
       <div className="absolute inset-0 bg-gradient-to-br from-[#5b13ec]/10 via-transparent to-[#06b6d4]/10" />
 
-      <motion.div
-        className="relative z-10 text-center max-w-3xl"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
+      <div className="relative z-10 text-center max-w-3xl animate-fade-up">
         {config.avatarUrl && (
           <img
             src={config.avatarUrl}
@@ -326,23 +324,23 @@ export function HeroSection({ config }: Props) {
             className="w-28 h-28 rounded-full object-cover mx-auto mb-6 ring-2 ring-[#5b13ec]/50"
           />
         )}
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-3 bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-3 bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent animate-fade-up-d1">
           {name}
         </h1>
         {title && (
-          <p className="text-lg text-[#06b6d4] mb-4 font-medium">{title}</p>
+          <p className="text-lg text-[#06b6d4] mb-4 font-medium animate-fade-up-d1">{title}</p>
         )}
-        <p className="text-xl text-gray-400 mb-8 max-w-xl mx-auto">
+        <p className="text-xl text-gray-400 mb-8 max-w-xl mx-auto animate-fade-up-d2">
           {tagline}
         </p>
         <a
           href="#services"
-          className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] text-white font-medium hover:opacity-90 transition-opacity"
+          className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] text-white font-medium hover:opacity-90 transition-opacity animate-fade-up-d2"
         >
           {t('hero.cta')}
           <ArrowDown className="w-4 h-4" />
         </a>
-      </motion.div>
+      </div>
     </section>
   );
 }
@@ -353,10 +351,10 @@ export function HeroSection({ config }: Props) {
 // ──────────────────────────────────────────────
 const servicesSection = `'use client';
 
-import { motion } from 'framer-motion';
 import { Palette, Package, Image, Layout, Zap, Component, type LucideIcon } from 'lucide-react';
 import type { ServiceItem } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
+import { AnimatedReveal } from './animated-reveal';
 
 const iconMap: Record<string, LucideIcon> = {
   palette: Palette,
@@ -377,15 +375,11 @@ export function ServicesSection({ services }: Props) {
   return (
     <section id="services" className="py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
-        <motion.h2
-          className="text-3xl font-bold mb-12 text-center bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          {t('services.title')}
-        </motion.h2>
+        <AnimatedReveal>
+          <h2 className="text-3xl font-bold mb-12 text-center bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent">
+            {t('services.title')}
+          </h2>
+        </AnimatedReveal>
 
         <div className="grid md:grid-cols-3 gap-6">
           {services.map((service, i) => {
@@ -394,32 +388,29 @@ export function ServicesSection({ services }: Props) {
             const desc = locale === 'en' && service.descEn ? service.descEn : service.desc;
             const price = locale === 'en' && service.priceEn ? service.priceEn : service.price;
             return (
-              <motion.div
-                key={i}
-                className="relative p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm group overflow-hidden"
-                style={{ transition: 'border-color 0.3s ease, box-shadow 0.3s ease' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(91,19,236,0.4)';
-                  e.currentTarget.style.boxShadow = '0 0 20px rgba(91,19,236,0.1), inset 0 0 20px rgba(6,182,212,0.05)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.5, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#5b13ec]/20 to-[#06b6d4]/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <Icon className="w-5 h-5 text-[#5b13ec]" />
+              <AnimatedReveal key={i} delay={i * 100}>
+                <div
+                  className="relative p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm group overflow-hidden"
+                  style={{ transition: 'border-color 0.3s ease, box-shadow 0.3s ease' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(91,19,236,0.4)';
+                    e.currentTarget.style.boxShadow = '0 0 20px rgba(91,19,236,0.1), inset 0 0 20px rgba(6,182,212,0.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#5b13ec]/20 to-[#06b6d4]/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <Icon className="w-5 h-5 text-[#5b13ec]" />
+                    </div>
+                    <span className="text-sm font-semibold text-[#06b6d4]">{price}</span>
                   </div>
-                  <span className="text-sm font-semibold text-[#06b6d4]">{price}</span>
+                  <h3 className="text-lg font-semibold text-gray-100 mb-2">{title}</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed">{desc}</p>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-100 mb-2">{title}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{desc}</p>
-              </motion.div>
+              </AnimatedReveal>
             );
           })}
         </div>
@@ -435,10 +426,10 @@ export function ServicesSection({ services }: Props) {
 const portfolioSection = `'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import type { PortfolioItem } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
+import { AnimatedReveal } from './animated-reveal';
 
 interface Props {
   portfolio: PortfolioItem[];
@@ -471,15 +462,11 @@ export function PortfolioSection({ portfolio }: Props) {
   return (
     <section id="portfolio" className="py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
-        <motion.h2
-          className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          {t('portfolio.title')}
-        </motion.h2>
+        <AnimatedReveal>
+          <h2 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent">
+            {t('portfolio.title')}
+          </h2>
+        </AnimatedReveal>
 
         <div className="flex items-center justify-center gap-2 mb-10 flex-wrap">
           {categories.map((cat) => (
@@ -497,26 +484,14 @@ export function PortfolioSection({ portfolio }: Props) {
           ))}
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeCategory}
-            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
-          >
-            {filtered.map((item, i) => {
-              const title = locale === 'en' && item.titleEn ? item.titleEn : item.title;
-              const desc = locale === 'en' && item.descEn ? item.descEn : item.desc;
-              return (
-                <motion.div
-                  key={i}
+        <div key={activeCategory} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-up">
+          {filtered.map((item, i) => {
+            const title = locale === 'en' && item.titleEn ? item.titleEn : item.title;
+            const desc = locale === 'en' && item.descEn ? item.descEn : item.desc;
+            return (
+              <AnimatedReveal key={i} delay={i * 50}>
+                <div
                   className="group rounded-2xl overflow-hidden border border-white/5 bg-white/[0.02] cursor-pointer"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  transition={{ duration: 0.4, delay: i * 0.05 }}
                   onClick={() => openLightbox(item.imageUrl, title, desc)}
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">
@@ -540,11 +515,11 @@ export function PortfolioSection({ portfolio }: Props) {
                     <h3 className="font-semibold text-gray-100 mb-1">{title}</h3>
                     <p className="text-sm text-gray-400 line-clamp-2">{desc}</p>
                   </div>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        </AnimatePresence>
+                </div>
+              </AnimatedReveal>
+            );
+          })}
+        </div>
       </div>
 
       {/* Lightbox dialog */}
@@ -585,10 +560,10 @@ export function PortfolioSection({ portfolio }: Props) {
 // ──────────────────────────────────────────────
 const testimonialsSection = `'use client';
 
-import { motion } from 'framer-motion';
 import { Star } from 'lucide-react';
 import type { TestimonialItem } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
+import { AnimatedReveal } from './animated-reveal';
 
 interface Props {
   testimonials: TestimonialItem[];
@@ -600,15 +575,11 @@ export function TestimonialsSection({ testimonials }: Props) {
   return (
     <section className="py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
-        <motion.h2
-          className="text-3xl font-bold mb-12 text-center bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          {t('testimonials.title')}
-        </motion.h2>
+        <AnimatedReveal>
+          <h2 className="text-3xl font-bold mb-12 text-center bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent">
+            {t('testimonials.title')}
+          </h2>
+        </AnimatedReveal>
 
         <div className="grid md:grid-cols-2 gap-6">
           {testimonials.map((item, i) => {
@@ -617,27 +588,22 @@ export function TestimonialsSection({ testimonials }: Props) {
             const company = locale === 'en' && item.companyEn ? item.companyEn : item.company;
             const content = locale === 'en' && item.contentEn ? item.contentEn : item.content;
             return (
-              <motion.div
-                key={i}
-                className="p-6 rounded-2xl border border-white/5 bg-white/[0.02]"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
-              >
-                <div className="flex gap-0.5 mb-3">
-                  {Array.from({ length: item.rating }).map((_, j) => (
-                    <Star key={j} className="w-4 h-4 fill-[#f59e0b] text-[#f59e0b]" />
-                  ))}
+              <AnimatedReveal key={i} delay={i * 100}>
+                <div className="p-6 rounded-2xl border border-white/5 bg-white/[0.02]">
+                  <div className="flex gap-0.5 mb-3">
+                    {Array.from({ length: item.rating }).map((_, j) => (
+                      <Star key={j} className="w-4 h-4 fill-[#f59e0b] text-[#f59e0b]" />
+                    ))}
+                  </div>
+                  <p className="text-sm text-gray-300 mb-4 leading-relaxed italic">
+                    &ldquo;{content}&rdquo;
+                  </p>
+                  <div>
+                    <p className="font-medium text-gray-100 text-sm">{author}</p>
+                    <p className="text-xs text-gray-500">{role}, {company}</p>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-300 mb-4 leading-relaxed italic">
-                  &ldquo;{content}&rdquo;
-                </p>
-                <div>
-                  <p className="font-medium text-gray-100 text-sm">{author}</p>
-                  <p className="text-xs text-gray-500">{role}, {company}</p>
-                </div>
-              </motion.div>
+              </AnimatedReveal>
             );
           })}
         </div>
@@ -652,9 +618,9 @@ export function TestimonialsSection({ testimonials }: Props) {
 // ──────────────────────────────────────────────
 const processSection = `'use client';
 
-import { motion } from 'framer-motion';
 import type { ProcessStep } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
+import { AnimatedReveal } from './animated-reveal';
 
 interface Props {
   process: ProcessStep[];
@@ -666,15 +632,11 @@ export function ProcessSection({ process }: Props) {
   return (
     <section id="process" className="py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
-        <motion.h2
-          className="text-3xl font-bold mb-16 text-center bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          {t('process.title')}
-        </motion.h2>
+        <AnimatedReveal>
+          <h2 className="text-3xl font-bold mb-16 text-center bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent">
+            {t('process.title')}
+          </h2>
+        </AnimatedReveal>
 
         {/* Desktop: horizontal stepper */}
         <div className="hidden lg:block">
@@ -686,21 +648,16 @@ export function ProcessSection({ process }: Props) {
               const title = locale === 'en' && step.titleEn ? step.titleEn : step.title;
               const desc = locale === 'en' && step.descEn ? step.descEn : step.desc;
               return (
-                <motion.div
-                  key={i}
-                  className="relative flex flex-col items-center text-center flex-1 px-4"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  transition={{ duration: 0.4, delay: i * 0.15 }}
-                >
-                  {/* Step circle */}
-                  <div className="relative z-10 w-12 h-12 rounded-full bg-gradient-to-br from-[#5b13ec] to-[#06b6d4] flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-[#5b13ec]/20 mb-4">
-                    {step.number}
+                <AnimatedReveal key={i} delay={i * 150}>
+                  <div className="relative flex flex-col items-center text-center flex-1 px-4">
+                    {/* Step circle */}
+                    <div className="relative z-10 w-12 h-12 rounded-full bg-gradient-to-br from-[#5b13ec] to-[#06b6d4] flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-[#5b13ec]/20 mb-4">
+                      {step.number}
+                    </div>
+                    <h3 className="text-base font-semibold text-gray-100 mb-2">{title}</h3>
+                    <p className="text-sm text-gray-400 leading-relaxed max-w-[200px]">{desc}</p>
                   </div>
-                  <h3 className="text-base font-semibold text-gray-100 mb-2">{title}</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed max-w-[200px]">{desc}</p>
-                </motion.div>
+                </AnimatedReveal>
               );
             })}
           </div>
@@ -717,23 +674,18 @@ export function ProcessSection({ process }: Props) {
                 const title = locale === 'en' && step.titleEn ? step.titleEn : step.title;
                 const desc = locale === 'en' && step.descEn ? step.descEn : step.desc;
                 return (
-                  <motion.div
-                    key={i}
-                    className="relative flex items-start gap-4 sm:gap-6"
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: 0.4, delay: i * 0.1 }}
-                  >
-                    {/* Step circle (positioned on the line) */}
-                    <div className="absolute -left-8 sm:-left-12 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-[#5b13ec] to-[#06b6d4] flex items-center justify-center text-white font-bold text-sm sm:text-base shadow-lg shadow-[#5b13ec]/20 flex-shrink-0">
-                      {step.number}
+                  <AnimatedReveal key={i} delay={i * 100}>
+                    <div className="relative flex items-start gap-4 sm:gap-6">
+                      {/* Step circle (positioned on the line) */}
+                      <div className="absolute -left-8 sm:-left-12 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-[#5b13ec] to-[#06b6d4] flex items-center justify-center text-white font-bold text-sm sm:text-base shadow-lg shadow-[#5b13ec]/20 flex-shrink-0">
+                        {step.number}
+                      </div>
+                      <div className="pt-0.5">
+                        <h3 className="text-lg font-semibold text-gray-100 mb-1">{title}</h3>
+                        <p className="text-sm text-gray-400 leading-relaxed">{desc}</p>
+                      </div>
                     </div>
-                    <div className="pt-0.5">
-                      <h3 className="text-lg font-semibold text-gray-100 mb-1">{title}</h3>
-                      <p className="text-sm text-gray-400 leading-relaxed">{desc}</p>
-                    </div>
-                  </motion.div>
+                  </AnimatedReveal>
                 );
               })}
             </div>
@@ -750,10 +702,10 @@ export function ProcessSection({ process }: Props) {
 // ──────────────────────────────────────────────
 const contactSection = `'use client';
 
-import { motion } from 'framer-motion';
 import { Mail } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
+import { AnimatedReveal } from './animated-reveal';
 
 interface Props {
   config: SiteConfig;
@@ -765,60 +717,46 @@ export function ContactSection({ config }: Props) {
   return (
     <section id="contact" className="py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-3xl mx-auto text-center">
-        <motion.h2
-          className="text-3xl font-bold mb-4 bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          {t('contact.title')}
-        </motion.h2>
+        <AnimatedReveal>
+          <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent">
+            {t('contact.title')}
+          </h2>
+        </AnimatedReveal>
 
-        <motion.p
-          className="text-gray-400 mb-8 max-w-md mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          {t('contact.desc')}
-        </motion.p>
+        <AnimatedReveal delay={100}>
+          <p className="text-gray-400 mb-8 max-w-md mx-auto">
+            {t('contact.desc')}
+          </p>
+        </AnimatedReveal>
 
         {config.email && (
-          <motion.a
-            href={\`mailto:\${config.email}\`}
-            className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] text-white font-medium hover:opacity-90 transition-opacity"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <Mail className="w-4 h-4" />
-            {t('contact.email')}
-          </motion.a>
+          <AnimatedReveal delay={200}>
+            <a
+              href={\`mailto:\${config.email}\`}
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] text-white font-medium hover:opacity-90 transition-opacity"
+            >
+              <Mail className="w-4 h-4" />
+              {t('contact.email')}
+            </a>
+          </AnimatedReveal>
         )}
 
         {config.socials.length > 0 && (
-          <motion.div
-            className="flex items-center justify-center gap-4 mt-6"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            {config.socials.map((social, i) => (
-              <a
-                key={i}
-                href={social.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 rounded-full border border-white/10 text-sm text-gray-400 hover:text-white hover:border-white/30 transition-colors capitalize"
-              >
-                {social.platform}
-              </a>
-            ))}
-          </motion.div>
+          <AnimatedReveal delay={300}>
+            <div className="flex items-center justify-center gap-4 mt-6">
+              {config.socials.map((social, i) => (
+                <a
+                  key={i}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 rounded-full border border-white/10 text-sm text-gray-400 hover:text-white hover:border-white/30 transition-colors capitalize"
+                >
+                  {social.platform}
+                </a>
+              ))}
+            </div>
+          </AnimatedReveal>
         )}
       </div>
     </section>
@@ -1167,14 +1105,7 @@ export type SiteConfig = typeof siteConfig;
 // ──────────────────────────────────────────────
 const libI18n = `'use client';
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-  type ReactNode,
-} from 'react';
+import { useSyncExternalStore } from 'react';
 
 export type Locale = 'ko' | 'en';
 
@@ -1196,6 +1127,8 @@ const translations: Record<Locale, Record<string, string>> = {
     'contact.email': '이메일 보내기',
     'theme.light': '라이트 모드로 전환',
     'theme.dark': '다크 모드로 전환',
+    'lang.switchLabel': 'Switch to English',
+    'lang.toggle': 'EN',
   },
   en: {
     'nav.home': 'Home',
@@ -1214,52 +1147,32 @@ const translations: Record<Locale, Record<string, string>> = {
     'contact.email': 'Send Email',
     'theme.light': 'Switch to light mode',
     'theme.dark': 'Switch to dark mode',
+    'lang.switchLabel': '한국어로 전환',
+    'lang.toggle': '한국어',
   },
 };
 
-interface LocaleContextValue {
-  locale: Locale;
-  setLocale: (l: Locale) => void;
-  t: (key: string) => string;
-}
+let _locale: Locale = 'ko';
+const _listeners = new Set<() => void>();
+function subscribe(cb: () => void) { _listeners.add(cb); return () => { _listeners.delete(cb); }; }
+function getSnapshot() { return _locale; }
+function getServerSnapshot() { return 'ko' as Locale; }
 
-const LocaleContext = createContext<LocaleContextValue>({
-  locale: 'ko',
-  setLocale: () => {},
-  t: (k) => k,
-});
-
-export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('ko');
-
-  useEffect(() => {
-    const saved = localStorage.getItem('locale') as Locale | null;
-    if (saved === 'ko' || saved === 'en') {
-      setLocaleState(saved);
-      document.documentElement.lang = saved;
-    }
-  }, []);
-
-  const setLocale = useCallback((l: Locale) => {
-    setLocaleState(l);
-    localStorage.setItem('locale', l);
-    document.documentElement.lang = l;
-  }, []);
-
-  const t = useCallback(
-    (key: string) => translations[locale]?.[key] ?? key,
-    [locale]
-  );
-
-  return (
-    <LocaleContext.Provider value={{ locale, setLocale, t }}>
-      {children}
-    </LocaleContext.Provider>
-  );
+if (typeof window !== 'undefined') {
+  const saved = localStorage.getItem('locale');
+  if (saved === 'ko' || saved === 'en') { _locale = saved; document.documentElement.lang = saved; }
 }
 
 export function useLocale() {
-  return useContext(LocaleContext);
+  const locale = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const setLocale = (l: Locale) => {
+    _locale = l;
+    localStorage.setItem('locale', l);
+    document.documentElement.lang = l;
+    _listeners.forEach((cb) => cb());
+  };
+  const t = (key: string) => translations[locale]?.[key] ?? key;
+  return { locale, setLocale, t };
 }
 `;
 

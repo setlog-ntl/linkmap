@@ -32,7 +32,7 @@ export interface HomepageTemplateContent {
 // ──────────────────────────────────────────────
 // 6. Link-in-Bio Pro (MVP)
 // ──────────────────────────────────────────────
-const linkInBioPackageJson = makePackageJson('link-in-bio-pro', { withFramerMotion: false });
+const linkInBioPackageJson = makePackageJson('link-in-bio-pro');
 
 const linkInBioOgRoute = `import { ImageResponse } from 'next/og';
 import { siteConfig } from '@/lib/config';
@@ -145,9 +145,7 @@ const linkInBioGlobalsCss = `@import "tailwindcss";
 }`;
 
 const linkInBioLayout = `import type { Metadata } from 'next';
-import { ThemeProvider } from 'next-themes';
 import { siteConfig } from '@/lib/config';
-import { LocaleProvider } from '@/lib/i18n';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -182,6 +180,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
+        <script dangerouslySetInnerHTML={{ __html: "(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}})()" }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -201,11 +200,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:shadow-lg focus:text-sm">본문으로 바로가기</a>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <LocaleProvider>
-            {children}
-          </LocaleProvider>
-        </ThemeProvider>
+        {children}
       </body>
     </html>
   );
@@ -317,17 +312,17 @@ interface Props {
 }
 
 export function LanguageToggle({ theme }: Props) {
-  const { locale, setLocale } = useLocale();
+  const { locale, setLocale, t } = useLocale();
 
   return (
     <button
       onClick={() => setLocale(locale === 'ko' ? 'en' : 'ko')}
       className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors hover:opacity-80"
       style={{ color: theme.textMuted }}
-      aria-label={locale === 'ko' ? 'Switch to English' : '한국어로 전환'}
+      aria-label={t('lang.switchLabel')}
     >
       <Globe className="w-3.5 h-3.5" />
-      {locale === 'ko' ? 'EN' : '한국어'}
+      {t('lang.toggle')}
     </button>
   );
 }`;
@@ -499,33 +494,34 @@ export function SocialBar({ socials, theme }: Props) {
 
 const linkInBioThemeToggle = `'use client';
 
-import { useTheme } from 'next-themes';
+import { useState, useEffect } from 'react';
 import { Sun, Moon } from 'lucide-react';
-import { useSyncExternalStore } from 'react';
-import { useLocale } from '@/lib/i18n';
-
-const subscribe = () => () => {};
-const getSnapshot = () => true;
-const getServerSnapshot = () => false;
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const { t } = useLocale();
-  const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const [dark, setDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setDark(document.documentElement.classList.contains('dark'));
+    setMounted(true);
+  }, []);
 
   if (!mounted) return <div className="w-8 h-8" />;
 
+  const toggle = () => {
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle('dark', next);
+    localStorage.setItem('theme', next ? 'dark' : 'light');
+  };
+
   return (
     <button
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      onClick={toggle}
       className="p-1.5 rounded-full transition-colors duration-200 hover:bg-white/10"
-      aria-label={theme === 'dark' ? t('theme.light') : t('theme.dark')}
+      aria-label={dark ? '라이트 모드로 전환' : '다크 모드로 전환'}
     >
-      {theme === 'dark' ? (
-        <Sun className="w-4 h-4" />
-      ) : (
-        <Moon className="w-4 h-4" />
-      )}
+      {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
     </button>
   );
 }`;
@@ -578,14 +574,7 @@ export type SiteConfig = typeof siteConfig;`;
 
 const linkInBioI18n = `'use client';
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-  type ReactNode,
-} from 'react';
+import { useSyncExternalStore } from 'react';
 
 export type Locale = 'ko' | 'en';
 
@@ -594,57 +583,39 @@ const translations: Record<Locale, Record<string, string>> = {
     'theme.light': '라이트 모드로 전환',
     'theme.dark': '다크 모드로 전환',
     'footer.powered': 'Powered by',
+    'lang.switchLabel': 'Switch to English',
+    'lang.toggle': 'EN',
   },
   en: {
     'theme.light': 'Switch to light mode',
     'theme.dark': 'Switch to dark mode',
     'footer.powered': 'Powered by',
+    'lang.switchLabel': '한국어로 전환',
+    'lang.toggle': '한국어',
   },
 };
 
-interface LocaleContextValue {
-  locale: Locale;
-  setLocale: (l: Locale) => void;
-  t: (key: string) => string;
-}
+let _locale: Locale = 'ko';
+const _listeners = new Set<() => void>();
+function subscribe(cb: () => void) { _listeners.add(cb); return () => { _listeners.delete(cb); }; }
+function getSnapshot() { return _locale; }
+function getServerSnapshot() { return 'ko' as Locale; }
 
-const LocaleContext = createContext<LocaleContextValue>({
-  locale: 'ko',
-  setLocale: () => {},
-  t: (k) => k,
-});
-
-export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('ko');
-
-  useEffect(() => {
-    const saved = localStorage.getItem('locale') as Locale | null;
-    if (saved === 'ko' || saved === 'en') {
-      setLocaleState(saved);
-      document.documentElement.lang = saved;
-    }
-  }, []);
-
-  const setLocale = useCallback((l: Locale) => {
-    setLocaleState(l);
-    localStorage.setItem('locale', l);
-    document.documentElement.lang = l;
-  }, []);
-
-  const t = useCallback(
-    (key: string) => translations[locale]?.[key] ?? key,
-    [locale]
-  );
-
-  return (
-    <LocaleContext.Provider value={{ locale, setLocale, t }}>
-      {children}
-    </LocaleContext.Provider>
-  );
+if (typeof window !== 'undefined') {
+  const saved = localStorage.getItem('locale');
+  if (saved === 'ko' || saved === 'en') { _locale = saved; document.documentElement.lang = saved; }
 }
 
 export function useLocale() {
-  return useContext(LocaleContext);
+  const locale = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const setLocale = (l: Locale) => {
+    _locale = l;
+    localStorage.setItem('locale', l);
+    document.documentElement.lang = l;
+    _listeners.forEach((cb) => cb());
+  };
+  const t = (key: string) => translations[locale]?.[key] ?? key;
+  return { locale, setLocale, t };
 }`;
 
 const linkInBioThemes = `export interface ThemePreset {
@@ -717,7 +688,6 @@ const namecardPackageJson = `{
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next-themes": "^0.4.4",
     "lucide-react": "^0.468.0",
     "qrcode.react": "^4.2.0"
   },
@@ -786,9 +756,7 @@ const namecardGlobalsCss = `@import "tailwindcss";
 }`;
 
 const namecardLayout = `import type { Metadata } from 'next';
-import { ThemeProvider } from 'next-themes';
 import { siteConfig } from '@/lib/config';
-import { LocaleProvider } from '@/lib/i18n';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -805,13 +773,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko" suppressHydrationWarning>
       <head>
         <link rel="stylesheet" as="style" crossOrigin="anonymous" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+        <script dangerouslySetInnerHTML={{ __html: "(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}})()" }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Person', name: siteConfig.name, jobTitle: siteConfig.title, ...(siteConfig.company ? { worksFor: { '@type': 'Organization', name: siteConfig.company } } : {}), ...(siteConfig.email || siteConfig.phone ? { contactPoint: { '@type': 'ContactPoint', ...(siteConfig.email ? { email: siteConfig.email } : {}), ...(siteConfig.phone ? { telephone: siteConfig.phone } : {}) } } : {}), ...(siteConfig.website ? { url: siteConfig.website } : {}), ...(siteConfig.socials?.length ? { sameAs: siteConfig.socials.map((s: { url: string }) => s.url) } : {}) }) }} />
       </head>
       <body className="antialiased bg-gray-50 dark:bg-gray-900">
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:shadow-lg focus:text-sm">본문으로 바로가기</a>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <LocaleProvider>{children}</LocaleProvider>
-        </ThemeProvider>
+        {children}
       </body>
     </html>
   );
@@ -894,10 +861,10 @@ import { useLocale } from '@/lib/i18n';
 import { Globe } from 'lucide-react';
 
 export function LanguageToggle() {
-  const { locale, setLocale } = useLocale();
+  const { locale, setLocale, t } = useLocale();
   return (
-    <button onClick={() => setLocale(locale === 'ko' ? 'en' : 'ko')} className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" aria-label={locale === 'ko' ? 'Switch to English' : '한국어로 전환'}>
-      <Globe className="w-3.5 h-3.5" />{locale === 'ko' ? 'EN' : '한국어'}
+    <button onClick={() => setLocale(locale === 'ko' ? 'en' : 'ko')} className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" aria-label={t('lang.switchLabel')}>
+      <Globe className="w-3.5 h-3.5" />{t('lang.toggle')}
     </button>
   );
 }`;
@@ -994,23 +961,34 @@ export function SocialLinks({ socials, accentColor }: Props) {
 
 const namecardThemeToggle = `'use client';
 
-import { useTheme } from 'next-themes';
+import { useState, useEffect } from 'react';
 import { Sun, Moon } from 'lucide-react';
-import { useSyncExternalStore } from 'react';
-import { useLocale } from '@/lib/i18n';
-
-const subscribe = () => () => {};
-const getSnapshot = () => true;
-const getServerSnapshot = () => false;
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const { t } = useLocale();
-  const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const [dark, setDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setDark(document.documentElement.classList.contains('dark'));
+    setMounted(true);
+  }, []);
+
   if (!mounted) return <div className="w-8 h-8" />;
+
+  const toggle = () => {
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle('dark', next);
+    localStorage.setItem('theme', next ? 'dark' : 'light');
+  };
+
   return (
-    <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-1.5 rounded-full transition-colors duration-200 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" aria-label={theme === 'dark' ? t('theme.light') : t('theme.dark')}>
-      {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+    <button
+      onClick={toggle}
+      className="p-1.5 rounded-full transition-colors duration-200 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+      aria-label={dark ? '라이트 모드로 전환' : '다크 모드로 전환'}
+    >
+      {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
     </button>
   );
 }`;
@@ -1044,28 +1022,37 @@ export type SiteConfig = typeof siteConfig;`;
 
 const namecardI18n = `'use client';
 
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import { useSyncExternalStore } from 'react';
 
 export type Locale = 'ko' | 'en';
 
 const translations: Record<Locale, Record<string, string>> = {
-  ko: { 'contact.call': '전화하기', 'contact.email': '이메일 보내기', 'contact.map': '지도에서 보기', 'contact.website': '웹사이트 방문', 'qr.hint': 'QR 코드를 스캔하면 연락처가 저장됩니다', 'save.contact': '연락처에 저장', 'theme.light': '라이트 모드로 전환', 'theme.dark': '다크 모드로 전환', 'footer.powered': 'Powered by' },
-  en: { 'contact.call': 'Call', 'contact.email': 'Send email', 'contact.map': 'View on map', 'contact.website': 'Visit website', 'qr.hint': 'Scan QR code to save contact', 'save.contact': 'Save Contact', 'theme.light': 'Switch to light mode', 'theme.dark': 'Switch to dark mode', 'footer.powered': 'Powered by' },
+  ko: { 'contact.call': '전화하기', 'contact.email': '이메일 보내기', 'contact.map': '지도에서 보기', 'contact.website': '웹사이트 방문', 'qr.hint': 'QR 코드를 스캔하면 연락처가 저장됩니다', 'save.contact': '연락처에 저장', 'theme.light': '라이트 모드로 전환', 'theme.dark': '다크 모드로 전환', 'footer.powered': 'Powered by', 'lang.switchLabel': 'Switch to English', 'lang.toggle': 'EN' },
+  en: { 'contact.call': 'Call', 'contact.email': 'Send email', 'contact.map': 'View on map', 'contact.website': 'Visit website', 'qr.hint': 'Scan QR code to save contact', 'save.contact': 'Save Contact', 'theme.light': 'Switch to light mode', 'theme.dark': 'Switch to dark mode', 'footer.powered': 'Powered by', 'lang.switchLabel': '한국어로 전환', 'lang.toggle': '한국어' },
 };
 
-interface LocaleContextValue { locale: Locale; setLocale: (l: Locale) => void; t: (key: string) => string; }
+let _locale: Locale = 'ko';
+const _listeners = new Set<() => void>();
+function subscribe(cb: () => void) { _listeners.add(cb); return () => { _listeners.delete(cb); }; }
+function getSnapshot() { return _locale; }
+function getServerSnapshot() { return 'ko' as Locale; }
 
-const LocaleContext = createContext<LocaleContextValue>({ locale: 'ko', setLocale: () => {}, t: (k) => k });
-
-export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('ko');
-  useEffect(() => { const saved = localStorage.getItem('locale') as Locale | null; if (saved === 'ko' || saved === 'en') { setLocaleState(saved); document.documentElement.lang = saved; } }, []);
-  const setLocale = useCallback((l: Locale) => { setLocaleState(l); localStorage.setItem('locale', l); document.documentElement.lang = l; }, []);
-  const t = useCallback((key: string) => translations[locale]?.[key] ?? key, [locale]);
-  return <LocaleContext.Provider value={{ locale, setLocale, t }}>{children}</LocaleContext.Provider>;
+if (typeof window !== 'undefined') {
+  const saved = localStorage.getItem('locale');
+  if (saved === 'ko' || saved === 'en') { _locale = saved; document.documentElement.lang = saved; }
 }
 
-export function useLocale() { return useContext(LocaleContext); }`;
+export function useLocale() {
+  const locale = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const setLocale = (l: Locale) => {
+    _locale = l;
+    localStorage.setItem('locale', l);
+    document.documentElement.lang = l;
+    _listeners.forEach((cb) => cb());
+  };
+  const t = (key: string) => translations[locale]?.[key] ?? key;
+  return { locale, setLocale, t };
+}`;
 
 const namecardVcard = `interface VCardData { name: string; title?: string | null; company?: string | null; email?: string | null; phone?: string | null; address?: string | null; website?: string | null; }
 

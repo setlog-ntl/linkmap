@@ -123,15 +123,22 @@ html {
   transition: width 0.1s linear;
   pointer-events: none;
 }
+
+/* Hero load animation */
+@keyframes fade-up { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+.animate-fade-up { animation: fade-up 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
+.animate-fade-up-d1 { animation-delay:150ms; opacity:0; }
+.animate-fade-up-d2 { animation-delay:300ms; opacity:0; }
+@media (prefers-reduced-motion:reduce) {
+  .animate-fade-up { animation:none; opacity:1; transform:none; }
+}
 `;
 
 // ──────────────────────────────────────────────
 // src/app/layout.tsx
 // ──────────────────────────────────────────────
 const layoutTsx = `import type { Metadata } from 'next';
-import { ThemeProvider } from 'next-themes';
 import { siteConfig } from '@/lib/config';
-import { LocaleProvider } from '@/lib/i18n';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -166,6 +173,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
+        <script dangerouslySetInnerHTML={{ __html: "(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}})()" }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -189,11 +197,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-[#fdf4e7] text-gray-900 dark:bg-gray-950 dark:text-gray-50">
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:shadow-lg focus:text-sm">본문으로 바로가기</a>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <LocaleProvider>
-            {children}
-          </LocaleProvider>
-        </ThemeProvider>
+        {children}
       </body>
     </html>
   );
@@ -242,7 +246,6 @@ export default function Home() {
 // ──────────────────────────────────────────────
 const heroSection = `'use client';
 
-import { motion } from 'framer-motion';
 import { Phone } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
@@ -261,12 +264,7 @@ export function HeroSection({ config }: Props) {
       id="hero"
       className="pt-20 pb-12 px-4 sm:px-6"
     >
-      <motion.div
-        className="max-w-lg mx-auto text-center"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div className="max-w-lg mx-auto text-center animate-fade-up">
         <h1 className="text-3xl sm:text-4xl font-bold text-[#d47311] mb-3">
           {name}
         </h1>
@@ -282,7 +280,7 @@ export function HeroSection({ config }: Props) {
             {t('hero.call')}
           </a>
         )}
-      </motion.div>
+      </div>
     </section>
   );
 }
@@ -350,7 +348,6 @@ export function QuickActions({ config }: Props) {
 const menuSection = `'use client';
 
 import { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import type { MenuItem } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
@@ -367,7 +364,6 @@ export function MenuSection({ items }: Props) {
     return acc;
   }, {});
 
-  /* Tab mode for desktop, accordion for mobile */
   const [activeCategory, setActiveCategory] = useState(categories[0] || '');
   const [openCategories, setOpenCategories] = useState<Set<string>>(new Set(categories.slice(0, 1)));
 
@@ -431,18 +427,9 @@ export function MenuSection({ items }: Props) {
         </div>
 
         <div className="hidden sm:block">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeCategory}
-              className="space-y-3"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              {filtered.map(renderItem)}
-            </motion.div>
-          </AnimatePresence>
+          <div key={activeCategory} className="space-y-3 animate-fade-up">
+            {filtered.map(renderItem)}
+          </div>
         </div>
 
         {/* Mobile: Accordion by category */}
@@ -462,21 +449,13 @@ export function MenuSection({ items }: Props) {
                   </span>
                   <ChevronDown className={\`w-4 h-4 text-gray-400 transition-transform duration-200 \${isOpen ? 'rotate-180' : ''}\`} />
                 </button>
-                <AnimatePresence>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25, ease: 'easeInOut' }}
-                      className="overflow-hidden"
-                    >
-                      <div className="px-3 pb-3 space-y-2">
-                        {catItems.map(renderItem)}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <div className={\`grid transition-[grid-template-rows] duration-250 ease-in-out overflow-hidden \${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}\`}>
+                  <div className="min-h-0">
+                    <div className="px-3 pb-3 space-y-2">
+                      {catItems.map(renderItem)}
+                    </div>
+                  </div>
+                </div>
               </div>
             );
           })}
@@ -613,7 +592,7 @@ export function LocationSection({ config }: Props) {
 // ──────────────────────────────────────────────
 const gallerySection = `'use client';
 
-import { motion } from 'framer-motion';
+import { AnimatedReveal } from './animated-reveal';
 import { useLocale } from '@/lib/i18n';
 
 interface Props {
@@ -632,21 +611,16 @@ export function GallerySection({ images }: Props) {
 
         <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
           {images.map((src, i) => (
-            <motion.div
-              key={i}
-              className="shrink-0 w-64 h-64 rounded-xl overflow-hidden snap-center"
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.3, delay: i * 0.05 }}
-            >
-              <img
-                src={src}
-                alt=""
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </motion.div>
+            <AnimatedReveal key={i} delay={i * 50}>
+              <div className="shrink-0 w-64 h-64 rounded-xl overflow-hidden snap-center">
+                <img
+                  src={src}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            </AnimatedReveal>
           ))}
         </div>
       </div>
@@ -1017,14 +991,7 @@ export type SiteConfig = typeof siteConfig;
 // ──────────────────────────────────────────────
 const libI18n = `'use client';
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-  type ReactNode,
-} from 'react';
+import { useSyncExternalStore } from 'react';
 
 export type Locale = 'ko' | 'en';
 
@@ -1051,6 +1018,8 @@ const translations: Record<Locale, Record<string, string>> = {
     'sns.kakao': '카카오톡 채널',
     'theme.light': '라이트 모드로 전환',
     'theme.dark': '다크 모드로 전환',
+    'lang.switchLabel': 'Switch to English',
+    'lang.toggle': 'EN',
   },
   en: {
     'nav.home': 'Home',
@@ -1074,52 +1043,32 @@ const translations: Record<Locale, Record<string, string>> = {
     'sns.kakao': 'KakaoTalk Channel',
     'theme.light': 'Switch to light mode',
     'theme.dark': 'Switch to dark mode',
+    'lang.switchLabel': '한국어로 전환',
+    'lang.toggle': '한국어',
   },
 };
 
-interface LocaleContextValue {
-  locale: Locale;
-  setLocale: (l: Locale) => void;
-  t: (key: string) => string;
-}
+let _locale: Locale = 'ko';
+const _listeners = new Set<() => void>();
+function subscribe(cb: () => void) { _listeners.add(cb); return () => { _listeners.delete(cb); }; }
+function getSnapshot() { return _locale; }
+function getServerSnapshot() { return 'ko' as Locale; }
 
-const LocaleContext = createContext<LocaleContextValue>({
-  locale: 'ko',
-  setLocale: () => {},
-  t: (k) => k,
-});
-
-export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('ko');
-
-  useEffect(() => {
-    const saved = localStorage.getItem('locale') as Locale | null;
-    if (saved === 'ko' || saved === 'en') {
-      setLocaleState(saved);
-      document.documentElement.lang = saved;
-    }
-  }, []);
-
-  const setLocale = useCallback((l: Locale) => {
-    setLocaleState(l);
-    localStorage.setItem('locale', l);
-    document.documentElement.lang = l;
-  }, []);
-
-  const t = useCallback(
-    (key: string) => translations[locale]?.[key] ?? key,
-    [locale]
-  );
-
-  return (
-    <LocaleContext.Provider value={{ locale, setLocale, t }}>
-      {children}
-    </LocaleContext.Provider>
-  );
+if (typeof window !== 'undefined') {
+  const saved = localStorage.getItem('locale');
+  if (saved === 'ko' || saved === 'en') { _locale = saved; document.documentElement.lang = saved; }
 }
 
 export function useLocale() {
-  return useContext(LocaleContext);
+  const locale = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const setLocale = (l: Locale) => {
+    _locale = l;
+    localStorage.setItem('locale', l);
+    document.documentElement.lang = l;
+    _listeners.forEach((cb) => cb());
+  };
+  const t = (key: string) => translations[locale]?.[key] ?? key;
+  return { locale, setLocale, t };
 }
 `;
 

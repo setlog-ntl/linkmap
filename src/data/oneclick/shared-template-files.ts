@@ -98,20 +98,13 @@ export default nextConfig;
 `;
 
 /** 템플릿별 name만 바꿔서 package.json 생성 */
-export function makePackageJson(
-  name: string,
-  opts?: { withFramerMotion?: boolean }
-): string {
+export function makePackageJson(name: string): string {
   const deps: Record<string, string> = {
     next: '^15.1.0',
     react: '^19.0.0',
     'react-dom': '^19.0.0',
-    'next-themes': '^0.4.4',
     'lucide-react': '^0.468.0',
   };
-  if (opts?.withFramerMotion !== false) {
-    deps['framer-motion'] = '^12.0.0';
-  }
 
   return JSON.stringify(
     {
@@ -219,31 +212,39 @@ export function SectionWrapper({
 }
 `;
 
+/** 인라인 테마 스크립트 — layout.tsx <head>에 dangerouslySetInnerHTML로 삽입 */
+export const sharedThemeScript = `(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}})()`;
+
 export const sharedThemeToggle = `'use client';
 
-import { useTheme } from 'next-themes';
+import { useState, useEffect } from 'react';
 import { Sun, Moon } from 'lucide-react';
-import { useSyncExternalStore } from 'react';
-import { useLocale } from '@/lib/i18n';
-
-const subscribe = () => () => {};
-const getSnapshot = () => true;
-const getServerSnapshot = () => false;
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const { t } = useLocale();
-  const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const [dark, setDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setDark(document.documentElement.classList.contains('dark'));
+    setMounted(true);
+  }, []);
 
   if (!mounted) return <div className="w-8 h-8" />;
 
+  const toggle = () => {
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle('dark', next);
+    localStorage.setItem('theme', next ? 'dark' : 'light');
+  };
+
   return (
     <button
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      onClick={toggle}
       className="p-1.5 rounded-full transition-colors duration-200 text-gray-500 hover:text-gray-300"
-      aria-label={theme === 'dark' ? t('theme.light') : t('theme.dark')}
+      aria-label={dark ? '라이트 모드로 전환' : '다크 모드로 전환'}
     >
-      {theme === 'dark' ? (
+      {dark ? (
         <Sun className="w-4 h-4" />
       ) : (
         <Moon className="w-4 h-4" />
@@ -259,16 +260,16 @@ import { useLocale } from '@/lib/i18n';
 import { Globe } from 'lucide-react';
 
 export function LanguageToggle() {
-  const { locale, setLocale } = useLocale();
+  const { locale, setLocale, t } = useLocale();
 
   return (
     <button
       onClick={() => setLocale(locale === 'ko' ? 'en' : 'ko')}
       className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-gray-400 hover:text-white transition-colors"
-      aria-label={locale === 'ko' ? 'Switch to English' : '한국어로 전환'}
+      aria-label={t('lang.switchLabel')}
     >
       <Globe className="w-3.5 h-3.5" />
-      {locale === 'ko' ? 'EN' : '한국어'}
+      {t('lang.toggle')}
     </button>
   );
 }
@@ -312,49 +313,34 @@ export function SocialIcon({ platform, url, className = '', size = 20 }: Props) 
 }
 `;
 
-export const sharedSectionHeading = `'use client';
-
-import { motion } from 'framer-motion';
-import { useLocale } from '@/lib/i18n';
+export const sharedSectionHeading = `import { AnimatedReveal } from './animated-reveal';
 
 interface Props {
-  titleKey: string;
-  subtitleKey?: string;
+  title: string;
+  subtitle?: string;
   gradient?: string;
   className?: string;
 }
 
 export function SectionHeading({
-  titleKey,
-  subtitleKey,
+  title,
+  subtitle,
   gradient = 'from-white to-gray-400',
   className = '',
 }: Props) {
-  const { t } = useLocale();
-
   return (
-    <div className={\\\`text-center mb-12 \\\${className}\\\`}>
-      <motion.h2
+    <AnimatedReveal className={\\\`text-center mb-12 \\\${className}\\\`}>
+      <h2
         className={\\\`text-3xl sm:text-4xl font-bold bg-gradient-to-r \\\${gradient} bg-clip-text text-transparent\\\`}
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.5 }}
       >
-        {t(titleKey)}
-      </motion.h2>
-      {subtitleKey && (
-        <motion.p
-          className="mt-3 text-gray-400 max-w-xl mx-auto"
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          {t(subtitleKey)}
-        </motion.p>
+        {title}
+      </h2>
+      {subtitle && (
+        <p className="mt-3 text-gray-400 max-w-xl mx-auto">
+          {subtitle}
+        </p>
       )}
-    </div>
+    </AnimatedReveal>
   );
 }
 `;

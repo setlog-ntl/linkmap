@@ -189,15 +189,22 @@ html {
   transition: width 0.1s linear;
   pointer-events: none;
 }
+
+/* Hero load animation (framer initial/animate replacement) */
+@keyframes fade-up { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+.animate-fade-up { animation: fade-up 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
+.animate-fade-up-d1 { animation-delay:150ms; opacity:0; }
+.animate-fade-up-d2 { animation-delay:300ms; opacity:0; }
+@media (prefers-reduced-motion:reduce) {
+  .animate-fade-up { animation:none; opacity:1; transform:none; }
+}
 `;
 
 // ──────────────────────────────────────────────
 // src/app/layout.tsx
 // ──────────────────────────────────────────────
 const layoutTsx = `import type { Metadata } from 'next';
-import { ThemeProvider } from 'next-themes';
 import { siteConfig } from '@/lib/config';
-import { LocaleProvider } from '@/lib/i18n';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -233,6 +240,11 @@ export default function RootLayout({
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
         <script
+          dangerouslySetInnerHTML={{
+            __html: \`(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}}catch(e){}})()\`,
+          }}
+        />
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
@@ -248,11 +260,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-white text-gray-900 dark:bg-[#0f0f0f] dark:text-gray-50">
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:shadow-lg focus:text-sm">본문으로 바로가기</a>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <LocaleProvider>
-            {children}
-          </LocaleProvider>
-        </ThemeProvider>
+        {children}
       </body>
     </html>
   );
@@ -297,8 +305,7 @@ export default function Home() {
 // ──────────────────────────────────────────────
 const heroSection = `'use client';
 
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import type { SiteConfig } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
 
@@ -308,16 +315,25 @@ interface Props {
 
 export function HeroSection({ config }: Props) {
   const ref = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start start', 'end start'],
-  });
-  const y = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-
+  const [scrollY, setScrollY] = useState(0);
   const { locale, t } = useLocale();
   const name = locale === 'en' && config.nameEn ? config.nameEn : config.name;
   const tagline = locale === 'en' && config.taglineEn ? config.taglineEn : config.tagline;
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const onScroll = () => {
+      const rect = el.getBoundingClientRect();
+      const h = el.offsetHeight;
+      if (h > 0) setScrollY(Math.max(0, Math.min(1, -rect.top / h)));
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const parallaxY = \`\${scrollY * 30}%\`;
+  const fadeOpacity = Math.max(0, 1 - scrollY * 1.25);
 
   return (
     <section
@@ -326,9 +342,9 @@ export function HeroSection({ config }: Props) {
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
       {config.heroImageUrl && (
-        <motion.div
+        <div
           className="absolute inset-0 z-0"
-          style={{ y }}
+          style={{ transform: \`translateY(\${parallaxY})\` }}
         >
           <img
             src={config.heroImageUrl}
@@ -336,7 +352,7 @@ export function HeroSection({ config }: Props) {
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-black/60" />
-        </motion.div>
+        </div>
       )}
 
       {!config.heroImageUrl && (
@@ -348,36 +364,27 @@ export function HeroSection({ config }: Props) {
         </>
       )}
 
-      <motion.div
+      <div
         className="relative z-10 text-center px-4 sm:px-6 max-w-4xl"
-        style={{ opacity }}
+        style={{ opacity: fadeOpacity }}
       >
-        <motion.h1
-          className="text-5xl sm:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-[#ee5b2b] via-[#f59e0b] to-[#ee5b2b] bg-[length:200%_auto] bg-clip-text text-transparent"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        <h1
+          className="text-5xl sm:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-[#ee5b2b] via-[#f59e0b] to-[#ee5b2b] bg-[length:200%_auto] bg-clip-text text-transparent animate-fade-up"
         >
           {name}
-        </motion.h1>
-        <motion.p
-          className="text-xl sm:text-2xl lg:text-3xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+        </h1>
+        <p
+          className="text-xl sm:text-2xl lg:text-3xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto animate-fade-up animate-fade-up-d1"
         >
           {tagline}
-        </motion.p>
-        <motion.a
+        </p>
+        <a
           href="#about"
-          className="inline-block px-10 py-4 rounded-full bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] text-white font-semibold text-lg shadow-lg shadow-[#ee5b2b]/20 hover:shadow-[#ee5b2b]/30 hover:scale-105 transition-all duration-300"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="inline-block px-10 py-4 rounded-full bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] text-white font-semibold text-lg shadow-lg shadow-[#ee5b2b]/20 hover:shadow-[#ee5b2b]/30 hover:scale-105 transition-all duration-300 animate-fade-up animate-fade-up-d2"
         >
           {t('hero.cta')}
-        </motion.a>
-      </motion.div>
+        </a>
+      </div>
     </section>
   );
 }
@@ -388,7 +395,7 @@ export function HeroSection({ config }: Props) {
 // ──────────────────────────────────────────────
 const aboutSection = `'use client';
 
-import { motion } from 'framer-motion';
+import { AnimatedReveal } from './animated-reveal';
 import type { SiteConfig } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
 
@@ -403,25 +410,21 @@ export function AboutSection({ config }: Props) {
   return (
     <section id="about" className="py-20 sm:py-28 px-4 sm:px-6 section-alt">
       <div className="max-w-3xl mx-auto">
-        <motion.h2
-          className="text-3xl sm:text-4xl font-bold mb-8 text-center bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          {t('about.title')}
-        </motion.h2>
+        <AnimatedReveal>
+          <h2
+            className="text-3xl sm:text-4xl font-bold mb-8 text-center bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
+          >
+            {t('about.title')}
+          </h2>
+        </AnimatedReveal>
 
-        <motion.p
-          className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          {story}
-        </motion.p>
+        <AnimatedReveal delay={100}>
+          <p
+            className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line"
+          >
+            {story}
+          </p>
+        </AnimatedReveal>
       </div>
     </section>
   );
@@ -433,7 +436,7 @@ export function AboutSection({ config }: Props) {
 // ──────────────────────────────────────────────
 const valuesSection = `'use client';
 
-import { motion } from 'framer-motion';
+import { AnimatedReveal } from './animated-reveal';
 import type { ValueItem } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
 
@@ -447,33 +450,28 @@ export function ValuesSection({ values }: Props) {
   return (
     <section id="values" className="py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
-        <motion.h2
-          className="text-3xl sm:text-4xl font-bold mb-12 text-center bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          {t('values.title')}
-        </motion.h2>
+        <AnimatedReveal>
+          <h2
+            className="text-3xl sm:text-4xl font-bold mb-12 text-center bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
+          >
+            {t('values.title')}
+          </h2>
+        </AnimatedReveal>
 
         <div className="grid md:grid-cols-3 gap-6">
           {values.map((value, i) => {
             const title = locale === 'en' && value.titleEn ? value.titleEn : value.title;
             const desc = locale === 'en' && value.descEn ? value.descEn : value.desc;
             return (
-              <motion.div
-                key={i}
-                className="p-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] hover:border-black/10 dark:hover:border-white/15 transition-all duration-300 group"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.5, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <span className="text-3xl mb-4 block group-hover:scale-110 transition-transform duration-300">{value.emoji}</span>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">{title}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{desc}</p>
-              </motion.div>
+              <AnimatedReveal key={i} delay={i * 100}>
+                <div
+                  className="p-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] hover:border-black/10 dark:hover:border-white/15 transition-all duration-300 group"
+                >
+                  <span className="text-3xl mb-4 block group-hover:scale-110 transition-transform duration-300">{value.emoji}</span>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">{title}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{desc}</p>
+                </div>
+              </AnimatedReveal>
             );
           })}
         </div>
@@ -488,7 +486,7 @@ export function ValuesSection({ values }: Props) {
 // ──────────────────────────────────────────────
 const highlightsSection = `'use client';
 
-import { motion } from 'framer-motion';
+import { AnimatedReveal } from './animated-reveal';
 import type { HighlightItem } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
 
@@ -502,34 +500,29 @@ export function HighlightsSection({ highlights }: Props) {
   return (
     <section className="py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
-        <motion.h2
-          className="text-3xl font-bold mb-12 text-center bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          {t('highlights.title')}
-        </motion.h2>
+        <AnimatedReveal>
+          <h2
+            className="text-3xl font-bold mb-12 text-center bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
+          >
+            {t('highlights.title')}
+          </h2>
+        </AnimatedReveal>
 
         <div className="grid sm:grid-cols-3 gap-6">
           {highlights.map((item, i) => {
             const label = locale === 'en' && item.labelEn ? item.labelEn : item.label;
             const value = locale === 'en' && item.valueEn ? item.valueEn : item.value;
             return (
-              <motion.div
-                key={i}
-                className="text-center p-8 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl hover:border-[#ee5b2b]/20 transition-all duration-300"
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.5, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <p className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent mb-2">
-                  {value}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
-              </motion.div>
+              <AnimatedReveal key={i} delay={i * 100}>
+                <div
+                  className="text-center p-8 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl hover:border-[#ee5b2b]/20 transition-all duration-300"
+                >
+                  <p className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent mb-2">
+                    {value}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
+                </div>
+              </AnimatedReveal>
             );
           })}
         </div>
@@ -544,7 +537,7 @@ export function HighlightsSection({ highlights }: Props) {
 // ──────────────────────────────────────────────
 const gallerySection = `'use client';
 
-import { motion } from 'framer-motion';
+import { AnimatedReveal } from './animated-reveal';
 import { useLocale } from '@/lib/i18n';
 
 interface Props {
@@ -557,33 +550,28 @@ export function GallerySection({ images }: Props) {
   return (
     <section id="gallery" className="py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
-        <motion.h2
-          className="text-3xl font-bold mb-12 text-center bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          {t('gallery.title')}
-        </motion.h2>
+        <AnimatedReveal>
+          <h2
+            className="text-3xl font-bold mb-12 text-center bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
+          >
+            {t('gallery.title')}
+          </h2>
+        </AnimatedReveal>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {images.map((src, i) => (
-            <motion.div
-              key={i}
-              className="aspect-square rounded-xl overflow-hidden group border border-black/5 dark:border-white/5 hover:border-[#ee5b2b]/20 transition-colors duration-300"
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.5, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <img
-                src={src}
-                alt=""
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
-                loading="lazy"
-              />
-            </motion.div>
+            <AnimatedReveal key={i} delay={i * 50}>
+              <div
+                className="aspect-square rounded-xl overflow-hidden group border border-black/5 dark:border-white/5 hover:border-[#ee5b2b]/20 transition-colors duration-300"
+              >
+                <img
+                  src={src}
+                  alt=""
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
+                  loading="lazy"
+                />
+              </div>
+            </AnimatedReveal>
           ))}
         </div>
       </div>
@@ -597,7 +585,7 @@ export function GallerySection({ images }: Props) {
 // ──────────────────────────────────────────────
 const contactSection = `'use client';
 
-import { motion } from 'framer-motion';
+import { AnimatedReveal } from './animated-reveal';
 import { Mail } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
@@ -612,60 +600,48 @@ export function ContactSection({ config }: Props) {
   return (
     <section id="contact" className="py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-3xl mx-auto text-center">
-        <motion.h2
-          className="text-3xl font-bold mb-4 bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          {t('contact.title')}
-        </motion.h2>
+        <AnimatedReveal>
+          <h2
+            className="text-3xl font-bold mb-4 bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
+          >
+            {t('contact.title')}
+          </h2>
+        </AnimatedReveal>
 
-        <motion.p
-          className="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          {t('contact.desc')}
-        </motion.p>
+        <AnimatedReveal delay={100}>
+          <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto">
+            {t('contact.desc')}
+          </p>
+        </AnimatedReveal>
 
         {config.email && (
-          <motion.a
-            href={\`mailto:\${config.email}\`}
-            className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] text-white font-medium hover:opacity-90 transition-opacity"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <Mail className="w-4 h-4" />
-            {t('contact.email')}
-          </motion.a>
+          <AnimatedReveal delay={200}>
+            <a
+              href={\`mailto:\${config.email}\`}
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] text-white font-medium hover:opacity-90 transition-opacity"
+            >
+              <Mail className="w-4 h-4" />
+              {t('contact.email')}
+            </a>
+          </AnimatedReveal>
         )}
 
         {config.socials.length > 0 && (
-          <motion.div
-            className="flex items-center justify-center gap-4 mt-6"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            {config.socials.map((social, i) => (
-              <a
-                key={i}
-                href={social.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 rounded-full border border-black/10 dark:border-white/10 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-black/30 dark:hover:border-white/30 transition-colors capitalize"
-              >
-                {social.platform}
-              </a>
-            ))}
-          </motion.div>
+          <AnimatedReveal delay={300}>
+            <div className="flex items-center justify-center gap-4 mt-6">
+              {config.socials.map((social, i) => (
+                <a
+                  key={i}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 rounded-full border border-black/10 dark:border-white/10 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-black/30 dark:hover:border-white/30 transition-colors capitalize"
+                >
+                  {social.platform}
+                </a>
+              ))}
+            </div>
+          </AnimatedReveal>
         )}
       </div>
     </section>
@@ -905,14 +881,7 @@ export type SiteConfig = typeof siteConfig;
 // ──────────────────────────────────────────────
 const libI18n = `'use client';
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-  type ReactNode,
-} from 'react';
+import { useSyncExternalStore, useCallback } from 'react';
 
 export type Locale = 'ko' | 'en';
 
@@ -933,6 +902,8 @@ const translations: Record<Locale, Record<string, string>> = {
     'contact.email': '이메일 보내기',
     'theme.light': '라이트 모드로 전환',
     'theme.dark': '다크 모드로 전환',
+    'lang.switchLabel': 'Switch to English',
+    'lang.toggle': 'EN',
   },
   en: {
     'nav.home': 'Home',
@@ -950,52 +921,54 @@ const translations: Record<Locale, Record<string, string>> = {
     'contact.email': 'Send Email',
     'theme.light': 'Switch to light mode',
     'theme.dark': 'Switch to dark mode',
+    'lang.switchLabel': '한국어로 전환',
+    'lang.toggle': '한국어',
   },
 };
 
-interface LocaleContextValue {
-  locale: Locale;
-  setLocale: (l: Locale) => void;
-  t: (key: string) => string;
+/* ── module-level state ── */
+let currentLocale: Locale = 'ko';
+const listeners = new Set<() => void>();
+
+function getLocale() {
+  return currentLocale;
+}
+function getServerLocale() {
+  return 'ko' as Locale;
+}
+function subscribe(cb: () => void) {
+  listeners.add(cb);
+  return () => { listeners.delete(cb); };
 }
 
-const LocaleContext = createContext<LocaleContextValue>({
-  locale: 'ko',
-  setLocale: () => {},
-  t: (k) => k,
-});
-
-export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('ko');
-
-  useEffect(() => {
-    const saved = localStorage.getItem('locale') as Locale | null;
-    if (saved === 'ko' || saved === 'en') {
-      setLocaleState(saved);
-      document.documentElement.lang = saved;
-    }
-  }, []);
-
-  const setLocale = useCallback((l: Locale) => {
-    setLocaleState(l);
+export function setLocale(l: Locale) {
+  if (l === currentLocale) return;
+  currentLocale = l;
+  try {
     localStorage.setItem('locale', l);
     document.documentElement.lang = l;
-  }, []);
+  } catch {}
+  listeners.forEach((cb) => cb());
+}
 
-  const t = useCallback(
-    (key: string) => translations[locale]?.[key] ?? key,
-    [locale]
-  );
-
-  return (
-    <LocaleContext.Provider value={{ locale, setLocale, t }}>
-      {children}
-    </LocaleContext.Provider>
-  );
+/* hydrate from localStorage once */
+if (typeof window !== 'undefined') {
+  try {
+    const saved = localStorage.getItem('locale');
+    if (saved === 'ko' || saved === 'en') {
+      currentLocale = saved;
+      document.documentElement.lang = saved;
+    }
+  } catch {}
 }
 
 export function useLocale() {
-  return useContext(LocaleContext);
+  const locale = useSyncExternalStore(subscribe, getLocale, getServerLocale);
+  const t = useCallback(
+    (key: string) => translations[locale]?.[key] ?? key,
+    [locale],
+  );
+  return { locale, setLocale, t };
 }
 `;
 
