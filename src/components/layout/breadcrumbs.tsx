@@ -63,7 +63,8 @@ export function AppBreadcrumbs({ projectName }: AppBreadcrumbsProps) {
     const labelKey = routeLabels[segment];
     crumbs.push({
       label: labelKey ? t(locale, labelKey) : segment.charAt(0).toUpperCase() + segment.slice(1),
-      href,
+      // /project 단독 경로는 페이지가 없으므로 대시보드로 연결
+      href: segment === 'project' ? '/dashboard' : href,
     });
   }
 

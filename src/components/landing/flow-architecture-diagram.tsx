@@ -88,7 +88,11 @@ function buildEdges(highlightedNodeIds: Set<string>): Edge[] {
         stroke: isHighlighted ? 'hsl(220,60%,35%)' : 'var(--flow-edge-color, #c8cdd6)',
         strokeWidth: isHighlighted ? 2.5 : 1.5,
         opacity: highlightedNodeIds.size > 0 && !isHighlighted ? 0.3 : 1,
+        filter: isHighlighted
+          ? 'drop-shadow(0 0 6px hsl(220,60%,35%)) drop-shadow(0 0 12px hsl(220,60%,35%))'
+          : undefined,
       },
+      className: isHighlighted ? 'animate-edge-glow-pulse' : undefined,
     };
   });
 }

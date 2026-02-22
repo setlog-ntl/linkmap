@@ -81,6 +81,13 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.91 0 0);
   --sidebar-ring: oklch(0.55 0 0);
+  --landing-card-bg: #ffffff;
+  --landing-muted: #63738a;
+  --landing-border: #dde0e7;
+  --landing-surface: #fafbfc;
+  --dot-color: #dde0e7;
+  --flow-label-bg: #f4f5f8;
+  --flow-edge-color: #c8cdd6;
 }
 
 .dark {
@@ -115,6 +122,13 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --landing-card-bg: #111827;
+  --landing-muted: #94a3b8;
+  --landing-border: rgba(255,255,255,0.1);
+  --landing-surface: #0f172a;
+  --dot-color: #334155;
+  --flow-label-bg: #1e293b;
+  --flow-edge-color: #475569;
 }
 
 @layer base {
@@ -376,7 +390,15 @@
   .animate-flow-pulse,
   .animate-hub-glow,
   .animate-ai-fade-in,
-  .animate-ai-reveal {
+  .animate-ai-reveal,
+  .animate-edge-glow-pulse {
     animation: none;
   }
+}
+@keyframes edge-glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 8px currentColor); }
+  50% { filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 16px currentColor); }
+}
+.animate-edge-glow-pulse {
+  animation: edge-glow-pulse 2s ease-in-out infinite;
 }

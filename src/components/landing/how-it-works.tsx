@@ -35,7 +35,7 @@ export function HowItWorks() {
   ];
 
   return (
-    <section className="py-24 bg-[#f4f5f8] border-y border-[#dde0e7]" id="how-it-works">
+    <section className="py-24 bg-[#f4f5f8] border-y border-[#dde0e7] dark:bg-[#0b1120] dark:border-white/10" id="how-it-works">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <ScrollReveal>
           <div className="text-center mb-16">
@@ -43,7 +43,7 @@ export function HowItWorks() {
               <span className="inline-block w-2 h-2 rounded-full bg-[hsl(220,60%,35%)]" />
               HOW IT WORKS
             </p>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-[#1a2740]">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-[#1a2740] dark:text-[#e2e8f0]">
               {locale === 'ko' ? '3단계로 시작하세요' : 'Get Started in 3 Steps'}
             </h2>
           </div>
@@ -52,7 +52,7 @@ export function HowItWorks() {
         <div className="relative grid grid-cols-1 md:grid-cols-3 gap-10 max-w-4xl mx-auto">
           {/* Connecting Line (Desktop) */}
           <div className="hidden md:block absolute top-10 left-[16%] right-[16%] h-px z-0">
-            <div className="h-full bg-gradient-to-r from-[#dde0e7] via-[hsl(220,60%,35%)]/40 to-[#dde0e7]" />
+            <div className="h-full bg-gradient-to-r from-[#dde0e7] via-[hsl(220,60%,35%)]/40 to-[#dde0e7] dark:from-[#475569] dark:via-[hsl(220,60%,50%)]/40 dark:to-[#475569]" />
           </div>
 
           {steps.map((step, i) => {
@@ -60,14 +60,14 @@ export function HowItWorks() {
             return (
               <ScrollReveal key={i} delay={i * 0.15}>
                 <div className="relative z-10 flex flex-col items-center text-center">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white border border-[#dde0e7] shadow-md mb-6 transition-transform hover:scale-105">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white border border-[#dde0e7] shadow-md dark:bg-[#111827] dark:border-white/10 mb-6 transition-transform hover:scale-105">
                     <span className="text-2xl font-bold text-[hsl(220,60%,35%)]">{step.number}</span>
                   </div>
                   <div className="flex items-center justify-center gap-2 mb-3">
                     <Icon className="w-5 h-5 text-[hsl(220,60%,35%)]" />
-                    <h3 className="text-xl font-bold text-[#1a2740]">{step.title}</h3>
+                    <h3 className="text-xl font-bold text-[#1a2740] dark:text-[#e2e8f0]">{step.title}</h3>
                   </div>
-                  <p className="text-sm text-[#63738a] max-w-xs leading-relaxed">{step.description}</p>
+                  <p className="text-sm text-[#63738a] dark:text-[#94a3b8] max-w-xs leading-relaxed">{step.description}</p>
                 </div>
               </ScrollReveal>
             );

@@ -210,6 +210,11 @@
 
     "heroHeadline": "Visualize Your",
     "heroHeadlineHighlight": "Infrastructure",
+    "heroPrefix": "Your Infrastructure,",
+    "heroRotate1": "Visualized",
+    "heroRotate2": "Secured",
+    "heroRotate3": "Deployed Instantly",
+    "heroRotate4": "Shared with Team",
     "heroSubtitle": "From GitHub to databases, visualize complex service connections at a glance. Automatically generate real-time infrastructure maps your entire team can understand.",
     "heroCtaDemo": "Watch Demo",
     "loadingArchitecture": "Loading Architecture...",

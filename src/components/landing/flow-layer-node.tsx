@@ -27,12 +27,12 @@ function FlowLayerNode({ data }: NodeProps) {
 
   return (
     <div
-      className={`px-5 py-3.5 rounded-xl border-2 shadow-md transition-all duration-300 min-w-[140px] bg-white
-        ${isHighlighted ? 'border-[hsl(220,60%,35%)] shadow-lg scale-105' : 'border-[#dde0e7] hover:scale-[1.02]'}
+      className={`px-5 py-3.5 rounded-xl border-2 shadow-md transition-all duration-300 min-w-[140px] bg-white dark:bg-[#111827]
+        ${isHighlighted ? 'border-[hsl(220,60%,35%)] shadow-lg scale-105' : 'border-[#dde0e7] dark:border-white/10 hover:scale-[1.02]'}
       `}
     >
-      <Handle type="target" position={Position.Left} className="!bg-[#c8cdd6] !w-2 !h-2 !border-0" />
-      <Handle type="source" position={Position.Right} className="!bg-[#c8cdd6] !w-2 !h-2 !border-0" />
+      <Handle type="target" position={Position.Left} className="!bg-[#c8cdd6] dark:!bg-[#475569] !w-2 !h-2 !border-0" />
+      <Handle type="source" position={Position.Right} className="!bg-[#c8cdd6] dark:!bg-[#475569] !w-2 !h-2 !border-0" />
 
       <div className="text-center">
         <div className="flex justify-center mb-1">
@@ -42,14 +42,14 @@ function FlowLayerNode({ data }: NodeProps) {
             <span className="text-xl">{d.emoji}</span>
           )}
         </div>
-        <div className={`font-bold text-sm ${isHighlighted ? 'text-[hsl(220,60%,35%)]' : 'text-[#1a2740]'}`}>{d.label}</div>
+        <div className={`font-bold text-sm ${isHighlighted ? 'text-[hsl(220,60%,35%)]' : 'text-[#1a2740] dark:text-[#e2e8f0]'}`}>{d.label}</div>
         {d.totalCount != null && d.totalCount > 0 && (
           <div className="mt-1.5 space-y-0.5">
-            <div className="text-[10px] text-[#63738a]">
+            <div className="text-[10px] text-[#63738a] dark:text-[#94a3b8]">
               {d.connectedCount}/{d.totalCount} {t(locale, 'landing.nodeConnected')}
             </div>
             {d.checklistTotal != null && d.checklistTotal > 0 && (
-              <div className="text-[10px] text-[#63738a]">
+              <div className="text-[10px] text-[#63738a] dark:text-[#94a3b8]">
                 {d.checklistDone}/{d.checklistTotal} {t(locale, 'landing.nodeCompleted')}
               </div>
             )}

@@ -210,6 +210,11 @@
 
     "heroHeadline": "서비스 인프라를",
     "heroHeadlineHighlight": "시각화하세요",
+    "heroPrefix": "서비스 인프라를",
+    "heroRotate1": "시각화하세요",
+    "heroRotate2": "안전하게 관리하세요",
+    "heroRotate3": "즉시 배포하세요",
+    "heroRotate4": "팀과 공유하세요",
     "heroSubtitle": "GitHub부터 데이터베이스까지, 복잡한 서비스 연결을 한눈에 시각화하세요. 팀 전체가 이해하는 실시간 인프라 지도를 자동으로 생성합니다.",
     "heroCtaDemo": "데모 영상 보기",
     "loadingArchitecture": "아키텍처 로딩 중...",
