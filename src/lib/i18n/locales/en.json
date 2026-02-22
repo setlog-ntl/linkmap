@@ -28,9 +28,7 @@
     "pricing": "Pricing",
     "oneclick": "One-Click Deploy",
     "mySites": "My Sites",
-    "connectedInfo": "Connections",
-    "beginnerLabel": "Get Started",
-    "advancedLabel": "Advanced"
+    "connectedInfo": "Connections"
   },
   "dashboard": {
     "title": "My Projects",
@@ -38,7 +36,11 @@
     "noProjects": "No projects yet",
     "noProjectsDesc": "Create a new project or start from a template to manage your service connections.",
     "createProject": "New Project",
-    "fromTemplate": "From Template"
+    "fromTemplate": "From Template",
+    "quickNewProject": "New Project",
+    "quickOneclick": "One-Click Deploy",
+    "quickCatalog": "Service Catalog",
+    "quickGuide": "Env Guide"
   },
   "project": {
     "overview": "Overview",

@@ -18,10 +18,14 @@ import { Plus } from 'lucide-react';
 
 interface CreateProjectDialogProps {
   onSubmit: (name: string, description?: string) => Promise<void>;
+  externalOpen?: boolean;
+  onExternalOpenChange?: (open: boolean) => void;
 }
 
-export function CreateProjectDialog({ onSubmit }: CreateProjectDialogProps) {
-  const [open, setOpen] = useState(false);
+export function CreateProjectDialog({ onSubmit, externalOpen, onExternalOpenChange }: CreateProjectDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = externalOpen ?? internalOpen;
+  const setOpen = onExternalOpenChange ?? setInternalOpen;
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);

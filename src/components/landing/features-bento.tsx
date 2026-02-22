@@ -1,6 +1,6 @@
 'use client';
 
-import { Map, Key, CheckCircle2, Layers, ArrowRight } from 'lucide-react';
+import { Map, Key, CheckCircle2, Layers, ArrowRight, Brain, Sparkles } from 'lucide-react';
 import { ScrollReveal } from './scroll-reveal';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
@@ -104,6 +104,7 @@ const featureColors = [
   { bg: 'bg-[hsl(145,60%,90%)]', text: 'text-[hsl(145,60%,30%)]' },     // green
   { bg: 'bg-[hsl(45,80%,90%)]', text: 'text-[hsl(45,80%,30%)]' },       // gold
   { bg: 'bg-[hsl(270,50%,92%)]', text: 'text-[hsl(270,50%,35%)]' },     // purple
+  { bg: 'bg-[hsl(200,80%,90%)]', text: 'text-[hsl(200,80%,30%)]' },     // cyan (AI)
 ];
 
 export function FeaturesBento() {
@@ -185,6 +186,39 @@ export function FeaturesBento() {
                   </a>
                 </div>
                 <EnvVarVisual />
+              </div>
+            </div>
+          </ScrollReveal>
+
+          {/* Card 5: AI-Powered (full width) */}
+          <ScrollReveal className="col-span-1 md:col-span-3" delay={0.5}>
+            <div className="group relative overflow-hidden rounded-2xl border border-[#dde0e7] bg-gradient-to-br from-white to-[hsl(220,60%,97%)] p-8 transition-all hover:shadow-md hover:-translate-y-0.5">
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`inline-flex h-11 w-11 items-center justify-center rounded-xl ${featureColors[4].bg} ${featureColors[4].text}`}>
+                    <Brain className="w-5 h-5" />
+                  </div>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(220,60%,35%)]/20 bg-[hsl(220,60%,92%)] px-3 py-1 text-xs font-medium text-[hsl(220,60%,35%)]">
+                    <Sparkles className="w-3 h-3" />
+                    AI-Powered
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold text-[#1a2740]">{t(locale, 'landing.aiSectionTitle')}</h3>
+                <p className="mt-2 text-sm text-[#63738a] leading-relaxed max-w-2xl">{t(locale, 'landing.aiSectionDesc')}</p>
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                  {[
+                    { titleKey: 'landing.aiFeature1Title', descKey: 'landing.aiFeature1Desc' },
+                    { titleKey: 'landing.aiFeature2Title', descKey: 'landing.aiFeature2Desc' },
+                    { titleKey: 'landing.aiFeature3Title', descKey: 'landing.aiFeature3Desc' },
+                    { titleKey: 'landing.aiFeature4Title', descKey: 'landing.aiFeature4Desc' },
+                    { titleKey: 'landing.aiFeature5Title', descKey: 'landing.aiFeature5Desc' },
+                  ].map((ai) => (
+                    <div key={ai.titleKey} className="rounded-xl bg-white/80 border border-[#dde0e7]/50 p-4 transition-all hover:border-[hsl(220,60%,35%)]/30">
+                      <h4 className="text-sm font-bold text-[#1a2740] mb-1">{t(locale, ai.titleKey)}</h4>
+                      <p className="text-xs text-[#63738a] leading-relaxed line-clamp-3">{t(locale, ai.descKey)}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </ScrollReveal>

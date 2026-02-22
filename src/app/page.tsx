@@ -3,16 +3,12 @@ export const dynamic = 'force-dynamic';
 import { createClient } from '@/lib/supabase/server';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import { PitchBanner } from '@/components/landing/pitch-banner';
 import { HeroSection } from '@/components/landing/hero-section';
-import { StatsSection } from '@/components/landing/stats-section';
+import { SocialProofSection } from '@/components/landing/social-proof-section';
 import { FeaturesBento } from '@/components/landing/features-bento';
-import { AiFeaturesSection } from '@/components/landing/ai-features-section';
 import { HowItWorks } from '@/components/landing/how-it-works';
 import { ServicesGrid } from '@/components/landing/services-grid';
-import { OneclickDeploySection } from '@/components/landing/oneclick-deploy-section';
 import { PricingSection, FinalCtaSection } from '@/components/landing/cta-section';
-import { TestimonialsSection } from '@/components/landing/testimonials-section';
 import type { Profile } from '@/types';
 
 export default async function LandingPage() {
@@ -30,37 +26,27 @@ export default async function LandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f4f5f8] text-[#1a2740]">
-      <PitchBanner />
       <Header profile={profile} />
 
       {/* Section 1: Hero */}
       <HeroSection />
 
-      {/* Section 2: Stats Bar */}
-      <StatsSection />
+      {/* Section 2: Social Proof (Stats + Testimonials) */}
+      <SocialProofSection />
 
-      {/* Section 3: Core Features (Bento Grid) */}
+      {/* Section 3: Core Features (Bento Grid + AI) */}
       <FeaturesBento />
 
-      {/* Section 4: AI Features */}
-      <AiFeaturesSection />
-
-      {/* Section 5: How It Works (4 steps) */}
+      {/* Section 4: How It Works (3 Steps) */}
       <HowItWorks />
 
-      {/* Section 6: Supported Services */}
+      {/* Section 5: Supported Services */}
       <ServicesGrid />
 
-      {/* Section 7: One-Click Deploy */}
-      <OneclickDeploySection />
-
-      {/* Section 8: Pricing */}
+      {/* Section 6: Pricing */}
       <PricingSection />
 
-      {/* Section 9: Testimonials */}
-      <TestimonialsSection />
-
-      {/* Section 10: Final CTA */}
+      {/* Section 7: Final CTA */}
       <FinalCtaSection />
 
       <Footer />

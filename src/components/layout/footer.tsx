@@ -39,10 +39,10 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-sm mb-3 text-white">{t(locale, 'landing.footerSupport')}</h4>
             <ul className="space-y-2 text-sm">
+              <li><Link href="/guides/env" className="hover:text-white transition-colors">{t(locale, 'landing.guideEnv')}</Link></li>
               <li><Link href="/guides/github" className="hover:text-white transition-colors">{t(locale, 'landing.guideGitHub')}</Link></li>
               <li><Link href="/guides/auth" className="hover:text-white transition-colors">{t(locale, 'landing.guideAuth')}</Link></li>
               <li><Link href="/guides/cloudflare" className="hover:text-white transition-colors">{t(locale, 'landing.guideCloudflare')}</Link></li>
-              <li><Link href="/guides/env" className="hover:text-white transition-colors">{t(locale, 'landing.guideEnv')}</Link></li>
               <li><a href="mailto:support@linkmap.dev" className="hover:text-white transition-colors">Contact</a></li>
             </ul>
           </div>

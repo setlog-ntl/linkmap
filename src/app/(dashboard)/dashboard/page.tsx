@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useProjects, useCreateProject, useDeleteProject } from '@/lib/queries/projects';
 import { ProjectCard } from '@/components/project/project-card';
 import { CreateProjectDialog } from '@/components/project/create-project-dialog';
 import { TemplateDialog } from '@/components/project/template-dialog';
+import { QuickActions } from '@/components/dashboard/quick-actions';
 import { createClient } from '@/lib/supabase/client';
 import { FolderOpen, Plus, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,6 +21,7 @@ export default function DashboardPage() {
   const { data: projects = [], isLoading } = useProjects();
   const createProject = useCreateProject();
   const deleteProject = useDeleteProject();
+  const [createOpen, setCreateOpen] = useState(false);
 
   const handleCreateProject = async (name: string, description?: string) => {
     const project = await createProject.mutateAsync({ name, description });
@@ -90,9 +93,16 @@ export default function DashboardPage() {
         </div>
         <div className="flex gap-3">
           <TemplateDialog onSubmit={handleCreateFromTemplate} />
-          <CreateProjectDialog onSubmit={handleCreateProject} />
+          <CreateProjectDialog
+            onSubmit={handleCreateProject}
+            externalOpen={createOpen}
+            onExternalOpenChange={setCreateOpen}
+          />
         </div>
       </div>
+
+      {/* Quick Actions */}
+      <QuickActions onNewProject={() => setCreateOpen(true)} />
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

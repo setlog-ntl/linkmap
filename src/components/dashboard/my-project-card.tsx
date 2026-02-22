@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { Plus, Map } from 'lucide-react';
+import { Plus, Map as MapIcon, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SystemStatusBadge } from './system-status-badge';
+import { useLocaleStore } from '@/stores/locale-store';
 import type { Project, DashboardMetrics, ServiceCardData } from '@/types';
 
 interface MyProjectCardProps {
@@ -12,7 +13,29 @@ interface MyProjectCardProps {
   allCards: ServiceCardData[];
 }
 
+function formatRelativeTime(dateStr: string, locale: 'ko' | 'en'): string {
+  const now = Date.now();
+  const diff = now - new Date(dateStr).getTime();
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+
+  if (locale === 'ko') {
+    if (minutes < 1) return '방금 전';
+    if (minutes < 60) return `${minutes}분 전`;
+    if (hours < 24) return `${hours}시간 전`;
+    if (days < 30) return `${days}일 전`;
+    return new Date(dateStr).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+  }
+  if (minutes < 1) return 'just now';
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 30) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
 export function MyProjectCard({ project, metrics, allCards }: MyProjectCardProps) {
+  const { locale } = useLocaleStore();
   const initial = project.name.charAt(0).toUpperCase();
 
   return (
@@ -33,6 +56,12 @@ export function MyProjectCard({ project, metrics, allCards }: MyProjectCardProps
           )}
         </div>
 
+        {/* Last updated */}
+        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <Clock className="h-3 w-3" />
+          <span>{formatRelativeTime(project.updated_at, locale)}</span>
+        </div>
+
         {/* System status */}
         <SystemStatusBadge projectId={project.id} allCards={allCards} />
 
@@ -40,7 +69,9 @@ export function MyProjectCard({ project, metrics, allCards }: MyProjectCardProps
         <div className="grid w-full grid-cols-3 text-center">
           <div className="border-r">
             <p className="text-xl font-mono font-bold">{metrics.totalServices}</p>
-            <p className="text-[11px] text-muted-foreground">서비스</p>
+            <p className="text-[11px] text-muted-foreground">
+              {locale === 'ko' ? '서비스' : 'Services'}
+            </p>
           </div>
           <div className="border-r">
             <p className="text-xl font-mono font-bold">{metrics.totalEnvVars}</p>
@@ -48,7 +79,9 @@ export function MyProjectCard({ project, metrics, allCards }: MyProjectCardProps
           </div>
           <div>
             <p className="text-xl font-mono font-bold">{metrics.progressPercent}%</p>
-            <p className="text-[11px] text-muted-foreground">진행률</p>
+            <p className="text-[11px] text-muted-foreground">
+              {locale === 'ko' ? '진행률' : 'Progress'}
+            </p>
           </div>
         </div>
 
@@ -76,13 +109,13 @@ export function MyProjectCard({ project, metrics, allCards }: MyProjectCardProps
           <Button variant="default" size="sm" className="flex-1" asChild>
             <Link href={`/project/${project.id}/integrations`}>
               <Plus className="mr-1 h-3.5 w-3.5" />
-              서비스 추가
+              {locale === 'ko' ? '서비스 추가' : 'Add Service'}
             </Link>
           </Button>
           <Button variant="outline" size="sm" className="flex-1" asChild>
             <Link href={`/project/${project.id}/service-map`}>
-              <Map className="mr-1 h-3.5 w-3.5" />
-              맵 보기
+              <MapIcon className="mr-1 h-3.5 w-3.5" />
+              {locale === 'ko' ? '맵 보기' : 'View Map'}
             </Link>
           </Button>
         </div>

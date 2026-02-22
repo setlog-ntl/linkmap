@@ -2,7 +2,9 @@ export const dynamic = 'force-dynamic';
 
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { Header } from '@/components/layout/header';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/layout/app-sidebar';
+import { AppHeader } from '@/components/layout/app-header';
 import { ProjectTabs } from '@/components/project/project-tabs';
 import { ServiceDetailSheetGlobal } from '@/components/service-map/service-detail-sheet-global';
 import { ServiceDetailResolver } from '@/components/service-map/service-detail-resolver';
@@ -38,23 +40,35 @@ export default async function ProjectLayout({
     redirect('/login');
   }
 
+  const projectName = (project as Record<string, unknown>)?.name as string;
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header profile={profile} />
-      <div className="container py-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">{(project as Record<string, unknown>)?.name as string}</h1>
-          {!!(project as Record<string, unknown>)?.description && (
-            <p className="text-muted-foreground mt-1">{(project as Record<string, unknown>).description as string}</p>
-          )}
-        </div>
-        <ProjectTabs projectId={id} />
-        <div className="mt-6">
-          {children}
+    <SidebarProvider>
+      <AppSidebar
+        profile={profile}
+        projectId={id}
+        projectName={projectName}
+      />
+      <div className="flex flex-1 flex-col min-h-screen w-full">
+        <AppHeader projectName={projectName} />
+        <div className="container py-6">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold">{projectName}</h1>
+            {!!(project as Record<string, unknown>)?.description && (
+              <p className="text-muted-foreground mt-1">{(project as Record<string, unknown>).description as string}</p>
+            )}
+          </div>
+          {/* Mobile tabs */}
+          <div className="md:hidden">
+            <ProjectTabs projectId={id} />
+          </div>
+          <div className="mt-6">
+            {children}
+          </div>
         </div>
       </div>
       <ServiceDetailSheetGlobal />
       <ServiceDetailResolver />
-    </div>
+    </SidebarProvider>
   );
 }

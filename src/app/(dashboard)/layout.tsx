@@ -1,7 +1,9 @@
 export const dynamic = 'force-dynamic';
 
 import { createClient } from '@/lib/supabase/server';
-import { Header } from '@/components/layout/header';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/layout/app-sidebar';
+import { AppHeader } from '@/components/layout/app-header';
 import { ServiceDetailSheetGlobal } from '@/components/service-map/service-detail-sheet-global';
 import { ServiceDetailResolver } from '@/components/service-map/service-detail-resolver';
 import type { Profile } from '@/types';
@@ -28,13 +30,16 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header profile={profile} />
-      <main className="flex-1">
-        {children}
-      </main>
+    <SidebarProvider>
+      <AppSidebar profile={profile} />
+      <div className="flex flex-1 flex-col min-h-screen w-full">
+        <AppHeader />
+        <main className="flex-1">
+          {children}
+        </main>
+      </div>
       <ServiceDetailSheetGlobal />
       <ServiceDetailResolver />
-    </div>
+    </SidebarProvider>
   );
 }
