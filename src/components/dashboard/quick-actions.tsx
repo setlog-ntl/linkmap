@@ -15,7 +15,7 @@ const actions = [
   {
     icon: Rocket,
     labelKey: 'dashboard.quickOneclick',
-    href: '/oneclick',
+    href: '/sites',
     color: 'bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 dark:text-orange-400',
   },
   {

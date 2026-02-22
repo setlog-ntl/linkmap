@@ -66,7 +66,7 @@ export function AppSidebar({ profile, projectId, projectName }: AppSidebarProps)
   const mainNav = [
     { labelKey: 'common.dashboard', href: '/dashboard', icon: LayoutDashboard },
     { labelKey: 'nav.serviceCatalog', href: '/services', icon: Search },
-    { labelKey: 'nav.sites', href: '/sites', icon: Rocket },
+    { labelKey: 'nav.oneclick', href: '/sites', icon: Rocket },
   ];
 
   const projectNav = projectId ? [

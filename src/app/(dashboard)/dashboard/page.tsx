@@ -1,17 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useProjects, useCreateProject, useDeleteProject } from '@/lib/queries/projects';
 import { ProjectCard } from '@/components/project/project-card';
+import { ProjectTreeList } from '@/components/dashboard/project-tree-list';
 import { CreateProjectDialog } from '@/components/project/create-project-dialog';
 import { TemplateDialog } from '@/components/project/template-dialog';
 import { QuickActions } from '@/components/dashboard/quick-actions';
 import { createClient } from '@/lib/supabase/client';
-import { FolderOpen, Layers, Puzzle, GitBranch } from 'lucide-react';
+import { FolderOpen, Layers, Puzzle, GitBranch, LayoutGrid, List } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
+
+type ViewMode = 'card' | 'list';
+const VIEW_STORAGE_KEY = 'linkmap-dashboard-view';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -21,6 +26,19 @@ export default function DashboardPage() {
   const createProject = useCreateProject();
   const deleteProject = useDeleteProject();
   const [createOpen, setCreateOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('card');
+
+  useEffect(() => {
+    const saved = localStorage.getItem(VIEW_STORAGE_KEY);
+    if (saved === 'card' || saved === 'list') {
+      setViewMode(saved);
+    }
+  }, []);
+
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem(VIEW_STORAGE_KEY, mode);
+  };
 
   const handleCreateProject = async (name: string, description?: string) => {
     const project = await createProject.mutateAsync({ name, description });
@@ -152,15 +170,43 @@ export default function DashboardPage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              onDelete={handleDeleteProject}
-            />
-          ))}
-        </div>
+        <>
+          {/* View mode toggle */}
+          <div className="flex items-center gap-1 mb-4">
+            <Button
+              variant={viewMode === 'card' ? 'secondary' : 'ghost'}
+              size="sm"
+              className="h-8 px-3 gap-1.5"
+              onClick={() => handleViewModeChange('card')}
+            >
+              <LayoutGrid className="h-4 w-4" />
+              <span className="text-xs">{t(locale, 'dashboard.viewCard')}</span>
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+              size="sm"
+              className="h-8 px-3 gap-1.5"
+              onClick={() => handleViewModeChange('list')}
+            >
+              <List className="h-4 w-4" />
+              <span className="text-xs">{t(locale, 'dashboard.viewList')}</span>
+            </Button>
+          </div>
+
+          {viewMode === 'list' ? (
+            <ProjectTreeList projects={projects} onDelete={handleDeleteProject} />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projects.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  onDelete={handleDeleteProject}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

@@ -49,6 +49,10 @@
     "quickOneclick": "원클릭 배포",
     "quickCatalog": "서비스 카탈로그",
     "quickGuide": "환경변수 가이드",
+    "viewCard": "카드",
+    "viewList": "목록",
+    "servicesConnected": "연결됨",
+    "openProject": "프로젝트 열기",
     "statProjects": "프로젝트",
     "statServices": "연결된 서비스",
     "statGithubRepos": "GitHub 레포"

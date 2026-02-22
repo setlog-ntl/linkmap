@@ -49,6 +49,10 @@
     "quickOneclick": "One-Click Deploy",
     "quickCatalog": "Service Catalog",
     "quickGuide": "Env Guide",
+    "viewCard": "Cards",
+    "viewList": "List",
+    "servicesConnected": "connected",
+    "openProject": "Open Project",
     "statProjects": "Projects",
     "statServices": "Services",
     "statGithubRepos": "GitHub Repos"
