@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError } from '@/lib/api/errors';
-import { checkHomepageDeployQuota } from '@/lib/quota';
 
 /**
  * GET /api/oneclick/github-check
@@ -38,11 +37,8 @@ export async function GET() {
     .limit(1)
     .single();
 
-  // Get quota info
-  const quota = await checkHomepageDeployQuota(user.id);
-
   if (!account) {
-    return NextResponse.json({ account: null, quota });
+    return NextResponse.json({ account: null });
   }
 
   const metadata = account.oauth_metadata as Record<string, string> | null;
@@ -53,6 +49,5 @@ export async function GET() {
       provider_account_id: metadata?.login || account.oauth_provider_user_id || 'GitHub User',
       status: account.status,
     },
-    quota,
   });
 }

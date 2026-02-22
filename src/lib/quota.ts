@@ -11,11 +11,11 @@ export interface PlanQuota {
 
 const DEFAULT_QUOTA: PlanQuota = {
   plan: 'free',
-  max_projects: 3,
-  max_env_vars_per_project: 20,
-  max_services_per_project: 10,
+  max_projects: 999999,
+  max_env_vars_per_project: 999999,
+  max_services_per_project: 999999,
   max_team_members: 0,
-  max_homepage_deploys: 3,
+  max_homepage_deploys: 999999,
 };
 
 export async function getUserQuota(userId: string): Promise<PlanQuota> {

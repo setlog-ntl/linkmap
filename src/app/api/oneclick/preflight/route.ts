@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError } from '@/lib/api/errors';
-import { checkHomepageDeployQuota } from '@/lib/quota';
-import { GitHubApiError } from '@/lib/github/api';
 import { safeDecryptToken } from '@/lib/github/token';
 
 /**
  * GET /api/oneclick/preflight?site_name=xxx
- * Unified pre-deploy check: GitHub connection + quota + site name availability.
+ * Unified pre-deploy check: GitHub connection + site name availability.
  * Replaces the old /github-check endpoint with additional validation.
  */
 export async function GET(request: NextRequest) {
@@ -17,21 +15,16 @@ export async function GET(request: NextRequest) {
 
   const siteName = request.nextUrl.searchParams.get('site_name');
 
-  // Parallel: GitHub account + quota check
-  const [githubServiceResult, quota] = await Promise.all([
-    supabase
-      .from('services')
-      .select('id')
-      .eq('slug', 'github')
-      .single(),
-    checkHomepageDeployQuota(user.id),
-  ]);
+  const githubServiceResult = await supabase
+    .from('services')
+    .select('id')
+    .eq('slug', 'github')
+    .single();
 
   const githubService = githubServiceResult.data;
   if (!githubService) {
     return NextResponse.json({
       github: { connected: false, account: null },
-      quota,
       siteNameAvailable: null,
     });
   }
@@ -89,7 +82,6 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     github: githubInfo,
-    quota,
     siteNameAvailable,
   });
 }

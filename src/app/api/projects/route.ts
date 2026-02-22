@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createProjectSchema } from '@/lib/validations/project';
-import { unauthorizedError, validationError, serverError, apiError } from '@/lib/api/errors';
+import { unauthorizedError, validationError, serverError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
-import { checkProjectQuota } from '@/lib/quota';
 
 export async function GET() {
   const supabase = await createClient();
@@ -25,11 +24,6 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
-
-  const quotaCheck = await checkProjectQuota(user.id);
-  if (!quotaCheck.allowed) {
-    return apiError(`프로젝트 한도에 도달했습니다 (${quotaCheck.current}/${quotaCheck.max}). 플랜을 업그레이드해주세요.`, 403);
-  }
 
   const body = await request.json();
   const parsed = createProjectSchema.safeParse(body);

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, validationError, serverError, apiError, notFoundError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
-import { checkHomepageDeployQuota } from '@/lib/quota';
 import { createRepo, pushFilesAtomically, deleteRepo, enableGitHubPagesWithActions, GitHubApiError } from '@/lib/github/api';
 import { getTemplateBySlug } from '@/data/oneclick/homepage-template-content';
 import { safeDecryptToken } from '@/lib/github/token';
@@ -26,8 +25,7 @@ export async function POST(request: NextRequest) {
   }
 
   // ── Group 2: 데이터 조회 병렬화 ──
-  const [quotaCheck, templateResult, githubServiceResult] = await Promise.all([
-    checkHomepageDeployQuota(user.id),
+  const [templateResult, githubServiceResult] = await Promise.all([
     supabase
       .from('homepage_templates')
       .select('*')
@@ -40,13 +38,6 @@ export async function POST(request: NextRequest) {
       .eq('slug', 'github')
       .single(),
   ]);
-
-  if (!quotaCheck.allowed) {
-    return apiError(
-      `무료 배포 한도에 도달했습니다 (${quotaCheck.current}/${quotaCheck.max}). Pro 플랜으로 업그레이드하세요.`,
-      403
-    );
-  }
 
   const template = templateResult.data;
   if (!template) return notFoundError('템플릿');
