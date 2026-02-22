@@ -4,17 +4,18 @@ import { SERVICE_BRANDS, getServiceIconUrl } from '@/lib/constants/service-brand
 
 interface ServiceIconProps {
   serviceId: string;
+  iconEmoji?: string | null;
   size?: number;
   className?: string;
 }
 
-export function ServiceIcon({ serviceId, size = 20, className }: ServiceIconProps) {
+export function ServiceIcon({ serviceId, iconEmoji, size = 20, className }: ServiceIconProps) {
   const brand = SERVICE_BRANDS[serviceId];
 
   const svgUrl = brand ? getServiceIconUrl(serviceId) : undefined;
 
   if (!brand || !svgUrl) {
-    return <span className={className}>{brand?.emoji ?? '⚙️'}</span>;
+    return <span className={className}>{iconEmoji || brand?.emoji || '⚙️'}</span>;
   }
 
   // 다색 SVG는 img 태그로 원본 색상 그대로 렌더링

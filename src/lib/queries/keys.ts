@@ -13,6 +13,8 @@ export const queryKeys = {
   },
   catalog: {
     all: ['catalog'] as const,
+    custom: ['catalog', 'custom'] as const,
+    matches: ['catalog', 'matches'] as const,
   },
   connections: {
     byProject: (projectId: string) => ['connections', 'project', projectId] as const,

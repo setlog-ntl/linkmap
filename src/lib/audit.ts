@@ -69,7 +69,11 @@ export type AuditAction =
   | 'admin.ai_feature_qna_create'
   | 'admin.ai_feature_qna_update'
   | 'admin.ai_feature_qna_delete'
-  | 'admin.ai_feature_preset_apply';
+  | 'admin.ai_feature_preset_apply'
+  | 'custom_service.create'
+  | 'custom_service.update'
+  | 'custom_service.delete'
+  | 'custom_service.migrate';
 
 interface AuditLogEntry {
   action: AuditAction;

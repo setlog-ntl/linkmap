@@ -49,6 +49,10 @@ export interface Service {
   dashboard_subcategory?: string | null;
   // Multi-account support (M031)
   supports_multi_account?: boolean;
+  // Custom service fields (M042)
+  user_id?: string | null;
+  is_custom?: boolean;
+  icon_emoji?: string | null;
 }
 
 // ============================================

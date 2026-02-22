@@ -14,7 +14,18 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Plus, Search } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Plus, Search, Pencil, Trash2, ArrowRightLeft } from 'lucide-react';
+import { ServiceIcon } from '@/components/ui/service-icon';
+import { CreateCustomServiceDialog } from './create-custom-service-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useDeleteCustomService, useCustomServiceMatches, useMigrateCustomService } from '@/lib/queries/services';
+import { toast } from 'sonner';
 import type { Service, ServiceCategory } from '@/types';
 
 const categoryLabels: Partial<Record<ServiceCategory, string>> = {
@@ -44,23 +55,51 @@ export function AddServiceDialog({ projectId, existingServiceIds, onAdd }: AddSe
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | 'all'>('all');
   const [loading, setLoading] = useState(false);
   const [adding, setAdding] = useState<string | null>(null);
+  const deleteMutation = useDeleteCustomService();
+  const { data: matches } = useCustomServiceMatches();
+  const migrateMutation = useMigrateCustomService();
+
+  // 커스텀 서비스 ID → 매칭된 글로벌 서비스
+  const matchMap = useMemo(() => {
+    const map = new Map<string, { id: string; name: string }>();
+    if (matches) {
+      for (const m of matches) {
+        map.set(m.customService.id, { id: m.globalService.id, name: m.globalService.name });
+      }
+    }
+    return map;
+  }, [matches]);
+
+  const handleMigrateService = async (customId: string, globalId: string, globalName: string) => {
+    try {
+      await migrateMutation.mutateAsync({ customServiceId: customId, globalServiceId: globalId });
+      toast.success(`"${globalName}" 글로벌 서비스로 전환되었습니다`);
+      fetchServices();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '전환에 실패했습니다');
+    }
+  };
+
+  const fetchServices = () => {
+    setLoading(true);
+    supabase
+      .from('services')
+      .select('*')
+      .order('is_custom', { ascending: true })
+      .order('name')
+      .then(({ data }) => {
+        setServices((data as Service[]) || []);
+        setLoading(false);
+      });
+  };
 
   useEffect(() => {
-    if (open) {
-      setLoading(true);
-      supabase
-        .from('services')
-        .select('*')
-        .order('name')
-        .then(({ data }) => {
-          setServices(data || []);
-          setLoading(false);
-        });
-    }
-  }, [open, supabase]);
+    if (open) fetchServices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
-  const filteredServices = useMemo(() => {
-    return services.filter((s) => {
+  const { globalServices, customServices } = useMemo(() => {
+    const filtered = services.filter((s) => {
       if (existingServiceIds.includes(s.id)) return false;
       if (selectedCategory !== 'all' && s.category !== selectedCategory) return false;
       if (search) {
@@ -73,6 +112,10 @@ export function AddServiceDialog({ projectId, existingServiceIds, onAdd }: AddSe
       }
       return true;
     });
+    return {
+      globalServices: filtered.filter((s) => !s.is_custom),
+      customServices: filtered.filter((s) => s.is_custom),
+    };
   }, [services, existingServiceIds, selectedCategory, search]);
 
   const handleAdd = async (serviceId: string) => {
@@ -84,7 +127,110 @@ export function AddServiceDialog({ projectId, existingServiceIds, onAdd }: AddSe
     }
   };
 
+  const handleCustomServiceCreated = () => {
+    fetchServices();
+  };
+
+  const handleDeleteCustomService = async (id: string) => {
+    try {
+      await deleteMutation.mutateAsync(id);
+      toast.success('커스텀 서비스가 삭제되었습니다');
+      fetchServices();
+    } catch {
+      toast.error('삭제에 실패했습니다');
+    }
+  };
+
+  const isEmpty = globalServices.length === 0 && customServices.length === 0;
+
   const categories: (ServiceCategory | 'all')[] = ['all', 'auth', 'social_login', 'database', 'deploy', 'email', 'payment', 'storage', 'monitoring', 'ai', 'other'];
+
+  const renderServiceRow = (service: Service) => (
+    <div
+      key={service.id}
+      className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+    >
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center text-sm font-medium shrink-0">
+          {service.is_custom && service.icon_emoji ? (
+            <span className="text-lg">{service.icon_emoji}</span>
+          ) : (
+            <ServiceIcon serviceId={service.slug} iconEmoji={service.icon_emoji} size={20} />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium">{service.name}</p>
+            {service.is_custom && (
+              <Badge variant="outline" className="text-[10px] px-1 py-0">커스텀</Badge>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground line-clamp-2">
+            {service.description_ko || service.description}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-1.5 ml-2">
+        <Badge variant="secondary" className="text-xs shrink-0">
+          {categoryLabels[service.category as ServiceCategory]}
+        </Badge>
+        {service.is_custom && (
+          <>
+            {matchMap.get(service.id) && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-7 w-7 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/15"
+                      disabled={migrateMutation.isPending}
+                      onClick={() => {
+                        const m = matchMap.get(service.id)!;
+                        handleMigrateService(service.id, m.id, m.name);
+                      }}
+                    >
+                      <ArrowRightLeft className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>&quot;{matchMap.get(service.id)!.name}&quot; 글로벌 서비스로 전환</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+            <CreateCustomServiceDialog
+              mode="edit"
+              service={service}
+              onSuccess={() => fetchServices()}
+              trigger={
+                <Button variant="ghost" size="icon" className="h-7 w-7">
+                  <Pencil className="h-3 w-3" />
+                </Button>
+              }
+            />
+            <ConfirmDialog
+              title="커스텀 서비스 삭제"
+              description={`"${service.name}" 서비스를 삭제하시겠습니까? 이 서비스가 연결된 프로젝트에서도 제거됩니다.`}
+              onConfirm={() => handleDeleteCustomService(service.id)}
+              trigger={
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive">
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              }
+            />
+          </>
+        )}
+        <Button
+          size="sm"
+          onClick={() => handleAdd(service.id)}
+          disabled={adding === service.id}
+        >
+          {adding === service.id ? '추가 중...' : '추가'}
+        </Button>
+      </div>
+    </div>
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -131,42 +277,48 @@ export function AddServiceDialog({ projectId, existingServiceIds, onAdd }: AddSe
                   <div key={i} className="h-16 rounded bg-muted animate-pulse" />
                 ))}
               </div>
-            ) : filteredServices.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                {search ? '검색 결과가 없습니다' : '추가할 수 있는 서비스가 없습니다'}
-              </p>
+            ) : isEmpty ? (
+              <div className="text-center py-8 space-y-3">
+                <p className="text-muted-foreground">
+                  {search ? `"${search}"에 대한 검색 결과가 없습니다` : '추가할 수 있는 서비스가 없습니다'}
+                </p>
+                <CreateCustomServiceDialog
+                  mode="create"
+                  onSuccess={handleCustomServiceCreated}
+                  trigger={
+                    <Button variant="outline" size="sm">
+                      <Plus className="mr-2 h-4 w-4" /> 직접 서비스 추가
+                    </Button>
+                  }
+                />
+              </div>
             ) : (
               <div className="space-y-2">
-                {filteredServices.map((service) => (
-                  <div
-                    key={service.id}
-                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center text-sm font-medium shrink-0">
-                        {service.name.charAt(0)}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium">{service.name}</p>
-                        <p className="text-xs text-muted-foreground line-clamp-2">
-                          {service.description_ko || service.description}
-                        </p>
-                      </div>
+                {globalServices.map(renderServiceRow)}
+
+                {customServices.length > 0 && (
+                  <>
+                    <div className="flex items-center gap-2 py-2 px-1">
+                      <div className="flex-1 h-px bg-border" />
+                      <span className="text-xs text-muted-foreground shrink-0">👤 내 서비스</span>
+                      <div className="flex-1 h-px bg-border" />
                     </div>
-                    <div className="flex items-center gap-2 ml-2">
-                      <Badge variant="secondary" className="text-xs shrink-0">
-                        {categoryLabels[service.category as ServiceCategory]}
-                      </Badge>
-                      <Button
-                        size="sm"
-                        onClick={() => handleAdd(service.id)}
-                        disabled={adding === service.id}
-                      >
-                        {adding === service.id ? '추가 중...' : '추가'}
+                    {customServices.map(renderServiceRow)}
+                  </>
+                )}
+
+                {/* 항상 "직접 추가" 버튼 표시 (결과가 있을 때도) */}
+                <div className="pt-2 text-center">
+                  <CreateCustomServiceDialog
+                    mode="create"
+                    onSuccess={handleCustomServiceCreated}
+                    trigger={
+                      <Button variant="ghost" size="sm" className="text-muted-foreground">
+                        <Plus className="mr-1 h-3 w-3" /> 직접 서비스 추가
                       </Button>
-                    </div>
-                  </div>
-                ))}
+                    }
+                  />
+                </div>
               </div>
             )}
           </ScrollArea>
