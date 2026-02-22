@@ -8,7 +8,7 @@ import { CreateProjectDialog } from '@/components/project/create-project-dialog'
 import { TemplateDialog } from '@/components/project/template-dialog';
 import { QuickActions } from '@/components/dashboard/quick-actions';
 import { createClient } from '@/lib/supabase/client';
-import { FolderOpen, Plus, Layers } from 'lucide-react';
+import { FolderOpen, Plus, Layers, Puzzle, GitBranch } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -101,6 +101,27 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Cross-Project Stats */}
+      {!isLoading && projects.length > 0 && (
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          <StatCard
+            icon={Layers}
+            value={projects.length}
+            label={locale === 'ko' ? '프로젝트' : 'Projects'}
+          />
+          <StatCard
+            icon={Puzzle}
+            value={projects.reduce((sum, p) => sum + (p.project_services?.length || 0), 0)}
+            label={locale === 'ko' ? '연결된 서비스' : 'Services'}
+          />
+          <StatCard
+            icon={GitBranch}
+            value={projects.reduce((sum, p) => sum + (p.project_github_repos?.length || 0), 0)}
+            label={locale === 'ko' ? 'GitHub 레포' : 'GitHub Repos'}
+          />
+        </div>
+      )}
+
       {/* Quick Actions */}
       <QuickActions onNewProject={() => setCreateOpen(true)} />
 
@@ -142,6 +163,20 @@ export default function DashboardPage() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function StatCard({ icon: Icon, value, label }: { icon: typeof Layers; value: number; label: string }) {
+  return (
+    <div className="rounded-xl border bg-card p-4 flex items-center gap-3">
+      <div className="rounded-lg bg-primary/10 p-2">
+        <Icon className="h-4 w-4 text-primary" />
+      </div>
+      <div>
+        <p className="text-2xl font-bold tracking-tight">{value}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
+      </div>
     </div>
   );
 }

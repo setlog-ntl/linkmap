@@ -19,8 +19,9 @@ interface AppBreadcrumbsProps {
 
 const routeLabels: Record<string, string> = {
   dashboard: 'common.dashboard',
-  oneclick: 'nav.oneclick',
-  'my-sites': 'nav.mySites',
+  sites: 'nav.sites',
+  oneclick: 'nav.sites',
+  'my-sites': 'nav.sites',
   services: 'nav.serviceCatalog',
   settings: 'common.settings',
   project: 'commandPalette.project',
@@ -33,9 +34,10 @@ const routeLabels: Record<string, string> = {
   accounts: 'account.connectionsTab',
   tokens: 'account.apiTokensTab',
   danger: 'account.dangerZone',
+  developer: 'account.developer',
   guides: 'nav.guides',
   pricing: 'nav.pricing',
-  account: 'account.tab',
+  account: 'account.myAccount',
 };
 
 export function AppBreadcrumbs({ projectName }: AppBreadcrumbsProps) {

@@ -12,13 +12,14 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useProject, useUpdateProject, useDeleteProject } from '@/lib/queries/projects';
-import { Save, Trash2, Users, UserPlus, Shield, Edit, Eye, GitBranch, RefreshCw } from 'lucide-react';
+import { Save, Trash2, Users, UserPlus, Shield, Edit, Eye, GitBranch, RefreshCw, History } from 'lucide-react';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { useLinkedRepos, useUnlinkRepo } from '@/lib/queries/github';
 import { RepoSelector } from '@/components/github/repo-selector';
+import { AuditContent } from '@/components/project/audit-content';
 
 const roleLabels: Record<string, string> = {
   admin: '관리자',
@@ -284,6 +285,24 @@ export default function ProjectSettingsPage() {
 
       {/* GitHub Integration */}
       <GitHubSettingsCard projectId={projectId} />
+
+      {/* Change History (Audit Log) */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <History className="h-5 w-5" />
+            <CardTitle>{t(locale, 'project.changeHistory')}</CardTitle>
+          </div>
+          <CardDescription>
+            {locale === 'ko'
+              ? '환경변수 조회·수정, 프로젝트 변경 등의 활동 기록입니다'
+              : 'Activity log for env var access, project changes, and more'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AuditContent projectId={projectId} />
+        </CardContent>
+      </Card>
 
       <Separator />
 

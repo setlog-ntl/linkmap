@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo, useReducer } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -52,6 +52,11 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import { ChatTerminal, type CodeBlock } from './chat-terminal';
 import { ModulePanel } from './module-panel';
+import {
+  ModuleDeployDialog,
+  deployDialogReducer,
+  initialDeployDialogState,
+} from './module-deploy-dialog';
 import { getModuleSchema } from '@/data/oneclick/module-schemas';
 import type { ModuleConfigState } from '@/lib/module-schema';
 import {
@@ -182,6 +187,27 @@ function buildFileTree(files: { name: string; path: string; sha: string; size: n
   return root;
 }
 
+/** 두 텍스트 간 라인 단위 diff 통계 계산 */
+function computeDiffStats(
+  oldContent: string | undefined,
+  newContent: string
+): { added: number; removed: number } {
+  if (!oldContent) return { added: newContent.split('\n').length, removed: 0 };
+  const oldLines = oldContent.split('\n');
+  const newLines = newContent.split('\n');
+  const oldSet = new Set(oldLines);
+  const newSet = new Set(newLines);
+  let added = 0;
+  let removed = 0;
+  for (const line of newLines) {
+    if (!oldSet.has(line)) added++;
+  }
+  for (const line of oldLines) {
+    if (!newSet.has(line)) removed++;
+  }
+  return { added, removed };
+}
+
 function formatRelativeTime(date: Date, locale: string): string {
   const diff = Date.now() - date.getTime();
   const seconds = Math.floor(diff / 1000);
@@ -240,8 +266,9 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   );
   const [moduleState, setModuleState] = useState<ModuleConfigState | null>(null);
   const [moduleInitialized, setModuleInitialized] = useState(false);
-  const [isApplyingModules, setIsApplyingModules] = useState(false);
-  const [isDeployingModules, setIsDeployingModules] = useState(false);
+  const [dialogState, dispatchDialog] = useReducer(deployDialogReducer, initialDeployDialogState);
+  const isApplyingModules = dialogState.overallStatus === 'running' && dialogState.mode === 'apply-only';
+  const isDeployingModules = dialogState.overallStatus === 'running' && dialogState.mode === 'apply-and-deploy';
 
   // config.ts 사전 fetch (모듈 초기화용 — selectedPath와 별도로 fetch)
   const { data: configFileForInit, isError: configInitError } = useFileContent(
@@ -585,14 +612,23 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     }
   }, [batchApply, deployId, selectedPath, fileDetail, filesShaMap, liveUrl, locale]);
 
-  // ── 모듈 → 코드에 적용 + 빌드 대기 ──
+  // ── 모듈 → 코드에 적용 (다이얼로그 통합) ──
   const handleApplyModulesToCode = useCallback(async () => {
     if (!moduleState || !moduleSchema) return;
+    dispatchDialog({ type: 'START', mode: 'apply-only' });
+
     try {
-      setIsApplyingModules(true);
+      // Step 1: 코드 생성
       const generatedFiles = generateFiles(moduleState, fileCache, templateSlug ?? undefined);
 
-      // 에디터 캐시 업데이트 (현재 열린 파일이면 에디터 내용도 갱신)
+      let totalAdded = 0;
+      let totalRemoved = 0;
+      for (const gf of generatedFiles) {
+        const stats = computeDiffStats(fileCache[gf.path], gf.content);
+        totalAdded += stats.added;
+        totalRemoved += stats.removed;
+      }
+
       for (const gf of generatedFiles) {
         setFileCache((prev) => ({ ...prev, [gf.path]: gf.content }));
         if (gf.path === selectedPath) {
@@ -600,13 +636,15 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         }
       }
 
-      // Batch update로 GitHub 커밋
+      dispatchDialog({ type: 'ADVANCE_STEP', stepId: 'generate' });
+
+      // Step 2: GitHub 커밋
       const filesToSave = generatedFiles.map((gf) => ({
         path: gf.path,
         content: gf.content,
       }));
 
-      const result = await batchApply.mutateAsync({
+      await batchApply.mutateAsync({
         deployId,
         files: filesToSave,
       });
@@ -614,65 +652,46 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       setHasUnsavedChanges(false);
       setLastSavedAt(new Date());
 
-      toast.success(
-        locale === 'ko'
-          ? `${result.file_count}개 파일이 코드에 적용되었습니다`
-          : `${result.file_count} file(s) applied to code`
-      );
+      // Complete
+      dispatchDialog({
+        type: 'COMPLETE',
+        diffStats: {
+          fileCount: generatedFiles.length,
+          added: totalAdded,
+          removed: totalRemoved,
+        },
+      });
 
-      // 빌드 완료 대기 → 미리보기 자동 갱신
+      // 미리보기 갱신
+      setLivePreviewKey((k) => k + 1);
       if (liveUrl) {
         setShowLiveAfterDeploy(true);
-        setDeployState('deploying');
-        toast.info(
-          locale === 'ko'
-            ? '미리보기 갱신 중... 약 30초 소요됩니다.'
-            : 'Updating preview... ~30 seconds.'
-        );
-
-        let attempts = 0;
-        await new Promise<void>((resolve) => {
-          const poll = setInterval(async () => {
-            attempts++;
-            try {
-              await fetch(`${liveUrl}?_t=${Date.now()}`, {
-                method: 'HEAD',
-                mode: 'no-cors',
-              });
-              if (attempts >= 6) { clearInterval(poll); resolve(); }
-            } catch { /* ignore */ }
-            if (attempts >= 12) { clearInterval(poll); resolve(); }
-          }, 5000);
-        });
-
-        setDeployState('deployed');
-        setLivePreviewKey((k) => k + 1);
-        toast.success(
-          locale === 'ko'
-            ? '미리보기가 갱신되었습니다!'
-            : 'Preview updated!'
-        );
-        setTimeout(() => setDeployState('idle'), 3000);
-      } else {
-        setLivePreviewKey((k) => k + 1);
       }
     } catch (err) {
-      setDeployState('idle');
-      toast.error(err instanceof Error ? err.message : '적용 실패');
-    } finally {
-      setIsApplyingModules(false);
+      dispatchDialog({
+        type: 'ERROR',
+        message: err instanceof Error ? err.message : '적용 실패',
+      });
     }
-  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, locale, fileCache, templateSlug]);
+  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, fileCache, templateSlug]);
 
-  // ── 모듈 → 코드 적용 + 배포 동시 ──
+  // ── 모듈 → 코드 적용 + 배포 (다이얼로그 통합) ──
   const handleApplyModulesAndDeploy = useCallback(async () => {
     if (!moduleState || !moduleSchema) return;
+    dispatchDialog({ type: 'START', mode: 'apply-and-deploy' });
+
     try {
-      setIsDeployingModules(true);
-      setDeployState('saving');
+      // Step 1: 코드 생성
       const generatedFiles = generateFiles(moduleState, fileCache, templateSlug ?? undefined);
 
-      // 에디터 캐시 업데이트
+      let totalAdded = 0;
+      let totalRemoved = 0;
+      for (const gf of generatedFiles) {
+        const stats = computeDiffStats(fileCache[gf.path], gf.content);
+        totalAdded += stats.added;
+        totalRemoved += stats.removed;
+      }
+
       for (const gf of generatedFiles) {
         setFileCache((prev) => ({ ...prev, [gf.path]: gf.content }));
         if (gf.path === selectedPath) {
@@ -680,34 +699,24 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         }
       }
 
-      // Batch update로 GitHub 커밋
+      dispatchDialog({ type: 'ADVANCE_STEP', stepId: 'generate' });
+
+      // Step 2: GitHub 커밋
       const filesToSave = generatedFiles.map((gf) => ({
         path: gf.path,
         content: gf.content,
       }));
 
-      const result = await batchApply.mutateAsync({
+      await batchApply.mutateAsync({
         deployId,
         files: filesToSave,
       });
 
       setHasUnsavedChanges(false);
       setLastSavedAt(new Date());
+      dispatchDialog({ type: 'ADVANCE_STEP', stepId: 'commit' });
 
-      toast.success(
-        locale === 'ko'
-          ? `${result.file_count}개 파일 저장 완료`
-          : `${result.file_count} file(s) saved`
-      );
-
-      // 배포 대기
-      setDeployState('deploying');
-      toast.info(
-        locale === 'ko'
-          ? 'GitHub Pages 배포 중... 약 30초 소요됩니다.'
-          : 'Deploying to GitHub Pages... ~30 seconds.'
-      );
-
+      // Step 3: 사이트 빌드 대기
       if (liveUrl) {
         let attempts = 0;
         await new Promise<void>((resolve) => {
@@ -727,22 +736,27 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         await new Promise((r) => setTimeout(r, 30000));
       }
 
-      setDeployState('deployed');
+      dispatchDialog({ type: 'ADVANCE_STEP', stepId: 'build' });
+
+      // Step 4: 배포 확인 → Complete
       setLivePreviewKey((k) => k + 1);
       setShowLiveAfterDeploy(true);
-      toast.success(
-        locale === 'ko'
-          ? '배포 완료! 사이트에 반영되었습니다.'
-          : 'Deployed! Changes are now live.'
-      );
-      setTimeout(() => setDeployState('idle'), 3000);
+
+      dispatchDialog({
+        type: 'COMPLETE',
+        diffStats: {
+          fileCount: generatedFiles.length,
+          added: totalAdded,
+          removed: totalRemoved,
+        },
+      });
     } catch (err) {
-      setDeployState('idle');
-      toast.error(err instanceof Error ? err.message : '적용 실패');
-    } finally {
-      setIsDeployingModules(false);
+      dispatchDialog({
+        type: 'ERROR',
+        message: err instanceof Error ? err.message : '적용 실패',
+      });
     }
-  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, locale, fileCache, templateSlug]);
+  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, fileCache, templateSlug]);
 
   // Ctrl+S 단축키
   useEffect(() => {
@@ -1387,6 +1401,19 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* ===== 모듈 배포 진행 다이얼로그 ===== */}
+      <ModuleDeployDialog
+        state={dialogState}
+        dispatch={dispatchDialog}
+        locale={locale}
+        liveUrl={liveUrl}
+        onRetry={
+          dialogState.mode === 'apply-only'
+            ? handleApplyModulesToCode
+            : handleApplyModulesAndDeploy
+        }
+      />
 
       {/* ===== AI 코드 도우미 (플로팅 위젯) ===== */}
       <ChatTerminal

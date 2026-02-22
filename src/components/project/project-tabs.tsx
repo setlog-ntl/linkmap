@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Map, List, Key, Settings, Activity } from 'lucide-react';
+import { LayoutDashboard, Map, List, Key, Settings } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
@@ -21,14 +21,11 @@ interface Tab {
 const tabGroups: Tab[][] = [
   [
     { labelKey: 'project.overview', href: '', icon: LayoutDashboard },
-    { labelKey: 'project.serviceMap', href: '/service-map', icon: Map },
     { labelKey: 'project.integrations', href: '/integrations', icon: List },
-  ],
-  [
     { labelKey: 'project.envVars', href: '/env', icon: Key },
-    { labelKey: 'project.monitoring', href: '/monitoring', icon: Activity },
   ],
   [
+    { labelKey: 'project.serviceMap', href: '/service-map', icon: Map },
     { labelKey: 'project.settings', href: '/settings', icon: Settings },
   ],
 ];

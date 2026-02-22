@@ -4,8 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  LayoutDashboard, Rocket, Monitor, Search, Map as MapIcon,
-  Puzzle, Key, Activity, Settings, BookOpen, ChevronDown,
+  LayoutDashboard, Rocket, Search, Map as MapIcon,
+  Puzzle, Key, Settings, BookOpen, ChevronDown,
   LogOut, Bot,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
@@ -65,17 +65,15 @@ export function AppSidebar({ profile, projectId, projectName }: AppSidebarProps)
 
   const mainNav = [
     { labelKey: 'common.dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { labelKey: 'nav.oneclick', href: '/oneclick', icon: Rocket },
-    { labelKey: 'nav.mySites', href: '/my-sites', icon: Monitor },
     { labelKey: 'nav.serviceCatalog', href: '/services', icon: Search },
+    { labelKey: 'nav.sites', href: '/sites', icon: Rocket },
   ];
 
   const projectNav = projectId ? [
     { labelKey: 'project.overview', href: `/project/${projectId}`, icon: LayoutDashboard, exact: true },
-    { labelKey: 'project.serviceMap', href: `/project/${projectId}/service-map`, icon: MapIcon },
     { labelKey: 'project.integrations', href: `/project/${projectId}/integrations`, icon: Puzzle },
     { labelKey: 'project.envVars', href: `/project/${projectId}/env`, icon: Key },
-    { labelKey: 'project.monitoring', href: `/project/${projectId}/monitoring`, icon: Activity },
+    { labelKey: 'project.serviceMap', href: `/project/${projectId}/service-map`, icon: MapIcon },
     { labelKey: 'project.settings', href: `/project/${projectId}/settings`, icon: Settings },
   ] : [];
 

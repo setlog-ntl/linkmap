@@ -3,16 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { User, GitBranch, Layers, Key, AlertTriangle } from 'lucide-react';
+import { User, GitBranch, Wrench } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 
 const settingsLinks = [
-  { key: 'account.profileInfo', href: '/settings/profile', icon: User },
+  { key: 'account.myAccount', href: '/settings/account', icon: User },
   { key: 'account.connectionsTab', href: '/settings/accounts', icon: GitBranch },
-  { key: 'account.allServices', href: '/settings/services', icon: Layers },
-  { key: 'account.apiTokensTab', href: '/settings/tokens', icon: Key },
-  { key: 'account.dangerZone', href: '/settings/danger', icon: AlertTriangle },
+  { key: 'account.developer', href: '/settings/developer', icon: Wrench },
 ];
 
 export function SettingsNav() {

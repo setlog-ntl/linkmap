@@ -34,7 +34,7 @@ interface ServiceMapState {
 }
 
 export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
-  viewLevel: 'status' as ViewLevel,
+  viewLevel: 'map' as ViewLevel,
   catalogSidebarOpen: false,
   focusedNodeId: null,
   contextMenu: null,

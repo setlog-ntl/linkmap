@@ -7,8 +7,8 @@ interface UIState {
   aiCommandMode: boolean;
   sidebarCollapsed: boolean;
   setSidebarOpen: (open: boolean) => void;
-  setCommandOpen: (open: boolean) => void;
   toggleSidebar: () => void;
+  setCommandOpen: (open: boolean) => void;
   setAiCommandMode: (mode: boolean) => void;
   toggleSidebarCollapsed: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
@@ -22,8 +22,8 @@ export const useUIStore = create<UIState>()(
       aiCommandMode: false,
       sidebarCollapsed: false,
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
-      setCommandOpen: (open) => set({ commandOpen: open }),
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+      setCommandOpen: (open) => set({ commandOpen: open }),
       setAiCommandMode: (mode) => set({ aiCommandMode: mode }),
       toggleSidebarCollapsed: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
       setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),

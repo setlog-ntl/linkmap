@@ -1,14 +1,13 @@
 'use client';
 
-import { Eye, Map, GitBranch } from 'lucide-react';
+import { Map, GitBranch } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import type { ViewLevel } from '@/types';
 
-const LEVELS: { key: ViewLevel; icon: typeof Eye; labelKey: string }[] = [
-  { key: 'status', icon: Eye, labelKey: 'serviceMap.viewLevel.status' },
+const LEVELS: { key: ViewLevel; icon: typeof Map; labelKey: string }[] = [
   { key: 'map', icon: Map, labelKey: 'serviceMap.viewLevel.map' },
   { key: 'dependency', icon: GitBranch, labelKey: 'serviceMap.viewLevel.dependency' },
 ];

@@ -9,11 +9,9 @@ import {
   Map,
   List,
   Key,
-  Activity,
   Settings,
   Home,
   Rocket,
-  Monitor,
   Link2,
   Sun,
   Moon,
@@ -203,15 +201,11 @@ export function CommandPalette() {
                 <Search className="mr-2 h-4 w-4" />
                 {t(locale, 'nav.serviceCatalog')}
               </CommandItem>
-              <CommandItem onSelect={() => navigate('/oneclick')}>
+              <CommandItem onSelect={() => navigate('/sites')}>
                 <Rocket className="mr-2 h-4 w-4" />
-                {t(locale, 'nav.oneclick')}
+                {t(locale, 'nav.sites')}
               </CommandItem>
-              <CommandItem onSelect={() => navigate('/my-sites')}>
-                <Monitor className="mr-2 h-4 w-4" />
-                {t(locale, 'nav.mySites')}
-              </CommandItem>
-              <CommandItem onSelect={() => navigate('/settings/account')}>
+              <CommandItem onSelect={() => navigate('/settings/accounts')}>
                 <Link2 className="mr-2 h-4 w-4" />
                 {t(locale, 'nav.connectedInfo')}
               </CommandItem>
@@ -241,10 +235,6 @@ export function CommandPalette() {
                   <CommandItem onSelect={() => navigate(`/project/${activeProjectId}/env`)}>
                     <Key className="mr-2 h-4 w-4" />
                     {t(locale, 'project.envVars')}
-                  </CommandItem>
-                  <CommandItem onSelect={() => navigate(`/project/${activeProjectId}/monitoring`)}>
-                    <Activity className="mr-2 h-4 w-4" />
-                    {t(locale, 'project.monitoring')}
                   </CommandItem>
                   <CommandItem onSelect={() => navigate(`/project/${activeProjectId}/settings`)}>
                     <Settings className="mr-2 h-4 w-4" />
