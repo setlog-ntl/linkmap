@@ -45,6 +45,9 @@ import { SplitButton } from './split-button';
 import type { Locale } from '@/lib/i18n';
 import type { ModulePreset } from '@/data/oneclick/module-presets';
 import { getModulePresets } from '@/data/oneclick/module-presets';
+import type { QuickEditQuestion } from '@/data/oneclick/module-quick-edits';
+import { getQuickEdits } from '@/data/oneclick/module-quick-edits';
+import { Zap } from 'lucide-react';
 
 // 아이콘 매핑
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -189,6 +192,7 @@ export function ModulePanel({
   );
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
+  const [loadingQuickEditId, setLoadingQuickEditId] = useState<string | null>(null);
 
   const selectedModule = useMemo(
     () => schema.modules.find((m) => m.id === selectedModuleId) ?? null,
@@ -197,6 +201,11 @@ export function ModulePanel({
 
   const presets: ModulePreset[] = useMemo(
     () => getModulePresets(schema.templateSlug),
+    [schema.templateSlug]
+  );
+
+  const quickEdits: QuickEditQuestion[] = useMemo(
+    () => getQuickEdits(schema.templateSlug),
     [schema.templateSlug]
   );
 
@@ -295,6 +304,79 @@ export function ModulePanel({
     [state, onStateChange]
   );
 
+  const handleQuickEdit = useCallback(
+    async (question: QuickEditQuestion) => {
+      const isModuleEnabled = state.enabled.includes(question.targetModuleId);
+      if (!isModuleEnabled) {
+        toast.error('모듈을 먼저 활성화하세요');
+        return;
+      }
+
+      setLoadingQuickEditId(question.id);
+      try {
+        const currentModuleValues = state.values[question.targetModuleId] || {};
+        const targetMod = schema.modules.find((m) => m.id === question.targetModuleId);
+
+        const fieldHints = targetMod
+          ? question.targetFields
+              .map((fieldKey) => {
+                const field = targetMod.fields.find((f) => f.key === fieldKey);
+                if (!field) return null;
+                return {
+                  key: field.key,
+                  type: field.type,
+                  options: field.options,
+                };
+              })
+              .filter((h): h is NonNullable<typeof h> => h !== null)
+          : undefined;
+
+        const res = await fetch('/api/ai/module-quick-edit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            questionId: question.id,
+            templateSlug: schema.templateSlug,
+            targetModuleId: question.targetModuleId,
+            targetFields: question.targetFields,
+            currentValues: currentModuleValues,
+            fieldHints,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || 'AI 퀵 편집 실패');
+        }
+
+        const { values, reasoning } = await res.json();
+
+        // 값 머지
+        const next = {
+          ...state,
+          values: {
+            ...state.values,
+            [question.targetModuleId]: {
+              ...state.values[question.targetModuleId],
+              ...values,
+            },
+          },
+        };
+        onStateChange(next);
+
+        // 대상 모듈 자동 선택
+        setSelectedModuleId(question.targetModuleId);
+
+        if (reasoning) toast.success(reasoning);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'AI 퀵 편집 실패');
+      } finally {
+        setLoadingQuickEditId(null);
+      }
+    },
+    [state, schema, onStateChange]
+  );
+
   const handleAiSuggest = useCallback(async () => {
     if (!aiPrompt.trim()) return;
     setAiLoading(true);
@@ -350,11 +432,52 @@ export function ModulePanel({
 
       {/* 스크롤 가능 영역 */}
       <div className="flex-1 overflow-y-auto">
-        {/* AI 추천 */}
-        <div className="px-4 pt-3 pb-2">
+        {/* AI 퀵 편집 */}
+        {quickEdits.length > 0 && (
+          <div className="px-4 pt-3 pb-2">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Zap className="h-3 w-3 text-amber-500" />
+              <span className="text-[11px] font-medium text-muted-foreground">AI 퀵 편집</span>
+            </div>
+            <div className="flex gap-1 flex-wrap">
+              {quickEdits.map((q) => {
+                const isTargetEnabled = state.enabled.includes(q.targetModuleId);
+                const isLoading = loadingQuickEditId === q.id;
+                const isAnyLoading = loadingQuickEditId !== null;
+                return (
+                  <button
+                    key={q.id}
+                    className={`text-[10px] px-2 py-0.5 rounded-full border transition-colors inline-flex items-center gap-1 ${
+                      isTargetEnabled
+                        ? 'hover:bg-amber-500/10 hover:border-amber-500'
+                        : 'opacity-40 cursor-not-allowed'
+                    }`}
+                    onClick={() => handleQuickEdit(q)}
+                    disabled={isAnyLoading || aiLoading}
+                    title={
+                      !isTargetEnabled
+                        ? `${q.targetModuleId} 모듈을 먼저 활성화하세요`
+                        : q.label
+                    }
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                    ) : (
+                      <span>{q.emoji}</span>
+                    )}
+                    {q.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 직접 요청 */}
+        <div className="px-4 pt-1 pb-2">
           <div className="flex items-center gap-1.5 mb-2">
             <Wand2 className="h-3 w-3 text-purple-500" />
-            <span className="text-[11px] font-medium text-muted-foreground">AI 추천</span>
+            <span className="text-[11px] font-medium text-muted-foreground">직접 요청</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Input
@@ -374,7 +497,7 @@ export function ModulePanel({
               size="icon"
               className="h-7 w-7 flex-shrink-0"
               onClick={handleAiSuggest}
-              disabled={aiLoading || !aiPrompt.trim()}
+              disabled={aiLoading || !aiPrompt.trim() || loadingQuickEditId !== null}
             >
               {aiLoading ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
