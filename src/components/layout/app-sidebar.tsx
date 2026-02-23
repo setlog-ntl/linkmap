@@ -362,9 +362,9 @@ export function AppSidebar({ profile }: AppSidebarProps) {
               <Collapsible defaultOpen className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip="내 사이트">
+                    <SidebarMenuButton tooltip="원클릭 배포">
                       <Rocket className="h-4 w-4" />
-                      <span>내 사이트</span>
+                      <span>원클릭 배포</span>
                       <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
