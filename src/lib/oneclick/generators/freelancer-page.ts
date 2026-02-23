@@ -148,7 +148,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const avatarUrl = (hero.avatarUrl as string) || '';
   const gradientFrom = (hero.gradientFrom as string) || '#5b13ec';
   const gradientTo = (hero.gradientTo as string) || '#06b6d4';
-  const fontFamily = (hero.fontFamily as string) || 'Noto Sans KR';
+  const fontFamily = (hero.fontFamily as string) || 'Pretendard';
   const email = (contact.email as string) || 'haeun@jung-design.kr';
   const portfolioColumns = (portfolio.columns as string) || '3';
 

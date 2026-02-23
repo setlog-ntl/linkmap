@@ -1094,6 +1094,10 @@ export const siteConfig = {
     { platform: 'instagram', url: 'https://instagram.com' },
     { platform: 'linkedin', url: 'https://linkedin.com' },
   ]),
+  gradientFrom: '#5b13ec',
+  gradientTo: '#06b6d4',
+  fontFamily: 'Pretendard',
+  portfolioColumns: '3',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 

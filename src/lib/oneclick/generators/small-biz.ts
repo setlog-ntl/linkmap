@@ -18,16 +18,18 @@ import {
 function buildMenuItemsArray(items: unknown[]): string {
   if (!Array.isArray(items) || items.length === 0) return '[]';
   const entries = items.map((item) => {
-    const v = item as Record<string, string>;
+    const v = item as Record<string, unknown>;
     const lines: string[] = [
-      `    name: '${esc(v.name || '')}',`,
+      `    name: '${esc(String(v.name || ''))}',`,
     ];
-    if (v.nameEn) lines.push(`    nameEn: '${esc(v.nameEn)}',`);
-    lines.push(`    desc: '${esc(v.desc || '')}',`);
-    if (v.descEn) lines.push(`    descEn: '${esc(v.descEn)}',`);
-    lines.push(`    price: '${esc(v.price || '')}',`);
-    lines.push(`    category: '${esc(v.category || '')}',`);
-    lines.push(`    emoji: '${esc(v.emoji || '🍽️')}',`);
+    if (v.nameEn) lines.push(`    nameEn: '${esc(String(v.nameEn))}',`);
+    lines.push(`    desc: '${esc(String(v.desc || ''))}',`);
+    if (v.descEn) lines.push(`    descEn: '${esc(String(v.descEn))}',`);
+    lines.push(`    price: '${esc(String(v.price || ''))}',`);
+    lines.push(`    category: '${esc(String(v.category || ''))}',`);
+    lines.push(`    emoji: '${esc(String(v.emoji || '🍽️'))}',`);
+    if (v.isNew) lines.push('    isNew: true,');
+    if (v.isPopular) lines.push('    isPopular: true,');
     return `  {\n${lines.join('\n')}\n  }`;
   });
   return `[\n${entries.join(',\n')}\n]`;
@@ -102,7 +104,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const descriptionEn = (hero.descriptionEn as string) || 'Start your day with a freshly baked loaf every morning.';
   const phone = (hero.phone as string) || '02-334-5870';
   const primaryColor = (hero.primaryColor as string) || '#d47311';
-  const fontFamily = (hero.fontFamily as string) || 'Noto Sans KR';
+  const fontFamily = (hero.fontFamily as string) || 'Pretendard';
 
   const address = (location.address as string) || '서울 마포구 연남동 239-10';
   const addressEn = (location.addressEn as string) || '239-10, Yeonnam-dong, Mapo-gu, Seoul';
@@ -255,7 +257,16 @@ function parseConfigToState(
 
   // Menu items
   try {
-    const items = parseArrayConstant(configContent, /const DEMO_MENU:.*?=\s*(\[[\s\S]*?\n\]);/, 'name');
+    const items = parseArrayConstant(
+      configContent,
+      /const DEMO_MENU:.*?=\s*(\[[\s\S]*?\n\]);/,
+      'name',
+      (_match, obj) => {
+        // isNew: true, isPopular: true boolean 파싱
+        if (_match && /isNew:\s*true/.test(_match)) obj.isNew = 'true';
+        if (_match && /isPopular:\s*true/.test(_match)) obj.isPopular = 'true';
+      }
+    );
     if (items.length > 0) state.values.menu.items = items;
   } catch { /* 기본값 유지 */ }
 

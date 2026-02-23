@@ -981,7 +981,9 @@ export const siteConfig = {
   galleryImages: parseJSON<string[]>(process.env.NEXT_PUBLIC_GALLERY_IMAGES, []),
   instagramUrl: process.env.NEXT_PUBLIC_INSTAGRAM_URL || 'https://instagram.com/ongi_bakery',
   naverBlogUrl: process.env.NEXT_PUBLIC_NAVER_BLOG_URL || '',
-  kakaoChannelUrl: process.env.NEXT_PUBLIC_KAKAO_CHANNEL || '',
+  kakaoChannelUrl: process.env.NEXT_PUBLIC_KAKAO_CHANNEL_URL || '',
+  primaryColor: process.env.NEXT_PUBLIC_PRIMARY_COLOR || '#d47311',
+  fontFamily: 'Pretendard',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 

@@ -1175,6 +1175,8 @@ export const siteConfig = {
   resumeUrl: process.env.NEXT_PUBLIC_RESUME_URL || null,
   email: process.env.NEXT_PUBLIC_EMAIL || null,
   linkedinUrl: process.env.NEXT_PUBLIC_LINKEDIN_URL || null,
+  typingWords: null,
+  maxRepos: 6,
   designPreset: 'github-dark',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
