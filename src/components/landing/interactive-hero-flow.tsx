@@ -19,11 +19,12 @@ const nodeTypes = {
     service: FlowServiceNode,
 };
 
+// Initial positions are overridden in useMemo below; these are fallback defaults
 const nodes: Node[] = [
     {
         id: 'nextjs',
         type: 'layer',
-        position: { x: window.innerWidth / 2 - 200, y: window.innerHeight / 2 - 100 },
+        position: { x: 400, y: 500 },
         data: { label: 'My App', emoji: getServiceEmoji('nextjs'), iconSlug: 'nextjs', layer: 'frontend', highlighted: true },
         draggable: false,
         selectable: false,
@@ -31,7 +32,7 @@ const nodes: Node[] = [
     {
         id: 'supabase',
         type: 'service',
-        position: { x: window.innerWidth / 2 + 150, y: window.innerHeight / 2 - 200 },
+        position: { x: 780, y: 400 },
         data: { label: 'Supabase', emoji: getServiceEmoji('supabase'), iconSlug: 'supabase', status: 'connected', envConfigured: 3, envTotal: 3, highlighted: true },
         draggable: false,
         selectable: false,
@@ -39,7 +40,7 @@ const nodes: Node[] = [
     {
         id: 'stripe',
         type: 'service',
-        position: { x: window.innerWidth / 2 + 200, y: window.innerHeight / 2 + 50 },
+        position: { x: 820, y: 650 },
         data: { label: 'Stripe', emoji: getServiceEmoji('stripe'), iconSlug: 'stripe', status: 'in_progress', envConfigured: 1, envTotal: 2, highlighted: true },
         draggable: false,
         selectable: false,
@@ -47,7 +48,7 @@ const nodes: Node[] = [
     {
         id: 'openai',
         type: 'service',
-        position: { x: window.innerWidth / 2 - 400, y: window.innerHeight / 2 - 50 },
+        position: { x: 200, y: 500 },
         data: { label: 'OpenAI', emoji: getServiceEmoji('openai'), iconSlug: 'openai', status: 'connected', envConfigured: 1, envTotal: 1, highlighted: false },
         draggable: false,
         selectable: false,
@@ -91,15 +92,17 @@ const edges: Edge[] = [
 
 export function InteractiveHeroFlow() {
     const currentNodes = useMemo(() => {
-        // Avoid SSR window issues by setting positions dynamically or roughly
+        // Position nodes in the lower portion of the viewport so they don't overlap hero text
         const isClient = typeof window !== 'undefined';
         const cx = isClient ? window.innerWidth / 2 : 600;
-        const cy = isClient ? window.innerHeight / 2 : 400;
+        const vh = isClient ? window.innerHeight : 800;
+        // Place nodes in the bottom 30% of the hero area (below CTA buttons)
+        const cy = vh * 0.72;
         return nodes.map(n => {
-            if (n.id === 'nextjs') n.position = { x: cx - 180, y: cy - 50 };
-            if (n.id === 'supabase') n.position = { x: cx + 180, y: cy - 150 };
-            if (n.id === 'stripe') n.position = { x: cx + 220, y: cy + 100 };
-            if (n.id === 'openai') n.position = { x: cx - 400, y: cy - 50 };
+            if (n.id === 'nextjs') n.position = { x: cx - 180, y: cy };
+            if (n.id === 'supabase') n.position = { x: cx + 180, y: cy - 100 };
+            if (n.id === 'stripe') n.position = { x: cx + 220, y: cy + 150 };
+            if (n.id === 'openai') n.position = { x: cx - 400, y: cy };
             return n;
         });
     }, []);
