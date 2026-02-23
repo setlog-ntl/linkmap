@@ -12,6 +12,7 @@ import {
   parseArrayConstant,
   parseSocialsFromConfig,
   buildInitialState,
+  unescapeString,
 } from './base-generator';
 
 // ─── 배열 빌더 ──────────────────────────────
@@ -331,7 +332,7 @@ function parseConfigToState(
         const fieldRe = /(\w+):\s*'([^']*)'/g;
         let fm;
         while ((fm = fieldRe.exec(m[1])) !== null) {
-          obj[fm[1]] = fm[2];
+          obj[fm[1]] = unescapeString(fm[2]);
         }
         // tags: ['a', 'b'] 패턴 파싱
         const tagsMatch = m[1].match(/tags:\s*\[([\s\S]*?)\]/);
@@ -340,7 +341,7 @@ function parseConfigToState(
           const tagRe = /'([^']*)'/g;
           let tm;
           while ((tm = tagRe.exec(tagsMatch[1])) !== null) {
-            tagVals.push(tm[1]);
+            tagVals.push(unescapeString(tm[1]));
           }
           obj.tags = tagVals.join(', ');
         }
@@ -366,7 +367,7 @@ function parseConfigToState(
         const fieldRe = /(\w+):\s*'([^']*)'/g;
         let fm;
         while ((fm = fieldRe.exec(m[1])) !== null) {
-          obj[fm[1]] = fm[2];
+          obj[fm[1]] = unescapeString(fm[2]);
         }
         // rating: 숫자 파싱
         const ratingMatch = m[1].match(/rating:\s*(\d+)/);

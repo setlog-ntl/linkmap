@@ -11,6 +11,17 @@ export function esc(s: string): string {
   return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
+/** JS 문자열의 이스케이프 시퀀스를 실제 문자로 디코딩 */
+export function unescapeString(s: string): string {
+  // \uXXXX 유니코드 이스케이프 → 실제 문자
+  let result = s.replace(/\\u([0-9A-Fa-f]{4})/g, (_, hex) =>
+    String.fromCharCode(parseInt(hex, 16))
+  );
+  // \' → ', \\ → \, etc.
+  result = result.replace(/\\(.)/g, '$1');
+  return result;
+}
+
 /** JSON.stringify with 2-space indent */
 export function jsonBlock(val: unknown): string {
   return JSON.stringify(val, null, 2);
@@ -56,11 +67,18 @@ export function buildGalleryArray(items: unknown[]): string {
 /** siteConfig 블록에서 문자열 값 추출 */
 export function createExtractors(siteBlock: string) {
   const extractString = (key: string): string | null => {
-    const re = new RegExp(
+    // 작은따옴표 문자열 매칭
+    const reSingle = new RegExp(
       `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'((?:[^'\\\\]|\\\\.)*)'`
     );
-    const m = siteBlock.match(re);
-    return m ? m[1].replace(/\\(.)/g, '$1') : null;
+    const m = siteBlock.match(reSingle);
+    if (m) return unescapeString(m[1]);
+    // 큰따옴표 문자열 매칭 (storyEn 등 아포스트로피 포함 문자열)
+    const reDouble = new RegExp(
+      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?"((?:[^"\\\\]|\\\\.)*)"`
+    );
+    const md = siteBlock.match(reDouble);
+    return md ? unescapeString(md[1]) : null;
   };
 
   const extractNullable = (key: string): string | null => {
@@ -68,7 +86,7 @@ export function createExtractors(siteBlock: string) {
       `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?(?:'((?:[^'\\\\]|\\\\.)*)'|null)`
     );
     const m = siteBlock.match(re);
-    return m ? (m[1] ?? '').replace(/\\(.)/g, '$1') : null;
+    return m ? unescapeString(m[1] ?? '') : null;
   };
 
   return { extractString, extractNullable };
@@ -100,7 +118,7 @@ export function parseArrayConstant(
     const fieldRe = /(\w+):\s*'([^']*)'/g;
     let fm;
     while ((fm = fieldRe.exec(m[1])) !== null) {
-      obj[fm[1]] = fm[2];
+      obj[fm[1]] = unescapeString(fm[2]);
     }
     if (extraParser) extraParser(m[1], obj);
     if (obj[requiredField]) items.push(obj);

@@ -95,7 +95,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const heroImageUrl = (hero.heroImageUrl as string) || '';
   const gradientFrom = (hero.gradientFrom as string) || '#ee5b2b';
   const gradientTo = (hero.gradientTo as string) || '#f59e0b';
-  const parallaxEnabled = hero.parallaxEnabled !== undefined ? !!hero.parallaxEnabled : false;
+  const parallaxEnabled = hero.parallaxEnabled !== undefined ? !!hero.parallaxEnabled : true;
   const fontFamily = (hero.fontFamily as string) || 'Pretendard';
   const designPreset = (hero.designPreset as string) || 'creator';
   const story = (about.story as string) || '';

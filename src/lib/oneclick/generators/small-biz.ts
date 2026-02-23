@@ -11,6 +11,7 @@ import {
   extractSiteBlock,
   parseArrayConstant,
   buildInitialState,
+  unescapeString,
 } from './base-generator';
 
 // ─── 배열 빌더 ──────────────────────────────
@@ -282,7 +283,7 @@ function parseConfigToState(
         const fieldRe = /(\w+):\s*'([^']*)'/g;
         let fm;
         while ((fm = fieldRe.exec(m[1])) !== null) {
-          obj[fm[1]] = fm[2];
+          obj[fm[1]] = unescapeString(fm[2]);
         }
         // isHoliday: true 파싱
         if (/isHoliday:\s*true/.test(m[1])) obj.isHoliday = true;
