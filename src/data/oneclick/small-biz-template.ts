@@ -875,6 +875,8 @@ const libConfig = `export interface MenuItem {
   price: string;
   category: string;
   emoji: string;
+  isNew?: boolean;
+  isPopular?: boolean;
 }
 
 export interface BusinessHour {

@@ -126,6 +126,8 @@ function generateConfigTs(state: ModuleConfigState): string {
   price: string;
   category: string;
   emoji: string;
+  isNew?: boolean;
+  isPopular?: boolean;
 }
 
 export interface BusinessHour {
