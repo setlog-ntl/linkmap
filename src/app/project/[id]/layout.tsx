@@ -44,11 +44,7 @@ export default async function ProjectLayout({
 
   return (
     <SidebarProvider>
-      <AppSidebar
-        profile={profile}
-        projectId={id}
-        projectName={projectName}
-      />
+      <AppSidebar profile={profile} />
       <div className="flex flex-1 flex-col min-h-screen w-full">
         <AppHeader projectName={projectName} />
         <div className="container py-6">
