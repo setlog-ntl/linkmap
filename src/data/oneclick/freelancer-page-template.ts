@@ -237,10 +237,10 @@ export default function RootLayout({
               ...(siteConfig.services?.length ? {
                 hasOfferCatalog: {
                   '@type': 'OfferCatalog',
-                  itemListElement: siteConfig.services.map((s: { name: string; description: string }) => ({
+                  itemListElement: siteConfig.services.map((s) => ({
                     '@type': 'Offer',
-                    name: s.name,
-                    description: s.description,
+                    name: s.title,
+                    description: s.desc,
                   })),
                 },
               } : {}),
