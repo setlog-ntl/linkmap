@@ -20,6 +20,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t, type Locale } from '@/lib/i18n';
 import type { DeployStatus, HomepageTemplate } from '@/lib/queries/oneclick';
+import { BuildingIllustration } from './building-illustration';
 import { WireframeSVG } from './template-card';
 
 interface DeployProgressProps {
@@ -100,28 +101,42 @@ export function DeployProgress({ status, template }: DeployProgressProps) {
   const activeStep = status.steps.find((s) => s.status === 'in_progress');
   const activeStepDesc = activeStep ? getStepDescription(activeStep.name, locale) : null;
 
+  // "설정 중" 단계가 가장 오래 걸리므로 이때 조립 애니메이션 표시
+  const isConfiguring = activeStep?.name.includes('pages')
+    || activeStep?.name.includes('config')
+    || activeStep?.name.includes('setting');
+
   return (
     <Card>
       <CardContent className="py-6">
         <div className="space-y-5">
-          {/* Template mini preview */}
+          {/* Template preview — 설정 중일 때 조립 애니메이션, 그 외 미니 프리뷰 */}
           {template && (
-            <div className="flex items-center gap-3 pb-3 border-b">
-              <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
-                <WireframeSVG slug={template.slug} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">
-                  {t(locale, 'deployProgress.selectedTemplate')}
-                </p>
-                <p className="text-sm font-semibold truncate">
+            isConfiguring ? (
+              <div className="pb-3 border-b">
+                <BuildingIllustration slug={template.slug} />
+                <p className="text-center text-sm font-semibold mt-2">
                   {locale === 'ko' ? template.name_ko : template.name}
                 </p>
-                <p className="text-xs text-muted-foreground line-clamp-1">
-                  {locale === 'ko' ? template.description_ko : template.description}
-                </p>
               </div>
-            </div>
+            ) : (
+              <div className="flex items-center gap-3 pb-3 border-b">
+                <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  <WireframeSVG slug={template.slug} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-muted-foreground">
+                    {t(locale, 'deployProgress.selectedTemplate')}
+                  </p>
+                  <p className="text-sm font-semibold truncate">
+                    {locale === 'ko' ? template.name_ko : template.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground line-clamp-1">
+                    {locale === 'ko' ? template.description_ko : template.description}
+                  </p>
+                </div>
+              </div>
+            )
           )}
 
           {/* Header */}
