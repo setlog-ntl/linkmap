@@ -36,12 +36,12 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
   {
     id: 'b2c3d4e5-0003-4000-9000-000000000003',
     slug: 'link-in-bio-pro',
-    name: 'Link-in-Bio Pro',
-    name_ko: 'SNS 링크허브',
+    name: 'My Link Page',
+    name_ko: '내 링크 모음',
     description:
-      'SNS profile link hub with animated backgrounds, custom themes, and visitor stats. Linktree alternative with full code ownership.',
+      'Your personal link page for SNS profiles. Animated backgrounds, custom themes, and visitor analytics — all with full code ownership.',
     description_ko:
-      'SNS 프로필 링크 허브. 애니메이션 배경, 커스텀 테마, 방문자 통계. 코드 완전 소유 Linktree 대안.',
+      'SNS 프로필에 연결하는 나만의 링크 페이지. 애니메이션 배경, 커스텀 테마, 방문자 통계까지.',
     preview_image_url: null,
     github_owner: 'linkmap-templates',
     github_repo: 'link-in-bio-pro',
@@ -100,12 +100,12 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
   {
     id: 'b2c3d4e5-0005-4000-9000-000000000005',
     slug: 'dev-showcase',
-    name: 'Developer Showcase',
-    name_ko: '개발자 쇼케이스',
+    name: 'Dev Home',
+    name_ko: '개발자 홈',
     description:
-      'Developer portfolio with GitHub project integration, skill visualization, experience timeline, and blog. Terminal-style dark theme with scroll animations.',
+      'Your developer home page. GitHub integration, skill visualization, career timeline, and blog — with terminal-style dark theme.',
     description_ko:
-      '개발자 포트폴리오. GitHub 프로젝트 연동, 기술 스택 시각화, 경력 타임라인, 블로그. 터미널 스타일 다크 테마.',
+      '나를 보여주는 개발자 홈. GitHub 연동, 기술 스택 시각화, 경력 타임라인. 다크 테마 기본 제공.',
     preview_image_url: null,
     github_owner: 'linkmap-templates',
     github_repo: 'dev-showcase',
@@ -277,9 +277,9 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     name: 'Personal Brand',
     name_ko: '나만의 홈페이지',
     description:
-      'Storytelling-driven personal branding page with fullscreen hero, parallax scroll, values showcase, and framer-motion animations. Express your identity.',
+      'Storytelling-driven personal branding page with fullscreen hero, parallax scroll, values showcase, and smooth animations. Express your identity.',
     description_ko:
-      '풀스크린 히어로, 패럴렉스 스크롤, 가치관 쇼케이스, framer-motion 애니메이션을 갖춘 스토리텔링 중심 퍼스널 브랜딩 페이지. 나다움을 표현하세요.',
+      '나다움을 표현하는 홈페이지. 풀스크린 히어로, 패럴렉스 스크롤, 가치관 쇼케이스와 부드러운 애니메이션.',
     preview_image_url: null,
     github_owner: 'linkmap-templates',
     github_repo: 'personal-brand',
@@ -312,11 +312,11 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     id: 'b2c3d4e5-0012-4000-9000-000000000012',
     slug: 'freelancer-page',
     name: 'Freelancer Page',
-    name_ko: '포트폴리오',
+    name_ko: '프리랜서 홍보',
     description:
-      'Professional freelancer page with service listings, portfolio grid with category filter, client testimonials with star ratings, work process steps, and contact form. Built for trust and conversion.',
+      'Professional freelancer page with services, portfolio, testimonials, work process, and contact form — all in one page.',
     description_ko:
-      '프리랜서 전문 홍보 페이지. 서비스 목록, 카테고리 필터 포트폴리오, 별점 후기, 업무 프로세스, 문의 폼. 신뢰 구축과 전환 최적화에 최적화.',
+      '프리랜서 전문 홍보 페이지. 서비스 소개, 포트폴리오, 고객 후기, 업무 프로세스, 문의 폼까지 한 페이지에.',
     preview_image_url: null,
     github_owner: 'linkmap-templates',
     github_repo: 'freelancer-page',

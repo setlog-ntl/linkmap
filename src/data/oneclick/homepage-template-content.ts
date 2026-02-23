@@ -30,7 +30,7 @@ export interface HomepageTemplateContent {
 }
 
 // ──────────────────────────────────────────────
-// 6. Link-in-Bio Pro (MVP)
+// 6. My Link Page (MVP)
 // ──────────────────────────────────────────────
 const linkInBioPackageJson = makePackageJson('link-in-bio-pro');
 

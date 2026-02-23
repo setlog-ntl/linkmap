@@ -193,7 +193,7 @@ export const namecardSample: { ko: NamecardContent; en: NamecardContent } = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 3. 개발자 쇼케이스 (dev-showcase)
+// 3. 개발자 홈 (dev-showcase)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface DevShowcaseSkill {
@@ -400,7 +400,7 @@ export const devShowcaseSample: { ko: DevShowcaseContent; en: DevShowcaseContent
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 4. 포트폴리오 / 프리랜서 페이지 (freelancer-page)
+// 4. 프리랜서 홍보 (freelancer-page)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface FreelancerService {
@@ -920,7 +920,7 @@ export const smallBizSample: { ko: SmallBizContent; en: SmallBizContent } = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 6. SNS 링크허브 (link-in-bio-pro)
+// 6. 내 링크 모음 (link-in-bio-pro)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface LinkHubLink {
