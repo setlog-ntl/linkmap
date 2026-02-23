@@ -8,6 +8,7 @@ import {
   esc,
   buildSocialsArray,
   buildGalleryArray,
+  normalizeImagePath,
   createExtractors,
   extractSiteBlock,
   parseArrayConstant,
@@ -92,7 +93,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const nameEn = (hero.nameEn as string) || 'Jiwon Lee';
   const tagline = (hero.tagline as string) || '콘텐츠로 세상을 연결하는 크리에이터';
   const taglineEn = (hero.taglineEn as string) || 'Creator who connects the world through content';
-  const heroImageUrl = (hero.heroImageUrl as string) || '';
+  const heroImageUrl = normalizeImagePath((hero.heroImageUrl as string) || '');
   const gradientFrom = (hero.gradientFrom as string) || '#ee5b2b';
   const gradientTo = (hero.gradientTo as string) || '#f59e0b';
   const parallaxEnabled = hero.parallaxEnabled !== undefined ? !!hero.parallaxEnabled : true;

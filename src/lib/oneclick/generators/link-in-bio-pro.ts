@@ -7,6 +7,7 @@ import type { TemplateGenerator, ComponentMapping } from './base-generator';
 import {
   esc,
   buildSocialsArray,
+  normalizeImagePath,
   createExtractors,
   extractSiteBlock,
   parseArrayConstant,
@@ -66,7 +67,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const siteNameEn = (profile.nameEn as string) || 'My Link Page';
   const bio = (profile.bio as string) || '안녕하세요! 여기서 저의 모든 링크를 확인하세요.';
   const bioEn = (profile.bioEn as string) || 'Hello! Check out all my links here.';
-  const avatarUrl = (profile.avatarUrl as string) || '';
+  const avatarUrl = normalizeImagePath((profile.avatarUrl as string) || '');
   const bgStyle = (theme.bgStyle as string) || 'gradient';
   const primaryColor = (theme.primaryColor as string) || '#6366f1';
   const cardStyle = (theme.cardStyle as string) || 'rounded';

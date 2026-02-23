@@ -156,9 +156,14 @@ export async function POST(
       },
     });
 
-    // Return the relative path that can be used in the template
+    // Return the web-accessible path (Next.js serves public/ from root)
+    // e.g. public/images/foo.webp → /images/foo.webp
+    const webPath = filePath.startsWith('public/')
+      ? `/${filePath.slice('public/'.length)}`
+      : `/${filePath}`;
+
     return NextResponse.json({
-      path: `/${filePath}`,
+      path: webPath,
       commit_sha: commit.sha,
     });
   } catch (err) {

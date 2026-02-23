@@ -7,6 +7,7 @@ import type { TemplateGenerator, ComponentMapping } from './base-generator';
 import {
   esc,
   buildSocialsArray,
+  normalizeImagePath,
   createExtractors,
   extractSiteBlock,
   parseSocialsFromConfig,
@@ -47,7 +48,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const titleEn = (profile.titleEn as string) || 'Freelance Developer';
   const company = (profile.company as string) || '';
   const companyEn = (profile.companyEn as string) || '';
-  const avatarUrl = (profile.avatarUrl as string) || '';
+  const avatarUrl = normalizeImagePath((profile.avatarUrl as string) || '');
   const email = (contact.email as string) || 'hello@example.com';
   const phone = (contact.phone as string) || '010-1234-5678';
   const address = (contact.address as string) || '';

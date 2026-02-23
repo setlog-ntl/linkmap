@@ -7,6 +7,7 @@ import type { TemplateGenerator, ComponentMapping } from './base-generator';
 import {
   esc,
   buildSocialsArray,
+  normalizeImagePath,
   createExtractors,
   extractSiteBlock,
   parseArrayConstant,
@@ -47,7 +48,7 @@ function buildPortfolioArray(items: unknown[]): string {
     if (v.categoryEn) lines.push(`    categoryEn: '${esc(v.categoryEn)}',`);
     lines.push(`    desc: '${esc(v.desc || '')}',`);
     if (v.descEn) lines.push(`    descEn: '${esc(v.descEn)}',`);
-    lines.push(`    imageUrl: '${esc(v.imageUrl || '')}',`);
+    lines.push(`    imageUrl: '${esc(normalizeImagePath(v.imageUrl || ''))}',`);
     const tagsStr = v.tags || '';
     const tagsArr = tagsStr
       .split(',')
@@ -146,7 +147,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const titleEn = (hero.titleEn as string) || 'Graphic Designer';
   const tagline = (hero.tagline as string) || '브랜드의 이야기를 시각으로 풀어내는 그래픽 디자이너';
   const taglineEn = (hero.taglineEn as string) || 'Graphic designer who tells brand stories through visuals';
-  const avatarUrl = (hero.avatarUrl as string) || '';
+  const avatarUrl = normalizeImagePath((hero.avatarUrl as string) || '');
   const gradientFrom = (hero.gradientFrom as string) || '#5b13ec';
   const gradientTo = (hero.gradientTo as string) || '#06b6d4';
   const fontFamily = (hero.fontFamily as string) || 'Pretendard';

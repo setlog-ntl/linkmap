@@ -333,6 +333,14 @@ interface ImageUrlFieldProps {
   locale: string;
 }
 
+/** /public/images/... → /images/... 경로 보정 */
+function fixPublicPath(path: string): string {
+  if (path.startsWith('/public/')) {
+    return path.slice('/public'.length);
+  }
+  return path;
+}
+
 function ImageUrlField({ label, value, onChange, placeholder, deployId, locale }: ImageUrlFieldProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -368,7 +376,7 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale }
       }
 
       const { path } = await res.json();
-      onChange(path);
+      onChange(fixPublicPath(path));
       toast.success(t(locale as Locale, 'moduleForm.imageUploaded'));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Upload failed');
@@ -377,6 +385,13 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale }
       if (fileRef.current) fileRef.current.value = '';
     }
   }, [deployId, locale, onChange]);
+
+  // 이미지 URL인지 판별 (미리보기 표시용)
+  const isImageUrl = value && (
+    value.startsWith('http') ||
+    value.startsWith('/images/') ||
+    value.startsWith('/public/images/')
+  );
 
   return (
     <div className="space-y-1.5">
@@ -413,6 +428,20 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale }
           onChange={handleUpload}
         />
       </div>
+      {/* 이미지 미리보기 썸네일 */}
+      {isImageUrl && (
+        <div className="mt-1.5 rounded-md border overflow-hidden bg-muted/30 w-fit">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={fixPublicPath(value)}
+            alt="미리보기"
+            className="max-h-20 max-w-full object-contain"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

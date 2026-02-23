@@ -42,6 +42,16 @@ export function levelToPercent(level: string): string {
   return '30';
 }
 
+// ─── 이미지 경로 정규화 ─────────────────────
+// 업로드 API가 과거에 /public/images/... 형태로 반환했던 경로를
+// Next.js의 정적 파일 서빙 경로 /images/... 로 보정
+export function normalizeImagePath(path: string): string {
+  if (path.startsWith('/public/')) {
+    return path.slice('/public'.length); // /public/images/x → /images/x
+  }
+  return path;
+}
+
 // ─── 공통 배열 빌더 ──────────────────────────
 
 export function buildSocialsArray(items: unknown[]): string {
@@ -57,7 +67,8 @@ export function buildGalleryArray(items: unknown[]): string {
   if (!Array.isArray(items) || items.length === 0) return '[]';
   const urls = items.map((item) => {
     const v = item as Record<string, string>;
-    return `  '${esc(v.url || v as unknown as string)}'`;
+    const raw = v.url || (v as unknown as string);
+    return `  '${esc(normalizeImagePath(raw))}'`;
   });
   return `[\n${urls.join(',\n')}\n]`;
 }
