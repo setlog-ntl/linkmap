@@ -68,7 +68,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const bioEn = (profile.bioEn as string) || 'Hello! Check out all my links here.';
   const avatarUrl = (profile.avatarUrl as string) || '';
   const bgStyle = (theme.bgStyle as string) || 'gradient';
-  const primaryColor = (theme.primaryColor as string) || '#8b5cf6';
+  const primaryColor = (theme.primaryColor as string) || '#6366f1';
   const cardStyle = (theme.cardStyle as string) || 'rounded';
   const linkItems = (links.items as unknown[]) || [];
   const socialItems = (socials.items as unknown[]) || [];

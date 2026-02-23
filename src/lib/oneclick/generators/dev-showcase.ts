@@ -245,6 +245,7 @@ export const siteConfig = {
   blogPosts: parseJSON<BlogPost[] | null>(process.env.NEXT_PUBLIC_BLOG_POSTS, ${buildBlogPostsArray(blogItems)}),
   resumeUrl: process.env.NEXT_PUBLIC_RESUME_URL || null,
   email: process.env.NEXT_PUBLIC_EMAIL || ${email ? `'${esc(email)}'` : 'null'},
+  githubUrl: process.env.NEXT_PUBLIC_GITHUB_URL || ${githubUrl ? `'${esc(githubUrl)}'` : 'null'},
   linkedinUrl: process.env.NEXT_PUBLIC_LINKEDIN_URL || ${linkedinUrl ? `'${esc(linkedinUrl)}'` : 'null'},
   typingWords: ${typingWords ? `'${esc(typingWords)}'` : 'null'},
   maxRepos: ${maxRepos},
@@ -364,11 +365,14 @@ function parseConfigToState(
   // Contact
   const email = extractNullable('email');
   if (email !== null) state.values.contact.email = email;
-  const linkedinUrl = extractNullable('linkedinUrl');
-  if (linkedinUrl !== null) state.values.contact.linkedin = linkedinUrl;
-  if (githubUsername) {
+  const githubUrl = extractNullable('githubUrl');
+  if (githubUrl !== null) {
+    state.values.contact.github = githubUrl;
+  } else if (githubUsername) {
     state.values.contact.github = `https://github.com/${githubUsername}`;
   }
+  const linkedinUrl = extractNullable('linkedinUrl');
+  if (linkedinUrl !== null) state.values.contact.linkedin = linkedinUrl;
 
   return state;
 }

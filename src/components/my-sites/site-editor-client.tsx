@@ -306,13 +306,6 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         return;
       }
 
-      if (deployOrigin === 'module-deploy') {
-        dispatchDialog({ type: 'ADVANCE_STEP', stepId: 'build' });
-        dispatchDialog({
-          type: 'COMPLETE',
-          diffStats: pendingDiffStatsRef.current ?? { fileCount: 0, added: 0, removed: 0 },
-        });
-      }
       setLivePreviewKey((k) => k + 1);
       setShowLiveAfterDeploy(true);
       setDeployState('deployed');
@@ -323,12 +316,8 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       const msg = status === 'timeout'
         ? '배포 시간이 초과되었습니다 (5분). GitHub Actions를 확인해주세요.'
         : deployStatusData.deploy_error || 'GitHub Actions 빌드 실패';
-      if (deployOrigin === 'module-deploy') {
-        dispatchDialog({ type: 'ERROR', message: msg });
-      } else {
-        toast.error(msg);
-        setDeployState('idle');
-      }
+      toast.error(msg);
+      setDeployState('idle');
       cleanup();
     }
     // 'building', 'creating', 'pending' 상태는 계속 대기
@@ -676,7 +665,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   // ── 모듈 → 코드 적용 + 배포 (다이얼로그 통합) ──
   const handleApplyModulesAndDeploy = useCallback(async () => {
     if (!moduleState || !moduleSchema) return;
-    dispatchDialog({ type: 'START', mode: 'apply-and-deploy' });
+    dispatchDialog({ type: 'START', mode: 'apply-only' });
 
     try {
       // Step 1: 코드 생성
@@ -720,16 +709,20 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
 
       setHasUnsavedChanges(false);
       setLastSavedAt(new Date());
-      dispatchDialog({ type: 'ADVANCE_STEP', stepId: 'commit' });
 
-      // Step 3+4: 캐시 초기화 + useDeployStatus 폴링으로 위임 (HEAD 폴링 제거)
-      pendingDiffStatsRef.current = { fileCount: generatedFiles.length, added: totalAdded, removed: totalRemoved };
+      // 커밋 완료 → 다이얼로그 즉시 COMPLETE (빌드 대기는 미리보기에서만)
+      dispatchDialog({
+        type: 'COMPLETE',
+        diffStats: { fileCount: generatedFiles.length, added: totalAdded, removed: totalRemoved },
+      });
+
+      // 빌드 추적은 미리보기 오버레이에서만 표시
       queryClient.removeQueries({ queryKey: queryKeys.oneclick.status(deployId) });
       deployStartedAtRef.current = Date.now();
       seenBuildingRef.current = false;
+      setDeployState('deploying');
       setDeployOrigin('module-deploy');
       setAwaitingDeploy(true);
-      // 이후 useEffect에서 build→verify→COMPLETE 처리
     } catch (err) {
       dispatchDialog({
         type: 'ERROR',
@@ -749,12 +742,12 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
 
   // ── 빌드 진행 서브 라벨 (module-deploy 다이얼로그용) ──
   const buildSubLabel = useMemo(() => {
-    if (!awaitingDeploy || !deployStatusData || deployOrigin !== 'module-deploy') return undefined;
+    if (!awaitingDeploy || !deployStatusData) return undefined;
     const ps = deployStatusData.pages_status;
     if (ps === 'enabling') return 'GitHub Pages 설정 중...';
     if (ps === 'building' || deployStatusData.deploy_status === 'building') return 'GitHub Actions 빌드 중...';
     return undefined;
-  }, [awaitingDeploy, deployStatusData, deployOrigin]);
+  }, [awaitingDeploy, deployStatusData]);
 
   const actionsUrl = deploy?.forked_repo_url ? `${deploy.forked_repo_url}/actions` : null;
 

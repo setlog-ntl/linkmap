@@ -66,16 +66,18 @@ export function buildGalleryArray(items: unknown[]): string {
 
 /** siteConfig 블록에서 문자열 값 추출 */
 export function createExtractors(siteBlock: string) {
+  // (?<!\w) : 단어 문자 바로 뒤가 아닌 위치에서만 매칭 (서브스트링 오매칭 방지)
+  // 예: 'name:' 정규식이 'siteName:' 에 매칭되지 않도록 함
   const extractString = (key: string): string | null => {
     // 작은따옴표 문자열 매칭
     const reSingle = new RegExp(
-      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'((?:[^'\\\\]|\\\\.)*)'`
+      `(?<!\\w)${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'((?:[^'\\\\]|\\\\.)*)'`
     );
     const m = siteBlock.match(reSingle);
     if (m) return unescapeString(m[1]);
     // 큰따옴표 문자열 매칭 (storyEn 등 아포스트로피 포함 문자열)
     const reDouble = new RegExp(
-      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?"((?:[^"\\\\]|\\\\.)*)"`
+      `(?<!\\w)${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?"((?:[^"\\\\]|\\\\.)*)"`
     );
     const md = siteBlock.match(reDouble);
     return md ? unescapeString(md[1]) : null;
@@ -83,10 +85,13 @@ export function createExtractors(siteBlock: string) {
 
   const extractNullable = (key: string): string | null => {
     const re = new RegExp(
-      `${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?(?:'((?:[^'\\\\]|\\\\.)*)'|null)`
+      `(?<!\\w)${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?(?:'((?:[^'\\\\]|\\\\.)*)'|null)`
     );
     const m = siteBlock.match(re);
-    return m ? unescapeString(m[1] ?? '') : null;
+    if (!m) return null;
+    // null 대안에 매칭된 경우 m[1]은 undefined → null 반환
+    if (m[1] === undefined) return null;
+    return unescapeString(m[1]);
   };
 
   return { extractString, extractNullable };
