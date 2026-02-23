@@ -104,6 +104,12 @@ export async function POST(
       commitMessage
     );
 
+    // 커밋 성공 → deploy_status를 'building'으로 리셋하여 새 빌드 추적 가능하게 함
+    await supabase
+      .from('homepage_deploys')
+      .update({ deploy_status: 'building', pages_status: 'building' })
+      .eq('id', id);
+
     await logAudit(user.id, {
       action: 'oneclick.batch_update',
       resourceType: 'homepage_deploy',

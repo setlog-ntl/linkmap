@@ -279,16 +279,33 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const [awaitingDeploy, setAwaitingDeploy] = useState(false);
   const [deployOrigin, setDeployOrigin] = useState<DeployOrigin>(null);
   const pendingDiffStatsRef = useRef<DiffStats | null>(null);
+  const deployStartedAtRef = useRef<number>(0);
+  const seenBuildingRef = useRef(false);
   const queryClient = useQueryClient();
 
   const { data: deployStatusData } = useDeployStatus(deployId, awaitingDeploy);
 
   // ── 배포 상태 감지 (useDeployStatus 폴링 결과 처리) ──
+  // Grace period: 커밋 후 DB가 'building'으로 업데이트되기 전에
+  // 이전 배포의 stale 'ready'가 캐시에서 반환될 수 있음 → 무시
+  const DEPLOY_GRACE_MS = 10_000;
+
   useEffect(() => {
     if (!awaitingDeploy || !deployStatusData) return;
     const status = deployStatusData.deploy_status;
 
+    // 빌드 진행 상태를 한 번이라도 확인하면 flag 설정
+    if (status === 'building' || status === 'creating' || status === 'pending') {
+      seenBuildingRef.current = true;
+    }
+
     if (status === 'ready') {
+      // 아직 빌드 진행 상태를 본 적 없고, grace period 내라면
+      // → 이전 배포의 stale 'ready' → 무시하고 다음 폴링 대기
+      if (!seenBuildingRef.current && Date.now() - deployStartedAtRef.current < DEPLOY_GRACE_MS) {
+        return;
+      }
+
       if (deployOrigin === 'module-deploy') {
         dispatchDialog({ type: 'ADVANCE_STEP', stepId: 'build' });
         dispatchDialog({
@@ -320,6 +337,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       setAwaitingDeploy(false);
       setDeployOrigin(null);
       pendingDiffStatsRef.current = null;
+      seenBuildingRef.current = false;
     }
   }, [awaitingDeploy, deployStatusData, deployOrigin, locale]);
 
@@ -516,14 +534,17 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
 
       setDeployState('deploying');
       toast.info(t(locale, 'editor.deploying'));
-      // HEAD 폴링 제거 → useDeployStatus 폴링으로 위임
+      // 캐시 초기화 + useDeployStatus 폴링으로 위임
+      queryClient.removeQueries({ queryKey: queryKeys.oneclick.status(deployId) });
+      deployStartedAtRef.current = Date.now();
+      seenBuildingRef.current = false;
       setDeployOrigin('direct');
       setAwaitingDeploy(true);
     } catch (err) {
       setDeployState('idle');
       toast.error(err instanceof Error ? err.message : t(locale, 'editor.deployFailed'));
     }
-  }, [selectedPath, fileDetail, hasUnsavedChanges, editorContent, deployId, updateFile, locale]);
+  }, [selectedPath, fileDetail, hasUnsavedChanges, editorContent, deployId, updateFile, locale, queryClient]);
 
   // 파일 경로 목록 + SHA 맵 (ChatTerminal에 전달)
   const allFilePaths = useMemo(() => {
@@ -567,16 +588,19 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
 
       toast.success(`${result.file_count}${t(locale, 'editor.filesSaved')}`);
 
-      // 2. 자동 배포 트리거 — useDeployStatus 폴링으로 위임
+      // 2. 자동 배포 트리거 — 캐시 초기화 + useDeployStatus 폴링으로 위임
       setDeployState('deploying');
       toast.info(t(locale, 'editor.deploying'));
+      queryClient.removeQueries({ queryKey: queryKeys.oneclick.status(deployId) });
+      deployStartedAtRef.current = Date.now();
+      seenBuildingRef.current = false;
       setDeployOrigin('ai-apply');
       setAwaitingDeploy(true);
     } catch (err) {
       setDeployState('idle');
       toast.error(err instanceof Error ? err.message : t(locale, 'editor.applyFailed'));
     }
-  }, [batchApply, deployId, selectedPath, filesShaMap, locale]);
+  }, [batchApply, deployId, selectedPath, filesShaMap, locale, queryClient]);
 
   // ── 모듈 → 코드에 적용 (다이얼로그 통합) ──
   const handleApplyModulesToCode = useCallback(async () => {
@@ -698,8 +722,11 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       setLastSavedAt(new Date());
       dispatchDialog({ type: 'ADVANCE_STEP', stepId: 'commit' });
 
-      // Step 3+4: useDeployStatus 폴링으로 위임 (HEAD 폴링 제거)
+      // Step 3+4: 캐시 초기화 + useDeployStatus 폴링으로 위임 (HEAD 폴링 제거)
       pendingDiffStatsRef.current = { fileCount: generatedFiles.length, added: totalAdded, removed: totalRemoved };
+      queryClient.removeQueries({ queryKey: queryKeys.oneclick.status(deployId) });
+      deployStartedAtRef.current = Date.now();
+      seenBuildingRef.current = false;
       setDeployOrigin('module-deploy');
       setAwaitingDeploy(true);
       // 이후 useEffect에서 build→verify→COMPLETE 처리
@@ -716,6 +743,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     setAwaitingDeploy(false);
     setDeployOrigin(null);
     pendingDiffStatsRef.current = null;
+    seenBuildingRef.current = false;
     handleApplyModulesAndDeploy();
   }, [handleApplyModulesAndDeploy]);
 
