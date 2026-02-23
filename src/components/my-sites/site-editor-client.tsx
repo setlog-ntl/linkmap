@@ -756,6 +756,18 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const isLivePreviewable = isHtmlFile(selectedPath) || isCssFile(selectedPath);
   const isDeploying = deployState === 'saving' || deployState === 'deploying' || awaitingDeploy;
 
+  // GitHub Actions 빌드 상태 라벨
+  const buildStatusLabel = useMemo(() => {
+    if (!awaitingDeploy || !deployStatusData) return null;
+    const ds = deployStatusData.deploy_status;
+    const ps = deployStatusData.pages_status;
+    if (ps === 'enabling') return 'Pages 설정 중...';
+    if (ds === 'building' || ps === 'building') return 'Actions 빌드 중...';
+    if (ds === 'creating') return '저장소 준비 중...';
+    if (ds === 'pending') return '빌드 대기 중...';
+    return '배포 진행 중...';
+  }, [awaitingDeploy, deployStatusData]);
+
   // 배포 버튼 라벨
   const deployButtonContent = (() => {
     switch (deployState) {
@@ -770,7 +782,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         return (
           <>
             <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-            <span className="hidden sm:inline ml-1">{t(locale, 'editor.stateDeploying')}</span>
+            <span className="hidden sm:inline ml-1">{buildStatusLabel || t(locale, 'editor.stateDeploying')}</span>
           </>
         );
       case 'deployed':
@@ -789,6 +801,22 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         );
     }
   })();
+
+  // 빌드 진행 오버레이 (미리보기 위에 표시)
+  const renderBuildOverlay = () => {
+    if (!awaitingDeploy) return null;
+    return (
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/80 backdrop-blur-[2px]">
+        <RefreshCw className="h-6 w-6 animate-spin text-primary mb-3" />
+        <p className="text-sm font-medium text-foreground">
+          {buildStatusLabel || '배포 진행 중...'}
+        </p>
+        <p className="text-xs text-muted-foreground mt-1">
+          완료 후 자동으로 최신 화면을 표시합니다
+        </p>
+      </div>
+    );
+  };
 
   // 미리보기 렌더링 (데스크탑/모바일 공용)
   // 부모가 block(h-full) 또는 명시적 높이 컨테이너이므로 h-full 사용 (flex-1은 flex 부모 필요)
@@ -1111,9 +1139,11 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         >
           <Eye className="h-3 w-3" />
           {t(locale, 'editor.preview')}
-          {showLiveAfterDeploy && (
+          {awaitingDeploy ? (
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+          ) : showLiveAfterDeploy ? (
             <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-          )}
+          ) : null}
         </button>
       </div>
 
@@ -1198,7 +1228,11 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
               <div className="border-b px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground flex-shrink-0 h-9">
                 <Eye className="h-3.5 w-3.5" />
                 <span className="font-medium">{t(locale, 'editor.preview')}</span>
-                {showLiveAfterDeploy ? (
+                {awaitingDeploy ? (
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-amber-500/20 text-amber-500 animate-pulse">
+                    {buildStatusLabel || '빌드 중...'}
+                  </Badge>
+                ) : showLiveAfterDeploy ? (
                   <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-green-600">
                     {t(locale, 'editor.deployedBadge')}
                   </Badge>
@@ -1259,7 +1293,8 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                 )}
               </div>
               {/* 반응형 뷰포트 래퍼 */}
-              <div className={`flex-1 overflow-auto ${previewViewport !== 'desktop' ? 'bg-muted/20 flex justify-center items-start py-6' : ''}`}>
+              <div className={`flex-1 overflow-auto relative ${previewViewport !== 'desktop' ? 'bg-muted/20 flex justify-center items-start py-6' : ''}`}>
+                {renderBuildOverlay()}
                 <div
                   className={previewViewport !== 'desktop'
                     ? 'bg-white shadow-xl rounded-xl overflow-hidden border-2 border-border/50'
@@ -1292,7 +1327,11 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
               <div className="px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground border-b flex-shrink-0">
                 <Eye className="h-3 w-3" />
                 <span>{t(locale, 'editor.preview')}</span>
-                {showLiveAfterDeploy ? (
+                {awaitingDeploy ? (
+                  <Badge variant="secondary" className="text-[10px] px-1 py-0 ml-auto bg-amber-500/20 text-amber-500 animate-pulse">
+                    {buildStatusLabel || '빌드 중...'}
+                  </Badge>
+                ) : showLiveAfterDeploy ? (
                   <Badge variant="default" className="text-[10px] px-1 py-0 ml-auto bg-green-600">
                     {t(locale, 'editor.deployedBadge')}
                   </Badge>
@@ -1302,7 +1341,8 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                   </Badge>
                 ) : null}
               </div>
-              <div className="flex-1 overflow-hidden">
+              <div className="flex-1 overflow-hidden relative">
+                {renderBuildOverlay()}
                 {renderPreview()}
               </div>
             </div>
@@ -1339,9 +1379,16 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
             );
           })()}
         </div>
-        <span className="text-muted-foreground/50 hidden sm:inline text-[11px]">
-          {t(locale, 'editor.statusBarHint')}
-        </span>
+        {awaitingDeploy ? (
+          <span className="hidden sm:flex items-center gap-1.5 text-[11px] text-amber-500">
+            <RefreshCw className="h-3 w-3 animate-spin" />
+            {buildStatusLabel || '배포 진행 중...'}
+          </span>
+        ) : (
+          <span className="text-muted-foreground/50 hidden sm:inline text-[11px]">
+            {t(locale, 'editor.statusBarHint')}
+          </span>
+        )}
         <div className="flex items-center gap-2 shrink-0">
           {lastSavedAt ? (
             <span className="text-[11px]">
