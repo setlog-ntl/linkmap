@@ -8,11 +8,13 @@ import {
   Rocket, Search, Map as MapIcon,
   List, Link2, Key, Settings, BookOpen, ChevronDown, ChevronRight,
   LogOut, Bot, User, GitBranch, Wrench, FolderKanban, Plus, LayoutDashboard,
+  Globe, ExternalLink, Loader2, AlertTriangle,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { useProjects } from '@/lib/queries/projects';
+import { useMyDeployments } from '@/lib/queries/oneclick';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Sidebar,
@@ -46,6 +48,7 @@ import {
 import type { Profile } from '@/types';
 
 const MAX_VISIBLE_PROJECTS = 15;
+const MAX_VISIBLE_SITES = 10;
 
 interface AppSidebarProps {
   profile: Profile | null;
@@ -70,6 +73,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
   const isCollapsed = state === 'collapsed';
 
   const { data: projects, isLoading: isProjectsLoading } = useProjects();
+  const { data: deployments, isLoading: isDeploymentsLoading } = useMyDeployments();
 
   // Extract active project ID from URL
   const activeProjectId = pathname.match(/^\/project\/([^/]+)/)?.[1] ?? null;
@@ -112,7 +116,6 @@ export function AppSidebar({ profile }: AppSidebarProps) {
 
   const mainNav = [
     { labelKey: 'nav.serviceCatalog', href: '/services', icon: Search },
-    { labelKey: 'nav.oneclick', href: '/sites', icon: Rocket },
   ];
 
   const guideLinks = [
@@ -129,6 +132,9 @@ export function AppSidebar({ profile }: AppSidebarProps) {
 
   const visibleProjects = projects?.slice(0, MAX_VISIBLE_PROJECTS) ?? [];
   const hasMoreProjects = (projects?.length ?? 0) > MAX_VISIBLE_PROJECTS;
+
+  const visibleSites = deployments?.slice(0, MAX_VISIBLE_SITES) ?? [];
+  const hasMoreSites = (deployments?.length ?? 0) > MAX_VISIBLE_SITES;
 
   return (
     <Sidebar collapsible="icon" className="border-r">
@@ -285,6 +291,141 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                           <Link href="/dashboard">
                             <Plus className="h-3.5 w-3.5" />
                             <span>새 프로젝트</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Sites Tree */}
+        <SidebarSeparator />
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <Collapsible defaultOpen className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip="내 사이트">
+                      <Rocket className="h-4 w-4" />
+                      <span>내 사이트</span>
+                      <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {/* Loading state */}
+                      {isDeploymentsLoading && (
+                        <>
+                          <SidebarMenuSubItem><SidebarMenuSkeleton /></SidebarMenuSubItem>
+                          <SidebarMenuSubItem><SidebarMenuSkeleton /></SidebarMenuSubItem>
+                          <SidebarMenuSubItem><SidebarMenuSkeleton /></SidebarMenuSubItem>
+                        </>
+                      )}
+
+                      {/* Empty state */}
+                      {!isDeploymentsLoading && visibleSites.length === 0 && (
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild>
+                            <Link href="/sites/new" className="text-muted-foreground text-xs">
+                              <span>배포된 사이트 없음</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      )}
+
+                      {/* Site list */}
+                      {visibleSites.map((deploy) => {
+                        const isReady = deploy.deploy_status === 'ready';
+                        const isBuilding = ['building', 'creating', 'pending'].includes(deploy.deploy_status);
+                        const isError = deploy.deploy_status === 'error';
+                        const siteUrl = deploy.pages_url || deploy.deployment_url;
+
+                        const StatusIcon = isReady
+                          ? Globe
+                          : isBuilding
+                            ? Loader2
+                            : isError
+                              ? AlertTriangle
+                              : Globe;
+
+                        if (isReady && siteUrl) {
+                          return (
+                            <Collapsible key={deploy.id} className="group/site">
+                              <SidebarMenuSubItem>
+                                <div className="flex items-center">
+                                  <CollapsibleTrigger asChild>
+                                    <button
+                                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm hover:bg-sidebar-accent"
+                                      aria-label={`Toggle ${deploy.site_name}`}
+                                    >
+                                      <ChevronRight className="h-3 w-3 transition-transform group-data-[state=open]/site:rotate-90" />
+                                    </button>
+                                  </CollapsibleTrigger>
+                                  <SidebarMenuSubButton
+                                    asChild
+                                    isActive={isActive('/sites/manage')}
+                                    className="flex-1 min-w-0"
+                                  >
+                                    <Link href="/sites/manage">
+                                      <StatusIcon className="h-3.5 w-3.5" />
+                                      <span className="truncate">{deploy.site_name}</span>
+                                    </Link>
+                                  </SidebarMenuSubButton>
+                                </div>
+                                <CollapsibleContent>
+                                  <SidebarMenuSub>
+                                    <SidebarMenuSubItem>
+                                      <SidebarMenuSubButton asChild>
+                                        <a href={siteUrl} target="_blank" rel="noopener noreferrer">
+                                          <ExternalLink className="h-3.5 w-3.5" />
+                                          <span>사이트 열기</span>
+                                        </a>
+                                      </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
+                                  </SidebarMenuSub>
+                                </CollapsibleContent>
+                              </SidebarMenuSubItem>
+                            </Collapsible>
+                          );
+                        }
+
+                        return (
+                          <SidebarMenuSubItem key={deploy.id}>
+                            <SidebarMenuSubButton
+                              asChild
+                              isActive={isActive('/sites/manage')}
+                            >
+                              <Link href="/sites/manage">
+                                <StatusIcon className={`h-3.5 w-3.5 ${isBuilding ? 'animate-spin' : ''}`} />
+                                <span className="truncate">{deploy.site_name}</span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        );
+                      })}
+
+                      {/* View all link */}
+                      {hasMoreSites && (
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild>
+                            <Link href="/sites/manage" className="text-muted-foreground">
+                              <span>전체 보기</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      )}
+
+                      {/* New site link */}
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <Link href="/sites/new">
+                            <Plus className="h-3.5 w-3.5" />
+                            <span>새 사이트</span>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
