@@ -28,6 +28,7 @@ import {
   RotateCw,
   ChevronRight,
   Folder,
+  Blocks,
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -222,7 +223,8 @@ function formatRelativeTime(date: Date, locale: string): string {
 }
 
 type DeployState = 'idle' | 'saving' | 'deploying' | 'deployed';
-type MobileTab = 'code' | 'preview';
+type RightPanel = 'preview' | 'modules' | null;
+type MobileTab = 'code' | 'preview' | 'modules';
 type PreviewViewport = 'mobile' | 'tablet' | 'desktop';
 
 const VIEWPORT_SIZES: Record<PreviewViewport, { width: string; label: string }> = {
@@ -242,7 +244,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const [editorContent, setEditorContent] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
-  const [showPreview, setShowPreview] = useState(true);
+  const [rightPanel, setRightPanel] = useState<RightPanel>('preview');
   const [deployState, setDeployState] = useState<DeployState>('idle');
   const [livePreviewKey, setLivePreviewKey] = useState(0);
   const [showLiveAfterDeploy, setShowLiveAfterDeploy] = useState(false);
@@ -309,6 +311,10 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       setLivePreviewKey((k) => k + 1);
       setShowLiveAfterDeploy(true);
       setDeployState('deployed');
+      // 모듈 배포 완료 시 우측 패널을 미리보기로 자동 전환
+      if (deployOrigin === 'module-deploy') {
+        setRightPanel('preview');
+      }
       toast.success(t(locale, 'editor.deployed'));
       setTimeout(() => setDeployState('idle'), 3000);
       cleanup();
@@ -448,7 +454,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         doc.close();
       }
     }
-  }, [previewHtml, selectedPath, showPreview, mobileTab]);
+  }, [previewHtml, selectedPath, rightPanel, mobileTab]);
 
   const handleContentChange = useCallback((value: string) => {
     setEditorContent(value);
@@ -1074,16 +1080,33 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
             <FolderOpen className="h-3.5 w-3.5" />
           </Button>
 
-          {/* 데스크탑: 미리보기 토글 */}
-          <Button
-            variant={showPreview ? 'default' : 'outline'}
-            size="sm"
-            className="hidden md:inline-flex h-8"
-            onClick={() => setShowPreview(!showPreview)}
-          >
-            <Eye className="mr-1.5 h-3.5 w-3.5" />
-            {t(locale, 'editor.preview')}
-          </Button>
+          {/* 데스크탑: 미리보기/모듈 세그먼트 토글 */}
+          <div className="hidden md:flex items-center border rounded-lg p-0.5 bg-muted/50 h-8">
+            <button
+              onClick={() => setRightPanel(rightPanel === 'preview' ? null : 'preview')}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
+                rightPanel === 'preview'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Eye className="h-3.5 w-3.5" />
+              {t(locale, 'editor.preview')}
+            </button>
+            {moduleSchema && (
+              <button
+                onClick={() => setRightPanel(rightPanel === 'modules' ? null : 'modules')}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
+                  rightPanel === 'modules'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Blocks className="h-3.5 w-3.5" />
+                모듈
+              </button>
+            )}
+          </div>
 
           {/* 사이트 열기 */}
           {liveUrl && (
@@ -1132,7 +1155,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         </div>
       </div>
 
-      {/* ===== 모바일 코드/미리보기 탭 전환 ===== */}
+      {/* ===== 모바일 코드/미리보기/모듈 탭 전환 ===== */}
       <div className="md:hidden border-b flex bg-muted/30">
         <button
           onClick={() => setMobileTab('code')}
@@ -1166,6 +1189,19 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
             <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
           ) : null}
         </button>
+        {moduleSchema && (
+          <button
+            onClick={() => setMobileTab('modules')}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors ${
+              mobileTab === 'modules'
+                ? 'text-foreground border-b-2 border-primary bg-background'
+                : 'text-muted-foreground'
+            }`}
+          >
+            <Blocks className="h-3 w-3" />
+            모듈
+          </button>
+        )}
       </div>
 
       {/* ===== 메인 영역 ===== */}
@@ -1223,7 +1259,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         {/* ===== 데스크탑: 에디터 + 미리보기 가로 분할 ===== */}
         <div className="hidden md:flex flex-1 overflow-hidden">
           {/* 코드 에디터 */}
-          <div className={`flex flex-col overflow-hidden ${showPreview ? 'w-1/2 border-r' : 'w-full'}`}>
+          <div className={`flex flex-col overflow-hidden ${rightPanel ? 'w-1/2 border-r' : 'w-full'}`}>
             <div className="border-b px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground flex-shrink-0 h-9">
               <Code className="h-3.5 w-3.5" />
               <span className="truncate font-medium">{selectedFileName || ''}</span>
@@ -1243,8 +1279,8 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
             {renderEditor()}
           </div>
 
-          {/* 미리보기 */}
-          {showPreview && (
+          {/* 우측 패널: 미리보기 또는 모듈 */}
+          {rightPanel === 'preview' && (
             <div className="w-1/2 flex flex-col overflow-hidden">
               <div className="border-b px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground flex-shrink-0 h-9">
                 <Eye className="h-3.5 w-3.5" />
@@ -1268,7 +1304,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                     { key: 'mobile' as PreviewViewport, icon: Smartphone, label: '375px' },
                     { key: 'tablet' as PreviewViewport, icon: Tablet, label: '768px' },
                     { key: 'desktop' as PreviewViewport, icon: Monitor, label: 'Full' },
-                  ]).map(({ key, icon: Icon, label }) => (
+                  ]).map(({ key, icon: VpIcon, label }) => (
                     <button
                       key={key}
                       onClick={() => setPreviewViewport(key)}
@@ -1279,7 +1315,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                       }`}
                       title={label}
                     >
-                      <Icon className="h-3 w-3" />
+                      <VpIcon className="h-3 w-3" />
                       {previewViewport === key && (
                         <span className="text-[10px]">{label}</span>
                       )}
@@ -1331,6 +1367,21 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
               </div>
             </div>
           )}
+          {rightPanel === 'modules' && moduleSchema && moduleState && (
+            <div className="w-1/2 flex flex-col overflow-hidden border-l-0">
+              <ModulePanel
+                schema={moduleSchema}
+                state={moduleState}
+                onStateChange={setModuleState}
+                onSaveOnly={handleApplyModulesToCode}
+                onSaveAndDeploy={handleApplyModulesAndDeploy}
+                isApplying={isApplyingModules}
+                isDeploying={isDeployingModules || isDeploying}
+                locale={locale}
+                deployId={deployId}
+              />
+            </div>
+          )}
         </div>
 
         {/* ===== 모바일: 탭 전환 방식 ===== */}
@@ -1368,23 +1419,25 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
               </div>
             </div>
           )}
+
+          {/* 모듈 탭 */}
+          {mobileTab === 'modules' && moduleSchema && moduleState && (
+            <div className="flex flex-col flex-1 overflow-hidden">
+              <ModulePanel
+                schema={moduleSchema}
+                state={moduleState}
+                onStateChange={setModuleState}
+                onSaveOnly={handleApplyModulesToCode}
+                onSaveAndDeploy={handleApplyModulesAndDeploy}
+                isApplying={isApplyingModules}
+                isDeploying={isDeployingModules || isDeploying}
+                locale={locale}
+                deployId={deployId}
+              />
+            </div>
+          )}
         </div>
       </div>
-
-      {/* ===== 모듈 패널 ===== */}
-      {moduleSchema && moduleState && (
-        <ModulePanel
-          schema={moduleSchema}
-          state={moduleState}
-          onStateChange={setModuleState}
-          onApplyToCode={handleApplyModulesToCode}
-          onApplyAndDeploy={handleApplyModulesAndDeploy}
-          isApplying={isApplyingModules}
-          isDeploying={isDeployingModules || isDeploying}
-          locale={locale}
-          deployId={deployId}
-        />
-      )}
 
       {/* ===== 상태 바 ===== */}
       <div className="border-t px-3 sm:px-4 h-8 flex items-center justify-between text-xs text-muted-foreground bg-muted/30 gap-4">

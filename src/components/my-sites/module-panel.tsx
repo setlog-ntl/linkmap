@@ -32,10 +32,8 @@ import {
   ChevronUp,
   ChevronDown,
   Loader2,
-  FileCode2,
   GripVertical,
   Wand2,
-  Rocket,
 } from 'lucide-react';
 import type {
   TemplateModuleSchema,
@@ -43,7 +41,8 @@ import type {
   ModuleDef,
 } from '@/lib/module-schema';
 import { ModuleForm } from './module-form';
-import { t, type Locale } from '@/lib/i18n';
+import { SplitButton } from './split-button';
+import type { Locale } from '@/lib/i18n';
 import type { ModulePreset } from '@/data/oneclick/module-presets';
 import { getModulePresets } from '@/data/oneclick/module-presets';
 
@@ -166,8 +165,8 @@ interface ModulePanelProps {
   schema: TemplateModuleSchema;
   state: ModuleConfigState;
   onStateChange: (state: ModuleConfigState) => void;
-  onApplyToCode: () => void;
-  onApplyAndDeploy: () => void;
+  onSaveOnly: () => void;
+  onSaveAndDeploy: () => void;
   isApplying: boolean;
   isDeploying: boolean;
   locale: Locale;
@@ -178,8 +177,8 @@ export function ModulePanel({
   schema,
   state,
   onStateChange,
-  onApplyToCode,
-  onApplyAndDeploy,
+  onSaveOnly,
+  onSaveAndDeploy,
   isApplying,
   isDeploying,
   locale,
@@ -188,7 +187,6 @@ export function ModulePanel({
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(
     schema.modules[0]?.id ?? null
   );
-  const [isExpanded, setIsExpanded] = useState(true);
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
 
@@ -338,194 +336,164 @@ export function ModulePanel({
   }, [aiPrompt, schema, state, onStateChange]);
 
   return (
-    <div className="border-t bg-background flex flex-col">
-      {/* 접기/펴기 헤더 */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center justify-between px-4 py-2 hover:bg-muted/30 transition-colors"
-      >
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* 패널 헤더 */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-b flex-shrink-0">
         <div className="flex items-center gap-2">
-          <FileCode2 className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-xs font-medium">
-            {t(locale, 'modulePanel.title')}
-          </span>
+          <Sparkles className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-xs font-semibold">모듈 편집</span>
           <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
             {state.enabled.length}/{schema.modules.length}
           </Badge>
         </div>
-        {isExpanded ? (
-          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-        ) : (
-          <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" />
-        )}
-      </button>
+      </div>
 
-      {isExpanded && (
-        <div className="flex flex-col md:flex-row flex-1 overflow-hidden border-t max-h-[50vh] md:max-h-[40vh]">
-          {/* 좌: 프리셋 + 모듈 카드 리스트 */}
-          <div className="md:w-48 lg:w-56 border-b md:border-b-0 md:border-r flex-shrink-0 overflow-y-auto">
-            {/* 프리셋 선택 */}
-            {presets.length > 0 && (
-              <div className="px-2 pt-2 pb-1 border-b">
-                <div className="flex gap-1 flex-wrap">
-                  {presets.map((preset) => (
-                    <button
-                      key={preset.id}
-                      className="text-[10px] px-2 py-0.5 rounded-full border hover:bg-primary/10 hover:border-primary transition-colors"
-                      onClick={() => handleApplyPreset(preset)}
-                      title={
-                        locale === 'en'
-                          ? preset.descriptionEn
-                          : preset.description
-                      }
-                    >
-                      {locale === 'en' ? preset.nameEn : preset.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={state.order}
-                strategy={verticalListSortingStrategy}
-              >
-                <div className="p-2 space-y-1">
-                  {state.order.map((moduleId, index) => {
-                    const mod = schema.modules.find(
-                      (m) => m.id === moduleId
-                    );
-                    if (!mod) return null;
-
-                    return (
-                      <SortableModuleCard
-                        key={moduleId}
-                        moduleId={moduleId}
-                        mod={mod}
-                        index={index}
-                        totalCount={state.order.length}
-                        isEnabled={state.enabled.includes(moduleId)}
-                        isSelected={selectedModuleId === moduleId}
-                        locale={locale}
-                        onSelect={setSelectedModuleId}
-                        onToggle={handleToggleModule}
-                        onMoveUp={handleMoveUp}
-                        onMoveDown={handleMoveDown}
-                      />
-                    );
-                  })}
-                </div>
-              </SortableContext>
-            </DndContext>
+      {/* 스크롤 가능 영역 */}
+      <div className="flex-1 overflow-y-auto">
+        {/* AI 추천 */}
+        <div className="px-4 pt-3 pb-2">
+          <div className="flex items-center gap-1.5 mb-2">
+            <Wand2 className="h-3 w-3 text-purple-500" />
+            <span className="text-[11px] font-medium text-muted-foreground">AI 추천</span>
           </div>
-
-          {/* 우: 선택된 모듈 편집 폼 */}
-          <div className="flex-1 overflow-y-auto">
-            {selectedModule && state.enabled.includes(selectedModule.id) ? (
-              <div className="p-4">
-                <div className="mb-3">
-                  <h3 className="text-sm font-semibold">
-                    {locale === 'en' && selectedModule.nameEn
-                      ? selectedModule.nameEn
-                      : selectedModule.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {locale === 'en' && selectedModule.descriptionEn
-                      ? selectedModule.descriptionEn
-                      : selectedModule.description}
-                  </p>
-                </div>
-                <ModuleForm
-                  fields={selectedModule.fields}
-                  values={state.values[selectedModule.id] || {}}
-                  onChange={(key, value) =>
-                    handleFieldChange(selectedModule.id, key, value)
-                  }
-                  locale={locale}
-                  deployId={deployId}
-                />
-                {/* AI 추천 */}
-                <div className="mt-3 pt-3 border-t">
-                  <div className="flex items-center gap-1.5">
-                    <Input
-                      value={aiPrompt}
-                      onChange={(e) => setAiPrompt(e.target.value)}
-                      placeholder={t(locale, 'modulePanel.aiPlaceholder')}
-                      className="h-7 text-xs flex-1"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleAiSuggest();
-                        }
-                      }}
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-7 w-7 flex-shrink-0"
-                      onClick={handleAiSuggest}
-                      disabled={aiLoading || !aiPrompt.trim()}
-                    >
-                      {aiLoading ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : (
-                        <Wand2 className="h-3 w-3" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="mt-3 pt-3 border-t flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex-1 h-8 gap-1.5"
-                    onClick={onApplyToCode}
-                    disabled={isApplying || isDeploying}
-                  >
-                    {isApplying ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <FileCode2 className="h-3.5 w-3.5" />
-                    )}
-                    <span className="text-xs">
-                      {t(locale, 'modulePanel.applyToCode')}
-                    </span>
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="flex-1 h-8 gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white"
-                    onClick={onApplyAndDeploy}
-                    disabled={isApplying || isDeploying}
-                  >
-                    {isDeploying ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <Rocket className="h-3.5 w-3.5" />
-                    )}
-                    <span className="text-xs">
-                      {t(locale, 'modulePanel.applyAndDeploy')}
-                    </span>
-                  </Button>
-                </div>
-              </div>
-            ) : selectedModule ? (
-              <div className="flex items-center justify-center h-full text-sm text-muted-foreground p-4">
-                {t(locale, 'modulePanel.moduleDisabled')}
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-full text-sm text-muted-foreground p-4">
-                {t(locale, 'modulePanel.selectModule')}
-              </div>
-            )}
+          <div className="flex items-center gap-1.5">
+            <Input
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+              placeholder="원하는 스타일을 설명해주세요..."
+              className="h-7 text-xs flex-1"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleAiSuggest();
+                }
+              }}
+            />
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7 flex-shrink-0"
+              onClick={handleAiSuggest}
+              disabled={aiLoading || !aiPrompt.trim()}
+            >
+              {aiLoading ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Wand2 className="h-3 w-3" />
+              )}
+            </Button>
           </div>
         </div>
-      )}
+
+        {/* 프리셋 */}
+        {presets.length > 0 && (
+          <div className="px-4 pb-2">
+            <span className="text-[11px] font-medium text-muted-foreground mb-1.5 block">프리셋</span>
+            <div className="flex gap-1 flex-wrap">
+              {presets.map((preset) => (
+                <button
+                  key={preset.id}
+                  className="text-[10px] px-2 py-0.5 rounded-full border hover:bg-primary/10 hover:border-primary transition-colors"
+                  onClick={() => handleApplyPreset(preset)}
+                  title={
+                    locale === 'en'
+                      ? preset.descriptionEn
+                      : preset.description
+                  }
+                >
+                  {locale === 'en' ? preset.nameEn : preset.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 모듈 리스트 */}
+        <div className="px-4 pb-2">
+          <span className="text-[11px] font-medium text-muted-foreground mb-1.5 block">모듈</span>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={state.order}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-1">
+                {state.order.map((moduleId, index) => {
+                  const mod = schema.modules.find(
+                    (m) => m.id === moduleId
+                  );
+                  if (!mod) return null;
+
+                  return (
+                    <SortableModuleCard
+                      key={moduleId}
+                      moduleId={moduleId}
+                      mod={mod}
+                      index={index}
+                      totalCount={state.order.length}
+                      isEnabled={state.enabled.includes(moduleId)}
+                      isSelected={selectedModuleId === moduleId}
+                      locale={locale}
+                      onSelect={setSelectedModuleId}
+                      onToggle={handleToggleModule}
+                      onMoveUp={handleMoveUp}
+                      onMoveDown={handleMoveDown}
+                    />
+                  );
+                })}
+              </div>
+            </SortableContext>
+          </DndContext>
+        </div>
+
+        {/* 구분선 + 선택된 모듈 편집 폼 */}
+        {selectedModule && state.enabled.includes(selectedModule.id) ? (
+          <div className="px-4 pb-4 border-t pt-3">
+            <div className="mb-3">
+              <h3 className="text-sm font-semibold">
+                {locale === 'en' && selectedModule.nameEn
+                  ? selectedModule.nameEn
+                  : selectedModule.name}
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {locale === 'en' && selectedModule.descriptionEn
+                  ? selectedModule.descriptionEn
+                  : selectedModule.description}
+              </p>
+            </div>
+            <ModuleForm
+              fields={selectedModule.fields}
+              values={state.values[selectedModule.id] || {}}
+              onChange={(key, value) =>
+                handleFieldChange(selectedModule.id, key, value)
+              }
+              locale={locale}
+              deployId={deployId}
+            />
+          </div>
+        ) : selectedModule ? (
+          <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
+            이 모듈은 비활성화 상태입니다
+          </div>
+        ) : (
+          <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
+            모듈을 선택하세요
+          </div>
+        )}
+      </div>
+
+      {/* 하단 CTA (sticky) */}
+      <div className="flex-shrink-0 border-t p-3 bg-background">
+        <SplitButton
+          onSaveAndDeploy={onSaveAndDeploy}
+          onSaveOnly={onSaveOnly}
+          isApplying={isApplying}
+          isDeploying={isDeploying}
+        />
+      </div>
     </div>
   );
 }
