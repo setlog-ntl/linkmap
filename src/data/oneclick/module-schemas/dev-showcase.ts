@@ -31,7 +31,7 @@ export const devShowcaseModuleSchema: TemplateModuleSchema = {
           type: 'text',
           label: '이름',
           labelEn: 'Name',
-          defaultValue: '김민수',
+          defaultValue: '김개발',
           validation: { required: true, maxLength: 50 },
         },
         {
@@ -39,7 +39,7 @@ export const devShowcaseModuleSchema: TemplateModuleSchema = {
           type: 'text',
           label: '영문 이름',
           labelEn: 'English Name',
-          defaultValue: 'Minsu Kim',
+          defaultValue: 'Gaebal Kim',
         },
         {
           key: 'tagline',
@@ -82,7 +82,7 @@ export const devShowcaseModuleSchema: TemplateModuleSchema = {
           type: 'textarea',
           label: '자기소개',
           labelEn: 'Bio',
-          defaultValue: '안녕하세요, 5년차 풀스택 개발자입니다.',
+          defaultValue: '안녕하세요! 웹 기술에 열정을 가진 풀스택 개발자입니다. React와 Next.js를 주로 사용하며, 오픈소스 프로젝트에 기여하는 것을 좋아합니다. 사용자 경험을 개선하고 깔끔한 코드를 작성하는 데 집중합니다.',
           validation: { required: true, maxLength: 2000 },
         },
         {
@@ -90,7 +90,7 @@ export const devShowcaseModuleSchema: TemplateModuleSchema = {
           type: 'textarea',
           label: '영문 자기소개',
           labelEn: 'Bio (English)',
-          defaultValue: 'Hi, I am a full-stack developer with 5 years of experience.',
+          defaultValue: "Hi! I'm a full-stack developer passionate about web technologies. I primarily work with React and Next.js, and love contributing to open source projects. I focus on improving user experience and writing clean code.",
         },
         {
           key: 'skills',
