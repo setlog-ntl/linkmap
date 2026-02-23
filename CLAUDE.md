@@ -17,6 +17,7 @@
 
 ## Key Decisions
 - Korean-first UI, global expansion later
+- **i18n 동결**: 새 기능 구현 시 `t(locale, key)` 사용하지 말고 한글 문자열 직접 사용. i18n JSON 파일(ko.json/en.json) 업데이트 금지. 다국어 지원은 추후 별도 스프린트에서 일괄 적용 예정
 - AES-256-GCM encryption for env vars (key: 64 hex chars)
 - React Flow (@xyflow/react) for service map visualization
 - Supabase Auth with Google/GitHub OAuth
