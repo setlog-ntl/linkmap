@@ -11,6 +11,7 @@ import {
   updateRef,
   createRef,
   GitHubApiError,
+  githubFetch,
 } from '@/lib/github/api';
 import { z } from 'zod';
 
@@ -115,7 +116,17 @@ export async function POST(
     const existingRef = await getRef(token, owner, repo, 'heads/main');
     const parentSha = existingRef?.object?.sha ?? null;
 
-    // Create tree with new file
+    // Get parent commit's tree SHA for base_tree (preserve existing files)
+    let baseTreeSha: string | undefined;
+    if (parentSha) {
+      const parentCommit = await githubFetch<{ tree: { sha: string } }>(
+        `/repos/${owner}/${repo}/git/commits/${parentSha}`,
+        { token }
+      );
+      baseTreeSha = parentCommit.tree.sha;
+    }
+
+    // Create tree with new file (base_tree preserves all existing files)
     const treeItems = [
       {
         path: filePath,
@@ -124,7 +135,7 @@ export async function POST(
         sha: blob.sha,
       },
     ];
-    const tree = await createTree(token, owner, repo, treeItems);
+    const tree = await createTree(token, owner, repo, treeItems, baseTreeSha);
 
     // Create commit
     const parents = parentSha ? [parentSha] : [];
