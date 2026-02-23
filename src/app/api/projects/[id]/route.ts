@@ -85,6 +85,23 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
 
   if (!existing) return notFoundError('프로젝트');
 
+  // 연결된 배포 조회 및 삭제 (cascade)
+  const { data: linkedDeploys } = await supabase
+    .from('homepage_deploys')
+    .select('id, site_name')
+    .eq('project_id', id)
+    .eq('user_id', user.id);
+
+  if (linkedDeploys && linkedDeploys.length > 0) {
+    const { error: deployDeleteError } = await supabase
+      .from('homepage_deploys')
+      .delete()
+      .in('id', linkedDeploys.map((d) => d.id))
+      .eq('user_id', user.id);
+
+    if (deployDeleteError) return serverError(deployDeleteError.message);
+  }
+
   const { error } = await supabase.from('projects').delete().eq('id', id);
   if (error) return serverError(error.message);
 
@@ -92,8 +109,14 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     action: 'project.delete',
     resourceType: 'project',
     resourceId: id,
-    details: { name: existing.name },
+    details: {
+      name: existing.name,
+      cascade_deleted_deploys: linkedDeploys?.map((d) => d.site_name) ?? [],
+    },
   });
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({
+    success: true,
+    deleted_deploy_ids: linkedDeploys?.map((d) => d.id) ?? [],
+  });
 }

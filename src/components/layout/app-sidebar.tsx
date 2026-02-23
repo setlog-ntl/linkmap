@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -8,13 +8,13 @@ import {
   Rocket, Search, Map as MapIcon,
   List, Link2, Key, Settings, BookOpen, ChevronDown, ChevronRight,
   LogOut, Bot, User, GitBranch, Wrench, FolderKanban, Plus, LayoutDashboard,
-  Globe, ExternalLink, Loader2, AlertTriangle,
+  Globe, ExternalLink, Loader2, AlertTriangle, Pencil,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { useProjects } from '@/lib/queries/projects';
-import { useMyDeployments } from '@/lib/queries/oneclick';
+import { useMyDeployments, type HomepageDeploy } from '@/lib/queries/oneclick';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Sidebar,
@@ -130,6 +130,22 @@ export function AppSidebar({ profile }: AppSidebarProps) {
     return pathname === href || pathname.startsWith(href + '/');
   };
 
+  // 프로젝트 → 배포 매핑 (프로젝트당 가장 최근 배포 1개)
+  const deployByProjectId = useMemo(() => {
+    const map = new Map<string, HomepageDeploy>();
+    deployments?.forEach((d) => {
+      if (d.project_id && !map.has(d.project_id)) {
+        map.set(d.project_id, d);
+      }
+    });
+    return map;
+  }, [deployments]);
+
+  // 사이트 active 판별 (/sites/{deployId}/edit)
+  const activeDeployId = pathname.startsWith('/sites/')
+    ? pathname.split('/')[2] ?? null
+    : null;
+
   const visibleProjects = projects?.slice(0, MAX_VISIBLE_PROJECTS) ?? [];
   const hasMoreProjects = (projects?.length ?? 0) > MAX_VISIBLE_PROJECTS;
 
@@ -191,9 +207,9 @@ export function AppSidebar({ profile }: AppSidebarProps) {
               <Collapsible defaultOpen className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip={t(locale, 'common.dashboard')}>
+                    <SidebarMenuButton tooltip="내 프로젝트">
                       <FolderKanban className="h-4 w-4" />
-                      <span>{t(locale, 'common.dashboard')}</span>
+                      <span>내 프로젝트</span>
                       <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
@@ -224,6 +240,10 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                         const isExpanded = expandedProjects.has(project.id);
                         const isActiveProject = activeProjectId === project.id;
                         const subNav = getProjectSubNav(project.id);
+                        const latestDeploy = deployByProjectId.get(project.id);
+                        const deploySiteUrl = latestDeploy
+                          ? latestDeploy.pages_url || latestDeploy.deployment_url
+                          : null;
 
                         return (
                           <Collapsible
@@ -249,6 +269,15 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                                 >
                                   <Link href={`/project/${project.id}`}>
                                     <span className="truncate">{project.name}</span>
+                                    {latestDeploy && (
+                                      latestDeploy.deploy_status === 'ready'
+                                        ? <Globe className="ml-1 h-3 w-3 shrink-0 text-green-500" />
+                                        : ['building', 'creating', 'pending'].includes(latestDeploy.deploy_status)
+                                          ? <Loader2 className="ml-1 h-3 w-3 shrink-0 animate-spin text-yellow-500" />
+                                          : latestDeploy.deploy_status === 'error'
+                                            ? <AlertTriangle className="ml-1 h-3 w-3 shrink-0 text-red-500" />
+                                            : null
+                                    )}
                                   </Link>
                                 </SidebarMenuSubButton>
                               </div>
@@ -267,6 +296,29 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                                       </SidebarMenuSubButton>
                                     </SidebarMenuSubItem>
                                   ))}
+                                  {/* 배포 연결 시 추가 서브메뉴 */}
+                                  {latestDeploy && (
+                                    <>
+                                      {latestDeploy.deploy_status === 'ready' && deploySiteUrl && (
+                                        <SidebarMenuSubItem>
+                                          <SidebarMenuSubButton asChild>
+                                            <a href={deploySiteUrl} target="_blank" rel="noopener noreferrer">
+                                              <ExternalLink className="h-3.5 w-3.5" />
+                                              <span>사이트 열기</span>
+                                            </a>
+                                          </SidebarMenuSubButton>
+                                        </SidebarMenuSubItem>
+                                      )}
+                                      <SidebarMenuSubItem>
+                                        <SidebarMenuSubButton asChild isActive={activeDeployId === latestDeploy.id}>
+                                          <Link href={`/sites/${latestDeploy.id}/edit`}>
+                                            <Pencil className="h-3.5 w-3.5" />
+                                            <span>사이트 편집</span>
+                                          </Link>
+                                        </SidebarMenuSubButton>
+                                      </SidebarMenuSubItem>
+                                    </>
+                                  )}
                                 </SidebarMenuSub>
                               </CollapsibleContent>
                             </SidebarMenuSubItem>
@@ -344,6 +396,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                         const isBuilding = ['building', 'creating', 'pending'].includes(deploy.deploy_status);
                         const isError = deploy.deploy_status === 'error';
                         const siteUrl = deploy.pages_url || deploy.deployment_url;
+                        const hasSubMenu = (isReady && siteUrl) || deploy.project_id;
 
                         const StatusIcon = isReady
                           ? Globe
@@ -353,7 +406,15 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                               ? AlertTriangle
                               : Globe;
 
-                        if (isReady && siteUrl) {
+                        const statusClass = isReady
+                          ? 'text-green-500'
+                          : isBuilding
+                            ? 'animate-spin text-yellow-500'
+                            : isError
+                              ? 'text-red-500'
+                              : '';
+
+                        if (hasSubMenu) {
                           return (
                             <Collapsible key={deploy.id} className="group/site">
                               <SidebarMenuSubItem>
@@ -368,25 +429,37 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                                   </CollapsibleTrigger>
                                   <SidebarMenuSubButton
                                     asChild
-                                    isActive={isActive('/sites/manage')}
+                                    isActive={activeDeployId === deploy.id}
                                     className="flex-1 min-w-0"
                                   >
-                                    <Link href="/sites/manage">
-                                      <StatusIcon className="h-3.5 w-3.5" />
+                                    <Link href={`/sites/${deploy.id}/edit`}>
+                                      <StatusIcon className={`h-3.5 w-3.5 ${statusClass}`} />
                                       <span className="truncate">{deploy.site_name}</span>
                                     </Link>
                                   </SidebarMenuSubButton>
                                 </div>
                                 <CollapsibleContent>
                                   <SidebarMenuSub>
-                                    <SidebarMenuSubItem>
-                                      <SidebarMenuSubButton asChild>
-                                        <a href={siteUrl} target="_blank" rel="noopener noreferrer">
-                                          <ExternalLink className="h-3.5 w-3.5" />
-                                          <span>사이트 열기</span>
-                                        </a>
-                                      </SidebarMenuSubButton>
-                                    </SidebarMenuSubItem>
+                                    {isReady && siteUrl && (
+                                      <SidebarMenuSubItem>
+                                        <SidebarMenuSubButton asChild>
+                                          <a href={siteUrl} target="_blank" rel="noopener noreferrer">
+                                            <ExternalLink className="h-3.5 w-3.5" />
+                                            <span>사이트 열기</span>
+                                          </a>
+                                        </SidebarMenuSubButton>
+                                      </SidebarMenuSubItem>
+                                    )}
+                                    {deploy.project_id && (
+                                      <SidebarMenuSubItem>
+                                        <SidebarMenuSubButton asChild isActive={activeProjectId === deploy.project_id}>
+                                          <Link href={`/project/${deploy.project_id}`}>
+                                            <FolderKanban className="h-3.5 w-3.5" />
+                                            <span>프로젝트 관리</span>
+                                          </Link>
+                                        </SidebarMenuSubButton>
+                                      </SidebarMenuSubItem>
+                                    )}
                                   </SidebarMenuSub>
                                 </CollapsibleContent>
                               </SidebarMenuSubItem>
@@ -398,10 +471,10 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                           <SidebarMenuSubItem key={deploy.id}>
                             <SidebarMenuSubButton
                               asChild
-                              isActive={isActive('/sites/manage')}
+                              isActive={activeDeployId === deploy.id}
                             >
-                              <Link href="/sites/manage">
-                                <StatusIcon className={`h-3.5 w-3.5 ${isBuilding ? 'animate-spin' : ''}`} />
+                              <Link href={`/sites/${deploy.id}/edit`}>
+                                <StatusIcon className={`h-3.5 w-3.5 ${statusClass}`} />
                                 <span className="truncate">{deploy.site_name}</span>
                               </Link>
                             </SidebarMenuSubButton>

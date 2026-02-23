@@ -78,11 +78,16 @@ export function useDeleteProject() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('projects').delete().eq('id', id);
-      if (error) throw error;
+      const res = await fetch(`/api/projects/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || '프로젝트 삭제 실패');
+      }
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
     },
   });
 }
