@@ -16,26 +16,30 @@ interface HealthSummaryCardProps {
   isRunning?: boolean;
 }
 
-const statusConfig: Record<HealthCheckStatus, { label: string; dotClass: string; badgeClass: string }> = {
+const statusConfig: Record<HealthCheckStatus, { label: string; dotClass: string; badgeClass: string; containerClass: string }> = {
   healthy: {
     label: '정상',
-    dotClass: 'bg-green-500 animate-pulse',
-    badgeClass: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+    dotClass: 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.8)] animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]',
+    badgeClass: 'bg-green-500/10 text-green-400 border-green-500/20',
+    containerClass: 'border-green-500/10 bg-gradient-to-r from-green-500/5 to-transparent',
   },
   degraded: {
     label: '저하',
-    dotClass: 'bg-yellow-500 animate-pulse',
-    badgeClass: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
+    dotClass: 'bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.8)] animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]',
+    badgeClass: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    containerClass: 'border-yellow-500/10 bg-gradient-to-r from-yellow-500/5 to-transparent',
   },
   unhealthy: {
     label: '오류',
-    dotClass: 'bg-red-500 animate-pulse',
-    badgeClass: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
+    dotClass: 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-[pulse_1s_cubic-bezier(0.4,0,0.6,1)_infinite]',
+    badgeClass: 'bg-red-500/10 text-red-400 border-red-500/20',
+    containerClass: 'border-red-500/20 bg-gradient-to-r from-red-500/10 to-transparent',
   },
   unknown: {
     label: '미확인',
-    dotClass: 'bg-gray-400',
-    badgeClass: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300',
+    dotClass: 'bg-slate-500',
+    badgeClass: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
+    containerClass: 'border-white/5 bg-white/[0.02]',
   },
 };
 
@@ -65,13 +69,13 @@ export function HealthSummaryCard({
   const config = status ? statusConfig[status] : statusConfig.unknown;
 
   return (
-    <div className="flex items-center justify-between p-3 rounded-lg border bg-card">
-      <div className="flex items-center gap-3 min-w-0">
-        <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${config.dotClass}`} />
+    <div className={`flex items-center justify-between p-4 rounded-xl border backdrop-blur-sm transition-all duration-300 hover:scale-[1.01] ${config.containerClass}`}>
+      <div className="flex items-center gap-4 min-w-0">
+        <span className={`w-3 h-3 rounded-full shrink-0 ${config.dotClass}`} />
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium truncate">{serviceName}</span>
-            <Badge className={config.badgeClass}>{config.label}</Badge>
+          <div className="flex items-center gap-2.5">
+            <span className="text-sm font-semibold truncate tracking-tight">{serviceName}</span>
+            <Badge variant="outline" className={`px-2 py-0 h-5 text-[10px] font-medium ${config.badgeClass}`}>{config.label}</Badge>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
             {serviceCategory && <span>{serviceCategory}</span>}

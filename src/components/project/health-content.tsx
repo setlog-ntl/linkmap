@@ -147,31 +147,45 @@ export function HealthContent({ projectId }: HealthContentProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 sm:gap-4">
-        <Card>
-          <CardContent className="py-4 flex items-center gap-3">
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
+      <div className="grid grid-cols-3 gap-3 sm:gap-6">
+        <Card className="border-green-500/10 bg-gradient-to-br from-green-500/10 via-green-500/5 to-transparent shadow-[0_4px_24px_rgba(34,197,94,0.05)] backdrop-blur-md">
+          <CardContent className="py-5 flex items-center justify-between">
             <div>
-              <div className="text-2xl font-bold">{healthySvcCount}</div>
-              <p className="text-xs text-muted-foreground">정상</p>
+              <p className="text-sm font-medium text-muted-foreground mb-1">정상 작동</p>
+              <div className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-300">
+                {healthySvcCount}
+              </div>
+            </div>
+            <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.2)]">
+              <CheckCircle2 className="h-6 w-6 text-green-400" />
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="py-4 flex items-center gap-3">
-            <XCircle className="h-5 w-5 text-red-600" />
+
+        <Card className="border-red-500/10 bg-gradient-to-br from-red-500/10 via-red-500/5 to-transparent shadow-[0_4px_24px_rgba(239,68,68,0.05)] backdrop-blur-md">
+          <CardContent className="py-5 flex items-center justify-between">
             <div>
-              <div className="text-2xl font-bold">{errorSvcCount}</div>
-              <p className="text-xs text-muted-foreground">오류</p>
+              <p className="text-sm font-medium text-muted-foreground mb-1">연결 오류</p>
+              <div className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-rose-300">
+                {errorSvcCount}
+              </div>
+            </div>
+            <div className="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)] animate-[pulse_2s_ease-in-out_infinite]">
+              <XCircle className="h-6 w-6 text-red-400" />
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="py-4 flex items-center gap-3">
-            <HelpCircle className="h-5 w-5 text-gray-500" />
+
+        <Card className="border-white/5 bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent shadow-[0_4px_24px_rgba(255,255,255,0.02)] backdrop-blur-md">
+          <CardContent className="py-5 flex items-center justify-between">
             <div>
-              <div className="text-2xl font-bold">{unknownSvcCount}</div>
-              <p className="text-xs text-muted-foreground">미확인</p>
+              <p className="text-sm font-medium text-muted-foreground mb-1">미확인 서비스</p>
+              <div className="text-3xl font-bold text-slate-300">
+                {unknownSvcCount}
+              </div>
+            </div>
+            <div className="h-12 w-12 rounded-full bg-slate-500/10 flex items-center justify-center border border-slate-500/20">
+              <HelpCircle className="h-6 w-6 text-slate-400" />
             </div>
           </CardContent>
         </Card>

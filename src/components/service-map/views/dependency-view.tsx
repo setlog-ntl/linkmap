@@ -151,9 +151,9 @@ export function DependencyView({ data, projectId }: DependencyViewProps) {
   }, [pendingOverrides, pendingMainServiceId, data.services, projectId, upsertLayerOverride, updateProject, clearPendingChanges, setEditMode]);
 
   return (
-    <div className="space-y-3">
+    <div className="flex-1 w-full h-full relative border-none bg-background overflow-hidden flex flex-col">
       <MapToolbar searchQuery={searchQuery} onSearchChange={setSearchQuery} onExportPng={interactions.handleExportPng} onAiAnalyze={() => setShowAiPanel(!showAiPanel)} onToggleLegend={() => setShowLegend(!showLegend)} />
-      <div className="h-[calc(100vh-20rem)] min-h-[400px] max-h-[900px] rounded-lg border bg-background relative flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden">
         <CatalogSidebar projectId={projectId} catalogServices={data.catalogServices} projectServices={data.services} isLoading={data.catalogLoading} />
         <div className="flex-1 relative">
           {connectingFrom && (

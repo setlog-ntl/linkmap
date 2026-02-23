@@ -57,9 +57,8 @@ function ServiceMapInner() {
 
   return (
     <TooltipProvider>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-bold tracking-tight shrink-0">서비스 맵</h2>
+      <div className="flex flex-col h-full w-full relative">
+        <div className="absolute top-4 right-4 z-10 flex items-center justify-between gap-4">
           <ViewLevelSwitcher />
         </div>
 

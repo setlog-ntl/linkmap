@@ -106,27 +106,28 @@ function MapViewInner({ data, projectId }: MapViewProps) {
   }, [data.projectName]);
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1 max-w-[200px]">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+    <div className="flex-1 w-full h-full relative">
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-background/80 backdrop-blur-md rounded-full border shadow-sm p-1">
+        <div className="relative flex-1 w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={t(locale, 'serviceMap.actions.search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 h-8 text-sm"
+            className="pl-9 h-9 text-sm border-0 bg-transparent focus-visible:ring-0 shadow-none"
           />
         </div>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => fitView({ padding: 0.3 })} title={t(locale, 'serviceMap.actions.fitView')}>
-          <Maximize2 className="h-3.5 w-3.5" />
+        <div className="w-px h-5 bg-border/50" />
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full" onClick={() => fitView({ padding: 0.3 })} title={t(locale, 'serviceMap.actions.fitView')}>
+          <Maximize2 className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="sm" className="h-8 text-muted-foreground" onClick={handleExportPng}>
-          <Download className="mr-1.5 h-3.5 w-3.5" />
+        <Button variant="ghost" size="sm" className="h-8 text-muted-foreground hover:text-foreground rounded-full" onClick={handleExportPng}>
+          <Download className="mr-1.5 h-4 w-4" />
           PNG
         </Button>
       </div>
 
-      <div className="h-[calc(100vh-20rem)] min-h-[400px] max-h-[800px] rounded-2xl border bg-card/40 dark:bg-zinc-900/30 overflow-hidden">
+      <div className="absolute inset-0 z-0 bg-background/50">
         <ReactFlow
           nodes={nodes}
           edges={edges}

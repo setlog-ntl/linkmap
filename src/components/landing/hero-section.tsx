@@ -4,31 +4,16 @@ import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Rocket, Lock, CheckCircle2, Check, LayoutDashboard } from 'lucide-react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { ArrowRight, Rocket, Check, LayoutDashboard } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { TypewriterHeadline } from './typewriter-headline';
 
-function DiagramLoader() {
-  const { locale } = useLocaleStore();
-  return (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="flex flex-col items-center gap-2">
-        <div className="w-8 h-8 rounded-full border-2 border-brand-blue border-t-transparent animate-spin" />
-        <span className="text-sm text-muted-foreground font-medium">{t(locale, 'landing.loadingArchitecture')}</span>
-      </div>
-    </div>
-  );
-}
-
-const FlowArchitectureDiagram = dynamic(
-  () => import('./flow-architecture-diagram').then((mod) => ({ default: mod.FlowArchitectureDiagram })),
-  {
-    ssr: false,
-    loading: () => <DiagramLoader />,
-  }
+const InteractiveHeroFlow = dynamic(
+  () => import('./interactive-hero-flow').then((mod) => ({ default: mod.InteractiveHeroFlow })),
+  { ssr: false }
 );
 
 export function HeroSection() {
@@ -38,68 +23,63 @@ export function HeroSection() {
   useEffect(() => {
     createClient().auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user));
   }, []);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"],
-  });
-
-  const y = useTransform(scrollYProgress, [0, 1], [0, 120]);
 
   return (
-    <section ref={containerRef} className="relative min-h-screen pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden flex flex-col justify-center">
-      {/* Light dot grid background */}
-      <div className="absolute inset-0 -z-10 bg-background" />
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(var(--dot-color,#c8cdd6)_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(0,0,0,1)_40%,rgba(0,0,0,0)_100%)] opacity-40" />
-      {/* Blue + green radial glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] -z-10 bg-[radial-gradient(ellipse_at_center,rgba(37,74,135,0.06)_0%,transparent_70%)]" />
-      <div className="absolute top-1/3 left-1/3 w-[500px] h-[400px] -z-10 bg-[radial-gradient(ellipse_at_center,rgba(43,238,121,0.04)_0%,transparent_70%)]" />
+    <section ref={containerRef} className="relative min-h-screen pt-32 pb-20 lg:pt-40 lg:pb-28 flex flex-col justify-center items-center">
+      {/* Dark theme background default layer */}
+      <div className="absolute inset-0 -z-20 bg-background" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8 text-center">
+      {/* The interactive canvas background */}
+      <InteractiveHeroFlow />
+
+      {/* Overlay Content */}
+      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8 text-center pointer-events-none">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
+          className="flex flex-col items-center justify-center"
         >
           {/* Badge */}
-          <div className="mb-8 flex justify-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card dark:bg-accent backdrop-blur-sm px-4 py-1.5 text-xs font-medium text-brand-blue">
+          <div className="mb-8 flex justify-center pointer-events-auto">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 dark:bg-accent/60 backdrop-blur-md px-4 py-1.5 text-xs font-medium text-brand-green shadow-lg">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-blue opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-blue" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-green opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-green" />
               </span>
               {t(locale, 'landing.badge')}
             </div>
           </div>
 
           {/* Headline with static line + typewriter effect */}
-          <h1 className="mx-auto max-w-4xl text-5xl font-extrabold tracking-tight sm:text-7xl mb-6 leading-[1.1] text-foreground">
+          <h1 className="mx-auto max-w-4xl text-5xl font-extrabold tracking-tight sm:text-7xl mb-6 leading-[1.1] text-foreground drop-shadow-md">
             <span className="block text-3xl sm:text-5xl font-bold mb-2">
               {t(locale, 'landing.heroHeadlineStatic')}
             </span>
             <TypewriterHeadline />
           </h1>
 
-          <p className="mx-auto max-w-2xl text-lg text-muted-foreground mb-10 leading-relaxed">
+          <p className="mx-auto max-w-2xl text-lg text-muted-foreground mb-10 leading-relaxed drop-shadow-sm bg-background/40 backdrop-blur-sm rounded-xl py-2 px-4 inline-block">
             {t(locale, 'landing.heroSubtitle')}
           </p>
 
-          {/* CTA Buttons — Primary: 초보자(green), Secondary: 개발자(outline) */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Button className="bg-brand-green text-black hover:bg-brand-green/85 px-8 py-3.5 h-auto rounded-lg text-base font-bold transition-all hover:scale-105 hover:shadow-lg" asChild>
+          {/* CTA Buttons - Important to set pointer-events-auto so they can be clicked */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 pointer-events-auto">
+            <Button className="bg-brand-green text-black hover:bg-brand-green/85 px-8 py-3.5 h-auto rounded-lg text-base font-bold transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]" asChild>
               <Link href="/sites">
                 <Rocket className="mr-2 h-4 w-4" />
                 {t(locale, 'landing.ctaOneclickHero')}
               </Link>
             </Button>
             {isLoggedIn ? (
-              <Button variant="outline" className="bg-card border-border text-foreground hover:border-brand-blue/40 hover:bg-muted dark:bg-accent dark:hover:bg-accent px-8 py-3.5 h-auto rounded-lg text-base font-bold transition-all" asChild>
+              <Button variant="outline" className="bg-card/80 backdrop-blur-md border-border text-foreground hover:border-brand-green/40 hover:bg-muted dark:bg-accent/80 dark:hover:bg-accent px-8 py-3.5 h-auto rounded-lg text-base font-bold transition-all shadow-lg" asChild>
                 <Link href="/dashboard">
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   {t(locale, 'common.dashboard')}
                 </Link>
               </Button>
             ) : (
-              <Button variant="outline" className="bg-card border-border text-foreground hover:border-brand-blue/40 hover:bg-muted dark:bg-accent dark:hover:bg-accent px-8 py-3.5 h-auto rounded-lg text-base font-bold transition-all" asChild>
+              <Button variant="outline" className="bg-card/80 backdrop-blur-md border-border text-foreground hover:border-brand-green/40 hover:bg-muted dark:bg-accent/80 dark:hover:bg-accent px-8 py-3.5 h-auto rounded-lg text-base font-bold transition-all shadow-lg" asChild>
                 <Link href="/signup">
                   {t(locale, 'landing.ctaStart')}
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -109,52 +89,17 @@ export function HeroSection() {
           </div>
 
           {/* Trust Badges */}
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground bg-background/40 backdrop-blur-sm rounded-full py-2 px-6 shadow-sm">
             {[
               t(locale, 'landing.trustFree'),
               t(locale, 'landing.trustNoCard'),
               t(locale, 'landing.trustEncryption'),
             ].map((badge) => (
-              <div key={badge} className="flex items-center gap-1.5">
-                <Check className="w-4 h-4 text-brand-blue" />
+              <div key={badge} className="flex items-center gap-1.5 font-medium">
+                <Check className="w-4 h-4 text-brand-green" />
                 <span>{badge}</span>
               </div>
             ))}
-          </div>
-        </motion.div>
-
-        {/* Visualization Card */}
-        <motion.div style={{ y }} className="relative mx-auto max-w-5xl mt-16">
-          {/* Glow effect behind card */}
-          <div className="absolute -inset-4 bg-gradient-to-r from-brand-blue/5 via-transparent to-brand-green/5 rounded-2xl blur-xl -z-10" />
-
-          <div className="rounded-2xl border border-border bg-card shadow-2xl shadow-black/5 dark:shadow-black/30 overflow-hidden">
-            {/* MacOS Window Header */}
-            <div className="flex items-center gap-2 border-b border-border bg-muted px-4 py-3">
-              <div className="h-3 w-3 rounded-full bg-[#FF5F56]" />
-              <div className="h-3 w-3 rounded-full bg-[#FFBD2E]" />
-              <div className="h-3 w-3 rounded-full bg-[#27C93F]" />
-              <div className="ml-4 flex h-6 w-full max-w-[400px] items-center rounded-md bg-card px-3 text-xs text-muted-foreground dark:bg-accent font-mono">
-                linkmap-infrastructure-map
-              </div>
-            </div>
-
-            {/* Diagram Area */}
-            <div className="relative h-[400px] md:h-[480px] lg:h-[520px] w-full bg-muted overflow-hidden" style={{ backgroundImage: 'radial-gradient(var(--dot-color, #dde0e7) 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
-              {/* Floating Badges inside diagram */}
-              <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
-                <div className="flex items-center gap-2 rounded-lg bg-card/90 backdrop-blur-sm border border-border dark:bg-card/90 px-3 py-2 text-xs text-brand-blue shadow-lg">
-                  <Lock className="w-3.5 h-3.5" />
-                  {t(locale, 'landing.trustEncryption')}
-                </div>
-                <div className="flex items-center gap-2 rounded-lg bg-card/90 backdrop-blur-sm border border-border dark:bg-card/90 px-3 py-2 text-xs text-green-600 shadow-lg">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  {t(locale, 'landing.allSystemsOperational')}
-                </div>
-              </div>
-
-              <FlowArchitectureDiagram />
-            </div>
           </div>
         </motion.div>
       </div>

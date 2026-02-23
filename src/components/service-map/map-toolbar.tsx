@@ -25,29 +25,33 @@ export function MapToolbar({
   const { toggleCatalogSidebar, catalogSidebarOpen, editMode, setEditMode } = useServiceMapStore();
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-background/80 backdrop-blur-md rounded-full border shadow-sm p-1">
       <Button
-        variant={catalogSidebarOpen ? 'default' : 'outline'}
+        variant={catalogSidebarOpen ? 'default' : 'ghost'}
         size="sm"
         onClick={toggleCatalogSidebar}
-        className="h-8"
+        className="h-8 rounded-full"
       >
         <Plus className="mr-1.5 h-3.5 w-3.5" />
         서비스 추가
       </Button>
 
+      <div className="w-px h-5 bg-border/50" />
+
       <div className="relative">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="서비스 검색..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-8 h-8 w-[180px] text-sm"
+          className="pl-9 h-9 w-[180px] text-sm border-0 bg-transparent focus-visible:ring-0 shadow-none"
         />
       </div>
 
-      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => fitView({ padding: 0.3 })} title="전체 보기">
-        <Maximize2 className="h-3.5 w-3.5" />
+      <div className="w-px h-5 bg-border/50" />
+
+      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full" onClick={() => fitView({ padding: 0.3 })} title="전체 보기">
+        <Maximize2 className="h-4 w-4" />
       </Button>
 
       {onAiAnalyze && (
@@ -55,22 +59,23 @@ export function MapToolbar({
           variant="outline"
           size="sm"
           onClick={onAiAnalyze}
-          className="h-8 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border-blue-500/20 hover:border-blue-500/40 text-blue-700 dark:text-blue-300"
+          className="h-8 ml-1 rounded-full bg-gradient-to-r from-blue-500/10 to-emerald-500/10 border-blue-500/20 hover:border-blue-500/40 text-blue-700 dark:text-blue-300"
         >
           <Brain className="mr-1.5 h-3.5 w-3.5" />
           AI 분석
         </Button>
       )}
 
-      <Button variant="outline" size="sm" className="h-8" onClick={onExportPng}>
-        <Download className="mr-1.5 h-3.5 w-3.5" />
-        PNG
+      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full" onClick={onExportPng} title="PNG 다운로드">
+        <Download className="h-4 w-4" />
       </Button>
 
+      <div className="w-px h-5 bg-border/50" />
+
       <Button
-        variant={editMode ? 'default' : 'outline'}
+        variant={editMode ? 'default' : 'ghost'}
         size="sm"
-        className="h-8"
+        className="h-8 rounded-full"
         onClick={() => setEditMode(!editMode)}
       >
         <Pencil className="mr-1.5 h-3.5 w-3.5" />
@@ -78,8 +83,8 @@ export function MapToolbar({
       </Button>
 
       {onToggleLegend && (
-        <Button variant="outline" size="icon" className="h-8 w-8" onClick={onToggleLegend} title="범례">
-          <HelpCircle className="h-3.5 w-3.5" />
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full" onClick={onToggleLegend} title="범례">
+          <HelpCircle className="h-4 w-4" />
         </Button>
       )}
     </div>
