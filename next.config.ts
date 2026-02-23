@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'export',
   poweredByHeader: false,
 
   // Cloudflare Workers 배포 시 NEXT_PUBLIC_* 환경변수가 클라이언트 번들에 인라인되도록 보장
