@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
@@ -33,7 +32,6 @@ import {
   ChevronDown,
   Loader2,
   GripVertical,
-  Wand2,
 } from 'lucide-react';
 import type {
   TemplateModuleSchema,
@@ -190,9 +188,8 @@ export function ModulePanel({
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(
     schema.modules[0]?.id ?? null
   );
-  const [aiPrompt, setAiPrompt] = useState('');
-  const [aiLoading, setAiLoading] = useState(false);
   const [loadingQuickEditId, setLoadingQuickEditId] = useState<string | null>(null);
+  const [aiPolishingField, setAiPolishingField] = useState<string | null>(null);
 
   const selectedModule = useMemo(
     () => schema.modules.find((m) => m.id === selectedModuleId) ?? null,
@@ -377,45 +374,56 @@ export function ModulePanel({
     [state, schema, onStateChange]
   );
 
-  const handleAiSuggest = useCallback(async () => {
-    if (!aiPrompt.trim()) return;
-    setAiLoading(true);
+  const handleAiPolish = useCallback(async (fieldKey: string, currentValue: string) => {
+    if (!selectedModuleId) return;
+    setAiPolishingField(fieldKey);
     try {
-      const res = await fetch('/api/ai/module-suggest', {
+      const targetMod = schema.modules.find((m) => m.id === selectedModuleId);
+      const fieldDef = targetMod?.fields.find((f) => f.key === fieldKey);
+      const fieldHints = fieldDef
+        ? [{ key: fieldDef.key, type: fieldDef.type, options: fieldDef.options }]
+        : undefined;
+
+      const res = await fetch('/api/ai/module-quick-edit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: aiPrompt,
+          questionId: `inline-polish-${fieldKey}`,
           templateSlug: schema.templateSlug,
-          currentEnabled: state.enabled,
-          moduleNames: schema.modules.map((m) => m.id),
+          targetModuleId: selectedModuleId,
+          targetFields: [fieldKey],
+          currentValues: { [fieldKey]: currentValue },
+          fieldHints,
+          inlinePolish: true,
         }),
       });
+
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'AI 추천 실패');
+        throw new Error(err.error || 'AI 다듬기 실패');
       }
-      const { state: suggested, reasoning } = await res.json();
-      const next = { ...state };
-      if (suggested.enabled) next.enabled = suggested.enabled;
-      if (suggested.order) next.order = suggested.order;
-      if (suggested.values) {
-        for (const [modId, fields] of Object.entries(suggested.values)) {
-          next.values = {
-            ...next.values,
-            [modId]: { ...next.values[modId], ...(fields as Record<string, unknown>) },
-          };
-        }
-      }
+
+      const { values, reasoning } = await res.json();
+
+      const next = {
+        ...state,
+        values: {
+          ...state.values,
+          [selectedModuleId]: {
+            ...state.values[selectedModuleId],
+            ...values,
+          },
+        },
+      };
       onStateChange(next);
-      setAiPrompt('');
+
       if (reasoning) toast.success(reasoning);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'AI 추천 실패');
+      toast.error(err instanceof Error ? err.message : 'AI 다듬기 실패');
     } finally {
-      setAiLoading(false);
+      setAiPolishingField(null);
     }
-  }, [aiPrompt, schema, state, onStateChange]);
+  }, [selectedModuleId, schema, state, onStateChange]);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -453,7 +461,7 @@ export function ModulePanel({
                         : 'opacity-40 cursor-not-allowed'
                     }`}
                     onClick={() => handleQuickEdit(q)}
-                    disabled={isAnyLoading || aiLoading}
+                    disabled={isAnyLoading}
                     title={
                       !isTargetEnabled
                         ? `${q.targetModuleId} 모듈을 먼저 활성화하세요`
@@ -472,41 +480,6 @@ export function ModulePanel({
             </div>
           </div>
         )}
-
-        {/* 직접 요청 */}
-        <div className="px-4 pt-1 pb-2">
-          <div className="flex items-center gap-1.5 mb-2">
-            <Wand2 className="h-3 w-3 text-purple-500" />
-            <span className="text-[11px] font-medium text-muted-foreground">직접 요청</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Input
-              value={aiPrompt}
-              onChange={(e) => setAiPrompt(e.target.value)}
-              placeholder="원하는 스타일을 설명해주세요..."
-              className="h-7 text-xs flex-1"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleAiSuggest();
-                }
-              }}
-            />
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-7 w-7 flex-shrink-0"
-              onClick={handleAiSuggest}
-              disabled={aiLoading || !aiPrompt.trim() || loadingQuickEditId !== null}
-            >
-              {aiLoading ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <Wand2 className="h-3 w-3" />
-              )}
-            </Button>
-          </div>
-        </div>
 
         {/* 프리셋 */}
         {presets.length > 0 && (
@@ -595,6 +568,8 @@ export function ModulePanel({
               }
               locale={locale}
               deployId={deployId}
+              onAiPolish={handleAiPolish}
+              aiPolishingField={aiPolishingField}
             />
           </div>
         ) : selectedModule ? (

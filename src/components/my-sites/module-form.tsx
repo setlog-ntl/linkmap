@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Trash2, Upload, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Upload, Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { t, type Locale } from '@/lib/i18n';
 import type { ModuleFieldDef } from '@/lib/module-schema';
@@ -24,9 +24,11 @@ interface ModuleFormProps {
   onChange: (key: string, value: unknown) => void;
   locale: string;
   deployId?: string;
+  onAiPolish?: (fieldKey: string, currentValue: string) => Promise<void>;
+  aiPolishingField?: string | null;
 }
 
-export function ModuleForm({ fields, values, onChange, locale, deployId }: ModuleFormProps) {
+export function ModuleForm({ fields, values, onChange, locale, deployId, onAiPolish, aiPolishingField }: ModuleFormProps) {
   return (
     <div className="space-y-4">
       {fields.map((field) => (
@@ -37,6 +39,8 @@ export function ModuleForm({ fields, values, onChange, locale, deployId }: Modul
           onChange={(val) => onChange(field.key, val)}
           locale={locale}
           deployId={deployId}
+          onAiPolish={onAiPolish}
+          aiPolishingField={aiPolishingField}
         />
       ))}
     </div>
@@ -53,25 +57,48 @@ interface FieldRendererProps {
   onChange: (value: unknown) => void;
   locale: string;
   deployId?: string;
+  onAiPolish?: (fieldKey: string, currentValue: string) => Promise<void>;
+  aiPolishingField?: string | null;
 }
 
-function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRendererProps) {
+function FieldRenderer({ field, value, onChange, locale, deployId, onAiPolish, aiPolishingField }: FieldRendererProps) {
   const label = locale === 'en' && field.labelEn ? field.labelEn : field.label;
 
   switch (field.type) {
-    case 'text':
+    case 'text': {
+      const textVal = (value as string) ?? '';
+      const isPolishingText = aiPolishingField === field.key;
       return (
         <div className="space-y-1.5">
           <Label className="text-xs font-medium">{label}</Label>
-          <Input
-            type="text"
-            value={(value as string) ?? ''}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={field.placeholder}
-            className="h-8 text-sm"
-          />
+          <div className="flex items-center gap-1">
+            <Input
+              type="text"
+              value={textVal}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder={field.placeholder}
+              className="h-8 text-sm flex-1"
+            />
+            {onAiPolish && textVal.trim() && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 flex-shrink-0 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10"
+                onClick={() => onAiPolish(field.key, textVal)}
+                disabled={!!aiPolishingField}
+                title="AI 다듬기"
+              >
+                {isPolishingText ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3.5 w-3.5" />
+                )}
+              </Button>
+            )}
+          </div>
         </div>
       );
+    }
 
     case 'url':
       return (
@@ -85,12 +112,33 @@ function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRender
         />
       );
 
-    case 'textarea':
+    case 'textarea': {
+      const textareaVal = (value as string) ?? '';
+      const isPolishingTextarea = aiPolishingField === field.key;
       return (
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium">{label}</Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs font-medium">{label}</Label>
+            {onAiPolish && textareaVal.trim() && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-1.5 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10 gap-1"
+                onClick={() => onAiPolish(field.key, textareaVal)}
+                disabled={!!aiPolishingField}
+                title="AI 다듬기"
+              >
+                {isPolishingTextarea ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3 w-3" />
+                )}
+                <span className="text-[10px]">다듬기</span>
+              </Button>
+            )}
+          </div>
           <Textarea
-            value={(value as string) ?? ''}
+            value={textareaVal}
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder}
             className="text-sm min-h-[80px] resize-y"
@@ -98,6 +146,7 @@ function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRender
           />
         </div>
       );
+    }
 
     case 'color':
       return (
@@ -175,6 +224,7 @@ function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRender
           value={value}
           onChange={onChange}
           locale={locale}
+          deployId={deployId}
         />
       );
 
@@ -192,6 +242,7 @@ interface ArrayFieldRendererProps {
   value: unknown;
   onChange: (value: unknown) => void;
   locale: string;
+  deployId?: string;
 }
 
 function ArrayFieldRenderer({
@@ -199,6 +250,7 @@ function ArrayFieldRenderer({
   value,
   onChange,
   locale,
+  deployId,
 }: ArrayFieldRendererProps) {
   const items = Array.isArray(value) ? value : [];
   const label = locale === 'en' && field.labelEn ? field.labelEn : field.label;
@@ -264,6 +316,7 @@ function ArrayFieldRenderer({
               value={(item as Record<string, unknown>)[subField.key]}
               onChange={(val) => handleItemChange(index, subField.key, val)}
               locale={locale}
+              deployId={deployId}
             />
           ))}
         </div>
@@ -344,10 +397,10 @@ function fixPublicPath(path: string): string {
 function ImageUrlField({ label, value, onChange, placeholder, deployId, locale }: ImageUrlFieldProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
 
-  const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !deployId) return;
+  const processFile = useCallback(async (file: File) => {
+    if (!deployId) return;
 
     if (file.size > 5 * 1024 * 1024) {
       toast.error(t(locale as Locale, 'moduleForm.maxSizeError'));
@@ -385,6 +438,33 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale }
       if (fileRef.current) fileRef.current.value = '';
     }
   }, [deployId, locale, onChange]);
+
+  const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await processFile(file);
+  }, [processFile]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    await processFile(file);
+  }, [processFile]);
 
   // 이미지 URL인지 판별 (미리보기 표시용)
   const isImageUrl = value && (
@@ -428,19 +508,68 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale }
           onChange={handleUpload}
         />
       </div>
-      {/* 이미지 미리보기 썸네일 */}
-      {isImageUrl && (
-        <div className="mt-1.5 rounded-md border overflow-hidden bg-muted/30 w-fit">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={fixPublicPath(value)}
-            alt="미리보기"
-            className="max-h-20 max-w-full object-contain"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = 'none';
-            }}
-          />
+      {/* 업로드 중 상태 텍스트 */}
+      {uploading && (
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          <span>업로드 중...</span>
         </div>
+      )}
+      {/* 드래그&드롭 영역 + 미리보기 */}
+      {deployId ? (
+        <div
+          className={`mt-1.5 rounded-md border-2 border-dashed overflow-hidden transition-colors ${
+            isDragOver
+              ? 'border-primary bg-primary/5'
+              : isImageUrl
+                ? 'border-transparent'
+                : 'border-muted-foreground/20 bg-muted/30'
+          }`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          {isImageUrl ? (
+            <div className="relative group cursor-pointer" onClick={() => fileRef.current?.click()}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={fixPublicPath(value)}
+                alt="미리보기"
+                className="max-h-32 max-w-full object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span className="text-white text-xs">클릭 또는 드래그하여 교체</span>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="flex flex-col items-center justify-center py-4 cursor-pointer"
+              onClick={() => fileRef.current?.click()}
+            >
+              <Upload className="h-5 w-5 text-muted-foreground/50 mb-1" />
+              <span className="text-[11px] text-muted-foreground">
+                이미지를 드래그하거나 클릭하여 업로드
+              </span>
+            </div>
+          )}
+        </div>
+      ) : (
+        isImageUrl && (
+          <div className="mt-1.5 rounded-md border overflow-hidden bg-muted/30 w-fit">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={fixPublicPath(value)}
+              alt="미리보기"
+              className="max-h-32 max-w-full object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          </div>
+        )
       )}
     </div>
   );

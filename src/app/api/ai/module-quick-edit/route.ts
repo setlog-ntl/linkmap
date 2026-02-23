@@ -48,13 +48,19 @@ export async function POST(request: NextRequest) {
     targetFields,
     currentValues,
     fieldHints,
+    inlinePolish,
   } = parsed.data;
 
-  // 질문 ID 유효성 검증
-  const quickEdits = getQuickEdits(templateSlug);
-  const question = quickEdits.find((q) => q.id === questionId);
-  if (!question) {
-    return apiError('유효하지 않은 퀵 에딧 질문입니다.', 400);
+  const isInlinePolish = inlinePolish && questionId.startsWith('inline-polish-');
+
+  // 인라인 폴리시 모드가 아닌 경우에만 질문 ID 유효성 검증
+  let question: ReturnType<typeof getQuickEdits>[number] | undefined;
+  if (!isInlinePolish) {
+    const quickEdits = getQuickEdits(templateSlug);
+    question = quickEdits.find((q) => q.id === questionId);
+    if (!question) {
+      return apiError('유효하지 않은 퀵 에딧 질문입니다.', 400);
+    }
   }
 
   try {
@@ -72,13 +78,17 @@ export async function POST(request: NextRequest) {
           .join('\n')
       : '';
 
+    const taskHint = isInlinePolish
+      ? 'Polish and refine the text. Improve clarity, professionalism, and flow while preserving the original meaning and language. Keep similar length unless improvement requires it.'
+      : question!.systemHint;
+
     const systemPrompt = `You are an AI assistant that performs quick edits on website template modules.
 
 Template: "${templateSlug}"
 Module: "${targetModuleId}"
 Target fields: ${targetFields.join(', ')}
 
-Task: ${question.systemHint}
+Task: ${taskHint}
 
 Current values:
 ${JSON.stringify(currentValues, null, 2)}
@@ -95,21 +105,25 @@ Important:
 - For array fields, return the complete updated array
 - For text fields, keep similar length unless improvement requires expansion`;
 
+    const maxTokens = isInlinePolish ? 512 : 1024;
+
     const { data, usage } = await callOpenAIStructured<QuickEditResponse>(
       apiKey,
       [
         {
           role: 'user',
-          content: `Execute quick edit: "${question.label}"`,
+          content: isInlinePolish
+            ? `Polish the text in the target fields`
+            : `Execute quick edit: "${question!.label}"`,
         },
       ],
       systemPrompt,
       JSON_SCHEMA,
-      { temperature: 0.7, max_tokens: 1024, baseUrl }
+      { temperature: 0.7, max_tokens: maxTokens, baseUrl }
     );
 
     await logAudit(user.id, {
-      action: 'ai.module_quick_edit',
+      action: isInlinePolish ? 'ai.module_inline_polish' : 'ai.module_quick_edit',
       resourceType: 'homepage_deploy',
       resourceId: templateSlug,
       details: {

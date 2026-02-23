@@ -74,7 +74,8 @@ export type AuditAction =
   | 'custom_service.update'
   | 'custom_service.delete'
   | 'custom_service.migrate'
-  | 'ai.module_quick_edit';
+  | 'ai.module_quick_edit'
+  | 'ai.module_inline_polish';
 
 interface AuditLogEntry {
   action: AuditAction;
