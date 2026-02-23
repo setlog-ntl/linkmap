@@ -84,7 +84,7 @@ const repoName = process.env.NEXT_PUBLIC_REPO_NAME || '';
 const nextConfig: NextConfig = {
   output: 'export',
   trailingSlash: true,
-  basePath: repoName ? \`/\\\${repoName}\` : '',
+  basePath: repoName ? \`/\${repoName}\` : '',
   images: {
     unoptimized: true,
   },
@@ -295,7 +295,7 @@ interface Props {
 
 export function SocialIcon({ platform, url, className = '', size = 20 }: Props) {
   const Icon = platformIcons[platform.toLowerCase()] || Globe;
-  const href = platform.toLowerCase() === 'email' ? \\\`mailto:\\\${url}\\\` : url;
+  const href = platform.toLowerCase() === 'email' ? \`mailto:\${url}\` : url;
   const label = platform.charAt(0).toUpperCase() + platform.slice(1);
 
   return (
@@ -303,8 +303,8 @@ export function SocialIcon({ platform, url, className = '', size = 20 }: Props) 
       href={href}
       target={platform.toLowerCase() === 'email' ? undefined : '_blank'}
       rel="noopener noreferrer"
-      className={\\\`inline-flex items-center justify-center p-2 rounded-full text-gray-400 hover:text-white transition-colors \\\${className}\\\`}
-      aria-label={\\\`\\\${label} 방문\\\`}
+      className={\`inline-flex items-center justify-center p-2 rounded-full text-gray-400 hover:text-white transition-colors \${className}\`}
+      aria-label={\`\${label} 방문\`}
     >
       <Icon style={{ width: size, height: size }} />
     </a>
@@ -328,9 +328,9 @@ export function SectionHeading({
   className = '',
 }: Props) {
   return (
-    <AnimatedReveal className={\\\`text-center mb-12 \\\${className}\\\`}>
+    <AnimatedReveal className={\`text-center mb-12 \${className}\`}>
       <h2
-        className={\\\`text-3xl sm:text-4xl font-bold bg-gradient-to-r \\\${gradient} bg-clip-text text-transparent\\\`}
+        className={\`text-3xl sm:text-4xl font-bold bg-gradient-to-r \${gradient} bg-clip-text text-transparent\`}
       >
         {title}
       </h2>
