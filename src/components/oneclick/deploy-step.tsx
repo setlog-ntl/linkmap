@@ -9,14 +9,14 @@ import {
   AlertTriangle,
   Github,
   ExternalLink,
-  Rocket,
   LayoutDashboard,
 } from 'lucide-react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t, type Locale } from '@/lib/i18n';
 import type { DeployStatus, HomepageTemplate } from '@/lib/queries/oneclick';
+import { BuildingIllustration } from './building-illustration';
 import { DeployProgress } from './deploy-progress';
 
 interface DeployStepProps {
@@ -120,12 +120,7 @@ function InitialLoadingCard({ locale, template }: { locale: Locale; template?: H
   return (
     <Card>
       <CardContent className="py-12 text-center space-y-4">
-        <motion.div
-          animate={prefersReducedMotion ? {} : { scale: [1, 1.1, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <Rocket className="h-10 w-10 mx-auto text-primary" />
-        </motion.div>
+        <BuildingIllustration slug={template?.slug ?? ''} />
         {template && (
           <p className="text-sm text-muted-foreground">
             {locale === 'ko' ? template.name_ko : template.name}
