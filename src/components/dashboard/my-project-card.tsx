@@ -40,10 +40,10 @@ export function MyProjectCard({ project, metrics, allCards }: MyProjectCardProps
   const initial = project.name.charAt(0).toUpperCase();
 
   return (
-    <div className="h-full rounded-lg border bg-muted/50 shadow-xl dark:bg-zinc-900/80">
+    <div className="h-full rounded-lg border bg-card shadow-xl">
       <div className="flex flex-col items-center gap-4 p-6">
         {/* Project avatar */}
-        <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-muted text-3xl font-bold text-foreground dark:bg-zinc-800">
+        <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-muted text-3xl font-bold text-foreground">
           {initial}
         </div>
 

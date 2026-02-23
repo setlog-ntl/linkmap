@@ -23,11 +23,11 @@ export function SocialProofSection() {
   ];
 
   return (
-    <section className="py-16 bg-white border-y border-[#dde0e7] dark:bg-[#111827] dark:border-white/10" id="social-proof">
+    <section className="py-16 bg-card border-y border-border" id="social-proof">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Stats */}
         <ScrollReveal>
-          <p className="text-center text-sm text-[#63738a] dark:text-[#94a3b8] pb-2 font-medium">
+          <p className="text-center text-sm text-muted-foreground pb-2 font-medium">
             {t(locale, 'landing.socialProofTagline')}
           </p>
           <div className="grid grid-cols-2 gap-6 py-6 md:grid-cols-4 md:gap-8">
@@ -36,16 +36,16 @@ export function SocialProofSection() {
               return (
                 <div
                   key={i}
-                  className="group flex items-center justify-center gap-4 md:justify-start rounded-xl px-4 py-3 transition-colors hover:bg-[#f4f5f8] dark:hover:bg-white/5"
+                  className="group flex items-center justify-center gap-4 md:justify-start rounded-xl px-4 py-3 transition-colors hover:bg-muted"
                 >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[hsl(220,60%,92%)] dark:bg-[hsl(220,60%,20%)] text-[hsl(220,60%,35%)] dark:text-[hsl(220,60%,70%)] transition-transform group-hover:scale-110">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-blue-light text-brand-blue transition-transform group-hover:scale-110">
                     <Icon className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold font-mono bg-gradient-to-r from-[hsl(220,60%,35%)] to-[#2bee79] bg-clip-text text-transparent">
+                    <p className="text-2xl font-bold font-mono bg-gradient-to-r from-brand-blue to-brand-green bg-clip-text text-transparent">
                       <AnimatedCounter end={stat.value} suffix={stat.suffix} />
                     </p>
-                    <p className="text-xs text-[#63738a] dark:text-[#94a3b8]">{stat.label}</p>
+                    <p className="text-xs text-muted-foreground">{stat.label}</p>
                   </div>
                 </div>
               );
@@ -57,9 +57,9 @@ export function SocialProofSection() {
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {testimonials.map((item, i) => (
             <ScrollReveal key={item.nameKey} delay={i * 0.1}>
-              <div className="rounded-2xl border border-[#dde0e7] bg-[#fafbfc] dark:border-white/10 dark:bg-[#0f172a] p-6 h-full flex flex-col transition-all hover:shadow-md hover:-translate-y-0.5">
-                <Quote className="w-8 h-8 text-[hsl(220,60%,35%)]/20 mb-4" />
-                <p className="text-sm text-[#1a2740]/80 dark:text-[#e2e8f0]/80 leading-relaxed flex-1 mb-6">
+              <div className="rounded-2xl border border-border bg-muted p-6 h-full flex flex-col transition-all hover:shadow-md hover:-translate-y-0.5">
+                <Quote className="w-8 h-8 text-brand-blue/20 mb-4" />
+                <p className="text-sm text-foreground/80 leading-relaxed flex-1 mb-6">
                   &ldquo;{t(locale, item.quoteKey)}&rdquo;
                 </p>
                 <div className="flex items-center gap-1 mb-3">
@@ -68,8 +68,8 @@ export function SocialProofSection() {
                   ))}
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-[#1a2740] dark:text-[#e2e8f0]">{t(locale, item.nameKey)}</p>
-                  <p className="text-xs text-[#63738a] dark:text-[#94a3b8]">{t(locale, item.roleKey)}</p>
+                  <p className="text-sm font-bold text-foreground">{t(locale, item.nameKey)}</p>
+                  <p className="text-xs text-muted-foreground">{t(locale, item.roleKey)}</p>
                 </div>
               </div>
             </ScrollReveal>

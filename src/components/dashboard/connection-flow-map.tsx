@@ -19,7 +19,7 @@ const STATUS_DOT: Record<string, string> = {
   connected: 'bg-emerald-500',
   error: 'bg-red-500',
   in_progress: 'bg-amber-500',
-  not_started: 'bg-zinc-400 dark:bg-zinc-600',
+  not_started: 'bg-muted-foreground/50',
 };
 
 const LAYER_CFG = {
@@ -48,7 +48,7 @@ type LayerKey = keyof typeof LAYER_CFG;
 /* ---- Sub-components ---- */
 
 function FlowPill({ svc, onClick }: { svc: ServiceCardData; onClick?: () => void }) {
-  const dotCls = STATUS_DOT[svc.status] ?? 'bg-zinc-400';
+  const dotCls = STATUS_DOT[svc.status] ?? 'bg-muted-foreground/50';
   const envPct = svc.envTotal > 0 ? Math.round((svc.envFilled / svc.envTotal) * 100) : null;
 
   return (
@@ -162,7 +162,7 @@ export function ConnectionFlowMap({
   }, [connections]);
 
   return (
-    <div className="rounded-2xl border bg-card/60 dark:bg-zinc-900/40 backdrop-blur-sm overflow-hidden">
+    <div className="rounded-2xl border bg-card overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-border/40">
         <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
@@ -173,7 +173,7 @@ export function ConnectionFlowMap({
             { label: '연결됨', cls: 'bg-emerald-500' },
             { label: '대기중', cls: 'bg-amber-500' },
             { label: '오류', cls: 'bg-red-500' },
-            { label: '미연결', cls: 'bg-zinc-500' },
+            { label: '미연결', cls: 'bg-muted-foreground' },
           ].map((s) => (
             <span key={s.label} className="flex items-center gap-1.5">
               <span className={cn('h-1.5 w-1.5 rounded-full', s.cls)} />
@@ -194,7 +194,7 @@ export function ConnectionFlowMap({
           <div className="flex flex-col items-center self-center px-3 min-w-[120px]">
             <div className="relative">
               <div className="absolute inset-0 rounded-2xl bg-primary/8 blur-xl scale-150" />
-              <div className="relative rounded-2xl border-2 border-primary/15 bg-card dark:bg-zinc-800/80 px-5 py-3.5 text-center shadow-sm">
+              <div className="relative rounded-2xl border-2 border-primary/15 bg-card px-5 py-3.5 text-center shadow-sm">
                 <p className="text-[13px] font-bold">Project</p>
                 <p className="text-[10px] text-muted-foreground">Hub</p>
                 <p className="text-[10px] text-muted-foreground/60 mt-1 font-mono tabular-nums">

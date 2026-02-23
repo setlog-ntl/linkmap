@@ -54,15 +54,15 @@ export function ServicesGrid() {
   );
 
   return (
-    <section className="py-24 bg-white dark:bg-[#111827]">
+    <section className="py-24 bg-card">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <ScrollReveal>
           <div className="text-center mb-10">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(220,60%,35%)] mb-3 flex items-center justify-center gap-2">
-              <span className="inline-block w-2 h-2 rounded-full bg-[hsl(220,60%,35%)]" />
+            <p className="text-xs font-semibold uppercase tracking-widest text-brand-blue mb-3 flex items-center justify-center gap-2">
+              <span className="inline-block w-2 h-2 rounded-full bg-brand-blue" />
               INTEGRATIONS
             </p>
-            <h2 className="text-3xl font-bold sm:text-4xl text-[#1a2740] dark:text-[#e2e8f0]">{t(locale, 'landing.servicesTitle')}</h2>
+            <h2 className="text-3xl font-bold sm:text-4xl text-foreground">{t(locale, 'landing.servicesTitle')}</h2>
           </div>
         </ScrollReveal>
 
@@ -75,8 +75,8 @@ export function ServicesGrid() {
                 onClick={() => setFilter(f.value)}
                 className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                   filter === f.value
-                    ? 'bg-[hsl(220,60%,35%)] text-white font-bold shadow-md'
-                    : 'bg-[#f4f5f8] border border-[#dde0e7] text-[#63738a] hover:text-[#1a2740] hover:border-[hsl(220,60%,35%)]/30 dark:bg-white/5 dark:border-white/10 dark:text-[#94a3b8] dark:hover:text-[#e2e8f0]'
+                    ? 'bg-brand-blue text-white font-bold shadow-md'
+                    : 'bg-muted border border-border text-muted-foreground hover:text-foreground hover:border-brand-blue/30 dark:bg-accent'
                 }`}
               >
                 {f.label}
@@ -99,13 +99,13 @@ export function ServicesGrid() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.2 }}
-                className="group flex flex-col items-center justify-center p-6 rounded-xl bg-white border border-[#dde0e7] hover:border-[hsl(220,60%,35%)]/30 hover:bg-[#fafbfc] dark:bg-[#0f172a] dark:border-white/10 dark:hover:bg-white/5 transition-all hover:shadow-md hover:-translate-y-0.5 aspect-square cursor-default"
+                className="group flex flex-col items-center justify-center p-6 rounded-xl bg-card border border-border hover:border-brand-blue/30 hover:bg-muted transition-all hover:shadow-md hover:-translate-y-0.5 aspect-square cursor-default"
                 style={tintBg ? { backgroundColor: tintBg } : undefined}
               >
                 <div className="mb-3 transition-transform group-hover:scale-110">
                   <ServiceIcon serviceId={svc.slug} size={36} />
                 </div>
-                <span className="text-xs text-[#63738a] group-hover:text-[#1a2740] dark:text-[#94a3b8] dark:group-hover:text-[#e2e8f0] transition-colors">{svc.name}</span>
+                <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">{svc.name}</span>
               </motion.div>
               );
             })}

@@ -125,7 +125,7 @@ export function HealthRingCard({ projectId, allCards }: HealthRingCardProps) {
   };
 
   return (
-    <div className="rounded-2xl border bg-card/80 dark:bg-zinc-900/60 backdrop-blur-md shadow-sm p-5 h-full flex flex-col items-center justify-center gap-3">
+    <div className="rounded-2xl border bg-card shadow-sm p-5 h-full flex flex-col items-center justify-center gap-3">
       <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest self-start">
         Health Check
       </h3>
@@ -159,7 +159,7 @@ export function HealthRingCard({ projectId, allCards }: HealthRingCardProps) {
           )}
           {dist.unknown > 0 && (
             <span className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-zinc-500" />
+              <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground" />
               미검증 <span className="font-mono font-semibold">{dist.unknown}</span>
             </span>
           )}

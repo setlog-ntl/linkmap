@@ -15,17 +15,17 @@ const STATUS_DOT: Record<string, string> = {
   connected: 'bg-green-500',
   error: 'bg-red-500',
   in_progress: 'bg-yellow-500',
-  not_started: 'bg-zinc-400 dark:bg-zinc-600',
+  not_started: 'bg-muted-foreground/50',
 };
 
 export const ServiceItem = memo(function ServiceItem({ card }: ServiceItemProps) {
-  const dotClass = STATUS_DOT[card.status] ?? 'bg-zinc-400';
+  const dotClass = STATUS_DOT[card.status] ?? 'bg-muted-foreground/50';
   const envPercent = card.envTotal > 0 ? Math.round((card.envFilled / card.envTotal) * 100) : 0;
 
   return (
     <div
       data-service-id={card.serviceId}
-      className="group flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors hover:bg-muted/50 dark:hover:bg-zinc-800/50"
+      className="group flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors hover:bg-muted/50"
     >
       {/* Service brand icon */}
       <ServiceIcon serviceId={card.slug} size={16} className="shrink-0" />

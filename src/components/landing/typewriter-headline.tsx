@@ -33,7 +33,7 @@ export function TypewriterHeadline() {
     return (
       <>
         {prefix} <br className="hidden sm:block" />
-        <span className="bg-gradient-to-r from-[hsl(220,60%,35%)] to-[#2bee79] bg-clip-text text-transparent">
+        <span className="bg-gradient-to-r from-brand-blue to-brand-green bg-clip-text text-transparent">
           {t(locale, ROTATE_KEYS[0])}
         </span>
       </>
@@ -50,7 +50,7 @@ export function TypewriterHeadline() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.4, ease: 'easeInOut' }}
-          className="inline-block bg-gradient-to-r from-[hsl(220,60%,35%)] to-[#2bee79] bg-clip-text text-transparent"
+          className="inline-block bg-gradient-to-r from-brand-blue to-brand-green bg-clip-text text-transparent"
         >
           {t(locale, ROTATE_KEYS[index])}
         </motion.span>

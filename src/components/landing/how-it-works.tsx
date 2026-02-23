@@ -88,20 +88,20 @@ export function HowItWorks() {
 
   return (
     <section
-      className="py-24 bg-[#f4f5f8] border-y border-[#dde0e7] dark:bg-[#0b1120] dark:border-white/10"
+      className="py-24 bg-background border-y border-border"
       id="how-it-works"
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <ScrollReveal>
           <div className="text-center mb-10">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(220,60%,35%)] mb-3 flex items-center justify-center gap-2">
-              <span className="inline-block w-2 h-2 rounded-full bg-[hsl(220,60%,35%)]" />
+            <p className="text-xs font-semibold uppercase tracking-widest text-brand-blue mb-3 flex items-center justify-center gap-2">
+              <span className="inline-block w-2 h-2 rounded-full bg-brand-blue" />
               HOW IT WORKS
             </p>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-[#1a2740] dark:text-[#e2e8f0]">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-foreground">
               {t(locale, 'landing.howTitle')}
             </h2>
-            <p className="mt-2 text-base text-[#63738a] dark:text-[#94a3b8]">
+            <p className="mt-2 text-base text-muted-foreground">
               {t(locale, 'landing.howDesc')}
             </p>
           </div>
@@ -113,8 +113,8 @@ export function HowItWorks() {
             onClick={() => setPersona('beginner')}
             className={`inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold transition-all ${
               persona === 'beginner'
-                ? 'bg-[#2bee79] text-black shadow-md'
-                : 'bg-white border border-[#dde0e7] text-[#63738a] hover:border-[hsl(220,60%,35%)]/40 dark:bg-white/5 dark:border-white/10 dark:text-[#94a3b8] dark:hover:border-white/20'
+                ? 'bg-brand-green text-black shadow-md'
+                : 'bg-card border border-border text-muted-foreground hover:border-brand-blue/40 dark:bg-accent'
             }`}
           >
             <Rocket className="w-4 h-4" />
@@ -124,8 +124,8 @@ export function HowItWorks() {
             onClick={() => setPersona('developer')}
             className={`inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold transition-all ${
               persona === 'developer'
-                ? 'bg-[hsl(220,60%,35%)] text-white shadow-md'
-                : 'bg-white border border-[#dde0e7] text-[#63738a] hover:border-[hsl(220,60%,35%)]/40 dark:bg-white/5 dark:border-white/10 dark:text-[#94a3b8] dark:hover:border-white/20'
+                ? 'bg-brand-blue text-white shadow-md'
+                : 'bg-card border border-border text-muted-foreground hover:border-brand-blue/40 dark:bg-accent'
             }`}
           >
             <Sparkles className="w-4 h-4" />
@@ -136,7 +136,7 @@ export function HowItWorks() {
         <div className="relative grid grid-cols-1 md:grid-cols-4 gap-10 max-w-5xl mx-auto">
           {/* Connecting Line (Desktop) */}
           <div className="hidden md:block absolute top-10 left-[12%] right-[12%] h-px z-0">
-            <div className="h-full bg-gradient-to-r from-[#dde0e7] via-[hsl(220,60%,35%)]/40 to-[#dde0e7] dark:from-[#475569] dark:via-[hsl(220,60%,50%)]/40 dark:to-[#475569]" />
+            <div className="h-full bg-gradient-to-r from-border via-brand-blue/40 to-border dark:from-border dark:via-brand-blue/40 dark:to-border" />
           </div>
 
           {steps.map((step, i) => {
@@ -144,18 +144,18 @@ export function HowItWorks() {
             return (
               <ScrollReveal key={`${persona}-${i}`} delay={i * 0.15}>
                 <div className="relative z-10 flex flex-col items-center text-center">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white border border-[#dde0e7] shadow-md dark:bg-[#111827] dark:border-white/10 mb-6 transition-transform hover:scale-105">
-                    <span className="text-2xl font-bold text-[hsl(220,60%,35%)]">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-card border border-border shadow-md mb-6 transition-transform hover:scale-105">
+                    <span className="text-2xl font-bold text-brand-blue">
                       {step.number}
                     </span>
                   </div>
                   <div className="flex items-center justify-center gap-2 mb-3">
-                    <Icon className="w-5 h-5 text-[hsl(220,60%,35%)]" />
-                    <h3 className="text-xl font-bold text-[#1a2740] dark:text-[#e2e8f0]">
+                    <Icon className="w-5 h-5 text-brand-blue" />
+                    <h3 className="text-xl font-bold text-foreground">
                       {step.title}
                     </h3>
                   </div>
-                  <p className="text-sm text-[#63738a] dark:text-[#94a3b8] max-w-xs leading-relaxed">
+                  <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
                     {step.description}
                   </p>
                 </div>
@@ -169,8 +169,8 @@ export function HowItWorks() {
           <Button
             className={
               persona === 'beginner'
-                ? 'bg-[#2bee79] text-black hover:bg-[#25d96d] px-6 py-2.5 h-auto rounded-lg font-bold'
-                : 'bg-[hsl(220,60%,35%)] text-white hover:bg-[hsl(220,60%,30%)] px-6 py-2.5 h-auto rounded-lg font-bold'
+                ? 'bg-brand-green text-black hover:bg-brand-green/85 px-6 py-2.5 h-auto rounded-lg font-bold'
+                : 'bg-brand-blue text-white hover:bg-brand-blue/85 px-6 py-2.5 h-auto rounded-lg font-bold'
             }
             asChild
           >

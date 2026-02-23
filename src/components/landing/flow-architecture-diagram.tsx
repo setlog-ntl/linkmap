@@ -77,7 +77,7 @@ function buildEdges(highlightedNodeIds: Set<string>): Edge[] {
       labelStyle: {
         fontSize: 10,
         fontWeight: 500,
-        fill: '#888',
+        fill: 'var(--muted-foreground)',
       },
       labelBgStyle: {
         fill: 'var(--flow-label-bg, #f1f5f3)',
@@ -85,11 +85,11 @@ function buildEdges(highlightedNodeIds: Set<string>): Edge[] {
       },
       labelBgPadding: [4, 2] as [number, number],
       style: {
-        stroke: isHighlighted ? 'hsl(220,60%,35%)' : 'var(--flow-edge-color, #c8cdd6)',
+        stroke: isHighlighted ? 'var(--brand-blue)' : 'var(--flow-edge-color, #c8cdd6)',
         strokeWidth: isHighlighted ? 2.5 : 1.5,
         opacity: highlightedNodeIds.size > 0 && !isHighlighted ? 0.3 : 1,
         filter: isHighlighted
-          ? 'drop-shadow(0 0 6px hsl(220,60%,35%)) drop-shadow(0 0 12px hsl(220,60%,35%))'
+          ? 'drop-shadow(0 0 6px var(--brand-blue)) drop-shadow(0 0 12px var(--brand-blue))'
           : undefined,
       },
       className: isHighlighted ? 'animate-edge-glow-pulse' : undefined,

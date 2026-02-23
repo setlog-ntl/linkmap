@@ -68,7 +68,7 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
       onClick={handleCardClick}
     >
       {/* Mini service map preview */}
-      <div className="relative h-28 sm:h-32 bg-muted/20 dark:bg-zinc-900/50 border-b overflow-hidden">
+      <div className="relative h-28 sm:h-32 bg-muted/20 border-b overflow-hidden">
         {totalCount > 0 ? (
           <div className="absolute inset-0 flex items-center justify-center p-4">
             <div className="relative">

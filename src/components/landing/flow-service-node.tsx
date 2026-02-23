@@ -5,7 +5,7 @@ import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { ServiceIcon } from './service-icon';
 
 const statusDots: Record<string, string> = {
-  connected: 'bg-[#2bee79]',
+  connected: 'bg-brand-green',
   in_progress: 'bg-yellow-500',
   not_started: 'bg-gray-500',
 };
@@ -28,14 +28,14 @@ function FlowServiceNode({ data }: NodeProps) {
 
   return (
     <div
-      className={`px-3 py-2 rounded-lg border shadow-sm transition-all duration-300 bg-white dark:bg-[#111827] ${
+      className={`px-3 py-2 rounded-lg border shadow-sm transition-all duration-300 bg-card ${
         d.highlighted
-          ? 'scale-110 shadow-md ring-2 ring-[hsl(220,60%,35%)]/30 border-[hsl(220,60%,35%)]/50'
-          : 'border-[#dde0e7] dark:border-white/10 hover:border-[#c8cdd6] dark:hover:border-white/20'
+          ? 'scale-110 shadow-md ring-2 ring-brand-blue/30 border-brand-blue/50'
+          : 'border-border hover:border-muted-foreground/30'
       }`}
     >
-      <Handle type="target" position={Position.Left} className="!bg-[#c8cdd6] dark:!bg-[#475569] !w-2 !h-2 !border-0" />
-      <Handle type="source" position={Position.Right} className="!bg-[#c8cdd6] dark:!bg-[#475569] !w-2 !h-2 !border-0" />
+      <Handle type="target" position={Position.Left} className="!bg-muted-foreground/40 !w-2 !h-2 !border-0" />
+      <Handle type="source" position={Position.Right} className="!bg-muted-foreground/40 !w-2 !h-2 !border-0" />
 
       <div className="flex items-center gap-2">
         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass}`} />
@@ -44,10 +44,10 @@ function FlowServiceNode({ data }: NodeProps) {
         ) : (
           <span className="text-base">{d.emoji}</span>
         )}
-        <span className="font-bold text-xs whitespace-nowrap text-[#1a2740] dark:text-[#e2e8f0]">{d.label}</span>
+        <span className="font-bold text-xs whitespace-nowrap text-foreground">{d.label}</span>
       </div>
       {d.envTotal != null && d.envTotal > 0 && (
-        <div className="text-[10px] text-[#63738a] dark:text-[#94a3b8] mt-0.5 ml-[22px]">
+        <div className="text-[10px] text-muted-foreground mt-0.5 ml-[22px]">
           {d.envConfigured}/{d.envTotal} vars
         </div>
       )}

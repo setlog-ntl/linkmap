@@ -28,7 +28,7 @@ const STATUS_BG: Record<string, string> = {
   connected: 'bg-emerald-500/10 dark:bg-emerald-500/15',
   error: 'bg-red-500/10 dark:bg-red-500/15',
   in_progress: 'bg-amber-500/10 dark:bg-amber-500/15',
-  not_started: 'bg-muted/50 dark:bg-zinc-800/50',
+  not_started: 'bg-muted/50',
 };
 
 export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: ProjectHeroCardProps) {
@@ -88,7 +88,7 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
   };
 
   return (
-    <div className="rounded-2xl border bg-card/80 dark:bg-zinc-900/60 backdrop-blur-md shadow-sm p-5 sm:p-6 h-full">
+    <div className="rounded-2xl border bg-card shadow-sm p-5 sm:p-6 h-full">
       <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
         {/* Project avatar with icon picker */}
         <ProjectIconPicker

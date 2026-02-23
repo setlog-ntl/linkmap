@@ -55,7 +55,7 @@ export function LayerCard({ data, projectId }: LayerCardProps) {
     <div
       className={`
         relative rounded-2xl border overflow-hidden h-full
-        bg-card/80 dark:bg-zinc-900/60 backdrop-blur-md shadow-sm
+        bg-card shadow-sm
         ${style.border}
       `}
     >

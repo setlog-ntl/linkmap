@@ -35,18 +35,18 @@ export function TemplateShowcase() {
   const { locale } = useLocaleStore();
 
   return (
-    <section className="py-24 bg-white dark:bg-[#0f172a]" id="templates">
+    <section className="py-24 bg-card" id="templates">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <ScrollReveal>
           <div className="text-center mb-16">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#2bee79] mb-3 flex items-center justify-center gap-2">
-              <span className="inline-block w-2 h-2 rounded-full bg-[#2bee79]" />
+            <p className="text-xs font-semibold uppercase tracking-widest text-brand-green mb-3 flex items-center justify-center gap-2">
+              <span className="inline-block w-2 h-2 rounded-full bg-brand-green" />
               TEMPLATES
             </p>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-[#1a2740] dark:text-[#e2e8f0]">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-foreground">
               {t(locale, 'landing.templateShowcaseTitle')}
             </h2>
-            <p className="mt-4 text-lg text-[#63738a] dark:text-[#94a3b8]">
+            <p className="mt-4 text-lg text-muted-foreground">
               {t(locale, 'landing.templateShowcaseDesc')}
             </p>
           </div>
@@ -62,7 +62,7 @@ export function TemplateShowcase() {
               <ScrollReveal key={tpl.slug} delay={i * 0.1}>
                 <Link
                   href="/sites"
-                  className="group flex flex-col rounded-xl border border-[#dde0e7] bg-white dark:border-white/10 dark:bg-[#111827] overflow-hidden transition-all hover:-translate-y-2 hover:shadow-lg"
+                  className="group flex flex-col rounded-xl border border-border bg-card overflow-hidden transition-all hover:-translate-y-2 hover:shadow-lg"
                 >
                   {/* Gradient header */}
                   <div className={`relative h-[140px] bg-gradient-to-br ${gradient} flex items-center justify-center`}>
@@ -83,13 +83,13 @@ export function TemplateShowcase() {
 
                   {/* Content */}
                   <div className="p-5 flex flex-col flex-1">
-                    <h3 className="font-bold text-[#1a2740] dark:text-[#e2e8f0] mb-1">
+                    <h3 className="font-bold text-foreground mb-1">
                       {locale === 'ko' ? tpl.name_ko : tpl.name}
                     </h3>
-                    <p className="text-xs text-[#63738a] dark:text-[#94a3b8] line-clamp-2 mb-4 flex-1">
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-4 flex-1">
                       {locale === 'ko' ? tpl.description_ko : tpl.description}
                     </p>
-                    <div className="flex items-center text-sm font-semibold text-[#2bee79] group-hover:gap-2 transition-all">
+                    <div className="flex items-center text-sm font-semibold text-brand-green group-hover:gap-2 transition-all">
                       {t(locale, 'landing.templateShowcaseCta')}
                       <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </div>

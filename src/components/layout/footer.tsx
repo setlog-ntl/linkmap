@@ -9,7 +9,7 @@ export function Footer() {
   const { locale } = useLocaleStore();
 
   return (
-    <footer className="bg-[#0f1d2f] text-[hsl(220,20%,75%)]">
+    <footer className="bg-[var(--circuit-950)] text-muted-foreground">
       <div className="container py-8 md:py-12">
         {/* Pitch-style quote */}
         <div className="text-center mb-10 pb-8 border-b border-white/10">
@@ -21,7 +21,7 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-1 font-bold text-lg mb-3">
-              <span className="text-[#2bee79]">Link</span>
+              <span className="text-brand-green">Link</span>
               <span className="text-white">map</span>
             </Link>
             <p className="text-sm">
