@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useProjects, useCreateProject, useDeleteProject } from '@/lib/queries/projects';
+import { useMyDeployments, type HomepageDeploy } from '@/lib/queries/oneclick';
 import { ProjectCard } from '@/components/project/project-card';
 import { ProjectTreeList } from '@/components/dashboard/project-tree-list';
 import { CreateProjectDialog } from '@/components/project/create-project-dialog';
@@ -23,10 +24,21 @@ export default function DashboardPage() {
   const supabase = createClient();
   const { locale } = useLocaleStore();
   const { data: projects = [], isLoading } = useProjects();
+  const { data: deployments } = useMyDeployments();
   const createProject = useCreateProject();
   const deleteProject = useDeleteProject();
   const [createOpen, setCreateOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('card');
+
+  const deployByProjectId = useMemo(() => {
+    const map = new Map<string, HomepageDeploy>();
+    deployments?.forEach((d) => {
+      if (d.project_id && !map.has(d.project_id)) {
+        map.set(d.project_id, d);
+      }
+    });
+    return map;
+  }, [deployments]);
 
   useEffect(() => {
     const saved = localStorage.getItem(VIEW_STORAGE_KEY);
@@ -194,7 +206,7 @@ export default function DashboardPage() {
           </div>
 
           {viewMode === 'list' ? (
-            <ProjectTreeList projects={projects} onDelete={handleDeleteProject} />
+            <ProjectTreeList projects={projects} onDelete={handleDeleteProject} deployByProjectId={deployByProjectId} />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {projects.map((project) => (
@@ -202,6 +214,7 @@ export default function DashboardPage() {
                   key={project.id}
                   project={project}
                   onDelete={handleDeleteProject}
+                  deploy={deployByProjectId.get(project.id)}
                 />
               ))}
             </div>

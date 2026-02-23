@@ -14,6 +14,9 @@ import {
   FolderOpen,
   Trash2,
   Loader2,
+  Globe,
+  AlertTriangle,
+  Rocket,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -40,13 +43,15 @@ import {
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import type { ProjectWithServices } from '@/types';
+import type { HomepageDeploy } from '@/lib/queries/oneclick';
 
 interface ProjectTreeListProps {
   projects: ProjectWithServices[];
   onDelete: (id: string) => void;
+  deployByProjectId?: Map<string, HomepageDeploy>;
 }
 
-export function ProjectTreeList({ projects, onDelete }: ProjectTreeListProps) {
+export function ProjectTreeList({ projects, onDelete, deployByProjectId }: ProjectTreeListProps) {
   return (
     <div className="space-y-2">
       {projects.map((project) => (
@@ -54,6 +59,7 @@ export function ProjectTreeList({ projects, onDelete }: ProjectTreeListProps) {
           key={project.id}
           project={project}
           onDelete={onDelete}
+          deploy={deployByProjectId?.get(project.id)}
         />
       ))}
     </div>
@@ -63,9 +69,11 @@ export function ProjectTreeList({ projects, onDelete }: ProjectTreeListProps) {
 function ProjectTreeItem({
   project,
   onDelete,
+  deploy,
 }: {
   project: ProjectWithServices;
   onDelete: (id: string) => void;
+  deploy?: HomepageDeploy;
 }) {
   const router = useRouter();
   const { locale } = useLocaleStore();
@@ -133,6 +141,7 @@ function ProjectTreeItem({
                 <span className="font-medium truncate text-sm">
                   {project.name}
                 </span>
+                {deploy && <DeployStatusIcon status={deploy.deploy_status} />}
                 <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground shrink-0 ml-auto">
                   {serviceCount > 0 && (
                     <span>{serviceCount}{locale === 'ko' ? '서비스' : ' services'}</span>
@@ -233,5 +242,24 @@ function ProjectTreeItem({
         </CollapsibleContent>
       </div>
     </Collapsible>
+  );
+}
+
+function DeployStatusIcon({ status }: { status: HomepageDeploy['deploy_status'] }) {
+  const config = {
+    ready: { icon: Globe, className: 'text-green-600 dark:text-green-400', label: '배포됨' },
+    building: { icon: Loader2, className: 'text-yellow-600 dark:text-yellow-400 animate-spin', label: '배포 중' },
+    creating: { icon: Loader2, className: 'text-yellow-600 dark:text-yellow-400 animate-spin', label: '배포 중' },
+    pending: { icon: Loader2, className: 'text-yellow-600 dark:text-yellow-400 animate-spin', label: '배포 중' },
+    error: { icon: AlertTriangle, className: 'text-red-600 dark:text-red-400', label: '배포 오류' },
+    canceled: { icon: Rocket, className: 'text-primary', label: '원클릭' },
+  } as const;
+
+  const { icon: Icon, className, label } = config[status] ?? config.canceled;
+
+  return (
+    <span className="shrink-0" title={label}>
+      <Icon className={`h-3.5 w-3.5 ${className}`} />
+    </span>
   );
 }

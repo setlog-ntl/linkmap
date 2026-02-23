@@ -21,10 +21,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { MoreHorizontal, Trash2, FolderOpen, Layers, Zap, AlertCircle, Loader2, GitBranch } from 'lucide-react';
+import { MoreHorizontal, Trash2, FolderOpen, Layers, Zap, AlertCircle, Loader2, GitBranch, Globe, Rocket, AlertTriangle } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import type { ProjectWithServices } from '@/types';
+import type { HomepageDeploy } from '@/lib/queries/oneclick';
 import { getCategoryStyle } from '@/lib/constants/category-styles';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { getServiceIconUrl } from '@/lib/constants/service-brands';
@@ -32,9 +33,10 @@ import { getServiceIconUrl } from '@/lib/constants/service-brands';
 interface ProjectCardProps {
   project: ProjectWithServices;
   onDelete: (id: string) => void;
+  deploy?: HomepageDeploy;
 }
 
-export function ProjectCard({ project, onDelete }: ProjectCardProps) {
+export function ProjectCard({ project, onDelete, deploy }: ProjectCardProps) {
   const router = useRouter();
   const { locale } = useLocaleStore();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -180,6 +182,7 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
             <CardTitle className="text-base font-semibold truncate">
               {project.name}
             </CardTitle>
+            {deploy && <DeployBadge status={deploy.deploy_status} />}
             {project.description && (
               <CardDescription className="line-clamp-1 text-xs">
                 {project.description}
@@ -285,5 +288,26 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function DeployBadge({ status }: { status: HomepageDeploy['deploy_status'] }) {
+  const config = {
+    ready: { icon: Globe, label: '배포됨', className: 'bg-green-500/10 text-green-700 dark:text-green-400' },
+    building: { icon: Loader2, label: '배포 중', className: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' },
+    creating: { icon: Loader2, label: '배포 중', className: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' },
+    pending: { icon: Loader2, label: '배포 중', className: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' },
+    error: { icon: AlertTriangle, label: '배포 오류', className: 'bg-red-500/10 text-red-700 dark:text-red-400' },
+    canceled: { icon: Rocket, label: '원클릭', className: 'bg-primary/10 text-primary' },
+  } as const;
+
+  const { icon: Icon, label, className } = config[status] ?? config.canceled;
+  const isSpinning = status === 'building' || status === 'creating' || status === 'pending';
+
+  return (
+    <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-md w-fit ${className}`}>
+      <Icon className={`h-3 w-3 ${isSpinning ? 'animate-spin' : ''}`} />
+      {label}
+    </span>
   );
 }

@@ -7,6 +7,14 @@ import { getTemplateBySlug } from '@/data/oneclick/homepage-template-content';
 import { safeDecryptToken } from '@/lib/github/token';
 import { deployPagesRequestSchema } from '@/lib/validations/oneclick';
 
+function humanizeSlug(slug: string): string {
+  return slug
+    .split('-')
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -83,7 +91,7 @@ export async function POST(request: NextRequest) {
     .from('projects')
     .insert({
       user_id: user.id,
-      name: site_name,
+      name: humanizeSlug(site_name),
       description: `${template.name_ko} 템플릿으로 생성된 GitHub Pages 사이트`,
     })
     .select()
