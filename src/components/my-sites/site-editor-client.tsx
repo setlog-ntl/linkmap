@@ -47,7 +47,10 @@ import {
   useUpdateFile,
   useBatchApplyFiles,
   useMyDeployments,
+  useDeployStatus,
 } from '@/lib/queries/oneclick';
+import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/queries/keys';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { ChatTerminal, type CodeBlock } from './chat-terminal';
@@ -56,6 +59,7 @@ import {
   ModuleDeployDialog,
   deployDialogReducer,
   initialDeployDialogState,
+  type DiffStats,
 } from './module-deploy-dialog';
 import { getModuleSchema } from '@/data/oneclick/module-schemas';
 import type { ModuleConfigState } from '@/lib/module-schema';
@@ -270,6 +274,55 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const isApplyingModules = dialogState.overallStatus === 'running' && dialogState.mode === 'apply-only';
   const isDeployingModules = dialogState.overallStatus === 'running' && dialogState.mode === 'apply-and-deploy';
 
+  // ── 배포 대기 상태 (useDeployStatus 연동) ──
+  type DeployOrigin = 'direct' | 'ai-apply' | 'module-deploy' | null;
+  const [awaitingDeploy, setAwaitingDeploy] = useState(false);
+  const [deployOrigin, setDeployOrigin] = useState<DeployOrigin>(null);
+  const pendingDiffStatsRef = useRef<DiffStats | null>(null);
+  const queryClient = useQueryClient();
+
+  const { data: deployStatusData } = useDeployStatus(deployId, awaitingDeploy);
+
+  // ── 배포 상태 감지 (useDeployStatus 폴링 결과 처리) ──
+  useEffect(() => {
+    if (!awaitingDeploy || !deployStatusData) return;
+    const status = deployStatusData.deploy_status;
+
+    if (status === 'ready') {
+      if (deployOrigin === 'module-deploy') {
+        dispatchDialog({ type: 'ADVANCE_STEP', stepId: 'build' });
+        dispatchDialog({
+          type: 'COMPLETE',
+          diffStats: pendingDiffStatsRef.current ?? { fileCount: 0, added: 0, removed: 0 },
+        });
+      }
+      setLivePreviewKey((k) => k + 1);
+      setShowLiveAfterDeploy(true);
+      setDeployState('deployed');
+      toast.success(t(locale, 'editor.deployed'));
+      setTimeout(() => setDeployState('idle'), 3000);
+      cleanup();
+    } else if (status === 'error' || status === 'timeout') {
+      const msg = status === 'timeout'
+        ? '배포 시간이 초과되었습니다 (5분). GitHub Actions를 확인해주세요.'
+        : deployStatusData.deploy_error || 'GitHub Actions 빌드 실패';
+      if (deployOrigin === 'module-deploy') {
+        dispatchDialog({ type: 'ERROR', message: msg });
+      } else {
+        toast.error(msg);
+        setDeployState('idle');
+      }
+      cleanup();
+    }
+    // 'building', 'creating', 'pending' 상태는 계속 대기
+
+    function cleanup() {
+      setAwaitingDeploy(false);
+      setDeployOrigin(null);
+      pendingDiffStatsRef.current = null;
+    }
+  }, [awaitingDeploy, deployStatusData, deployOrigin, locale]);
+
   // config.ts 사전 fetch (모듈 초기화용 — selectedPath와 별도로 fetch)
   const { data: configFileForInit, isError: configInitError } = useFileContent(
     moduleSchema && !moduleInitialized ? deployId : null,
@@ -423,6 +476,10 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   // 저장
   const handleSave = useCallback(async () => {
     if (!selectedPath || !fileDetail) return;
+    if (contentLoading) {
+      toast.info('파일 동기화 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
     try {
       const result = await updateFile.mutateAsync({
         deployId,
@@ -437,7 +494,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t(locale, 'editor.saveFailed'));
     }
-  }, [selectedPath, fileDetail, editorContent, deployId, updateFile, locale]);
+  }, [selectedPath, fileDetail, editorContent, deployId, updateFile, locale, contentLoading]);
 
   // 배포
   const handleDeploy = useCallback(async () => {
@@ -459,49 +516,14 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
 
       setDeployState('deploying');
       toast.info(t(locale, 'editor.deploying'));
-
-      if (liveUrl) {
-        let attempts = 0;
-        const maxAttempts = 12;
-        const checkInterval = 5000;
-
-        await new Promise<void>((resolve) => {
-          const poll = setInterval(async () => {
-            attempts++;
-            try {
-              await fetch(`${liveUrl}?_t=${Date.now()}`, {
-                method: 'HEAD',
-                mode: 'no-cors',
-              });
-              if (attempts >= 6) {
-                clearInterval(poll);
-                resolve();
-              }
-            } catch {
-              // ignore
-            }
-            if (attempts >= maxAttempts) {
-              clearInterval(poll);
-              resolve();
-            }
-          }, checkInterval);
-        });
-      } else {
-        await new Promise((r) => setTimeout(r, 30000));
-      }
-
-      setDeployState('deployed');
-      setLivePreviewKey((k) => k + 1);
-      setShowLiveAfterDeploy(true);
-
-      toast.success(t(locale, 'editor.deployed'));
-
-      setTimeout(() => setDeployState('idle'), 3000);
+      // HEAD 폴링 제거 → useDeployStatus 폴링으로 위임
+      setDeployOrigin('direct');
+      setAwaitingDeploy(true);
     } catch (err) {
       setDeployState('idle');
       toast.error(err instanceof Error ? err.message : t(locale, 'editor.deployFailed'));
     }
-  }, [selectedPath, fileDetail, hasUnsavedChanges, editorContent, deployId, updateFile, locale, liveUrl]);
+  }, [selectedPath, fileDetail, hasUnsavedChanges, editorContent, deployId, updateFile, locale]);
 
   // 파일 경로 목록 + SHA 맵 (ChatTerminal에 전달)
   const allFilePaths = useMemo(() => {
@@ -545,52 +567,16 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
 
       toast.success(`${result.file_count}${t(locale, 'editor.filesSaved')}`);
 
-      // 2. 자동 배포 트리거
+      // 2. 자동 배포 트리거 — useDeployStatus 폴링으로 위임
       setDeployState('deploying');
       toast.info(t(locale, 'editor.deploying'));
-
-      if (liveUrl) {
-        let attempts = 0;
-        const maxAttempts = 12;
-        const checkInterval = 5000;
-
-        await new Promise<void>((resolve) => {
-          const poll = setInterval(async () => {
-            attempts++;
-            try {
-              await fetch(`${liveUrl}?_t=${Date.now()}`, {
-                method: 'HEAD',
-                mode: 'no-cors',
-              });
-              if (attempts >= 6) {
-                clearInterval(poll);
-                resolve();
-              }
-            } catch {
-              // ignore
-            }
-            if (attempts >= maxAttempts) {
-              clearInterval(poll);
-              resolve();
-            }
-          }, checkInterval);
-        });
-      } else {
-        await new Promise((r) => setTimeout(r, 30000));
-      }
-
-      setDeployState('deployed');
-      setLivePreviewKey((k) => k + 1);
-      setShowLiveAfterDeploy(true);
-
-      toast.success(t(locale, 'editor.deployed'));
-
-      setTimeout(() => setDeployState('idle'), 3000);
+      setDeployOrigin('ai-apply');
+      setAwaitingDeploy(true);
     } catch (err) {
       setDeployState('idle');
       toast.error(err instanceof Error ? err.message : t(locale, 'editor.applyFailed'));
     }
-  }, [batchApply, deployId, selectedPath, fileDetail, filesShaMap, liveUrl, locale]);
+  }, [batchApply, deployId, selectedPath, filesShaMap, locale]);
 
   // ── 모듈 → 코드에 적용 (다이얼로그 통합) ──
   const handleApplyModulesToCode = useCallback(async () => {
@@ -624,10 +610,18 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         content: gf.content,
       }));
 
-      await batchApply.mutateAsync({
-        deployId,
-        files: filesToSave,
-      });
+      try {
+        await batchApply.mutateAsync({
+          deployId,
+          files: filesToSave,
+        });
+      } catch (err) {
+        if (err instanceof Error && (err.message.includes('409') || err.message.includes('conflict'))) {
+          queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.files(deployId) });
+          throw new Error('파일 충돌이 발생했습니다. 잠시 후 다시 시도해주세요.');
+        }
+        throw err;
+      }
 
       setHasUnsavedChanges(false);
       setLastSavedAt(new Date());
@@ -687,56 +681,54 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         content: gf.content,
       }));
 
-      await batchApply.mutateAsync({
-        deployId,
-        files: filesToSave,
-      });
+      try {
+        await batchApply.mutateAsync({
+          deployId,
+          files: filesToSave,
+        });
+      } catch (err) {
+        if (err instanceof Error && (err.message.includes('409') || err.message.includes('conflict'))) {
+          queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.files(deployId) });
+          throw new Error('파일 충돌이 발생했습니다. 잠시 후 다시 시도해주세요.');
+        }
+        throw err;
+      }
 
       setHasUnsavedChanges(false);
       setLastSavedAt(new Date());
       dispatchDialog({ type: 'ADVANCE_STEP', stepId: 'commit' });
 
-      // Step 3: 사이트 빌드 대기
-      if (liveUrl) {
-        let attempts = 0;
-        await new Promise<void>((resolve) => {
-          const poll = setInterval(async () => {
-            attempts++;
-            try {
-              await fetch(`${liveUrl}?_t=${Date.now()}`, {
-                method: 'HEAD',
-                mode: 'no-cors',
-              });
-              if (attempts >= 6) { clearInterval(poll); resolve(); }
-            } catch { /* ignore */ }
-            if (attempts >= 12) { clearInterval(poll); resolve(); }
-          }, 5000);
-        });
-      } else {
-        await new Promise((r) => setTimeout(r, 30000));
-      }
-
-      dispatchDialog({ type: 'ADVANCE_STEP', stepId: 'build' });
-
-      // Step 4: 배포 확인 → Complete
-      setLivePreviewKey((k) => k + 1);
-      setShowLiveAfterDeploy(true);
-
-      dispatchDialog({
-        type: 'COMPLETE',
-        diffStats: {
-          fileCount: generatedFiles.length,
-          added: totalAdded,
-          removed: totalRemoved,
-        },
-      });
+      // Step 3+4: useDeployStatus 폴링으로 위임 (HEAD 폴링 제거)
+      pendingDiffStatsRef.current = { fileCount: generatedFiles.length, added: totalAdded, removed: totalRemoved };
+      setDeployOrigin('module-deploy');
+      setAwaitingDeploy(true);
+      // 이후 useEffect에서 build→verify→COMPLETE 처리
     } catch (err) {
       dispatchDialog({
         type: 'ERROR',
         message: err instanceof Error ? err.message : t(locale, 'editor.applyFailed'),
       });
     }
-  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, fileCache, templateSlug, locale]);
+  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, fileCache, templateSlug, locale, queryClient]);
+
+  // ── 배포 리트라이 (상태 초기화 포함) ──
+  const handleRetryDeploy = useCallback(() => {
+    setAwaitingDeploy(false);
+    setDeployOrigin(null);
+    pendingDiffStatsRef.current = null;
+    handleApplyModulesAndDeploy();
+  }, [handleApplyModulesAndDeploy]);
+
+  // ── 빌드 진행 서브 라벨 (module-deploy 다이얼로그용) ──
+  const buildSubLabel = useMemo(() => {
+    if (!awaitingDeploy || !deployStatusData || deployOrigin !== 'module-deploy') return undefined;
+    const ps = deployStatusData.pages_status;
+    if (ps === 'enabling') return 'GitHub Pages 설정 중...';
+    if (ps === 'building' || deployStatusData.deploy_status === 'building') return 'GitHub Actions 빌드 중...';
+    return undefined;
+  }, [awaitingDeploy, deployStatusData, deployOrigin]);
+
+  const actionsUrl = deploy?.forked_repo_url ? `${deploy.forked_repo_url}/actions` : null;
 
   // Ctrl+S 단축키
   useEffect(() => {
@@ -762,7 +754,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   }, [hasUnsavedChanges]);
 
   const isLivePreviewable = isHtmlFile(selectedPath) || isCssFile(selectedPath);
-  const isDeploying = deployState === 'saving' || deployState === 'deploying';
+  const isDeploying = deployState === 'saving' || deployState === 'deploying' || awaitingDeploy;
 
   // 배포 버튼 라벨
   const deployButtonContent = (() => {
@@ -1391,8 +1383,10 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         onRetry={
           dialogState.mode === 'apply-only'
             ? handleApplyModulesToCode
-            : handleApplyModulesAndDeploy
+            : handleRetryDeploy
         }
+        buildSubLabel={buildSubLabel}
+        actionsUrl={actionsUrl}
       />
 
       {/* ===== AI 코드 도우미 (플로팅 위젯) ===== */}

@@ -242,6 +242,8 @@ interface ModuleDeployDialogProps {
   locale: Locale;
   liveUrl?: string | null;
   onRetry?: () => void;
+  buildSubLabel?: string;
+  actionsUrl?: string | null;
 }
 
 export function ModuleDeployDialog({
@@ -250,6 +252,8 @@ export function ModuleDeployDialog({
   locale,
   liveUrl,
   onRetry,
+  buildSubLabel,
+  actionsUrl,
 }: ModuleDeployDialogProps) {
   const prefersReducedMotion = useReducedMotion();
   const isRunning = state.overallStatus === 'running';
@@ -450,6 +454,9 @@ export function ModuleDeployDialog({
                         className="text-xs text-muted-foreground ml-8 leading-relaxed"
                       >
                         {getStepDesc(step.id, locale)}
+                        {step.id === 'build' && isActive && buildSubLabel && (
+                          <span className="block text-primary/70 mt-0.5">{buildSubLabel}</span>
+                        )}
                       </motion.p>
                     )}
                   </AnimatePresence>
@@ -463,7 +470,20 @@ export function ModuleDeployDialog({
         {isError && state.errorMessage && (
           <div className="flex items-start gap-2 p-3 rounded-md bg-destructive/10 text-destructive text-sm">
             <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-            <span>{state.errorMessage}</span>
+            <div>
+              <span>{state.errorMessage}</span>
+              {actionsUrl && (
+                <a
+                  href={actionsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 mt-1 text-xs underline"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  GitHub Actions 로그 확인
+                </a>
+              )}
+            </div>
           </div>
         )}
 
