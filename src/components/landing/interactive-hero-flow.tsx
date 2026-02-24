@@ -38,12 +38,17 @@ function svc(
 
 const DISCONNECTED_IDS = new Set(['e-naver-myapp', 'e-myapp-gemini', 'e-myapp-vercel', 'e-myapp-firebase']);
 
+/* ── Group region dimensions (pad around service nodes, label hangs below via overflow:visible) ── */
+const GP = 16;          // padding inside region around nodes
+const GW = 190;         // group region width
+const NODE_H = 54;      // approx service node rendered height
+
 /* ─────────────────── Nodes ─────────────────── */
 const baseNodes: Node[] = [
-    // ── Group regions (behind service nodes) ──
-    { id: 'g-auth', type: 'group', position: { x: 0, y: 0 }, data: { label: '🔐 AUTH', colorHint: 'green' }, style: { width: 195, height: 250 }, zIndex: -1, draggable: false, selectable: false },
-    { id: 'g-ai', type: 'group', position: { x: 0, y: 0 }, data: { label: '🤖 AI', colorHint: 'purple' }, style: { width: 195, height: 168 }, zIndex: -1, draggable: false, selectable: false },
-    { id: 'g-deploy', type: 'group', position: { x: 0, y: 0 }, data: { label: '🚀 DEPLOY', colorHint: 'blue' }, style: { width: 195, height: 232 }, zIndex: -1, draggable: false, selectable: false },
+    // ── Group regions (behind service nodes, label below via overflow:visible) ──
+    { id: 'g-auth', type: 'group', position: { x: 0, y: 0 }, data: { label: '🔐 AUTH', colorHint: 'green' }, style: { width: GW, height: 0, overflow: 'visible' }, zIndex: -1, draggable: false, selectable: false },
+    { id: 'g-ai', type: 'group', position: { x: 0, y: 0 }, data: { label: '🤖 AI', colorHint: 'purple' }, style: { width: GW, height: 0, overflow: 'visible' }, zIndex: -1, draggable: false, selectable: false },
+    { id: 'g-deploy', type: 'group', position: { x: 0, y: 0 }, data: { label: '🚀 DEPLOY', colorHint: 'blue' }, style: { width: GW, height: 0, overflow: 'visible' }, zIndex: -1, draggable: false, selectable: false },
 
     // ── Center hub ──
     {
@@ -70,7 +75,7 @@ const baseNodes: Node[] = [
     svc('github', 'GitHub', 'github', 'connected', 2, 2, 'GITHUB_TOKEN', true),
 ];
 
-/* ─────────────────── Edge styles (clean, no labels) ─────────────────── */
+/* ─────────────────── Edge styles ─────────────────── */
 const connectedStyle = {
     stroke: 'var(--brand-green)', strokeWidth: 1.5,
     filter: 'drop-shadow(0 0 3px var(--brand-green))',
@@ -116,9 +121,7 @@ const baseEdges: Edge[] = [
 ];
 
 /* ─────────────────── Layout ─────────────────── */
-const CY = 190;
-const GROUP_PAD_X = 20;
-const GROUP_PAD_TOP = 30;
+const CY = 180;
 
 /* ─────────────────── Component ─────────────────── */
 export function InteractiveHeroFlow() {
@@ -128,34 +131,48 @@ export function InteractiveHeroFlow() {
         const isClient = typeof window !== 'undefined';
         const cx = isClient ? window.innerWidth / 2 : 700;
 
+        // ── Service node positions ──
         const positions: Record<string, { x: number; y: number }> = {
-            // Auth (left)
-            google:     { x: cx - 370, y: CY - 60 },
-            kakao:      { x: cx - 370, y: CY + 12 },
-            naver:      { x: cx - 370, y: CY + 84 },
+            // Auth (left) — 3 nodes, gap ~70px
+            google:     { x: cx - 370, y: CY - 55 },
+            kakao:      { x: cx - 370, y: CY + 15 },
+            naver:      { x: cx - 370, y: CY + 85 },
             // Center
-            myapp:      { x: cx - 80,  y: CY + 5 },
+            myapp:      { x: cx - 80,  y: CY + 10 },
             // GitHub (bottom-center)
-            github:     { x: cx - 40,  y: CY + 175 },
-            // AI (right-top)
-            openai:     { x: cx + 300, y: CY - 50 },
-            gemini:     { x: cx + 300, y: CY + 18 },
-            // Deploy (right-bottom)
-            vercel:     { x: cx + 300, y: CY + 120 },
+            github:     { x: cx - 40,  y: CY + 170 },
+            // AI (right-top) — 2 nodes, gap ~65px
+            openai:     { x: cx + 300, y: CY - 45 },
+            gemini:     { x: cx + 300, y: CY + 20 },
+            // Deploy (right-bottom) — 3 nodes, gap ~65px
+            vercel:     { x: cx + 300, y: CY + 125 },
             cloudflare: { x: cx + 300, y: CY + 190 },
-            firebase:   { x: cx + 300, y: CY + 260 },
+            firebase:   { x: cx + 300, y: CY + 255 },
         };
 
-        const groupPositions: Record<string, { x: number; y: number }> = {
-            'g-auth':   { x: positions.google.x - GROUP_PAD_X, y: positions.google.y - GROUP_PAD_TOP },
-            'g-ai':     { x: positions.openai.x - GROUP_PAD_X, y: positions.openai.y - GROUP_PAD_TOP },
-            'g-deploy': { x: positions.vercel.x - GROUP_PAD_X, y: positions.vercel.y - GROUP_PAD_TOP },
+        // ── Group regions: tightly wrap their service nodes ──
+        // Auth: google → naver
+        const authTop = positions.google.y;
+        const authBot = positions.naver.y + NODE_H;
+        // AI: openai → gemini
+        const aiTop = positions.openai.y;
+        const aiBot = positions.gemini.y + NODE_H;
+        // Deploy: vercel → firebase
+        const deployTop = positions.vercel.y;
+        const deployBot = positions.firebase.y + NODE_H;
+
+        const groupPositions: Record<string, { x: number; y: number; h: number }> = {
+            'g-auth':   { x: positions.google.x - GP,  y: authTop - GP,   h: (authBot - authTop) + GP * 2 },
+            'g-ai':     { x: positions.openai.x - GP,  y: aiTop - GP,     h: (aiBot - aiTop) + GP * 2 },
+            'g-deploy': { x: positions.vercel.x - GP,  y: deployTop - GP,  h: (deployBot - deployTop) + GP * 2 },
         };
 
         return baseNodes.map(n => {
-            const clone = { ...n, position: { ...n.position } };
-            if (groupPositions[n.id]) {
-                clone.position = groupPositions[n.id];
+            const clone = { ...n, position: { ...n.position }, style: n.style ? { ...n.style } : undefined };
+            const gp = groupPositions[n.id];
+            if (gp) {
+                clone.position = { x: gp.x, y: gp.y };
+                if (clone.style) clone.style.height = gp.h;
             } else if (positions[n.id]) {
                 clone.position = positions[n.id];
             }
