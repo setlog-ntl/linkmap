@@ -92,17 +92,17 @@ const edges: Edge[] = [
 
 export function InteractiveHeroFlow() {
     const currentNodes = useMemo(() => {
-        // Position nodes in the lower portion of the viewport so they don't overlap hero text
+        // Position nodes well below the hero content to avoid overlap with CTA/trust badges
         const isClient = typeof window !== 'undefined';
         const cx = isClient ? window.innerWidth / 2 : 600;
         const vh = isClient ? window.innerHeight : 800;
-        // Place nodes in the bottom 30% of the hero area (below CTA buttons)
-        const cy = vh * 0.72;
+        // Push nodes further down — bottom edge of the viewport
+        const cy = vh * 0.88;
         return nodes.map(n => {
             if (n.id === 'nextjs') n.position = { x: cx - 180, y: cy };
-            if (n.id === 'supabase') n.position = { x: cx + 180, y: cy - 100 };
-            if (n.id === 'stripe') n.position = { x: cx + 220, y: cy + 150 };
-            if (n.id === 'openai') n.position = { x: cx - 400, y: cy };
+            if (n.id === 'supabase') n.position = { x: cx + 280, y: cy - 80 };
+            if (n.id === 'stripe') n.position = { x: cx + 320, y: cy + 150 };
+            if (n.id === 'openai') n.position = { x: cx - 480, y: cy - 40 };
             return n;
         });
     }, []);

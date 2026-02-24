@@ -32,6 +32,9 @@ export function HeroSection() {
       {/* The interactive canvas background */}
       <InteractiveHeroFlow />
 
+      {/* Gradient mask to separate content from background flow nodes */}
+      <div className="absolute inset-x-0 bottom-0 h-1/3 z-[5] bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
+
       {/* Overlay Content */}
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8 text-center pointer-events-none">
         <motion.div
