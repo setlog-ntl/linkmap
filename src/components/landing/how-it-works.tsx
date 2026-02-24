@@ -80,7 +80,6 @@ export function HowItWorks() {
   ];
 
   const steps = persona === 'beginner' ? beginnerSteps : developerSteps;
-  const activeColor = persona === 'beginner' ? 'brand-green' : 'brand-blue';
 
   const ctaHref = persona === 'beginner' ? '/sites' : '/signup';
   const ctaText =
@@ -93,17 +92,17 @@ export function HowItWorks() {
       className="py-24 relative overflow-hidden bg-background"
       id="how-it-works"
     >
-      {/* Background gradients */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.03)_0%,transparent_100%)] pointer-events-none" />
+      {/* Subtle background radial */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.02)_0%,transparent_70%)] pointer-events-none" />
 
       <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
         <ScrollReveal>
           <div className="text-center mb-16">
-            <p className={`text-xs font-bold uppercase tracking-widest text-${activeColor} mb-4 flex items-center justify-center gap-2 drop-shadow-[0_0_8px_rgba(var(--${activeColor}-rgb),0.4)]`}>
-              <span className={`inline-block w-2 h-2 rounded-full bg-${activeColor} animate-pulse`} />
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green mb-4 flex items-center justify-center gap-2">
+              <span className="inline-block w-2 h-2 rounded-full bg-brand-green animate-pulse" />
               HOW TO START
             </p>
-            <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl text-foreground drop-shadow-sm">
+            <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl text-foreground">
               {t(locale, 'landing.howTitle')}
             </h2>
             <p className="mt-5 text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
@@ -112,54 +111,57 @@ export function HowItWorks() {
           </div>
         </ScrollReveal>
 
-        {/* Persona Tabs */}
-        <div className="flex justify-center gap-4 mb-20 relative z-20">
-          <button
-            onClick={() => setPersona('beginner')}
-            className={`group inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-bold transition-all duration-300 ${persona === 'beginner'
-                ? 'bg-brand-green/10 text-brand-green border border-brand-green/50 shadow-[0_0_20px_rgba(16,185,129,0.3)]'
-                : 'bg-card/40 backdrop-blur-md border border-border/40 text-muted-foreground hover:border-brand-green/30 hover:bg-card/80'
-              }`}
-          >
-            <Rocket className={`w-5 h-5 transition-transform ${persona === 'beginner' ? 'scale-110 drop-shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'group-hover:-translate-y-0.5'}`} />
-            {t(locale, 'landing.howTabBeginner')}
-          </button>
+        {/* Persona Tabs - clean pill style */}
+        <div className="flex justify-center mb-20 relative z-20">
+          <div className="inline-flex gap-2 rounded-xl bg-muted/70 dark:bg-secondary/70 p-1.5 border border-border">
+            <button
+              onClick={() => setPersona('beginner')}
+              className={`group inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-bold transition-all duration-200 ${persona === 'beginner'
+                  ? 'bg-card text-brand-green shadow-sm border border-brand-green/20'
+                  : 'text-muted-foreground hover:text-foreground'
+                }`}
+            >
+              <Rocket className={`w-4 h-4 transition-transform ${persona === 'beginner' ? 'text-brand-green' : 'group-hover:-translate-y-0.5'}`} />
+              {t(locale, 'landing.howTabBeginner')}
+            </button>
 
-          <button
-            onClick={() => setPersona('developer')}
-            className={`group inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-bold transition-all duration-300 ${persona === 'developer'
-                ? 'bg-brand-blue/10 text-brand-blue border border-brand-blue/50 shadow-[0_0_20px_rgba(59,130,246,0.3)]'
-                : 'bg-card/40 backdrop-blur-md border border-border/40 text-muted-foreground hover:border-brand-blue/30 hover:bg-card/80'
-              }`}
-          >
-            <Sparkles className={`w-5 h-5 transition-transform ${persona === 'developer' ? 'scale-110 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]' : 'group-hover:rotate-12'}`} />
-            {t(locale, 'landing.howTabDeveloper')}
-          </button>
+            <button
+              onClick={() => setPersona('developer')}
+              className={`group inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-bold transition-all duration-200 ${persona === 'developer'
+                  ? 'bg-card text-brand-blue shadow-sm border border-brand-blue/20'
+                  : 'text-muted-foreground hover:text-foreground'
+                }`}
+            >
+              <Sparkles className={`w-4 h-4 transition-transform ${persona === 'developer' ? 'text-brand-blue' : 'group-hover:rotate-12'}`} />
+              {t(locale, 'landing.howTabDeveloper')}
+            </button>
+          </div>
         </div>
 
-        <div className="relative grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12 max-w-6xl mx-auto">
+        <div className="relative grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-10 max-w-6xl mx-auto">
           {/* Connecting Line (Desktop) */}
-          <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-[2px] z-0 overflow-hidden rounded-full bg-border/40">
-            <div className={`h-full bg-gradient-to-r from-transparent via-${activeColor} to-transparent w-full -translate-x-full animate-[shimmer_3s_infinite] opacity-70`} />
+          <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-px z-0">
+            <div className={`h-full ${persona === 'beginner' ? 'bg-brand-green/20' : 'bg-brand-blue/20'} transition-colors duration-300`} />
           </div>
 
           {steps.map((step, i) => {
             const Icon = step.icon;
+            const activeColor = persona === 'beginner' ? 'brand-green' : 'brand-blue';
             return (
-              <ScrollReveal key={`${persona}-${i}`} delay={i * 0.15}>
+              <ScrollReveal key={`${persona}-${i}`} delay={i * 0.12}>
                 <div className="relative z-10 flex flex-col items-center text-center group">
-                  <div className={`flex h-24 w-24 items-center justify-center rounded-3xl bg-card/60 backdrop-blur-xl border border-border/50 shadow-lg mb-8 transition-all duration-500 group-hover:-translate-y-2 group-hover:border-${activeColor}/50 group-hover:shadow-[0_10px_30px_rgba(var(--${activeColor}-rgb),0.15)] relative overflow-hidden`}>
-                    <div className={`absolute inset-0 bg-gradient-to-b from-${activeColor}/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                    <span className={`text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-foreground to-muted-foreground/30 absolute -top-4 -right-2 opacity-20 user-select-none`}>
+                  {/* Step circle */}
+                  <div className={`flex h-20 w-20 items-center justify-center rounded-2xl bg-card border border-border shadow-sm mb-6 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-md group-hover:border-${activeColor}/40 relative`}>
+                    <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-bold text-muted-foreground">
                       {step.number}
                     </span>
-                    <Icon className={`w-10 h-10 text-${activeColor} drop-shadow-[0_0_10px_rgba(var(--${activeColor}-rgb),0.5)] transition-transform duration-500 group-hover:scale-110`} />
+                    <Icon className={`w-8 h-8 text-${activeColor} transition-transform duration-300 group-hover:scale-110`} />
                   </div>
 
-                  <h3 className="text-xl font-bold text-foreground tracking-tight mb-3">
+                  <h3 className="text-lg font-bold text-foreground tracking-tight mb-2">
                     {step.title}
                   </h3>
-                  <p className="text-base text-muted-foreground/80 max-w-xs leading-relaxed">
+                  <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
                     {step.description}
                   </p>
                 </div>
@@ -173,8 +175,8 @@ export function HowItWorks() {
           <Button
             className={
               persona === 'beginner'
-                ? 'bg-brand-green text-black hover:bg-brand-green/85 px-10 py-4 h-auto rounded-xl text-base font-bold transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(16,185,129,0.35)]'
-                : 'bg-brand-blue text-white hover:bg-brand-blue/85 px-10 py-4 h-auto rounded-xl text-base font-bold transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(59,130,246,0.35)]'
+                ? 'bg-brand-green text-black hover:bg-brand-green/90 px-10 py-4 h-auto rounded-xl text-base font-bold transition-all duration-200 hover:shadow-[0_4px_24px_rgba(16,185,129,0.25)] active:scale-[0.98]'
+                : 'bg-brand-blue text-white hover:bg-brand-blue/90 px-10 py-4 h-auto rounded-xl text-base font-bold transition-all duration-200 hover:shadow-[0_4px_24px_rgba(59,130,246,0.25)] active:scale-[0.98]'
             }
             asChild
           >
@@ -188,15 +190,6 @@ export function HowItWorks() {
           </Button>
         </div>
       </div>
-
-      {/* Global shimmer animation definition for the connecting line */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        @keyframes shimmer {
-          100% { transform: translateX(100%); }
-        }
-      `}} />
     </section>
   );
 }
-

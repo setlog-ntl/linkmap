@@ -3,13 +3,15 @@
 import { memo } from 'react';
 import { type NodeProps } from '@xyflow/react';
 
+import type { GroupColorHint } from '@/data/hero-flow-config';
+
 interface HeroGroupNodeData {
   label: string;
-  colorHint?: 'green' | 'purple' | 'blue' | 'amber';
+  colorHint?: GroupColorHint;
   [key: string]: unknown;
 }
 
-const colorMap = {
+const colorMap: Record<GroupColorHint, { border: string; text: string }> = {
   green: {
     border: 'border-emerald-500/20 dark:border-emerald-400/15',
     text: 'text-emerald-600/40 dark:text-emerald-400/30',
@@ -25,6 +27,22 @@ const colorMap = {
   amber: {
     border: 'border-amber-500/20 dark:border-amber-400/15',
     text: 'text-amber-600/40 dark:text-amber-400/30',
+  },
+  red: {
+    border: 'border-red-500/20 dark:border-red-400/15',
+    text: 'text-red-600/40 dark:text-red-400/30',
+  },
+  cyan: {
+    border: 'border-cyan-500/20 dark:border-cyan-400/15',
+    text: 'text-cyan-600/40 dark:text-cyan-400/30',
+  },
+  orange: {
+    border: 'border-orange-500/20 dark:border-orange-400/15',
+    text: 'text-orange-600/40 dark:text-orange-400/30',
+  },
+  pink: {
+    border: 'border-pink-500/20 dark:border-pink-400/15',
+    text: 'text-pink-600/40 dark:text-pink-400/30',
   },
 };
 

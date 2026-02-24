@@ -15,6 +15,7 @@ import FlowLayerNode from './flow-layer-node';
 import FlowServiceNode from './flow-service-node';
 import HeroGroupNode from './hero-group-node';
 import { getServiceEmoji } from '@/lib/constants/service-brands';
+import { NODE_OFFSETS, GROUP_CONFIGS, LAYOUT } from '@/data/hero-flow-config';
 
 const nodeTypes = {
     layer: FlowLayerNode,
@@ -38,20 +39,17 @@ function svc(
 
 const DISCONNECTED_IDS = new Set(['e-naver-myapp', 'e-myapp-gemini', 'e-myapp-vercel', 'e-firebase-myapp']);
 
-/* ── Group region dimensions ── */
-const GP = 16;          // padding inside region
-const GW = 190;         // group region width
-const NODE_H = 54;      // approx service node rendered height
-
 /* ─────────────────── Nodes ─────────────────── */
 const baseNodes: Node[] = [
-    // ── Group regions ──
-    { id: 'g-db',     type: 'group', position: { x: 0, y: 0 }, data: { label: '🗄️ DATABASE', colorHint: 'amber'  }, style: { width: GW, height: 0, overflow: 'visible' }, zIndex: -1, draggable: false, selectable: false },
-    { id: 'g-auth',   type: 'group', position: { x: 0, y: 0 }, data: { label: '🔐 AUTH',     colorHint: 'green'  }, style: { width: GW, height: 0, overflow: 'visible' }, zIndex: -1, draggable: false, selectable: false },
-    { id: 'g-ai',     type: 'group', position: { x: 0, y: 0 }, data: { label: '🤖 AI',       colorHint: 'purple' }, style: { width: GW, height: 0, overflow: 'visible' }, zIndex: -1, draggable: false, selectable: false },
-    { id: 'g-deploy', type: 'group', position: { x: 0, y: 0 }, data: { label: '🚀 DEPLOY',   colorHint: 'blue'   }, style: { width: GW, height: 0, overflow: 'visible' }, zIndex: -1, draggable: false, selectable: false },
+    // ── Group regions (위치/크기는 런타임에 계산) ──
+    ...Object.entries(GROUP_CONFIGS).map(([id, cfg]) => ({
+        id, type: 'group' as const, position: { x: 0, y: 0 },
+        data: { label: cfg.label, colorHint: cfg.colorHint },
+        style: { width: LAYOUT.groupWidth, height: 0, overflow: 'visible' as const },
+        zIndex: -1, draggable: false, selectable: false,
+    })),
 
-    // ── Database (top row, horizontal) ──
+    // ── Database ──
     svc('supabase', 'Supabase', 'supabase', 'connected',   2, 2, 'SUPABASE_URL'),
     svc('firebase', 'Firebase', 'firebase', 'not_started', 0, 3, 'FIREBASE_CONFIG'),
 
@@ -62,16 +60,16 @@ const baseNodes: Node[] = [
         draggable: false, selectable: false,
     },
 
-    // ── Auth (left) ──
+    // ── Auth ──
     svc('google',     'Google', 'google-oauth',  'connected',   1, 1, 'GOOGLE_CLIENT_ID'),
     svc('kakao',      'Kakao',  'kakao-login',   'connected',   2, 2, 'KAKAO_REST_KEY'),
     svc('naver',      'Naver',  'naver-login',   'not_started', 0, 2, 'NAVER_CLIENT_ID'),
 
-    // ── AI (right-top) ──
+    // ── AI ──
     svc('openai',     'OpenAI', 'openai',        'connected',   1, 1, 'OPENAI_API_KEY'),
     svc('gemini',     'Gemini', 'google-gemini', 'not_started', 0, 1, 'GEMINI_API_KEY'),
 
-    // ── Deploy (right-bottom, includes GitHub) ──
+    // ── Deploy ──
     svc('vercel',     'Vercel',      'vercel',     'not_started', 0, 1, 'VERCEL_TOKEN'),
     svc('cloudflare', 'Cloudflare',  'cloudflare', 'connected',   2, 2, 'CF_API_TOKEN', true),
     svc('github',     'GitHub',      'github',     'connected',   2, 2, 'GITHUB_TOKEN', true),
@@ -118,20 +116,20 @@ function edge(
 
 /* ─────────────────── Edges ─────────────────── */
 const baseEdges: Edge[] = [
-    // DB → myapp (DB on top, connect bottom → top)
+    // DB → myapp
     edge('e-supabase-myapp', 'supabase', 'myapp', connectedStyle,    true,  'bottom', 'top'),
     edge('e-firebase-myapp', 'firebase', 'myapp', disconnectedStyle, false, 'bottom', 'top'),
-    // Auth → myapp (left → right, horizontal)
+    // Auth → myapp
     edge('e-google-myapp',   'google',   'myapp', connectedStyle,    true,  'right', 'left'),
     edge('e-kakao-myapp',    'kakao',    'myapp', connectedStyle,    true,  'right', 'left'),
     edge('e-naver-myapp',    'naver',    'myapp', disconnectedStyle, false, 'right', 'left'),
-    // myapp → AI (right → left, horizontal)
+    // myapp → AI
     edge('e-myapp-openai',   'myapp', 'openai',     connectedStyle,    true,  'right', 'left'),
     edge('e-myapp-gemini',   'myapp', 'gemini',     disconnectedStyle, false, 'right', 'left'),
-    // myapp → Deploy (bottom-right)
+    // myapp → Deploy
     edge('e-myapp-vercel',   'myapp', 'vercel',     disconnectedStyle, false, 'right', 'left'),
     edge('e-myapp-cloudflare','myapp','cloudflare',  connectedStyle,   true,  'right', 'left'),
-    // myapp → GitHub (bottom)
+    // myapp → GitHub
     edge('e-myapp-github',   'myapp', 'github',     blueStyle,        true,  'bottom', 'left'),
 ];
 
@@ -142,53 +140,40 @@ export function InteractiveHeroFlow() {
     const currentNodes = useMemo(() => {
         const isClient = typeof window !== 'undefined';
         const cx = isClient ? window.innerWidth / 2 : 700;
+        const { groupPadding: GP, groupWidth: GW, nodeHeight: NODE_H } = LAYOUT;
 
-        // Horizontal layout — MyApp at center, services fan out
-        const MY = 190;     // myapp vertical center
+        // Convert offsets → absolute positions
+        const positions: Record<string, { x: number; y: number }> = {};
+        for (const [id, offset] of Object.entries(NODE_OFFSETS)) {
+            positions[id] = { x: cx + offset.dx, y: offset.dy };
+        }
 
-        const positions: Record<string, { x: number; y: number }> = {
-            // ── Database (top, horizontal pair above myapp) ──
-            supabase:   { x: cx - 140, y: 30 },
-            firebase:   { x: cx + 10,  y: 30 },
-            // ── Auth (left, stacked vertically) ──
-            google:     { x: cx - 340, y: MY - 50 },
-            kakao:      { x: cx - 340, y: MY + 15 },
-            naver:      { x: cx - 340, y: MY + 80 },
-            // ── Center hub ──
-            myapp:      { x: cx - 75,  y: MY },
-            // ── AI (right-top) ──
-            openai:     { x: cx + 230, y: MY - 40 },
-            gemini:     { x: cx + 230, y: MY + 25 },
-            // ── Deploy (right-bottom) ──
-            vercel:     { x: cx + 230, y: MY + 110 },
-            cloudflare: { x: cx + 230, y: MY + 175 },
-            // ── GitHub (bottom-right, within Deploy group) ──
-            github:     { x: cx + 230, y: MY + 240 },
-        };
+        // Compute group bounding boxes from members
+        const groupPositions: Record<string, { x: number; y: number; h: number; w?: number }> = {};
 
-        // ── Group bounding boxes ──
-        const dbTop     = positions.supabase.y;
-        const dbBot     = positions.firebase.y + NODE_H;
-        // DB group spans both nodes horizontally
-        const dbLeft    = positions.supabase.x;
-        const dbRight   = positions.firebase.x + GW;
-        const dbGroupW  = (dbRight - dbLeft) + GP * 2;
+        for (const [gid, cfg] of Object.entries(GROUP_CONFIGS)) {
+            const memberPositions = cfg.members
+                .map(mid => positions[mid])
+                .filter(Boolean);
+            if (memberPositions.length === 0) continue;
 
-        const authTop   = positions.google.y;
-        const authBot   = positions.naver.y + NODE_H;
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            for (const p of memberPositions) {
+                minX = Math.min(minX, p.x);
+                minY = Math.min(minY, p.y);
+                maxX = Math.max(maxX, p.x + GW);
+                maxY = Math.max(maxY, p.y + NODE_H);
+            }
 
-        const aiTop     = positions.openai.y;
-        const aiBot     = positions.gemini.y + NODE_H;
-
-        const deployTop = positions.vercel.y;
-        const deployBot = positions.github.y + NODE_H;
-
-        const groupPositions: Record<string, { x: number; y: number; h: number; w?: number }> = {
-            'g-db':     { x: dbLeft - GP,           y: dbTop - GP,     h: (dbBot - dbTop) + GP * 2,     w: dbGroupW },
-            'g-auth':   { x: positions.google.x - GP,   y: authTop - GP,   h: (authBot - authTop) + GP * 2 },
-            'g-ai':     { x: positions.openai.x - GP,   y: aiTop - GP,     h: (aiBot - aiTop) + GP * 2 },
-            'g-deploy': { x: positions.vercel.x - GP,   y: deployTop - GP, h: (deployBot - deployTop) + GP * 2 },
-        };
+            const w = (maxX - minX) + GP * 2;
+            groupPositions[gid] = {
+                x: minX - GP,
+                y: minY - GP,
+                h: (maxY - minY) + GP * 2,
+                // Only set custom width if wider than default
+                ...(w > GW + GP * 2 ? { w } : {}),
+            };
+        }
 
         return baseNodes.map(n => {
             const clone = { ...n, position: { ...n.position }, style: n.style ? { ...n.style } : undefined };

@@ -20,18 +20,18 @@ export function TemplateShowcase() {
   const { locale } = useLocaleStore();
 
   return (
-    <section className="py-24 bg-card" id="templates">
+    <section className="py-24 bg-card/50 dark:bg-card/30" id="templates">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <ScrollReveal>
           <div className="text-center mb-16">
-            <p className="text-xs font-semibold uppercase tracking-widest text-brand-green mb-3 flex items-center justify-center gap-2">
-              <span className="inline-block w-2 h-2 rounded-full bg-brand-green" />
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green mb-4 flex items-center justify-center gap-2">
+              <span className="inline-block w-2 h-2 rounded-full bg-brand-green animate-pulse" />
               TEMPLATES
             </p>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-foreground">
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-foreground">
               어떤 홈페이지를 만들까요?
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
               6가지 템플릿 중 골라서 클릭 한 번이면 끝
             </p>
           </div>
@@ -46,7 +46,7 @@ export function TemplateShowcase() {
               <ScrollReveal key={tpl.slug} delay={i * 0.08}>
                 <Link
                   href={`/sites/new?template=${tpl.slug}`}
-                  className="group flex flex-col rounded-xl border border-border bg-card overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg hover:border-primary/30"
+                  className="group flex flex-col rounded-xl border border-border bg-card overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-primary/25"
                 >
                   {/* Wireframe preview */}
                   <div className="relative h-36 bg-muted/50 flex items-center justify-center px-6 overflow-hidden">
@@ -76,7 +76,7 @@ export function TemplateShowcase() {
                     <h3 className="font-bold text-foreground mb-1">
                       {locale === 'ko' ? tpl.name_ko : tpl.name}
                     </h3>
-                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3 flex-1">
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3 flex-1 leading-relaxed">
                       {locale === 'ko' ? tpl.description_ko : tpl.description}
                     </p>
 

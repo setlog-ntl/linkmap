@@ -1,171 +1,86 @@
 # Linkmap Project Instructions
 
 ## CRITICAL RULES (절대 위반 금지)
-- 기존 인증/RLS/암호화 코드를 제거하거나 약화시키지 마라
-- `SUPABASE_SERVICE_ROLE_KEY`, `ENCRYPTION_KEY`를 클라이언트에 노출하지 마라
-- API 입력은 반드시 Zod `safeParse`로 검증 (`parse` 금지 — throw하면 500)
-- 기존 에러 헬퍼(`src/lib/api/errors.ts`) 사용 필수 — 직접 에러 객체 만들지 마라
-- API 라우트 첫 번째 단계: 반드시 `getUser()` → `if (!user) return unauthorizedError()`
-- 민감 작업은 `logAudit()` 호출 필수 (`src/lib/audit.ts`)
-- 기존 유틸리티가 있으면 새로 만들지 마라 — `src/lib/` 먼저 확인
-- Rate Limiting은 Cloudflare Rules로 처리됨 — 앱 코드에 추가 금지
+- 인증/RLS/암호화 코드 제거·약화 금지
+- `SUPABASE_SERVICE_ROLE_KEY`, `ENCRYPTION_KEY` 클라이언트 노출 금지
+- `NEXT_PUBLIC_` 접두사로 서버 전용 키 노출 금지
+- API 입력: Zod `safeParse` 필수 (`parse` 금지 — throw→500)
+- API 라우트 5단계: `getUser()` → Zod safeParse → 소유권 확인 → 비즈니스 로직 → `logAudit()`
+- 에러: `src/lib/api/errors.ts` 헬퍼 사용 (직접 생성 금지)
+- 감사 로그: 민감 작업 시 `logAudit()` 필수 (`src/lib/audit.ts`)
+- `createAdminClient()` = 감사 로그 전용 (일반 CRUD 금지)
+- 기존 유틸 있으면 재사용 — `src/lib/` 먼저 확인
+- Rate Limiting: Cloudflare Rules (앱 코드 추가 금지)
+- 인증 로직 반전 주의: `if (!user)` return error (NOT `if (user)`)
+- 복호화된 값 로깅·API 응답 포함 금지
+- `catch` 블록 silent catch 금지
 
 ## Project Overview
-- **Linkmap**: 프로젝트에 연결된 외부 서비스의 연결 정보를 시각화하고, API 키·환경변수를 안전하게 관리하는 설정 관리 플랫폼
-- **Stack**: Next.js 16 (App Router) + Supabase + TypeScript + Tailwind CSS + shadcn/ui
+- **Linkmap**: 외부 서비스 연결 시각화 + API 키·환경변수 관리 플랫폼
+- **Stack**: Next.js 16 (App Router) + Supabase + TypeScript + Tailwind + shadcn/ui
 - **Deploy**: Cloudflare Workers (`@opennextjs/cloudflare`)
 
 ## Key Decisions
-- Korean-first UI, global expansion later
-- **i18n 동결**: 새 기능 구현 시 `t(locale, key)` 사용하지 말고 한글 문자열 직접 사용. i18n JSON 파일(ko.json/en.json) 업데이트 금지. 다국어 지원은 추후 별도 스프린트에서 일괄 적용 예정
-- AES-256-GCM encryption for env vars (key: 64 hex chars)
-- React Flow (@xyflow/react) for service map visualization
-- Supabase Auth with Google/GitHub OAuth
-- TanStack Query (server state) + Zustand (client state)
-- Zod v4 for API input validation
-- next-themes for dark mode
-- sonner for toast notifications (react-hot-toast 금지)
-- lucide-react for icons (다른 아이콘 라이브러리 금지)
+- Korean-first UI (i18n 동결: 한글 직접 사용, ko.json/en.json 업데이트 금지)
+- AES-256-GCM encryption (key: 64 hex chars)
+- React Flow (`@xyflow/react`) — `next/dynamic` + `ssr: false`
+- Supabase Auth (Google/GitHub OAuth)
+- TanStack Query + Zustand | Zod v4 | next-themes | sonner (react-hot-toast 금지) | lucide-react (타 아이콘 금지)
+- 디자인: Circuit Blue-Green v2, `brand-blue/green` 토큰, `bg-card shadow-sm` (글래스모피즘 금지, 헤더만 예외)
+- 폰트: Pretendard Variable (CDN) + Geist Mono
 
-## Important Patterns
-- **API 라우트 5단계**: Auth → Zod safeParse → 소유권 확인 → 비즈니스 로직 → 감사 로그
-- Server components: `export const dynamic = 'force-dynamic'` (Supabase 서버 클라이언트 사용 시)
-- Supabase 클라이언트 3종: Server(API/서버), Browser(클라이언트), Admin(감사 로그 전용)
-- RLS + API 레벨 `user_id` 확인 (이중 방어)
+## Patterns
+- Supabase 클라이언트 3종: Server(API) / Browser(클라) / Admin(감사 로그 전용)
+- RLS + API 레벨 `user_id` 이중 방어
+- Server components: `export const dynamic = 'force-dynamic'`
+- 서비스 노드: `export default memo()` (named export 아님)
 - QueryKey factory: `src/lib/queries/keys.ts`
-- Standardized errors: `src/lib/api/errors.ts`
-- Audit logging: `src/lib/audit.ts` — `logAudit(userId, entry)`
-- React Flow: `next/dynamic` + `ssr: false`
-- i18n: Zustand locale-store + `t(locale, key)` 함수 (2인자 — useTranslation 훅 없음)
-- 서비스 노드 export: `export default memo()` 패턴 (named export 아님)
+- i18n: Zustand locale-store + `t(locale, key)` 2인자
 
-## Build & Test Commands
+## Build Commands
 ```bash
-npm run dev          # 개발 서버
-npm run build        # 프로덕션 빌드 (--webpack 플래그 포함)
-npm run typecheck    # tsc --noEmit
-npm run lint         # ESLint
-npm run test         # Vitest 전체 실행
-npm run test:coverage # 커버리지 리포트
+npm run dev / build / typecheck / lint / test / test:coverage
 ```
 
 ## Known Gotchas
-- `next build --webpack` 필수 — turbopack은 콜론 파일명 생성 → Windows NTFS 미지원
-- Windows에서 `build:cf` 불가 — WSL 또는 GitHub Actions(Linux)에서만 빌드
-- Next.js 16.1.6 "middleware deprecated" 경고 — 향후 "proxy" 컨벤션 마이그레이션 필요
-- Sentry 제거됨 — 번들 사이즈 최적화 완료 (17MB → 8.5MB)
-- lucide-react `Map` import 시 전역 `Map` 섀도잉 → `Map as MapIcon` 필수
+- `next build --webpack` 필수 (turbopack → 콜론 파일명 → Windows NTFS 불가)
+- `build:cf`는 WSL/Linux에서만 가능
+- lucide-react `Map` → `Map as MapIcon` (전역 Map 섀도잉)
+- Sentry/Logger 제거됨 (Workers 호환 문제)
 
-## Database Rules (DB 작업 시 필수)
-- **스키마 레퍼런스**: `docs/db-schema.md` — 모든 테이블, 컬럼, RLS, 타입 매핑
-- **마이그레이션**: `supabase/migrations/NNN_*.sql` (현재 040, 다음 041)
-- **마이그레이션 후 3-step**: ① `src/types/` 타입 동기화 → ② `src/lib/queries/` 쿼리 반영 → ③ `docs/db-schema.md` 업데이트
-- **새 테이블 필수**: RLS 활성화 + 정책 추가 + created_at 컬럼
-- **타입 매핑**: core.ts(profiles/subscriptions/tokens), service.ts(services/catalog), project.ts(projects/bindings), env.ts(env_vars/health), connection.ts(user_connections), service-account.ts(service_accounts), ai.ts(ai_*), dashboard.ts(view models)
-- DB CHECK 제약조건 변경 시 TS union type도 반드시 동기화
+## Database Rules
+- 스키마: `docs/db-schema.md` | 마이그레이션: `supabase/migrations/NNN_*.sql` (현재 040)
+- **마이그레이션 후 3-step**: ① `src/types/` 동기화 → ② `src/lib/queries/` 반영 → ③ `docs/db-schema.md` 업데이트
+- 새 테이블: RLS + 정책 + created_at 필수
+- 타입 매핑: core(profiles/subscriptions/tokens), service(services/catalog), project(projects/bindings), env(env_vars/health), connection(user_connections), service-account, ai(ai_*), dashboard(view models)
+- DB CHECK 변경 → TS union type 동기화 필수
+- 기존 마이그레이션 수정 금지 (새 파일로 ALTER)
 
-## Anti-Patterns — NEVER Do These
-- `createAdminClient()`를 일반 CRUD에 사용 (감사 로그 전용)
-- `NEXT_PUBLIC_` 접두사로 서버 전용 키 노출
-- `catch` 블록에서 에러 삼키기 (silent catch)
-- `any` 타입 사용 (`unknown` + 타입 가드로 대체)
-- 인증 로직 반전: `if (user) return unauthorizedError()` ← 치명적 버그
-- 복호화된 값 로깅 또는 API 응답에 포함
-- 마이그레이션 없이 DB 스키마 변경
-- TS 타입 동기화 없이 마이그레이션 적용
-- 기존 마이그레이션 파일 수정 (새 파일로 ALTER)
+## Testing
+- `mockResolvedValue` 필수 (`Once` 금지 — 리렌더링 실패)
+- `beforeEach`: `clearAllMocks` 후 mock chain 재구성
+- Cast: `vi.mocked(createClient).mockResolvedValue(mock as never)`
+- 순서: 401 → 400 → 404 → 200 → audit
 
-## Testing Notes
-- `mockResolvedValue` 사용 필수 (`Once` 금지 — React 리렌더링으로 실패)
-- `beforeEach`에서 `clearAllMocks` 후 mock chain 재구성
-- Cast mock: `vi.mocked(createClient).mockResolvedValue(mock as never)`
-- Test order: 401 → 400 → 404 → 200 → audit
-
-## File Structure
+## File Structure (축약)
 ```
-src/
-├── app/
-│   ├── (auth)/            # Login, signup, reset-password
-│   ├── (dashboard)/       # Protected dashboard
-│   ├── project/[id]/      # Project pages (overview, integrations, env, map, monitoring, settings)
-│   ├── services/          # Service catalog
-│   ├── pricing/           # Pricing page
-│   ├── settings/          # User settings (tokens, connections)
-│   └── api/               # 15 route groups:
-│       ├── account/       #   GitHub connections (GET/PATCH/DELETE)
-│       ├── admin/         #   Setup templates
-│       ├── ai/            #   stack-recommend, env-doctor, map-narrate, compare-services, command
-│       ├── connections/   #   User connections CRUD
-│       ├── env/           #   Environment variables
-│       ├── github/        #   OAuth, repos, secrets sync
-│       ├── health-check/  #   Service health checks
-│       ├── oauth/         #   OAuth callback
-│       ├── oneclick/      #   One-click deploy
-│       ├── projects/      #   Projects CRUD + layer-overrides, main-service
-│       ├── seed/          #   DB seeding (admin only)
-│       ├── service-accounts/ # Service account management
-│       ├── stripe/        #   Billing
-│       ├── teams/         #   Team members + invitations
-│       └── tokens/        #   API tokens
-├── components/
-│   ├── ui/                # shadcn/ui (empty-state, confirm-dialog 포함)
-│   ├── layout/            # Header, Footer
-│   ├── project/           # Project tabs, cards
-│   ├── service/           # Service catalog
-│   ├── service-map/       # React Flow — 3-level view (Status/Map/Dependency)
-│   ├── ai/                # AI feature panels
-│   ├── dashboard/         # Onboarding checklist, action-needed
-│   ├── oneclick/          # One-click deploy wizard + module editor
-│   ├── github/            # Repo selector, secrets sync, connection info
-│   ├── settings/          # Settings pages
-│   ├── landing/           # Landing page sections
-│   ├── env/               # Env data table
-│   ├── icons/             # Custom icons
-│   ├── guides/            # Guide components
-│   ├── admin/             # Admin panels
-│   └── my-sites/          # Deployed sites management
-├── lib/
-│   ├── api/               # Error helpers (errors.ts)
-│   ├── ai/                # openai.ts, resolve-key.ts, guardrails.ts, providers.ts
-│   ├── crypto/            # AES-256-GCM encryption
-│   ├── github/            # 13 files: client, repos, secrets, pages, content, git-data, forks, token, permissions, auto-map, auto-sync, nacl-encrypt, api(barrel)
-│   ├── hooks/             # use-streaming.ts
-│   ├── i18n/              # ko.json, en.json, t() function
-│   ├── oneclick/          # code-generator.ts, deploy-status.ts
-│   ├── queries/           # 16 TanStack Query hooks (keys.ts = QueryKey factory)
-│   ├── supabase/          # Client/Server/Admin/Middleware
-│   ├── validations/       # Zod schemas
-│   ├── connections/       # Connection helpers
-│   ├── constants/         # App constants
-│   ├── env/               # Env helpers
-│   ├── health-check/      # Health check logic
-│   ├── layout/            # Layout helpers
-│   ├── mappers/           # Data mappers
-│   └── utils/             # General utilities
-│   # Root files: audit.ts, admin.ts, quota.ts, module-schema.ts, utils.ts, deploy-error-map.ts
-├── stores/                # Zustand: ui-store, project-store, locale-store, service-map-store
-├── types/                 # 8 domain files + barrel: core, service, project, env, ai, connection, service-account, dashboard
-└── data/
-    ├── seed/              # DB seed data
-    ├── oneclick/          # One-click templates
-    ├── templates/         # Site templates
-    └── ui/                # UI constants
-
-packages/
-├── mcp-server/            # MCP server for Claude Code/Cursor
-└── cli/                   # CLI tool for env management
+src/app/          — (auth), (dashboard), project/[id]/, services/, pricing/, settings/
+src/app/api/      — 15 groups: account, admin, ai, connections, env, github, health-check, oauth, oneclick, projects, seed, service-accounts, stripe, teams, tokens
+src/components/   — ui/, layout/, project/, service/, service-map/, ai/, dashboard/, oneclick/, github/, settings/, landing/, env/, icons/, guides/, admin/, my-sites/
+src/lib/          — api/, ai/, crypto/, github/(13files), hooks/, i18n/, oneclick/, queries/(16hooks), supabase/, validations/, connections/, constants/, env/, health-check/, layout/, mappers/, utils/
+                    root: audit.ts, admin.ts, quota.ts, module-schema.ts, utils.ts, deploy-error-map.ts
+src/stores/       — ui-store, project-store, locale-store, service-map-store
+src/types/        — 8 domain files + barrel
+src/data/         — seed/, oneclick/, templates/, ui/
+packages/         — mcp-server/, cli/
 ```
 
-## How to Find Info
+## Reference Docs
 | 찾는 것 | 위치 |
 |---------|------|
-| 아키텍처 개요 | `ARCHITECTURE.md` |
+| 아키텍처 | `ARCHITECTURE.md` |
 | 보안 정책 | `SECURITY.md` |
-| **DB 스키마 레퍼런스** | **`docs/db-schema.md`** |
-| DB 마이그레이션 파일 | `supabase/migrations/` |
-| Cloudflare 배포 가이드 | `docs/cloudflare-migration.md` |
-| 서비스맵 V2 설계 | `docs/service-map-v2.md` |
-| 대시보드 PMO | `docs/dashboard-pmo.md` |
-| 모듈 에디터 기획 | `docs/onelink/08-modular-template-editor.md` |
-| 모듈화 가이드 | `docs/instructions/` |
-| **AI 서비스 모듈 맵** | **`docs/ai-module-map.md`** |
+| DB 스키마 | `docs/db-schema.md` |
+| 서비스맵 V2 | `docs/service-map-v2.md` |
+| AI 모듈 맵 | `docs/ai-module-map.md` |
+| 모듈 에디터 | `docs/onelink/08-modular-template-editor.md` |
