@@ -43,6 +43,9 @@ export function Footer() {
               <li><Link href="/guides/github" className="hover:text-white transition-colors">{t(locale, 'landing.guideGitHub')}</Link></li>
               <li><Link href="/guides/auth" className="hover:text-white transition-colors">{t(locale, 'landing.guideAuth')}</Link></li>
               <li><Link href="/guides/cloudflare" className="hover:text-white transition-colors">{t(locale, 'landing.guideCloudflare')}</Link></li>
+              <li><Link href="/guides/frontend" className="hover:text-white transition-colors">프론트엔드 가이드</Link></li>
+              <li><Link href="/guides/backend" className="hover:text-white transition-colors">백엔드 가이드</Link></li>
+              <li><Link href="/guides/deploy" className="hover:text-white transition-colors">도메인·배포·서버</Link></li>
               <li><a href="mailto:support@linkmap.dev" className="hover:text-white transition-colors">Contact</a></li>
             </ul>
           </div>

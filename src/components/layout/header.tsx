@@ -92,6 +92,22 @@ export function Header({ profile }: HeaderProps) {
               {t(locale, 'landing.guideCloudflare')}
             </Link>
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href="/guides/frontend" onClick={() => setSidebarOpen(false)}>
+              프론트엔드 가이드
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/guides/backend" onClick={() => setSidebarOpen(false)}>
+              백엔드 가이드
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/guides/deploy" onClick={() => setSidebarOpen(false)}>
+              도메인·배포·서버
+            </Link>
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </>

@@ -119,10 +119,13 @@ export function AppSidebar({ profile }: AppSidebarProps) {
   ];
 
   const guideLinks = [
-    { labelKey: 'landing.guideEnv', href: '/guides/env' },
-    { labelKey: 'landing.guideGitHub', href: '/guides/github' },
-    { labelKey: 'landing.guideAuth', href: '/guides/auth' },
-    { labelKey: 'landing.guideCloudflare', href: '/guides/cloudflare' },
+    { label: '환경변수 가이드', href: '/guides/env' },
+    { label: 'GitHub 가이드', href: '/guides/github' },
+    { label: '인증 가이드', href: '/guides/auth' },
+    { label: 'Cloudflare 가이드', href: '/guides/cloudflare' },
+    { label: '프론트엔드 가이드', href: '/guides/frontend' },
+    { label: '백엔드 가이드', href: '/guides/backend' },
+    { label: '도메인·배포·서버', href: '/guides/deploy' },
   ];
 
   const isActive = (href: string, exact?: boolean) => {
@@ -530,7 +533,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                         <SidebarMenuSubItem key={link.href}>
                           <SidebarMenuSubButton asChild isActive={isActive(link.href)}>
                             <Link href={link.href}>
-                              <span>{t(locale, link.labelKey)}</span>
+                              <span>{link.label}</span>
                             </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
