@@ -1,10 +1,11 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import {
     ReactFlow,
     type Node,
     type Edge,
+    type EdgeMouseHandler,
     Background,
     BackgroundVariant,
     ConnectionLineType,
@@ -19,100 +20,205 @@ const nodeTypes = {
     service: FlowServiceNode,
 };
 
-// Initial positions are overridden in useMemo below; these are fallback defaults
-const nodes: Node[] = [
+/* ── Nodes ── */
+const baseNodes: Node[] = [
+    // Center: My App
     {
-        id: 'nextjs',
+        id: 'myapp',
         type: 'layer',
-        position: { x: 400, y: 500 },
+        position: { x: 0, y: 0 },
         data: { label: 'My App', emoji: getServiceEmoji('nextjs'), iconSlug: 'nextjs', layer: 'frontend', highlighted: true },
         draggable: false,
         selectable: false,
     },
+    // Left: Auth providers
     {
-        id: 'supabase',
+        id: 'google',
         type: 'service',
-        position: { x: 780, y: 400 },
-        data: { label: 'Supabase', emoji: getServiceEmoji('supabase'), iconSlug: 'supabase', status: 'connected', envConfigured: 3, envTotal: 3, highlighted: true },
+        position: { x: 0, y: 0 },
+        data: { label: 'Google', emoji: getServiceEmoji('google-oauth'), iconSlug: 'google-oauth', status: 'connected', envConfigured: 1, envTotal: 1 },
         draggable: false,
         selectable: false,
     },
     {
-        id: 'stripe',
+        id: 'kakao',
         type: 'service',
-        position: { x: 820, y: 650 },
-        data: { label: 'Stripe', emoji: getServiceEmoji('stripe'), iconSlug: 'stripe', status: 'in_progress', envConfigured: 1, envTotal: 2, highlighted: true },
+        position: { x: 0, y: 0 },
+        data: { label: 'Kakao', emoji: getServiceEmoji('kakao-login'), iconSlug: 'kakao-login', status: 'connected', envConfigured: 2, envTotal: 2 },
         draggable: false,
         selectable: false,
     },
+    // Bottom-center: GitHub
+    {
+        id: 'github',
+        type: 'service',
+        position: { x: 0, y: 0 },
+        data: { label: 'GitHub', emoji: getServiceEmoji('github'), iconSlug: 'github', status: 'connected', envConfigured: 2, envTotal: 2, highlighted: true },
+        draggable: false,
+        selectable: false,
+    },
+    // Right: AI services
     {
         id: 'openai',
         type: 'service',
-        position: { x: 200, y: 500 },
-        data: { label: 'OpenAI', emoji: getServiceEmoji('openai'), iconSlug: 'openai', status: 'connected', envConfigured: 1, envTotal: 1, highlighted: false },
+        position: { x: 0, y: 0 },
+        data: { label: 'OpenAI', emoji: getServiceEmoji('openai'), iconSlug: 'openai', status: 'connected', envConfigured: 1, envTotal: 1 },
+        draggable: false,
+        selectable: false,
+    },
+    {
+        id: 'gemini',
+        type: 'service',
+        position: { x: 0, y: 0 },
+        data: { label: 'Gemini', emoji: getServiceEmoji('google-gemini'), iconSlug: 'google-gemini', status: 'not_started', envConfigured: 0, envTotal: 1 },
         draggable: false,
         selectable: false,
     },
 ];
 
-const edges: Edge[] = [
+/* ── Edge styles ── */
+const connectedStyle = {
+    stroke: 'var(--brand-green)',
+    strokeWidth: 2,
+    filter: 'drop-shadow(0 0 6px var(--brand-green))',
+};
+const connectedHoverStyle = {
+    stroke: 'var(--brand-green)',
+    strokeWidth: 3,
+    filter: 'drop-shadow(0 0 12px var(--brand-green))',
+};
+const disconnectedStyle = {
+    stroke: 'var(--muted-foreground)',
+    strokeWidth: 1.5,
+    strokeDasharray: '6 4',
+    opacity: 0.35,
+};
+const disconnectedHoverStyle = {
+    stroke: 'var(--muted-foreground)',
+    strokeWidth: 2.5,
+    strokeDasharray: '6 4',
+    opacity: 0.7,
+};
+const labelStyle = { fontSize: 10, fontWeight: 500, fill: 'var(--muted-foreground)' };
+const labelBgStyle = { fill: 'var(--flow-label-bg, #1a1e2e)', fillOpacity: 0.85 };
+const hoverLabelStyle = { fontSize: 11, fontWeight: 600, fill: 'var(--foreground)' };
+
+/* ── Edges ── */
+const baseEdges: Edge[] = [
+    // Auth → My App
     {
-        id: 'e-nextjs-supabase',
-        source: 'nextjs',
-        target: 'supabase',
+        id: 'e-google-myapp',
+        source: 'google',
+        target: 'myapp',
         type: 'smoothstep',
         animated: true,
-        label: 'DATABASE_URL',
-        labelStyle: { fontSize: 10, fontWeight: 500, fill: 'var(--muted-foreground)' },
-        labelBgStyle: { fill: 'var(--flow-label-bg, #1a1e2e)', fillOpacity: 0.8 },
-        style: { stroke: 'var(--brand-green)', strokeWidth: 2, filter: 'drop-shadow(0 0 8px var(--brand-green))' },
-        className: 'animate-edge-glow-pulse',
+        label: 'GOOGLE_CLIENT_ID',
+        labelStyle,
+        labelBgStyle,
+        style: connectedStyle,
     },
     {
-        id: 'e-nextjs-stripe',
-        source: 'nextjs',
-        target: 'stripe',
+        id: 'e-kakao-myapp',
+        source: 'kakao',
+        target: 'myapp',
         type: 'smoothstep',
         animated: true,
-        label: 'STRIPE_SECRET_KEY',
-        labelStyle: { fontSize: 10, fontWeight: 500, fill: 'var(--muted-foreground)' },
-        labelBgStyle: { fill: 'var(--flow-label-bg, #1a1e2e)', fillOpacity: 0.8 },
-        style: { stroke: 'var(--brand-blue)', strokeWidth: 2, filter: 'drop-shadow(0 0 8px var(--brand-blue))' },
-        className: 'animate-edge-glow-pulse',
+        label: 'KAKAO_REST_KEY',
+        labelStyle,
+        labelBgStyle,
+        style: connectedStyle,
     },
+    // My App → GitHub
     {
-        id: 'e-openai-nextjs',
-        source: 'openai',
-        target: 'nextjs',
+        id: 'e-myapp-github',
+        source: 'myapp',
+        target: 'github',
+        type: 'smoothstep',
+        animated: true,
+        label: 'GITHUB_TOKEN',
+        labelStyle,
+        labelBgStyle,
+        style: { stroke: 'var(--brand-blue)', strokeWidth: 2, filter: 'drop-shadow(0 0 6px var(--brand-blue))' },
+    },
+    // My App → OpenAI (connected)
+    {
+        id: 'e-myapp-openai',
+        source: 'myapp',
+        target: 'openai',
+        type: 'smoothstep',
+        animated: true,
+        label: 'OPENAI_API_KEY',
+        labelStyle,
+        labelBgStyle,
+        style: connectedStyle,
+    },
+    // My App → Gemini (not connected)
+    {
+        id: 'e-myapp-gemini',
+        source: 'myapp',
+        target: 'gemini',
         type: 'smoothstep',
         animated: false,
-        style: { stroke: 'var(--flow-edge-color, #334155)', strokeWidth: 1.5, opacity: 0.3 },
+        label: 'GEMINI_API_KEY',
+        labelStyle,
+        labelBgStyle,
+        style: disconnectedStyle,
     },
 ];
 
 export function InteractiveHeroFlow() {
+    const [hoveredEdge, setHoveredEdge] = useState<string | null>(null);
+
     const currentNodes = useMemo(() => {
-        // Position nodes within the dedicated flow showcase area (340-400px tall)
         const isClient = typeof window !== 'undefined';
-        const cx = isClient ? window.innerWidth / 2 : 600;
-        // Center vertically within the showcase container
-        const cy = 160;
-        return nodes.map(n => {
-            if (n.id === 'nextjs') n.position = { x: cx - 80, y: cy };
-            if (n.id === 'supabase') n.position = { x: cx + 200, y: cy - 70 };
-            if (n.id === 'stripe') n.position = { x: cx + 260, y: cy + 100 };
-            if (n.id === 'openai') n.position = { x: cx - 340, y: cy - 20 };
-            return n;
+        const cx = isClient ? window.innerWidth / 2 : 700;
+        const cy = 170; // vertical center of the 340-400px showcase area
+
+        return baseNodes.map(n => {
+            const clone = { ...n, position: { ...n.position } };
+            // Layout: left auth → center app → bottom github → right AI
+            if (n.id === 'google')  clone.position = { x: cx - 380, y: cy - 60 };
+            if (n.id === 'kakao')   clone.position = { x: cx - 380, y: cy + 60 };
+            if (n.id === 'myapp')   clone.position = { x: cx - 80,  y: cy };
+            if (n.id === 'github')  clone.position = { x: cx - 40,  y: cy + 150 };
+            if (n.id === 'openai')  clone.position = { x: cx + 240, y: cy - 60 };
+            if (n.id === 'gemini')  clone.position = { x: cx + 240, y: cy + 60 };
+            return clone;
         });
     }, []);
 
+    // Edges with hover highlight
+    const currentEdges = useMemo(() => {
+        return baseEdges.map(e => {
+            if (hoveredEdge !== e.id) return e;
+            const isDisconnected = e.id === 'e-myapp-gemini';
+            return {
+                ...e,
+                style: isDisconnected ? disconnectedHoverStyle : connectedHoverStyle,
+                labelStyle: hoverLabelStyle,
+                labelBgStyle: { ...labelBgStyle, fillOpacity: 1 },
+                zIndex: 10,
+            };
+        });
+    }, [hoveredEdge]);
+
+    const onEdgeMouseEnter: EdgeMouseHandler = useCallback((_event, edge) => {
+        setHoveredEdge(edge.id);
+    }, []);
+
+    const onEdgeMouseLeave: EdgeMouseHandler = useCallback(() => {
+        setHoveredEdge(null);
+    }, []);
+
     return (
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-70 dark:opacity-80">
+        <div className="absolute inset-0 z-0 opacity-80 dark:opacity-90">
             <ReactFlow
                 nodes={currentNodes}
-                edges={edges}
+                edges={currentEdges}
                 nodeTypes={nodeTypes}
                 connectionLineType={ConnectionLineType.SmoothStep}
+                onEdgeMouseEnter={onEdgeMouseEnter}
+                onEdgeMouseLeave={onEdgeMouseLeave}
                 panOnDrag={false}
                 zoomOnScroll={false}
                 zoomOnPinch={false}
