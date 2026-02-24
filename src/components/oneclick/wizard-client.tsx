@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { TemplatePickerStep } from './template-picker-step';
 import { DeployStep } from './deploy-step';
@@ -19,7 +20,15 @@ interface OneclickWizardClientProps {
 
 export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientProps) {
   const { locale } = useLocaleStore();
+  const searchParams = useSearchParams();
   const { data: templates = [], isLoading: templatesLoading } = useHomepageTemplates('github_pages');
+
+  // Resolve ?template=<slug> query param to template id
+  const templateSlugFromUrl = searchParams.get('template');
+  const defaultTemplateFromUrl = useMemo(() => {
+    if (!templateSlugFromUrl || templates.length === 0) return null;
+    return templates.find((t) => t.slug === templateSlugFromUrl)?.id ?? null;
+  }, [templateSlugFromUrl, templates]);
 
   const {
     state,
@@ -132,7 +141,7 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
           isGitHubLoading={githubLoading}
           isAuthenticated={isAuthenticated}
           defaultSiteName={state.siteName}
-          defaultTemplate={state.template}
+          defaultTemplate={defaultTemplateFromUrl ?? state.template}
           accounts={accounts}
           selectedAccountId={selectedAccountId}
           onAccountChange={setSelectedAccountId}

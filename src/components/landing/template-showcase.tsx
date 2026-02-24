@@ -1,31 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Star } from 'lucide-react';
 import { ScrollReveal } from './scroll-reveal';
+import { Badge } from '@/components/ui/badge';
 import { useLocaleStore } from '@/stores/locale-store';
-import { t } from '@/lib/i18n';
 import { homepageTemplateSeedData } from '@/data/oneclick/homepage-templates';
-
-const GRADIENT_MAP: Record<string, string> = {
-  'link-in-bio-pro': 'from-purple-500 to-pink-500',
-  'personal-brand': 'from-blue-500 to-cyan-500',
-  'digital-namecard': 'from-emerald-500 to-teal-500',
-  'dev-showcase': 'from-orange-500 to-amber-500',
-  'freelancer-page': 'from-indigo-500 to-violet-500',
-  'small-biz': 'from-rose-500 to-red-500',
-};
-
-const EMOJI_MAP: Record<string, string> = {
-  'link-in-bio-pro': '\u{1F517}',
-  'personal-brand': '\u{1F3E0}',
-  'digital-namecard': '\u{1F4B3}',
-  'dev-showcase': '\u{1F4BB}',
-  'freelancer-page': '\u{1F4BC}',
-  'small-biz': '\u{1F3EA}',
-};
-
-const POPULAR_SLUGS = new Set(['dev-showcase', 'personal-brand']);
+import { WireframeSVG } from '@/components/oneclick/template-card';
+import {
+  RECOMMENDED_SLUGS,
+  TEMPLATE_USE_CASES,
+} from '@/lib/constants/template-categories';
 
 const activeTemplates = homepageTemplateSeedData
   .filter((tpl) => tpl.is_active)
@@ -44,41 +29,46 @@ export function TemplateShowcase() {
               TEMPLATES
             </p>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-foreground">
-              {t(locale, 'landing.templateShowcaseTitle')}
+              어떤 홈페이지를 만들까요?
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              {t(locale, 'landing.templateShowcaseDesc')}
+              6가지 템플릿 중 골라서 클릭 한 번이면 끝
             </p>
           </div>
         </ScrollReveal>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
           {activeTemplates.map((tpl, i) => {
-            const gradient = GRADIENT_MAP[tpl.slug] ?? 'from-gray-500 to-gray-600';
-            const emoji = EMOJI_MAP[tpl.slug] ?? '\u{1F4C4}';
-            const isPopular = POPULAR_SLUGS.has(tpl.slug);
+            const isRecommended = RECOMMENDED_SLUGS.has(tpl.slug);
+            const useCases = TEMPLATE_USE_CASES[tpl.slug];
 
             return (
-              <ScrollReveal key={tpl.slug} delay={i * 0.1}>
+              <ScrollReveal key={tpl.slug} delay={i * 0.08}>
                 <Link
-                  href="/sites"
-                  className="group flex flex-col rounded-xl border border-border bg-card overflow-hidden transition-all hover:-translate-y-2 hover:shadow-lg"
+                  href={`/sites/new?template=${tpl.slug}`}
+                  className="group flex flex-col rounded-xl border border-border bg-card overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg hover:border-primary/30"
                 >
-                  {/* Gradient header */}
-                  <div className={`relative h-[140px] bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-                    <span className="text-5xl">{emoji}</span>
-                    {/* Badge */}
-                    <div className="absolute top-3 right-3">
-                      {isPopular ? (
-                        <span className="inline-flex items-center rounded-full bg-white/20 backdrop-blur-sm px-2.5 py-0.5 text-xs font-semibold text-white">
-                          {t(locale, 'landing.templateTagPopular')}
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-white/20 backdrop-blur-sm px-2.5 py-0.5 text-xs font-semibold text-white">
-                          {t(locale, 'landing.templateTagFree')}
-                        </span>
-                      )}
-                    </div>
+                  {/* Wireframe preview */}
+                  <div className="relative h-36 bg-muted/50 flex items-center justify-center px-6 overflow-hidden">
+                    <WireframeSVG slug={tpl.slug} />
+
+                    {/* Recommended badge */}
+                    {isRecommended && (
+                      <Badge className="absolute top-2.5 left-2.5 gap-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5">
+                        <Star className="h-3 w-3" />
+                        추천
+                      </Badge>
+                    )}
+
+                    {/* Free badge for non-recommended */}
+                    {!isRecommended && (
+                      <Badge
+                        variant="secondary"
+                        className="absolute top-2.5 right-2.5 text-[10px] px-1.5 py-0.5"
+                      >
+                        무료
+                      </Badge>
+                    )}
                   </div>
 
                   {/* Content */}
@@ -86,11 +76,29 @@ export function TemplateShowcase() {
                     <h3 className="font-bold text-foreground mb-1">
                       {locale === 'ko' ? tpl.name_ko : tpl.name}
                     </h3>
-                    <p className="text-xs text-muted-foreground line-clamp-2 mb-4 flex-1">
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3 flex-1">
                       {locale === 'ko' ? tpl.description_ko : tpl.description}
                     </p>
+
+                    {/* Use case tags */}
+                    {useCases && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {(locale === 'ko' ? useCases.ko : useCases.en).map(
+                          (tag) => (
+                            <Badge
+                              key={tag}
+                              variant="outline"
+                              className="text-[10px] px-1.5 py-0 h-4"
+                            >
+                              {tag}
+                            </Badge>
+                          )
+                        )}
+                      </div>
+                    )}
+
                     <div className="flex items-center text-sm font-semibold text-brand-green group-hover:gap-2 transition-all">
-                      {t(locale, 'landing.templateShowcaseCta')}
+                      바로 시작하기
                       <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </div>
                   </div>
