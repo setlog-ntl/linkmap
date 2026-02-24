@@ -13,188 +13,150 @@ import {
 import '@xyflow/react/dist/style.css';
 import FlowLayerNode from './flow-layer-node';
 import FlowServiceNode from './flow-service-node';
+import HeroGroupNode from './hero-group-node';
 import { getServiceEmoji } from '@/lib/constants/service-brands';
 
 const nodeTypes = {
     layer: FlowLayerNode,
     service: FlowServiceNode,
+    group: HeroGroupNode,
 };
 
-/* ── Nodes ── */
+/* ─────────────────── helpers ─────────────────── */
+function svc(id: string, label: string, iconSlug: string, status: 'connected' | 'in_progress' | 'not_started', configured: number, total: number, highlighted = false): Node {
+    return {
+        id, type: 'service', position: { x: 0, y: 0 },
+        data: { label, emoji: getServiceEmoji(iconSlug), iconSlug, status, envConfigured: configured, envTotal: total, highlighted },
+        draggable: false, selectable: false,
+    };
+}
+
+const DISCONNECTED_IDS = new Set(['e-naver-myapp', 'e-myapp-gemini', 'e-myapp-vercel', 'e-myapp-firebase']);
+
+/* ─────────────────── Nodes (10 + 3 group labels) ─────────────────── */
 const baseNodes: Node[] = [
+    // Group labels
+    { id: 'g-auth', type: 'group', position: { x: 0, y: 0 }, data: { label: '🔐 로그인' }, draggable: false, selectable: false },
+    { id: 'g-ai', type: 'group', position: { x: 0, y: 0 }, data: { label: '🤖 AI' }, draggable: false, selectable: false },
+    { id: 'g-deploy', type: 'group', position: { x: 0, y: 0 }, data: { label: '🚀 배포' }, draggable: false, selectable: false },
+
     // Center: My App
     {
-        id: 'myapp',
-        type: 'layer',
-        position: { x: 0, y: 0 },
+        id: 'myapp', type: 'layer', position: { x: 0, y: 0 },
         data: { label: 'My App', emoji: getServiceEmoji('nextjs'), iconSlug: 'nextjs', layer: 'frontend', highlighted: true },
-        draggable: false,
-        selectable: false,
+        draggable: false, selectable: false,
     },
+
     // Left: Auth providers
-    {
-        id: 'google',
-        type: 'service',
-        position: { x: 0, y: 0 },
-        data: { label: 'Google', emoji: getServiceEmoji('google-oauth'), iconSlug: 'google-oauth', status: 'connected', envConfigured: 1, envTotal: 1 },
-        draggable: false,
-        selectable: false,
-    },
-    {
-        id: 'kakao',
-        type: 'service',
-        position: { x: 0, y: 0 },
-        data: { label: 'Kakao', emoji: getServiceEmoji('kakao-login'), iconSlug: 'kakao-login', status: 'connected', envConfigured: 2, envTotal: 2 },
-        draggable: false,
-        selectable: false,
-    },
+    svc('google', 'Google', 'google-oauth', 'connected', 1, 1),
+    svc('kakao', 'Kakao', 'kakao-login', 'connected', 2, 2),
+    svc('naver', 'Naver', 'naver-login', 'not_started', 0, 2),
+
+    // Right-top: AI
+    svc('openai', 'OpenAI', 'openai', 'connected', 1, 1),
+    svc('gemini', 'Gemini', 'google-gemini', 'not_started', 0, 1),
+
+    // Right-bottom: Deploy
+    svc('vercel', 'Vercel', 'vercel', 'not_started', 0, 1),
+    svc('cloudflare', 'Cloudflare', 'cloudflare', 'connected', 2, 2, true),
+    svc('firebase', 'Firebase', 'firebase', 'not_started', 0, 3),
+
     // Bottom-center: GitHub
-    {
-        id: 'github',
-        type: 'service',
-        position: { x: 0, y: 0 },
-        data: { label: 'GitHub', emoji: getServiceEmoji('github'), iconSlug: 'github', status: 'connected', envConfigured: 2, envTotal: 2, highlighted: true },
-        draggable: false,
-        selectable: false,
-    },
-    // Right: AI services
-    {
-        id: 'openai',
-        type: 'service',
-        position: { x: 0, y: 0 },
-        data: { label: 'OpenAI', emoji: getServiceEmoji('openai'), iconSlug: 'openai', status: 'connected', envConfigured: 1, envTotal: 1 },
-        draggable: false,
-        selectable: false,
-    },
-    {
-        id: 'gemini',
-        type: 'service',
-        position: { x: 0, y: 0 },
-        data: { label: 'Gemini', emoji: getServiceEmoji('google-gemini'), iconSlug: 'google-gemini', status: 'not_started', envConfigured: 0, envTotal: 1 },
-        draggable: false,
-        selectable: false,
-    },
+    svc('github', 'GitHub', 'github', 'connected', 2, 2, true),
 ];
 
-/* ── Edge styles ── */
+/* ─────────────────── Edge styles ─────────────────── */
 const connectedStyle = {
-    stroke: 'var(--brand-green)',
-    strokeWidth: 2,
-    filter: 'drop-shadow(0 0 6px var(--brand-green))',
+    stroke: 'var(--brand-green)', strokeWidth: 2,
+    filter: 'drop-shadow(0 0 4px var(--brand-green))',
 };
 const connectedHoverStyle = {
-    stroke: 'var(--brand-green)',
-    strokeWidth: 3,
-    filter: 'drop-shadow(0 0 12px var(--brand-green))',
+    stroke: 'var(--brand-green)', strokeWidth: 3,
+    filter: 'drop-shadow(0 0 10px var(--brand-green))',
+};
+const blueStyle = {
+    stroke: 'var(--brand-blue)', strokeWidth: 2,
+    filter: 'drop-shadow(0 0 4px var(--brand-blue))',
+};
+const blueHoverStyle = {
+    stroke: 'var(--brand-blue)', strokeWidth: 3,
+    filter: 'drop-shadow(0 0 10px var(--brand-blue))',
 };
 const disconnectedStyle = {
-    stroke: 'var(--muted-foreground)',
-    strokeWidth: 1.5,
-    strokeDasharray: '6 4',
-    opacity: 0.35,
+    stroke: 'var(--muted-foreground)', strokeWidth: 1.5,
+    strokeDasharray: '6 4', opacity: 0.3,
 };
 const disconnectedHoverStyle = {
-    stroke: 'var(--muted-foreground)',
-    strokeWidth: 2.5,
-    strokeDasharray: '6 4',
-    opacity: 0.7,
+    stroke: 'var(--muted-foreground)', strokeWidth: 2.5,
+    strokeDasharray: '6 4', opacity: 0.65,
 };
 const labelStyle = { fontSize: 10, fontWeight: 500, fill: 'var(--muted-foreground)' };
 const labelBgStyle = { fill: 'var(--flow-label-bg, #1a1e2e)', fillOpacity: 0.85 };
 const hoverLabelStyle = { fontSize: 11, fontWeight: 600, fill: 'var(--foreground)' };
 
-/* ── Edges ── */
+function edge(id: string, source: string, target: string, label: string, style: Record<string, unknown>, animated = true): Edge {
+    return { id, source, target, type: 'smoothstep', animated, label, labelStyle, labelBgStyle, style };
+}
+
+/* ─────────────────── Edges (9) ─────────────────── */
 const baseEdges: Edge[] = [
     // Auth → My App
-    {
-        id: 'e-google-myapp',
-        source: 'google',
-        target: 'myapp',
-        type: 'smoothstep',
-        animated: true,
-        label: 'GOOGLE_CLIENT_ID',
-        labelStyle,
-        labelBgStyle,
-        style: connectedStyle,
-    },
-    {
-        id: 'e-kakao-myapp',
-        source: 'kakao',
-        target: 'myapp',
-        type: 'smoothstep',
-        animated: true,
-        label: 'KAKAO_REST_KEY',
-        labelStyle,
-        labelBgStyle,
-        style: connectedStyle,
-    },
+    edge('e-google-myapp', 'google', 'myapp', 'GOOGLE_CLIENT_ID', connectedStyle),
+    edge('e-kakao-myapp', 'kakao', 'myapp', 'KAKAO_REST_KEY', connectedStyle),
+    edge('e-naver-myapp', 'naver', 'myapp', 'NAVER_CLIENT_ID', disconnectedStyle, false),
     // My App → GitHub
-    {
-        id: 'e-myapp-github',
-        source: 'myapp',
-        target: 'github',
-        type: 'smoothstep',
-        animated: true,
-        label: 'GITHUB_TOKEN',
-        labelStyle,
-        labelBgStyle,
-        style: { stroke: 'var(--brand-blue)', strokeWidth: 2, filter: 'drop-shadow(0 0 6px var(--brand-blue))' },
-    },
-    // My App → OpenAI (connected)
-    {
-        id: 'e-myapp-openai',
-        source: 'myapp',
-        target: 'openai',
-        type: 'smoothstep',
-        animated: true,
-        label: 'OPENAI_API_KEY',
-        labelStyle,
-        labelBgStyle,
-        style: connectedStyle,
-    },
-    // My App → Gemini (not connected)
-    {
-        id: 'e-myapp-gemini',
-        source: 'myapp',
-        target: 'gemini',
-        type: 'smoothstep',
-        animated: false,
-        label: 'GEMINI_API_KEY',
-        labelStyle,
-        labelBgStyle,
-        style: disconnectedStyle,
-    },
+    edge('e-myapp-github', 'myapp', 'github', 'GITHUB_TOKEN', blueStyle),
+    // My App → AI
+    edge('e-myapp-openai', 'myapp', 'openai', 'OPENAI_API_KEY', connectedStyle),
+    edge('e-myapp-gemini', 'myapp', 'gemini', 'GEMINI_API_KEY', disconnectedStyle, false),
+    // My App → Deploy
+    edge('e-myapp-vercel', 'myapp', 'vercel', 'VERCEL_TOKEN', disconnectedStyle, false),
+    edge('e-myapp-cloudflare', 'myapp', 'cloudflare', 'CF_API_TOKEN', connectedStyle),
+    edge('e-myapp-firebase', 'myapp', 'firebase', 'FIREBASE_CONFIG', disconnectedStyle, false),
 ];
 
+/* ─────────────────── Component ─────────────────── */
 export function InteractiveHeroFlow() {
     const [hoveredEdge, setHoveredEdge] = useState<string | null>(null);
 
     const currentNodes = useMemo(() => {
         const isClient = typeof window !== 'undefined';
         const cx = isClient ? window.innerWidth / 2 : 700;
-        const cy = 170; // vertical center of the 340-400px showcase area
+        const cy = 190;
 
         return baseNodes.map(n => {
             const clone = { ...n, position: { ...n.position } };
-            // Layout: left auth → center app → bottom github → right AI
-            if (n.id === 'google')  clone.position = { x: cx - 380, y: cy - 60 };
-            if (n.id === 'kakao')   clone.position = { x: cx - 380, y: cy + 60 };
-            if (n.id === 'myapp')   clone.position = { x: cx - 80,  y: cy };
-            if (n.id === 'github')  clone.position = { x: cx - 40,  y: cy + 150 };
-            if (n.id === 'openai')  clone.position = { x: cx + 240, y: cy - 60 };
-            if (n.id === 'gemini')  clone.position = { x: cx + 240, y: cy + 60 };
+            // ── Group labels ──
+            if (n.id === 'g-auth')   clone.position = { x: cx - 520, y: cy - 60 };
+            if (n.id === 'g-ai')     clone.position = { x: cx + 260, y: cy - 110 };
+            if (n.id === 'g-deploy') clone.position = { x: cx + 260, y: cy + 70 };
+            // ── Center ──
+            if (n.id === 'myapp')    clone.position = { x: cx - 80, y: cy };
+            // ── Auth (left) ──
+            if (n.id === 'google')   clone.position = { x: cx - 380, y: cy - 80 };
+            if (n.id === 'kakao')    clone.position = { x: cx - 380, y: cy + 10 };
+            if (n.id === 'naver')    clone.position = { x: cx - 380, y: cy + 100 };
+            // ── GitHub (bottom-center) ──
+            if (n.id === 'github')   clone.position = { x: cx - 40, y: cy + 170 };
+            // ── AI (right-top) ──
+            if (n.id === 'openai')   clone.position = { x: cx + 300, y: cy - 70 };
+            if (n.id === 'gemini')   clone.position = { x: cx + 300, y: cy + 10 };
+            // ── Deploy (right-bottom) ──
+            if (n.id === 'vercel')     clone.position = { x: cx + 300, y: cy + 110 };
+            if (n.id === 'cloudflare') clone.position = { x: cx + 300, y: cy + 190 };
+            if (n.id === 'firebase')   clone.position = { x: cx + 300, y: cy + 270 };
             return clone;
         });
     }, []);
 
-    // Edges with hover highlight
     const currentEdges = useMemo(() => {
         return baseEdges.map(e => {
             if (hoveredEdge !== e.id) return e;
-            const isDisconnected = e.id === 'e-myapp-gemini';
+            const isDisconnected = DISCONNECTED_IDS.has(e.id);
+            const isBlue = e.id === 'e-myapp-github';
             return {
                 ...e,
-                style: isDisconnected ? disconnectedHoverStyle : connectedHoverStyle,
+                style: isDisconnected ? disconnectedHoverStyle : isBlue ? blueHoverStyle : connectedHoverStyle,
                 labelStyle: hoverLabelStyle,
                 labelBgStyle: { ...labelBgStyle, fillOpacity: 1 },
                 zIndex: 10,
