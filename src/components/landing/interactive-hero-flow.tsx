@@ -51,7 +51,7 @@ const baseNodes: Node[] = [
     { id: 'g-ai',     type: 'group', position: { x: 0, y: 0 }, data: { label: '🤖 AI',       colorHint: 'purple' }, style: { width: GW, height: 0, overflow: 'visible' }, zIndex: -1, draggable: false, selectable: false },
     { id: 'g-deploy', type: 'group', position: { x: 0, y: 0 }, data: { label: '🚀 DEPLOY',   colorHint: 'blue'   }, style: { width: GW, height: 0, overflow: 'visible' }, zIndex: -1, draggable: false, selectable: false },
 
-    // ── Database (top-center) ──
+    // ── Database (top row, horizontal) ──
     svc('supabase', 'Supabase', 'supabase', 'connected',   2, 2, 'SUPABASE_URL'),
     svc('firebase', 'Firebase', 'firebase', 'not_started', 0, 3, 'FIREBASE_CONFIG'),
 
@@ -71,12 +71,10 @@ const baseNodes: Node[] = [
     svc('openai',     'OpenAI', 'openai',        'connected',   1, 1, 'OPENAI_API_KEY'),
     svc('gemini',     'Gemini', 'google-gemini', 'not_started', 0, 1, 'GEMINI_API_KEY'),
 
-    // ── Deploy (right-bottom) ──
+    // ── Deploy (right-bottom, includes GitHub) ──
     svc('vercel',     'Vercel',      'vercel',     'not_started', 0, 1, 'VERCEL_TOKEN'),
     svc('cloudflare', 'Cloudflare',  'cloudflare', 'connected',   2, 2, 'CF_API_TOKEN', true),
-
-    // ── GitHub (bottom-center) ──
-    svc('github', 'GitHub', 'github', 'connected', 2, 2, 'GITHUB_TOKEN', true),
+    svc('github',     'GitHub',      'github',     'connected',   2, 2, 'GITHUB_TOKEN', true),
 ];
 
 /* ─────────────────── Edge styles ─────────────────── */
@@ -120,25 +118,22 @@ function edge(
 
 /* ─────────────────── Edges ─────────────────── */
 const baseEdges: Edge[] = [
-    // DB → myapp (top)
+    // DB → myapp (DB on top, connect bottom → top)
     edge('e-supabase-myapp', 'supabase', 'myapp', connectedStyle,    true,  'bottom', 'top'),
     edge('e-firebase-myapp', 'firebase', 'myapp', disconnectedStyle, false, 'bottom', 'top'),
-    // Auth → myapp
-    edge('e-google-myapp',   'google',   'myapp', connectedStyle),
-    edge('e-kakao-myapp',    'kakao',    'myapp', connectedStyle),
-    edge('e-naver-myapp',    'naver',    'myapp', disconnectedStyle, false),
-    // myapp → GitHub
-    edge('e-myapp-github',   'myapp', 'github',     blueStyle,        true,  'bottom'),
-    // myapp → AI
-    edge('e-myapp-openai',   'myapp', 'openai',     connectedStyle),
-    edge('e-myapp-gemini',   'myapp', 'gemini',     disconnectedStyle, false),
-    // myapp → Deploy
-    edge('e-myapp-vercel',   'myapp', 'vercel',     disconnectedStyle, false),
-    edge('e-myapp-cloudflare','myapp','cloudflare',  connectedStyle),
+    // Auth → myapp (left → right, horizontal)
+    edge('e-google-myapp',   'google',   'myapp', connectedStyle,    true,  'right', 'left'),
+    edge('e-kakao-myapp',    'kakao',    'myapp', connectedStyle,    true,  'right', 'left'),
+    edge('e-naver-myapp',    'naver',    'myapp', disconnectedStyle, false, 'right', 'left'),
+    // myapp → AI (right → left, horizontal)
+    edge('e-myapp-openai',   'myapp', 'openai',     connectedStyle,    true,  'right', 'left'),
+    edge('e-myapp-gemini',   'myapp', 'gemini',     disconnectedStyle, false, 'right', 'left'),
+    // myapp → Deploy (bottom-right)
+    edge('e-myapp-vercel',   'myapp', 'vercel',     disconnectedStyle, false, 'right', 'left'),
+    edge('e-myapp-cloudflare','myapp','cloudflare',  connectedStyle,   true,  'right', 'left'),
+    // myapp → GitHub (bottom)
+    edge('e-myapp-github',   'myapp', 'github',     blueStyle,        true,  'bottom', 'left'),
 ];
-
-/* ─────────────────── Layout ─────────────────── */
-const CY = 200;   // vertical center of main service ring
 
 /* ─────────────────── Component ─────────────────── */
 export function InteractiveHeroFlow() {
@@ -148,38 +143,48 @@ export function InteractiveHeroFlow() {
         const isClient = typeof window !== 'undefined';
         const cx = isClient ? window.innerWidth / 2 : 700;
 
+        // Horizontal layout — MyApp at center, services fan out
+        const MY = 190;     // myapp vertical center
+
         const positions: Record<string, { x: number; y: number }> = {
-            // ── Database (top-center, stacked vertically above myapp) ──
-            supabase:   { x: cx - 90, y: 20 },
-            firebase:   { x: cx - 90, y: 90 },
-            // ── Auth (left) ──
-            google:     { x: cx - 370, y: CY - 55 },
-            kakao:      { x: cx - 370, y: CY + 15 },
-            naver:      { x: cx - 370, y: CY + 85 },
-            // ── Center ──
-            myapp:      { x: cx - 80,  y: CY + 10 },
-            // ── GitHub (bottom-center) ──
-            github:     { x: cx - 40,  y: CY + 175 },
+            // ── Database (top, horizontal pair above myapp) ──
+            supabase:   { x: cx - 140, y: 30 },
+            firebase:   { x: cx + 10,  y: 30 },
+            // ── Auth (left, stacked vertically) ──
+            google:     { x: cx - 340, y: MY - 50 },
+            kakao:      { x: cx - 340, y: MY + 15 },
+            naver:      { x: cx - 340, y: MY + 80 },
+            // ── Center hub ──
+            myapp:      { x: cx - 75,  y: MY },
             // ── AI (right-top) ──
-            openai:     { x: cx + 300, y: CY - 45 },
-            gemini:     { x: cx + 300, y: CY + 20 },
+            openai:     { x: cx + 230, y: MY - 40 },
+            gemini:     { x: cx + 230, y: MY + 25 },
             // ── Deploy (right-bottom) ──
-            vercel:     { x: cx + 300, y: CY + 125 },
-            cloudflare: { x: cx + 300, y: CY + 190 },
+            vercel:     { x: cx + 230, y: MY + 110 },
+            cloudflare: { x: cx + 230, y: MY + 175 },
+            // ── GitHub (bottom-right, within Deploy group) ──
+            github:     { x: cx + 230, y: MY + 240 },
         };
 
         // ── Group bounding boxes ──
         const dbTop     = positions.supabase.y;
         const dbBot     = positions.firebase.y + NODE_H;
+        // DB group spans both nodes horizontally
+        const dbLeft    = positions.supabase.x;
+        const dbRight   = positions.firebase.x + GW;
+        const dbGroupW  = (dbRight - dbLeft) + GP * 2;
+
         const authTop   = positions.google.y;
         const authBot   = positions.naver.y + NODE_H;
+
         const aiTop     = positions.openai.y;
         const aiBot     = positions.gemini.y + NODE_H;
-        const deployTop = positions.vercel.y;
-        const deployBot = positions.cloudflare.y + NODE_H;
 
-        const groupPositions: Record<string, { x: number; y: number; h: number }> = {
-            'g-db':     { x: positions.supabase.x - GP, y: dbTop - GP,     h: (dbBot - dbTop) + GP * 2 },
+        const deployTop = positions.vercel.y;
+        const deployBot = positions.github.y + NODE_H;
+
+        const groupPositions: Record<string, { x: number; y: number; h: number; w?: number }> = {
+            'g-db':     { x: dbLeft - GP,           y: dbTop - GP,     h: (dbBot - dbTop) + GP * 2,     w: dbGroupW },
             'g-auth':   { x: positions.google.x - GP,   y: authTop - GP,   h: (authBot - authTop) + GP * 2 },
             'g-ai':     { x: positions.openai.x - GP,   y: aiTop - GP,     h: (aiBot - aiTop) + GP * 2 },
             'g-deploy': { x: positions.vercel.x - GP,   y: deployTop - GP, h: (deployBot - deployTop) + GP * 2 },
@@ -190,7 +195,10 @@ export function InteractiveHeroFlow() {
             const gp = groupPositions[n.id];
             if (gp) {
                 clone.position = { x: gp.x, y: gp.y };
-                if (clone.style) clone.style.height = gp.h;
+                if (clone.style) {
+                    clone.style.height = gp.h;
+                    if (gp.w) clone.style.width = gp.w;
+                }
             } else if (positions[n.id]) {
                 clone.position = positions[n.id];
             }
