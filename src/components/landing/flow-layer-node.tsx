@@ -30,6 +30,7 @@ function FlowLayerNode({ data }: NodeProps) {
         }
       `}
     >
+      <Handle type="target" position={Position.Top} id="top" className="!bg-muted-foreground/30 !w-2 !h-2 !border-0" />
       <Handle type="target" position={Position.Left} className="!bg-muted-foreground/30 !w-2 !h-2 !border-0" />
       <Handle type="source" position={Position.Right} className="!bg-muted-foreground/30 !w-2 !h-2 !border-0" />
       <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-muted-foreground/30 !w-2 !h-2 !border-0" />

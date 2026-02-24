@@ -46,6 +46,7 @@ function FlowServiceNode({ data }: NodeProps) {
     >
       <Handle type="target" position={Position.Left} className="!bg-muted-foreground/30 !w-1.5 !h-1.5 !border-0" />
       <Handle type="source" position={Position.Right} className="!bg-muted-foreground/30 !w-1.5 !h-1.5 !border-0" />
+      <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-muted-foreground/30 !w-1.5 !h-1.5 !border-0" />
 
       <div className="flex items-center gap-2">
         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass}`} />
