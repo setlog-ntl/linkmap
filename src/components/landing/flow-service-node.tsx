@@ -18,6 +18,7 @@ interface FlowServiceNodeData {
   status: string;
   envConfigured?: number;
   envTotal?: number;
+  envKey?: string;
   highlighted?: boolean;
   [key: string]: unknown;
 }
@@ -35,33 +36,38 @@ function FlowServiceNode({ data }: NodeProps) {
 
   return (
     <div
-      className={`group px-3 py-2 rounded-lg border shadow-sm transition-all duration-300 bg-card cursor-default
+      className={`group px-3 py-2 rounded-[10px] border transition-all duration-200 bg-card cursor-default
         ${d.highlighted
-          ? 'scale-110 shadow-md ring-2 ring-brand-blue/30 border-brand-blue/50'
+          ? 'scale-[1.06] border-brand-blue/40 shadow-[0_0_16px_rgba(59,130,246,0.18)]'
           : isDisconnected
-            ? 'border-dashed border-muted-foreground/30 opacity-60 hover:opacity-100 hover:border-muted-foreground/50'
-            : 'border-border hover:border-brand-green/40 hover:shadow-md hover:scale-105'
+            ? 'border-dashed border-muted-foreground/20 opacity-45 hover:opacity-85 hover:border-muted-foreground/35'
+            : 'border-border/50 shadow-sm hover:border-brand-green/30 hover:shadow-[0_0_12px_rgba(16,185,129,0.12)] hover:scale-[1.03]'
         }`}
     >
-      <Handle type="target" position={Position.Left} className="!bg-muted-foreground/40 !w-2 !h-2 !border-0" />
-      <Handle type="source" position={Position.Right} className="!bg-muted-foreground/40 !w-2 !h-2 !border-0" />
+      <Handle type="target" position={Position.Left} className="!bg-muted-foreground/30 !w-1.5 !h-1.5 !border-0" />
+      <Handle type="source" position={Position.Right} className="!bg-muted-foreground/30 !w-1.5 !h-1.5 !border-0" />
 
       <div className="flex items-center gap-2">
         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass}`} />
         {d.iconSlug ? (
-          <ServiceIcon serviceId={d.iconSlug} size={18} />
+          <ServiceIcon serviceId={d.iconSlug} size={16} />
         ) : (
-          <span className="text-base">{d.emoji}</span>
+          <span className="text-sm">{d.emoji}</span>
         )}
         <span className="font-bold text-xs whitespace-nowrap text-foreground">{d.label}</span>
       </div>
-      <div className="flex items-center gap-1.5 mt-0.5 ml-[22px]">
-        {d.envTotal != null && d.envTotal > 0 && (
-          <span className="text-[10px] text-muted-foreground">
-            {d.envConfigured}/{d.envTotal} vars
-          </span>
+
+      {/* Env key + status */}
+      <div className="mt-1 ml-[22px] flex items-center gap-1">
+        {d.envKey && (
+          <>
+            <code className="text-[8.5px] font-mono text-muted-foreground/40 leading-none">
+              {d.envKey}
+            </code>
+            <span className="text-[8px] text-muted-foreground/20">·</span>
+          </>
         )}
-        <span className={`text-[10px] font-medium ${isDisconnected ? 'text-muted-foreground/60' : 'text-brand-green'}`}>
+        <span className={`text-[8.5px] font-medium leading-none ${isDisconnected ? 'text-muted-foreground/40' : 'text-brand-green/70'}`}>
           {statusLabels[d.status] || statusLabels.not_started}
         </span>
       </div>
