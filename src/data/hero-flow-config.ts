@@ -16,22 +16,22 @@ export interface NodeOffset {
 
 export const NODE_OFFSETS: Record<string, NodeOffset> = {
   // ── Database (상단 가로 배치) ──
-  supabase:   { dx: -140, dy: 30 },
-  firebase:   { dx:   10, dy: 30 },
-  // ── Auth (좌측 세로) ──
-  google:     { dx: -340, dy: 140 },
-  kakao:      { dx: -340, dy: 205 },
-  naver:      { dx: -340, dy: 270 },
+  supabase:   { dx: -155, dy:  20 },
+  firebase:   { dx:   15, dy:  20 },
+  // ── Auth (좌측 세로, 70px 간격) ──
+  google:     { dx: -360, dy:  85 },
+  kakao:      { dx: -360, dy: 155 },
+  naver:      { dx: -360, dy: 225 },
   // ── Center hub ──
-  myapp:      { dx:  -75, dy: 190 },
-  // ── AI (우측 상단) ──
-  openai:     { dx:  230, dy: 150 },
-  gemini:     { dx:  230, dy: 215 },
-  // ── Deploy (우측 하단) ──
-  vercel:     { dx:  230, dy: 300 },
-  cloudflare: { dx:  230, dy: 365 },
+  myapp:      { dx:  -80, dy: 145 },
+  // ── AI (우측 상단, 70px 간격) ──
+  openai:     { dx:  240, dy:  85 },
+  gemini:     { dx:  240, dy: 155 },
+  // ── Deploy (우측 하단, 70px 간격) ──
+  vercel:     { dx:  240, dy: 255 },
+  cloudflare: { dx:  240, dy: 325 },
   // ── GitHub (Deploy 그룹 내) ──
-  github:     { dx:  230, dy: 430 },
+  github:     { dx:  240, dy: 395 },
 };
 
 // ── 그룹 색상 ──
@@ -54,7 +54,7 @@ export const GROUP_CONFIGS: Record<string, GroupConfig> = {
 // ── 레이아웃 상수 ──
 export const LAYOUT = {
   /** 그룹 내부 패딩 */
-  groupPadding: 16,
+  groupPadding: 14,
   /** 그룹 기본 너비 */
   groupWidth: 190,
   /** 서비스 노드 대략 높이 */
