@@ -92,23 +92,22 @@ const edges: Edge[] = [
 
 export function InteractiveHeroFlow() {
     const currentNodes = useMemo(() => {
-        // Position nodes well below the hero content to avoid overlap with CTA/trust badges
+        // Position nodes within the dedicated flow showcase area (340-400px tall)
         const isClient = typeof window !== 'undefined';
         const cx = isClient ? window.innerWidth / 2 : 600;
-        const vh = isClient ? window.innerHeight : 800;
-        // Push nodes further down — bottom edge of the viewport
-        const cy = vh * 0.88;
+        // Center vertically within the showcase container
+        const cy = 160;
         return nodes.map(n => {
-            if (n.id === 'nextjs') n.position = { x: cx - 180, y: cy };
-            if (n.id === 'supabase') n.position = { x: cx + 280, y: cy - 80 };
-            if (n.id === 'stripe') n.position = { x: cx + 320, y: cy + 150 };
-            if (n.id === 'openai') n.position = { x: cx - 480, y: cy - 40 };
+            if (n.id === 'nextjs') n.position = { x: cx - 80, y: cy };
+            if (n.id === 'supabase') n.position = { x: cx + 200, y: cy - 70 };
+            if (n.id === 'stripe') n.position = { x: cx + 260, y: cy + 100 };
+            if (n.id === 'openai') n.position = { x: cx - 340, y: cy - 20 };
             return n;
         });
     }, []);
 
     return (
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40 dark:opacity-60">
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-70 dark:opacity-80">
             <ReactFlow
                 nodes={currentNodes}
                 edges={edges}

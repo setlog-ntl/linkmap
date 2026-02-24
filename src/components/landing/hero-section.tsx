@@ -25,26 +25,20 @@ export function HeroSection() {
   }, []);
 
   return (
-    <section ref={containerRef} className="relative min-h-screen pt-32 pb-20 lg:pt-40 lg:pb-28 flex flex-col justify-center items-center">
-      {/* Dark theme background default layer */}
-      <div className="absolute inset-0 -z-20 bg-background" />
+    <section ref={containerRef} className="relative flex flex-col bg-background">
+      {/* ── Area 1: Text + CTA (vertically centered, full-screen) ── */}
+      <div className="relative z-10 min-h-screen flex flex-col justify-center items-center pt-32 pb-10 lg:pt-40 lg:pb-14 px-6 lg:px-8">
+        {/* Dot-grid background for text area only */}
+        <div className="absolute inset-0 -z-10" style={{ backgroundImage: 'radial-gradient(circle, var(--dot-color, #334155) 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
 
-      {/* The interactive canvas background */}
-      <InteractiveHeroFlow />
-
-      {/* Gradient mask to separate content from background flow nodes */}
-      <div className="absolute inset-x-0 bottom-0 h-1/3 z-[5] bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
-
-      {/* Overlay Content */}
-      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8 text-center pointer-events-none">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="flex flex-col items-center justify-center"
+          className="flex flex-col items-center justify-center text-center max-w-7xl mx-auto"
         >
           {/* Badge */}
-          <div className="mb-8 flex justify-center pointer-events-auto">
+          <div className="mb-8 flex justify-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 dark:bg-accent/60 backdrop-blur-md px-4 py-1.5 text-xs font-medium text-brand-green shadow-lg">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-green opacity-75" />
@@ -54,20 +48,20 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Headline with static line + typewriter effect */}
-          <h1 className="mx-auto max-w-4xl text-5xl font-extrabold tracking-tight sm:text-7xl mb-6 leading-[1.1] text-foreground drop-shadow-md">
+          {/* Headline */}
+          <h1 className="mx-auto max-w-4xl text-5xl font-extrabold tracking-tight sm:text-7xl mb-6 leading-[1.1] text-foreground">
             <span className="block text-3xl sm:text-5xl font-bold mb-2">
               {t(locale, 'landing.heroHeadlineStatic')}
             </span>
             <TypewriterHeadline />
           </h1>
 
-          <p className="mx-auto max-w-2xl text-lg text-muted-foreground mb-10 leading-relaxed drop-shadow-sm bg-background/40 backdrop-blur-sm rounded-xl py-2 px-4 inline-block">
+          <p className="mx-auto max-w-2xl text-lg text-muted-foreground mb-10 leading-relaxed">
             {t(locale, 'landing.heroSubtitle')}
           </p>
 
-          {/* CTA Buttons - Important to set pointer-events-auto so they can be clicked */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 pointer-events-auto">
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
             <Button className="bg-brand-green text-black hover:bg-brand-green/85 px-8 py-3.5 h-auto rounded-lg text-base font-bold transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]" asChild>
               <Link href="/sites">
                 <Rocket className="mr-2 h-4 w-4" />
@@ -92,7 +86,7 @@ export function HeroSection() {
           </div>
 
           {/* Trust Badges */}
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground bg-background/40 backdrop-blur-sm rounded-full py-2 px-6 shadow-sm">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
             {[
               t(locale, 'landing.trustFree'),
               t(locale, 'landing.trustNoCard'),
@@ -105,6 +99,15 @@ export function HeroSection() {
             ))}
           </div>
         </motion.div>
+      </div>
+
+      {/* ── Area 2: Interactive Flow showcase (dedicated space below text) ── */}
+      <div className="relative h-[340px] lg:h-[400px] -mt-8">
+        {/* Top fade: blend into text area */}
+        <div className="absolute inset-x-0 top-0 h-24 z-10 bg-gradient-to-b from-background to-transparent pointer-events-none" />
+        <InteractiveHeroFlow />
+        {/* Bottom fade: blend into next section */}
+        <div className="absolute inset-x-0 bottom-0 h-20 z-10 bg-gradient-to-t from-background to-transparent pointer-events-none" />
       </div>
     </section>
   );
