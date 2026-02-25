@@ -19,6 +19,7 @@ import {
 import { useLocaleStore } from '@/stores/locale-store';
 import { t, type Locale } from '@/lib/i18n';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 import type { DeployStatus, HomepageTemplate } from '@/lib/queries/oneclick';
 
 interface DeploySuccessProps {
@@ -27,28 +28,66 @@ interface DeploySuccessProps {
   template?: HomepageTemplate | null;
 }
 
+type GithubBadgeState = 'loading' | 'refreshing' | 'success' | 'unavailable';
+
+const BADGE_CONFIG: Record<GithubBadgeState, { label: string; dotClass: string; pillClass: string }> = {
+  loading: {
+    label: '미리보기 로드 중',
+    dotClass: 'bg-blue-500 animate-pulse',
+    pillClass: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  },
+  refreshing: {
+    label: '최신 버전 확인 중',
+    dotClass: 'bg-amber-500 animate-pulse',
+    pillClass: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  },
+  success: {
+    label: '게시됨',
+    dotClass: 'bg-green-500',
+    pillClass: 'bg-green-500/10 text-green-600 dark:text-green-400',
+  },
+  unavailable: {
+    label: '준비 중',
+    dotClass: 'bg-muted-foreground/40',
+    pillClass: 'bg-muted text-muted-foreground',
+  },
+};
+
 export function DeploySuccess({ status, projectId, template }: DeploySuccessProps) {
   const { locale } = useLocaleStore();
   const liveUrl = status.pages_url || status.deployment_url;
 
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
-  const [iframeKey, setIframeKey] = useState(0);
+  // src 변경 방식: key 변경(재마운트)과 달리 기존 iframe 콘텐츠를 유지하면서
+  // 새 URL로 로드 → 재시도 중에도 이전 화면이 그대로 보임.
+  const [iframeSrc, setIframeSrc] = useState(liveUrl ?? '');
   const [refreshCount, setRefreshCount] = useState(0);
 
-  // CDN 전파 지연 대응: iframe 로드 실패 시 30초마다 자동 재시도 (최대 3회)
-  // 서버에서 Pages Deployments API로 전파 완료 감지 후 success 전환하지만,
-  // CDN 엣지 전파 지연이 있을 수 있어 클라이언트에서도 재시도.
+  // CDN 전파 지연 대응: 미로드 시 30초마다 src를 캐시버스팅 쿼리로 변경 (최대 3회)
   useEffect(() => {
     if (!liveUrl || iframeLoaded || refreshCount >= 3) return;
     const timer = setTimeout(() => {
+      const next = refreshCount + 1;
+      setIframeSrc(`${liveUrl}?_r=${next}`);
       setIframeLoaded(false);
       setIframeError(false);
-      setIframeKey((k) => k + 1);
-      setRefreshCount((c) => c + 1);
+      setRefreshCount(next);
     }, 30_000);
     return () => clearTimeout(timer);
   }, [liveUrl, iframeLoaded, iframeError, refreshCount]);
+
+  const badgeState: GithubBadgeState = iframeLoaded
+    ? 'success'
+    : iframeError && refreshCount >= 3
+      ? 'unavailable'
+      : refreshCount > 0
+        ? 'refreshing'
+        : 'loading';
+
+  const badge = BADGE_CONFIG[badgeState];
+  // 첫 로드 전에만 스피너 overlay — 재시도 중엔 이전 iframe 화면이 그대로 유지됨
+  const showOverlay = refreshCount === 0 && !iframeLoaded && !iframeError;
 
   return (
     <>
@@ -62,28 +101,41 @@ export function DeploySuccess({ status, projectId, template }: DeploySuccessProp
                   className="relative w-full overflow-hidden rounded-xl border bg-background shadow-lg"
                   style={{ height: '320px' }}
                 >
-                  {/* Browser chrome — 주소창 */}
+                  {/* Browser chrome — 주소창 + GitHub 배포 상태 배지 */}
                   <div className="absolute top-0 left-0 right-0 h-9 bg-muted/90 border-b z-20 flex items-center px-3 gap-2 rounded-t-xl">
                     <div className="flex gap-1.5 shrink-0">
                       <div className="w-2.5 h-2.5 rounded-full bg-red-400/70" />
                       <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/70" />
                       <div className="w-2.5 h-2.5 rounded-full bg-green-400/70" />
                     </div>
-                    <div className="flex-1 h-5 bg-background/70 rounded flex items-center gap-1.5 px-2 text-muted-foreground truncate">
+                    <div className="flex-1 h-5 bg-background/70 rounded flex items-center gap-1.5 px-2 text-muted-foreground truncate min-w-0">
                       <Globe className="h-2.5 w-2.5 shrink-0" />
                       <span className="text-[9px] font-mono truncate">
                         {liveUrl.replace('https://', '')}
                       </span>
                     </div>
+                    {/* GitHub 배포 상태 배지 */}
+                    <div
+                      className={cn(
+                        'flex items-center gap-1 shrink-0 px-1.5 py-0.5 rounded-full text-[9px] font-medium transition-all duration-500',
+                        badge.pillClass
+                      )}
+                    >
+                      <Github className="h-2.5 w-2.5" />
+                      <span className={cn('h-1.5 w-1.5 rounded-full transition-colors duration-500', badge.dotClass)} />
+                      <span className="whitespace-nowrap">{badge.label}</span>
+                    </div>
                   </div>
 
-                  {/* Scaled iframe — 주소창 아래 */}
+                  {/* Scaled iframe — 주소창 아래. 재시도 중엔 이전 화면 그대로 유지 */}
                   <div className="absolute left-0 right-0 bottom-0 top-9 overflow-hidden pointer-events-none">
                     <iframe
-                      key={iframeKey}
-                      src={liveUrl}
+                      src={iframeSrc}
                       title="Site preview"
-                      className="absolute top-0 left-0 border-0"
+                      className={cn(
+                        'absolute top-0 left-0 border-0 transition-opacity duration-700',
+                        iframeLoaded ? 'opacity-100' : 'opacity-80'
+                      )}
                       style={{
                         width: '860px',
                         height: '720px',
@@ -97,20 +149,11 @@ export function DeploySuccess({ status, projectId, template }: DeploySuccessProp
                     />
                   </div>
 
-                  {/* Loading spinner */}
-                  {!iframeLoaded && !iframeError && (
-                    <div className="absolute left-0 right-0 bottom-0 top-9 flex items-center justify-center bg-muted">
-                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                    </div>
-                  )}
-
-                  {/* Iframe error fallback */}
-                  {iframeError && (
+                  {/* 첫 로드 시에만 스피너 overlay */}
+                  {showOverlay && (
                     <div className="absolute left-0 right-0 bottom-0 top-9 flex flex-col items-center justify-center bg-muted gap-2">
-                      <Globe className="h-8 w-8 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">
-                        {t(locale, 'deploySuccess.previewUnavailable')}
-                      </span>
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                      <span className="text-[11px] text-muted-foreground">미리보기 불러오는 중</span>
                     </div>
                   )}
 
