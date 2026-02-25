@@ -36,7 +36,7 @@ export const easyCategoryDescriptions: Record<EasyCategory, string> = {
 export const easyCategoryToServiceCategories: Record<EasyCategory, ServiceCategory[]> = {
   login_signup: ['auth', 'social_login'],
   data_storage: ['database', 'storage', 'cache'],
-  deploy_hosting: ['deploy', 'cdn', 'serverless'],
+  deploy_hosting: ['deploy', 'cdn', 'serverless', 'domain'],
   payments: ['payment', 'ecommerce'],
   notifications: ['email', 'sms', 'push', 'chat'],
   ai_tools: ['ai'],
