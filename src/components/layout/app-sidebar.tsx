@@ -160,18 +160,18 @@ export function AppSidebar({ profile }: AppSidebarProps) {
       {/* Logo */}
       <SidebarHeader className="px-3 py-3">
         <Link href="/" className="flex items-center gap-2 font-bold text-lg px-1">
-          <div className="relative w-7 h-7 shrink-0">
+          <div className="relative w-8 h-8 shrink-0 rounded-lg overflow-hidden">
             <Image
-              src="/logo.png"
+              src="/logo-icon.png"
               alt="Linkmap"
               fill
-              className="object-contain dark:brightness-0 dark:invert"
+              className="object-cover"
             />
           </div>
           {!isCollapsed && (
             <span className="flex items-center">
-              <span className="text-primary">Link</span>
-              <span>map</span>
+              <span className="text-[#38bdf8]">Link</span>
+              <span className="text-foreground">map</span>
             </span>
           )}
         </Link>

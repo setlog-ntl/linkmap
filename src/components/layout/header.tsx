@@ -117,17 +117,17 @@ export function Header({ profile }: HeaderProps) {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-          <div className="relative w-8 h-8">
+          <div className="relative w-8 h-8 rounded-lg overflow-hidden">
             <Image
-              src="/logo.png"
+              src="/logo-icon.png"
               alt="Linkmap Logo"
               fill
-              className="object-contain dark:brightness-0 dark:invert"
+              className="object-cover"
             />
           </div>
           <div className="flex items-center">
-            <span className="text-primary">Link</span>
-            <span>map</span>
+            <span className="text-[#38bdf8]">Link</span>
+            <span className="text-foreground">map</span>
           </div>
         </Link>
 
