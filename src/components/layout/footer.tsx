@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Github } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
+import { toast } from 'sonner';
 
 export function Footer() {
   const { locale } = useLocaleStore();
@@ -39,7 +40,7 @@ export function Footer() {
               <li><Link href="/guides/frontend" className="hover:text-white transition-colors">프론트엔드 가이드</Link></li>
               <li><Link href="/guides/backend" className="hover:text-white transition-colors">백엔드 가이드</Link></li>
               <li><Link href="/guides/deploy" className="hover:text-white transition-colors">도메인·배포·서버</Link></li>
-              <li><a href="mailto:support@linkmap.dev" className="hover:text-white transition-colors">Contact</a></li>
+              <li><a href="mailto:cdhrich2@gmail.com" className="hover:text-white transition-colors">Contact</a></li>
             </ul>
           </div>
           <div>
@@ -53,20 +54,29 @@ export function Footer() {
             <h4 className="font-semibold text-sm mb-3 text-white">{t(locale, 'landing.footerCommunity')}</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="https://github.com/linkmap-dev" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors inline-flex items-center gap-1.5">
+                <button
+                  onClick={() => toast.info('추후 예정입니다.')}
+                  className="hover:text-white transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                >
                   <Github className="w-3.5 h-3.5" />
                   {t(locale, 'landing.footerGitHub')}
-                </a>
+                </button>
               </li>
               <li>
-                <a href="https://discord.gg/linkmap" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                <button
+                  onClick={() => toast.info('추후 예정입니다.')}
+                  className="hover:text-white transition-colors cursor-pointer"
+                >
                   {t(locale, 'landing.footerDiscord')}
-                </a>
+                </button>
               </li>
               <li>
-                <a href="https://x.com/linkmap_dev" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                <button
+                  onClick={() => toast.info('추후 예정입니다.')}
+                  className="hover:text-white transition-colors cursor-pointer"
+                >
                   {t(locale, 'landing.footerTwitter')}
-                </a>
+                </button>
               </li>
             </ul>
           </div>
