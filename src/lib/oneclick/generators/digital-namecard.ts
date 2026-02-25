@@ -8,6 +8,8 @@ import {
   esc,
   buildSocialsArray,
   normalizeImagePath,
+  genBasePathConst,
+  imagePathExpr,
   createExtractors,
   extractSiteBlock,
   parseSocialsFromConfig,
@@ -59,6 +61,8 @@ function generateConfigTs(state: ModuleConfigState): string {
 
   return `export interface SocialItem { platform: string; url: string; }
 
+${genBasePathConst()}
+
 function parseJSON<T>(raw: string | undefined, fallback: T): T {
   if (!raw) return fallback;
   try { return JSON.parse(raw) as T; } catch { return fallback; }
@@ -77,7 +81,7 @@ export const siteConfig = {
   addressEn: process.env.NEXT_PUBLIC_ADDRESS_EN || ${addressEn ? `'${esc(addressEn)}'` : 'null'},
   website: process.env.NEXT_PUBLIC_WEBSITE || ${website ? `'${esc(website)}'` : 'null'},
   socials: parseJSON<SocialItem[]>(process.env.NEXT_PUBLIC_SOCIALS, ${buildSocialsArray(socialItems)}),
-  avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || ${avatarUrl ? `'${esc(avatarUrl)}'` : 'null'},
+  avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || ${avatarUrl ? imagePathExpr(avatarUrl) : 'null'},
   accentColor: process.env.NEXT_PUBLIC_ACCENT_COLOR || '${esc(accentColor)}',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };

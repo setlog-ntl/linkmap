@@ -8,6 +8,8 @@ import {
   esc,
   buildSocialsArray,
   normalizeImagePath,
+  genBasePathConst,
+  imagePathExpr,
   createExtractors,
   extractSiteBlock,
   parseArrayConstant,
@@ -88,6 +90,8 @@ export interface SocialItem {
 
 const DEMO_LINKS: LinkItem[] = ${buildLinksArray(linkItems)};
 
+${genBasePathConst()}
+
 function parseJSON<T>(raw: string | undefined, fallback: T): T {
   if (!raw) return fallback;
   try {
@@ -102,7 +106,7 @@ export const siteConfig = {
   siteNameEn: process.env.NEXT_PUBLIC_SITE_NAME_EN || '${esc(siteNameEn)}',
   bio: process.env.NEXT_PUBLIC_BIO || '${esc(bio)}',
   bioEn: process.env.NEXT_PUBLIC_BIO_EN || '${esc(bioEn)}',
-  avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || ${avatarUrl ? `'${esc(avatarUrl)}'` : 'null'},
+  avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || ${avatarUrl ? imagePathExpr(avatarUrl) : 'null'},
   theme: process.env.NEXT_PUBLIC_THEME || '${esc(bgStyle)}',
   bgStyle: '${esc(bgStyle)}',
   primaryColor: '${esc(primaryColor)}',

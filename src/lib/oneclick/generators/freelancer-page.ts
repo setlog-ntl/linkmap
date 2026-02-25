@@ -8,6 +8,8 @@ import {
   esc,
   buildSocialsArray,
   normalizeImagePath,
+  genBasePathConst,
+  imagePathExpr,
   createExtractors,
   extractSiteBlock,
   parseArrayConstant,
@@ -48,7 +50,7 @@ function buildPortfolioArray(items: unknown[]): string {
     if (v.categoryEn) lines.push(`    categoryEn: '${esc(v.categoryEn)}',`);
     lines.push(`    desc: '${esc(v.desc || '')}',`);
     if (v.descEn) lines.push(`    descEn: '${esc(v.descEn)}',`);
-    lines.push(`    imageUrl: '${esc(normalizeImagePath(v.imageUrl || ''))}',`);
+    lines.push(`    imageUrl: \`\${_basePath}${esc(normalizeImagePath(v.imageUrl || ''))}\`,`);
     const tagsStr = v.tags || '';
     const tagsArr = tagsStr
       .split(',')
@@ -214,6 +216,8 @@ const DEMO_TESTIMONIALS: TestimonialItem[] = ${buildTestimonialsArray(testimonia
 
 const DEMO_PROCESS: ProcessStep[] = ${buildProcessArray(processItems)};
 
+${genBasePathConst()}
+
 function parseJSON<T>(raw: string | undefined, fallback: T): T {
   if (!raw) return fallback;
   try {
@@ -230,7 +234,7 @@ export const siteConfig = {
   titleEn: process.env.NEXT_PUBLIC_TITLE_EN || '${esc(titleEn)}',
   tagline: process.env.NEXT_PUBLIC_TAGLINE || '${esc(tagline)}',
   taglineEn: process.env.NEXT_PUBLIC_TAGLINE_EN || '${esc(taglineEn)}',
-  avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || ${avatarUrl ? `'${esc(avatarUrl)}'` : 'null'},
+  avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || ${avatarUrl ? imagePathExpr(avatarUrl) : 'null'},
   services: parseJSON<ServiceItem[]>(process.env.NEXT_PUBLIC_SERVICES, DEMO_SERVICES),
   portfolio: parseJSON<PortfolioItem[]>(process.env.NEXT_PUBLIC_PORTFOLIO, DEMO_PORTFOLIO),
   testimonials: parseJSON<TestimonialItem[]>(process.env.NEXT_PUBLIC_TESTIMONIALS, DEMO_TESTIMONIALS),
@@ -334,6 +338,11 @@ function parseConfigToState(
         let fm;
         while ((fm = fieldRe.exec(m[1])) !== null) {
           obj[fm[1]] = unescapeString(fm[2]);
+        }
+        // imageUrl template literal 파싱: `${_basePath}/images/...`
+        const imgTplMatch = m[1].match(/imageUrl:\s*`\$\{_basePath\}([^`]*)`/);
+        if (imgTplMatch) {
+          obj.imageUrl = imgTplMatch[1];
         }
         // tags: ['a', 'b'] 패턴 파싱
         const tagsMatch = m[1].match(/tags:\s*\[([\s\S]*?)\]/);

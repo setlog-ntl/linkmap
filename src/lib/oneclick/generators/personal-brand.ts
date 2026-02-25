@@ -9,6 +9,8 @@ import {
   buildSocialsArray,
   buildGalleryArray,
   normalizeImagePath,
+  genBasePathConst,
+  imagePathExpr,
   createExtractors,
   extractSiteBlock,
   parseArrayConstant,
@@ -133,6 +135,8 @@ const DEMO_VALUES: ValueItem[] = ${buildValuesArray(valuesItems)};
 
 const DEMO_HIGHLIGHTS: HighlightItem[] = ${buildHighlightsArray(highlightsItems)};
 
+${genBasePathConst()}
+
 function parseJSON<T>(raw: string | undefined, fallback: T): T {
   if (!raw) return fallback;
   try {
@@ -147,7 +151,7 @@ export const siteConfig = {
   nameEn: process.env.NEXT_PUBLIC_SITE_NAME_EN || '${esc(nameEn)}',
   tagline: process.env.NEXT_PUBLIC_TAGLINE || '${esc(tagline)}',
   taglineEn: process.env.NEXT_PUBLIC_TAGLINE_EN || '${esc(taglineEn)}',
-  heroImageUrl: process.env.NEXT_PUBLIC_HERO_IMAGE_URL || ${heroImageUrl ? `'${esc(heroImageUrl)}'` : 'null'},
+  heroImageUrl: process.env.NEXT_PUBLIC_HERO_IMAGE_URL || ${heroImageUrl ? imagePathExpr(heroImageUrl) : 'null'},
   story:
     process.env.NEXT_PUBLIC_STORY ||
     '${esc(story)}',
@@ -267,17 +271,17 @@ function parseConfigToState(
     if (items.length > 0) state.values.contact.socials = items;
   } catch { /* 기본값 유지 */ }
 
-  // Gallery images
+  // Gallery images (작은따옴표 또는 template literal)
   try {
     const galMatch = configContent.match(
       /galleryImages:\s*parseJSON<string\[\]>\([^,]+,\s*(\[[\s\S]*?\])\s*\)/
     );
     if (galMatch) {
       const items: Record<string, string>[] = [];
-      const urlRe = /'([^']+)'/g;
+      const urlRe = /(?:'([^']+)'|`\$\{_basePath\}([^`]+)`)/g;
       let m;
       while ((m = urlRe.exec(galMatch[1])) !== null) {
-        items.push({ url: m[1] });
+        items.push({ url: m[1] || m[2] });
       }
       if (items.length > 0) state.values.gallery.images = items;
     }

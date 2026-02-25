@@ -52,6 +52,30 @@ export function normalizeImagePath(path: string): string {
   return path;
 }
 
+// ─── basePath 지원 ──────────────────────────
+// GitHub Pages 배포 시 /<repo-name>/ 하위에 서빙되므로
+// <img src="/images/..."> 같은 절대 경로에 basePath 접두사 필요
+
+/** config.ts 상단에 삽입할 _basePath 상수 코드 */
+export function genBasePathConst(): string {
+  return `const _basePath = process.env.NEXT_PUBLIC_REPO_NAME ? \`/\${process.env.NEXT_PUBLIC_REPO_NAME}\` : '';`;
+}
+
+/** 로컬 이미지 경로 → basePath 포함 template literal 표현식 생성 */
+export function imagePathExpr(path: string): string {
+  if (!path) return 'null';
+  return `\`\${_basePath}${esc(path)}\``;
+}
+
+/** 파싱된 이미지 경로에서 basePath 접두사 제거 (에디터 상태 복원용) */
+export function stripBasePath(path: string): string {
+  // ${_basePath}/images/... 형태의 빌드 결과물에서 basePath를 제거
+  // 런타임에 이미 resolve된 경로: /repo-name/images/... → /images/...
+  const m = path.match(/^\/[^/]+(\/(images|icons)\/.+)$/);
+  if (m) return m[1];
+  return path;
+}
+
 // ─── 공통 배열 빌더 ──────────────────────────
 
 export function buildSocialsArray(items: unknown[]): string {
@@ -68,7 +92,8 @@ export function buildGalleryArray(items: unknown[]): string {
   const urls = items.map((item) => {
     const v = item as Record<string, string>;
     const raw = v.url || (v as unknown as string);
-    return `  '${esc(normalizeImagePath(raw))}'`;
+    const normalized = normalizeImagePath(raw);
+    return `  \`\${_basePath}${esc(normalized)}\``;
   });
   return `[\n${urls.join(',\n')}\n]`;
 }
@@ -95,6 +120,14 @@ export function createExtractors(siteBlock: string) {
   };
 
   const extractNullable = (key: string): string | null => {
+    // template literal 형태: `${_basePath}/images/...` 매칭
+    const reTpl = new RegExp(
+      `(?<!\\w)${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?` +
+      '`\\$\\{_basePath\\}([^`]*)`'
+    );
+    const mt = siteBlock.match(reTpl);
+    if (mt) return mt[1]; // basePath 없이 /images/... 부분만 반환
+
     const re = new RegExp(
       `(?<!\\w)${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?(?:'((?:[^'\\\\]|\\\\.)*)'|null)`
     );

@@ -7,6 +7,7 @@ import type { TemplateGenerator, ComponentMapping } from './base-generator';
 import {
   esc,
   buildGalleryArray,
+  genBasePathConst,
   createExtractors,
   extractSiteBlock,
   parseArrayConstant,
@@ -144,6 +145,8 @@ export interface BusinessHour {
 const DEMO_MENU: MenuItem[] = ${buildMenuItemsArray(menuItems)};
 
 const DEMO_HOURS: BusinessHour[] = ${buildBusinessHoursArray(hoursItems)};
+
+${genBasePathConst()}
 
 function parseJSON<T>(raw: string | undefined, fallback: T): T {
   if (!raw) return fallback;
@@ -293,17 +296,18 @@ function parseConfigToState(
     }
   } catch { /* 기본값 유지 */ }
 
-  // Gallery images — parseJSON 패턴
+  // Gallery images — parseJSON 패턴 (작은따옴표 또는 template literal)
   try {
     const galMatch = configContent.match(
       /galleryImages:\s*parseJSON<string\[\]>\([^,]+,\s*(\[[\s\S]*?\])\s*\)/
     );
     if (galMatch) {
       const items: Record<string, string>[] = [];
-      const urlRe = /'([^']+)'/g;
+      // template literal: `${_basePath}/images/...` 또는 작은따옴표: '/images/...'
+      const urlRe = /(?:'([^']+)'|`\$\{_basePath\}([^`]+)`)/g;
       let urlM;
       while ((urlM = urlRe.exec(galMatch[1])) !== null) {
-        items.push({ url: urlM[1] });
+        items.push({ url: urlM[1] || urlM[2] });
       }
       if (items.length > 0) state.values.gallery.images = items;
     }
