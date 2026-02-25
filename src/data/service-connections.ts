@@ -158,7 +158,7 @@ export const serviceConnectionConfigs: Record<string, ServiceConnectionConfig> =
         label: 'Publishable Key',
         label_ko: '공개 키',
         placeholder: 'pk_test_xxxxxxxxxxxxxxxxxxxx',
-        is_required: true,
+        is_required: false,
       },
     ],
     description_ko: '사용자 인증 및 관리를 처리합니다',
