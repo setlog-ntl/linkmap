@@ -21,9 +21,10 @@ import {
   Check,
   X,
   Loader2,
+  FileText,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { parseEnvLine } from '@/lib/utils/parse-env';
+import { parseEnvLine, parseEnvContent } from '@/lib/utils/parse-env';
 import type { EnvironmentVariable, EnvVarTemplate, Environment } from '@/types';
 
 interface ServiceEnvVarsSectionProps {
@@ -54,6 +55,8 @@ export function ServiceEnvVarsSection({
   const [formDescription, setFormDescription] = useState('');
   const [decryptedValues, setDecryptedValues] = useState<Record<string, string>>({});
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [rawEditorMode, setRawEditorMode] = useState(false);
+  const [rawEditorText, setRawEditorText] = useState('');
 
   // M2: Clear decrypted values on unmount
   useEffect(() => {
@@ -175,6 +178,37 @@ export function ServiceEnvVarsSection({
         toast.error('복호화에 실패했습니다');
       },
     });
+  };
+
+  const handleBulkSave = async () => {
+    const parsed = parseEnvContent(rawEditorText);
+    if (parsed.length === 0) {
+      toast.error('유효한 변수가 없습니다');
+      return;
+    }
+    try {
+      await Promise.all(
+        parsed.map(({ key, value }) => {
+          const existing = varByKey.get(key);
+          if (existing) {
+            return updateEnvVar.mutateAsync({ id: existing.id, value });
+          }
+          return addEnvVar.mutateAsync({
+            key_name: key,
+            value,
+            environment: activeEnv,
+            is_secret: true,
+            description: null,
+            service_id: serviceId,
+          });
+        })
+      );
+      toast.success(`${parsed.length}개 변수가 저장되었습니다`);
+      setRawEditorMode(false);
+      setRawEditorText('');
+    } catch {
+      toast.error('일부 변수 저장에 실패했습니다');
+    }
   };
 
   const maskValue = (encrypted: string) => {
@@ -324,20 +358,40 @@ export function ServiceEnvVarsSection({
             </Badge>
           )}
         </h4>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-6 text-xs px-2"
-          onClick={() => {
-            setAddingCustom(true);
-            setFormKey('');
-            setFormValue('');
-            setFormDescription('');
-          }}
-        >
-          <Plus className="h-3 w-3 mr-1" />
-          추가
-        </Button>
+        <div className="flex gap-1">
+          <Button
+            variant={rawEditorMode ? 'default' : 'ghost'}
+            size="icon"
+            className="h-6 w-6"
+            onClick={() => {
+              setRawEditorMode((v) => !v);
+              setRawEditorText('');
+              setAddingCustom(false);
+              setAddingKey(null);
+              setEditingId(null);
+              setFormValue('');
+              setFormKey('');
+            }}
+            title="일괄 편집"
+          >
+            <FileText className="h-3 w-3" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-6 text-xs px-2"
+            onClick={() => {
+              setAddingCustom(true);
+              setRawEditorMode(false);
+              setFormKey('');
+              setFormValue('');
+              setFormDescription('');
+            }}
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            추가
+          </Button>
+        </div>
       </div>
 
       {/* Environment tabs */}
@@ -364,8 +418,47 @@ export function ServiceEnvVarsSection({
         ))}
       </div>
 
+      {/* RAW Editor */}
+      {rawEditorMode && (
+        <div className="space-y-2 mb-3">
+          <textarea
+            className="w-full h-48 text-xs font-mono rounded-md border bg-muted/40 p-2 resize-none focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground"
+            placeholder={`.env 형식으로 붙여넣기\nKEY=VALUE\nAPI_KEY=your_key`}
+            value={rawEditorText}
+            onChange={(e) => setRawEditorText(e.target.value)}
+            autoFocus
+          />
+          <div className="flex gap-1.5">
+            <Button
+              size="sm"
+              className="h-6 text-xs"
+              onClick={handleBulkSave}
+              disabled={!rawEditorText.trim() || addEnvVar.isPending || updateEnvVar.isPending}
+            >
+              {(addEnvVar.isPending || updateEnvVar.isPending) ? (
+                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+              ) : (
+                <Check className="h-3 w-3 mr-1" />
+              )}
+              저장
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 text-xs"
+              onClick={() => {
+                setRawEditorMode(false);
+                setRawEditorText('');
+              }}
+            >
+              취소
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Required env vars (from catalog template) */}
-      {requiredEnvVars.length > 0 && (
+      {!rawEditorMode && requiredEnvVars.length > 0 && (
         <div className="space-y-0.5">
           <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-1">
             필수
@@ -413,7 +506,7 @@ export function ServiceEnvVarsSection({
       )}
 
       {/* Additional env vars (user-added, not in template) */}
-      {additionalVars.length > 0 && (
+      {!rawEditorMode && additionalVars.length > 0 && (
         <>
           {requiredEnvVars.length > 0 && <Separator className="my-2" />}
           <div className="space-y-0.5">
@@ -426,7 +519,7 @@ export function ServiceEnvVarsSection({
       )}
 
       {/* Custom add form */}
-      {addingCustom && (
+      {!rawEditorMode && addingCustom && (
         <>
           <Separator className="my-2" />
           <div className="space-y-1.5">
@@ -495,7 +588,7 @@ export function ServiceEnvVarsSection({
       )}
 
       {/* Empty state */}
-      {requiredEnvVars.length === 0 && filteredVars.length === 0 && !addingCustom && (
+      {!rawEditorMode && requiredEnvVars.length === 0 && filteredVars.length === 0 && !addingCustom && (
         <p className="text-xs text-muted-foreground py-2">
           등록된 환경변수가 없습니다
         </p>
