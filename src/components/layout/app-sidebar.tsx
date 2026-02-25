@@ -150,7 +150,17 @@ export function AppSidebar({ profile }: AppSidebarProps) {
     ? pathname.split('/')[2] ?? null
     : null;
 
-  const visibleProjects = projects?.slice(0, MAX_VISIBLE_PROJECTS) ?? [];
+  // 즐겨찾기 프로젝트를 최상단으로 정렬
+  const sortedProjects = useMemo(() => {
+    if (!projects) return [];
+    return [...projects].sort((a, b) => {
+      if (a.is_favorited && !b.is_favorited) return -1;
+      if (!a.is_favorited && b.is_favorited) return 1;
+      return 0;
+    });
+  }, [projects]);
+
+  const visibleProjects = sortedProjects.slice(0, MAX_VISIBLE_PROJECTS);
   const hasMoreProjects = (projects?.length ?? 0) > MAX_VISIBLE_PROJECTS;
 
   const visibleSites = deployments?.slice(0, MAX_VISIBLE_SITES) ?? [];
