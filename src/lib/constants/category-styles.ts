@@ -202,6 +202,12 @@ export const CATEGORY_STYLES: Record<ServiceCategory, CategoryStyle> = {
     accentGradient: 'from-teal-400 to-cyan-600',
     hexColor: '#0d9488',
   },
+  advertising: {
+    nodeClasses: 'bg-orange-50 border-orange-200 dark:bg-orange-950/50 dark:border-orange-800',
+    gridBorderClasses: 'border-orange-300 dark:border-orange-700',
+    accentGradient: 'from-orange-400 to-amber-600',
+    hexColor: '#f97316',
+  },
 };
 
 /** 카테고리 스타일 조회 (없으면 'other' 반환) */
