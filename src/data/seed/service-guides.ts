@@ -402,33 +402,80 @@ export const config = { matcher: ['/((?!.*\\\\..*|_next).*)', '/', '/(api|trpc)(
     setup_steps: [
       {
         step: 1,
-        title: 'Install OpenAI SDK',
-        title_ko: 'OpenAI SDK 설치',
-        description: 'Install the official OpenAI Node SDK',
-        description_ko: '공식 OpenAI Node SDK 설치',
-        code_snippet: 'npm install openai'
+        title: 'Get API Key',
+        title_ko: 'API 키 발급',
+        description: 'Sign up at platform.openai.com and create a secret API key',
+        description_ko: 'platform.openai.com에서 가입 후 API Keys 메뉴에서 키 생성 (생성 후 재조회 불가 — 즉시 복사)',
       },
       {
         step: 2,
+        title: 'Set environment variable',
+        title_ko: '환경변수 설정',
+        description: 'Add OPENAI_API_KEY to your .env file (never use NEXT_PUBLIC_ prefix)',
+        description_ko: '.env 파일에 OPENAI_API_KEY 추가 (NEXT_PUBLIC_ 접두사 절대 금지 — 브라우저 노출 위험)',
+        code_snippet: `OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxxxxxxxxxxxxx`
+      },
+      {
+        step: 3,
+        title: 'Install OpenAI SDK',
+        title_ko: 'OpenAI SDK 설치',
+        description: 'Install the official OpenAI Node.js SDK',
+        description_ko: '공식 OpenAI Node.js SDK 설치',
+        code_snippet: 'npm install openai'
+      },
+      {
+        step: 4,
         title: 'Initialize client',
         title_ko: '클라이언트 초기화',
-        description: 'Create an OpenAI client with your API key',
-        description_ko: 'API 키로 OpenAI 클라이언트 생성',
+        description: 'Create an OpenAI client — API key is read automatically from env',
+        description_ko: '클라이언트 생성 — 환경변수에서 API 키 자동 인식',
         code_snippet: `import OpenAI from 'openai'
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })`
+const openai = new OpenAI()
+// process.env.OPENAI_API_KEY 자동 인식
+// 명시적 설정: new OpenAI({ apiKey: process.env.OPENAI_API_KEY })`
       }
     ],
     code_examples: {
       typescript: `import OpenAI from 'openai'
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const openai = new OpenAI()
 
 // Chat completion
 const completion = await openai.chat.completions.create({
-  model: 'gpt-4-turbo',
+  model: 'gpt-4o',
   messages: [{ role: 'user', content: 'Hello!' }]
 })
 
-console.log(completion.choices[0].message.content)`
+console.log(completion.choices[0].message.content)
+
+// Streaming
+const stream = await openai.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: '긴 응답을 스트리밍으로 받기' }],
+  stream: true,
+})
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content || '')
+}`,
+      python: `from openai import OpenAI
+
+client = OpenAI()  # OPENAI_API_KEY 환경변수 자동 인식
+
+# Chat completion
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Hello!"}
+    ]
+)
+print(response.choices[0].message.content)
+
+# Embeddings
+embed = client.embeddings.create(
+    model="text-embedding-3-small",
+    input="텍스트를 벡터로 변환"
+)
+vector = embed.data[0].embedding`
     },
     common_pitfalls: [
       {
@@ -443,7 +490,32 @@ console.log(completion.choices[0].message.content)`
         problem: 'Long wait times for responses',
         solution: 'Use stream: true for real-time token streaming',
         code: `const stream = await openai.chat.completions.create({
-  model: 'gpt-4', messages, stream: true
+  model: 'gpt-4o', messages, stream: true
+})`
+      },
+      {
+        title: 'Exposing API key to client',
+        title_ko: 'API 키 클라이언트 노출',
+        problem: 'Using NEXT_PUBLIC_OPENAI_API_KEY exposes the key in the browser bundle',
+        solution: 'Always use server-side API routes. Never add NEXT_PUBLIC_ prefix to OpenAI key',
+        code: `// ❌ 절대 금지
+const openai = new OpenAI({ apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY })
+
+// ✅ 올바른 방법 (서버 전용)
+// src/app/api/chat/route.ts
+export async function POST(req: Request) {
+  const openai = new OpenAI() // 서버에서만 실행
+}`
+      },
+      {
+        title: 'No max_tokens limit set',
+        title_ko: 'max_tokens 미설정',
+        problem: 'Unexpected large responses cause cost spikes',
+        solution: 'Always set max_tokens to control cost and response length',
+        code: `const completion = await openai.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+  max_tokens: 1024, // 반드시 설정
 })`
       }
     ],
@@ -455,16 +527,30 @@ console.log(completion.choices[0].message.content)`
         code: `import { OpenAIStream, StreamingTextResponse } from 'ai'
 const stream = OpenAIStream(response)
 return new StreamingTextResponse(stream)`
+      },
+      {
+        with_service_slug: 'supabase',
+        tip: 'Store embeddings in pgvector for semantic search',
+        tip_ko: 'Supabase pgvector에 임베딩 저장 후 시맨틱 검색 구현',
+        code: `// OpenAI로 임베딩 생성 후 Supabase에 저장
+const { data: embed } = await openai.embeddings.create({
+  model: 'text-embedding-3-small', input: text
+})
+await supabase.from('documents').insert({
+  content: text, embedding: embed.data[0].embedding
+})`
       }
     ],
     pros: [
       { text: 'State-of-the-art language models', text_ko: '최첨단 언어 모델' },
       { text: 'Simple and well-documented API', text_ko: '간단하고 잘 문서화된 API' },
-      { text: 'Function calling and structured outputs', text_ko: '함수 호출 및 구조화된 출력' }
+      { text: 'Function calling and structured outputs', text_ko: '함수 호출 및 구조화된 출력' },
+      { text: 'Broad model selection (GPT-4o, o1, DALL-E, Whisper)', text_ko: '다양한 모델 선택 (GPT-4o, o1, DALL-E, Whisper)' }
     ],
     cons: [
       { text: 'Can be expensive at scale', text_ko: '대규모 사용 시 비용 부담' },
-      { text: 'Rate limits on lower tiers', text_ko: '낮은 티어 속도 제한' }
+      { text: 'Rate limits on lower tiers', text_ko: '낮은 티어 속도 제한' },
+      { text: 'Risk of unexpected cost spikes without max_tokens', text_ko: 'max_tokens 미설정 시 비용 폭증 위험' }
     ]
   },
   {

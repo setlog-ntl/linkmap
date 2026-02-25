@@ -1,7 +1,7 @@
 # Linkmap Database Schema Reference
 
-> **Last Updated**: 2026-02-25
-> **Migrations**: 001 ~ 046 (46 files)
+> **Last Updated**: 2026-02-26
+> **Migrations**: 001 ~ 048 (48 files)
 > **Engine**: Supabase (PostgreSQL 15+)
 
 이 문서는 바이브코딩 시 DB 구조를 빠르게 참조하기 위한 스키마 레퍼런스입니다.
@@ -642,7 +642,7 @@ CREATE TYPE team_role AS ENUM ('admin', 'editor', 'viewer');
 
 | DB Value | TS Type | Location |
 |----------|---------|----------|
-| ServiceCategory (30 values) | `ServiceCategory` | core.ts |
+| ServiceCategory (31 values) | `ServiceCategory` | core.ts |
 | ServiceDomain (8 values) | `ServiceDomain` | core.ts |
 | ServiceStatus (4 values) | `ServiceStatus` | core.ts |
 | Environment (3 values) | `Environment` | core.ts |

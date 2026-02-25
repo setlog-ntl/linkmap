@@ -80,6 +80,13 @@ export const SERVICE_IDS_V2 = {
   gabia: '10000000-0000-4000-a000-000000000094',
   hosting_kr: '10000000-0000-4000-a000-000000000095',
   dotname: '10000000-0000-4000-a000-000000000096',
+  // Advertising network services
+  google_adsense: '10000000-0000-4000-a000-000000000097',
+  kakao_adfit: '10000000-0000-4000-a000-000000000098',
+  criteo: '10000000-0000-4000-a000-000000000099',
+  taboola: '10000000-0000-4000-a000-000000000100',
+  amazon_aps: '10000000-0000-4000-a000-000000000101',
+  google_ad_manager: '10000000-0000-4000-a000-000000000102',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -2361,5 +2368,369 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$0.8~$1/월 (.kr 도메인)',
       enterprise: '문의',
     },
+  },
+
+  // -----------------------------------------------------------------------
+  // 37. Google AdSense
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.google_adsense,
+    name: 'Google AdSense',
+    slug: 'google-adsense',
+    category: 'advertising',
+    description:
+      'Google\'s publisher monetization platform that displays contextual banner, native, and auto ads (CPC/CPM) on websites and apps.',
+    description_ko:
+      '구글이 제공하는 퍼블리셔 수익화 플랫폼으로, 웹사이트·앱에 문맥형 배너·네이티브·자동 광고(CPC/CPM)를 게재할 수 있습니다.',
+    icon_url: null,
+    website_url: 'https://adsense.google.com',
+    docs_url: 'https://support.google.com/adsense',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '가입 무료, 광고 수익에서 수수료 공제 (게시자에게 광고 수익의 68% 지급)',
+      plans: [
+        { name: 'Standard', price: '무료 (수익의 68% 지급)' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'NEXT_PUBLIC_ADSENSE_PUBLISHER_ID',
+        public: true,
+        description: 'AdSense Publisher ID (ca-pub-XXXXXXXXXXXXXXXX 형식)',
+        description_ko: 'AdSense 게시자 ID (ca-pub-XXXXXXXXXXXXXXXX 형식)',
+      },
+      {
+        name: 'NEXT_PUBLIC_ADSENSE_SLOT_ID',
+        public: true,
+        description: 'AdSense Ad Slot ID (광고 단위 ID)',
+        description_ko: 'AdSense 광고 슬롯 ID (광고 단위 ID)',
+      },
+    ],
+    domain: 'business',
+    subcategory: 'display_ads',
+    popularity_score: 90,
+    difficulty_level: 'beginner',
+    tags: ['advertising', 'monetization', 'banner', 'native', 'cpc', 'cpm', 'google', 'display'],
+    alternatives: ['kakao-adfit', 'google-ad-manager'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'nuxt', 'gatsby', 'astro', 'angular', 'svelte'],
+      language: ['javascript', 'typescript'],
+    },
+    official_sdks: {
+      javascript: 'https://developers.google.com/adsense/management/libraries',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 30,
+    monthly_cost_estimate: {
+      starter: '$0 (수익 공유)',
+      growth: '$0 (수익 공유)',
+      enterprise: '$0 (수익 공유)',
+    },
+    github_stars: null,
+  },
+
+  // -----------------------------------------------------------------------
+  // 38. Kakao AdFit
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.kakao_adfit,
+    name: 'Kakao AdFit',
+    slug: 'kakao-adfit',
+    category: 'advertising',
+    description:
+      'Kakao\'s Korean-exclusive ad network offering banner and native ads (CPC/CPM) with high fill rates for Korean-language content publishers.',
+    description_ko:
+      '카카오가 운영하는 한국 전용 광고 네트워크로, 한국어 콘텐츠 퍼블리셔를 위한 배너·네이티브 광고(CPC/CPM)를 높은 광고 충전율로 제공합니다.',
+    icon_url: null,
+    website_url: 'https://adfit.kakao.com',
+    docs_url: 'https://adfit.kakao.com/info/guide',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '가입 무료, 수익 공유 방식 (광고 클릭·노출 기반 수익 지급)',
+      plans: [
+        { name: 'Standard', price: '무료 (수익 공유)' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'NEXT_PUBLIC_ADFIT_AD_UNIT_ID',
+        public: true,
+        description: 'Kakao AdFit 광고 단위 ID (DAN-XXXXXXXXXXXXXXXX 형식)',
+        description_ko: 'Kakao AdFit 광고 단위 ID (DAN-XXXXXXXXXXXXXXXX 형식)',
+      },
+    ],
+    domain: 'business',
+    subcategory: 'display_ads',
+    popularity_score: 72,
+    difficulty_level: 'beginner',
+    tags: ['advertising', 'monetization', 'banner', 'native', 'cpc', 'cpm', 'kakao', 'korea', 'display'],
+    alternatives: ['google-adsense', 'google-ad-manager'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'nuxt', 'gatsby', 'angular'],
+      language: ['javascript', 'typescript'],
+    },
+    official_sdks: {
+      javascript: 'https://adfit.kakao.com/info/guide',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 20,
+    monthly_cost_estimate: {
+      starter: '$0 (수익 공유)',
+      growth: '$0 (수익 공유)',
+      enterprise: '$0 (수익 공유)',
+    },
+    github_stars: null,
+  },
+
+  // -----------------------------------------------------------------------
+  // 39. Criteo
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.criteo,
+    name: 'Criteo',
+    slug: 'criteo',
+    category: 'advertising',
+    description:
+      'AI-powered retargeting and performance advertising platform offering banner, native, and header bidding (CPM) for e-commerce and direct-to-consumer brands.',
+    description_ko:
+      'AI 기반 리타겟팅 및 퍼포먼스 광고 플랫폼으로, 이커머스·DTC 브랜드를 위한 배너·네이티브·헤더 비딩(CPM) 광고를 제공합니다. 한국 법인 운영 중.',
+    icon_url: null,
+    website_url: 'https://www.criteo.com',
+    docs_url: 'https://developers.criteo.com',
+    pricing_info: {
+      free_tier: false,
+      free_tier_details: '최소 예산 요건 있음, 성과 기반 CPM/CPC 과금',
+      plans: [
+        { name: 'Self-Service', price: 'CPM 기반 (최소 예산 문의)' },
+        { name: 'Managed Service', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'CRITEO_PARTNER_ID',
+        public: false,
+        description: 'Criteo Partner ID (광고 계정 식별자)',
+        description_ko: 'Criteo 파트너 ID (광고 계정 식별자)',
+      },
+      {
+        name: 'CRITEO_NETWORK_ID',
+        public: false,
+        description: 'Criteo Network ID (광고 네트워크 ID)',
+        description_ko: 'Criteo 네트워크 ID (광고 네트워크 ID)',
+      },
+    ],
+    domain: 'business',
+    subcategory: 'retargeting',
+    popularity_score: 68,
+    difficulty_level: 'intermediate',
+    tags: ['advertising', 'retargeting', 'performance', 'cpm', 'header-bidding', 'ecommerce', 'programmatic', 'ai'],
+    alternatives: ['taboola', 'amazon-aps'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'nuxt', 'angular'],
+      language: ['javascript', 'typescript'],
+    },
+    official_sdks: {
+      javascript: 'https://developers.criteo.com/marketing-solutions/docs/javascript-tag',
+    },
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 45,
+    monthly_cost_estimate: {
+      starter: '예산 문의',
+      growth: '$500~$5,000',
+      enterprise: '$5,000+',
+    },
+    github_stars: null,
+  },
+
+  // -----------------------------------------------------------------------
+  // 40. Taboola
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.taboola,
+    name: 'Taboola',
+    slug: 'taboola',
+    category: 'advertising',
+    description:
+      'Native content recommendation and sponsored content ad network (CPC) for publishers, offering widget-based discovery placements on article pages.',
+    description_ko:
+      '퍼블리셔를 위한 네이티브 콘텐츠 추천·스폰서드 광고 네트워크(CPC)로, 기사 페이지에 위젯 기반 디스커버리 지면을 제공합니다. 한국 진출 서비스.',
+    icon_url: null,
+    website_url: 'https://www.taboola.com',
+    docs_url: 'https://developers.taboola.com',
+    pricing_info: {
+      free_tier: false,
+      free_tier_details: '최소 트래픽 요건 있음 (월간 방문자 수 기준), 퍼블리셔는 수익 공유',
+      plans: [
+        { name: 'Publisher (수익화)', price: '수익 공유 (무료 가입)' },
+        { name: 'Advertiser (광고주)', price: 'CPC 기반 (최소 예산 문의)' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'TABOOLA_PUBLISHER_ID',
+        public: true,
+        description: 'Taboola Publisher ID (퍼블리셔 계정 식별자)',
+        description_ko: 'Taboola 퍼블리셔 ID',
+      },
+      {
+        name: 'TABOOLA_WIDGET_ID',
+        public: true,
+        description: 'Taboola Widget ID (광고 위젯 ID)',
+        description_ko: 'Taboola 위젯 ID',
+      },
+    ],
+    domain: 'business',
+    subcategory: 'native_ads',
+    popularity_score: 62,
+    difficulty_level: 'beginner',
+    tags: ['advertising', 'native', 'content-recommendation', 'sponsored', 'cpc', 'widget', 'discovery', 'publisher'],
+    alternatives: ['criteo', 'amazon-aps'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'nuxt', 'angular', 'gatsby'],
+      language: ['javascript', 'typescript'],
+    },
+    official_sdks: {
+      javascript: 'https://developers.taboola.com/web-integrations/docs',
+    },
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 30,
+    monthly_cost_estimate: {
+      starter: '$0 (수익 공유)',
+      growth: '$0 (수익 공유)',
+      enterprise: '문의',
+    },
+    github_stars: null,
+  },
+
+  // -----------------------------------------------------------------------
+  // 41. Amazon Publisher Services (APS)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.amazon_aps,
+    name: 'Amazon Publisher Services',
+    slug: 'amazon-aps',
+    category: 'advertising',
+    description:
+      'Amazon\'s publisher monetization suite offering header bidding, display, and video ads (CPM) with access to Amazon\'s first-party demand and DSP.',
+    description_ko:
+      'Amazon의 퍼블리셔 수익화 솔루션으로, 헤더 비딩·디스플레이·동영상 광고(CPM)와 Amazon 퍼스트파티 수요 및 DSP 연동을 제공합니다.',
+    icon_url: null,
+    website_url: 'https://aps.amazon.com',
+    docs_url: 'https://aps.amazon.com/aps/resources/',
+    pricing_info: {
+      free_tier: false,
+      free_tier_details: '최소 트래픽 요건 있음, 수익 공유 방식 (Amazon이 일부 수수료 공제)',
+      plans: [
+        { name: 'Transparent Ad Marketplace', price: '수익 공유 (무료 가입)' },
+        { name: 'Unified Ad Marketplace', price: '수익 공유' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'APS_PUBLISHER_ID',
+        public: false,
+        description: 'Amazon Publisher Services Publisher ID',
+        description_ko: 'Amazon Publisher Services 퍼블리셔 ID',
+      },
+      {
+        name: 'APS_APP_ID',
+        public: false,
+        description: 'Amazon Publisher Services App ID (앱 식별자)',
+        description_ko: 'Amazon Publisher Services 앱 ID',
+      },
+      {
+        name: 'APS_SLOT_UUID',
+        public: true,
+        description: 'Amazon Publisher Services Slot UUID (광고 슬롯 식별자)',
+        description_ko: 'Amazon Publisher Services 슬롯 UUID',
+      },
+    ],
+    domain: 'business',
+    subcategory: 'header_bidding',
+    popularity_score: 58,
+    difficulty_level: 'advanced',
+    tags: ['advertising', 'header-bidding', 'display', 'video', 'cpm', 'amazon', 'programmatic', 'dsp'],
+    alternatives: ['criteo', 'taboola', 'google-ad-manager'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'nuxt', 'angular'],
+      language: ['javascript', 'typescript'],
+    },
+    official_sdks: {
+      javascript: 'https://aps.amazon.com/aps/resources/apt-integration/',
+    },
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 60,
+    monthly_cost_estimate: {
+      starter: '$0 (수익 공유)',
+      growth: '$0 (수익 공유)',
+      enterprise: '$0 (수익 공유)',
+    },
+    github_stars: null,
+  },
+
+  // -----------------------------------------------------------------------
+  // 42. Google Ad Manager
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.google_ad_manager,
+    name: 'Google Ad Manager',
+    slug: 'google-ad-manager',
+    category: 'advertising',
+    description:
+      'Enterprise-grade ad server and SSP (formerly DFP) for large publishers, supporting header bidding, programmatic CPM, direct deals, and video monetization.',
+    description_ko:
+      '대형 퍼블리셔를 위한 엔터프라이즈 광고 서버·SSP(구 DFP)로, 헤더 비딩·프로그래매틱 CPM·다이렉트 딜·동영상 수익화를 지원합니다.',
+    icon_url: null,
+    website_url: 'https://admanager.google.com',
+    docs_url: 'https://developers.google.com/ad-manager',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Google Ad Manager 360(Small Business): 무료 (월 90M 노출 미만). 대형 퍼블리셔는 Ad Manager 360 유료',
+      plans: [
+        { name: 'Ad Manager (Small Business)', price: '$0/월 (월 90M 노출 이하)' },
+        { name: 'Ad Manager 360', price: '문의 (대형 퍼블리셔)' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'GAM_NETWORK_CODE',
+        public: true,
+        description: 'Google Ad Manager 네트워크 코드 (숫자 형식)',
+        description_ko: 'Google Ad Manager 네트워크 코드 (숫자 형식)',
+      },
+      {
+        name: 'GAM_AD_UNIT_PATH',
+        public: true,
+        description: 'Google Ad Manager 광고 단위 경로 (/네트워크코드/광고단위 형식)',
+        description_ko: 'Google Ad Manager 광고 단위 경로 (/네트워크코드/광고단위 형식)',
+      },
+    ],
+    domain: 'business',
+    subcategory: 'header_bidding',
+    popularity_score: 75,
+    difficulty_level: 'advanced',
+    tags: ['advertising', 'ad-server', 'header-bidding', 'programmatic', 'cpm', 'google', 'dfp', 'ssp', 'video'],
+    alternatives: ['google-adsense', 'amazon-aps'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'nuxt', 'angular', 'gatsby'],
+      language: ['javascript', 'typescript'],
+    },
+    official_sdks: {
+      javascript: 'https://developers.google.com/publisher-tag/guides/get-started',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'high',
+    setup_time_minutes: 60,
+    monthly_cost_estimate: {
+      starter: '$0 (수익 공유)',
+      growth: '$0 (수익 공유)',
+      enterprise: '문의 (Ad Manager 360)',
+    },
+    github_stars: null,
   },
 ];

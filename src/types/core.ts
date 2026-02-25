@@ -28,7 +28,8 @@ export type ServiceCategory =
   | 'serverless'
   | 'code_quality'
   | 'automation'
-  | 'domain';
+  | 'domain'
+  | 'advertising';
 
 export type ServiceDomain =
   | 'infrastructure'
