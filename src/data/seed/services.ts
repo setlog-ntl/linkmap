@@ -138,6 +138,13 @@ const SERVICE_IDS = {
   vitest: '10000000-0000-4000-a000-000000000083',
   storybook: '10000000-0000-4000-a000-000000000084',
   docker: '10000000-0000-4000-a000-000000000085',
+
+  // Domain registrar services (Korean)
+  gabia: '10000000-0000-4000-a000-000000000086',
+  whois: '10000000-0000-4000-a000-000000000087',
+  cafe24: '10000000-0000-4000-a000-000000000088',
+  inames: '10000000-0000-4000-a000-000000000089',
+  hostingkr: '10000000-0000-4000-a000-000000000090',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -3448,6 +3455,302 @@ export const services: ServiceSeed[] = [
     monthly_cost_estimate: { starter: '$0', growth: '$5', enterprise: '$24' },
     dx_score: 8.0,
   },
+
+  // -----------------------------------------------------------------------
+  // 86. 가비아 (Gabia)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS.gabia,
+    name: '가비아',
+    slug: 'gabia',
+    category: 'domain',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'hosting',
+    description:
+      'Gabia is South Korea\'s largest domain registrar and web hosting provider offering domain registration, DNS management, SSL certificates, and cloud hosting.',
+    description_ko:
+      '국내 최대 도메인 등록 및 웹 호스팅 서비스. 도메인 등록, DNS 관리, SSL 인증서, 클라우드 호스팅을 제공합니다.',
+    icon_url: null,
+    website_url: 'https://www.gabia.com',
+    docs_url: 'https://api.gabia.com/docs',
+    pricing_info: {
+      free_tier: false,
+      plans: [
+        { name: '.com 도메인', price: '연 13,200원~' },
+        { name: '.co.kr 도메인', price: '연 22,000원~' },
+        { name: '웹호스팅', price: '월 2,200원~' },
+        { name: 'SSL 인증서', price: '연 11,000원~' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'GABIA_API_ID',
+        public: false,
+        description: 'Gabia API ID (가비아 API 아이디)',
+        description_ko: '가비아 API 아이디',
+      },
+      {
+        name: 'GABIA_API_KEY',
+        public: false,
+        description: 'Gabia HMAC API key for authentication',
+        description_ko: '가비아 HMAC 인증용 API 키',
+      },
+    ],
+    domain: 'infrastructure',
+    subcategory: 'domain_hosting',
+    popularity_score: 88,
+    difficulty_level: 'beginner',
+    tags: ['domain', 'dns', 'hosting', 'ssl', 'korea', 'registrar'],
+    alternatives: ['whois', 'cafe24', 'inames', 'hostingkr'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'vue', 'wordpress'],
+      language: ['php', 'javascript', 'python'],
+    },
+    official_sdks: { docs: 'https://api.gabia.com/docs' },
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 15,
+    monthly_cost_estimate: { starter: '₩2,200', growth: '₩10,000', enterprise: '문의' },
+    dx_score: 7.2,
+  },
+
+  // -----------------------------------------------------------------------
+  // 87. 후이즈 (Whois)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS.whois,
+    name: '후이즈',
+    slug: 'whois',
+    category: 'domain',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'hosting',
+    description:
+      'Whois is one of Korea\'s leading domain registrars specializing in domain registration, WHOIS lookup, DNS hosting, and domain transfer services.',
+    description_ko:
+      '국내 대표 도메인 등록 전문 서비스. 도메인 등록, WHOIS 조회, DNS 호스팅, 도메인 이전 서비스를 제공합니다.',
+    icon_url: null,
+    website_url: 'https://www.whois.co.kr',
+    docs_url: 'https://www.whois.co.kr/api',
+    pricing_info: {
+      free_tier: false,
+      plans: [
+        { name: '.com 도메인', price: '연 14,300원~' },
+        { name: '.co.kr 도메인', price: '연 22,000원~' },
+        { name: 'DNS 호스팅', price: '무료 제공' },
+        { name: 'SSL 인증서', price: '연 15,000원~' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'WHOIS_API_KEY',
+        public: false,
+        description: 'Whois API key',
+        description_ko: '후이즈 API 키',
+      },
+      {
+        name: 'WHOIS_API_SECRET',
+        public: false,
+        description: 'Whois API secret key',
+        description_ko: '후이즈 API 시크릿 키',
+      },
+    ],
+    domain: 'infrastructure',
+    subcategory: 'domain_registrar',
+    popularity_score: 78,
+    difficulty_level: 'beginner',
+    tags: ['domain', 'dns', 'whois', 'ssl', 'korea', 'registrar'],
+    alternatives: ['gabia', 'cafe24', 'inames', 'hostingkr'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'vue', 'wordpress'],
+      language: ['php', 'javascript', 'python'],
+    },
+    official_sdks: { docs: 'https://www.whois.co.kr/api' },
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 15,
+    monthly_cost_estimate: { starter: '₩1,200', growth: '₩8,000', enterprise: '문의' },
+    dx_score: 6.8,
+  },
+
+  // -----------------------------------------------------------------------
+  // 88. 카페24 (Cafe24)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS.cafe24,
+    name: '카페24',
+    slug: 'cafe24',
+    category: 'domain',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'hosting',
+    description:
+      'Cafe24 is a major Korean web hosting and domain service provider offering domain registration, web hosting, shopping mall solutions, and cloud services.',
+    description_ko:
+      '국내 주요 웹호스팅·도메인 종합 서비스. 도메인 등록, 웹호스팅, 쇼핑몰 솔루션, 클라우드 서비스를 제공합니다.',
+    icon_url: null,
+    website_url: 'https://www.cafe24.com',
+    docs_url: 'https://developers.cafe24.com',
+    pricing_info: {
+      free_tier: false,
+      plans: [
+        { name: '.com 도메인', price: '연 14,300원~' },
+        { name: '웹호스팅', price: '월 1,100원~' },
+        { name: '쇼핑몰 Basic', price: '무료 (거래 수수료)' },
+        { name: '클라우드', price: '월 11,000원~' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'CAFE24_CLIENT_ID',
+        public: false,
+        description: 'Cafe24 OAuth client ID',
+        description_ko: '카페24 OAuth 클라이언트 ID',
+      },
+      {
+        name: 'CAFE24_CLIENT_SECRET',
+        public: false,
+        description: 'Cafe24 OAuth client secret',
+        description_ko: '카페24 OAuth 클라이언트 시크릿',
+      },
+      {
+        name: 'CAFE24_MALL_ID',
+        public: false,
+        description: 'Cafe24 mall ID',
+        description_ko: '카페24 쇼핑몰 ID',
+      },
+    ],
+    domain: 'infrastructure',
+    subcategory: 'domain_hosting',
+    popularity_score: 83,
+    difficulty_level: 'beginner',
+    tags: ['domain', 'hosting', 'ecommerce', 'korea', 'shopping-mall', 'cloud'],
+    alternatives: ['gabia', 'whois', 'inames', 'hostingkr'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'vue', 'wordpress', 'php'],
+      language: ['php', 'javascript', 'python'],
+    },
+    official_sdks: { docs: 'https://developers.cafe24.com' },
+    free_tier_quality: 'limited',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 20,
+    monthly_cost_estimate: { starter: '₩1,100', growth: '₩11,000', enterprise: '문의' },
+    dx_score: 7.0,
+  },
+
+  // -----------------------------------------------------------------------
+  // 89. 아이네임즈 (iNames)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS.inames,
+    name: '아이네임즈',
+    slug: 'inames',
+    category: 'domain',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'hosting',
+    description:
+      'iNames is a Korean domain registrar offering domain registration, DNS management, and domain transfer services at competitive pricing.',
+    description_ko:
+      '국내 도메인 전문 등록 서비스. 경쟁력 있는 가격으로 도메인 등록, DNS 관리, 도메인 이전 서비스를 제공합니다.',
+    icon_url: null,
+    website_url: 'https://www.inames.co.kr',
+    docs_url: 'https://www.inames.co.kr/domain/api',
+    pricing_info: {
+      free_tier: false,
+      plans: [
+        { name: '.com 도메인', price: '연 12,100원~' },
+        { name: '.co.kr 도메인', price: '연 20,900원~' },
+        { name: '.kr 도메인', price: '연 20,900원~' },
+        { name: 'DNS 서비스', price: '무료 제공' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'INAMES_API_KEY',
+        public: false,
+        description: 'iNames API key',
+        description_ko: '아이네임즈 API 키',
+      },
+      {
+        name: 'INAMES_API_PASSWORD',
+        public: false,
+        description: 'iNames API password',
+        description_ko: '아이네임즈 API 패스워드',
+      },
+    ],
+    domain: 'infrastructure',
+    subcategory: 'domain_registrar',
+    popularity_score: 68,
+    difficulty_level: 'beginner',
+    tags: ['domain', 'dns', 'korea', 'registrar', 'affordable'],
+    alternatives: ['gabia', 'whois', 'cafe24', 'hostingkr'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'vue', 'wordpress'],
+      language: ['php', 'javascript', 'python'],
+    },
+    official_sdks: { docs: 'https://www.inames.co.kr/domain/api' },
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: { starter: '₩1,008', growth: '₩5,000', enterprise: '문의' },
+    dx_score: 6.5,
+  },
+
+  // -----------------------------------------------------------------------
+  // 90. 호스팅케이알 (Hosting.KR)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS.hostingkr,
+    name: '호스팅케이알',
+    slug: 'hostingkr',
+    category: 'domain',
+    dashboard_layer: 'devtools',
+    dashboard_subcategory: 'hosting',
+    description:
+      'Hosting.KR is a Korean web hosting and domain service offering affordable domain registration, shared hosting, VPS, and dedicated server services.',
+    description_ko:
+      '국내 웹호스팅·도메인 서비스. 저렴한 가격의 도메인 등록, 공유 호스팅, VPS, 전용 서버 서비스를 제공합니다.',
+    icon_url: null,
+    website_url: 'https://www.hosting.kr',
+    docs_url: 'https://www.hosting.kr/support/api',
+    pricing_info: {
+      free_tier: false,
+      plans: [
+        { name: '.com 도메인', price: '연 11,000원~' },
+        { name: '.kr 도메인', price: '연 18,700원~' },
+        { name: '공유 호스팅', price: '월 990원~' },
+        { name: 'VPS', price: '월 11,000원~' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'HOSTINGKR_API_KEY',
+        public: false,
+        description: 'Hosting.KR API key',
+        description_ko: '호스팅케이알 API 키',
+      },
+      {
+        name: 'HOSTINGKR_API_SECRET',
+        public: false,
+        description: 'Hosting.KR API secret',
+        description_ko: '호스팅케이알 API 시크릿',
+      },
+    ],
+    domain: 'infrastructure',
+    subcategory: 'domain_hosting',
+    popularity_score: 72,
+    difficulty_level: 'beginner',
+    tags: ['domain', 'hosting', 'vps', 'korea', 'affordable', 'shared-hosting'],
+    alternatives: ['gabia', 'whois', 'cafe24', 'inames'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'vue', 'wordpress', 'php'],
+      language: ['php', 'javascript', 'python'],
+    },
+    official_sdks: { docs: 'https://www.hosting.kr/support/api' },
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: { starter: '₩990', growth: '₩5,500', enterprise: '문의' },
+    dx_score: 6.7,
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -5010,5 +5313,225 @@ export const checklistItems: ChecklistItemSeed[] = [
     description: '필요한 권한 범위(scope)를 설정하고, 액세스 토큰으로 사용자 정보를 가져오세요.',
     description_ko: '필요한 권한 범위(scope)를 설정하고, 액세스 토큰으로 사용자 정보를 가져오세요.',
     guide_url: 'https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps',
+  },
+
+  // =======================================================================
+  // 86. 가비아
+  // =======================================================================
+  {
+    id: cid('gabia'),
+    service_id: SERVICE_IDS.gabia,
+    order_index: 0,
+    title: '가비아 계정 생성 및 로그인',
+    title_ko: '가비아 계정 생성 및 로그인',
+    description: 'gabia.com에서 회원가입 후 로그인하세요.',
+    description_ko: 'gabia.com에서 회원가입 후 로그인하세요.',
+    guide_url: 'https://www.gabia.com',
+  },
+  {
+    id: cid('gabia'),
+    service_id: SERVICE_IDS.gabia,
+    order_index: 1,
+    title: '도메인 검색 및 등록',
+    title_ko: '도메인 검색 및 등록',
+    description: '원하는 도메인명을 검색하고 사용 가능한 도메인을 등록하세요.',
+    description_ko: '원하는 도메인명을 검색하고 사용 가능한 도메인을 등록하세요.',
+    guide_url: 'https://www.gabia.com/domain',
+  },
+  {
+    id: cid('gabia'),
+    service_id: SERVICE_IDS.gabia,
+    order_index: 2,
+    title: 'API 키 발급',
+    title_ko: 'API 키 발급',
+    description: '마이페이지 > API 관리에서 API ID와 HMAC 키를 발급받으세요.',
+    description_ko: '마이페이지 > API 관리에서 API ID와 HMAC 키를 발급받으세요.',
+    guide_url: 'https://api.gabia.com/docs',
+  },
+  {
+    id: cid('gabia'),
+    service_id: SERVICE_IDS.gabia,
+    order_index: 3,
+    title: 'DNS 레코드 설정',
+    title_ko: 'DNS 레코드 설정',
+    description: '도메인 관리 패널에서 A, CNAME, TXT 등 필요한 DNS 레코드를 설정하세요.',
+    description_ko: '도메인 관리 패널에서 A, CNAME, TXT 등 필요한 DNS 레코드를 설정하세요.',
+    guide_url: 'https://customer.gabia.com/manual/domain/dns',
+  },
+
+  // =======================================================================
+  // 87. 후이즈
+  // =======================================================================
+  {
+    id: cid('whois'),
+    service_id: SERVICE_IDS.whois,
+    order_index: 0,
+    title: '후이즈 계정 생성 및 로그인',
+    title_ko: '후이즈 계정 생성 및 로그인',
+    description: 'whois.co.kr에서 회원가입 후 로그인하세요.',
+    description_ko: 'whois.co.kr에서 회원가입 후 로그인하세요.',
+    guide_url: 'https://www.whois.co.kr',
+  },
+  {
+    id: cid('whois'),
+    service_id: SERVICE_IDS.whois,
+    order_index: 1,
+    title: '도메인 검색 및 등록',
+    title_ko: '도메인 검색 및 등록',
+    description: '원하는 도메인명을 검색하고 사용 가능한 도메인을 등록하세요.',
+    description_ko: '원하는 도메인명을 검색하고 사용 가능한 도메인을 등록하세요.',
+    guide_url: 'https://www.whois.co.kr/domain',
+  },
+  {
+    id: cid('whois'),
+    service_id: SERVICE_IDS.whois,
+    order_index: 2,
+    title: 'API 키 발급',
+    title_ko: 'API 키 발급',
+    description: '마이페이지에서 API 키와 시크릿 키를 발급받아 환경 변수에 설정하세요.',
+    description_ko: '마이페이지에서 API 키와 시크릿 키를 발급받아 환경 변수에 설정하세요.',
+    guide_url: 'https://www.whois.co.kr/api',
+  },
+  {
+    id: cid('whois'),
+    service_id: SERVICE_IDS.whois,
+    order_index: 3,
+    title: 'DNS 레코드 설정',
+    title_ko: 'DNS 레코드 설정',
+    description: '도메인 관리에서 네임서버 변경 또는 DNS 레코드(A, CNAME, MX 등)를 설정하세요.',
+    description_ko: '도메인 관리에서 네임서버 변경 또는 DNS 레코드(A, CNAME, MX 등)를 설정하세요.',
+    guide_url: null,
+  },
+
+  // =======================================================================
+  // 88. 카페24
+  // =======================================================================
+  {
+    id: cid('cafe24'),
+    service_id: SERVICE_IDS.cafe24,
+    order_index: 0,
+    title: '카페24 계정 생성 및 로그인',
+    title_ko: '카페24 계정 생성 및 로그인',
+    description: 'cafe24.com에서 회원가입 후 로그인하세요.',
+    description_ko: 'cafe24.com에서 회원가입 후 로그인하세요.',
+    guide_url: 'https://www.cafe24.com',
+  },
+  {
+    id: cid('cafe24'),
+    service_id: SERVICE_IDS.cafe24,
+    order_index: 1,
+    title: '도메인 등록 또는 쇼핑몰 개설',
+    title_ko: '도메인 등록 또는 쇼핑몰 개설',
+    description: '도메인을 등록하거나 쇼핑몰을 개설하고 Mall ID를 확인하세요.',
+    description_ko: '도메인을 등록하거나 쇼핑몰을 개설하고 Mall ID를 확인하세요.',
+    guide_url: 'https://developers.cafe24.com/docs/api/shop',
+  },
+  {
+    id: cid('cafe24'),
+    service_id: SERVICE_IDS.cafe24,
+    order_index: 2,
+    title: 'OAuth 앱 등록 및 Client ID 발급',
+    title_ko: 'OAuth 앱 등록 및 Client ID 발급',
+    description: 'developers.cafe24.com에서 앱을 등록하고 Client ID / Secret을 발급받으세요.',
+    description_ko: 'developers.cafe24.com에서 앱을 등록하고 Client ID / Secret을 발급받으세요.',
+    guide_url: 'https://developers.cafe24.com/docs/authentication',
+  },
+  {
+    id: cid('cafe24'),
+    service_id: SERVICE_IDS.cafe24,
+    order_index: 3,
+    title: '환경 변수 설정',
+    title_ko: '환경 변수 설정',
+    description: 'CAFE24_CLIENT_ID, CAFE24_CLIENT_SECRET, CAFE24_MALL_ID를 .env에 설정하세요.',
+    description_ko: 'CAFE24_CLIENT_ID, CAFE24_CLIENT_SECRET, CAFE24_MALL_ID를 .env에 설정하세요.',
+    guide_url: null,
+  },
+
+  // =======================================================================
+  // 89. 아이네임즈
+  // =======================================================================
+  {
+    id: cid('inames'),
+    service_id: SERVICE_IDS.inames,
+    order_index: 0,
+    title: '아이네임즈 계정 생성 및 로그인',
+    title_ko: '아이네임즈 계정 생성 및 로그인',
+    description: 'inames.co.kr에서 회원가입 후 로그인하세요.',
+    description_ko: 'inames.co.kr에서 회원가입 후 로그인하세요.',
+    guide_url: 'https://www.inames.co.kr',
+  },
+  {
+    id: cid('inames'),
+    service_id: SERVICE_IDS.inames,
+    order_index: 1,
+    title: '도메인 검색 및 등록',
+    title_ko: '도메인 검색 및 등록',
+    description: '원하는 도메인명을 검색하고 사용 가능한 도메인을 등록하세요.',
+    description_ko: '원하는 도메인명을 검색하고 사용 가능한 도메인을 등록하세요.',
+    guide_url: 'https://www.inames.co.kr/domain',
+  },
+  {
+    id: cid('inames'),
+    service_id: SERVICE_IDS.inames,
+    order_index: 2,
+    title: 'API 키 발급',
+    title_ko: 'API 키 발급',
+    description: '마이페이지 > API 설정에서 API 키와 패스워드를 발급받으세요.',
+    description_ko: '마이페이지 > API 설정에서 API 키와 패스워드를 발급받으세요.',
+    guide_url: 'https://www.inames.co.kr/domain/api',
+  },
+  {
+    id: cid('inames'),
+    service_id: SERVICE_IDS.inames,
+    order_index: 3,
+    title: 'DNS 레코드 설정',
+    title_ko: 'DNS 레코드 설정',
+    description: '도메인 관리에서 네임서버 또는 DNS 레코드를 설정하세요.',
+    description_ko: '도메인 관리에서 네임서버 또는 DNS 레코드를 설정하세요.',
+    guide_url: null,
+  },
+
+  // =======================================================================
+  // 90. 호스팅케이알
+  // =======================================================================
+  {
+    id: cid('hostingkr'),
+    service_id: SERVICE_IDS.hostingkr,
+    order_index: 0,
+    title: '호스팅케이알 계정 생성 및 로그인',
+    title_ko: '호스팅케이알 계정 생성 및 로그인',
+    description: 'hosting.kr에서 회원가입 후 로그인하세요.',
+    description_ko: 'hosting.kr에서 회원가입 후 로그인하세요.',
+    guide_url: 'https://www.hosting.kr',
+  },
+  {
+    id: cid('hostingkr'),
+    service_id: SERVICE_IDS.hostingkr,
+    order_index: 1,
+    title: '도메인 등록 또는 호스팅 신청',
+    title_ko: '도메인 등록 또는 호스팅 신청',
+    description: '원하는 도메인을 등록하거나 웹호스팅/VPS를 신청하세요.',
+    description_ko: '원하는 도메인을 등록하거나 웹호스팅/VPS를 신청하세요.',
+    guide_url: 'https://www.hosting.kr/domain',
+  },
+  {
+    id: cid('hostingkr'),
+    service_id: SERVICE_IDS.hostingkr,
+    order_index: 2,
+    title: 'API 키 발급',
+    title_ko: 'API 키 발급',
+    description: '마이페이지에서 API 키와 시크릿을 발급받아 환경 변수에 설정하세요.',
+    description_ko: '마이페이지에서 API 키와 시크릿을 발급받아 환경 변수에 설정하세요.',
+    guide_url: 'https://www.hosting.kr/support/api',
+  },
+  {
+    id: cid('hostingkr'),
+    service_id: SERVICE_IDS.hostingkr,
+    order_index: 3,
+    title: 'DNS 레코드 및 네임서버 설정',
+    title_ko: 'DNS 레코드 및 네임서버 설정',
+    description: '호스팅 컨트롤 패널에서 A 레코드, CNAME, 네임서버를 설정하세요.',
+    description_ko: '호스팅 컨트롤 패널에서 A 레코드, CNAME, 네임서버를 설정하세요.',
+    guide_url: null,
   },
 ];

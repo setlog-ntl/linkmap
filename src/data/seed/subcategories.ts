@@ -137,4 +137,8 @@ export const subcategories: SubcategorySeed[] = [
   // --- media ---
   { id: 'image_video', category: 'media', name: 'Image & Video', name_ko: '이미지 & 영상', description: 'Image and video processing', description_ko: '이미지 및 영상 처리' },
   { id: 'maps-location', category: 'media', name: 'Maps & Location', name_ko: '지도 & 위치', description: 'Maps, geocoding, and location services', description_ko: '지도, 지오코딩 및 위치 서비스' },
+
+  // --- domain ---
+  { id: 'domain_registrar', category: 'domain', name: 'Domain Registrar', name_ko: '도메인 등록', description: 'Domain registration and DNS management', description_ko: '도메인 등록 및 DNS 관리' },
+  { id: 'domain_hosting', category: 'domain', name: 'Domain & Hosting', name_ko: '도메인 & 호스팅', description: 'Domain registration with web hosting', description_ko: '웹 호스팅 포함 도메인 등록 서비스' },
 ];

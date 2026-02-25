@@ -74,6 +74,7 @@ export const serviceCategoryToEasy: Record<ServiceCategory, EasyCategory> = {
   queue: 'analytics_other',
   scheduling: 'analytics_other',
   other: 'analytics_other',
+  domain: 'deploy_hosting',
 };
 
 export interface ProcessStep {

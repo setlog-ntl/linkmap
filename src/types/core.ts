@@ -27,7 +27,8 @@ export type ServiceCategory =
   | 'ecommerce'
   | 'serverless'
   | 'code_quality'
-  | 'automation';
+  | 'automation'
+  | 'domain';
 
 export type ServiceDomain =
   | 'infrastructure'

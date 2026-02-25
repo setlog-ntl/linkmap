@@ -196,6 +196,12 @@ export const CATEGORY_STYLES: Record<ServiceCategory, CategoryStyle> = {
     accentGradient: 'from-violet-400 to-violet-600',
     hexColor: '#8b5cf6',
   },
+  domain: {
+    nodeClasses: 'bg-teal-50 border-teal-200 dark:bg-teal-950/50 dark:border-teal-800',
+    gridBorderClasses: 'border-teal-300 dark:border-teal-700',
+    accentGradient: 'from-teal-400 to-cyan-600',
+    hexColor: '#0d9488',
+  },
 };
 
 /** 카테고리 스타일 조회 (없으면 'other' 반환) */

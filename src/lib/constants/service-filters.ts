@@ -52,6 +52,7 @@ export const allCategoryLabels: Record<ServiceCategory, string> = {
   serverless: '서버리스',
   code_quality: '코드 품질',
   automation: '자동화',
+  domain: '도메인',
 };
 
 export const allCategoryEmojis: Record<ServiceCategory, string> = {
@@ -84,10 +85,11 @@ export const allCategoryEmojis: Record<ServiceCategory, string> = {
   serverless: '☁️',
   code_quality: '✅',
   automation: '🤖',
+  domain: '🌐',
 };
 
 export const domainCategoryMap: Record<ServiceDomain, ServiceCategory[]> = {
-  infrastructure: ['deploy', 'cdn', 'serverless', 'storage', 'cache'],
+  infrastructure: ['deploy', 'cdn', 'serverless', 'storage', 'cache', 'domain'],
   backend: ['database', 'auth', 'social_login', 'queue', 'search', 'cms'],
   devtools: ['cicd', 'testing', 'code_quality', 'logging'],
   communication: ['email', 'sms', 'push', 'chat'],
