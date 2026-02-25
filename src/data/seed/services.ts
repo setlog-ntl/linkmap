@@ -139,12 +139,12 @@ const SERVICE_IDS = {
   storybook: '10000000-0000-4000-a000-000000000084',
   docker: '10000000-0000-4000-a000-000000000085',
 
-  // Domain registrar services (Korean)
+  // Domain registrar services
   gabia: '10000000-0000-4000-a000-000000000086',
   whois: '10000000-0000-4000-a000-000000000087',
   cafe24: '10000000-0000-4000-a000-000000000088',
   inames: '10000000-0000-4000-a000-000000000089',
-  hostingkr: '10000000-0000-4000-a000-000000000090',
+  namecheap: '10000000-0000-4000-a000-000000000090',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -3501,7 +3501,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 88,
     difficulty_level: 'beginner',
     tags: ['domain', 'dns', 'hosting', 'ssl', 'korea', 'registrar'],
-    alternatives: ['whois', 'cafe24', 'inames', 'hostingkr'],
+    alternatives: ['whois', 'cafe24', 'inames', 'namecheap'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'wordpress'],
       language: ['php', 'javascript', 'python'],
@@ -3559,7 +3559,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 78,
     difficulty_level: 'beginner',
     tags: ['domain', 'dns', 'whois', 'ssl', 'korea', 'registrar'],
-    alternatives: ['gabia', 'cafe24', 'inames', 'hostingkr'],
+    alternatives: ['gabia', 'cafe24', 'inames', 'namecheap'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'wordpress'],
       language: ['php', 'javascript', 'python'],
@@ -3623,7 +3623,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 83,
     difficulty_level: 'beginner',
     tags: ['domain', 'hosting', 'ecommerce', 'korea', 'shopping-mall', 'cloud'],
-    alternatives: ['gabia', 'whois', 'inames', 'hostingkr'],
+    alternatives: ['gabia', 'whois', 'inames', 'namecheap'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'wordpress', 'php'],
       language: ['php', 'javascript', 'python'],
@@ -3681,7 +3681,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 68,
     difficulty_level: 'beginner',
     tags: ['domain', 'dns', 'korea', 'registrar', 'affordable'],
-    alternatives: ['gabia', 'whois', 'cafe24', 'hostingkr'],
+    alternatives: ['gabia', 'whois', 'cafe24', 'namecheap'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'wordpress'],
       language: ['php', 'javascript', 'python'],
@@ -3695,61 +3695,67 @@ export const services: ServiceSeed[] = [
   },
 
   // -----------------------------------------------------------------------
-  // 90. 호스팅케이알 (Hosting.KR)
+  // 90. Namecheap
   // -----------------------------------------------------------------------
   {
-    id: SERVICE_IDS.hostingkr,
-    name: '호스팅케이알',
-    slug: 'hostingkr',
+    id: SERVICE_IDS.namecheap,
+    name: 'Namecheap',
+    slug: 'namecheap',
     category: 'domain',
     dashboard_layer: 'devtools',
     dashboard_subcategory: 'hosting',
     description:
-      'Hosting.KR is a Korean web hosting and domain service offering affordable domain registration, shared hosting, VPS, and dedicated server services.',
+      'Namecheap is a leading global domain registrar offering affordable domain registration, free WHOIS privacy, SSL certificates, shared hosting, and VPS.',
     description_ko:
-      '국내 웹호스팅·도메인 서비스. 저렴한 가격의 도메인 등록, 공유 호스팅, VPS, 전용 서버 서비스를 제공합니다.',
+      '글로벌 주요 도메인 등록 서비스. 저렴한 도메인 등록, 무료 WHOIS 개인정보 보호, SSL 인증서, 공유 호스팅, VPS를 제공합니다.',
     icon_url: null,
-    website_url: 'https://www.hosting.kr',
-    docs_url: 'https://www.hosting.kr/support/api',
+    website_url: 'https://www.namecheap.com',
+    docs_url: 'https://www.namecheap.com/support/api/intro/',
     pricing_info: {
       free_tier: false,
       plans: [
-        { name: '.com 도메인', price: '연 11,000원~' },
-        { name: '.kr 도메인', price: '연 18,700원~' },
-        { name: '공유 호스팅', price: '월 990원~' },
-        { name: 'VPS', price: '월 11,000원~' },
+        { name: '.com 도메인', price: '$6.99/년~' },
+        { name: 'WHOIS 개인정보 보호', price: '무료 제공' },
+        { name: '공유 호스팅', price: '$1.98/월~' },
+        { name: 'VPS', price: '$4.99/월~' },
       ],
     },
     required_env_vars: [
       {
-        name: 'HOSTINGKR_API_KEY',
+        name: 'NAMECHEAP_API_KEY',
         public: false,
-        description: 'Hosting.KR API key',
-        description_ko: '호스팅케이알 API 키',
+        description: 'Namecheap API key (Profile > Tools > API Access)',
+        description_ko: '네임칩 API 키 (Profile > Tools > API Access에서 발급)',
       },
       {
-        name: 'HOSTINGKR_API_SECRET',
+        name: 'NAMECHEAP_API_USER',
         public: false,
-        description: 'Hosting.KR API secret',
-        description_ko: '호스팅케이알 API 시크릿',
+        description: 'Namecheap account username',
+        description_ko: '네임칩 계정 사용자명',
+      },
+      {
+        name: 'NAMECHEAP_CLIENT_IP',
+        public: false,
+        description: 'Whitelisted client IP address for Namecheap API',
+        description_ko: 'Namecheap API 허용 목록에 등록된 클라이언트 IP',
       },
     ],
     domain: 'infrastructure',
-    subcategory: 'domain_hosting',
-    popularity_score: 72,
+    subcategory: 'domain_registrar',
+    popularity_score: 85,
     difficulty_level: 'beginner',
-    tags: ['domain', 'hosting', 'vps', 'korea', 'affordable', 'shared-hosting'],
+    tags: ['domain', 'dns', 'ssl', 'hosting', 'whois-privacy', 'global', 'registrar'],
     alternatives: ['gabia', 'whois', 'cafe24', 'inames'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'wordpress', 'php'],
-      language: ['php', 'javascript', 'python'],
+      language: ['php', 'javascript', 'python', 'go'],
     },
-    official_sdks: { docs: 'https://www.hosting.kr/support/api' },
+    official_sdks: { docs: 'https://www.namecheap.com/support/api/intro/' },
     free_tier_quality: 'none',
     vendor_lock_in_risk: 'low',
-    setup_time_minutes: 10,
-    monthly_cost_estimate: { starter: '₩990', growth: '₩5,500', enterprise: '문의' },
-    dx_score: 6.7,
+    setup_time_minutes: 15,
+    monthly_cost_estimate: { starter: '$0.58', growth: '$1.98', enterprise: '$24.99+' },
+    dx_score: 7.8,
   },
 ];
 
@@ -5492,46 +5498,46 @@ export const checklistItems: ChecklistItemSeed[] = [
   },
 
   // =======================================================================
-  // 90. 호스팅케이알
+  // 90. Namecheap
   // =======================================================================
   {
-    id: cid('hostingkr'),
-    service_id: SERVICE_IDS.hostingkr,
+    id: cid('namecheap'),
+    service_id: SERVICE_IDS.namecheap,
     order_index: 0,
-    title: '호스팅케이알 계정 생성 및 로그인',
-    title_ko: '호스팅케이알 계정 생성 및 로그인',
-    description: 'hosting.kr에서 회원가입 후 로그인하세요.',
-    description_ko: 'hosting.kr에서 회원가입 후 로그인하세요.',
-    guide_url: 'https://www.hosting.kr',
+    title: 'Namecheap 계정 생성 및 로그인',
+    title_ko: 'Namecheap 계정 생성 및 로그인',
+    description: 'namecheap.com에서 계정을 생성하고 로그인하세요.',
+    description_ko: 'namecheap.com에서 계정을 생성하고 로그인하세요.',
+    guide_url: 'https://www.namecheap.com',
   },
   {
-    id: cid('hostingkr'),
-    service_id: SERVICE_IDS.hostingkr,
+    id: cid('namecheap'),
+    service_id: SERVICE_IDS.namecheap,
     order_index: 1,
-    title: '도메인 등록 또는 호스팅 신청',
-    title_ko: '도메인 등록 또는 호스팅 신청',
-    description: '원하는 도메인을 등록하거나 웹호스팅/VPS를 신청하세요.',
-    description_ko: '원하는 도메인을 등록하거나 웹호스팅/VPS를 신청하세요.',
-    guide_url: 'https://www.hosting.kr/domain',
+    title: '도메인 검색 및 등록',
+    title_ko: '도메인 검색 및 등록',
+    description: '원하는 도메인명을 검색하고 등록하세요. 무료 WHOIS 개인정보 보호가 자동 적용됩니다.',
+    description_ko: '원하는 도메인명을 검색하고 등록하세요. 무료 WHOIS 개인정보 보호가 자동 적용됩니다.',
+    guide_url: 'https://www.namecheap.com/domains/',
   },
   {
-    id: cid('hostingkr'),
-    service_id: SERVICE_IDS.hostingkr,
+    id: cid('namecheap'),
+    service_id: SERVICE_IDS.namecheap,
     order_index: 2,
-    title: 'API 키 발급',
-    title_ko: 'API 키 발급',
-    description: '마이페이지에서 API 키와 시크릿을 발급받아 환경 변수에 설정하세요.',
-    description_ko: '마이페이지에서 API 키와 시크릿을 발급받아 환경 변수에 설정하세요.',
-    guide_url: 'https://www.hosting.kr/support/api',
+    title: 'API 활성화 및 IP 화이트리스트 등록',
+    title_ko: 'API 활성화 및 IP 화이트리스트 등록',
+    description: 'Profile > Tools > API Access에서 API를 활성화하고 서버 IP를 화이트리스트에 추가하세요.',
+    description_ko: 'Profile > Tools > API Access에서 API를 활성화하고 서버 IP를 화이트리스트에 추가하세요.',
+    guide_url: 'https://www.namecheap.com/support/api/intro/',
   },
   {
-    id: cid('hostingkr'),
-    service_id: SERVICE_IDS.hostingkr,
+    id: cid('namecheap'),
+    service_id: SERVICE_IDS.namecheap,
     order_index: 3,
-    title: 'DNS 레코드 및 네임서버 설정',
-    title_ko: 'DNS 레코드 및 네임서버 설정',
-    description: '호스팅 컨트롤 패널에서 A 레코드, CNAME, 네임서버를 설정하세요.',
-    description_ko: '호스팅 컨트롤 패널에서 A 레코드, CNAME, 네임서버를 설정하세요.',
-    guide_url: null,
+    title: '환경 변수 설정 및 DNS 레코드 구성',
+    title_ko: '환경 변수 설정 및 DNS 레코드 구성',
+    description: 'NAMECHEAP_API_KEY, NAMECHEAP_API_USER, NAMECHEAP_CLIENT_IP를 .env에 설정하고, Advanced DNS에서 A/CNAME 레코드를 구성하세요.',
+    description_ko: 'NAMECHEAP_API_KEY, NAMECHEAP_API_USER, NAMECHEAP_CLIENT_IP를 .env에 설정하고, Advanced DNS에서 A/CNAME 레코드를 구성하세요.',
+    guide_url: 'https://www.namecheap.com/support/knowledgebase/article.aspx/319/2237/how-can-i-set-up-an-a-address-record-for-my-domain/',
   },
 ];
