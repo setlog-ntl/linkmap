@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { callAiProvider } from '@/lib/ai/providers';
@@ -28,6 +29,27 @@ const DEFAULT_MODEL = 'gpt-4o-mini';
 const DEFAULT_TEMPERATURE = 0.3;
 const DEFAULT_MAX_TOKENS = 4096;
 
+// P0-2 fix: Zod 입력 검증 스키마 — 미검증 사용자 입력의 시스템 프롬프트 주입 방지
+const aiChatSchema = z.object({
+  messages: z
+    .array(
+      z.object({
+        role: z.enum(['user', 'assistant']),
+        content: z.string().max(50_000, '메시지가 너무 깁니다'),
+      })
+    )
+    .min(1, '메시지가 필요합니다')
+    .max(50, '대화 기록이 너무 깁니다'),
+  fileContent: z.string().max(200_000, '파일이 너무 큽니다').optional(),
+  filePath: z
+    .string()
+    .max(500, '파일 경로가 너무 깁니다')
+    .refine((v) => !v.includes('..'), '유효하지 않은 경로')
+    .optional(),
+  allFiles: z.array(z.string().max(500)).max(200, '파일 목록이 너무 큽니다').optional(),
+  persona_id: z.string().uuid('유효하지 않은 persona ID').optional(),
+});
+
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -35,11 +57,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: '인증이 필요합니다' }, { status: 401 });
   }
 
-  try {
-    const { messages, fileContent, filePath, allFiles, persona_id } = await request.json();
-    const adminSupabase = createAdminClient();
+  // P0-2 fix: safeParse로 모든 입력 검증
+  const body = await request.json();
+  const parsed = aiChatSchema.safeParse(body);
+  if (!parsed.success) {
+    const message = parsed.error.issues.map((e) => e.message).join(', ');
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
 
-    // 1. Load global config
+  const { messages, fileContent, filePath, allFiles, persona_id } = parsed.data;
+
+  try {
     let configPrompt = DEFAULT_SYSTEM_PROMPT;
     let configModel = DEFAULT_MODEL;
     let configTemperature = DEFAULT_TEMPERATURE;
@@ -50,6 +78,7 @@ export async function POST(request: NextRequest) {
     let configPresPenalty = 0;
     let configStopSeq: string[] | null = null;
 
+    // 1. Load global config (supabase 클라이언트 — ai_assistant_config에 authenticated read 정책 있음)
     const { data: dbConfig } = await supabase
       .from('ai_assistant_config')
       .select('*')
@@ -69,13 +98,12 @@ export async function POST(request: NextRequest) {
       configPresPenalty = Number(dbConfig.presence_penalty) || 0;
       configStopSeq = dbConfig.stop_sequences;
 
-      // Add custom instructions
       if (dbConfig.custom_instructions) {
         configPrompt += `\n\nAdditional instructions:\n${dbConfig.custom_instructions}`;
       }
     }
 
-    // 2. Load persona overrides (if specified)
+    // 2. Load persona overrides (supabase 클라이언트 — ai_personas에 authenticated read 정책 있음)
     let personaId: string | null = null;
     if (persona_id) {
       const { data: persona } = await supabase
@@ -98,7 +126,6 @@ export async function POST(request: NextRequest) {
         if (persona.stop_sequences) configStopSeq = persona.stop_sequences;
       }
     } else if (dbConfig?.default_persona_id) {
-      // Load default persona
       const { data: defaultPersona } = await supabase
         .from('ai_personas')
         .select('*')
@@ -117,7 +144,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Guardrails check
-    const { data: guardrails } = await adminSupabase
+    // P0-2 fix: adminSupabase → supabase (042 마이그레이션으로 authenticated read policy 추가)
+    const { data: guardrails } = await supabase
       .from('ai_guardrails')
       .select('*')
       .eq('is_active', true)
@@ -126,11 +154,11 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (guardrails) {
-      const lastUserMessage = messages?.[messages.length - 1]?.content || '';
+      const lastUserMessage = messages[messages.length - 1]?.content || '';
       const result = checkGuardrails(
         lastUserMessage,
         guardrails as AiGuardrails,
-        messages?.length || 0
+        messages.length
       );
       if (!result.allowed) {
         return NextResponse.json(
@@ -141,6 +169,9 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Resolve API key
+    // P0-2 note: ai_providers에는 encrypted_api_key가 포함되어 있어 일반 RLS read 불가.
+    // 서버 API 라우트에서만 호출되며 클라이언트에 키가 노출되지 않으므로 adminSupabase 유지.
+    // (CLAUDE.md 예외: 암호화 키 조회 목적의 서버 전용 접근)
     let apiKey: string | undefined;
     let baseUrl: string | undefined;
 
@@ -148,9 +179,10 @@ export async function POST(request: NextRequest) {
       apiKey = process.env.OPENAI_API_KEY;
       baseUrl = process.env.OPENAI_BASE_URL;
     } else {
+      const adminSupabase = createAdminClient();
       const { data: providerRow } = await adminSupabase
         .from('ai_providers')
-        .select('*')
+        .select('encrypted_api_key, base_url')
         .eq('slug', configProvider)
         .eq('is_enabled', true)
         .single();
@@ -169,9 +201,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Build system prompt with file context
-    const allFilesContext = Array.isArray(allFiles) && allFiles.length > 0
-      ? `\nAll files in this project: ${allFiles.join(', ')}`
-      : '';
+    // P0-2 fix: Zod로 검증된 값만 사용 (filePath, allFiles, fileContent 모두 검증 완료)
+    const allFilesContext =
+      Array.isArray(allFiles) && allFiles.length > 0
+        ? `\nAll files in this project: ${allFiles.join(', ')}`
+        : '';
 
     const fullSystemPrompt = `${configPrompt}
 
@@ -204,7 +238,8 @@ ${fileContent || ''}
     const responseTimeMs = Date.now() - startTime;
 
     // 7. Log usage (fire-and-forget)
-    adminSupabase.from('ai_usage_logs').insert({
+    // P0-2 fix: supabase 클라이언트로 변경 (042 마이그레이션으로 user own insert policy 추가)
+    supabase.from('ai_usage_logs').insert({
       user_id: user.id,
       persona_id: personaId,
       provider: configProvider,

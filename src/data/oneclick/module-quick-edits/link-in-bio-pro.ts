@@ -37,4 +37,13 @@ export const linkInBioProQuickEdits: QuickEditQuestion[] = [
     targetModuleId: 'links',
     targetFields: ['items'],
   },
+  {
+    id: 'lib-layout-style',
+    label: '폰트 조합 추천',
+    emoji: '🔤',
+    systemHint:
+      'Based on the current bgStyle and cardStyle, recommend the most suitable fontFamily option from: system, serif, mono, display. Explain briefly why the font matches the visual style (e.g., mono pairs well with neon-dark for a tech/indie aesthetic). Return only one of the four values as fontFamily.',
+    targetModuleId: 'theme',
+    targetFields: ['fontFamily'],
+  },
 ];

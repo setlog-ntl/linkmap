@@ -203,7 +203,7 @@ export function CommandPalette() {
               </CommandItem>
               <CommandItem onSelect={() => navigate('/sites')}>
                 <Rocket className="mr-2 h-4 w-4" />
-                {t(locale, 'nav.sites')}
+                {t(locale, 'nav.oneclick')}
               </CommandItem>
               <CommandItem onSelect={() => navigate('/settings/accounts')}>
                 <Link2 className="mr-2 h-4 w-4" />

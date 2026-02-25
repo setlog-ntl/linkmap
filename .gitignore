@@ -58,3 +58,19 @@ next-env.d.ts
 
 # One-time rotation scripts
 scripts/rotate-encryption-key.ts
+
+# Benchmarking (internal analysis — not for sharing)
+docs/benchmark/
+docs/benchmarking-*.md
+docs/benchmarking-*.html
+
+# Design captures & tools (internal dev artifacts)
+docs/captures/
+docs/tools/
+
+# Playwright MCP (local tool config)
+.playwright-mcp/
+
+# Local design references
+*.jpeg
+*.jpg

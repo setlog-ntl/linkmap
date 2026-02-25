@@ -7,16 +7,16 @@ import { t } from '@/lib/i18n';
 
 const actions = [
   {
-    icon: FolderPlus,
-    labelKey: 'dashboard.quickNewProject',
-    href: '#new-project',
-    color: 'bg-primary/10 text-primary hover:bg-primary/20',
-  },
-  {
     icon: Rocket,
     labelKey: 'dashboard.quickOneclick',
     href: '/sites',
     color: 'bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 dark:text-orange-400',
+  },
+  {
+    icon: FolderPlus,
+    labelKey: 'dashboard.quickNewProject',
+    href: '#new-project',
+    color: 'bg-primary/10 text-primary hover:bg-primary/20',
   },
   {
     icon: Search,

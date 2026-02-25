@@ -1117,7 +1117,7 @@ export const homepageTemplates: HomepageTemplateContent[] = [
   {
     slug: 'link-in-bio-pro',
     repoName: 'link-in-bio-pro',
-    description: '링크인바이오 페이지 - Linkmap으로 생성',
+    description: '내링크모음 - Linkmap으로 생성',
     files: [
       { path: '.github/workflows/deploy.yml', content: deployWorkflow },
       { path: 'package.json', content: linkInBioPackageJson },

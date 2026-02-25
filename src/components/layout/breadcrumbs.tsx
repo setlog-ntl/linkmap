@@ -19,9 +19,9 @@ interface AppBreadcrumbsProps {
 
 const routeLabels: Record<string, string> = {
   dashboard: 'common.dashboard',
-  sites: 'nav.sites',
-  oneclick: 'nav.sites',
-  'my-sites': 'nav.sites',
+  sites: 'nav.oneclick',
+  oneclick: 'nav.oneclick',
+  'my-sites': 'nav.oneclick',
   services: 'nav.serviceCatalog',
   settings: 'common.settings',
   project: 'commandPalette.project',

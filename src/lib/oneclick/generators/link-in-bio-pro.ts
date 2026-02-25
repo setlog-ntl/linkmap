@@ -73,6 +73,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const bgStyle = (theme.bgStyle as string) || 'gradient';
   const primaryColor = (theme.primaryColor as string) || '#6366f1';
   const cardStyle = (theme.cardStyle as string) || 'rounded';
+  const fontFamily = (theme.fontFamily as string) || 'system';
   const linkItems = (links.items as unknown[]) || [];
   const socialItems = (socials.items as unknown[]) || [];
 
@@ -87,6 +88,13 @@ export interface SocialItem {
   platform: string;
   url: string;
 }
+
+/** 배경 스타일: gradient | solid | mesh | aurora | glass | dark */
+export type BgStyle = 'gradient' | 'solid' | 'mesh' | 'aurora' | 'glass' | 'dark';
+/** 카드 스타일: rounded | pill | square | glass | neon */
+export type CardStyle = 'rounded' | 'pill' | 'square' | 'glass' | 'neon';
+/** 폰트 패밀리: system | serif | mono | display */
+export type FontFamily = 'system' | 'serif' | 'mono' | 'display';
 
 const DEMO_LINKS: LinkItem[] = ${buildLinksArray(linkItems)};
 
@@ -108,9 +116,10 @@ export const siteConfig = {
   bioEn: process.env.NEXT_PUBLIC_BIO_EN || '${esc(bioEn)}',
   avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || ${avatarUrl ? imagePathExpr(avatarUrl) : 'null'},
   theme: process.env.NEXT_PUBLIC_THEME || '${esc(bgStyle)}',
-  bgStyle: '${esc(bgStyle)}',
-  primaryColor: '${esc(primaryColor)}',
-  cardStyle: '${esc(cardStyle)}',
+  bgStyle: (process.env.NEXT_PUBLIC_BG_STYLE || '${esc(bgStyle)}') as BgStyle,
+  primaryColor: process.env.NEXT_PUBLIC_PRIMARY_COLOR || '${esc(primaryColor)}',
+  cardStyle: (process.env.NEXT_PUBLIC_CARD_STYLE || '${esc(cardStyle)}') as CardStyle,
+  fontFamily: (process.env.NEXT_PUBLIC_FONT_FAMILY || '${esc(fontFamily)}') as FontFamily,
   links: parseJSON<LinkItem[]>(process.env.NEXT_PUBLIC_LINKS, DEMO_LINKS),
   socials: parseJSON<SocialItem[]>(process.env.NEXT_PUBLIC_SOCIALS, ${buildSocialsArray(socialItems)}),
   youtubeUrl: process.env.NEXT_PUBLIC_YOUTUBE_URL || null,
@@ -149,13 +158,25 @@ function generatePageTsx(state: ModuleConfigState): string {
 
   return `${imports.join('\n')}
 
+function getFontClass(fontFamily: string): string {
+  switch (fontFamily) {
+    case 'serif': return 'font-serif';
+    case 'mono': return 'font-mono';
+    case 'display': return 'font-display';
+    default: return 'font-sans';
+  }
+}
+
 export default function Home() {
   const theme = getTheme(siteConfig.theme);
   const bgStyle = siteConfig.bgStyle || 'gradient';
+  const fontClass = getFontClass(siteConfig.fontFamily || 'system');
+  const isAnimated = bgStyle === 'gradient' || bgStyle === 'aurora';
+  const isDark = bgStyle === 'dark';
 
   return (
     <main id="main"
-      className={\`min-h-screen flex flex-col items-center justify-center p-4\${bgStyle === 'gradient' ? ' animate-gradient' : ''}\`}
+      className={\`min-h-screen flex flex-col items-center justify-center p-4 \${fontClass}\${isAnimated ? ' animate-gradient' : ''}\${isDark ? ' dark' : ''}\`}
       style={getBackground(theme, bgStyle)}
     >
       <div className="w-full max-w-md mx-auto flex flex-col items-center gap-6 py-12">
@@ -216,10 +237,15 @@ function parseConfigToState(
   // Theme
   const themeVal = extractString('theme');
   if (themeVal !== null) state.values.theme.bgStyle = themeVal;
+  // bgStyle 환경변수 직접 저장 값 우선 복원
+  const bgStyleVal = extractString('bgStyle');
+  if (bgStyleVal !== null) state.values.theme.bgStyle = bgStyleVal;
   const primaryColor = extractString('primaryColor');
   if (primaryColor !== null) state.values.theme.primaryColor = primaryColor;
   const cardStyle = extractString('cardStyle');
   if (cardStyle !== null) state.values.theme.cardStyle = cardStyle;
+  const fontFamily = extractString('fontFamily');
+  if (fontFamily !== null) state.values.theme.fontFamily = fontFamily;
 
   return state;
 }

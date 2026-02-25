@@ -15,9 +15,24 @@ import {
 } from '@/lib/github/api';
 import { z } from 'zod';
 
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB base64 ≈ 1.5MB binary
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB base64 string length limit
 
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+// P0-3 fix: SVG 제거 — SVG는 <script> 태그를 포함할 수 있어 GitHub Pages에 XSS 페이로드가 영구 배포될 수 있음
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'] as const;
+type AllowedMimeType = (typeof ALLOWED_TYPES)[number];
+
+// P0-3 fix: MIME 타입별 매직 바이트 시그니처 (클라이언트 mimeType 신뢰 불가)
+const MAGIC_BYTES: Record<AllowedMimeType, (buf: Buffer) => boolean> = {
+  'image/jpeg': (buf) => buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff,
+  'image/png': (buf) =>
+    buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47 &&
+    buf[4] === 0x0d && buf[5] === 0x0a && buf[6] === 0x1a && buf[7] === 0x0a,
+  'image/webp': (buf) =>
+    buf[0] === 0x52 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x46 &&
+    buf[8] === 0x57 && buf[9] === 0x45 && buf[10] === 0x42 && buf[11] === 0x50,
+  'image/gif': (buf) =>
+    buf[0] === 0x47 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x38,
+};
 
 const uploadSchema = z.object({
   /** Base64-encoded image data (no data URI prefix) */
@@ -30,11 +45,12 @@ const uploadSchema = z.object({
     .string()
     .min(1)
     .max(100)
-    .refine((val) => /\.(jpe?g|png|webp|gif|svg)$/i.test(val), 'Unsupported image format'),
+    // P0-3 fix: svg 확장자 제거
+    .refine((val) => /\.(jpe?g|png|webp|gif)$/i.test(val), 'Unsupported image format'),
   /** MIME type */
   mimeType: z
     .string()
-    .refine((val) => ALLOWED_TYPES.includes(val), 'Unsupported MIME type'),
+    .refine((val): val is AllowedMimeType => (ALLOWED_TYPES as readonly string[]).includes(val), 'Unsupported MIME type'),
   /** Target directory in the repo */
   directory: z
     .string()
@@ -61,7 +77,21 @@ export async function POST(
     return apiError(messages, 400);
   }
 
-  const { data: imageData, filename, directory } = parsed.data;
+  const { data: imageData, filename, mimeType, directory } = parsed.data;
+
+  // P0-3 fix: 매직 바이트 검증 — 클라이언트가 전달한 mimeType과 실제 파일 내용 일치 여부 확인
+  try {
+    const buffer = Buffer.from(imageData, 'base64');
+    if (buffer.length < 12) {
+      return apiError('유효하지 않은 이미지 파일입니다', 400);
+    }
+    const isValidMagic = MAGIC_BYTES[mimeType](buffer);
+    if (!isValidMagic) {
+      return apiError('파일 내용이 선언된 형식과 일치하지 않습니다', 400);
+    }
+  } catch {
+    return apiError('이미지 데이터를 파싱할 수 없습니다', 400);
+  }
 
   // 3. Ownership
   const { data: deploy } = await supabase
