@@ -203,17 +203,6 @@ function clearPendingDeploy() {
   try { sessionStorage.removeItem(PENDING_KEY); } catch { /* ignore */ }
 }
 
-// ── Random Site Name Generator ──
-
-function generateSiteName(): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let suffix = '';
-  for (let i = 0; i < 4; i++) {
-    suffix += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return `my-site-${suffix}`;
-}
-
 // ── Hook ──
 
 interface UseDeployMachineOptions {
@@ -224,7 +213,7 @@ export function useDeployMachine({ isAuthenticated }: UseDeployMachineOptions) {
   const [state, dispatch] = useReducer(deployReducer, {
     phase: 'selecting',
     template: null,
-    siteName: generateSiteName(),
+    siteName: '',
   });
 
   const deployMutation = useDeployToGitHubPages();
