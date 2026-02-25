@@ -68,6 +68,9 @@ docs/benchmarking-*.html
 docs/captures/
 docs/tools/
 
+# DB upload SQL files (local-only seed data — not for sharing)
+docs/db-uploads/
+
 # Playwright MCP (local tool config)
 .playwright-mcp/
 
