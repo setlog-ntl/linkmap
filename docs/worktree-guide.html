@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Git Worktree × Claude Code 작업 가이드 — Linkmap</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: '#2bee79',
+            blue: '#3b82f6',
+            dark: '#0a0a0a',
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0a0a; color: #e5e7eb; }
+    .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
+    .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; transition: all 0.25s; }
+    .card:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
+    .tag-green { background: rgba(43,238,121,0.12); color: #2bee79; border: 1px solid rgba(43,238,121,0.25); }
+    .tag-blue  { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
+    .tag-red   { background: rgba(239,68,68,0.12);  color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+    .tag-gray  { background: rgba(255,255,255,0.06); color: #9ca3af; border: 1px solid rgba(255,255,255,0.12); }
+    pre, code { font-family: 'Fira Code', 'Cascadia Code', 'Courier New', monospace; }
+    pre { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 1rem 1.25rem; overflow-x: auto; font-size: 0.82rem; line-height: 1.7; }
+    .step-num { width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+    .connector { width: 2px; background: rgba(255,255,255,0.1); flex-grow: 1; min-height: 24px; margin: 4px auto; }
+    .highlight { color: #2bee79; font-weight: 600; }
+    .warn { color: #fb923c; font-weight: 600; }
+    .muted { color: #6b7280; }
+    .section-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 3rem 0; }
+    .cmd-inline { background: rgba(43,238,121,0.1); color: #2bee79; padding: 0.1rem 0.45rem; border-radius: 4px; font-family: monospace; font-size: 0.85em; border: 1px solid rgba(43,238,121,0.2); }
+    .badge { padding: 0.15rem 0.55rem; border-radius: 999px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 0.6rem 0.9rem; color: #6b7280; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    td { padding: 0.7rem 0.9rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.875rem; }
+    tr:last-child td { border-bottom: none; }
+    .tree-line { border-left: 2px solid rgba(255,255,255,0.1); padding-left: 1rem; margin-left: 0.5rem; }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- Hero -->
+  <header style="background: linear-gradient(135deg, #0a0a0a 0%, #0d1a2e 50%, #0a1a12 100%); border-bottom: 1px solid rgba(255,255,255,0.06);">
+    <div class="max-w-5xl mx-auto px-6 py-16">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="badge tag-green">Git Worktree</span>
+        <span class="badge tag-blue">Claude Code</span>
+        <span class="badge tag-gray">Linkmap 프로젝트</span>
+      </div>
+      <h1 class="text-4xl font-extrabold mb-4 leading-tight">
+        동시 작업 충돌 없이<br>
+        <span class="highlight">Worktree × Claude Code</span> 가이드
+      </h1>
+      <p class="text-gray-400 text-lg max-w-2xl">
+        여러 기능을 동시에 개발할 때 파일 충돌 없이 안전하게 작업하는 방법.
+        Git Worktree를 이용해 각 작업에 독립된 폴더를 만들고, Claude Code로 병렬 개발합니다.
+      </p>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-6 py-12 space-y-16">
+
+    <!-- 1. 개념 설명 -->
+    <section>
+      <h2 class="section-title">1. Worktree가 뭔가요? <span class="text-gray-500 text-base font-normal">(1분 요약)</span></h2>
+      <p class="text-gray-400 mb-6">아파트 비유로 이해하세요.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="card p-5">
+          <div class="text-2xl mb-3">🏠</div>
+          <div class="font-semibold mb-1 text-white">기존 방식 (브랜치만)</div>
+          <p class="text-gray-400 text-sm">방 하나에 짐이 섞여있음. 기능A 작업하다가 기능B 파일 건드리면 충돌 발생.</p>
+          <div class="mt-3"><span class="badge tag-red">충돌 위험</span></div>
+        </div>
+        <div class="card p-5">
+          <div class="text-2xl mb-3">🏢</div>
+          <div class="font-semibold mb-1 text-white">Worktree 방식</div>
+          <p class="text-gray-400 text-sm">기능별로 방이 따로 있음. 각 방(폴더)에서 독립 작업. Git 이력은 공유.</p>
+          <div class="mt-3"><span class="badge tag-green">완전 격리</span></div>
+        </div>
+        <div class="card p-5">
+          <div class="text-2xl mb-3">🔗</div>
+          <div class="font-semibold mb-1 text-white">공통점</div>
+          <p class="text-gray-400 text-sm">같은 Git 저장소(.git)를 공유. 작업 완료 후 main에 머지. 브랜치 기록 유지.</p>
+          <div class="mt-3"><span class="badge tag-blue">동일 레포</span></div>
+        </div>
+      </div>
+
+      <div class="card mt-6 p-5">
+        <div class="font-semibold text-white mb-3">폴더 구조 비교</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <div class="text-gray-500 text-xs uppercase mb-2 font-semibold">❌ 기존 (충돌 위험)</div>
+            <pre>C:\Dev\
+└── linkmap\         ← 하나의 폴더
+    ├── src/         ← 모든 세션이 같이 수정
+    └── .git/</pre>
+          </div>
+          <div>
+            <div class="text-gray-500 text-xs uppercase mb-2 font-semibold">✅ Worktree (격리됨)</div>
+            <pre>C:\Dev\
+├── linkmap\             ← main (원본)
+│   └── .git/
+├── linkmap-dx-score\    ← 기능A 독립 폴더
+└── linkmap-compare-api\ ← 기능B 독립 폴더</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- 2. 기본 명령어 -->
+    <section>
+      <h2 class="section-title">2. 핵심 명령어 4개</h2>
+      <p class="text-gray-400 mb-6">이 4개만 알면 됩니다.</p>
+
+      <div class="space-y-3">
+        <div class="card p-4">
+          <div class="flex items-start gap-4">
+            <span class="badge tag-green mt-1">생성</span>
+            <div class="flex-1">
+              <pre>git worktree add ../linkmap-<span class="highlight">기능명</span> -b feat/<span class="highlight">기능명</span></pre>
+              <p class="text-gray-400 text-sm mt-2">현재 폴더 옆에 <span class="cmd-inline">linkmap-기능명</span> 폴더 생성 + 새 브랜치 자동 생성</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-4">
+          <div class="flex items-start gap-4">
+            <span class="badge tag-blue mt-1">목록</span>
+            <div class="flex-1">
+              <pre>git worktree list</pre>
+              <p class="text-gray-400 text-sm mt-2">현재 활성화된 모든 worktree와 브랜치 확인</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-4">
+          <div class="flex items-start gap-4">
+            <span class="badge tag-gray mt-1">이동</span>
+            <div class="flex-1">
+              <pre>cd ../linkmap-기능명</pre>
+              <p class="text-gray-400 text-sm mt-2">해당 worktree 폴더로 이동 후 Claude Code 실행</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-4">
+          <div class="flex items-start gap-4">
+            <span class="badge tag-red mt-1">삭제</span>
+            <div class="flex-1">
+              <pre>git worktree remove ../linkmap-기능명</pre>
+              <p class="text-gray-400 text-sm mt-2">작업 완료 후 폴더 제거 (브랜치는 유지됨)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- 3. 전체 워크플로우 -->
+    <section>
+      <h2 class="section-title">3. 전체 워크플로우</h2>
+      <p class="text-gray-400 mb-8">실제 작업 순서를 단계별로 따라하세요.</p>
+
+      <!-- Step 1 -->
+      <div class="flex gap-4 mb-2">
+        <div class="flex flex-col items-center">
+          <div class="step-num" style="background: rgba(43,238,121,0.2); color: #2bee79; border: 2px solid rgba(43,238,121,0.4);">1</div>
+          <div class="connector"></div>
+        </div>
+        <div class="card flex-1 p-5 mb-2">
+          <div class="font-semibold text-white mb-2">Worktree 생성 (main 폴더에서 실행)</div>
+          <pre><span class="muted"># main 브랜치가 최신인지 확인</span>
+cd /c/Dev/linkmap
+git checkout main && git pull
+
+<span class="muted"># 새 worktree 생성 (폴더명은 작업 내용으로)</span>
+git worktree add ../linkmap-dx-score -b feat/dx-score
+git worktree add ../linkmap-compare-api -b feat/compare-api</pre>
+          <p class="text-gray-400 text-sm mt-3">→ <span class="cmd-inline">C:\Dev\linkmap-dx-score</span> 폴더가 자동 생성됩니다</p>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="flex gap-4 mb-2">
+        <div class="flex flex-col items-center">
+          <div class="step-num" style="background: rgba(59,130,246,0.2); color: #60a5fa; border: 2px solid rgba(59,130,246,0.4);">2</div>
+          <div class="connector"></div>
+        </div>
+        <div class="card flex-1 p-5 mb-2">
+          <div class="font-semibold text-white mb-2">각 Worktree에서 Claude Code 실행</div>
+          <pre><span class="muted"># 터미널 1 — 기능 A 작업</span>
+cd /c/Dev/linkmap-dx-score
+claude  <span class="muted"># Claude Code 시작</span>
+
+<span class="muted"># 터미널 2 — 기능 B 작업 (동시에!)</span>
+cd /c/Dev/linkmap-compare-api
+claude  <span class="muted"># Claude Code 시작</span></pre>
+          <div class="mt-3 flex gap-2 flex-wrap">
+            <span class="badge tag-green">완전 독립 폴더</span>
+            <span class="badge tag-blue">파일 충돌 없음</span>
+            <span class="badge tag-gray">동시 실행 가능</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="flex gap-4 mb-2">
+        <div class="flex flex-col items-center">
+          <div class="step-num" style="background: rgba(168,85,247,0.2); color: #c084fc; border: 2px solid rgba(168,85,247,0.4);">3</div>
+          <div class="connector"></div>
+        </div>
+        <div class="card flex-1 p-5 mb-2">
+          <div class="font-semibold text-white mb-2">각 Worktree에서 커밋 & 푸시 (<code class="cmd-inline">/gitp</code>)</div>
+          <pre><span class="muted"># 각 worktree 폴더의 Claude Code에서</span>
+/gitp
+
+<span class="muted"># 또는 직접 명령어로</span>
+git add -p          <span class="muted"># 변경사항 확인하며 스테이징</span>
+git commit -m "feat: dx-score 점수 계산 로직 추가"
+git push -u origin feat/dx-score</pre>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="flex gap-4 mb-2">
+        <div class="flex flex-col items-center">
+          <div class="step-num" style="background: rgba(251,146,60,0.2); color: #fb923c; border: 2px solid rgba(251,146,60,0.4);">4</div>
+          <div class="connector"></div>
+        </div>
+        <div class="card flex-1 p-5 mb-2">
+          <div class="font-semibold text-white mb-2">main에 머지</div>
+          <pre><span class="muted"># main 폴더로 이동</span>
+cd /c/Dev/linkmap
+git checkout main
+
+<span class="muted"># 첫 번째 기능 머지</span>
+git merge feat/dx-score
+
+<span class="muted"># 두 번째 기능 머지 (충돌 있으면 해결 후)</span>
+git merge feat/compare-api
+
+git push</pre>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="flex gap-4">
+        <div class="flex flex-col items-center">
+          <div class="step-num" style="background: rgba(239,68,68,0.2); color: #f87171; border: 2px solid rgba(239,68,68,0.4);">5</div>
+        </div>
+        <div class="card flex-1 p-5">
+          <div class="font-semibold text-white mb-2">Worktree 정리</div>
+          <pre><span class="muted"># 작업 완료된 worktree 제거</span>
+git worktree remove ../linkmap-dx-score
+git worktree remove ../linkmap-compare-api
+
+<span class="muted"># 브랜치도 삭제 (선택)</span>
+git branch -d feat/dx-score feat/compare-api</pre>
+          <p class="text-gray-400 text-sm mt-3">폴더만 제거됩니다. Git 이력은 main에 영구 보존.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- 4. 한눈에 보는 흐름도 -->
+    <section>
+      <h2 class="section-title">4. 한눈에 보는 흐름도</h2>
+      <div class="card p-6">
+        <pre style="font-size: 0.78rem; line-height: 1.9;">
+<span class="highlight">main</span>  ──●──────────────────────────────────────────────●── push
+          │                                              ▲
+          │  git worktree add                            │ merge
+          ├──→ <span style="color:#60a5fa;">linkmap-dx-score/</span>   [브랜치: feat/dx-score]
+          │      Claude 작업 → /gitp ──────────────────→ ┘
+          │
+          └──→ <span style="color:#c084fc;">linkmap-compare-api/</span> [브랜치: feat/compare-api]
+                 Claude 작업 → /gitp ──────────────────→ ┘
+
+<span class="muted">각 폴더는 완전히 독립 — 파일 충돌 없음, 동시 작업 가능</span></pre>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- 5. 실전 시나리오 (Linkmap 기준) -->
+    <section>
+      <h2 class="section-title">5. 실전 시나리오 <span class="text-gray-500 text-base font-normal">(Linkmap 기준)</span></h2>
+
+      <div class="overflow-hidden rounded-xl" style="border: 1px solid rgba(255,255,255,0.08);">
+        <table>
+          <thead style="background: rgba(255,255,255,0.03);">
+            <tr>
+              <th>시나리오</th>
+              <th>Worktree 이름</th>
+              <th>브랜치</th>
+              <th>안전도</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>AI API 수정 + 서비스 UI 수정 동시</td>
+              <td><code class="cmd-inline">linkmap-ai-fix</code><br><code class="cmd-inline">linkmap-ui-fix</code></td>
+              <td><code>feat/ai-fix</code><br><code>feat/ui-fix</code></td>
+              <td><span class="badge tag-green">안전</span></td>
+            </tr>
+            <tr>
+              <td>서비스 타입 수정 + DB 마이그레이션 동시</td>
+              <td><code class="cmd-inline">linkmap-types</code><br><code class="cmd-inline">linkmap-db</code></td>
+              <td><code>feat/types</code><br><code>feat/db</code></td>
+              <td><span class="badge tag-red">주의 — 머지 순서 지키기</span></td>
+            </tr>
+            <tr>
+              <td>마이그레이션 2개 동시 작업</td>
+              <td>—</td>
+              <td>—</td>
+              <td><span class="badge tag-red">금지 — 번호 충돌</span></td>
+            </tr>
+            <tr>
+              <td>서로 다른 컴포넌트 작업</td>
+              <td><code class="cmd-inline">linkmap-comp-a</code><br><code class="cmd-inline">linkmap-comp-b</code></td>
+              <td><code>feat/comp-a</code><br><code>feat/comp-b</code></td>
+              <td><span class="badge tag-green">안전</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card p-5 mt-4">
+        <div class="font-semibold text-white mb-2">⚠️ 동시 작업 금지 파일 (Linkmap)</div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+          <div class="glass rounded-lg p-3 text-sm">
+            <div class="warn mb-1">DB 마이그레이션</div>
+            <code class="text-gray-400 text-xs">supabase/migrations/NNN_*.sql</code>
+            <p class="text-gray-500 text-xs mt-1">번호 순서가 겹치면 안 됨</p>
+          </div>
+          <div class="glass rounded-lg p-3 text-sm">
+            <div class="warn mb-1">공유 타입</div>
+            <code class="text-gray-400 text-xs">src/types/service.ts</code>
+            <p class="text-gray-500 text-xs mt-1">머지 시 신중히 검토</p>
+          </div>
+          <div class="glass rounded-lg p-3 text-sm">
+            <div class="warn mb-1">시드 데이터</div>
+            <code class="text-gray-400 text-xs">src/data/seed/services-v2.ts</code>
+            <p class="text-gray-500 text-xs mt-1">데이터 중복 추가 위험</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- 6. 치트시트 -->
+    <section>
+      <h2 class="section-title">6. 빠른 치트시트</h2>
+      <div class="card p-6">
+        <pre><span class="muted">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="highlight">  Git Worktree 치트시트 — Linkmap</span>
+<span class="muted">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+
+<span style="color:#60a5fa;">[생성]</span>
+  git worktree add ../linkmap-<span class="highlight">이름</span> -b feat/<span class="highlight">이름</span>
+
+<span style="color:#60a5fa;">[확인]</span>
+  git worktree list
+
+<span style="color:#60a5fa;">[작업]</span>
+  cd ../linkmap-<span class="highlight">이름</span>
+  claude              <span class="muted"># Claude Code 시작</span>
+  /gitp               <span class="muted"># 커밋 + 푸시</span>
+
+<span style="color:#60a5fa;">[머지]</span>
+  cd /c/Dev/linkmap
+  git checkout main
+  git merge feat/<span class="highlight">이름</span>
+  git push
+
+<span style="color:#60a5fa;">[정리]</span>
+  git worktree remove ../linkmap-<span class="highlight">이름</span>
+  git branch -d feat/<span class="highlight">이름</span>
+
+<span class="muted">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="warn">주의:</span> 각 worktree는 서로 다른 브랜치여야 함 (같은 브랜치 불가)
+<span class="muted">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span></pre>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- 7. 현재 상태 정리 -->
+    <section>
+      <h2 class="section-title">7. 지금 당장 할 일 <span class="text-gray-500 text-base font-normal">(현재 main에 미커밋 파일 있음)</span></h2>
+
+      <div class="card p-6">
+        <div class="font-semibold text-white mb-4">현재 수정된 파일들을 브랜치로 분리하는 방법</div>
+        <pre><span class="muted"># 1. 현재 변경사항을 새 브랜치로 이동</span>
+cd /c/Dev/linkmap
+git checkout -b feat/current-changes
+
+<span class="muted"># 2. 커밋 & 푸시</span>
+/gitp
+
+<span class="muted"># 3. main으로 돌아와서 새 worktree 작업 시작</span>
+git checkout main</pre>
+
+        <div class="mt-4 p-4 rounded-lg" style="background: rgba(43,238,121,0.06); border: 1px solid rgba(43,238,121,0.15);">
+          <div class="text-sm font-semibold text-green-400 mb-2">현재 main에 쌓인 수정사항</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-1">
+            <code class="text-gray-400 text-xs">src/app/api/ai/compare-services/route.ts</code>
+            <code class="text-gray-400 text-xs">src/app/api/ai/stack-recommend/route.ts</code>
+            <code class="text-gray-400 text-xs">src/components/service-map/service-detail-sheet.tsx</code>
+            <code class="text-gray-400 text-xs">src/components/service/service-badges.tsx</code>
+            <code class="text-gray-400 text-xs">src/components/service/service-catalog-client.tsx</code>
+            <code class="text-gray-400 text-xs">src/components/service/service-detail-client.tsx</code>
+            <code class="text-gray-400 text-xs">src/components/service/service-list-item.tsx</code>
+            <code class="text-gray-400 text-xs">src/data/seed/services-v2.ts</code>
+            <code class="text-gray-400 text-xs">src/types/service.ts</code>
+            <code class="text-gray-400 text-xs">supabase/migrations/047_replace_dx_score_with_github_stars.sql</code>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer style="border-top: 1px solid rgba(255,255,255,0.06);" class="mt-16 py-8 text-center text-gray-600 text-sm">
+    Linkmap — Git Worktree 가이드 · 2026
+  </footer>
+
+</body>
+</html>
