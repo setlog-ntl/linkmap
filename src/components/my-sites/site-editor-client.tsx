@@ -29,6 +29,7 @@ import {
   ChevronRight,
   Folder,
   Blocks,
+  Github,
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -1113,6 +1114,15 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
             <Button variant="outline" size="icon" className="h-8 w-8" asChild>
               <a href={liveUrl} target="_blank" rel="noopener noreferrer" title={t(locale, 'editor.openNewTab')}>
                 <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </Button>
+          )}
+
+          {/* GitHub 레포 */}
+          {deploy?.forked_repo_url && (
+            <Button variant="outline" size="icon" className="h-8 w-8" asChild>
+              <a href={deploy.forked_repo_url} target="_blank" rel="noopener noreferrer" title={t(locale, 'mySites.githubRepo')}>
+                <Github className="h-3.5 w-3.5" />
               </a>
             </Button>
           )}
