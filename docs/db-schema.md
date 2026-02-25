@@ -1,7 +1,7 @@
 # Linkmap Database Schema Reference
 
-> **Last Updated**: 2026-02-22
-> **Migrations**: 001 ~ 042 (42 files)
+> **Last Updated**: 2026-02-25
+> **Migrations**: 001 ~ 046 (46 files)
 > **Engine**: Supabase (PostgreSQL 15+)
 
 이 문서는 바이브코딩 시 DB 구조를 빠르게 참조하기 위한 스키마 레퍼런스입니다.
@@ -710,8 +710,8 @@ CREATE TYPE team_role AS ENUM ('admin', 'editor', 'viewer');
 ```
 supabase/migrations/NNN_description.sql
 ```
-- NNN: 3자리 숫자 (001~040)
-- 다음 마이그레이션: **042**
+- NNN: 3자리 숫자 (001~046)
+- 다음 마이그레이션: **047**
 
 ### 마이그레이션 작성 규칙
 1. **IF NOT EXISTS / IF EXISTS** 사용 → idempotent하게
