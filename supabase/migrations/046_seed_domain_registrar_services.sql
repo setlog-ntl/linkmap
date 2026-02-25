@@ -2,6 +2,7 @@
 -- 046: 도메인 등록 서비스 6개 DB 반영
 -- (국내: Gabia, HostingKR, DotName / 해외: Namecheap, Cloudflare Registrar, GoDaddy)
 -- Seed API(개발전용)를 대신해 프로덕션 DB에 직접 upsert
+-- ID 범위: 91~96 (services.ts 1~90, services-v2.ts 1~50 사용 중)
 -- ============================================================
 
 -- 1. service_subcategories: domain_registrar 확보
@@ -22,6 +23,7 @@ ON CONFLICT (id) DO UPDATE SET
   description_ko = EXCLUDED.description_ko;
 
 -- 2. services: 6개 도메인 등록 서비스 upsert (slug 기준 conflict)
+-- 주의: ON CONFLICT UPDATE 시 id는 변경하지 않음 (PK 충돌 방지)
 
 -- 2-1. Namecheap
 INSERT INTO public.services (
@@ -32,7 +34,7 @@ INSERT INTO public.services (
   free_tier_quality, vendor_lock_in_risk, setup_time_minutes,
   monthly_cost_estimate, dx_score
 ) VALUES (
-  '10000000-0000-4000-a000-000000000051',
+  '10000000-0000-4000-a000-000000000091',
   'Namecheap',
   'namecheap',
   'domain',
@@ -58,7 +60,6 @@ INSERT INTO public.services (
   8.0
 )
 ON CONFLICT (slug) DO UPDATE SET
-  id                    = EXCLUDED.id,
   name                  = EXCLUDED.name,
   category              = EXCLUDED.category,
   description           = EXCLUDED.description,
@@ -90,7 +91,7 @@ INSERT INTO public.services (
   free_tier_quality, vendor_lock_in_risk, setup_time_minutes,
   monthly_cost_estimate, dx_score
 ) VALUES (
-  '10000000-0000-4000-a000-000000000052',
+  '10000000-0000-4000-a000-000000000092',
   'Cloudflare Registrar',
   'cloudflare-registrar',
   'domain',
@@ -116,7 +117,6 @@ INSERT INTO public.services (
   8.5
 )
 ON CONFLICT (slug) DO UPDATE SET
-  id                    = EXCLUDED.id,
   name                  = EXCLUDED.name,
   category              = EXCLUDED.category,
   description           = EXCLUDED.description,
@@ -148,7 +148,7 @@ INSERT INTO public.services (
   free_tier_quality, vendor_lock_in_risk, setup_time_minutes,
   monthly_cost_estimate, dx_score
 ) VALUES (
-  '10000000-0000-4000-a000-000000000053',
+  '10000000-0000-4000-a000-000000000093',
   'GoDaddy',
   'godaddy',
   'domain',
@@ -174,7 +174,6 @@ INSERT INTO public.services (
   7.5
 )
 ON CONFLICT (slug) DO UPDATE SET
-  id                    = EXCLUDED.id,
   name                  = EXCLUDED.name,
   category              = EXCLUDED.category,
   description           = EXCLUDED.description,
@@ -206,7 +205,7 @@ INSERT INTO public.services (
   free_tier_quality, vendor_lock_in_risk, setup_time_minutes,
   monthly_cost_estimate, dx_score
 ) VALUES (
-  '10000000-0000-4000-a000-000000000054',
+  '10000000-0000-4000-a000-000000000094',
   'Gabia',
   'gabia',
   'domain',
@@ -232,7 +231,6 @@ INSERT INTO public.services (
   7.5
 )
 ON CONFLICT (slug) DO UPDATE SET
-  id                    = EXCLUDED.id,
   name                  = EXCLUDED.name,
   category              = EXCLUDED.category,
   description           = EXCLUDED.description,
@@ -264,7 +262,7 @@ INSERT INTO public.services (
   free_tier_quality, vendor_lock_in_risk, setup_time_minutes,
   monthly_cost_estimate, dx_score
 ) VALUES (
-  '10000000-0000-4000-a000-000000000055',
+  '10000000-0000-4000-a000-000000000095',
   'HostingKR',
   'hosting-kr',
   'domain',
@@ -290,7 +288,6 @@ INSERT INTO public.services (
   7.0
 )
 ON CONFLICT (slug) DO UPDATE SET
-  id                    = EXCLUDED.id,
   name                  = EXCLUDED.name,
   category              = EXCLUDED.category,
   description           = EXCLUDED.description,
@@ -322,7 +319,7 @@ INSERT INTO public.services (
   free_tier_quality, vendor_lock_in_risk, setup_time_minutes,
   monthly_cost_estimate, dx_score
 ) VALUES (
-  '10000000-0000-4000-a000-000000000056',
+  '10000000-0000-4000-a000-000000000096',
   'DotName',
   'dotname',
   'domain',
@@ -348,7 +345,6 @@ INSERT INTO public.services (
   7.5
 )
 ON CONFLICT (slug) DO UPDATE SET
-  id                    = EXCLUDED.id,
   name                  = EXCLUDED.name,
   category              = EXCLUDED.category,
   description           = EXCLUDED.description,
