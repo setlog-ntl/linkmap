@@ -188,7 +188,163 @@ export function AppSidebar({ profile }: AppSidebarProps) {
       <SidebarSeparator />
 
       <SidebarContent>
+        {/* Sites Tree */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <Collapsible defaultOpen className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip="원클릭 배포">
+                      <Rocket className={`h-4 w-4 ${oneclickColorClass}`} />
+                      <span className={oneclickColorClass}>원클릭 배포</span>
+                      <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {/* Loading state */}
+                      {isDeploymentsLoading && (
+                        <>
+                          <SidebarMenuSubItem><SidebarMenuSkeleton /></SidebarMenuSubItem>
+                          <SidebarMenuSubItem><SidebarMenuSkeleton /></SidebarMenuSubItem>
+                          <SidebarMenuSubItem><SidebarMenuSkeleton /></SidebarMenuSubItem>
+                        </>
+                      )}
+
+                      {/* Empty state */}
+                      {!isDeploymentsLoading && visibleSites.length === 0 && (
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild>
+                            <Link href="/sites/new" className="text-muted-foreground text-xs">
+                              <span>배포된 사이트 없음</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      )}
+
+                      {/* Site list */}
+                      {visibleSites.map((deploy) => {
+                        const isReady = deploy.deploy_status === 'ready';
+                        const isBuilding = ['building', 'creating', 'pending'].includes(deploy.deploy_status);
+                        const isError = deploy.deploy_status === 'error';
+                        const siteUrl = deploy.pages_url || deploy.deployment_url;
+                        const hasSubMenu = (isReady && siteUrl) || deploy.project_id;
+
+                        const StatusIcon = isReady
+                          ? Globe
+                          : isBuilding
+                            ? Loader2
+                            : isError
+                              ? AlertTriangle
+                              : Globe;
+
+                        const statusClass = isReady
+                          ? 'text-green-500'
+                          : isBuilding
+                            ? 'animate-spin text-yellow-500'
+                            : isError
+                              ? 'text-red-500'
+                              : '';
+
+                        if (hasSubMenu) {
+                          return (
+                            <Collapsible key={deploy.id} className="group/site">
+                              <SidebarMenuSubItem>
+                                <div className="flex items-center">
+                                  <CollapsibleTrigger asChild>
+                                    <button
+                                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm hover:bg-sidebar-accent"
+                                      aria-label={`Toggle ${deploy.site_name}`}
+                                    >
+                                      <ChevronRight className="h-3 w-3 transition-transform group-data-[state=open]/site:rotate-90" />
+                                    </button>
+                                  </CollapsibleTrigger>
+                                  <SidebarMenuSubButton
+                                    asChild
+                                    isActive={activeDeployId === deploy.id}
+                                    className="flex-1 min-w-0"
+                                  >
+                                    <Link href={`/sites/${deploy.id}/edit`}>
+                                      <StatusIcon className={`h-3.5 w-3.5 ${statusClass}`} />
+                                      <span className="truncate">{deploy.site_name}</span>
+                                    </Link>
+                                  </SidebarMenuSubButton>
+                                </div>
+                                <CollapsibleContent>
+                                  <SidebarMenuSub>
+                                    {isReady && siteUrl && (
+                                      <SidebarMenuSubItem>
+                                        <SidebarMenuSubButton asChild>
+                                          <a href={siteUrl} target="_blank" rel="noopener noreferrer">
+                                            <ExternalLink className="h-3.5 w-3.5" />
+                                            <span>사이트 열기</span>
+                                          </a>
+                                        </SidebarMenuSubButton>
+                                      </SidebarMenuSubItem>
+                                    )}
+                                    {deploy.project_id && (
+                                      <SidebarMenuSubItem>
+                                        <SidebarMenuSubButton asChild isActive={activeProjectId === deploy.project_id}>
+                                          <Link href={`/project/${deploy.project_id}`}>
+                                            <FolderKanban className="h-3.5 w-3.5" />
+                                            <span>프로젝트 관리</span>
+                                          </Link>
+                                        </SidebarMenuSubButton>
+                                      </SidebarMenuSubItem>
+                                    )}
+                                  </SidebarMenuSub>
+                                </CollapsibleContent>
+                              </SidebarMenuSubItem>
+                            </Collapsible>
+                          );
+                        }
+
+                        return (
+                          <SidebarMenuSubItem key={deploy.id}>
+                            <SidebarMenuSubButton
+                              asChild
+                              isActive={activeDeployId === deploy.id}
+                            >
+                              <Link href={`/sites/${deploy.id}/edit`}>
+                                <StatusIcon className={`h-3.5 w-3.5 ${statusClass}`} />
+                                <span className="truncate">{deploy.site_name}</span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        );
+                      })}
+
+                      {/* View all link */}
+                      {hasMoreSites && (
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild>
+                            <Link href="/sites/manage" className="text-muted-foreground">
+                              <span>전체 보기</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      )}
+
+                      {/* New site link */}
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <Link href="/sites/new">
+                            <Plus className="h-3.5 w-3.5" />
+                            <span>새 사이트</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         {/* Main Navigation */}
+        <SidebarSeparator />
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -366,162 +522,6 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                           <Link href="/dashboard">
                             <Plus className="h-3.5 w-3.5" />
                             <span>새 프로젝트</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Sites Tree */}
-        <SidebarSeparator />
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <Collapsible defaultOpen className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip="원클릭 배포">
-                      <Rocket className={`h-4 w-4 ${oneclickColorClass}`} />
-                      <span className={oneclickColorClass}>원클릭 배포</span>
-                      <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {/* Loading state */}
-                      {isDeploymentsLoading && (
-                        <>
-                          <SidebarMenuSubItem><SidebarMenuSkeleton /></SidebarMenuSubItem>
-                          <SidebarMenuSubItem><SidebarMenuSkeleton /></SidebarMenuSubItem>
-                          <SidebarMenuSubItem><SidebarMenuSkeleton /></SidebarMenuSubItem>
-                        </>
-                      )}
-
-                      {/* Empty state */}
-                      {!isDeploymentsLoading && visibleSites.length === 0 && (
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton asChild>
-                            <Link href="/sites/new" className="text-muted-foreground text-xs">
-                              <span>배포된 사이트 없음</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      )}
-
-                      {/* Site list */}
-                      {visibleSites.map((deploy) => {
-                        const isReady = deploy.deploy_status === 'ready';
-                        const isBuilding = ['building', 'creating', 'pending'].includes(deploy.deploy_status);
-                        const isError = deploy.deploy_status === 'error';
-                        const siteUrl = deploy.pages_url || deploy.deployment_url;
-                        const hasSubMenu = (isReady && siteUrl) || deploy.project_id;
-
-                        const StatusIcon = isReady
-                          ? Globe
-                          : isBuilding
-                            ? Loader2
-                            : isError
-                              ? AlertTriangle
-                              : Globe;
-
-                        const statusClass = isReady
-                          ? 'text-green-500'
-                          : isBuilding
-                            ? 'animate-spin text-yellow-500'
-                            : isError
-                              ? 'text-red-500'
-                              : '';
-
-                        if (hasSubMenu) {
-                          return (
-                            <Collapsible key={deploy.id} className="group/site">
-                              <SidebarMenuSubItem>
-                                <div className="flex items-center">
-                                  <CollapsibleTrigger asChild>
-                                    <button
-                                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm hover:bg-sidebar-accent"
-                                      aria-label={`Toggle ${deploy.site_name}`}
-                                    >
-                                      <ChevronRight className="h-3 w-3 transition-transform group-data-[state=open]/site:rotate-90" />
-                                    </button>
-                                  </CollapsibleTrigger>
-                                  <SidebarMenuSubButton
-                                    asChild
-                                    isActive={activeDeployId === deploy.id}
-                                    className="flex-1 min-w-0"
-                                  >
-                                    <Link href={`/sites/${deploy.id}/edit`}>
-                                      <StatusIcon className={`h-3.5 w-3.5 ${statusClass}`} />
-                                      <span className="truncate">{deploy.site_name}</span>
-                                    </Link>
-                                  </SidebarMenuSubButton>
-                                </div>
-                                <CollapsibleContent>
-                                  <SidebarMenuSub>
-                                    {isReady && siteUrl && (
-                                      <SidebarMenuSubItem>
-                                        <SidebarMenuSubButton asChild>
-                                          <a href={siteUrl} target="_blank" rel="noopener noreferrer">
-                                            <ExternalLink className="h-3.5 w-3.5" />
-                                            <span>사이트 열기</span>
-                                          </a>
-                                        </SidebarMenuSubButton>
-                                      </SidebarMenuSubItem>
-                                    )}
-                                    {deploy.project_id && (
-                                      <SidebarMenuSubItem>
-                                        <SidebarMenuSubButton asChild isActive={activeProjectId === deploy.project_id}>
-                                          <Link href={`/project/${deploy.project_id}`}>
-                                            <FolderKanban className="h-3.5 w-3.5" />
-                                            <span>프로젝트 관리</span>
-                                          </Link>
-                                        </SidebarMenuSubButton>
-                                      </SidebarMenuSubItem>
-                                    )}
-                                  </SidebarMenuSub>
-                                </CollapsibleContent>
-                              </SidebarMenuSubItem>
-                            </Collapsible>
-                          );
-                        }
-
-                        return (
-                          <SidebarMenuSubItem key={deploy.id}>
-                            <SidebarMenuSubButton
-                              asChild
-                              isActive={activeDeployId === deploy.id}
-                            >
-                              <Link href={`/sites/${deploy.id}/edit`}>
-                                <StatusIcon className={`h-3.5 w-3.5 ${statusClass}`} />
-                                <span className="truncate">{deploy.site_name}</span>
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        );
-                      })}
-
-                      {/* View all link */}
-                      {hasMoreSites && (
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton asChild>
-                            <Link href="/sites/manage" className="text-muted-foreground">
-                              <span>전체 보기</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      )}
-
-                      {/* New site link */}
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild>
-                          <Link href="/sites/new">
-                            <Plus className="h-3.5 w-3.5" />
-                            <span>새 사이트</span>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
