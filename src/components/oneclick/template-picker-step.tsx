@@ -49,21 +49,21 @@ import type { GitHubConnection } from '@/types';
 
 // 템플릿 slug → 기본 사이트 이름 (GitHub repo 이름이 되므로 a-z0-9- 형식)
 const TEMPLATE_DEFAULT_NAMES: Record<string, string> = {
-  'link-in-bio-pro': 'my-linkcard',
-  'digital-namecard': 'my-namecard',
-  'dev-showcase': 'dev-portfolio',
-  'small-biz': 'my-store-page',
-  'personal-brand': 'my-homepage',
-  'freelancer-page': 'my-freelance',
-  'product-landing': 'my-product-page',
-  'saas-landing': 'my-saas-page',
-  'resume-site': 'my-resume-site',
-  'qr-menu-pro': 'my-qr-menu',
-  'newsletter-landing': 'my-newsletter',
-  'community-hub': 'my-community',
-  'study-recruit': 'my-study-page',
-  'event-page': 'my-event-page',
-  'nonprofit-page': 'my-org-page',
+  'link-in-bio-pro': 'linkcard',
+  'digital-namecard': 'namecard',
+  'dev-showcase': 'devfolio',
+  'small-biz': 'myshop',
+  'personal-brand': 'mypage',
+  'freelancer-page': 'mywork',
+  'product-landing': 'myprod',
+  'saas-landing': 'mysaas',
+  'resume-site': 'myresume',
+  'qr-menu-pro': 'mymenu',
+  'newsletter-landing': 'mynews',
+  'community-hub': 'myhub',
+  'study-recruit': 'mystudy',
+  'event-page': 'myevent',
+  'nonprofit-page': 'myorg',
 };
 
 // 템플릿 slug → 대표 아이콘 (lucide-react)
