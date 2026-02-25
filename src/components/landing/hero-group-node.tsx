@@ -11,7 +11,9 @@ interface HeroGroupNodeData {
   [key: string]: unknown;
 }
 
-const colorMap: Record<GroupColorHint, { border: string; text: string }> = {
+type InnerColorHint = Exclude<GroupColorHint, 'outer'>;
+
+const colorMap: Record<InnerColorHint, { border: string; text: string }> = {
   green: {
     border: 'border-emerald-500/20 dark:border-emerald-400/15',
     text: 'text-emerald-600/40 dark:text-emerald-400/30',
@@ -46,9 +48,29 @@ const colorMap: Record<GroupColorHint, { border: string; text: string }> = {
   },
 };
 
+// outer: 전체를 감싸는 단일 외부 박스 스타일
+const outerStyle = {
+  border: 'border-border/30 dark:border-border/20',
+  text: '',
+};
+
 function HeroGroupNode({ data }: NodeProps) {
   const d = data as unknown as HeroGroupNodeData;
-  const colors = colorMap[d.colorHint || 'green'];
+  const hint = d.colorHint ?? 'green';
+
+  if (hint === 'outer') {
+    return (
+      <div
+        className="w-full h-full relative pointer-events-none select-none"
+        style={{ overflow: 'visible' }}
+      >
+        {/* 단일 외부 바운딩 박스 — 매우 subtle한 테두리 */}
+        <div className={`absolute inset-0 rounded-3xl border ${outerStyle.border}`} />
+      </div>
+    );
+  }
+
+  const colors = colorMap[hint as InnerColorHint];
 
   return (
     <div

@@ -14,13 +14,15 @@ import '@xyflow/react/dist/style.css';
 import FlowLayerNode from './flow-layer-node';
 import FlowServiceNode from './flow-service-node';
 import HeroGroupNode from './hero-group-node';
+import HeroLabelNode from './hero-label-node';
 import { getServiceEmoji } from '@/lib/constants/service-brands';
-import { NODE_OFFSETS, GROUP_CONFIGS, LAYOUT } from '@/data/hero-flow-config';
+import { NODE_OFFSETS, GROUP_CONFIGS, LAYOUT, SECTION_LABELS } from '@/data/hero-flow-config';
 
 const nodeTypes = {
     layer: FlowLayerNode,
     service: FlowServiceNode,
     group: HeroGroupNode,
+    sectionLabel: HeroLabelNode,
 };
 
 /* ─────────────────── helpers ─────────────────── */
@@ -49,6 +51,13 @@ const baseNodes: Node[] = [
         zIndex: -1, draggable: false, selectable: false,
     })),
 
+    // ── Section label nodes (텍스트 전용, zIndex -1) ──
+    ...SECTION_LABELS.map((sl, i) => ({
+        id: `label-${i}`, type: 'sectionLabel' as const, position: { x: 0, y: 0 },
+        data: { text: sl.text, colorHint: sl.colorHint },
+        zIndex: 0, draggable: false, selectable: false,
+    })),
+
     // ── Database ──
     svc('supabase', 'Supabase', 'supabase', 'connected',   2, 2, 'SUPABASE_URL'),
     svc('firebase', 'Firebase', 'firebase', 'not_started', 0, 3, 'FIREBASE_CONFIG'),
@@ -72,6 +81,8 @@ const baseNodes: Node[] = [
     // ── Deploy ──
     svc('vercel',     'Vercel',      'vercel',     'not_started', 0, 1, 'VERCEL_TOKEN'),
     svc('cloudflare', 'Cloudflare',  'cloudflare', 'connected',   2, 2, 'CF_API_TOKEN', true),
+
+    // ── CI/CD ──
     svc('github',     'GitHub',      'github',     'connected',   2, 2, 'GITHUB_TOKEN', true),
 ];
 
@@ -129,8 +140,8 @@ const baseEdges: Edge[] = [
     // myapp → Deploy
     edge('e-myapp-vercel',   'myapp', 'vercel',     disconnectedStyle, false, 'right', 'left'),
     edge('e-myapp-cloudflare','myapp','cloudflare',  connectedStyle,   true,  'right', 'left'),
-    // myapp → GitHub
-    edge('e-myapp-github',   'myapp', 'github',     blueStyle,        true,  'bottom', 'left'),
+    // myapp → GitHub CI/CD (myapp 하단 → github 상단, 수직 연결)
+    edge('e-myapp-github',   'myapp', 'github',     blueStyle,        true,  'bottom', 'top'),
 ];
 
 /* ─────────────────── Component ─────────────────── */
@@ -142,13 +153,19 @@ export function InteractiveHeroFlow() {
         const cx = isClient ? window.innerWidth / 2 : 700;
         const { groupPadding: GP, groupWidth: GW, nodeHeight: NODE_H } = LAYOUT;
 
-        // Convert offsets → absolute positions
+        // Convert service/layer node offsets → absolute positions
         const positions: Record<string, { x: number; y: number }> = {};
         for (const [id, offset] of Object.entries(NODE_OFFSETS)) {
             positions[id] = { x: cx + offset.dx, y: offset.dy };
         }
 
-        // Compute group bounding boxes from members
+        // Section label node positions (from SECTION_LABELS)
+        const labelPositions: { x: number; y: number }[] = SECTION_LABELS.map(sl => ({
+            x: cx + sl.dx,
+            y: sl.dy,
+        }));
+
+        // Compute g-outer bounding box from all members
         const groupPositions: Record<string, { x: number; y: number; h: number; w?: number }> = {};
 
         for (const [gid, cfg] of Object.entries(GROUP_CONFIGS)) {
@@ -170,13 +187,21 @@ export function InteractiveHeroFlow() {
                 x: minX - GP,
                 y: minY - GP,
                 h: (maxY - minY) + GP * 2,
-                // Only set custom width if wider than default
                 ...(w > GW + GP * 2 ? { w } : {}),
             };
         }
 
         return baseNodes.map(n => {
             const clone = { ...n, position: { ...n.position }, style: n.style ? { ...n.style } : undefined };
+
+            if (n.type === 'sectionLabel') {
+                // label-0, label-1, ... → labelPositions 인덱스 매핑
+                const labelIdx = parseInt(n.id.replace('label-', ''), 10);
+                const lp = labelPositions[labelIdx];
+                if (lp) clone.position = lp;
+                return clone;
+            }
+
             const gp = groupPositions[n.id];
             if (gp) {
                 clone.position = { x: gp.x, y: gp.y };
