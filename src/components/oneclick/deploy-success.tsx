@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,6 +33,22 @@ export function DeploySuccess({ status, projectId, template }: DeploySuccessProp
 
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
+  const [iframeKey, setIframeKey] = useState(0);
+  const [refreshCount, setRefreshCount] = useState(0);
+
+  // CDN 전파 지연 대응: iframe 로드 실패 시 30초마다 자동 재시도 (최대 3회)
+  // 서버에서 Pages Deployments API로 전파 완료 감지 후 success 전환하지만,
+  // CDN 엣지 전파 지연이 있을 수 있어 클라이언트에서도 재시도.
+  useEffect(() => {
+    if (!liveUrl || iframeLoaded || refreshCount >= 3) return;
+    const timer = setTimeout(() => {
+      setIframeLoaded(false);
+      setIframeError(false);
+      setIframeKey((k) => k + 1);
+      setRefreshCount((c) => c + 1);
+    }, 30_000);
+    return () => clearTimeout(timer);
+  }, [liveUrl, iframeLoaded, iframeError, refreshCount]);
 
   return (
     <>
@@ -64,6 +80,7 @@ export function DeploySuccess({ status, projectId, template }: DeploySuccessProp
                   {/* Scaled iframe — 주소창 아래 */}
                   <div className="absolute left-0 right-0 bottom-0 top-9 overflow-hidden pointer-events-none">
                     <iframe
+                      key={iframeKey}
                       src={liveUrl}
                       title="Site preview"
                       className="absolute top-0 left-0 border-0"

@@ -1,4 +1,4 @@
-import { getGitHubPagesStatus, getLatestWorkflowRun, GitHubApiError } from '@/lib/github/api';
+import { getGitHubPagesStatus, getLatestWorkflowRun, getLatestPagesDeployment, GitHubApiError } from '@/lib/github/api';
 
 export type StepStatus = 'completed' | 'in_progress' | 'pending' | 'error';
 
@@ -53,8 +53,19 @@ export async function resolveDeployStatus(
       try {
         const run = await getLatestWorkflowRun(githubToken, owner, repo);
         if (run?.status === 'completed' && run.conclusion === 'success') {
-          newDeployStatus = 'ready';
-          newPagesStatus = 'built';
+          // Actions 완료 후 Pages CDN 전파 완료 여부 추가 확인.
+          // Pages Deployments API status: 'in_progress' = CDN 전파 중, 'succeed' = 완료.
+          // API 미지원(null)이면 Actions 완료 = 충분한 신호로 간주해 ready 처리.
+          const pagesDeploy = await getLatestPagesDeployment(githubToken, owner, repo);
+          if (pagesDeploy?.status === 'in_progress') {
+            // CDN 전파 진행 중 — 아직 ready 아님
+            newDeployStatus = 'building';
+            newPagesStatus = 'building';
+          } else {
+            // 'succeed', 'failed'(재시도 불가), null(API 없음) 모두 ready 처리
+            newDeployStatus = 'ready';
+            newPagesStatus = 'built';
+          }
         } else if (run?.status === 'completed' && run.conclusion === 'failure') {
           newDeployStatus = 'error';
           newPagesStatus = 'errored';

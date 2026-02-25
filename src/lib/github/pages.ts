@@ -91,6 +91,40 @@ export async function triggerWorkflowDispatch(
 }
 
 /**
+ * GitHub Pages Deployment status from the Pages Deployments API.
+ * Reflects actual CDN propagation state — more accurate than Actions run status alone.
+ */
+export interface PagesDeployment {
+  /** 'in_progress' | 'succeed' | 'failed' */
+  status: string;
+  environment_name: string;
+  created_at: string;
+  page_url: string | null;
+}
+
+/**
+ * Get the latest GitHub Pages deployment.
+ * Actions completion ≠ CDN propagation complete — this API tracks CDN state.
+ * Returns null if the API is unavailable (non-fatal; caller should treat as 'ready').
+ */
+export async function getLatestPagesDeployment(
+  token: string,
+  owner: string,
+  repo: string
+): Promise<PagesDeployment | null> {
+  try {
+    const result = await githubFetch<PagesDeployment[]>(
+      `/repos/${owner}/${repo}/pages/deployments?limit=1`,
+      { token }
+    );
+    return Array.isArray(result) ? (result[0] ?? null) : null;
+  } catch {
+    // Beta API — may not be available for all repos/accounts. Non-fatal.
+    return null;
+  }
+}
+
+/**
  * Get the latest GitHub Actions workflow run for a repo.
  * Used to detect failed Pages deploy workflows.
  */
