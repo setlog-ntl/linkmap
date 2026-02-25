@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -80,6 +80,15 @@ export function TemplatePickerStep({
   if (!selectedTemplate && recommendedTemplateId && templates.length > 0) {
     setSelectedTemplate(recommendedTemplateId);
   }
+
+  // Sort templates: link-in-bio-pro 상단 고정 → 나머지 원본 순서 유지
+  const sortedTemplates = useMemo(() => {
+    return [...templates].sort((a, b) => {
+      if (a.slug === 'link-in-bio-pro') return -1;
+      if (b.slug === 'link-in-bio-pro') return 1;
+      return 0;
+    });
+  }, [templates]);
 
   const validateSiteName = (name: string) => {
     if (name.length < 2) {
@@ -219,7 +228,7 @@ export function TemplatePickerStep({
         {/* Template grid with animations */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <AnimatePresence mode="popLayout">
-            {templates.map((tpl, index) => (
+            {sortedTemplates.map((tpl, index) => (
               <motion.div
                 key={tpl.id}
                 layout
@@ -275,7 +284,7 @@ export function TemplatePickerStep({
           ) : (
             <>
               <Rocket className="h-4 w-4" />
-              {t(locale, 'templatePicker.deploy')}
+              원클릭 배포
             </>
           )}
         </Button>

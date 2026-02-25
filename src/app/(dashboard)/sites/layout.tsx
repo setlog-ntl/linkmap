@@ -8,8 +8,8 @@ import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 
 const sitesNav = [
-  { labelKey: 'nav.sitesNew', href: '/sites/new', icon: Rocket },
-  { labelKey: 'nav.sitesManage', href: '/sites/manage', icon: Monitor },
+  { label: '원클릭 배포', href: '/sites/new', icon: Rocket },
+  { label: '내 사이트', href: '/sites/manage', icon: Monitor },
 ];
 
 export default function SitesLayout({ children }: { children: React.ReactNode }) {
@@ -19,7 +19,7 @@ export default function SitesLayout({ children }: { children: React.ReactNode })
   return (
     <div className="container py-8 max-w-5xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">{t(locale, 'nav.sites')}</h1>
+        <h1 className="text-2xl font-bold">{t(locale, 'nav.oneclick')}</h1>
         <p className="text-muted-foreground mt-1">{t(locale, 'nav.sitesDesc')}</p>
       </div>
 
@@ -38,7 +38,7 @@ export default function SitesLayout({ children }: { children: React.ReactNode })
               )}
             >
               <item.icon className="h-4 w-4" />
-              {t(locale, item.labelKey)}
+              {item.label}
             </Link>
           );
         })}

@@ -14,6 +14,7 @@ import {
   Share2,
   Copy,
   Check,
+  Link as LinkIcon,
 } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t, type Locale } from '@/lib/i18n';
@@ -39,22 +40,37 @@ export function DeploySuccess({ status, projectId, template }: DeploySuccessProp
         <CardContent className="py-8 space-y-6">
           {/* Live preview area */}
           <div className="text-center space-y-4">
-            <div className="relative mx-auto w-full max-w-sm">
+            <div className="relative mx-auto w-full">
               {liveUrl ? (
                 <div
-                  className="relative w-full overflow-hidden rounded-xl border bg-muted/30 shadow-md"
-                  style={{ height: '200px' }}
+                  className="relative w-full overflow-hidden rounded-xl border bg-background shadow-lg"
+                  style={{ height: '320px' }}
                 >
-                  {/* Scaled iframe */}
-                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  {/* Browser chrome — 주소창 */}
+                  <div className="absolute top-0 left-0 right-0 h-9 bg-muted/90 border-b z-20 flex items-center px-3 gap-2 rounded-t-xl">
+                    <div className="flex gap-1.5 shrink-0">
+                      <div className="w-2.5 h-2.5 rounded-full bg-red-400/70" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/70" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-green-400/70" />
+                    </div>
+                    <div className="flex-1 h-5 bg-background/70 rounded flex items-center gap-1.5 px-2 text-muted-foreground truncate">
+                      <Globe className="h-2.5 w-2.5 shrink-0" />
+                      <span className="text-[9px] font-mono truncate">
+                        {liveUrl.replace('https://', '')}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Scaled iframe — 주소창 아래 */}
+                  <div className="absolute left-0 right-0 bottom-0 top-9 overflow-hidden pointer-events-none">
                     <iframe
                       src={liveUrl}
                       title="Site preview"
                       className="absolute top-0 left-0 border-0"
                       style={{
-                        width: '1280px',
-                        height: '800px',
-                        transform: 'scale(0.25)',
+                        width: '860px',
+                        height: '720px',
+                        transform: 'scale(0.47)',
                         transformOrigin: 'top left',
                       }}
                       sandbox="allow-scripts allow-same-origin"
@@ -66,14 +82,14 @@ export function DeploySuccess({ status, projectId, template }: DeploySuccessProp
 
                   {/* Loading spinner */}
                   {!iframeLoaded && !iframeError && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-muted">
+                    <div className="absolute left-0 right-0 bottom-0 top-9 flex items-center justify-center bg-muted">
                       <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
                   )}
 
                   {/* Iframe error fallback */}
                   {iframeError && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted gap-2">
+                    <div className="absolute left-0 right-0 bottom-0 top-9 flex flex-col items-center justify-center bg-muted gap-2">
                       <Globe className="h-8 w-8 text-muted-foreground" />
                       <span className="text-xs text-muted-foreground">
                         {t(locale, 'deploySuccess.previewUnavailable')}
@@ -237,19 +253,11 @@ function ShareSection({ url, locale }: { url: string; locale: Locale }) {
   const handleNativeShare = useCallback(async () => {
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: shareText,
-          url,
-        });
+        await navigator.share({ title: shareText, url });
       } catch {
         // User cancelled or share failed — ignore
       }
     }
-  }, [url, shareText]);
-
-  const handleTwitterShare = useCallback(() => {
-    const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`;
-    window.open(twitterUrl, '_blank', 'noopener,noreferrer,width=550,height=420');
   }, [url, shareText]);
 
   return (
@@ -258,11 +266,17 @@ function ShareSection({ url, locale }: { url: string; locale: Locale }) {
         {t(locale, 'deployProgress.shareTitle')}
       </p>
       <div className="flex items-center justify-center gap-2">
+        {/* URL 박스 */}
+        <div className="flex-1 flex items-center gap-2 bg-muted/60 rounded-lg px-3 py-2 text-xs font-mono text-muted-foreground truncate min-w-0">
+          <LinkIcon className="h-3.5 w-3.5 shrink-0" />
+          <span className="truncate">{url.replace('https://', '')}</span>
+        </div>
+        {/* 링크 복사 */}
         <Button
           variant="outline"
           size="sm"
           onClick={handleCopy}
-          className="gap-1.5"
+          className="gap-1.5 shrink-0"
         >
           {copied ? (
             <Check className="h-3.5 w-3.5 text-green-500" />
@@ -273,26 +287,16 @@ function ShareSection({ url, locale }: { url: string; locale: Locale }) {
             ? t(locale, 'deployProgress.shareCopied')
             : t(locale, 'deployProgress.shareCopyLink')}
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleTwitterShare}
-          className="gap-1.5"
-        >
-          <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current" aria-hidden="true">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-          </svg>
-          {t(locale, 'deployProgress.shareTwitter')}
-        </Button>
+        {/* 네이티브 공유 (모바일) */}
         {canNativeShare && (
           <Button
             variant="outline"
             size="sm"
             onClick={handleNativeShare}
-            className="gap-1.5"
+            className="gap-1.5 shrink-0"
           >
             <Share2 className="h-3.5 w-3.5" />
-            {t(locale, 'deployProgress.shareNative')}
+            공유
           </Button>
         )}
       </div>
