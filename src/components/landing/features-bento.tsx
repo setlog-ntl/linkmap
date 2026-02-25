@@ -1,6 +1,6 @@
 'use client';
 
-import { Map, Key, CheckCircle2, Layers, ArrowRight, Brain, Sparkles } from 'lucide-react';
+import { Map, Key, CheckCircle2, Layers, ArrowRight } from 'lucide-react';
 import { ScrollReveal } from './scroll-reveal';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
@@ -211,44 +211,6 @@ export function FeaturesBento() {
             </div>
           </ScrollReveal>
 
-          {/* Card 5: AI-Powered (full width) */}
-          <ScrollReveal className="col-span-1 md:col-span-3" delay={0.5}>
-            <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-10 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-brand-blue/30">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(59,130,246,0.06)_0%,transparent_60%)] opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-4">
-                    <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl ${featureColors[0].bg} ${featureColors[0].text} ring-1 ring-inset ${featureColors[0].ring}`}>
-                      <Brain className="w-6 h-6" />
-                    </div>
-                    <h3 className="text-2xl font-extrabold text-foreground tracking-tight">{t(locale, 'landing.aiSectionTitle')}</h3>
-                  </div>
-                  <div className="hidden sm:inline-flex items-center gap-2 rounded-full border border-brand-blue/30 bg-brand-blue/10 px-4 py-1.5 text-sm font-bold text-brand-blue">
-                    <Sparkles className="w-4 h-4" />
-                    AI-Powered MCP
-                  </div>
-                </div>
-
-                <p className="mb-8 text-base text-muted-foreground leading-relaxed max-w-3xl">{t(locale, 'landing.aiSectionDesc')}</p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                  {[
-                    { titleKey: 'landing.aiFeature1Title', descKey: 'landing.aiFeature1Desc' },
-                    { titleKey: 'landing.aiFeature2Title', descKey: 'landing.aiFeature2Desc' },
-                    { titleKey: 'landing.aiFeature3Title', descKey: 'landing.aiFeature3Desc' },
-                    { titleKey: 'landing.aiFeature4Title', descKey: 'landing.aiFeature4Desc' },
-                    { titleKey: 'landing.aiFeature5Title', descKey: 'landing.aiFeature5Desc' },
-                  ].map((ai, idx) => (
-                    <div key={ai.titleKey} className="rounded-xl bg-muted/50 dark:bg-secondary/50 border border-border p-5 transition-all duration-200 hover:border-brand-blue/30 hover:bg-card hover:-translate-y-0.5 hover:shadow-md">
-                      <div className="w-8 h-8 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue font-bold text-xs mb-4 border border-brand-blue/20">0{idx + 1}</div>
-                      <h4 className="text-sm font-bold text-foreground mb-2">{t(locale, ai.titleKey)}</h4>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{t(locale, ai.descKey)}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </ScrollReveal>
         </div>
       </div>
     </section>
