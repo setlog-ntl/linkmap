@@ -14,7 +14,7 @@ export function Footer() {
         {/* Pitch-style quote */}
         <div className="text-center mb-10 pb-8 border-b border-white/10">
           <p className="text-lg italic text-white/60">
-            &ldquo;1인 x Claude Code = 완성된 SaaS 플랫폼&rdquo;
+            &ldquo;1인 &times; 바이브코딩 = 서비스 연결이 보인다&rdquo;
           </p>
         </div>
 
