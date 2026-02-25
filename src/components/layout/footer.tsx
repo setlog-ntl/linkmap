@@ -11,13 +11,6 @@ export function Footer() {
   return (
     <footer className="bg-[var(--circuit-950)] text-muted-foreground">
       <div className="container py-8 md:py-12">
-        {/* Pitch-style quote */}
-        <div className="text-center mb-10 pb-8 border-b border-white/10">
-          <p className="text-lg italic text-white/60">
-            &ldquo;1인 &times; 바이브코딩 = 서비스 연결이 보인다&rdquo;
-          </p>
-        </div>
-
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-1 font-bold text-lg mb-3">
