@@ -118,3 +118,38 @@ export function useUpdateProject() {
     },
   });
 }
+
+export function useToggleFavoriteProject() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, isFavorited }: { id: string; isFavorited: boolean }) => {
+      const res = await fetch(`/api/projects/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_favorited: isFavorited }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || '즐겨찾기 변경 실패');
+      }
+      return res.json();
+    },
+    onMutate: async ({ id, isFavorited }) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.projects.all });
+      const previous = queryClient.getQueryData<ProjectWithServices[]>(queryKeys.projects.all);
+      queryClient.setQueryData<ProjectWithServices[]>(queryKeys.projects.all, (old) =>
+        old?.map((p) => (p.id === id ? { ...p, is_favorited: isFavorited } : p)) ?? []
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous) {
+        queryClient.setQueryData(queryKeys.projects.all, ctx.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+    },
+  });
+}

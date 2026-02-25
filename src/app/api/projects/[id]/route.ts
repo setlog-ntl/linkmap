@@ -51,20 +51,24 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (error) return serverError(error.message);
 
   const updatedFields = Object.keys(parsed.data);
-  const auditAction = updatedFields.includes('main_service_id')
-    ? 'project.set_main_service'
-    : updatedFields.includes('icon_type')
-      ? 'project.set_icon'
-      : 'project.update';
+  const auditAction = updatedFields.includes('is_favorited')
+    ? 'project.toggle_favorite'
+    : updatedFields.includes('main_service_id')
+      ? 'project.set_main_service'
+      : updatedFields.includes('icon_type')
+        ? 'project.set_icon'
+        : 'project.update';
   await logAudit(user.id, {
     action: auditAction,
     resourceType: 'project',
     resourceId: id,
-    details: updatedFields.includes('main_service_id')
-      ? { main_service_id: parsed.data.main_service_id }
-      : updatedFields.includes('icon_type')
-        ? { icon_type: parsed.data.icon_type, icon_value: parsed.data.icon_value }
-        : { updated_fields: updatedFields },
+    details: updatedFields.includes('is_favorited')
+      ? { is_favorited: parsed.data.is_favorited }
+      : updatedFields.includes('main_service_id')
+        ? { main_service_id: parsed.data.main_service_id }
+        : updatedFields.includes('icon_type')
+          ? { icon_type: parsed.data.icon_type, icon_value: parsed.data.icon_value }
+          : { updated_fields: updatedFields },
   });
 
   return NextResponse.json(data);

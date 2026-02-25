@@ -61,6 +61,7 @@ export type AuditAction =
   | 'github_connection.disconnect'
   | 'project.set_main_service'
   | 'project.set_icon'
+  | 'project.toggle_favorite'
   | 'profile.update'
   | 'github_connection.toggle_status'
   | 'service_account.toggle_status'

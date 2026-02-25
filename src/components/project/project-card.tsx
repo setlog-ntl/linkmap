@@ -21,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { MoreHorizontal, Trash2, FolderOpen, Layers, Zap, AlertCircle, Loader2, GitBranch, Globe, Rocket, AlertTriangle } from 'lucide-react';
+import { MoreHorizontal, Trash2, FolderOpen, Layers, Zap, AlertCircle, Loader2, GitBranch, Globe, Rocket, AlertTriangle, Star } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import type { ProjectWithServices } from '@/types';
@@ -33,10 +33,11 @@ import { getServiceIconUrl } from '@/lib/constants/service-brands';
 interface ProjectCardProps {
   project: ProjectWithServices;
   onDelete: (id: string) => void;
+  onToggleFavorite: (id: string, isFavorited: boolean) => void;
   deploy?: HomepageDeploy;
 }
 
-export function ProjectCard({ project, onDelete, deploy }: ProjectCardProps) {
+export function ProjectCard({ project, onDelete, onToggleFavorite, deploy }: ProjectCardProps) {
   const router = useRouter();
   const { locale } = useLocaleStore();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -71,6 +72,23 @@ export function ProjectCard({ project, onDelete, deploy }: ProjectCardProps) {
     >
       {/* Mini service map preview */}
       <div className="relative h-28 sm:h-32 bg-muted/20 border-b overflow-hidden">
+        {/* Favorite button */}
+        <button
+          className="absolute top-2 left-2 z-10 p-1 rounded-md transition-colors hover:bg-background/70"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleFavorite(project.id, !project.is_favorited);
+          }}
+          aria-label={project.is_favorited ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+        >
+          <Star
+            className={`h-3.5 w-3.5 transition-colors ${
+              project.is_favorited
+                ? 'fill-yellow-400 text-yellow-400'
+                : 'text-muted-foreground/30 group-hover:text-muted-foreground/60'
+            }`}
+          />
+        </button>
         {totalCount > 0 ? (
           <div className="absolute inset-0 flex items-center justify-center p-4">
             <div className="relative">

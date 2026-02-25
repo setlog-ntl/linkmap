@@ -12,6 +12,7 @@ export interface Project {
   icon_type: 'brand' | 'emoji' | 'custom' | null;
   icon_value: string | null;
   link_url: string | null;
+  is_favorited: boolean;
   created_at: string;
   updated_at: string;
 }

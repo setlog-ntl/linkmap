@@ -62,10 +62,11 @@
 | icon_type | TEXT | YES | NULL | 'brand'\|'emoji'\|'custom', M036 |
 | icon_value | TEXT | YES | NULL | slug\|char\|URL, M036 |
 | link_url | TEXT | YES | NULL | max 500 chars, M038 |
+| is_favorited | BOOLEAN | NO | false | 즐겨찾기 여부, M044 |
 | created_at | TIMESTAMPTZ | NO | now() | |
 | updated_at | TIMESTAMPTZ | NO | now() | |
 
-**Indexes**: `idx_projects_user_id`, `idx_projects_team`
+**Indexes**: `idx_projects_user_id`, `idx_projects_team`, `idx_projects_user_favorited`
 **RLS**: 소유자 CRUD + 팀 멤버 조회
 **TS Type**: `Project` (`src/types/project.ts`)
 

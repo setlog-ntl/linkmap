@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useProjects, useCreateProject, useDeleteProject } from '@/lib/queries/projects';
+import { useProjects, useCreateProject, useDeleteProject, useToggleFavoriteProject } from '@/lib/queries/projects';
 import { useMyDeployments, type HomepageDeploy } from '@/lib/queries/oneclick';
 import { ProjectCard } from '@/components/project/project-card';
 import { ProjectTreeList } from '@/components/dashboard/project-tree-list';
@@ -27,6 +27,7 @@ export default function DashboardPage() {
   const { data: deployments } = useMyDeployments();
   const createProject = useCreateProject();
   const deleteProject = useDeleteProject();
+  const toggleFavorite = useToggleFavoriteProject();
   const [createOpen, setCreateOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('card');
 
@@ -39,6 +40,18 @@ export default function DashboardPage() {
     });
     return map;
   }, [deployments]);
+
+  const sortedProjects = useMemo(() => {
+    return [...projects].sort((a, b) => {
+      if (a.is_favorited && !b.is_favorited) return -1;
+      if (!a.is_favorited && b.is_favorited) return 1;
+      return 0;
+    });
+  }, [projects]);
+
+  const handleToggleFavorite = (id: string, isFavorited: boolean) => {
+    toggleFavorite.mutate({ id, isFavorited });
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem(VIEW_STORAGE_KEY);
@@ -131,21 +144,21 @@ export default function DashboardPage() {
       </div>
 
       {/* Cross-Project Stats */}
-      {!isLoading && projects.length > 0 && (
+      {!isLoading && sortedProjects.length > 0 && (
         <div className="grid grid-cols-3 gap-4 mb-8">
           <StatCard
             icon={Layers}
-            value={projects.length}
+            value={sortedProjects.length}
             label={t(locale, 'dashboard.statProjects')}
           />
           <StatCard
             icon={Puzzle}
-            value={projects.reduce((sum, p) => sum + (p.project_services?.length || 0), 0)}
+            value={sortedProjects.reduce((sum, p) => sum + (p.project_services?.length || 0), 0)}
             label={t(locale, 'dashboard.statServices')}
           />
           <StatCard
             icon={GitBranch}
-            value={projects.reduce((sum, p) => sum + (p.project_github_repos?.length || 0), 0)}
+            value={sortedProjects.reduce((sum, p) => sum + (p.project_github_repos?.length || 0), 0)}
             label={t(locale, 'dashboard.statGithubRepos')}
           />
         </div>
@@ -167,7 +180,7 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
-      ) : projects.length === 0 ? (
+      ) : sortedProjects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <div className="rounded-2xl bg-muted/50 p-6 mb-6">
             <FolderOpen className="h-12 w-12 text-muted-foreground/40" />
@@ -206,14 +219,20 @@ export default function DashboardPage() {
           </div>
 
           {viewMode === 'list' ? (
-            <ProjectTreeList projects={projects} onDelete={handleDeleteProject} deployByProjectId={deployByProjectId} />
+            <ProjectTreeList
+              projects={sortedProjects}
+              onDelete={handleDeleteProject}
+              onToggleFavorite={handleToggleFavorite}
+              deployByProjectId={deployByProjectId}
+            />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects.map((project) => (
+              {sortedProjects.map((project) => (
                 <ProjectCard
                   key={project.id}
                   project={project}
                   onDelete={handleDeleteProject}
+                  onToggleFavorite={handleToggleFavorite}
                   deploy={deployByProjectId.get(project.id)}
                 />
               ))}

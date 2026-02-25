@@ -14,9 +14,8 @@ import {
   FolderOpen,
   Trash2,
   Loader2,
-  Globe,
-  AlertTriangle,
   Rocket,
+  Star,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -48,10 +47,11 @@ import type { HomepageDeploy } from '@/lib/queries/oneclick';
 interface ProjectTreeListProps {
   projects: ProjectWithServices[];
   onDelete: (id: string) => void;
+  onToggleFavorite: (id: string, isFavorited: boolean) => void;
   deployByProjectId?: Map<string, HomepageDeploy>;
 }
 
-export function ProjectTreeList({ projects, onDelete, deployByProjectId }: ProjectTreeListProps) {
+export function ProjectTreeList({ projects, onDelete, onToggleFavorite, deployByProjectId }: ProjectTreeListProps) {
   return (
     <div className="space-y-2">
       {projects.map((project) => (
@@ -59,6 +59,7 @@ export function ProjectTreeList({ projects, onDelete, deployByProjectId }: Proje
           key={project.id}
           project={project}
           onDelete={onDelete}
+          onToggleFavorite={onToggleFavorite}
           deploy={deployByProjectId?.get(project.id)}
         />
       ))}
@@ -69,10 +70,12 @@ export function ProjectTreeList({ projects, onDelete, deployByProjectId }: Proje
 function ProjectTreeItem({
   project,
   onDelete,
+  onToggleFavorite,
   deploy,
 }: {
   project: ProjectWithServices;
   onDelete: (id: string) => void;
+  onToggleFavorite: (id: string, isFavorited: boolean) => void;
   deploy?: HomepageDeploy;
 }) {
   const router = useRouter();
@@ -157,6 +160,26 @@ function ProjectTreeItem({
             {serviceCount > 0 && <span>{serviceCount}</span>}
             <span className="text-muted-foreground/50">{formatRelativeTime(project.updated_at)}</span>
           </div>
+
+          {/* Favorite button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavorite(project.id, !project.is_favorited);
+            }}
+            aria-label={project.is_favorited ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+          >
+            <Star
+              className={`h-4 w-4 transition-colors ${
+                project.is_favorited
+                  ? 'fill-yellow-400 text-yellow-400'
+                  : 'text-muted-foreground/40 hover:text-yellow-400'
+              }`}
+            />
+          </Button>
 
           {/* More menu */}
           <DropdownMenu>
@@ -246,20 +269,25 @@ function ProjectTreeItem({
 }
 
 function DeployStatusIcon({ status }: { status: HomepageDeploy['deploy_status'] }) {
-  const config = {
-    ready: { icon: Globe, className: 'text-green-600 dark:text-green-400', label: '배포됨' },
-    building: { icon: Loader2, className: 'text-yellow-600 dark:text-yellow-400 animate-spin', label: '배포 중' },
-    creating: { icon: Loader2, className: 'text-yellow-600 dark:text-yellow-400 animate-spin', label: '배포 중' },
-    pending: { icon: Loader2, className: 'text-yellow-600 dark:text-yellow-400 animate-spin', label: '배포 중' },
-    error: { icon: AlertTriangle, className: 'text-red-600 dark:text-red-400', label: '배포 오류' },
-    canceled: { icon: Rocket, className: 'text-primary', label: '원클릭' },
+  const dotConfig = {
+    ready: { dotClass: 'bg-green-500', label: '원클릭 배포 · 배포됨' },
+    building: { dotClass: 'bg-yellow-500 animate-pulse', label: '원클릭 배포 · 배포 중' },
+    creating: { dotClass: 'bg-yellow-500 animate-pulse', label: '원클릭 배포 · 생성 중' },
+    pending: { dotClass: 'bg-yellow-500 animate-pulse', label: '원클릭 배포 · 대기 중' },
+    error: { dotClass: 'bg-red-500', label: '원클릭 배포 · 오류' },
+    canceled: { dotClass: 'bg-muted-foreground/40', label: '원클릭 배포' },
   } as const;
 
-  const { icon: Icon, className, label } = config[status] ?? config.canceled;
+  const { dotClass, label } = dotConfig[status] ?? dotConfig.canceled;
 
   return (
-    <span className="shrink-0" title={label}>
-      <Icon className={`h-3.5 w-3.5 ${className}`} />
+    <span
+      className="inline-flex items-center gap-0.5 rounded border border-primary/20 bg-primary/5 px-1 py-0.5 shrink-0"
+      title={label}
+    >
+      <Rocket className="h-2.5 w-2.5 text-primary" />
+      <span className="text-[10px] font-medium text-primary leading-none">원클릭</span>
+      <span className={`h-1.5 w-1.5 rounded-full ${dotClass}`} />
     </span>
   );
 }
