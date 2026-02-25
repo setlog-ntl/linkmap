@@ -15,15 +15,13 @@ import '@xyflow/react/dist/style.css';
 import FlowLayerNode from './flow-layer-node';
 import FlowServiceNode from './flow-service-node';
 import HeroGroupNode from './hero-group-node';
-import HeroLabelNode from './hero-label-node';
 import { getServiceEmoji } from '@/lib/constants/service-brands';
-import { NODE_OFFSETS, GROUP_CONFIGS, LAYOUT, SECTION_LABELS } from '@/data/hero-flow-config';
+import { NODE_OFFSETS, GROUP_CONFIGS, LAYOUT } from '@/data/hero-flow-config';
 
 const nodeTypes = {
     layer: FlowLayerNode,
     service: FlowServiceNode,
     group: HeroGroupNode,
-    sectionLabel: HeroLabelNode,
 };
 
 /* ─────────────────── helpers ─────────────────── */
@@ -50,13 +48,6 @@ const baseNodes: Node[] = [
         data: { label: cfg.label, colorHint: cfg.colorHint },
         style: { width: LAYOUT.groupWidth, height: 0, overflow: 'visible' as const },
         zIndex: -1, draggable: false, selectable: false,
-    })),
-
-    // ── Section label nodes (텍스트 전용, zIndex -1) ──
-    ...SECTION_LABELS.map((sl, i) => ({
-        id: `label-${i}`, type: 'sectionLabel' as const, position: { x: 0, y: 0 },
-        data: { text: sl.text, colorHint: sl.colorHint },
-        zIndex: 0, draggable: false, selectable: false,
     })),
 
     // ── Database ──
@@ -175,12 +166,6 @@ export function InteractiveHeroFlow() {
             positions[id] = { x: cx + offset.dx, y: offset.dy };
         }
 
-        // Section label node positions (from SECTION_LABELS)
-        const labelPositions: { x: number; y: number }[] = SECTION_LABELS.map(sl => ({
-            x: cx + sl.dx,
-            y: sl.dy,
-        }));
-
         // Compute g-outer bounding box from all members
         const groupPositions: Record<string, { x: number; y: number; h: number; w?: number }> = {};
 
@@ -209,14 +194,6 @@ export function InteractiveHeroFlow() {
 
         return baseNodes.map(n => {
             const clone = { ...n, position: { ...n.position }, style: n.style ? { ...n.style } : undefined };
-
-            if (n.type === 'sectionLabel') {
-                // label-0, label-1, ... → labelPositions 인덱스 매핑
-                const labelIdx = parseInt(n.id.replace('label-', ''), 10);
-                const lp = labelPositions[labelIdx];
-                if (lp) clone.position = lp;
-                return clone;
-            }
 
             const gp = groupPositions[n.id];
             if (gp) {

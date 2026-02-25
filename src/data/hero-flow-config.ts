@@ -53,22 +53,6 @@ export const GROUP_CONFIGS: Record<string, GroupConfig> = {
   },
 };
 
-// ── 섹션 레이블 위치 (cx 기준 오프셋) — 텍스트 노드용 ──
-export interface LabelOffset {
-  dx: number;
-  dy: number;
-  text: string;
-  colorHint: Exclude<GroupColorHint, 'outer'>;
-}
-
-export const SECTION_LABELS: LabelOffset[] = [
-  { dx: -155, dy:  12, text: 'DATABASE',  colorHint: 'amber'  },
-  { dx: -370, dy:  84, text: 'AUTH',      colorHint: 'green'  },
-  { dx:  250, dy:  84, text: 'AI',        colorHint: 'purple' },
-  { dx:  250, dy: 254, text: 'DEPLOY',    colorHint: 'blue'   },
-  { dx:  -80, dy: 289, text: 'CI/CD',     colorHint: 'orange' },
-];
-
 // ── 레이아웃 상수 ──
 export const LAYOUT = {
   /** 외부 그룹 내부 패딩 */

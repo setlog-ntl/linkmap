@@ -140,6 +140,23 @@ export function HeroSection() {
         {/* Top fade: blend into text area */}
         <div className="absolute inset-x-0 top-0 h-10 z-10 bg-gradient-to-b from-background/70 to-transparent pointer-events-none" />
         <InteractiveHeroFlow />
+        {/* 섹션 범례 — 하단 중앙 HTML 오버레이 */}
+        <div className="absolute bottom-24 inset-x-0 z-20 flex items-center justify-center gap-6 pointer-events-none">
+          {([
+            { label: 'DATABASE', color: 'text-amber-400' },
+            { label: 'AUTH',     color: 'text-emerald-400' },
+            { label: 'AI',       color: 'text-violet-400' },
+            { label: 'DEPLOY',   color: 'text-blue-400' },
+            { label: 'CI/CD',    color: 'text-orange-400' },
+          ] as const).map(item => (
+            <span
+              key={item.label}
+              className={`text-[11px] font-bold tracking-[0.22em] opacity-60 dark:opacity-50 ${item.color}`}
+            >
+              {item.label}
+            </span>
+          ))}
+        </div>
         {/* Bottom fade: blend into next section */}
         <div className="absolute inset-x-0 bottom-0 h-20 z-10 bg-gradient-to-t from-background to-transparent pointer-events-none" />
       </div>
