@@ -409,17 +409,16 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale }
 
     try {
       setUploading(true);
+      // resizeImage()는 항상 WebP로 변환하므로 mimeType/filename을 WebP로 고정
       const base64 = await resizeImage(file);
-      const ext = file.name.match(/\.\w+$/)?.[0] || '.webp';
-      const filename = `upload${ext === '.webp' ? '.webp' : ext}`;
 
       const res = await fetch(`/api/oneclick/deployments/${deployId}/upload`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           data: base64,
-          filename,
-          mimeType: ext === '.webp' ? 'image/webp' : file.type,
+          filename: 'upload.webp',
+          mimeType: 'image/webp',
         }),
       });
 
