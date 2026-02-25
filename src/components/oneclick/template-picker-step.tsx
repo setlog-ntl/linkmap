@@ -22,6 +22,22 @@ import {
   Globe,
   AlertCircle,
   Plus,
+  Link2,
+  CreditCard,
+  Code2,
+  Store,
+  User,
+  Briefcase,
+  Package,
+  Layers,
+  FileText,
+  QrCode,
+  Mail,
+  Users,
+  BookOpen,
+  Calendar,
+  Heart,
+  type LucideIcon,
 } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -33,21 +49,40 @@ import type { GitHubConnection } from '@/types';
 
 // 템플릿 slug → 기본 사이트 이름 (GitHub repo 이름이 되므로 a-z0-9- 형식)
 const TEMPLATE_DEFAULT_NAMES: Record<string, string> = {
-  'link-in-bio-pro': 'my-links',
-  'digital-namecard': 'my-card',
-  'dev-showcase': 'dev-home',
-  'small-biz': 'my-shop',
-  'personal-brand': 'my-page',
-  'freelancer-page': 'my-work',
-  'product-landing': 'my-product',
-  'saas-landing': 'my-saas',
-  'resume-site': 'my-resume',
-  'qr-menu-pro': 'my-menu',
-  'newsletter-landing': 'my-letter',
-  'community-hub': 'my-hub',
-  'study-recruit': 'my-study',
-  'event-page': 'my-event',
-  'nonprofit-page': 'my-org',
+  'link-in-bio-pro': 'my-linkcard',
+  'digital-namecard': 'my-namecard',
+  'dev-showcase': 'dev-portfolio',
+  'small-biz': 'my-store-page',
+  'personal-brand': 'my-homepage',
+  'freelancer-page': 'my-freelance',
+  'product-landing': 'my-product-page',
+  'saas-landing': 'my-saas-page',
+  'resume-site': 'my-resume-site',
+  'qr-menu-pro': 'my-qr-menu',
+  'newsletter-landing': 'my-newsletter',
+  'community-hub': 'my-community',
+  'study-recruit': 'my-study-page',
+  'event-page': 'my-event-page',
+  'nonprofit-page': 'my-org-page',
+};
+
+// 템플릿 slug → 대표 아이콘 (lucide-react)
+const TEMPLATE_ICONS: Record<string, LucideIcon> = {
+  'link-in-bio-pro': Link2,
+  'digital-namecard': CreditCard,
+  'dev-showcase': Code2,
+  'small-biz': Store,
+  'personal-brand': User,
+  'freelancer-page': Briefcase,
+  'product-landing': Package,
+  'saas-landing': Layers,
+  'resume-site': FileText,
+  'qr-menu-pro': QrCode,
+  'newsletter-landing': Mail,
+  'community-hub': Users,
+  'study-recruit': BookOpen,
+  'event-page': Calendar,
+  'nonprofit-page': Heart,
 };
 
 function resolveDefaultSiteName(templateId: string | null, templates: HomepageTemplate[]): string {
@@ -152,6 +187,10 @@ export function TemplatePickerStep({
   };
 
   const canProceed = selectedTemplate && siteName.length >= 2 && !siteNameError;
+
+  // 선택된 템플릿의 slug → 아이콘
+  const selectedTemplateSlug = templates.find((t) => t.id === selectedTemplate)?.slug ?? null;
+  const TemplateIcon: LucideIcon | null = selectedTemplateSlug ? (TEMPLATE_ICONS[selectedTemplateSlug] ?? null) : null;
 
   const handleNext = () => {
     if (!canProceed) return;
@@ -292,13 +331,20 @@ export function TemplatePickerStep({
         <Label htmlFor="site-name" className="text-base font-semibold">
           {t(locale, 'templatePicker.siteName')}
         </Label>
-        <Input
-          id="site-name"
-          placeholder={t(locale, 'templatePicker.siteNamePlaceholder')}
-          value={siteName}
-          onChange={(e) => handleSiteNameChange(e.target.value)}
-          className={siteNameError ? 'border-red-500' : ''}
-        />
+        <div className="relative">
+          {TemplateIcon && (
+            <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+              <TemplateIcon className="h-4 w-4" />
+            </div>
+          )}
+          <Input
+            id="site-name"
+            placeholder={t(locale, 'templatePicker.siteNamePlaceholder')}
+            value={siteName}
+            onChange={(e) => handleSiteNameChange(e.target.value)}
+            className={`${TemplateIcon ? 'pl-10' : ''} ${siteNameError ? 'border-red-500' : ''}`}
+          />
+        </div>
         {siteNameError && (
           <p className="text-sm text-red-500">{siteNameError}</p>
         )}

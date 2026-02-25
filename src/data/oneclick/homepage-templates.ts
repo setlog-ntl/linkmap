@@ -36,12 +36,12 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
   {
     id: 'b2c3d4e5-0003-4000-9000-000000000003',
     slug: 'link-in-bio-pro',
-    name: 'My Link Page',
-    name_ko: '내 링크 모음',
+    name: 'Link Card',
+    name_ko: '링크 카드',
     description:
-      'Your personal link page for SNS profiles. Animated backgrounds, custom themes, and visitor analytics — all with full code ownership.',
+      'Your personal card page — collect all your links in one place. Animated backgrounds, custom themes, and visitor analytics with full code ownership.',
     description_ko:
-      'SNS 프로필에 연결하는 나만의 링크 페이지. 애니메이션 배경, 커스텀 테마, 방문자 통계까지.',
+      '나만의 링크 카드. 프로필과 링크를 한 곳에 모아 한 번에 공유하세요. 애니메이션 배경, 커스텀 테마, 방문자 통계 포함.',
     preview_image_url: null,
     github_owner: 'linkmap-templates',
     github_repo: 'link-in-bio-pro',
