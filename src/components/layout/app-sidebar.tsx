@@ -8,12 +8,12 @@ import {
   Rocket, Search, Map as MapIcon,
   List, Link2, Key, Settings, BookOpen, ChevronDown, ChevronRight,
   LogOut, Bot, User, GitBranch, Wrench, FolderKanban, Plus, LayoutDashboard,
-  Globe, ExternalLink, Loader2, AlertTriangle, Pencil,
+  Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
-import { useProjects } from '@/lib/queries/projects';
+import { useProjects, useToggleFavoriteProject } from '@/lib/queries/projects';
 import { useMyDeployments, type HomepageDeploy } from '@/lib/queries/oneclick';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -74,6 +74,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
 
   const { data: projects, isLoading: isProjectsLoading } = useProjects();
   const { data: deployments, isLoading: isDeploymentsLoading } = useMyDeployments();
+  const { mutate: toggleFavorite } = useToggleFavoriteProject();
 
   // Extract active project ID from URL
   const activeProjectId = pathname.match(/^\/project\/([^/]+)/)?.[1] ?? null;
@@ -154,6 +155,10 @@ export function AppSidebar({ profile }: AppSidebarProps) {
 
   const visibleSites = deployments?.slice(0, MAX_VISIBLE_SITES) ?? [];
   const hasMoreSites = (deployments?.length ?? 0) > MAX_VISIBLE_SITES;
+
+  // 원클릭 배포 여부: ready 상태 사이트가 하나라도 있으면 배포됨
+  const hasReadySite = deployments?.some((d) => d.deploy_status === 'ready') ?? false;
+  const oneclickColorClass = !isDeploymentsLoading && hasReadySite ? 'text-green-500' : 'text-yellow-500';
 
   return (
     <Sidebar collapsible="icon" className="border-r">
@@ -249,7 +254,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                             className="group/project"
                           >
                             <SidebarMenuSubItem>
-                              <div className="flex items-center">
+                              <div className="flex items-center group/project-row">
                                 <CollapsibleTrigger asChild>
                                   <button
                                     className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm hover:bg-sidebar-accent"
@@ -265,17 +270,20 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                                 >
                                   <Link href={`/project/${project.id}`}>
                                     <span className="truncate">{project.name}</span>
-                                    {latestDeploy && (
-                                      latestDeploy.deploy_status === 'ready'
-                                        ? <Globe className="ml-1 h-3 w-3 shrink-0 text-green-500" />
-                                        : ['building', 'creating', 'pending'].includes(latestDeploy.deploy_status)
-                                          ? <Loader2 className="ml-1 h-3 w-3 shrink-0 animate-spin text-yellow-500" />
-                                          : latestDeploy.deploy_status === 'error'
-                                            ? <AlertTriangle className="ml-1 h-3 w-3 shrink-0 text-red-500" />
-                                            : null
-                                    )}
                                   </Link>
                                 </SidebarMenuSubButton>
+                                {/* 즐겨찾기 버튼 */}
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    toggleFavorite({ id: project.id, isFavorited: !project.is_favorited });
+                                  }}
+                                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-sm hover:bg-sidebar-accent transition-opacity ${project.is_favorited ? 'opacity-100' : 'opacity-0 group-hover/project-row:opacity-100'}`}
+                                  title={project.is_favorited ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+                                >
+                                  <Star className={`h-3 w-3 ${project.is_favorited ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`} />
+                                </button>
                               </div>
                               <CollapsibleContent>
                                 <SidebarMenuSub>
@@ -359,8 +367,8 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton tooltip="원클릭 배포">
-                      <Rocket className="h-4 w-4" />
-                      <span>원클릭 배포</span>
+                      <Rocket className={`h-4 w-4 ${oneclickColorClass}`} />
+                      <span className={oneclickColorClass}>원클릭 배포</span>
                       <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
