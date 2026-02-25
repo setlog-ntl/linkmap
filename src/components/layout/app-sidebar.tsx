@@ -272,7 +272,16 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                                     <span className="truncate">{project.name}</span>
                                   </Link>
                                 </SidebarMenuSubButton>
-                                {/* 즐겨찾기 버튼 */}
+                                {/* 원클릭 배포 아이콘 */}
+                                {latestDeploy && (
+                                  <span
+                                    className="flex h-5 w-5 shrink-0 items-center justify-center"
+                                    title={`원클릭 배포 · ${latestDeploy.deploy_status === 'ready' ? '배포됨' : latestDeploy.deploy_status === 'error' ? '오류' : '배포 중'}`}
+                                  >
+                                    <Rocket className={`h-3 w-3 ${latestDeploy.deploy_status === 'ready' ? 'text-green-500' : latestDeploy.deploy_status === 'error' ? 'text-red-500' : 'text-yellow-500 animate-pulse'}`} />
+                                  </span>
+                                )}
+                              {/* 즐겨찾기 버튼 */}
                                 <button
                                   onClick={(e) => {
                                     e.preventDefault();

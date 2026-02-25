@@ -324,6 +324,7 @@ function DeployBadge({ status }: { status: HomepageDeploy['deploy_status'] }) {
 
   return (
     <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-md w-fit ${className}`}>
+      <Rocket className="h-3 w-3 opacity-70" />
       <Icon className={`h-3 w-3 ${isSpinning ? 'animate-spin' : ''}`} />
       {label}
     </span>
