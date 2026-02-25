@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { LinkmapLogo } from '@/components/icons/linkmap-logo';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import {
@@ -117,24 +117,7 @@ export function Header({ profile }: HeaderProps) {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-          <div className="relative w-8 h-8">
-            {/* 라이트모드 */}
-            <Image
-              src="/logo.png"
-              alt="Linkmap Logo"
-              fill
-              className="object-contain dark:hidden"
-            />
-            {/* 다크모드 */}
-            <div className="relative w-full h-full rounded-lg overflow-hidden hidden dark:block">
-              <Image
-                src="/logo-icon.png"
-                alt="Linkmap Logo"
-                fill
-                className="object-cover"
-              />
-            </div>
-          </div>
+          <LinkmapLogo size={32} />
           <div className="flex items-center">
             <span className="text-[#38bdf8]">Link</span>
             <span className="text-foreground">map</span>

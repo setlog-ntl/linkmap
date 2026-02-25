@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
+import { LinkmapLogo } from '@/components/icons/linkmap-logo';
 import {
   Rocket, Search, Map as MapIcon,
   List, Link2, Key, Settings, BookOpen, ChevronDown, ChevronRight,
@@ -160,24 +160,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
       {/* Logo */}
       <SidebarHeader className="px-3 py-3">
         <Link href="/" className="flex items-center gap-2 font-bold text-lg px-1">
-          <div className="relative w-8 h-8 shrink-0">
-            {/* 라이트모드 */}
-            <Image
-              src="/logo.png"
-              alt="Linkmap"
-              fill
-              className="object-contain dark:hidden"
-            />
-            {/* 다크모드 */}
-            <div className="relative w-full h-full rounded-lg overflow-hidden hidden dark:block">
-              <Image
-                src="/logo-icon.png"
-                alt="Linkmap"
-                fill
-                className="object-cover"
-              />
-            </div>
-          </div>
+          <LinkmapLogo size={32} className="shrink-0" />
           {!isCollapsed && (
             <span className="flex items-center">
               <span className="text-[#38bdf8]">Link</span>
