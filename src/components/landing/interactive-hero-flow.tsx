@@ -3,6 +3,7 @@
 import { useMemo, useState, useCallback } from 'react';
 import {
     ReactFlow,
+    MarkerType,
     type Node,
     type Edge,
     type EdgeMouseHandler,
@@ -112,36 +113,51 @@ const disconnectedHoverStyle = {
     strokeDasharray: '5 4', opacity: 0.5,
 };
 
+const connectedMarker = {
+    type: MarkerType.ArrowClosed,
+    width: 8,
+    height: 8,
+    color: 'var(--brand-green)',
+};
+const blueMarker = {
+    type: MarkerType.ArrowClosed,
+    width: 8,
+    height: 8,
+    color: 'var(--brand-blue)',
+};
+
 function edge(
     id: string, source: string, target: string,
     style: Record<string, unknown>,
     animated = true,
     sourceHandle?: string,
     targetHandle?: string,
+    marker?: typeof connectedMarker,
 ): Edge {
     const e: Edge = { id, source, target, type: 'smoothstep', animated, style };
     if (sourceHandle) e.sourceHandle = sourceHandle;
     if (targetHandle) e.targetHandle = targetHandle;
+    if (marker) e.markerEnd = marker;
     return e;
 }
 
 /* ─────────────────── Edges ─────────────────── */
 const baseEdges: Edge[] = [
     // DB → myapp
-    edge('e-supabase-myapp', 'supabase', 'myapp', connectedStyle,    true,  'bottom', 'top'),
+    edge('e-supabase-myapp', 'supabase', 'myapp', connectedStyle,    true,  'bottom', 'top',  connectedMarker),
     edge('e-firebase-myapp', 'firebase', 'myapp', disconnectedStyle, false, 'bottom', 'top'),
     // Auth → myapp
-    edge('e-google-myapp',   'google',   'myapp', connectedStyle,    true,  'right', 'left'),
-    edge('e-kakao-myapp',    'kakao',    'myapp', connectedStyle,    true,  'right', 'left'),
+    edge('e-google-myapp',   'google',   'myapp', connectedStyle,    true,  'right', 'left',  connectedMarker),
+    edge('e-kakao-myapp',    'kakao',    'myapp', connectedStyle,    true,  'right', 'left',  connectedMarker),
     edge('e-naver-myapp',    'naver',    'myapp', disconnectedStyle, false, 'right', 'left'),
     // myapp → AI
-    edge('e-myapp-openai',   'myapp', 'openai',     connectedStyle,    true,  'right', 'left'),
-    edge('e-myapp-gemini',   'myapp', 'gemini',     disconnectedStyle, false, 'right', 'left'),
+    edge('e-myapp-openai',   'myapp', 'openai',    connectedStyle,    true,  'right', 'left',  connectedMarker),
+    edge('e-myapp-gemini',   'myapp', 'gemini',    disconnectedStyle, false, 'right', 'left'),
     // myapp → Deploy
-    edge('e-myapp-vercel',   'myapp', 'vercel',     disconnectedStyle, false, 'right', 'left'),
-    edge('e-myapp-cloudflare','myapp','cloudflare',  connectedStyle,   true,  'right', 'left'),
+    edge('e-myapp-vercel',   'myapp', 'vercel',    disconnectedStyle, false, 'right', 'left'),
+    edge('e-myapp-cloudflare','myapp','cloudflare', connectedStyle,   true,  'right', 'left',  connectedMarker),
     // myapp → GitHub CI/CD (myapp 하단 → github 상단, 수직 연결)
-    edge('e-myapp-github',   'myapp', 'github',     blueStyle,        true,  'bottom', 'top'),
+    edge('e-myapp-github',   'myapp', 'github',    blueStyle,        true,  'bottom', 'top',  blueMarker),
 ];
 
 /* ─────────────────── Component ─────────────────── */

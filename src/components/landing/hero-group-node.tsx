@@ -48,11 +48,6 @@ const colorMap: Record<InnerColorHint, { border: string; text: string }> = {
   },
 };
 
-// outer: 전체를 감싸는 단일 외부 박스 스타일
-const outerStyle = {
-  border: 'border-border/30 dark:border-border/20',
-  text: '',
-};
 
 function HeroGroupNode({ data }: NodeProps) {
   const d = data as unknown as HeroGroupNodeData;
@@ -64,8 +59,11 @@ function HeroGroupNode({ data }: NodeProps) {
         className="w-full h-full relative pointer-events-none select-none"
         style={{ overflow: 'visible' }}
       >
-        {/* 단일 외부 바운딩 박스 — 매우 subtle한 테두리 */}
-        <div className={`absolute inset-0 rounded-3xl border ${outerStyle.border}`} />
+        {/* 단일 외부 바운딩 박스 — 거의 보이지 않는 점선 테두리 */}
+        <div
+          className="absolute inset-0 rounded-3xl border-dashed border-border/15 dark:border-white/8"
+          style={{ boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)' }}
+        />
       </div>
     );
   }

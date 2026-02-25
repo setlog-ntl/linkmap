@@ -44,10 +44,10 @@ function FlowServiceNode({ data }: NodeProps) {
             : 'border-border/50 shadow-sm hover:border-brand-green/30 hover:shadow-[0_0_12px_rgba(16,185,129,0.12)] hover:scale-[1.03]'
         }`}
     >
-      <Handle type="target" position={Position.Left} id="left" className="!bg-muted-foreground/30 !w-1.5 !h-1.5 !border-0" />
-      <Handle type="target" position={Position.Top} id="top" className="!bg-muted-foreground/30 !w-1.5 !h-1.5 !border-0" />
-      <Handle type="source" position={Position.Right} id="right" className="!bg-muted-foreground/30 !w-1.5 !h-1.5 !border-0" />
-      <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-muted-foreground/30 !w-1.5 !h-1.5 !border-0" />
+      <Handle type="target" position={Position.Left}   id="left"   className="!bg-transparent !border-0 !w-2 !h-2 !opacity-0" />
+      <Handle type="target" position={Position.Top}    id="top"    className="!bg-transparent !border-0 !w-2 !h-2 !opacity-0" />
+      <Handle type="source" position={Position.Right}  id="right"  className="!bg-transparent !border-0 !w-2 !h-2 !opacity-0" />
+      <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-transparent !border-0 !w-2 !h-2 !opacity-0" />
 
       <div className="flex items-center gap-2">
         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass}`} />

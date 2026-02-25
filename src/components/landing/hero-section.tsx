@@ -138,7 +138,7 @@ export function HeroSection() {
       {/* ── Area 2: Interactive Flow showcase (dedicated space below text) ── */}
       <div className="relative h-[640px] lg:h-[720px] -mt-8">
         {/* Top fade: blend into text area */}
-        <div className="absolute inset-x-0 top-0 h-24 z-10 bg-gradient-to-b from-background to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-10 z-10 bg-gradient-to-b from-background/70 to-transparent pointer-events-none" />
         <InteractiveHeroFlow />
         {/* Bottom fade: blend into next section */}
         <div className="absolute inset-x-0 bottom-0 h-20 z-10 bg-gradient-to-t from-background to-transparent pointer-events-none" />
