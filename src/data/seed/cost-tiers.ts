@@ -62,6 +62,12 @@ const S: Record<string, string> = {
   cypress: '10000000-0000-4000-a000-000000000048',
   bullmq: '10000000-0000-4000-a000-000000000049',
   shopify_api: '10000000-0000-4000-a000-000000000050',
+  namecheap: '10000000-0000-4000-a000-000000000051',
+  cloudflare_registrar: '10000000-0000-4000-a000-000000000052',
+  godaddy: '10000000-0000-4000-a000-000000000053',
+  gabia: '10000000-0000-4000-a000-000000000054',
+  hosting_kr: '10000000-0000-4000-a000-000000000055',
+  dotname: '10000000-0000-4000-a000-000000000056',
 };
 
 // Helper function to create tier
@@ -725,4 +731,63 @@ export const costTiers: CostTierSeed[] = [
     ['5 staff accounts', '5명 직원', true],
     ['Priority support', '우선 지원', true],
   ], { requests: 'Higher limits', apps: 'Unlimited', orders: 'Unlimited' }, '성장 상점', 1),
+
+  // Namecheap (1 tier - Basic Registration)
+  t(S.namecheap, 'standard', '표준', '$0.54', '$6.49', [
+    ['Domain registration', '도메인 등록', true],
+    ['Free WHOIS privacy', '무료 WHOIS 프라이버시', true],
+    ['Free DNS management', '무료 DNS 관리', true],
+    ['Domain transfer', '도메인 이전', true],
+  ], { domains: 'Unlimited', subdomains: 'Unlimited', nameservers: 'Unlimited' }, '모든 규모', 0),
+
+  // Cloudflare Registrar (1 tier - No Markup)
+  t(S.cloudflare_registrar, 'standard', '표준', '$0.87', '$10.46', [
+    ['No markup pricing', '마크업 없는 가격', true],
+    ['Integrated DNS', '통합 DNS', true],
+    ['Free DNSSEC', '무료 DNSSEC', true],
+    ['Auto-renewal', '자동 갱신', true],
+  ], { domains: 'Unlimited', api: 'Available', uptime: '99.99%' }, '모든 규모', 0),
+
+  // GoDaddy (3 tiers - Based on renewal rates)
+  t(S.godaddy, 'promo', '프로모션', '$0.01', '$0.01', [
+    ['Domain registration (1st year)', '도메인 등록(첫해)', true],
+    ['WHOIS privacy (optional)', 'WHOIS 프라이버시(선택)', false],
+    ['Email forwarding', '이메일 포워딩', true],
+  ], { domains: 'Unlimited', nameservers: '5', renewal: 'Higher rate' }, '신규 등록', 0),
+
+  t(S.godaddy, 'standard', '표준', '$1.58', '$18.99', [
+    ['Domain renewal', '도메인 갱신', true],
+    ['WHOIS privacy', 'WHOIS 프라이버시', false],
+    ['Full DNS control', '전체 DNS 제어', true],
+  ], { domains: 'Unlimited', nameservers: '5', autorenew: 'Optional' }, '갱신 시', 1),
+
+  t(S.godaddy, 'premium', '프리미엄', '$5', '$60', [
+    ['Premium domain', '프리미엄 도메인', true],
+    ['Priority support', '우선 지원', true],
+    ['Brand protection', '브랜드 보호', true],
+  ], { domains: 'Premium only', bidding: 'Available', auction: 'Eligible' }, '프리미엄', 2),
+
+  // Gabia (1 tier - Standard Registration)
+  t(S.gabia, 'standard', '표준', '$1', '$12', [
+    ['Domain registration', '도메인 등록', true],
+    ['Free DNS management', '무료 DNS 관리', true],
+    ['WHOIS privacy', 'WHOIS 프라이버시', true],
+    ['Free email forwarding', '무료 이메일 포워딩', true],
+  ], { domains: 'Unlimited', subdomains: 'Unlimited', nameservers: 'Unlimited' }, '모든 규모', 0),
+
+  // HostingKR (1 tier - Standard Registration)
+  t(S.hosting_kr, 'standard', '표준', '$0.83', '$10', [
+    ['Domain registration', '도메인 등록', true],
+    ['Free DNS management', '무료 DNS 관리', true],
+    ['WHOIS privacy', 'WHOIS 프라이버시', true],
+    ['Email service', '이메일 서비스', true],
+  ], { domains: 'Unlimited', subdomains: 'Unlimited', nameservers: 'Unlimited' }, '모든 규모', 0),
+
+  // DotName (1 tier - Free Hosting Included)
+  t(S.dotname, 'free_hosting', '무료 호스팅 포함', '$0.83', '$10', [
+    ['Domain registration', '도메인 등록', true],
+    ['Free web hosting', '무료 웹 호스팅', true],
+    ['Free DNS management', '무료 DNS 관리', true],
+    ['Free SSL certificate', '무료 SSL 인증서', true],
+  ], { domains: 'Unlimited', bandwidth: '100GB', storage: '10GB' }, '모든 규모', 0),
 ];

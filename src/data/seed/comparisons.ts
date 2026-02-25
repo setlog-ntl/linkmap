@@ -45,6 +45,12 @@ const S = {
   playwright: '10000000-0000-4000-a000-000000000040',
   cypress: '10000000-0000-4000-a000-000000000048',
   groq: '10000000-0000-4000-a000-000000000037',
+  namecheap: '10000000-0000-4000-a000-000000000051',
+  cloudflare_registrar: '10000000-0000-4000-a000-000000000052',
+  godaddy: '10000000-0000-4000-a000-000000000053',
+  gabia: '10000000-0000-4000-a000-000000000054',
+  hosting_kr: '10000000-0000-4000-a000-000000000055',
+  dotname: '10000000-0000-4000-a000-000000000056',
 } as const;
 
 export const comparisons: ComparisonSeed[] = [
@@ -169,6 +175,58 @@ export const comparisons: ComparisonSeed[] = [
       product_analytics: { need: '제품 분석 (퍼널, 코호트)이 필요할 때', choose: 'Mixpanel', because: '이벤트 기반 분석의 강자, 강력한 퍼널 분석' },
       all_in_one: { need: '분석 + 세션 리플레이 + 피처 플래그가 필요할 때', choose: 'PostHog', because: '올인원 제품 분석 스위트, 자체 호스팅 가능' },
       privacy_first: { need: '프라이버시 최우선이 필요할 때', choose: 'Plausible', because: '쿠키 없는 분석, GDPR 걱정 없음, 가벼움' },
+    },
+  },
+
+  // --- 6. Domain Registrar Comparison (International) ---
+  {
+    category: 'domain',
+    title: 'Domain Registrar Comparison (International)',
+    title_ko: '도메인 등록 비교 (국제)',
+    services: [S.namecheap, S.cloudflare_registrar, S.godaddy],
+    comparison_data: {
+      criteria: [
+        { name: 'First Year .COM Price', name_ko: '.COM 첫해 가격', values: { namecheap: '$6.49', cloudflare_registrar: '$10.46', godaddy: '$0.01 (프로모션)' } },
+        { name: 'Renewal .COM Price', name_ko: '.COM 갱신 가격', values: { namecheap: '$14.98', cloudflare_registrar: '$10.46', godaddy: '$18.99' } },
+        { name: 'Free WHOIS Privacy', name_ko: '무료 WHOIS 프라이버시', values: { namecheap: '예', cloudflare_registrar: '예', godaddy: '아니오 (추가 요금)' } },
+        { name: 'DNS Management', name_ko: 'DNS 관리', values: { namecheap: '무료', cloudflare_registrar: '무료 (Cloudflare 통합)', godaddy: '무료' } },
+        { name: 'API Support', name_ko: 'API 지원', values: { namecheap: '예', cloudflare_registrar: '예', godaddy: '예' } },
+        { name: 'DNSSEC', name_ko: 'DNSSEC', values: { namecheap: '유료 추가', cloudflare_registrar: '자동 활성화', godaddy: '유료 추가' } },
+        { name: 'Domain Transfer', name_ko: '도메인 이전', values: { namecheap: '무료 + 1년 연장', cloudflare_registrar: '무료 이전', godaddy: '무료' } },
+        { name: 'DX Score', name_ko: 'DX 점수', values: { namecheap: '8.0', cloudflare_registrar: '8.5', godaddy: '7.5' } },
+      ],
+    },
+    recommendation: {
+      budget: { need: '저가 도메인 등록이 필요할 때', choose: 'Namecheap', because: '첫해 저가 + 무료 WHOIS 프라이버시' },
+      transparent_pricing: { need: '투명한 가격 + 마크업 없음이 필요할 때', choose: 'Cloudflare Registrar', because: '마크업 없는 레지스트리 가격, DNS 통합' },
+      integrated_platform: { need: 'Cloudflare와 통합이 필요할 때', choose: 'Cloudflare Registrar', because: 'DNS + DNSSEC + 도메인 자동 관리' },
+      full_service: { need: '도메인 + 호스팅 + 이메일 통합이 필요할 때', choose: 'GoDaddy', because: '올인원 웹 호스팅 플랫폼' },
+    },
+  },
+
+  // --- 7. Domain Registrar Comparison (Korean) ---
+  {
+    category: 'domain',
+    title: 'Domain Registrar Comparison (Korea)',
+    title_ko: '도메인 등록 비교 (국내)',
+    services: [S.gabia, S.hosting_kr, S.dotname],
+    comparison_data: {
+      criteria: [
+        { name: '.KR Domain Price', name_ko: '.KR 도메인 가격', values: { gabia: '$12/년', hosting_kr: '$10~$12/년', dotname: '$10~$12/년' } },
+        { name: '.COM Domain Price', name_ko: '.COM 도메인 가격', values: { gabia: '$8.50/년', hosting_kr: '$8/년', dotname: '$8~$9/년' } },
+        { name: 'Free Web Hosting', name_ko: '무료 웹호스팅', values: { gabia: '선택 사항', hosting_kr: '선택 사항', dotname: '도메인 등록 시 포함' } },
+        { name: 'AI Domain Recommendation', name_ko: 'AI 도메인 추천', values: { gabia: '예 (2024년 신규)', hosting_kr: '아니오', dotname: '아니오' } },
+        { name: 'DNS Management', name_ko: 'DNS 관리', values: { gabia: '무료', hosting_kr: '무료', dotname: '무료' } },
+        { name: 'WHOIS Privacy', name_ko: 'WHOIS 프라이버시', values: { gabia: '무료', hosting_kr: '무료', dotname: '무료' } },
+        { name: 'Email Service', name_ko: '이메일 서비스', values: { gabia: '무료 포워딩', hosting_kr: '무료 포워딩', dotname: '무료 포워딩' } },
+        { name: 'Market Share', name_ko: '시장 점유율', values: { gabia: '1위 (100만 도메인)', hosting_kr: '주요 업체', dotname: '45만 고객' } },
+      ],
+    },
+    recommendation: {
+      best_korean: { need: '최고의 한국 도메인 서비스가 필요할 때', choose: 'Gabia', because: '시장 점유율 1위, AI 도메인 추천, 신뢰성' },
+      low_cost: { need: '저가 .KR 도메인이 필요할 때', choose: 'HostingKR', because: '합리적인 가격, KISA 우수 기업 인증' },
+      free_hosting: { need: '도메인과 함께 무료 호스팅이 필요할 때', choose: 'DotName', because: '도메인 등록 시 무료 호스팅 + SSL 인증서' },
+      established_player: { need: '성숙한 서비스가 필요할 때', choose: 'HostingKR', because: '국내 도메인 등록 대행 우수 기업' },
     },
   },
 ];

@@ -59,9 +59,15 @@ const S = {
   cypress: '10000000-0000-4000-a000-000000000048',
   bullmq: '10000000-0000-4000-a000-000000000049',
   shopify_api: '10000000-0000-4000-a000-000000000050',
-  github: '10000000-0000-4000-a000-000000000051',
-  claude_code: '10000000-0000-4000-a000-000000000052',
-  google_gemini: '10000000-0000-4000-a000-000000000053',
+  namecheap: '10000000-0000-4000-a000-000000000051',
+  cloudflare_registrar: '10000000-0000-4000-a000-000000000052',
+  godaddy: '10000000-0000-4000-a000-000000000053',
+  gabia: '10000000-0000-4000-a000-000000000054',
+  hosting_kr: '10000000-0000-4000-a000-000000000055',
+  dotname: '10000000-0000-4000-a000-000000000056',
+  github: '10000000-0000-4000-a000-000000000057',
+  claude_code: '10000000-0000-4000-a000-000000000058',
+  google_gemini: '10000000-0000-4000-a000-000000000059',
 } as const;
 
 export const dependencies: DependencySeed[] = [
@@ -149,4 +155,28 @@ export const dependencies: DependencySeed[] = [
   { service_id: S.google_gemini, depends_on_service_id: S.anthropic, dependency_type: 'alternative', description: 'Anthropic is an alternative LLM provider', description_ko: 'Anthropic은 대안 LLM 제공자입니다' },
 
   { service_id: S.github, depends_on_service_id: S.vercel, dependency_type: 'recommended', description: 'GitHub integrates with Vercel for automatic deployments', description_ko: 'GitHub는 Vercel과 자동 배포를 위해 연동됩니다' },
+
+  // --- Domain Registrars: Alternatives (all interchangeable) ---
+  { service_id: S.namecheap, depends_on_service_id: S.godaddy, dependency_type: 'alternative', description: 'GoDaddy is an alternative domain registrar', description_ko: 'GoDaddy는 대안 도메인 등록업체입니다' },
+  { service_id: S.namecheap, depends_on_service_id: S.cloudflare_registrar, dependency_type: 'alternative', description: 'Cloudflare Registrar offers no-markup pricing', description_ko: 'Cloudflare Registrar는 마크업 없는 가격을 제공합니다' },
+  { service_id: S.namecheap, depends_on_service_id: S.gabia, dependency_type: 'alternative', description: 'Gabia is an alternative for .kr domain registration', description_ko: 'Gabia는 .kr 도메인 등록의 대안입니다' },
+
+  { service_id: S.cloudflare_registrar, depends_on_service_id: S.godaddy, dependency_type: 'alternative', description: 'GoDaddy is an alternative domain registrar', description_ko: 'GoDaddy는 대안 도메인 등록업체입니다' },
+  { service_id: S.cloudflare_registrar, depends_on_service_id: S.namecheap, dependency_type: 'alternative', description: 'Namecheap is a budget-friendly alternative', description_ko: 'Namecheap는 저가 대안입니다' },
+
+  { service_id: S.godaddy, depends_on_service_id: S.namecheap, dependency_type: 'alternative', description: 'Namecheap is a cheaper alternative to GoDaddy', description_ko: 'Namecheap는 GoDaddy보다 저렴한 대안입니다' },
+  { service_id: S.godaddy, depends_on_service_id: S.cloudflare_registrar, dependency_type: 'alternative', description: 'Cloudflare offers no-markup domain pricing', description_ko: 'Cloudflare는 마크업 없는 도메인 가격을 제공합니다' },
+
+  { service_id: S.gabia, depends_on_service_id: S.hosting_kr, dependency_type: 'alternative', description: 'HostingKR is an alternative for Korean domains', description_ko: 'HostingKR은 한국 도메인의 대안입니다' },
+  { service_id: S.gabia, depends_on_service_id: S.dotname, dependency_type: 'alternative', description: 'DotName offers free hosting with domain', description_ko: 'DotName은 도메인과 함께 무료 호스팅을 제공합니다' },
+  { service_id: S.gabia, depends_on_service_id: S.namecheap, dependency_type: 'alternative', description: 'Namecheap supports international domain registration', description_ko: 'Namecheap는 국제 도메인 등록을 지원합니다' },
+
+  { service_id: S.hosting_kr, depends_on_service_id: S.gabia, dependency_type: 'alternative', description: 'Gabia is an alternative for Korean domains', description_ko: 'Gabia는 한국 도메인의 대안입니다' },
+  { service_id: S.hosting_kr, depends_on_service_id: S.dotname, dependency_type: 'alternative', description: 'DotName is another Korean registrar option', description_ko: 'DotName은 또 다른 한국 등록업체 옵션입니다' },
+
+  { service_id: S.dotname, depends_on_service_id: S.gabia, dependency_type: 'alternative', description: 'Gabia is an alternative with stronger market presence', description_ko: 'Gabia는 더 강한 시장 입지의 대안입니다' },
+  { service_id: S.dotname, depends_on_service_id: S.hosting_kr, dependency_type: 'alternative', description: 'HostingKR is an alternative with more hosting features', description_ko: 'HostingKR은 더 많은 호스팅 기능의 대안입니다' },
+
+  // --- Domain Registrars: Optional relationships with Cloudflare ---
+  { service_id: S.cloudflare, depends_on_service_id: S.cloudflare_registrar, dependency_type: 'optional', description: 'Cloudflare Registrar integrates seamlessly with Cloudflare DNS', description_ko: 'Cloudflare Registrar는 Cloudflare DNS와 완벽하게 통합됩니다' },
 ];

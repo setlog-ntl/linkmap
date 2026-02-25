@@ -74,6 +74,12 @@ export const SERVICE_IDS_V2 = {
   cypress: '10000000-0000-4000-a000-000000000048',
   bullmq: '10000000-0000-4000-a000-000000000049',
   shopify_api: '10000000-0000-4000-a000-000000000050',
+  namecheap: '10000000-0000-4000-a000-000000000051',
+  cloudflare_registrar: '10000000-0000-4000-a000-000000000052',
+  godaddy: '10000000-0000-4000-a000-000000000053',
+  gabia: '10000000-0000-4000-a000-000000000054',
+  hosting_kr: '10000000-0000-4000-a000-000000000055',
+  dotname: '10000000-0000-4000-a000-000000000056',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -2006,6 +2012,389 @@ export const servicesV2: ServiceSeedV2[] = [
       starter: '$39',
       growth: '$105~$399',
       enterprise: '$2,300+',
+    },
+    dx_score: 7.5,
+  },
+
+  // -----------------------------------------------------------------------
+  // 31. Namecheap
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.namecheap,
+    name: 'Namecheap',
+    slug: 'namecheap',
+    category: 'domain',
+    description:
+      '저가 도메인 등록 및 DNS 관리 서비스로, 무료 WHOIS 프라이버시 보호·도메인 이전·DNS 관리 기능을 제공합니다.',
+    description_ko:
+      '저가 도메인 등록 및 DNS 관리 서비스로, 무료 WHOIS 프라이버시 보호·도메인 이전·DNS 관리 기능을 제공합니다.',
+    icon_url: null,
+    website_url: 'https://www.namecheap.com',
+    docs_url: 'https://www.namecheap.com/support/knowledgebase',
+    pricing_info: {
+      free_tier: false,
+      free_tier_details: '무료 등급 없음 (기본 도메인 가격: .com $6.49/첫해, $14.98/연장)',
+      plans: [
+        { name: 'Domain Registration', price: '.com $6.49~$14.98/년' },
+        { name: 'Domain Hosting Bundle', price: '$1.98~$4.98/월' },
+        { name: 'Premium DNS', price: '무료' },
+        { name: 'SSL Certificate', price: '$8.88/년~' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'NAMECHEAP_API_KEY',
+        public: false,
+        description: 'Namecheap API 키',
+        description_ko: 'Namecheap API 키',
+      },
+      {
+        name: 'NAMECHEAP_USERNAME',
+        public: false,
+        description: 'Namecheap 계정 사용자명',
+        description_ko: 'Namecheap 계정 사용자명',
+      },
+    ],
+    domain: 'infrastructure',
+    subcategory: 'domain_registrar',
+    popularity_score: 82,
+    difficulty_level: 'beginner',
+    tags: ['domain', 'registrar', 'dns', 'whois', 'cheap', 'transfer', 'privacy', 'bulk-registration'],
+    alternatives: ['godaddy', 'cloudflare-registrar', 'gabia'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'rails'],
+      language: ['javascript', 'typescript', 'python', 'ruby', 'php'],
+    },
+    official_sdks: {
+      javascript: 'https://github.com/Namecheap/namecheap-api-sdk-js',
+      php: 'https://github.com/Namecheap/namecheap-api',
+    },
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0.54/월 (.com)',
+      growth: '$1.25~$4.98/월',
+      enterprise: '문의',
+    },
+    dx_score: 8.0,
+  },
+
+  // -----------------------------------------------------------------------
+  // 32. Cloudflare Registrar
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.cloudflare_registrar,
+    name: 'Cloudflare Registrar',
+    slug: 'cloudflare-registrar',
+    category: 'domain',
+    description:
+      'Cloudflare의 도메인 등록 서비스로, 마크업 없는 투명한 가격·DNS 통합·DNSSEC 자동화를 제공합니다.',
+    description_ko:
+      'Cloudflare의 도메인 등록 서비스로, 마크업 없는 투명한 가격·DNS 통합·DNSSEC 자동화를 제공합니다.',
+    icon_url: null,
+    website_url: 'https://www.cloudflare.com/products/registrar/',
+    docs_url: 'https://developers.cloudflare.com/registrar/',
+    pricing_info: {
+      free_tier: false,
+      free_tier_details: '무료 등급 없음 (마크업 없는 레지스트리 가격 청구)',
+      plans: [
+        { name: 'Domain Registration', price: '.com $10.46/년 (마크업 없음)' },
+        { name: 'Enterprise Transfer', price: '무료 이전' },
+        { name: 'DNS Management', price: '포함 (무료)' },
+        { name: 'DNSSEC', price: '자동 활성화 (무료)' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'CLOUDFLARE_API_TOKEN',
+        public: false,
+        description: 'Cloudflare API 토큰 (도메인 관리 권한)',
+        description_ko: 'Cloudflare API 토큰 (도메인 관리 권한)',
+      },
+      {
+        name: 'CLOUDFLARE_ZONE_ID',
+        public: false,
+        description: 'Cloudflare Zone ID',
+        description_ko: 'Cloudflare Zone ID',
+      },
+    ],
+    domain: 'infrastructure',
+    subcategory: 'domain_registrar',
+    popularity_score: 75,
+    difficulty_level: 'intermediate',
+    tags: ['domain', 'registrar', 'dns', 'dnssec', 'cloudflare', 'transparent-pricing', 'api', 'cdn-integration'],
+    alternatives: ['namecheap', 'godaddy'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'rails', 'remix'],
+      language: ['javascript', 'typescript', 'python', 'ruby', 'go'],
+    },
+    official_sdks: {
+      javascript: 'https://github.com/cloudflare/cloudflare-typescript',
+      python: 'https://github.com/cloudflare/python-cloudflare',
+      go: 'https://github.com/cloudflare/cloudflare-go',
+    },
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: {
+      starter: '$0.87/월 (.com)',
+      growth: '$5~$20/월 (멀티 도메인)',
+      enterprise: '문의',
+    },
+    dx_score: 8.5,
+  },
+
+  // -----------------------------------------------------------------------
+  // 33. GoDaddy
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.godaddy,
+    name: 'GoDaddy',
+    slug: 'godaddy',
+    category: 'domain',
+    description:
+      '세계 최대 도메인 등록업체로, 도메인 등록·호스팅·이메일·웹사이트 빌더·SSL 인증서를 통합 제공합니다.',
+    description_ko:
+      '세계 최대 도메인 등록업체로, 도메인 등록·호스팅·이메일·웹사이트 빌더·SSL 인증서를 통합 제공합니다.',
+    icon_url: null,
+    website_url: 'https://www.godaddy.com',
+    docs_url: 'https://developer.godaddy.com',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '프로모션: .com 첫해 $0.01 (연장 시 $18.99)',
+      plans: [
+        { name: 'Domain Only', price: '.com $0.01~$18.99/년 (프로모션)' },
+        { name: 'Starter Hosting', price: '$2.99~$5.99/월' },
+        { name: 'Business Hosting', price: '$5.99~$9.99/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'GODADDY_API_KEY',
+        public: false,
+        description: 'GoDaddy API 키',
+        description_ko: 'GoDaddy API 키',
+      },
+      {
+        name: 'GODADDY_API_SECRET',
+        public: false,
+        description: 'GoDaddy API 시크릿 키',
+        description_ko: 'GoDaddy API 시크릿 키',
+      },
+    ],
+    domain: 'infrastructure',
+    subcategory: 'domain_registrar',
+    popularity_score: 90,
+    difficulty_level: 'beginner',
+    tags: ['domain', 'registrar', 'hosting', 'builder', 'email', 'ssl', 'popular', 'all-in-one'],
+    alternatives: ['namecheap', 'cloudflare-registrar'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'rails', 'wordpress'],
+      language: ['javascript', 'typescript', 'python', 'ruby', 'php', 'java'],
+    },
+    official_sdks: {
+      php: 'https://github.com/godaddy/godaddy-api-php',
+      python: 'https://github.com/godaddy/godaddy-python',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0.01~$1.58/월 (프로모션)',
+      growth: '$5.99~$9.99/월 (호스팅)',
+      enterprise: '문의',
+    },
+    dx_score: 7.5,
+  },
+
+  // -----------------------------------------------------------------------
+  // 34. Gabia (가비아)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.gabia,
+    name: 'Gabia',
+    slug: 'gabia',
+    category: 'domain',
+    description:
+      '한국 도메인 등록 1위 업체로, 한국 도메인(.kr)·국제 도메인(.com 등)을 제공하며 AI 도메인 추천·웹호스팅·SSL을 지원합니다.',
+    description_ko:
+      '한국 도메인 등록 1위 업체로, 한국 도메인(.kr)·국제 도메인(.com 등)을 제공하며 AI 도메인 추천·웹호스팅·SSL을 지원합니다.',
+    icon_url: null,
+    website_url: 'https://domain.gabia.com',
+    docs_url: 'https://www.gabia.com/support/documentation',
+    pricing_info: {
+      free_tier: false,
+      free_tier_details: '무료 등급 없음 (.kr 기본: $12/년, .com 기본: $8.5/년)',
+      plans: [
+        { name: '.KR Domain', price: '$12/년' },
+        { name: '.COM Domain', price: '$8.5/년' },
+        { name: 'Web Hosting', price: '$2.5~$5/월' },
+        { name: 'SSL Certificate', price: '$40~$200/년' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'GABIA_API_KEY',
+        public: false,
+        description: '가비아 API 키',
+        description_ko: '가비아 API 키',
+      },
+      {
+        name: 'GABIA_ACCOUNT_ID',
+        public: false,
+        description: '가비아 계정 ID',
+        description_ko: '가비아 계정 ID',
+      },
+    ],
+    domain: 'infrastructure',
+    subcategory: 'domain_registrar',
+    popularity_score: 88,
+    difficulty_level: 'beginner',
+    tags: ['domain', 'registrar', '.kr', 'korea', 'local', 'ai-recommendation', 'hosting', 'ssl'],
+    alternatives: ['hosting-kr', 'dotname'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'rails'],
+      language: ['javascript', 'typescript', 'python', 'ruby', 'php'],
+    },
+    official_sdks: {
+      javascript: 'https://github.com/gabia/gabia-api-sdk',
+      python: 'https://github.com/gabia/gabia-python-sdk',
+    },
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$1/월 (.kr)',
+      growth: '$2.5~$5/월 (호스팅)',
+      enterprise: '문의',
+    },
+    dx_score: 7.5,
+  },
+
+  // -----------------------------------------------------------------------
+  // 35. HostingKR (호스팅케이알)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.hosting_kr,
+    name: 'HostingKR',
+    slug: 'hosting-kr',
+    category: 'domain',
+    description:
+      '한국의 신뢰할 수 있는 도메인 등록·호스팅 서비스로, 500개 이상의 도메인 확장자·DNS 관리·웹호스팅·이메일 서비스를 제공합니다.',
+    description_ko:
+      '한국의 신뢰할 수 있는 도메인 등록·호스팅 서비스로, 500개 이상의 도메인 확장자·DNS 관리·웹호스팅·이메일 서비스를 제공합니다.',
+    icon_url: null,
+    website_url: 'https://www.hosting.kr',
+    docs_url: 'https://www.hosting.kr/support',
+    pricing_info: {
+      free_tier: false,
+      free_tier_details: '무료 등급 없음 (.kr 기본: $10~$12/년, .com 기본: $8/년)',
+      plans: [
+        { name: '.KR Domain', price: '$10~$12/년' },
+        { name: '.COM Domain', price: '$8/년' },
+        { name: 'Basic Hosting', price: '$2.5/월' },
+        { name: 'Premium Hosting', price: '$5~$10/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'HOSTING_KR_API_KEY',
+        public: false,
+        description: '호스팅케이알 API 키',
+        description_ko: '호스팅케이알 API 키',
+      },
+      {
+        name: 'HOSTING_KR_ACCOUNT_ID',
+        public: false,
+        description: '호스팅케이알 계정 ID',
+        description_ko: '호스팅케이알 계정 ID',
+      },
+    ],
+    domain: 'infrastructure',
+    subcategory: 'domain_registrar',
+    popularity_score: 78,
+    difficulty_level: 'beginner',
+    tags: ['domain', 'registrar', '.kr', 'korea', 'hosting', 'email', 'dns', 'local'],
+    alternatives: ['gabia', 'dotname'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'rails'],
+      language: ['javascript', 'typescript', 'python', 'ruby', 'php'],
+    },
+    official_sdks: {
+      javascript: 'https://github.com/hosting-kr/hosting-kr-api',
+    },
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0.8~$1/월 (.kr)',
+      growth: '$2.5~$5/월 (호스팅)',
+      enterprise: '문의',
+    },
+    dx_score: 7.0,
+  },
+
+  // -----------------------------------------------------------------------
+  // 36. DotName (닷네임)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.dotname,
+    name: 'DotName',
+    slug: 'dotname',
+    category: 'domain',
+    description:
+      '국내 도메인 등록 전문 기업으로, 한국 도메인(.kr)·국제 도메인 등록·DNS 관리·무료 웹호스팅을 제공합니다.',
+    description_ko:
+      '국내 도메인 등록 전문 기업으로, 한국 도메인(.kr)·국제 도메인 등록·DNS 관리·무료 웹호스팅을 제공합니다.',
+    icon_url: null,
+    website_url: 'https://www.dotname.co.kr',
+    docs_url: 'https://www.dotname.co.kr/support',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '도메인 등록 시 무료 웹호스팅 제공',
+      plans: [
+        { name: '.KR Domain', price: '$10~$12/년 + 무료 호스팅' },
+        { name: '.COM Domain', price: '$8~$9/년 + 무료 호스팅' },
+        { name: 'Free Hosting', price: '$0/월 (도메인 등록 포함)' },
+        { name: 'Premium Add-ons', price: '$2~$10/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'DOTNAME_API_KEY',
+        public: false,
+        description: '닷네임 API 키',
+        description_ko: '닷네임 API 키',
+      },
+      {
+        name: 'DOTNAME_ACCOUNT_ID',
+        public: false,
+        description: '닷네임 계정 ID',
+        description_ko: '닷네임 계정 ID',
+      },
+    ],
+    domain: 'infrastructure',
+    subcategory: 'domain_registrar',
+    popularity_score: 72,
+    difficulty_level: 'beginner',
+    tags: ['domain', 'registrar', '.kr', 'korea', 'free-hosting', 'dns', 'local', 'affordable'],
+    alternatives: ['gabia', 'hosting-kr'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'rails'],
+      language: ['javascript', 'typescript', 'python', 'ruby', 'php'],
+    },
+    official_sdks: {
+      javascript: 'https://github.com/dotname/dotname-api-js',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0/월 (무료 호스팅 포함)',
+      growth: '$0.8~$1/월 (.kr 도메인)',
+      enterprise: '문의',
     },
     dx_score: 7.5,
   },
