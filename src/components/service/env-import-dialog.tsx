@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -40,12 +40,19 @@ interface EnvImportDialogProps {
   onOpenChange: (open: boolean) => void;
   onImport: (vars: ImportVariable[]) => Promise<void>;
   projectServices?: { service_id: string; service: Service | null }[];
+  initialContent?: string;
 }
 
-export function EnvImportDialog({ open, onOpenChange, onImport, projectServices }: EnvImportDialogProps) {
+export function EnvImportDialog({ open, onOpenChange, onImport, projectServices, initialContent }: EnvImportDialogProps) {
   const [content, setContent] = useState('');
   const [environment, setEnvironment] = useState<Environment>('development');
   const [importing, setImporting] = useState(false);
+
+  useEffect(() => {
+    if (open && initialContent) {
+      setContent(initialContent);
+    }
+  }, [open, initialContent]);
   const { locale } = useLocaleStore();
   const { data: catalogServices = [] } = useCatalogServices();
 

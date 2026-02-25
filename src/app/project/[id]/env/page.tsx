@@ -74,6 +74,7 @@ export default function ProjectEnvPage() {
   const { data: linkedRepos = [] } = useLinkedRepos(projectId);
   const [showGitHubSync, setShowGitHubSync] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [importInitialContent, setImportInitialContent] = useState('');
   const [activeEnv, setActiveEnv] = useState<Environment>('development');
   const [search, setSearch] = useState('');
   const [decryptedValues, setDecryptedValues] = useState<Record<string, string>>({});
@@ -316,6 +317,7 @@ export default function ProjectEnvPage() {
         open={importOpen}
         onOpenChange={setImportOpen}
         projectServices={projectServices}
+        initialContent={importInitialContent}
         onImport={async (vars: ImportVariable[]) => {
           const res = await fetch('/api/env/bulk', {
             method: 'POST',
@@ -359,6 +361,18 @@ export default function ProjectEnvPage() {
                 }}
                 onPaste={(e) => {
                   const text = e.clipboardData.getData('text');
+                  const validLines = text.split('\n').filter((l) => {
+                    const s = l.trim();
+                    return s && !s.startsWith('#') && s.includes('=');
+                  });
+                  if (validLines.length > 1) {
+                    // 여러 변수 감지 → 가져오기 다이얼로그로 자동 전환
+                    e.preventDefault();
+                    setAddOpen(false);
+                    setImportInitialContent(text);
+                    setImportOpen(true);
+                    return;
+                  }
                   const parsed = parseEnvLine(text);
                   if (parsed) {
                     e.preventDefault();
