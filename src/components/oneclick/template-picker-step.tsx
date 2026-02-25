@@ -31,6 +31,32 @@ import { RECOMMENDED_SLUGS } from '@/lib/constants/template-categories';
 import type { HomepageTemplate } from '@/lib/queries/oneclick';
 import type { GitHubConnection } from '@/types';
 
+// 템플릿 slug → 기본 사이트 이름 (GitHub repo 이름이 되므로 a-z0-9- 형식)
+const TEMPLATE_DEFAULT_NAMES: Record<string, string> = {
+  'link-in-bio-pro': 'my-links',
+  'digital-namecard': 'my-card',
+  'dev-showcase': 'dev-home',
+  'small-biz': 'my-shop',
+  'personal-brand': 'my-page',
+  'freelancer-page': 'my-work',
+  'product-landing': 'my-product',
+  'saas-landing': 'my-saas',
+  'resume-site': 'my-resume',
+  'qr-menu-pro': 'my-menu',
+  'newsletter-landing': 'my-letter',
+  'community-hub': 'my-hub',
+  'study-recruit': 'my-study',
+  'event-page': 'my-event',
+  'nonprofit-page': 'my-org',
+};
+
+function resolveDefaultSiteName(templateId: string | null, templates: HomepageTemplate[]): string {
+  if (!templateId) return '';
+  const tpl = templates.find((t) => t.id === templateId);
+  if (!tpl) return '';
+  return TEMPLATE_DEFAULT_NAMES[tpl.slug] ?? '';
+}
+
 interface TemplatePickerStepProps {
   templates: HomepageTemplate[];
   isLoading: boolean;
@@ -70,10 +96,12 @@ export function TemplatePickerStep({
     (t) => RECOMMENDED_SLUGS.has(t.slug)
   )?.id ?? null;
 
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(
-    defaultTemplate ?? recommendedTemplateId
+  const initialTemplateId = defaultTemplate ?? recommendedTemplateId;
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(initialTemplateId);
+  const [siteName, setSiteName] = useState(
+    defaultSiteName || resolveDefaultSiteName(initialTemplateId, templates)
   );
-  const [siteName, setSiteName] = useState(defaultSiteName);
+  const [siteNameTouched, setSiteNameTouched] = useState(!!defaultSiteName);
   const [siteNameError, setSiteNameError] = useState<string | null>(null);
 
   // Re-apply recommended template when templates load
@@ -106,10 +134,20 @@ export function TemplatePickerStep({
   const handleSiteNameChange = (value: string) => {
     const lowered = value.toLowerCase().replace(/[^a-z0-9-]/g, '');
     setSiteName(lowered);
+    setSiteNameTouched(true);
     if (lowered.length >= 2) {
       setSiteNameError(validateSiteName(lowered));
     } else {
       setSiteNameError(null);
+    }
+  };
+
+  const handleTemplateSelect = (id: string) => {
+    setSelectedTemplate(id);
+    // 사용자가 이름을 직접 수정하지 않은 경우에만 자동 네이밍 적용
+    if (!siteNameTouched) {
+      const autoName = resolveDefaultSiteName(id, templates);
+      if (autoName) setSiteName(autoName);
     }
   };
 
@@ -241,7 +279,7 @@ export function TemplatePickerStep({
                   template={tpl}
                   isSelected={selectedTemplate === tpl.id}
                   locale={locale}
-                  onSelect={setSelectedTemplate}
+                  onSelect={handleTemplateSelect}
                 />
               </motion.div>
             ))}
