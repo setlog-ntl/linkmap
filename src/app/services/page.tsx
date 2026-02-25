@@ -18,12 +18,23 @@ export default async function ServicesPage() {
   let profile: Profile | null = null;
   let services: Service[] = [];
   let domains: ServiceDomainRecord[] = [];
+  let usedServiceIds: string[] = [];
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      profile = data ?? null;
+      const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      profile = profileData ?? null;
+      // 사용자 프로젝트에서 사용 중인 서비스 ID 조회
+      const { data: projectsData } = await supabase.from('projects').select('id').eq('user_id', user.id);
+      const projectIds = (projectsData ?? []).map((p: { id: string }) => p.id);
+      if (projectIds.length > 0) {
+        const { data: projectServicesData } = await supabase
+          .from('project_services')
+          .select('service_id')
+          .in('project_id', projectIds);
+        usedServiceIds = [...new Set((projectServicesData ?? []).map((ps: { service_id: string }) => ps.service_id))];
+      }
     }
     const [servicesRes, domainsRes] = await Promise.all([
       supabase.from('services').select('*').order('name'),
@@ -45,7 +56,7 @@ export default async function ServicesPage() {
             내 프로젝트에 필요한 서비스를 쉽게 찾아 연결하세요
           </p>
         </div>
-        <ServiceCatalogClient services={services} domains={domains} />
+        <ServiceCatalogClient services={services} domains={domains} usedServiceIds={usedServiceIds} />
       </main>
       <Footer />
     </div>

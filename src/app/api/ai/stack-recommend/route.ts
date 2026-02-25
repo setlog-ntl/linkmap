@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       tags: s.tags || [],
       domain: s.domain || '',
       monthly_cost_estimate: s.monthly_cost_estimate || {},
-      dx_score: s.dx_score || 0,
+      github_stars: s.github_stars ?? null,
     }));
 
     const systemPrompt = `당신은 소프트웨어 아키텍트입니다. 사용자의 프로젝트 요구사항을 분석하여 최적의 서비스 스택을 추천합니다.

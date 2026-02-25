@@ -7,7 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   DifficultyBadge,
   FreeTierBadge,
-  DxScoreBadge,
+  GithubStarsBadge,
   CostEstimateBadge,
   VendorLockInBadge,
 } from '@/components/service/service-badges';
@@ -177,7 +177,7 @@ export function ServiceDetailSheet({
                     <VendorLockInBadge risk={svc?.vendor_lock_in_risk} />
                   </div>
                   <div className="flex items-center gap-3">
-                    <DxScoreBadge score={svc?.dx_score} />
+                    <GithubStarsBadge stars={svc?.github_stars} />
                     <CostEstimateBadge estimate={svc?.monthly_cost_estimate} />
                   </div>
                 </div>

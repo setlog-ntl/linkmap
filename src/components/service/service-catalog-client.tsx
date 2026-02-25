@@ -29,17 +29,17 @@ import { CategoryProcessDiagram } from './category-process-diagram';
 import { easyCategoryProcessFlows } from '@/lib/constants/easy-categories';
 import { EasyCategoryCard } from './easy-category-card';
 import { ServiceListItem } from './service-list-item';
-import { DifficultyBadge, DxScoreBadge, FreeTierBadge, CostEstimateBadge } from './service-badges';
+import { DifficultyBadge, GithubStarsBadge, FreeTierBadge, CostEstimateBadge } from './service-badges';
 import type { Service, ServiceCategory, ServiceDomain, ServiceDomainRecord, FreeTierQuality, EasyCategory } from '@/types';
 
-type SortOption = 'popularity' | 'name' | 'dx_score' | 'difficulty';
+type SortOption = 'popularity' | 'name' | 'github_stars' | 'difficulty';
 type ViewMode = 'easy' | 'advanced';
 type DisplayMode = 'grid' | 'list';
 
 const sortLabels: Record<SortOption, string> = {
   popularity: '인기순',
   name: '이름순',
-  dx_score: 'DX 점수순',
+  github_stars: 'GitHub 인기순',
   difficulty: '난이도순',
 };
 
@@ -55,9 +55,10 @@ const difficultyOrder = { beginner: 0, intermediate: 1, advanced: 2 };
 interface ServiceCatalogClientProps {
   services: Service[];
   domains: ServiceDomainRecord[];
+  usedServiceIds?: string[];
 }
 
-export function ServiceCatalogClient({ services, domains }: ServiceCatalogClientProps) {
+export function ServiceCatalogClient({ services, domains, usedServiceIds = [] }: ServiceCatalogClientProps) {
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -120,6 +121,42 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
     return counts;
   }, [services]);
 
+  // Top services per easy category (for icon preview - QW-2)
+  const easyCategoryTopServices = useMemo(() => {
+    const result: Record<string, { slug: string }[]> = {};
+    for (const ec of EASY_CATEGORY_ORDER) {
+      const cats = easyCategoryToServiceCategories[ec];
+      result[ec] = [...services]
+        .filter((s) => cats.includes(s.category as ServiceCategory))
+        .sort((a, b) => (b.popularity_score || 0) - (a.popularity_score || 0))
+        .slice(0, 3)
+        .map((s) => ({ slug: s.slug }));
+    }
+    return result;
+  }, [services]);
+
+  // Featured services top 6 by popularity (QW-3)
+  const featuredServices = useMemo(() => {
+    return [...services]
+      .sort((a, b) => (b.popularity_score || 0) - (a.popularity_score || 0))
+      .slice(0, 6);
+  }, [services]);
+
+  // Suggested services for empty state - tag/category partial match (QW-6)
+  const suggestedServices = useMemo(() => {
+    if (!search) return [];
+    const q = search.toLowerCase().slice(0, 4);
+    if (q.length < 2) return [];
+    return services
+      .filter((s) => {
+        const tagMatch = s.tags?.some((tag) => tag.toLowerCase().includes(q));
+        const catLabel = (allCategoryLabels[s.category as ServiceCategory] || '').toLowerCase();
+        return tagMatch || catLabel.includes(q);
+      })
+      .sort((a, b) => (b.popularity_score || 0) - (a.popularity_score || 0))
+      .slice(0, 3);
+  }, [search, services]);
+
   const filteredServices = useMemo(() => {
     const result = services.filter((s) => {
       // Easy mode category filter
@@ -159,8 +196,8 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
           return (b.popularity_score || 0) - (a.popularity_score || 0);
         case 'name':
           return a.name.localeCompare(b.name);
-        case 'dx_score':
-          return (b.dx_score || 0) - (a.dx_score || 0);
+        case 'github_stars':
+          return (b.github_stars || 0) - (a.github_stars || 0);
         case 'difficulty':
           return (difficultyOrder[a.difficulty_level || 'intermediate'] || 1) -
                  (difficultyOrder[b.difficulty_level || 'intermediate'] || 1);
@@ -193,6 +230,31 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
 
   return (
     <div className="space-y-6">
+      {/* Featured Services Strip - QW-3 */}
+      {featuredServices.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5">
+            <Sparkles className="h-4 w-4 text-amber-500" />
+            <span className="text-sm font-medium">인기 서비스</span>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {featuredServices.map((service) => (
+              <Link
+                key={service.id}
+                href={`/services/${service.slug}`}
+                className="flex items-center gap-2 shrink-0 px-3 py-2 rounded-lg border bg-card hover:bg-muted transition-colors"
+              >
+                <ServiceIcon serviceId={service.slug} size={20} />
+                <span className="text-sm font-medium whitespace-nowrap">{service.name}</span>
+                <Badge variant="secondary" className="text-xs hidden sm:inline-flex">
+                  {allCategoryLabels[service.category as ServiceCategory] || service.category}
+                </Badge>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* View mode toggle — Tabs */}
       <Tabs
         value={viewMode}
@@ -435,6 +497,10 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
                     </button>
                   </Badge>
                 )}
+                <Button variant="ghost" size="sm" onClick={clearAllFilters} className="ml-auto h-7 text-xs">
+                  <X className="mr-1 h-3 w-3" />
+                  모두 초기화
+                </Button>
               </div>
             )}
 
@@ -451,7 +517,7 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
                         exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.98 }}
                         transition={{ duration: 0.2, delay: Math.min(index * 0.02, 0.2) }}
                       >
-                        <ServiceListItem service={service} />
+                        <ServiceListItem service={service} isUsed={usedServiceIds.includes(service.id)} />
                       </motion.div>
                     ))}
                   </AnimatePresence>
@@ -476,9 +542,16 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
                                     <ServiceIcon serviceId={service.slug} size={24} />
                                   </div>
                                   <div>
-                                    <CardTitle className="text-base group-hover:text-primary transition-colors">
-                                      {service.name}
-                                    </CardTitle>
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <CardTitle className="text-base group-hover:text-primary transition-colors">
+                                        {service.name}
+                                      </CardTitle>
+                                      {usedServiceIds.includes(service.id) && (
+                                        <Badge className="text-xs bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800">
+                                          사용 중
+                                        </Badge>
+                                      )}
+                                    </div>
                                     <Badge variant="secondary" className="text-xs mt-1">
                                       {allCategoryLabels[service.category as ServiceCategory] || service.category}
                                     </Badge>
@@ -496,7 +569,7 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
                                 <FreeTierBadge quality={service.free_tier_quality} />
                               </div>
                               <div className="flex items-center justify-between gap-2">
-                                <DxScoreBadge score={service.dx_score} />
+                                <GithubStarsBadge stars={service.github_stars} />
                                 <CostEstimateBadge estimate={service.monthly_cost_estimate} />
                               </div>
                             </CardContent>
@@ -527,7 +600,7 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
                 </div>
               )
             ) : (
-              <div className="text-center py-16 space-y-3">
+              <div className="text-center py-12 space-y-3">
                 <div className="text-4xl" aria-hidden="true">&#x1F50D;</div>
                 <p className="text-muted-foreground font-medium">
                   {search ? `"${search}"에 대한 검색 결과가 없습니다` : '서비스가 없습니다'}
@@ -539,6 +612,23 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
                   <Button variant="outline" size="sm" onClick={clearAllFilters} className="mt-2">
                     모든 필터 초기화
                   </Button>
+                )}
+                {search && suggestedServices.length > 0 && (
+                  <div className="mt-6 space-y-3">
+                    <p className="text-sm font-medium text-muted-foreground">이런 서비스는 어떠세요?</p>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {suggestedServices.map((s) => (
+                        <Link
+                          key={s.id}
+                          href={`/services/${s.slug}`}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-card hover:bg-muted transition-colors"
+                        >
+                          <ServiceIcon serviceId={s.slug} size={16} />
+                          <span className="text-sm font-medium">{s.name}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             )}
@@ -594,6 +684,7 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
               <EasyCategoryCard
                 category={ec}
                 serviceCount={easyCategoryCounts[ec] || 0}
+                topServices={easyCategoryTopServices[ec]}
                 selected={false}
                 onClick={() => setSelectedEasyCategory(ec)}
               />
@@ -735,6 +826,10 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
               </button>
             </Badge>
           )}
+          <Button variant="ghost" size="sm" onClick={clearAllFilters} className="ml-auto h-7 text-xs">
+            <X className="mr-1 h-3 w-3" />
+            모두 초기화
+          </Button>
         </div>
       )}
 
@@ -751,7 +846,7 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
                   exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.98 }}
                   transition={{ duration: 0.2, delay: Math.min(index * 0.02, 0.2) }}
                 >
-                  <ServiceListItem service={service} />
+                  <ServiceListItem service={service} isUsed={usedServiceIds.includes(service.id)} />
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -776,9 +871,16 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
                               <ServiceIcon serviceId={service.slug} size={24} />
                             </div>
                             <div>
-                              <CardTitle className="text-base group-hover:text-primary transition-colors">
-                                {service.name}
-                              </CardTitle>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <CardTitle className="text-base group-hover:text-primary transition-colors">
+                                  {service.name}
+                                </CardTitle>
+                                {usedServiceIds.includes(service.id) && (
+                                  <Badge className="text-xs bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800">
+                                    사용 중
+                                  </Badge>
+                                )}
+                              </div>
                               <Badge variant="secondary" className="text-xs mt-1">
                                 {allCategoryLabels[service.category as ServiceCategory] || service.category}
                               </Badge>
@@ -796,7 +898,7 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
                           <FreeTierBadge quality={service.free_tier_quality} />
                         </div>
                         <div className="flex items-center justify-between gap-2">
-                          <DxScoreBadge score={service.dx_score} />
+                          <GithubStarsBadge stars={service.github_stars} />
                           <CostEstimateBadge estimate={service.monthly_cost_estimate} />
                         </div>
                       </CardContent>
@@ -830,7 +932,7 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
 
       {/* Easy mode: Empty state */}
       {viewMode === 'easy' && showServiceGrid && filteredServices.length === 0 && (
-        <div className="text-center py-16 space-y-3">
+        <div className="text-center py-12 space-y-3">
           <div className="text-4xl" aria-hidden="true">&#x1F50D;</div>
           <p className="text-muted-foreground font-medium">
             {search ? `"${search}"에 대한 검색 결과가 없습니다` : '서비스가 없습니다'}
@@ -842,6 +944,23 @@ export function ServiceCatalogClient({ services, domains }: ServiceCatalogClient
             <Button variant="outline" size="sm" onClick={clearAllFilters} className="mt-2">
               모든 필터 초기화
             </Button>
+          )}
+          {search && suggestedServices.length > 0 && (
+            <div className="mt-6 space-y-3">
+              <p className="text-sm font-medium text-muted-foreground">이런 서비스는 어떠세요?</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {suggestedServices.map((s) => (
+                  <Link
+                    key={s.id}
+                    href={`/services/${s.slug}`}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-card hover:bg-muted transition-colors"
+                  >
+                    <ServiceIcon serviceId={s.slug} size={16} />
+                    <span className="text-sm font-medium">{s.name}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       )}

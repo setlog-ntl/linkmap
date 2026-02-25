@@ -16,7 +16,7 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, ExternalLink, Globe, BookOpen, Github, Clock, Copy, Check } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { allCategoryLabels, allCategoryEmojis, domainLabels, domainIcons } from '@/lib/constants/service-filters';
-import { DifficultyBadge, DxScoreBadge, FreeTierBadge, VendorLockInBadge, CostEstimateBadge } from './service-badges';
+import { DifficultyBadge, GithubStarsBadge, FreeTierBadge, VendorLockInBadge, CostEstimateBadge } from './service-badges';
 import type {
   Service, ServiceGuide, ServiceCostTier, ServiceDependency,
   ServiceCategory, ServiceDomain, DependencyType,
@@ -130,8 +130,8 @@ export function ServiceDetailClient({ service, guide, costTiers, dependencies }:
             <MetaCard label="난이도">
               <DifficultyBadge level={service.difficulty_level} />
             </MetaCard>
-            <MetaCard label="DX 점수">
-              <DxScoreBadge score={service.dx_score} />
+            <MetaCard label="GitHub Stars">
+              <GithubStarsBadge stars={service.github_stars} />
             </MetaCard>
             <MetaCard label="무료 플랜">
               <FreeTierBadge quality={service.free_tier_quality} />

@@ -102,7 +102,7 @@
 | vendor_lock_in_risk | TEXT | YES | NULL | CHECK: low\|medium\|high |
 | setup_time_minutes | INT | YES | NULL | M002 |
 | monthly_cost_estimate | JSONB | YES | NULL | M002 |
-| dx_score | NUMERIC | YES | NULL | M002 |
+| github_stars | INTEGER | YES | NULL | M047 |
 | last_updated | TIMESTAMPTZ | YES | NULL | M002 |
 | dashboard_layer | TEXT | YES | 'devtools' | CHECK: frontend\|backend\|devtools, M027 |
 | dashboard_subcategory | TEXT | YES | NULL | M027 |

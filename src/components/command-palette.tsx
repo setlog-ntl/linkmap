@@ -32,9 +32,13 @@ import {
   CommandSeparator,
 } from '@/components/ui/command';
 import { Badge } from '@/components/ui/badge';
+import { ServiceIcon } from '@/components/ui/service-icon';
 import { useUIStore } from '@/stores/ui-store';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
+import { useCatalogServices } from '@/lib/queries/services';
+import { allCategoryLabels } from '@/lib/constants/service-filters';
+import type { ServiceCategory } from '@/types';
 
 export function CommandPalette() {
   const router = useRouter();
@@ -46,6 +50,10 @@ export function CommandPalette() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { data: catalogServices } = useCatalogServices();
+  const sortedCatalogServices = catalogServices
+    ? [...catalogServices].sort((a, b) => (b.popularity_score || 0) - (a.popularity_score || 0))
+    : [];
 
   // Detect project context from pathname
   const projectMatch = pathname.match(/^\/project\/([^/]+)/);
@@ -212,6 +220,32 @@ export function CommandPalette() {
               <CommandItem onSelect={() => navigate('/settings')}>
                 <Settings className="mr-2 h-4 w-4" />
                 {t(locale, 'common.settings')}
+              </CommandItem>
+            </CommandGroup>
+
+            {/* Service Catalog */}
+            <CommandSeparator />
+            <CommandGroup heading="서비스 카탈로그">
+              {sortedCatalogServices.map((service) => (
+                <CommandItem
+                  key={service.id}
+                  value={`${service.name} ${service.slug} ${service.category}`}
+                  onSelect={() => navigate(`/services/${service.slug}`)}
+                >
+                  <ServiceIcon serviceId={service.slug} size={16} className="mr-2 shrink-0" />
+                  <span>{service.name}</span>
+                  <Badge variant="secondary" className="ml-auto text-[10px]">
+                    {allCategoryLabels[service.category as ServiceCategory] || service.category}
+                  </Badge>
+                </CommandItem>
+              ))}
+              <CommandItem
+                onSelect={() => navigate('/services')}
+                className="text-muted-foreground text-xs"
+                value="서비스 카탈로그 전체 보기"
+              >
+                <Search className="mr-2 h-3.5 w-3.5" />
+                서비스 카탈로그 전체 보기 →
               </CommandItem>
             </CommandGroup>
 

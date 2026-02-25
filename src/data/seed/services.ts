@@ -29,7 +29,7 @@ export interface ServiceSeed {
   vendor_lock_in_risk?: VendorLockInRisk;
   setup_time_minutes?: number;
   monthly_cost_estimate?: Record<string, string>;
-  dx_score?: number;
+  github_stars?: number | null;
   // Dashboard fields
   dashboard_layer?: DashboardLayer;
   dashboard_subcategory?: DashboardSubcategory | string;
@@ -215,7 +215,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$25-50', enterprise: '$599+' },
-    dx_score: 9.2,
   },
 
   // -----------------------------------------------------------------------
@@ -297,7 +296,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'high',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$25-100', enterprise: '$200+' },
-    dx_score: 8.5,
   },
 
   // -----------------------------------------------------------------------
@@ -362,7 +360,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 5,
     monthly_cost_estimate: { starter: '$0', growth: '$20', enterprise: '$Custom' },
-    dx_score: 9.5,
   },
 
   // -----------------------------------------------------------------------
@@ -421,7 +418,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 5,
     monthly_cost_estimate: { starter: '$0', growth: '$19', enterprise: '$Custom' },
-    dx_score: 8.8,
   },
 
   // -----------------------------------------------------------------------
@@ -485,7 +481,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 30,
     monthly_cost_estimate: { starter: '2.9%+30\u00A2/tx', growth: '2.9%+30\u00A2/tx', enterprise: 'Custom' },
-    dx_score: 9.0,
   },
 
   // -----------------------------------------------------------------------
@@ -556,7 +551,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'high',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$25', enterprise: '$99+' },
-    dx_score: 9.5,
   },
 
   // -----------------------------------------------------------------------
@@ -635,7 +629,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 20,
     monthly_cost_estimate: { starter: '$0', growth: '$0', enterprise: '$0' },
-    dx_score: 7.5,
   },
 
   // -----------------------------------------------------------------------
@@ -688,7 +681,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$20', enterprise: '$Custom' },
-    dx_score: 9.3,
   },
 
   // -----------------------------------------------------------------------
@@ -748,7 +740,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 15,
     monthly_cost_estimate: { starter: '$0', growth: '$19.95', enterprise: '$89.95+' },
-    dx_score: 7.5,
   },
 
   // -----------------------------------------------------------------------
@@ -803,7 +794,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 5,
     monthly_cost_estimate: { starter: '$5-20', growth: '$50-200', enterprise: '$500+' },
-    dx_score: 9.0,
   },
 
   // -----------------------------------------------------------------------
@@ -852,7 +842,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 5,
     monthly_cost_estimate: { starter: '$5-20', growth: '$50-200', enterprise: '$500+' },
-    dx_score: 9.0,
   },
 
   // -----------------------------------------------------------------------
@@ -918,7 +907,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$89', enterprise: '$224+' },
-    dx_score: 7.8,
   },
 
   // -----------------------------------------------------------------------
@@ -990,7 +978,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$26', enterprise: '$80+' },
-    dx_score: 8.8,
   },
 
   // -----------------------------------------------------------------------
@@ -1044,7 +1031,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$29', enterprise: '$Custom' },
-    dx_score: 8.8,
   },
 
   // -----------------------------------------------------------------------
@@ -1104,7 +1090,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 5,
     monthly_cost_estimate: { starter: '$0', growth: '$19', enterprise: '$Custom' },
-    dx_score: 9.0,
   },
 
   // -----------------------------------------------------------------------
@@ -1158,7 +1143,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 5,
     monthly_cost_estimate: { starter: '$5', growth: '$20-50', enterprise: '$Custom' },
-    dx_score: 9.0,
   },
 
   // -----------------------------------------------------------------------
@@ -1219,7 +1203,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 15,
     monthly_cost_estimate: { starter: '5%+50\u00A2/tx', growth: '5%+50\u00A2/tx', enterprise: '3.5%+50\u00A2/tx' },
-    dx_score: 8.5,
   },
 
   // -----------------------------------------------------------------------
@@ -1278,7 +1261,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$10', enterprise: '$Custom' },
-    dx_score: 9.2,
   },
 
   // -----------------------------------------------------------------------
@@ -1336,7 +1318,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 5,
     monthly_cost_estimate: { starter: '$0', growth: '$0-450', enterprise: '$Custom' },
-    dx_score: 9.0,
   },
 
   // -----------------------------------------------------------------------
@@ -1406,7 +1387,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 20,
     monthly_cost_estimate: { starter: '$0-5', growth: '$20-100', enterprise: '$500+' },
-    dx_score: 7.0,
   },
 
   // -----------------------------------------------------------------------
@@ -1470,7 +1450,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 5,
     monthly_cost_estimate: { starter: '$0', growth: '$4/사용자', enterprise: '$21/사용자' },
-    dx_score: 9.5,
   },
 
   // -----------------------------------------------------------------------
@@ -1521,7 +1500,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 5,
     monthly_cost_estimate: { starter: '$20', growth: '$100', enterprise: '$200+' },
-    dx_score: 9.3,
   },
 
   // -----------------------------------------------------------------------
@@ -1572,7 +1550,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 5,
     monthly_cost_estimate: { starter: '$0', growth: '$10-50', enterprise: '$100+' },
-    dx_score: 8.5,
   },
 
   // -----------------------------------------------------------------------
@@ -1637,7 +1614,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 15,
     monthly_cost_estimate: { starter: '$0', growth: '$0', enterprise: '$0' },
-    dx_score: 8.0,
   },
 
   // -----------------------------------------------------------------------
@@ -1696,7 +1672,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$0', enterprise: '$0' },
-    dx_score: 8.5,
   },
 
   // -----------------------------------------------------------------------
@@ -1755,7 +1730,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 15,
     monthly_cost_estimate: { starter: '$0', growth: '$0', enterprise: '$0' },
-    dx_score: 7.5,
   },
 
   // -----------------------------------------------------------------------
@@ -1829,7 +1803,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 30,
     monthly_cost_estimate: { starter: '$0', growth: '$0', enterprise: '$0' },
-    dx_score: 6.5,
   },
 
   // -----------------------------------------------------------------------
@@ -1888,7 +1861,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$0', enterprise: '$0' },
-    dx_score: 9.0,
   },
 
   // -----------------------------------------------------------------------
@@ -1966,7 +1938,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 25,
     monthly_cost_estimate: { starter: '$0', growth: '$35', enterprise: '$240' },
-    dx_score: 8.5,
   },
 
   // 60. Convex
@@ -2027,7 +1998,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'high',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$25', enterprise: '문의' },
-    dx_score: 9.0,
   },
 
   // 61. Drizzle ORM
@@ -2078,7 +2048,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 15,
     monthly_cost_estimate: { starter: '$0', growth: '$0', enterprise: '$0' },
-    dx_score: 9.0,
   },
 
   // 62. Prisma
@@ -2139,7 +2108,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 15,
     monthly_cost_estimate: { starter: '$0', growth: '$49', enterprise: '문의' },
-    dx_score: 9.2,
   },
 
   // 63. Turso
@@ -2194,7 +2162,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$29', enterprise: '문의' },
-    dx_score: 8.8,
   },
 
   // 64. Redis Cloud
@@ -2249,7 +2216,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 15,
     monthly_cost_estimate: { starter: '$0', growth: '$5', enterprise: '문의' },
-    dx_score: 8.0,
   },
 
   // 65. Vercel KV
@@ -2315,7 +2281,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'high',
     setup_time_minutes: 5,
     monthly_cost_estimate: { starter: '$0', growth: '$10', enterprise: '문의' },
-    dx_score: 9.0,
   },
 
   // 66. Pinecone
@@ -2376,7 +2341,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 15,
     monthly_cost_estimate: { starter: '$0', growth: '$70', enterprise: '문의' },
-    dx_score: 8.5,
   },
 
   // 67. LangChain
@@ -2437,7 +2401,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 20,
     monthly_cost_estimate: { starter: '$0', growth: '$39', enterprise: '문의' },
-    dx_score: 8.0,
   },
 
   // 68. Replicate
@@ -2482,7 +2445,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 5,
     monthly_cost_estimate: { starter: '$5', growth: '$50', enterprise: '$500+' },
-    dx_score: 9.0,
   },
 
   // 69. Hugging Face
@@ -2537,7 +2499,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$9', enterprise: '$20+' },
-    dx_score: 8.5,
   },
 
   // 70. Stability AI
@@ -2586,7 +2547,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$10', enterprise: '문의' },
-    dx_score: 8.0,
   },
 
   // 71. Notion API
@@ -2641,7 +2601,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$10', enterprise: '$18' },
-    dx_score: 8.5,
   },
 
   // 72. Linear API
@@ -2696,7 +2655,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$8', enterprise: '$14' },
-    dx_score: 9.2,
   },
 
   // 73. Toss Payments (토스페이먼츠)
@@ -2753,7 +2711,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 30,
     monthly_cost_estimate: { starter: '수수료', growth: '수수료', enterprise: '수수료' },
-    dx_score: 8.0,
   },
 
   // 74. PayPal
@@ -2810,7 +2767,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 25,
     monthly_cost_estimate: { starter: '수수료', growth: '수수료', enterprise: '수수료' },
-    dx_score: 7.5,
   },
 
   // 75. AWS SES
@@ -2876,7 +2832,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 30,
     monthly_cost_estimate: { starter: '$0', growth: '$10', enterprise: '$100+' },
-    dx_score: 7.0,
   },
 
   // 76. Mailchimp
@@ -2938,7 +2893,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 15,
     monthly_cost_estimate: { starter: '$0', growth: '$13', enterprise: '$350' },
-    dx_score: 7.5,
   },
 
   // 77. ImageKit
@@ -2999,7 +2953,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$49', enterprise: '문의' },
-    dx_score: 8.5,
   },
 
   // 78. Cloudflare R2
@@ -3065,7 +3018,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 15,
     monthly_cost_estimate: { starter: '$0', growth: '$5', enterprise: '$50+' },
-    dx_score: 8.0,
   },
 
   // 79. Grafana
@@ -3126,7 +3078,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 20,
     monthly_cost_estimate: { starter: '$0', growth: '$29', enterprise: '문의' },
-    dx_score: 8.0,
   },
 
   // 80. New Relic
@@ -3187,7 +3138,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 20,
     monthly_cost_estimate: { starter: '$0', growth: '$99', enterprise: '$349+' },
-    dx_score: 7.5,
   },
 
   // 81. GitHub Copilot
@@ -3237,7 +3187,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 5,
     monthly_cost_estimate: { starter: '$0', growth: '$10', enterprise: '$39' },
-    dx_score: 9.5,
   },
 
   // 82. Cursor
@@ -3286,7 +3235,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 5,
     monthly_cost_estimate: { starter: '$0', growth: '$20', enterprise: '$40' },
-    dx_score: 9.5,
   },
 
   // 83. Vitest
@@ -3337,7 +3285,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '$0', growth: '$0', enterprise: '$0' },
-    dx_score: 9.5,
   },
 
   // 84. Storybook
@@ -3391,7 +3338,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 15,
     monthly_cost_estimate: { starter: '$0', growth: '$149', enterprise: '문의' },
-    dx_score: 8.5,
   },
 
   // 85. Docker
@@ -3453,7 +3399,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 20,
     monthly_cost_estimate: { starter: '$0', growth: '$5', enterprise: '$24' },
-    dx_score: 8.0,
   },
 
   // -----------------------------------------------------------------------
@@ -3511,7 +3456,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 15,
     monthly_cost_estimate: { starter: '₩2,200', growth: '₩10,000', enterprise: '문의' },
-    dx_score: 7.2,
   },
 
   // -----------------------------------------------------------------------
@@ -3569,7 +3513,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 15,
     monthly_cost_estimate: { starter: '₩1,200', growth: '₩8,000', enterprise: '문의' },
-    dx_score: 6.8,
   },
 
   // -----------------------------------------------------------------------
@@ -3633,7 +3576,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 20,
     monthly_cost_estimate: { starter: '₩1,100', growth: '₩11,000', enterprise: '문의' },
-    dx_score: 7.0,
   },
 
   // -----------------------------------------------------------------------
@@ -3691,7 +3633,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 10,
     monthly_cost_estimate: { starter: '₩1,008', growth: '₩5,000', enterprise: '문의' },
-    dx_score: 6.5,
   },
 
   // -----------------------------------------------------------------------
@@ -3755,7 +3696,6 @@ export const services: ServiceSeed[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 15,
     monthly_cost_estimate: { starter: '$0.58', growth: '$1.98', enterprise: '$24.99+' },
-    dx_score: 7.8,
   },
 ];
 

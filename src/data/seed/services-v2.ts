@@ -36,7 +36,7 @@ export interface ServiceSeedV2 {
   vendor_lock_in_risk: VendorLockInRisk;
   setup_time_minutes: number;
   monthly_cost_estimate: Record<string, string>;
-  dx_score: number;
+  github_stars?: number | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -140,7 +140,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$4/유저',
       enterprise: '$21/유저',
     },
-    dx_score: 8.5,
   },
 
   // -----------------------------------------------------------------------
@@ -213,7 +212,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$50~$200',
       enterprise: '$500+',
     },
-    dx_score: 8.0,
   },
 
   // -----------------------------------------------------------------------
@@ -278,7 +276,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$9~$50',
       enterprise: '$99+',
     },
-    dx_score: 7.5,
   },
 
   // -----------------------------------------------------------------------
@@ -350,7 +347,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$50~$200',
       enterprise: '$500+',
     },
-    dx_score: 9.0,
   },
 
   // -----------------------------------------------------------------------
@@ -419,7 +415,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$15~$75',
       enterprise: '$200+',
     },
-    dx_score: 8.5,
   },
 
   // -----------------------------------------------------------------------
@@ -474,7 +469,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$0',
       enterprise: '$50,000+/년',
     },
-    dx_score: 7.0,
   },
 
   // -----------------------------------------------------------------------
@@ -538,7 +532,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$10~$50',
       enterprise: '$280+',
     },
-    dx_score: 9.0,
   },
 
   // -----------------------------------------------------------------------
@@ -601,7 +594,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$20~$50',
       enterprise: '$200+',
     },
-    dx_score: 8.0,
   },
 
   // -----------------------------------------------------------------------
@@ -658,7 +650,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$20~$100',
       enterprise: '$200+',
     },
-    dx_score: 8.0,
   },
 
   // -----------------------------------------------------------------------
@@ -729,7 +720,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$50~$300',
       enterprise: '$500+',
     },
-    dx_score: 7.5,
   },
 
   // -----------------------------------------------------------------------
@@ -787,7 +777,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$20~$100',
       enterprise: '$500+',
     },
-    dx_score: 8.5,
   },
 
   // -----------------------------------------------------------------------
@@ -857,7 +846,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$300',
       enterprise: '$1,000+',
     },
-    dx_score: 7.5,
   },
 
   // -----------------------------------------------------------------------
@@ -929,7 +917,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$30~$100',
       enterprise: '$300+',
     },
-    dx_score: 9.0,
   },
 
   // -----------------------------------------------------------------------
@@ -1007,7 +994,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$49~$99',
       enterprise: '$299+',
     },
-    dx_score: 8.0,
   },
 
   // -----------------------------------------------------------------------
@@ -1069,7 +1055,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$30~$100',
       enterprise: '$300+',
     },
-    dx_score: 9.0,
   },
 
   // -----------------------------------------------------------------------
@@ -1135,7 +1120,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$50~$200',
       enterprise: '$500+',
     },
-    dx_score: 8.0,
   },
 
   // -----------------------------------------------------------------------
@@ -1192,7 +1176,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$10~$50',
       enterprise: '$200+',
     },
-    dx_score: 9.0,
   },
 
   // -----------------------------------------------------------------------
@@ -1247,7 +1230,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$7~$50',
       enterprise: '$100+',
     },
-    dx_score: 8.5,
   },
 
   // -----------------------------------------------------------------------
@@ -1305,7 +1287,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$69~$150',
       enterprise: '$295+',
     },
-    dx_score: 8.0,
   },
 
   // -----------------------------------------------------------------------
@@ -1360,7 +1341,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$0',
       enterprise: '$0',
     },
-    dx_score: 9.0,
   },
 
   // -----------------------------------------------------------------------
@@ -1431,7 +1411,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$8.75/유저',
       enterprise: '$12.50+/유저',
     },
-    dx_score: 7.5,
   },
 
   // -----------------------------------------------------------------------
@@ -1503,7 +1482,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$0',
       enterprise: '$0 (호스팅 비용 별도)',
     },
-    dx_score: 7.5,
   },
 
   // -----------------------------------------------------------------------
@@ -1567,7 +1545,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$50~$200',
       enterprise: '$500+',
     },
-    dx_score: 8.0,
   },
 
   // -----------------------------------------------------------------------
@@ -1627,7 +1604,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$22~$99',
       enterprise: '$330+',
     },
-    dx_score: 8.5,
   },
 
   // -----------------------------------------------------------------------
@@ -1691,7 +1667,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$50~$150',
       enterprise: '$300+',
     },
-    dx_score: 9.0,
   },
 
   // -----------------------------------------------------------------------
@@ -1754,7 +1729,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$29~$99',
       enterprise: '$200+',
     },
-    dx_score: 8.0,
   },
 
   // -----------------------------------------------------------------------
@@ -1816,7 +1790,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$19~$69',
       enterprise: '$150+',
     },
-    dx_score: 9.5,
   },
 
   // -----------------------------------------------------------------------
@@ -1880,7 +1853,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$67',
       enterprise: '$250+',
     },
-    dx_score: 8.5,
   },
 
   // -----------------------------------------------------------------------
@@ -1935,7 +1907,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$10~$50 (Redis)',
       enterprise: '$299+ (Pro 라이선스)',
     },
-    dx_score: 8.0,
   },
 
   // -----------------------------------------------------------------------
@@ -2013,7 +1984,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$105~$399',
       enterprise: '$2,300+',
     },
-    dx_score: 7.5,
   },
 
   // -----------------------------------------------------------------------
@@ -2077,7 +2047,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$1.25~$4.98/월',
       enterprise: '문의',
     },
-    dx_score: 8.0,
   },
 
   // -----------------------------------------------------------------------
@@ -2142,7 +2111,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$5~$20/월 (멀티 도메인)',
       enterprise: '문의',
     },
-    dx_score: 8.5,
   },
 
   // -----------------------------------------------------------------------
@@ -2206,7 +2174,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$5.99~$9.99/월 (호스팅)',
       enterprise: '문의',
     },
-    dx_score: 7.5,
   },
 
   // -----------------------------------------------------------------------
@@ -2270,7 +2237,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$2.5~$5/월 (호스팅)',
       enterprise: '문의',
     },
-    dx_score: 7.5,
   },
 
   // -----------------------------------------------------------------------
@@ -2333,7 +2299,6 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$2.5~$5/월 (호스팅)',
       enterprise: '문의',
     },
-    dx_score: 7.0,
   },
 
   // -----------------------------------------------------------------------
@@ -2396,6 +2361,5 @@ export const servicesV2: ServiceSeedV2[] = [
       growth: '$0.8~$1/월 (.kr 도메인)',
       enterprise: '문의',
     },
-    dx_score: 7.5,
   },
 ];

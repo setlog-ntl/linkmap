@@ -42,7 +42,7 @@ export interface Service {
   vendor_lock_in_risk?: VendorLockInRisk;
   setup_time_minutes?: number | null;
   monthly_cost_estimate?: Record<string, string>;
-  dx_score?: number | null;
+  github_stars?: number | null;
   last_updated?: string;
   // Dashboard layer (M027)
   dashboard_layer?: DashboardLayer | null;

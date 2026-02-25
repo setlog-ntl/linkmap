@@ -3,6 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight } from 'lucide-react';
+import { ServiceIcon } from '@/components/ui/service-icon';
 import type { EasyCategory } from '@/types';
 import {
   easyCategoryLabels,
@@ -15,11 +16,12 @@ const POPULAR_CATEGORIES: EasyCategory[] = ['login_signup', 'data_storage', 'dep
 interface EasyCategoryCardProps {
   category: EasyCategory;
   serviceCount: number;
+  topServices?: { slug: string }[];
   selected: boolean;
   onClick: () => void;
 }
 
-export function EasyCategoryCard({ category, serviceCount, selected, onClick }: EasyCategoryCardProps) {
+export function EasyCategoryCard({ category, serviceCount, topServices, selected, onClick }: EasyCategoryCardProps) {
   const isPopular = POPULAR_CATEGORIES.includes(category);
   const label = easyCategoryLabels[category];
 
@@ -66,6 +68,19 @@ export function EasyCategoryCard({ category, serviceCount, selected, onClick }: 
             <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
         </div>
+        {topServices && topServices.length > 0 && (
+          <div className="flex items-center mt-2 pt-2 border-t border-border/40">
+            {topServices.map((s, i) => (
+              <div
+                key={s.slug}
+                className="h-5 w-5 rounded-full bg-background border border-border flex items-center justify-center"
+                style={{ marginLeft: i > 0 ? '-6px' : 0, zIndex: topServices.length - i }}
+              >
+                <ServiceIcon serviceId={s.slug} size={12} />
+              </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

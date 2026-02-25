@@ -1,11 +1,5 @@
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Star } from 'lucide-react';
 import type { DifficultyLevel, FreeTierQuality, VendorLockInRisk } from '@/types';
 
 // --- Difficulty Badge ---
@@ -34,31 +28,20 @@ export function DifficultyBadge({ level }: { level?: DifficultyLevel }) {
   );
 }
 
-// --- DX Score Badge ---
-function getDxScoreConfig(score: number): { color: string; progressClass: string; label: string } {
-  if (score >= 8) return { color: 'text-emerald-600 dark:text-emerald-400', progressClass: '[&>div]:bg-emerald-500', label: 'DX 점수: 우수' };
-  if (score >= 6) return { color: 'text-blue-600 dark:text-blue-400', progressClass: '[&>div]:bg-blue-500', label: 'DX 점수: 양호' };
-  if (score >= 4) return { color: 'text-amber-600 dark:text-amber-400', progressClass: '[&>div]:bg-amber-500', label: 'DX 점수: 보통' };
-  return { color: 'text-red-600 dark:text-red-400', progressClass: '[&>div]:bg-red-500', label: 'DX 점수: 개선 필요' };
+// --- GitHub Stars Badge ---
+function formatStars(n: number): string {
+  if (n >= 10000) return `${Math.round(n / 1000)}k`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
 }
 
-export function DxScoreBadge({ score }: { score?: number | null }) {
-  if (score == null) return null;
-  const config = getDxScoreConfig(score);
+export function GithubStarsBadge({ stars }: { stars?: number | null }) {
+  if (stars == null) return null;
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="flex items-center gap-2">
-            <Progress value={score * 10} className={`h-2 w-20 ${config.progressClass}`} />
-            <span className={`text-xs font-semibold tabular-nums ${config.color}`}>{score}/10</span>
-          </div>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>{config.label}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+      {formatStars(stars)}
+    </span>
   );
 }
 

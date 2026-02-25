@@ -6,15 +6,16 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, ArrowRight } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/service-icon';
-import { DifficultyBadge, DxScoreBadge, FreeTierBadge } from './service-badges';
+import { DifficultyBadge, GithubStarsBadge, FreeTierBadge } from './service-badges';
 import { allCategoryLabels } from '@/lib/constants/service-filters';
 import type { Service, ServiceCategory } from '@/types';
 
 interface ServiceListItemProps {
   service: Service;
+  isUsed?: boolean;
 }
 
-export function ServiceListItem({ service }: ServiceListItemProps) {
+export function ServiceListItem({ service, isUsed = false }: ServiceListItemProps) {
   return (
     <Card className="hover:shadow-md transition-all duration-200 group">
       <div className="flex items-center gap-4 p-4">
@@ -29,6 +30,11 @@ export function ServiceListItem({ service }: ServiceListItemProps) {
             <span className="font-medium text-sm group-hover:text-primary transition-colors truncate">
               {service.name}
             </span>
+            {isUsed && (
+              <Badge className="text-xs bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800 shrink-0">
+                사용 중
+              </Badge>
+            )}
             <ArrowRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
           </div>
           <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
@@ -45,7 +51,7 @@ export function ServiceListItem({ service }: ServiceListItemProps) {
         <div className="hidden lg:flex items-center gap-2 shrink-0">
           <DifficultyBadge level={service.difficulty_level} />
           <FreeTierBadge quality={service.free_tier_quality} />
-          <DxScoreBadge score={service.dx_score} />
+          <GithubStarsBadge stars={service.github_stars} />
         </div>
 
         {/* External links */}

@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
         tags: s!.tags || [],
         pricing_info: s!.pricing_info,
         monthly_cost_estimate: s!.monthly_cost_estimate || {},
-        dx_score: s!.dx_score || 0,
+        github_stars: s!.github_stars ?? null,
         difficulty_level: s!.difficulty_level || 'beginner',
         free_tier_quality: s!.free_tier_quality || 'unknown',
         vendor_lock_in_risk: s!.vendor_lock_in_risk || 'unknown',
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
 |------|${selectedServices.map(() => '------').join('|')}|
 | 카테고리 | ... |
 | 무료 등급 | ... |
-| DX 점수 | ... |
+| GitHub Stars | ... |
 | 셋업 시간 | ... |
 | 벤더 락인 | ... |
 | 가격 | ... |
