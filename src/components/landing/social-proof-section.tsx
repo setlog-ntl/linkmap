@@ -56,7 +56,7 @@ export function SocialProofSection() {
         {/* Stats */}
         <ScrollReveal>
           <p className="text-center text-xs text-muted-foreground pb-6 font-semibold tracking-widest uppercase">
-            {t(locale, 'landing.socialProofTagline')}
+            {locale === 'ko' ? '바이브코더를 위한 서비스 연결 허브' : 'The Infrastructure Hub for Vibe Coders'}
           </p>
           <div className="grid grid-cols-2 gap-4 py-6 md:grid-cols-4 md:gap-6 bg-card rounded-2xl border border-border shadow-sm">
             {stats.map((stat, i) => {
