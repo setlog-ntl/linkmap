@@ -45,6 +45,27 @@ const S = {
   playwright: '10000000-0000-4000-a000-000000000040',
   cypress: '10000000-0000-4000-a000-000000000048',
   groq: '10000000-0000-4000-a000-000000000037',
+  elevenlabs: '10000000-0000-4000-a000-000000000044',
+  pinecone: '10000000-0000-4000-a000-000000000066',
+  huggingface: '10000000-0000-4000-a000-000000000069',
+  stability_ai: '10000000-0000-4000-a000-000000000070',
+  github_copilot: '10000000-0000-4000-a000-000000000081',
+  cursor: '10000000-0000-4000-a000-000000000082',
+  grok: '10000000-0000-4000-a000-000000000103',
+  mistral: '10000000-0000-4000-a000-000000000104',
+  cohere: '10000000-0000-4000-a000-000000000105',
+  deepseek: '10000000-0000-4000-a000-000000000106',
+  midjourney: '10000000-0000-4000-a000-000000000109',
+  runway_ml: '10000000-0000-4000-a000-000000000110',
+  sora: '10000000-0000-4000-a000-000000000111',
+  leonardo_ai: '10000000-0000-4000-a000-000000000112',
+  deepgram: '10000000-0000-4000-a000-000000000113',
+  assemblyai: '10000000-0000-4000-a000-000000000114',
+  windsurf: '10000000-0000-4000-a000-000000000116',
+  weaviate: '10000000-0000-4000-a000-000000000119',
+  qdrant: '10000000-0000-4000-a000-000000000120',
+  chroma: '10000000-0000-4000-a000-000000000121',
+  together_ai: '10000000-0000-4000-a000-000000000124',
   namecheap: '10000000-0000-4000-a000-000000000051',
   cloudflare_registrar: '10000000-0000-4000-a000-000000000052',
   godaddy: '10000000-0000-4000-a000-000000000053',
@@ -227,6 +248,148 @@ export const comparisons: ComparisonSeed[] = [
       low_cost: { need: '저가 .KR 도메인이 필요할 때', choose: 'HostingKR', because: '합리적인 가격, KISA 우수 기업 인증' },
       free_hosting: { need: '도메인과 함께 무료 호스팅이 필요할 때', choose: 'DotName', because: '도메인 등록 시 무료 호스팅 + SSL 인증서' },
       established_player: { need: '성숙한 서비스가 필요할 때', choose: 'HostingKR', because: '국내 도메인 등록 대행 우수 기업' },
+    },
+  },
+
+  // --- 8. LLM Provider Comparison ---
+  {
+    category: 'ai',
+    title: 'LLM Provider Comparison',
+    title_ko: 'LLM 제공자 비교',
+    services: [S.openai, S.anthropic, S.grok, S.mistral, S.deepseek, S.groq],
+    comparison_data: {
+      criteria: [
+        { name: 'Top Model', name_ko: '최상위 모델', values: { openai: 'GPT-5', anthropic: 'Claude Opus 4.6', grok: 'Grok 4.1', 'mistral-ai': 'Large 3', deepseek: 'V3 / R1', groq: 'Llama 4 (호스팅)' } },
+        { name: 'Context Window', name_ko: '컨텍스트 윈도우', values: { openai: '400K', anthropic: '200K', grok: '2M', 'mistral-ai': '128K', deepseek: '128K', groq: '128K' } },
+        { name: 'Free Tier', name_ko: '무료 티어', values: { openai: '$5 크레딧', anthropic: '체험 크레딧', grok: '$25 크레딧', 'mistral-ai': '없음', deepseek: '없음', groq: '일 14.4K 요청' } },
+        { name: 'Input Price (1M)', name_ko: '입력 가격 (1M)', values: { openai: '$1.25~$2.50', anthropic: '$3~$5', grok: '$0.20', 'mistral-ai': '$0.02~$0.50', deepseek: '$0.14', groq: '무료~$0.10' } },
+        { name: 'Open Source', name_ko: '오픈소스', values: { openai: '아니오', anthropic: '아니오', grok: '부분적', 'mistral-ai': '예', deepseek: '예', groq: '호스팅만' } },
+        { name: 'Best For', name_ko: '최적 용도', values: { openai: '범용 최강', anthropic: '안전성·추론', grok: '웹 검색·장문맥', 'mistral-ai': '유럽·비용 효율', deepseek: '최저가', groq: '최고 속도' } },
+        { name: 'DX Score', name_ko: 'DX 점수', values: { openai: '9.5', anthropic: '9.2', grok: '8.0', 'mistral-ai': '8.5', deepseek: '8.0', groq: '9.0' } },
+      ],
+    },
+    recommendation: {
+      best_overall: { need: '최고의 범용 LLM이 필요할 때', choose: 'OpenAI', because: 'GPT-5로 최대 모델 생태계와 SDK 지원' },
+      safety_reasoning: { need: '안전성과 추론 능력이 중요할 때', choose: 'Anthropic', because: 'Claude는 안전성·장문맥·코딩에 강점' },
+      lowest_cost: { need: '최저 비용이 필요할 때', choose: 'DeepSeek', because: '업계 최저가, 오프피크 75% 할인' },
+      fastest_speed: { need: '최고 속도가 필요할 때', choose: 'Groq', because: 'LPU 기반 업계 최저 지연 시간' },
+      long_context: { need: '대용량 컨텍스트가 필요할 때', choose: 'Grok', because: '2M 토큰 컨텍스트 + 웹 검색 내장' },
+    },
+  },
+
+  // --- 9. AI Coding Assistant Comparison ---
+  {
+    category: 'ai',
+    title: 'AI Coding Assistant Comparison',
+    title_ko: 'AI 코딩 어시스턴트 비교',
+    services: [S.github_copilot, S.cursor, S.windsurf],
+    comparison_data: {
+      criteria: [
+        { name: 'Type', name_ko: '타입', values: { 'github-copilot': 'IDE 플러그인', cursor: 'AI 네이티브 IDE', windsurf: '에이전틱 IDE' } },
+        { name: 'Free Tier', name_ko: '무료 티어', values: { 'github-copilot': '없음', cursor: '제한적 무료', windsurf: '무제한 무료 (기본)' } },
+        { name: 'Price', name_ko: '가격', values: { 'github-copilot': '$10/월', cursor: '$20/월', windsurf: '$15/월' } },
+        { name: 'Multi-Model', name_ko: '멀티 모델', values: { 'github-copilot': 'GPT-4o, Claude, Gemini', cursor: 'GPT-4, Claude', windsurf: '자체 모델' } },
+        { name: 'Agent Mode', name_ko: '에이전트 모드', values: { 'github-copilot': 'Copilot Workspace', cursor: 'Composer', windsurf: 'Cascade' } },
+        { name: 'IDE Support', name_ko: 'IDE 지원', values: { 'github-copilot': 'VS Code, JetBrains 등', cursor: 'Cursor (자체 IDE)', windsurf: 'Windsurf (자체 IDE)' } },
+        { name: 'DX Score', name_ko: 'DX 점수', values: { 'github-copilot': '8.5', cursor: '9.2', windsurf: '8.8' } },
+      ],
+    },
+    recommendation: {
+      existing_ide: { need: '기존 IDE를 유지하고 싶을 때', choose: 'GitHub Copilot', because: 'VS Code, JetBrains 등 다양한 IDE에서 사용 가능' },
+      best_dx: { need: '최고의 AI 코딩 경험이 필요할 때', choose: 'Cursor', because: '전체 코드베이스 인식 + Composer 에이전트' },
+      free_option: { need: '무료로 시작하고 싶을 때', choose: 'Windsurf', because: '무제한 무료 코드 완성 제공' },
+    },
+  },
+
+  // --- 10. Vector Database Comparison ---
+  {
+    category: 'ai',
+    title: 'Vector Database Comparison',
+    title_ko: '벡터 데이터베이스 비교',
+    services: [S.pinecone, S.weaviate, S.qdrant, S.chroma],
+    comparison_data: {
+      criteria: [
+        { name: 'Type', name_ko: '타입', values: { pinecone: '관리형 SaaS', weaviate: '오픈소스 + 클라우드', qdrant: '오픈소스 + 클라우드', chroma: '오픈소스 경량' } },
+        { name: 'Free Tier', name_ko: '무료 티어', values: { pinecone: '1개 인덱스, 100K 벡터', weaviate: '오픈소스 무료', qdrant: '1GB 영구 무료', chroma: '오픈소스 무료' } },
+        { name: 'Hybrid Search', name_ko: '하이브리드 검색', values: { pinecone: '예', weaviate: '예 (강점)', qdrant: '예', chroma: '제한적' } },
+        { name: 'Self-host', name_ko: '자체 호스팅', values: { pinecone: '아니오', weaviate: '예', qdrant: '예', chroma: '예' } },
+        { name: 'Scale', name_ko: '확장성', values: { pinecone: '자동 (서버리스)', weaviate: '분산 배포', qdrant: '분산 배포', chroma: '소규모' } },
+        { name: 'Best For', name_ko: '최적 용도', values: { pinecone: '빠른 시작·관리형', weaviate: '하이브리드 검색', qdrant: '고성능·Rust', chroma: '프로토타이핑' } },
+        { name: 'DX Score', name_ko: 'DX 점수', values: { pinecone: '9.0', weaviate: '8.5', qdrant: '8.5', chroma: '9.0' } },
+      ],
+    },
+    recommendation: {
+      managed: { need: '관리형 서비스가 필요할 때', choose: 'Pinecone', because: '서버리스, 자동 스케일링, 최소 운영 부담' },
+      hybrid_search: { need: '하이브리드 검색이 중요할 때', choose: 'Weaviate', because: '벡터 + 키워드 + 지식 그래프 통합' },
+      high_perf: { need: '최고 성능이 필요할 때', choose: 'Qdrant', because: 'Rust 기반, ACID 트랜잭션, 분산 배포' },
+      prototype: { need: '빠른 프로토타이핑이 필요할 때', choose: 'Chroma', because: '경량, 간편 설정, 로컬 개발에 최적' },
+    },
+  },
+
+  // --- 11. AI Image Generation Comparison ---
+  {
+    category: 'ai',
+    title: 'AI Image Generation Comparison',
+    title_ko: 'AI 이미지 생성 비교',
+    services: [S.midjourney, S.stability_ai, S.leonardo_ai],
+    comparison_data: {
+      criteria: [
+        { name: 'Quality', name_ko: '품질', values: { midjourney: '최고 (예술적)', 'stability-ai': '높음 (커스터마이징)', 'leonardo-ai': '높음 (게임 특화)' } },
+        { name: 'Free Tier', name_ko: '무료 티어', values: { midjourney: '없음', 'stability-ai': '25 크레딧', 'leonardo-ai': '일일 무료 크레딧' } },
+        { name: 'API Access', name_ko: 'API 접근', values: { midjourney: '제한적', 'stability-ai': '예 (REST API)', 'leonardo-ai': '예 (REST API)' } },
+        { name: 'Open Source', name_ko: '오픈소스', values: { midjourney: '아니오', 'stability-ai': '예 (모델)', 'leonardo-ai': '아니오' } },
+        { name: 'Starting Price', name_ko: '시작 가격', values: { midjourney: '$10/월', 'stability-ai': '$0 (OSS)', 'leonardo-ai': '$0 (무료 크레딧)' } },
+        { name: 'DX Score', name_ko: 'DX 점수', values: { midjourney: '8.0', 'stability-ai': '8.5', 'leonardo-ai': '8.0' } },
+      ],
+    },
+    recommendation: {
+      best_quality: { need: '최고 품질 이미지가 필요할 때', choose: 'Midjourney', because: '예술적 품질, 색상 조화, 구도에서 압도적' },
+      api_integration: { need: 'API 통합이 필요할 때', choose: 'Stability AI', because: '오픈소스 모델 + REST API + 커스터마이징' },
+      game_assets: { need: '게임/앱 자산이 필요할 때', choose: 'Leonardo AI', because: '게임 아트 특화 + Flux 모델 통합' },
+    },
+  },
+
+  // --- 12. AI Video Generation Comparison ---
+  {
+    category: 'ai',
+    title: 'AI Video Generation Comparison',
+    title_ko: 'AI 비디오 생성 비교',
+    services: [S.sora, S.runway_ml],
+    comparison_data: {
+      criteria: [
+        { name: 'Quality', name_ko: '품질', values: { sora: '최고 (시네마틱)', 'runway-ml': '높음 (다양한 모드)' } },
+        { name: 'Models', name_ko: '모델', values: { sora: 'Sora 2', 'runway-ml': 'Gen-4 Aleph, Act-Two' } },
+        { name: 'Features', name_ko: '기능', values: { sora: '텍스트→비디오', 'runway-ml': '텍스트→비디오, 이미지→비디오, 립싱크' } },
+        { name: 'Starting Price', name_ko: '시작 가격', values: { sora: '$20/월 (Plus 포함)', 'runway-ml': '$15/월' } },
+        { name: 'API Access', name_ko: 'API 접근', values: { sora: '예 (OpenAI API)', 'runway-ml': '예' } },
+        { name: 'DX Score', name_ko: 'DX 점수', values: { sora: '8.5', 'runway-ml': '8.0' } },
+      ],
+    },
+    recommendation: {
+      cinematic: { need: '시네마틱 품질이 필요할 때', choose: 'Sora', because: 'OpenAI의 최고 품질 비디오 생성' },
+      versatile: { need: '다양한 비디오 편집이 필요할 때', choose: 'Runway ML', because: '다양한 모드(Gen-4, 립싱크 등) 제공' },
+    },
+  },
+
+  // --- 13. AI Speech-to-Text Comparison ---
+  {
+    category: 'ai',
+    title: 'AI Speech-to-Text Comparison',
+    title_ko: 'AI 음성 인식 비교',
+    services: [S.deepgram, S.assemblyai],
+    comparison_data: {
+      criteria: [
+        { name: 'Latency', name_ko: '지연 시간', values: { deepgram: '<300ms (초저지연)', assemblyai: '표준' } },
+        { name: 'Accuracy', name_ko: '정확도', values: { deepgram: '높음', assemblyai: '최고 (14.5% WER)' } },
+        { name: 'Free Tier', name_ko: '무료 티어', values: { deepgram: '$200 크레딧', assemblyai: '체험 크레딧' } },
+        { name: 'Domain Specialization', name_ko: '도메인 특화', values: { deepgram: '대화형 AI', assemblyai: '의료·세일즈' } },
+        { name: 'Billing', name_ko: '과금', values: { deepgram: '초 단위', assemblyai: '시간 단위' } },
+        { name: 'DX Score', name_ko: 'DX 점수', values: { deepgram: '8.5', assemblyai: '8.5' } },
+      ],
+    },
+    recommendation: {
+      real_time: { need: '실시간 대화형 AI가 필요할 때', choose: 'Deepgram', because: '초저지연 + 초 단위 과금' },
+      accuracy: { need: '최고 정확도가 필요할 때', choose: 'AssemblyAI', because: '업계 최고 정확도 + 의료 도메인 특화' },
     },
   },
 ];

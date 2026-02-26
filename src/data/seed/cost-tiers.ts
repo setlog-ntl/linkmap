@@ -68,6 +68,23 @@ const S: Record<string, string> = {
   gabia: '10000000-0000-4000-a000-000000000054',
   hosting_kr: '10000000-0000-4000-a000-000000000055',
   dotname: '10000000-0000-4000-a000-000000000056',
+  // AI Phase 5
+  grok: '10000000-0000-4000-a000-000000000103',
+  mistral: '10000000-0000-4000-a000-000000000104',
+  cohere: '10000000-0000-4000-a000-000000000105',
+  deepseek: '10000000-0000-4000-a000-000000000106',
+  perplexity: '10000000-0000-4000-a000-000000000107',
+  midjourney: '10000000-0000-4000-a000-000000000109',
+  runway_ml: '10000000-0000-4000-a000-000000000110',
+  deepgram: '10000000-0000-4000-a000-000000000113',
+  assemblyai: '10000000-0000-4000-a000-000000000114',
+  windsurf: '10000000-0000-4000-a000-000000000116',
+  weaviate: '10000000-0000-4000-a000-000000000119',
+  qdrant: '10000000-0000-4000-a000-000000000120',
+  dify: '10000000-0000-4000-a000-000000000123',
+  together_ai: '10000000-0000-4000-a000-000000000124',
+  modal: '10000000-0000-4000-a000-000000000126',
+  wandb: '10000000-0000-4000-a000-000000000127',
 };
 
 // Helper function to create tier
@@ -790,4 +807,240 @@ export const costTiers: CostTierSeed[] = [
     ['Free DNS management', '무료 DNS 관리', true],
     ['Free SSL certificate', '무료 SSL 인증서', true],
   ], { domains: 'Unlimited', bandwidth: '100GB', storage: '10GB' }, '모든 규모', 0),
+
+  // =======================================================================
+  // AI Services - Phase 5
+  // =======================================================================
+
+  // Grok (2 tiers)
+  t(S.grok, 'free', '무료', '$0', '$0', [
+    ['$25 free credit', '$25 무료 크레딧', true],
+    ['Rate limited', '속도 제한', true],
+    ['Community support', '커뮤니티 지원', true],
+  ], { credit: '$25', rate_limit: 'Standard' }, '개인 개발자', 0),
+  t(S.grok, 'pay_as_you_go', '종량제', 'Pay as you go', 'Pay as you go', [
+    ['All Grok models', '모든 Grok 모델', true],
+    ['Web/X search tools', '웹/X 검색 도구', true],
+    ['Higher rate limits', '높은 속도 제한', true],
+  ], { input: '$0.20/1M tokens', output: '$0.50/1M tokens' }, '스타트업', 1),
+
+  // Mistral AI (2 tiers)
+  t(S.mistral, 'pay_as_you_go', '종량제', 'Pay as you go', 'Pay as you go', [
+    ['All models (Nemo~Large)', '모든 모델 (Nemo~Large)', true],
+    ['API access', 'API 접근', true],
+    ['Email support', '이메일 지원', true],
+  ], { nemo: '$0.02/1M', large: '$0.50/$1.50/1M' }, '개인/스타트업', 0),
+  t(S.mistral, 'enterprise', '엔터프라이즈', 'Contact', 'Contact', [
+    ['Custom deployment', '맞춤 배포', true],
+    ['On-premises option', '온프레미스 옵션', true],
+    ['Dedicated support', '전담 지원', true],
+  ], { models: 'Custom', support: 'Dedicated' }, '대기업', 1),
+
+  // Cohere (3 tiers)
+  t(S.cohere, 'trial', '체험', '$0', '$0', [
+    ['Rate-limited API access', '속도 제한 API 접근', true],
+    ['All models', '모든 모델', true],
+    ['Community support', '커뮤니티 지원', true],
+  ], { rate_limit: 'Trial limits' }, '개인 개발자', 0),
+  t(S.cohere, 'production', '프로덕션', 'Pay as you go', 'Pay as you go', [
+    ['Full API access', '전체 API 접근', true],
+    ['Higher rate limits', '높은 속도 제한', true],
+    ['Email support', '이메일 지원', true],
+  ], { command_r_plus: '$2.50/$10/1M', embed: '$0.10/1M' }, '스타트업', 1),
+  t(S.cohere, 'enterprise', '엔터프라이즈', 'Contact', 'Contact', [
+    ['On-premises deployment', '온프레미스 배포', true],
+    ['Fine-tuning', '파인튜닝', true],
+    ['Dedicated support', '전담 지원', true],
+  ], { deployment: 'Custom', support: 'Dedicated' }, '대기업', 2),
+
+  // DeepSeek (2 tiers)
+  t(S.deepseek, 'standard', '표준', 'Pay as you go', 'Pay as you go', [
+    ['V3 model access', 'V3 모델 접근', true],
+    ['R1 reasoning model', 'R1 추론 모델', true],
+    ['Standard rate limits', '표준 속도 제한', true],
+  ], { v3_input: '$0.14/1M', r1_input: '$0.55/1M' }, '개인/스타트업', 0),
+  t(S.deepseek, 'off_peak', '오프피크', 'Pay as you go', 'Pay as you go', [
+    ['Up to 75% discount', '최대 75% 할인', true],
+    ['Off-peak hours', '오프피크 시간대', true],
+    ['Same models', '동일 모델', true],
+  ], { discount: 'Up to 75%' }, '비용 최적화', 1),
+
+  // Perplexity (2 tiers)
+  t(S.perplexity, 'sonar', 'Sonar', 'Pay as you go', 'Pay as you go', [
+    ['Web search integration', '웹 검색 통합', true],
+    ['Citation-based answers', '인용 기반 답변', true],
+    ['Standard model', '표준 모델', true],
+  ], { input: '$1/1M', output: '$1/1M' }, '개인 개발자', 0),
+  t(S.perplexity, 'sonar_pro', 'Sonar Pro', 'Pay as you go', 'Pay as you go', [
+    ['Advanced web search', '고급 웹 검색', true],
+    ['Higher accuracy', '높은 정확도', true],
+    ['Pro model', 'Pro 모델', true],
+  ], { input: '$3/1M', output: '$15/1M' }, '프로덕션', 1),
+
+  // Midjourney (4 tiers)
+  t(S.midjourney, 'basic', '베이직', '$10', '$96', [
+    ['~200 images/month', '월 ~200 이미지', true],
+    ['Standard queue', '표준 큐', true],
+    ['Community gallery', '커뮤니티 갤러리', true],
+  ], { images: '~200/month', fast_hours: '3.3h/month' }, '개인', 0),
+  t(S.midjourney, 'standard', '스탠다드', '$30', '$288', [
+    ['Unlimited relaxed', '무제한 리팩스', true],
+    ['15h fast generation', '15시간 빠른 생성', true],
+    ['Stealth mode', '스텔스 모드', false],
+  ], { fast_hours: '15h/month', relax: 'Unlimited' }, '크리에이터', 1),
+  t(S.midjourney, 'pro', '프로', '$60', '$576', [
+    ['30h fast generation', '30시간 빠른 생성', true],
+    ['Stealth mode', '스텔스 모드', true],
+    ['12x concurrent jobs', '12배 동시 작업', true],
+  ], { fast_hours: '30h/month', concurrent: '12 jobs' }, '전문가', 2),
+  t(S.midjourney, 'mega', '메가', '$120', '$1152', [
+    ['60h fast generation', '60시간 빠른 생성', true],
+    ['Stealth mode', '스텔스 모드', true],
+    ['12x concurrent jobs', '12배 동시 작업', true],
+  ], { fast_hours: '60h/month', concurrent: '12 jobs' }, '팀/에이전시', 3),
+
+  // Runway ML (3 tiers)
+  t(S.runway_ml, 'free', '무료', '$0', '$0', [
+    ['Trial credits', '체험 크레딧', true],
+    ['Basic models', '기본 모델', true],
+    ['Watermark', '워터마크', true],
+  ], { credits: 'Trial' }, '체험', 0),
+  t(S.runway_ml, 'standard', '스탠다드', '$15', '$144', [
+    ['625 credits/month', '월 625 크레딧', true],
+    ['Gen-4 access', 'Gen-4 접근', true],
+    ['No watermark', '워터마크 없음', true],
+  ], { credits: '625/month' }, '크리에이터', 1),
+  t(S.runway_ml, 'pro', '프로', '$35', '$336', [
+    ['2250 credits/month', '월 2250 크레딧', true],
+    ['All models', '모든 모델', true],
+    ['Priority queue', '우선 큐', true],
+  ], { credits: '2250/month' }, '전문가', 2),
+
+  // Deepgram (2 tiers)
+  t(S.deepgram, 'free', '무료', '$0', '$0', [
+    ['$200 free credit', '$200 무료 크레딧', true],
+    ['All models', '모든 모델', true],
+    ['Community support', '커뮤니티 지원', true],
+  ], { credit: '$200' }, '개인 개발자', 0),
+  t(S.deepgram, 'pay_as_you_go', '종량제', 'Pay as you go', 'Pay as you go', [
+    ['Nova-3 model', 'Nova-3 모델', true],
+    ['Per-second billing', '초 단위 과금', true],
+    ['Email support', '이메일 지원', true],
+  ], { price: '$0.0043/min', billing: 'Per-second' }, '스타트업', 1),
+
+  // AssemblyAI (2 tiers)
+  t(S.assemblyai, 'free', '무료', '$0', '$0', [
+    ['Trial credits', '체험 크레딧', true],
+    ['All features', '모든 기능', true],
+    ['Community support', '커뮤니티 지원', true],
+  ], { credit: 'Trial' }, '개인 개발자', 0),
+  t(S.assemblyai, 'pay_as_you_go', '종량제', 'Pay as you go', 'Pay as you go', [
+    ['Universal-2 model', 'Universal-2 모델', true],
+    ['Streaming STT', '스트리밍 STT', true],
+    ['Domain specialization', '도메인 특화', true],
+  ], { price: '$0.15/hour', streaming: '$0.40/hour' }, '스타트업', 1),
+
+  // Windsurf/Codeium (2 tiers)
+  t(S.windsurf, 'free', '무료', '$0', '$0', [
+    ['Unlimited autocomplete', '무제한 자동 완성', true],
+    ['Basic chat', '기본 채팅', true],
+    ['Community support', '커뮤니티 지원', true],
+  ], { autocomplete: 'Unlimited' }, '개인 개발자', 0),
+  t(S.windsurf, 'pro', '프로', '$15', '$144', [
+    ['Advanced agent mode', '고급 에이전트 모드', true],
+    ['All features', '모든 기능', true],
+    ['Priority support', '우선 지원', true],
+  ], { features: 'All' }, '전문가', 1),
+
+  // Weaviate (3 tiers)
+  t(S.weaviate, 'open_source', '오픈소스', '$0', '$0', [
+    ['Self-hosted', '자체 호스팅', true],
+    ['All features', '모든 기능', true],
+    ['Community support', '커뮤니티 지원', true],
+  ], { hosting: 'Self-managed' }, '개인/팀', 0),
+  t(S.weaviate, 'cloud', '클라우드', '$25', '$240', [
+    ['Managed hosting', '관리형 호스팅', true],
+    ['Auto-scaling', '자동 스케일링', true],
+    ['Email support', '이메일 지원', true],
+  ], { hosting: 'Managed' }, '스타트업', 1),
+  t(S.weaviate, 'enterprise', '엔터프라이즈', 'Contact', 'Contact', [
+    ['Dedicated cluster', '전용 클러스터', true],
+    ['SLA', 'SLA', true],
+    ['Dedicated support', '전담 지원', true],
+  ], { hosting: 'Dedicated' }, '대기업', 2),
+
+  // Qdrant (3 tiers)
+  t(S.qdrant, 'free', '무료', '$0', '$0', [
+    ['1GB free cluster', '1GB 무료 클러스터', true],
+    ['All features', '모든 기능', true],
+    ['Community support', '커뮤니티 지원', true],
+  ], { storage: '1GB' }, '프로토타이핑', 0),
+  t(S.qdrant, 'cloud', '클라우드', '$25', '$240', [
+    ['Managed cluster', '관리형 클러스터', true],
+    ['Auto-scaling', '자동 스케일링', true],
+    ['Email support', '이메일 지원', true],
+  ], { storage: 'Pay per use' }, '스타트업', 1),
+  t(S.qdrant, 'enterprise', '엔터프라이즈', 'Contact', 'Contact', [
+    ['Dedicated infrastructure', '전용 인프라', true],
+    ['SLA', 'SLA', true],
+    ['Dedicated support', '전담 지원', true],
+  ], { storage: 'Custom' }, '대기업', 2),
+
+  // Dify (3 tiers)
+  t(S.dify, 'sandbox', '샌드박스', '$0', '$0', [
+    ['200 messages', '200 메시지', true],
+    ['Basic models', '기본 모델', true],
+    ['Community support', '커뮤니티 지원', true],
+  ], { messages: '200' }, '체험', 0),
+  t(S.dify, 'professional', '프로페셔널', '$59', '$564', [
+    ['5,000 messages/month', '월 5,000 메시지', true],
+    ['All models', '모든 모델', true],
+    ['Email support', '이메일 지원', true],
+  ], { messages: '5,000/month' }, '스타트업', 1),
+  t(S.dify, 'team', '팀', '$159', '$1524', [
+    ['Unlimited messages', '무제한 메시지', true],
+    ['Team collaboration', '팀 협업', true],
+    ['Priority support', '우선 지원', true],
+  ], { messages: 'Unlimited', team: 'Unlimited' }, '팀', 2),
+
+  // Together AI (2 tiers)
+  t(S.together_ai, 'free', '무료', '$0', '$0', [
+    ['$5 free credit', '$5 무료 크레딧', true],
+    ['200+ models', '200개 이상 모델', true],
+    ['Community support', '커뮤니티 지원', true],
+  ], { credit: '$5' }, '개인 개발자', 0),
+  t(S.together_ai, 'pay_as_you_go', '종량제', 'Pay as you go', 'Pay as you go', [
+    ['All models', '모든 모델', true],
+    ['Sub-100ms latency', '100ms 미만 지연', true],
+    ['Email support', '이메일 지원', true],
+  ], { pricing: 'Per token (model-based)' }, '스타트업', 1),
+
+  // Modal (2 tiers)
+  t(S.modal, 'free', '무료', '$0', '$0', [
+    ['$30/month free compute', '월 $30 무료 컴퓨트', true],
+    ['GPU access', 'GPU 접근', true],
+    ['Community support', '커뮤니티 지원', true],
+  ], { credit: '$30/month' }, '개인 개발자', 0),
+  t(S.modal, 'pay_as_you_go', '종량제', 'Pay as you go', 'Pay as you go', [
+    ['Per-second GPU billing', '초 단위 GPU 과금', true],
+    ['All GPU types', '모든 GPU 타입', true],
+    ['Email support', '이메일 지원', true],
+  ], { billing: 'Per-second', gpu: 'All types' }, '팀/기업', 1),
+
+  // Weights & Biases (3 tiers)
+  t(S.wandb, 'free', '무료', '$0', '$0', [
+    ['100GB storage', '100GB 스토리지', true],
+    ['Personal projects', '개인 프로젝트', true],
+    ['Community support', '커뮤니티 지원', true],
+  ], { storage: '100GB', team: '1' }, '개인 개발자', 0),
+  t(S.wandb, 'pro', '프로', '$60', '$576', [
+    ['Advanced features', '고급 기능', true],
+    ['Team collaboration', '팀 협업', true],
+    ['Email support', '이메일 지원', true],
+  ], { storage: '1TB', team: 'Unlimited' }, '팀', 1),
+  t(S.wandb, 'enterprise', '엔터프라이즈', 'Contact', 'Contact', [
+    ['Custom storage', '맞춤 스토리지', true],
+    ['SSO/SAML', 'SSO/SAML', true],
+    ['Dedicated support', '전담 지원', true],
+  ], { storage: 'Custom', support: 'Dedicated' }, '대기업', 2),
 ];

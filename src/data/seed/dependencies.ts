@@ -68,6 +68,34 @@ const S = {
   github: '10000000-0000-4000-a000-000000000057',
   claude_code: '10000000-0000-4000-a000-000000000058',
   google_gemini: '10000000-0000-4000-a000-000000000059',
+  // AI Phase 5
+  pinecone: '10000000-0000-4000-a000-000000000066',
+  langchain: '10000000-0000-4000-a000-000000000067',
+  replicate: '10000000-0000-4000-a000-000000000068',
+  huggingface: '10000000-0000-4000-a000-000000000069',
+  stability_ai: '10000000-0000-4000-a000-000000000070',
+  github_copilot: '10000000-0000-4000-a000-000000000081',
+  cursor: '10000000-0000-4000-a000-000000000082',
+  grok: '10000000-0000-4000-a000-000000000103',
+  mistral: '10000000-0000-4000-a000-000000000104',
+  cohere: '10000000-0000-4000-a000-000000000105',
+  deepseek: '10000000-0000-4000-a000-000000000106',
+  perplexity: '10000000-0000-4000-a000-000000000107',
+  midjourney: '10000000-0000-4000-a000-000000000109',
+  runway_ml: '10000000-0000-4000-a000-000000000110',
+  sora: '10000000-0000-4000-a000-000000000111',
+  leonardo_ai: '10000000-0000-4000-a000-000000000112',
+  deepgram: '10000000-0000-4000-a000-000000000113',
+  assemblyai: '10000000-0000-4000-a000-000000000114',
+  windsurf: '10000000-0000-4000-a000-000000000116',
+  tabnine: '10000000-0000-4000-a000-000000000117',
+  weaviate: '10000000-0000-4000-a000-000000000119',
+  qdrant: '10000000-0000-4000-a000-000000000120',
+  chroma: '10000000-0000-4000-a000-000000000121',
+  crewai: '10000000-0000-4000-a000-000000000122',
+  dify: '10000000-0000-4000-a000-000000000123',
+  together_ai: '10000000-0000-4000-a000-000000000124',
+  fireworks_ai: '10000000-0000-4000-a000-000000000125',
 } as const;
 
 export const dependencies: DependencySeed[] = [
@@ -179,4 +207,54 @@ export const dependencies: DependencySeed[] = [
 
   // --- Domain Registrars: Optional relationships with Cloudflare ---
   { service_id: S.cloudflare, depends_on_service_id: S.cloudflare_registrar, dependency_type: 'optional', description: 'Cloudflare Registrar integrates seamlessly with Cloudflare DNS', description_ko: 'Cloudflare Registrar는 Cloudflare DNS와 완벽하게 통합됩니다' },
+
+  // --- AI Services: LLM Alternatives ---
+  { service_id: S.grok, depends_on_service_id: S.openai, dependency_type: 'alternative', description: 'OpenAI is an alternative LLM provider', description_ko: 'OpenAI는 대안 LLM 제공자입니다' },
+  { service_id: S.grok, depends_on_service_id: S.anthropic, dependency_type: 'alternative', description: 'Anthropic is an alternative LLM provider', description_ko: 'Anthropic은 대안 LLM 제공자입니다' },
+  { service_id: S.mistral, depends_on_service_id: S.openai, dependency_type: 'alternative', description: 'OpenAI is an alternative LLM provider', description_ko: 'OpenAI는 대안 LLM 제공자입니다' },
+  { service_id: S.mistral, depends_on_service_id: S.deepseek, dependency_type: 'alternative', description: 'DeepSeek offers low-cost LLM alternative', description_ko: 'DeepSeek는 저비용 LLM 대안입니다' },
+  { service_id: S.cohere, depends_on_service_id: S.openai, dependency_type: 'alternative', description: 'OpenAI is an alternative LLM provider', description_ko: 'OpenAI는 대안 LLM 제공자입니다' },
+  { service_id: S.deepseek, depends_on_service_id: S.openai, dependency_type: 'alternative', description: 'OpenAI is an alternative (more expensive) LLM', description_ko: 'OpenAI는 대안 (고가) LLM입니다' },
+  { service_id: S.deepseek, depends_on_service_id: S.mistral, dependency_type: 'alternative', description: 'Mistral is an alternative open-source LLM', description_ko: 'Mistral은 대안 오픈소스 LLM입니다' },
+  { service_id: S.perplexity, depends_on_service_id: S.openai, dependency_type: 'alternative', description: 'OpenAI is an alternative for AI-powered answers', description_ko: 'OpenAI는 AI 답변의 대안입니다' },
+
+  // --- AI Services: LLM Inference Alternatives ---
+  { service_id: S.together_ai, depends_on_service_id: S.groq, dependency_type: 'alternative', description: 'Groq is an alternative fast inference platform', description_ko: 'Groq는 대안 고속 추론 플랫폼입니다' },
+  { service_id: S.together_ai, depends_on_service_id: S.fireworks_ai, dependency_type: 'alternative', description: 'Fireworks AI is an alternative inference platform', description_ko: 'Fireworks AI는 대안 추론 플랫폼입니다' },
+  { service_id: S.fireworks_ai, depends_on_service_id: S.groq, dependency_type: 'alternative', description: 'Groq is an alternative fast inference platform', description_ko: 'Groq는 대안 고속 추론 플랫폼입니다' },
+  { service_id: S.fireworks_ai, depends_on_service_id: S.together_ai, dependency_type: 'alternative', description: 'Together AI is an alternative inference platform', description_ko: 'Together AI는 대안 추론 플랫폼입니다' },
+
+  // --- AI Services: Code Assistant Alternatives ---
+  { service_id: S.windsurf, depends_on_service_id: S.cursor, dependency_type: 'alternative', description: 'Cursor is an alternative AI IDE', description_ko: 'Cursor는 대안 AI IDE입니다' },
+  { service_id: S.windsurf, depends_on_service_id: S.github_copilot, dependency_type: 'alternative', description: 'GitHub Copilot is an alternative coding assistant', description_ko: 'GitHub Copilot은 대안 코딩 어시스턴트입니다' },
+  { service_id: S.tabnine, depends_on_service_id: S.github_copilot, dependency_type: 'alternative', description: 'GitHub Copilot is an alternative coding assistant', description_ko: 'GitHub Copilot은 대안 코딩 어시스턴트입니다' },
+  { service_id: S.tabnine, depends_on_service_id: S.cursor, dependency_type: 'alternative', description: 'Cursor is an alternative AI IDE', description_ko: 'Cursor는 대안 AI IDE입니다' },
+
+  // --- AI Services: Image/Video Generation Alternatives ---
+  { service_id: S.midjourney, depends_on_service_id: S.stability_ai, dependency_type: 'alternative', description: 'Stability AI is an open-source image generation alternative', description_ko: 'Stability AI는 오픈소스 이미지 생성 대안입니다' },
+  { service_id: S.midjourney, depends_on_service_id: S.leonardo_ai, dependency_type: 'alternative', description: 'Leonardo AI is an alternative for image generation', description_ko: 'Leonardo AI는 이미지 생성의 대안입니다' },
+  { service_id: S.runway_ml, depends_on_service_id: S.sora, dependency_type: 'alternative', description: 'Sora is an alternative video generation tool', description_ko: 'Sora는 대안 비디오 생성 도구입니다' },
+  { service_id: S.sora, depends_on_service_id: S.runway_ml, dependency_type: 'alternative', description: 'Runway ML is an alternative video generation platform', description_ko: 'Runway ML은 대안 비디오 생성 플랫폼입니다' },
+
+  // --- AI Services: Voice/Audio Alternatives ---
+  { service_id: S.deepgram, depends_on_service_id: S.assemblyai, dependency_type: 'alternative', description: 'AssemblyAI is an alternative STT provider', description_ko: 'AssemblyAI는 대안 STT 제공자입니다' },
+  { service_id: S.assemblyai, depends_on_service_id: S.deepgram, dependency_type: 'alternative', description: 'Deepgram is an alternative STT provider', description_ko: 'Deepgram은 대안 STT 제공자입니다' },
+
+  // --- AI Services: Vector DB Alternatives ---
+  { service_id: S.weaviate, depends_on_service_id: S.pinecone, dependency_type: 'alternative', description: 'Pinecone is an alternative managed vector DB', description_ko: 'Pinecone은 대안 관리형 벡터 DB입니다' },
+  { service_id: S.weaviate, depends_on_service_id: S.qdrant, dependency_type: 'alternative', description: 'Qdrant is an alternative high-performance vector DB', description_ko: 'Qdrant는 대안 고성능 벡터 DB입니다' },
+  { service_id: S.qdrant, depends_on_service_id: S.pinecone, dependency_type: 'alternative', description: 'Pinecone is an alternative managed vector DB', description_ko: 'Pinecone은 대안 관리형 벡터 DB입니다' },
+  { service_id: S.qdrant, depends_on_service_id: S.chroma, dependency_type: 'alternative', description: 'Chroma is a lightweight vector DB alternative', description_ko: 'Chroma는 경량 벡터 DB 대안입니다' },
+  { service_id: S.chroma, depends_on_service_id: S.pinecone, dependency_type: 'alternative', description: 'Pinecone is a managed alternative', description_ko: 'Pinecone은 관리형 대안입니다' },
+
+  // --- AI Services: Agent Framework Alternatives ---
+  { service_id: S.crewai, depends_on_service_id: S.langchain, dependency_type: 'alternative', description: 'LangChain is an alternative AI framework', description_ko: 'LangChain은 대안 AI 프레임워크입니다' },
+  { service_id: S.crewai, depends_on_service_id: S.dify, dependency_type: 'alternative', description: 'Dify is a no-code alternative for AI apps', description_ko: 'Dify는 AI 앱의 노코드 대안입니다' },
+  { service_id: S.dify, depends_on_service_id: S.langchain, dependency_type: 'alternative', description: 'LangChain is a code-first alternative', description_ko: 'LangChain은 코드 우선 대안입니다' },
+
+  // --- AI Services: Recommended Combinations ---
+  { service_id: S.langchain, depends_on_service_id: S.pinecone, dependency_type: 'recommended', description: 'Pinecone is commonly used with LangChain for RAG', description_ko: 'Pinecone은 RAG를 위해 LangChain과 자주 사용됩니다' },
+  { service_id: S.langchain, depends_on_service_id: S.openai, dependency_type: 'recommended', description: 'OpenAI is the most common LLM used with LangChain', description_ko: 'OpenAI는 LangChain과 가장 많이 사용되는 LLM입니다' },
+  { service_id: S.crewai, depends_on_service_id: S.openai, dependency_type: 'recommended', description: 'OpenAI is commonly used as the LLM backend for CrewAI', description_ko: 'OpenAI는 CrewAI의 LLM 백엔드로 자주 사용됩니다' },
+  { service_id: S.dify, depends_on_service_id: S.openai, dependency_type: 'recommended', description: 'OpenAI is the default LLM provider for Dify', description_ko: 'OpenAI는 Dify의 기본 LLM 제공자입니다' },
 ];

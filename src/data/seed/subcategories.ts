@@ -55,6 +55,13 @@ export const subcategories: SubcategorySeed[] = [
   { id: 'multimodal_ai', category: 'ai', name: 'Multimodal AI', name_ko: '멀티모달 AI', description: 'Multimodal AI models for text, image, audio', description_ko: '텍스트, 이미지, 오디오 멀티모달 AI 모델' },
   { id: 'llm-inference', category: 'ai', name: 'LLM Inference', name_ko: 'LLM 추론', description: 'Fast LLM inference services', description_ko: '빠른 LLM 추론 서비스' },
   { id: 'voice-synthesis', category: 'ai', name: 'Voice Synthesis', name_ko: '음성 합성', description: 'AI voice synthesis and cloning', description_ko: 'AI 음성 합성 및 복제' },
+  { id: 'image_generation', category: 'ai', name: 'Image Generation', name_ko: '이미지 생성', description: 'AI image generation services', description_ko: 'AI 이미지 생성 서비스' },
+  { id: 'video_generation', category: 'ai', name: 'Video Generation', name_ko: '비디오 생성', description: 'AI video generation services', description_ko: 'AI 비디오 생성 서비스' },
+  { id: 'speech_to_text', category: 'ai', name: 'Speech to Text', name_ko: '음성 인식', description: 'AI speech recognition services', description_ko: 'AI 음성 인식 서비스' },
+  { id: 'ai_agent', category: 'ai', name: 'AI Agent Framework', name_ko: 'AI 에이전트', description: 'AI agent and orchestration frameworks', description_ko: 'AI 에이전트 및 오케스트레이션 프레임워크' },
+  { id: 'vector_db', category: 'ai', name: 'Vector Database', name_ko: '벡터 데이터베이스', description: 'Vector databases for AI embeddings', description_ko: 'AI 임베딩을 위한 벡터 데이터베이스' },
+  { id: 'mlops', category: 'ai', name: 'MLOps', name_ko: 'MLOps', description: 'ML operations and infrastructure', description_ko: 'ML 운영 및 인프라' },
+  { id: 'ai_search', category: 'ai', name: 'AI Search', name_ko: 'AI 검색', description: 'AI-powered search and answer engines', description_ko: 'AI 기반 검색 및 답변 엔진' },
 
   // --- cdn ---
   { id: 'cdn_general', category: 'cdn', name: 'General CDN', name_ko: '범용 CDN', description: 'Content delivery networks', description_ko: '콘텐츠 전송 네트워크' },

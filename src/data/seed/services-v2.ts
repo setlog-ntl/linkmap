@@ -87,6 +87,32 @@ export const SERVICE_IDS_V2 = {
   taboola: '10000000-0000-4000-a000-000000000100',
   amazon_aps: '10000000-0000-4000-a000-000000000101',
   google_ad_manager: '10000000-0000-4000-a000-000000000102',
+  // AI services - Phase 5
+  grok: '10000000-0000-4000-a000-000000000103',
+  mistral: '10000000-0000-4000-a000-000000000104',
+  cohere: '10000000-0000-4000-a000-000000000105',
+  deepseek: '10000000-0000-4000-a000-000000000106',
+  perplexity: '10000000-0000-4000-a000-000000000107',
+  ai21_labs: '10000000-0000-4000-a000-000000000108',
+  midjourney: '10000000-0000-4000-a000-000000000109',
+  runway_ml: '10000000-0000-4000-a000-000000000110',
+  sora: '10000000-0000-4000-a000-000000000111',
+  leonardo_ai: '10000000-0000-4000-a000-000000000112',
+  deepgram: '10000000-0000-4000-a000-000000000113',
+  assemblyai: '10000000-0000-4000-a000-000000000114',
+  playht: '10000000-0000-4000-a000-000000000115',
+  windsurf: '10000000-0000-4000-a000-000000000116',
+  tabnine: '10000000-0000-4000-a000-000000000117',
+  amazon_q: '10000000-0000-4000-a000-000000000118',
+  weaviate: '10000000-0000-4000-a000-000000000119',
+  qdrant: '10000000-0000-4000-a000-000000000120',
+  chroma: '10000000-0000-4000-a000-000000000121',
+  crewai: '10000000-0000-4000-a000-000000000122',
+  dify: '10000000-0000-4000-a000-000000000123',
+  together_ai: '10000000-0000-4000-a000-000000000124',
+  fireworks_ai: '10000000-0000-4000-a000-000000000125',
+  modal: '10000000-0000-4000-a000-000000000126',
+  wandb: '10000000-0000-4000-a000-000000000127',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -2732,5 +2758,1410 @@ export const servicesV2: ServiceSeedV2[] = [
       enterprise: '문의 (Ad Manager 360)',
     },
     github_stars: null,
+  },
+
+  // =======================================================================
+  // AI Services - Phase 5 (25 services)
+  // =======================================================================
+
+  // -----------------------------------------------------------------------
+  // 43. Grok (xAI)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.grok,
+    name: 'Grok',
+    slug: 'grok',
+    category: 'ai',
+    description:
+      'xAI\'s high-performance LLM with 2M token context window, built-in web/X search, and code execution tools.',
+    description_ko:
+      'xAI의 고성능 LLM으로, 2M 토큰 컨텍스트 윈도우와 웹/X(트위터) 검색, 코드 실행 내장 도구를 제공합니다.',
+    icon_url: null,
+    website_url: 'https://x.ai',
+    docs_url: 'https://docs.x.ai',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '신규 $25 무료 크레딧',
+      plans: [
+        { name: 'Free', price: '$25 크레딧' },
+        { name: 'Pay-as-you-go', price: '토큰당 과금' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'XAI_API_KEY',
+        public: false,
+        description: 'xAI API key for Grok models',
+        description_ko: 'xAI Grok 모델 API 키',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'llm',
+    popularity_score: 75,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'llm', 'grok', 'xai', 'elon-musk', 'web-search', 'long-context'],
+    alternatives: ['openai', 'anthropic', 'google-gemini'],
+    compatibility: {
+      framework: ['next', 'express', 'fastify', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python', 'go'],
+    },
+    official_sdks: {
+      python: 'https://github.com/xai-org/grok',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$20~$100',
+      enterprise: '$500+',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 44. Mistral AI
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.mistral,
+    name: 'Mistral AI',
+    slug: 'mistral-ai',
+    category: 'ai',
+    description:
+      'European open-source oriented LLM provider offering models from Nemo (lightweight) to Large (high-performance) with competitive pricing.',
+    description_ko:
+      '유럽 기반 오픈소스 지향 LLM 제공자로, Nemo(경량)부터 Large(고성능)까지 다양한 크기의 모델을 경쟁력 있는 가격에 제공합니다.',
+    icon_url: null,
+    website_url: 'https://mistral.ai',
+    docs_url: 'https://docs.mistral.ai',
+    pricing_info: {
+      free_tier: false,
+      free_tier_details: '종량제 과금',
+      plans: [
+        { name: 'Pay-as-you-go', price: '토큰당 과금 (Nemo $0.02/1M)' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'MISTRAL_API_KEY',
+        public: false,
+        description: 'Mistral AI API key',
+        description_ko: 'Mistral AI API 키',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'llm',
+    popularity_score: 78,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'llm', 'mistral', 'open-source', 'european', 'nemo', 'mixtral'],
+    alternatives: ['openai', 'anthropic', 'deepseek'],
+    compatibility: {
+      framework: ['next', 'express', 'fastify', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python', 'go', 'java'],
+    },
+    official_sdks: {
+      javascript: 'https://www.npmjs.com/package/@mistralai/mistralai',
+      python: 'https://github.com/mistralai/client-python',
+    },
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$5',
+      growth: '$20~$100',
+      enterprise: '$500+',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 45. Cohere
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.cohere,
+    name: 'Cohere',
+    slug: 'cohere',
+    category: 'ai',
+    description:
+      'Enterprise LLM optimized for RAG with 256K context window, on-premises deployment support, and fine-tuning capabilities.',
+    description_ko:
+      '256K 컨텍스트 윈도우와 RAG 최적화에 특화된 엔터프라이즈 LLM으로, 온프레미스 배포와 파인튜닝을 지원합니다.',
+    icon_url: null,
+    website_url: 'https://cohere.com',
+    docs_url: 'https://docs.cohere.com',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '무료 체험판 제공 (rate-limited)',
+      plans: [
+        { name: 'Free Trial', price: '$0/월' },
+        { name: 'Production', price: '토큰당 과금' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'COHERE_API_KEY',
+        public: false,
+        description: 'Cohere API key',
+        description_ko: 'Cohere API 키',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'llm',
+    popularity_score: 72,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'llm', 'rag', 'enterprise', 'embeddings', 'reranking', 'fine-tuning'],
+    alternatives: ['openai', 'anthropic', 'mistral-ai'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'flask', 'fastify'],
+      language: ['javascript', 'typescript', 'python', 'go', 'java'],
+    },
+    official_sdks: {
+      javascript: 'https://www.npmjs.com/package/cohere-ai',
+      python: 'https://github.com/cohere-ai/cohere-python',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$50~$200',
+      enterprise: '$500+',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 46. DeepSeek
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.deepseek,
+    name: 'DeepSeek',
+    slug: 'deepseek',
+    category: 'ai',
+    description:
+      'Ultra-low-cost LLM API with V3 (general) and R1 (reasoning) models, up to 75% off-peak discount.',
+    description_ko:
+      '업계 최저가 수준의 LLM API로, V3(범용)와 R1(추론) 모델을 제공하며 오프피크 시간 최대 75% 할인됩니다.',
+    icon_url: null,
+    website_url: 'https://www.deepseek.com',
+    docs_url: 'https://api-docs.deepseek.com',
+    pricing_info: {
+      free_tier: false,
+      free_tier_details: '종량제 (업계 최저가)',
+      plans: [
+        { name: 'Pay-as-you-go', price: 'V3: $0.14/1M입력, R1: $0.55/1M입력' },
+        { name: 'Off-peak', price: '최대 75% 할인' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'DEEPSEEK_API_KEY',
+        public: false,
+        description: 'DeepSeek API key',
+        description_ko: 'DeepSeek API 키',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'llm',
+    popularity_score: 82,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'llm', 'deepseek', 'low-cost', 'reasoning', 'chinese', 'open-source'],
+    alternatives: ['openai', 'mistral-ai', 'groq'],
+    compatibility: {
+      framework: ['next', 'express', 'fastify', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python', 'go'],
+    },
+    official_sdks: {
+      python: 'https://github.com/deepseek-ai/DeepSeek-V3',
+    },
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$1~$5',
+      growth: '$10~$50',
+      enterprise: '$100+',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 47. Perplexity AI
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.perplexity,
+    name: 'Perplexity AI',
+    slug: 'perplexity',
+    category: 'ai',
+    description:
+      'AI-powered answer engine with real-time web search integration and citation-based accurate responses via Sonar API.',
+    description_ko:
+      '실시간 웹 검색과 인용 기반 정확한 답변을 제공하는 AI 검색 엔진으로, Sonar API를 통해 접근 가능합니다.',
+    icon_url: null,
+    website_url: 'https://www.perplexity.ai',
+    docs_url: 'https://docs.perplexity.ai',
+    pricing_info: {
+      free_tier: false,
+      free_tier_details: 'Pro 구독 시 월 $5 API 크레딧',
+      plans: [
+        { name: 'Sonar', price: '$1/1M 토큰' },
+        { name: 'Sonar Pro', price: '$3/$15/1M 토큰' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'PERPLEXITY_API_KEY',
+        public: false,
+        description: 'Perplexity Sonar API key',
+        description_ko: 'Perplexity Sonar API 키',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'ai_search',
+    popularity_score: 80,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'search', 'rag', 'web-search', 'citations', 'sonar', 'answer-engine'],
+    alternatives: ['openai', 'google-gemini', 'cohere'],
+    compatibility: {
+      framework: ['next', 'express', 'fastify', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python', 'go'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$5',
+      growth: '$20~$100',
+      enterprise: '$200+',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 48. AI21 Labs
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.ai21_labs,
+    name: 'AI21 Labs',
+    slug: 'ai21-labs',
+    category: 'ai',
+    description:
+      'Jamba model series using SSM-Transformer hybrid architecture, 2.5x faster processing at 256K context.',
+    description_ko:
+      'SSM-Transformer 하이브리드 아키텍처의 Jamba 모델로, 256K 컨텍스트에서 2.5배 빠른 처리 속도를 제공합니다.',
+    icon_url: null,
+    website_url: 'https://www.ai21.com',
+    docs_url: 'https://docs.ai21.com',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '신규 $10 무료 크레딧',
+      plans: [
+        { name: 'Free', price: '$10 크레딧' },
+        { name: 'Pay-as-you-go', price: 'Jamba Mini: $0.2/1M 토큰' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'AI21_API_KEY',
+        public: false,
+        description: 'AI21 Labs API key',
+        description_ko: 'AI21 Labs API 키',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'llm',
+    popularity_score: 60,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'llm', 'jamba', 'ssm', 'hybrid', 'long-context', 'fast'],
+    alternatives: ['openai', 'mistral-ai', 'cohere'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python'],
+    },
+    official_sdks: {
+      python: 'https://github.com/AI21Labs/ai21-python',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$20~$80',
+      enterprise: '$200+',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 49. Midjourney
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.midjourney,
+    name: 'Midjourney',
+    slug: 'midjourney',
+    category: 'ai',
+    description:
+      'Leading AI image generation service excelling in artistic quality, color harmony, and visual consistency.',
+    description_ko:
+      '예술적 품질, 색상 조화, 시각적 일관성에서 최고 수준의 AI 이미지 생성 서비스입니다.',
+    icon_url: null,
+    website_url: 'https://www.midjourney.com',
+    docs_url: 'https://docs.midjourney.com',
+    pricing_info: {
+      free_tier: false,
+      free_tier_details: '유료 구독만 제공',
+      plans: [
+        { name: 'Basic', price: '$10/월' },
+        { name: 'Standard', price: '$30/월' },
+        { name: 'Pro', price: '$60/월' },
+        { name: 'Mega', price: '$120/월' },
+      ],
+    },
+    required_env_vars: [],
+    domain: 'ai_ml',
+    subcategory: 'image_generation',
+    popularity_score: 90,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'image-generation', 'art', 'creative', 'design', 'visual'],
+    alternatives: ['stability-ai', 'leonardo-ai', 'ideogram'],
+    compatibility: {
+      framework: [],
+      language: [],
+    },
+    official_sdks: {},
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'high',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$10',
+      growth: '$30~$60',
+      enterprise: '$120',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 50. Runway ML
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.runway_ml,
+    name: 'Runway ML',
+    slug: 'runway-ml',
+    category: 'ai',
+    description:
+      'AI video generation and editing platform with Gen-4 models for text-to-video, image-to-video, and Act-Two lip-sync.',
+    description_ko:
+      'Gen-4 모델 기반 AI 비디오 생성·편집 플랫폼으로, 텍스트→비디오, 이미지→비디오, 립싱크 등을 지원합니다.',
+    icon_url: null,
+    website_url: 'https://runwayml.com',
+    docs_url: 'https://docs.runwayml.com',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '무료 체험 크레딧 제공',
+      plans: [
+        { name: 'Free', price: '체험 크레딧' },
+        { name: 'Standard', price: '$15/월' },
+        { name: 'Pro', price: '$35/월' },
+        { name: 'Unlimited', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'RUNWAY_API_KEY',
+        public: false,
+        description: 'Runway ML API key',
+        description_ko: 'Runway ML API 키',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'video_generation',
+    popularity_score: 78,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'video-generation', 'gen-4', 'creative', 'editing', 'lip-sync'],
+    alternatives: ['sora', 'pika', 'leonardo-ai'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python'],
+    },
+    official_sdks: {
+      python: 'https://github.com/runwayml/sdk-python',
+    },
+    free_tier_quality: 'limited',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: {
+      starter: '$15',
+      growth: '$35',
+      enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 51. Sora (OpenAI)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.sora,
+    name: 'Sora',
+    slug: 'sora',
+    category: 'ai',
+    description:
+      'OpenAI\'s text-to-video generation model supporting 720p~1080p resolution with cinematic quality.',
+    description_ko:
+      'OpenAI의 텍스트→비디오 생성 모델로, 720p~1080p 해상도의 시네마틱 품질 비디오를 생성합니다.',
+    icon_url: null,
+    website_url: 'https://openai.com/sora',
+    docs_url: 'https://platform.openai.com/docs',
+    pricing_info: {
+      free_tier: false,
+      free_tier_details: 'ChatGPT Plus/Pro 구독 필요',
+      plans: [
+        { name: 'Plus (포함)', price: '$20/월' },
+        { name: 'Pro (포함)', price: '$200/월' },
+        { name: 'API', price: '$0.10~$0.50/초' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'OPENAI_API_KEY',
+        public: false,
+        description: 'OpenAI API key (Sora access)',
+        description_ko: 'OpenAI API 키 (Sora 접근용)',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'video_generation',
+    popularity_score: 85,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'video-generation', 'text-to-video', 'openai', 'cinematic'],
+    alternatives: ['runway-ml', 'pika', 'leonardo-ai'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python'],
+    },
+    official_sdks: {
+      npm: 'https://www.npmjs.com/package/openai',
+    },
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'high',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$20',
+      growth: '$200',
+      enterprise: '$500+',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 52. Leonardo AI
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.leonardo_ai,
+    name: 'Leonardo AI',
+    slug: 'leonardo-ai',
+    category: 'ai',
+    description:
+      'AI image generation platform specialized for game and art asset creation with Flux model integration.',
+    description_ko:
+      '게임·예술 자산 생성에 특화된 AI 이미지 생성 플랫폼으로, Flux 모델 통합을 지원합니다.',
+    icon_url: null,
+    website_url: 'https://leonardo.ai',
+    docs_url: 'https://docs.leonardo.ai',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '일일 무료 크레딧 제공',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Starter', price: '$15/월' },
+        { name: 'Creator', price: '$35/월' },
+        { name: 'Pro', price: '$70/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'LEONARDO_API_KEY',
+        public: false,
+        description: 'Leonardo AI API key',
+        description_ko: 'Leonardo AI API 키',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'image_generation',
+    popularity_score: 72,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'image-generation', 'game-art', 'flux', 'creative', 'assets'],
+    alternatives: ['midjourney', 'stability-ai', 'ideogram'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$15~$35',
+      enterprise: '$70+',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 53. Deepgram
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.deepgram,
+    name: 'Deepgram',
+    slug: 'deepgram',
+    category: 'ai',
+    description:
+      'Ultra-low latency (<300ms) speech-to-text engine optimized for conversational AI with per-second billing.',
+    description_ko:
+      '초저지연(300ms 미만) 음성 인식 엔진으로, 대화형 AI에 최적화되어 있으며 초 단위 과금됩니다.',
+    icon_url: null,
+    website_url: 'https://deepgram.com',
+    docs_url: 'https://developers.deepgram.com',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '$200 무료 크레딧',
+      plans: [
+        { name: 'Free', price: '$200 크레딧' },
+        { name: 'Pay-as-you-go', price: '$0.0043/분' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'DEEPGRAM_API_KEY',
+        public: false,
+        description: 'Deepgram API key',
+        description_ko: 'Deepgram API 키',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'speech_to_text',
+    popularity_score: 75,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'stt', 'speech', 'voice', 'transcription', 'real-time', 'low-latency'],
+    alternatives: ['assemblyai', 'openai'],
+    compatibility: {
+      framework: ['next', 'express', 'fastify', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python', 'go', 'rust'],
+    },
+    official_sdks: {
+      javascript: 'https://www.npmjs.com/package/@deepgram/sdk',
+      python: 'https://github.com/deepgram/deepgram-python-sdk',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$20~$100',
+      enterprise: '$500+',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 54. AssemblyAI
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.assemblyai,
+    name: 'AssemblyAI',
+    slug: 'assemblyai',
+    category: 'ai',
+    description:
+      'Highest accuracy streaming STT with medical/sales domain specialization and Slam-1 speech-language model.',
+    description_ko:
+      '최고 정확도 스트리밍 음성 인식(STT)으로, 의료·세일즈 도메인 특화 및 Slam-1 음성-언어 모델을 제공합니다.',
+    icon_url: null,
+    website_url: 'https://www.assemblyai.com',
+    docs_url: 'https://www.assemblyai.com/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '무료 체험 크레딧 제공',
+      plans: [
+        { name: 'Free', price: '체험 크레딧' },
+        { name: 'Pay-as-you-go', price: '$0.15/시간' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'ASSEMBLYAI_API_KEY',
+        public: false,
+        description: 'AssemblyAI API key',
+        description_ko: 'AssemblyAI API 키',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'speech_to_text',
+    popularity_score: 73,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'stt', 'speech', 'transcription', 'medical', 'accuracy', 'slam-1'],
+    alternatives: ['deepgram', 'openai'],
+    compatibility: {
+      framework: ['next', 'express', 'fastify', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python', 'go', 'java', 'ruby'],
+    },
+    official_sdks: {
+      javascript: 'https://www.npmjs.com/package/assemblyai',
+      python: 'https://github.com/AssemblyAI/assemblyai-python-sdk',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$15~$75',
+      enterprise: '$300+',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 55. PlayHT
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.playht,
+    name: 'PlayHT',
+    slug: 'playht',
+    category: 'ai',
+    description:
+      'AI TTS platform with 600+ voices and voice cloning at affordable prices with ~300ms latency.',
+    description_ko:
+      '600개 이상 AI 음성과 보이스 클로닝을 합리적 가격에 제공하는 TTS 플랫폼입니다 (~300ms 지연).',
+    icon_url: null,
+    website_url: 'https://play.ht',
+    docs_url: 'https://docs.play.ht',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '무료 체험 제공',
+      plans: [
+        { name: 'Free', price: '체험' },
+        { name: 'Creator', price: '$39/월' },
+        { name: 'Pro', price: '$99/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'PLAYHT_API_KEY',
+        public: false,
+        description: 'PlayHT API key',
+        description_ko: 'PlayHT API 키',
+      },
+      {
+        name: 'PLAYHT_USER_ID',
+        public: false,
+        description: 'PlayHT User ID',
+        description_ko: 'PlayHT 사용자 ID',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'voice-synthesis',
+    popularity_score: 65,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'tts', 'voice', 'speech', 'clone', 'text-to-speech', 'audio'],
+    alternatives: ['elevenlabs', 'openai'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python'],
+    },
+    official_sdks: {
+      javascript: 'https://www.npmjs.com/package/playht',
+    },
+    free_tier_quality: 'limited',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$39~$99',
+      enterprise: '$200+',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 56. Windsurf (Codeium)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.windsurf,
+    name: 'Windsurf',
+    slug: 'windsurf',
+    category: 'ai',
+    description:
+      'Agentic IDE by Codeium where autonomous coding agents understand complex requirements and implement solutions across multiple files.',
+    description_ko:
+      'Codeium의 에이전틱 IDE로, 자율적 코딩 에이전트가 복잡한 요구사항을 이해하고 다중 파일에 걸쳐 솔루션을 구현합니다.',
+    icon_url: null,
+    website_url: 'https://codeium.com',
+    docs_url: 'https://docs.codeium.com',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '무료 무제한 코드 완성',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Pro', price: '$15/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [],
+    domain: 'ai_ml',
+    subcategory: 'code_assistant',
+    popularity_score: 75,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'coding-assistant', 'ide', 'agentic', 'codeium', 'autocomplete'],
+    alternatives: ['cursor', 'github-copilot', 'claude-code'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'svelte', 'express', 'django'],
+      language: ['typescript', 'javascript', 'python', 'go', 'rust', 'java', 'c#'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$15',
+      enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 57. Tabnine
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.tabnine,
+    name: 'Tabnine',
+    slug: 'tabnine',
+    category: 'ai',
+    description:
+      'Privacy-first AI coding assistant with 100% on-premises deployment. SOC 2, GDPR, HIPAA compliant.',
+    description_ko:
+      '100% 온프레미스 배포 가능한 프라이버시 중심 AI 코딩 어시스턴트로, SOC 2/GDPR/HIPAA를 준수합니다.',
+    icon_url: null,
+    website_url: 'https://www.tabnine.com',
+    docs_url: 'https://docs.tabnine.com',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '기본 코드 완성 무료',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Pro', price: '$12/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [],
+    domain: 'ai_ml',
+    subcategory: 'code_assistant',
+    popularity_score: 68,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'coding-assistant', 'privacy', 'on-premises', 'compliance', 'soc2'],
+    alternatives: ['github-copilot', 'cursor', 'windsurf'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'angular', 'express', 'django'],
+      language: ['typescript', 'javascript', 'python', 'go', 'java', 'rust', 'c++', 'ruby'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$12',
+      enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 58. Amazon Q Developer
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.amazon_q,
+    name: 'Amazon Q Developer',
+    slug: 'amazon-q-developer',
+    category: 'ai',
+    description:
+      'AWS integrated AI coding assistant with inline suggestions, chat, code transformation, and autonomous agents.',
+    description_ko:
+      'AWS 통합 AI 코딩 어시스턴트로, 인라인 코드 제안, 채팅, 코드 변환, 자율 에이전트를 포함합니다.',
+    icon_url: null,
+    website_url: 'https://aws.amazon.com/q/developer',
+    docs_url: 'https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '개인 개발자 무료 티어',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Pro', price: '$19/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'AWS_ACCESS_KEY_ID',
+        public: false,
+        description: 'AWS access key for Q Developer',
+        description_ko: 'Q Developer용 AWS 액세스 키',
+      },
+      {
+        name: 'AWS_SECRET_ACCESS_KEY',
+        public: false,
+        description: 'AWS secret key for Q Developer',
+        description_ko: 'Q Developer용 AWS 시크릿 키',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'code_assistant',
+    popularity_score: 70,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'coding-assistant', 'aws', 'amazon', 'code-transformation', 'agent'],
+    alternatives: ['github-copilot', 'cursor', 'claude-code'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'flask', 'spring'],
+      language: ['typescript', 'javascript', 'python', 'java', 'go', 'c#', 'rust'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$19',
+      enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 59. Weaviate
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.weaviate,
+    name: 'Weaviate',
+    slug: 'weaviate',
+    category: 'ai',
+    description:
+      'Open-source vector database combining vector search, knowledge graphs, and structured data relationships with hybrid search.',
+    description_ko:
+      '벡터 검색 + 지식 그래프 + 구조화 데이터 관계를 결합한 오픈소스 벡터 DB로, 하이브리드 검색에 강합니다.',
+    icon_url: null,
+    website_url: 'https://weaviate.io',
+    docs_url: 'https://weaviate.io/developers/weaviate',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '오픈소스 무료, 클라우드 14일 무료 체험',
+      plans: [
+        { name: 'Open Source', price: '$0/월' },
+        { name: 'Cloud', price: '$25/월~' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'WEAVIATE_URL',
+        public: true,
+        description: 'Weaviate instance URL',
+        description_ko: 'Weaviate 인스턴스 URL',
+      },
+      {
+        name: 'WEAVIATE_API_KEY',
+        public: false,
+        description: 'Weaviate API key',
+        description_ko: 'Weaviate API 키',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'vector_db',
+    popularity_score: 76,
+    difficulty_level: 'intermediate',
+    tags: ['ai', 'vector-db', 'embeddings', 'hybrid-search', 'knowledge-graph', 'open-source'],
+    alternatives: ['pinecone', 'qdrant', 'chroma'],
+    compatibility: {
+      framework: ['next', 'express', 'fastify', 'django', 'flask'],
+      language: ['typescript', 'javascript', 'python', 'go', 'java'],
+    },
+    official_sdks: {
+      javascript: 'https://www.npmjs.com/package/weaviate-client',
+      python: 'https://github.com/weaviate/weaviate-python-client',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 15,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$25~$100',
+      enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 60. Qdrant
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.qdrant,
+    name: 'Qdrant',
+    slug: 'qdrant',
+    category: 'ai',
+    description:
+      'High-performance vector search engine written in Rust with metadata filtering, distributed deployment, and ACID transactions.',
+    description_ko:
+      'Rust로 작성된 고성능 벡터 검색 엔진으로, 메타데이터 필터링, 분산 배포, ACID 트랜잭션을 지원합니다.',
+    icon_url: null,
+    website_url: 'https://qdrant.tech',
+    docs_url: 'https://qdrant.tech/documentation',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '1GB 영구 무료 클러스터',
+      plans: [
+        { name: 'Free', price: '$0 (1GB)' },
+        { name: 'Cloud', price: '$25/월~' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'QDRANT_URL',
+        public: true,
+        description: 'Qdrant instance URL',
+        description_ko: 'Qdrant 인스턴스 URL',
+      },
+      {
+        name: 'QDRANT_API_KEY',
+        public: false,
+        description: 'Qdrant API key',
+        description_ko: 'Qdrant API 키',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'vector_db',
+    popularity_score: 74,
+    difficulty_level: 'intermediate',
+    tags: ['ai', 'vector-db', 'rust', 'high-performance', 'distributed', 'open-source'],
+    alternatives: ['pinecone', 'weaviate', 'chroma'],
+    compatibility: {
+      framework: ['next', 'express', 'fastify', 'django', 'flask'],
+      language: ['typescript', 'javascript', 'python', 'go', 'rust', 'java'],
+    },
+    official_sdks: {
+      javascript: 'https://www.npmjs.com/package/@qdrant/js-client-rest',
+      python: 'https://github.com/qdrant/qdrant-client',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$25~$100',
+      enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 61. Chroma
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.chroma,
+    name: 'Chroma',
+    slug: 'chroma',
+    category: 'ai',
+    description:
+      'Developer-friendly lightweight vector database ideal for prototyping and small-to-medium AI apps with simple setup.',
+    description_ko:
+      '프로토타이핑과 소중규모 AI 앱에 적합한 개발자 친화적 경량 벡터 데이터베이스입니다.',
+    icon_url: null,
+    website_url: 'https://www.trychroma.com',
+    docs_url: 'https://docs.trychroma.com',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '오픈소스 무료',
+      plans: [
+        { name: 'Open Source', price: '$0/월' },
+        { name: 'Cloud', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'CHROMA_HOST',
+        public: true,
+        description: 'Chroma server host',
+        description_ko: 'Chroma 서버 호스트',
+      },
+      {
+        name: 'CHROMA_API_KEY',
+        public: false,
+        description: 'Chroma API key (cloud only)',
+        description_ko: 'Chroma API 키 (클라우드 전용)',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'vector_db',
+    popularity_score: 72,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'vector-db', 'lightweight', 'prototyping', 'embeddings', 'open-source'],
+    alternatives: ['pinecone', 'weaviate', 'qdrant'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'flask'],
+      language: ['typescript', 'javascript', 'python'],
+    },
+    official_sdks: {
+      javascript: 'https://www.npmjs.com/package/chromadb',
+      python: 'https://github.com/chroma-core/chroma',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$0~$50',
+      enterprise: '문의',
+    },
+    github_stars: 17000,
+  },
+
+  // -----------------------------------------------------------------------
+  // 62. CrewAI
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.crewai,
+    name: 'CrewAI',
+    slug: 'crewai',
+    category: 'ai',
+    description:
+      'Role-based multi-agent collaboration framework for automated research, content pipelines, and business intelligence.',
+    description_ko:
+      '역할 기반 멀티 에이전트 협업 프레임워크로, 자동화된 리서치, 콘텐츠 파이프라인, BI에 활용됩니다.',
+    icon_url: null,
+    website_url: 'https://www.crewai.com',
+    docs_url: 'https://docs.crewai.com',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '오픈소스 무료',
+      plans: [
+        { name: 'Open Source', price: '$0/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'OPENAI_API_KEY',
+        public: false,
+        description: 'LLM provider API key (OpenAI default)',
+        description_ko: 'LLM 제공자 API 키 (기본: OpenAI)',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'ai_agent',
+    popularity_score: 76,
+    difficulty_level: 'intermediate',
+    tags: ['ai', 'agents', 'multi-agent', 'automation', 'orchestration', 'open-source'],
+    alternatives: ['langchain', 'dify', 'autogen'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'flask'],
+      language: ['python'],
+    },
+    official_sdks: {
+      python: 'https://github.com/crewAIInc/crewAI',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 15,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$0 (+ LLM 비용)',
+      enterprise: '문의',
+    },
+    github_stars: 25000,
+  },
+
+  // -----------------------------------------------------------------------
+  // 63. Dify
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.dify,
+    name: 'Dify',
+    slug: 'dify',
+    category: 'ai',
+    description:
+      'No-code/low-code LLM app builder with visual workflows, RAG pipelines, agent framework, and model management.',
+    description_ko:
+      '노코드/로우코드 LLM 앱 빌더로, 비주얼 워크플로우, RAG 파이프라인, 에이전트 프레임워크, 모델 관리를 통합합니다.',
+    icon_url: null,
+    website_url: 'https://dify.ai',
+    docs_url: 'https://docs.dify.ai',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Sandbox: 무료 200 메시지',
+      plans: [
+        { name: 'Sandbox', price: '$0/월' },
+        { name: 'Professional', price: '$59/월' },
+        { name: 'Team', price: '$159/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'DIFY_API_KEY',
+        public: false,
+        description: 'Dify app API key',
+        description_ko: 'Dify 앱 API 키',
+      },
+      {
+        name: 'DIFY_BASE_URL',
+        public: true,
+        description: 'Dify instance base URL',
+        description_ko: 'Dify 인스턴스 기본 URL',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'ai_agent',
+    popularity_score: 78,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'no-code', 'low-code', 'rag', 'workflow', 'agents', 'llm-app', 'open-source'],
+    alternatives: ['langchain', 'crewai', 'flowise'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python'],
+    },
+    official_sdks: {
+      python: 'https://github.com/langgenius/dify',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$59',
+      enterprise: '문의',
+    },
+    github_stars: 55000,
+  },
+
+  // -----------------------------------------------------------------------
+  // 64. Together AI
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.together_ai,
+    name: 'Together AI',
+    slug: 'together-ai',
+    category: 'ai',
+    description:
+      'High-performance inference platform serving 200+ open-source LLMs with sub-100ms latency.',
+    description_ko:
+      '200개 이상 오픈소스 LLM을 100ms 미만 지연으로 서빙하는 고성능 추론 플랫폼입니다.',
+    icon_url: null,
+    website_url: 'https://together.ai',
+    docs_url: 'https://docs.together.ai',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '$5 무료 크레딧',
+      plans: [
+        { name: 'Free', price: '$5 크레딧' },
+        { name: 'Pay-as-you-go', price: '토큰당 과금 (모델별 상이)' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'TOGETHER_API_KEY',
+        public: false,
+        description: 'Together AI API key',
+        description_ko: 'Together AI API 키',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'llm-inference',
+    popularity_score: 74,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'llm', 'inference', 'open-source', 'fast', 'hosting'],
+    alternatives: ['groq', 'fireworks-ai', 'replicate'],
+    compatibility: {
+      framework: ['next', 'express', 'fastify', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python', 'go'],
+    },
+    official_sdks: {
+      javascript: 'https://www.npmjs.com/package/together-ai',
+      python: 'https://github.com/togethercomputer/together-python',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$20~$100',
+      enterprise: '$500+',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 65. Fireworks AI
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.fireworks_ai,
+    name: 'Fireworks AI',
+    slug: 'fireworks-ai',
+    category: 'ai',
+    description:
+      'FireAttention engine-based text/image/audio inference platform with HIPAA/SOC2 compliance.',
+    description_ko:
+      'FireAttention 엔진 기반 텍스트/이미지/오디오 추론 플랫폼으로, HIPAA/SOC2 컴플라이언스를 충족합니다.',
+    icon_url: null,
+    website_url: 'https://fireworks.ai',
+    docs_url: 'https://docs.fireworks.ai',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '$1 무료 크레딧',
+      plans: [
+        { name: 'Free', price: '$1 크레딧' },
+        { name: 'Pay-as-you-go', price: '토큰당 과금' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'FIREWORKS_API_KEY',
+        public: false,
+        description: 'Fireworks AI API key',
+        description_ko: 'Fireworks AI API 키',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'llm-inference',
+    popularity_score: 70,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'llm', 'inference', 'fireattention', 'compliance', 'hipaa', 'multimodal'],
+    alternatives: ['groq', 'together-ai', 'replicate'],
+    compatibility: {
+      framework: ['next', 'express', 'fastify', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python', 'go'],
+    },
+    official_sdks: {
+      python: 'https://github.com/fw-ai/fireworks-python',
+    },
+    free_tier_quality: 'limited',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$20~$100',
+      enterprise: '$500+',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 66. Modal
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.modal,
+    name: 'Modal',
+    slug: 'modal',
+    category: 'ai',
+    description:
+      'Serverless GPU computing platform for ML training, inference, and batch processing without infrastructure setup.',
+    description_ko:
+      '인프라 설정 없이 ML 학습·추론·배치 처리를 위한 서버리스 GPU 컴퓨팅 플랫폼입니다.',
+    icon_url: null,
+    website_url: 'https://modal.com',
+    docs_url: 'https://modal.com/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '$30/월 무료 컴퓨트 크레딧',
+      plans: [
+        { name: 'Free', price: '$30/월 크레딧' },
+        { name: 'Pay-as-you-go', price: '초 단위 GPU 과금' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'MODAL_TOKEN_ID',
+        public: false,
+        description: 'Modal token ID',
+        description_ko: 'Modal 토큰 ID',
+      },
+      {
+        name: 'MODAL_TOKEN_SECRET',
+        public: false,
+        description: 'Modal token secret',
+        description_ko: 'Modal 토큰 시크릿',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'mlops',
+    popularity_score: 72,
+    difficulty_level: 'intermediate',
+    tags: ['ai', 'gpu', 'serverless', 'ml', 'training', 'inference', 'batch'],
+    alternatives: ['replicate', 'together-ai', 'anyscale'],
+    compatibility: {
+      framework: ['django', 'flask', 'fastapi'],
+      language: ['python'],
+    },
+    official_sdks: {
+      python: 'https://github.com/modal-labs/modal-client',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$50~$200',
+      enterprise: '$1000+',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // 67. Weights & Biases
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.wandb,
+    name: 'Weights & Biases',
+    slug: 'wandb',
+    category: 'ai',
+    description:
+      'Integrated MLOps platform for experiment tracking, model evaluation, and app observability.',
+    description_ko:
+      '실험 추적, 모델 평가, 앱 관찰성(Observability)을 통합한 MLOps 플랫폼입니다.',
+    icon_url: null,
+    website_url: 'https://wandb.ai',
+    docs_url: 'https://docs.wandb.ai',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '개인 무료, 100GB 스토리지',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Pro', price: '$60/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'WANDB_API_KEY',
+        public: false,
+        description: 'Weights & Biases API key',
+        description_ko: 'Weights & Biases API 키',
+      },
+      {
+        name: 'WANDB_PROJECT',
+        public: true,
+        description: 'W&B project name',
+        description_ko: 'W&B 프로젝트 이름',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'mlops',
+    popularity_score: 80,
+    difficulty_level: 'intermediate',
+    tags: ['ai', 'mlops', 'experiment-tracking', 'model-eval', 'observability', 'dashboard'],
+    alternatives: ['mlflow', 'neptune-ai', 'comet-ml'],
+    compatibility: {
+      framework: ['pytorch', 'tensorflow', 'jax', 'fastai'],
+      language: ['python'],
+    },
+    official_sdks: {
+      python: 'https://github.com/wandb/wandb',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$60',
+      enterprise: '$315+/시트',
+    },
   },
 ];
