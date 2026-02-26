@@ -8,7 +8,7 @@ import { DeployStep } from './deploy-step';
 import { DeploySuccess } from './deploy-success';
 import { AuthModal } from './auth-modal';
 import { GitHubConnectModal } from './github-connect-modal';
-import { useHomepageTemplates } from '@/lib/queries/oneclick';
+import { useHomepageTemplates, useMyDeployments } from '@/lib/queries/oneclick';
 import { useGitHubConnections } from '@/lib/queries/github-connections';
 import { useDeployMachine } from '@/hooks/use-deploy-machine';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -22,6 +22,11 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
   const { locale } = useLocaleStore();
   const searchParams = useSearchParams();
   const { data: templates = [], isLoading: templatesLoading } = useHomepageTemplates('github_pages');
+  const { data: existingDeploys = [] } = useMyDeployments();
+  const existingSiteNames = useMemo(
+    () => existingDeploys.map((d) => d.site_name),
+    [existingDeploys]
+  );
 
   // Resolve ?template=<slug> query param to template id
   const templateSlugFromUrl = searchParams.get('template');
@@ -145,6 +150,7 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
           accounts={accounts}
           selectedAccountId={selectedAccountId}
           onAccountChange={setSelectedAccountId}
+          existingSiteNames={existingSiteNames}
         />
       )}
 

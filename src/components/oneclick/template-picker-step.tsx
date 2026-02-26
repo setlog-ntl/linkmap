@@ -85,11 +85,26 @@ const TEMPLATE_ICONS: Record<string, LucideIcon> = {
   'nonprofit-page': Heart,
 };
 
-function resolveDefaultSiteName(templateId: string | null, templates: HomepageTemplate[]): string {
+function resolveDefaultSiteName(
+  templateId: string | null,
+  templates: HomepageTemplate[],
+  existingSiteNames: string[] = []
+): string {
   if (!templateId) return '';
   const tpl = templates.find((t) => t.id === templateId);
   if (!tpl) return '';
-  return TEMPLATE_DEFAULT_NAMES[tpl.slug] ?? '';
+  const baseName = TEMPLATE_DEFAULT_NAMES[tpl.slug] ?? '';
+  if (!baseName) return '';
+
+  // 기존 사이트 이름과 중복되지 않도록 일련번호 추가
+  const nameSet = new Set(existingSiteNames.map((n) => n.toLowerCase()));
+  if (!nameSet.has(baseName)) return baseName;
+
+  let suffix = 2;
+  while (nameSet.has(`${baseName}-${suffix}`)) {
+    suffix++;
+  }
+  return `${baseName}-${suffix}`;
 }
 
 interface TemplatePickerStepProps {
@@ -105,6 +120,7 @@ interface TemplatePickerStepProps {
   accounts?: GitHubConnection[];
   selectedAccountId?: string | null;
   onAccountChange?: (id: string) => void;
+  existingSiteNames?: string[];
 }
 
 const SITE_NAME_REGEX = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
@@ -122,6 +138,7 @@ export function TemplatePickerStep({
   accounts = [],
   selectedAccountId = null,
   onAccountChange,
+  existingSiteNames = [],
 }: TemplatePickerStepProps) {
   const { locale } = useLocaleStore();
   const prefersReducedMotion = useReducedMotion();
@@ -134,7 +151,7 @@ export function TemplatePickerStep({
   const initialTemplateId = defaultTemplate ?? recommendedTemplateId;
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(initialTemplateId);
   const [siteName, setSiteName] = useState(
-    defaultSiteName || resolveDefaultSiteName(initialTemplateId, templates)
+    defaultSiteName || resolveDefaultSiteName(initialTemplateId, templates, existingSiteNames)
   );
   const [siteNameTouched, setSiteNameTouched] = useState(!!defaultSiteName);
   const [siteNameError, setSiteNameError] = useState<string | null>(null);
@@ -181,7 +198,7 @@ export function TemplatePickerStep({
     setSelectedTemplate(id);
     // 사용자가 이름을 직접 수정하지 않은 경우에만 자동 네이밍 적용
     if (!siteNameTouched) {
-      const autoName = resolveDefaultSiteName(id, templates);
+      const autoName = resolveDefaultSiteName(id, templates, existingSiteNames);
       if (autoName) setSiteName(autoName);
     }
   };
