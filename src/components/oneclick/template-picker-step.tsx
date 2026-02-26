@@ -195,9 +195,17 @@ export function TemplatePickerStep({
   };
 
   const handleSiteNameChange = (value: string) => {
-    const lowered = value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    const hasKorean = /[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(value);
+    let lowered = value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    // 시작/끝 하이픈 자동 제거
+    lowered = lowered.replace(/^-+/, '').replace(/-+$/, '');
     setSiteName(lowered);
     setSiteNameTouched(true);
+
+    if (hasKorean && lowered.length < 2) {
+      setSiteNameError(t(locale, 'templatePicker.koreanNotAllowed'));
+      return;
+    }
     if (lowered.length >= 2) {
       setSiteNameError(validateSiteName(lowered));
     } else {
@@ -373,6 +381,9 @@ export function TemplatePickerStep({
             className={`${TemplateIcon ? 'pl-10' : ''} ${siteNameError ? 'border-red-500' : ''}`}
           />
         </div>
+        <p className="text-xs text-muted-foreground">
+          {t(locale, 'templatePicker.siteNameHint')}
+        </p>
         {siteNameError && (
           <p className="text-sm text-red-500">{siteNameError}</p>
         )}

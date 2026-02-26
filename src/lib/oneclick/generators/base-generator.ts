@@ -6,9 +6,15 @@ import type { ModuleConfigState, TemplateModuleSchema } from '@/lib/module-schem
 
 // ─── 문자열 유틸 ─────────────────────────────
 
-/** 문자열 내 작은따옴표 이스케이프 */
+/** 문자열 리터럴에 안전한 이스케이프 (빌드 파괴 방지) */
 export function esc(s: string): string {
-  return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  return s
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/`/g, '\\`')
+    .replace(/\$\{/g, '\\${');
 }
 
 /** JS 문자열의 이스케이프 시퀀스를 실제 문자로 디코딩 */

@@ -720,7 +720,9 @@
     "connected": "Connected",
     "githubNotConnected": "GitHub not connected — will connect automatically on deploy",
     "siteNamePlaceholder": "my-portfolio",
-    "urlPlaceholder": "{site-name}"
+    "urlPlaceholder": "{site-name}",
+    "koreanNotAllowed": "Korean characters are not allowed. Please use lowercase letters",
+    "siteNameHint": "Lowercase letters, numbers, and hyphens only (e.g., my-page-1)"
   },
   "wizard": {
     "step1": "Choose",
@@ -1139,7 +1141,10 @@
     "checkOnGitHub": "Check on GitHub",
     "maintenanceTitle": "Template Update in Progress",
     "maintenanceDesc": "We're currently updating templates for a better experience. Please try again shortly.",
-    "maintenanceNotice": "Preparing a better experience for you"
+    "maintenanceNotice": "Preparing a better experience for you",
+    "errorCause": "Cause",
+    "errorSolution": "Solution",
+    "failedAt": "Failed at"
   },
   "authModal": {
     "title": "Sign In Required",

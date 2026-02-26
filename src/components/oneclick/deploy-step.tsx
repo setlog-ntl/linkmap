@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t, type Locale } from '@/lib/i18n';
 import type { DeployStatus, HomepageTemplate } from '@/lib/queries/oneclick';
+import { getErrorDetails } from '@/lib/deploy-error-map';
 import { BuildingIllustration } from './building-illustration';
 import { DeployProgress } from './deploy-progress';
 
@@ -38,6 +39,7 @@ export function DeployStep({ status, isLoading, error, template, onRetry }: Depl
       <ErrorCard
         onRetry={onRetry}
         locale={locale}
+        errorMessage={error.message}
       />
     );
   }
@@ -62,6 +64,8 @@ export function DeployStep({ status, isLoading, error, template, onRetry }: Depl
         <ErrorCard
           onRetry={onRetry}
           locale={locale}
+          errorMessage={status.deploy_error}
+          deployStatus={status}
         />
       )}
 
@@ -182,12 +186,20 @@ function InitialLoadingCard({ locale, template }: { locale: Locale; template?: H
 interface ErrorCardProps {
   onRetry?: () => void;
   locale: Locale;
+  errorMessage?: string | null;
+  deployStatus?: DeployStatus | null;
 }
 
 function ErrorCard({
   onRetry,
   locale,
+  errorMessage,
+  deployStatus,
 }: ErrorCardProps) {
+  const details = errorMessage
+    ? getErrorDetails(errorMessage, deployStatus ?? null, locale)
+    : null;
+
   return (
     <Card className="border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20">
       <CardContent className="py-8 space-y-5">
@@ -198,9 +210,28 @@ function ErrorCard({
           <h3 className="text-lg font-semibold">
             {t(locale, 'deployStep.maintenanceTitle')}
           </h3>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            {t(locale, 'deployStep.maintenanceDesc')}
-          </p>
+
+          {details ? (
+            <div className="text-left mx-auto max-w-md space-y-2">
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium">{t(locale, 'deployStep.errorCause')}: </span>
+                {details.cause}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium">{t(locale, 'deployStep.errorSolution')}: </span>
+                {details.solution}
+              </p>
+              {details.failedStep && (
+                <p className="text-xs text-muted-foreground/70">
+                  {t(locale, 'deployStep.failedAt')}: {details.failedStep}
+                </p>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              {t(locale, 'deployStep.maintenanceDesc')}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center justify-center gap-2 py-2">

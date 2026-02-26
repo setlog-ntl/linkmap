@@ -15,6 +15,29 @@ function humanizeSlug(slug: string): string {
     .join(' ');
 }
 
+/** 배포 실패 시 생성된 리소스 정리 */
+async function cleanupResources(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  projectId: string,
+  copiedServiceAccountId: string | null,
+  githubToken?: string,
+  repoOwner?: string,
+  repoName?: string,
+) {
+  // 1. GitHub 레포 삭제 (있으면)
+  if (githubToken && repoOwner && repoName) {
+    try {
+      await deleteRepo(githubToken, repoOwner, repoName);
+    } catch { /* best effort */ }
+  }
+  // 2. 복사된 service_account 삭제 (있으면)
+  if (copiedServiceAccountId) {
+    await supabase.from('service_accounts').delete().eq('id', copiedServiceAccountId);
+  }
+  // 3. 프로젝트 삭제
+  await supabase.from('projects').delete().eq('id', projectId);
+}
+
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -101,6 +124,7 @@ export async function POST(request: NextRequest) {
 
   // 4.5. Copy user-level service account to project
   let projectServiceAccountId = ghAccount.id;
+  let copiedServiceAccountId: string | null = null;
   if (!ghAccount.project_id) {
     const { data: copiedAccount } = await supabase.from('service_accounts').insert({
       project_id: project.id,
@@ -119,13 +143,14 @@ export async function POST(request: NextRequest) {
 
     if (copiedAccount) {
       projectServiceAccountId = copiedAccount.id;
+      copiedServiceAccountId = copiedAccount.id;
     }
   }
 
   // 5. Look up bundled template content
   const templateContent = getTemplateBySlug(template.slug);
   if (!templateContent) {
-    await supabase.from('projects').delete().eq('id', project.id);
+    await cleanupResources(supabase, project.id, copiedServiceAccountId);
     return apiError(`템플릿 번들을 찾을 수 없습니다 (${template.slug}). 관리자에게 문의하세요.`, 404);
   }
 
@@ -139,7 +164,7 @@ export async function POST(request: NextRequest) {
       { auto_init: true }
     );
   } catch (err) {
-    await supabase.from('projects').delete().eq('id', project.id);
+    await cleanupResources(supabase, project.id, copiedServiceAccountId);
 
     if (err instanceof GitHubApiError) {
       if (err.status === 422) {
@@ -183,10 +208,7 @@ export async function POST(request: NextRequest) {
         continue;
       }
       // Fatal error — clean up and return
-      try {
-        await deleteRepo(githubToken, repoResult.owner.login, repoResult.name);
-      } catch { /* best effort cleanup */ }
-      await supabase.from('projects').delete().eq('id', project.id);
+      await cleanupResources(supabase, project.id, copiedServiceAccountId, githubToken, repoResult.owner.login, repoResult.name);
 
       const errMsg = err instanceof GitHubApiError ? err.message : 'GitHub Pages 활성화 실패';
       return apiError(`GitHub Pages 활성화 실패: ${errMsg}`, 502);
@@ -194,10 +216,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (!pagesEnabled) {
-    try {
-      await deleteRepo(githubToken, repoResult.owner.login, repoResult.name);
-    } catch { /* best effort cleanup */ }
-    await supabase.from('projects').delete().eq('id', project.id);
+    await cleanupResources(supabase, project.id, copiedServiceAccountId, githubToken, repoResult.owner.login, repoResult.name);
     return apiError('GitHub Pages 활성화 시간 초과. 다시 시도해주세요.', 502);
   }
 
@@ -228,11 +247,8 @@ export async function POST(request: NextRequest) {
   }
 
   if (pushError) {
-    // Clean up: delete the created repo and project
-    try {
-      await deleteRepo(githubToken, repoResult.owner.login, repoResult.name);
-    } catch { /* best effort cleanup */ }
-    await supabase.from('projects').delete().eq('id', project.id);
+    // Clean up: delete the created repo, service account, and project
+    await cleanupResources(supabase, project.id, copiedServiceAccountId, githubToken, repoResult.owner.login, repoResult.name);
 
     if (pushError instanceof GitHubApiError) {
       return apiError(`파일 업로드 실패: ${pushError.message}`, 502);
