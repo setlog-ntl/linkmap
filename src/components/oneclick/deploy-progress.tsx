@@ -15,6 +15,7 @@ import {
   Globe,
   Lightbulb,
   Clock,
+  Github,
 } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -158,9 +159,19 @@ export function DeployProgress({ status, template }: DeployProgressProps) {
                 </span>
               )}
               {isRunning && (
-                <Badge variant="secondary" className="gap-1">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  {t(locale, 'deployProgress.inProgress')}
+                <Badge variant="secondary" className="gap-1.5 pr-2.5">
+                  <span className="relative flex items-center justify-center">
+                    <Github className="h-3.5 w-3.5 animate-github-wiggle" />
+                    <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  </span>
+                  <span className="flex items-center gap-1">
+                    {t(locale, 'deployProgress.inProgress')}
+                    <span className="flex gap-[2px] items-center ml-0.5">
+                      <span className="h-[3px] w-[3px] rounded-full bg-current animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="h-[3px] w-[3px] rounded-full bg-current animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="h-[3px] w-[3px] rounded-full bg-current animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </span>
+                  </span>
                 </Badge>
               )}
               {isError && (
@@ -210,6 +221,11 @@ export function DeployProgress({ status, template }: DeployProgressProps) {
                       >
                         <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
                       </motion.div>
+                    ) : isActive && (step.name.includes('live') || step.name.includes('deploy') || step.name.includes('build')) ? (
+                      <span className="relative flex-shrink-0">
+                        <Github className="h-5 w-5 text-primary animate-github-wiggle" />
+                        <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-background bg-amber-500 animate-pulse" />
+                      </span>
                     ) : isActive ? (
                       <Loader2 className="h-5 w-5 text-primary animate-spin flex-shrink-0" />
                     ) : step.status === 'error' ? (

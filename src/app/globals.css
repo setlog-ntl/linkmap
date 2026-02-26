@@ -410,6 +410,30 @@
   color: oklch(0.7 0.15 270);
 }
 
+/* Deploy: GitHub octocat wiggle — 배포 진행 중 GitHub 아이콘 귀여운 흔들림 */
+@keyframes github-wiggle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  15% { transform: rotate(-12deg) scale(1.1); }
+  30% { transform: rotate(8deg) scale(1.05); }
+  45% { transform: rotate(-6deg) scale(1.08); }
+  60% { transform: rotate(4deg) scale(1.03); }
+  75% { transform: rotate(-2deg) scale(1); }
+}
+.animate-github-wiggle {
+  animation: github-wiggle 2s ease-in-out infinite;
+  transform-origin: center center;
+}
+
+/* Deploy: GitHub 아이콘 옆 작은 점멸 코드 라인 */
+@keyframes code-blink {
+  0%, 100% { opacity: 0.3; width: 0; }
+  30% { opacity: 1; width: 100%; }
+  70% { opacity: 1; width: 100%; }
+}
+.animate-code-blink {
+  animation: code-blink 1.5s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-pulse-ring,
   .animate-float,
@@ -421,7 +445,9 @@
   .animate-hub-glow,
   .animate-ai-fade-in,
   .animate-ai-reveal,
-  .animate-edge-glow-pulse {
+  .animate-edge-glow-pulse,
+  .animate-github-wiggle,
+  .animate-code-blink {
     animation: none;
   }
 }

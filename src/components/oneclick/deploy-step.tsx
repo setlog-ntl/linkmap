@@ -9,7 +9,9 @@ import {
   AlertTriangle,
   Github,
   ExternalLink,
+  Globe,
   LayoutDashboard,
+  GitFork,
 } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
@@ -148,7 +150,28 @@ function InitialLoadingCard({ locale, template }: { locale: Locale; template?: H
             </motion.p>
           </AnimatePresence>
         </div>
-        <Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" />
+        {/* GitHub Actions 배포 진행 시각화 */}
+        <div className="flex items-center justify-center gap-3">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <GitFork className="h-3.5 w-3.5" />
+            <div className="flex gap-[3px]">
+              <span className="h-[3px] w-2 rounded-full bg-muted-foreground/40 animate-code-blink" style={{ animationDelay: '0ms' }} />
+              <span className="h-[3px] w-3 rounded-full bg-muted-foreground/40 animate-code-blink" style={{ animationDelay: '300ms' }} />
+              <span className="h-[3px] w-1.5 rounded-full bg-muted-foreground/40 animate-code-blink" style={{ animationDelay: '600ms' }} />
+            </div>
+          </div>
+          <span className="relative">
+            <Github className="h-5 w-5 text-muted-foreground animate-github-wiggle" />
+            <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+          </span>
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <div className="flex gap-[3px]">
+              <span className="h-[3px] w-1.5 rounded-full bg-muted-foreground/40 animate-code-blink" style={{ animationDelay: '900ms' }} />
+              <span className="h-[3px] w-3 rounded-full bg-muted-foreground/40 animate-code-blink" style={{ animationDelay: '1200ms' }} />
+            </div>
+            <Globe className="h-3.5 w-3.5" />
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

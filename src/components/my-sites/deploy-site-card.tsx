@@ -152,7 +152,7 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
                 badge.pillClass
               )}
             >
-              <Github className="h-2 w-2" />
+              <Github className={cn('h-2 w-2', isDeploying && 'animate-github-wiggle')} />
               <span className={cn('h-1.5 w-1.5 rounded-full transition-colors duration-500', badge.dotClass)} />
               <span className="whitespace-nowrap">{badge.label}</span>
             </div>
@@ -186,7 +186,10 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
           {/* 배포 중 플레이스홀더 (iframe 없을 때) — deploying이면서 URL은 있는 케이스 */}
           {isDeploying && !iframeLoaded && (
             <div className="absolute left-0 right-0 bottom-0 top-7 flex flex-col items-center justify-center bg-muted gap-2">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground/60" />
+              <span className="relative">
+                <Github className="h-6 w-6 text-muted-foreground/60 animate-github-wiggle" />
+                <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+              </span>
               <span className="text-[11px] text-muted-foreground">
                 {t(locale, 'deploySiteCard.preparing')}
               </span>
@@ -218,7 +221,7 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
               <span className="text-[8px] font-mono">준비 중...</span>
             </div>
             <div className={cn('flex items-center gap-1 shrink-0 px-1.5 py-0.5 rounded-full text-[8px] font-medium', badge.pillClass)}>
-              <Github className="h-2 w-2" />
+              <Github className={cn('h-2 w-2', isDeploying && 'animate-github-wiggle')} />
               <span className={cn('h-1.5 w-1.5 rounded-full', badge.dotClass)} />
               <span className="whitespace-nowrap">{badge.label}</span>
             </div>
