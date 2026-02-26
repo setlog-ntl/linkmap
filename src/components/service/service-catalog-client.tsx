@@ -855,7 +855,7 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
                   exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.98 }}
                   transition={{ duration: 0.2, delay: Math.min(index * 0.02, 0.2) }}
                 >
-                  <ServiceListItem service={service} isUsed={usedServiceIds.includes(service.id)} />
+                  <ServiceListItem service={service} isUsed={usedServiceIds.includes(service.id)} hasGuide={guideServiceIds.includes(service.id)} />
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -912,8 +912,16 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
                         </div>
                       </CardContent>
                     </Link>
-                    {(service.website_url || service.docs_url) && (
+                    {(service.website_url || service.docs_url || guideServiceIds.includes(service.id)) && (
                       <div className="px-6 pb-4 pt-2 flex gap-2 border-t border-border/50 mt-auto">
+                        {guideServiceIds.includes(service.id) && (
+                          <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
+                            <Link href={`/services/${service.slug}?tab=quickstart`}>
+                              <KeyRound className="mr-1 h-3 w-3" />
+                              빠른 설정
+                            </Link>
+                          </Button>
+                        )}
                         {service.website_url && (
                           <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
                             <a href={service.website_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
