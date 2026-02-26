@@ -19,6 +19,7 @@ export default async function ServicesPage() {
   let services: Service[] = [];
   let domains: ServiceDomainRecord[] = [];
   let usedServiceIds: string[] = [];
+  let guideServiceIds: string[] = [];
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -36,12 +37,14 @@ export default async function ServicesPage() {
         usedServiceIds = [...new Set((projectServicesData ?? []).map((ps: { service_id: string }) => ps.service_id))];
       }
     }
-    const [servicesRes, domainsRes] = await Promise.all([
+    const [servicesRes, domainsRes, guidesRes] = await Promise.all([
       supabase.from('services').select('*').order('name'),
       supabase.from('service_domains').select('*').order('order_index'),
+      supabase.from('service_guides').select('service_id'),
     ]);
     services = (servicesRes.data ?? []) as Service[];
     domains = (domainsRes.data ?? []) as ServiceDomainRecord[];
+    guideServiceIds = (guidesRes.data ?? []).map((g: { service_id: string }) => g.service_id);
   } catch {
     profile = null;
   }
@@ -56,7 +59,7 @@ export default async function ServicesPage() {
             내 프로젝트에 필요한 서비스를 쉽게 찾아 연결하세요
           </p>
         </div>
-        <ServiceCatalogClient services={services} domains={domains} usedServiceIds={usedServiceIds} />
+        <ServiceCatalogClient services={services} domains={domains} usedServiceIds={usedServiceIds} guideServiceIds={guideServiceIds} />
       </main>
       <Footer />
     </div>

@@ -26,6 +26,8 @@ export interface ServiceGuideSeed {
   }[];
   pros: { text: string; text_ko: string }[];
   cons: { text: string; text_ko: string }[];
+  api_key_url?: string;
+  api_key_url_label?: string;
 }
 
 // Service ID constants
@@ -126,7 +128,9 @@ CREATE POLICY "Users view own" ON users FOR SELECT USING (auth.uid() = id);`
     cons: [
       { text: 'Learning curve for RLS policies', text_ko: 'RLS 정책 학습 곡선' },
       { text: 'Cold starts on free tier', text_ko: '무료 플랜 콜드 스타트' }
-    ]
+    ],
+    api_key_url: 'https://supabase.com/dashboard/project/_/settings/api',
+    api_key_url_label: 'Supabase Dashboard',
   },
   {
     service_id: S.firebase,
@@ -197,7 +201,9 @@ service cloud.firestore {
     cons: [
       { text: 'Complex pricing for high usage', text_ko: '높은 사용량 시 복잡한 가격' },
       { text: 'Vendor lock-in with Google', text_ko: 'Google 종속성' }
-    ]
+    ],
+    api_key_url: 'https://console.firebase.google.com',
+    api_key_url_label: 'Firebase Console',
   },
   {
     service_id: S.vercel,
@@ -254,7 +260,9 @@ service cloud.firestore {
     cons: [
       { text: 'Expensive for high bandwidth', text_ko: '높은 대역폭 사용 시 비쌈' },
       { text: 'Limited to 10s serverless timeout on Hobby', text_ko: 'Hobby 플랜 10초 타임아웃' }
-    ]
+    ],
+    api_key_url: 'https://vercel.com/account/tokens',
+    api_key_url_label: 'Vercel Tokens',
   },
   {
     service_id: S.stripe,
@@ -334,7 +342,9 @@ const session = await stripe.checkout.sessions.create({
     cons: [
       { text: 'Complex for simple use cases', text_ko: '간단한 사용 사례에는 복잡함' },
       { text: 'Transaction fees add up', text_ko: '거래 수수료 누적' }
-    ]
+    ],
+    api_key_url: 'https://dashboard.stripe.com/apikeys',
+    api_key_url_label: 'Stripe API Keys',
   },
   {
     service_id: S.clerk,
@@ -400,7 +410,9 @@ export const config = { matcher: ['/((?!.*\\\\..*|_next).*)', '/', '/(api|trpc)(
     cons: [
       { text: 'Paid plans for production features', text_ko: '프로덕션 기능 유료' },
       { text: 'Limited customization on free tier', text_ko: '무료 플랜 커스터마이징 제한' }
-    ]
+    ],
+    api_key_url: 'https://dashboard.clerk.com',
+    api_key_url_label: 'Clerk Dashboard',
   },
   {
     service_id: S.openai,
@@ -558,7 +570,9 @@ await supabase.from('documents').insert({
       { text: 'Can be expensive at scale', text_ko: '대규모 사용 시 비용 부담' },
       { text: 'Rate limits on lower tiers', text_ko: '낮은 티어 속도 제한' },
       { text: 'Risk of unexpected cost spikes without max_tokens', text_ko: 'max_tokens 미설정 시 비용 폭증 위험' }
-    ]
+    ],
+    api_key_url: 'https://platform.openai.com/api-keys',
+    api_key_url_label: 'OpenAI API Keys',
   },
   {
     service_id: S.sentry,
@@ -817,7 +831,9 @@ client.capture({ distinctId: 'user', event: 'server_event' })`
     cons: [
       { text: 'Can be expensive for high event volume', text_ko: '높은 이벤트 볼륨 시 비쌈' },
       { text: 'UI can be complex for beginners', text_ko: '초보자에게 복잡한 UI' }
-    ]
+    ],
+    api_key_url: 'https://app.posthog.com/settings/project-api-key',
+    api_key_url_label: 'PostHog Project Key',
   },
 
   // ---------------------------------------------------------------------------
@@ -982,6 +998,8 @@ export function AdUnit({
       { text: 'Limited control over which ads appear — advertisers selected by Google', text_ko: '게재 광고 제어 제한 — Google이 광고주 선택' },
       { text: 'Low RPM for low-traffic or niche sites', text_ko: '저트래픽·틈새 사이트의 경우 낮은 RPM' },
     ],
+    api_key_url: 'https://www.google.com/adsense',
+    api_key_url_label: 'Google AdSense',
   },
   {
     service_id: S.kakao_adfit,
@@ -1139,6 +1157,8 @@ if (!existing) {
       { text: 'Limited ad formats compared to Google AdSense', text_ko: 'Google AdSense 대비 제한적인 광고 형식' },
       { text: 'Minimum payout threshold and monthly settlement cycle', text_ko: '최소 지급액 기준 및 월 정산 주기' },
     ],
+    api_key_url: 'https://adfit.kakao.com',
+    api_key_url_label: 'Kakao AdFit',
   },
   {
     service_id: S.criteo,
@@ -1295,6 +1315,8 @@ export function CriteoTracker() {
       { text: 'Complex setup — requires event tracking on each page type', text_ko: 'AdSense 대비 복잡한 설정 — 페이지 유형별 이벤트 추적 필요' },
       { text: 'Black-box optimization — limited visibility into bid and audience decisions', text_ko: '블랙박스 최적화 — 입찰 및 오디언스 결정에 대한 가시성 제한' },
     ],
+    api_key_url: 'https://marketing.criteo.com',
+    api_key_url_label: 'Criteo Console',
   },
   {
     service_id: S.taboola,
@@ -1462,6 +1484,8 @@ useEffect(() => {
       { text: 'Widget placement largely fixed — limited layout customization', text_ko: '위젯 배치 고정 — 레이아웃 커스터마이징 제한' },
       { text: 'Can affect page performance if loader is not deferred properly', text_ko: '로더가 적절히 지연되지 않으면 페이지 성능에 영향' },
     ],
+    api_key_url: 'https://backstage.taboola.com',
+    api_key_url_label: 'Taboola Backstage',
   },
   {
     service_id: S.amazon_aps,
@@ -1669,6 +1693,8 @@ apstag.fetchBids({ slots: [...], timeout: 2000 }, callback)`,
       { text: 'Minimum traffic requirement (5,000+ daily unique visitors)', text_ko: '최소 트래픽 요건 (일일 고유 방문자 5,000명+)' },
       { text: 'Adds latency to ad loading if timeout is not managed carefully', text_ko: '타임아웃 관리 미흡 시 광고 로딩 지연 발생' },
     ],
+    api_key_url: 'https://aps.amazon.com/aps/index.html',
+    api_key_url_label: 'Amazon APS',
   },
   {
     service_id: S.google_ad_manager,
@@ -1917,5 +1943,7 @@ export function GamAdSlot({
       { text: 'Google vendor lock-in — migration requires significant infrastructure work', text_ko: 'Google 종속성 — 마이그레이션 시 상당한 인프라 작업 필요' },
       { text: 'Full-featured UI can be overwhelming for small publisher teams', text_ko: '소규모 팀에게 압도적인 복잡한 UI' },
     ],
+    api_key_url: 'https://admanager.google.com',
+    api_key_url_label: 'Google Ad Manager',
   },
 ];

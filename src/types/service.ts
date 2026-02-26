@@ -98,6 +98,8 @@ export interface ServiceGuide {
   integration_tips: IntegrationTip[];
   pros: LocalizedText[];
   cons: LocalizedText[];
+  api_key_url: string | null;
+  api_key_url_label: string | null;
   updated_at: string;
 }
 

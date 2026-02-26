@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, ArrowRight } from 'lucide-react';
+import { ExternalLink, ArrowRight, KeyRound } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { DifficultyBadge, GithubStarsBadge, FreeTierBadge } from './service-badges';
 import { allCategoryLabels } from '@/lib/constants/service-filters';
@@ -13,9 +13,10 @@ import type { Service, ServiceCategory } from '@/types';
 interface ServiceListItemProps {
   service: Service;
   isUsed?: boolean;
+  hasGuide?: boolean;
 }
 
-export function ServiceListItem({ service, isUsed = false }: ServiceListItemProps) {
+export function ServiceListItem({ service, isUsed = false, hasGuide = false }: ServiceListItemProps) {
   return (
     <Card className="hover:shadow-md transition-all duration-200 group">
       <div className="flex items-center gap-4 p-4">
@@ -56,6 +57,13 @@ export function ServiceListItem({ service, isUsed = false }: ServiceListItemProp
 
         {/* External links */}
         <div className="hidden sm:flex items-center gap-1 shrink-0">
+          {hasGuide && (
+            <Button variant="ghost" size="icon" className="h-8 w-8" asChild title="빠른 설정">
+              <Link href={`/services/${service.slug}?tab=quickstart`} onClick={(e) => e.stopPropagation()}>
+                <KeyRound className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
+          )}
           {service.website_url && (
             <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
               <a href={service.website_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>

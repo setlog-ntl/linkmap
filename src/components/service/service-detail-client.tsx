@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +14,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, ExternalLink, Globe, BookOpen, Github, Clock, Copy, Check } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Globe, BookOpen, Github, Clock, Copy, Check, KeyRound } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { allCategoryLabels, allCategoryEmojis, domainLabels, domainIcons } from '@/lib/constants/service-filters';
 import { DifficultyBadge, GithubStarsBadge, FreeTierBadge, VendorLockInBadge, CostEstimateBadge } from './service-badges';
@@ -61,6 +62,9 @@ const depTypeLabels: Record<DependencyType, string> = {
 };
 
 export function ServiceDetailClient({ service, guide, costTiers, dependencies }: ServiceDetailClientProps) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const hasGuide = guide && (guide.quick_start || guide.setup_steps?.length > 0);
   const hasTips = guide && (guide.common_pitfalls?.length > 0 || guide.integration_tips?.length > 0 || guide.pros?.length > 0 || guide.cons?.length > 0);
 
@@ -79,6 +83,22 @@ export function ServiceDetailClient({ service, guide, costTiers, dependencies }:
     ...(dependencies.length > 0 ? [{ value: 'related', label: '대안 & 연관' }] : []),
     ...(hasTips ? [{ value: 'tips', label: '활용 팁' }] : []),
   ];
+
+  const tabParam = searchParams.get('tab');
+  const validTabs = availableTabs.map(t => t.value);
+  const initialTab = tabParam && validTabs.includes(tabParam) ? tabParam : 'overview';
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    const url = new URL(window.location.href);
+    if (value === 'overview') {
+      url.searchParams.delete('tab');
+    } else {
+      url.searchParams.set('tab', value);
+    }
+    router.replace(url.pathname + url.search, { scroll: false });
+  };
 
   return (
     <div className="space-y-6">
@@ -114,7 +134,7 @@ export function ServiceDetailClient({ service, guide, costTiers, dependencies }:
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="overview">
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="flex flex-wrap h-auto gap-1">
           {availableTabs.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value}>
@@ -266,6 +286,30 @@ export function ServiceDetailClient({ service, guide, costTiers, dependencies }:
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm whitespace-pre-wrap">{guide.quick_start}</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {guide.api_key_url && (
+              <Card className="border-primary/20 bg-primary/5">
+                <CardContent className="p-4 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <KeyRound className="h-4.5 w-4.5 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium">API 키 발급 / 확인</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {guide.api_key_url_label || service.name} 콘솔에서 키를 발급받으세요
+                      </p>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" className="shrink-0" asChild>
+                    <a href={guide.api_key_url} target="_blank" rel="noopener noreferrer">
+                      {guide.api_key_url_label || '콘솔 열기'}
+                      <ExternalLink className="ml-1.5 h-3 w-3" />
+                    </a>
+                  </Button>
                 </CardContent>
               </Card>
             )}
