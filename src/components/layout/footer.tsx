@@ -5,6 +5,7 @@ import { Github } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { toast } from 'sonner';
+import { GUIDE_CATEGORIES, getGuidesByCategory } from '@/data/ui/guide-meta';
 
 export function Footer() {
   const { locale } = useLocaleStore();
@@ -12,7 +13,7 @@ export function Footer() {
   return (
     <footer className="bg-[var(--circuit-950)] text-muted-foreground">
       <div className="container py-8 md:py-12">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-1 font-bold text-lg mb-3">
               <span className="text-brand-green">Link</span>
@@ -30,20 +31,27 @@ export function Footer() {
               <li><Link href="/#pricing" className="hover:text-white transition-colors">{t(locale, 'landing.pricingTitle')}</Link></li>
             </ul>
           </div>
-          <div>
-            <h4 className="font-semibold text-sm mb-3 text-white">{t(locale, 'landing.footerSupport')}</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/guides/env" className="hover:text-white transition-colors">{t(locale, 'landing.guideEnv')}</Link></li>
-              <li><Link href="/guides/github" className="hover:text-white transition-colors">{t(locale, 'landing.guideGitHub')}</Link></li>
-              <li><Link href="/guides/auth" className="hover:text-white transition-colors">{t(locale, 'landing.guideAuth')}</Link></li>
-              <li><Link href="/guides/cloudflare" className="hover:text-white transition-colors">{t(locale, 'landing.guideCloudflare')}</Link></li>
-              <li><Link href="/guides/frontend" className="hover:text-white transition-colors">프론트엔드 가이드</Link></li>
-              <li><Link href="/guides/backend" className="hover:text-white transition-colors">백엔드 가이드</Link></li>
-              <li><Link href="/guides/deploy" className="hover:text-white transition-colors">도메인·배포·서버</Link></li>
-              <li><Link href="/guides/openai" className="hover:text-white transition-colors">OpenAI 가이드</Link></li>
-              <li><a href="mailto:cdhrich2@gmail.com" className="hover:text-white transition-colors">Contact</a></li>
-            </ul>
-          </div>
+          {(['concept', 'service'] as const).map((catKey) => {
+            const cat = GUIDE_CATEGORIES[catKey];
+            const guides = getGuidesByCategory(catKey);
+            return (
+              <div key={catKey}>
+                <h4 className="font-semibold text-sm mb-3 text-white">{cat.label}</h4>
+                <ul className="space-y-2 text-sm">
+                  {guides.map((guide) => (
+                    <li key={guide.slug}>
+                      <Link href={guide.href} className="hover:text-white transition-colors">
+                        {guide.title}
+                      </Link>
+                    </li>
+                  ))}
+                  {catKey === 'concept' && (
+                    <li><a href="mailto:cdhrich2@gmail.com" className="hover:text-white transition-colors">Contact</a></li>
+                  )}
+                </ul>
+              </div>
+            );
+          })}
           <div>
             <h4 className="font-semibold text-sm mb-3 text-white">{t(locale, 'landing.footerLegal')}</h4>
             <ul className="space-y-2 text-sm">

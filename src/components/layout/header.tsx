@@ -9,13 +9,15 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { Menu, Globe, Search, BookOpen, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench } from 'lucide-react';
+import { Menu, Globe, Search, BookOpen, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench, ArrowRight } from 'lucide-react';
+import { GUIDE_CATEGORIES, getGuidesByCategory } from '@/data/ui/guide-meta';
 import { useUIStore } from '@/stores/ui-store';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t, localeNames } from '@/lib/i18n';
@@ -71,46 +73,33 @@ export function Header({ profile }: HeaderProps) {
           {t(locale, 'nav.guides')}
           <ChevronDown className="h-3 w-3" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem asChild>
-            <Link href="/guides/env" onClick={() => setSidebarOpen(false)}>
-              {t(locale, 'landing.guideEnv')}
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/guides/github" onClick={() => setSidebarOpen(false)}>
-              {t(locale, 'landing.guideGitHub')}
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/guides/auth" onClick={() => setSidebarOpen(false)}>
-              {t(locale, 'landing.guideAuth')}
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/guides/cloudflare" onClick={() => setSidebarOpen(false)}>
-              {t(locale, 'landing.guideCloudflare')}
-            </Link>
-          </DropdownMenuItem>
+        <DropdownMenuContent align="start" className="w-56">
+          {(['concept', 'service'] as const).map((catKey, idx) => {
+            const cat = GUIDE_CATEGORIES[catKey];
+            const CatIcon = cat.icon;
+            const guides = getGuidesByCategory(catKey);
+            return (
+              <div key={catKey}>
+                {idx > 0 && <DropdownMenuSeparator />}
+                <DropdownMenuLabel className="flex items-center gap-1.5 text-xs">
+                  <CatIcon className="h-3.5 w-3.5" />
+                  {cat.label}
+                </DropdownMenuLabel>
+                {guides.map((guide) => (
+                  <DropdownMenuItem key={guide.slug} asChild>
+                    <Link href={guide.href} onClick={() => setSidebarOpen(false)}>
+                      {guide.title}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </div>
+            );
+          })}
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
-            <Link href="/guides/frontend" onClick={() => setSidebarOpen(false)}>
-              프론트엔드 가이드
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/guides/backend" onClick={() => setSidebarOpen(false)}>
-              백엔드 가이드
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/guides/deploy" onClick={() => setSidebarOpen(false)}>
-              도메인·배포·서버
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/guides/openai" onClick={() => setSidebarOpen(false)}>
-              OpenAI 가이드
+            <Link href="/guides" onClick={() => setSidebarOpen(false)} className="flex items-center justify-between">
+              전체 보기
+              <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -291,20 +280,34 @@ export function Header({ profile }: HeaderProps) {
                 </Link>
 
                 <div className="border-t my-2" />
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold px-2.5 mb-1">
-                  {t(locale, 'nav.guides')}
-                </p>
-                <Link href="/guides/env" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5" onClick={() => setSidebarOpen(false)}>
-                  {t(locale, 'landing.guideEnv')}
-                </Link>
-                <Link href="/guides/github" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5" onClick={() => setSidebarOpen(false)}>
-                  {t(locale, 'landing.guideGitHub')}
-                </Link>
-                <Link href="/guides/auth" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5" onClick={() => setSidebarOpen(false)}>
-                  {t(locale, 'landing.guideAuth')}
-                </Link>
-                <Link href="/guides/cloudflare" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5" onClick={() => setSidebarOpen(false)}>
-                  {t(locale, 'landing.guideCloudflare')}
+                {(['concept', 'service'] as const).map((catKey) => {
+                  const cat = GUIDE_CATEGORIES[catKey];
+                  const guides = getGuidesByCategory(catKey);
+                  return (
+                    <div key={catKey}>
+                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold px-2.5 mb-1 mt-2">
+                        {cat.label}
+                      </p>
+                      {guides.map((guide) => (
+                        <Link
+                          key={guide.slug}
+                          href={guide.href}
+                          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 block"
+                          onClick={() => setSidebarOpen(false)}
+                        >
+                          {guide.title}
+                        </Link>
+                      ))}
+                    </div>
+                  );
+                })}
+                <Link
+                  href="/guides"
+                  className="text-sm font-medium text-brand-blue hover:text-brand-blue/80 transition-colors px-2.5 py-1.5 flex items-center gap-1 mt-1"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  전체 보기
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
 
                 <div className="border-t my-2" />

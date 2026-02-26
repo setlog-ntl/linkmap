@@ -8,8 +8,9 @@ import {
   Rocket, Search, Map as MapIcon,
   List, Link2, Key, Settings, BookOpen, ChevronDown, ChevronRight,
   LogOut, Bot, User, GitBranch, Wrench, FolderKanban, Plus, LayoutDashboard,
-  Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star,
+  Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight,
 } from 'lucide-react';
+import { GUIDE_CATEGORIES, getGuidesByCategory, type GuideCategory } from '@/data/ui/guide-meta';
 import { createClient } from '@/lib/supabase/client';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
@@ -119,16 +120,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
     { labelKey: 'nav.serviceCatalog', href: '/services', icon: Search },
   ];
 
-  const guideLinks = [
-    { label: '환경변수 가이드', href: '/guides/env' },
-    { label: 'GitHub 가이드', href: '/guides/github' },
-    { label: '인증 가이드', href: '/guides/auth' },
-    { label: 'Cloudflare 가이드', href: '/guides/cloudflare' },
-    { label: '프론트엔드 가이드', href: '/guides/frontend' },
-    { label: '백엔드 가이드', href: '/guides/backend' },
-    { label: '도메인·배포·서버', href: '/guides/deploy' },
-    { label: 'OpenAI 가이드', href: '/guides/openai' },
-  ];
+  const guideCategoryOrder: GuideCategory[] = ['concept', 'service'];
 
   const isActive = (href: string, exact?: boolean) => {
     if (exact) return pathname === href;
@@ -550,15 +542,34 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {guideLinks.map((link) => (
-                        <SidebarMenuSubItem key={link.href}>
-                          <SidebarMenuSubButton asChild isActive={isActive(link.href)}>
-                            <Link href={link.href}>
-                              <span>{link.label}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
+                      {guideCategoryOrder.map((catKey) => {
+                        const cat = GUIDE_CATEGORIES[catKey];
+                        const guides = getGuidesByCategory(catKey);
+                        return (
+                          <div key={catKey}>
+                            <li className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold px-2 pt-2 pb-1">
+                              {cat.label}
+                            </li>
+                            {guides.map((guide) => (
+                              <SidebarMenuSubItem key={guide.href}>
+                                <SidebarMenuSubButton asChild isActive={isActive(guide.href)}>
+                                  <Link href={guide.href}>
+                                    <span>{guide.title}</span>
+                                  </Link>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            ))}
+                          </div>
+                        );
+                      })}
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild isActive={pathname === '/guides'}>
+                          <Link href="/guides" className="text-muted-foreground">
+                            <ArrowRight className="h-3.5 w-3.5" />
+                            <span>전체 보기</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>
