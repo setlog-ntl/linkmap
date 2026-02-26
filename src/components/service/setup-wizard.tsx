@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Dialog,
   DialogContent,
@@ -21,9 +22,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { CheckCircle2, XCircle, ArrowRight, ArrowLeft, ExternalLink } from 'lucide-react';
+import { CheckCircle2, XCircle, ArrowRight, ArrowLeft, ExternalLink, KeyRound } from 'lucide-react';
 import { useAddEnvVar } from '@/lib/queries/env-vars';
 import { useRunHealthCheck } from '@/lib/queries/health-checks';
+import { createClient } from '@/lib/supabase/client';
+import { queryKeys } from '@/lib/queries/keys';
 import { SetupArchitecturePreview } from './setup-architecture-preview';
 import { SetupLiveLogs } from './setup-live-logs';
 import type { Service, ProjectService, Environment, HealthCheck } from '@/types';
@@ -55,6 +58,20 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
 
   const addEnvVar = useAddEnvVar(projectId);
   const runHealthCheck = useRunHealthCheck();
+
+  const { data: guide } = useQuery({
+    queryKey: queryKeys.serviceGuides.byService(service.id),
+    queryFn: async () => {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from('service_guides')
+        .select('api_key_url, api_key_url_label')
+        .eq('service_id', service.id)
+        .single();
+      return data;
+    },
+    staleTime: Infinity,
+  });
 
   const requiredVars = service.required_env_vars || [];
   const stepIndex = steps.indexOf(currentStep);
@@ -145,17 +162,30 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
               <p className="text-sm text-muted-foreground">
                 {service.description_ko || service.description}
               </p>
-              {service.docs_url && (
-                <a
-                  href={service.docs_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  공식 문서 보기
-                </a>
-              )}
+              <div className="flex flex-wrap gap-3">
+                {service.docs_url && (
+                  <a
+                    href={service.docs_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    공식 문서 보기
+                  </a>
+                )}
+                {guide?.api_key_url && (
+                  <a
+                    href={guide.api_key_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                  >
+                    <KeyRound className="h-3.5 w-3.5" />
+                    {guide.api_key_url_label || 'API 키 발급'}
+                  </a>
+                )}
+              </div>
 
               <div className="space-y-2">
                 <Label>환경 선택</Label>

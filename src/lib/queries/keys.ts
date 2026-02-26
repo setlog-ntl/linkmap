@@ -16,6 +16,9 @@ export const queryKeys = {
     custom: ['catalog', 'custom'] as const,
     matches: ['catalog', 'matches'] as const,
   },
+  serviceGuides: {
+    byService: (serviceId: string) => ['service-guides', serviceId] as const,
+  },
   connections: {
     byProject: (projectId: string) => ['connections', 'project', projectId] as const,
   },
