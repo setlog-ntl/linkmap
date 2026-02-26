@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -155,6 +155,17 @@ export function TemplatePickerStep({
   );
   const [siteNameTouched, setSiteNameTouched] = useState(!!defaultSiteName);
   const [siteNameError, setSiteNameError] = useState<string | null>(null);
+
+  // 기존 배포 목록이 비동기 로딩 후 도착하면 사이트 이름 재계산
+  const prevExistingCountRef = useRef(existingSiteNames.length);
+  useEffect(() => {
+    // 배포 목록이 0 → N으로 로딩 완료된 시점에만 실행
+    if (prevExistingCountRef.current === 0 && existingSiteNames.length > 0 && !siteNameTouched && selectedTemplate) {
+      const autoName = resolveDefaultSiteName(selectedTemplate, templates, existingSiteNames);
+      if (autoName) setSiteName(autoName);
+    }
+    prevExistingCountRef.current = existingSiteNames.length;
+  }, [existingSiteNames, siteNameTouched, selectedTemplate, templates]);
 
   // Re-apply recommended template when templates load
   if (!selectedTemplate && recommendedTemplateId && templates.length > 0) {
