@@ -108,6 +108,11 @@ export function Header({ profile }: HeaderProps) {
               도메인·배포·서버
             </Link>
           </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/guides/openai" onClick={() => setSidebarOpen(false)}>
+              OpenAI 가이드
+            </Link>
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </>

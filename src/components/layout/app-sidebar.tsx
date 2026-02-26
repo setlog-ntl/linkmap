@@ -127,6 +127,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
     { label: '프론트엔드 가이드', href: '/guides/frontend' },
     { label: '백엔드 가이드', href: '/guides/backend' },
     { label: '도메인·배포·서버', href: '/guides/deploy' },
+    { label: 'OpenAI 가이드', href: '/guides/openai' },
   ];
 
   const isActive = (href: string, exact?: boolean) => {

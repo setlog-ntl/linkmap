@@ -40,6 +40,7 @@ export function Footer() {
               <li><Link href="/guides/frontend" className="hover:text-white transition-colors">프론트엔드 가이드</Link></li>
               <li><Link href="/guides/backend" className="hover:text-white transition-colors">백엔드 가이드</Link></li>
               <li><Link href="/guides/deploy" className="hover:text-white transition-colors">도메인·배포·서버</Link></li>
+              <li><Link href="/guides/openai" className="hover:text-white transition-colors">OpenAI 가이드</Link></li>
               <li><a href="mailto:cdhrich2@gmail.com" className="hover:text-white transition-colors">Contact</a></li>
             </ul>
           </div>
