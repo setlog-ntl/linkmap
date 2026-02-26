@@ -92,14 +92,14 @@ export function DeploySuccess({ status, projectId, template }: DeploySuccessProp
   return (
     <>
       <Card className="border-green-300 dark:border-green-700 bg-gradient-to-b from-green-50/80 to-white dark:from-green-950/30 dark:to-background shadow-lg">
-        <CardContent className="py-8 space-y-6">
+        <CardContent className="py-5 space-y-4">
           {/* Live preview area */}
-          <div className="text-center space-y-4">
+          <div className="text-center space-y-3">
             <div className="relative mx-auto w-full">
               {liveUrl ? (
                 <div
                   className="relative w-full overflow-hidden rounded-xl border bg-background shadow-lg"
-                  style={{ height: '320px' }}
+                  style={{ height: '280px' }}
                 >
                   {/* Browser chrome — 주소창 + GitHub 배포 상태 배지 */}
                   <div className="absolute top-0 left-0 right-0 h-9 bg-muted/90 border-b z-20 flex items-center px-3 gap-2 rounded-t-xl">
@@ -128,19 +128,19 @@ export function DeploySuccess({ status, projectId, template }: DeploySuccessProp
                   </div>
 
                   {/* Scaled iframe — 주소창 아래. 재시도 중엔 이전 화면 그대로 유지 */}
-                  <div className="absolute left-0 right-0 bottom-0 top-9 overflow-hidden pointer-events-none">
+                  <div className="absolute left-0 right-0 bottom-0 top-9 overflow-hidden pointer-events-none flex justify-center">
                     <iframe
                       src={iframeSrc}
                       title="Site preview"
                       className={cn(
-                        'absolute top-0 left-0 border-0 transition-opacity duration-700',
+                        'border-0 transition-opacity duration-700 shrink-0',
                         iframeLoaded ? 'opacity-100' : 'opacity-80'
                       )}
                       style={{
-                        width: '860px',
-                        height: '720px',
-                        transform: 'scale(0.47)',
-                        transformOrigin: 'top left',
+                        width: '1280px',
+                        height: '800px',
+                        transform: 'scale(0.5)',
+                        transformOrigin: 'top center',
                       }}
                       sandbox="allow-scripts allow-same-origin"
                       loading="lazy"
@@ -170,13 +170,13 @@ export function DeploySuccess({ status, projectId, template }: DeploySuccessProp
               )}
             </div>
 
-            <div className="space-y-1 pt-1">
+            <div className="space-y-0.5">
               {template && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {locale === 'ko' ? template.name_ko : template.name}
                 </p>
               )}
-              <h3 className="text-xl font-semibold">
+              <h3 className="text-lg font-semibold">
                 {t(locale, 'deployProgress.siteReady')}
               </h3>
             </div>
@@ -195,7 +195,7 @@ export function DeploySuccess({ status, projectId, template }: DeploySuccessProp
           </div>
 
           {/* 2x2 Action grid */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             {liveUrl && (
               <ActionCard
                 href={liveUrl}
@@ -263,12 +263,14 @@ function ActionCard({
 }) {
   const inner = (
     <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full">
-      <CardContent className="py-4 px-3 flex flex-col items-center gap-1.5 text-center">
-        <div className="text-muted-foreground">{icon}</div>
-        <span className="text-sm font-medium">{label}</span>
-        {desc && (
-          <span className="text-xs text-muted-foreground leading-tight">{desc}</span>
-        )}
+      <CardContent className="py-2.5 px-2.5 flex items-center gap-2.5">
+        <div className="text-muted-foreground shrink-0">{icon}</div>
+        <div className="min-w-0">
+          <span className="text-sm font-medium leading-tight block">{label}</span>
+          {desc && (
+            <span className="text-[11px] text-muted-foreground leading-tight block">{desc}</span>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
@@ -321,8 +323,8 @@ function ShareSection({ url, locale }: { url: string; locale: Locale }) {
   }, [url, shareText]);
 
   return (
-    <div className="pt-4 border-t">
-      <p className="text-sm font-medium text-center mb-3">
+    <div className="pt-3 border-t">
+      <p className="text-xs font-medium text-center mb-2">
         {t(locale, 'deployProgress.shareTitle')}
       </p>
       <div className="flex items-center justify-center gap-2">
