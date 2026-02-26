@@ -39,10 +39,24 @@ export async function getUserQuota(userId: string): Promise<PlanQuota> {
   return (quota as PlanQuota) || DEFAULT_QUOTA;
 }
 
-export async function checkHomepageDeployQuota(userId: string): Promise<{ allowed: boolean; current: number; max: number }> {
+/** Atomically checks homepage deploy quota using a DB-level advisory lock.
+ *  Falls back to the legacy two-query approach if the RPC is unavailable. */
+export async function checkHomepageDeployQuota(
+  userId: string,
+): Promise<{ allowed: boolean; current: number; max: number }> {
   const supabase = await createClient();
-  const quota = await getUserQuota(userId);
 
+  const { data, error } = await supabase.rpc('check_homepage_deploy_quota', {
+    p_user_id: userId,
+  });
+
+  if (!error && data) {
+    const result = data as { allowed: boolean; current: number; max: number };
+    return result;
+  }
+
+  // Fallback: legacy two-query approach (used before migration 052 is applied)
+  const quota = await getUserQuota(userId);
   const { count } = await supabase
     .from('homepage_deploys')
     .select('*', { count: 'exact', head: true })
@@ -55,10 +69,24 @@ export async function checkHomepageDeployQuota(userId: string): Promise<{ allowe
   };
 }
 
-export async function checkProjectQuota(userId: string): Promise<{ allowed: boolean; current: number; max: number }> {
+/** Atomically checks project quota using a DB-level advisory lock.
+ *  Falls back to the legacy two-query approach if the RPC is unavailable. */
+export async function checkProjectQuota(
+  userId: string,
+): Promise<{ allowed: boolean; current: number; max: number }> {
   const supabase = await createClient();
-  const quota = await getUserQuota(userId);
 
+  const { data, error } = await supabase.rpc('check_project_quota', {
+    p_user_id: userId,
+  });
+
+  if (!error && data) {
+    const result = data as { allowed: boolean; current: number; max: number };
+    return result;
+  }
+
+  // Fallback: legacy two-query approach
+  const quota = await getUserQuota(userId);
   const { count } = await supabase
     .from('projects')
     .select('*', { count: 'exact', head: true })

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { unauthorizedError, apiError } from '@/lib/api/errors';
+import { unauthorizedError, apiError, validationError } from '@/lib/api/errors';
+import { checkoutRequestSchema } from '@/lib/validations/stripe';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -10,8 +11,10 @@ export async function POST(request: NextRequest) {
   const stripeKey = process.env.STRIPE_SECRET_KEY;
   if (!stripeKey) return apiError('결제 시스템이 설정되지 않았습니다', 503);
 
-  const { priceId } = await request.json();
-  if (!priceId) return apiError('가격 ID가 필요합니다', 400);
+  const body = await request.json();
+  const parsed = checkoutRequestSchema.safeParse(body);
+  if (!parsed.success) return validationError(parsed.error);
+  const { priceId } = parsed.data;
 
   // Get or create stripe customer (with race condition handling)
   const { data: subscription } = await supabase

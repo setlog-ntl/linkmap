@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { timingSafeEqual, createHmac } from 'crypto';
+import { logAudit } from '@/lib/audit';
 
 function verifyStripeSignature(
   payload: string,
@@ -72,15 +73,34 @@ export async function POST(request: NextRequest) {
       const customerId = session.customer;
       const subscriptionId = session.subscription;
 
-      await supabase
-        .from('subscriptions')
-        .update({
-          stripe_subscription_id: subscriptionId,
-          plan: 'pro',
-          status: 'active',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('stripe_customer_id', customerId);
+      const [, { data: sub }] = await Promise.all([
+        supabase
+          .from('subscriptions')
+          .update({
+            stripe_subscription_id: subscriptionId,
+            plan: 'pro',
+            status: 'active',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('stripe_customer_id', customerId),
+        supabase
+          .from('subscriptions')
+          .select('user_id')
+          .eq('stripe_customer_id', customerId as string)
+          .single(),
+      ]);
+
+      if (sub?.user_id) {
+        await logAudit(sub.user_id, {
+          action: 'payment.checkout_complete',
+          resourceType: 'subscription',
+          details: {
+            stripe_customer_id: customerId,
+            stripe_subscription_id: subscriptionId,
+            plan: 'pro',
+          },
+        });
+      }
       break;
     }
 
@@ -93,20 +113,44 @@ export async function POST(request: NextRequest) {
       };
       const status = subscription.status === 'active' ? 'active' : 'past_due';
 
-      await supabase
-        .from('subscriptions')
-        .update({
-          status,
-          current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-          current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq('stripe_subscription_id', subscription.id);
+      const [, { data: subUpdated }] = await Promise.all([
+        supabase
+          .from('subscriptions')
+          .update({
+            status,
+            current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+            current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('stripe_subscription_id', subscription.id),
+        supabase
+          .from('subscriptions')
+          .select('user_id')
+          .eq('stripe_subscription_id', subscription.id)
+          .single(),
+      ]);
+
+      if (subUpdated?.user_id) {
+        await logAudit(subUpdated.user_id, {
+          action: 'payment.subscription_updated',
+          resourceType: 'subscription',
+          details: {
+            stripe_subscription_id: subscription.id,
+            status,
+          },
+        });
+      }
       break;
     }
 
     case 'customer.subscription.deleted': {
-      const subscription = data.object;
+      const subscription = data.object as { id: string };
+
+      const { data: subDeleted } = await supabase
+        .from('subscriptions')
+        .select('user_id')
+        .eq('stripe_subscription_id', subscription.id)
+        .single();
 
       await supabase
         .from('subscriptions')
@@ -116,6 +160,14 @@ export async function POST(request: NextRequest) {
           updated_at: new Date().toISOString(),
         })
         .eq('stripe_subscription_id', subscription.id);
+
+      if (subDeleted?.user_id) {
+        await logAudit(subDeleted.user_id, {
+          action: 'payment.subscription_canceled',
+          resourceType: 'subscription',
+          details: { stripe_subscription_id: subscription.id },
+        });
+      }
       break;
     }
   }
