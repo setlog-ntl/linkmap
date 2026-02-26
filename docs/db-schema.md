@@ -171,6 +171,8 @@
 | code_examples | JSONB | YES | '{}' |
 | pros | JSONB | YES | '[]' |
 | cons | JSONB | YES | '[]' |
+| api_key_url | TEXT | YES | NULL |
+| api_key_url_label | TEXT | YES | NULL |
 | updated_at | TIMESTAMPTZ | NO | now() |
 
 **TS Type**: `ServiceGuide` (`src/types/service.ts`)
