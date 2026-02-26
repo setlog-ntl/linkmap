@@ -42,6 +42,11 @@ const S = {
   sentry: '10000000-0000-4000-a000-000000000013',
   neon: '10000000-0000-4000-a000-000000000015',
   posthog: '10000000-0000-4000-a000-000000000019',
+  // Social Login
+  kakao_login: '10000000-0000-4000-a000-000000000054',
+  google_oauth: '10000000-0000-4000-a000-000000000055',
+  naver_login: '10000000-0000-4000-a000-000000000056',
+  apple_login: '10000000-0000-4000-a000-000000000057',
   // Advertising
   google_adsense: '10000000-0000-4000-a000-000000000097',
   kakao_adfit: '10000000-0000-4000-a000-000000000098',
@@ -637,7 +642,9 @@ transaction.finish()`
     cons: [
       { text: 'Can be overwhelming with many errors', text_ko: '많은 에러 시 압도적' },
       { text: 'Paid plans for team features', text_ko: '팀 기능 유료' }
-    ]
+    ],
+    api_key_url: 'https://sentry.io/settings/account/api/auth-tokens/',
+    api_key_url_label: 'Sentry Auth Tokens',
   },
   {
     service_id: S.neon,
@@ -707,7 +714,9 @@ const result = await sql.transaction([
     cons: [
       { text: 'Cold starts on free tier', text_ko: '무료 플랜 콜드 스타트' },
       { text: 'Limited to PostgreSQL', text_ko: 'PostgreSQL로 제한' }
-    ]
+    ],
+    api_key_url: 'https://console.neon.tech/app/settings/api-keys',
+    api_key_url_label: 'Neon API Keys',
   },
   {
     service_id: S.resend,
@@ -767,7 +776,9 @@ await resend.emails.send({
     cons: [
       { text: 'Limited analytics compared to SendGrid', text_ko: 'SendGrid 대비 제한적 분석' },
       { text: 'Newer service with smaller ecosystem', text_ko: '신생 서비스로 작은 생태계' }
-    ]
+    ],
+    api_key_url: 'https://resend.com/api-keys',
+    api_key_url_label: 'Resend API Keys',
   },
   {
     service_id: S.posthog,
@@ -1945,5 +1956,111 @@ export function GamAdSlot({
     ],
     api_key_url: 'https://admanager.google.com',
     api_key_url_label: 'Google Ad Manager',
+  },
+
+  // ---------------------------------------------------------------------------
+  // Social Login services
+  // ---------------------------------------------------------------------------
+  {
+    service_id: S.kakao_login,
+    quick_start: '카카오 개발자 콘솔에서 앱을 생성하고 REST API 키를 발급받아 Next.js 앱에 카카오 로그인을 추가할 수 있습니다.',
+    quick_start_en: 'Create an app in Kakao Developers console and get a REST API key to add Kakao Login to your Next.js app.',
+    setup_steps: [
+      {
+        step: 1,
+        title: 'Create Kakao App',
+        title_ko: '카카오 앱 생성',
+        description: 'Go to developers.kakao.com, create a new application, and copy the REST API Key and JavaScript Key.',
+        description_ko: 'developers.kakao.com에서 새 애플리케이션을 생성하고 REST API 키와 JavaScript 키를 복사합니다.',
+      },
+      {
+        step: 2,
+        title: 'Configure Redirect URI',
+        title_ko: '리다이렉트 URI 설정',
+        description: 'In Kakao Developers > App Settings > Kakao Login, add your redirect URI (e.g., https://your-domain.com/api/auth/callback/kakao).',
+        description_ko: '카카오 개발자 > 앱 설정 > 카카오 로그인에서 리다이렉트 URI를 추가합니다 (예: https://your-domain.com/api/auth/callback/kakao).',
+      },
+      {
+        step: 3,
+        title: 'Set Environment Variables',
+        title_ko: '환경변수 설정',
+        description: 'Add NEXT_PUBLIC_KAKAO_CLIENT_ID, KAKAO_CLIENT_SECRET, NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY, and KAKAO_REDIRECT_URI to your .env file.',
+        description_ko: '.env 파일에 NEXT_PUBLIC_KAKAO_CLIENT_ID, KAKAO_CLIENT_SECRET, NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY, KAKAO_REDIRECT_URI를 추가합니다.',
+      },
+    ],
+    code_examples: {},
+    common_pitfalls: [
+      {
+        title: 'Redirect URI mismatch',
+        title_ko: '리다이렉트 URI 불일치',
+        problem: 'OAuth callback fails with redirect_uri_mismatch error',
+        solution: 'Ensure the redirect URI in Kakao Developers matches your app URL exactly including protocol and path',
+      },
+    ],
+    integration_tips: [],
+    pros: [
+      { text: 'Most popular login method in Korea', text_ko: '한국에서 가장 인기 있는 로그인 방식' },
+      { text: 'Completely free to use', text_ko: '완전 무료' },
+    ],
+    cons: [
+      { text: 'Korea-only user base', text_ko: '한국 전용 사용자 기반' },
+      { text: 'Documentation mainly in Korean', text_ko: '문서가 주로 한국어' },
+    ],
+    api_key_url: 'https://developers.kakao.com/console/app',
+    api_key_url_label: 'Kakao Developers',
+  },
+  {
+    service_id: S.google_oauth,
+    quick_start: 'Google Cloud Console에서 OAuth 2.0 클라이언트를 생성하고 Client ID/Secret을 발급받아 소셜 로그인을 추가할 수 있습니다.',
+    quick_start_en: 'Create an OAuth 2.0 client in Google Cloud Console and get Client ID/Secret to add social login.',
+    setup_steps: [],
+    code_examples: {},
+    common_pitfalls: [],
+    integration_tips: [],
+    pros: [
+      { text: 'Global user base with Gmail accounts', text_ko: 'Gmail 계정의 글로벌 사용자 기반' },
+      { text: 'Well-documented OAuth 2.0 flow', text_ko: '잘 문서화된 OAuth 2.0 흐름' },
+    ],
+    cons: [
+      { text: 'Google Cloud Console can be complex', text_ko: 'Google Cloud Console이 복잡할 수 있음' },
+    ],
+    api_key_url: 'https://console.cloud.google.com/apis/credentials',
+    api_key_url_label: 'Google Cloud Console',
+  },
+  {
+    service_id: S.naver_login,
+    quick_start: '네이버 개발자 센터에서 애플리케이션을 등록하고 Client ID/Secret을 발급받아 네이버 로그인을 추가할 수 있습니다.',
+    quick_start_en: 'Register an application in Naver Developers and get Client ID/Secret to add Naver Login.',
+    setup_steps: [],
+    code_examples: {},
+    common_pitfalls: [],
+    integration_tips: [],
+    pros: [
+      { text: 'Second most popular login in Korea', text_ko: '한국에서 두 번째로 인기 있는 로그인' },
+      { text: 'Free to use', text_ko: '무료 사용' },
+    ],
+    cons: [
+      { text: 'Korea-only user base', text_ko: '한국 전용 사용자 기반' },
+    ],
+    api_key_url: 'https://developers.naver.com/apps/#/myapps',
+    api_key_url_label: 'Naver Developers',
+  },
+  {
+    service_id: S.apple_login,
+    quick_start: 'Apple Developer Console에서 Sign in with Apple을 활성화하고 Service ID를 생성하여 앱에 연결할 수 있습니다.',
+    quick_start_en: 'Enable Sign in with Apple in Apple Developer Console and create a Service ID to connect to your app.',
+    setup_steps: [],
+    code_examples: {},
+    common_pitfalls: [],
+    integration_tips: [],
+    pros: [
+      { text: 'Required for iOS apps with third-party login', text_ko: '서드파티 로그인이 있는 iOS 앱에 필수' },
+      { text: 'Privacy-focused with email relay', text_ko: '이메일 릴레이로 프라이버시 중시' },
+    ],
+    cons: [
+      { text: 'Requires Apple Developer account ($99/year)', text_ko: 'Apple 개발자 계정 필요 (연 $99)' },
+    ],
+    api_key_url: 'https://developer.apple.com/account/resources/identifiers/list/serviceId',
+    api_key_url_label: 'Apple Developer',
   },
 ];
