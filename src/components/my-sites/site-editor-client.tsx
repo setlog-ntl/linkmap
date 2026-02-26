@@ -292,6 +292,19 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   // 이전 배포의 stale 'ready'가 캐시에서 반환될 수 있음 → 무시
   const DEPLOY_GRACE_MS = 10_000;
 
+  // Grace period 만료 안전장치: grace period + 1초 후에도
+  // building을 못 봤으면 seenBuildingRef를 강제 설정하여
+  // 다음 ready에서 정상 완료 처리되도록 함
+  useEffect(() => {
+    if (!awaitingDeploy) return;
+    const timer = setTimeout(() => {
+      if (!seenBuildingRef.current) {
+        seenBuildingRef.current = true;
+      }
+    }, DEPLOY_GRACE_MS + 1000);
+    return () => clearTimeout(timer);
+  }, [awaitingDeploy]);
+
   useEffect(() => {
     if (!awaitingDeploy || !deployStatusData) return;
     const status = deployStatusData.deploy_status;
@@ -303,8 +316,15 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
 
     if (status === 'ready') {
       // 아직 빌드 진행 상태를 본 적 없고, grace period 내라면
-      // → 이전 배포의 stale 'ready' → 무시하고 다음 폴링 대기
+      // → 이전 배포의 stale 'ready' → 캐시 제거로 재폴링 유도
       if (!seenBuildingRef.current && Date.now() - deployStartedAtRef.current < DEPLOY_GRACE_MS) {
+        // 1.5초 후 캐시 제거 → data=undefined → refetchInterval이 1000ms로 재시작
+        // 즉시 제거하면 렌더링 루프 위험
+        setTimeout(() => {
+          if (awaitingDeploy && !seenBuildingRef.current) {
+            queryClient.removeQueries({ queryKey: queryKeys.oneclick.status(deployId) });
+          }
+        }, 1500);
         return;
       }
 
@@ -334,7 +354,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       pendingDiffStatsRef.current = null;
       seenBuildingRef.current = false;
     }
-  }, [awaitingDeploy, deployStatusData, deployOrigin, locale]);
+  }, [awaitingDeploy, deployStatusData, deployOrigin, locale, deployId, queryClient]);
 
   // config.ts 사전 fetch (모듈 초기화용 — selectedPath와 별도로 fetch)
   const { data: configFileForInit, isError: configInitError } = useFileContent(
