@@ -2,21 +2,35 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { isAdmin } from '@/lib/admin';
 import { unauthorizedError, apiError } from '@/lib/api/errors';
-import { services, checklistItems } from '@/data/seed/services';
-import { templates } from '@/data/seed/templates';
-import { domains } from '@/data/seed/domains';
-import { subcategories } from '@/data/seed/subcategories';
-import { servicesV2 } from '@/data/seed/services-v2';
-import { serviceGuides } from '@/data/seed/service-guides';
-import { costTiers } from '@/data/seed/cost-tiers';
-import { dependencies } from '@/data/seed/dependencies';
-import { comparisons } from '@/data/seed/comparisons';
 
 export async function POST() {
   // Only allow in development
   if (process.env.NODE_ENV === 'production') {
     return NextResponse.json({ error: 'Not allowed in production' }, { status: 403 });
   }
+
+  // Lazy-load seed data (large files — not needed in production build startup)
+  const [
+    { services, checklistItems },
+    { templates },
+    { domains },
+    { subcategories },
+    { servicesV2 },
+    { serviceGuides },
+    { costTiers },
+    { dependencies },
+    { comparisons },
+  ] = await Promise.all([
+    import('@/data/seed/services'),
+    import('@/data/seed/templates'),
+    import('@/data/seed/domains'),
+    import('@/data/seed/subcategories'),
+    import('@/data/seed/services-v2'),
+    import('@/data/seed/service-guides'),
+    import('@/data/seed/cost-tiers'),
+    import('@/data/seed/dependencies'),
+    import('@/data/seed/comparisons'),
+  ]);
 
   const supabase = await createClient();
 

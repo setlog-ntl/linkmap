@@ -5,7 +5,6 @@ import { envDoctorSchema } from '@/lib/validations/ai-env';
 import { resolveOpenAIKey, AIKeyNotConfiguredError } from '@/lib/ai/resolve-key';
 import { callOpenAIWithTools, type ToolDefinition } from '@/lib/ai/openai';
 import { logAudit } from '@/lib/audit';
-import { services as serviceCatalog } from '@/data/seed/services';
 
 const tools: ToolDefinition[] = [
   {
@@ -60,6 +59,8 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) return validationError(parsed.error);
 
     const { project_id } = parsed.data;
+
+    const { services: serviceCatalog } = await import('@/data/seed/services');
 
     // Verify project ownership
     const { data: project } = await supabase

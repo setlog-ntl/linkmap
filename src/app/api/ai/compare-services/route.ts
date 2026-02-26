@@ -5,7 +5,6 @@ import { compareServicesSchema } from '@/lib/validations/ai-compare';
 import { resolveOpenAIKey, AIKeyNotConfiguredError } from '@/lib/ai/resolve-key';
 import { callOpenAIStructured } from '@/lib/ai/openai';
 import { logAudit } from '@/lib/audit';
-import { services as serviceCatalog } from '@/data/seed/services';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -19,7 +18,10 @@ export async function POST(request: NextRequest) {
 
     const { slugs } = parsed.data;
 
-    const { apiKey, baseUrl } = await resolveOpenAIKey();
+    const [{ apiKey, baseUrl }, { services: serviceCatalog }] = await Promise.all([
+      resolveOpenAIKey(),
+      import('@/data/seed/services'),
+    ]);
 
     // Gather full service data for comparison
     const selectedServices = slugs

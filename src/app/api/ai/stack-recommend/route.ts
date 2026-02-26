@@ -5,7 +5,6 @@ import { stackRecommendSchema } from '@/lib/validations/ai-stack';
 import { resolveOpenAIKey, AIKeyNotConfiguredError } from '@/lib/ai/resolve-key';
 import { callOpenAIStructured } from '@/lib/ai/openai';
 import { logAudit } from '@/lib/audit';
-import { services as serviceCatalog } from '@/data/seed/services';
 
 const STACK_JSON_SCHEMA = {
   type: 'object' as const,
@@ -65,7 +64,10 @@ export async function POST(request: NextRequest) {
 
     const { description } = parsed.data;
 
-    const { apiKey, baseUrl } = await resolveOpenAIKey();
+    const [{ apiKey, baseUrl }, { services: serviceCatalog }] = await Promise.all([
+      resolveOpenAIKey(),
+      import('@/data/seed/services'),
+    ]);
 
     // Build service catalog context (compact)
     const catalogContext = serviceCatalog.map((s) => ({

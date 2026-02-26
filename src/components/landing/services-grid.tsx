@@ -5,7 +5,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useTheme } from 'next-themes';
 import { ScrollReveal } from './scroll-reveal';
 import { ServiceIcon } from './service-icon';
-import { services } from '@/data/seed/services';
+import { TOP_SERVICES } from '@/data/landing/top-services';
 import { SERVICE_BRANDS, type ServiceBrand } from '@/lib/constants/service-brands';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
@@ -17,12 +17,6 @@ function getBrandTintBg(brand: ServiceBrand | undefined, isDark: boolean): strin
   const color = isDark ? brand.darkColor : brand.color;
   return isDark ? `${color}15` : `${color}08`;
 }
-
-/** Top 20 popular services by popularity_score */
-const TOP_SERVICES = services
-  .filter((s) => s.domain)
-  .sort((a, b) => (b.popularity_score ?? 0) - (a.popularity_score ?? 0))
-  .slice(0, 20);
 
 export function ServicesGrid() {
   const [filter, setFilter] = useState<ServiceDomain | 'all'>('all');

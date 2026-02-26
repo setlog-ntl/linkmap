@@ -7,9 +7,9 @@ import { resolveOpenAIKey, AIKeyNotConfiguredError } from '@/lib/ai/resolve-key'
 import { callOpenAIStream } from '@/lib/ai/openai';
 import { checkGuardrails } from '@/lib/ai/guardrails';
 import { logAudit } from '@/lib/audit';
-import { services as serviceCatalog } from '@/data/seed/services';
+import type { ServiceSeed } from '@/data/seed/services';
 
-function buildCatalogContext(): string {
+function buildCatalogContext(serviceCatalog: ServiceSeed[]): string {
   const grouped: Record<string, string[]> = {};
   for (const svc of serviceCatalog) {
     const layer = svc.domain || svc.category || 'other';
@@ -27,12 +27,13 @@ function buildSystemPrompt(
   overridePrompt: string | null,
   personaPrompt: string | null,
   answerGuide: string | null,
+  serviceCatalog: ServiceSeed[],
 ): string {
   const base = personaPrompt || `당신은 Linkmap 프로젝트의 AI 스택 아키텍트입니다.
 사용자의 프로젝트에 적합한 서비스와 아키텍처를 추천하고, 기술적인 질문에 답변합니다.
 친절하고 전문적으로 답변하되, 한국어를 기본으로 사용합니다.`;
 
-  const catalog = buildCatalogContext();
+  const catalog = buildCatalogContext(serviceCatalog);
 
   let context = `\n\n## 프로젝트 정보
 - 프로젝트명: ${projectName}`;
@@ -90,7 +91,10 @@ export async function POST(request: NextRequest) {
 
   // 4. Business logic
   try {
-    const adminSupabase = createAdminClient();
+    const [adminSupabase, { services: serviceCatalog }] = await Promise.all([
+      Promise.resolve(createAdminClient()),
+      import('@/data/seed/services'),
+    ]);
 
     // Load feature config
     const { data: featureConfig } = await adminSupabase
@@ -168,6 +172,7 @@ export async function POST(request: NextRequest) {
       featureConfig?.system_prompt_override || null,
       personaPrompt,
       answerGuide,
+      serviceCatalog,
     );
 
     const openaiMessages = messages.map((m) => ({

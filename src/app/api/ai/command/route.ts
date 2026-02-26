@@ -5,7 +5,6 @@ import { aiCommandSchema } from '@/lib/validations/ai-command';
 import { resolveOpenAIKey, AIKeyNotConfiguredError } from '@/lib/ai/resolve-key';
 import { callOpenAIWithTools, type ToolDefinition } from '@/lib/ai/openai';
 import { logAudit } from '@/lib/audit';
-import { services as serviceCatalog } from '@/data/seed/services';
 
 const tools: ToolDefinition[] = [
   {
@@ -88,7 +87,10 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) return validationError(parsed.error);
 
     const { command, project_id } = parsed.data;
-    const { apiKey, baseUrl } = await resolveOpenAIKey();
+    const [{ apiKey, baseUrl }, { services: serviceCatalog }] = await Promise.all([
+      resolveOpenAIKey(),
+      import('@/data/seed/services'),
+    ]);
 
     // Load project services if project context exists
     let projectServices: Array<{ service_id: string; slug: string; name: string }> = [];
