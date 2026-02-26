@@ -146,12 +146,6 @@ export function ConnectionFlowMap({
 }: ConnectionFlowMapProps) {
   const layers = useMemo(() => groupConnectionsByLayer(allCards), [allCards]);
 
-  if (allCards.length === 0) return null;
-
-  const fe = layers.find((l) => l.layer === 'frontend')?.services ?? [];
-  const be = layers.find((l) => l.layer === 'backend')?.services ?? [];
-  const dt = layers.find((l) => l.layer === 'devtools')?.services ?? [];
-
   const connectedCount = useMemo(() => {
     const ids = new Set<string>();
     for (const c of connections) {
@@ -160,6 +154,12 @@ export function ConnectionFlowMap({
     }
     return ids.size;
   }, [connections]);
+
+  if (allCards.length === 0) return null;
+
+  const fe = layers.find((l) => l.layer === 'frontend')?.services ?? [];
+  const be = layers.find((l) => l.layer === 'backend')?.services ?? [];
+  const dt = layers.find((l) => l.layer === 'devtools')?.services ?? [];
 
   return (
     <div className="rounded-2xl border bg-card overflow-hidden">

@@ -69,9 +69,9 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
   const [iframeError, setIframeError] = useState(false);
 
   const liveUrl = deploy.pages_url || deploy.deployment_url;
-  const cacheBuster = deploy.deployed_at
-    ? new Date(deploy.deployed_at).getTime()
-    : Date.now();
+  const [cacheBuster] = useState(() =>
+    deploy.deployed_at ? new Date(deploy.deployed_at).getTime() : Date.now()
+  );
 
   // src 변경 방식: key 변경(재마운트)과 달리 기존 iframe 콘텐츠를 유지하면서
   // 새 URL로 로드 → 재시도 중에도 이전 화면이 그대로 보임.

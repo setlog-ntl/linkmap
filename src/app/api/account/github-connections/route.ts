@@ -52,7 +52,7 @@ export async function GET() {
   const adminClient = createAdminClient();
   const connectionIds = githubConnections.map((c) => c.id);
 
-  let linkedReposMap: Record<string, { project_id: string; count: number }[]> = {};
+  const linkedReposMap: Record<string, { project_id: string; count: number }[]> = {};
   if (connectionIds.length > 0) {
     const { data: repos } = await adminClient
       .from('project_github_repos')
@@ -84,7 +84,7 @@ export async function GET() {
   const allProjectIds = [
     ...new Set(Object.values(linkedReposMap).flatMap((arr) => arr.map((p) => p.project_id))),
   ];
-  let projectNameMap: Record<string, string> = {};
+  const projectNameMap: Record<string, string> = {};
   if (allProjectIds.length > 0) {
     const { data: projects } = await adminClient
       .from('projects')

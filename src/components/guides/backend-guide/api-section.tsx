@@ -44,7 +44,7 @@ export function ApiSection() {
         <h2 className="text-2xl md:text-3xl font-bold mb-3">API란?</h2>
         <p className="text-muted-foreground mb-8 max-w-2xl">
           API(Application Programming Interface)는 프론트엔드와 백엔드가 대화하는 방법입니다.
-          프론트가 "이 데이터 줘"라고 요청하면 백엔드가 처리해서 돌려주는 약속된 창구입니다.
+          프론트가 &ldquo;이 데이터 줘&rdquo;라고 요청하면 백엔드가 처리해서 돌려주는 약속된 창구입니다.
         </p>
       </ScrollReveal>
 

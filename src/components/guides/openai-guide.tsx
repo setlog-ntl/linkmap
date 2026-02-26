@@ -170,7 +170,7 @@ export async function POST(req: Request) {
 }`}
           </pre>
           <p className="text-muted-foreground text-sm mt-3">
-            클라이언트에서는 이 API Route를 <code>fetch('/api/chat', ...)</code>으로 호출합니다.
+            클라이언트에서는 이 API Route를 <code>fetch(&apos;/api/chat&apos;, ...)</code>으로 호출합니다.
           </p>
         </section>
 

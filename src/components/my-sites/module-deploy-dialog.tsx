@@ -23,6 +23,7 @@ import {
   Clock,
   ExternalLink,
   AlertTriangle,
+  Github,
 } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { t, type Locale } from '@/lib/i18n';
@@ -317,7 +318,12 @@ export function ModuleDeployDialog({
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2">
-              {isRunning && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+              {isRunning && (
+                <span className="relative">
+                  <Github className="h-4 w-4 text-primary animate-github-wiggle" />
+                  <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                </span>
+              )}
               {isCompleted && (
                 <motion.div
                   initial={prefersReducedMotion ? false : { scale: 0.5 }}
@@ -420,6 +426,11 @@ export function ModuleDeployDialog({
                       >
                         <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
                       </motion.div>
+                    ) : isActive && (step.id === 'commit' || step.id === 'build') ? (
+                      <span className="relative flex-shrink-0">
+                        <Github className="h-5 w-5 text-primary animate-github-wiggle" />
+                        <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-background bg-amber-500 animate-pulse" />
+                      </span>
                     ) : isActive ? (
                       <Loader2 className="h-5 w-5 text-primary animate-spin flex-shrink-0" />
                     ) : isStepError ? (

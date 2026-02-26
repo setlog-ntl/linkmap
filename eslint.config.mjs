@@ -18,6 +18,10 @@ const eslintConfig = defineConfig([
     // Cloudflare build artifacts
     ".open-next/**",
     ".wrangler/**",
+    // Standalone scripts (CommonJS / non-React)
+    "_write_script.js",
+    "scripts/**",
+    "coverage/**",
   ]),
   {
     rules: {

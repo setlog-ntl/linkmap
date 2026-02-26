@@ -51,7 +51,7 @@ export function RenderingModesSection() {
       <ScrollReveal>
         <h2 className="text-2xl md:text-3xl font-bold mb-3">CSR · SSR · SSG — 렌더링 방식</h2>
         <p className="text-muted-foreground mb-8 max-w-2xl">
-          "화면을 어디서 그리느냐"에 따라 방식이 나뉩니다.
+          &ldquo;화면을 어디서 그리느냐&rdquo;에 따라 방식이 나뉩니다.
           Next.js는 세 가지를 상황에 맞게 혼합해서 사용합니다.
         </p>
       </ScrollReveal>

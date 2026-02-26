@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
 
 interface LogEntry {
@@ -17,58 +17,63 @@ interface SetupLiveLogsProps {
   serviceName: string;
 }
 
+function now() {
+  return new Date().toLocaleTimeString('ko-KR', { hour12: false });
+}
+
 export function SetupLiveLogs({
   saving,
-  verifying,
   verifySuccess,
   envVarCount,
   serviceName,
 }: SetupLiveLogsProps) {
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+  // props로부터 직접 로그를 파생 — useEffect + setState 체이닝 제거
+  const logs = useMemo<LogEntry[]>(() => {
+    if (!saving && verifySuccess === null) return [];
 
-  useEffect(() => {
-    const now = () => new Date().toLocaleTimeString('ko-KR', { hour12: false });
+    const entries: LogEntry[] = [];
 
     if (saving) {
-      setLogs([
-        { timestamp: now(), message: `${envVarCount}개 환경변수 암호화 중...`, status: 'running' },
-      ]);
-    }
-  }, [saving, envVarCount]);
+      // 저장 중
+      entries.push({
+        timestamp: now(),
+        message: `${envVarCount}개 환경변수 암호화 중...`,
+        status: 'running',
+      });
+    } else {
+      // 저장 완료
+      entries.push({
+        timestamp: now(),
+        message: `${envVarCount}개 환경변수 저장 완료`,
+        status: 'success',
+      });
 
-  useEffect(() => {
-    if (!saving && logs.length > 0 && logs[0].status === 'running') {
-      const now = () => new Date().toLocaleTimeString('ko-KR', { hour12: false });
-      setLogs((prev) => [
-        { ...prev[0], status: 'success', message: `${envVarCount}개 환경변수 저장 완료` },
-        { timestamp: now(), message: `${serviceName} 연결 검증 중...`, status: 'running' },
-      ]);
-    }
-  }, [saving, logs, envVarCount, serviceName]);
-
-  useEffect(() => {
-    if (verifySuccess !== null && logs.length >= 2) {
-      const now = () => new Date().toLocaleTimeString('ko-KR', { hour12: false });
-      setLogs((prev) => {
-        const updated = [...prev];
-        if (updated.length >= 2) {
-          updated[1] = {
-            ...updated[1],
-            status: verifySuccess ? 'success' : 'error',
-            message: verifySuccess
-              ? `${serviceName} 연결 성공`
-              : `${serviceName} 연결 확인 필요`,
-          };
-        }
-        updated.push({
+      if (verifySuccess === null) {
+        // 검증 대기 중
+        entries.push({
+          timestamp: now(),
+          message: `${serviceName} 연결 검증 중...`,
+          status: 'running',
+        });
+      } else {
+        // 검증 완료
+        entries.push({
+          timestamp: now(),
+          message: verifySuccess
+            ? `${serviceName} 연결 성공`
+            : `${serviceName} 연결 확인 필요`,
+          status: verifySuccess ? 'success' : 'error',
+        });
+        entries.push({
           timestamp: now(),
           message: verifySuccess ? '설정 완료' : '환경변수 저장됨 (연결 확인 필요)',
           status: verifySuccess ? 'success' : 'error',
         });
-        return updated;
-      });
+      }
     }
-  }, [verifySuccess, serviceName, logs.length]);
+
+    return entries;
+  }, [saving, verifySuccess, envVarCount, serviceName]);
 
   if (logs.length === 0) return null;
 

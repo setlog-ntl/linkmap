@@ -18,7 +18,6 @@ import {
   Eye,
   Rocket,
   CheckCircle2,
-  RefreshCw,
   FolderOpen,
   X,
   Smartphone,
@@ -809,7 +808,10 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       case 'deploying':
         return (
           <>
-            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+            <span className="relative">
+              <Github className="h-3.5 w-3.5 animate-github-wiggle" />
+              <span className="absolute -top-0.5 -right-0.5 h-1 w-1 rounded-full bg-amber-400 animate-pulse" />
+            </span>
             <span className="hidden sm:inline ml-1">{buildStatusLabel || t(locale, 'editor.stateDeploying')}</span>
           </>
         );
@@ -835,9 +837,17 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     if (!awaitingDeploy) return null;
     return (
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/80 backdrop-blur-[2px]">
-        <RefreshCw className="h-6 w-6 animate-spin text-primary mb-3" />
-        <p className="text-sm font-medium text-foreground">
+        <span className="relative mb-3">
+          <Github className="h-7 w-7 text-primary animate-github-wiggle" />
+          <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+        </span>
+        <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
           {buildStatusLabel || '배포 진행 중...'}
+          <span className="flex gap-[2px]">
+            <span className="h-[3px] w-[3px] rounded-full bg-current animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="h-[3px] w-[3px] rounded-full bg-current animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="h-[3px] w-[3px] rounded-full bg-current animate-bounce" style={{ animationDelay: '300ms' }} />
+          </span>
         </p>
         <p className="text-xs text-muted-foreground mt-1">
           완료 후 자동으로 최신 화면을 표시합니다
@@ -1194,7 +1204,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           <Eye className="h-3 w-3" />
           {t(locale, 'editor.preview')}
           {awaitingDeploy ? (
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            <Github className="h-3 w-3 text-amber-500 animate-github-wiggle" />
           ) : showLiveAfterDeploy ? (
             <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
           ) : null}
@@ -1296,7 +1306,8 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                 <Eye className="h-3.5 w-3.5" />
                 <span className="font-medium">{t(locale, 'editor.preview')}</span>
                 {awaitingDeploy ? (
-                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-amber-500/20 text-amber-500 animate-pulse">
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 gap-1 bg-amber-500/20 text-amber-500">
+                    <Github className="h-2.5 w-2.5 animate-github-wiggle" />
                     {buildStatusLabel || '빌드 중...'}
                   </Badge>
                 ) : showLiveAfterDeploy ? (
@@ -1410,7 +1421,8 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                 <Eye className="h-3 w-3" />
                 <span>{t(locale, 'editor.preview')}</span>
                 {awaitingDeploy ? (
-                  <Badge variant="secondary" className="text-[10px] px-1 py-0 ml-auto bg-amber-500/20 text-amber-500 animate-pulse">
+                  <Badge variant="secondary" className="text-[10px] px-1 py-0 gap-1 ml-auto bg-amber-500/20 text-amber-500">
+                    <Github className="h-2.5 w-2.5 animate-github-wiggle" />
                     {buildStatusLabel || '빌드 중...'}
                   </Badge>
                 ) : showLiveAfterDeploy ? (
@@ -1465,7 +1477,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         </div>
         {awaitingDeploy ? (
           <span className="hidden sm:flex items-center gap-1.5 text-[11px] text-amber-500">
-            <RefreshCw className="h-3 w-3 animate-spin" />
+            <Github className="h-3 w-3 animate-github-wiggle" />
             {buildStatusLabel || '배포 진행 중...'}
           </span>
         ) : (
