@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, notFoundError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
+import { deleteRepo } from '@/lib/github/api';
+import { safeDecryptToken } from '@/lib/github/token';
 
 export async function DELETE(
   _request: NextRequest,
@@ -33,6 +35,44 @@ export async function DELETE(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  // Best-effort: GitHub 저장소 삭제 (삭제 후 동일 이름 재배포 가능하도록)
+  let githubRepoDeletion: 'deleted' | 'skipped' | 'failed' = 'skipped';
+  if (deploy.forked_repo_full_name && deploy.project_id) {
+    try {
+      const { data: repoRecord } = await supabase
+        .from('project_github_repos')
+        .select('service_account_id')
+        .eq('project_id', deploy.project_id)
+        .single();
+
+      if (repoRecord?.service_account_id) {
+        const { data: serviceAccount } = await supabase
+          .from('service_accounts')
+          .select('encrypted_access_token')
+          .eq('id', repoRecord.service_account_id)
+          .single();
+
+        if (serviceAccount?.encrypted_access_token) {
+          const decryptResult = await safeDecryptToken(
+            serviceAccount.encrypted_access_token,
+            supabase,
+            repoRecord.service_account_id,
+          );
+          if (!('error' in decryptResult)) {
+            const slashIdx = deploy.forked_repo_full_name.indexOf('/');
+            const owner = deploy.forked_repo_full_name.slice(0, slashIdx);
+            const repoName = deploy.forked_repo_full_name.slice(slashIdx + 1);
+            await deleteRepo(decryptResult.token, owner, repoName);
+            githubRepoDeletion = 'deleted';
+          }
+        }
+      }
+    } catch {
+      // best-effort: GitHub 저장소 삭제 실패해도 Linkmap 기록은 정상 삭제
+      githubRepoDeletion = 'failed';
+    }
+  }
+
   // Delete the linked project if it exists
   let deletedProjectId: string | null = null;
   if (deploy.project_id) {
@@ -61,6 +101,7 @@ export async function DELETE(
       site_name: deploy.site_name,
       repo: deploy.forked_repo_full_name,
       deleted_project_id: deletedProjectId,
+      github_repo_deletion: githubRepoDeletion,
     },
   });
 
