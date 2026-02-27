@@ -11,6 +11,7 @@ import { serviceGuidesBatch3 } from './service-guides-batch3';
 import { serviceGuidesBatch4 } from './service-guides-batch4';
 import { serviceGuidesBatch5a } from './service-guides-batch5a';
 import { serviceGuidesBatch5b } from './service-guides-batch5b';
+import { serviceGuidesBatch6 } from './service-guides-batch6';
 
 export const serviceGuides = [
   ..._base,
@@ -18,6 +19,7 @@ export const serviceGuides = [
   ...serviceGuidesBatch4,
   ...serviceGuidesBatch5a,
   ...serviceGuidesBatch5b,
+  ...serviceGuidesBatch6,
 ];
 
 export { costTiers } from './cost-tiers';
