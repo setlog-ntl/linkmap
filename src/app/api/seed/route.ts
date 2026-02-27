@@ -26,7 +26,7 @@ export async function POST() {
     import('@/data/seed/domains'),
     import('@/data/seed/subcategories'),
     import('@/data/seed/services-v2'),
-    import('@/data/seed/service-guides'),
+    import('@/data/seed'),
     import('@/data/seed/cost-tiers'),
     import('@/data/seed/dependencies'),
     import('@/data/seed/comparisons'),
