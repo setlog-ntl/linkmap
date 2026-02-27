@@ -17,14 +17,21 @@ import { domainLabels } from '@/lib/constants/service-filters';
 import { useHealthChecks, useRunHealthCheck } from '@/lib/queries/health-checks';
 import { ServiceAccountSection } from '@/components/service-map/service-account-section';
 import { ServiceEnvVarsSection } from '@/components/service-map/service-env-vars-section';
-import { ExternalLink, BookOpen, GitFork, Activity, Loader2, X, KeyRound } from 'lucide-react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { ExternalLink, BookOpen, GitFork, Activity, Loader2, X, KeyRound, Lightbulb, Copy, Check } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { queryKeys } from '@/lib/queries/keys';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import type { ProjectService, Service, ServiceDependency, ServiceCategory, ServiceDomain, EnvironmentVariable } from '@/types';
+import { useState } from 'react';
+import type { ProjectService, Service, ServiceDependency, ServiceCategory, ServiceDomain, EnvironmentVariable, ServiceGuide } from '@/types';
 
 interface ServiceDetailSheetProps {
   service: (ProjectService & { service: Service }) | null;
@@ -70,10 +77,10 @@ export function ServiceDetailSheet({
       const supabase = createClient();
       const { data } = await supabase
         .from('service_guides')
-        .select('api_key_url, api_key_url_label')
+        .select('*')
         .eq('service_id', svcId)
         .single();
-      return data;
+      return data as ServiceGuide | null;
     },
     enabled: !!svcId,
     staleTime: Infinity,
@@ -129,6 +136,15 @@ export function ServiceDetailSheet({
   const configuredKeys = new Set(serviceEnvVars.map((ev) => ev.key_name));
   const unsetCount = requiredEnvVars.filter((t) => !configuredKeys.has(t.name)).length;
 
+  // 가이드 데이터 유무 확인
+  const hasGuideContent = guide && (
+    guide.quick_start ||
+    (guide.setup_steps && guide.setup_steps.length > 0) ||
+    (guide.pros && guide.pros.length > 0) ||
+    (guide.cons && guide.cons.length > 0) ||
+    (guide.common_pitfalls && guide.common_pitfalls.length > 0)
+  );
+
   const handleRunCheck = () => {
     runHealthCheck.mutate({ project_service_id: service.id });
   };
@@ -150,9 +166,9 @@ export function ServiceDetailSheet({
 
       {/* 탭 */}
       <Tabs defaultValue="overview" className="flex flex-col flex-1 min-h-0">
-        <TabsList className="mx-4 mb-1 grid grid-cols-4 h-8 shrink-0">
-          <TabsTrigger value="overview" className="text-xs">개요</TabsTrigger>
-          <TabsTrigger value="envvars" className="text-xs">
+        <TabsList className="mx-4 mb-1 flex h-8 shrink-0 gap-0">
+          <TabsTrigger value="overview" className="text-xs flex-1">개요</TabsTrigger>
+          <TabsTrigger value="envvars" className="text-xs flex-1">
             환경변수
             {unsetCount > 0 && (
               <span className="ml-1 bg-red-500 text-white rounded-full text-[9px] px-1 leading-4 min-w-[14px] inline-flex items-center justify-center">
@@ -160,8 +176,11 @@ export function ServiceDetailSheet({
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="connections" className="text-xs">연결</TabsTrigger>
-          <TabsTrigger value="health" className="text-xs">상태</TabsTrigger>
+          {hasGuideContent && (
+            <TabsTrigger value="guide" className="text-xs flex-1">가이드</TabsTrigger>
+          )}
+          <TabsTrigger value="connections" className="text-xs flex-1">연결</TabsTrigger>
+          <TabsTrigger value="health" className="text-xs flex-1">상태</TabsTrigger>
         </TabsList>
 
         {/* 개요 탭 */}
@@ -261,6 +280,156 @@ export function ServiceDetailSheet({
           </ScrollArea>
         </TabsContent>
 
+        {/* 가이드 탭 */}
+        {hasGuideContent && (
+          <TabsContent value="guide" className="flex-1 overflow-hidden m-0 data-[state=active]:flex data-[state=active]:flex-col">
+            <ScrollArea className="flex-1 w-full">
+              <div className="space-y-4 p-4 pt-2 pb-6">
+                {/* 빠른 시작 */}
+                {guide.quick_start && (
+                  <div className="rounded-lg bg-primary/5 border border-primary/20 p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Lightbulb className="h-3.5 w-3.5 text-primary" />
+                      <span className="text-xs font-medium text-primary">빠른 시작</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{guide.quick_start}</p>
+                  </div>
+                )}
+
+                {/* API 키 발급 링크 */}
+                {guide.api_key_url && (
+                  <Button variant="outline" size="sm" asChild className="w-full justify-start gap-2 text-primary border-primary/30 hover:bg-primary/5">
+                    <a href={guide.api_key_url} target="_blank" rel="noopener noreferrer">
+                      <KeyRound className="h-3.5 w-3.5" />
+                      {guide.api_key_url_label || 'API 키 발급 / 확인'}
+                      <ExternalLink className="ml-auto h-3 w-3" />
+                    </a>
+                  </Button>
+                )}
+
+                {/* 설정 단계 */}
+                {guide.setup_steps && guide.setup_steps.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">설정 단계</h4>
+                    <Accordion type="multiple" className="space-y-1.5">
+                      {guide.setup_steps.map((step, i) => (
+                        <AccordionItem key={i} value={`step-${i}`} className="border rounded-lg px-3">
+                          <AccordionTrigger className="text-xs py-2.5">
+                            <span className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0">
+                                {step.step}
+                              </Badge>
+                              <span className="text-left">{step.title_ko || step.title}</span>
+                            </span>
+                          </AccordionTrigger>
+                          <AccordionContent className="space-y-2 pb-3">
+                            <p className="text-xs text-muted-foreground">
+                              {step.description_ko || step.description}
+                            </p>
+                            {step.code_snippet && (
+                              <SheetCodeBlock code={step.code_snippet} />
+                            )}
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </div>
+                )}
+
+                {/* 코드 예제 */}
+                {guide.code_examples && Object.keys(guide.code_examples).length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">코드 예제</h4>
+                    <div className="space-y-3">
+                      {Object.entries(guide.code_examples).map(([title, code]) => (
+                        <div key={title}>
+                          <p className="text-xs font-medium mb-1.5 text-muted-foreground">{title}</p>
+                          <SheetCodeBlock code={code} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 장점 / 단점 */}
+                {((guide.pros && guide.pros.length > 0) || (guide.cons && guide.cons.length > 0)) && (
+                  <div className="space-y-3">
+                    {guide.pros && guide.pros.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-medium mb-1.5 text-green-600 dark:text-green-400">장점</h4>
+                        <ul className="space-y-1">
+                          {guide.pros.map((item, i) => (
+                            <li key={i} className="text-xs flex items-start gap-1.5">
+                              <span className="shrink-0 mt-0.5 text-green-500">+</span>
+                              <span className="text-muted-foreground">{item.text_ko || item.text}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {guide.cons && guide.cons.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-medium mb-1.5 text-red-600 dark:text-red-400">단점</h4>
+                        <ul className="space-y-1">
+                          {guide.cons.map((item, i) => (
+                            <li key={i} className="text-xs flex items-start gap-1.5">
+                              <span className="shrink-0 mt-0.5 text-red-500">-</span>
+                              <span className="text-muted-foreground">{item.text_ko || item.text}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 흔한 실수 */}
+                {guide.common_pitfalls && guide.common_pitfalls.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">흔한 실수</h4>
+                    <Accordion type="multiple" className="space-y-1.5">
+                      {guide.common_pitfalls.map((pitfall, i) => (
+                        <AccordionItem key={i} value={`pitfall-${i}`} className="border rounded-lg px-3">
+                          <AccordionTrigger className="text-xs py-2.5">
+                            {pitfall.title_ko || pitfall.title}
+                          </AccordionTrigger>
+                          <AccordionContent className="space-y-1.5 pb-3">
+                            <p className="text-xs text-muted-foreground">
+                              <span className="font-medium">문제:</span> {pitfall.problem}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              <span className="font-medium">해결:</span> {pitfall.solution}
+                            </p>
+                            {pitfall.code && <SheetCodeBlock code={pitfall.code} />}
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </div>
+                )}
+
+                {/* 통합 팁 */}
+                {guide.integration_tips && guide.integration_tips.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">통합 팁</h4>
+                    <div className="space-y-2">
+                      {guide.integration_tips.map((tip, i) => (
+                        <div key={i} className="rounded-lg border p-3 space-y-1.5">
+                          <Badge variant="outline" className="text-[10px]">
+                            {tip.with_service_slug}
+                          </Badge>
+                          <p className="text-xs text-muted-foreground">{tip.tip_ko || tip.tip}</p>
+                          {tip.code && <SheetCodeBlock code={tip.code} />}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          </TabsContent>
+        )}
+
         {/* 연결 탭 */}
         <TabsContent value="connections" className="flex-1 overflow-hidden m-0 data-[state=active]:flex data-[state=active]:flex-col">
           <ScrollArea className="flex-1 w-full">
@@ -350,6 +519,30 @@ export function ServiceDetailSheet({
           </ScrollArea>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function SheetCodeBlock({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <div className="relative group">
+      <pre className="bg-muted rounded-md p-3 overflow-x-auto text-[11px] leading-relaxed">
+        <code>{code}</code>
+      </pre>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+        onClick={handleCopy}
+      >
+        {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+      </Button>
     </div>
   );
 }
