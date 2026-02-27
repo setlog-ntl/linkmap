@@ -17,7 +17,10 @@ import { domainLabels } from '@/lib/constants/service-filters';
 import { useHealthChecks, useRunHealthCheck } from '@/lib/queries/health-checks';
 import { ServiceAccountSection } from '@/components/service-map/service-account-section';
 import { ServiceEnvVarsSection } from '@/components/service-map/service-env-vars-section';
-import { ExternalLink, BookOpen, GitFork, Activity, Loader2, X } from 'lucide-react';
+import { ExternalLink, BookOpen, GitFork, Activity, Loader2, X, KeyRound } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { createClient } from '@/lib/supabase/browser';
+import { queryKeys } from '@/lib/queries/keys';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
@@ -59,7 +62,22 @@ export function ServiceDetailSheet({
   loading = false,
 }: ServiceDetailSheetProps) {
   const psId = service?.id || '';
+  const svcId = service?.service_id || '';
   const { data: healthChecks = [] } = useHealthChecks(psId);
+  const { data: guide } = useQuery({
+    queryKey: queryKeys.serviceGuides.byService(svcId),
+    queryFn: async () => {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from('service_guides')
+        .select('api_key_url, api_key_url_label')
+        .eq('service_id', svcId)
+        .single();
+      return data;
+    },
+    enabled: !!svcId,
+    staleTime: Infinity,
+  });
   const runHealthCheck = useRunHealthCheck();
 
   const showLoading = loading || (open && !service);
@@ -184,23 +202,35 @@ export function ServiceDetailSheet({
               </div>
 
               {/* 링크 */}
-              {(svc?.website_url || svc?.docs_url) && (
+              {(svc?.website_url || svc?.docs_url || guide?.api_key_url) && (
                 <>
                   <Separator />
-                  <div className="grid grid-cols-2 gap-2">
-                    {svc?.website_url && (
-                      <Button variant="outline" size="sm" asChild className="w-full justify-center">
-                        <a href={svc.website_url} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="mr-2 h-3.5 w-3.5" />
-                          공식 웹사이트
-                        </a>
-                      </Button>
+                  <div className="space-y-2">
+                    {(svc?.website_url || svc?.docs_url) && (
+                      <div className="grid grid-cols-2 gap-2">
+                        {svc?.website_url && (
+                          <Button variant="outline" size="sm" asChild className="w-full justify-center">
+                            <a href={svc.website_url} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="mr-2 h-3.5 w-3.5" />
+                              공식 웹사이트
+                            </a>
+                          </Button>
+                        )}
+                        {svc?.docs_url && (
+                          <Button variant="outline" size="sm" asChild className="w-full justify-center">
+                            <a href={svc.docs_url} target="_blank" rel="noopener noreferrer">
+                              <BookOpen className="mr-2 h-3.5 w-3.5" />
+                              개발자 문서
+                            </a>
+                          </Button>
+                        )}
+                      </div>
                     )}
-                    {svc?.docs_url && (
-                      <Button variant="outline" size="sm" asChild className="w-full justify-center">
-                        <a href={svc.docs_url} target="_blank" rel="noopener noreferrer">
-                          <BookOpen className="mr-2 h-3.5 w-3.5" />
-                          개발자 문서
+                    {guide?.api_key_url && (
+                      <Button variant="outline" size="sm" asChild className="w-full justify-start gap-2 text-primary border-primary/30 hover:bg-primary/5">
+                        <a href={guide.api_key_url} target="_blank" rel="noopener noreferrer">
+                          <KeyRound className="h-3.5 w-3.5" />
+                          {guide.api_key_url_label || 'API 키 발급 / 확인'}
                         </a>
                       </Button>
                     )}
