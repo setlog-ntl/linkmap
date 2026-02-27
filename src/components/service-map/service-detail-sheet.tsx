@@ -19,7 +19,7 @@ import { ServiceAccountSection } from '@/components/service-map/service-account-
 import { ServiceEnvVarsSection } from '@/components/service-map/service-env-vars-section';
 import { ExternalLink, BookOpen, GitFork, Activity, Loader2, X, KeyRound } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { createClient } from '@/lib/supabase/browser';
+import { createClient } from '@/lib/supabase/client';
 import { queryKeys } from '@/lib/queries/keys';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
