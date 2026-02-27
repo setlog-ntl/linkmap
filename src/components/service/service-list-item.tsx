@@ -14,9 +14,10 @@ interface ServiceListItemProps {
   service: Service;
   isUsed?: boolean;
   hasGuide?: boolean;
+  apiKeyInfo?: { url: string; label: string | null } | null;
 }
 
-export function ServiceListItem({ service, isUsed = false, hasGuide = false }: ServiceListItemProps) {
+export function ServiceListItem({ service, isUsed = false, hasGuide = false, apiKeyInfo }: ServiceListItemProps) {
   return (
     <Card className="hover:shadow-md transition-all duration-200 group">
       <div className="flex items-center gap-4 p-4">
@@ -62,6 +63,13 @@ export function ServiceListItem({ service, isUsed = false, hasGuide = false }: S
               <Link href={`/services/${service.slug}?tab=quickstart`} onClick={(e) => e.stopPropagation()}>
                 <KeyRound className="h-3.5 w-3.5" />
               </Link>
+            </Button>
+          )}
+          {apiKeyInfo && (
+            <Button variant="ghost" size="icon" className="h-8 w-8" asChild title={apiKeyInfo.label || '키 설정'}>
+              <a href={apiKeyInfo.url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
             </Button>
           )}
           {service.website_url && (

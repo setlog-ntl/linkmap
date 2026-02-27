@@ -20,6 +20,7 @@ export default async function ServicesPage() {
   let domains: ServiceDomainRecord[] = [];
   let usedServiceIds: string[] = [];
   let guideServiceIds: string[] = [];
+  let guideApiKeyMap: Record<string, { url: string; label: string | null }> = {};
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -40,11 +41,17 @@ export default async function ServicesPage() {
     const [servicesRes, domainsRes, guidesRes] = await Promise.all([
       supabase.from('services').select('*').order('name'),
       supabase.from('service_domains').select('*').order('order_index'),
-      supabase.from('service_guides').select('service_id'),
+      supabase.from('service_guides').select('service_id, api_key_url, api_key_url_label'),
     ]);
     services = (servicesRes.data ?? []) as Service[];
     domains = (domainsRes.data ?? []) as ServiceDomainRecord[];
-    guideServiceIds = (guidesRes.data ?? []).map((g: { service_id: string }) => g.service_id);
+    const guidesData = (guidesRes.data ?? []) as { service_id: string; api_key_url: string | null; api_key_url_label: string | null }[];
+    guideServiceIds = guidesData.map((g) => g.service_id);
+    guideApiKeyMap = Object.fromEntries(
+      guidesData
+        .filter((g) => g.api_key_url)
+        .map((g) => [g.service_id, { url: g.api_key_url!, label: g.api_key_url_label }])
+    );
   } catch {
     profile = null;
   }
@@ -59,7 +66,7 @@ export default async function ServicesPage() {
             내 프로젝트에 필요한 서비스를 쉽게 찾아 연결하세요
           </p>
         </div>
-        <ServiceCatalogClient services={services} domains={domains} usedServiceIds={usedServiceIds} guideServiceIds={guideServiceIds} />
+        <ServiceCatalogClient services={services} domains={domains} usedServiceIds={usedServiceIds} guideServiceIds={guideServiceIds} guideApiKeyMap={guideApiKeyMap} />
       </main>
       <Footer />
     </div>
