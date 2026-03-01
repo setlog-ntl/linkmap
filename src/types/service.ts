@@ -87,6 +87,36 @@ export interface ServiceDependency {
   description_ko: string | null;
 }
 
+// API 키 발급 단계 (초보자용)
+export interface ApiKeyIssueStep {
+  step: number;
+  title: string;       // 단계 제목
+  description: string; // 상세 설명 (UI 경로 힌트 포함)
+}
+
+// 서비스 단일 기능 단위
+export interface ServiceFeatureGuide {
+  id: string;          // 기능 식별자
+  name: string;        // 기능명
+  description: string; // 기능 설명
+  tag?: 'free' | 'paid' | 'beta';
+  api_key?: {
+    env_var: string;                // 환경변수명
+    url: string;                    // 발급 URL
+    url_label: string;              // 링크 텍스트
+    issue_steps: ApiKeyIssueStep[]; // 발급 단계
+  };
+  setup_steps?: SetupStep[];        // 이 기능의 설정 단계 (선택)
+  code_example?: string;            // 코드 예제 (선택)
+}
+
+// 가입 안내
+export interface ServiceSignupGuide {
+  url: string;        // 가입 URL
+  steps: string[];    // 가입 단계 (3~5개 텍스트)
+  free_tier?: string; // 무료 플랜 설명
+}
+
 export interface ServiceGuide {
   id: string;
   service_id: string;
@@ -101,6 +131,9 @@ export interface ServiceGuide {
   api_key_url: string | null;
   api_key_url_label: string | null;
   updated_at: string;
+  // 신규 (v2): 가입 안내 + 기능별 가이드
+  signup?: ServiceSignupGuide | null;
+  features?: ServiceFeatureGuide[] | null;
 }
 
 export interface SetupStep {

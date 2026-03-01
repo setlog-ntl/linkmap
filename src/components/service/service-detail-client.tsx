@@ -14,13 +14,14 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, ExternalLink, Globe, BookOpen, Github, Clock, Copy, Check, KeyRound } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Globe, BookOpen, Clock, Copy, Check, KeyRound, UserPlus } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/service-icon';
-import { allCategoryLabels, allCategoryEmojis, domainLabels, domainIcons } from '@/lib/constants/service-filters';
-import { DifficultyBadge, GithubStarsBadge, FreeTierBadge, VendorLockInBadge, CostEstimateBadge } from './service-badges';
+import { allCategoryLabels, domainLabels, domainIcons } from '@/lib/constants/service-filters';
+import { DifficultyBadge, GithubStarsBadge, FreeTierBadge, VendorLockInBadge } from './service-badges';
 import type {
   Service, ServiceGuide, ServiceCostTier, ServiceDependency,
   ServiceCategory, ServiceDomain, DependencyType,
+  ServiceFeatureGuide, ServiceSignupGuide,
 } from '@/types';
 
 interface ServiceDetailClientProps {
@@ -65,7 +66,12 @@ export function ServiceDetailClient({ service, guide, costTiers, dependencies }:
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const hasGuide = guide && (guide.quick_start || guide.setup_steps?.length > 0);
+  const hasGuide = guide && (
+    guide.quick_start ||
+    guide.setup_steps?.length > 0 ||
+    guide.signup ||
+    (guide.features && guide.features.length > 0)
+  );
   const hasTips = guide && (guide.common_pitfalls?.length > 0 || guide.integration_tips?.length > 0 || guide.pros?.length > 0 || guide.cons?.length > 0);
 
   // Group dependencies by type
@@ -78,7 +84,7 @@ export function ServiceDetailClient({ service, guide, costTiers, dependencies }:
 
   const availableTabs = [
     { value: 'overview', label: '개요' },
-    ...(hasGuide ? [{ value: 'quickstart', label: '빠른 시작' }] : []),
+    ...(hasGuide ? [{ value: 'quickstart', label: '시작하기' }] : []),
     ...(costTiers.length > 0 ? [{ value: 'pricing', label: '가격' }] : []),
     ...(dependencies.length > 0 ? [{ value: 'related', label: '대안 & 연관' }] : []),
     ...(hasTips ? [{ value: 'tips', label: '활용 팁' }] : []),
@@ -276,13 +282,14 @@ export function ServiceDetailClient({ service, guide, costTiers, dependencies }:
           </div>
         </TabsContent>
 
-        {/* Tab 2: Quick Start */}
+        {/* Tab 2: 시작하기 */}
         {hasGuide && (
           <TabsContent value="quickstart" className="space-y-6 mt-6">
+            {/* 1. 서비스 소개 카드 */}
             {guide.quick_start && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm">빠른 시작</CardTitle>
+                  <CardTitle className="text-sm">서비스 소개</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm whitespace-pre-wrap">{guide.quick_start}</p>
@@ -290,70 +297,86 @@ export function ServiceDetailClient({ service, guide, costTiers, dependencies }:
               </Card>
             )}
 
-            {guide.api_key_url && (
-              <Card className="border-primary/20 bg-primary/5">
-                <CardContent className="p-4 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <KeyRound className="h-4.5 w-4.5 text-primary" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium">API 키 발급 / 확인</p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {guide.api_key_url_label || service.name} 콘솔에서 키를 발급받으세요
-                      </p>
+            {/* 2. 가입 안내 (signup 있을 때만) */}
+            {guide.signup && <SignupSection signup={guide.signup} />}
+
+            {/* 3. 기능별 API 키 아코디언 (features 있을 때) */}
+            {guide.features && guide.features.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium mb-3">기능별 시작 가이드</h3>
+                <FeatureAccordion features={guide.features} />
+              </div>
+            )}
+
+            {/* 4. Fallback: features 없을 때 기존 UI 유지 */}
+            {(!guide.features || guide.features.length === 0) && (
+              <>
+                {guide.api_key_url && (
+                  <Card className="border-primary/20 bg-primary/5">
+                    <CardContent className="p-4 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <KeyRound className="h-4.5 w-4.5 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium">API 키 발급 / 확인</p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {guide.api_key_url_label || service.name} 콘솔에서 키를 발급받으세요
+                          </p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" className="shrink-0" asChild>
+                        <a href={guide.api_key_url} target="_blank" rel="noopener noreferrer">
+                          {guide.api_key_url_label || '콘솔 열기'}
+                          <ExternalLink className="ml-1.5 h-3 w-3" />
+                        </a>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {guide.setup_steps && guide.setup_steps.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium mb-3">설정 단계</h3>
+                    <Accordion type="multiple" className="space-y-2">
+                      {guide.setup_steps.map((step, i) => (
+                        <AccordionItem key={i} value={`step-${i}`} className="border rounded-lg px-4">
+                          <AccordionTrigger className="text-sm">
+                            <span className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs shrink-0">
+                                {step.step}
+                              </Badge>
+                              {step.title_ko || step.title}
+                            </span>
+                          </AccordionTrigger>
+                          <AccordionContent className="space-y-3">
+                            <p className="text-sm text-muted-foreground">
+                              {step.description_ko || step.description}
+                            </p>
+                            {step.code_snippet && (
+                              <CodeBlock code={step.code_snippet} />
+                            )}
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </div>
+                )}
+
+                {guide.code_examples && Object.keys(guide.code_examples).length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium mb-3">코드 예제</h3>
+                    <div className="space-y-4">
+                      {Object.entries(guide.code_examples).map(([title, code]) => (
+                        <div key={title}>
+                          <p className="text-sm font-medium mb-2">{title}</p>
+                          <CodeBlock code={code} language="typescript" />
+                        </div>
+                      ))}
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" className="shrink-0" asChild>
-                    <a href={guide.api_key_url} target="_blank" rel="noopener noreferrer">
-                      {guide.api_key_url_label || '콘솔 열기'}
-                      <ExternalLink className="ml-1.5 h-3 w-3" />
-                    </a>
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-
-            {guide.setup_steps && guide.setup_steps.length > 0 && (
-              <div>
-                <h3 className="text-sm font-medium mb-3">설정 단계</h3>
-                <Accordion type="multiple" className="space-y-2">
-                  {guide.setup_steps.map((step, i) => (
-                    <AccordionItem key={i} value={`step-${i}`} className="border rounded-lg px-4">
-                      <AccordionTrigger className="text-sm">
-                        <span className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs shrink-0">
-                            {step.step}
-                          </Badge>
-                          {step.title_ko || step.title}
-                        </span>
-                      </AccordionTrigger>
-                      <AccordionContent className="space-y-3">
-                        <p className="text-sm text-muted-foreground">
-                          {step.description_ko || step.description}
-                        </p>
-                        {step.code_snippet && (
-                          <CodeBlock code={step.code_snippet} />
-                        )}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </div>
-            )}
-
-            {guide.code_examples && Object.keys(guide.code_examples).length > 0 && (
-              <div>
-                <h3 className="text-sm font-medium mb-3">코드 예제</h3>
-                <div className="space-y-4">
-                  {Object.entries(guide.code_examples).map(([title, code]) => (
-                    <div key={title}>
-                      <p className="text-sm font-medium mb-2">{title}</p>
-                      <CodeBlock code={code} language="typescript" />
-                    </div>
-                  ))}
-                </div>
-              </div>
+                )}
+              </>
             )}
           </TabsContent>
         )}
@@ -556,5 +579,149 @@ function MetaCard({ label, children }: { label: string; children: React.ReactNod
       <span className="text-xs text-muted-foreground block mb-1">{label}</span>
       {children}
     </div>
+  );
+}
+
+// ── 가입 안내 섹션 ────────────────────────────────────────────────────────────
+function SignupSection({ signup }: { signup: ServiceSignupGuide }) {
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm flex items-center gap-2">
+          <UserPlus className="h-4 w-4 text-primary" />
+          가입 안내
+          {signup.free_tier && (
+            <Badge variant="secondary" className="text-xs font-normal ml-1">
+              {signup.free_tier}
+            </Badge>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <ol className="space-y-2">
+          {signup.steps.map((step, i) => (
+            <li key={i} className="flex items-start gap-2.5 text-sm">
+              <span className="flex-shrink-0 h-5 w-5 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center justify-center mt-0.5">
+                {i + 1}
+              </span>
+              <span className="text-muted-foreground">{step}</span>
+            </li>
+          ))}
+        </ol>
+        <Button size="sm" asChild>
+          <a href={signup.url} target="_blank" rel="noopener noreferrer">
+            가입하기
+            <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
+          </a>
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ── 기능별 아코디언 ────────────────────────────────────────────────────────────
+const featureTagLabels: Record<string, { label: string; className: string }> = {
+  free:  { label: '무료', className: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
+  paid:  { label: '유료', className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' },
+  beta:  { label: 'Beta', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
+};
+
+function FeatureAccordion({ features }: { features: ServiceFeatureGuide[] }) {
+  return (
+    <Accordion type="multiple" className="space-y-2">
+      {features.map((feature) => {
+        const tagMeta = feature.tag ? featureTagLabels[feature.tag] : null;
+        return (
+          <AccordionItem
+            key={feature.id}
+            value={feature.id}
+            className="border rounded-lg px-4"
+          >
+            <AccordionTrigger className="text-sm hover:no-underline">
+              <span className="flex items-center gap-2 min-w-0">
+                <span className="font-medium truncate">{feature.name}</span>
+                {tagMeta && (
+                  <span className={`text-[11px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${tagMeta.className}`}>
+                    {tagMeta.label}
+                  </span>
+                )}
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-4 pb-4">
+              <p className="text-sm text-muted-foreground">{feature.description}</p>
+
+              {/* API 키 발급 */}
+              {feature.api_key && (
+                <div className="rounded-lg bg-muted/60 border p-3 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <KeyRound className="h-3.5 w-3.5 text-primary shrink-0" />
+                      <span className="text-xs font-medium">API 키 발급</span>
+                    </div>
+                    <code className="text-[11px] bg-background border rounded px-1.5 py-0.5 font-mono text-primary">
+                      {feature.api_key.env_var}
+                    </code>
+                  </div>
+                  <ApiKeyIssueSteps steps={feature.api_key.issue_steps} />
+                  <Button variant="outline" size="sm" asChild className="w-full justify-center">
+                    <a href={feature.api_key.url} target="_blank" rel="noopener noreferrer">
+                      {feature.api_key.url_label}
+                      <ExternalLink className="ml-1.5 h-3 w-3" />
+                    </a>
+                  </Button>
+                </div>
+              )}
+
+              {/* 기능별 설정 단계 */}
+              {feature.setup_steps && feature.setup_steps.length > 0 && (
+                <div>
+                  <p className="text-xs font-medium mb-2 text-muted-foreground">설정 단계</p>
+                  <ol className="space-y-1.5">
+                    {feature.setup_steps.map((step, i) => (
+                      <li key={i} className="text-sm">
+                        <span className="font-medium">{step.step}. {step.title_ko || step.title}</span>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {step.description_ko || step.description}
+                        </p>
+                        {step.code_snippet && <CodeBlock code={step.code_snippet} />}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              {/* 코드 예제 */}
+              {feature.code_example && (
+                <div>
+                  <p className="text-xs font-medium mb-2 text-muted-foreground">코드 예제</p>
+                  <CodeBlock code={feature.code_example} />
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        );
+      })}
+    </Accordion>
+  );
+}
+
+// ── API 키 발급 단계 번호 목록 ────────────────────────────────────────────────
+function ApiKeyIssueSteps({ steps }: { steps: { step: number; title: string; description: string }[] }) {
+  return (
+    <ol className="space-y-2">
+      {steps.map((s) => (
+        <li key={s.step} className="flex items-start gap-2 text-xs">
+          <span className="flex-shrink-0 h-4.5 w-4.5 rounded-full bg-primary/20 text-primary font-semibold flex items-center justify-center text-[10px] mt-0.5">
+            {s.step}
+          </span>
+          <div>
+            <span className="font-medium text-foreground">{s.title}</span>
+            {s.description && (
+              <p className="text-muted-foreground mt-0.5">{s.description}</p>
+            )}
+          </div>
+        </li>
+      ))}
+    </ol>
   );
 }

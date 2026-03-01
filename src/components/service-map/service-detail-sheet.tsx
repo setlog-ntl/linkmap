@@ -23,7 +23,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { ExternalLink, BookOpen, GitFork, Activity, Loader2, X, KeyRound, Lightbulb, Copy, Check } from 'lucide-react';
+import { ExternalLink, BookOpen, GitFork, Activity, Loader2, X, KeyRound, Lightbulb, Copy, Check, UserPlus } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { queryKeys } from '@/lib/queries/keys';
@@ -31,7 +31,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
-import type { ProjectService, Service, ServiceDependency, ServiceCategory, ServiceDomain, EnvironmentVariable, ServiceGuide } from '@/types';
+import type { ProjectService, Service, ServiceDependency, ServiceCategory, ServiceDomain, EnvironmentVariable, ServiceGuide, ServiceFeatureGuide, ServiceSignupGuide } from '@/types';
 
 interface ServiceDetailSheetProps {
   service: (ProjectService & { service: Service }) | null;
@@ -142,7 +142,9 @@ export function ServiceDetailSheet({
     (guide.setup_steps && guide.setup_steps.length > 0) ||
     (guide.pros && guide.pros.length > 0) ||
     (guide.cons && guide.cons.length > 0) ||
-    (guide.common_pitfalls && guide.common_pitfalls.length > 0)
+    (guide.common_pitfalls && guide.common_pitfalls.length > 0) ||
+    guide.signup ||
+    (guide.features && guide.features.length > 0)
   );
 
   const handleRunCheck = () => {
@@ -285,73 +287,89 @@ export function ServiceDetailSheet({
           <TabsContent value="guide" className="flex-1 overflow-hidden m-0 data-[state=active]:flex data-[state=active]:flex-col">
             <ScrollArea className="flex-1 w-full">
               <div className="space-y-4 p-4 pt-2 pb-6">
-                {/* 빠른 시작 */}
+                {/* 1. 서비스 소개 */}
                 {guide.quick_start && (
                   <div className="rounded-lg bg-primary/5 border border-primary/20 p-3">
                     <div className="flex items-center gap-2 mb-2">
                       <Lightbulb className="h-3.5 w-3.5 text-primary" />
-                      <span className="text-xs font-medium text-primary">빠른 시작</span>
+                      <span className="text-xs font-medium text-primary">서비스 소개</span>
                     </div>
                     <p className="text-sm text-muted-foreground">{guide.quick_start}</p>
                   </div>
                 )}
 
-                {/* API 키 발급 링크 */}
-                {guide.api_key_url && (
-                  <Button variant="outline" size="sm" asChild className="w-full justify-start gap-2 text-primary border-primary/30 hover:bg-primary/5">
-                    <a href={guide.api_key_url} target="_blank" rel="noopener noreferrer">
-                      <KeyRound className="h-3.5 w-3.5" />
-                      {guide.api_key_url_label || 'API 키 발급 / 확인'}
-                      <ExternalLink className="ml-auto h-3 w-3" />
-                    </a>
-                  </Button>
-                )}
+                {/* 2. 가입 안내 (signup 있을 때) */}
+                {guide.signup && <SheetSignupSection signup={guide.signup} />}
 
-                {/* 설정 단계 */}
-                {guide.setup_steps && guide.setup_steps.length > 0 && (
+                {/* 3. 기능별 아코디언 (features 있을 때) */}
+                {guide.features && guide.features.length > 0 && (
                   <div>
-                    <h4 className="text-sm font-medium mb-2">설정 단계</h4>
-                    <Accordion type="multiple" className="space-y-1.5">
-                      {guide.setup_steps.map((step, i) => (
-                        <AccordionItem key={i} value={`step-${i}`} className="border rounded-lg px-3">
-                          <AccordionTrigger className="text-xs py-2.5">
-                            <span className="flex items-center gap-2">
-                              <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0">
-                                {step.step}
-                              </Badge>
-                              <span className="text-left">{step.title_ko || step.title}</span>
-                            </span>
-                          </AccordionTrigger>
-                          <AccordionContent className="space-y-2 pb-3">
-                            <p className="text-xs text-muted-foreground">
-                              {step.description_ko || step.description}
-                            </p>
-                            {step.code_snippet && (
-                              <SheetCodeBlock code={step.code_snippet} />
-                            )}
-                          </AccordionContent>
-                        </AccordionItem>
-                      ))}
-                    </Accordion>
+                    <h4 className="text-xs font-medium mb-2">기능별 시작 가이드</h4>
+                    <SheetFeatureAccordion features={guide.features} />
                   </div>
                 )}
 
-                {/* 코드 예제 */}
-                {guide.code_examples && Object.keys(guide.code_examples).length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium mb-2">코드 예제</h4>
-                    <div className="space-y-3">
-                      {Object.entries(guide.code_examples).map(([title, code]) => (
-                        <div key={title}>
-                          <p className="text-xs font-medium mb-1.5 text-muted-foreground">{title}</p>
-                          <SheetCodeBlock code={code} />
+                {/* 4. Fallback: features 없을 때 기존 UI 유지 */}
+                {(!guide.features || guide.features.length === 0) && (
+                  <>
+                    {/* API 키 발급 링크 */}
+                    {guide.api_key_url && (
+                      <Button variant="outline" size="sm" asChild className="w-full justify-start gap-2 text-primary border-primary/30 hover:bg-primary/5">
+                        <a href={guide.api_key_url} target="_blank" rel="noopener noreferrer">
+                          <KeyRound className="h-3.5 w-3.5" />
+                          {guide.api_key_url_label || 'API 키 발급 / 확인'}
+                          <ExternalLink className="ml-auto h-3 w-3" />
+                        </a>
+                      </Button>
+                    )}
+
+                    {/* 설정 단계 */}
+                    {guide.setup_steps && guide.setup_steps.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium mb-2">설정 단계</h4>
+                        <Accordion type="multiple" className="space-y-1.5">
+                          {guide.setup_steps.map((step, i) => (
+                            <AccordionItem key={i} value={`step-${i}`} className="border rounded-lg px-3">
+                              <AccordionTrigger className="text-xs py-2.5">
+                                <span className="flex items-center gap-2">
+                                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0">
+                                    {step.step}
+                                  </Badge>
+                                  <span className="text-left">{step.title_ko || step.title}</span>
+                                </span>
+                              </AccordionTrigger>
+                              <AccordionContent className="space-y-2 pb-3">
+                                <p className="text-xs text-muted-foreground">
+                                  {step.description_ko || step.description}
+                                </p>
+                                {step.code_snippet && (
+                                  <SheetCodeBlock code={step.code_snippet} />
+                                )}
+                              </AccordionContent>
+                            </AccordionItem>
+                          ))}
+                        </Accordion>
+                      </div>
+                    )}
+
+                    {/* 코드 예제 */}
+                    {guide.code_examples && Object.keys(guide.code_examples).length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium mb-2">코드 예제</h4>
+                        <div className="space-y-3">
+                          {Object.entries(guide.code_examples).map(([title, code]) => (
+                            <div key={title}>
+                              <p className="text-xs font-medium mb-1.5 text-muted-foreground">{title}</p>
+                              <SheetCodeBlock code={code} />
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </div>
+                      </div>
+                    )}
+                  </>
                 )}
 
-                {/* 장점 / 단점 */}
+                {/* 장점 / 단점 (항상 표시) */}
                 {((guide.pros && guide.pros.length > 0) || (guide.cons && guide.cons.length > 0)) && (
                   <div className="space-y-3">
                     {guide.pros && guide.pros.length > 0 && (
@@ -520,6 +538,115 @@ export function ServiceDetailSheet({
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+// ── 가입 안내 (시트용, 소형) ──────────────────────────────────────────────────
+function SheetSignupSection({ signup }: { signup: ServiceSignupGuide }) {
+  return (
+    <div className="rounded-lg border p-3 space-y-3">
+      <div className="flex items-center gap-1.5">
+        <UserPlus className="h-3.5 w-3.5 text-primary" />
+        <span className="text-xs font-medium">가입 안내</span>
+        {signup.free_tier && (
+          <span className="ml-1 text-[10px] bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 px-1.5 py-0.5 rounded-full">
+            {signup.free_tier}
+          </span>
+        )}
+      </div>
+      <ol className="space-y-1.5">
+        {signup.steps.map((step, i) => (
+          <li key={i} className="flex items-start gap-2 text-xs">
+            <span className="flex-shrink-0 h-4 w-4 rounded-full bg-primary/15 text-primary font-semibold flex items-center justify-center text-[10px] mt-0.5">
+              {i + 1}
+            </span>
+            <span className="text-muted-foreground">{step}</span>
+          </li>
+        ))}
+      </ol>
+      <Button size="sm" variant="outline" asChild className="w-full h-7 text-xs">
+        <a href={signup.url} target="_blank" rel="noopener noreferrer">
+          가입하기
+          <ExternalLink className="ml-1 h-3 w-3" />
+        </a>
+      </Button>
+    </div>
+  );
+}
+
+// ── 기능별 아코디언 (시트용, 소형) ───────────────────────────────────────────
+const sheetFeatureTagLabels: Record<string, { label: string; className: string }> = {
+  free: { label: '무료', className: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
+  paid: { label: '유료', className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' },
+  beta: { label: 'Beta', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
+};
+
+function SheetFeatureAccordion({ features }: { features: ServiceFeatureGuide[] }) {
+  return (
+    <Accordion type="multiple" className="space-y-1.5">
+      {features.map((feature) => {
+        const tagMeta = feature.tag ? sheetFeatureTagLabels[feature.tag] : null;
+        return (
+          <AccordionItem key={feature.id} value={feature.id} className="border rounded-lg px-3">
+            <AccordionTrigger className="text-xs py-2.5 hover:no-underline">
+              <span className="flex items-center gap-2 min-w-0">
+                <span className="font-medium truncate text-left">{feature.name}</span>
+                {tagMeta && (
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${tagMeta.className}`}>
+                    {tagMeta.label}
+                  </span>
+                )}
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-3 pb-3">
+              <p className="text-xs text-muted-foreground">{feature.description}</p>
+
+              {feature.api_key && (
+                <div className="rounded-md bg-muted/60 border p-2.5 space-y-2">
+                  <div className="flex items-center justify-between gap-1">
+                    <div className="flex items-center gap-1.5">
+                      <KeyRound className="h-3 w-3 text-primary shrink-0" />
+                      <span className="text-[11px] font-medium">API 키 발급</span>
+                    </div>
+                    <code className="text-[10px] bg-background border rounded px-1 py-0.5 font-mono text-primary">
+                      {feature.api_key.env_var}
+                    </code>
+                  </div>
+                  <ol className="space-y-1.5">
+                    {feature.api_key.issue_steps.map((s) => (
+                      <li key={s.step} className="flex items-start gap-1.5 text-[11px]">
+                        <span className="flex-shrink-0 h-3.5 w-3.5 rounded-full bg-primary/20 text-primary font-semibold flex items-center justify-center text-[9px] mt-0.5">
+                          {s.step}
+                        </span>
+                        <div>
+                          <span className="font-medium text-foreground">{s.title}</span>
+                          {s.description && (
+                            <p className="text-muted-foreground mt-0.5">{s.description}</p>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                  <Button variant="outline" size="sm" asChild className="w-full h-6 text-[11px] justify-center">
+                    <a href={feature.api_key.url} target="_blank" rel="noopener noreferrer">
+                      {feature.api_key.url_label}
+                      <ExternalLink className="ml-1 h-2.5 w-2.5" />
+                    </a>
+                  </Button>
+                </div>
+              )}
+
+              {feature.code_example && (
+                <div>
+                  <p className="text-[11px] font-medium mb-1 text-muted-foreground">코드 예제</p>
+                  <SheetCodeBlock code={feature.code_example} />
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        );
+      })}
+    </Accordion>
   );
 }
 

@@ -173,8 +173,13 @@
 | cons | JSONB | YES | '[]' |
 | api_key_url | TEXT | YES | NULL |
 | api_key_url_label | TEXT | YES | NULL |
+| signup | JSONB | YES | NULL |
+| features | JSONB | YES | '[]' |
 | updated_at | TIMESTAMPTZ | NO | now() |
 
+**signup 구조**: `{ url: string, steps: string[], free_tier?: string }`
+**features 구조**: `ServiceFeatureGuide[]` — `{ id, name, description, tag?, api_key?: { env_var, url, url_label, issue_steps[] }, setup_steps?, code_example? }`
+**Migration**: 058_service_guide_features.sql
 **TS Type**: `ServiceGuide` (`src/types/service.ts`)
 
 ### service_comparisons

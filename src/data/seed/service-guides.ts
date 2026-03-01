@@ -1,3 +1,37 @@
+export interface ApiKeyIssueStepSeed {
+  step: number;
+  title: string;
+  description: string;
+}
+
+export interface ServiceFeatureGuideSeed {
+  id: string;
+  name: string;
+  description: string;
+  tag?: 'free' | 'paid' | 'beta';
+  api_key?: {
+    env_var: string;
+    url: string;
+    url_label: string;
+    issue_steps: ApiKeyIssueStepSeed[];
+  };
+  setup_steps?: {
+    step: number;
+    title: string;
+    title_ko: string;
+    description: string;
+    description_ko: string;
+    code_snippet?: string;
+  }[];
+  code_example?: string;
+}
+
+export interface ServiceSignupGuideSeed {
+  url: string;
+  steps: string[];
+  free_tier?: string;
+}
+
 export interface ServiceGuideSeed {
   service_id: string;
   quick_start: string;
@@ -28,6 +62,9 @@ export interface ServiceGuideSeed {
   cons: { text: string; text_ko: string }[];
   api_key_url?: string;
   api_key_url_label?: string;
+  // 신규 (v2)
+  signup?: ServiceSignupGuideSeed;
+  features?: ServiceFeatureGuideSeed[];
 }
 
 // Service ID constants
@@ -371,6 +408,91 @@ const session = await stripe.checkout.sessions.create({
     ],
     api_key_url: 'https://dashboard.stripe.com/apikeys',
     api_key_url_label: 'Stripe API Keys',
+    signup: {
+      url: 'https://dashboard.stripe.com/register',
+      steps: [
+        'stripe.com 접속 후 [회원가입] 클릭',
+        '이메일·비밀번호 입력 후 이메일 인증',
+        '사업자 정보 또는 개인 정보 입력',
+        '계좌 연결 (출금 받으려면 필수)',
+      ],
+      free_tier: '무료 가입 후 결제 성공 시 2.9% + $0.30 수수료만 부과 (월정액 없음)',
+    },
+    features: [
+      {
+        id: 'payments',
+        name: '결제 처리',
+        description: '신용카드·간편결제·국제 결제를 한 번에 처리합니다. Checkout 또는 Elements UI로 빠르게 구현할 수 있습니다.',
+        tag: 'paid',
+        api_key: {
+          env_var: 'STRIPE_SECRET_KEY',
+          url: 'https://dashboard.stripe.com/apikeys',
+          url_label: 'Stripe API Keys 페이지',
+          issue_steps: [
+            { step: 1, title: '대시보드 접속', description: 'dashboard.stripe.com에 로그인합니다.' },
+            { step: 2, title: 'Developers → API keys 클릭', description: '좌측 사이드바에서 Developers 메뉴를 열고 API keys를 선택합니다.' },
+            { step: 3, title: 'Secret key 복사', description: '"Secret key" 옆 [Reveal test key] 버튼을 클릭해 키를 복사합니다. 절대 공개하지 마세요.' },
+            { step: 4, title: '.env에 저장', description: 'STRIPE_SECRET_KEY=sk_test_... 형식으로 .env.local에 붙여넣습니다.' },
+          ],
+        },
+        code_example: `import Stripe from 'stripe'
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+
+const session = await stripe.checkout.sessions.create({
+  line_items: [{ price: 'price_xxx', quantity: 1 }],
+  mode: 'payment',
+  success_url: 'https://example.com/success',
+  cancel_url: 'https://example.com/cancel',
+})`,
+      },
+      {
+        id: 'webhooks',
+        name: '웹훅 (Webhook)',
+        description: '결제 완료·환불·구독 갱신 등 이벤트를 서버로 실시간 수신합니다. 반드시 서명 검증을 해야 합니다.',
+        tag: 'free',
+        api_key: {
+          env_var: 'STRIPE_WEBHOOK_SECRET',
+          url: 'https://dashboard.stripe.com/webhooks',
+          url_label: 'Stripe Webhooks 페이지',
+          issue_steps: [
+            { step: 1, title: 'Webhooks 페이지 이동', description: '대시보드 → Developers → Webhooks 클릭합니다.' },
+            { step: 2, title: '엔드포인트 추가', description: '[Add endpoint] 버튼을 클릭하고 수신할 서버 URL (예: https://yoursite.com/api/webhooks/stripe)을 입력합니다.' },
+            { step: 3, title: '이벤트 선택', description: 'checkout.session.completed, invoice.paid 등 필요한 이벤트를 선택합니다.' },
+            { step: 4, title: 'Signing secret 복사', description: '엔드포인트 생성 후 나타나는 [Reveal] 버튼을 눌러 Signing secret (whsec_...)을 복사합니다.' },
+            { step: 5, title: '.env에 저장', description: 'STRIPE_WEBHOOK_SECRET=whsec_... 형식으로 .env.local에 붙여넣습니다.' },
+          ],
+        },
+        code_example: `import { stripe } from '@/lib/stripe'
+import { headers } from 'next/headers'
+
+export async function POST(req: Request) {
+  const body = await req.text()
+  const sig = headers().get('stripe-signature')!
+  const event = stripe.webhooks.constructEvent(
+    body, sig, process.env.STRIPE_WEBHOOK_SECRET!
+  )
+  if (event.type === 'checkout.session.completed') {
+    // 결제 완료 처리
+  }
+  return Response.json({ received: true })
+}`,
+      },
+      {
+        id: 'subscriptions',
+        name: '구독 관리',
+        description: '월/연 구독 상품을 만들고 자동 갱신·업그레이드·해지를 관리합니다. 결제 API 키와 동일하게 사용합니다.',
+        tag: 'paid',
+        api_key: {
+          env_var: 'STRIPE_SECRET_KEY',
+          url: 'https://dashboard.stripe.com/apikeys',
+          url_label: 'Stripe API Keys 페이지',
+          issue_steps: [
+            { step: 1, title: '결제 처리와 동일한 키 사용', description: '구독도 동일한 STRIPE_SECRET_KEY를 사용합니다. 별도 발급이 필요하지 않습니다.' },
+            { step: 2, title: '구독 상품 생성', description: '대시보드 → Products → [Add product]에서 구독 상품과 가격 플랜을 먼저 생성합니다.' },
+          ],
+        },
+      },
+    ],
   },
   {
     service_id: S.clerk,
