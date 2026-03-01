@@ -25,5 +25,7 @@ export function getResendApiKey(): string | null {
 }
 
 export function getFromEmail(): string {
-  return getRuntimeEnv('RESEND_FROM_EMAIL') ?? 'onboarding@resend.dev';
+  const email = getRuntimeEnv('RESEND_FROM_EMAIL') ?? 'noreply@linkmap.biz';
+  const name = getRuntimeEnv('RESEND_FROM_NAME') ?? 'Linkmap';
+  return `${name} <${email}>`;
 }
