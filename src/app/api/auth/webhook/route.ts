@@ -85,16 +85,7 @@ export async function POST(request: NextRequest) {
     action: sent ? 'email.welcome' : 'email.send_failed',
     resourceType: 'user',
     resourceId: record.id,
-    details: {
-      email: record.email,
-      sent,
-      // TODO: 진단용 — 확인 후 제거
-      _diag: {
-        has_resend_key: !!process.env.RESEND_API_KEY,
-        has_from_email: !!process.env.RESEND_FROM_EMAIL,
-        has_webhook_secret: !!process.env.SUPABASE_WEBHOOK_SECRET,
-      },
-    },
+    details: { email: record.email, sent },
   });
 
   return NextResponse.json({ received: true });
