@@ -145,8 +145,8 @@ export function ProjectCard({ project, onDelete, onToggleFavorite, deploy }: Pro
                         zIndex: 5,
                       }}
                     >
-                      {ps.service?.id && getServiceIconUrl(ps.service.id) ? (
-                        <ServiceIcon serviceId={ps.service.id} size={14} />
+                      {ps.service?.slug && getServiceIconUrl(ps.service.slug) ? (
+                        <ServiceIcon serviceId={ps.service.slug} size={14} />
                       ) : (
                         ps.service?.name?.charAt(0) || '?'
                       )}
