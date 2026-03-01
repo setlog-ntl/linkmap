@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/client';
 import { queryKeys } from './keys';
 import type { Project, ProjectWithServices } from '@/types';
 
+
 const supabase = createClient();
 
 export function useProjects() {
@@ -87,6 +88,44 @@ export function useDeleteProject() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
+    },
+  });
+}
+
+export function useRestoreProject() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/projects/${id}/restore`, { method: 'POST' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || '프로젝트 복구 실패');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.trash.all });
+    },
+  });
+}
+
+export function usePermanentDeleteProject() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/projects/${id}/permanent`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || '프로젝트 영구 삭제 실패');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.trash.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
     },
   });

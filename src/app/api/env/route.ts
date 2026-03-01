@@ -138,7 +138,10 @@ export async function DELETE(request: NextRequest) {
     return notFoundError('환경변수');
   }
 
-  const { error } = await supabase.from('environment_variables').delete().eq('id', id);
+  const { error } = await supabase
+    .from('environment_variables')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', id);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }

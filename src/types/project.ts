@@ -15,6 +15,7 @@ export interface Project {
   is_favorited: boolean;
   created_at: string;
   updated_at: string;
+  deleted_at?: string | null;
 }
 
 export interface ProjectService {

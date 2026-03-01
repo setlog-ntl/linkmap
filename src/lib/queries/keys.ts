@@ -77,6 +77,9 @@ export const queryKeys = {
   subscription: {
     current: ['subscription', 'current'] as const,
   },
+  trash: {
+    all: ['trash'] as const,
+  },
   aiConfig: {
     global: ['ai-config', 'global'] as const,
     personas: ['ai-config', 'personas'] as const,

@@ -75,7 +75,10 @@ export async function DELETE(
     return apiError('연결을 찾을 수 없습니다', 404);
   }
 
-  const { error } = await supabase.from('user_connections').delete().eq('id', id);
+  const { error } = await supabase
+    .from('user_connections')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', id);
   if (error) return apiError(error.message, 400);
 
   await logAudit(user.id, {

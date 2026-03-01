@@ -1,6 +1,9 @@
 'use client';
 
 import { useId } from 'react';
+import { useTheme } from 'next-themes';
+
+const DARK_LOGO_SRC = '/img/linkmap-logo-dark.svg';
 
 interface LinkmapLogoProps {
   size?: number;
@@ -8,7 +11,23 @@ interface LinkmapLogoProps {
 }
 
 export function LinkmapLogo({ size = 32, className }: LinkmapLogoProps) {
+  const { resolvedTheme } = useTheme();
   const uid = useId().replace(/:/g, '');
+
+  const isDark = resolvedTheme === 'dark';
+
+  if (isDark) {
+    return (
+      <img
+        src={DARK_LOGO_SRC}
+        alt="Linkmap"
+        width={size}
+        height={size}
+        className={className}
+        aria-label="Linkmap"
+      />
+    );
+  }
 
   const gradMain   = `${uid}-grad-main`;
   const gradEdge   = `${uid}-grad-edge`;

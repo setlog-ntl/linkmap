@@ -87,7 +87,14 @@ export type AuditAction =
   | 'email.team_invite'
   | 'email.subscription_change'
   | 'email.send_failed'
-  | 'account.delete';
+  | 'account.delete'
+  | 'project.restore'
+  | 'project.permanently_delete'
+  | 'env_var.restore'
+  | 'env_var.permanently_delete'
+  | 'connection.restore'
+  | 'connection.permanently_delete'
+  | 'trash.empty';
 
 interface AuditLogEntry {
   action: AuditAction;

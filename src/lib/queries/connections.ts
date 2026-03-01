@@ -157,6 +157,36 @@ export function useDeleteConnection(projectId: string) {
   });
 }
 
+export function useRestoreConnection() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/connections/${id}/restore`, { method: 'POST' });
+      if (!res.ok) throw new Error('연결 복구 실패');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.trash.all });
+    },
+  });
+}
+
+export function usePermanentDeleteConnection() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/connections/${id}/permanent`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('연결 영구 삭제 실패');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.trash.all });
+    },
+  });
+}
+
 export function useAutoConnectSuggestions(projectId: string) {
   return useQuery({
     queryKey: [...queryKeys.connections.byProject(projectId), 'auto-suggestions'] as const,

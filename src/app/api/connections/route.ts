@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
     .from('user_connections')
     .select('*')
     .eq('project_id', projectId)
+    .is('deleted_at', null)
     .order('created_at');
 
   if (error) return apiError(error.message, 400);

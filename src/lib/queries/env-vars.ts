@@ -183,6 +183,36 @@ export function useDeleteEnvVar(projectId: string) {
   });
 }
 
+export function useRestoreEnvVar() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/env/restore?id=${id}`, { method: 'POST' });
+      if (!res.ok) throw new Error('환경변수 복구 실패');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.trash.all });
+    },
+  });
+}
+
+export function usePermanentDeleteEnvVar() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/env/permanent?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('환경변수 영구 삭제 실패');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.trash.all });
+    },
+  });
+}
+
 export function useSyncEnvServices(projectId: string) {
   const queryClient = useQueryClient();
 
