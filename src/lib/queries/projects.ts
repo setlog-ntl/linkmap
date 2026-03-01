@@ -13,6 +13,7 @@ export function useProjects() {
       const { data, error } = await supabase
         .from('projects')
         .select(`*, project_services!project_services_project_id_fkey (*, service:services (*)), project_github_repos (id)`)
+        .is('deleted_at', null)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;

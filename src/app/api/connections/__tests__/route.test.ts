@@ -28,7 +28,7 @@ function createRequest(url: string, options?: RequestInit) {
 
 function makeChain(result: { data: unknown; error: unknown }) {
   const chain: Record<string, unknown> = {};
-  const methods = ['select', 'eq', 'insert', 'upsert', 'delete', 'limit', 'update'];
+  const methods = ['select', 'eq', 'insert', 'upsert', 'delete', 'limit', 'update', 'is', 'not'];
   for (const m of methods) {
     chain[m] = vi.fn().mockReturnValue(chain);
   }

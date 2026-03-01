@@ -13,6 +13,7 @@ export function useEnvVars(projectId: string) {
         .from('environment_variables')
         .select('*')
         .eq('project_id', projectId)
+        .is('deleted_at', null)
         .order('key_name');
 
       if (error) throw error;

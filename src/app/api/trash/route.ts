@@ -14,6 +14,8 @@ export interface TrashItem {
   deleted_at: string;
 }
 
+type ProjectJoin = { name: string; user_id: string };
+
 export async function GET() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -54,7 +56,7 @@ export async function GET() {
   }
 
   for (const ev of envVarsRes.data ?? []) {
-    const proj = ev.project as { name: string; user_id: string } | null;
+    const proj = (ev.project as unknown as ProjectJoin | null);
     if (!proj || proj.user_id !== user.id) continue;
     items.push({
       id: ev.id,
@@ -67,7 +69,7 @@ export async function GET() {
   }
 
   for (const conn of connectionsRes.data ?? []) {
-    const proj = conn.project as { name: string; user_id: string } | null;
+    const proj = (conn.project as unknown as ProjectJoin | null);
     if (!proj || proj.user_id !== user.id) continue;
     items.push({
       id: conn.id,
@@ -79,7 +81,6 @@ export async function GET() {
     });
   }
 
-  // deleted_at DESC 전체 정렬
   items.sort((a, b) => new Date(b.deleted_at).getTime() - new Date(a.deleted_at).getTime());
 
   return NextResponse.json({ items });
@@ -90,42 +91,40 @@ export async function DELETE() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
 
-  // connections → env_vars → projects 순서로 삭제
-  const [connRes, envRes, projRes] = await Promise.all([
-    supabase
+  // 사용자 프로젝트 ID 목록 조회
+  const { data: userProjects } = await supabase
+    .from('projects')
+    .select('id')
+    .eq('user_id', user.id);
+
+  const projectIds = (userProjects ?? []).map((p) => p.id);
+
+  // connections → env_vars → projects 순서로 영구 삭제
+  if (projectIds.length > 0) {
+    await supabase
       .from('user_connections')
       .delete()
-      .in(
-        'project_id',
-        supabase.from('projects').select('id').eq('user_id', user.id)
-      )
-      .not('deleted_at', 'is', null),
+      .in('project_id', projectIds)
+      .not('deleted_at', 'is', null);
 
-    supabase
+    await supabase
       .from('environment_variables')
       .delete()
-      .in(
-        'project_id',
-        supabase.from('projects').select('id').eq('user_id', user.id)
-      )
-      .not('deleted_at', 'is', null),
+      .in('project_id', projectIds)
+      .not('deleted_at', 'is', null);
+  }
 
-    supabase
-      .from('projects')
-      .delete()
-      .eq('user_id', user.id)
-      .not('deleted_at', 'is', null),
-  ]);
+  const { error } = await supabase
+    .from('projects')
+    .delete()
+    .eq('user_id', user.id)
+    .not('deleted_at', 'is', null);
 
-  if (projRes.error) return serverError(projRes.error.message);
+  if (error) return serverError(error.message);
 
   await logAudit(user.id, {
     action: 'trash.empty',
     resourceType: 'trash',
-    details: {
-      connection_errors: connRes.error?.message ?? null,
-      env_var_errors: envRes.error?.message ?? null,
-    },
   });
 
   return NextResponse.json({ success: true });
