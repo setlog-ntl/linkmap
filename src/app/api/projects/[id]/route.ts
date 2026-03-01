@@ -57,7 +57,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       ? 'project.set_main_service'
       : updatedFields.includes('icon_type')
         ? 'project.set_icon'
-        : 'project.update';
+        : updatedFields.includes('monthly_budget') || updatedFields.includes('budget_currency')
+          ? 'project.budget_update'
+          : 'project.update';
   await logAudit(user.id, {
     action: auditAction,
     resourceType: 'project',

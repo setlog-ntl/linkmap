@@ -63,6 +63,8 @@
 | icon_value | TEXT | YES | NULL | slug\|char\|URL, M036 |
 | link_url | TEXT | YES | NULL | max 500 chars, M038 |
 | is_favorited | BOOLEAN | NO | false | 즐겨찾기 여부, M044 |
+| monthly_budget | NUMERIC(10,2) | YES | NULL | 월간 예산, M060 |
+| budget_currency | TEXT | NO | 'USD' | 'USD'\|'KRW', M060 |
 | created_at | TIMESTAMPTZ | NO | now() | |
 | updated_at | TIMESTAMPTZ | NO | now() | |
 
@@ -211,11 +213,18 @@
 | service_id | UUID FK | NO | → services(id) |
 | status | TEXT | NO | 'not_started' |
 | notes | TEXT | YES | NULL |
+| cost_tier_id | UUID FK | YES | NULL | → service_cost_tiers(id), M060 |
+| custom_cost_monthly | NUMERIC(10,2) | YES | NULL | 커스텀 월 비용, M060 |
+| custom_cost_yearly | NUMERIC(10,2) | YES | NULL | 커스텀 연 비용, M060 |
+| cost_notes | TEXT | YES | NULL | 비용 메모, M060 |
+| billing_cycle | TEXT | NO | 'monthly' | M060 |
 | created_at | TIMESTAMPTZ | NO | now() |
 | updated_at | TIMESTAMPTZ | NO | now() |
 
 **Constraint**: UNIQUE(project_id, service_id)
 **CHECK**: status IN ('not_started', 'in_progress', 'connected', 'error')
+**CHECK**: billing_cycle IN ('monthly', 'yearly', 'one_time', 'usage_based')
+**Index**: `idx_project_services_cost_tier` (WHERE cost_tier_id IS NOT NULL)
 **RLS**: 프로젝트 소유자 + 팀 멤버
 **TS Type**: `ProjectService` (`src/types/project.ts`)
 

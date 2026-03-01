@@ -94,7 +94,9 @@ export type AuditAction =
   | 'env_var.permanently_delete'
   | 'connection.restore'
   | 'connection.permanently_delete'
-  | 'trash.empty';
+  | 'trash.empty'
+  | 'service_cost.update'
+  | 'project.budget_update';
 
 interface AuditLogEntry {
   action: AuditAction;

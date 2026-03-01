@@ -141,7 +141,7 @@ export function useUpdateProject() {
       ...updates
     }: {
       id: string;
-    } & Partial<Pick<Project, 'name' | 'description' | 'tech_stack' | 'main_service_id' | 'icon_type' | 'icon_value' | 'link_url'>>) => {
+    } & Partial<Pick<Project, 'name' | 'description' | 'tech_stack' | 'main_service_id' | 'icon_type' | 'icon_value' | 'link_url' | 'monthly_budget' | 'budget_currency'>>) => {
       const res = await fetch(`/api/projects/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },

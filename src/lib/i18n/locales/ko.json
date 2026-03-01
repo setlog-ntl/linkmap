@@ -66,6 +66,7 @@
     "health": "상태 모니터링",
     "audit": "감사 로그",
     "settings": "설정",
+    "costs": "비용",
     "integrations": "내 서비스",
     "monitoring": "상태 확인",
     "changeHistory": "변경 기록",

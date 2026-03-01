@@ -18,6 +18,8 @@ export const updateProjectSchema = z.object({
   icon_value: z.string().max(500).nullable().optional(),
   link_url: z.string().url().max(500).nullable().optional(),
   is_favorited: z.boolean().optional(),
+  monthly_budget: z.number().min(0).max(999999.99).nullable().optional(),
+  budget_currency: z.enum(['USD', 'KRW']).optional(),
 });
 
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;

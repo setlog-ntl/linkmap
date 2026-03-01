@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, notFoundError, serverError } from '@/lib/api/errors';
-import type { DashboardLayer, DashboardResponse, ServiceCardData, LayerData, DashboardMetrics, UserConnection } from '@/types';
+import type { DashboardLayer, DashboardResponse, ServiceCardData, LayerData, DashboardMetrics } from '@/types';
+import type { UserConnection } from '@/types';
 
 const LAYER_ORDER: DashboardLayer[] = ['frontend', 'backend', 'devtools'];
 
@@ -21,7 +22,7 @@ export async function GET(
   if (!user) return unauthorizedError();
 
   try {
-    const [projectResult, servicesResult, envResult, connectionsResult, overridesResult] = await Promise.all([
+    const [projectResult, servicesResult, envResult, connectionsResult, overridesResult, costTiersResult] = await Promise.all([
       supabase
         .from('projects')
         .select('*')
@@ -45,6 +46,10 @@ export async function GET(
       supabase
         .from('project_service_overrides')
         .select('service_id, dashboard_layer, dashboard_subcategory')
+        .eq('project_id', id),
+      supabase
+        .from('project_services')
+        .select('id, cost_tier_id, custom_cost_monthly, cost_tier:service_cost_tiers(tier_name, price_monthly)')
         .eq('project_id', id),
     ]);
 
@@ -124,8 +129,37 @@ export async function GET(
       services: layerMap.get(layer) ?? [],
     }));
 
+    // Build cost lookup for cards
+    interface CostTierRow { id: string; cost_tier_id: string | null; custom_cost_monthly: number | null; cost_tier: { tier_name: string; price_monthly: string | null } | null }
+    const costData = (costTiersResult.data ?? []) as unknown as CostTierRow[];
+    const costMap = new Map<string, { monthlyCost: number; tierName?: string }>();
+    let totalMonthlyCost = 0;
+    for (const ct of costData) {
+      let cost = 0;
+      let tierName: string | undefined;
+      if (ct.custom_cost_monthly != null) {
+        cost = ct.custom_cost_monthly;
+      } else if (ct.cost_tier?.price_monthly) {
+        const match = ct.cost_tier.price_monthly.match(/^\$?([\d,]+\.?\d*)$/);
+        if (match) cost = parseFloat(match[1].replace(/,/g, ''));
+        tierName = ct.cost_tier.tier_name;
+      }
+      totalMonthlyCost += cost;
+      costMap.set(ct.id, { monthlyCost: cost, tierName });
+    }
+
+    // Enrich cards with cost data
+    for (const card of cards) {
+      const cm = costMap.get(card.projectServiceId);
+      if (cm) {
+        card.monthlyCost = cm.monthlyCost;
+        card.tierName = cm.tierName;
+      }
+    }
+
     // Metrics
     const connectedCount = cards.filter((c) => c.status === 'connected').length;
+    const monthlyBudget = project.monthly_budget as number | null ?? null;
     const metrics: DashboardMetrics = {
       totalServices: cards.length,
       connectedServices: connectedCount,
@@ -133,6 +167,9 @@ export async function GET(
       progressPercent: cards.length > 0
         ? Math.round((connectedCount / cards.length) * 100)
         : 0,
+      totalMonthlyCost,
+      monthlyBudget,
+      isOverBudget: monthlyBudget != null ? totalMonthlyCost > monthlyBudget : false,
     };
 
     const connections = (connectionsResult.data as unknown as UserConnection[]) ?? [];

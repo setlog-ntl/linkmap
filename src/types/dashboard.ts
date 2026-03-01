@@ -34,6 +34,8 @@ export interface ServiceCardData {
   envTotal: number;
   envFilled: number;
   websiteUrl: string | null;
+  monthlyCost?: number;
+  tierName?: string;
 }
 
 export interface LayerData {
@@ -47,6 +49,9 @@ export interface DashboardMetrics {
   connectedServices: number;
   totalEnvVars: number;
   progressPercent: number;
+  totalMonthlyCost?: number;
+  monthlyBudget?: number | null;
+  isOverBudget?: boolean;
 }
 
 export interface DashboardResponse {
@@ -61,6 +66,30 @@ export interface ViewGroupData {
   label: string;
   icon: string;
   services: ServiceCardData[];
+}
+
+export interface ProjectCostSummary {
+  totalMonthlyCost: number;
+  totalYearlyCost: number;
+  monthlyBudget: number | null;
+  budgetCurrency: 'USD' | 'KRW';
+  isOverBudget: boolean;
+  budgetUsagePercent: number | null;
+  services: ServiceCostEntry[];
+}
+
+export interface ServiceCostEntry {
+  projectServiceId: string;
+  serviceId: string;
+  serviceName: string;
+  serviceSlug: string;
+  costTierId: string | null;
+  tierName: string | null;
+  tierNameKo: string | null;
+  monthlyCost: number;
+  billingCycle: string;
+  costNotes: string | null;
+  isCustomCost: boolean;
 }
 
 export interface HealthScore {

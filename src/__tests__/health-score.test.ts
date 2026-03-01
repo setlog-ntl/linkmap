@@ -10,6 +10,11 @@ const mockService = (status: 'not_started' | 'in_progress' | 'connected' | 'erro
   service_id: `svc-${Math.random()}`,
   status,
   notes: null,
+  cost_tier_id: null,
+  custom_cost_monthly: null,
+  custom_cost_yearly: null,
+  cost_notes: null,
+  billing_cycle: 'monthly',
   created_at: '',
   updated_at: '',
   service: {

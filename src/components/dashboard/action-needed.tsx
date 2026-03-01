@@ -73,6 +73,15 @@ export function ActionNeeded({ projectId, allCards, metrics }: ActionNeededProps
     }
   }
 
+  // Budget exceeded
+  if (metrics.isOverBudget) {
+    items.push({
+      severity: 'warning',
+      message: '월간 예산을 초과했습니다',
+      href: `/project/${projectId}/costs`,
+    });
+  }
+
   // No services
   if (metrics.totalServices === 0) {
     items.push({

@@ -1,6 +1,8 @@
 import type { ServiceStatus } from './core';
 import type { Service } from './service';
 
+export type BudgetCurrency = 'USD' | 'KRW';
+
 export interface Project {
   id: string;
   user_id: string;
@@ -13,10 +15,14 @@ export interface Project {
   icon_value: string | null;
   link_url: string | null;
   is_favorited: boolean;
+  monthly_budget: number | null;
+  budget_currency: BudgetCurrency;
   created_at: string;
   updated_at: string;
   deleted_at?: string | null;
 }
+
+export type BillingCycle = 'monthly' | 'yearly' | 'one_time' | 'usage_based';
 
 export interface ProjectService {
   id: string;
@@ -24,6 +30,11 @@ export interface ProjectService {
   service_id: string;
   status: ServiceStatus;
   notes: string | null;
+  cost_tier_id: string | null;
+  custom_cost_monthly: number | null;
+  custom_cost_yearly: number | null;
+  cost_notes: string | null;
+  billing_cycle: BillingCycle;
   created_at: string;
   updated_at: string;
   service?: Service;

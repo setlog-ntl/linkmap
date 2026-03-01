@@ -74,6 +74,9 @@ export const queryKeys = {
   layerOverrides: {
     byProject: (projectId: string) => ['layer-overrides', 'project', projectId] as const,
   },
+  costs: {
+    byProject: (projectId: string) => ['costs', 'project', projectId] as const,
+  },
   subscription: {
     current: ['subscription', 'current'] as const,
   },

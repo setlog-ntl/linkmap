@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { Plus, Map as MapIcon, Boxes, Key, TrendingUp, ExternalLink, Link as LinkIcon } from 'lucide-react';
+import { Plus, Map as MapIcon, Boxes, Key, TrendingUp, DollarSign, ExternalLink, Link as LinkIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -169,6 +169,9 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
             <MetricPill icon={Boxes} value={metrics.totalServices} label="서비스" />
             <MetricPill icon={Key} value={metrics.totalEnvVars} label="ENV" />
             <MetricPill icon={TrendingUp} value={`${metrics.progressPercent}%`} label="진행률" />
+            {metrics.totalMonthlyCost != null && metrics.totalMonthlyCost > 0 && (
+              <MetricPill icon={DollarSign} value={`$${metrics.totalMonthlyCost.toFixed(0)}`} label="월 비용" />
+            )}
           </div>
 
           {/* Service icon grid */}
