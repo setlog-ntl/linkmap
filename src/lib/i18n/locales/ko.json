@@ -802,7 +802,14 @@
     "logoutDesc": "계정에서 로그아웃합니다",
     "deleteAccount": "계정 삭제",
     "deleteAccountDesc": "계정과 모든 데이터를 영구 삭제합니다",
-    "comingSoon": "추후 지원 예정"
+    "comingSoon": "추후 지원 예정",
+    "deleteAccountTitle": "정말 계정을 삭제하시겠습니까?",
+    "deleteAccountWarning": "계정을 삭제하면 다음 데이터가 모두 영구적으로 삭제되며 복구할 수 없습니다:\n• 모든 프로젝트 및 서비스 연결\n• 환경변수 및 API 토큰\n• 배포된 사이트\n• GitHub 연결 정보",
+    "deleteAccountConfirmLabel": "확인을 위해 아래에 '계정 삭제'를 입력하세요",
+    "deleteAccountConfirmText": "계정 삭제",
+    "deleteAccountSuccess": "계정이 삭제되었습니다",
+    "deleteAccountFailed": "계정 삭제에 실패했습니다",
+    "deletingAccount": "삭제 중..."
   },
   "commandPalette": {
     "placeholder": "명령어 검색...",

@@ -802,7 +802,14 @@
     "logoutDesc": "Sign out of your account",
     "deleteAccount": "Delete Account",
     "deleteAccountDesc": "Permanently delete your account and all data",
-    "comingSoon": "Coming soon"
+    "comingSoon": "Coming soon",
+    "deleteAccountTitle": "Are you sure you want to delete your account?",
+    "deleteAccountWarning": "Deleting your account will permanently remove the following data and cannot be undone:\n• All projects and service connections\n• Environment variables and API tokens\n• Deployed sites\n• GitHub connection info",
+    "deleteAccountConfirmLabel": "Type 'Delete Account' below to confirm",
+    "deleteAccountConfirmText": "Delete Account",
+    "deleteAccountSuccess": "Your account has been deleted",
+    "deleteAccountFailed": "Failed to delete account",
+    "deletingAccount": "Deleting..."
   },
   "commandPalette": {
     "placeholder": "Search commands...",

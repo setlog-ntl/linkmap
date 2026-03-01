@@ -86,7 +86,8 @@ export type AuditAction =
   | 'email.health_alert'
   | 'email.team_invite'
   | 'email.subscription_change'
-  | 'email.send_failed';
+  | 'email.send_failed'
+  | 'account.delete';
 
 interface AuditLogEntry {
   action: AuditAction;

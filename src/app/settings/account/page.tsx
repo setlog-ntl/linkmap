@@ -8,6 +8,18 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Label } from '@/components/ui/label';
 import { Pencil, Check, X, Calendar, LogOut, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
@@ -75,10 +87,37 @@ export default function AccountPage() {
     }
   };
 
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push('/login');
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    try {
+      const res = await fetch('/api/account/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmText: deleteConfirmText }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || t(locale, 'account.deleteAccountFailed'));
+      }
+      toast.success(t(locale, 'account.deleteAccountSuccess'));
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push('/login');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t(locale, 'account.deleteAccountFailed'));
+    } finally {
+      setDeletingAccount(false);
+    }
   };
 
   if (loading) {
@@ -185,15 +224,63 @@ export default function AccountPage() {
               <p className="text-[15px] font-semibold text-foreground">{t(locale, 'account.deleteAccount')}</p>
               <p className="text-[13px] text-muted-foreground mt-0.5">{t(locale, 'account.deleteAccountDesc')}</p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-red-300/60 dark:border-red-500/40 text-red-600 dark:text-red-400 hover:bg-red-500/15"
-              onClick={() => toast.info(t(locale, 'account.comingSoon'))}
-            >
-              <AlertTriangle className="h-4 w-4 mr-2" />
-              {t(locale, 'account.deleteAccount')}
-            </Button>
+            <AlertDialog open={deleteDialogOpen} onOpenChange={(open) => {
+              setDeleteDialogOpen(open);
+              if (!open) setDeleteConfirmText('');
+            }}>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-red-300/60 dark:border-red-500/40 text-red-600 dark:text-red-400 hover:bg-red-500/15"
+                >
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  {t(locale, 'account.deleteAccount')}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-red-600 dark:text-red-400">
+                    {t(locale, 'account.deleteAccountTitle')}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription asChild>
+                    <div className="space-y-3">
+                      <p className="whitespace-pre-line text-sm text-muted-foreground">
+                        {t(locale, 'account.deleteAccountWarning')}
+                      </p>
+                      <div className="space-y-2 pt-2">
+                        <Label htmlFor="delete-confirm" className="text-sm font-medium text-foreground">
+                          {t(locale, 'account.deleteAccountConfirmLabel')}
+                        </Label>
+                        <Input
+                          id="delete-confirm"
+                          value={deleteConfirmText}
+                          onChange={(e) => setDeleteConfirmText(e.target.value)}
+                          placeholder={t(locale, 'account.deleteAccountConfirmText')}
+                          className="bg-muted border-border"
+                          autoComplete="off"
+                        />
+                      </div>
+                    </div>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={deletingAccount}>
+                    {t(locale, 'common.cancel')}
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    disabled={deleteConfirmText !== t(locale, 'account.deleteAccountConfirmText') || deletingAccount}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleDeleteAccount();
+                    }}
+                    className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
+                  >
+                    {deletingAccount ? t(locale, 'account.deletingAccount') : t(locale, 'account.deleteAccount')}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </section>
