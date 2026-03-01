@@ -1,4 +1,4 @@
-import { BookOpen, Wrench, Key, Shield, Monitor, Server, Globe, Github, Cloud, Bot } from 'lucide-react';
+import { BookOpen, Wrench, Key, Shield, Monitor, Server, Globe, Github, Cloud, Bot, Database, Triangle } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export type GuideCategory = 'concept' | 'service';
@@ -30,6 +30,8 @@ export const GUIDE_LIST: GuideMeta[] = [
   { slug: 'github', title: 'GitHub 시작하기', description: '가입부터 첫 저장소까지 5단계 완성', category: 'service', icon: Github, badge: '단계별', readingTime: '30분', href: '/guides/github' },
   { slug: 'cloudflare', title: 'Cloudflare 연결', description: '계정 생성부터 자동 배포까지 7단계', category: 'service', icon: Cloud, badge: '단계별', readingTime: '40분', href: '/guides/cloudflare' },
   { slug: 'openai', title: 'OpenAI 연동', description: 'API 키 설정부터 스트리밍까지', category: 'service', icon: Bot, badge: 'AI', readingTime: '15분', href: '/guides/openai' },
+  { slug: 'supabase', title: 'Supabase 시작하기', description: '계정 생성부터 DB, 인증, RLS까지 10분 완성', category: 'service', icon: Database, badge: '단계별', readingTime: '20분', href: '/guides/supabase' },
+  { slug: 'vercel', title: 'Vercel 배포하기', description: 'GitHub 연동부터 커스텀 도메인까지 15분 완성', category: 'service', icon: Triangle, badge: '단계별', readingTime: '15분', href: '/guides/vercel' },
 ];
 
 export function getGuidesByCategory(category: GuideCategory): GuideMeta[] {
