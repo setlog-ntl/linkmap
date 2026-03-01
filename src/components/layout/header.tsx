@@ -16,7 +16,7 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { Menu, Globe, Search, BookOpen, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench, ArrowRight } from 'lucide-react';
+import { Menu, Globe, Search, BookOpen, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench, ArrowRight, Rocket } from 'lucide-react';
 import { GUIDE_CATEGORIES, getGuidesByCategory } from '@/data/ui/guide-meta';
 import { useUIStore } from '@/stores/ui-store';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -42,6 +42,14 @@ export function Header({ profile }: HeaderProps) {
 
   const navLinks = (
     <>
+      <Link
+        href="/sites/new"
+        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+        onClick={() => setSidebarOpen(false)}
+      >
+        <Rocket className="h-3.5 w-3.5" />
+        원클릭 배포
+      </Link>
       {profile && (
         <Link
           href="/dashboard"
@@ -240,6 +248,14 @@ export function Header({ profile }: HeaderProps) {
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
               <nav className="flex flex-col gap-2 mt-8">
+                <Link
+                  href="/sites/new"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <Rocket className="h-4 w-4" />
+                  원클릭 배포
+                </Link>
                 {profile && (
                   <>
                     <div className="flex items-center gap-2 px-2.5 py-1.5 mb-1">

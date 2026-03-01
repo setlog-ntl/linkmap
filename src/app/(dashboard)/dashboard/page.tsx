@@ -15,7 +15,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
-import { OneclickSidePanel } from '@/components/dashboard/oneclick-side-panel';
 
 type ViewMode = 'card' | 'list';
 const VIEW_STORAGE_KEY = 'linkmap-dashboard-view';
@@ -168,89 +167,79 @@ export default function DashboardPage() {
       {/* Quick Actions */}
       <QuickActions onNewProject={() => setCreateOpen(true)} />
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* 원클릭 배포 사이드 패널 */}
-        <div className="lg:w-64 xl:w-72 shrink-0">
-          <OneclickSidePanel deployments={deployments ?? []} />
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-xl border border-border/40 overflow-hidden">
+              <Skeleton className="h-32" />
+              <div className="p-4 space-y-3">
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-2 w-full rounded-full" />
+              </div>
+            </div>
+          ))}
         </div>
+      ) : sortedProjects.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="rounded-2xl bg-muted/50 p-6 mb-6">
+            <FolderOpen className="h-12 w-12 text-muted-foreground/40" />
+          </div>
+          <h2 className="text-xl font-semibold mb-2">{t(locale, 'dashboard.noProjects')}</h2>
+          <p className="text-muted-foreground mb-8 max-w-md text-sm">
+            {t(locale, 'dashboard.noProjectsDesc')}
+          </p>
+          <div className="flex gap-3">
+            <TemplateDialog onSubmit={handleCreateFromTemplate} />
+            <CreateProjectDialog onSubmit={handleCreateProject} />
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* View mode toggle */}
+          <div className="flex items-center gap-1 mb-4">
+            <Button
+              variant={viewMode === 'card' ? 'secondary' : 'ghost'}
+              size="sm"
+              className="h-8 px-3 gap-1.5"
+              onClick={() => handleViewModeChange('card')}
+            >
+              <LayoutGrid className="h-4 w-4" />
+              <span className="text-xs">{t(locale, 'dashboard.viewCard')}</span>
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+              size="sm"
+              className="h-8 px-3 gap-1.5"
+              onClick={() => handleViewModeChange('list')}
+            >
+              <List className="h-4 w-4" />
+              <span className="text-xs">{t(locale, 'dashboard.viewList')}</span>
+            </Button>
+          </div>
 
-        {/* 내 프로젝트 */}
-        <div className="flex-1 min-w-0">
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="rounded-xl border border-border/40 overflow-hidden">
-                  <Skeleton className="h-32" />
-                  <div className="p-4 space-y-3">
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-2 w-full rounded-full" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : sortedProjects.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 text-center">
-              <div className="rounded-2xl bg-muted/50 p-6 mb-6">
-                <FolderOpen className="h-12 w-12 text-muted-foreground/40" />
-              </div>
-              <h2 className="text-xl font-semibold mb-2">{t(locale, 'dashboard.noProjects')}</h2>
-              <p className="text-muted-foreground mb-8 max-w-md text-sm">
-                {t(locale, 'dashboard.noProjectsDesc')}
-              </p>
-              <div className="flex gap-3">
-                <TemplateDialog onSubmit={handleCreateFromTemplate} />
-                <CreateProjectDialog onSubmit={handleCreateProject} />
-              </div>
-            </div>
+          {viewMode === 'list' ? (
+            <ProjectTreeList
+              projects={sortedProjects}
+              onDelete={handleDeleteProject}
+              onToggleFavorite={handleToggleFavorite}
+              deployByProjectId={deployByProjectId}
+            />
           ) : (
-            <>
-              {/* View mode toggle */}
-              <div className="flex items-center gap-1 mb-4">
-                <Button
-                  variant={viewMode === 'card' ? 'secondary' : 'ghost'}
-                  size="sm"
-                  className="h-8 px-3 gap-1.5"
-                  onClick={() => handleViewModeChange('card')}
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                  <span className="text-xs">{t(locale, 'dashboard.viewCard')}</span>
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                  size="sm"
-                  className="h-8 px-3 gap-1.5"
-                  onClick={() => handleViewModeChange('list')}
-                >
-                  <List className="h-4 w-4" />
-                  <span className="text-xs">{t(locale, 'dashboard.viewList')}</span>
-                </Button>
-              </div>
-
-              {viewMode === 'list' ? (
-                <ProjectTreeList
-                  projects={sortedProjects}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {sortedProjects.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
                   onDelete={handleDeleteProject}
                   onToggleFavorite={handleToggleFavorite}
-                  deployByProjectId={deployByProjectId}
+                  deploy={deployByProjectId.get(project.id)}
                 />
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {sortedProjects.map((project) => (
-                    <ProjectCard
-                      key={project.id}
-                      project={project}
-                      onDelete={handleDeleteProject}
-                      onToggleFavorite={handleToggleFavorite}
-                      deploy={deployByProjectId.get(project.id)}
-                    />
-                  ))}
-                </div>
-              )}
-            </>
+              ))}
+            </div>
           )}
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }
