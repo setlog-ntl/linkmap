@@ -194,6 +194,150 @@ CREATE POLICY "Users view own" ON users FOR SELECT USING (auth.uid() = id);`
     ],
     api_key_url: 'https://supabase.com/dashboard/project/_/settings/api',
     api_key_url_label: 'Supabase Dashboard',
+    signup: {
+      url: 'https://supabase.com',
+      steps: [
+        'supabase.com 접속 후 [Start your project] 클릭',
+        'GitHub 계정으로 간편 가입 (권장) 또는 이메일 가입',
+        'New project 버튼 → 프로젝트 이름·DB 비밀번호·리전 설정',
+        '프로젝트 생성 완료 후 Project Settings → API에서 키 복사',
+      ],
+      free_tier: '무료 플랜: 프로젝트 2개, DB 500MB, 인증 50,000 MAU, 스토리지 1GB',
+    },
+    features: [
+      {
+        id: 'database',
+        name: '데이터베이스 (PostgreSQL)',
+        description: '완전 관리형 PostgreSQL입니다. SQL 쿼리는 물론 JavaScript SDK로도 데이터를 읽고 쓸 수 있습니다. RLS(Row Level Security)로 행 단위 접근 제어가 가능합니다.',
+        tag: 'free',
+        api_key: {
+          env_var: 'NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY',
+          url: 'https://supabase.com/dashboard/project/_/settings/api',
+          url_label: 'Supabase Project API Settings',
+          issue_steps: [
+            { step: 1, title: '대시보드 접속', description: 'supabase.com/dashboard에서 해당 프로젝트를 선택합니다.' },
+            { step: 2, title: 'Project Settings → API 클릭', description: '좌측 하단 Settings 아이콘 → API 메뉴를 엽니다.' },
+            { step: 3, title: 'Project URL 복사', description: 'Project URL 항목의 값을 복사합니다. (https://xxxx.supabase.co 형태)' },
+            { step: 4, title: 'anon public 키 복사', description: 'Project API Keys에서 anon / public 키를 복사합니다. 이 키는 공개해도 안전합니다(RLS 적용 시).' },
+            { step: 5, title: '.env에 저장', description: 'NEXT_PUBLIC_SUPABASE_URL=... 와 NEXT_PUBLIC_SUPABASE_ANON_KEY=... 를 .env.local에 붙여넣습니다.' },
+          ],
+        },
+        code_example: `import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+// 데이터 조회
+const { data, error } = await supabase
+  .from('posts')
+  .select('*')
+  .eq('published', true)`,
+      },
+      {
+        id: 'auth',
+        name: '인증 (Auth)',
+        description: '이메일/비밀번호, Google·GitHub·Kakao 등 소셜 로그인, 매직 링크를 지원합니다. 데이터베이스와 동일한 API 키를 사용합니다.',
+        tag: 'free',
+        api_key: {
+          env_var: 'NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY',
+          url: 'https://supabase.com/dashboard/project/_/settings/api',
+          url_label: 'Supabase Project API Settings',
+          issue_steps: [
+            { step: 1, title: '데이터베이스와 동일한 키 사용', description: '인증도 NEXT_PUBLIC_SUPABASE_URL과 NEXT_PUBLIC_SUPABASE_ANON_KEY를 그대로 사용합니다. 별도 발급이 필요하지 않습니다.' },
+            { step: 2, title: '소셜 로그인 설정 (선택)', description: 'Authentication → Providers에서 사용할 OAuth 제공자(Google, GitHub 등)를 활성화하고 Client ID/Secret을 입력합니다.' },
+          ],
+        },
+        code_example: `// 이메일 회원가입
+await supabase.auth.signUp({ email, password })
+
+// Google 로그인
+await supabase.auth.signInWithOAuth({ provider: 'google' })
+
+// 현재 사용자 조회
+const { data: { user } } = await supabase.auth.getUser()`,
+      },
+      {
+        id: 'storage',
+        name: '스토리지 (Storage)',
+        description: '이미지·파일을 버킷 단위로 관리합니다. RLS 정책으로 파일 접근 권한을 제어하고 CDN을 통해 빠르게 제공합니다.',
+        tag: 'free',
+        api_key: {
+          env_var: 'NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY',
+          url: 'https://supabase.com/dashboard/project/_/storage/buckets',
+          url_label: 'Supabase Storage Buckets',
+          issue_steps: [
+            { step: 1, title: '데이터베이스와 동일한 키 사용', description: '스토리지도 동일한 클라이언트 키를 사용합니다.' },
+            { step: 2, title: '버킷 생성', description: '대시보드 → Storage → New bucket에서 버킷 이름과 공개/비공개 여부를 설정합니다.' },
+            { step: 3, title: 'RLS 정책 설정', description: '비공개 버킷은 Policies 탭에서 업로드·다운로드 정책을 추가해야 사용자가 접근할 수 있습니다.' },
+          ],
+        },
+        code_example: `// 파일 업로드
+const { data, error } = await supabase.storage
+  .from('avatars')
+  .upload(\`\${userId}/avatar.png\`, file)
+
+// 공개 URL 조회
+const { data: { publicUrl } } = supabase.storage
+  .from('avatars')
+  .getPublicUrl(\`\${userId}/avatar.png\`)`,
+      },
+      {
+        id: 'edge-functions',
+        name: 'Edge Functions',
+        description: 'Deno 기반 서버리스 함수입니다. 서버 전용 로직(결제 처리, 외부 API 호출 등)을 안전하게 실행합니다. 서버 측에서는 service_role 키를 사용합니다.',
+        tag: 'free',
+        api_key: {
+          env_var: 'SUPABASE_SERVICE_ROLE_KEY',
+          url: 'https://supabase.com/dashboard/project/_/settings/api',
+          url_label: 'Supabase Project API Settings',
+          issue_steps: [
+            { step: 1, title: 'API Settings 접속', description: 'Project Settings → API를 엽니다.' },
+            { step: 2, title: 'service_role 키 복사', description: 'Project API Keys에서 service_role 키를 복사합니다. 이 키는 RLS를 우회하므로 절대 클라이언트에 노출하지 마세요.' },
+            { step: 3, title: '.env에 저장', description: 'SUPABASE_SERVICE_ROLE_KEY=... 를 .env.local에 붙여넣습니다. NEXT_PUBLIC_ 접두사를 붙이면 절대 안 됩니다.' },
+          ],
+        },
+        code_example: `// supabase/functions/hello/index.ts
+import { createClient } from 'jsr:@supabase/supabase-js@2'
+
+Deno.serve(async (req) => {
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  )
+  const { data } = await supabase.from('posts').select()
+  return Response.json(data)
+})`,
+      },
+      {
+        id: 'realtime',
+        name: '실시간 (Realtime)',
+        description: 'DB 변경사항을 WebSocket으로 실시간 수신합니다. 채팅·알림·대시보드 라이브 업데이트 등에 활용됩니다. 클라이언트 키로 바로 사용 가능합니다.',
+        tag: 'free',
+        api_key: {
+          env_var: 'NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY',
+          url: 'https://supabase.com/dashboard/project/_/settings/api',
+          url_label: 'Supabase Project API Settings',
+          issue_steps: [
+            { step: 1, title: '데이터베이스와 동일한 키 사용', description: 'Realtime도 동일한 클라이언트 키를 사용합니다.' },
+            { step: 2, title: '테이블 Realtime 활성화', description: '대시보드 → Database → Replication에서 구독할 테이블의 Realtime을 활성화합니다.' },
+          ],
+        },
+        code_example: `// 테이블 변경 실시간 구독
+const channel = supabase
+  .channel('posts-changes')
+  .on(
+    'postgres_changes',
+    { event: 'INSERT', schema: 'public', table: 'posts' },
+    (payload) => console.log('New post:', payload.new)
+  )
+  .subscribe()
+
+// 구독 해제
+await supabase.removeChannel(channel)`,
+      },
+    ],
   },
   {
     service_id: S.firebase,
