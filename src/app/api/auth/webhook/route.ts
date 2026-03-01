@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { logAudit } from '@/lib/audit';
 import { sendEmail } from '@/lib/email/sender';
 
@@ -34,7 +35,15 @@ function verifySecret(received: string, expected: string): boolean {
 }
 
 export async function POST(request: NextRequest) {
-  const webhookSecret = process.env.SUPABASE_WEBHOOK_SECRET;
+  let webhookSecret = process.env.SUPABASE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    try {
+      const { env } = getCloudflareContext();
+      webhookSecret = (env as Record<string, string | undefined>).SUPABASE_WEBHOOK_SECRET;
+    } catch {
+      // 로컬 개발 환경 — Cloudflare 컨텍스트 없음
+    }
+  }
 
   const body = await request.text();
 
