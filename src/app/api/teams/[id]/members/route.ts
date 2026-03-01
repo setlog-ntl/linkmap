@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, notFoundError, serverError, apiError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
+import { sendEmail } from '@/lib/email/sender';
 import { z } from 'zod';
 
 const inviteMemberSchema = z.object({
@@ -112,6 +113,27 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     .single();
 
   if (error) return serverError(error.message);
+
+  // Fetch team name and inviter name for the invite email
+  const [{ data: team }, { data: inviterProfile }] = await Promise.all([
+    supabase.from('teams').select('name').eq('id', teamId).single(),
+    supabase.from('profiles').select('full_name, email').eq('id', user.id).single(),
+  ]);
+
+  const sent = await sendEmail({
+    type: 'team_invite',
+    to: parsed.data.email,
+    inviterName: inviterProfile?.full_name ?? inviterProfile?.email ?? '팀 관리자',
+    teamName: team?.name ?? teamId,
+    role: parsed.data.role,
+  });
+
+  await logAudit(user.id, {
+    action: sent ? 'email.team_invite' : 'email.send_failed',
+    resourceType: 'team_member',
+    resourceId: member.id,
+    details: { team_id: teamId, target_user_id: targetUserId, role: parsed.data.role, sent },
+  });
 
   await logAudit(user.id, {
     action: 'team_member.add',

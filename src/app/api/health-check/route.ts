@@ -5,6 +5,7 @@ import { runHealthCheck } from '@/lib/health-check';
 import { runHealthCheckSchema } from '@/lib/validations/health-check';
 import { unauthorizedError, notFoundError, validationError, apiError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
+import { sendEmail } from '@/lib/email/sender';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
   // Verify ownership: project_service → project → user
   const { data: projectService } = await supabase
     .from('project_services')
-    .select('*, service:services(*), project:projects!inner(user_id)')
+    .select('*, service:services(*), project:projects!inner(user_id, name)')
     .eq('id', project_service_id)
     .single();
 
@@ -79,6 +80,36 @@ export async function POST(request: NextRequest) {
       .from('project_services')
       .update({ status: newStatus, updated_at: new Date().toISOString() })
       .eq('id', project_service_id);
+  }
+
+  // Send alert email for unhealthy/degraded status
+  if (result.status === 'unhealthy' || result.status === 'degraded') {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.email) {
+      const sent = await sendEmail({
+        type: 'health_alert',
+        to: profile.email,
+        serviceName: service.name ?? service.slug,
+        serviceSlug: service.slug,
+        projectName: (projectService.project as { name?: string }).name ?? project_service_id,
+        environment,
+        status: result.status,
+        message: result.message ?? '서비스 상태 이상이 감지되었습니다.',
+        checkedAt: result.checkedAt,
+      });
+
+      await logAudit(user.id, {
+        action: sent ? 'email.health_alert' : 'email.send_failed',
+        resourceType: 'project_service',
+        resourceId: project_service_id,
+        details: { service_slug: service.slug, environment, status: result.status, sent },
+      });
+    }
   }
 
   // Audit log
