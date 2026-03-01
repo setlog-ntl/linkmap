@@ -29,10 +29,9 @@ export function LinkmapLogo({ size = 32, className }: LinkmapLogoProps) {
     );
   }
 
-  const gradMain   = `${uid}-grad-main`;
-  const gradEdge   = `${uid}-grad-edge`;
-  const gradCenter = `${uid}-grad-center`;
-  const filtGlow   = `${uid}-glow`;
+  const gradBg      = `${uid}-grad-bg`;
+  const gradPlatform = `${uid}-grad-platform`;
+  const filtGlow    = `${uid}-glow`;
 
   return (
     <svg
@@ -46,38 +45,29 @@ export function LinkmapLogo({ size = 32, className }: LinkmapLogoProps) {
       role="img"
     >
       <defs>
-        {/* 메인 그라디언트: brand-blue → brand-green */}
+        {/* 배경 그라디언트: 하늘색 → 파란색 */}
         <linearGradient
-          id={gradMain}
-          x1="0" y1="0" x2="32" y2="32"
+          id={gradBg}
+          x1="16" y1="0" x2="16" y2="32"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%"   stopColor="#3b82f6" />
-          <stop offset="100%" stopColor="#10b981" />
+          <stop offset="0%" stopColor="#56C8F0" />
+          <stop offset="100%" stopColor="#3070E0" />
         </linearGradient>
 
-        {/* 연결선용 그라디언트 (반투명) */}
+        {/* 플랫폼 그라디언트 */}
         <linearGradient
-          id={gradEdge}
-          x1="0" y1="0" x2="32" y2="32"
+          id={gradPlatform}
+          x1="16" y1="22" x2="16" y2="28"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%"   stopColor="#3b82f6" stopOpacity="0.5" />
-          <stop offset="100%" stopColor="#10b981" stopOpacity="0.5" />
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.12" />
         </linearGradient>
 
-        {/* 중앙 노드 내부 광택 */}
-        <radialGradient
-          id={gradCenter}
-          cx="38%" cy="32%" r="60%"
-        >
-          <stop offset="0%"   stopColor="#ffffff" stopOpacity="0.38" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-        </radialGradient>
-
-        {/* 중앙 노드 발광 — 부드럽게 */}
+        {/* 중앙 노드 발광 */}
         <filter id={filtGlow} x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="0.8" result="blur" />
+          <feGaussianBlur in="SourceGraphic" stdDeviation="0.6" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
@@ -85,28 +75,39 @@ export function LinkmapLogo({ size = 32, className }: LinkmapLogoProps) {
         </filter>
       </defs>
 
-      {/* ── 연결선 (중앙 → 위성 5개) ── */}
-      <line x1="16" y1="16" x2="16"   y2="4.5"  stroke={`url(#${gradEdge})`} strokeWidth="1.2" strokeLinecap="round" />
-      <line x1="16" y1="16" x2="25.5" y2="8.5"  stroke={`url(#${gradEdge})`} strokeWidth="1.2" strokeLinecap="round" />
-      <line x1="16" y1="16" x2="25.5" y2="23.5" stroke={`url(#${gradEdge})`} strokeWidth="1.2" strokeLinecap="round" />
-      <line x1="16" y1="16" x2="6.5"  y2="23.5" stroke={`url(#${gradEdge})`} strokeWidth="1.2" strokeLinecap="round" />
-      <line x1="16" y1="16" x2="6.5"  y2="8.5"  stroke={`url(#${gradEdge})`} strokeWidth="1.2" strokeLinecap="round" />
+      {/* 둥근 사각형 배경 */}
+      <rect x="0" y="0" width="32" height="32" rx="7" fill={`url(#${gradBg})`} />
 
-      {/* ── 위성 노드 (균일하고 가볍게) ── */}
-      <circle cx="16"   cy="4.5"  r="2.0" fill={`url(#${gradMain})`} opacity="0.80" />
-      <circle cx="25.5" cy="8.5"  r="1.8" fill={`url(#${gradMain})`} opacity="0.72" />
-      <circle cx="25.5" cy="23.5" r="2.1" fill={`url(#${gradMain})`} opacity="0.85" />
-      <circle cx="6.5"  cy="23.5" r="1.8" fill={`url(#${gradMain})`} opacity="0.75" />
-      <circle cx="6.5"  cy="8.5"  r="2.0" fill={`url(#${gradMain})`} opacity="0.68" />
+      {/* 하단 다이아몬드 플랫폼 */}
+      <polygon
+        points="16,22 24,25 16,28 8,25"
+        fill={`url(#${gradPlatform})`}
+      />
+      <line x1="8" y1="25" x2="24" y2="25" stroke="white" strokeOpacity="0.15" strokeWidth="0.4" />
 
-      {/* ── 중앙 허브 노드 (축소) ── */}
-      <circle cx="16" cy="16" r="4.0"
-        fill={`url(#${gradMain})`}
+      {/* 연결선 (중앙 → 위성 5개) */}
+      <line x1="16" y1="14" x2="16"   y2="5"    stroke="white" strokeOpacity="0.55" strokeWidth="1.0" strokeLinecap="round" />
+      <line x1="16" y1="14" x2="25"   y2="8"    stroke="white" strokeOpacity="0.55" strokeWidth="1.0" strokeLinecap="round" />
+      <line x1="16" y1="14" x2="25"   y2="20"   stroke="white" strokeOpacity="0.55" strokeWidth="1.0" strokeLinecap="round" />
+      <line x1="16" y1="14" x2="7"    y2="20"   stroke="white" strokeOpacity="0.55" strokeWidth="1.0" strokeLinecap="round" />
+      <line x1="16" y1="14" x2="7"    y2="8"    stroke="white" strokeOpacity="0.55" strokeWidth="1.0" strokeLinecap="round" />
+
+      {/* 위성 노드 */}
+      <circle cx="16" cy="5"   r="2.0" fill="white" />
+      <circle cx="25" cy="8"   r="1.7" fill="white" />
+      <circle cx="25" cy="20"  r="2.0" fill="white" />
+      <circle cx="7"  cy="20"  r="1.7" fill="white" />
+      <circle cx="7"  cy="8"   r="1.9" fill="white" />
+
+      {/* 중앙 허브 노드 */}
+      <circle cx="16" cy="14" r="3.8"
+        fill="white"
         filter={`url(#${filtGlow})`}
       />
-      {/* 광택 오버레이 */}
-      <circle cx="16" cy="16" r="4.0"
-        fill={`url(#${gradCenter})`}
+      {/* 중앙 노드 내부 하이라이트 */}
+      <circle cx="15.2" cy="13.2" r="1.5"
+        fill="white"
+        opacity="0.4"
       />
     </svg>
   );
