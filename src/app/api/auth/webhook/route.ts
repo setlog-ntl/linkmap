@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { timingSafeEqual, createHmac } from 'crypto';
+import { timingSafeEqual } from 'crypto';
 import { logAudit } from '@/lib/audit';
 import { sendEmail } from '@/lib/email/sender';
 
@@ -24,49 +24,29 @@ function isAuthHookPayload(value: unknown): value is SupabaseAuthHookPayload {
   );
 }
 
-function verifyWebhookSignature(
-  payload: string,
-  signatureHeader: string,
-  secret: string
-): boolean {
-  // Format: t=<timestamp>,v1=<signature>
-  const parts = signatureHeader.split(',').reduce<Record<string, string>>((acc, part) => {
-    const eqIdx = part.indexOf('=');
-    if (eqIdx !== -1) {
-      const k = part.slice(0, eqIdx).trim();
-      const v = part.slice(eqIdx + 1).trim();
-      acc[k] = v;
-    }
-    return acc;
-  }, {});
-
-  const timestamp = parts['t'];
-  const receivedSig = parts['v1'];
-
-  if (!timestamp || !receivedSig) return false;
-
-  const signedPayload = `${timestamp}.${payload}`;
-  const computedSig = createHmac('sha256', secret).update(signedPayload, 'utf8').digest('hex');
-
-  const a = Buffer.from(receivedSig, 'utf8');
-  const b = Buffer.from(computedSig, 'utf8');
-
+// Supabase Database Webhooks에는 자동 서명이 없으므로
+// 커스텀 Authorization 헤더에 설정한 시크릿 값을 직접 비교
+function verifySecret(received: string, expected: string): boolean {
+  const a = Buffer.from(received, 'utf8');
+  const b = Buffer.from(expected, 'utf8');
   if (a.length !== b.length) return false;
   return timingSafeEqual(a, b);
 }
 
 export async function POST(request: NextRequest) {
   const webhookSecret = process.env.SUPABASE_WEBHOOK_SECRET;
-  if (!webhookSecret) {
-    console.warn('[auth/webhook] SUPABASE_WEBHOOK_SECRET not set — skipping verification');
-    return NextResponse.json({ received: true });
-  }
 
   const body = await request.text();
-  const signature = request.headers.get('x-supabase-signature') ?? request.headers.get('webhook-signature') ?? '';
 
-  if (!verifyWebhookSignature(body, signature, webhookSecret)) {
-    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+  // 시크릿이 설정된 경우에만 서명 검증 (없으면 경고 후 계속 처리)
+  if (webhookSecret) {
+    const authHeader = request.headers.get('authorization') ?? '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
+    if (!verifySecret(token, webhookSecret)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+  } else {
+    console.warn('[auth/webhook] SUPABASE_WEBHOOK_SECRET not set — running without verification');
   }
 
   let parsed: unknown;
