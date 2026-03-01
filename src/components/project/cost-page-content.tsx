@@ -11,7 +11,7 @@ interface CostPageContentProps {
 }
 
 export function CostPageContent({ projectId }: CostPageContentProps) {
-  const { data: costSummary, isLoading } = useProjectCostSummary(projectId);
+  const { data: costSummary, isLoading, error } = useProjectCostSummary(projectId);
 
   if (isLoading) {
     return (
@@ -25,6 +25,15 @@ export function CostPageContent({ projectId }: CostPageContentProps) {
         {[1, 2, 3].map((i) => (
           <Skeleton key={i} className="h-16 rounded-lg" />
         ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-lg border bg-card p-8 text-center">
+        <p className="text-sm text-destructive">비용 정보를 불러오지 못했습니다.</p>
+        <p className="text-xs text-muted-foreground mt-1">{error.message}</p>
       </div>
     );
   }
