@@ -79,7 +79,14 @@ export type AuditAction =
   | 'ai.module_inline_polish'
   | 'payment.checkout_complete'
   | 'payment.subscription_updated'
-  | 'payment.subscription_canceled';
+  | 'payment.subscription_canceled'
+  | 'payment.portal_access'
+  | 'payment.invoice_failed'
+  | 'email.welcome'
+  | 'email.health_alert'
+  | 'email.team_invite'
+  | 'email.subscription_change'
+  | 'email.send_failed';
 
 interface AuditLogEntry {
   action: AuditAction;

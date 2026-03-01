@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { timingSafeEqual, createHmac } from 'crypto';
 import { logAudit } from '@/lib/audit';
+import { sendEmail } from '@/lib/email/sender';
 
 function verifyStripeSignature(
   payload: string,
@@ -91,6 +93,28 @@ export async function POST(request: NextRequest) {
       ]);
 
       if (sub?.user_id) {
+        // Send upgrade email
+        const adminClient = createAdminClient();
+        const { data: profile } = await adminClient
+          .from('profiles')
+          .select('email')
+          .eq('id', sub.user_id)
+          .single();
+
+        if (profile?.email) {
+          const sent = await sendEmail({
+            type: 'subscription_change',
+            to: profile.email,
+            changeType: 'upgraded',
+            plan: 'Pro',
+          });
+          await logAudit(sub.user_id, {
+            action: sent ? 'email.subscription_change' : 'email.send_failed',
+            resourceType: 'subscription',
+            details: { changeType: 'upgraded', plan: 'pro', sent },
+          });
+        }
+
         await logAudit(sub.user_id, {
           action: 'payment.checkout_complete',
           resourceType: 'subscription',
@@ -131,6 +155,28 @@ export async function POST(request: NextRequest) {
       ]);
 
       if (subUpdated?.user_id) {
+        // Send subscription update email
+        const adminClient = createAdminClient();
+        const { data: profile } = await adminClient
+          .from('profiles')
+          .select('email')
+          .eq('id', subUpdated.user_id)
+          .single();
+
+        if (profile?.email) {
+          const sent = await sendEmail({
+            type: 'subscription_change',
+            to: profile.email,
+            changeType: 'updated',
+            status,
+          });
+          await logAudit(subUpdated.user_id, {
+            action: sent ? 'email.subscription_change' : 'email.send_failed',
+            resourceType: 'subscription',
+            details: { changeType: 'updated', status, sent },
+          });
+        }
+
         await logAudit(subUpdated.user_id, {
           action: 'payment.subscription_updated',
           resourceType: 'subscription',
@@ -162,10 +208,84 @@ export async function POST(request: NextRequest) {
         .eq('stripe_subscription_id', subscription.id);
 
       if (subDeleted?.user_id) {
+        // Send cancellation email
+        const adminClient = createAdminClient();
+        const { data: profile } = await adminClient
+          .from('profiles')
+          .select('email')
+          .eq('id', subDeleted.user_id)
+          .single();
+
+        if (profile?.email) {
+          const sent = await sendEmail({
+            type: 'subscription_change',
+            to: profile.email,
+            changeType: 'canceled',
+          });
+          await logAudit(subDeleted.user_id, {
+            action: sent ? 'email.subscription_change' : 'email.send_failed',
+            resourceType: 'subscription',
+            details: { changeType: 'canceled', sent },
+          });
+        }
+
         await logAudit(subDeleted.user_id, {
           action: 'payment.subscription_canceled',
           resourceType: 'subscription',
           details: { stripe_subscription_id: subscription.id },
+        });
+      }
+      break;
+    }
+
+    case 'invoice.payment_failed': {
+      const invoice = data.object as {
+        customer: string;
+        attempt_count: number;
+        amount_due: number;
+      };
+
+      const { data: subFailed } = await supabase
+        .from('subscriptions')
+        .select('user_id')
+        .eq('stripe_customer_id', invoice.customer as string)
+        .single();
+
+      if (subFailed?.user_id) {
+        await supabase
+          .from('subscriptions')
+          .update({ status: 'past_due', updated_at: new Date().toISOString() })
+          .eq('stripe_customer_id', invoice.customer as string);
+
+        const adminClient = createAdminClient();
+        const { data: profile } = await adminClient
+          .from('profiles')
+          .select('email')
+          .eq('id', subFailed.user_id)
+          .single();
+
+        if (profile?.email) {
+          const sent = await sendEmail({
+            type: 'subscription_change',
+            to: profile.email,
+            changeType: 'updated',
+            status: 'past_due',
+          });
+          await logAudit(subFailed.user_id, {
+            action: sent ? 'email.subscription_change' : 'email.send_failed',
+            resourceType: 'subscription',
+            details: { changeType: 'payment_failed', sent },
+          });
+        }
+
+        await logAudit(subFailed.user_id, {
+          action: 'payment.invoice_failed',
+          resourceType: 'subscription',
+          details: {
+            stripe_customer_id: invoice.customer,
+            attempt_count: invoice.attempt_count,
+            amount_due: invoice.amount_due,
+          },
         });
       }
       break;

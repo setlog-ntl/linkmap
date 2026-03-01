@@ -1,11 +1,16 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Check } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
+import { toast } from 'sonner';
+import { useSubscription } from '@/lib/queries/subscription';
+import type { SubscriptionPlan } from '@/types';
 
 interface Plan {
   nameKey: string;
@@ -13,6 +18,8 @@ interface Plan {
   featureKeys: string[];
   isFree: boolean;
   popular: boolean;
+  planKey: SubscriptionPlan;
+  priceEnvKey: string;
 }
 
 const plans: Plan[] = [
@@ -22,6 +29,8 @@ const plans: Plan[] = [
     featureKeys: ['pricing.freeF1', 'pricing.freeF2', 'pricing.freeF3', 'pricing.freeF4', 'pricing.freeF5'],
     isFree: true,
     popular: false,
+    planKey: 'free',
+    priceEnvKey: '',
   },
   {
     nameKey: 'pricing.planPro',
@@ -29,6 +38,8 @@ const plans: Plan[] = [
     featureKeys: ['pricing.proF1', 'pricing.proF2', 'pricing.proF3', 'pricing.proF4', 'pricing.proF5', 'pricing.proF6'],
     isFree: false,
     popular: true,
+    planKey: 'pro',
+    priceEnvKey: 'NEXT_PUBLIC_STRIPE_PRICE_PRO',
   },
   {
     nameKey: 'pricing.planTeam',
@@ -36,11 +47,69 @@ const plans: Plan[] = [
     featureKeys: ['pricing.teamF1', 'pricing.teamF2', 'pricing.teamF3', 'pricing.teamF4', 'pricing.teamF5', 'pricing.teamF6', 'pricing.teamF7'],
     isFree: false,
     popular: false,
+    planKey: 'team',
+    priceEnvKey: 'NEXT_PUBLIC_STRIPE_PRICE_TEAM',
   },
 ];
 
+const priceIdMap: Record<string, string | undefined> = {
+  NEXT_PUBLIC_STRIPE_PRICE_PRO: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO,
+  NEXT_PUBLIC_STRIPE_PRICE_TEAM: process.env.NEXT_PUBLIC_STRIPE_PRICE_TEAM,
+};
+
 export function PricingContent() {
   const { locale } = useLocaleStore();
+  const router = useRouter();
+  const { data: subscription } = useSubscription();
+  const [loadingPlan, setLoadingPlan] = useState<SubscriptionPlan | null>(null);
+
+  const currentPlan: SubscriptionPlan = subscription?.plan ?? 'free';
+
+  async function handleUpgrade(plan: Plan) {
+    if (plan.isFree) return;
+
+    const priceId = priceIdMap[plan.priceEnvKey];
+    if (!priceId) {
+      toast.error('결제 설정이 준비 중입니다');
+      return;
+    }
+
+    setLoadingPlan(plan.planKey);
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId }),
+      });
+
+      if (res.status === 401) {
+        router.push('/auth');
+        return;
+      }
+
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        toast.error(data.error || '결제 페이지 이동에 실패했습니다');
+        return;
+      }
+
+      window.location.href = data.url;
+    } catch {
+      toast.error('네트워크 오류가 발생했습니다');
+    } finally {
+      setLoadingPlan(null);
+    }
+  }
+
+  function getButtonLabel(plan: Plan): string {
+    if (plan.planKey === currentPlan) return t(locale, 'pricing.currentPlan');
+    if (plan.isFree) return t(locale, 'pricing.currentPlan');
+    return t(locale, 'pricing.upgrade');
+  }
+
+  function isButtonDisabled(plan: Plan): boolean {
+    return plan.isFree || plan.planKey === currentPlan || loadingPlan !== null;
+  }
 
   return (
     <>
@@ -76,9 +145,14 @@ export function PricingContent() {
               <Button
                 className="w-full"
                 variant={plan.popular ? 'default' : 'outline'}
-                disabled={plan.isFree}
+                disabled={isButtonDisabled(plan)}
+                onClick={() => handleUpgrade(plan)}
               >
-                {plan.isFree ? t(locale, 'pricing.currentPlan') : t(locale, 'pricing.upgrade')}
+                {loadingPlan === plan.planKey ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  getButtonLabel(plan)
+                )}
               </Button>
             </CardContent>
           </Card>
