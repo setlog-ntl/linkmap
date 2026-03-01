@@ -182,7 +182,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
       <SidebarSeparator />
 
       <SidebarContent>
-        {/* Sites Tree */}
+        {/* ① 원클릭 배포 */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -197,6 +197,16 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
+                      {/* 사이트 만들기 — 최상단 */}
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <Link href="/sites/new">
+                            <Plus className="h-3.5 w-3.5" />
+                            <span>사이트 만들기</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+
                       {/* Loading state */}
                       {isDeploymentsLoading && (
                         <>
@@ -319,16 +329,6 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       )}
-
-                      {/* New site link */}
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild>
-                          <Link href="/sites/new">
-                            <Plus className="h-3.5 w-3.5" />
-                            <span>새 사이트</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>
@@ -337,33 +337,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Main Navigation */}
-        <SidebarSeparator />
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {mainNav.map((item) => {
-                const label = item.label ?? t(locale, item.labelKey);
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive(item.href)}
-                      tooltip={label}
-                    >
-                      <Link href={item.href}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Project Tree */}
+        {/* ② 내 프로젝트 */}
         <SidebarSeparator />
         <SidebarGroup>
           <SidebarGroupContent>
@@ -379,6 +353,16 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
+                      {/* + 새 프로젝트 만들기 — 최상단 */}
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <Link href="/dashboard">
+                            <Plus className="h-3.5 w-3.5" />
+                            <span>+ 새 프로젝트 만들기</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+
                       {/* Loading state */}
                       {isProjectsLoading && (
                         <>
@@ -512,16 +496,6 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       )}
-
-                      {/* New project link */}
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild>
-                          <Link href="/dashboard">
-                            <Plus className="h-3.5 w-3.5" />
-                            <span>새 프로젝트</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>
@@ -530,7 +504,33 @@ export function AppSidebar({ profile }: AppSidebarProps) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Resources */}
+        {/* ③ 서비스탐색 + 휴지통 */}
+        <SidebarSeparator />
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {mainNav.map((item) => {
+                const label = item.label ?? t(locale, item.labelKey);
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive(item.href)}
+                      tooltip={label}
+                    >
+                      <Link href={item.href}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* ④ 가이드 */}
         <SidebarSeparator />
         <SidebarGroup>
           <SidebarGroupContent>
