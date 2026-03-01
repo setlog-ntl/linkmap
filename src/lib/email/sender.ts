@@ -1,4 +1,4 @@
-import { getResendClient, getFromEmail } from './client';
+import { getResendApiKey, getFromEmail } from './client';
 import {
   buildWelcomeEmail,
   buildHealthAlertEmail,
@@ -8,8 +8,8 @@ import {
 import type { EmailPayload } from './types';
 
 export async function sendEmail(payload: EmailPayload): Promise<boolean> {
-  const client = getResendClient();
-  if (!client) return false;
+  const apiKey = getResendApiKey();
+  if (!apiKey) return false;
 
   try {
     let subject: string;
@@ -58,15 +58,23 @@ export async function sendEmail(payload: EmailPayload): Promise<boolean> {
       }
     }
 
-    const { error } = await client.emails.send({
-      from: getFromEmail(),
-      to: payload.to,
-      subject,
-      html,
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: getFromEmail(),
+        to: payload.to,
+        subject,
+        html,
+      }),
     });
 
-    if (error) {
-      console.warn('[email] Send failed:', error);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.warn('[email] Send failed:', err);
       return false;
     }
 
