@@ -12,29 +12,33 @@ import { cn } from '@/lib/utils';
 import type { ClientUsageData } from '@/lib/validations/cost';
 
 // ────────────────────────────────────────────────────────────
-// 브라우저에서 직접 OpenAI Billing API 호출
-// (Cloudflare Workers 배포 환경의 지역 제한 우회)
+// 브라우저에서 직접 OpenAI Organization Costs API 호출
+// - 엔드포인트: /v1/organization/costs (Admin Key 전용)
+// - /dashboard/billing/usage 는 세션키 전용으로 변경되어 사용 불가
+// - Cloudflare Workers 지역 제한 우회를 위해 브라우저에서 직접 호출
 // ────────────────────────────────────────────────────────────
-interface BillingResponse {
-  total_usage: number;
-  daily_costs?: Array<{
-    timestamp: number;
-    line_items: Array<{ name: string; cost: number }>;
+type CostsResponse = {
+  data?: Array<{
+    results?: Array<{
+      amount?: { value?: number; currency?: string };
+      line_item?: string;
+    }>;
   }>;
-}
+  has_more?: boolean;
+};
 
-async function fetchOpenAIBillingFromBrowser(
+async function fetchOpenAICostsFromBrowser(
   apiKey: string
 ): Promise<ClientUsageData> {
   const now = new Date();
-  const pad = (n: number) => String(n).padStart(2, '0');
-  const startDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-01`;
-  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-  const endDate = `${tomorrow.getFullYear()}-${pad(tomorrow.getMonth() + 1)}-${pad(tomorrow.getDate())}`;
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startTime = Math.floor(startOfMonth.getTime() / 1000);
+  const endTime = Math.floor(now.getTime() / 1000);
 
-  const url = new URL('https://api.openai.com/dashboard/billing/usage');
-  url.searchParams.set('start_date', startDate);
-  url.searchParams.set('end_date', endDate);
+  const url = new URL('https://api.openai.com/v1/organization/costs');
+  url.searchParams.set('start_time', String(startTime));
+  url.searchParams.set('end_time', String(endTime));
+  url.searchParams.set('bucket_width', '1d');
 
   const res = await fetch(url.toString(), {
     headers: { Authorization: `Bearer ${apiKey}` },
@@ -42,32 +46,34 @@ async function fetchOpenAIBillingFromBrowser(
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    const msg =
-      (body as { error?: { message?: string } | string })?.error
-        ? typeof (body as { error: unknown }).error === 'string'
-          ? (body as { error: string }).error
-          : ((body as { error: { message?: string } }).error.message ?? `OpenAI API 오류 (${res.status})`)
-        : `OpenAI API 오류 (${res.status})`;
+    const errorObj = (body as { error?: { message?: string } | string }).error;
+    const msg = errorObj
+      ? typeof errorObj === 'string'
+        ? errorObj
+        : (errorObj.message ?? `OpenAI API 오류 (${res.status})`)
+      : `OpenAI API 오류 (${res.status})`;
     throw new Error(msg);
   }
 
-  const data = (await res.json()) as BillingResponse;
-  const totalCost = (data.total_usage ?? 0) / 100;
+  const data = (await res.json()) as CostsResponse;
 
-  const byModelMap = new Map<string, number>();
-  for (const day of data.daily_costs ?? []) {
-    for (const item of day.line_items ?? []) {
-      if (item.cost > 0) {
-        byModelMap.set(item.name, (byModelMap.get(item.name) ?? 0) + item.cost / 100);
-      }
+  let totalCost = 0;
+  const byLineItemMap = new Map<string, number>();
+
+  for (const bucket of data.data ?? []) {
+    for (const result of bucket.results ?? []) {
+      const value = result.amount?.value ?? 0;
+      totalCost += value;
+      const key = result.line_item ?? 'Other';
+      byLineItemMap.set(key, (byLineItemMap.get(key) ?? 0) + value);
     }
   }
 
   return {
     total_cost: Math.round(totalCost * 10000) / 10000,
-    period_start: new Date(now.getFullYear(), now.getMonth(), 1).toISOString(),
+    period_start: startOfMonth.toISOString(),
     period_end: now.toISOString(),
-    by_model: Array.from(byModelMap.entries()).map(([modelId, cost]) => ({
+    by_model: Array.from(byLineItemMap.entries()).map(([modelId, cost]) => ({
       modelId,
       cost: Math.round(cost * 10000) / 10000,
       inputTokens: 0,
@@ -133,7 +139,7 @@ export function CostOpenAIUsagePanel({
     // 항상 브라우저에서 직접 OpenAI 호출 (서버 측 지역 제한 우회)
     setIsBrowserFetching(true);
     try {
-      const usageData = await fetchOpenAIBillingFromBrowser(apiKeyInput);
+      const usageData = await fetchOpenAICostsFromBrowser(apiKeyInput);
       syncMutation.mutate(
         { projectServiceId, apiKey: apiKeyInput, usageData },
         {
@@ -223,7 +229,7 @@ export function CostOpenAIUsagePanel({
               <Key className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
                 type="password"
-                placeholder="sk-proj-..."
+                placeholder="sk-admin-..."
                 value={apiKeyInput}
                 onChange={(e) => setApiKeyInput(e.target.value)}
                 className="h-8 pl-8 text-xs font-mono"
@@ -245,13 +251,13 @@ export function CostOpenAIUsagePanel({
             )}
           </div>
           <a
-            href="https://platform.openai.com/api-keys"
+            href="https://platform.openai.com/settings/organization/admin-keys"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             <ExternalLink className="h-3 w-3" />
-            OpenAI API Key 발급 · 확인
+            OpenAI Admin Key 발급 · 확인
           </a>
         </div>
       )}
@@ -290,7 +296,7 @@ export function CostOpenAIUsagePanel({
                 ) : (
                   <ChevronDown className="h-3 w-3" />
                 )}
-                모델별 상세
+                항목별 상세
               </button>
 
               {showBreakdown && (
