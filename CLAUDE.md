@@ -48,6 +48,12 @@ npm run dev / build / typecheck / lint / test / test:coverage
 - lucide-react `Map` → `Map as MapIcon` (전역 Map 섀도잉)
 - Sentry/Logger 제거됨 (Workers 호환 문제)
 
+## MCP Supabase 사용 규칙
+- DB 마이그레이션(`apply_migration`), SQL 실행(`execute_sql`), 스키마 조회 등 **Supabase MCP 툴이 필요한 시점**에는 즉시 실행하지 말고 먼저 아래 메시지로 확인을 요청할 것:
+  > "Supabase MCP 연결이 필요합니다. `/mcp` 명령으로 연결 후 진행해주세요."
+- 사용자가 연결을 확인한 뒤에만 MCP 툴 호출
+- 단, 사용자가 대화 중 명시적으로 "MCP 연결됨" 또는 직접 MCP 관련 작업을 요청한 경우에는 바로 실행해도 됨
+
 ## Database Rules
 - 스키마: `docs/db-schema.md` | 마이그레이션: `supabase/migrations/NNN_*.sql` (현재 040)
 - **마이그레이션 후 3-step**: ① `src/types/` 동기화 → ② `src/lib/queries/` 반영 → ③ `docs/db-schema.md` 업데이트
