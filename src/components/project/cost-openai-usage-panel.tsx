@@ -51,7 +51,8 @@ export function CostOpenAIUsagePanel({
   const syncMutation = useSyncOpenAIUsage(projectId);
 
   const handleSync = () => {
-    const key = showApiKeyInput && apiKeyInput ? apiKeyInput : undefined;
+    // showApiKeyInput(변경 모드) 또는 hasApiKey=false(초기 미연결) 상태에서 입력된 키 전송
+    const key = (showApiKeyInput || !usage?.hasApiKey) && apiKeyInput ? apiKeyInput : undefined;
 
     if (!usage?.hasApiKey && !apiKeyInput) {
       setShowApiKeyInput(true);
