@@ -174,27 +174,27 @@ export default async function LandingPage() {
       {/* Section 1: Hero — 듀얼 메시지 */}
       <HeroSection />
 
-      {/* Section 2: How It Works — 경로 선택 (초보자/개발자 탭) */}
-      <HowItWorks />
-
-      {/* Section 3: Template Showcase — 초보자 deep-dive */}
-      <TemplateShowcase />
-
-      {/* Section 4: Core Features — 개발자 deep-dive */}
-      <FeaturesBento />
-
-      {/* Section 5: Supported Services */}
-      <ServicesGrid />
-
-      {/* Section 6: Social Proof — 구매 전 신뢰 */}
-      <SocialProofSection />
-
-      {/* Section 7: My Projects — 로그인 시 실제 데이터, 미로그인 시 샘플 */}
+      {/* Section 2: My Projects — 로그인 시 실제 데이터, 미로그인 시 샘플 */}
       <ProjectsPreviewSection
         projects={previewProjects}
         isDemo={isDemo}
         isLoggedIn={!!profile}
       />
+
+      {/* Section 3: How It Works — 경로 선택 (초보자/개발자 탭) */}
+      <HowItWorks />
+
+      {/* Section 4: Template Showcase — 초보자 deep-dive */}
+      <TemplateShowcase />
+
+      {/* Section 5: Core Features — 개발자 deep-dive */}
+      <FeaturesBento />
+
+      {/* Section 6: Supported Services */}
+      <ServicesGrid />
+
+      {/* Section 7: Social Proof — 구매 전 신뢰 */}
+      <SocialProofSection />
 
       {/* Section 8: Pricing */}
       <PricingSection />
