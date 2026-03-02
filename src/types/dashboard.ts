@@ -126,13 +126,15 @@ export interface CostAttachment {
   id: string;
   projectServiceId: string;
   fileName: string;
-  storagePath: string;
-  fileSize: number;
-  fileType: string;
+  storagePath: string | null;  // 링크일 때 null
+  fileSize: number | null;     // 링크일 때 null
+  fileType: string | null;     // 링크일 때 null
   attachmentType: AttachmentType;
   notes: string | null;
   uploadedBy: string;
   createdAt: string;
-  /** 서명된 다운로드 URL (API 응답에만 포함) */
+  linkUrl?: string | null;     // 링크 전용
+  linkTitle?: string | null;
+  /** 서명된 다운로드 URL (API 응답에만 포함, 파일 전용) */
   signedUrl?: string;
 }

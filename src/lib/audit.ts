@@ -56,6 +56,7 @@ export type AuditAction =
   | 'ai.compare_services'
   | 'ai.command'
   | 'ai.module_suggest'
+  | 'ai.cost_report'
   | 'github_connection.add'
   | 'github_connection.delete'
   | 'github_connection.rename'
@@ -101,7 +102,8 @@ export type AuditAction =
   | 'service_cost.usage_sync'
   | 'service_cost.api_key_save'
   | 'cost_attachment.upload'
-  | 'cost_attachment.delete';
+  | 'cost_attachment.delete'
+  | 'cost_attachment.link_add';
 
 interface AuditLogEntry {
   action: AuditAction;

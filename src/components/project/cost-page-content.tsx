@@ -1,10 +1,14 @@
 'use client';
 
+import { useState } from 'react';
+import { Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { useProjectCostSummary, useExchangeRate } from '@/lib/queries/costs';
 import { CostBudgetCard } from './cost-budget-card';
 import { CostSummaryMetrics } from './cost-summary-metrics';
 import { CostServiceList } from './cost-service-list';
+import { CostReportSheet } from './cost-report-sheet';
 
 interface CostPageContentProps {
   projectId: string;
@@ -13,6 +17,7 @@ interface CostPageContentProps {
 export function CostPageContent({ projectId }: CostPageContentProps) {
   const { data: costSummary, isLoading, error } = useProjectCostSummary(projectId);
   const { data: exchangeRate } = useExchangeRate();
+  const [reportOpen, setReportOpen] = useState(false);
 
   const usdToKrw = exchangeRate?.rate ?? null;
 
@@ -45,6 +50,21 @@ export function CostPageContent({ projectId }: CostPageContentProps) {
 
   return (
     <div className="space-y-6">
+      {/* Header row with AI report button */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-muted-foreground">비용 관리</h2>
+        <Button
+          size="sm"
+          variant="outline"
+          className="gap-1.5 h-8 text-xs"
+          onClick={() => setReportOpen(true)}
+          disabled={costSummary.services.length === 0}
+        >
+          <Sparkles className="h-3.5 w-3.5" />
+          AI 리포트
+        </Button>
+      </div>
+
       <CostBudgetCard
         projectId={projectId}
         monthlyBudget={costSummary.monthlyBudget}
@@ -71,6 +91,14 @@ export function CostPageContent({ projectId }: CostPageContentProps) {
         services={costSummary.services}
         budgetCurrency={costSummary.budgetCurrency}
         usdToKrw={usdToKrw}
+      />
+
+      <CostReportSheet
+        projectId={projectId}
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        costSummary={costSummary}
+        budgetCurrency={costSummary.budgetCurrency}
       />
     </div>
   );

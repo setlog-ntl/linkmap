@@ -63,3 +63,12 @@ export const createAttachmentMetaSchema = z.object({
   attachment_type: z.enum(ATTACHMENT_TYPES).default('other'),
   notes: z.string().max(500).nullable().optional(),
 });
+
+export const addLinkSchema = z.object({
+  attachment_type: z.enum(ATTACHMENT_TYPES).default('other'),
+  link_url: z.string().url('올바른 URL 형식이 아닙니다').max(2048),
+  link_title: z.string().min(1, '링크 제목을 입력하세요').max(200).optional(),
+  notes: z.string().max(500).nullable().optional(),
+});
+
+export type AddLinkInput = z.infer<typeof addLinkSchema>;

@@ -138,7 +138,8 @@ export type AiFeatureSlug =
   | 'map_narrator'
   | 'compare_services'
   | 'command'
-  | 'module_suggest';
+  | 'module_suggest'
+  | 'cost_report';
 
 export interface AiFeaturePersona {
   id: string;

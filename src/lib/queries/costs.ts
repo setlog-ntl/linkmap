@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './keys';
 import type { ProjectCostSummary, OpenAIUsageSummary, CostAttachment } from '@/types';
-import type { UpdateServiceCostInput, ClientUsageData } from '@/lib/validations/cost';
+import type { UpdateServiceCostInput, ClientUsageData, AddLinkInput } from '@/lib/validations/cost';
 import type { AttachmentType } from '@/types/dashboard';
 
 /** USD → KRW 환율 조회 (하루 1회 업데이트, 24h 캐시) */
@@ -169,6 +169,37 @@ export function useDeleteCostAttachment(projectId: string) {
         const data = await res.json().catch(() => ({}));
         throw new Error((data as { error?: string }).error ?? '파일 삭제 실패');
       }
+    },
+    onSuccess: (_, { projectServiceId }) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.costs.attachments(projectServiceId),
+      });
+    },
+  });
+}
+
+/** 링크 첨부 저장 */
+export function useAddCostLink(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      projectServiceId,
+      ...data
+    }: { projectServiceId: string } & AddLinkInput): Promise<CostAttachment> => {
+      const res = await fetch(
+        `/api/projects/${projectId}/services/${projectServiceId}/cost/attachments`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        }
+      );
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error((json as { error?: string }).error ?? '링크 저장 실패');
+      }
+      return res.json();
     },
     onSuccess: (_, { projectServiceId }) => {
       queryClient.invalidateQueries({
