@@ -239,6 +239,10 @@ export function InteractiveHeroFlow() {
                 connectionLineType={ConnectionLineType.SmoothStep}
                 onEdgeMouseEnter={onEdgeMouseEnter}
                 onEdgeMouseLeave={onEdgeMouseLeave}
+                fitView
+                fitViewOptions={{ padding: 0.12, minZoom: 0.2 }}
+                minZoom={0.1}
+                maxZoom={1.2}
                 panOnDrag={false}
                 zoomOnScroll={false}
                 zoomOnPinch={false}
