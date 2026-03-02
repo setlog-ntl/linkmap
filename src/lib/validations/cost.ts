@@ -15,3 +15,13 @@ export const updateServiceCostSchema = z
   });
 
 export type UpdateServiceCostInput = z.infer<typeof updateServiceCostSchema>;
+
+export const syncOpenAIUsageSchema = z.object({
+  api_key: z
+    .string()
+    .min(1)
+    .regex(/^sk-/, 'OpenAI API Key는 sk-로 시작해야 합니다')
+    .optional(),
+});
+
+export type SyncOpenAIUsageInput = z.infer<typeof syncOpenAIUsageSchema>;

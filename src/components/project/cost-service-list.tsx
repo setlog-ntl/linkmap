@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { CostTierSelector } from './cost-tier-selector';
+import { CostOpenAIUsagePanel } from './cost-openai-usage-panel';
 import { useUpdateServiceCost } from '@/lib/queries/costs';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from './cost-budget-card';
@@ -67,7 +68,14 @@ export function CostServiceList({ projectId, services, budgetCurrency }: CostSer
       <CardContent className="pt-0 divide-y">
         {services.map((entry) => {
           const isExpanded = expandedId === entry.projectServiceId;
-          const hasCost = entry.monthlyCost > 0 || entry.costTierId || entry.isCustomCost;
+          const isOpenAI = entry.serviceSlug === 'openai';
+          // actual_cost가 있으면 우선 표시
+          const hasCost =
+            entry.actualCostMonthly != null ||
+            entry.monthlyCost > 0 ||
+            entry.costTierId ||
+            entry.isCustomCost;
+          const displayCost = entry.actualCostMonthly ?? entry.monthlyCost;
 
           return (
             <div key={entry.projectServiceId} className="py-3 first:pt-0 last:pb-0">
@@ -89,11 +97,20 @@ export function CostServiceList({ projectId, services, budgetCurrency }: CostSer
 
                 {hasCost ? (
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs font-mono">
-                      {entry.isCustomCost ? '커스텀' : entry.tierName ?? ''}
-                    </Badge>
+                    {entry.actualCostMonthly != null ? (
+                      <Badge
+                        variant="secondary"
+                        className="text-xs font-mono bg-brand-blue/10 text-brand-blue border-brand-blue/20"
+                      >
+                        실사용량
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="text-xs font-mono">
+                        {entry.isCustomCost ? '커스텀' : (entry.tierName ?? '')}
+                      </Badge>
+                    )}
                     <span className="text-sm font-mono font-medium">
-                      {formatCurrency(entry.monthlyCost, budgetCurrency)}
+                      {formatCurrency(displayCost, budgetCurrency)}
                       <span className="text-muted-foreground text-xs">
                         /{BILLING_CYCLE_LABELS[entry.billingCycle] ?? entry.billingCycle}
                       </span>
@@ -119,7 +136,16 @@ export function CostServiceList({ projectId, services, budgetCurrency }: CostSer
               </div>
 
               {isExpanded && (
-                <div className="mt-3 ml-7 pl-3 border-l-2 border-muted">
+                <div className="mt-3 ml-7 pl-3 border-l-2 border-muted space-y-4">
+                  {/* OpenAI: 실제 사용량 패널 먼저 표시 */}
+                  {isOpenAI && (
+                    <CostOpenAIUsagePanel
+                      projectId={projectId}
+                      projectServiceId={entry.projectServiceId}
+                    />
+                  )}
+
+                  {/* 요금제 / 커스텀 입력 (OpenAI 포함 모든 서비스) */}
                   <CostTierSelector
                     serviceId={entry.serviceId}
                     currentTierId={entry.costTierId}

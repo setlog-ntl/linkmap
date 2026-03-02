@@ -29,7 +29,7 @@ export async function GET(
     .from('project_services')
     .select(
       `id, service_id, cost_tier_id, custom_cost_monthly, custom_cost_yearly,
-       cost_notes, billing_cycle,
+       cost_notes, billing_cycle, actual_cost_monthly, usage_synced_at,
        service:services(id, name, slug),
        cost_tier:service_cost_tiers(id, tier_name, tier_name_ko, price_monthly, price_yearly)`
     )
@@ -46,6 +46,8 @@ export async function GET(
     custom_cost_yearly: number | null;
     cost_notes: string | null;
     billing_cycle: string;
+    actual_cost_monthly: number | null;
+    usage_synced_at: string | null;
     service: { id: string; name: string; slug: string } | null;
     cost_tier: {
       id: string;
@@ -62,15 +64,16 @@ export async function GET(
   let totalYearlyCost = 0;
 
   const services: ServiceCostEntry[] = typedRows.map((row) => {
+    // actual_cost 우선 → custom_cost → tier 단가 순
     let monthlyCost = 0;
     const isCustomCost = row.custom_cost_monthly != null;
 
-    if (row.custom_cost_monthly != null) {
+    if (row.actual_cost_monthly != null) {
+      monthlyCost = row.actual_cost_monthly;
+    } else if (row.custom_cost_monthly != null) {
       monthlyCost = row.custom_cost_monthly;
     } else if (row.cost_tier?.price_monthly) {
-      const match = row.cost_tier.price_monthly.match(
-        /^\$?([\d,]+\.?\d*)$/
-      );
+      const match = row.cost_tier.price_monthly.match(/^\$?([\d,]+\.?\d*)$/);
       if (match) {
         monthlyCost = parseFloat(match[1].replace(/,/g, ''));
       }
@@ -96,6 +99,8 @@ export async function GET(
       billingCycle: row.billing_cycle,
       costNotes: row.cost_notes,
       isCustomCost,
+      actualCostMonthly: row.actual_cost_monthly,
+      usageSyncedAt: row.usage_synced_at,
     };
   });
 

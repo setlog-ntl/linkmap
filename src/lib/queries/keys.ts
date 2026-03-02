@@ -76,6 +76,8 @@ export const queryKeys = {
   },
   costs: {
     byProject: (projectId: string) => ['costs', 'project', projectId] as const,
+    openaiUsage: (projectServiceId: string) =>
+      ['costs', 'openai-usage', projectServiceId] as const,
   },
   subscription: {
     current: ['subscription', 'current'] as const,

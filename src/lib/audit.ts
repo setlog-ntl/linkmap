@@ -96,7 +96,9 @@ export type AuditAction =
   | 'connection.permanently_delete'
   | 'trash.empty'
   | 'service_cost.update'
-  | 'project.budget_update';
+  | 'project.budget_update'
+  | 'service_cost.usage_sync'
+  | 'service_cost.api_key_save';
 
 interface AuditLogEntry {
   action: AuditAction;

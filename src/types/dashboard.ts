@@ -90,6 +90,8 @@ export interface ServiceCostEntry {
   billingCycle: string;
   costNotes: string | null;
   isCustomCost: boolean;
+  actualCostMonthly: number | null;
+  usageSyncedAt: string | null;
 }
 
 export interface HealthScore {
@@ -99,4 +101,21 @@ export interface HealthScore {
     healthy: number;
     envComplete: number;
   };
+}
+
+export interface OpenAIModelUsage {
+  modelId: string;
+  inputTokens: number;
+  outputTokens: number;
+  cost: number;
+}
+
+export interface OpenAIUsageSummary {
+  projectServiceId: string;
+  hasApiKey: boolean;
+  periodStart: string | null;
+  periodEnd: string | null;
+  totalCost: number | null;
+  syncedAt: string | null;
+  byModel: OpenAIModelUsage[];
 }
