@@ -1,11 +1,12 @@
 export const dynamic = 'force-dynamic';
 
+import { redirect } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { DemoProjectGrid } from '@/components/demo/demo-project-grid';
-import type { Profile, ProjectWithServices } from '@/types';
+import type { ProjectWithServices } from '@/types';
 
 const DEMO_USER_EMAIL = 'vcdemo@linkmap.site';
 const PROJECT_PREVIEW_LIMIT = 12;
@@ -132,26 +133,22 @@ async function fetchDemoProjects(): Promise<ProjectWithServices[]> {
 }
 
 export default async function DemoPage() {
-  let profile: Profile | null = null;
-
+  // 로그인된 사용자는 대시보드로 이동
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      profile = data ?? null;
-    }
+    if (user) redirect('/');
   } catch {
-    profile = null;
+    // 미인증 상태 → 데모 계속 표시
   }
 
   const demoProjects = await fetchDemoProjects();
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <Header profile={profile} />
+      <Header profile={null} />
       <main className="flex-1">
-        <DemoProjectGrid projects={demoProjects} isLoggedIn={!!profile} />
+        <DemoProjectGrid projects={demoProjects} isLoggedIn={false} />
       </main>
       <Footer />
     </div>

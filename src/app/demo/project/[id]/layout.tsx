@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { redirect } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { createClient } from '@/lib/supabase/server';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { AppHeader } from '@/components/layout/app-header';
@@ -18,6 +19,15 @@ export default async function DemoProjectLayout({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
+  // 로그인된 사용자는 대시보드로 이동
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) redirect('/');
+  } catch {
+    // 미인증 → 계속
+  }
 
   let projectName = '데모 프로젝트';
   let projectDescription: string | undefined;
