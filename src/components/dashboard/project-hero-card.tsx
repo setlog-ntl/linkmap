@@ -62,10 +62,18 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
     );
   };
 
-  const saveDescription = () => {
+  const cancelDesc = () => {
+    setDescValue(project.description || '');
     setEditingDesc(false);
+  };
+
+  const saveDescription = () => {
     const trimmed = descValue.trim() || null;
-    if (trimmed === project.description) return;
+    if (trimmed === project.description) {
+      setEditingDesc(false);
+      return;
+    }
+    setEditingDesc(false);
     updateProject.mutate(
       { id: project.id, description: trimmed },
       { onError: () => toast.error('저장에 실패했습니다') },
@@ -115,16 +123,33 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
 
               {/* Inline description */}
               {editingDesc ? (
-                <Input
-                  ref={descRef}
-                  value={descValue}
-                  onChange={(e) => setDescValue(e.target.value)}
-                  onBlur={saveDescription}
-                  onKeyDown={(e) => { if (e.key === 'Enter') descRef.current?.blur(); if (e.key === 'Escape') { setDescValue(project.description || ''); setEditingDesc(false); } }}
-                  className="mt-1 h-7 text-xs"
-                  placeholder={t(locale, 'project.addDescription')}
-                  autoFocus
-                />
+                <div className="mt-1 flex items-center gap-1">
+                  <Input
+                    ref={descRef}
+                    value={descValue}
+                    onChange={(e) => setDescValue(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') saveDescription(); if (e.key === 'Escape') cancelDesc(); }}
+                    className="h-7 text-xs flex-1"
+                    placeholder={t(locale, 'project.addDescription')}
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    className="h-7 w-7 flex items-center justify-center rounded text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 shrink-0 transition-colors"
+                    title="저장 (Enter)"
+                    onClick={saveDescription}
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    className="h-7 w-7 flex items-center justify-center rounded text-muted-foreground hover:bg-muted shrink-0 transition-colors"
+                    title="취소 (Esc)"
+                    onClick={cancelDesc}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               ) : (
                 <p
                   className="mt-0.5 text-xs text-muted-foreground line-clamp-1 cursor-pointer hover:text-foreground transition-colors"
