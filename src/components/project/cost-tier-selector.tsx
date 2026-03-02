@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CostTierSelectorProps {
@@ -25,6 +26,7 @@ interface CostTierSelectorProps {
   currentBillingCycle: string;
   isPending: boolean;
   budgetCurrency: 'USD' | 'KRW';
+  pricingUrl?: string;
   onSave: (data: {
     cost_tier_id?: string | null;
     custom_cost_monthly?: number | null;
@@ -55,6 +57,7 @@ export function CostTierSelector({
   currentBillingCycle,
   isPending,
   budgetCurrency,
+  pricingUrl,
   onSave,
   onCancel,
 }: CostTierSelectorProps) {
@@ -121,6 +124,19 @@ export function CostTierSelector({
 
   return (
     <div className="space-y-4">
+      {/* 공식 요금표 링크 */}
+      {pricingUrl && (
+        <a
+          href={pricingUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs text-brand-blue hover:text-brand-blue/80 transition-colors"
+        >
+          <ExternalLink className="h-3 w-3" />
+          공식 요금표 보기
+        </a>
+      )}
+
       {/* Mode toggle */}
       {tiers.length > 0 && (
         <div className="flex gap-1 p-1 bg-muted/50 rounded-lg w-fit">

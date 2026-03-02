@@ -14,6 +14,47 @@ import { cn } from '@/lib/utils';
 import { formatCurrency } from './cost-budget-card';
 import type { ServiceCostEntry } from '@/types';
 
+/** 서비스 slug → 공식 요금표 페이지 URL */
+const SERVICE_PRICING_URLS: Record<string, string> = {
+  openai: 'https://openai.com/pricing',
+  anthropic: 'https://www.anthropic.com/pricing',
+  vercel: 'https://vercel.com/pricing',
+  supabase: 'https://supabase.com/pricing',
+  github: 'https://github.com/pricing',
+  aws: 'https://aws.amazon.com/pricing/',
+  gcp: 'https://cloud.google.com/pricing',
+  azure: 'https://azure.microsoft.com/pricing/',
+  cloudflare: 'https://www.cloudflare.com/plans/',
+  netlify: 'https://www.netlify.com/pricing/',
+  mongodb: 'https://www.mongodb.com/pricing',
+  stripe: 'https://stripe.com/pricing',
+  sendgrid: 'https://sendgrid.com/pricing/',
+  twilio: 'https://www.twilio.com/pricing',
+  firebase: 'https://firebase.google.com/pricing',
+  render: 'https://render.com/pricing',
+  railway: 'https://railway.app/pricing',
+  heroku: 'https://www.heroku.com/pricing',
+  digitalocean: 'https://www.digitalocean.com/pricing/',
+  datadog: 'https://www.datadoghq.com/pricing/',
+  sentry: 'https://sentry.io/pricing/',
+  algolia: 'https://www.algolia.com/pricing/',
+  upstash: 'https://upstash.com/pricing',
+  planetscale: 'https://planetscale.com/pricing',
+  neon: 'https://neon.tech/pricing',
+  resend: 'https://resend.com/pricing',
+  postmark: 'https://postmarkapp.com/pricing',
+  slack: 'https://slack.com/pricing',
+  figma: 'https://www.figma.com/pricing/',
+  linear: 'https://linear.app/pricing',
+  groq: 'https://groq.com/pricing/',
+  fly: 'https://fly.io/pricing',
+  mixpanel: 'https://mixpanel.com/pricing/',
+  contentful: 'https://www.contentful.com/pricing/',
+  algolia_search: 'https://www.algolia.com/pricing/',
+  trigger: 'https://trigger.dev/pricing',
+  launchdarkly: 'https://launchdarkly.com/pricing/',
+};
+
 /** 서비스 slug → 비용/사용량 페이지 URL */
 const SERVICE_COST_URLS: Record<string, string> = {
   openai: 'https://platform.openai.com/usage',
@@ -113,6 +154,7 @@ export function CostServiceList({ projectId, services, budgetCurrency, usdToKrw 
             entry.isCustomCost;
           const displayCost = entry.actualCostMonthly ?? entry.monthlyCost;
           const costUrl = SERVICE_COST_URLS[entry.serviceSlug];
+          const pricingUrl = SERVICE_PRICING_URLS[entry.serviceSlug];
 
           return (
             <div key={entry.projectServiceId} className="py-3 first:pt-0 last:pb-0">
@@ -213,6 +255,7 @@ export function CostServiceList({ projectId, services, budgetCurrency, usdToKrw 
                     currentBillingCycle={entry.billingCycle}
                     isPending={updateCost.isPending}
                     budgetCurrency={budgetCurrency}
+                    pricingUrl={pricingUrl}
                     onSave={(data) => handleSave(entry, data)}
                     onCancel={() => setExpandedId(null)}
                   />
