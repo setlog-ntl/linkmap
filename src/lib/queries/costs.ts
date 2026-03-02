@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './keys';
-import type { ProjectCostSummary, OpenAIUsageSummary } from '@/types';
+import type { ProjectCostSummary, OpenAIUsageSummary, CostAttachment } from '@/types';
 import type { UpdateServiceCostInput, ClientUsageData } from '@/lib/validations/cost';
+import type { AttachmentType } from '@/types/dashboard';
 
 /** USD → KRW 환율 조회 (하루 1회 업데이트, 24h 캐시) */
 export function useExchangeRate() {
@@ -87,6 +88,93 @@ export function useOpenAIUsage(
     },
     enabled: !!projectId && !!projectServiceId && enabled,
     staleTime: 1000 * 60 * 5, // 5분 캐시
+  });
+}
+
+/** 첨부 파일 목록 조회 */
+export function useCostAttachments(projectId: string, projectServiceId: string) {
+  return useQuery({
+    queryKey: queryKeys.costs.attachments(projectServiceId),
+    queryFn: async (): Promise<CostAttachment[]> => {
+      const res = await fetch(
+        `/api/projects/${projectId}/services/${projectServiceId}/cost/attachments`
+      );
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error((data as { error?: string }).error ?? '첨부 파일 조회 실패');
+      }
+      return res.json();
+    },
+    enabled: !!projectId && !!projectServiceId,
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+/** 첨부 파일 업로드 */
+export function useUploadCostAttachment(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      projectServiceId,
+      file,
+      attachmentType,
+      notes,
+    }: {
+      projectServiceId: string;
+      file: File;
+      attachmentType?: AttachmentType;
+      notes?: string;
+    }): Promise<CostAttachment> => {
+      const formData = new FormData();
+      formData.append('file', file);
+      if (attachmentType) formData.append('attachment_type', attachmentType);
+      if (notes) formData.append('notes', notes);
+
+      const res = await fetch(
+        `/api/projects/${projectId}/services/${projectServiceId}/cost/attachments`,
+        { method: 'POST', body: formData }
+      );
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error((data as { error?: string }).error ?? '파일 업로드 실패');
+      }
+      return res.json();
+    },
+    onSuccess: (_, { projectServiceId }) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.costs.attachments(projectServiceId),
+      });
+    },
+  });
+}
+
+/** 첨부 파일 삭제 */
+export function useDeleteCostAttachment(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      projectServiceId,
+      attachmentId,
+    }: {
+      projectServiceId: string;
+      attachmentId: string;
+    }) => {
+      const res = await fetch(
+        `/api/projects/${projectId}/services/${projectServiceId}/cost/attachments/${attachmentId}`,
+        { method: 'DELETE' }
+      );
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error((data as { error?: string }).error ?? '파일 삭제 실패');
+      }
+    },
+    onSuccess: (_, { projectServiceId }) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.costs.attachments(projectServiceId),
+      });
+    },
   });
 }
 

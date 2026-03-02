@@ -43,3 +43,23 @@ export const syncOpenAIUsageSchema = z.object({
 
 export type SyncOpenAIUsageInput = z.infer<typeof syncOpenAIUsageSchema>;
 export type ClientUsageData = z.infer<typeof clientUsageDataSchema>;
+
+export const ALLOWED_ATTACHMENT_MIME_TYPES = [
+  'application/pdf',
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/heic',
+  'text/csv',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-excel',
+] as const;
+
+export const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10MB
+
+export const ATTACHMENT_TYPES = ['invoice', 'receipt', 'contract', 'screenshot', 'other'] as const;
+
+export const createAttachmentMetaSchema = z.object({
+  attachment_type: z.enum(ATTACHMENT_TYPES).default('other'),
+  notes: z.string().max(500).nullable().optional(),
+});

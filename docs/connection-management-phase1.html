@@ -3,429 +3,393 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>연결관리 고도화 — Phase 1 완료 + 점검 보고</title>
+  <title>연결관리 고도화 — Sprint 완료 보고</title>
   <style>
     :root {
-      --blue: #2563eb;
-      --blue-light: #eff6ff;
-      --blue-mid: #93c5fd;
-      --green: #16a34a;
-      --green-light: #f0fdf4;
-      --red: #dc2626;
-      --red-light: #fef2f2;
-      --yellow: #d97706;
-      --yellow-light: #fffbeb;
-      --purple: #7c3aed;
-      --purple-light: #f5f3ff;
-      --gray: #6b7280;
-      --gray-light: #f9fafb;
-      --border: #e5e7eb;
-      --text: #111827;
-      --text-muted: #6b7280;
+      --blue: #2563eb; --blue-light: #eff6ff; --blue-mid: #93c5fd;
+      --green: #16a34a; --green-light: #f0fdf4;
+      --red: #dc2626; --red-light: #fef2f2;
+      --yellow: #d97706; --yellow-light: #fffbeb;
+      --purple: #7c3aed; --purple-light: #f5f3ff;
+      --orange: #ea580c; --orange-light: #fff7ed;
+      --gray: #6b7280; --gray-light: #f9fafb;
+      --border: #e5e7eb; --text: #111827; --text-muted: #6b7280;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-      background: #f3f4f6;
-      color: var(--text);
-      line-height: 1.6;
-    }
+    body { font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif; background:#f3f4f6; color:var(--text); line-height:1.6; }
 
-    /* ── Header ── */
-    .header {
-      background: linear-gradient(135deg, #1e40af 0%, #0369a1 50%, #0f766e 100%);
-      color: white;
-      padding: 48px 40px 36px;
-    }
-    .header-badge {
-      display: inline-block;
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 20px;
-      padding: 4px 14px;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      margin-bottom: 16px;
-    }
-    .header h1 { font-size: 30px; font-weight: 800; margin-bottom: 8px; }
-    .header p { font-size: 15px; opacity: 0.85; max-width: 640px; }
-    .header-meta {
-      margin-top: 20px;
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      font-size: 13px;
-      opacity: 0.8;
-    }
-    .header-meta span {
-      background: rgba(255,255,255,0.15);
-      padding: 3px 10px;
-      border-radius: 12px;
-    }
+    /* Header */
+    .header { background:linear-gradient(135deg,#1e40af 0%,#0369a1 40%,#0f766e 100%); color:white; padding:48px 40px 36px; }
+    .header-badge { display:inline-block; background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.3); border-radius:20px; padding:4px 14px; font-size:12px; font-weight:600; letter-spacing:.05em; margin-bottom:16px; }
+    .header h1 { font-size:28px; font-weight:800; margin-bottom:8px; }
+    .header p { font-size:15px; opacity:.85; max-width:680px; }
+    .header-meta { margin-top:20px; display:flex; gap:12px; flex-wrap:wrap; font-size:13px; opacity:.85; }
+    .header-meta span { background:rgba(255,255,255,.15); padding:3px 12px; border-radius:12px; }
 
-    /* ── Nav tabs ── */
-    .nav-tabs {
-      background: white;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      gap: 0;
-      padding: 0 40px;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    }
-    .nav-tab {
-      padding: 14px 20px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      color: var(--text-muted);
-      white-space: nowrap;
-      user-select: none;
-    }
-    .nav-tab.active { border-bottom-color: var(--blue); color: var(--blue); }
-    .nav-tab:hover:not(.active) { color: var(--text); }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+    /* Nav */
+    .nav-tabs { background:white; border-bottom:1px solid var(--border); display:flex; padding:0 40px; position:sticky; top:0; z-index:10; box-shadow:0 1px 3px rgba(0,0,0,.06); overflow-x:auto; }
+    .nav-tab { padding:14px 18px; font-size:13px; font-weight:600; cursor:pointer; border-bottom:2px solid transparent; color:var(--text-muted); white-space:nowrap; }
+    .nav-tab.active { border-bottom-color:var(--blue); color:var(--blue); }
+    .nav-tab:hover:not(.active) { color:var(--text); }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
 
-    /* ── Layout ── */
-    .container { max-width: 980px; margin: 0 auto; padding: 40px 24px; }
-    .section { margin-bottom: 40px; }
-    .section-title {
-      font-size: 19px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .section-title .num {
-      background: var(--blue);
-      color: white;
-      border-radius: 6px;
-      width: 28px; height: 28px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
+    /* Layout */
+    .container { max-width:1000px; margin:0 auto; padding:40px 24px; }
+    .section { margin-bottom:40px; }
+    .section-title { font-size:18px; font-weight:700; margin-bottom:16px; padding-bottom:10px; border-bottom:2px solid var(--border); display:flex; align-items:center; gap:8px; }
+    .section-title .num { background:var(--blue); color:white; border-radius:6px; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; flex-shrink:0; }
 
-    /* ── Cards ── */
-    .card {
-      background: white;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      padding: 22px;
-      margin-bottom: 14px;
-    }
-    .card-title {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    /* Cards */
+    .card { background:white; border-radius:12px; border:1px solid var(--border); padding:20px; margin-bottom:14px; }
+    .card-title { font-size:15px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
 
-    /* ── Grids ── */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-    @media (max-width: 700px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+    /* Grid */
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+    .grid-4 { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; }
+    @media (max-width:700px) { .grid-2,.grid-3,.grid-4 { grid-template-columns:1fr; } }
 
-    /* ── Badges ── */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-    .badge-blue   { background: var(--blue-light); color: var(--blue); }
-    .badge-green  { background: var(--green-light); color: var(--green); }
-    .badge-red    { background: var(--red-light); color: var(--red); }
-    .badge-yellow { background: var(--yellow-light); color: var(--yellow); }
-    .badge-purple { background: var(--purple-light); color: var(--purple); }
-    .badge-gray   { background: #f3f4f6; color: var(--gray); }
+    /* Badges */
+    .badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+    .badge-blue   { background:var(--blue-light);   color:var(--blue);   }
+    .badge-green  { background:var(--green-light);  color:var(--green);  }
+    .badge-red    { background:var(--red-light);    color:var(--red);    }
+    .badge-yellow { background:var(--yellow-light); color:var(--yellow); }
+    .badge-purple { background:var(--purple-light); color:var(--purple); }
+    .badge-orange { background:var(--orange-light); color:var(--orange); }
+    .badge-gray   { background:#f3f4f6; color:var(--gray); }
 
-    /* ── Tables ── */
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th {
-      background: var(--gray-light);
-      text-align: left;
-      padding: 10px 14px;
-      font-weight: 600;
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--border);
-    }
-    td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
-    tr:last-child td { border-bottom: none; }
+    /* Tables */
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th { background:var(--gray-light); text-align:left; padding:10px 14px; font-weight:600; color:var(--text-muted); border-bottom:1px solid var(--border); }
+    td { padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+    tr:last-child td { border-bottom:none; }
 
-    /* ── Code ── */
-    code {
-      background: #f1f5f9;
-      border: 1px solid #e2e8f0;
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-size: 12px;
-      font-family: 'Geist Mono', 'Fira Code', monospace;
-      color: #0f172a;
-    }
-    .code-block {
-      background: #0f172a;
-      color: #e2e8f0;
-      border-radius: 8px;
-      padding: 16px 20px;
-      font-size: 13px;
-      font-family: 'Geist Mono', 'Fira Code', monospace;
-      line-height: 1.7;
-      overflow-x: auto;
-      margin-top: 10px;
-    }
-    .code-block .comment  { color: #64748b; }
-    .code-block .keyword  { color: #93c5fd; }
-    .code-block .string   { color: #86efac; }
-    .code-block .bad      { color: #fca5a5; text-decoration: line-through; }
-    .code-block .good     { color: #86efac; }
+    /* Code */
+    code { background:#f1f5f9; border:1px solid #e2e8f0; border-radius:4px; padding:2px 6px; font-size:12px; font-family:'Geist Mono','Fira Code',monospace; color:#0f172a; }
+    .code-block { background:#0f172a; color:#e2e8f0; border-radius:8px; padding:14px 18px; font-size:12px; font-family:'Geist Mono','Fira Code',monospace; line-height:1.7; overflow-x:auto; margin-top:10px; }
+    .code-block .c { color:#64748b; }
+    .code-block .k { color:#93c5fd; }
+    .code-block .s { color:#86efac; }
+    .code-block .bad { color:#fca5a5; text-decoration:line-through; }
+    .code-block .ok  { color:#86efac; }
 
-    /* ── Flow diagram ── */
-    .flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin: 10px 0; }
-    .flow-node {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 14px;
-      font-size: 13px;
-      font-weight: 600;
-      text-align: center;
-    }
-    .flow-node.blue   { background: var(--blue-light); border-color: var(--blue-mid); color: var(--blue); }
-    .flow-node.green  { background: var(--green-light); border-color: #86efac; color: var(--green); }
-    .flow-node.red    { background: var(--red-light); border-color: #fca5a5; color: var(--red); }
-    .flow-arrow { color: var(--text-muted); font-size: 18px; padding: 0 8px; }
+    /* Tags */
+    .tag { display:inline-block; border-radius:4px; padding:2px 8px; font-size:11px; font-weight:700; }
+    .tag-p0 { background:#fee2e2; color:#991b1b; }
+    .tag-p1 { background:#fef3c7; color:#92400e; }
+    .tag-p2 { background:#dbeafe; color:#1e40af; }
+    .tag-p3 { background:#f3e8ff; color:#6b21a8; }
+    .tag-new { background:#dcfce7; color:#15803d; }
+    .tag-fix { background:#fee2e2; color:#991b1b; }
 
-    /* ── Lists ── */
-    ul { list-style: none; }
-    ul li {
-      padding: 5px 0;
-      padding-left: 20px;
-      position: relative;
-      font-size: 14px;
-    }
-    ul li::before { content: '•'; position: absolute; left: 0; color: var(--blue); font-weight: 700; }
+    /* File path */
+    .fp { background:#0f172a; color:#7dd3fc; border-radius:4px; padding:2px 7px; font-size:11px; font-family:monospace; }
 
-    /* ── Status before/after ── */
-    .status-before-after {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap: 12px;
-      align-items: start;
-      margin: 12px 0;
-    }
-    .status-box {
-      background: var(--gray-light);
-      border-radius: 8px;
-      padding: 12px 14px;
-      font-size: 13px;
-    }
-    .status-box.before { border-left: 3px solid var(--red); }
-    .status-box.after  { border-left: 3px solid var(--green); }
-    .status-box .label { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 6px; }
-    .status-box.before .label { color: var(--red); }
-    .status-box.after  .label { color: var(--green); }
-    .arrow-center {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      color: var(--text-muted);
-      padding-top: 28px;
-    }
+    /* Before/After */
+    .ba { display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:start; margin:12px 0; }
+    .ba-box { border-radius:8px; padding:12px 14px; font-size:13px; background:var(--gray-light); }
+    .ba-box.before { border-left:3px solid var(--red); }
+    .ba-box.after  { border-left:3px solid var(--green); }
+    .ba-label { font-size:11px; font-weight:700; letter-spacing:.05em; margin-bottom:6px; }
+    .ba-box.before .ba-label { color:var(--red); }
+    .ba-box.after  .ba-label { color:var(--green); }
+    .ba-arrow { display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--text-muted); padding-top:28px; }
 
-    /* ── Phase cards ── */
-    .phase-card { border-radius: 12px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 12px; }
-    .phase-header {
-      padding: 14px 20px;
-      font-weight: 700;
-      font-size: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .phase-header.done   { background: #dcfce7; color: #15803d; }
-    .phase-header.next   { background: #eff6ff; color: #1d4ed8; }
-    .phase-header.future { background: #fafafa; color: #374151; }
-    .phase-body { background: white; padding: 16px 20px; }
+    /* Phase cards */
+    .phase-card { border-radius:12px; border:1px solid var(--border); overflow:hidden; margin-bottom:12px; }
+    .phase-header { padding:14px 20px; font-weight:700; font-size:15px; display:flex; align-items:center; justify-content:space-between; }
+    .phase-header.done   { background:#dcfce7; color:#15803d; }
+    .phase-header.next   { background:#eff6ff; color:#1d4ed8; }
+    .phase-header.future { background:#fafafa; color:#374151; }
+    .phase-body { background:white; padding:16px 20px; }
 
-    /* ── Tags ── */
-    .tag {
-      display: inline-block;
-      border-radius: 4px;
-      padding: 2px 8px;
-      font-size: 11px;
-      font-weight: 700;
-    }
-    .tag-p0 { background: #fee2e2; color: #991b1b; }
-    .tag-p1 { background: #fef3c7; color: #92400e; }
-    .tag-p2 { background: #dbeafe; color: #1e40af; }
-    .tag-p3 { background: #f3e8ff; color: #6b21a8; }
-    .tag-fix { background: #fee2e2; color: #991b1b; }
-    .tag-new { background: #dcfce7; color: #15803d; }
-    .tag-perf { background: #fef3c7; color: #92400e; }
+    /* Bug cards */
+    .bug-card { border-radius:10px; border:1px solid var(--border); overflow:hidden; margin-bottom:12px; }
+    .bug-header { padding:10px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .bug-header.critical { background:#fee2e2; }
+    .bug-header.warn     { background:#fef3c7; }
+    .bug-header.info     { background:#eff6ff; }
+    .bug-body { background:white; padding:14px 16px; font-size:13px; }
 
-    /* ── Bug fix cards ── */
-    .bug-card {
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      overflow: hidden;
-      margin-bottom: 12px;
-    }
-    .bug-header {
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-    .bug-header.critical { background: #fee2e2; }
-    .bug-header.warn     { background: #fef3c7; }
-    .bug-header.info     { background: #eff6ff; }
-    .bug-body { background: white; padding: 14px 16px; font-size: 13px; }
+    /* Test bar */
+    .test-bar { background:var(--green-light); border:1px solid #86efac; border-radius:10px; padding:16px 20px; display:flex; align-items:center; gap:20px; margin-bottom:16px; flex-wrap:wrap; }
+    .test-count { font-size:36px; font-weight:800; color:var(--green); line-height:1; }
+    .test-label { font-size:12px; color:var(--green); }
 
-    /* ── Test result ── */
-    .test-bar {
-      background: var(--green-light);
-      border: 1px solid #86efac;
-      border-radius: 10px;
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 14px;
-    }
-    .test-count {
-      font-size: 36px;
-      font-weight: 800;
-      color: var(--green);
-      line-height: 1;
-    }
-    .test-label { font-size: 13px; color: var(--green); }
+    /* Status pill */
+    .pill { display:inline-flex; align-items:center; gap:6px; border-radius:8px; padding:6px 12px; font-size:13px; font-weight:600; }
+    .pill.green  { background:var(--green-light);  color:var(--green);  }
+    .pill.red    { background:var(--red-light);    color:var(--red);    }
+    .pill.yellow { background:var(--yellow-light); color:var(--yellow); }
+    .pill.gray   { background:#f3f4f6;             color:var(--gray);   }
 
-    /* ── Misc ── */
-    .file-path {
-      background: #0f172a;
-      color: #7dd3fc;
-      border-radius: 4px;
-      padding: 2px 8px;
-      font-size: 12px;
-      font-family: monospace;
-    }
-    .note {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-radius: 8px;
-      padding: 12px 16px;
-      font-size: 13px;
-      color: #92400e;
-      margin-top: 12px;
-    }
-    .note strong { font-weight: 700; }
-    .check-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      padding: 6px 0;
-      font-size: 14px;
-      border-bottom: 1px solid var(--border);
-    }
-    .check-item:last-child { border-bottom: none; }
-    .check-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-    .next-card {
-      background: white;
-      border: 2px solid var(--blue);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 14px;
-    }
-    .next-card-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--blue);
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .footer {
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 13px;
-      padding: 32px 24px;
-      border-top: 1px solid var(--border);
-      margin-top: 16px;
-    }
+    /* Flow */
+    .flow { display:flex; align-items:center; gap:0; flex-wrap:wrap; margin:10px 0; }
+    .flow-node { border:1px solid var(--border); border-radius:8px; padding:7px 13px; font-size:13px; font-weight:600; text-align:center; background:white; }
+    .flow-node.blue  { background:var(--blue-light);   border-color:var(--blue-mid); color:var(--blue);  }
+    .flow-node.green { background:var(--green-light);  border-color:#86efac;         color:var(--green); }
+    .flow-node.red   { background:var(--red-light);    border-color:#fca5a5;         color:var(--red);   }
+    .flow-arrow { color:var(--text-muted); font-size:18px; padding:0 8px; }
+
+    /* Misc */
+    .note { background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:12px 16px; font-size:13px; color:#92400e; margin-top:12px; }
+    .note strong { font-weight:700; }
+    .check-item { display:flex; align-items:flex-start; gap:8px; padding:6px 0; font-size:14px; border-bottom:1px solid var(--border); }
+    .check-item:last-child { border-bottom:none; }
+    .ci { font-size:16px; flex-shrink:0; margin-top:1px; }
+
+    /* Summary stat cards */
+    .stat-card { background:white; border-radius:12px; border:1px solid var(--border); padding:18px 20px; }
+    .stat-val { font-size:32px; font-weight:800; line-height:1.1; margin-bottom:4px; }
+    .stat-label { font-size:12px; color:var(--text-muted); }
+
+    /* Next card */
+    .next-card { background:white; border:2px solid var(--blue); border-radius:12px; padding:18px; margin-bottom:12px; }
+    .next-card-title { font-size:15px; font-weight:700; color:var(--blue); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+
+    /* Footer */
+    .footer { text-align:center; color:var(--text-muted); font-size:13px; padding:32px 24px; border-top:1px solid var(--border); margin-top:16px; }
+
+    /* Color swatch */
+    .swatch { display:inline-flex; align-items:center; gap:8px; border-radius:8px; padding:7px 14px; font-size:13px; font-weight:600; }
+
+    /* Section sub-header */
+    .sub-h { font-size:13px; font-weight:600; margin-bottom:8px; color:var(--text); }
   </style>
 </head>
 <body>
 
-<!-- ═══════════════════ HEADER ═══════════════════ -->
+<!-- ═══ HEADER ═══ -->
 <div class="header">
-  <div style="max-width:980px;margin:0 auto;">
+  <div style="max-width:1000px;margin:0 auto;">
     <div class="header-badge">LINKMAP · 연결관리 고도화</div>
-    <h1>연결관리 Phase 1 — 구현 + 점검 완료 보고</h1>
-    <p>헬스체크 자동 연동 · 환경 필터 · 수동 검증 버튼 구현 완료.<br>
-       코드 점검에서 발견된 버그 3개 즉시 수정 · 신규 테스트 14개 추가.</p>
+    <h1>연결관리 고도화 Sprint — 전체 완료 보고</h1>
+    <p>Phase 1 (헬스체크 연동·환경 필터·수동 검증) → Service Map 엣지 컬러링 → Phase 2-1 (의존성 리스크 분석) 순차 완료.</p>
     <div class="header-meta">
       <span>📅 2026-03-02</span>
-      <span>🔖 commit 4b93496</span>
-      <span>✅ 테스트 44/44 통과</span>
-      <span>🔧 변경 파일 12개</span>
-      <span>🐛 버그 수정 3건</span>
+      <span>🔖 마지막 커밋 6515c99</span>
+      <span>✅ 테스트 135/135 통과</span>
+      <span>📁 신규/수정 파일 20+개</span>
+      <span>🐛 버그 수정 4건</span>
+      <span>🆕 신규 API 3개</span>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════ NAV TABS ═══════════════════ -->
+<!-- ═══ NAV ═══ -->
 <div class="nav-tabs">
-  <div class="nav-tab active" onclick="showTab('impl')">① 구현 내용</div>
-  <div class="nav-tab" onclick="showTab('inspect')">② 점검 결과</div>
-  <div class="nav-tab" onclick="showTab('tests')">③ 테스트 현황</div>
-  <div class="nav-tab" onclick="showTab('debt')">④ 기술 부채</div>
-  <div class="nav-tab" onclick="showTab('next')">⑤ 다음 단계</div>
+  <div class="nav-tab active" onclick="showTab('overview')">① 전체 현황</div>
+  <div class="nav-tab" onclick="showTab('phase1')">② Phase 1</div>
+  <div class="nav-tab" onclick="showTab('phase15')">③ 엣지 컬러링</div>
+  <div class="nav-tab" onclick="showTab('phase21')">④ 영향 분석</div>
+  <div class="nav-tab" onclick="showTab('tests')">⑤ 테스트 현황</div>
+  <div class="nav-tab" onclick="showTab('next')">⑥ 다음 단계</div>
 </div>
 
-<!-- ═══════════════════ TAB: 구현 내용 ═══════════════════ -->
-<div id="tab-impl" class="tab-content active">
+
+<!-- ══════════════════════════════════════════════
+     TAB ① 전체 현황
+══════════════════════════════════════════════ -->
+<div id="tab-overview" class="tab-content active">
 <div class="container">
 
   <div class="section">
-    <div class="section-title"><span class="num">1</span>Phase 1 구현 내용 — 3가지 기능</div>
-
-    <!-- P0 -->
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <div class="card-title" style="margin-bottom:0;"><span class="tag tag-p0">P0</span> 🔗 헬스체크 → connection_status 자동화</div>
-        <span class="badge badge-green">✅ 완료</span>
+    <div class="section-title"><span class="num">1</span>Sprint 결과 요약</div>
+    <div class="grid-4">
+      <div class="stat-card">
+        <div class="stat-val" style="color:var(--green);">135</div>
+        <div class="stat-label">✅ 테스트 통과 (0 실패)</div>
       </div>
-      <div class="status-before-after">
-        <div class="status-box before">
-          <div class="label">BEFORE</div>
+      <div class="stat-card">
+        <div class="stat-val" style="color:var(--blue);">3</div>
+        <div class="stat-label">🆕 신규 API 엔드포인트</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" style="color:var(--purple);">11</div>
+        <div class="stat-label">📝 신규 테스트 파일</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" style="color:var(--red);">4</div>
+        <div class="stat-label">🐛 버그 즉시 수정</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">2</span>완료된 기능 전체 목록</div>
+
+    <!-- Phase 1 -->
+    <div class="phase-card">
+      <div class="phase-header done">
+        ✅ Phase 1 — 헬스체크 연동 · 환경 필터 · 수동 검증
+        <span style="font-size:12px;font-weight:400;">commit 9be68a8 · 4b93496</span>
+      </div>
+      <div class="phase-body">
+        <div class="grid-3">
+          <div>
+            <span class="tag tag-p0">P0</span>
+            <div style="margin-top:6px;font-size:13px;">
+              <strong>헬스체크 → connection_status 자동화</strong><br>
+              <span style="color:var(--text-muted);">
+                unhealthy/degraded → error 자동 반영<br>
+                healthy 복구 → active 복구 (error 상태만)
+              </span>
+            </div>
+          </div>
+          <div>
+            <span class="tag tag-p1">P1</span>
+            <div style="margin-top:6px;font-size:13px;">
+              <strong>Environment 필터 UI + API</strong><br>
+              <span style="color:var(--text-muted);">
+                전체/개발/스테이징/프로덕션 탭 필터<br>
+                화이트리스트 검증으로 인젝션 방어
+              </span>
+            </div>
+          </div>
+          <div>
+            <span class="tag tag-p2">P2</span>
+            <div style="margin-top:6px;font-size:13px;">
+              <strong>수동 Verify 버튼</strong><br>
+              <span style="color:var(--text-muted);">
+                POST /api/connections/[id]/verify<br>
+                헬스체크 최신 기록 → status 결정
+              </span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:13px;color:var(--text-muted);">
+          🐛 점검 후 버그 3개 수정 · 신규 테스트 14개 추가
+        </div>
+      </div>
+    </div>
+
+    <!-- Service Map 엣지 -->
+    <div class="phase-card">
+      <div class="phase-header done">
+        ✅ Service Map 엣지 컬러링 — connection_status 시각화
+        <span style="font-size:12px;font-weight:400;">commit 3c477ca</span>
+      </div>
+      <div class="phase-body">
+        <div class="grid-2">
+          <div style="font-size:13px;">
+            <div class="sub-h">구현 내용</div>
+            <ul style="list-style:none;padding:0;">
+              <li style="padding:3px 0 3px 16px;position:relative;font-size:13px;">
+                <span style="position:absolute;left:0;color:var(--blue);">•</span>
+                <code>radial-edge.tsx</code> — <code>connectionStatus</code> 기반 컬러링 추가
+              </li>
+              <li style="padding:3px 0 3px 16px;position:relative;font-size:13px;">
+                <span style="position:absolute;left:0;color:var(--blue);">•</span>
+                <code>useRadialMapNodes.ts</code> — 하드코딩 <code>'connected'</code> → 실제 <code>connection_status</code> 전달
+              </li>
+              <li style="padding:3px 0 3px 16px;position:relative;font-size:13px;">
+                <span style="position:absolute;left:0;color:var(--blue);">•</span>
+                <code>map-legend.tsx</code> — "연결 상태" 섹션 추가
+              </li>
+              <li style="padding:3px 0 3px 16px;position:relative;font-size:13px;">
+                <span style="position:absolute;left:0;color:var(--red);">🐛</span>
+                SVG 마커 ID 불일치 버그 수정 (<code>#radial-arrow</code> → <code>#radial-arrow-{key}</code>)
+              </li>
+            </ul>
+          </div>
+          <div>
+            <div class="sub-h">s2s 엣지 컬러 매핑</div>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
+              <div class="swatch" style="background:#dcfce7;color:#16a34a;border:1px solid #86efac;">● active → 초록 (#22c55e)</div>
+              <div class="swatch" style="background:#fef3c7;color:#d97706;border:1px solid #fde68a;">● pending → 노란 (#f59e0b)</div>
+              <div class="swatch" style="background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;">● inactive → 회색 30% opacity</div>
+              <div class="swatch" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;">● error → 빨간 (#ef4444)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 2-1 -->
+    <div class="phase-card">
+      <div class="phase-header done">
+        ✅ Phase 2-1 — 서비스 장애 영향 분석 (Impact Analysis)
+        <span style="font-size:12px;font-weight:400;">commit 6515c99</span>
+      </div>
+      <div class="phase-body">
+        <div class="grid-2">
+          <div style="font-size:13px;">
+            <div class="sub-h">핵심 기능</div>
+            <ul style="list-style:none;padding:0;">
+              <li style="padding:3px 0 3px 16px;position:relative;font-size:13px;"><span style="position:absolute;left:0;color:var(--blue);">•</span>BFS 그래프 순회로 "A 장애 시 영향받는 서비스" 자동 계산</li>
+              <li style="padding:3px 0 3px 16px;position:relative;font-size:13px;"><span style="position:absolute;left:0;color:var(--blue);">•</span>직접 의존(depth 1) → 리스크 High, 간접(depth 2) → Medium</li>
+              <li style="padding:3px 0 3px 16px;position:relative;font-size:13px;"><span style="position:absolute;left:0;color:var(--blue);">•</span>연결 유형(connection_type) 경로 포함 표시</li>
+              <li style="padding:3px 0 3px 16px;position:relative;font-size:13px;"><span style="position:absolute;left:0;color:var(--blue);">•</span>연결관리 페이지 하단 "서비스 장애 영향 분석" 패널</li>
+            </ul>
+          </div>
+          <div style="font-size:13px;">
+            <div class="sub-h">신규 파일</div>
+            <div style="display:flex;flex-direction:column;gap:5px;margin-top:6px;">
+              <div><span class="fp">src/lib/connections/impact-analysis.ts</span> <span class="tag tag-new" style="font-size:10px;">순수 함수</span></div>
+              <div><span class="fp">src/app/api/connections/impact/route.ts</span> <span class="tag tag-new" style="font-size:10px;">API</span></div>
+              <div><span class="fp">src/components/project/impact-analysis-panel.tsx</span> <span class="tag tag-new" style="font-size:10px;">UI</span></div>
+              <div><span class="fp">src/lib/connections/__tests__/impact-analysis.test.ts</span> <span class="tag tag-new" style="font-size:10px;">11테스트</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">3</span>전체 변경 파일 목록</div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table>
+        <thead><tr><th>파일</th><th>유형</th><th>Sprint 단계</th><th>주요 변경</th></tr></thead>
+        <tbody>
+          <tr><td><code>src/app/api/health-check/route.ts</code></td><td><span class="badge badge-yellow">수정</span></td><td>Phase 1</td><td>헬스체크 후 연관 connection_status 자동 업데이트</td></tr>
+          <tr><td><code>src/app/api/connections/route.ts</code></td><td><span class="badge badge-yellow">수정</span></td><td>Phase 1</td><td>environment 화이트리스트 + 필터 + POST 저장</td></tr>
+          <tr><td><code>src/app/api/connections/[id]/verify/route.ts</code></td><td><span class="badge badge-blue">신규</span></td><td>Phase 1</td><td>연결 수동 검증 엔드포인트</td></tr>
+          <tr><td><code>src/app/api/connections/impact/route.ts</code></td><td><span class="badge badge-blue">신규</span></td><td>Phase 2-1</td><td>영향 분석 API (GET)</td></tr>
+          <tr><td><code>src/lib/connections/impact-analysis.ts</code></td><td><span class="badge badge-blue">신규</span></td><td>Phase 2-1</td><td>BFS 그래프 순회 순수 함수</td></tr>
+          <tr><td><code>src/lib/validations/connection.ts</code></td><td><span class="badge badge-yellow">수정</span></td><td>Phase 1</td><td>connectionEnvironmentEnum + environment 필드</td></tr>
+          <tr><td><code>src/lib/queries/connections.ts</code></td><td><span class="badge badge-yellow">수정</span></td><td>Phase 1+2-1</td><td>useVerifyConnection + useImpactAnalysis 훅 추가</td></tr>
+          <tr><td><code>src/lib/queries/keys.ts</code></td><td><span class="badge badge-yellow">수정</span></td><td>Phase 2-1</td><td>connections.impact 쿼리 키 추가</td></tr>
+          <tr><td><code>src/lib/audit.ts</code></td><td><span class="badge badge-yellow">수정</span></td><td>Phase 1</td><td>connection.verify AuditAction 추가</td></tr>
+          <tr><td><code>src/components/service-map/radial-edge.tsx</code></td><td><span class="badge badge-yellow">수정</span></td><td>엣지 컬러링</td><td>connectionStatus 컬러링 + 마커 ID 버그 수정</td></tr>
+          <tr><td><code>src/components/service-map/hooks/useRadialMapNodes.ts</code></td><td><span class="badge badge-yellow">수정</span></td><td>엣지 컬러링</td><td>s2s 엣지에 connectionStatus 실값 전달</td></tr>
+          <tr><td><code>src/components/service-map/map-legend.tsx</code></td><td><span class="badge badge-yellow">수정</span></td><td>엣지 컬러링</td><td>연결 상태 범례 섹션 추가</td></tr>
+          <tr><td><code>src/components/project/connections-content.tsx</code></td><td><span class="badge badge-yellow">수정</span></td><td>Phase 1+2-1</td><td>환경 탭·검증 버튼·영향 분석 패널 통합</td></tr>
+          <tr><td><code>src/components/project/impact-analysis-panel.tsx</code></td><td><span class="badge badge-blue">신규</span></td><td>Phase 2-1</td><td>서비스 장애 영향 분석 UI 패널</td></tr>
+          <tr><td><code>src/app/api/connections/__tests__/route.test.ts</code></td><td><span class="badge badge-yellow">수정</span></td><td>Phase 1</td><td>environment 필터 테스트 +5개</td></tr>
+          <tr><td><code>src/app/api/connections/[id]/__tests__/verify.test.ts</code></td><td><span class="badge badge-blue">신규</span></td><td>Phase 1</td><td>verify 엔드포인트 10개 테스트</td></tr>
+          <tr><td><code>src/lib/connections/__tests__/impact-analysis.test.ts</code></td><td><span class="badge badge-blue">신규</span></td><td>Phase 2-1</td><td>BFS 순수 함수 11개 테스트</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     TAB ② Phase 1
+══════════════════════════════════════════════ -->
+<div id="tab-phase1" class="tab-content">
+<div class="container">
+
+  <div class="section">
+    <div class="section-title"><span class="num">1</span>P0 — 헬스체크 → connection_status 자동화</div>
+    <div class="card">
+      <div class="ba">
+        <div class="ba-box before">
+          <div class="ba-label">BEFORE</div>
           헬스체크 실행 → <code>project_services.status</code>만 업데이트<br>
           <code>user_connections.connection_status</code>는 항상 수동 설정값 유지
         </div>
-        <div class="arrow-center">→</div>
-        <div class="status-box after">
-          <div class="label">AFTER</div>
+        <div class="ba-arrow">→</div>
+        <div class="ba-box after">
+          <div class="ba-label">AFTER</div>
           헬스체크 실행 → project_services 업데이트<br>
-          <strong>+ 연관 연결의 status · last_verified_at 자동 반영</strong>
+          <strong>+ 연관 connection_status · last_verified_at 자동 반영</strong>
         </div>
       </div>
       <div style="margin-top:14px;">
@@ -439,277 +403,142 @@
         <div class="flow" style="margin-top:6px;">
           <div class="flow-node blue">헬스체크 실행</div>
           <div class="flow-arrow">→</div>
-          <div class="flow-node green">healthy (현재 error 상태만)</div>
+          <div class="flow-node green">healthy (현재 error인 연결만)</div>
           <div class="flow-arrow">→</div>
           <div class="flow-node green">connection_status = <strong>'active'</strong></div>
         </div>
       </div>
-      <div class="note" style="margin-top:12px;">
-        <strong>설계 의도:</strong> healthy 복구 시 현재 <code>'error'</code> 상태인 연결만 복구.
-        수동으로 <code>'inactive'</code>로 설정한 연결은 건드리지 않음.
+      <div class="note">
+        <strong>설계 의도:</strong> healthy 복구 시 <code>'error'</code> 상태 연결만 active로 복구.
+        사용자가 수동으로 <code>'inactive'</code>로 설정한 연결은 건드리지 않음.
       </div>
       <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">
-        <span class="file-path">src/app/api/health-check/route.ts</span> 수정 (+18 lines)
+        <span class="fp">src/app/api/health-check/route.ts</span> (+18 lines)
       </div>
     </div>
+  </div>
 
-    <!-- P1 -->
+  <div class="section">
+    <div class="section-title"><span class="num">2</span>P1 — Environment 필터 활성화</div>
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <div class="card-title" style="margin-bottom:0;"><span class="tag tag-p1">P1</span> 🌍 Environment 필터 활성화</div>
-        <span class="badge badge-green">✅ 완료</span>
-      </div>
       <div class="grid-2">
         <div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:8px;">변경 사항</div>
-          <ul>
-            <li>연결 생성 시 <code>environment</code> 선택 (기본값: <code>all</code>)</li>
-            <li>GET API에 <code>?environment=</code> 파라미터 지원</li>
-            <li>Zod 스키마에 <code>connectionEnvironmentEnum</code> 추가</li>
-            <li>UI 상단 환경 필터 탭 (전체/개발/스테이징/프로덕션)</li>
+          <div class="sub-h">변경 사항</div>
+          <ul style="list-style:none;padding:0;">
+            <li style="padding:4px 0 4px 16px;position:relative;font-size:13px;"><span style="position:absolute;left:0;color:var(--blue);">•</span>연결 생성 시 <code>environment</code> 선택 드롭다운 (기본: <code>all</code>)</li>
+            <li style="padding:4px 0 4px 16px;position:relative;font-size:13px;"><span style="position:absolute;left:0;color:var(--blue);">•</span>GET API에 <code>?environment=</code> 파라미터 지원</li>
+            <li style="padding:4px 0 4px 16px;position:relative;font-size:13px;"><span style="position:absolute;left:0;color:var(--blue);">•</span>Zod 스키마에 <code>connectionEnvironmentEnum</code> 추가</li>
+            <li style="padding:4px 0 4px 16px;position:relative;font-size:13px;"><span style="position:absolute;left:0;color:var(--blue);">•</span>UI 상단 환경 필터 탭 (전체/개발/스테이징/프로덕션)</li>
           </ul>
         </div>
         <div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:8px;">필터 동작 규칙</div>
-          <ul>
-            <li><code>production</code> 탭 → production + all + null 표시</li>
-            <li><code>development</code> 탭 → development + all + null 표시</li>
-            <li><code>전체</code> 탭 → 필터 없이 전부 표시</li>
-            <li>잘못된 environment 값 → 필터 미적용 (화이트리스트 검증)</li>
+          <div class="sub-h">필터 동작 규칙</div>
+          <ul style="list-style:none;padding:0;">
+            <li style="padding:4px 0 4px 16px;position:relative;font-size:13px;"><span style="position:absolute;left:0;color:var(--blue);">•</span><code>production</code> 탭 → production + all + null 표시</li>
+            <li style="padding:4px 0 4px 16px;position:relative;font-size:13px;"><span style="position:absolute;left:0;color:var(--blue);">•</span><code>development</code> 탭 → development + all + null 표시</li>
+            <li style="padding:4px 0 4px 16px;position:relative;font-size:13px;"><span style="position:absolute;left:0;color:var(--blue);">•</span><code>전체</code> 탭 → 필터 없이 전부 표시</li>
+            <li style="padding:4px 0 4px 16px;position:relative;font-size:13px;"><span style="position:absolute;left:0;color:var(--red);">🛡</span>잘못된 값 → 화이트리스트 검증 후 필터 미적용 (인젝션 방어)</li>
           </ul>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- P2 -->
+  <div class="section">
+    <div class="section-title"><span class="num">3</span>P2 — 수동 Verify 버튼</div>
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <div class="card-title" style="margin-bottom:0;"><span class="tag tag-p2">P2</span> 🔍 연결 검증(Verify) 수동 버튼</div>
-        <span class="badge badge-green">✅ 완료</span>
-      </div>
-      <div class="status-before-after">
-        <div class="status-box before">
-          <div class="label">BEFORE</div>
+      <div class="ba">
+        <div class="ba-box before">
+          <div class="ba-label">BEFORE</div>
           "이 연결 지금 살아있나?" 확인 방법 없음.<br>
           status 값이 실제 서비스 상태와 다를 수 있음.
         </div>
-        <div class="arrow-center">→</div>
-        <div class="status-box after">
-          <div class="label">AFTER</div>
+        <div class="ba-arrow">→</div>
+        <div class="ba-box after">
+          <div class="ba-label">AFTER</div>
           🔄 버튼 클릭 → 최신 헬스체크 기록 조회<br>
           → connection_status + last_verified_at 즉시 반영
         </div>
       </div>
       <div style="margin-top:14px;">
-        <div style="font-size:13px;font-weight:600;margin-bottom:6px;">검증 상태 결정 로직</div>
+        <div class="sub-h">검증 상태 결정 로직</div>
         <div class="code-block">
-<span class="keyword">ANY</span> unhealthy | degraded  →  connection_status = <span class="string">'error'</span>
-<span class="keyword">ALL</span> healthy               →  connection_status = <span class="string">'active'</span>
-<span class="keyword">헬스체크 기록 없음</span>          →  connection_status = <span class="string">'pending'</span>
-<span class="comment">// 각 project_service 당 최신 1건만 사용 (dedup)</span>
+<span class="c">// 각 project_service의 최신 health_check 기록 조회 (dedup)</span>
+<span class="k">ANY</span> unhealthy | degraded  →  connection_status = <span class="s">'error'</span>
+<span class="k">ALL</span> healthy               →  connection_status = <span class="s">'active'</span>
+<span class="k">헬스체크 기록 없음</span>          →  connection_status = <span class="s">'pending'</span>
         </div>
       </div>
       <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">
-        <span class="file-path">src/app/api/connections/[id]/verify/route.ts</span> 신규 (99 lines) &nbsp;
-        <span class="file-path">src/lib/queries/connections.ts</span> useVerifyConnection hook 추가
+        <span class="fp">src/app/api/connections/[id]/verify/route.ts</span> 신규 (99 lines) &nbsp;
+        <span class="fp">src/lib/queries/connections.ts</span> useVerifyConnection hook 추가
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title"><span class="num">2</span>변경 파일 전체 목록</div>
-    <div class="card" style="padding:0;overflow:hidden;">
-      <table>
-        <thead><tr><th>파일</th><th>유형</th><th>주요 변경</th></tr></thead>
-        <tbody>
-          <tr><td><code>src/app/api/health-check/route.ts</code></td><td><span class="badge badge-yellow">수정</span></td><td>헬스체크 후 연관 연결 status 자동 업데이트</td></tr>
-          <tr><td><code>src/app/api/connections/route.ts</code></td><td><span class="badge badge-yellow">수정</span></td><td>environment 화이트리스트 검증 + 필터 + POST 저장</td></tr>
-          <tr><td><code>src/app/api/connections/[id]/verify/route.ts</code></td><td><span class="badge badge-blue">신규</span></td><td>연결 검증 엔드포인트</td></tr>
-          <tr><td><code>src/lib/validations/connection.ts</code></td><td><span class="badge badge-yellow">수정</span></td><td>connectionEnvironmentEnum + environment 필드</td></tr>
-          <tr><td><code>src/lib/queries/connections.ts</code></td><td><span class="badge badge-yellow">수정</span></td><td>environment 파라미터, useVerifyConnection hook, optimistic update 수정</td></tr>
-          <tr><td><code>src/lib/audit.ts</code></td><td><span class="badge badge-yellow">수정</span></td><td>'connection.verify' AuditAction 추가</td></tr>
-          <tr><td><code>src/components/project/connections-content.tsx</code></td><td><span class="badge badge-yellow">수정</span></td><td>환경 탭 UI, 검증 버튼, last_verified_at 표시</td></tr>
-          <tr><td><code>src/app/api/connections/__tests__/route.test.ts</code></td><td><span class="badge badge-yellow">수정</span></td><td>environment 필터 테스트 5개 추가</td></tr>
-          <tr><td><code>src/app/api/connections/[id]/__tests__/verify.test.ts</code></td><td><span class="badge badge-blue">신규</span></td><td>verify 엔드포인트 테스트 10개</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+    <div class="section-title"><span class="num">4</span>점검에서 발견·수정된 버그 (4건)</div>
 
-</div>
-</div>
-
-<!-- ═══════════════════ TAB: 점검 결과 ═══════════════════ -->
-<div id="tab-inspect" class="tab-content">
-<div class="container">
-
-  <div class="section">
-    <div class="section-title"><span class="num">1</span>점검 방법 및 범위</div>
-    <div class="card">
-      <div class="grid-2">
-        <div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:8px;">점검 항목</div>
-          <ul>
-            <li>전체 변경 파일 코드 리뷰 (라인 단위)</li>
-            <li>보안 취약점 (파라미터 인젝션, 인증 누락)</li>
-            <li>성능 문제 (무제한 쿼리, N+1)</li>
-            <li>UX 버그 (낙관적 업데이트 불일치)</li>
-            <li>엣지 케이스 (null, 빈 배열, 타입 불일치)</li>
-            <li>기존 테스트 회귀 여부</li>
-          </ul>
-        </div>
-        <div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:8px;">점검 결과</div>
-          <ul>
-            <li>🔴 보안 버그 1건 → 즉시 수정</li>
-            <li>🟡 성능 문제 1건 → 즉시 수정</li>
-            <li>🟡 UX 버그 1건 → 즉시 수정</li>
-            <li>📝 테스트 미비 → 14개 신규 추가</li>
-            <li>✅ 기존 테스트 29개 전부 유지</li>
-            <li>✅ 타입체크 에러 0개</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title"><span class="num">2</span>발견 & 수정된 버그 상세</div>
-
-    <!-- Bug 1 -->
     <div class="bug-card">
       <div class="bug-header critical">
         <div style="display:flex;align-items:center;gap:8px;">
-          <span class="tag tag-fix">🔴 보안 · 즉시 수정</span>
+          <span class="tag tag-fix">🔴 보안</span>
           <strong>environment 파라미터 미검증 — PostgREST 인젝션 위험</strong>
         </div>
         <span class="badge badge-green">수정 완료</span>
       </div>
       <div class="bug-body">
-        <div class="grid-2">
-          <div>
-            <div style="font-weight:600;margin-bottom:6px;color:var(--red);">문제</div>
-            <div>GET 쿼리 파라미터 <code>?environment=</code> 값을 검증 없이<br>
-            PostgREST <code>.or()</code> 문자열에 직접 삽입.</div>
-            <div class="code-block" style="margin-top:8px;">
-<span class="comment">// 취약 코드 (수정 전)</span>
-<span class="bad">query = query.or(`environment.eq.${environment},...`)</span>
-<span class="comment">// 악의적 입력 예시</span>
-<span class="bad">?environment=prod,environment.is.null</span>
-            </div>
-          </div>
-          <div>
-            <div style="font-weight:600;margin-bottom:6px;color:var(--green);">수정</div>
-            <div>허용된 값 목록(화이트리스트)으로 먼저 검증 후 사용.</div>
-            <div class="code-block" style="margin-top:8px;">
-<span class="comment">// 수정 후</span>
-<span class="good">const VALID_ENVS = ['development', 'staging', 'production']</span>
-<span class="good">const environment = VALID_ENVS.includes(envParam)</span>
-<span class="good">  ? envParam : null</span>
-<span class="comment">// null이면 .or() 호출 자체를 건너뜀</span>
-            </div>
-          </div>
-        </div>
-        <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">
-          파일: <span class="file-path">src/app/api/connections/route.ts</span>
-        </div>
+        GET 파라미터 <code>?environment=</code> 값을 검증 없이 PostgREST <code>.or()</code> 문자열에 직접 삽입.
+        화이트리스트 검증 추가 + 유효하지 않은 값이면 .or() 호출 자체를 건너뜀.<br>
+        <div style="margin-top:8px;font-size:12px;color:var(--text-muted);"><span class="fp">src/app/api/connections/route.ts</span></div>
       </div>
     </div>
 
-    <!-- Bug 2 -->
     <div class="bug-card">
       <div class="bug-header warn">
         <div style="display:flex;align-items:center;gap:8px;">
-          <span class="tag tag-perf">🟡 성능 · 즉시 수정</span>
-          <strong>health_checks 쿼리에 limit 없음 — 대량 데이터 시 풀스캔</strong>
+          <span class="tag tag-p1">🟡 성능</span>
+          <strong>health_checks 쿼리에 limit 없음 — 대량 누적 시 풀스캔</strong>
         </div>
         <span class="badge badge-green">수정 완료</span>
       </div>
       <div class="bug-body">
-        <div class="grid-2">
-          <div>
-            <div style="font-weight:600;margin-bottom:6px;color:var(--yellow);">문제</div>
-            <div>verify 엔드포인트에서 health_checks를 조회할 때<br>
-            limit 없이 project_service의 모든 기록을 가져옴.</div>
-            <div style="font-size:13px;color:var(--text-muted);margin-top:6px;">
-              실제 사용: 각 service의 최신 1건만 필요.<br>
-              헬스체크 누적 시 수백~수천 row 불필요 로드.
-            </div>
-          </div>
-          <div>
-            <div style="font-weight:600;margin-bottom:6px;color:var(--green);">수정</div>
-            <div class="code-block">
-<span class="bad">.order('checked_at', { ascending: false })</span>
-<span class="good">.order('checked_at', { ascending: false })</span>
-<span class="good">.limit(projectServiceIds.length * 20)</span>
-<span class="comment">// 연결당 최대 2개 서비스 × 20 = 최대 40건</span>
-            </div>
-          </div>
-        </div>
-        <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">
-          파일: <span class="file-path">src/app/api/connections/[id]/verify/route.ts</span>
-        </div>
+        verify 엔드포인트에서 health_checks 조회 시 limit 없이 전체 기록 로드.
+        <code>.limit(projectServiceIds.length * 20)</code> 추가.<br>
+        <div style="margin-top:8px;font-size:12px;color:var(--text-muted);"><span class="fp">src/app/api/connections/[id]/verify/route.ts</span></div>
       </div>
     </div>
 
-    <!-- Bug 3 -->
     <div class="bug-card">
       <div class="bug-header warn">
         <div style="display:flex;align-items:center;gap:8px;">
-          <span class="tag tag-perf">🟡 UX · 즉시 수정</span>
+          <span class="tag tag-p1">🟡 UX</span>
           <strong>낙관적 업데이트 객체에 environment 필드 누락</strong>
         </div>
         <span class="badge badge-green">수정 완료</span>
       </div>
       <div class="bug-body">
-        <div class="grid-2">
-          <div>
-            <div style="font-weight:600;margin-bottom:6px;color:var(--yellow);">문제</div>
-            <div>연결 생성 시 낙관적 업데이트로 임시 렌더링되는 객체에<br>
-            <code>environment</code> 필드가 없음.</div>
-            <div style="font-size:13px;color:var(--text-muted);margin-top:6px;">
-              환경 탭 필터가 활성화된 상태에서 생성 시<br>
-              낙관적 렌더링 중 연결이 보이지 않을 수 있음.
-            </div>
-          </div>
-          <div>
-            <div style="font-weight:600;margin-bottom:6px;color:var(--green);">수정</div>
-            <div class="code-block">
-<span class="comment">// 수정 전 — environment 누락</span>
-<span class="bad">const optimistic: UserConnection = { id, ... }</span>
-
-<span class="comment">// 수정 후</span>
-<span class="good">const optimistic: UserConnection = {</span>
-<span class="good">  id, ...,</span>
-<span class="good">  environment: params.environment ?? 'all',</span>
-<span class="good">}</span>
-            </div>
-          </div>
-        </div>
-        <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">
-          파일: <span class="file-path">src/lib/queries/connections.ts</span>
-        </div>
+        연결 생성 시 낙관적 업데이트 임시 객체에 <code>environment</code> 누락.
+        환경 탭 필터 활성 상태에서 생성 시 낙관적 렌더링 중 연결이 안 보이는 문제.
+        <code>environment: params.environment ?? 'all'</code> 추가.<br>
+        <div style="margin-top:8px;font-size:12px;color:var(--text-muted);"><span class="fp">src/lib/queries/connections.ts</span></div>
       </div>
     </div>
 
-    <!-- Bug 4 (test infra) -->
     <div class="bug-card">
       <div class="bug-header info">
         <div style="display:flex;align-items:center;gap:8px;">
-          <span class="tag tag-p2">📝 테스트 인프라 수정</span>
+          <span class="tag tag-p2">📝 테스트 인프라</span>
           <strong>makeChain에 'or' 메서드 누락 → 테스트 3개 실패</strong>
         </div>
         <span class="badge badge-green">수정 완료</span>
       </div>
       <div class="bug-body">
-        <div>
-          route.ts에서 <code>.or()</code> 호출 순서 재정렬 (order 전에 or) +
-          테스트 mock chain에 <code>'or'</code> 추가.
-          수정 후 테스트 3개 즉시 통과.
-        </div>
-        <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">
-          파일: <span class="file-path">src/app/api/connections/__tests__/route.test.ts</span>
-          &nbsp; <span class="file-path">src/app/api/connections/route.ts</span>
+        route.ts에서 <code>.or()</code> 호출 순서 재정렬 (order 전으로 이동) +
+        테스트 mock chain에 <code>'or'</code> 메서드 추가. 수정 후 3개 즉시 통과.<br>
+        <div style="margin-top:8px;font-size:12px;color:var(--text-muted);">
+          <span class="fp">src/app/api/connections/__tests__/route.test.ts</span> &nbsp;
+          <span class="fp">src/app/api/connections/route.ts</span>
         </div>
       </div>
     </div>
@@ -718,7 +547,352 @@
 </div>
 </div>
 
-<!-- ═══════════════════ TAB: 테스트 현황 ═══════════════════ -->
+
+<!-- ══════════════════════════════════════════════
+     TAB ③ 엣지 컬러링
+══════════════════════════════════════════════ -->
+<div id="tab-phase15" class="tab-content">
+<div class="container">
+
+  <div class="section">
+    <div class="section-title"><span class="num">1</span>목적 및 배경</div>
+    <div class="card">
+      <div class="ba">
+        <div class="ba-box before">
+          <div class="ba-label">BEFORE</div>
+          Service Map의 s2s(서비스↔서비스) 엣지가 모두 같은 초록색.<br>
+          <code>connection_status</code>가 실값을 갖게 됐지만 시각적으로 미반영.<br>
+          SVG 화살표 마커 ID 불일치로 화살촉이 렌더링 안 됨(숨겨진 버그).
+        </div>
+        <div class="ba-arrow">→</div>
+        <div class="ba-box after">
+          <div class="ba-label">AFTER</div>
+          <code>connection_status</code>에 따라 s2s 엣지 색상 자동 변경.<br>
+          inactive 엣지는 30% opacity로 시각적 구분.<br>
+          SVG 마커 ID 수정으로 화살촉 정상 렌더링.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">2</span>아키텍처 — 엣지 렌더링 2중 구조</div>
+    <div class="card">
+      <div class="grid-2">
+        <div style="border:1px solid var(--border);border-radius:10px;padding:14px;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--green);">✅ Dashboard 오버레이</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;"><code>connection-overlay.tsx</code></div>
+          <div style="font-size:13px;">SVG 오버레이 방식.<br>
+          이미 STATUS_COLORS 구현 완료.<br>
+          변경 불필요.</div>
+        </div>
+        <div style="border:2px solid var(--blue);border-radius:10px;padding:14px;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--blue);">🔧 이번에 수정</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;"><code>radial-edge.tsx</code> (React Flow)</div>
+          <div style="font-size:13px;">React Flow <code>type: 'radial'</code> 엣지.<br>
+          <code>connectionStatus</code> 컬러 + 마커 ID 수정.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">3</span>데이터 흐름 변경</div>
+    <div class="card">
+      <div class="sub-h">useRadialMapNodes.ts — s2s 엣지 data 수정</div>
+      <div class="code-block">
+<span class="c">// BEFORE: 하드코딩 — 모든 s2s 엣지가 동일한 초록색</span>
+<span class="bad">data: { connectionType: c.connection_type, status: 'connected' }</span>
+
+<span class="c">// AFTER: 실제 connection_status 전달</span>
+<span class="ok">data: { connectionType: c.connection_type, connectionStatus: c.connection_status }</span>
+      </div>
+      <div style="margin-top:14px;" class="sub-h">radial-edge.tsx — 컬러 결정 로직</div>
+      <div class="code-block">
+<span class="c">// Hub 엣지 (project→service): status 필드 사용</span>
+<span class="k">const</span> STATUS_COLORS = { connected: '#22c55e', error: '#ef4444', ... }
+
+<span class="c">// s2s 엣지 (service↔service): connectionStatus 필드 우선 사용</span>
+<span class="k">const</span> CONNECTION_STATUS_COLORS = {
+  active: <span class="s">'#22c55e'</span>,  inactive: <span class="s">'#94a3b8'</span>,
+  error:  <span class="s">'#ef4444'</span>,  pending: <span class="s">'#f59e0b'</span>,
+}
+
+<span class="k">const</span> strokeColor = connectionStatus
+  ? CONNECTION_STATUS_COLORS[connectionStatus]  <span class="c">// s2s: connectionStatus 우선</span>
+  : STATUS_COLORS[status]                       <span class="c">// hub: 기존 status 그대로</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">4</span>버그 수정 — SVG 마커 ID 불일치</div>
+    <div class="card">
+      <div class="grid-2">
+        <div>
+          <div class="sub-h" style="color:var(--red);">문제</div>
+          <div style="font-size:13px;">
+            <code>map-view.tsx</code>가 <code>radial-arrow-connected</code> 등 per-status 마커를 정의했지만,
+            <code>radial-edge.tsx</code>가 존재하지 않는 <code>#radial-arrow</code>를 참조 → 화살촉 미렌더링.
+          </div>
+        </div>
+        <div>
+          <div class="sub-h" style="color:var(--green);">수정</div>
+          <div class="code-block" style="font-size:11px;">
+<span class="bad">markerEnd="url(#radial-arrow)"</span>
+<span class="ok">markerEnd={`url(#radial-arrow-${markerKey})`}</span>
+<span class="c">// markerKey: active→connected, inactive→not_started,</span>
+<span class="c">//           error→error, pending→in_progress</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">5</span>범례(Legend) 업데이트</div>
+    <div class="card">
+      <div class="grid-2">
+        <div>
+          <div class="sub-h">추가된 "연결 상태" 섹션</div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+              <svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#22c55e" stroke-width="2" stroke-dasharray="4 2"/></svg>
+              활성 (active)
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+              <svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 2"/></svg>
+              대기중 (pending)
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+              <svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 2"/></svg>
+              비활성 (inactive) — opacity 30%
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+              <svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#ef4444" stroke-width="2" stroke-dasharray="4 2"/></svg>
+              오류 (error)
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="sub-h">기존 유지 항목</div>
+          <div style="font-size:13px;color:var(--text-muted);">
+            "상태" 섹션 (노드 상태: 연결됨/진행중/시작전/오류) 유지.<br>
+            "연결 타입" 섹션 (uses/integrates/api_call 등) 유지.<br>
+            새로운 "연결 상태" 섹션이 중간에 추가됨.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     TAB ④ 영향 분석
+══════════════════════════════════════════════ -->
+<div id="tab-phase21" class="tab-content">
+<div class="container">
+
+  <div class="section">
+    <div class="section-title"><span class="num">1</span>기능 개요</div>
+    <div class="card">
+      <div class="ba">
+        <div class="ba-box before">
+          <div class="ba-label">BEFORE</div>
+          "A 서비스가 장애나면 뭐가 문제가 되지?" 확인 방법 없음.<br>
+          연결 목록만 있고 의존성 영향 범위 파악 불가.
+        </div>
+        <div class="ba-arrow">→</div>
+        <div class="ba-box after">
+          <div class="ba-label">AFTER</div>
+          서비스 선택 → 영향받는 서비스 목록 자동 계산.<br>
+          직접(High) / 간접(Medium) 리스크 레벨 + 연결 경로 표시.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">2</span>알고리즘 — BFS 역방향 그래프 순회</div>
+    <div class="card">
+      <div class="grid-2">
+        <div>
+          <div class="sub-h">연결 방향 정의</div>
+          <div style="font-size:13px;margin-bottom:12px;">
+            <code>source_service</code> → <code>target_service</code>: "source가 target을 사용"<br><br>
+            B가 장애 시 → B를 사용하는 모든 서비스가 영향받음
+          </div>
+          <div class="flow" style="flex-direction:column;align-items:flex-start;gap:4px;">
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">예시 그래프:</div>
+            <div style="font-size:13px;">A → B (A uses B)</div>
+            <div style="font-size:13px;">C → B (C uses B)</div>
+            <div style="font-size:13px;">D → C (D uses C)</div>
+          </div>
+          <div style="margin-top:10px;font-size:13px;border:1px solid var(--border);border-radius:8px;padding:10px;">
+            <strong>B 장애 시 영향:</strong><br>
+            A → depth 1 (High)<br>
+            C → depth 1 (High)<br>
+            D → depth 2 (Medium, C 경유)
+          </div>
+        </div>
+        <div>
+          <div class="sub-h">리스크 레벨 기준</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+            <div style="border-radius:8px;border:1px solid #fca5a5;background:#fee2e2;padding:10px 14px;">
+              <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:4px;">🔴 High (직접 영향)</div>
+              <div style="font-size:12px;color:var(--red);">depth = 1. 장애 서비스를 직접 사용하는 서비스.</div>
+            </div>
+            <div style="border-radius:8px;border:1px solid #fde68a;background:#fef3c7;padding:10px 14px;">
+              <div style="font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:4px;">🟡 Medium (간접 영향)</div>
+              <div style="font-size:12px;color:var(--yellow);">depth = 2. 영향받는 서비스에 의존하는 서비스.</div>
+            </div>
+            <div style="border-radius:8px;border:1px solid #e5e7eb;background:#f9fafb;padding:10px 14px;">
+              <div style="font-size:13px;font-weight:700;color:var(--gray);margin-bottom:4px;">⚪ Low (미미한 영향)</div>
+              <div style="font-size:12px;color:var(--gray);">depth ≥ 3. 멀리 떨어진 간접 의존.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">3</span>API — GET /api/connections/impact</div>
+    <div class="card">
+      <div class="grid-2">
+        <div>
+          <div class="sub-h">요청</div>
+          <div class="code-block" style="font-size:12px;">
+GET /api/connections/impact
+  ?project_id=<span class="s">{UUID}</span>
+  &amp;service_id=<span class="s">{UUID}</span>    <span class="c">// 장애 서비스</span>
+          </div>
+          <div style="margin-top:10px;font-size:13px;">
+            5단계 API 패턴 준수:<br>
+            auth → Zod 검증 → ownership → 로직 → 응답
+          </div>
+        </div>
+        <div>
+          <div class="sub-h">응답</div>
+          <div class="code-block" style="font-size:12px;">
+{
+  <span class="s">"failing_service_id"</span>: <span class="s">"..."</span>,
+  <span class="s">"failing_service_name"</span>: <span class="s">"Service B"</span>,
+  <span class="s">"affected"</span>: [
+    {
+      <span class="s">"service_id"</span>: <span class="s">"..."</span>,
+      <span class="s">"name"</span>: <span class="s">"Service A"</span>,
+      <span class="s">"depth"</span>: 1,
+      <span class="s">"risk"</span>: <span class="s">"high"</span>,
+      <span class="s">"via_connection_type"</span>: <span class="s">"uses"</span>
+    }
+  ],
+  <span class="s">"summary"</span>: {
+    <span class="s">"total"</span>: 3,
+    <span class="s">"risk_level"</span>: <span class="s">"high"</span>,
+    <span class="s">"direct_count"</span>: 2,
+    <span class="s">"transitive_count"</span>: 1
+  }
+}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">4</span>UI — 영향 분석 패널</div>
+    <div class="card">
+      <div class="grid-2">
+        <div>
+          <div class="sub-h">위치</div>
+          <div style="font-size:13px;">
+            <code>/project/[id]/connections</code> 페이지<br>
+            연결 목록 카드 하단에 통합 배치.
+          </div>
+          <div style="margin-top:12px;" class="sub-h">구성 요소</div>
+          <ul style="list-style:none;padding:0;">
+            <li style="padding:4px 0 4px 16px;position:relative;font-size:13px;"><span style="position:absolute;left:0;color:var(--blue);">1</span>"만약 [서비스 선택...] 이/가 장애 발생 시" 드롭다운</li>
+            <li style="padding:4px 0 4px 16px;position:relative;font-size:13px;"><span style="position:absolute;left:0;color:var(--blue);">2</span>요약 바 — 총 영향 N개 · 직접/간접 분류 · 전체 리스크</li>
+            <li style="padding:4px 0 4px 16px;position:relative;font-size:13px;"><span style="position:absolute;left:0;color:var(--blue);">3</span>영향 서비스 테이블 — 이름, 리스크, 연결 경로</li>
+          </ul>
+        </div>
+        <div>
+          <div class="sub-h" style="color:var(--text-muted);">UI 미리보기 (텍스트)</div>
+          <div style="border:1px solid var(--border);border-radius:10px;padding:14px;font-size:12px;background:var(--gray-light);">
+            <div style="font-weight:700;margin-bottom:10px;">⚠️ 서비스 장애 영향 분석</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <span>만약</span>
+              <span style="border:1px solid var(--border);border-radius:6px;padding:3px 10px;background:white;">[Service B ▾]</span>
+              <span>이/가 장애 발생 시</span>
+            </div>
+            <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;gap:10px;">
+              <span>⚠️</span>
+              <div>
+                <div style="font-weight:600;">영향받는 서비스: <span style="color:var(--red);">3개</span></div>
+                <div style="color:var(--text-muted);font-size:11px;">직접 2개 · 간접 1개 · 전체 리스크: <span style="color:var(--red);">높음</span></div>
+              </div>
+            </div>
+            <table style="font-size:11px;width:100%;">
+              <tr style="background:var(--gray-light);">
+                <th style="padding:4px 6px;">서비스</th><th style="padding:4px 6px;">리스크</th><th style="padding:4px 6px;">경로</th>
+              </tr>
+              <tr style="background:#fee2e2;">
+                <td style="padding:4px 6px;">Service A</td><td style="padding:4px 6px;"><span style="color:var(--red);">직접 영향</span></td><td style="padding:4px 6px;">B→A (uses)</td>
+              </tr>
+              <tr style="background:#fee2e2;">
+                <td style="padding:4px 6px;">Service C</td><td style="padding:4px 6px;"><span style="color:var(--red);">직접 영향</span></td><td style="padding:4px 6px;">B→C (integrates)</td>
+              </tr>
+              <tr style="background:#fef3c7;">
+                <td style="padding:4px 6px;">Service D</td><td style="padding:4px 6px;"><span style="color:var(--yellow);">간접 영향</span></td><td style="padding:4px 6px;">B→...→D</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">5</span>순수 함수 유닛 테스트 11개</div>
+    <div class="card">
+      <div class="grid-2">
+        <div>
+          <div class="sub-h">테스트 케이스</div>
+          <div class="check-item"><span class="ci">✅</span><span>의존 서비스 없을 때 — 빈 결과 + 리스크 low</span></div>
+          <div class="check-item"><span class="ci">✅</span><span>직접 의존(depth 1) 서비스 감지</span></div>
+          <div class="check-item"><span class="ci">✅</span><span>간접 의존(depth 2) 서비스 감지</span></div>
+          <div class="check-item"><span class="ci">✅</span><span>depth 1 → High, depth 2 → Medium 리스크</span></div>
+          <div class="check-item"><span class="ci">✅</span><span>직접 의존 있으면 전체 리스크 high</span></div>
+          <div class="check-item"><span class="ci">✅</span><span>failing service 자신은 결과에 미포함</span></div>
+          <div class="check-item"><span class="ci">✅</span><span>서비스 이름 없으면 ID 앞 8자 fallback</span></div>
+          <div class="check-item"><span class="ci">✅</span><span>빈 connections 배열 — 에러 없이 빈 결과</span></div>
+          <div class="check-item"><span class="ci">✅</span><span>via_connection_type 정확히 포함</span></div>
+          <div class="check-item"><span class="ci">✅</span><span>direct_count / transitive_count 정확성</span></div>
+          <div class="check-item"><span class="ci">✅</span><span>리스크 요약 low/medium/high 정확성</span></div>
+        </div>
+        <div>
+          <div class="sub-h">테스트 구성</div>
+          <div style="font-size:13px;">
+            <div style="margin-bottom:8px;">테스트 대상: <code>analyzeImpact()</code> 순수 함수</div>
+            <div style="margin-bottom:8px;">파일: <span class="fp">src/lib/connections/__tests__/impact-analysis.test.ts</span></div>
+            <div>Mock 없이 실제 로직만 테스트 — 외부 의존성 없음.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     TAB ⑤ 테스트 현황
+══════════════════════════════════════════════ -->
 <div id="tab-tests" class="tab-content">
 <div class="container">
 
@@ -726,12 +900,12 @@
     <div class="section-title"><span class="num">1</span>최종 테스트 결과</div>
     <div class="test-bar">
       <div>
-        <div class="test-count">44</div>
+        <div class="test-count">135</div>
         <div class="test-label">전체 테스트</div>
       </div>
       <div style="width:1px;height:48px;background:var(--border);"></div>
       <div>
-        <div class="test-count" style="color:var(--green);">44</div>
+        <div class="test-count" style="color:var(--green);">135</div>
         <div class="test-label" style="color:var(--green);">통과</div>
       </div>
       <div>
@@ -739,8 +913,34 @@
         <div class="test-label" style="color:var(--red);">실패</div>
       </div>
       <div style="margin-left:auto;text-align:right;">
-        <div style="font-size:13px;color:var(--text-muted);">4개 테스트 파일</div>
-        <div style="font-size:13px;color:var(--text-muted);">타입체크 에러 0개</div>
+        <div style="font-size:13px;color:var(--text-muted);">15개 테스트 파일</div>
+        <div style="font-size:13px;color:var(--text-muted);">TypeScript 에러 0개</div>
+      </div>
+    </div>
+
+    <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:14px;">
+      <div class="sub-h">Sprint 기간 테스트 증가 추이</div>
+      <div style="display:flex;align-items:flex-end;gap:12px;margin-top:12px;height:80px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div style="background:#dbeafe;border-radius:4px;width:60px;" style="height:30px;"></div>
+          <div style="font-size:11px;color:var(--text-muted);">Sprint 전</div>
+          <div style="font-size:13px;font-weight:700;color:var(--blue);">~30개</div>
+        </div>
+        <div style="color:var(--text-muted);">→</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div style="font-size:13px;font-weight:700;color:var(--blue);">44개</div>
+          <div style="font-size:11px;color:var(--text-muted);">Phase 1 후</div>
+        </div>
+        <div style="color:var(--text-muted);">→</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div style="font-size:13px;font-weight:700;color:var(--blue);">124개</div>
+          <div style="font-size:11px;color:var(--text-muted);">엣지 컬러링 후</div>
+        </div>
+        <div style="color:var(--text-muted);">→</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div style="font-size:13px;font-weight:700;color:var(--green);">135개</div>
+          <div style="font-size:11px;color:var(--green);">Phase 2-1 후 ✅</div>
+        </div>
       </div>
     </div>
   </div>
@@ -749,83 +949,173 @@
     <div class="section-title"><span class="num">2</span>테스트 파일별 현황</div>
     <div class="card" style="padding:0;overflow:hidden;">
       <table>
-        <thead><tr><th>파일</th><th>케이스 수</th><th>상태</th><th>커버 범위</th></tr></thead>
+        <thead><tr><th>테스트 파일</th><th>케이스</th><th>상태</th><th>커버 범위</th></tr></thead>
         <tbody>
           <tr>
             <td><code>connections/__tests__/route.test.ts</code></td>
-            <td><strong>14개</strong> (+5 신규)</td>
-            <td><span class="badge badge-green">✅ 전체 통과</span></td>
-            <td>401 / 400 / 404 / 200 / environment 필터 / POST 생성 / 중복 / 기본값</td>
+            <td><strong>16개</strong> (+5 신규)</td>
+            <td><span class="badge badge-green">✅ 통과</span></td>
+            <td>401/400/200 + environment 필터 + 인젝션 방어 + POST 시나리오</td>
           </tr>
           <tr>
             <td><code>connections/[id]/__tests__/route.test.ts</code></td>
             <td><strong>8개</strong></td>
-            <td><span class="badge badge-green">✅ 전체 통과</span></td>
-            <td>PATCH 401 / 400 / 404(2가지) / 200 / DELETE 401 / 404 / 200</td>
+            <td><span class="badge badge-green">✅ 통과</span></td>
+            <td>PATCH 401/400/404/200 + DELETE 401/404/200</td>
           </tr>
           <tr>
             <td><code>connections/[id]/__tests__/verify.test.ts</code></td>
             <td><strong>10개</strong> (신규)</td>
-            <td><span class="badge badge-green">✅ 전체 통과</span></td>
-            <td>401 / 404(2가지) / no-project_services / all-healthy→active / any-unhealthy→error / degraded→error / no-checks→pending / dedup(최신 우선) / DB 실패</td>
+            <td><span class="badge badge-green">✅ 통과</span></td>
+            <td>401/404(2) + healthy/unhealthy/degraded/pending + dedup + DB실패</td>
           </tr>
           <tr>
             <td><code>connections/auto/__tests__/route.test.ts</code></td>
             <td><strong>10개</strong></td>
-            <td><span class="badge badge-green">✅ 전체 통과</span></td>
-            <td>GET/POST 각 401 / 400(2가지) / 404 / 200</td>
+            <td><span class="badge badge-green">✅ 통과</span></td>
+            <td>GET/POST 각 401/400(2)/404/200</td>
           </tr>
           <tr>
-            <td><code>app/api/health-check/</code></td>
+            <td><code>connections/__tests__/impact-analysis.test.ts</code></td>
+            <td><strong>11개</strong> (신규)</td>
+            <td><span class="badge badge-green">✅ 통과</span></td>
+            <td>BFS 순회 · 리스크 레벨 · depth 계산 · fallback 이름</td>
+          </tr>
+          <tr>
+            <td><code>service-accounts/__tests__/route.test.ts</code></td>
+            <td><strong>9개</strong></td>
+            <td><span class="badge badge-green">✅ 통과</span></td>
+            <td>서비스 계정 CRUD</td>
+          </tr>
+          <tr>
+            <td><code>env/decrypt/__tests__/route.test.ts</code></td>
+            <td><strong>7개</strong></td>
+            <td><span class="badge badge-green">✅ 통과</span></td>
+            <td>환경변수 복호화</td>
+          </tr>
+          <tr>
+            <td><code>env/download/__tests__/route.test.ts</code></td>
+            <td><strong>7개</strong></td>
+            <td><span class="badge badge-green">✅ 통과</span></td>
+            <td>환경변수 다운로드</td>
+          </tr>
+          <tr>
+            <td><code>teams/__tests__/members.test.ts</code></td>
+            <td><strong>7개</strong></td>
+            <td><span class="badge badge-green">✅ 통과</span></td>
+            <td>팀 멤버 관리</td>
+          </tr>
+          <tr>
+            <td><code>account/github-connections/__tests__/</code></td>
+            <td><strong>11개</strong></td>
+            <td><span class="badge badge-green">✅ 통과</span></td>
+            <td>GitHub 계정 연결</td>
+          </tr>
+          <tr>
+            <td><code>health-check/</code></td>
             <td><strong>0개</strong></td>
             <td><span class="badge badge-yellow">⚠️ 미작성</span></td>
-            <td>connection_status 자동 업데이트 로직 테스트 없음 → Phase 2에서 추가 권장</td>
+            <td>connection_status 자동화 로직 테스트 필요</td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
 
+</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     TAB ⑥ 다음 단계
+══════════════════════════════════════════════ -->
+<div id="tab-next" class="tab-content">
+<div class="container">
+
   <div class="section">
-    <div class="section-title"><span class="num">3</span>신규 테스트 케이스 상세 (14개)</div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">🔍 verify.test.ts — 10케이스</div>
-        <div style="space-y:4px;">
-          <div class="check-item"><span class="check-icon">✅</span><span>401 — 미인증 요청 거부</span></div>
-          <div class="check-item"><span class="check-icon">✅</span><span>404 — 연결 없음</span></div>
-          <div class="check-item"><span class="check-icon">✅</span><span>404 — 타인 소유 연결 접근 거부</span></div>
-          <div class="check-item"><span class="check-icon">✅</span><span>project_services 없음 → last_verified_at만 갱신</span></div>
-          <div class="check-item"><span class="check-icon">✅</span><span>모두 healthy → 'active'</span></div>
-          <div class="check-item"><span class="check-icon">✅</span><span>하나라도 unhealthy → 'error'</span></div>
-          <div class="check-item"><span class="check-icon">✅</span><span>degraded → 'error'</span></div>
-          <div class="check-item"><span class="check-icon">✅</span><span>헬스체크 기록 없음 → 'pending'</span></div>
-          <div class="check-item"><span class="check-icon">✅</span><span>dedup: 같은 서비스 최신 기록만 사용</span></div>
-          <div class="check-item"><span class="check-icon">✅</span><span>DB 업데이트 실패 → 400</span></div>
+    <div class="section-title"><span class="num">1</span>전체 로드맵 현황</div>
+
+    <div class="phase-card">
+      <div class="phase-header done">✅ Phase 1 — 완료 (commits 9be68a8 · 4b93496)</div>
+      <div class="phase-body">
+        <div class="grid-3">
+          <div><span class="tag tag-p0">P0 ✅</span><div style="margin-top:5px;font-size:13px;">헬스체크 → connection_status 자동화</div></div>
+          <div><span class="tag tag-p1">P1 ✅</span><div style="margin-top:5px;font-size:13px;">Environment 필터 UI + API</div></div>
+          <div><span class="tag tag-p2">P2 ✅</span><div style="margin-top:5px;font-size:13px;">수동 Verify 버튼 + 신규 엔드포인트</div></div>
+        </div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:13px;">🐛 버그 4개 수정 · 신규 테스트 +15개</div>
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-header done">✅ Service Map 엣지 컬러링 — 완료 (commit 3c477ca)</div>
+      <div class="phase-body">
+        <div style="font-size:13px;">radial-edge.tsx connection_status 컬러링 · SVG 마커 버그 수정 · 범례 업데이트</div>
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-header done">✅ Phase 2-1 — 의존성 리스크 분석 완료 (commit 6515c99)</div>
+      <div class="phase-body">
+        <div style="font-size:13px;">BFS 그래프 순회 · GET /api/connections/impact · 영향 분석 패널 · 테스트 11개</div>
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-header next">🔵 Phase 2-2 — 다음 대상 (미구현)</div>
+      <div class="phase-body">
+        <div class="grid-2">
+          <div class="next-card">
+            <div class="next-card-title">📋 연결 상태 변경 히스토리</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px;">
+              <code>connection_status</code> 변경 이력을 <code>audit_logs</code>에서 조회.<br>
+              "언제 error 발생 → 언제 active 복구" 타임라인 표시.<br><br>
+              <strong>특징:</strong> DB 변경 없음. audit_logs 재활용.<br>
+              connection.verify + 자동 업데이트 이력 모두 포함.
+            </div>
+            <div style="font-size:12px;">
+              예상 변경 파일:<br>
+              <span class="fp">src/app/api/connections/[id]/history/route.ts</span><br>
+              <span class="fp">src/components/project/connections-content.tsx</span>
+            </div>
+            <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">예상 공수: 2일 · DB 변경 없음</div>
+          </div>
+          <div class="next-card">
+            <div class="next-card-title" style="color:var(--purple);">🧪 health-check 테스트 보강</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px;">
+              현재 <code>health-check/route.ts</code>에 테스트가 없음.<br>
+              Phase 1에서 추가된 <code>connection_status</code> 자동 업데이트 로직에 대한
+              테스트 커버리지 확보 필요.
+            </div>
+            <div style="font-size:12px;">
+              예상 변경 파일:<br>
+              <span class="fp">src/app/api/health-check/__tests__/route.test.ts</span>
+            </div>
+            <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">예상 공수: 1일 · 기술 부채 해소</div>
+          </div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-title">🌍 route.test.ts — environment 4케이스</div>
-        <div>
-          <div class="check-item"><span class="check-icon">✅</span><span>?environment=production → .or() 올바르게 호출</span></div>
-          <div class="check-item"><span class="check-icon">✅</span><span>잘못된 값 → .or() 호출 안 함 (인젝션 방어)</span></div>
-          <div class="check-item"><span class="check-icon">✅</span><span>?environment=all → 필터 미적용 (전체 표시)</span></div>
-          <div class="check-item"><span class="check-icon">✅</span><span>POST에 environment='production' → 저장 확인</span></div>
-          <div class="check-item"><span class="check-icon">✅</span><span>POST에 잘못된 environment → 400 (Zod 거부)</span></div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-header future">⬜ Phase 3 — 중기 (미기획)</div>
+      <div class="phase-body">
+        <div class="grid-2">
+          <div>
+            <div style="font-size:13px;font-weight:600;">배포 순서 결정 엔진</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:3px;">위상 정렬(topological sort) → 최적 배포 순서 제안<br>"A를 배포하려면 먼저 B, C를 배포해야 함"</div>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:600;">외부 트래픽 모니터링 연동</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:3px;">Datadog / Prometheus / Cloudflare → 실제 API 오류율 표시<br>metadata JSONB 필드 활용</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-</div>
-</div>
-
-<!-- ═══════════════════ TAB: 기술 부채 ═══════════════════ -->
-<div id="tab-debt" class="tab-content">
-<div class="container">
-
   <div class="section">
-    <div class="section-title"><span class="num">1</span>현재 기술 부채 목록</div>
+    <div class="section-title"><span class="num">2</span>현재 남은 기술 부채</div>
     <div class="card" style="padding:0;overflow:hidden;">
       <table>
         <thead><tr><th>항목</th><th>현황</th><th>우선순위</th><th>비고</th></tr></thead>
@@ -837,34 +1127,34 @@
             <td>connection_status 자동 업데이트 로직 검증 필요</td>
           </tr>
           <tr>
-            <td><code>metadata JSONB</code> 필드</td>
-            <td><span class="badge badge-gray">미활용</span></td>
-            <td><span class="tag tag-p3">P3</span></td>
-            <td>Phase 3 외부 트래픽 데이터 저장에 활용 가능</td>
+            <td>연결 상태 변경 히스토리</td>
+            <td><span class="badge badge-yellow">미구현</span></td>
+            <td><span class="tag tag-p1">P1</span></td>
+            <td>audit_logs 활용 — DB 변경 없음, Phase 2-2</td>
           </tr>
           <tr>
-            <td>Service Map 엣지 컬러링</td>
-            <td><span class="badge badge-yellow">미반영</span></td>
-            <td><span class="tag tag-p2">P2</span></td>
-            <td>connection_status가 실값 → connection-overlay.tsx에 색상 반영 필요</td>
-          </tr>
-          <tr>
-            <td>auto-connect의 environment</td>
+            <td>auto-connect environment 선택</td>
             <td><span class="badge badge-gray">미반영</span></td>
             <td><span class="tag tag-p2">P2</span></td>
-            <td>자동 생성 연결도 environment='all'로 기본 저장은 되나, UI 선택 없음</td>
+            <td>자동 생성 연결도 environment='all' 기본 저장은 되나 UI 선택 없음</td>
           </tr>
           <tr>
-            <td>connection_status 변경 시 이메일 알림</td>
+            <td>connection_status 변경 시 알림</td>
             <td><span class="badge badge-gray">미구현</span></td>
             <td><span class="tag tag-p2">P2</span></td>
-            <td>health_alert와 유사한 패턴으로 구현 가능</td>
+            <td>health_alert 유사 패턴으로 구현 가능</td>
+          </tr>
+          <tr>
+            <td>metadata JSONB 필드</td>
+            <td><span class="badge badge-gray">미활용</span></td>
+            <td><span class="tag tag-p3">P3</span></td>
+            <td>Phase 3 외부 트래픽 데이터 저장용으로 예약</td>
           </tr>
           <tr>
             <td><code>/settings/connections</code> 전용 UI</td>
             <td><span class="badge badge-gray">GitHub 리다이렉트</span></td>
             <td><span class="tag tag-p3">P3</span></td>
-            <td>현재 연결 관리는 /project/[id]/connections 에서만 가능</td>
+            <td>현재 /project/[id]/connections 에서만 연결 관리 가능</td>
           </tr>
         </tbody>
       </table>
@@ -872,140 +1162,28 @@
   </div>
 
   <div class="section">
-    <div class="section-title"><span class="num">2</span>즉시 반영 권장 사항</div>
-    <div class="card">
-      <div class="card-title">🗺️ Service Map 엣지 상태 반영</div>
-      <div style="font-size:14px;">
-        <code>connection-overlay.tsx</code> 에서 엣지 색상이 현재 고정값.<br>
-        <code>connection_status</code> 가 이제 실값을 가지므로 색상 연동하면 즉각적인 시각 효과.<br>
-        <br>
-        <strong>제안 색상 매핑:</strong>
-      </div>
-      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
-        <div style="background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;color:#16a34a;">active → 초록 (#16a34a)</div>
-        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;color:#dc2626;">error → 빨간 (#dc2626)</div>
-        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;color:#d97706;">pending → 노란 (#d97706)</div>
-        <div style="background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;color:#6b7280;">inactive → 회색 (#6b7280)</div>
-      </div>
-    </div>
-  </div>
-
-</div>
-</div>
-
-<!-- ═══════════════════ TAB: 다음 단계 ═══════════════════ -->
-<div id="tab-next" class="tab-content">
-<div class="container">
-
-  <div class="section">
-    <div class="section-title"><span class="num">1</span>전체 로드맵 현황</div>
-
-    <div class="phase-card">
-      <div class="phase-header done">✅ Phase 1 — 완료 + 점검 완료 (2026-03-02 · commit 4b93496)</div>
-      <div class="phase-body">
-        <div class="grid-3">
-          <div><span class="tag tag-p0">P0</span><div style="margin-top:5px;font-size:13px;">헬스체크 → connection_status 자동화</div></div>
-          <div><span class="tag tag-p1">P1</span><div style="margin-top:5px;font-size:13px;">Environment 필터 UI + API</div></div>
-          <div><span class="tag tag-p2">P2</span><div style="margin-top:5px;font-size:13px;">수동 Verify 버튼 + 신규 엔드포인트</div></div>
-        </div>
-        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:13px;">
-          🐛 점검에서 버그 3개 수정 · 테스트 14개 추가 (총 44개)
-        </div>
-      </div>
-    </div>
-
-    <div class="phase-card">
-      <div class="phase-header next">🔵 Phase 2 — 다음 단계 (미구현)</div>
-      <div class="phase-body">
-        <div class="grid-2">
-          <div class="next-card">
-            <div class="next-card-title"><span class="tag tag-p3">P3</span> 의존성 리스크 분석</div>
-            <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px;">
-              "A 서비스가 다운되면 어떤 서비스들이 영향받나?" 를 자동 계산.<br>
-              연결 그래프 순회 → 영향 서비스 목록 + 리스크 레벨 표시.
-            </div>
-            <div style="font-size:12px;">
-              <strong>신규 파일:</strong><br>
-              <span class="file-path">src/lib/connections/impact-analysis.ts</span><br>
-              <span class="file-path" style="margin-top:4px;display:inline-block;">src/app/api/connections/impact/route.ts</span>
-            </div>
-            <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">예상 공수: 5일 | 차별화 기능</div>
-          </div>
-          <div class="next-card">
-            <div class="next-card-title"><span class="tag tag-p3">P4</span> 연결 상태 히스토리</div>
-            <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px;">
-              connection_status 변경 이력을 audit_logs에서 조회하여 타임라인으로 표시.<br>
-              "언제 에러가 발생했고 언제 복구됐는지" 파악 가능.
-            </div>
-            <div style="font-size:12px;">
-              <strong>기존 활용:</strong> audit_logs 재활용 — DB 변경 없음.<br>
-              connection.verify + 자동 업데이트 이력 조회.
-            </div>
-            <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">예상 공수: 2일 | 즉시 가시 효과</div>
-          </div>
-        </div>
-        <div style="margin-top:12px;">
-          <div class="next-card" style="border-color:var(--border);">
-            <div class="next-card-title" style="color:var(--text);">🗺️ Service Map 엣지 상태 컬러링 (기술 부채 즉시 해소)</div>
-            <div style="font-size:13px;color:var(--text-muted);">
-              connection_status 실값 반영 → connection-overlay.tsx 엣지 색상 동적 적용.<br>
-              헬스체크 후 서비스 맵에서 즉각적인 시각 피드백 가능. 예상 공수: 0.5일.
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="phase-card">
-      <div class="phase-header future">⬜ Phase 3 — 중기 미기획</div>
-      <div class="phase-body">
-        <div class="grid-2">
-          <div>
-            <div style="font-size:13px;font-weight:600;">배포 순서 결정 엔진</div>
-            <div style="font-size:12px;color:var(--text-muted);margin-top:3px;">위상 정렬(topological sort) → 최적 배포 순서 제안</div>
-          </div>
-          <div>
-            <div style="font-size:13px;font-weight:600;">외부 트래픽 모니터링 연동</div>
-            <div style="font-size:12px;color:var(--text-muted);margin-top:3px;">Datadog / Prometheus / Cloudflare → 실제 오류율 표시</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title"><span class="num">2</span>Phase 2 권장 실행 순서</div>
+    <div class="section-title"><span class="num">3</span>Phase 2-2 권장 실행 순서</div>
     <div class="card" style="padding:0;overflow:hidden;">
       <table>
-        <thead><tr><th>순서</th><th>작업</th><th>예상 공수</th><th>효과</th><th>선행 조건</th></tr></thead>
+        <thead><tr><th>순서</th><th>작업</th><th>예상 공수</th><th>효과</th></tr></thead>
         <tbody>
           <tr>
             <td><strong>1</strong></td>
-            <td>Service Map 엣지 컬러링</td>
-            <td>0.5일</td>
-            <td>즉시 시각 피드백 — 데모 효과 높음</td>
-            <td>없음 (connection_status 이미 실값)</td>
+            <td>연결 상태 변경 히스토리 (타임라인)</td>
+            <td>2일</td>
+            <td>audit_logs 재활용 · "언제 장애/복구" 파악 가능</td>
           </tr>
           <tr>
             <td><strong>2</strong></td>
-            <td>연결 상태 히스토리</td>
-            <td>2일</td>
-            <td>audit_logs 재활용 — DB 변경 없음</td>
-            <td>없음</td>
+            <td>health-check 테스트 보강</td>
+            <td>1일</td>
+            <td>connection_status 자동화 로직 안전성 확보</td>
           </tr>
           <tr>
             <td><strong>3</strong></td>
-            <td>의존성 리스크 분석</td>
-            <td>5일</td>
-            <td>핵심 차별화 기능</td>
-            <td>1, 2 완료 후 권장</td>
-          </tr>
-          <tr>
-            <td><strong>+</strong></td>
-            <td>health-check 테스트 추가</td>
-            <td>1일</td>
-            <td>connection_status 자동화 로직 안전성 확보</td>
-            <td>없음 (기술 부채 해소)</td>
+            <td>connection_status 변경 알림</td>
+            <td>2일</td>
+            <td>사용자 모니터링 UX 개선</td>
           </tr>
         </tbody>
       </table>
@@ -1015,9 +1193,9 @@
 </div>
 </div>
 
-<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<!-- FOOTER -->
 <div class="footer">
-  Linkmap · 연결관리 고도화 Phase 1 완료 + 점검 보고서 · 2026-03-02 · commit 4b93496 · 테스트 44/44
+  Linkmap · 연결관리 고도화 Sprint 완료 보고서 · 2026-03-02 · 최종 커밋 6515c99 · 테스트 135/135
 </div>
 
 <script>
@@ -1028,6 +1206,5 @@
     event.currentTarget.classList.add('active');
   }
 </script>
-
 </body>
 </html>

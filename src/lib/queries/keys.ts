@@ -23,6 +23,8 @@ export const queryKeys = {
     byProject: (projectId: string) => ['connections', 'project', projectId] as const,
     impact: (projectId: string, serviceId: string) =>
       ['connections', 'impact', projectId, serviceId] as const,
+    history: (connectionId: string) =>
+      ['connections', 'history', connectionId] as const,
   },
   dependencies: {
     all: ['dependencies'] as const,
@@ -80,6 +82,8 @@ export const queryKeys = {
     byProject: (projectId: string) => ['costs', 'project', projectId] as const,
     openaiUsage: (projectServiceId: string) =>
       ['costs', 'openai-usage', projectServiceId] as const,
+    attachments: (projectServiceId: string) =>
+      ['costs', 'attachments', projectServiceId] as const,
   },
   exchangeRate: ['exchange-rate', 'usd-krw'] as const,
   subscription: {

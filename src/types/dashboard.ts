@@ -119,3 +119,20 @@ export interface OpenAIUsageSummary {
   syncedAt: string | null;
   byModel: OpenAIModelUsage[];
 }
+
+export type AttachmentType = 'invoice' | 'receipt' | 'contract' | 'screenshot' | 'other';
+
+export interface CostAttachment {
+  id: string;
+  projectServiceId: string;
+  fileName: string;
+  storagePath: string;
+  fileSize: number;
+  fileType: string;
+  attachmentType: AttachmentType;
+  notes: string | null;
+  uploadedBy: string;
+  createdAt: string;
+  /** 서명된 다운로드 URL (API 응답에만 포함) */
+  signedUrl?: string;
+}

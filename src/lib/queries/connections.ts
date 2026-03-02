@@ -249,6 +249,26 @@ export function useAutoConnect(projectId: string) {
   });
 }
 
+export interface ConnectionHistoryEntry {
+  id: string;
+  action: string;
+  details: Record<string, unknown>;
+  created_at: string;
+}
+
+export function useConnectionHistory(connectionId: string | null) {
+  return useQuery<ConnectionHistoryEntry[]>({
+    queryKey: queryKeys.connections.history(connectionId ?? ''),
+    queryFn: async () => {
+      const res = await fetch(`/api/connections/${connectionId}/history`);
+      if (!res.ok) throw new Error('히스토리를 불러올 수 없습니다');
+      return res.json();
+    },
+    enabled: !!connectionId,
+    staleTime: 30_000,
+  });
+}
+
 export function useImpactAnalysis(projectId: string, serviceId: string | null) {
   return useQuery<ImpactAnalysisResult>({
     queryKey: queryKeys.connections.impact(projectId, serviceId ?? ''),

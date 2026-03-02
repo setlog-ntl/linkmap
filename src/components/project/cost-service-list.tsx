@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { CostTierSelector } from './cost-tier-selector';
 import { CostOpenAIUsagePanel } from './cost-openai-usage-panel';
+import { CostAttachmentsPanel } from './cost-attachments-panel';
 import { useUpdateServiceCost } from '@/lib/queries/costs';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from './cost-budget-card';
@@ -257,6 +258,13 @@ export function CostServiceList({ projectId, services, budgetCurrency, usdToKrw 
                     pricingUrl={pricingUrl}
                     onSave={(data) => handleSave(entry, data)}
                     onCancel={() => setExpandedId(null)}
+                  />
+
+                  {/* 인보이스·영수증 첨부 */}
+                  <CostAttachmentsPanel
+                    projectId={projectId}
+                    projectServiceId={entry.projectServiceId}
+                    serviceName={entry.serviceName}
                   />
                 </div>
               )}

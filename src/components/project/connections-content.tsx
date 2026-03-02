@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { Cable, Wand2, Trash2, Plus, RefreshCw } from 'lucide-react';
+import { useState, Fragment } from 'react';
+import { Cable, Wand2, Trash2, Plus, RefreshCw, Clock } from 'lucide-react';
 import { ImpactAnalysisPanel } from '@/components/project/impact-analysis-panel';
+import { ConnectionHistoryRow } from '@/components/project/connection-history-row';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -74,6 +75,7 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
 
   const [envFilter, setEnvFilter] = useState<ConnectionEnvironment | 'all'>('all');
   const [showCreate, setShowCreate] = useState(false);
+  const [expandedHistoryId, setExpandedHistoryId] = useState<string | null>(null);
   const [newSource, setNewSource] = useState('');
   const [newTarget, setNewTarget] = useState('');
   const [newType, setNewType] = useState<UserConnectionType>('uses');
@@ -310,66 +312,80 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
                 </thead>
                 <tbody>
                   {connections.map((conn) => (
-                    <tr key={conn.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
-                      <td className="px-4 py-2.5 font-medium">
-                        {serviceMap.get(conn.source_service_id) ?? conn.source_service_id.slice(0, 8)}
-                      </td>
-                      <td className="px-4 py-2.5 font-medium">
-                        {serviceMap.get(conn.target_service_id) ?? conn.target_service_id.slice(0, 8)}
-                      </td>
-                      <td className="px-4 py-2.5">
-                        <Select
-                          value={conn.connection_type}
-                          onValueChange={(v) => updateMutation.mutate({ id: conn.id, connection_type: v as UserConnectionType })}
-                        >
-                          <SelectTrigger className="h-7 w-[120px] text-xs border-none bg-transparent p-0">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {(Object.entries(TYPE_KEYS) as [UserConnectionType, string][]).map(([k, key]) => (
-                              <SelectItem key={k} value={k} className="text-xs">{t(locale, key)}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </td>
-                      <td className="px-4 py-2.5">
-                        <div className="flex flex-col gap-0.5">
-                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_BADGE[conn.connection_status] ?? STATUS_BADGE.active}`}>
-                            {t(locale, STATUS_KEYS[conn.connection_status] ?? 'connections.statusActive')}
-                          </span>
-                          {conn.last_verified_at && (
-                            <span className="text-[10px] text-muted-foreground pl-0.5">
-                              {formatVerifiedAt(conn.last_verified_at)}
+                    <Fragment key={conn.id}>
+                      <tr className="border-b hover:bg-muted/30 transition-colors">
+                        <td className="px-4 py-2.5 font-medium">
+                          {serviceMap.get(conn.source_service_id) ?? conn.source_service_id.slice(0, 8)}
+                        </td>
+                        <td className="px-4 py-2.5 font-medium">
+                          {serviceMap.get(conn.target_service_id) ?? conn.target_service_id.slice(0, 8)}
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <Select
+                            value={conn.connection_type}
+                            onValueChange={(v) => updateMutation.mutate({ id: conn.id, connection_type: v as UserConnectionType })}
+                          >
+                            <SelectTrigger className="h-7 w-[120px] text-xs border-none bg-transparent p-0">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {(Object.entries(TYPE_KEYS) as [UserConnectionType, string][]).map(([k, key]) => (
+                                <SelectItem key={k} value={k} className="text-xs">{t(locale, key)}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <div className="flex flex-col gap-0.5">
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_BADGE[conn.connection_status] ?? STATUS_BADGE.active}`}>
+                              {t(locale, STATUS_KEYS[conn.connection_status] ?? 'connections.statusActive')}
                             </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-2.5 text-muted-foreground text-xs max-w-[200px] truncate">
-                        {conn.description ?? conn.label ?? '-'}
-                      </td>
-                      <td className="px-4 py-2.5 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 w-7 p-0 text-muted-foreground hover:text-brand-blue"
-                            title="헬스체크 기반 상태 검증"
-                            disabled={verifyMutation.isPending && verifyMutation.variables === conn.id}
-                            onClick={() => handleVerify(conn.id)}
-                          >
-                            <RefreshCw className={`h-3.5 w-3.5 ${verifyMutation.isPending && verifyMutation.variables === conn.id ? 'animate-spin' : ''}`} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-                            onClick={() => deleteMutation.mutate(conn.id)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
+                            {conn.last_verified_at && (
+                              <span className="text-[10px] text-muted-foreground pl-0.5">
+                                {formatVerifiedAt(conn.last_verified_at)}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-2.5 text-muted-foreground text-xs max-w-[200px] truncate">
+                          {conn.description ?? conn.label ?? '-'}
+                        </td>
+                        <td className="px-4 py-2.5 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className={`h-7 w-7 p-0 hover:text-brand-blue ${expandedHistoryId === conn.id ? 'text-brand-blue' : 'text-muted-foreground'}`}
+                              title="변경 이력 보기"
+                              onClick={() => setExpandedHistoryId(expandedHistoryId === conn.id ? null : conn.id)}
+                            >
+                              <Clock className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0 text-muted-foreground hover:text-brand-blue"
+                              title="헬스체크 기반 상태 검증"
+                              disabled={verifyMutation.isPending && verifyMutation.variables === conn.id}
+                              onClick={() => handleVerify(conn.id)}
+                            >
+                              <RefreshCw className={`h-3.5 w-3.5 ${verifyMutation.isPending && verifyMutation.variables === conn.id ? 'animate-spin' : ''}`} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                              onClick={() => deleteMutation.mutate(conn.id)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                      {expandedHistoryId === conn.id && (
+                        <ConnectionHistoryRow connectionId={conn.id} colSpan={6} />
+                      )}
+                    </Fragment>
                   ))}
                 </tbody>
               </table>
