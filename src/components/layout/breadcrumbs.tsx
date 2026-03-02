@@ -38,6 +38,9 @@ const routeLabels: Record<string, string> = {
   guides: 'nav.guides',
   pricing: 'nav.pricing',
   account: 'account.myAccount',
+  manage: 'nav.mySites',
+  new: 'nav.oneclick',
+  edit: 'common.edit',
 };
 
 export function AppBreadcrumbs({ projectName }: AppBreadcrumbsProps) {
@@ -55,10 +58,19 @@ export function AppBreadcrumbs({ projectName }: AppBreadcrumbsProps) {
 
     // Skip UUIDs (project IDs) — use project name instead
     if (segment.match(/^[0-9a-f]{8}-[0-9a-f]{4}-/i) || segment.match(/^[0-9a-f]{20,}$/i)) {
-      crumbs.push({
-        label: projectName || segment.slice(0, 8) + '...',
-        href,
-      });
+      const parentSegment = segments[i - 1];
+      // sites/{uuid}/... 경로: UUID 대신 "내 사이트" 표시하고 목록 페이지로 연결
+      if (parentSegment === 'sites') {
+        crumbs.push({
+          label: '내 사이트',
+          href: '/sites/manage',
+        });
+      } else {
+        crumbs.push({
+          label: projectName || segment.slice(0, 8) + '...',
+          href,
+        });
+      }
       continue;
     }
 
