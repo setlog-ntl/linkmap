@@ -8,3 +8,4 @@ export * from './env';
 export * from './service-account';
 export * from './dashboard';
 export * from './team';
+export * from './feedback';
