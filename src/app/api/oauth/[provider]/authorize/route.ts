@@ -57,7 +57,7 @@ export async function GET(
   const stateToken = randomBytes(32).toString('hex');
 
   const redirectUrl = flowContext === 'settings'
-    ? '/settings/connections'
+    ? '/settings/github'
     : flowContext === 'oneclick'
       ? '/oneclick'
       : `/project/${projectId}/service-map`;

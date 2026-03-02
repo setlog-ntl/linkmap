@@ -236,7 +236,7 @@ export async function GET(
     // Redirect based on flow context
     let redirectUrl: string;
     if (oauthState.flow_context === 'settings') {
-      redirectUrl = `/settings/connections?oauth_success=${provider}`;
+      redirectUrl = `/settings/github?oauth_success=${provider}`;
     } else if (oauthState.flow_context === 'oneclick') {
       redirectUrl = `/oneclick?oauth_success=${provider}`;
     } else if (oauthState.redirect_url.includes('/service-map')) {
