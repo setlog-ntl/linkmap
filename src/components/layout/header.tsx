@@ -50,13 +50,15 @@ export function Header({ profile }: HeaderProps) {
         <Rocket className="h-3.5 w-3.5" />
         원클릭 배포
       </Link>
-      <Link
-        href="/demo"
-        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-        onClick={() => setSidebarOpen(false)}
-      >
-        샘플 프로젝트
-      </Link>
+      {!profile && (
+        <Link
+          href="/demo"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          onClick={() => setSidebarOpen(false)}
+        >
+          샘플 프로젝트
+        </Link>
+      )}
       {profile && (
         <Link
           href="/dashboard"
@@ -270,13 +272,15 @@ export function Header({ profile }: HeaderProps) {
                   <Rocket className="h-4 w-4" />
                   원클릭 배포
                 </Link>
-                <Link
-                  href="/demo"
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5"
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  샘플 프로젝트
-                </Link>
+                {!profile && (
+                  <Link
+                    href="/demo"
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5"
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    샘플 프로젝트
+                  </Link>
+                )}
                 {profile && (
                   <>
                     <div className="flex items-center gap-2 px-2.5 py-1.5 mb-1">
