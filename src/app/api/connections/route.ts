@@ -12,12 +12,21 @@ export async function GET(request: NextRequest) {
   const projectId = request.nextUrl.searchParams.get('project_id');
   if (!projectId) return apiError('project_id가 필요합니다', 400);
 
-  const { data, error } = await supabase
+  const environment = request.nextUrl.searchParams.get('environment');
+
+  let query = supabase
     .from('user_connections')
     .select('*')
     .eq('project_id', projectId)
     .is('deleted_at', null)
     .order('created_at');
+
+  // Filter by environment: show explicit match + 'all' + unset
+  if (environment && environment !== 'all') {
+    query = query.or(`environment.eq.${environment},environment.eq.all,environment.is.null`);
+  }
+
+  const { data, error } = await query;
 
   if (error) return apiError(error.message, 400);
   return NextResponse.json(data);
@@ -32,7 +41,7 @@ export async function POST(request: NextRequest) {
   const parsed = createConnectionSchema.safeParse(body);
   if (!parsed.success) return validationError(parsed.error);
 
-  const { project_id, source_service_id, target_service_id, connection_type, connection_status, label, description } = parsed.data;
+  const { project_id, source_service_id, target_service_id, connection_type, connection_status, environment, label, description } = parsed.data;
 
   // Verify project ownership
   const { data: project } = await supabase
@@ -52,6 +61,7 @@ export async function POST(request: NextRequest) {
       target_service_id,
       connection_type,
       connection_status: connection_status ?? 'active',
+      environment: environment ?? 'all',
       label: label || null,
       description: description || null,
       created_by: user.id,

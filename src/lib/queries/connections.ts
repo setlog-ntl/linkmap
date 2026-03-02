@@ -10,16 +10,18 @@ interface AutoConnectSuggestion {
   dependency_type: string;
 }
 
-export function useProjectConnections(projectId: string) {
+export function useProjectConnections(projectId: string, environment?: string) {
   return useQuery({
-    queryKey: queryKeys.connections.byProject(projectId),
+    queryKey: [...queryKeys.connections.byProject(projectId), environment ?? 'all'] as const,
     queryFn: async (): Promise<UserConnection[]> => {
-      const res = await fetch(`/api/connections?project_id=${projectId}`);
+      const params = new URLSearchParams({ project_id: projectId });
+      if (environment && environment !== 'all') params.set('environment', environment);
+      const res = await fetch(`/api/connections?${params}`);
       if (!res.ok) throw new Error('연결 목록을 불러올 수 없습니다');
       return res.json();
     },
     enabled: !!projectId,
-    staleTime: 30_000, // 30초 캐시 — 불필요한 refetch 방지
+    staleTime: 30_000,
   });
 }
 
@@ -29,6 +31,7 @@ interface CreateConnectionParams {
   target_service_id: string;
   connection_type: UserConnectionType;
   connection_status?: ConnectionStatus;
+  environment?: string;
   label?: string | null;
   description?: string | null;
 }
@@ -198,6 +201,24 @@ export function useAutoConnectSuggestions(projectId: string) {
     },
     enabled: !!projectId,
     staleTime: 60_000,
+  });
+}
+
+export function useVerifyConnection(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (connectionId: string): Promise<UserConnection> => {
+      const res = await fetch(`/api/connections/${connectionId}/verify`, { method: 'POST' });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || '연결 검증에 실패했습니다');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.connections.byProject(projectId) });
+    },
   });
 }
 

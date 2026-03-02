@@ -10,12 +10,18 @@ const connectionStatusEnum = z.enum(
   { error: '유효하지 않은 연결 상태입니다' }
 );
 
+const connectionEnvironmentEnum = z.enum(
+  ['development', 'staging', 'production', 'all'],
+  { error: '유효하지 않은 환경 값입니다' }
+);
+
 export const createConnectionSchema = z.object({
   project_id: z.string().uuid('유효하지 않은 프로젝트 ID'),
   source_service_id: z.string().uuid('유효하지 않은 소스 서비스 ID'),
   target_service_id: z.string().uuid('유효하지 않은 타겟 서비스 ID'),
   connection_type: connectionTypeEnum,
   connection_status: connectionStatusEnum.optional().default('active'),
+  environment: connectionEnvironmentEnum.optional().default('all'),
   label: z.string().max(100).nullable().optional(),
   description: z.string().max(500).nullable().optional(),
 }).refine((data) => data.source_service_id !== data.target_service_id, {

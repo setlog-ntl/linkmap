@@ -82,6 +82,28 @@ export async function POST(request: NextRequest) {
       .eq('id', project_service_id);
   }
 
+  // Auto-update connection_status for connections involving this service
+  const serviceId = service.id;
+  const now = new Date().toISOString();
+  if (result.status === 'unhealthy' || result.status === 'degraded') {
+    // Service is down → mark related connections as error
+    await supabase
+      .from('user_connections')
+      .update({ connection_status: 'error', last_verified_at: now, updated_at: now })
+      .eq('project_id', projectService.project_id)
+      .or(`source_service_id.eq.${serviceId},target_service_id.eq.${serviceId}`)
+      .is('deleted_at', null);
+  } else if (result.status === 'healthy') {
+    // Service recovered → restore error-state connections to active
+    await supabase
+      .from('user_connections')
+      .update({ connection_status: 'active', last_verified_at: now, updated_at: now })
+      .eq('project_id', projectService.project_id)
+      .or(`source_service_id.eq.${serviceId},target_service_id.eq.${serviceId}`)
+      .eq('connection_status', 'error')
+      .is('deleted_at', null);
+  }
+
   // Send alert email for unhealthy/degraded status
   if (result.status === 'unhealthy' || result.status === 'degraded') {
     const { data: profile } = await supabase
