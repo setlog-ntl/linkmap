@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Rocket, Check, LayoutDashboard } from 'lucide-react';
+import { ArrowRight, Rocket, Check, LayoutDashboard, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -108,6 +108,24 @@ export function HeroSection() {
               </Button>
             )}
           </div>
+
+          {/* 미로그인 사용자: 프로젝트 미리보기 앵커 */}
+          {!isLoggedIn && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="flex justify-center mb-6"
+            >
+              <a
+                href="#my-projects"
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+              >
+                <span>프로젝트 현황 미리보기</span>
+                <ChevronDown className="h-4 w-4 group-hover:translate-y-0.5 transition-transform" />
+              </a>
+            </motion.div>
+          )}
 
           {/* Trust Badges - more refined spacing and style */}
           <motion.div
