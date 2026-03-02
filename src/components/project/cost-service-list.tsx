@@ -61,7 +61,7 @@ const SERVICE_COST_URLS: Record<string, string> = {
   anthropic: 'https://console.anthropic.com/settings/usage',
   vercel: 'https://vercel.com/account/usage',
   supabase: 'https://supabase.com/dashboard/org/_/billing',
-  github: 'https://github.com/settings/billing',
+  github: 'https://github.com/settings/billing/summary',
   aws: 'https://console.aws.amazon.com/billing/home',
   gcp: 'https://console.cloud.google.com/billing',
   azure: 'https://portal.azure.com/#blade/Microsoft_Azure_Billing/BillingMenuBlade/overview',
@@ -85,7 +85,6 @@ const SERVICE_COST_URLS: Record<string, string> = {
   resend: 'https://resend.com/settings/billing',
   postmark: 'https://account.postmarkapp.com/subscription',
   slack: 'https://slack.com/account/billing',
-  figma: 'https://www.figma.com/account/billing',
   linear: 'https://linear.app/settings/billing',
 };
 
