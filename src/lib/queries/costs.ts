@@ -3,6 +3,20 @@ import { queryKeys } from './keys';
 import type { ProjectCostSummary, OpenAIUsageSummary } from '@/types';
 import type { UpdateServiceCostInput, ClientUsageData } from '@/lib/validations/cost';
 
+/** USD → KRW 환율 조회 (하루 1회 업데이트, 24h 캐시) */
+export function useExchangeRate() {
+  return useQuery({
+    queryKey: queryKeys.exchangeRate,
+    queryFn: async (): Promise<{ rate: number; updatedAt: string | null; fallback: boolean }> => {
+      const res = await fetch('/api/exchange-rate');
+      if (!res.ok) return { rate: 1350, updatedAt: null, fallback: true };
+      return res.json();
+    },
+    staleTime: 1000 * 60 * 60,       // 1시간 stale
+    gcTime: 1000 * 60 * 60 * 24,     // 24시간 gc
+  });
+}
+
 export function useProjectCostSummary(projectId: string) {
   return useQuery({
     queryKey: queryKeys.costs.byProject(projectId),

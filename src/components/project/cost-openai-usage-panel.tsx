@@ -13,10 +13,15 @@ import { cn } from '@/lib/utils';
 interface CostOpenAIUsagePanelProps {
   projectId: string;
   projectServiceId: string;
+  usdToKrw?: number | null;
 }
 
 function formatCost(amount: number) {
   return `$${amount.toFixed(4)}`;
+}
+
+function formatCostKrw(amount: number, rate: number): string {
+  return `≈ ₩${Math.round(amount * rate).toLocaleString('ko-KR')}`;
 }
 
 function formatTokens(n: number) {
@@ -39,6 +44,7 @@ function formatSyncedAt(iso: string) {
 export function CostOpenAIUsagePanel({
   projectId,
   projectServiceId,
+  usdToKrw,
 }: CostOpenAIUsagePanelProps) {
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const [apiKeyInput, setApiKeyInput] = useState('');
@@ -50,8 +56,9 @@ export function CostOpenAIUsagePanel({
   );
   const syncMutation = useSyncOpenAIUsage(projectId);
 
+  const showKrw = usdToKrw != null;
+
   const handleSync = () => {
-    // 입력된 키가 없으면 → 입력 필드 노출 (재입력 요청)
     if (!apiKeyInput) {
       setShowApiKeyInput(true);
       if (usage?.hasApiKey) {
@@ -60,7 +67,6 @@ export function CostOpenAIUsagePanel({
       return;
     }
 
-    // 서버 → Supabase Edge Function → OpenAI 경유 (지역 제한 우회)
     syncMutation.mutate(
       { projectServiceId, apiKey: apiKeyInput },
       {
@@ -86,7 +92,6 @@ export function CostOpenAIUsagePanel({
     );
   }
 
-  // maskedKey는 API 응답에 포함되어 있음 (OpenAIUsageSummary 확장)
   const maskedKey = (usage as (typeof usage & { maskedKey?: string | null }))
     ?.maskedKey;
 
@@ -132,7 +137,7 @@ export function CostOpenAIUsagePanel({
         </Button>
       </div>
 
-      {/* API Key 입력 (미연결 시 또는 변경 시) */}
+      {/* API Key 입력 */}
       {(showApiKeyInput || (!usage?.hasApiKey)) && (
         <div className="space-y-1.5">
           <div className="flex gap-2">
@@ -173,7 +178,7 @@ export function CostOpenAIUsagePanel({
         </div>
       )}
 
-      {/* API Key 연결 시 변경 버튼 */}
+      {/* API Key 변경 버튼 */}
       {usage?.hasApiKey && !showApiKeyInput && (
         <button
           type="button"
@@ -189,9 +194,16 @@ export function CostOpenAIUsagePanel({
         <div className="rounded-md bg-muted/50 p-3 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">이번 달 합계</span>
-            <span className="text-sm font-mono font-semibold">
-              {formatCost(usage.totalCost)}
-            </span>
+            <div className="text-right">
+              <span className="text-sm font-mono font-semibold">
+                {formatCost(usage.totalCost)}
+              </span>
+              {showKrw && usage.totalCost > 0 && (
+                <div className="text-xs text-muted-foreground font-mono">
+                  {formatCostKrw(usage.totalCost, usdToKrw!)}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* 모델별 브레이크다운 */}
@@ -228,9 +240,14 @@ export function CostOpenAIUsagePanel({
                           {formatTokens(m.inputTokens + m.outputTokens)} tokens
                         </span>
                       </div>
-                      <span className="font-mono shrink-0">
-                        {formatCost(m.cost)}
-                      </span>
+                      <div className="text-right shrink-0">
+                        <span className="font-mono">{formatCost(m.cost)}</span>
+                        {showKrw && m.cost > 0 && (
+                          <div className="text-[10px] text-muted-foreground font-mono">
+                            {formatCostKrw(m.cost, usdToKrw!)}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

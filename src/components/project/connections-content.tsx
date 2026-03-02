@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Cable, Wand2, Trash2, Plus } from 'lucide-react';
+import { Cable, Wand2, Trash2, Plus, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,11 +14,12 @@ import {
   useDeleteConnection,
   useAutoConnectSuggestions,
   useAutoConnect,
+  useVerifyConnection,
 } from '@/lib/queries/connections';
 import { useProjectServices } from '@/lib/queries/services';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
-import type { UserConnectionType, ConnectionStatus } from '@/types';
+import type { UserConnectionType, ConnectionStatus, ConnectionEnvironment } from '@/types';
 
 const TYPE_KEYS: Record<UserConnectionType, string> = {
   uses: 'connections.typeUses',
@@ -43,6 +45,25 @@ const STATUS_BADGE: Record<ConnectionStatus, string> = {
   pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
 };
 
+const ENVIRONMENTS: { value: ConnectionEnvironment | 'all'; label: string }[] = [
+  { value: 'all', label: '전체' },
+  { value: 'development', label: '개발' },
+  { value: 'staging', label: '스테이징' },
+  { value: 'production', label: '프로덕션' },
+];
+
+function formatVerifiedAt(iso: string | null): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const diffMin = Math.floor((now.getTime() - d.getTime()) / 60_000);
+  if (diffMin < 1) return '방금 전';
+  if (diffMin < 60) return `${diffMin}분 전`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}시간 전`;
+  return `${Math.floor(diffHr / 24)}일 전`;
+}
+
 interface ConnectionsContentProps {
   projectId: string;
 }
@@ -50,18 +71,21 @@ interface ConnectionsContentProps {
 export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
   const { locale } = useLocaleStore();
 
-  const { data: connections, isLoading } = useProjectConnections(projectId);
+  const [envFilter, setEnvFilter] = useState<ConnectionEnvironment | 'all'>('all');
+  const [showCreate, setShowCreate] = useState(false);
+  const [newSource, setNewSource] = useState('');
+  const [newTarget, setNewTarget] = useState('');
+  const [newType, setNewType] = useState<UserConnectionType>('uses');
+  const [newEnv, setNewEnv] = useState<ConnectionEnvironment>('all');
+
+  const { data: connections, isLoading } = useProjectConnections(projectId, envFilter === 'all' ? undefined : envFilter);
   const { data: services } = useProjectServices(projectId);
   const { data: suggestions } = useAutoConnectSuggestions(projectId);
   const createMutation = useCreateConnection(projectId);
   const updateMutation = useUpdateConnection(projectId);
   const deleteMutation = useDeleteConnection(projectId);
   const autoConnectMutation = useAutoConnect(projectId);
-
-  const [showCreate, setShowCreate] = useState(false);
-  const [newSource, setNewSource] = useState('');
-  const [newTarget, setNewTarget] = useState('');
-  const [newType, setNewType] = useState<UserConnectionType>('uses');
+  const verifyMutation = useVerifyConnection(projectId);
 
   const serviceMap = new Map<string, string>();
   if (services) {
@@ -91,9 +115,21 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
         source_service_id: newSource,
         target_service_id: newTarget,
         connection_type: newType,
+        environment: newEnv,
       },
       { onSuccess: () => setShowCreate(false) }
     );
+  };
+
+  const handleVerify = (connectionId: string) => {
+    verifyMutation.mutate(connectionId, {
+      onSuccess: (data) => {
+        toast.success(`연결 상태 검증 완료: ${t(locale, STATUS_KEYS[data.connection_status] ?? 'connections.statusActive')}`);
+      },
+      onError: (err) => {
+        toast.error(err instanceof Error ? err.message : '검증에 실패했습니다');
+      },
+    });
   };
 
   return (
@@ -125,6 +161,23 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
             {t(locale, 'connections.addConnection')}
           </Button>
         </div>
+      </div>
+
+      {/* 환경 필터 탭 */}
+      <div className="flex gap-1 border-b">
+        {ENVIRONMENTS.map((env) => (
+          <button
+            key={env.value}
+            onClick={() => setEnvFilter(env.value)}
+            className={`px-3 py-1.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+              envFilter === env.value
+                ? 'border-brand-blue text-brand-blue'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {env.label}
+          </button>
+        ))}
       </div>
 
       {showCreate && (
@@ -166,6 +219,19 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
                   <SelectContent>
                     {(Object.entries(TYPE_KEYS) as [UserConnectionType, string][]).map(([k, key]) => (
                       <SelectItem key={k} value={k} className="text-sm">{t(locale, key)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="min-w-[120px]">
+                <label className="text-xs text-muted-foreground mb-1 block">환경</label>
+                <Select value={newEnv} onValueChange={(v) => setNewEnv(v as ConnectionEnvironment)}>
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ENVIRONMENTS.map((env) => (
+                      <SelectItem key={env.value} value={env.value} className="text-sm">{env.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -220,7 +286,7 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
                   <Skeleton className="h-4 w-20" />
                   <Skeleton className="h-5 w-12 rounded-full" />
                   <Skeleton className="h-4 w-32 flex-1" />
-                  <Skeleton className="h-7 w-7 rounded" />
+                  <Skeleton className="h-7 w-14 rounded" />
                 </div>
               ))}
             </div>
@@ -266,22 +332,41 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
                         </Select>
                       </td>
                       <td className="px-4 py-2.5">
-                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_BADGE[conn.connection_status] ?? STATUS_BADGE.active}`}>
-                          {t(locale, STATUS_KEYS[conn.connection_status] ?? 'connections.statusActive')}
-                        </span>
+                        <div className="flex flex-col gap-0.5">
+                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_BADGE[conn.connection_status] ?? STATUS_BADGE.active}`}>
+                            {t(locale, STATUS_KEYS[conn.connection_status] ?? 'connections.statusActive')}
+                          </span>
+                          {conn.last_verified_at && (
+                            <span className="text-[10px] text-muted-foreground pl-0.5">
+                              {formatVerifiedAt(conn.last_verified_at)}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-2.5 text-muted-foreground text-xs max-w-[200px] truncate">
                         {conn.description ?? conn.label ?? '-'}
                       </td>
                       <td className="px-4 py-2.5 text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-                          onClick={() => deleteMutation.mutate(conn.id)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-muted-foreground hover:text-brand-blue"
+                            title="헬스체크 기반 상태 검증"
+                            disabled={verifyMutation.isPending && verifyMutation.variables === conn.id}
+                            onClick={() => handleVerify(conn.id)}
+                          >
+                            <RefreshCw className={`h-3.5 w-3.5 ${verifyMutation.isPending && verifyMutation.variables === conn.id ? 'animate-spin' : ''}`} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                            onClick={() => deleteMutation.mutate(conn.id)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}

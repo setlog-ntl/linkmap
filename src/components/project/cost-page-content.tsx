@@ -1,7 +1,7 @@
 'use client';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { useProjectCostSummary } from '@/lib/queries/costs';
+import { useProjectCostSummary, useExchangeRate } from '@/lib/queries/costs';
 import { CostBudgetCard } from './cost-budget-card';
 import { CostSummaryMetrics } from './cost-summary-metrics';
 import { CostServiceList } from './cost-service-list';
@@ -12,6 +12,9 @@ interface CostPageContentProps {
 
 export function CostPageContent({ projectId }: CostPageContentProps) {
   const { data: costSummary, isLoading, error } = useProjectCostSummary(projectId);
+  const { data: exchangeRate } = useExchangeRate();
+
+  const usdToKrw = exchangeRate?.rate ?? null;
 
   if (isLoading) {
     return (
@@ -49,6 +52,7 @@ export function CostPageContent({ projectId }: CostPageContentProps) {
         totalMonthlyCost={costSummary.totalMonthlyCost}
         budgetUsagePercent={costSummary.budgetUsagePercent}
         isOverBudget={costSummary.isOverBudget}
+        usdToKrw={usdToKrw}
       />
 
       <CostSummaryMetrics
@@ -59,12 +63,14 @@ export function CostPageContent({ projectId }: CostPageContentProps) {
         }
         totalServices={costSummary.services.length}
         budgetCurrency={costSummary.budgetCurrency}
+        usdToKrw={usdToKrw}
       />
 
       <CostServiceList
         projectId={projectId}
         services={costSummary.services}
         budgetCurrency={costSummary.budgetCurrency}
+        usdToKrw={usdToKrw}
       />
     </div>
   );

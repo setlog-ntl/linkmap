@@ -26,6 +26,7 @@ interface CostBudgetCardProps {
   totalMonthlyCost: number;
   budgetUsagePercent: number | null;
   isOverBudget: boolean;
+  usdToKrw?: number | null;
 }
 
 function formatCurrency(amount: number, currency: 'USD' | 'KRW'): string {
@@ -35,6 +36,12 @@ function formatCurrency(amount: number, currency: 'USD' | 'KRW'): string {
   return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+/** USD 금액의 KRW 환산 표시 (소수점 없이 반올림) */
+function formatKrwEquiv(usdAmount: number, rate: number): string {
+  const krw = Math.round(usdAmount * rate);
+  return `≈ ₩${krw.toLocaleString('ko-KR')}`;
+}
+
 export function CostBudgetCard({
   projectId,
   monthlyBudget,
@@ -42,12 +49,15 @@ export function CostBudgetCard({
   totalMonthlyCost,
   budgetUsagePercent,
   isOverBudget,
+  usdToKrw,
 }: CostBudgetCardProps) {
   const [editing, setEditing] = useState(false);
   const [budgetValue, setBudgetValue] = useState(monthlyBudget?.toString() ?? '');
   const [currency, setCurrency] = useState(budgetCurrency);
   const updateProject = useUpdateProject();
   const queryClient = useQueryClient();
+
+  const showKrwEquiv = budgetCurrency === 'USD' && usdToKrw != null;
 
   const handleSave = () => {
     const parsed = budgetValue.trim() ? parseFloat(budgetValue) : null;
@@ -129,12 +139,26 @@ export function CostBudgetCard({
         ) : monthlyBudget != null ? (
           <>
             <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold font-mono">
-                {formatCurrency(totalMonthlyCost, budgetCurrency)}
-              </span>
-              <span className="text-sm text-muted-foreground">
-                / {formatCurrency(monthlyBudget, budgetCurrency)}
-              </span>
+              <div>
+                <span className="text-2xl font-bold font-mono">
+                  {formatCurrency(totalMonthlyCost, budgetCurrency)}
+                </span>
+                {showKrwEquiv && (
+                  <span className="ml-2 text-xs text-muted-foreground font-mono">
+                    {formatKrwEquiv(totalMonthlyCost, usdToKrw!)}
+                  </span>
+                )}
+              </div>
+              <div className="text-right">
+                <span className="text-sm text-muted-foreground">
+                  / {formatCurrency(monthlyBudget, budgetCurrency)}
+                </span>
+                {showKrwEquiv && (
+                  <div className="text-xs text-muted-foreground/70 font-mono">
+                    / {formatKrwEquiv(monthlyBudget, usdToKrw!)}
+                  </div>
+                )}
+              </div>
             </div>
             <Progress
               value={progressValue}

@@ -14,6 +14,7 @@ export type AuditAction =
   | 'connection.create'
   | 'connection.update'
   | 'connection.delete'
+  | 'connection.verify'
   | 'service.health_check'
   | 'service_account.connect_oauth'
   | 'service_account.connect_api_key'
