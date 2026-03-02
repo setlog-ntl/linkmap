@@ -25,6 +25,21 @@ export const metadata: Metadata = {
     "서비스 연결",
     "프로젝트 설정",
   ],
+  openGraph: {
+    title: "Linkmap - 3분 만에 배포하세요",
+    description:
+      "초보자부터 개발자까지. Google 계정 하나면 GitHub 가입부터 홈페이지 배포까지 자동으로.",
+    url: "https://linkmap.biz",
+    siteName: "Linkmap",
+    locale: "ko_KR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Linkmap - 3분 만에 배포하세요",
+    description:
+      "초보자부터 개발자까지. Google 계정 하나면 GitHub 가입부터 홈페이지 배포까지 자동으로.",
+  },
 };
 
 export default function RootLayout({
