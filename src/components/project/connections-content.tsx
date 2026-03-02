@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Cable, Wand2, Trash2, Plus, RefreshCw } from 'lucide-react';
+import { ImpactAnalysisPanel } from '@/components/project/impact-analysis-panel';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -376,6 +377,14 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
           )}
         </CardContent>
       </Card>
+
+      {/* 영향 분석 패널 */}
+      {services && services.length > 0 && (
+        <ImpactAnalysisPanel
+          projectId={projectId}
+          serviceOptions={[...serviceMap.entries()].map(([id, name]) => ({ id, name }))}
+        />
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './keys';
 import type { UserConnection, UserConnectionType, ConnectionStatus } from '@/types';
+import type { ImpactAnalysisResult } from '@/lib/connections/impact-analysis';
 
 interface AutoConnectSuggestion {
   source_service_id: string;
@@ -245,5 +246,20 @@ export function useAutoConnect(projectId: string) {
       queryClient.invalidateQueries({ queryKey: queryKeys.connections.byProject(projectId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all(projectId) });
     },
+  });
+}
+
+export function useImpactAnalysis(projectId: string, serviceId: string | null) {
+  return useQuery<ImpactAnalysisResult>({
+    queryKey: queryKeys.connections.impact(projectId, serviceId ?? ''),
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/connections/impact?project_id=${projectId}&service_id=${serviceId}`,
+      );
+      if (!res.ok) throw new Error('영향 분석을 불러올 수 없습니다');
+      return res.json();
+    },
+    enabled: !!projectId && !!serviceId,
+    staleTime: 30_000,
   });
 }

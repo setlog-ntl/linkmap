@@ -21,6 +21,8 @@ export const queryKeys = {
   },
   connections: {
     byProject: (projectId: string) => ['connections', 'project', projectId] as const,
+    impact: (projectId: string, serviceId: string) =>
+      ['connections', 'impact', projectId, serviceId] as const,
   },
   dependencies: {
     all: ['dependencies'] as const,
