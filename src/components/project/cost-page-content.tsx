@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,6 @@ import { useProjectCostSummary, useExchangeRate } from '@/lib/queries/costs';
 import { CostBudgetCard } from './cost-budget-card';
 import { CostSummaryMetrics } from './cost-summary-metrics';
 import { CostServiceList } from './cost-service-list';
-import { CostReportDialog } from './cost-report-dialog';
 
 interface CostPageContentProps {
   projectId: string;
@@ -17,7 +16,6 @@ interface CostPageContentProps {
 export function CostPageContent({ projectId }: CostPageContentProps) {
   const { data: costSummary, isLoading, error } = useProjectCostSummary(projectId);
   const { data: exchangeRate } = useExchangeRate();
-  const [reportOpen, setReportOpen] = useState(false);
 
   const usdToKrw = exchangeRate?.rate ?? null;
 
@@ -57,11 +55,13 @@ export function CostPageContent({ projectId }: CostPageContentProps) {
           size="sm"
           variant="outline"
           className="gap-1.5 h-8 text-xs"
-          onClick={() => setReportOpen(true)}
           disabled={costSummary.services.length === 0}
+          asChild
         >
-          <Sparkles className="h-3.5 w-3.5" />
-          AI 리포트
+          <Link href={`/project/${projectId}/costs/report`}>
+            <Sparkles className="h-3.5 w-3.5" />
+            AI 리포트
+          </Link>
         </Button>
       </div>
 
@@ -91,13 +91,6 @@ export function CostPageContent({ projectId }: CostPageContentProps) {
         services={costSummary.services}
         budgetCurrency={costSummary.budgetCurrency}
         usdToKrw={usdToKrw}
-      />
-
-      <CostReportDialog
-        projectId={projectId}
-        open={reportOpen}
-        onOpenChange={setReportOpen}
-        costSummary={costSummary}
       />
     </div>
   );
