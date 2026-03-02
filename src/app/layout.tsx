@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
+import { PageTracker } from "@/components/tracking/page-tracker";
 import "./globals.css";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
@@ -55,6 +56,7 @@ export default function RootLayout({
         className={`${geistMono.variable} antialiased`}
       >
         <Providers>
+          <PageTracker />
           {children}
         </Providers>
         <Toaster />

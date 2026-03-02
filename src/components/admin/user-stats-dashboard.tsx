@@ -1,12 +1,14 @@
 'use client';
 
-import { Users, UserPlus, TrendingUp, Calendar, RefreshCw } from 'lucide-react';
+import { Users, UserPlus, TrendingUp, Calendar, RefreshCw, MonitorSmartphone, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAdminUserStats } from '@/lib/queries/admin-users';
+import { useAdminVisitorStats } from '@/lib/queries/admin-visitors';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
@@ -34,6 +36,11 @@ function formatFullDate(dateStr: string) {
   return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+function formatDateTime(dateStr: string) {
+  const d = new Date(dateStr);
+  return d.toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
 function KpiSkeleton() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -49,8 +56,8 @@ function KpiSkeleton() {
   );
 }
 
-export default function UserStatsDashboard() {
-  const { data, isLoading, isError, refetch, isFetching } = useAdminUserStats();
+function UsersTab() {
+  const { data, isLoading, isError } = useAdminUserStats();
 
   if (isError) {
     return (
@@ -66,29 +73,10 @@ export default function UserStatsDashboard() {
   const trend = data?.registrationTrend ?? [];
   const planDist = data?.planDistribution ?? [];
   const recentUsers = data?.recentUsers ?? [];
-
   const trendWithLabel = trend.map((t) => ({ ...t, label: formatDate(t.date) }));
 
   return (
     <div className="space-y-6">
-      {/* 헤더 */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Users className="h-6 w-6 text-brand-blue" />
-          <h1 className="text-2xl font-bold">사용자 대시보드</h1>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => refetch()}
-          disabled={isFetching}
-          className="flex items-center gap-2"
-        >
-          <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
-          새로고침
-        </Button>
-      </div>
-
       {/* ① KPI 카드 */}
       {isLoading ? (
         <KpiSkeleton />
@@ -213,7 +201,6 @@ export default function UserStatsDashboard() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* PieChart */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base">플랜 분포</CardTitle>
@@ -244,7 +231,6 @@ export default function UserStatsDashboard() {
             </CardContent>
           </Card>
 
-          {/* 최근 가입자 */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base">최근 가입자 (최대 10명)</CardTitle>
@@ -296,6 +282,239 @@ export default function UserStatsDashboard() {
           </Card>
         </div>
       )}
+    </div>
+  );
+}
+
+function VisitorsTab() {
+  const { data, isLoading, isError } = useAdminVisitorStats();
+
+  if (isError) {
+    return (
+      <Card>
+        <CardContent className="pt-6 text-center text-muted-foreground">
+          방문자 통계를 불러오지 못했습니다.
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const kpis = data?.kpis;
+  const dailyTrend = data?.dailyTrend ?? [];
+  const topPages = data?.topPages ?? [];
+  const recentSessions = data?.recentSessions ?? [];
+  const trendWithLabel = dailyTrend.map((t) => ({ ...t, label: formatDate(t.date) }));
+
+  return (
+    <div className="space-y-6">
+      {/* KPI 카드 */}
+      {isLoading ? (
+        <KpiSkeleton />
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
+                <MonitorSmartphone className="h-4 w-4 text-amber-500" />
+                총 세션 (30일)
+              </div>
+              <p className="text-3xl font-bold">{(kpis?.totalSessions ?? 0).toLocaleString()}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
+                <MonitorSmartphone className="h-4 w-4 text-green-500" />
+                오늘 세션
+              </div>
+              <p className="text-3xl font-bold">{(kpis?.todaySessions ?? 0).toLocaleString()}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
+                <TrendingUp className="h-4 w-4 text-blue-500" />
+                이번 주 세션
+              </div>
+              <p className="text-3xl font-bold">{(kpis?.weekSessions ?? 0).toLocaleString()}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
+                <Globe className="h-4 w-4 text-red-500" />
+                세션당 PV
+              </div>
+              <p className="text-3xl font-bold">{kpis?.avgPagesPerSession ?? 0}</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* 일별 추이 차트 */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card><CardContent className="pt-6"><Skeleton className="h-52 w-full" /></CardContent></Card>
+          <Card><CardContent className="pt-6"><Skeleton className="h-52 w-full" /></CardContent></Card>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">일별 세션 수 (30일)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={trendWithLabel}>
+                  <XAxis dataKey="label" tick={{ fontSize: 11 }} interval={4} />
+                  <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                  <Tooltip
+                    formatter={(value: number | undefined) => [`${value ?? 0}`, '세션'] as [string, string]}
+                    labelFormatter={(label) => `날짜: ${String(label)}`}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="sessions"
+                    stroke="#F59E0B"
+                    fill="#F59E0B"
+                    fillOpacity={0.3}
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">일별 페이지뷰 (30일)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={trendWithLabel}>
+                  <XAxis dataKey="label" tick={{ fontSize: 11 }} interval={4} />
+                  <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                  <Tooltip
+                    formatter={(value: number | undefined) => [`${value ?? 0}`, '페이지뷰'] as [string, string]}
+                    labelFormatter={(label) => `날짜: ${String(label)}`}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="pageViews"
+                    stroke="#EF4444"
+                    fill="#EF4444"
+                    fillOpacity={0.3}
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* 상위 페이지 + 최근 세션 */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card><CardContent className="pt-6"><Skeleton className="h-64 w-full" /></CardContent></Card>
+          <Card><CardContent className="pt-6"><Skeleton className="h-64 w-full" /></CardContent></Card>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">상위 방문 페이지 (상위 10개)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2">
+                {topPages.map((page) => (
+                  <li key={page.path} className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-mono truncate flex-1">{page.path}</span>
+                    <Badge variant="secondary">{page.views.toLocaleString()}</Badge>
+                  </li>
+                ))}
+                {topPages.length === 0 && (
+                  <li className="text-sm text-muted-foreground text-center py-4">
+                    방문 데이터가 없습니다.
+                  </li>
+                )}
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">최근 세션 (최근 20개)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3">
+                {recentSessions.map((s) => (
+                  <li key={s.sessionId} className="flex items-start gap-3">
+                    <MonitorSmartphone className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-mono truncate">{s.firstPage}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDateTime(s.firstSeen)} · {s.pageCount}페이지
+                      </p>
+                    </div>
+                  </li>
+                ))}
+                {recentSessions.length === 0 && (
+                  <li className="text-sm text-muted-foreground text-center py-4">
+                    세션 데이터가 없습니다.
+                  </li>
+                )}
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function UserStatsDashboard() {
+  const { refetch: refetchUsers, isFetching: isFetchingUsers } = useAdminUserStats();
+  const { refetch: refetchVisitors, isFetching: isFetchingVisitors } = useAdminVisitorStats();
+
+  return (
+    <div className="space-y-6">
+      <Tabs defaultValue="users">
+        {/* 헤더 */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Users className="h-6 w-6 text-brand-blue" />
+            <h1 className="text-2xl font-bold">사용자 대시보드</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <TabsList>
+              <TabsTrigger value="users">가입자</TabsTrigger>
+              <TabsTrigger value="visitors">방문자</TabsTrigger>
+            </TabsList>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                void refetchUsers();
+                void refetchVisitors();
+              }}
+              disabled={isFetchingUsers || isFetchingVisitors}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${(isFetchingUsers || isFetchingVisitors) ? 'animate-spin' : ''}`} />
+              새로고침
+            </Button>
+          </div>
+        </div>
+
+        <TabsContent value="users">
+          <UsersTab />
+        </TabsContent>
+
+        <TabsContent value="visitors">
+          <VisitorsTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
