@@ -64,6 +64,9 @@ docs/benchmark/
 docs/benchmarking-*.md
 docs/benchmarking-*.html
 
+# Strategy & competitive intelligence (internal — not for sharing)
+docs/strategy-private/
+
 # Design captures & tools (internal dev artifacts)
 docs/captures/
 docs/tools/
