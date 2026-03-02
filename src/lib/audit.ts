@@ -99,7 +99,9 @@ export type AuditAction =
   | 'service_cost.update'
   | 'project.budget_update'
   | 'service_cost.usage_sync'
-  | 'service_cost.api_key_save';
+  | 'service_cost.api_key_save'
+  | 'cost_attachment.upload'
+  | 'cost_attachment.delete';
 
 interface AuditLogEntry {
   action: AuditAction;
