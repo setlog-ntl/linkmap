@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import { ProjectsPreviewSection } from '@/components/landing/projects-preview-section';
+import { DemoProjectGrid } from '@/components/demo/demo-project-grid';
 import type { Profile, ProjectWithServices } from '@/types';
 
 const DEMO_USER_EMAIL = 'cdhrich2@gmail.com';
@@ -109,7 +109,6 @@ async function fetchDemoProjects(): Promise<ProjectWithServices[]> {
   try {
     const admin = createAdminClient();
 
-    // 1차: cdhnaya2@naver.com 계정 프로젝트 조회
     const { data: primaryProfile } = await admin
       .from('profiles')
       .select('id')
@@ -127,7 +126,6 @@ async function fetchDemoProjects(): Promise<ProjectWithServices[]> {
       if (data && data.length > 0) return data as ProjectWithServices[];
     }
 
-    // 2차: 백업 계정 시도
     const { data: fallbackProfile } = await admin
       .from('profiles')
       .select('id')
@@ -170,15 +168,9 @@ export default async function DemoPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Header profile={profile} />
-
-      <main className="flex-1 pt-16">
-        <ProjectsPreviewSection
-          projects={demoProjects}
-          isDemo={true}
-          isLoggedIn={!!profile}
-        />
+      <main className="flex-1">
+        <DemoProjectGrid projects={demoProjects} isLoggedIn={!!profile} />
       </main>
-
       <Footer />
     </div>
   );
