@@ -72,7 +72,7 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
         source: c.source_service_id,
         target: c.target_service_id,
         type: 'radial',
-        data: { connectionType: c.connection_type, status: 'connected' },
+        data: { connectionType: c.connection_type, connectionStatus: c.connection_status },
         style: { strokeDasharray: '4 4' },
       }));
 

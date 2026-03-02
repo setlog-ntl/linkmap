@@ -10,6 +10,13 @@ const STATUS_ITEMS = [
   { color: 'bg-red-500', label: '오류' },
 ];
 
+const CONNECTION_STATUS_ITEMS = [
+  { color: '#22c55e', label: '활성' },
+  { color: '#f59e0b', label: '대기중' },
+  { color: '#94a3b8', label: '비활성' },
+  { color: '#ef4444', label: '오류' },
+];
+
 const CONNECTION_ITEMS = [
   { color: '#3b82f6', dash: false, label: '사용' },
   { color: '#22c55e', dash: false, label: '연동' },
@@ -54,6 +61,21 @@ export function MapLegend({ onClose }: MapLegendProps) {
             <Crown className="h-2.5 w-2.5" />
           </div>
           메인 서비스
+        </div>
+      </div>
+
+      {/* Connection status (s2s) */}
+      <div className="px-3 pb-2">
+        <span className="text-[10px] font-medium uppercase text-muted-foreground">연결 상태</span>
+        <div className="mt-1 grid grid-cols-2 gap-1">
+          {CONNECTION_STATUS_ITEMS.map((item) => (
+            <div key={item.label} className="flex items-center gap-1.5 text-xs">
+              <svg width="16" height="6" className="shrink-0">
+                <line x1="0" y1="3" x2="16" y2="3" stroke={item.color} strokeWidth="2" strokeDasharray="4 2" />
+              </svg>
+              {item.label}
+            </div>
+          ))}
         </div>
       </div>
 
