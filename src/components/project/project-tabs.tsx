@@ -16,19 +16,18 @@ interface Tab {
   labelKey: string;
   href: string;
   icon: LucideIcon;
-  tourId?: string;
 }
 
 const tabGroups: Tab[][] = [
   [
     { labelKey: 'project.overview', href: '', icon: LayoutDashboard },
-    { labelKey: 'project.services', href: '/services', icon: List, tourId: 'project-add-service' },
-    { labelKey: 'project.connections', href: '/connections', icon: Link2, tourId: 'project-connect' },
-    { labelKey: 'project.envVars', href: '/env', icon: Key, tourId: 'project-env' },
+    { labelKey: 'project.services', href: '/services', icon: List },
+    { labelKey: 'project.connections', href: '/connections', icon: Link2 },
+    { labelKey: 'project.envVars', href: '/env', icon: Key },
     { labelKey: 'project.costs', href: '/costs', icon: DollarSign },
   ],
   [
-    { labelKey: 'project.serviceMap', href: '/service-map', icon: Map, tourId: 'project-service-map' },
+    { labelKey: 'project.serviceMap', href: '/service-map', icon: Map },
     { labelKey: 'project.settings', href: '/settings', icon: Settings },
   ],
 ];
@@ -58,7 +57,6 @@ export function ProjectTabs({ projectId }: ProjectTabsProps) {
               <Link
                 key={tab.href}
                 href={tabPath}
-                data-tour={tab.tourId}
                 className={cn(
                   'flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-colors',
                   isActive
