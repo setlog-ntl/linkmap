@@ -1,26 +1,27 @@
 import { ImageResponse } from 'next/og';
 
+// 빌드 시 prerender 방지 (폰트 외부 fetch 필요)
+export const dynamic = 'force-dynamic';
+
 export const alt = 'Linkmap - 3분 만에 배포하세요';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
 async function loadKoreanFont(): Promise<ArrayBuffer | null> {
   try {
+    // 구버전 UA → woff 형식 반환 (woff2는 satori 미지원)
     const css = await fetch(
       'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700;800&display=swap',
       {
         headers: {
-          'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0',
+          'User-Agent': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)',
         },
       }
     ).then((r) => r.text());
 
-    const urls = Array.from(css.matchAll(/url\((https:\/\/fonts\.gstatic\.com[^)]+\.woff2)\)/g))
-      .map((m) => m[1]);
-
-    if (urls.length === 0) return null;
-    return fetch(urls[0]).then((r) => r.arrayBuffer());
+    const urlMatch = css.match(/url\((https:\/\/fonts\.gstatic\.com[^)]+\.(?:woff|ttf))\)/);
+    if (!urlMatch) return null;
+    return fetch(urlMatch[1]).then((r) => r.arrayBuffer());
   } catch {
     return null;
   }
