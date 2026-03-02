@@ -8,14 +8,14 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useOpenAIUsage, useSyncOpenAIUsage } from '@/lib/queries/costs';
+import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import type { ClientUsageData } from '@/lib/validations/cost';
 
 // ────────────────────────────────────────────────────────────
-// 브라우저에서 직접 OpenAI Organization Costs API 호출
-// - 엔드포인트: /v1/organization/costs (Admin Key 전용)
-// - /dashboard/billing/usage 는 세션키 전용으로 변경되어 사용 불가
-// - Cloudflare Workers 지역 제한 우회를 위해 브라우저에서 직접 호출
+// Supabase Edge Function을 통해 OpenAI 비용 조회
+// - Cloudflare Workers 지역 제한 우회 (Deno Deploy는 제한 없음)
+// - /v1/organization/costs (Admin Key 전용, CORS 미지원 → Edge Function 프록시)
 // ────────────────────────────────────────────────────────────
 type CostsResponse = {
   data?: Array<{
@@ -35,32 +35,20 @@ async function fetchOpenAICostsFromBrowser(
   const startTime = Math.floor(startOfMonth.getTime() / 1000);
   const endTime = Math.floor(now.getTime() / 1000);
 
-  const url = new URL('https://api.openai.com/v1/organization/costs');
-  url.searchParams.set('start_time', String(startTime));
-  url.searchParams.set('end_time', String(endTime));
-  url.searchParams.set('bucket_width', '1d');
-
-  const res = await fetch(url.toString(), {
-    headers: { Authorization: `Bearer ${apiKey}` },
+  const supabase = createClient();
+  const { data, error } = await supabase.functions.invoke<CostsResponse>('openai-costs', {
+    body: { api_key: apiKey, start_time: startTime, end_time: endTime },
   });
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    const errorObj = (body as { error?: { message?: string } | string }).error;
-    const msg = errorObj
-      ? typeof errorObj === 'string'
-        ? errorObj
-        : (errorObj.message ?? `OpenAI API 오류 (${res.status})`)
-      : `OpenAI API 오류 (${res.status})`;
+  if (error) {
+    const msg = (error as { message?: string }).message ?? 'OpenAI 비용 조회 실패';
     throw new Error(msg);
   }
-
-  const data = (await res.json()) as CostsResponse;
 
   let totalCost = 0;
   const byLineItemMap = new Map<string, number>();
 
-  for (const bucket of data.data ?? []) {
+  for (const bucket of data?.data ?? []) {
     for (const result of bucket.results ?? []) {
       const value = result.amount?.value ?? 0;
       totalCost += value;
