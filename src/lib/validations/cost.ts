@@ -33,8 +33,8 @@ const clientUsageDataSchema = z.object({
 export const syncOpenAIUsageSchema = z.object({
   api_key: z
     .string()
-    .min(1)
-    .regex(/^sk-/, 'OpenAI API Key는 sk-로 시작해야 합니다')
+    .min(10)
+    .regex(/^sk/, 'OpenAI API Key는 sk로 시작해야 합니다')
     .optional(),
   // 클라이언트가 브라우저에서 직접 OpenAI를 호출한 결과
   // 서버 측 지역 제한 우회용
