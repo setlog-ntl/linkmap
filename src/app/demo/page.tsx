@@ -7,8 +7,8 @@ import { Footer } from '@/components/layout/footer';
 import { ProjectsPreviewSection } from '@/components/landing/projects-preview-section';
 import type { Profile, ProjectWithServices } from '@/types';
 
-const DEMO_USER_EMAIL = 'cdhnaya2@naver.com';
-const FALLBACK_EMAIL = 'cdhrich2@gmail.com';
+const DEMO_USER_EMAIL = 'cdhrich2@gmail.com';
+const FALLBACK_EMAIL = 'cdhnaya2@naver.com';
 const PROJECT_PREVIEW_LIMIT = 12;
 
 const FALLBACK_SAMPLE_PROJECTS: ProjectWithServices[] = [
