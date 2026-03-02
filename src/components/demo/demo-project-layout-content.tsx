@@ -36,15 +36,14 @@ export function DemoProjectLayoutContent({
 
   return (
     <div className="container py-6 flex flex-col flex-1">
-      <div className="mb-6">
+      <div className="mb-4">
         <h1 className="text-2xl font-bold">{projectName}</h1>
         {projectDescription && (
           <p className="text-muted-foreground mt-1">{projectDescription}</p>
         )}
       </div>
-      <div className="md:hidden mb-6">
-        <DemoProjectTabs projectId={projectId} />
-      </div>
+      {/* 데모는 사이드바에 탭이 없으므로 항상 표시 */}
+      <DemoProjectTabs projectId={projectId} />
       <div className="mt-6 flex-1 flex flex-col">
         {children}
       </div>

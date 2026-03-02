@@ -45,7 +45,7 @@ export default async function DemoEnvPage({
 
     // encrypted_value 제외하고 조회
     const { data: envVars } = await admin
-      .from('env_vars')
+      .from('environment_variables')
       .select('id, key_name, environment, is_secret, description, service_id')
       .eq('project_id', id)
       .order('key_name');

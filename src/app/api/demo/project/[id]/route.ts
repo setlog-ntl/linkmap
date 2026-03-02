@@ -46,19 +46,18 @@ export async function GET(
         .eq('project_id', id),
       admin
         .from('service_dependencies')
-        .select('*')
-        .eq('project_id', id),
+        .select('*'),
       admin
         .from('user_connections')
-        .select('id, provider, status')
-        .eq('user_id', demoProfile.id),
+        .select('id, source_service_id, target_service_id, connection_type, connection_status, environment, label')
+        .eq('project_id', id),
       // encrypted_value 절대 포함하지 않음
       admin
-        .from('env_vars')
+        .from('environment_variables')
         .select('id, key_name, environment, is_secret, service_id')
         .eq('project_id', id),
       admin
-        .from('layer_overrides')
+        .from('project_service_overrides')
         .select('service_id, dashboard_layer')
         .eq('project_id', id),
     ]);

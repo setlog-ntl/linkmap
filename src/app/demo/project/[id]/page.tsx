@@ -39,7 +39,7 @@ export default async function DemoProjectPage({
         .select('*, service:services(*)')
         .eq('project_id', id),
       admin
-        .from('env_vars')
+        .from('environment_variables')
         .select('id, key_name, environment, is_secret')
         .eq('project_id', id),
     ]);

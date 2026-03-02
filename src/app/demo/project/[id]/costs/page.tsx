@@ -40,7 +40,7 @@ export default async function DemoCostsPage({
 
     const { data: services } = await admin
       .from('project_services')
-      .select('*, service:services(*), cost_tier:cost_tiers(*)')
+      .select('*, service:services(*)')
       .eq('project_id', id)
       .order('created_at');
 
