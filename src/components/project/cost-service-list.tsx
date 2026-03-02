@@ -60,7 +60,7 @@ const SERVICE_COST_URLS: Record<string, string> = {
   openai: 'https://platform.openai.com/usage',
   anthropic: 'https://console.anthropic.com/settings/usage',
   vercel: 'https://vercel.com/account/usage',
-  supabase: 'https://supabase.com/dashboard/account/billing',
+  supabase: 'https://supabase.com/dashboard/org/_/billing',
   github: 'https://github.com/settings/billing',
   aws: 'https://console.aws.amazon.com/billing/home',
   gcp: 'https://console.cloud.google.com/billing',
