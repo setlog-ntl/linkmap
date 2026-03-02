@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { Plus, Map as MapIcon, Boxes, Key, TrendingUp, DollarSign, ExternalLink, Link as LinkIcon } from 'lucide-react';
+import { Plus, Map as MapIcon, Boxes, Key, TrendingUp, DollarSign, ExternalLink, Link as LinkIcon, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -72,15 +72,22 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
     );
   };
 
-  const saveLink = () => {
+  const cancelLink = () => {
+    setLinkValue(project.link_url || '');
     setEditingLink(false);
+  };
+
+  const saveLink = () => {
     const trimmed = linkValue.trim() || null;
-    if (trimmed === project.link_url) return;
-    if (trimmed && !/^https?:\/\/.+/.test(trimmed)) {
-      toast.error('올바른 URL을 입력하세요 (https://...)');
-      setLinkValue(project.link_url || '');
+    if (trimmed === project.link_url) {
+      setEditingLink(false);
       return;
     }
+    if (trimmed && !/^https?:\/\/.+/.test(trimmed)) {
+      toast.error('올바른 URL을 입력하세요 (https://...)');
+      return;
+    }
+    setEditingLink(false);
     updateProject.mutate(
       { id: project.id, link_url: trimmed },
       { onError: () => toast.error('저장에 실패했습니다') },
@@ -129,16 +136,33 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
 
               {/* Inline link */}
               {editingLink ? (
-                <Input
-                  ref={linkRef}
-                  value={linkValue}
-                  onChange={(e) => setLinkValue(e.target.value)}
-                  onBlur={saveLink}
-                  onKeyDown={(e) => { if (e.key === 'Enter') linkRef.current?.blur(); if (e.key === 'Escape') { setLinkValue(project.link_url || ''); setEditingLink(false); } }}
-                  className="mt-1 h-7 text-xs"
-                  placeholder="https://..."
-                  autoFocus
-                />
+                <div className="mt-1 flex items-center gap-1">
+                  <Input
+                    ref={linkRef}
+                    value={linkValue}
+                    onChange={(e) => setLinkValue(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') saveLink(); if (e.key === 'Escape') cancelLink(); }}
+                    className="h-7 text-xs flex-1"
+                    placeholder="https://..."
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    className="h-7 w-7 flex items-center justify-center rounded text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 shrink-0 transition-colors"
+                    title="저장 (Enter)"
+                    onClick={saveLink}
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    className="h-7 w-7 flex items-center justify-center rounded text-muted-foreground hover:bg-muted shrink-0 transition-colors"
+                    title="취소 (Esc)"
+                    onClick={cancelLink}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               ) : project.link_url ? (
                 <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
                   <LinkIcon className="h-3 w-3 shrink-0" />

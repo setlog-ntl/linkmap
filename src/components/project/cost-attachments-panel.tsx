@@ -194,12 +194,12 @@ export function CostAttachmentsPanel({
               key={att.id}
               className="flex items-center gap-2 p-2 rounded-md bg-muted/40 hover:bg-muted/60 transition-colors group"
             >
-              {getFileIcon(att.fileType)}
+              {getFileIcon(att.fileType ?? '')}
 
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium truncate">{att.fileName}</p>
                 <p className="text-[11px] text-muted-foreground">
-                  {formatFileSize(att.fileSize)} · {new Date(att.createdAt).toLocaleDateString('ko-KR')}
+                  {att.fileSize != null ? formatFileSize(att.fileSize) : '-'} · {new Date(att.createdAt).toLocaleDateString('ko-KR')}
                   {att.notes && ` · ${att.notes}`}
                 </p>
               </div>
