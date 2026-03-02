@@ -58,12 +58,13 @@ export async function POST(
 
   const projectServiceIds = projectServices.map((ps) => ps.id);
 
-  // 최신 헬스체크 결과 조회
+  // 최신 헬스체크 결과 조회 (project_service당 최대 20건으로 제한)
   const { data: latestChecks } = await supabase
     .from('health_checks')
     .select('project_service_id, status')
     .in('project_service_id', projectServiceIds)
-    .order('checked_at', { ascending: false });
+    .order('checked_at', { ascending: false })
+    .limit(projectServiceIds.length * 20);
 
   // project_service 당 가장 최신 status만 유지
   const latestByService = new Map<string, string>();

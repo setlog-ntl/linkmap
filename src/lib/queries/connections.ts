@@ -65,6 +65,7 @@ export function useCreateConnection(projectId: string) {
         target_service_id: params.target_service_id,
         connection_type: params.connection_type,
         connection_status: params.connection_status ?? 'active',
+        environment: (params.environment as UserConnection['environment']) ?? 'all',
         label: params.label || null,
         description: params.description || null,
         last_verified_at: null,

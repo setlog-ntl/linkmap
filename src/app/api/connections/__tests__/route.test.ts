@@ -28,7 +28,7 @@ function createRequest(url: string, options?: RequestInit) {
 
 function makeChain(result: { data: unknown; error: unknown }) {
   const chain: Record<string, unknown> = {};
-  const methods = ['select', 'eq', 'insert', 'upsert', 'delete', 'limit', 'update', 'is', 'not'];
+  const methods = ['select', 'eq', 'insert', 'upsert', 'delete', 'limit', 'update', 'is', 'not', 'or'];
   for (const m of methods) {
     chain[m] = vi.fn().mockReturnValue(chain);
   }
@@ -128,6 +128,62 @@ describe('GET /api/connections', () => {
     const body = await res.json();
     expect(body).toHaveLength(2);
     expect(body[0].id).toBe('c-1');
+  });
+
+  it('applies environment filter when ?environment=production is passed', async () => {
+    const connections = [{ id: 'c-prod', project_id: UUID_PROJECT, environment: 'production' }];
+    const mock = createMockSupabase({
+      fromResults: {
+        user_connections: { data: connections, error: null },
+      },
+    });
+    vi.mocked(createClient).mockResolvedValue(mock as never);
+
+    const req = createRequest(
+      `http://localhost:3000/api/connections?project_id=${UUID_PROJECT}&environment=production`,
+    );
+    const res = await GET(req);
+    expect(res.status).toBe(200);
+    // Verify that .or() was called on the chain (environment filter applied)
+    const fromCall = mock.from.mock.results[0]?.value;
+    expect(fromCall?.or).toHaveBeenCalledWith(
+      'environment.eq.production,environment.eq.all,environment.is.null',
+    );
+  });
+
+  it('ignores invalid environment values (injection prevention)', async () => {
+    const connections = [{ id: 'c-1', project_id: UUID_PROJECT }];
+    const mock = createMockSupabase({
+      fromResults: {
+        user_connections: { data: connections, error: null },
+      },
+    });
+    vi.mocked(createClient).mockResolvedValue(mock as never);
+
+    // Malicious value should NOT be passed to .or()
+    const req = createRequest(
+      `http://localhost:3000/api/connections?project_id=${UUID_PROJECT}&environment=malicious_value`,
+    );
+    const res = await GET(req);
+    expect(res.status).toBe(200);
+    const fromCall = mock.from.mock.results[0]?.value;
+    expect(fromCall?.or).not.toHaveBeenCalled();
+  });
+
+  it('does not apply environment filter when ?environment=all', async () => {
+    const connections = [{ id: 'c-1' }];
+    const mock = createMockSupabase({
+      fromResults: { user_connections: { data: connections, error: null } },
+    });
+    vi.mocked(createClient).mockResolvedValue(mock as never);
+
+    const req = createRequest(
+      `http://localhost:3000/api/connections?project_id=${UUID_PROJECT}&environment=all`,
+    );
+    const res = await GET(req);
+    expect(res.status).toBe(200);
+    const fromCall = mock.from.mock.results[0]?.value;
+    expect(fromCall?.or).not.toHaveBeenCalled();
   });
 
   it('returns 400 on DB error', async () => {
@@ -272,6 +328,46 @@ describe('POST /api/connections', () => {
       'user-1',
       expect.objectContaining({ action: 'connection.create' }),
     );
+  });
+
+  it('stores environment field when provided', async () => {
+    const created = {
+      id: 'conn-env',
+      project_id: UUID_PROJECT,
+      connection_status: 'active',
+      environment: 'production',
+    };
+
+    const mock = createMockSupabase({
+      fromResults: {
+        projects: { data: { id: UUID_PROJECT }, error: null },
+        user_connections: { data: created, error: null },
+      },
+    });
+    vi.mocked(createClient).mockResolvedValue(mock as never);
+
+    const req = createRequest('http://localhost:3000/api/connections', {
+      method: 'POST',
+      body: JSON.stringify({ ...validBody, environment: 'production' }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.environment).toBe('production');
+  });
+
+  it('rejects invalid environment value', async () => {
+    const mock = createMockSupabase();
+    vi.mocked(createClient).mockResolvedValue(mock as never);
+
+    const req = createRequest('http://localhost:3000/api/connections', {
+      method: 'POST',
+      body: JSON.stringify({ ...validBody, environment: 'invalid_env' }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(400);
   });
 
   it('defaults connection_status to active', async () => {

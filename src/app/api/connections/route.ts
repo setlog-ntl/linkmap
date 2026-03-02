@@ -12,21 +12,24 @@ export async function GET(request: NextRequest) {
   const projectId = request.nextUrl.searchParams.get('project_id');
   if (!projectId) return apiError('project_id가 필요합니다', 400);
 
-  const environment = request.nextUrl.searchParams.get('environment');
+  const VALID_ENVS = ['development', 'staging', 'production'] as const;
+  const envParam = request.nextUrl.searchParams.get('environment');
+  const environment = VALID_ENVS.includes(envParam as typeof VALID_ENVS[number])
+    ? (envParam as typeof VALID_ENVS[number])
+    : null;
 
   let query = supabase
     .from('user_connections')
     .select('*')
     .eq('project_id', projectId)
-    .is('deleted_at', null)
-    .order('created_at');
+    .is('deleted_at', null);
 
   // Filter by environment: show explicit match + 'all' + unset
-  if (environment && environment !== 'all') {
+  if (environment) {
     query = query.or(`environment.eq.${environment},environment.eq.all,environment.is.null`);
   }
 
-  const { data, error } = await query;
+  const { data, error } = await query.order('created_at');
 
   if (error) return apiError(error.message, 400);
   return NextResponse.json(data);
