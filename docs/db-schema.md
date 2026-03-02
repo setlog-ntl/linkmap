@@ -802,3 +802,7 @@ supabase/migrations/NNN_description.sql
 - [ ] CHECK 제약조건 → TS union type 생성
 - [ ] JSONB 컬럼 → 적절한 interface 정의
 - [ ] 암호화 필드 → 클라이언트 반환 금지 주석
+
+| feature_requests | `FeatureRequest` | feedback.ts | ✅ |
+| feature_request_votes | - | - | ✅ (인라인) |
+| feature_request_comments | `FeatureRequestComment` | feedback.ts | ✅ |

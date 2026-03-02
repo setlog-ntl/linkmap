@@ -39,9 +39,10 @@ const edgeTypes = {
 interface MapViewProps {
   data: ServiceMapData;
   projectId: string;
+  isReadOnly?: boolean;
 }
 
-function MapViewInner({ data, projectId }: MapViewProps) {
+function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
   const { locale } = useLocaleStore();
   const { fitView } = useReactFlow();
   const openSheet = useServiceDetailStore((s) => s.openSheet);
@@ -71,6 +72,7 @@ function MapViewInner({ data, projectId }: MapViewProps) {
   }, []);
 
   const handleNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
+    if (isReadOnly) return;
     if (node.type === 'project') return;
     const svc = data.services.find((s) => s.id === node.id);
     if (!svc) return;
@@ -78,7 +80,7 @@ function MapViewInner({ data, projectId }: MapViewProps) {
     for (const s of data.services) serviceNames[s.service_id] = s.service?.name || 'Unknown';
     const deps = data.dependencies.filter((d) => d.service_id === svc.service_id);
     openSheet({ service: svc, dependencies: deps, serviceNames, projectId, envVars: data.envVars });
-  }, [data, projectId, openSheet]);
+  }, [data, projectId, openSheet, isReadOnly]);
 
   const handleExportPng = useCallback(() => {
     const svgEl = document.querySelector('.react-flow__viewport');
@@ -164,5 +166,5 @@ function MapViewInner({ data, projectId }: MapViewProps) {
 }
 
 export function MapView(props: MapViewProps) {
-  return <MapViewInner {...props} />;
+  return <MapViewInner {...props} isReadOnly={props.isReadOnly} />;
 }

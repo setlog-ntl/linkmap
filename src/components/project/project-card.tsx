@@ -35,9 +35,10 @@ interface ProjectCardProps {
   onDelete: (id: string) => void;
   onToggleFavorite: (id: string, isFavorited: boolean) => void;
   deploy?: HomepageDeploy;
+  basePath?: string;
 }
 
-export function ProjectCard({ project, onDelete, onToggleFavorite, deploy }: ProjectCardProps) {
+export function ProjectCard({ project, onDelete, onToggleFavorite, deploy, basePath = '/project' }: ProjectCardProps) {
   const router = useRouter();
   const { locale } = useLocaleStore();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -62,7 +63,7 @@ export function ProjectCard({ project, onDelete, onToggleFavorite, deploy }: Pro
     if (target.closest('[data-radix-dropdown-menu-trigger]') || target.closest('[role="menu"]')) {
       return;
     }
-    router.push(`/project/${project.id}`);
+    router.push(`${basePath}/${project.id}`);
   };
 
   return (
@@ -224,21 +225,23 @@ export function ProjectCard({ project, onDelete, onToggleFavorite, deploy }: Pro
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link href={`/project/${project.id}`}>
+                <Link href={`${basePath}/${project.id}`}>
                   <FolderOpen className="mr-2 h-4 w-4" />
                   프로젝트 열기
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-destructive"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setConfirmOpen(true);
-                }}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                삭제
-              </DropdownMenuItem>
+              {basePath === '/project' && (
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setConfirmOpen(true);
+                  }}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  삭제
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
 

@@ -42,9 +42,10 @@ const edgeTypes = { connection: ConnectionEdge };
 interface DependencyViewProps {
   data: ServiceMapData;
   projectId: string;
+  isReadOnly?: boolean;
 }
 
-export function DependencyView({ data, projectId }: DependencyViewProps) {
+export function DependencyView({ data, projectId, isReadOnly = false }: DependencyViewProps) {
   const {
     focusedNodeId, setFocusedNodeId, setContextMenu,
     connectingFrom, setConnectingFrom,
@@ -154,25 +155,31 @@ export function DependencyView({ data, projectId }: DependencyViewProps) {
     <div className="flex-1 w-full h-full relative border-none bg-background overflow-hidden flex flex-col">
       <MapToolbar searchQuery={searchQuery} onSearchChange={setSearchQuery} onExportPng={interactions.handleExportPng} onAiAnalyze={() => setShowAiPanel(!showAiPanel)} onToggleLegend={() => setShowLegend(!showLegend)} />
       <div className="flex-1 flex overflow-hidden">
-        <CatalogSidebar projectId={projectId} catalogServices={data.catalogServices} projectServices={data.services} isLoading={data.catalogLoading} />
+        {!isReadOnly && (
+          <CatalogSidebar projectId={projectId} catalogServices={data.catalogServices} projectServices={data.services} isLoading={data.catalogLoading} />
+        )}
         <div className="flex-1 relative">
-          {connectingFrom && (
+          {!isReadOnly && connectingFrom && (
             <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-blue-600 text-white text-xs px-3 py-1.5 rounded-full shadow-lg">
               대상 서비스를 클릭하세요 (ESC로 취소)
             </div>
           )}
           <ReactFlow
             nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
-            onConnect={handleNativeConnect} onNodeClick={interactions.handleNodeClick}
-            onPaneClick={interactions.handlePaneClick} onNodeContextMenu={interactions.handleNodeContextMenu}
-            onPaneContextMenu={interactions.handlePaneContextMenu}
+            onConnect={isReadOnly ? undefined : handleNativeConnect}
+            onNodeClick={isReadOnly ? undefined : interactions.handleNodeClick}
+            onPaneClick={isReadOnly ? undefined : interactions.handlePaneClick}
+            onNodeContextMenu={isReadOnly ? undefined : interactions.handleNodeContextMenu}
+            onPaneContextMenu={isReadOnly ? undefined : interactions.handlePaneContextMenu}
             nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView fitViewOptions={{ padding: 0.2 }}
+            nodesDraggable={!isReadOnly}
+            nodesConnectable={!isReadOnly}
           >
             <Controls />
             <MiniMap nodeStrokeWidth={3} nodeColor={interactions.getNodeColor} zoomable pannable />
             <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
           </ReactFlow>
-          <EditSaveBar onSave={handleSaveChanges} saving={saving} />
+          {!isReadOnly && <EditSaveBar onSave={handleSaveChanges} saving={saving} />}
           {showLegend && <MapLegend onClose={() => setShowLegend(false)} />}
         </div>
         <NodeContextMenu

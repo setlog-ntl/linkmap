@@ -97,6 +97,7 @@ export function DemoProjectGrid({ projects, isLoggedIn }: DemoProjectGridProps) 
             project={project}
             onDelete={noop}
             onToggleFavorite={noop}
+            basePath="/demo/project"
           />
         ))}
       </div>

@@ -13,13 +13,18 @@ import { DependencyView } from '@/components/service-map/views/dependency-view';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import { useServiceMapData } from '@/components/service-map/hooks/useServiceMapData';
 
-function ServiceMapInner() {
+interface ServiceMapInnerProps {
+  isReadOnly?: boolean;
+}
+
+function ServiceMapInner({ isReadOnly = false }: ServiceMapInnerProps) {
   const params = useParams();
   const projectId = params.id as string;
   const { viewLevel } = useServiceMapStore();
 
-  // OAuth success redirect handling
+  // OAuth success redirect handling (로그인 상태에서만)
   useEffect(() => {
+    if (isReadOnly) return;
     const urlParams = new URLSearchParams(window.location.search);
     const oauthSuccess = urlParams.get('oauth_success');
     const ALLOWED_PROVIDERS = ['github', 'google', 'vercel', 'gitlab', 'bitbucket', 'azure', 'aws'];
@@ -29,10 +34,10 @@ function ServiceMapInner() {
       url.searchParams.delete('oauth_success');
       window.history.replaceState({}, '', url.toString());
     }
-  }, []);
+  }, [isReadOnly]);
 
-  // Single data fetch — shared across all views
-  const data = useServiceMapData(projectId);
+  // Single data fetch — shared across all views (isReadOnly = 데모 모드)
+  const data = useServiceMapData(projectId, isReadOnly);
 
   // Loading state
   const isDataLoading = data.servicesLoading || data.depsLoading || data.connectionsLoading;
@@ -49,7 +54,13 @@ function ServiceMapInner() {
           <ViewLevelSwitcher />
         </div>
         <div className="h-[calc(100vh-16rem)] min-h-[500px] max-h-[900px]">
-          <EmptyMapState projectId={projectId} />
+          {isReadOnly ? (
+            <div className="flex h-full items-center justify-center rounded-2xl border border-dashed">
+              <p className="text-sm text-muted-foreground">연결된 서비스가 없습니다.</p>
+            </div>
+          ) : (
+            <EmptyMapState projectId={projectId} />
+          )}
         </div>
       </div>
     );
@@ -62,17 +73,21 @@ function ServiceMapInner() {
           <ViewLevelSwitcher />
         </div>
 
-        {viewLevel === 'map' && <MapView data={data} projectId={projectId} />}
-        {viewLevel === 'dependency' && <DependencyView data={data} projectId={projectId} />}
+        {viewLevel === 'map' && <MapView data={data} projectId={projectId} isReadOnly={isReadOnly} />}
+        {viewLevel === 'dependency' && <DependencyView data={data} projectId={projectId} isReadOnly={isReadOnly} />}
       </div>
     </TooltipProvider>
   );
 }
 
-export default function ServiceMapClient() {
+interface ServiceMapClientProps {
+  isReadOnly?: boolean;
+}
+
+export default function ServiceMapClient({ isReadOnly = false }: ServiceMapClientProps) {
   return (
     <ReactFlowProvider>
-      <ServiceMapInner />
+      <ServiceMapInner isReadOnly={isReadOnly} />
     </ReactFlowProvider>
   );
 }

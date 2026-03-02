@@ -7,8 +7,7 @@ import { Footer } from '@/components/layout/footer';
 import { DemoProjectGrid } from '@/components/demo/demo-project-grid';
 import type { Profile, ProjectWithServices } from '@/types';
 
-const DEMO_USER_EMAIL = 'cdhrich2@gmail.com';
-const FALLBACK_EMAIL = 'cdhnaya2@naver.com';
+const DEMO_USER_EMAIL = 'vcdemo@linkmap.site';
 const PROJECT_PREVIEW_LIMIT = 12;
 
 const FALLBACK_SAMPLE_PROJECTS: ProjectWithServices[] = [
@@ -120,23 +119,6 @@ async function fetchDemoProjects(): Promise<ProjectWithServices[]> {
         .from('projects')
         .select('*, project_services(*, service:services(*))')
         .eq('user_id', primaryProfile.id)
-        .is('deleted_at', null)
-        .order('updated_at', { ascending: false })
-        .limit(PROJECT_PREVIEW_LIMIT);
-      if (data && data.length > 0) return data as ProjectWithServices[];
-    }
-
-    const { data: fallbackProfile } = await admin
-      .from('profiles')
-      .select('id')
-      .eq('email', FALLBACK_EMAIL)
-      .single();
-
-    if (fallbackProfile) {
-      const { data } = await admin
-        .from('projects')
-        .select('*, project_services(*, service:services(*))')
-        .eq('user_id', fallbackProfile.id)
         .is('deleted_at', null)
         .order('updated_at', { ascending: false })
         .limit(PROJECT_PREVIEW_LIMIT);
