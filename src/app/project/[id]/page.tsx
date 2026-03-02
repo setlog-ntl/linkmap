@@ -8,6 +8,7 @@ import { BentoDashboardSkeleton } from '@/components/dashboard/bento-dashboard-s
 import { BentoDashboardLayout } from '@/components/dashboard/bento-dashboard-layout';
 import { AiChatPanel } from '@/components/ai/ai-chat-panel';
 import { HealthContent } from '@/components/project/health-content';
+import { ProjectTour } from '@/components/project/project-tour';
 
 export default function ProjectDashboardPage() {
   const params = useParams();
@@ -33,6 +34,7 @@ export default function ProjectDashboardPage() {
 
   return (
     <>
+      <ProjectTour projectId={projectId} />
       <BentoDashboardLayout data={data} />
       <div className="mt-8">
         <HealthContent projectId={projectId} />

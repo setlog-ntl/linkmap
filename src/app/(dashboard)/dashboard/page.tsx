@@ -9,6 +9,7 @@ import { ProjectTreeList } from '@/components/dashboard/project-tree-list';
 import { CreateProjectDialog } from '@/components/project/create-project-dialog';
 import { TemplateDialog } from '@/components/project/template-dialog';
 import { QuickActions } from '@/components/dashboard/quick-actions';
+import { DashboardTour } from '@/components/dashboard/dashboard-tour';
 import { createClient } from '@/lib/supabase/client';
 import { FolderOpen, Layers, Puzzle, GitBranch, LayoutGrid, List } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -125,6 +126,8 @@ export default function DashboardPage() {
 
   return (
     <div className="container py-8 max-w-7xl">
+      <DashboardTour />
+
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10">
         <div>
@@ -134,18 +137,22 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex gap-3">
-          <TemplateDialog onSubmit={handleCreateFromTemplate} />
-          <CreateProjectDialog
-            onSubmit={handleCreateProject}
-            externalOpen={createOpen}
-            onExternalOpenChange={setCreateOpen}
-          />
+          <span data-tour="template-dialog">
+            <TemplateDialog onSubmit={handleCreateFromTemplate} />
+          </span>
+          <span data-tour="create-project">
+            <CreateProjectDialog
+              onSubmit={handleCreateProject}
+              externalOpen={createOpen}
+              onExternalOpenChange={setCreateOpen}
+            />
+          </span>
         </div>
       </div>
 
       {/* Cross-Project Stats */}
       {!isLoading && sortedProjects.length > 0 && (
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div data-tour="stat-cards" className="grid grid-cols-3 gap-4 mb-8">
           <StatCard
             icon={Layers}
             value={sortedProjects.length}
@@ -165,7 +172,9 @@ export default function DashboardPage() {
       )}
 
       {/* Quick Actions */}
-      <QuickActions onNewProject={() => setCreateOpen(true)} />
+      <div data-tour="quick-actions">
+        <QuickActions onNewProject={() => setCreateOpen(true)} />
+      </div>
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

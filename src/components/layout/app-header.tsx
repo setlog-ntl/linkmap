@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, Globe, Settings, LogOut, Bot, User, GitBranch, Wrench, Users } from 'lucide-react';
+import { Search, Globe, LogOut, Bot, User, GitBranch, Wrench, Users, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -18,6 +18,7 @@ import {
 import { createClient } from '@/lib/supabase/client';
 import { useUIStore } from '@/stores/ui-store';
 import { useLocaleStore } from '@/stores/locale-store';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { t, localeNames } from '@/lib/i18n';
 import type { Locale } from '@/lib/i18n';
 import type { Profile } from '@/types';
@@ -30,8 +31,16 @@ interface AppHeaderProps {
 
 export function AppHeader({ projectName, profile }: AppHeaderProps) {
   const router = useRouter();
-  const { setCommandOpen } = useUIStore();
+  const { setCommandOpen, tourEnabled, toggleTourEnabled } = useUIStore();
   const { locale, setLocale } = useLocaleStore();
+
+  const handleTourToggle = () => {
+    const willEnable = !tourEnabled;
+    toggleTourEnabled();
+    if (willEnable) {
+      window.dispatchEvent(new CustomEvent('linkmap:tour:restart'));
+    }
+  };
 
   const handleSignOut = async () => {
     await createClient().auth.signOut();
@@ -82,6 +91,24 @@ export function AppHeader({ projectName, profile }: AppHeaderProps) {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Tour toggle */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleTourToggle}
+              aria-label={tourEnabled ? '초보자 가이드 끄기' : '초보자 가이드 켜기'}
+            >
+              <HelpCircle className={`h-4 w-4 ${tourEnabled ? 'text-primary' : 'text-muted-foreground'}`} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            {tourEnabled ? '초보자 가이드 끄기' : '초보자 가이드 켜기'}
+          </TooltipContent>
+        </Tooltip>
 
         <ThemeToggle />
 
