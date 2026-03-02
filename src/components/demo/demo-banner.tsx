@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 
 export function DemoBanner() {
   return (
-    <div className="sticky top-0 z-50 w-full border-b border-brand-blue/20 bg-brand-blue/[0.08] backdrop-blur-sm">
+    <div className="w-full border-b border-brand-blue/20 bg-brand-blue/[0.08]">
       <div className="container flex h-10 items-center justify-between gap-4">
         <div className="flex items-center gap-2 min-w-0">
           <Eye className="h-3.5 w-3.5 text-brand-blue shrink-0" />

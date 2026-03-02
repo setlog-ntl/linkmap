@@ -29,7 +29,7 @@ export default async function DemoProjectPage({
     const [projectResult, servicesResult, envResult] = await Promise.all([
       admin
         .from('projects')
-        .select('*, project_services(*, service:services(*))')
+        .select('*')
         .eq('id', id)
         .eq('user_id', demoProfile.id)
         .is('deleted_at', null)
