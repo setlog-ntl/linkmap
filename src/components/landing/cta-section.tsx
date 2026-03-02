@@ -71,19 +71,19 @@ export function PricingSection() {
   ];
 
   return (
-    <section className="py-24 bg-background" id="pricing">
+    <section className="py-12 sm:py-16 lg:py-24 bg-background" id="pricing">
       {/* Top divider */}
       <div className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <p className="text-xs font-bold uppercase tracking-widest text-brand-blue mb-4 flex items-center justify-center gap-2">
               <span className="inline-block w-2 h-2 rounded-full bg-brand-blue" />
               PRICING
             </p>
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-foreground">{t(locale, 'landing.pricingTitle')}</h2>
-            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">{t(locale, 'landing.pricingDesc')}</p>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">{t(locale, 'landing.pricingTitle')}</h2>
+            <p className="mt-3 sm:mt-4 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">{t(locale, 'landing.pricingDesc')}</p>
           </div>
         </ScrollReveal>
 
@@ -91,7 +91,7 @@ export function PricingSection() {
           {plans.map((plan, i) => (
             <ScrollReveal key={plan.name} delay={i * 0.1}>
               <div
-                className={`rounded-2xl p-7 flex flex-col h-full transition-all duration-200 ${
+                className={`rounded-2xl p-5 sm:p-7 flex flex-col h-full transition-all duration-200 ${
                   plan.highlighted
                     ? 'bg-card border-2 border-brand-blue relative md:scale-[1.03] shadow-lg ring-1 ring-brand-blue/10'
                     : 'bg-card border border-border hover:shadow-md hover:-translate-y-0.5'
@@ -146,7 +146,7 @@ export function FinalCtaSection() {
   const signupHref = useSignupHref();
 
   return (
-    <section className="py-24 relative overflow-hidden" style={{ backgroundColor: 'var(--circuit-950)' }}>
+    <section className="py-12 sm:py-20 lg:py-24 relative overflow-hidden" style={{ backgroundColor: 'var(--circuit-950)' }}>
       {/* Dot pattern background */}
       <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:24px_24px]" />
       {/* Subtle gradient orb */}
@@ -160,9 +160,9 @@ export function FinalCtaSection() {
             {t(locale, 'landing.finalCtaSocialProof')}
           </div>
 
-          <h2 className="text-4xl font-extrabold tracking-tight mb-6 sm:text-5xl text-white leading-tight">{t(locale, 'landing.finalCtaTitle')}</h2>
-          <p className="text-lg text-white/60 mb-10 max-w-xl mx-auto leading-relaxed">{t(locale, 'landing.finalCtaDesc')}</p>
-          <Button className="bg-brand-green text-black hover:bg-brand-green/90 px-10 py-4 h-auto rounded-xl text-base font-bold transition-all duration-200 hover:shadow-[0_4px_24px_rgba(16,185,129,0.3)] active:scale-[0.98]" asChild>
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-5 sm:mb-6 text-white leading-tight">{t(locale, 'landing.finalCtaTitle')}</h2>
+          <p className="text-base sm:text-lg text-white/60 mb-8 sm:mb-10 max-w-xl mx-auto leading-relaxed">{t(locale, 'landing.finalCtaDesc')}</p>
+          <Button className="bg-brand-green text-black hover:bg-brand-green/90 px-7 py-3 sm:px-10 sm:py-4 h-auto rounded-xl text-base font-bold transition-all duration-200 hover:shadow-[0_4px_24px_rgba(16,185,129,0.3)] active:scale-[0.98]" asChild>
             <Link href={signupHref}>
               {t(locale, 'landing.ctaStart')}
               <ArrowRight className="ml-2 h-4 w-4" />

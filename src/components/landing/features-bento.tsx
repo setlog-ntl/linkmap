@@ -53,7 +53,7 @@ function ServiceMapVisual() {
 
 function EnvVarVisual() {
   return (
-    <div className="flex-1 rounded-xl bg-muted/60 dark:bg-secondary/60 border border-border p-5 font-mono text-xs text-foreground/80 group-hover:border-brand-green/30 transition-colors">
+    <div className="flex-1 rounded-xl bg-muted/60 dark:bg-secondary/60 border border-border p-3 sm:p-5 font-mono text-xs text-foreground/80 group-hover:border-brand-green/30 transition-colors">
       <div className="flex gap-1.5 mb-4 border-b border-border/30 pb-3">
         <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56]" />
         <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
@@ -123,28 +123,28 @@ export function FeaturesBento() {
   const { locale } = useLocaleStore();
 
   return (
-    <section className="py-24 relative overflow-hidden" id="features">
+    <section className="py-12 sm:py-16 lg:py-24 relative overflow-hidden" id="features">
       {/* Subtle background decoration */}
       <div className="absolute inset-0 -z-10 bg-background" />
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-blue/[0.03] rounded-full blur-[100px] -z-10" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-brand-green/[0.03] rounded-full blur-[100px] -z-10" />
 
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <p className="text-xs font-bold uppercase tracking-widest text-brand-green mb-4 flex items-center justify-center gap-2">
               <span className="inline-block w-2 h-2 rounded-full bg-brand-green animate-pulse" />
               THE WORKSPACE
             </p>
-            <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl text-foreground">{t(locale, 'landing.featuresTitle')}</h2>
-            <p className="mt-5 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">{t(locale, 'landing.featuresDesc')}</p>
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">{t(locale, 'landing.featuresTitle')}</h2>
+            <p className="mt-3 sm:mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">{t(locale, 'landing.featuresDesc')}</p>
           </div>
         </ScrollReveal>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* Card 1: Map Visualization (2 cols) */}
           <ScrollReveal className="col-span-1 md:col-span-2" delay={0.1}>
-            <div className="group relative h-full overflow-hidden rounded-2xl border border-border bg-card p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-brand-blue/30">
+            <div className="group relative h-full overflow-hidden rounded-2xl border border-border bg-card p-5 sm:p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-brand-blue/30">
               <div className="absolute inset-0 bg-gradient-to-br from-brand-blue/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="relative flex flex-col h-full justify-between z-10">
                 <div>
@@ -163,7 +163,7 @@ export function FeaturesBento() {
 
           {/* Card 2: Checklist */}
           <ScrollReveal delay={0.2}>
-            <div className="group relative h-full overflow-hidden rounded-2xl border border-border bg-card p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-brand-green/30">
+            <div className="group relative h-full overflow-hidden rounded-2xl border border-border bg-card p-5 sm:p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-brand-green/30">
               <div className="absolute inset-0 bg-gradient-to-br from-brand-green/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="relative z-10">
                 <div className={`mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl ${featureColors[1].bg} ${featureColors[1].text} ring-1 ring-inset ${featureColors[1].ring}`}>
@@ -178,7 +178,7 @@ export function FeaturesBento() {
 
           {/* Card 3: Templates */}
           <ScrollReveal delay={0.3}>
-            <div className="group relative h-full overflow-hidden rounded-2xl border border-border bg-card p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-purple-500/30">
+            <div className="group relative h-full overflow-hidden rounded-2xl border border-border bg-card p-5 sm:p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-purple-500/30">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="relative z-10">
                 <div className={`mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl ${featureColors[2].bg} ${featureColors[2].text} ring-1 ring-inset ${featureColors[2].ring}`}>
@@ -193,9 +193,9 @@ export function FeaturesBento() {
 
           {/* Card 4: Env Vars (2 cols, horizontal layout) */}
           <ScrollReveal className="col-span-1 md:col-span-2" delay={0.4}>
-            <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-brand-green/30">
+            <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 sm:p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-brand-green/30">
               <div className="absolute inset-0 bg-gradient-to-br from-brand-green/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative flex flex-col md:flex-row h-full gap-8 z-10">
+              <div className="relative flex flex-col md:flex-row h-full gap-5 sm:gap-8 z-10">
                 <div className="flex-1">
                   <div className={`mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl ${featureColors[1].bg} ${featureColors[1].text} ring-1 ring-inset ${featureColors[1].ring}`}>
                     <Key className="w-5 h-5" />

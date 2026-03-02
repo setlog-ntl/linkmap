@@ -96,13 +96,13 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
   const activeTemplate = templateId ? templates.find((tmpl) => tmpl.id === templateId) ?? null : null;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="w-full max-w-2xl mx-auto space-y-6 sm:space-y-8">
       {/* Header */}
       <div className="text-center space-y-2">
         <Badge variant="secondary" className="mb-2">
           {t(locale, 'wizard.badge')}
         </Badge>
-        <h1 className="text-3xl font-bold">
+        <h1 className="text-2xl sm:text-3xl font-bold">
           {t(locale, 'wizard.title')}
         </h1>
         <p className="text-muted-foreground">
@@ -111,11 +111,11 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
       </div>
 
       {/* 3-Step Indicator */}
-      <div className="flex items-center justify-center gap-2">
+      <div className="flex items-center justify-center gap-1 sm:gap-2">
         {stepLabels.map((label, idx) => (
           <div key={idx} className="flex items-center">
             <div
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors ${
                 idx === currentStepIndex
                   ? 'bg-primary text-primary-foreground'
                   : idx < currentStepIndex
@@ -123,13 +123,13 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
                     : 'bg-muted text-muted-foreground'
               }`}
             >
-              <span className="w-5 h-5 rounded-full bg-background/20 flex items-center justify-center text-xs font-bold">
+              <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-background/20 flex items-center justify-center text-xs font-bold shrink-0">
                 {idx + 1}
               </span>
-              <span>{label}</span>
+              <span className="hidden sm:inline">{label}</span>
             </div>
             {idx < stepLabels.length - 1 && (
-              <div className={`w-8 h-0.5 mx-1 ${idx < currentStepIndex ? 'bg-primary' : 'bg-muted'}`} />
+              <div className={`w-4 sm:w-8 h-0.5 mx-0.5 sm:mx-1 ${idx < currentStepIndex ? 'bg-primary' : 'bg-muted'}`} />
             )}
           </div>
         ))}

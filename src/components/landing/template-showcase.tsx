@@ -20,18 +20,18 @@ export function TemplateShowcase() {
   const { locale } = useLocaleStore();
 
   return (
-    <section className="py-24 bg-card/50 dark:bg-card/30" id="templates">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <section className="py-12 sm:py-16 lg:py-24 bg-card/50 dark:bg-card/30" id="templates">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <p className="text-xs font-bold uppercase tracking-widest text-brand-green mb-4 flex items-center justify-center gap-2">
               <span className="inline-block w-2 h-2 rounded-full bg-brand-green animate-pulse" />
               TEMPLATES
             </p>
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-foreground">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">
               어떤 홈페이지를 만들까요?
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
+            <p className="mt-3 sm:mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed">
               6가지 템플릿 중 골라서 클릭 한 번이면 끝
             </p>
           </div>
@@ -49,7 +49,7 @@ export function TemplateShowcase() {
                   className="group flex flex-col rounded-xl border border-border bg-card overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-primary/25"
                 >
                   {/* Wireframe preview */}
-                  <div className="relative h-36 bg-muted/50 flex items-center justify-center px-6 overflow-hidden">
+                  <div className="relative h-28 sm:h-36 bg-muted/50 flex items-center justify-center px-6 overflow-hidden">
                     <WireframeSVG slug={tpl.slug} />
 
                     {/* Recommended badge */}

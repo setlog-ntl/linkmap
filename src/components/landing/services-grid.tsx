@@ -47,27 +47,27 @@ export function ServicesGrid() {
   );
 
   return (
-    <section className="py-24 bg-card/50 dark:bg-card/30">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <section className="py-12 sm:py-16 lg:py-24 bg-card/50 dark:bg-card/30">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
-          <div className="text-center mb-10">
+          <div className="text-center mb-6 sm:mb-10">
             <p className="text-xs font-bold uppercase tracking-widest text-brand-blue mb-4 flex items-center justify-center gap-2">
               <span className="inline-block w-2 h-2 rounded-full bg-brand-blue" />
               INTEGRATIONS
             </p>
-            <h2 className="text-3xl font-extrabold sm:text-4xl text-foreground tracking-tight">{t(locale, 'landing.servicesTitle')}</h2>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight">{t(locale, 'landing.servicesTitle')}</h2>
           </div>
         </ScrollReveal>
 
         {/* Filter tabs - pill container style matching how-it-works */}
         <ScrollReveal>
           <div className="flex justify-center mb-10">
-            <div className="inline-flex flex-wrap justify-center gap-1.5 rounded-xl bg-muted/70 dark:bg-secondary/70 p-1.5 border border-border">
+            <div className="inline-flex flex-wrap justify-center gap-1 sm:gap-1.5 rounded-xl bg-muted/70 dark:bg-secondary/70 p-1 sm:p-1.5 border border-border">
               {domainFilters.map((f) => (
                 <button
                   key={f.value}
                   onClick={() => setFilter(f.value)}
-                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                  className={`rounded-lg px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm font-medium transition-all duration-200 ${
                     filter === f.value
                       ? 'bg-card text-brand-blue font-bold shadow-sm border border-brand-blue/20'
                       : 'text-muted-foreground hover:text-foreground'
@@ -81,7 +81,7 @@ export function ServicesGrid() {
         </ScrollReveal>
 
         {/* 6-column Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
           <AnimatePresence mode="popLayout">
             {filtered.map((svc) => {
               const brand = SERVICE_BRANDS[svc.slug];
@@ -94,13 +94,13 @@ export function ServicesGrid() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.2 }}
-                className="group flex flex-col items-center justify-center p-5 rounded-xl bg-card border border-border hover:border-brand-blue/25 transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5 aspect-square cursor-default"
+                className="group flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl bg-card border border-border hover:border-brand-blue/25 transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5 aspect-square cursor-default"
                 style={tintBg ? { backgroundColor: tintBg } : undefined}
               >
                 <div className="mb-3 transition-transform duration-200 group-hover:scale-110">
                   <ServiceIcon serviceId={svc.slug} size={36} />
                 </div>
-                <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors font-medium">{svc.name}</span>
+                <span className="text-[10px] sm:text-xs text-muted-foreground group-hover:text-foreground transition-colors font-medium text-center leading-tight">{svc.name}</span>
               </motion.div>
               );
             })}

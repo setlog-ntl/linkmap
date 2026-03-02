@@ -89,34 +89,34 @@ export function HowItWorks() {
 
   return (
     <section
-      className="py-24 relative overflow-hidden bg-background"
+      className="py-12 sm:py-16 lg:py-24 relative overflow-hidden bg-background"
       id="how-it-works"
     >
       {/* Subtle background radial */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.02)_0%,transparent_70%)] pointer-events-none" />
 
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
         <ScrollReveal>
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <p className="text-xs font-bold uppercase tracking-widest text-brand-green mb-4 flex items-center justify-center gap-2">
               <span className="inline-block w-2 h-2 rounded-full bg-brand-green animate-pulse" />
               HOW TO START
             </p>
-            <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl text-foreground">
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
               {t(locale, 'landing.howTitle')}
             </h2>
-            <p className="mt-5 text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            <p className="mt-3 sm:mt-5 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
               {t(locale, 'landing.howDesc')}
             </p>
           </div>
         </ScrollReveal>
 
         {/* Persona Tabs - clean pill style */}
-        <div className="flex justify-center mb-20 relative z-20">
-          <div className="inline-flex gap-2 rounded-xl bg-muted/70 dark:bg-secondary/70 p-1.5 border border-border">
+        <div className="flex justify-center mb-12 sm:mb-20 relative z-20">
+          <div className="inline-flex gap-1 sm:gap-2 rounded-xl bg-muted/70 dark:bg-secondary/70 p-1.5 border border-border">
             <button
               onClick={() => setPersona('beginner')}
-              className={`group inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-bold transition-all duration-200 ${persona === 'beginner'
+              className={`group inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-4 py-2 sm:px-6 sm:py-2.5 text-sm font-bold transition-all duration-200 ${persona === 'beginner'
                   ? 'bg-card text-brand-green shadow-sm border border-brand-green/20'
                   : 'text-muted-foreground hover:text-foreground'
                 }`}
@@ -127,7 +127,7 @@ export function HowItWorks() {
 
             <button
               onClick={() => setPersona('developer')}
-              className={`group inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-bold transition-all duration-200 ${persona === 'developer'
+              className={`group inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-4 py-2 sm:px-6 sm:py-2.5 text-sm font-bold transition-all duration-200 ${persona === 'developer'
                   ? 'bg-card text-brand-blue shadow-sm border border-brand-blue/20'
                   : 'text-muted-foreground hover:text-foreground'
                 }`}
@@ -138,7 +138,7 @@ export function HowItWorks() {
           </div>
         </div>
 
-        <div className="relative grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-10 max-w-6xl mx-auto">
+        <div className="relative grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 lg:gap-10 max-w-6xl mx-auto">
           {/* Connecting Line (Desktop) */}
           <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-px z-0">
             <div className={`h-full ${persona === 'beginner' ? 'bg-brand-green/20' : 'bg-brand-blue/20'} transition-colors duration-300`} />
@@ -151,17 +151,17 @@ export function HowItWorks() {
               <ScrollReveal key={`${persona}-${i}`} delay={i * 0.12}>
                 <div className="relative z-10 flex flex-col items-center text-center group">
                   {/* Step circle */}
-                  <div className={`flex h-20 w-20 items-center justify-center rounded-2xl bg-card border border-border shadow-sm mb-6 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-md group-hover:border-${activeColor}/40 relative`}>
+                  <div className={`flex h-14 w-14 sm:h-20 sm:w-20 items-center justify-center rounded-xl sm:rounded-2xl bg-card border border-border shadow-sm mb-4 sm:mb-6 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-md group-hover:border-${activeColor}/40 relative`}>
                     <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-bold text-muted-foreground">
                       {step.number}
                     </span>
-                    <Icon className={`w-8 h-8 text-${activeColor} transition-transform duration-300 group-hover:scale-110`} />
+                    <Icon className={`w-6 h-6 sm:w-8 sm:h-8 text-${activeColor} transition-transform duration-300 group-hover:scale-110`} />
                   </div>
 
-                  <h3 className="text-lg font-bold text-foreground tracking-tight mb-2">
+                  <h3 className="text-sm sm:text-lg font-bold text-foreground tracking-tight mb-1 sm:mb-2">
                     {step.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
+                  <p className="text-xs sm:text-sm text-muted-foreground max-w-xs leading-relaxed hidden sm:block">
                     {step.description}
                   </p>
                 </div>
@@ -171,12 +171,12 @@ export function HowItWorks() {
         </div>
 
         {/* CTA */}
-        <div className="mt-20 text-center">
+        <div className="mt-12 sm:mt-20 text-center">
           <Button
             className={
               persona === 'beginner'
-                ? 'bg-brand-green text-black hover:bg-brand-green/90 px-10 py-4 h-auto rounded-xl text-base font-bold transition-all duration-200 hover:shadow-[0_4px_24px_rgba(16,185,129,0.25)] active:scale-[0.98]'
-                : 'bg-brand-blue text-white hover:bg-brand-blue/90 px-10 py-4 h-auto rounded-xl text-base font-bold transition-all duration-200 hover:shadow-[0_4px_24px_rgba(59,130,246,0.25)] active:scale-[0.98]'
+                ? 'bg-brand-green text-black hover:bg-brand-green/90 px-7 py-3 sm:px-10 sm:py-4 h-auto rounded-xl text-base font-bold transition-all duration-200 hover:shadow-[0_4px_24px_rgba(16,185,129,0.25)] active:scale-[0.98]'
+                : 'bg-brand-blue text-white hover:bg-brand-blue/90 px-7 py-3 sm:px-10 sm:py-4 h-auto rounded-xl text-base font-bold transition-all duration-200 hover:shadow-[0_4px_24px_rgba(59,130,246,0.25)] active:scale-[0.98]'
             }
             asChild
           >

@@ -17,10 +17,10 @@ export default function SitesLayout({ children }: { children: React.ReactNode })
   const { locale } = useLocaleStore();
 
   return (
-    <div className="container py-8 max-w-5xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">{t(locale, 'nav.oneclick')}</h1>
-        <p className="text-muted-foreground mt-1">{t(locale, 'nav.sitesDesc')}</p>
+    <div className="container py-4 sm:py-8 max-w-5xl px-4 sm:px-6">
+      <div className="mb-5 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold">{t(locale, 'nav.oneclick')}</h1>
+        <p className="text-sm sm:text-base text-muted-foreground mt-1">{t(locale, 'nav.sitesDesc')}</p>
       </div>
 
       <nav className="flex gap-1 border-b mb-6">

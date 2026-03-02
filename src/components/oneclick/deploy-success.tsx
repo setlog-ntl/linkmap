@@ -97,10 +97,7 @@ export function DeploySuccess({ status, projectId, template }: DeploySuccessProp
           <div className="text-center space-y-3">
             <div className="relative mx-auto w-full">
               {liveUrl ? (
-                <div
-                  className="relative w-full overflow-hidden rounded-xl border bg-background shadow-lg"
-                  style={{ height: '280px' }}
-                >
+                <div className="relative w-full overflow-hidden rounded-xl border bg-background shadow-lg h-[200px] sm:h-[280px]">
                   {/* Browser chrome — 주소창 + GitHub 배포 상태 배지 */}
                   <div className="absolute top-0 left-0 right-0 h-9 bg-muted/90 border-b z-20 flex items-center px-3 gap-2 rounded-t-xl">
                     <div className="flex gap-1.5 shrink-0">
@@ -139,7 +136,7 @@ export function DeploySuccess({ status, projectId, template }: DeploySuccessProp
                       style={{
                         width: '1280px',
                         height: '800px',
-                        transform: 'scale(0.5)',
+                        transform: 'scale(0.3)',
                         transformOrigin: 'top center',
                       }}
                       sandbox="allow-scripts allow-same-origin"

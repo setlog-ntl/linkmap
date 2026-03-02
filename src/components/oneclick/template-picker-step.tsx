@@ -267,7 +267,7 @@ export function TemplatePickerStep({
     <div className="space-y-6">
       {/* GitHub connection status — inline indicator */}
       {isAuthenticated && (
-        <div className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm ${
+        <div className={`flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg border text-sm ${
           isGitHubLoading
             ? 'bg-muted/50 border-border'
             : (hasAccounts || githubUsername)
@@ -285,7 +285,7 @@ export function TemplatePickerStep({
             <>
               <Github className="h-4 w-4 text-green-700 dark:text-green-300 flex-shrink-0" />
               <Select value={selectedAccountId || ''} onValueChange={handleAccountSelect}>
-                <SelectTrigger className="h-7 w-auto min-w-[160px] border-green-300 dark:border-green-700 bg-transparent text-green-700 dark:text-green-300 text-sm font-medium">
+                <SelectTrigger className="h-7 w-auto min-w-[120px] sm:min-w-[160px] border-green-300 dark:border-green-700 bg-transparent text-green-700 dark:text-green-300 text-sm font-medium">
                   <SelectValue placeholder={t(locale, 'templatePicker.selectAccount')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -339,7 +339,7 @@ export function TemplatePickerStep({
         </Label>
 
         {/* Template grid with animations */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           <AnimatePresence mode="popLayout">
             {sortedTemplates.map((tpl, index) => (
               <motion.div
@@ -398,7 +398,7 @@ export function TemplatePickerStep({
 
       {/* Deploy button */}
       <div className="flex justify-end">
-        <Button onClick={handleNext} disabled={!canProceed || isDeploying} size="lg" className="gap-2">
+        <Button onClick={handleNext} disabled={!canProceed || isDeploying} size="lg" className="gap-2 w-full sm:w-auto">
           {isDeploying ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />

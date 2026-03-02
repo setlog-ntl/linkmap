@@ -27,7 +27,7 @@ export function HeroSection() {
   return (
     <section ref={containerRef} className="relative flex flex-col bg-background">
       {/* ── Area 1: Text + CTA (vertically centered, full-screen) ── */}
-      <div className="relative z-10 min-h-screen flex flex-col justify-center items-center pt-32 pb-10 lg:pt-40 lg:pb-14 px-6 lg:px-8">
+      <div className="relative z-10 min-h-screen flex flex-col justify-center items-center pt-20 pb-8 sm:pt-32 sm:pb-10 lg:pt-40 lg:pb-14 px-4 sm:px-6 lg:px-8">
         {/* Subtle dot-grid background */}
         <div
           className="absolute inset-0 -z-10 opacity-60"
@@ -62,21 +62,21 @@ export function HeroSection() {
           </motion.div>
 
           {/* Headline - stronger visual hierarchy */}
-          <h1 className="mx-auto max-w-4xl text-5xl font-extrabold tracking-tight sm:text-7xl mb-6 leading-[1.08] text-foreground">
-            <span className="block text-2xl sm:text-4xl font-semibold mb-3 text-muted-foreground">
+          <h1 className="mx-auto max-w-4xl text-3xl font-extrabold tracking-tight sm:text-5xl lg:text-7xl mb-5 sm:mb-6 leading-[1.08] text-foreground">
+            <span className="block text-lg sm:text-2xl md:text-4xl font-semibold mb-2 sm:mb-3 text-muted-foreground">
               {t(locale, 'landing.heroHeadlineStatic')}
             </span>
             <TypewriterHeadline />
           </h1>
 
-          <p className="mx-auto max-w-2xl text-lg text-muted-foreground mb-12 leading-relaxed">
+          <p className="mx-auto max-w-2xl text-sm sm:text-lg text-muted-foreground mb-8 sm:mb-12 leading-relaxed">
             {t(locale, 'landing.heroSubtitle')}
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8 sm:mb-12 w-full sm:w-auto">
             <Button
-              className="bg-brand-green text-black hover:bg-brand-green/90 px-8 py-3.5 h-auto rounded-xl text-base font-bold transition-all duration-200 hover:shadow-[0_4px_24px_rgba(16,185,129,0.25)] active:scale-[0.98]"
+              className="w-full sm:w-auto bg-brand-green text-black hover:bg-brand-green/90 px-8 py-3.5 h-auto rounded-xl text-base font-bold transition-all duration-200 hover:shadow-[0_4px_24px_rgba(16,185,129,0.25)] active:scale-[0.98]"
               asChild
             >
               <Link href="/sites">
@@ -87,7 +87,7 @@ export function HeroSection() {
             {isLoggedIn ? (
               <Button
                 variant="outline"
-                className="bg-card border-border text-foreground hover:border-brand-green/40 hover:bg-muted px-8 py-3.5 h-auto rounded-xl text-base font-bold transition-all duration-200 shadow-sm"
+                className="w-full sm:w-auto bg-card border-border text-foreground hover:border-brand-green/40 hover:bg-muted px-8 py-3.5 h-auto rounded-xl text-base font-bold transition-all duration-200 shadow-sm"
                 asChild
               >
                 <Link href="/dashboard">
@@ -98,7 +98,7 @@ export function HeroSection() {
             ) : (
               <Button
                 variant="outline"
-                className="bg-card border-border text-foreground hover:border-brand-green/40 hover:bg-muted px-8 py-3.5 h-auto rounded-xl text-base font-bold transition-all duration-200 shadow-sm"
+                className="w-full sm:w-auto bg-card border-border text-foreground hover:border-brand-green/40 hover:bg-muted px-8 py-3.5 h-auto rounded-xl text-base font-bold transition-all duration-200 shadow-sm"
                 asChild
               >
                 <Link href="/signup">
@@ -114,7 +114,7 @@ export function HeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-muted-foreground"
+            className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:gap-x-8 sm:gap-y-3 text-xs sm:text-sm text-muted-foreground"
           >
             {[
               t(locale, 'landing.trustFree'),
@@ -136,12 +136,12 @@ export function HeroSection() {
       </div>
 
       {/* ── Area 2: Interactive Flow showcase (dedicated space below text) ── */}
-      <div className="relative h-[640px] lg:h-[720px] -mt-8">
+      <div className="relative h-[280px] sm:h-[480px] lg:h-[720px] -mt-4 sm:-mt-8">
         {/* Top fade: blend into text area */}
         <div className="absolute inset-x-0 top-0 h-10 z-10 bg-gradient-to-b from-background/70 to-transparent pointer-events-none" />
         <InteractiveHeroFlow />
         {/* 섹션 범례 — 하단 중앙 HTML 오버레이 */}
-        <div className="absolute bottom-24 inset-x-0 z-20 flex items-center justify-center gap-6 pointer-events-none">
+        <div className="absolute bottom-8 sm:bottom-24 inset-x-0 z-20 flex items-center justify-center gap-3 sm:gap-6 pointer-events-none">
           {([
             { label: 'DATABASE', color: 'text-amber-400' },
             { label: 'AUTH',     color: 'text-emerald-400' },
@@ -151,7 +151,7 @@ export function HeroSection() {
           ] as const).map(item => (
             <span
               key={item.label}
-              className={`text-[11px] font-bold tracking-[0.22em] opacity-60 dark:opacity-50 ${item.color}`}
+              className={`text-[8px] sm:text-[11px] font-bold tracking-[0.15em] sm:tracking-[0.22em] opacity-60 dark:opacity-50 ${item.color}`}
             >
               {item.label}
             </span>

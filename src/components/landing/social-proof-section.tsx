@@ -46,7 +46,7 @@ export function SocialProofSection() {
   };
 
   return (
-    <section className="py-20 relative overflow-hidden" id="social-proof">
+    <section className="py-10 sm:py-14 lg:py-20 relative overflow-hidden" id="social-proof">
       {/* Section dividers */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-background to-transparent pointer-events-none" />
@@ -58,7 +58,7 @@ export function SocialProofSection() {
           <p className="text-center text-xs text-muted-foreground pb-6 font-semibold tracking-widest uppercase">
             {locale === 'ko' ? '바이브코더를 위한 서비스 연결 허브' : 'The Infrastructure Hub for Vibe Coders'}
           </p>
-          <div className="grid grid-cols-2 gap-4 py-6 md:grid-cols-4 md:gap-6 bg-card rounded-2xl border border-border shadow-sm">
+          <div className="grid grid-cols-2 gap-3 py-4 sm:py-6 md:grid-cols-4 md:gap-6 bg-card rounded-2xl border border-border shadow-sm">
             {stats.map((stat, i) => {
               const Icon = stat.icon;
               const colors = statColorClasses[stat.color];
@@ -71,7 +71,7 @@ export function SocialProofSection() {
                     <Icon className="w-5 h-5" />
                   </div>
                   <div className="text-center">
-                    <p className={`text-3xl font-black font-mono ${colors.valueText} tracking-tighter`}>
+                    <p className={`text-2xl sm:text-3xl font-black font-mono ${colors.valueText} tracking-tighter`}>
                       <AnimatedCounter end={stat.value} suffix={stat.suffix} />
                     </p>
                     <p className="text-[11px] text-muted-foreground mt-1 uppercase tracking-wider font-semibold">{stat.label}</p>
@@ -83,10 +83,10 @@ export function SocialProofSection() {
         </ScrollReveal>
 
         {/* Testimonials */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="mt-10 sm:mt-16 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
           {testimonials.map((item, i) => (
             <ScrollReveal key={item.nameKey} delay={i * 0.12}>
-              <div className="group relative rounded-2xl border border-border bg-card p-7 h-full flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-brand-blue/25 overflow-hidden">
+              <div className="group relative rounded-2xl border border-border bg-card p-5 sm:p-7 h-full flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-brand-blue/25 overflow-hidden">
                 <div className="absolute top-0 right-0 p-5 opacity-[0.06] group-hover:opacity-[0.1] transition-opacity duration-300 text-brand-blue pointer-events-none">
                   <Quote className="w-20 h-20 rotate-12" />
                 </div>

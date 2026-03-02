@@ -312,7 +312,7 @@ export function TemplateCard({ template, isSelected, locale, onSelect }: Templat
     >
       <CardContent className="p-0">
         {/* Preview area */}
-        <div className="h-36 rounded-t-xl bg-muted/50 flex items-center justify-center relative overflow-hidden px-6">
+        <div className="h-28 sm:h-36 rounded-t-xl bg-muted/50 flex items-center justify-center relative overflow-hidden px-4 sm:px-6">
           <WireframeSVG slug={template.slug} />
 
           {/* Recommended badge — top left */}
@@ -339,8 +339,8 @@ export function TemplateCard({ template, isSelected, locale, onSelect }: Templat
         </div>
 
         {/* Info */}
-        <div className="p-4 pt-3">
-          <h4 className="font-semibold text-sm">
+        <div className="p-3 sm:p-4 pt-2.5 sm:pt-3">
+          <h4 className="font-semibold text-xs sm:text-sm">
             {locale === 'ko' ? template.name_ko : template.name}
           </h4>
           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
