@@ -332,6 +332,62 @@ export function TemplatePickerStep({
         </div>
       )}
 
+      {/* Site name + Deploy button — 상단 배치로 즉시 배포 가능 */}
+      <div className="bg-card border rounded-xl p-4 sm:p-5 shadow-sm space-y-3">
+        <Label htmlFor="site-name" className="text-base font-semibold">
+          {t(locale, 'templatePicker.siteName')}
+        </Label>
+        <div className="flex gap-2 items-start">
+          <div className="flex-1 space-y-1.5">
+            <div className="relative">
+              {TemplateIcon && (
+                <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <TemplateIcon className="h-4 w-4" />
+                </div>
+              )}
+              <Input
+                id="site-name"
+                placeholder={t(locale, 'templatePicker.siteNamePlaceholder')}
+                value={siteName}
+                onChange={(e) => handleSiteNameChange(e.target.value)}
+                className={`${TemplateIcon ? 'pl-10' : ''} ${siteNameError ? 'border-red-500' : ''}`}
+              />
+            </div>
+            {siteNameError && (
+              <p className="text-sm text-red-500">{siteNameError}</p>
+            )}
+          </div>
+          <Button
+            onClick={handleNext}
+            disabled={!canProceed || isDeploying}
+            size="default"
+            className="gap-2 shrink-0 h-10"
+          >
+            {isDeploying ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="hidden sm:inline">{t(locale, 'templatePicker.deploying')}</span>
+              </>
+            ) : (
+              <>
+                <Rocket className="h-4 w-4" />
+                <span>원클릭 배포</span>
+              </>
+            )}
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {t(locale, 'templatePicker.siteNameHint')}
+        </p>
+        {/* Live URL preview */}
+        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
+          <Globe className="h-3.5 w-3.5 flex-shrink-0" />
+          <span className="font-mono truncate">
+            https://{urlUsername}.github.io/{siteName || t(locale, 'templatePicker.urlPlaceholder')}
+          </span>
+        </div>
+      </div>
+
       {/* Template selection */}
       <div>
         <Label className="text-base font-semibold mb-3 block">
@@ -360,57 +416,6 @@ export function TemplatePickerStep({
             ))}
           </AnimatePresence>
         </div>
-      </div>
-
-      {/* Site name input with live URL preview */}
-      <div className="space-y-2">
-        <Label htmlFor="site-name" className="text-base font-semibold">
-          {t(locale, 'templatePicker.siteName')}
-        </Label>
-        <div className="relative">
-          {TemplateIcon && (
-            <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-              <TemplateIcon className="h-4 w-4" />
-            </div>
-          )}
-          <Input
-            id="site-name"
-            placeholder={t(locale, 'templatePicker.siteNamePlaceholder')}
-            value={siteName}
-            onChange={(e) => handleSiteNameChange(e.target.value)}
-            className={`${TemplateIcon ? 'pl-10' : ''} ${siteNameError ? 'border-red-500' : ''}`}
-          />
-        </div>
-        <p className="text-xs text-muted-foreground">
-          {t(locale, 'templatePicker.siteNameHint')}
-        </p>
-        {siteNameError && (
-          <p className="text-sm text-red-500">{siteNameError}</p>
-        )}
-        {/* Live URL preview */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
-          <Globe className="h-3.5 w-3.5 flex-shrink-0" />
-          <span className="font-mono truncate">
-            https://{urlUsername}.github.io/{siteName || t(locale, 'templatePicker.urlPlaceholder')}
-          </span>
-        </div>
-      </div>
-
-      {/* Deploy button */}
-      <div className="flex justify-end">
-        <Button onClick={handleNext} disabled={!canProceed || isDeploying} size="lg" className="gap-2 w-full sm:w-auto">
-          {isDeploying ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {t(locale, 'templatePicker.deploying')}
-            </>
-          ) : (
-            <>
-              <Rocket className="h-4 w-4" />
-              원클릭 배포
-            </>
-          )}
-        </Button>
       </div>
     </div>
   );
