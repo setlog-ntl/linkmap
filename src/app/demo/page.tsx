@@ -118,7 +118,7 @@ async function fetchDemoProjects(): Promise<ProjectWithServices[]> {
     if (primaryProfile) {
       const { data } = await admin
         .from('projects')
-        .select('*, project_services(*, service:services(*))')
+        .select('*, project_services!project_services_project_id_fkey(*, service:services(*))')
         .eq('user_id', primaryProfile.id)
         .is('deleted_at', null)
         .order('updated_at', { ascending: false })
