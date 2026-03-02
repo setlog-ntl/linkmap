@@ -92,6 +92,9 @@ export const queryKeys = {
   trash: {
     all: ['trash'] as const,
   },
+  admin: {
+    users: ['admin', 'users'] as const,
+  },
   aiConfig: {
     global: ['ai-config', 'global'] as const,
     personas: ['ai-config', 'personas'] as const,

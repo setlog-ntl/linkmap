@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, Globe, Settings, LogOut, Bot, User, GitBranch, Wrench } from 'lucide-react';
+import { Search, Globe, Settings, LogOut, Bot, User, GitBranch, Wrench, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -133,6 +133,14 @@ export function AppHeader({ projectName, profile }: AppHeaderProps) {
                   <Link href="/admin/ai-config">
                     <Bot className="mr-2 h-4 w-4" />
                     {t(locale, 'nav.adminAi')}
+                  </Link>
+                </DropdownMenuItem>
+              )}
+              {profile.is_admin && (
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/users">
+                    <Users className="mr-2 h-4 w-4" />
+                    사용자 관리
                   </Link>
                 </DropdownMenuItem>
               )}

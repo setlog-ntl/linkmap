@@ -103,7 +103,8 @@ export type AuditAction =
   | 'service_cost.api_key_save'
   | 'cost_attachment.upload'
   | 'cost_attachment.delete'
-  | 'cost_attachment.link_add';
+  | 'cost_attachment.link_add'
+  | 'admin.users_stats_view';
 
 interface AuditLogEntry {
   action: AuditAction;
