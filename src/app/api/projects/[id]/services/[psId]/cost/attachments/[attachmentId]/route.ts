@@ -39,13 +39,15 @@ export async function DELETE(request: NextRequest, { params }: Params) {
 
   if (!attachment) return notFoundError('첨부 파일');
 
-  // Storage에서 파일 삭제
-  const { error: storageError } = await supabase.storage
-    .from('cost-receipts')
-    .remove([attachment.storage_path]);
+  // storage_path가 있을 때만 Storage에서 파일 삭제 (링크 첨부는 skip)
+  if (attachment.storage_path) {
+    const { error: storageError } = await supabase.storage
+      .from('cost-receipts')
+      .remove([attachment.storage_path]);
 
-  if (storageError) {
-    return serverError(`Storage 파일 삭제 실패: ${storageError.message}`);
+    if (storageError) {
+      return serverError(`Storage 파일 삭제 실패: ${storageError.message}`);
+    }
   }
 
   // DB 레코드 삭제

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createAttachmentMetaSchema, ALLOWED_ATTACHMENT_MIME_TYPES, MAX_ATTACHMENT_SIZE } from '@/lib/validations/cost';
+import { createAttachmentMetaSchema, addLinkSchema, ALLOWED_ATTACHMENT_MIME_TYPES, MAX_ATTACHMENT_SIZE } from '@/lib/validations/cost';
 import {
   unauthorizedError,
   notFoundError,
@@ -58,25 +58,31 @@ export async function GET(request: NextRequest, { params }: Params) {
 
   if (error) return serverError(error.message);
 
-  // 각 파일에 서명된 URL 생성 (60분 유효)
+  // 각 파일에 서명된 URL 생성 (60분 유효, 파일 첨부만)
   const attachments: CostAttachment[] = await Promise.all(
     (rows ?? []).map(async (row) => {
-      const { data: signed } = await supabase.storage
-        .from('cost-receipts')
-        .createSignedUrl(row.storage_path, 3600);
+      let signedUrl: string | undefined;
+      if (row.storage_path) {
+        const { data: signed } = await supabase.storage
+          .from('cost-receipts')
+          .createSignedUrl(row.storage_path, 3600);
+        signedUrl = signed?.signedUrl ?? undefined;
+      }
 
       return {
         id: row.id,
         projectServiceId: row.project_service_id,
         fileName: row.file_name,
-        storagePath: row.storage_path,
-        fileSize: row.file_size,
-        fileType: row.file_type,
+        storagePath: row.storage_path ?? null,
+        fileSize: row.file_size ?? null,
+        fileType: row.file_type ?? null,
         attachmentType: row.attachment_type,
         notes: row.notes,
         uploadedBy: row.uploaded_by,
         createdAt: row.created_at,
-        signedUrl: signed?.signedUrl ?? undefined,
+        linkUrl: row.link_url ?? null,
+        linkTitle: row.link_title ?? null,
+        signedUrl,
       };
     })
   );
@@ -84,7 +90,7 @@ export async function GET(request: NextRequest, { params }: Params) {
   return NextResponse.json(attachments);
 }
 
-// ── POST: 파일 업로드 ──────────────────────────────────────────────────────
+// ── POST: 파일 업로드 또는 링크 저장 ─────────────────────────────────────
 export async function POST(request: NextRequest, { params }: Params) {
   const { id, psId } = await params;
   const supabase = await createClient();
@@ -97,7 +103,82 @@ export async function POST(request: NextRequest, { params }: Params) {
   const ps = await verifyOwnership(supabase, user.id, id, psId);
   if (!ps) return notFoundError('프로젝트 서비스');
 
-  // FormData 파싱
+  const contentType = request.headers.get('content-type') ?? '';
+
+  // ── JSON 요청 → 링크 저장 ────────────────────────────────────────────
+  if (contentType.includes('application/json')) {
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return validationError({ issues: [{ message: '요청 본문을 읽을 수 없습니다' }] } as never);
+    }
+
+    const parsed = addLinkSchema.safeParse(body);
+    if (!parsed.success) return validationError(parsed.error);
+
+    const { link_url, link_title, attachment_type, notes } = parsed.data;
+
+    // file_name: 제목 우선, 없으면 URL 호스트명
+    let fileName = link_title ?? '';
+    if (!fileName) {
+      try {
+        fileName = new URL(link_url).hostname;
+      } catch {
+        fileName = link_url.slice(0, 100);
+      }
+    }
+
+    const { data: attachment, error: dbError } = await supabase
+      .from('cost_attachments')
+      .insert({
+        project_service_id: psId,
+        file_name: fileName,
+        storage_path: null,
+        file_size: null,
+        file_type: null,
+        attachment_type,
+        notes: notes ?? null,
+        uploaded_by: user.id,
+        link_url,
+        link_title: link_title ?? null,
+      })
+      .select()
+      .single();
+
+    if (dbError) return serverError(dbError.message);
+
+    await logAudit(user.id, {
+      action: 'cost_attachment.link_add',
+      resourceType: 'cost_attachment',
+      resourceId: attachment.id,
+      details: {
+        project_id: id,
+        project_service_id: psId,
+        link_url,
+        attachment_type,
+      },
+    });
+
+    const result: CostAttachment = {
+      id: attachment.id,
+      projectServiceId: attachment.project_service_id,
+      fileName: attachment.file_name,
+      storagePath: null,
+      fileSize: null,
+      fileType: null,
+      attachmentType: attachment.attachment_type,
+      notes: attachment.notes,
+      uploadedBy: attachment.uploaded_by,
+      createdAt: attachment.created_at,
+      linkUrl: attachment.link_url ?? null,
+      linkTitle: attachment.link_title ?? null,
+    };
+
+    return NextResponse.json(result, { status: 201 });
+  }
+
+  // ── FormData 요청 → 파일 업로드 ──────────────────────────────────────
   let formData: FormData;
   try {
     formData = await request.formData();
@@ -193,9 +274,9 @@ export async function POST(request: NextRequest, { params }: Params) {
     id: attachment.id,
     projectServiceId: attachment.project_service_id,
     fileName: attachment.file_name,
-    storagePath: attachment.storage_path,
-    fileSize: attachment.file_size,
-    fileType: attachment.file_type,
+    storagePath: attachment.storage_path ?? null,
+    fileSize: attachment.file_size ?? null,
+    fileType: attachment.file_type ?? null,
     attachmentType: attachment.attachment_type,
     notes: attachment.notes,
     uploadedBy: attachment.uploaded_by,
