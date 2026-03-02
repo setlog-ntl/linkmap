@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 
+import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/app-sidebar';
@@ -17,14 +18,15 @@ export default async function DashboardLayout({
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      profile = data ?? null;
+    if (!user) {
+      redirect('/signup');
     }
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    profile = data ?? null;
   } catch {
     profile = null;
   }

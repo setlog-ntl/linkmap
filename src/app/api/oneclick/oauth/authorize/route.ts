@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { unauthorizedError, apiError } from '@/lib/api/errors';
+import { apiError } from '@/lib/api/errors';
 import { randomBytes } from 'crypto';
 
 const GITHUB_SCOPES = ['repo', 'read:org', 'read:user', 'workflow'];
@@ -13,7 +13,9 @@ const GITHUB_SCOPES = ['repo', 'read:org', 'read:user', 'workflow'];
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return unauthorizedError();
+  if (!user) {
+    return NextResponse.redirect(new URL('/signup?redirect=/sites/new', request.nextUrl.origin));
+  }
 
   const clientId = process.env.GITHUB_OAUTH_CLIENT_ID;
   if (!clientId) return apiError('OAuth 설정이 완료되지 않았습니다. 관리자에게 문의하세요.', 503);
