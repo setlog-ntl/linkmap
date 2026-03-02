@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Pencil, ExternalLink } from 'lucide-react';
+import { ChevronDown, ChevronRight, Pencil, BarChart2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -170,19 +170,19 @@ export function CostServiceList({ projectId, services, budgetCurrency, usdToKrw 
 
                 <ServiceIcon serviceId={entry.serviceSlug} size={20} />
 
-                {/* 서비스명 + 외부 링크 */}
-                <span className="flex items-center gap-1 flex-1 min-w-0">
+                {/* 서비스명 + 사용량 대시보드 링크 */}
+                <span className="flex items-center gap-2 flex-1 min-w-0">
                   <span className="text-sm font-medium truncate">{entry.serviceName}</span>
                   {costUrl && (
                     <a
                       href={costUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      title={`${entry.serviceName} 사용량 페이지`}
-                      className="shrink-0 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
                       onClick={(e) => e.stopPropagation()}
+                      className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs text-muted-foreground hover:text-brand-blue hover:bg-brand-blue/10 transition-colors"
                     >
-                      <ExternalLink className="h-3 w-3" />
+                      <BarChart2 className="h-3 w-3" />
+                      사용량 확인
                     </a>
                   )}
                 </span>

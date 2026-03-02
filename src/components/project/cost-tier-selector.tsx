@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ExternalLink } from 'lucide-react';
+import { Receipt, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CostTierSelectorProps {
@@ -130,10 +130,11 @@ export function CostTierSelector({
           href={pricingUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs text-brand-blue hover:text-brand-blue/80 transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-xs text-muted-foreground hover:text-foreground hover:border-brand-blue/40 hover:bg-brand-blue/5 transition-colors w-fit"
         >
-          <ExternalLink className="h-3 w-3" />
+          <Receipt className="h-3.5 w-3.5 text-brand-blue" />
           공식 요금표 보기
+          <ExternalLink className="h-3 w-3 opacity-50" />
         </a>
       )}
 
