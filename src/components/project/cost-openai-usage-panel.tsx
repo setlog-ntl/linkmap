@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { RefreshCw, Key, CheckCircle2, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { RefreshCw, Key, CheckCircle2, AlertCircle, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -131,31 +131,42 @@ export function CostOpenAIUsagePanel({
 
       {/* API Key 입력 (미연결 시 또는 변경 시) */}
       {(showApiKeyInput || (!usage?.hasApiKey)) && (
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Key className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input
-              type="password"
-              placeholder="sk-proj-..."
-              value={apiKeyInput}
-              onChange={(e) => setApiKeyInput(e.target.value)}
-              className="h-8 pl-8 text-xs font-mono"
-              autoComplete="off"
-            />
+        <div className="space-y-1.5">
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Key className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                type="password"
+                placeholder="sk-proj-..."
+                value={apiKeyInput}
+                onChange={(e) => setApiKeyInput(e.target.value)}
+                className="h-8 pl-8 text-xs font-mono"
+                autoComplete="off"
+              />
+            </div>
+            {showApiKeyInput && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 text-xs"
+                onClick={() => {
+                  setShowApiKeyInput(false);
+                  setApiKeyInput('');
+                }}
+              >
+                취소
+              </Button>
+            )}
           </div>
-          {showApiKeyInput && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 text-xs"
-              onClick={() => {
-                setShowApiKeyInput(false);
-                setApiKeyInput('');
-              }}
-            >
-              취소
-            </Button>
-          )}
+          <a
+            href="https://platform.openai.com/api-keys"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ExternalLink className="h-3 w-3" />
+            OpenAI API Key 발급 · 확인
+          </a>
         </div>
       )}
 
