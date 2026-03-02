@@ -8,67 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useOpenAIUsage, useSyncOpenAIUsage } from '@/lib/queries/costs';
-import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
-import type { ClientUsageData } from '@/lib/validations/cost';
-
-// ────────────────────────────────────────────────────────────
-// Supabase Edge Function을 통해 OpenAI 비용 조회
-// - Cloudflare Workers 지역 제한 우회 (Deno Deploy는 제한 없음)
-// - /v1/organization/costs (Admin Key 전용, CORS 미지원 → Edge Function 프록시)
-// ────────────────────────────────────────────────────────────
-type CostsResponse = {
-  data?: Array<{
-    results?: Array<{
-      amount?: { value?: number; currency?: string };
-      line_item?: string;
-    }>;
-  }>;
-  has_more?: boolean;
-};
-
-async function fetchOpenAICostsFromBrowser(
-  apiKey: string
-): Promise<ClientUsageData> {
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startTime = Math.floor(startOfMonth.getTime() / 1000);
-  const endTime = Math.floor(now.getTime() / 1000);
-
-  const supabase = createClient();
-  const { data, error } = await supabase.functions.invoke<CostsResponse>('openai-costs', {
-    body: { api_key: apiKey, start_time: startTime, end_time: endTime },
-  });
-
-  if (error) {
-    const msg = (error as { message?: string }).message ?? 'OpenAI 비용 조회 실패';
-    throw new Error(msg);
-  }
-
-  let totalCost = 0;
-  const byLineItemMap = new Map<string, number>();
-
-  for (const bucket of data?.data ?? []) {
-    for (const result of bucket.results ?? []) {
-      const value = result.amount?.value ?? 0;
-      totalCost += value;
-      const key = result.line_item ?? 'Other';
-      byLineItemMap.set(key, (byLineItemMap.get(key) ?? 0) + value);
-    }
-  }
-
-  return {
-    total_cost: Math.round(totalCost * 10000) / 10000,
-    period_start: startOfMonth.toISOString(),
-    period_end: now.toISOString(),
-    by_model: Array.from(byLineItemMap.entries()).map(([modelId, cost]) => ({
-      modelId,
-      cost: Math.round(cost * 10000) / 10000,
-      inputTokens: 0,
-      outputTokens: 0,
-    })),
-  };
-}
 
 interface CostOpenAIUsagePanelProps {
   projectId: string;
@@ -110,48 +50,31 @@ export function CostOpenAIUsagePanel({
   );
   const syncMutation = useSyncOpenAIUsage(projectId);
 
-  const [isBrowserFetching, setIsBrowserFetching] = useState(false);
-
-  const handleSync = async () => {
+  const handleSync = () => {
     // 입력된 키가 없으면 → 입력 필드 노출 (재입력 요청)
     if (!apiKeyInput) {
       setShowApiKeyInput(true);
       if (usage?.hasApiKey) {
-        toast.info('재동기화하려면 API Key를 다시 입력해주세요.', {
-          description: '브라우저에서 직접 조회하여 지역 제한을 우회합니다.',
-        });
+        toast.info('재동기화하려면 Admin Key를 다시 입력해주세요.');
       }
       return;
     }
 
-    // 항상 브라우저에서 직접 OpenAI 호출 (서버 측 지역 제한 우회)
-    setIsBrowserFetching(true);
-    try {
-      const usageData = await fetchOpenAICostsFromBrowser(apiKeyInput);
-      syncMutation.mutate(
-        { projectServiceId, apiKey: apiKeyInput, usageData },
-        {
-          onSuccess: (result) => {
-            toast.success(
-              `동기화 완료: ${result.totalCost != null ? formatCost(result.totalCost) : '$0'}`
-            );
-            setShowApiKeyInput(false);
-            setApiKeyInput('');
-            setShowBreakdown(true);
-          },
-          onError: (err) => toast.error(err.message),
-        }
-      );
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'OpenAI API 호출 실패';
-      // 403 / 지역 제한 시 수동 입력 안내
-      toast.error('OpenAI 사용량을 가져올 수 없습니다.', {
-        description: msg,
-        duration: 8000,
-      });
-    } finally {
-      setIsBrowserFetching(false);
-    }
+    // 서버 → Supabase Edge Function → OpenAI 경유 (지역 제한 우회)
+    syncMutation.mutate(
+      { projectServiceId, apiKey: apiKeyInput },
+      {
+        onSuccess: (result) => {
+          toast.success(
+            `동기화 완료: ${result.totalCost != null ? formatCost(result.totalCost) : '$0'}`
+          );
+          setShowApiKeyInput(false);
+          setApiKeyInput('');
+          setShowBreakdown(true);
+        },
+        onError: (err) => toast.error(err.message),
+      }
+    );
   };
 
   if (isLoading) {
@@ -200,12 +123,12 @@ export function CostOpenAIUsagePanel({
           size="sm"
           className="ml-auto h-7 text-xs gap-1.5"
           onClick={handleSync}
-          disabled={syncMutation.isPending || isBrowserFetching}
+          disabled={syncMutation.isPending}
         >
           <RefreshCw
-            className={cn('h-3.5 w-3.5', (syncMutation.isPending || isBrowserFetching) && 'animate-spin')}
+            className={cn('h-3.5 w-3.5', syncMutation.isPending && 'animate-spin')}
           />
-          {syncMutation.isPending || isBrowserFetching ? '동기화 중...' : '동기화'}
+          {syncMutation.isPending ? '동기화 중...' : '동기화'}
         </Button>
       </div>
 

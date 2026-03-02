@@ -1,6 +1,6 @@
 // POST /api/projects/[id]/services/[psId]/usage/sync
 // OpenAI 실제 사용량 동기화
-// 브라우저에서 직접 OpenAI를 조회한 결과를 저장 (서버 측 Cloudflare 지역 제한 우회)
+// 흐름: 브라우저 → Next.js 라우트(인증) → Supabase Edge Function(service_role) → OpenAI
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
@@ -17,6 +17,70 @@ import { syncOpenAIUsageSchema } from '@/lib/validations/cost';
 import type { OpenAIUsageSummary } from '@/types';
 
 export const dynamic = 'force-dynamic';
+
+type CostsResponse = {
+  data?: Array<{
+    results?: Array<{
+      amount?: { value?: number };
+      line_item?: string;
+    }>;
+  }>;
+};
+
+async function fetchCostsViaEdgeFunction(
+  apiKey: string,
+  startTime: number,
+  endTime: number
+): Promise<{ totalCost: number; periodStart: string; periodEnd: string; byModel: { modelId: string; cost: number; inputTokens: number; outputTokens: number }[] }> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Supabase 환경 변수가 설정되지 않았습니다');
+  }
+
+  const res = await fetch(`${supabaseUrl}/functions/v1/openai-costs`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${serviceRoleKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ api_key: apiKey, start_time: startTime, end_time: endTime }),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({})) as { error?: string };
+    throw new Error(body.error ?? `OpenAI 비용 조회 실패 (${res.status})`);
+  }
+
+  const data = (await res.json()) as CostsResponse;
+
+  let totalCost = 0;
+  const byLineItemMap = new Map<string, number>();
+  for (const bucket of data.data ?? []) {
+    for (const result of bucket.results ?? []) {
+      const value = result.amount?.value ?? 0;
+      totalCost += value;
+      const key = result.line_item ?? 'Other';
+      byLineItemMap.set(key, (byLineItemMap.get(key) ?? 0) + value);
+    }
+  }
+
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  return {
+    totalCost: Math.round(totalCost * 10000) / 10000,
+    periodStart: startOfMonth.toISOString(),
+    periodEnd: now.toISOString(),
+    byModel: Array.from(byLineItemMap.entries()).map(([modelId, cost]) => ({
+      modelId,
+      cost: Math.round(cost * 10000) / 10000,
+      inputTokens: 0,
+      outputTokens: 0,
+    })),
+  };
+}
 
 export async function POST(
   request: NextRequest,
@@ -36,12 +100,9 @@ export async function POST(
   const parsed = syncOpenAIUsageSchema.safeParse(body);
   if (!parsed.success) return validationError(parsed.error);
 
-  // usage_data 필수 — 서버에서 직접 OpenAI 호출 금지 (Cloudflare Workers 지역 제한)
-  if (!parsed.data.usage_data) {
-    return apiError(
-      'usage_data가 필요합니다. 브라우저에서 직접 OpenAI 사용량을 조회한 후 전달해주세요.',
-      400
-    );
+  // api_key 또는 usage_data 중 하나는 필수
+  if (!parsed.data.api_key && !parsed.data.usage_data) {
+    return apiError('api_key 또는 usage_data가 필요합니다.', 400);
   }
 
   // 3. 소유권 확인
@@ -69,7 +130,7 @@ export async function POST(
 
   if (!serviceId) return serverError('서비스 정보를 찾을 수 없습니다');
 
-  // 4. API Key 저장 (요청에 포함된 경우만 — 저장 목적, OpenAI 호출에는 사용 안 함)
+  // 4. API Key 저장 (요청에 포함된 경우만)
   if (parsed.data.api_key) {
     const apiKey = parsed.data.api_key;
     const encryptedKey = encrypt(apiKey);
@@ -124,14 +185,37 @@ export async function POST(
     });
   }
 
-  // 5. 브라우저에서 전달받은 사용량 데이터 사용 (usage_data 필수 여부는 step 2에서 확인)
-  const ud = parsed.data.usage_data!;
-  const usageResult = {
-    totalCost: ud.total_cost,
-    periodStart: ud.period_start,
-    periodEnd: ud.period_end,
-    byModel: ud.by_model,
+  // 5. 사용량 데이터 확보
+  // usage_data가 있으면 바로 사용, 없으면 Supabase Edge Function 경유로 OpenAI 조회
+  let usageResult: {
+    totalCost: number;
+    periodStart: string;
+    periodEnd: string;
+    byModel: { modelId: string; cost: number; inputTokens: number; outputTokens: number }[];
   };
+
+  if (parsed.data.usage_data) {
+    const ud = parsed.data.usage_data;
+    usageResult = {
+      totalCost: ud.total_cost,
+      periodStart: ud.period_start,
+      periodEnd: ud.period_end,
+      byModel: ud.by_model,
+    };
+  } else {
+    // api_key만 있는 경우 → Supabase Edge Function 경유 (지역 제한 우회)
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startTime = Math.floor(startOfMonth.getTime() / 1000);
+    const endTime = Math.floor(now.getTime() / 1000);
+
+    try {
+      usageResult = await fetchCostsViaEdgeFunction(parsed.data.api_key!, startTime, endTime);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'OpenAI 비용 조회 실패';
+      return serverError(msg);
+    }
+  }
 
   // 6. project_services 업데이트 (actual_cost_monthly, usage_synced_at)
   const { error: updateError } = await supabase
