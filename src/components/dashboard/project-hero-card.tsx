@@ -136,7 +136,7 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
         {/* Project avatar with icon picker */}
         <ProjectIconPicker
           projectId={project.id}
-          projectName={project.name}
+          projectName={nameValue || project.name}
           currentIconType={project.icon_type}
           currentIconValue={project.icon_value}
           onSelect={handleIconSelect}
