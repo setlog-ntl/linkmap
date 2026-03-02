@@ -36,10 +36,13 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
   const queryClient = useQueryClient();
   const { locale } = useLocaleStore();
 
+  const [editingName, setEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState(project.name);
   const [editingDesc, setEditingDesc] = useState(false);
   const [descValue, setDescValue] = useState(project.description || '');
   const [editingLink, setEditingLink] = useState(false);
   const [linkValue, setLinkValue] = useState(project.link_url || '');
+  const nameRef = useRef<HTMLInputElement>(null);
   const descRef = useRef<HTMLInputElement>(null);
   const linkRef = useRef<HTMLInputElement>(null);
 
@@ -62,6 +65,25 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
     );
   };
 
+  const cancelName = () => {
+    setNameValue(project.name);
+    setEditingName(false);
+  };
+
+  const saveName = () => {
+    const trimmed = nameValue.trim();
+    if (!trimmed) { setNameValue(project.name); setEditingName(false); return; }
+    if (trimmed === project.name) { setEditingName(false); return; }
+    setEditingName(false);
+    updateProject.mutate(
+      { id: project.id, name: trimmed },
+      {
+        onSuccess: () => { toast.success('프로젝트명이 변경되었습니다'); invalidateAll(); },
+        onError: () => { setNameValue(project.name); toast.error('저장에 실패했습니다'); },
+      },
+    );
+  };
+
   const cancelDesc = () => {
     setDescValue(project.description || '');
     setEditingDesc(false);
@@ -76,7 +98,10 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
     setEditingDesc(false);
     updateProject.mutate(
       { id: project.id, description: trimmed },
-      { onError: () => toast.error('저장에 실패했습니다') },
+      {
+        onSuccess: () => invalidateAll(),
+        onError: () => toast.error('저장에 실패했습니다'),
+      },
     );
   };
 
@@ -98,7 +123,10 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
     setEditingLink(false);
     updateProject.mutate(
       { id: project.id, link_url: trimmed },
-      { onError: () => toast.error('저장에 실패했습니다') },
+      {
+        onSuccess: () => invalidateAll(),
+        onError: () => toast.error('저장에 실패했습니다'),
+      },
     );
   };
 
@@ -119,7 +147,43 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
           {/* Name + status */}
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <h2 className="text-xl font-bold tracking-tight">{project.name}</h2>
+              {editingName ? (
+                <div className="flex items-center gap-1">
+                  <Input
+                    ref={nameRef}
+                    value={nameValue}
+                    onChange={(e) => setNameValue(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') cancelName(); }}
+                    className="h-8 text-base font-bold flex-1"
+                    placeholder="프로젝트 이름"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    className="h-8 w-8 flex items-center justify-center rounded text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 shrink-0 transition-colors"
+                    title="저장 (Enter)"
+                    onClick={saveName}
+                  >
+                    <Check className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    className="h-8 w-8 flex items-center justify-center rounded text-muted-foreground hover:bg-muted shrink-0 transition-colors"
+                    title="취소 (Esc)"
+                    onClick={cancelName}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <h2
+                  className="text-xl font-bold tracking-tight cursor-pointer hover:text-muted-foreground transition-colors"
+                  title="클릭하여 이름 변경"
+                  onClick={() => { setNameValue(project.name); setEditingName(true); }}
+                >
+                  {project.name}
+                </h2>
+              )}
 
               {/* Inline description */}
               {editingDesc ? (

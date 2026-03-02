@@ -297,12 +297,25 @@ export function CostAttachmentsPanel({
             return (
               <li
                 key={att.id}
-                className="flex items-center gap-2 p-2 rounded-md bg-muted/40 hover:bg-muted/60 transition-colors group"
+                className={cn(
+                  'flex items-center gap-2 p-2 rounded-md transition-colors group',
+                  isLink && att.linkUrl
+                    ? 'bg-brand-blue/5 hover:bg-brand-blue/10 cursor-pointer border border-brand-blue/15'
+                    : 'bg-muted/40 hover:bg-muted/60'
+                )}
+                onClick={() => {
+                  if (isLink && att.linkUrl) window.open(att.linkUrl, '_blank', 'noopener,noreferrer');
+                }}
               >
                 {getFileIcon(att.fileType)}
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium truncate">{att.fileName}</p>
+                  <p className="text-xs font-medium truncate">
+                    {att.fileName}
+                    {isLink && att.linkUrl && (
+                      <ExternalLink className="inline h-3 w-3 ml-1 text-brand-blue/60 align-middle" />
+                    )}
+                  </p>
                   <p className="text-[11px] text-muted-foreground">
                     {isLink ? linkHostname : att.fileSize != null ? formatFileSize(att.fileSize) : '-'}
                     {' · '}
@@ -319,18 +332,7 @@ export function CostAttachmentsPanel({
                 </Badge>
 
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {isLink && att.linkUrl ? (
-                    <a
-                      href={att.linkUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                      title="새 탭으로 열기"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </a>
-                  ) : att.signedUrl ? (
+                  {!isLink && att.signedUrl && (
                     <a
                       href={att.signedUrl}
                       target="_blank"
@@ -341,12 +343,12 @@ export function CostAttachmentsPanel({
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
                     </a>
-                  ) : null}
+                  )}
                   <Button
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                    onClick={() => handleDelete(att.id, att.fileName)}
+                    onClick={(e) => { e.stopPropagation(); handleDelete(att.id, att.fileName); }}
                     disabled={deletingId === att.id}
                     title="삭제"
                   >
