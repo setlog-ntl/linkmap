@@ -254,11 +254,11 @@ export default function ProjectEnvPage() {
         onSync={async () => {
           try {
             const result = await syncEnvServices.mutateAsync();
-            toast.success(
-              t(locale, 'envVar.syncSuccess')
-                .replace('{services}', String(result.added_services))
-                .replace('{connections}', String(result.auto_connections))
-            );
+            const parts: string[] = [];
+            if (result.updated_vars > 0) parts.push(`변수 ${result.updated_vars}개 서비스 매칭`);
+            if (result.added_services > 0) parts.push(`서비스 ${result.added_services}개 추가`);
+            if (result.auto_connections > 0) parts.push(`연결 ${result.auto_connections}개 생성`);
+            toast.success(parts.length > 0 ? parts.join(' · ') : '이미 최신 상태입니다');
           } catch {
             toast.error(t(locale, 'envVar.syncFailed'));
           }

@@ -219,6 +219,7 @@ export function useSyncEnvServices(projectId: string) {
 
   return useMutation({
     mutationFn: async (): Promise<{
+      updated_vars: number;
       added_services: number;
       updated_statuses: number;
       auto_connections: number;

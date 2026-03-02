@@ -4,6 +4,8 @@ import { syncEnvServicesSchema } from '@/lib/validations/env';
 import { unauthorizedError, notFoundError, validationError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 import { suggestAutoConnections } from '@/lib/connections/auto-connect';
+import { buildEnvKeyServiceMap, buildEnvPrefixServiceMap, matchEnvKeyToServiceFuzzy } from '@/lib/utils/env-service-matcher';
+import type { Service } from '@/types';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -26,15 +28,55 @@ export async function POST(request: NextRequest) {
 
   if (!project) return notFoundError('프로젝트');
 
-  // Get env vars that have a service_id assigned
-  const { data: envVars = [] } = await supabase
+  // Get all catalog services with required_env_vars for matching
+  const { data: catalogServices = [] } = await supabase
+    .from('services')
+    .select('id, name, required_env_vars');
+
+  // Build matching maps
+  const exactMap = buildEnvKeyServiceMap(catalogServices as Service[]);
+  const prefixMap = buildEnvPrefixServiceMap(catalogServices as Service[]);
+
+  // Get ALL env vars for this project (including those without service_id)
+  const { data: allEnvVars = [] } = await supabase
+    .from('environment_variables')
+    .select('id, key_name, service_id')
+    .eq('project_id', project_id)
+    .is('deleted_at', null);
+
+  // Auto-detect service_id for env vars that don't have one yet
+  const toUpdate: { id: string; service_id: string }[] = [];
+  for (const ev of allEnvVars || []) {
+    if (ev.service_id) continue; // already assigned
+    const match = matchEnvKeyToServiceFuzzy(ev.key_name, exactMap, prefixMap);
+    if (match) {
+      toUpdate.push({ id: ev.id, service_id: match.serviceId });
+    }
+  }
+
+  // Batch update service_id on matched env vars
+  let updatedVars = 0;
+  if (toUpdate.length > 0) {
+    for (const item of toUpdate) {
+      const { error } = await supabase
+        .from('environment_variables')
+        .update({ service_id: item.service_id })
+        .eq('id', item.id)
+        .eq('project_id', project_id);
+      if (!error) updatedVars++;
+    }
+  }
+
+  // Re-fetch env vars to get updated service_id assignments
+  const { data: envVarsWithService = [] } = await supabase
     .from('environment_variables')
     .select('service_id, key_name')
     .eq('project_id', project_id)
+    .is('deleted_at', null)
     .not('service_id', 'is', null);
 
   const envServiceIds = new Set(
-    (envVars || []).filter((v) => v.service_id).map((v) => v.service_id as string)
+    (envVarsWithService || []).filter((v) => v.service_id).map((v) => v.service_id as string)
   );
 
   // Get existing project_services
@@ -68,18 +110,19 @@ export async function POST(request: NextRequest) {
   }
 
   // Update existing service statuses based on required env vars completeness
-  const { data: allServices = [] } = await supabase
+  const { data: matchedServices = [] } = await supabase
     .from('services')
     .select('id, required_env_vars')
     .in('id', [...envServiceIds]);
 
-  const { data: allEnvVars = [] } = await supabase
+  const { data: latestEnvVars = [] } = await supabase
     .from('environment_variables')
     .select('key_name, service_id')
-    .eq('project_id', project_id);
+    .eq('project_id', project_id)
+    .is('deleted_at', null);
 
   const envKeysByService = new Map<string, Set<string>>();
-  for (const ev of allEnvVars || []) {
+  for (const ev of latestEnvVars || []) {
     if (!ev.service_id) continue;
     if (!envKeysByService.has(ev.service_id)) {
       envKeysByService.set(ev.service_id, new Set());
@@ -88,7 +131,7 @@ export async function POST(request: NextRequest) {
   }
 
   let updatedStatuses = 0;
-  for (const svc of allServices || []) {
+  for (const svc of matchedServices || []) {
     const requiredKeys = (svc.required_env_vars as { name: string }[] | null)?.map(
       (v) => v.name
     ) ?? [];
@@ -147,6 +190,7 @@ export async function POST(request: NextRequest) {
     resourceType: 'project',
     resourceId: project_id,
     details: {
+      updated_vars: updatedVars,
       added_services: addedServices,
       updated_statuses: updatedStatuses,
       auto_connections: autoConnections,
@@ -154,6 +198,7 @@ export async function POST(request: NextRequest) {
   });
 
   return NextResponse.json({
+    updated_vars: updatedVars,
     added_services: addedServices,
     updated_statuses: updatedStatuses,
     auto_connections: autoConnections,
