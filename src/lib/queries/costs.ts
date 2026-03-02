@@ -3,6 +3,7 @@ import { queryKeys } from './keys';
 import type { ProjectCostSummary, OpenAIUsageSummary, CostAttachment } from '@/types';
 import type { UpdateServiceCostInput, ClientUsageData, AddLinkInput } from '@/lib/validations/cost';
 import type { AttachmentType } from '@/types/dashboard';
+import type { CostReportResult } from '@/lib/validations/ai-cost-report';
 
 /** USD → KRW 환율 조회 (하루 1회 업데이트, 24h 캐시) */
 export function useExchangeRate() {
@@ -205,6 +206,26 @@ export function useAddCostLink(projectId: string) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.costs.attachments(projectServiceId),
       });
+    },
+  });
+}
+
+/** AI 비용 분석 리포트 생성 */
+export function useGenerateCostReport(projectId: string) {
+  return useMutation({
+    mutationFn: async (): Promise<CostReportResult> => {
+      const res = await fetch('/api/ai/cost-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ project_id: projectId }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        if ((json as { code?: string }).code === 'ai_key_not_configured')
+          throw new Error('ai_key_not_configured');
+        throw new Error((json as { error?: string }).error ?? 'AI 리포트 생성 실패');
+      }
+      return res.json();
     },
   });
 }

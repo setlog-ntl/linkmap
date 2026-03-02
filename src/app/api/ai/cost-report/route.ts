@@ -1,15 +1,18 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import {
   unauthorizedError,
   validationError,
   notFoundError,
   serverError,
-  configurationError,
 } from '@/lib/api/errors';
-import { costReportSchema } from '@/lib/validations/ai-cost-report';
+import {
+  costReportSchema,
+  COST_REPORT_JSON_SCHEMA,
+  type CostReportResult,
+} from '@/lib/validations/ai-cost-report';
 import { resolveOpenAIKey, AIKeyNotConfiguredError } from '@/lib/ai/resolve-key';
-import { callOpenAIWithTools, callOpenAIStream, type ToolDefinition } from '@/lib/ai/openai';
+import { callOpenAIWithTools, callOpenAIStructured, type ToolDefinition } from '@/lib/ai/openai';
 import { logAudit } from '@/lib/audit';
 
 // ─── Tool definitions ─────────────────────────────────────────────────────────
@@ -248,8 +251,7 @@ export async function POST(request: NextRequest) {
     // ── Phase 1: Function calling — data collection ───────────────────────────
     const orchestratorSystemPrompt = `당신은 SaaS 비용 최적화 전문 컨설턴트입니다.
 제공된 도구로 프로젝트 비용 데이터와 시장 정보를 수집한 뒤,
-아래 6개 섹션으로 구성된 전문적이고 실행 가능한 비용 분석 리포트를 작성합니다.
-리포트는 한국어로, 마크다운 형식으로 작성합니다.
+수집한 데이터를 구조화된 형태로 요약합니다.
 
 반드시 다음 도구를 모두 호출하세요:
 1. get_project_cost_breakdown — 프로젝트 전체 비용 내역 조회
@@ -268,44 +270,27 @@ export async function POST(request: NextRequest) {
       5,
     );
 
-    // ── Phase 2: SSE streaming — report synthesis ─────────────────────────────
+    // ── Phase 2: Structured output — report synthesis ─────────────────────────
     const reportSystemPrompt = `당신은 SaaS 비용 최적화 전문 컨설턴트입니다.
-수집된 데이터를 바탕으로 아래 6개 섹션으로 구성된 비용 분석 리포트를 작성하세요.
+수집된 데이터를 바탕으로 구조화된 비용 분석 리포트를 JSON 형식으로 생성하세요.
 
-## 📊 비용 현황 요약
-총 월 비용, 예산 소진율, 서비스 수, 전체 현황을 간결하게 요약
+요구사항:
+- headline: 전체 비용 상태를 한 문장으로 요약 (예: "월 $123의 비용 중 30% 절감 가능")
+- totalInsight: 전반적인 비용 현황과 주요 인사이트 2~3문장
+- services: 각 서비스별 비용 비중, 상태(optimal/review/high_cost), 인사이트
+- optimizations: 구체적인 절감 기회 (estimatedMonthlySaving은 USD 숫자)
+- alternatives: 대안 서비스 제안 (실제 절감 가능 금액 포함)
+- trends: 관련 시장 트렌드 3~5개
+- actionItems: 우선순위별 실행 계획 (timeline별로 분류)
 
-## 🔍 서비스별 비용 분석
-각 서비스의 요금제, 커스텀 입력값, 비용 적정성을 구체적으로 평가
+모든 내용은 한국어로 작성하고, 금액은 USD 기준 숫자로 표기하세요.`;
 
-## 💰 비용 최적화 기회
-과금 단계 변경, 다운그레이드, 연간 계약 전환 등 즉시 적용 가능한 절감 방법
-
-## 🔄 대안 서비스 제안
-동일 기능의 저렴한 대안 서비스 (카탈로그 기반, 구체적 절감액 포함)
-
-## 📈 SaaS 시장 트렌드
-사용량 기반 과금 전환, AI 프리미엄 추이 등 의사결정에 필요한 시장 인사이트
-
-## ✅ 의사결정 가이드
-우선순위별 실행 액션 (단기: 즉시 적용, 중기: 1~3개월, 장기: 3개월 이상)
-
-규칙:
-- 한국어로 작성
-- 구체적인 금액($, USD)과 절감률(%) 포함
-- 실행 가능한 제안 위주
-- 마크다운 형식 (##, ###, -, **굵게**)`;
-
-    const stream = callOpenAIStream(
+    const result = await callOpenAIStructured<CostReportResult>(
       apiKey,
-      [
-        {
-          role: 'user',
-          content: `다음 수집 데이터를 바탕으로 비용 분석 리포트를 작성해주세요:\n\n${collectedData}`,
-        },
-      ],
+      [{ role: 'user', content: `수집 데이터:\n\n${collectedData}` }],
       reportSystemPrompt,
-      { model: 'gpt-4o', temperature: 0.4, max_tokens: 4096, baseUrl },
+      COST_REPORT_JSON_SCHEMA,
+      { model: 'gpt-4o', temperature: 0.3, max_tokens: 4096, baseUrl },
     );
 
     // 5. Audit log (fire-and-forget)
@@ -316,13 +301,7 @@ export async function POST(request: NextRequest) {
       details: { service_count: projectServices.length },
     });
 
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive',
-      },
-    });
+    return NextResponse.json(result.data);
   } catch (err) {
     if (err instanceof AIKeyNotConfiguredError) {
       return new Response(

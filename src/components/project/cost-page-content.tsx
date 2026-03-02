@@ -8,7 +8,7 @@ import { useProjectCostSummary, useExchangeRate } from '@/lib/queries/costs';
 import { CostBudgetCard } from './cost-budget-card';
 import { CostSummaryMetrics } from './cost-summary-metrics';
 import { CostServiceList } from './cost-service-list';
-import { CostReportSheet } from './cost-report-sheet';
+import { CostReportDialog } from './cost-report-dialog';
 
 interface CostPageContentProps {
   projectId: string;
@@ -93,12 +93,11 @@ export function CostPageContent({ projectId }: CostPageContentProps) {
         usdToKrw={usdToKrw}
       />
 
-      <CostReportSheet
+      <CostReportDialog
         projectId={projectId}
         open={reportOpen}
         onOpenChange={setReportOpen}
         costSummary={costSummary}
-        budgetCurrency={costSummary.budgetCurrency}
       />
     </div>
   );
