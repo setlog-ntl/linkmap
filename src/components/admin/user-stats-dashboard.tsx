@@ -1,14 +1,19 @@
 'use client';
 
-import { Users, UserPlus, TrendingUp, Calendar, RefreshCw, MonitorSmartphone, Globe } from 'lucide-react';
+import { Users, UserPlus, TrendingUp, Calendar, RefreshCw, MonitorSmartphone, Globe, Network, ChevronDown, MessageSquarePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+} from '@/components/ui/accordion';
 import { useAdminUserStats } from '@/lib/queries/admin-users';
 import { useAdminVisitorStats } from '@/lib/queries/admin-visitors';
+import { useFeedbackList } from '@/lib/queries/feedback';
+import type { VisitorByIp } from '@/app/api/admin/visitors/route';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
@@ -303,15 +308,20 @@ function VisitorsTab() {
   const dailyTrend = data?.dailyTrend ?? [];
   const topPages = data?.topPages ?? [];
   const recentSessions = data?.recentSessions ?? [];
+  const visitorsByIp = data?.visitorsByIp ?? [];
   const trendWithLabel = dailyTrend.map((t) => ({ ...t, label: formatDate(t.date) }));
 
   return (
     <div className="space-y-6">
       {/* KPI 카드 */}
       {isLoading ? (
-        <KpiSkeleton />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Card key={i}><CardContent className="pt-6"><Skeleton className="h-4 w-24 mb-2" /><Skeleton className="h-8 w-16" /></CardContent></Card>
+          ))}
+        </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
@@ -346,6 +356,15 @@ function VisitorsTab() {
                 세션당 PV
               </div>
               <p className="text-3xl font-bold">{kpis?.avgPagesPerSession ?? 0}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
+                <Network className="h-4 w-4 text-purple-500" />
+                고유 IP
+              </div>
+              <p className="text-3xl font-bold">{(kpis?.uniqueIps ?? 0).toLocaleString()}</p>
             </CardContent>
           </Card>
         </div>
@@ -455,6 +474,9 @@ function VisitorsTab() {
                       <p className="text-sm font-mono truncate">{s.firstPage}</p>
                       <p className="text-xs text-muted-foreground">
                         {formatDateTime(s.firstSeen)} · {s.pageCount}페이지
+                        {s.ip && (
+                          <span className="ml-1 text-purple-500 font-mono">· {s.ip}</span>
+                        )}
                       </p>
                     </div>
                   </li>
@@ -467,6 +489,142 @@ function VisitorsTab() {
               </ul>
             </CardContent>
           </Card>
+        </div>
+      )}
+
+      {/* IP별 방문자 */}
+      {!isLoading && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Network className="h-4 w-4 text-purple-500" />
+              <CardTitle className="text-base">IP별 방문자 (상위 100개, 페이지뷰 기준)</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {visitorsByIp.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">IP 데이터가 없습니다.</p>
+            ) : (
+              <Accordion type="single" collapsible className="w-full">
+                {visitorsByIp.map((v: VisitorByIp) => (
+                  <AccordionItem key={v.ip} value={v.ip}>
+                    <AccordionTrigger className="hover:no-underline">
+                      <div className="flex items-center gap-3 w-full pr-2">
+                        <span className="font-mono text-sm text-purple-600 dark:text-purple-400 w-36 shrink-0 text-left">
+                          {v.ip}
+                        </span>
+                        <div className="flex items-center gap-2 flex-1 flex-wrap">
+                          <Badge variant="secondary" className="gap-1">
+                            <MonitorSmartphone className="h-3 w-3" />
+                            {v.sessionCount}세션
+                          </Badge>
+                          <Badge variant="outline" className="gap-1">
+                            <Globe className="h-3 w-3" />
+                            {v.pageViews}PV
+                          </Badge>
+                          <span className="text-xs text-muted-foreground hidden md:inline">
+                            {formatDateTime(v.firstSeen)} ~ {formatDateTime(v.lastSeen)}
+                          </span>
+                        </div>
+                        <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200" />
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="pl-4 space-y-3 pt-1">
+                        {/* 방문 기간 */}
+                        <div className="text-xs text-muted-foreground">
+                          첫 방문: {formatDateTime(v.firstSeen)} · 마지막: {formatDateTime(v.lastSeen)}
+                        </div>
+                        {/* UA */}
+                        {v.userAgent && (
+                          <p className="text-xs text-muted-foreground truncate">
+                            <span className="font-medium">UA:</span> {v.userAgent}
+                          </p>
+                        )}
+                        {/* 주요 방문 페이지 */}
+                        <div>
+                          <p className="text-xs font-medium mb-1.5">주요 방문 페이지</p>
+                          <ul className="space-y-1">
+                            {v.topPaths.map((p) => (
+                              <li key={p.path} className="flex items-center justify-between gap-2">
+                                <span className="text-xs font-mono truncate flex-1 text-muted-foreground">{p.path}</span>
+                                <Badge variant="secondary" className="text-xs shrink-0">{p.count}</Badge>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            )}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function FeedbackAdminTab() {
+  const { data, isLoading } = useFeedbackList({ sort: 'newest', limit: 50 });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-16 w-full" />
+        ))}
+      </div>
+    );
+  }
+
+  const items = data?.items ?? [];
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">총 {data?.total ?? 0}개의 요청</p>
+        <a
+          href="/feedback"
+          className="text-xs text-brand-blue hover:underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          공개 페이지 열기 →
+        </a>
+      </div>
+
+      {items.length === 0 ? (
+        <Card>
+          <CardContent className="pt-6 text-center text-muted-foreground text-sm">
+            등록된 요청이 없습니다.
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-2">
+          {items.map((item) => (
+            <a key={item.id} href={`/feedback/${item.id}`} className="block group">
+              <Card className="hover:border-brand-blue/50 transition-colors">
+                <CardContent className="pt-4 pb-3 flex items-center gap-3">
+                  <div className="text-center min-w-[40px]">
+                    <p className="text-lg font-bold leading-none">{item.vote_count}</p>
+                    <p className="text-[10px] text-muted-foreground">투표</p>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate group-hover:text-brand-blue transition-colors">
+                      {item.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">{item.description}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <Badge variant="outline" className="text-xs">{item.category}</Badge>
+                    <Badge variant="secondary" className="text-xs">{item.status}</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+          ))}
         </div>
       )}
     </div>
@@ -490,6 +648,10 @@ export default function UserStatsDashboard() {
             <TabsList>
               <TabsTrigger value="users">가입자</TabsTrigger>
               <TabsTrigger value="visitors">방문자</TabsTrigger>
+              <TabsTrigger value="feedback" className="flex items-center gap-1.5">
+                <MessageSquarePlus className="h-3.5 w-3.5" />
+                피드백
+              </TabsTrigger>
             </TabsList>
             <Button
               variant="outline"
@@ -513,6 +675,10 @@ export default function UserStatsDashboard() {
 
         <TabsContent value="visitors">
           <VisitorsTab />
+        </TabsContent>
+
+        <TabsContent value="feedback">
+          <FeedbackAdminTab />
         </TabsContent>
       </Tabs>
     </div>

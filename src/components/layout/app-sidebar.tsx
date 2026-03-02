@@ -8,7 +8,7 @@ import {
   Rocket, Search, Map as MapIcon,
   List, Link2, Key, Settings, BookOpen, ChevronDown, ChevronRight,
   LogOut, Bot, User, GitBranch, Wrench, FolderKanban, Plus, LayoutDashboard,
-  Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight, Trash2, DollarSign, Users,
+  Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight, Trash2, DollarSign, Users, MessageSquarePlus,
 } from 'lucide-react';
 import { GUIDE_CATEGORIES, getGuidesByCategory, type GuideCategory } from '@/data/ui/guide-meta';
 import { createClient } from '@/lib/supabase/client';
@@ -120,6 +120,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
   const mainNav: { labelKey: string; label?: string; href: string; icon: React.ElementType }[] = [
     { labelKey: 'nav.serviceCatalog', href: '/services', icon: Search },
     { labelKey: 'nav.trash', label: '휴지통', href: '/trash', icon: Trash2 },
+    { labelKey: 'nav.feedback', label: '기능 요청', href: '/feedback', icon: MessageSquarePlus },
   ];
 
   const guideCategoryOrder: GuideCategory[] = ['concept', 'service'];

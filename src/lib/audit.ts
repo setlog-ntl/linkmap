@@ -105,7 +105,12 @@ export type AuditAction =
   | 'cost_attachment.delete'
   | 'cost_attachment.link_add'
   | 'admin.users_stats_view'
-  | 'admin.visitors_stats_view';
+  | 'admin.visitors_stats_view'
+  | 'feedback.create'
+  | 'feedback.update'
+  | 'feedback.delete'
+  | 'feedback.admin_update'
+  | 'feedback.comment_create';
 
 interface AuditLogEntry {
   action: AuditAction;

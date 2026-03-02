@@ -96,6 +96,11 @@ export const queryKeys = {
     users: ['admin', 'users'] as const,
     visitors: ['admin', 'visitors'] as const,
   },
+  feedback: {
+    list: (params?: Record<string, unknown>) => ['feedback', 'list', params ?? {}] as const,
+    detail: (id: string) => ['feedback', 'detail', id] as const,
+    comments: (id: string) => ['feedback', 'comments', id] as const,
+  },
   aiConfig: {
     global: ['ai-config', 'global'] as const,
     personas: ['ai-config', 'personas'] as const,

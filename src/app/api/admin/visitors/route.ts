@@ -5,6 +5,16 @@ import { isAdmin } from '@/lib/admin';
 import { unauthorizedError, apiError, serverError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 
+export interface VisitorByIp {
+  ip: string;
+  sessionCount: number;
+  pageViews: number;
+  firstSeen: string;
+  lastSeen: string;
+  topPaths: Array<{ path: string; count: number }>;
+  userAgent: string | null;
+}
+
 export interface AdminVisitorStats {
   kpis: {
     totalSessions: number;
@@ -12,6 +22,7 @@ export interface AdminVisitorStats {
     weekSessions: number;
     totalPageViews: number;
     avgPagesPerSession: number;
+    uniqueIps: number;
   };
   dailyTrend: Array<{ date: string; sessions: number; pageViews: number }>;
   topPages: Array<{ path: string; views: number }>;
@@ -22,7 +33,9 @@ export interface AdminVisitorStats {
     firstSeen: string;
     lastSeen: string;
     userAgent: string | null;
+    ip: string | null;
   }>;
+  visitorsByIp: VisitorByIp[];
 }
 
 export async function GET() {
@@ -40,7 +53,7 @@ export async function GET() {
 
   const { data: logs, error } = await adminSupabase
     .from('visitor_logs')
-    .select('session_id, page_path, user_agent, created_at')
+    .select('session_id, page_path, user_agent, ip_address, created_at')
     .gte('created_at', thirtyDaysAgo.toISOString())
     .order('created_at', { ascending: true });
 
@@ -51,7 +64,6 @@ export async function GET() {
 
   const allLogs = logs ?? [];
 
-  // 날짜 경계
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const weekStart = new Date(todayStart.getTime() - 6 * 24 * 60 * 60 * 1000);
 
@@ -61,6 +73,7 @@ export async function GET() {
     firstSeen: string;
     lastSeen: string;
     userAgent: string | null;
+    ip: string | null;
   }>();
 
   for (const log of allLogs) {
@@ -71,6 +84,7 @@ export async function GET() {
         firstSeen: log.created_at,
         lastSeen: log.created_at,
         userAgent: log.user_agent ?? null,
+        ip: log.ip_address ?? null,
       });
     } else {
       existing.pages.push(log.page_path);
@@ -84,7 +98,6 @@ export async function GET() {
     ? Math.round((totalPageViews / totalSessions) * 10) / 10
     : 0;
 
-  // 오늘/이번 주 세션 수
   const todaySessions = Array.from(sessionMap.values()).filter(
     (s) => new Date(s.firstSeen) >= todayStart
   ).length;
@@ -130,7 +143,7 @@ export async function GET() {
     .slice(0, 10)
     .map(([path, views]) => ({ path, views }));
 
-  // 최근 20 세션
+  // 최근 20 세션 (IP 포함)
   const recentSessions = Array.from(sessionMap.entries())
     .sort(([, a], [, b]) => new Date(b.firstSeen).getTime() - new Date(a.firstSeen).getTime())
     .slice(0, 20)
@@ -141,6 +154,60 @@ export async function GET() {
       firstSeen: s.firstSeen,
       lastSeen: s.lastSeen,
       userAgent: s.userAgent,
+      ip: s.ip,
+    }));
+
+  // IP별 방문자 집계
+  const ipMap = new Map<string, {
+    sessions: Set<string>;
+    pageViews: number;
+    firstSeen: string;
+    lastSeen: string;
+    pathCounts: Map<string, number>;
+    userAgent: string | null;
+  }>();
+
+  for (const log of allLogs) {
+    const ip = log.ip_address ?? '(알 수 없음)';
+    const existing = ipMap.get(ip);
+    if (!existing) {
+      const pathCounts = new Map<string, number>();
+      pathCounts.set(log.page_path, 1);
+      ipMap.set(ip, {
+        sessions: new Set([log.session_id]),
+        pageViews: 1,
+        firstSeen: log.created_at,
+        lastSeen: log.created_at,
+        pathCounts,
+        userAgent: log.user_agent ?? null,
+      });
+    } else {
+      existing.sessions.add(log.session_id);
+      existing.pageViews++;
+      if (log.created_at > existing.lastSeen) existing.lastSeen = log.created_at;
+      existing.pathCounts.set(
+        log.page_path,
+        (existing.pathCounts.get(log.page_path) ?? 0) + 1
+      );
+    }
+  }
+
+  const uniqueIps = ipMap.size;
+
+  const visitorsByIp: VisitorByIp[] = Array.from(ipMap.entries())
+    .sort(([, a], [, b]) => b.pageViews - a.pageViews)
+    .slice(0, 100)
+    .map(([ip, v]) => ({
+      ip,
+      sessionCount: v.sessions.size,
+      pageViews: v.pageViews,
+      firstSeen: v.firstSeen,
+      lastSeen: v.lastSeen,
+      topPaths: Array.from(v.pathCounts.entries())
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 5)
+        .map(([path, count]) => ({ path, count })),
+      userAgent: v.userAgent,
     }));
 
   await logAudit(user.id, {
@@ -155,10 +222,12 @@ export async function GET() {
       weekSessions,
       totalPageViews,
       avgPagesPerSession,
+      uniqueIps,
     },
     dailyTrend,
     topPages,
     recentSessions,
+    visitorsByIp,
   };
 
   return NextResponse.json(result);
