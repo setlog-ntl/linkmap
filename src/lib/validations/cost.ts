@@ -16,12 +16,30 @@ export const updateServiceCostSchema = z
 
 export type UpdateServiceCostInput = z.infer<typeof updateServiceCostSchema>;
 
+const openAIModelUsageSchema = z.object({
+  modelId: z.string(),
+  cost: z.number().min(0),
+  inputTokens: z.number().int().min(0),
+  outputTokens: z.number().int().min(0),
+});
+
+const clientUsageDataSchema = z.object({
+  total_cost: z.number().min(0),
+  period_start: z.string(),
+  period_end: z.string(),
+  by_model: z.array(openAIModelUsageSchema).default([]),
+});
+
 export const syncOpenAIUsageSchema = z.object({
   api_key: z
     .string()
     .min(1)
     .regex(/^sk-/, 'OpenAI API Key는 sk-로 시작해야 합니다')
     .optional(),
+  // 클라이언트가 브라우저에서 직접 OpenAI를 호출한 결과
+  // 서버 측 지역 제한 우회용
+  usage_data: clientUsageDataSchema.optional(),
 });
 
 export type SyncOpenAIUsageInput = z.infer<typeof syncOpenAIUsageSchema>;
+export type ClientUsageData = z.infer<typeof clientUsageDataSchema>;

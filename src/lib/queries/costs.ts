@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './keys';
 import type { ProjectCostSummary, OpenAIUsageSummary } from '@/types';
-import type { UpdateServiceCostInput } from '@/lib/validations/cost';
+import type { UpdateServiceCostInput, ClientUsageData } from '@/lib/validations/cost';
 
 export function useProjectCostSummary(projectId: string) {
   return useQuery({
@@ -84,16 +84,21 @@ export function useSyncOpenAIUsage(projectId: string) {
     mutationFn: async ({
       projectServiceId,
       apiKey,
+      usageData,
     }: {
       projectServiceId: string;
       apiKey?: string;
+      usageData?: ClientUsageData;
     }) => {
       const res = await fetch(
         `/api/projects/${projectId}/services/${projectServiceId}/usage/sync`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(apiKey ? { api_key: apiKey } : {}),
+          body: JSON.stringify({
+            ...(apiKey ? { api_key: apiKey } : {}),
+            ...(usageData ? { usage_data: usageData } : {}),
+          }),
         }
       );
       if (!res.ok) {

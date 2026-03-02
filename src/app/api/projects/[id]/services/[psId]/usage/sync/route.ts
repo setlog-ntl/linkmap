@@ -168,15 +168,32 @@ export async function POST(
     });
   }
 
-  // 5. OpenAI Usage API 호출
-  const { start, end } = getCurrentMonthRange();
+  // 5. 사용량 데이터 확보
+  // usage_data가 있으면 클라이언트(브라우저)에서 이미 OpenAI를 호출한 결과 → 서버 호출 생략
+  // 없으면 서버에서 직접 OpenAI 호출 (Cloudflare 지역 제한 가능성 있음)
+  let usageResult: {
+    totalCost: number;
+    periodStart: string;
+    periodEnd: string;
+    byModel: { modelId: string; cost: number; inputTokens: number; outputTokens: number }[];
+  };
 
-  let usageResult;
-  try {
-    usageResult = await fetchOpenAIUsage(apiKey, start, end);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : 'OpenAI API 호출 실패';
-    return serverError(msg);
+  if (parsed.data.usage_data) {
+    const ud = parsed.data.usage_data;
+    usageResult = {
+      totalCost: ud.total_cost,
+      periodStart: ud.period_start,
+      periodEnd: ud.period_end,
+      byModel: ud.by_model,
+    };
+  } else {
+    const { start, end } = getCurrentMonthRange();
+    try {
+      usageResult = await fetchOpenAIUsage(apiKey, start, end);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'OpenAI API 호출 실패';
+      return serverError(msg);
+    }
   }
 
   // 6. project_services 업데이트 (actual_cost_monthly, usage_synced_at)

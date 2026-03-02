@@ -9,6 +9,72 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useOpenAIUsage, useSyncOpenAIUsage } from '@/lib/queries/costs';
 import { cn } from '@/lib/utils';
+import type { ClientUsageData } from '@/lib/validations/cost';
+
+// ────────────────────────────────────────────────────────────
+// 브라우저에서 직접 OpenAI Billing API 호출
+// (Cloudflare Workers 배포 환경의 지역 제한 우회)
+// ────────────────────────────────────────────────────────────
+interface BillingResponse {
+  total_usage: number;
+  daily_costs?: Array<{
+    timestamp: number;
+    line_items: Array<{ name: string; cost: number }>;
+  }>;
+}
+
+async function fetchOpenAIBillingFromBrowser(
+  apiKey: string
+): Promise<ClientUsageData> {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const startDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-01`;
+  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  const endDate = `${tomorrow.getFullYear()}-${pad(tomorrow.getMonth() + 1)}-${pad(tomorrow.getDate())}`;
+
+  const url = new URL('https://api.openai.com/dashboard/billing/usage');
+  url.searchParams.set('start_date', startDate);
+  url.searchParams.set('end_date', endDate);
+
+  const res = await fetch(url.toString(), {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    const msg =
+      (body as { error?: { message?: string } | string })?.error
+        ? typeof (body as { error: unknown }).error === 'string'
+          ? (body as { error: string }).error
+          : ((body as { error: { message?: string } }).error.message ?? `OpenAI API 오류 (${res.status})`)
+        : `OpenAI API 오류 (${res.status})`;
+    throw new Error(msg);
+  }
+
+  const data = (await res.json()) as BillingResponse;
+  const totalCost = (data.total_usage ?? 0) / 100;
+
+  const byModelMap = new Map<string, number>();
+  for (const day of data.daily_costs ?? []) {
+    for (const item of day.line_items ?? []) {
+      if (item.cost > 0) {
+        byModelMap.set(item.name, (byModelMap.get(item.name) ?? 0) + item.cost / 100);
+      }
+    }
+  }
+
+  return {
+    total_cost: Math.round(totalCost * 10000) / 10000,
+    period_start: new Date(now.getFullYear(), now.getMonth(), 1).toISOString(),
+    period_end: now.toISOString(),
+    by_model: Array.from(byModelMap.entries()).map(([modelId, cost]) => ({
+      modelId,
+      cost: Math.round(cost * 10000) / 10000,
+      inputTokens: 0,
+      outputTokens: 0,
+    })),
+  };
+}
 
 interface CostOpenAIUsagePanelProps {
   projectId: string;
@@ -50,8 +116,9 @@ export function CostOpenAIUsagePanel({
   );
   const syncMutation = useSyncOpenAIUsage(projectId);
 
-  const handleSync = () => {
-    // showApiKeyInput(변경 모드) 또는 hasApiKey=false(초기 미연결) 상태에서 입력된 키 전송
+  const [isBrowserFetching, setIsBrowserFetching] = useState(false);
+
+  const handleSync = async () => {
     const key = (showApiKeyInput || !usage?.hasApiKey) && apiKeyInput ? apiKeyInput : undefined;
 
     if (!usage?.hasApiKey && !apiKeyInput) {
@@ -59,20 +126,69 @@ export function CostOpenAIUsagePanel({
       return;
     }
 
-    syncMutation.mutate(
-      { projectServiceId, apiKey: key },
-      {
-        onSuccess: (result) => {
-          toast.success(
-            `동기화 완료: ${result.totalCost != null ? formatCost(result.totalCost) : '$0'}`
-          );
-          setShowApiKeyInput(false);
-          setApiKeyInput('');
-          setShowBreakdown(true);
-        },
-        onError: (err) => toast.error(err.message),
+    const onSuccess = (result: { totalCost: number | null }) => {
+      toast.success(
+        `동기화 완료: ${result.totalCost != null ? formatCost(result.totalCost) : '$0'}`
+      );
+      setShowApiKeyInput(false);
+      setApiKeyInput('');
+      setShowBreakdown(true);
+    };
+
+    if (key) {
+      // 새 키 입력 시: 브라우저에서 직접 OpenAI 호출 → 지역 제한 우회
+      setIsBrowserFetching(true);
+      try {
+        const usageData = await fetchOpenAIBillingFromBrowser(key);
+        syncMutation.mutate(
+          { projectServiceId, apiKey: key, usageData },
+          {
+            onSuccess,
+            onError: (err) => toast.error(err.message),
+          }
+        );
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'OpenAI API 호출 실패';
+        toast.error(msg, {
+          description: (
+            <a
+              href="https://platform.openai.com/usage"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              OpenAI 사용량 대시보드에서 직접 확인 →
+            </a>
+          ) as unknown as string,
+          duration: 8000,
+        });
+      } finally {
+        setIsBrowserFetching(false);
       }
-    );
+    } else {
+      // 저장된 키로 재동기화: 서버에서 OpenAI 호출
+      syncMutation.mutate(
+        { projectServiceId },
+        {
+          onSuccess,
+          onError: (err) => {
+            toast.error(err.message, {
+              description: (
+                <a
+                  href="https://platform.openai.com/usage"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  OpenAI 사용량 대시보드에서 직접 확인 →
+                </a>
+              ) as unknown as string,
+              duration: 8000,
+            });
+          },
+        }
+      );
+    }
   };
 
   if (isLoading) {
@@ -121,12 +237,12 @@ export function CostOpenAIUsagePanel({
           size="sm"
           className="ml-auto h-7 text-xs gap-1.5"
           onClick={handleSync}
-          disabled={syncMutation.isPending}
+          disabled={syncMutation.isPending || isBrowserFetching}
         >
           <RefreshCw
-            className={cn('h-3.5 w-3.5', syncMutation.isPending && 'animate-spin')}
+            className={cn('h-3.5 w-3.5', (syncMutation.isPending || isBrowserFetching) && 'animate-spin')}
           />
-          {syncMutation.isPending ? '동기화 중...' : '동기화'}
+          {syncMutation.isPending || isBrowserFetching ? '동기화 중...' : '동기화'}
         </Button>
       </div>
 
