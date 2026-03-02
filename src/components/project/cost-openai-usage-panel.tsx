@@ -119,75 +119,44 @@ export function CostOpenAIUsagePanel({
   const [isBrowserFetching, setIsBrowserFetching] = useState(false);
 
   const handleSync = async () => {
-    const key = (showApiKeyInput || !usage?.hasApiKey) && apiKeyInput ? apiKeyInput : undefined;
-
-    if (!usage?.hasApiKey && !apiKeyInput) {
+    // 입력된 키가 없으면 → 입력 필드 노출 (재입력 요청)
+    if (!apiKeyInput) {
       setShowApiKeyInput(true);
+      if (usage?.hasApiKey) {
+        toast.info('재동기화하려면 API Key를 다시 입력해주세요.', {
+          description: '브라우저에서 직접 조회하여 지역 제한을 우회합니다.',
+        });
+      }
       return;
     }
 
-    const onSuccess = (result: { totalCost: number | null }) => {
-      toast.success(
-        `동기화 완료: ${result.totalCost != null ? formatCost(result.totalCost) : '$0'}`
-      );
-      setShowApiKeyInput(false);
-      setApiKeyInput('');
-      setShowBreakdown(true);
-    };
-
-    if (key) {
-      // 새 키 입력 시: 브라우저에서 직접 OpenAI 호출 → 지역 제한 우회
-      setIsBrowserFetching(true);
-      try {
-        const usageData = await fetchOpenAIBillingFromBrowser(key);
-        syncMutation.mutate(
-          { projectServiceId, apiKey: key, usageData },
-          {
-            onSuccess,
-            onError: (err) => toast.error(err.message),
-          }
-        );
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : 'OpenAI API 호출 실패';
-        toast.error(msg, {
-          description: (
-            <a
-              href="https://platform.openai.com/usage"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline"
-            >
-              OpenAI 사용량 대시보드에서 직접 확인 →
-            </a>
-          ) as unknown as string,
-          duration: 8000,
-        });
-      } finally {
-        setIsBrowserFetching(false);
-      }
-    } else {
-      // 저장된 키로 재동기화: 서버에서 OpenAI 호출
+    // 항상 브라우저에서 직접 OpenAI 호출 (서버 측 지역 제한 우회)
+    setIsBrowserFetching(true);
+    try {
+      const usageData = await fetchOpenAIBillingFromBrowser(apiKeyInput);
       syncMutation.mutate(
-        { projectServiceId },
+        { projectServiceId, apiKey: apiKeyInput, usageData },
         {
-          onSuccess,
-          onError: (err) => {
-            toast.error(err.message, {
-              description: (
-                <a
-                  href="https://platform.openai.com/usage"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  OpenAI 사용량 대시보드에서 직접 확인 →
-                </a>
-              ) as unknown as string,
-              duration: 8000,
-            });
+          onSuccess: (result) => {
+            toast.success(
+              `동기화 완료: ${result.totalCost != null ? formatCost(result.totalCost) : '$0'}`
+            );
+            setShowApiKeyInput(false);
+            setApiKeyInput('');
+            setShowBreakdown(true);
           },
+          onError: (err) => toast.error(err.message),
         }
       );
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'OpenAI API 호출 실패';
+      // 403 / 지역 제한 시 수동 입력 안내
+      toast.error('OpenAI 사용량을 가져올 수 없습니다.', {
+        description: msg,
+        duration: 8000,
+      });
+    } finally {
+      setIsBrowserFetching(false);
     }
   };
 

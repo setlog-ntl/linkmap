@@ -1,5 +1,6 @@
 // POST /api/projects/[id]/services/[psId]/usage/sync
-// OpenAI 실제 사용량 동기화 (당월 1일~오늘)
+// OpenAI 실제 사용량 동기화
+// 브라우저에서 직접 OpenAI를 조회한 결과를 저장 (서버 측 Cloudflare 지역 제한 우회)
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
@@ -11,12 +12,8 @@ import {
   apiError,
 } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
-import { decrypt, encrypt } from '@/lib/crypto';
+import { encrypt } from '@/lib/crypto';
 import { syncOpenAIUsageSchema } from '@/lib/validations/cost';
-import {
-  fetchOpenAIUsage,
-  getCurrentMonthRange,
-} from '@/lib/openai/usage';
 import type { OpenAIUsageSummary } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -38,6 +35,14 @@ export async function POST(
   const body = await request.json().catch(() => ({}));
   const parsed = syncOpenAIUsageSchema.safeParse(body);
   if (!parsed.success) return validationError(parsed.error);
+
+  // usage_data 필수 — 서버에서 직접 OpenAI 호출 금지 (Cloudflare Workers 지역 제한)
+  if (!parsed.data.usage_data) {
+    return apiError(
+      'usage_data가 필요합니다. 브라우저에서 직접 OpenAI 사용량을 조회한 후 전달해주세요.',
+      400
+    );
+  }
 
   // 3. 소유권 확인
   const { data: project } = await supabase
@@ -64,58 +69,9 @@ export async function POST(
 
   if (!serviceId) return serverError('서비스 정보를 찾을 수 없습니다');
 
-  // 4. 비즈니스 로직 — API Key 확보
-  let apiKey: string;
-  let isNewKey = false;
-
+  // 4. API Key 저장 (요청에 포함된 경우만 — 저장 목적, OpenAI 호출에는 사용 안 함)
   if (parsed.data.api_key) {
-    // 요청 바디에 API Key가 포함된 경우 → 저장 후 사용
-    apiKey = parsed.data.api_key;
-    isNewKey = true;
-  } else {
-    // service_accounts에서 저장된 API Key 조회
-    // 1순위: 프로젝트 레벨
-    const { data: saProject } = await supabase
-      .from('service_accounts')
-      .select('id, encrypted_api_key')
-      .eq('project_id', id)
-      .eq('user_id', user.id)
-      .eq('service_id', serviceId)
-      .eq('connection_type', 'api_key')
-      .eq('status', 'active')
-      .maybeSingle();
-
-    // 2순위: 사용자 레벨
-    const { data: saUser } = !saProject
-      ? await supabase
-          .from('service_accounts')
-          .select('id, encrypted_api_key')
-          .is('project_id', null)
-          .eq('user_id', user.id)
-          .eq('service_id', serviceId)
-          .eq('connection_type', 'api_key')
-          .eq('status', 'active')
-          .maybeSingle()
-      : { data: null };
-
-    const sa = saProject ?? saUser;
-
-    if (!sa?.encrypted_api_key) {
-      return apiError(
-        'OpenAI API Key가 연결되지 않았습니다. api_key를 요청에 포함하거나 설정에서 연결해주세요.',
-        400
-      );
-    }
-
-    try {
-      apiKey = decrypt(sa.encrypted_api_key);
-    } catch {
-      return serverError('API Key 복호화에 실패했습니다');
-    }
-  }
-
-  // 새 API Key 입력 시 service_accounts에 저장
-  if (isNewKey) {
+    const apiKey = parsed.data.api_key;
     const encryptedKey = encrypt(apiKey);
     const label = `${apiKey.substring(0, 12)}••••`;
 
@@ -168,33 +124,14 @@ export async function POST(
     });
   }
 
-  // 5. 사용량 데이터 확보
-  // usage_data가 있으면 클라이언트(브라우저)에서 이미 OpenAI를 호출한 결과 → 서버 호출 생략
-  // 없으면 서버에서 직접 OpenAI 호출 (Cloudflare 지역 제한 가능성 있음)
-  let usageResult: {
-    totalCost: number;
-    periodStart: string;
-    periodEnd: string;
-    byModel: { modelId: string; cost: number; inputTokens: number; outputTokens: number }[];
+  // 5. 브라우저에서 전달받은 사용량 데이터 사용 (usage_data 필수 여부는 step 2에서 확인)
+  const ud = parsed.data.usage_data!;
+  const usageResult = {
+    totalCost: ud.total_cost,
+    periodStart: ud.period_start,
+    periodEnd: ud.period_end,
+    byModel: ud.by_model,
   };
-
-  if (parsed.data.usage_data) {
-    const ud = parsed.data.usage_data;
-    usageResult = {
-      totalCost: ud.total_cost,
-      periodStart: ud.period_start,
-      periodEnd: ud.period_end,
-      byModel: ud.by_model,
-    };
-  } else {
-    const { start, end } = getCurrentMonthRange();
-    try {
-      usageResult = await fetchOpenAIUsage(apiKey, start, end);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'OpenAI API 호출 실패';
-      return serverError(msg);
-    }
-  }
 
   // 6. project_services 업데이트 (actual_cost_monthly, usage_synced_at)
   const { error: updateError } = await supabase
