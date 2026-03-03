@@ -62,6 +62,16 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <a
+                  href="https://open.kakao.com/o/gctXEtji"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                >
+                  Linkmap 오픈채팅방
+                </a>
+              </li>
+              <li>
+                <a
                   href="mailto:cdhrich2@gmail.com"
                   className="hover:text-white transition-colors"
                 >
