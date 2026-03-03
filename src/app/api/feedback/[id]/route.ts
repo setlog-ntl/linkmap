@@ -20,7 +20,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     .select(
       `
       *,
-      author:profiles!feature_requests_user_id_fkey(full_name, avatar_url),
+      author:profiles!feature_requests_user_id_fkey(name, avatar_url),
       comment_count:feature_request_comments(count)
       `
     )
@@ -41,14 +41,14 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
   }
 
   const { author, comment_count, ...rest } = data as Record<string, unknown>;
-  const authorData = author as { full_name?: string | null; avatar_url?: string | null } | null;
+  const authorData = author as { name?: string | null; avatar_url?: string | null } | null;
   const commentArr = comment_count as { count: number }[] | null;
 
   return NextResponse.json({
     item: {
       ...rest,
       author: {
-        name: authorData?.full_name ?? null,
+        name: authorData?.name ?? null,
         avatar_url: authorData?.avatar_url ?? null,
       },
       has_voted: hasVoted,

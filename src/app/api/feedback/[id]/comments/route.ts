@@ -27,7 +27,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     .select(
       `
       *,
-      author:profiles!feature_request_comments_user_id_fkey(full_name, avatar_url)
+      author:profiles!feature_request_comments_user_id_fkey(name, avatar_url)
       `
     )
     .eq('feature_request_id', id)
@@ -37,11 +37,11 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
   const comments = (data ?? []).map((row) => {
     const { author, ...rest } = row as Record<string, unknown>;
-    const authorData = author as { full_name?: string | null; avatar_url?: string | null } | null;
+    const authorData = author as { name?: string | null; avatar_url?: string | null } | null;
     return {
       ...rest,
       author: {
-        name: authorData?.full_name ?? null,
+        name: authorData?.name ?? null,
         avatar_url: authorData?.avatar_url ?? null,
       },
     };
