@@ -1,4 +1,4 @@
-import type { ServiceCategory, ServiceStatus, ViewGroup } from './core';
+import type { ServiceCategory, ServiceStatus, ViewGroup, HealthCheckStatus } from './core';
 import type { Project } from './project';
 import type { UserConnection } from './connection';
 
@@ -59,6 +59,8 @@ export interface DashboardResponse {
   layers: LayerData[];
   metrics: DashboardMetrics;
   connections: UserConnection[];
+  /** SSR에서 주입하는 초기 헬스체크 데이터 (데모·서버 프리로드 용) */
+  healthChecks?: Record<string, { status: HealthCheckStatus }>;
 }
 
 export interface ViewGroupData {

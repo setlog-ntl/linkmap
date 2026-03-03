@@ -38,7 +38,7 @@ export function BentoDashboardLayout({ data }: BentoDashboardLayoutProps) {
             <ProjectHeroCard project={project} metrics={metrics} allCards={allCards} />
           </div>
           <div className="md:col-span-4">
-            <HealthRingCard projectId={project.id} allCards={allCards} />
+            <HealthRingCard projectId={project.id} allCards={allCards} initialHealthChecks={data.healthChecks} />
           </div>
         </div>
         <Card className="border-dashed">
@@ -80,7 +80,7 @@ export function BentoDashboardLayout({ data }: BentoDashboardLayoutProps) {
           <ProjectHeroCard project={project} metrics={metrics} allCards={allCards} onServiceClick={handleServiceClick} />
         </div>
         <div className="md:col-span-4">
-          <HealthRingCard projectId={project.id} allCards={allCards} />
+          <HealthRingCard projectId={project.id} allCards={allCards} initialHealthChecks={data.healthChecks} />
         </div>
       </div>
 

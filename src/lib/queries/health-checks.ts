@@ -15,9 +15,13 @@ export function useHealthChecks(projectServiceId: string) {
   });
 }
 
-export function useLatestHealthChecks(projectId: string) {
+export function useLatestHealthChecks(
+  projectId: string,
+  initialData?: Record<string, { status: HealthCheck['status'] }>,
+) {
   return useQuery({
     queryKey: queryKeys.healthChecks.latestByProject(projectId),
+    initialData: initialData as Record<string, HealthCheck> | undefined,
     queryFn: async (): Promise<Record<string, HealthCheck>> => {
       const supabase = createClient();
       const { data: services } = await supabase

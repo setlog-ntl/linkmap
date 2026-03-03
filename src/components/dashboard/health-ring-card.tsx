@@ -11,6 +11,7 @@ import type { ServiceCardData } from '@/types';
 interface HealthRingCardProps {
   projectId: string;
   allCards: ServiceCardData[];
+  initialHealthChecks?: Record<string, { status: 'healthy' | 'degraded' | 'unhealthy' | 'unknown' }>;
 }
 
 const RING_COLORS = {
@@ -95,8 +96,8 @@ function DonutChart({ dist }: { dist: ReturnType<typeof computeHealthDistributio
   );
 }
 
-export function HealthRingCard({ projectId, allCards }: HealthRingCardProps) {
-  const { data: healthChecks = {} } = useLatestHealthChecks(projectId);
+export function HealthRingCard({ projectId, allCards, initialHealthChecks }: HealthRingCardProps) {
+  const { data: healthChecks = {} } = useLatestHealthChecks(projectId, initialHealthChecks);
   const runHealthCheck = useRunHealthCheck();
   const [isRunningAll, setIsRunningAll] = useState(false);
 
