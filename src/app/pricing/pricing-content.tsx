@@ -83,7 +83,7 @@ export function PricingContent() {
       });
 
       if (res.status === 401) {
-        router.push('/auth');
+        router.push('/login');
         return;
       }
 
@@ -102,13 +102,14 @@ export function PricingContent() {
   }
 
   function getButtonLabel(plan: Plan): string {
+    if (plan.planKey === 'team') return '준비 중';
     if (plan.planKey === currentPlan) return t(locale, 'pricing.currentPlan');
     if (plan.isFree) return t(locale, 'pricing.currentPlan');
     return t(locale, 'pricing.upgrade');
   }
 
   function isButtonDisabled(plan: Plan): boolean {
-    return plan.isFree || plan.planKey === currentPlan || loadingPlan !== null;
+    return plan.isFree || plan.planKey === currentPlan || plan.planKey === 'team' || loadingPlan !== null;
   }
 
   return (
@@ -122,9 +123,12 @@ export function PricingContent() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
         {plans.map((plan) => (
-          <Card key={plan.nameKey} className={plan.popular ? 'border-primary shadow-lg relative' : ''}>
+          <Card key={plan.nameKey} className={`${plan.popular ? 'border-primary shadow-lg' : ''} ${plan.planKey === 'team' ? 'opacity-60' : ''} relative`}>
             {plan.popular && (
               <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">{t(locale, 'pricing.recommended')}</Badge>
+            )}
+            {plan.planKey === 'team' && (
+              <Badge variant="secondary" className="absolute -top-3 left-1/2 -translate-x-1/2">준비 중</Badge>
             )}
             <CardHeader className="text-center pb-2">
               <CardTitle className="text-lg">{t(locale, plan.nameKey)}</CardTitle>

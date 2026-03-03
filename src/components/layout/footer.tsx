@@ -1,10 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { Github } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
-import { toast } from 'sonner';
 import { GUIDE_CATEGORIES, getGuidesByCategory } from '@/data/ui/guide-meta';
 
 export function Footer() {
@@ -63,29 +61,12 @@ export function Footer() {
             <h4 className="font-semibold text-sm mb-3 text-white">{t(locale, 'landing.footerCommunity')}</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <button
-                  onClick={() => toast.info('추후 예정입니다.')}
-                  className="hover:text-white transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                <a
+                  href="mailto:cdhrich2@gmail.com"
+                  className="hover:text-white transition-colors"
                 >
-                  <Github className="w-3.5 h-3.5" />
-                  {t(locale, 'landing.footerGitHub')}
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => toast.info('추후 예정입니다.')}
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  {t(locale, 'landing.footerDiscord')}
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => toast.info('추후 예정입니다.')}
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  {t(locale, 'landing.footerTwitter')}
-                </button>
+                  Contact
+                </a>
               </li>
             </ul>
           </div>

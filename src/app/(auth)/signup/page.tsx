@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Github, Loader2 } from 'lucide-react';
+import { Github, Loader2, RefreshCw } from 'lucide-react';
 import { GoogleIcon } from '@/components/icons/google-icon';
 
 export default function SignupPage() {
@@ -29,6 +29,34 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resending, setResending] = useState(false);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const handleResendEmail = useCallback(async () => {
+    if (resendCooldown > 0 || resending || !email) return;
+    setResending(true);
+    const { error: resendError } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirect)}`,
+      },
+    });
+    setResending(false);
+    if (resendError) {
+      setError(resendError.message);
+      return;
+    }
+    setResendCooldown(60);
+  }, [email, redirect, resendCooldown, resending, supabase.auth]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,7 +115,24 @@ export default function SignupPage() {
               이메일을 확인하여 가입을 완료해주세요.
             </CardDescription>
           </CardHeader>
-          <CardFooter className="justify-center">
+          <CardFooter className="flex flex-col gap-2 items-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleResendEmail}
+              disabled={resendCooldown > 0 || resending}
+              className="gap-2"
+            >
+              {resending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              {resendCooldown > 0
+                ? `재전송 (${resendCooldown}초)`
+                : '인증 메일 다시 보내기'}
+            </Button>
+            {error && <p className="text-sm text-destructive">{error}</p>}
             <Button variant="ghost" asChild>
               <Link href="/login">로그인 페이지로 돌아가기</Link>
             </Button>

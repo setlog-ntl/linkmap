@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, apiError, validationError } from '@/lib/api/errors';
 import { checkoutRequestSchema } from '@/lib/validations/stripe';
+import { logAudit } from '@/lib/audit';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -83,6 +84,17 @@ export async function POST(request: NextRequest) {
     }),
   });
   const session = await sessionRes.json();
+
+  await logAudit(user.id, {
+    action: 'payment.checkout_initiated',
+    resourceType: 'subscription',
+    details: {
+      priceId,
+      stripeCustomerId: customerId,
+      sessionId: session.id,
+    },
+    ipAddress: request.headers.get('x-forwarded-for') ?? undefined,
+  });
 
   return NextResponse.json({ url: session.url });
 }

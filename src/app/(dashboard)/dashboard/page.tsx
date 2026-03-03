@@ -10,9 +10,11 @@ import { CreateProjectDialog } from '@/components/project/create-project-dialog'
 import { TemplateDialog } from '@/components/project/template-dialog';
 import { QuickActions } from '@/components/dashboard/quick-actions';
 import { createClient } from '@/lib/supabase/client';
-import { FolderOpen, Layers, Puzzle, GitBranch, LayoutGrid, List } from 'lucide-react';
+import { FolderOpen, Layers, Puzzle, GitBranch, LayoutGrid, List, Rocket, BookOpen, Link2, CheckCircle2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import Link from 'next/link';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 
@@ -181,17 +183,93 @@ export default function DashboardPage() {
           ))}
         </div>
       ) : sortedProjects.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="rounded-2xl bg-muted/50 p-6 mb-6">
-            <FolderOpen className="h-12 w-12 text-muted-foreground/40" />
+        <div className="space-y-8">
+          {/* Welcome Card */}
+          <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center text-center">
+                <div className="rounded-2xl bg-primary/10 p-4 mb-4">
+                  <Rocket className="h-10 w-10 text-primary" />
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Linkmap에 오신 걸 환영합니다!</h2>
+                <p className="text-muted-foreground max-w-lg text-sm mb-6">
+                  프로젝트를 만들고, 서비스를 연결하고, 환경변수를 안전하게 관리하세요.
+                  <br />아래 체크리스트를 따라 시작해보세요.
+                </p>
+                <div className="flex gap-3">
+                  <TemplateDialog onSubmit={handleCreateFromTemplate} />
+                  <CreateProjectDialog onSubmit={handleCreateProject} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Getting Started Checklist */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">시작 가이드</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="hover:border-primary/30 transition-colors">
+                <CardContent className="pt-5">
+                  <div className="flex items-start gap-3">
+                    <div className="rounded-lg bg-blue-500/10 p-2 shrink-0">
+                      <FolderOpen className="h-5 w-5 text-blue-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">1. 프로젝트 생성</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        새 프로젝트를 만들거나 템플릿으로 빠르게 시작하세요
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="hover:border-primary/30 transition-colors">
+                <CardContent className="pt-5">
+                  <div className="flex items-start gap-3">
+                    <div className="rounded-lg bg-green-500/10 p-2 shrink-0">
+                      <Link2 className="h-5 w-5 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">2. 서비스 연결</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Supabase, Stripe 등 필요한 서비스를 프로젝트에 추가하세요
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="hover:border-primary/30 transition-colors">
+                <CardContent className="pt-5">
+                  <div className="flex items-start gap-3">
+                    <div className="rounded-lg bg-purple-500/10 p-2 shrink-0">
+                      <CheckCircle2 className="h-5 w-5 text-purple-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">3. 환경변수 설정</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        API 키와 시크릿을 암호화하여 안전하게 관리하세요
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-          <h2 className="text-xl font-semibold mb-2">{t(locale, 'dashboard.noProjects')}</h2>
-          <p className="text-muted-foreground mb-8 max-w-md text-sm">
-            {t(locale, 'dashboard.noProjectsDesc')}
-          </p>
-          <div className="flex gap-3">
-            <TemplateDialog onSubmit={handleCreateFromTemplate} />
-            <CreateProjectDialog onSubmit={handleCreateProject} />
+
+          {/* Helpful Links */}
+          <div className="flex flex-wrap gap-3">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/services" className="gap-1.5">
+                <Puzzle className="h-4 w-4" />
+                서비스 카탈로그
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/guides" className="gap-1.5">
+                <BookOpen className="h-4 w-4" />
+                가이드 보기
+              </Link>
+            </Button>
           </div>
         </div>
       ) : (
