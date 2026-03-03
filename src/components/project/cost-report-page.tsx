@@ -442,7 +442,17 @@ function SectionHeader({ icon: Icon, title, extra }: {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export function CostReportPage({ projectId }: { projectId: string }) {
+interface CostReportPageProps {
+  projectId: string;
+  /** 데모 모드: 리포트 생성 버튼 숨김, API 호출 차단 */
+  isDemo?: boolean;
+  /** 데모/초기 리포트 데이터 (localStorage 불필요 시) */
+  initialReport?: { report: CostReportResult; generatedAt: string };
+  /** 뒤로가기 링크 (기본값: /project/${projectId}/costs) */
+  backHref?: string;
+}
+
+export function CostReportPage({ projectId, isDemo = false, initialReport, backHref }: CostReportPageProps) {
   const [report, setReport] = useState<CostReportResult | null>(null);
   const [generatedAt, setGeneratedAt] = useState<string | null>(null);
   const [loadingStep, setLoadingStep] = useState(0);
@@ -500,11 +510,16 @@ export function CostReportPage({ projectId }: { projectId: string }) {
   // Load from storage or auto-generate on mount
   useEffect(() => {
     setCurrency(loadCurrency());
+    if (initialReport) {
+      setReport(initialReport.report);
+      setGeneratedAt(initialReport.generatedAt);
+      return;
+    }
     const stored = loadStoredReport(projectId);
     if (stored) {
       setReport(stored.report);
       setGeneratedAt(stored.generatedAt);
-    } else {
+    } else if (!isDemo) {
       handleGenerate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -592,7 +607,7 @@ export function CostReportPage({ projectId }: { projectId: string }) {
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
           <Link
-            href={`/project/${projectId}/costs`}
+            href={backHref ?? `/project/${projectId}/costs`}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -635,15 +650,17 @@ export function CostReportPage({ projectId }: { projectId: string }) {
               HTML 다운로드
             </Button>
           )}
-          <Button
-            size="sm"
-            className="gap-1.5 h-8 text-xs bg-gradient-to-r from-brand-blue to-brand-green hover:opacity-90"
-            onClick={handleGenerate}
-            disabled={mutation.isPending}
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${mutation.isPending ? 'animate-spin' : ''}`} />
-            {mutation.isPending ? '생성 중...' : '재생성'}
-          </Button>
+          {!isDemo && (
+            <Button
+              size="sm"
+              className="gap-1.5 h-8 text-xs bg-gradient-to-r from-brand-blue to-brand-green hover:opacity-90"
+              onClick={handleGenerate}
+              disabled={mutation.isPending}
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${mutation.isPending ? 'animate-spin' : ''}`} />
+              {mutation.isPending ? '생성 중...' : '재생성'}
+            </Button>
+          )}
         </div>
       </div>
 

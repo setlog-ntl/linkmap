@@ -1,23 +1,58 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, FileText, Clock } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useProjectCostSummary, useExchangeRate } from '@/lib/queries/costs';
 import { CostBudgetCard } from './cost-budget-card';
 import { CostSummaryMetrics } from './cost-summary-metrics';
 import { CostServiceList } from './cost-service-list';
+import type { CostReportResult } from '@/lib/validations/ai-cost-report';
+
+interface StoredReport { report: CostReportResult; generatedAt: string; }
+
+function loadStoredReport(projectId: string): StoredReport | null {
+  try {
+    const raw = localStorage.getItem(`cost-report:${projectId}`);
+    return raw ? (JSON.parse(raw) as StoredReport) : null;
+  } catch { return null; }
+}
+
+function formatRelativeTime(isoStr: string): string {
+  const diff = Date.now() - new Date(isoStr).getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return '방금 전';
+  if (mins < 60) return `${mins}분 전`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}시간 전`;
+  const days = Math.floor(hrs / 24);
+  return `${days}일 전`;
+}
 
 interface CostPageContentProps {
   projectId: string;
+  /** 데모 모드: AI 리포트 생성 비활성화 */
+  isDemo?: boolean;
+  /** 데모 모드: 리포트 보기 링크 (기본값: /project/${projectId}/costs/report) */
+  reportHref?: string;
 }
 
-export function CostPageContent({ projectId }: CostPageContentProps) {
+export function CostPageContent({ projectId, isDemo = false, reportHref }: CostPageContentProps) {
   const { data: costSummary, isLoading, error } = useProjectCostSummary(projectId);
   const { data: exchangeRate } = useExchangeRate();
+  const [storedReport, setStoredReport] = useState<StoredReport | null>(null);
+  const [reportChecked, setReportChecked] = useState(false);
 
   const usdToKrw = exchangeRate?.rate ?? null;
+  const reportLink = reportHref ?? `/project/${projectId}/costs/report`;
+
+  useEffect(() => {
+    setStoredReport(loadStoredReport(projectId));
+    setReportChecked(true);
+  }, [projectId]);
 
   if (isLoading) {
     return (
@@ -46,23 +81,78 @@ export function CostPageContent({ projectId }: CostPageContentProps) {
 
   if (!costSummary) return null;
 
+  const hasReport = reportChecked && storedReport !== null;
+
   return (
     <div className="space-y-6">
       {/* Header row with AI report button */}
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-muted-foreground">비용 관리</h2>
-        <Button
-          size="sm"
-          variant="outline"
-          className="gap-1.5 h-8 text-xs"
-          disabled={costSummary.services.length === 0}
-          asChild
-        >
-          <Link href={`/project/${projectId}/costs/report`}>
-            <Sparkles className="h-3.5 w-3.5" />
-            AI 리포트
-          </Link>
-        </Button>
+
+        <div className="flex items-center gap-2">
+          {reportChecked && hasReport ? (
+            /* 기존 리포트 있음 → "AI 리포트 보기" + 생성 시간 */
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Clock className="h-3 w-3" />
+                <span>{formatRelativeTime(storedReport!.generatedAt)}</span>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 h-8 text-xs border-brand-blue/30 text-brand-blue hover:bg-brand-blue/5"
+                asChild
+              >
+                <Link href={reportLink}>
+                  <FileText className="h-3.5 w-3.5" />
+                  AI 리포트 보기
+                </Link>
+              </Button>
+              {!isDemo && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="gap-1.5 h-8 text-xs text-muted-foreground"
+                  disabled={costSummary.services.length === 0}
+                  asChild
+                >
+                  <Link href={reportLink}>
+                    <Sparkles className="h-3.5 w-3.5" />
+                    재생성
+                  </Link>
+                </Button>
+              )}
+            </div>
+          ) : isDemo ? (
+            /* 데모 모드 + 리포트 없음 → 비활성화 */
+            <div className="flex items-center gap-1.5">
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5">데모</Badge>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 h-8 text-xs"
+                disabled
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                AI 리포트
+              </Button>
+            </div>
+          ) : (
+            /* 리포트 없음 → 생성 */
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 h-8 text-xs"
+              disabled={costSummary.services.length === 0}
+              asChild
+            >
+              <Link href={reportLink}>
+                <Sparkles className="h-3.5 w-3.5" />
+                AI 리포트
+              </Link>
+            </Button>
+          )}
+        </div>
       </div>
 
       <CostBudgetCard

@@ -2,9 +2,11 @@ export const dynamic = 'force-dynamic';
 
 import { redirect } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, DollarSign } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Eye, DollarSign, FileText } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { getServiceIconUrl } from '@/lib/constants/service-brands';
 
@@ -48,12 +50,25 @@ export default async function DemoCostsPage({
 
     return (
       <div className="space-y-6">
-        {/* 읽기 전용 안내 */}
-        <div className="rounded-lg border border-brand-blue/20 bg-brand-blue/[0.05] px-4 py-3 flex items-center gap-2">
-          <Eye className="h-4 w-4 text-brand-blue shrink-0" />
-          <p className="text-sm text-muted-foreground">
-            데모 모드에서는 비용 정보를 볼 수만 있습니다.
-          </p>
+        {/* Header: 읽기 전용 안내 + AI 리포트 보기 */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 rounded-lg border border-brand-blue/20 bg-brand-blue/[0.05] px-4 py-2.5 flex-1">
+            <Eye className="h-4 w-4 text-brand-blue shrink-0" />
+            <p className="text-sm text-muted-foreground">
+              데모 모드에서는 비용 정보를 볼 수만 있습니다.
+            </p>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5 h-9 text-xs border-brand-blue/30 text-brand-blue hover:bg-brand-blue/5 shrink-0"
+            asChild
+          >
+            <Link href={`/demo/project/${id}/costs/report`}>
+              <FileText className="h-3.5 w-3.5" />
+              AI 리포트 보기
+            </Link>
+          </Button>
         </div>
 
         {/* 예산 정보 */}
