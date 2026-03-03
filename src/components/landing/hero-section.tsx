@@ -136,29 +136,33 @@ export function HeroSection() {
       </div>
 
       {/* ── Area 2: Interactive Flow showcase (dedicated space below text) ── */}
-      <div className="relative h-[280px] sm:h-[480px] lg:h-[720px] -mt-4 sm:-mt-8">
+      <div className="relative h-[320px] sm:h-[520px] lg:h-[740px] -mt-4 sm:-mt-8">
         {/* Top fade: blend into text area */}
         <div className="absolute inset-x-0 top-0 h-10 z-10 bg-gradient-to-b from-background/70 to-transparent pointer-events-none" />
         <InteractiveHeroFlow />
-        {/* 섹션 범례 — 하단 중앙 HTML 오버레이 */}
-        <div className="absolute bottom-8 sm:bottom-24 inset-x-0 z-20 flex items-center justify-center gap-3 sm:gap-6 pointer-events-none">
+        {/* 섹션 범례 — 하단 그라데이션 위에 확실히 노출되도록 z-30 */}
+        <div className="absolute bottom-12 sm:bottom-16 inset-x-0 z-30 flex items-center justify-center gap-4 sm:gap-8 pointer-events-none">
           {([
             { label: 'DATABASE', color: 'text-amber-400' },
             { label: 'AUTH',     color: 'text-emerald-400' },
             { label: 'AI',       color: 'text-violet-400' },
             { label: 'DEPLOY',   color: 'text-blue-400' },
             { label: 'CI/CD',    color: 'text-orange-400' },
-          ] as const).map(item => (
-            <span
-              key={item.label}
-              className={`text-[8px] sm:text-[11px] font-bold tracking-[0.15em] sm:tracking-[0.22em] opacity-60 dark:opacity-50 ${item.color}`}
-            >
-              {item.label}
+          ] as const).map((item, idx, arr) => (
+            <span key={item.label} className="flex items-center gap-4 sm:gap-8">
+              <span
+                className={`text-[11px] sm:text-[13px] lg:text-[14px] font-bold tracking-[0.2em] sm:tracking-[0.25em] opacity-80 dark:opacity-70 ${item.color}`}
+              >
+                {item.label}
+              </span>
+              {idx < arr.length - 1 && (
+                <span className="w-px h-3 bg-border/50 opacity-60 shrink-0" />
+              )}
             </span>
           ))}
         </div>
-        {/* Bottom fade: blend into next section */}
-        <div className="absolute inset-x-0 bottom-0 h-20 z-10 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+        {/* Bottom fade: blend into next section — 레이블 아래에서 시작하도록 높이 축소 */}
+        <div className="absolute inset-x-0 bottom-0 h-10 z-20 bg-gradient-to-t from-background to-transparent pointer-events-none" />
       </div>
     </section>
   );

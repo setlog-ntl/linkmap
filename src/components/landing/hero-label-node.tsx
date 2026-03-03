@@ -28,7 +28,7 @@ function HeroLabelNode({ data }: NodeProps) {
   return (
     <div className="pointer-events-none select-none">
       <span
-        className={`text-[9px] font-semibold tracking-[0.18em] whitespace-nowrap ${colorClass}`}
+        className={`text-[11px] font-bold tracking-[0.2em] whitespace-nowrap ${colorClass}`}
       >
         {d.text}
       </span>
