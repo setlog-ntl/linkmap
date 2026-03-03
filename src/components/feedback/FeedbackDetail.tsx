@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, ChevronUp, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, ChevronUp, ShieldAlert, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-import { useFeedbackDetail, useToggleFeedbackVote } from '@/lib/queries/feedback';
+import { useFeedbackDetail, useToggleFeedbackVote, useDeleteFeedback } from '@/lib/queries/feedback';
 import { FeedbackCommentList } from './FeedbackCommentList';
 import { FeedbackAdminPanel } from './FeedbackAdminPanel';
 import { CATEGORY_BADGE, STATUS_BADGE } from './FeedbackCard';
@@ -15,6 +15,7 @@ interface FeedbackDetailProps {
   id: string;
   isLoggedIn: boolean;
   isAdmin: boolean;
+  currentUserId?: string | null;
 }
 
 function formatDate(dateStr: string) {
@@ -27,9 +28,10 @@ function formatDate(dateStr: string) {
   });
 }
 
-export function FeedbackDetail({ id, isLoggedIn, isAdmin }: FeedbackDetailProps) {
+export function FeedbackDetail({ id, isLoggedIn, isAdmin, currentUserId }: FeedbackDetailProps) {
   const { data: item, isLoading, isError } = useFeedbackDetail(id);
   const { mutate: toggleVote, isPending: isVoting } = useToggleFeedbackVote();
+  const { mutate: deleteFeedback, isPending: isDeleting } = useDeleteFeedback();
 
   const handleVote = () => {
     if (!isLoggedIn) {
@@ -65,6 +67,20 @@ export function FeedbackDetail({ id, isLoggedIn, isAdmin }: FeedbackDetailProps)
 
   const catBadge = CATEGORY_BADGE[item.category];
   const stsBadge = STATUS_BADGE[item.status];
+  const isOwner = currentUserId ? item.user_id === currentUserId : false;
+  const canDelete = isAdmin || isOwner;
+
+  const handleDelete = () => {
+    if (!canDelete) return;
+    if (
+      !window.confirm(
+        '이 기능 요청을 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.',
+      )
+    ) {
+      return;
+    }
+    deleteFeedback(id);
+  };
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
@@ -78,7 +94,7 @@ export function FeedbackDetail({ id, isLoggedIn, isAdmin }: FeedbackDetailProps)
       </Link>
 
       {/* 메인 카드 */}
-      <div className="bg-card border rounded-lg p-6 shadow-sm">
+      <div className="bg-card border rounded-lg p-6 shadow-sm space-y-4">
         {/* 배지 */}
         <div className="flex flex-wrap gap-2 mb-3">
           <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${catBadge.className}`}>
@@ -89,7 +105,20 @@ export function FeedbackDetail({ id, isLoggedIn, isAdmin }: FeedbackDetailProps)
           </span>
         </div>
 
-        <h1 className="text-xl font-bold mb-2">{item.title}</h1>
+        <div className="flex items-start justify-between gap-4">
+          <h1 className="text-xl font-bold mb-2">{item.title}</h1>
+          {canDelete && (
+            <Button
+              variant="destructive"
+              size="icon"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              aria-label="요청 삭제"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
 
         {/* 작성자 & 날짜 */}
         <div className="flex items-center gap-2 mb-4">

@@ -33,7 +33,12 @@ export default async function FeedbackDetailPage({ params }: PageProps) {
     <div className="min-h-screen flex flex-col">
       <Header profile={profile} />
       <main className="flex-1 container max-w-3xl mx-auto px-4 py-10">
-        <FeedbackDetail id={id} isLoggedIn={!!user} isAdmin={admin} />
+        <FeedbackDetail
+          id={id}
+          isLoggedIn={!!user}
+          isAdmin={admin}
+          currentUserId={user?.id ?? null}
+        />
       </main>
       <Footer />
     </div>

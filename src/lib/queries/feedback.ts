@@ -6,6 +6,8 @@ import {
   useQueryClient,
   type UseQueryOptions,
 } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { queryKeys } from './keys';
 import type {
   FeedbackListParams,
@@ -221,6 +223,36 @@ export function useCreateFeedbackComment() {
     },
     onSuccess: (_data, { id }) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.feedback.comments(id) });
+    },
+  });
+}
+
+// ─── 요청 삭제 ────────────────────────────────────────────────────────────────
+
+export function useDeleteFeedback() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/feedback/${id}`, { method: 'DELETE' });
+      if (!res.ok && res.status !== 204) {
+        try {
+          const err = await res.json() as { error?: string };
+          throw new Error(err.error ?? '삭제에 실패했습니다');
+        } catch {
+          throw new Error('삭제에 실패했습니다');
+        }
+      }
+    },
+    onSuccess: (_data, id) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.feedback.detail(id) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.feedback.list() });
+      toast.success('요청이 삭제되었습니다');
+      router.push('/feedback');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
     },
   });
 }
