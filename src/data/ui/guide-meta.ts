@@ -22,7 +22,7 @@ export const GUIDE_CATEGORIES: Record<GuideCategory, { label: string; icon: Luci
 export const GUIDE_LIST: GuideMeta[] = [
   // 기본 개념
   { slug: 'env', title: '환경변수 완전 정복', description: 'API 키와 환경변수(.env)의 개념부터 배포까지', category: 'concept', icon: Key, badge: '초보자용', readingTime: '10분', href: '/guides/env' },
-  { slug: 'auth', title: '인증 가이드', description: '앱 로그인과 서비스 연동 인증의 차이', category: 'concept', icon: Shield, badge: '초보자용', readingTime: '8분', href: '/guides/auth' },
+  { slug: 'auth', title: '인증 가이드', description: '앱 로그인·서비스 연동 개념 + 구글·카카오 로그인 설정법', category: 'concept', icon: Shield, badge: '초보자용', readingTime: '15분', href: '/guides/auth' },
   { slug: 'frontend', title: '프론트엔드 가이드', description: '브라우저 렌더링, 컴포넌트, CSR·SSR·SSG', category: 'concept', icon: Monitor, readingTime: '12분', href: '/guides/frontend' },
   { slug: 'backend', title: '백엔드 가이드', description: 'API, 데이터베이스, BaaS의 기초', category: 'concept', icon: Server, readingTime: '10분', href: '/guides/backend' },
   { slug: 'deploy', title: '도메인·배포·서버', description: '도메인, DNS, 호스팅, 배포 파이프라인', category: 'concept', icon: Globe, readingTime: '15분', href: '/guides/deploy' },

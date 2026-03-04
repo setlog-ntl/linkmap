@@ -36,6 +36,22 @@ const faqs = [
     q: 'API Key는 안전하게 저장되나요?',
     a: '네, Linkmap은 모든 API Key와 시크릿을 AES-256-GCM 알고리즘으로 암호화해 저장합니다. 원문은 서버 메모리에만 일시적으로 존재하며, DB에는 암호문만 보관됩니다.',
   },
+  {
+    q: '구글 로그인에서 redirect_uri_mismatch 오류가 나요',
+    a: 'Google Cloud Console > 사용자 인증 정보 > 해당 OAuth 클라이언트에서 "승인된 리디렉션 URI"를 확인하세요. Supabase 콜백 URL(https://<ref>.supabase.co/auth/v1/callback)이 정확히 등록되어 있어야 합니다. 후행 슬래시, 프로토콜(http vs https), 포트 번호를 모두 점검합니다.',
+  },
+  {
+    q: '카카오 로그인도 Supabase에서 지원하나요?',
+    a: 'Supabase는 카카오를 기본 Provider로 제공하지 않지만, Custom OIDC Provider 기능을 통해 카카오 로그인을 연동할 수 있습니다. 카카오 개발자 콘솔에서 OpenID Connect를 활성화하고, Supabase에 Client ID(REST API 키), Client Secret, Issuer URL(https://kauth.kakao.com)을 등록합니다.',
+  },
+  {
+    q: '구글과 카카오 로그인을 동시에 사용할 수 있나요?',
+    a: '네, 가능합니다. Supabase의 Providers에서 Google과 카카오(Custom OIDC)를 모두 활성화하면 됩니다. 사용자가 같은 이메일로 두 곳 모두 로그인하면 Supabase가 자동으로 계정을 연결합니다.',
+  },
+  {
+    q: '테스트 모드에서는 다른 사람이 로그인을 못 하나요?',
+    a: '구글 OAuth 동의 화면이 "테스트" 상태일 때는 등록된 테스트 사용자(최대 100명)만 로그인할 수 있습니다. OAuth 동의 화면에서 "테스트 사용자" 항목에 이메일을 추가하거나, "프로덕션에 게시"를 클릭하면 모든 Google 계정으로 로그인이 가능해집니다.',
+  },
 ];
 
 export function FaqSection() {

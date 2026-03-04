@@ -3,7 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollReveal } from '@/components/landing/scroll-reveal';
 import { FlowDiagram, type FlowNode } from './flow-diagram';
-import { Mail, Chrome, Github, LogIn, ArrowRightLeft, LayoutDashboard } from 'lucide-react';
+import { Mail, Chrome, Github, MessageCircle, LogIn, ArrowRightLeft, LayoutDashboard } from 'lucide-react';
 
 const methods = [
   {
@@ -15,11 +15,18 @@ const methods = [
     icon: Chrome,
     name: 'Google 로그인',
     desc: '구글 계정을 클릭 한 번으로 사용. 별도 비밀번호 불필요.',
+    anchor: '#google-login',
   },
   {
     icon: Github,
     name: 'GitHub 로그인',
     desc: '개발자라면 이미 있는 GitHub 계정으로 바로 시작.',
+  },
+  {
+    icon: MessageCircle,
+    name: '카카오 로그인',
+    desc: '한국에서 가장 많이 쓰이는 소셜 로그인. 카카오톡 계정으로 시작.',
+    anchor: '#kakao-login',
   },
 ];
 
@@ -49,14 +56,14 @@ export function AppLoginSection() {
           <h2 className="text-2xl md:text-3xl font-bold mb-3">앱 로그인</h2>
           <p className="text-muted-foreground max-w-2xl">
             Linkmap 서비스 자체에 들어오기 위한 인증입니다.
-            이메일, Google, GitHub 중 하나로 로그인할 수 있습니다.
+            이메일, Google, GitHub, 카카오 중 하나로 로그인할 수 있습니다.
           </p>
         </div>
       </ScrollReveal>
 
       {/* 3 Method Cards */}
       <ScrollReveal delay={0.1}>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           {methods.map((m) => {
             const Icon = m.icon;
             return (
@@ -66,7 +73,19 @@ export function AppLoginSection() {
                     <Icon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <h3 className="font-semibold mb-1">{m.name}</h3>
-                  <p className="text-sm text-muted-foreground">{m.desc}</p>
+                  <p className="text-sm text-muted-foreground mb-2">{m.desc}</p>
+                  {'anchor' in m && m.anchor && (
+                    <a
+                      href={m.anchor}
+                      className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.querySelector(m.anchor!)?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                    >
+                      설정 방법 →
+                    </a>
+                  )}
                 </CardContent>
               </Card>
             );

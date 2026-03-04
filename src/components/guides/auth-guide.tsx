@@ -3,14 +3,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { HeroSection } from './auth-guide/hero-section';
 import { AppLoginSection } from './auth-guide/app-login-section';
+import { GoogleLoginSection } from './auth-guide/google-login-section';
+import { KakaoLoginSection } from './auth-guide/kakao-login-section';
 import { ServiceAuthSection } from './auth-guide/service-auth-section';
 import { ComparisonTable } from './auth-guide/comparison-table';
+import { GlossarySection } from './auth-guide/glossary-section';
 import { FaqSection } from './auth-guide/faq-section';
 
 const sections = [
   { id: 'app-login', label: '앱 로그인' },
+  { id: 'google-login', label: 'Google 설정' },
+  { id: 'kakao-login', label: '카카오 설정' },
   { id: 'service-auth', label: '서비스 연동' },
   { id: 'comparison', label: '비교' },
+  { id: 'glossary', label: '용어 사전' },
   { id: 'faq', label: 'FAQ' },
 ] as const;
 
@@ -69,8 +75,11 @@ export function AuthGuide() {
       </nav>
 
       <AppLoginSection />
+      <GoogleLoginSection />
+      <KakaoLoginSection />
       <ServiceAuthSection />
       <ComparisonTable />
+      <GlossarySection />
       <FaqSection />
     </div>
   );
