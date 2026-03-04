@@ -123,10 +123,14 @@ export function FeedbackDetail({ id, isLoggedIn, isAdmin, currentUserId }: Feedb
         {/* 작성자 & 날짜 */}
         <div className="flex items-center gap-2 mb-4">
           <Avatar className="h-6 w-6">
-            <AvatarImage src={item.author.avatar_url ?? undefined} />
-            <AvatarFallback className="text-xs">{item.author.name?.charAt(0) ?? '?'}</AvatarFallback>
+            {!item.is_anonymous && <AvatarImage src={item.author.avatar_url ?? undefined} />}
+            <AvatarFallback className="text-xs">
+              {item.is_anonymous ? '?' : (item.author.name?.charAt(0) ?? '?')}
+            </AvatarFallback>
           </Avatar>
-          <span className="text-xs text-muted-foreground">{item.author.name ?? '익명'}</span>
+          <span className="text-xs text-muted-foreground">
+            {item.is_anonymous ? '익명' : (item.author.name ?? '익명')}
+          </span>
           <span className="text-xs text-muted-foreground">·</span>
           <span className="text-xs text-muted-foreground">{formatDate(item.created_at)}</span>
         </div>

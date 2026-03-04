@@ -71,12 +71,12 @@ export async function GET(request: NextRequest) {
     const { author, comment_count, ...rest } = row as Record<string, unknown>;
     const authorData = author as { name?: string | null; avatar_url?: string | null } | null;
     const commentArr = comment_count as { count: number }[] | null;
+    const isAnon = rest.is_anonymous as boolean;
     return {
       ...rest,
-      author: {
-        name: authorData?.name ?? null,
-        avatar_url: authorData?.avatar_url ?? null,
-      },
+      author: isAnon
+        ? { name: '익명', avatar_url: null }
+        : { name: authorData?.name ?? null, avatar_url: authorData?.avatar_url ?? null },
       has_voted: votedSet.has(rest.id as string),
       comment_count: commentArr?.[0]?.count ?? 0,
     };
@@ -101,11 +101,11 @@ export async function POST(request: NextRequest) {
     return apiError(parsed.error.issues[0].message, 400);
   }
 
-  const { title, description, category } = parsed.data;
+  const { title, description, category, is_anonymous } = parsed.data;
 
   const { data, error } = await supabase
     .from('feature_requests')
-    .insert({ user_id: user.id, title, description, category })
+    .insert({ user_id: user.id, title, description, category, is_anonymous })
     .select()
     .single();
 

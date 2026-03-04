@@ -12,6 +12,7 @@ export const createFeedbackSchema = z.object({
   category: z.enum(['feature', 'bug', 'improvement'], {
     error: '올바른 카테고리를 선택해주세요',
   }),
+  is_anonymous: z.boolean().optional().default(false),
 });
 
 export const updateFeedbackSchema = z.object({

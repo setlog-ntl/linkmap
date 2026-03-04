@@ -13,7 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Gift } from 'lucide-react';
 import { useCreateFeedback } from '@/lib/queries/feedback';
 import type { FeatureRequestCategory } from '@/types/feedback';
 
@@ -26,6 +28,7 @@ export function FeedbackForm({ onSuccess, onCancel }: FeedbackFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<FeatureRequestCategory>('feature');
+  const [isAnonymous, setIsAnonymous] = useState(false);
 
   const { mutate: createFeedback, isPending } = useCreateFeedback();
 
@@ -41,7 +44,7 @@ export function FeedbackForm({ onSuccess, onCancel }: FeedbackFormProps) {
     }
 
     createFeedback(
-      { title: title.trim(), description: description.trim(), category },
+      { title: title.trim(), description: description.trim(), category, is_anonymous: isAnonymous },
       {
         onSuccess: () => {
           toast.success('요청이 등록되었습니다');
@@ -97,6 +100,33 @@ export function FeedbackForm({ onSuccess, onCancel }: FeedbackFormProps) {
                 <SelectItem value="improvement">개선 요청</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          {/* 익명/공개 토글 */}
+          <div className="flex items-center justify-between rounded-lg border px-4 py-3">
+            <div className="space-y-0.5">
+              <Label htmlFor="feedback-anonymous" className="text-sm font-medium cursor-pointer">
+                익명으로 작성
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {isAnonymous ? '작성자 정보가 표시되지 않습니다' : '프로필 이름이 함께 표시됩니다'}
+              </p>
+            </div>
+            <Switch
+              id="feedback-anonymous"
+              checked={isAnonymous}
+              onCheckedChange={setIsAnonymous}
+            />
+          </div>
+
+          {/* 베니핏 안내 */}
+          <div className="flex items-start gap-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 px-4 py-3">
+            <Gift className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+              서비스 개선에 도움이 되는 의견을 주시면 감사의 의미로
+              <span className="font-semibold"> 프리미엄 기능 이용권</span>이나
+              <span className="font-semibold"> 쿠폰 등의 혜택</span>을 드릴 수 있습니다.
+            </p>
           </div>
 
           <div className="flex justify-end gap-2">

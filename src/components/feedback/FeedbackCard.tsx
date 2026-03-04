@@ -87,12 +87,14 @@ export function FeedbackCard({ item, isLoggedIn }: FeedbackCardProps) {
         <div className="flex items-center justify-between mt-3">
           <div className="flex items-center gap-2">
             <Avatar className="h-5 w-5">
-              <AvatarImage src={item.author.avatar_url ?? undefined} />
+              {!item.is_anonymous && <AvatarImage src={item.author.avatar_url ?? undefined} />}
               <AvatarFallback className="text-[10px]">
-                {item.author.name?.charAt(0) ?? '?'}
+                {item.is_anonymous ? '?' : (item.author.name?.charAt(0) ?? '?')}
               </AvatarFallback>
             </Avatar>
-            <span className="text-xs text-muted-foreground">{item.author.name ?? '익명'}</span>
+            <span className="text-xs text-muted-foreground">
+              {item.is_anonymous ? '익명' : (item.author.name ?? '익명')}
+            </span>
           </div>
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <MessageSquare className="h-3.5 w-3.5" />

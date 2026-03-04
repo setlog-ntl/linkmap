@@ -43,14 +43,14 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { author, comment_count, ...rest } = data as Record<string, unknown>;
   const authorData = author as { name?: string | null; avatar_url?: string | null } | null;
   const commentArr = comment_count as { count: number }[] | null;
+  const isAnon = rest.is_anonymous as boolean;
 
   return NextResponse.json({
     item: {
       ...rest,
-      author: {
-        name: authorData?.name ?? null,
-        avatar_url: authorData?.avatar_url ?? null,
-      },
+      author: isAnon
+        ? { name: '익명', avatar_url: null }
+        : { name: authorData?.name ?? null, avatar_url: authorData?.avatar_url ?? null },
       has_voted: hasVoted,
       comment_count: commentArr?.[0]?.count ?? 0,
     },
