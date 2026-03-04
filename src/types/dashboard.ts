@@ -51,6 +51,7 @@ export interface DashboardMetrics {
   progressPercent: number;
   totalMonthlyCost?: number;
   monthlyBudget?: number | null;
+  budgetUsagePercent?: number | null;
   isOverBudget?: boolean;
 }
 

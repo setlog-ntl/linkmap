@@ -2,15 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Sparkles, FileText, Clock } from 'lucide-react';
+import { Sparkles, FileText, Clock, TrendingDown, Zap } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import { useProjectCostSummary, useExchangeRate } from '@/lib/queries/costs';
 import { CostBudgetCard } from './cost-budget-card';
 import { CostSummaryMetrics } from './cost-summary-metrics';
 import { CostServiceList } from './cost-service-list';
+import { formatCurrency } from './cost-budget-card';
 import type { CostReportResult } from '@/lib/validations/ai-cost-report';
+import type { ProjectCostSummary } from '@/types';
 
 interface StoredReport { report: CostReportResult; generatedAt: string; }
 
@@ -30,6 +33,52 @@ function formatRelativeTime(isoStr: string): string {
   if (hrs < 24) return `${hrs}시간 전`;
   const days = Math.floor(hrs / 24);
   return `${days}일 전`;
+}
+
+function buildCostSummaryLine(
+  summary: ProjectCostSummary,
+  budgetCurrency: 'USD' | 'KRW',
+  usdToKrw: number | null,
+): { text: string; variant: 'free' | 'paid' | 'info' } {
+  const total = summary.services.length;
+  const freeCount = summary.services.filter(
+    (s) => s.monthlyCost === 0 && (s.costTierId != null || s.isCustomCost),
+  ).length;
+  const paidCount = summary.services.filter((s) => s.monthlyCost > 0).length;
+  const cost = summary.totalMonthlyCost;
+
+  if (total === 0) {
+    return { text: '서비스를 추가하면 비용을 한눈에 볼 수 있어요', variant: 'info' };
+  }
+
+  if (cost === 0 && freeCount > 0) {
+    return {
+      text: `모든 서비스 무료 사용 중! 월 $0`,
+      variant: 'free',
+    };
+  }
+
+  const costStr = formatCurrency(cost, budgetCurrency);
+  const krwStr =
+    budgetCurrency === 'USD' && usdToKrw
+      ? ` (약 ₩${Math.round(cost * usdToKrw).toLocaleString('ko-KR')})`
+      : '';
+  const budgetPart =
+    summary.budgetUsagePercent != null
+      ? `, 예산의 ${summary.budgetUsagePercent}%`
+      : '';
+
+  if (freeCount > 0) {
+    return {
+      text: `${total}개 서비스 중 ${freeCount}개가 무료, 총 ${costStr}/월${krwStr}${budgetPart}`,
+      variant: 'paid',
+    };
+  }
+
+  return {
+    text: `${paidCount}개 서비스, 총 ${costStr}/월${krwStr}${budgetPart}`,
+    variant: 'paid',
+  };
 }
 
 interface CostPageContentProps {
@@ -82,9 +131,29 @@ export function CostPageContent({ projectId, isDemo = false, reportHref }: CostP
   if (!costSummary) return null;
 
   const hasReport = reportChecked && storedReport !== null;
+  const summaryLine = buildCostSummaryLine(costSummary, costSummary.budgetCurrency, usdToKrw);
 
   return (
     <div className="space-y-6">
+      {/* 한 줄 요약 배너 */}
+      <div
+        className={cn(
+          'flex items-center gap-2.5 rounded-lg px-4 py-3 text-sm font-medium',
+          summaryLine.variant === 'free'
+            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400'
+            : summaryLine.variant === 'paid'
+              ? 'bg-brand-blue/5 text-brand-blue dark:bg-brand-blue/10'
+              : 'bg-muted text-muted-foreground',
+        )}
+      >
+        {summaryLine.variant === 'free' ? (
+          <Zap className="h-4 w-4 shrink-0" />
+        ) : (
+          <TrendingDown className="h-4 w-4 shrink-0" />
+        )}
+        {summaryLine.text}
+      </div>
+
       {/* Header row with AI report button */}
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-muted-foreground">비용 관리</h2>

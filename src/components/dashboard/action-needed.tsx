@@ -80,6 +80,16 @@ export function ActionNeeded({ projectId, allCards, metrics }: ActionNeededProps
       message: '월간 예산을 초과했습니다',
       href: `/project/${projectId}/costs`,
     });
+  } else if (
+    metrics.budgetUsagePercent != null &&
+    metrics.budgetUsagePercent >= 80
+  ) {
+    // Budget 80% 사전 경고
+    items.push({
+      severity: 'info',
+      message: `월간 예산의 ${metrics.budgetUsagePercent}%를 사용했습니다`,
+      href: `/project/${projectId}/costs`,
+    });
   }
 
   // No services

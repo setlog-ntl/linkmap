@@ -156,6 +156,13 @@ export function CostServiceList({ projectId, services, budgetCurrency, usdToKrw 
           const costUrl = SERVICE_COST_URLS[entry.serviceSlug];
           const pricingUrl = SERVICE_PRICING_URLS[entry.serviceSlug];
 
+          // 3단계 비용 상태: free / paid / unset
+          const isFree =
+            (entry.costTierId != null || entry.isCustomCost) &&
+            entry.monthlyCost === 0 &&
+            entry.actualCostMonthly == null;
+          const isUnset = !entry.costTierId && !entry.isCustomCost && entry.actualCostMonthly == null;
+
           return (
             <div key={entry.projectServiceId} className="py-3 first:pt-0 last:pb-0">
               <div
@@ -187,7 +194,16 @@ export function CostServiceList({ projectId, services, budgetCurrency, usdToKrw 
                   )}
                 </span>
 
-                {hasCost ? (
+                {isFree ? (
+                  /* 무료 배지 */
+                  <Badge
+                    variant="secondary"
+                    className="text-xs font-medium bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800"
+                  >
+                    무료
+                  </Badge>
+                ) : hasCost ? (
+                  /* 유료: 금액 표시 */
                   <div className="flex flex-col items-end gap-0.5">
                     <div className="flex items-center gap-2">
                       {entry.actualCostMonthly != null ? (
@@ -215,6 +231,31 @@ export function CostServiceList({ projectId, services, budgetCurrency, usdToKrw 
                         /{BILLING_CYCLE_LABELS[entry.billingCycle] ?? entry.billingCycle}
                       </span>
                     )}
+                  </div>
+                ) : isUnset ? (
+                  /* 미설정 배지 */
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant="outline"
+                      className="text-xs text-muted-foreground border-dashed"
+                    >
+                      비용 미설정
+                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={cn(
+                        'h-7 text-xs text-muted-foreground',
+                        'opacity-0 group-hover:opacity-100 transition-opacity'
+                      )}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedId(entry.projectServiceId);
+                      }}
+                    >
+                      <Pencil className="mr-1 h-3 w-3" />
+                      요금 선택
+                    </Button>
                   </div>
                 ) : (
                   <Button

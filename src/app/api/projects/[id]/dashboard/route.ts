@@ -169,6 +169,9 @@ export async function GET(
         : 0,
       totalMonthlyCost,
       monthlyBudget,
+      budgetUsagePercent: monthlyBudget != null && monthlyBudget > 0
+        ? Math.round((totalMonthlyCost / monthlyBudget) * 100)
+        : null,
       isOverBudget: monthlyBudget != null ? totalMonthlyCost > monthlyBudget : false,
     };
 

@@ -10,7 +10,7 @@ import { CreateProjectDialog } from '@/components/project/create-project-dialog'
 import { TemplateDialog } from '@/components/project/template-dialog';
 import { QuickActions } from '@/components/dashboard/quick-actions';
 import { createClient } from '@/lib/supabase/client';
-import { FolderOpen, Layers, Puzzle, GitBranch, LayoutGrid, List, Rocket, BookOpen, Link2, CheckCircle2 } from 'lucide-react';
+import { FolderOpen, Layers, Puzzle, GitBranch, LayoutGrid, List, Rocket, BookOpen, Link2, CheckCircle2, DollarSign } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -146,25 +146,34 @@ export default function DashboardPage() {
       </div>
 
       {/* Cross-Project Stats */}
-      {!isLoading && sortedProjects.length > 0 && (
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          <StatCard
-            icon={Layers}
-            value={sortedProjects.length}
-            label={t(locale, 'dashboard.statProjects')}
-          />
-          <StatCard
-            icon={Puzzle}
-            value={sortedProjects.reduce((sum, p) => sum + (p.project_services?.length || 0), 0)}
-            label={t(locale, 'dashboard.statServices')}
-          />
-          <StatCard
-            icon={GitBranch}
-            value={sortedProjects.reduce((sum, p) => sum + (p.project_github_repos?.length || 0), 0)}
-            label={t(locale, 'dashboard.statGithubRepos')}
-          />
-        </div>
-      )}
+      {!isLoading && sortedProjects.length > 0 && (() => {
+        const totalCost = sortedProjects.reduce((sum, p) => {
+          return sum + (p.project_services ?? []).reduce((s, ps) => {
+            return s + (ps.custom_cost_monthly ?? 0);
+          }, 0);
+        }, 0);
+
+        return (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+            <StatCard
+              icon={Layers}
+              value={sortedProjects.length}
+              label={t(locale, 'dashboard.statProjects')}
+            />
+            <StatCard
+              icon={Puzzle}
+              value={sortedProjects.reduce((sum, p) => sum + (p.project_services?.length || 0), 0)}
+              label={t(locale, 'dashboard.statServices')}
+            />
+            <StatCard
+              icon={GitBranch}
+              value={sortedProjects.reduce((sum, p) => sum + (p.project_github_repos?.length || 0), 0)}
+              label={t(locale, 'dashboard.statGithubRepos')}
+            />
+            <CostStatCard totalCost={totalCost} />
+          </div>
+        );
+      })()}
 
       {/* Quick Actions */}
       <QuickActions onNewProject={() => setCreateOpen(true)} />
@@ -331,6 +340,24 @@ function StatCard({ icon: Icon, value, label }: { icon: typeof Layers; value: nu
       <div>
         <p className="text-2xl font-bold tracking-tight">{value}</p>
         <p className="text-xs text-muted-foreground">{label}</p>
+      </div>
+    </div>
+  );
+}
+
+function CostStatCard({ totalCost }: { totalCost: number }) {
+  const costDisplay = totalCost === 0
+    ? '$0'
+    : `$${totalCost.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+
+  return (
+    <div className="rounded-xl border bg-card p-4 flex items-center gap-3">
+      <div className={`rounded-lg p-2 ${totalCost === 0 ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-primary/10'}`}>
+        <DollarSign className={`h-4 w-4 ${totalCost === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-primary'}`} />
+      </div>
+      <div>
+        <p className="text-2xl font-bold tracking-tight font-mono">{costDisplay}</p>
+        <p className="text-xs text-muted-foreground">전체 월 비용</p>
       </div>
     </div>
   );
