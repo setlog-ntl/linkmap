@@ -15,7 +15,6 @@ export const aiChatSchema = z.object({
       'map_narrator',
       'compare_services',
       'command',
-      'module_suggest',
     ])
     .default('overview_chat'),
   context: z

@@ -52,13 +52,6 @@ export const FEATURE_DEFINITIONS: FeatureDefinition[] = [
     description: 'AI 자연어 명령어 처리',
     default_prompt_override: null,
   },
-  {
-    slug: 'module_suggest',
-    label_ko: 'AI 모듈 추천',
-    label_en: 'Module Suggest',
-    description: '모듈 구성 추천',
-    default_prompt_override: null,
-  },
 ];
 
 // ─── Default Q&A ─────────────────────────────────────────────────────
@@ -146,21 +139,6 @@ export const DEFAULT_QNA: DefaultQna[] = [
     question_ko: '사용 가능한 명령어가 뭐야?',
     answer_guide: '사용 가능한 자연어 명령어 목록(서비스 추가/제거, 환경변수 생성, 연결 관리 등)을 안내하세요.',
     sort_order: 1,
-  },
-  // module_suggest
-  {
-    feature_slug: 'module_suggest',
-    question: 'Suggest modules for my site',
-    question_ko: '내 사이트에 적합한 모듈 추천해줘',
-    answer_guide: '사이트의 목적과 현재 모듈 구성을 분석하여 추가하면 좋을 모듈을 추천하고 배치 순서를 제안하세요.',
-    sort_order: 1,
-  },
-  {
-    feature_slug: 'module_suggest',
-    question: 'Optimize module order',
-    question_ko: '모듈 순서를 최적화해줘',
-    answer_guide: '현재 모듈 순서를 사용자 경험과 전환율 관점에서 분석하여 최적의 순서를 제안하세요.',
-    sort_order: 2,
   },
 ];
 
@@ -251,13 +229,6 @@ export const PRESETS: Preset[] = [
           { question: 'Batch operations guide', question_ko: '일괄 작업 가이드', answer_guide: '여러 서비스 추가, 환경변수 일괄 설정, 연결 대량 생성 등 배치 명령어 사용법을 안내하세요.', sort_order: 1 },
         ],
       },
-      module_suggest: {
-        system_prompt_override: 'UX 전문가이자 프론트엔드 아키텍트로서 모듈을 추천하세요. 전환율 데이터와 A/B 테스트 결과를 근거로 제시하세요.',
-        qna: [
-          { question: 'Conversion optimization modules', question_ko: '전환율 최적화 모듈 추천', answer_guide: 'CTA 배치, 소셜 프루프, 어전시(긴급성), A/B 테스트 가능한 모듈 조합을 전환율 관점에서 추천하세요.', sort_order: 1 },
-          { question: 'SEO-optimized module structure', question_ko: 'SEO 최적화 모듈 구성', answer_guide: '검색 엔진 최적화에 유리한 모듈 순서와 콘텐츠 구조를 추천하세요. 스키마 마크업, 헤딩 계층 구조를 고려하세요.', sort_order: 2 },
-        ],
-      },
     },
   },
   {
@@ -296,12 +267,6 @@ export const PRESETS: Preset[] = [
         system_prompt_override: '명령 실행 결과만 간결하게 보여주세요. 부가 설명 없이 결과만.',
         qna: [
           { question: 'Quick command list', question_ko: '명령어 목록', answer_guide: '사용 가능한 명령어를 한 줄씩 나열하세요.', sort_order: 1 },
-        ],
-      },
-      module_suggest: {
-        system_prompt_override: '추천 모듈을 이름만 나열하세요. 설명은 필요 시 한 줄로.',
-        qna: [
-          { question: 'Must-have modules', question_ko: '필수 모듈', answer_guide: '반드시 포함해야 할 모듈 3개만 추천하세요.', sort_order: 1 },
         ],
       },
     },

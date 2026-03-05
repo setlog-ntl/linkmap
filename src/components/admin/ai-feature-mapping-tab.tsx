@@ -40,7 +40,6 @@ const FEATURE_LABELS: Record<string, { ko: string; en: string; desc: string }> =
   map_narrator: { ko: 'AI 아키텍처 분석', en: 'Map Narrator', desc: '서비스맵 분석 및 인사이트' },
   compare_services: { ko: 'AI 서비스 비교', en: 'Service Comparison', desc: '서비스 비교 분석' },
   command: { ko: 'AI 자연어 커맨드', en: 'AI Command', desc: 'AI 자연어 명령어 처리' },
-  module_suggest: { ko: 'AI 모듈 추천', en: 'Module Suggest', desc: '모듈 구성 추천' },
 };
 
 // ─── Q&A Inline Editor ──────────────────────────────────────────────

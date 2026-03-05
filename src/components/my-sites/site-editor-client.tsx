@@ -54,7 +54,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queries/keys';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { ChatTerminal, type CodeBlock } from './chat-terminal';
 import { ModulePanel } from './module-panel';
 import {
   ModuleDeployDialog,
@@ -277,7 +276,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const isDeployingModules = dialogState.overallStatus === 'running' && dialogState.mode === 'apply-and-deploy';
 
   // ── 배포 대기 상태 (useDeployStatus 연동) ──
-  type DeployOrigin = 'direct' | 'ai-apply' | 'module-deploy' | null;
+  type DeployOrigin = 'direct' | 'module-deploy' | null;
   const [awaitingDeploy, setAwaitingDeploy] = useState(false);
   const [deployOrigin, setDeployOrigin] = useState<DeployOrigin>(null);
   const pendingDiffStatsRef = useRef<DiffStats | null>(null);
@@ -561,61 +560,6 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     }
   }, [selectedPath, fileDetail, hasUnsavedChanges, editorContent, deployId, updateFile, locale, queryClient]);
 
-  // 파일 경로 목록 + SHA 맵 (ChatTerminal에 전달)
-  const allFilePaths = useMemo(() => {
-    return files?.map((f) => f.path) || [];
-  }, [files]);
-
-  const filesShaMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    if (files) {
-      for (const f of files) {
-        map[f.path] = f.sha;
-      }
-    }
-    return map;
-  }, [files]);
-
-  // AI 코드 적용 + 자동 배포 (원자적 단일 커밋)
-  const handleApplyFiles = useCallback(async (blocks: CodeBlock[]) => {
-    try {
-      setDeployState('saving');
-
-      // 1. 모든 파일을 단일 원자적 커밋으로 저장
-      const filesToSave = blocks.map((block) => ({
-        path: block.filePath,
-        content: block.code,
-        sha: block.isNew ? undefined : filesShaMap[block.filePath],
-      }));
-
-      const result = await batchApply.mutateAsync({
-        deployId,
-        files: filesToSave,
-      });
-
-      // 현재 편집 중인 파일이 포함되어 있으면 에디터 갱신
-      for (const block of blocks) {
-        if (block.filePath === selectedPath) {
-          setEditorContent(block.code);
-          setHasUnsavedChanges(false);
-        }
-      }
-
-      toast.success(`${result.file_count}${t(locale, 'editor.filesSaved')}`);
-
-      // 2. 자동 배포 트리거 — 캐시 초기화 + useDeployStatus 폴링으로 위임
-      setDeployState('deploying');
-      toast.info(t(locale, 'editor.deploying'));
-      queryClient.removeQueries({ queryKey: queryKeys.oneclick.status(deployId) });
-      deployStartedAtRef.current = Date.now();
-      seenBuildingRef.current = false;
-      setDeployOrigin('ai-apply');
-      setAwaitingDeploy(true);
-    } catch (err) {
-      setDeployState('idle');
-      toast.error(err instanceof Error ? err.message : t(locale, 'editor.applyFailed'));
-    }
-  }, [batchApply, deployId, selectedPath, filesShaMap, locale, queryClient]);
 
   // ── 모듈 → 코드에 적용 (다이얼로그 통합) ──
   const handleApplyModulesToCode = useCallback(async () => {
@@ -1552,16 +1496,6 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         actionsUrl={actionsUrl}
       />
 
-      {/* ===== AI 코드 도우미 (플로팅 위젯) ===== */}
-      <ChatTerminal
-        fileContent={editorContent}
-        filePath={selectedPath}
-        allFiles={allFilePaths}
-        onApplyCode={(code) => {
-          handleContentChange(code);
-        }}
-        onApplyFiles={handleApplyFiles}
-      />
     </div>
   );
 }
