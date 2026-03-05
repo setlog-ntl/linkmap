@@ -22,7 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { CheckCircle2, XCircle, ArrowRight, ArrowLeft, ExternalLink, KeyRound } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { CheckCircle2, XCircle, ArrowRight, ArrowLeft, ExternalLink, KeyRound, ClipboardPaste } from 'lucide-react';
+import { toast } from 'sonner';
+import { parseEnvContent } from '@/lib/utils/parse-env';
 import { useAddEnvVar } from '@/lib/queries/env-vars';
 import { useRunHealthCheck } from '@/lib/queries/health-checks';
 import { createClient } from '@/lib/supabase/client';
@@ -55,6 +58,8 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
   const [saving, setSaving] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [verifySuccess, setVerifySuccess] = useState<boolean | null>(null);
+  const [showPaste, setShowPaste] = useState(false);
+  const [pasteText, setPasteText] = useState('');
 
   const addEnvVar = useAddEnvVar(projectId);
   const runHealthCheck = useRunHealthCheck();
@@ -200,6 +205,61 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* .env 붙여넣기 */}
+              {requiredVars.length > 0 && (
+                <div className="space-y-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs"
+                    onClick={() => setShowPaste((prev) => !prev)}
+                  >
+                    <ClipboardPaste className="mr-1.5 h-3.5 w-3.5" />
+                    .env 붙여넣기로 자동 입력
+                  </Button>
+                  {showPaste && (
+                    <div className="space-y-2">
+                      <Textarea
+                        placeholder={'.env.local 내용을 붙여넣으세요\nSUPABASE_URL=https://...\nSUPABASE_ANON_KEY=eyJ...'}
+                        value={pasteText}
+                        onChange={(e) => setPasteText(e.target.value)}
+                        rows={4}
+                        className="font-mono text-xs"
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={!pasteText.trim()}
+                        onClick={() => {
+                          const parsed = parseEnvContent(pasteText);
+                          const varNames = requiredVars.map((v) => v.name.toUpperCase());
+                          const matched: Record<string, string> = {};
+                          let count = 0;
+                          for (const item of parsed) {
+                            const idx = varNames.indexOf(item.key.toUpperCase());
+                            if (idx !== -1) {
+                              matched[requiredVars[idx].name] = item.value;
+                              count++;
+                            }
+                          }
+                          if (count > 0) {
+                            setEnvValues((prev) => ({ ...prev, ...matched }));
+                            toast.success(`${count}개 항목 자동 입력됨`);
+                          } else {
+                            toast.error('매칭되는 환경변수가 없습니다');
+                          }
+                          setPasteText('');
+                          setShowPaste(false);
+                        }}
+                      >
+                        적용
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-3 max-h-[200px] overflow-y-auto">
                 {requiredVars.map((v) => (
