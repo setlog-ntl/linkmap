@@ -37,10 +37,11 @@ export async function GET() {
 
   const adminSupabase = createAdminClient();
 
-  // 모든 프로필 조회 (created_at 포함)
+  // 모든 프로필 조회 (created_at 포함, 관리자 제외)
   const { data: profiles, error: profilesError } = await adminSupabase
     .from('profiles')
-    .select('id, email, name, created_at')
+    .select('id, email, name, created_at, is_admin')
+    .eq('is_admin', false)
     .order('created_at', { ascending: true });
 
   if (profilesError) {

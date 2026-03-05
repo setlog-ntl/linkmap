@@ -46,6 +46,13 @@ export async function GET() {
   const adminSupabase = createAdminClient();
 
   try {
+    // 관리자 ID 목록 조회 (통계에서 제외)
+    const { data: adminProfiles } = await adminSupabase
+      .from('profiles')
+      .select('id')
+      .eq('is_admin', true);
+    const adminIds = new Set((adminProfiles ?? []).map((p) => p.id));
+
     // 병렬 조회
     const [
       projectsRes,
@@ -95,10 +102,18 @@ export async function GET() {
     if (aiLogsRes.error) throw aiLogsRes.error;
     if (featureRequestsRes.error) throw featureRequestsRes.error;
 
-    const projects = projectsRes.data ?? [];
-    const projectServices = projectServicesRes.data ?? [];
+    // 관리자 소유 프로젝트 제외
+    const projects = (projectsRes.data ?? []).filter((p) => !adminIds.has(p.user_id));
+    const adminProjectIds = new Set(
+      (projectsRes.data ?? []).filter((p) => adminIds.has(p.user_id)).map((p) => p.id)
+    );
+    const projectServices = (projectServicesRes.data ?? []).filter(
+      (ps) => !adminProjectIds.has(ps.project_id)
+    );
     const services = servicesRes.data ?? [];
-    const envVars = envVarsRes.data ?? [];
+    const envVars = (envVarsRes.data ?? []).filter(
+      (e) => !adminProjectIds.has(e.project_id)
+    );
     const deploys = deploysRes.data ?? [];
     const tokens = tokensRes.data ?? [];
     const aiLogs = aiLogsRes.data ?? [];
