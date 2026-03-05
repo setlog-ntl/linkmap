@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Trash2, Upload, Loader2, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Upload, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { t, type Locale } from '@/lib/i18n';
 import type { ModuleFieldDef } from '@/lib/module-schema';
@@ -24,11 +24,9 @@ interface ModuleFormProps {
   onChange: (key: string, value: unknown) => void;
   locale: string;
   deployId?: string;
-  onAiPolish?: (fieldKey: string, currentValue: string) => Promise<void>;
-  aiPolishingField?: string | null;
 }
 
-export function ModuleForm({ fields, values, onChange, locale, deployId, onAiPolish, aiPolishingField }: ModuleFormProps) {
+export function ModuleForm({ fields, values, onChange, locale, deployId }: ModuleFormProps) {
   return (
     <div className="space-y-4">
       {fields.map((field) => (
@@ -39,8 +37,6 @@ export function ModuleForm({ fields, values, onChange, locale, deployId, onAiPol
           onChange={(val) => onChange(field.key, val)}
           locale={locale}
           deployId={deployId}
-          onAiPolish={onAiPolish}
-          aiPolishingField={aiPolishingField}
         />
       ))}
     </div>
@@ -57,45 +53,24 @@ interface FieldRendererProps {
   onChange: (value: unknown) => void;
   locale: string;
   deployId?: string;
-  onAiPolish?: (fieldKey: string, currentValue: string) => Promise<void>;
-  aiPolishingField?: string | null;
 }
 
-function FieldRenderer({ field, value, onChange, locale, deployId, onAiPolish, aiPolishingField }: FieldRendererProps) {
+function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRendererProps) {
   const label = locale === 'en' && field.labelEn ? field.labelEn : field.label;
 
   switch (field.type) {
     case 'text': {
       const textVal = (value as string) ?? '';
-      const isPolishingText = aiPolishingField === field.key;
       return (
         <div className="space-y-1.5">
           <Label className="text-xs font-medium">{label}</Label>
-          <div className="flex items-center gap-1">
-            <Input
-              type="text"
-              value={textVal}
-              onChange={(e) => onChange(e.target.value)}
-              placeholder={field.placeholder}
-              className="h-8 text-sm flex-1"
-            />
-            {onAiPolish && textVal.trim() && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 flex-shrink-0 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10"
-                onClick={() => onAiPolish(field.key, textVal)}
-                disabled={!!aiPolishingField}
-                title="AI 다듬기"
-              >
-                {isPolishingText ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Sparkles className="h-3.5 w-3.5" />
-                )}
-              </Button>
-            )}
-          </div>
+          <Input
+            type="text"
+            value={textVal}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={field.placeholder}
+            className="h-8 text-sm"
+          />
         </div>
       );
     }
@@ -114,29 +89,9 @@ function FieldRenderer({ field, value, onChange, locale, deployId, onAiPolish, a
 
     case 'textarea': {
       const textareaVal = (value as string) ?? '';
-      const isPolishingTextarea = aiPolishingField === field.key;
       return (
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <Label className="text-xs font-medium">{label}</Label>
-            {onAiPolish && textareaVal.trim() && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-1.5 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10 gap-1"
-                onClick={() => onAiPolish(field.key, textareaVal)}
-                disabled={!!aiPolishingField}
-                title="AI 다듬기"
-              >
-                {isPolishingTextarea ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <Sparkles className="h-3 w-3" />
-                )}
-                <span className="text-[10px]">다듬기</span>
-              </Button>
-            )}
-          </div>
+          <Label className="text-xs font-medium">{label}</Label>
           <Textarea
             value={textareaVal}
             onChange={(e) => onChange(e.target.value)}
