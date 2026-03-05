@@ -111,6 +111,7 @@ export interface HomepageDeploy {
   forked_repo_url: string | null;
   forked_repo_full_name: string | null;
   deploy_error_message: string | null;
+  retry_count?: number;
   created_at: string;
   deployed_at: string | null;
   template_id: string;
@@ -190,6 +191,27 @@ export function useDeleteDeployment() {
       if (data.deleted_project_id) {
         queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
       }
+    },
+  });
+}
+
+// ---------- Redeploy ----------
+
+export function useRedeployDeployment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (deployId: string): Promise<{ success: boolean; deploy_status: string }> => {
+      const res = await fetch(`/api/oneclick/deployments/${deployId}/redeploy`, {
+        method: 'POST',
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '재배포 실패');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
     },
   });
 }

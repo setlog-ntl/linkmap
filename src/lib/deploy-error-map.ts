@@ -75,6 +75,24 @@ export function getErrorDetails(
     };
   }
 
+  // Deploy timeout
+  if (msg.includes('시간이 초과') || msg.includes('timeout') || msg.includes('10분')) {
+    return {
+      cause: '배포 시간이 10분을 초과했습니다.',
+      solution: '아래 "재배포" 버튼을 눌러 다시 시도해주세요. 반복되면 GitHub Actions 탭에서 로그를 확인하세요.',
+      failedStep,
+    };
+  }
+
+  // Auto-retry exhausted
+  if (msg.includes('재시도 후에도') || msg.includes('retry')) {
+    return {
+      cause: '자동 재시도 후에도 빌드에 실패했습니다.',
+      solution: 'GitHub 레포지토리의 Actions 탭에서 실패 원인을 확인하고, 문제 해결 후 "재배포" 버튼을 눌러주세요.',
+      failedStep,
+    };
+  }
+
   // Workflow build failure (lock file / dependency install)
   if (msg.includes('lock file') || msg.includes('npm err') || msg.includes('워크플로우 빌드')) {
     return {

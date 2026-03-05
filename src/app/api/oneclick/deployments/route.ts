@@ -22,6 +22,7 @@ export async function GET() {
       forked_repo_url,
       forked_repo_full_name,
       deploy_error_message,
+      retry_count,
       created_at,
       deployed_at,
       template_id,
@@ -76,19 +77,31 @@ async function refreshDeployStatus(
       deploy.forked_repo_full_name as string,
       deploy.deploy_status as string,
       deploy.pages_status as string,
-      deploy.pages_url as string | null
+      deploy.pages_url as string | null,
+      {
+        createdAt: deploy.created_at as string,
+        retryCount: (deploy.retry_count as number) ?? 0,
+      }
     );
 
-    if (result.changed) {
+    if (result.changed || result.retryTriggered) {
       const updateData: Record<string, unknown> = {
         deploy_status: result.deployStatus,
         pages_status: result.pagesStatus,
         pages_url: result.pagesUrl,
       };
 
+      if (result.retryTriggered) {
+        updateData.retry_count = ((deploy.retry_count as number) ?? 0) + 1;
+      }
+
       if (result.deployStatus === 'ready') {
         updateData.deployed_at = new Date().toISOString();
         updateData.deployment_url = result.deploymentUrl;
+      }
+
+      if (result.deployStatus === 'error' && result.errorMessage) {
+        updateData.deploy_error_message = result.errorMessage;
       }
 
       await supabase
@@ -103,6 +116,9 @@ async function refreshDeployStatus(
       if (result.deployStatus === 'ready') {
         deploy.deployment_url = result.deploymentUrl;
         deploy.deployed_at = updateData.deployed_at;
+      }
+      if (result.retryTriggered) {
+        deploy.retry_count = updateData.retry_count;
       }
     }
   } catch {

@@ -1,7 +1,7 @@
 # Linkmap Database Schema Reference
 
-> **Last Updated**: 2026-02-26
-> **Migrations**: 001 ~ 048 (48 files)
+> **Last Updated**: 2026-03-05
+> **Migrations**: 001 ~ 069 (69 files)
 > **Engine**: Supabase (PostgreSQL 15+)
 
 이 문서는 바이브코딩 시 DB 구조를 빠르게 참조하기 위한 스키마 레퍼런스입니다.
@@ -513,6 +513,7 @@
 | site_name | TEXT | YES | NULL |
 | custom_domain | TEXT | YES | NULL |
 | config_data | JSONB | YES | '{}' |
+| retry_count | SMALLINT | NO | 0 | M069 |
 | created_at | TIMESTAMPTZ | NO | now() |
 | updated_at | TIMESTAMPTZ | NO | now() |
 | deployed_at | TIMESTAMPTZ | YES | NULL |

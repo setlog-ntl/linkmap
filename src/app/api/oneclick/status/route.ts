@@ -66,7 +66,11 @@ export async function GET(request: NextRequest) {
             deploy.forked_repo_full_name as string,
             deploy.deploy_status,
             deploy.pages_status,
-            deploy.pages_url
+            deploy.pages_url,
+            {
+              createdAt: deploy.created_at,
+              retryCount: deploy.retry_count ?? 0,
+            }
           );
 
           // Preserve error message from resolveDeployStatus
@@ -74,12 +78,17 @@ export async function GET(request: NextRequest) {
             deploy.deploy_error_message = result.errorMessage;
           }
 
-          if (result.changed) {
+          if (result.changed || result.retryTriggered) {
             const updateData: Record<string, unknown> = {
               deploy_status: result.deployStatus,
               pages_status: result.pagesStatus,
               pages_url: result.pagesUrl,
             };
+
+            // Auto-retry was triggered — increment retry_count
+            if (result.retryTriggered) {
+              updateData.retry_count = (deploy.retry_count ?? 0) + 1;
+            }
 
             if (result.deployStatus === 'ready') {
               updateData.deployed_at = new Date().toISOString();
@@ -92,7 +101,9 @@ export async function GET(request: NextRequest) {
               });
             }
             if (result.deployStatus === 'error') {
-              if (deploy.deploy_error_message) {
+              if (result.errorMessage) {
+                updateData.deploy_error_message = result.errorMessage;
+              } else if (deploy.deploy_error_message) {
                 updateData.deploy_error_message = deploy.deploy_error_message;
               }
               await logAudit(user.id, {

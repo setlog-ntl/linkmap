@@ -14,10 +14,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ExternalLink, Github, Globe, LayoutDashboard, Loader2, Pencil, Trash2 } from 'lucide-react';
+import { ExternalLink, Github, Globe, LayoutDashboard, Loader2, Pencil, RefreshCw, Trash2 } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
-import { useDeleteDeployment, type HomepageDeploy } from '@/lib/queries/oneclick';
+import { useDeleteDeployment, useRedeployDeployment, type HomepageDeploy } from '@/lib/queries/oneclick';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -64,6 +64,7 @@ const BADGE_CONFIG: Record<GithubBadgeState, { label: string; dotClass: string; 
 export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
   const { locale } = useLocaleStore();
   const deleteMutation = useDeleteDeployment();
+  const redeployMutation = useRedeployDeployment();
   const [open, setOpen] = useState(false);
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
@@ -118,6 +119,15 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
       setOpen(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '삭제 실패');
+    }
+  };
+
+  const handleRedeploy = async () => {
+    try {
+      await redeployMutation.mutateAsync(deploy.id);
+      toast.success('재배포가 시작되었습니다');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '재배포 실패');
     }
   };
 
@@ -295,6 +305,23 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
                 <LayoutDashboard className="mr-1 h-3 w-3" />
                 {t(locale, 'deploySiteCard.manage')}
               </Link>
+            </Button>
+          )}
+
+          {/* 재배포 (오류 상태에서만) */}
+          {deploy.deploy_status === 'error' && deploy.forked_repo_full_name && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleRedeploy}
+              disabled={redeployMutation.isPending}
+            >
+              {redeployMutation.isPending ? (
+                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-1 h-3 w-3" />
+              )}
+              재배포
             </Button>
           )}
 
