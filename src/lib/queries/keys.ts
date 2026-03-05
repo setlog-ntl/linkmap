@@ -95,6 +95,7 @@ export const queryKeys = {
   admin: {
     users: ['admin', 'users'] as const,
     visitors: ['admin', 'visitors'] as const,
+    usageStats: ['admin', 'usage-stats'] as const,
   },
   feedback: {
     list: (params?: Record<string, unknown>) => ['feedback', 'list', params ?? {}] as const,

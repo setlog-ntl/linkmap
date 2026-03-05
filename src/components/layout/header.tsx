@@ -16,7 +16,7 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { Menu, Globe, Search, BookOpen, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench, ArrowRight, Rocket } from 'lucide-react';
+import { Menu, Globe, Search, BookOpen, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench, ArrowRight, Rocket, BarChart3 } from 'lucide-react';
 import { GUIDE_CATEGORIES, getGuidesByCategory } from '@/data/ui/guide-meta';
 import { useUIStore } from '@/stores/ui-store';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -185,7 +185,7 @@ export function Header({ profile }: HeaderProps) {
           <ThemeToggle />
 
           {/* Auth buttons */}
-          <div className="hidden md:flex items-center gap-2">
+          <div className="flex items-center gap-2">
             {profile ? (
               <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -236,6 +236,14 @@ export function Header({ profile }: HeaderProps) {
                         </Link>
                       </DropdownMenuItem>
                     )}
+                    {profile.is_admin && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/usage-stats">
+                          <BarChart3 className="mr-2 h-4 w-4" />
+                          기능 통계
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="mr-2 h-4 w-4" />
@@ -245,10 +253,10 @@ export function Header({ profile }: HeaderProps) {
                 </DropdownMenu>
             ) : (
               <>
-                <Button variant="ghost" asChild>
+                <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
                   <Link href="/login">{t(locale, 'common.login')}</Link>
                 </Button>
-                <Button asChild>
+                <Button size="sm" asChild>
                   <Link href="/signup">{t(locale, 'common.signup')}</Link>
                 </Button>
               </>

@@ -8,7 +8,7 @@ import {
   Rocket, Search, Map as MapIcon,
   List, Link2, Key, Settings, BookOpen, ChevronDown, ChevronRight,
   LogOut, Bot, User, GitBranch, Wrench, FolderKanban, Plus, LayoutDashboard,
-  Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight, Trash2, DollarSign, Users, MessageSquarePlus,
+  Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight, Trash2, DollarSign, Users, MessageSquarePlus, BarChart3,
 } from 'lucide-react';
 import { GUIDE_CATEGORIES, getGuidesByCategory, type GuideCategory } from '@/data/ui/guide-meta';
 import { createClient } from '@/lib/supabase/client';
@@ -657,6 +657,14 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                       <Link href="/admin/users">
                         <Users className="mr-2 h-4 w-4" />
                         사용자 관리
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {profile.is_admin && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin/usage-stats">
+                        <BarChart3 className="mr-2 h-4 w-4" />
+                        기능 통계
                       </Link>
                     </DropdownMenuItem>
                   )}
