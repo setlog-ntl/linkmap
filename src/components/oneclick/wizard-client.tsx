@@ -3,6 +3,8 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
+import { ChevronDown, Globe, GitBranch, Rocket } from 'lucide-react';
 import { TemplatePickerStep } from './template-picker-step';
 import { DeployStep } from './deploy-step';
 import { DeploySuccess } from './deploy-success';
@@ -109,6 +111,53 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
           {t(locale, 'wizard.subtitle')}
         </p>
       </div>
+
+      {/* Beginner Guide */}
+      {isStep1 && (
+        <Collapsible>
+          <CollapsibleTrigger className="group flex items-center gap-1.5 mx-auto text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+            <span>배포가 처음이신가요?</span>
+            <ChevronDown className="h-3.5 w-3.5 transition-transform group-data-[state=open]:rotate-180" />
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="mt-3 p-4 bg-muted/50 rounded-lg text-sm text-muted-foreground space-y-3">
+              <p className="font-medium text-foreground">
+                배포(Deploy)란?
+              </p>
+              <p>
+                내 컴퓨터에서만 보이던 웹사이트를 인터넷에 공개해서,
+                누구나 주소(URL)로 접속할 수 있게 만드는 과정이에요.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                <div className="flex items-start gap-2">
+                  <Rocket className="h-4 w-4 mt-0.5 text-brand-blue shrink-0" />
+                  <div>
+                    <p className="font-medium text-foreground text-xs">1. 템플릿 선택</p>
+                    <p className="text-xs">원하는 디자인을 골라요</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <GitBranch className="h-4 w-4 mt-0.5 text-brand-blue shrink-0" />
+                  <div>
+                    <p className="font-medium text-foreground text-xs">2. GitHub 연결</p>
+                    <p className="text-xs">코드 저장소가 자동 생성돼요</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Globe className="h-4 w-4 mt-0.5 text-brand-blue shrink-0" />
+                  <div>
+                    <p className="font-medium text-foreground text-xs">3. 자동 배포</p>
+                    <p className="text-xs">몇 분이면 내 사이트 완성!</p>
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground/80 pt-1">
+                GitHub Pages를 통해 무료로 호스팅되며, 별도 서버 비용이 없어요.
+              </p>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
 
       {/* 3-Step Indicator */}
       <div className="flex items-center justify-center gap-1 sm:gap-2">

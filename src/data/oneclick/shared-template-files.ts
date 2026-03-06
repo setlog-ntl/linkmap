@@ -140,13 +140,16 @@ export const sharedAnimatedReveal = `'use client';
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
+type RevealVariant = 'fade' | 'slide-left' | 'slide-right' | 'scale';
+
 interface Props {
   children: ReactNode;
   className?: string;
   delay?: number;
+  variant?: RevealVariant;
 }
 
-export function AnimatedReveal({ children, className = '', delay = 0 }: Props) {
+export function AnimatedReveal({ children, className = '', delay = 0, variant = 'fade' }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -172,8 +175,13 @@ export function AnimatedReveal({ children, className = '', delay = 0 }: Props) {
     return () => observer.disconnect();
   }, [delay]);
 
+  const variantClass = variant === 'fade' ? 'reveal-fade'
+    : variant === 'slide-left' ? 'reveal-slide-left'
+    : variant === 'slide-right' ? 'reveal-slide-right'
+    : 'reveal-scale';
+
   return (
-    <div ref={ref} className={\`reveal-fade \${visible ? 'revealed' : ''} \${className}\`}>
+    <div ref={ref} className={\`\${variantClass} \${visible ? 'revealed' : ''} \${className}\`}>
       {children}
     </div>
   );
@@ -183,12 +191,15 @@ export function AnimatedReveal({ children, className = '', delay = 0 }: Props) {
 export const sharedSectionWrapper = `import type { ReactNode } from 'react';
 import { AnimatedReveal } from './animated-reveal';
 
+type RevealVariant = 'fade' | 'slide-left' | 'slide-right' | 'scale';
+
 interface Props {
   id?: string;
   ariaLabel?: string;
   className?: string;
   animate?: boolean;
   delay?: number;
+  variant?: RevealVariant;
   children: ReactNode;
 }
 
@@ -198,16 +209,17 @@ export function SectionWrapper({
   className = '',
   animate = true,
   delay = 0,
+  variant = 'fade',
   children,
 }: Props) {
   const section = (
-    <section id={id} aria-label={ariaLabel} className={\`py-16 md:py-24 px-4 sm:px-6 \${className}\`}>
+    <section id={id} aria-label={ariaLabel} className={\`section-gap px-[var(--section-padding-x,1rem)] \${className}\`}>
       <div className="max-w-5xl mx-auto">{children}</div>
     </section>
   );
 
   if (!animate) return section;
-  return <AnimatedReveal delay={delay}>{section}</AnimatedReveal>;
+  return <AnimatedReveal delay={delay} variant={variant}>{section}</AnimatedReveal>;
 }
 `;
 
@@ -318,6 +330,7 @@ interface Props {
   title: string;
   subtitle?: string;
   gradient?: string;
+  useGradient?: boolean;
   className?: string;
 }
 
@@ -325,17 +338,22 @@ export function SectionHeading({
   title,
   subtitle,
   gradient = 'from-white to-gray-400',
+  useGradient = false,
   className = '',
 }: Props) {
   return (
     <AnimatedReveal className={\`text-center mb-12 \${className}\`}>
       <h2
-        className={\`text-3xl sm:text-4xl font-bold bg-gradient-to-r \${gradient} bg-clip-text text-transparent\`}
+        className={\`text-3xl sm:text-4xl font-bold \${
+          useGradient
+            ? \`bg-gradient-to-r \${gradient} bg-clip-text text-transparent\`
+            : 'text-gray-900 dark:text-gray-100'
+        }\`}
       >
         {title}
       </h2>
       {subtitle && (
-        <p className="mt-3 text-gray-400 max-w-xl mx-auto">
+        <p className="mt-3 text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
           {subtitle}
         </p>
       )}
