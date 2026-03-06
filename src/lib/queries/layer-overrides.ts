@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './keys';
+import { staleTime } from './stale-time';
 import type { ZoneKey } from '@/lib/layout/zone-layout';
 
 interface LayerOverride {
@@ -16,6 +17,7 @@ interface LayerOverride {
 export function useLayerOverrides(projectId: string) {
   return useQuery({
     queryKey: queryKeys.layerOverrides.byProject(projectId),
+    staleTime: staleTime.layerOverride,
     queryFn: async () => {
       const res = await fetch(`/api/projects/${projectId}/layer-override`);
       if (!res.ok) throw new Error('Failed to fetch layer overrides');

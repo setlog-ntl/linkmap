@@ -1,10 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './keys';
+import { staleTime } from './stale-time';
 import type { GitHubConnection } from '@/types';
 
 export function useGitHubConnections() {
   return useQuery({
     queryKey: queryKeys.github.connections,
+    staleTime: staleTime.github,
     queryFn: async (): Promise<GitHubConnection[]> => {
       const res = await fetch('/api/account/github-connections');
       if (!res.ok) {

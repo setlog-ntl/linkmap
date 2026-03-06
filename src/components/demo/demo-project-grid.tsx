@@ -59,13 +59,24 @@ export function DemoProjectGrid({ projects, isLoggedIn }: DemoProjectGridProps) 
         <div className="flex items-center gap-3">
           <Lock className="h-5 w-5 text-brand-blue shrink-0" />
           <div>
-            <p className="font-semibold text-foreground text-sm">샘플 미리보기</p>
+            <p className="font-semibold text-foreground text-sm">
+              {isLoggedIn ? '샘플 프로젝트' : '샘플 미리보기'}
+            </p>
             <p className="text-xs text-muted-foreground">
-              실제 사용자의 프로젝트 대시보드 예시입니다. 로그인하면 내 프로젝트를 관리할 수 있습니다.
+              {isLoggedIn
+                ? '아래는 데모 프로젝트 예시입니다. 내 프로젝트는 대시보드에서 확인하세요.'
+                : '실제 사용자의 프로젝트 대시보드 예시입니다. 로그인하면 내 프로젝트를 관리할 수 있습니다.'}
             </p>
           </div>
         </div>
-        {!isLoggedIn && (
+        {isLoggedIn ? (
+          <Button size="sm" className="bg-brand-blue text-white hover:bg-brand-blue/90 rounded-xl shrink-0" asChild>
+            <Link href="/dashboard">
+              내 대시보드로 이동
+              <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </Link>
+          </Button>
+        ) : (
           <div className="flex gap-2 shrink-0">
             <Button variant="outline" size="sm" className="rounded-xl" asChild>
               <Link href="/login">로그인</Link>

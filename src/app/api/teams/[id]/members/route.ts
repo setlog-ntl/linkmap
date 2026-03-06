@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, notFoundError, serverError, apiError } from '@/lib/api/errors';
+import { requireTeamRole, isTeamAuthError } from '@/lib/api/team-auth';
 import { logAudit } from '@/lib/audit';
 import { sendEmail } from '@/lib/email/sender';
 import { z } from 'zod';
@@ -16,18 +17,9 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
 
-  // Check if requester is a member of the team (or team owner)
-  const { data: membership } = await supabase
-    .from('team_members')
-    .select('id')
-    .eq('team_id', teamId)
-    .eq('user_id', user.id)
-    .single();
-
-  if (!membership) {
-    const { data: team } = await supabase.from('teams').select('owner_id').eq('id', teamId).single();
-    if (!team || team.owner_id !== user.id) return apiError('접근 권한이 없습니다', 403);
-  }
+  // Check if requester is at least a viewer (or team owner)
+  const authResult = await requireTeamRole(teamId, user.id, 'viewer');
+  if (isTeamAuthError(authResult)) return authResult;
 
   const { data: members, error } = await supabase
     .from('team_members')
@@ -59,16 +51,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (!user) return unauthorizedError();
 
   // Check if requester is admin of the team
-  const { data: requesterMember } = await supabase
-    .from('team_members')
-    .select('role')
-    .eq('team_id', teamId)
-    .eq('user_id', user.id)
-    .single();
-
-  if (!requesterMember || requesterMember.role !== 'admin') {
-    return apiError('팀 관리자만 멤버를 초대할 수 있습니다', 403);
-  }
+  const authResult = await requireTeamRole(teamId, user.id, 'admin');
+  if (isTeamAuthError(authResult)) return authResult;
 
   const body = await request.json();
   const parsed = inviteMemberSchema.safeParse(body);
@@ -156,16 +140,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   if (!memberId) return apiError('member_id가 필요합니다', 400);
 
   // Check if requester is admin
-  const { data: requesterMember } = await supabase
-    .from('team_members')
-    .select('role')
-    .eq('team_id', teamId)
-    .eq('user_id', user.id)
-    .single();
-
-  if (!requesterMember || requesterMember.role !== 'admin') {
-    return apiError('팀 관리자만 멤버를 제거할 수 있습니다', 403);
-  }
+  const authResult = await requireTeamRole(teamId, user.id, 'admin');
+  if (isTeamAuthError(authResult)) return authResult;
 
   const { error } = await supabase
     .from('team_members')

@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic';
 
-import { redirect } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { Header } from '@/components/layout/header';
@@ -133,11 +132,11 @@ async function fetchDemoProjects(): Promise<ProjectWithServices[]> {
 }
 
 export default async function DemoPage() {
-  // 로그인된 사용자는 대시보드로 이동
+  let isLoggedIn = false;
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (user) redirect('/');
+    isLoggedIn = !!user;
   } catch {
     // 미인증 상태 → 데모 계속 표시
   }
@@ -148,7 +147,7 @@ export default async function DemoPage() {
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Header profile={null} />
       <main className="flex-1">
-        <DemoProjectGrid projects={demoProjects} isLoggedIn={false} />
+        <DemoProjectGrid projects={demoProjects} isLoggedIn={isLoggedIn} />
       </main>
       <Footer />
     </div>

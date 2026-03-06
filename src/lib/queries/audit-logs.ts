@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { queryKeys } from './keys';
+import { staleTime } from './stale-time';
 
 const supabase = createClient();
 
@@ -18,6 +19,7 @@ export interface AuditLog {
 export function useAuditLogs(projectId: string, filters?: { action?: string }) {
   return useQuery({
     queryKey: [...queryKeys.auditLogs.byProject(projectId), filters],
+    staleTime: staleTime.auditLog,
     queryFn: async (): Promise<AuditLog[]> => {
       let query = supabase
         .from('audit_logs')

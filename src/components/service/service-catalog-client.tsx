@@ -15,7 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, ExternalLink, ArrowRight, LayoutGrid, Settings2, X, List, Sparkles, KeyRound } from 'lucide-react';
+import { Search, ExternalLink, ArrowRight, LayoutGrid, Settings2, X, List, Sparkles, KeyRound, Plus } from 'lucide-react';
+import { CreateCustomServiceDialog } from '@/components/service/create-custom-service-dialog';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { domainLabels, domainIcons, allCategoryLabels, allCategoryEmojis, domainCategoryMap } from '@/lib/constants/service-filters';
 import {
@@ -232,6 +233,19 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
 
   return (
     <div className="space-y-6">
+      {/* Custom service quick entry */}
+      <div className="flex justify-end">
+        <CreateCustomServiceDialog
+          mode="create"
+          trigger={
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <Plus className="h-3.5 w-3.5" />
+              커스텀 서비스 추가
+            </Button>
+          }
+        />
+      </div>
+
       {/* Featured Services Strip - QW-3 */}
       {featuredServices.length > 0 && (
         <div className="space-y-2">

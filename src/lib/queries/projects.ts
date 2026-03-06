@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { queryKeys } from './keys';
+import { staleTime } from './stale-time';
 import type { Project, ProjectWithServices } from '@/types';
 
 
@@ -9,6 +10,7 @@ const supabase = createClient();
 export function useProjects() {
   return useQuery({
     queryKey: queryKeys.projects.all,
+    staleTime: staleTime.project,
     queryFn: async (): Promise<ProjectWithServices[]> => {
       const { data, error } = await supabase
         .from('projects')
@@ -25,6 +27,7 @@ export function useProjects() {
 export function useProject(id: string) {
   return useQuery({
     queryKey: queryKeys.projects.detail(id),
+    staleTime: staleTime.project,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('projects')

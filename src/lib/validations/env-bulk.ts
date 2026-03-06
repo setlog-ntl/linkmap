@@ -15,7 +15,7 @@ export const bulkEnvVarSchema = z.object({
       description: z.string().max(500).nullable().optional(),
       service_id: z.string().uuid().nullable().optional(),
     })
-  ).min(1, '최소 1개의 변수가 필요합니다').max(50, '최대 50개까지 일괄 추가 가능합니다'),
+  ).min(1, '최소 1개의 변수가 필요합니다').max(100, '최대 100개까지 일괄 추가 가능합니다'),
 }).refine(
   (data) => {
     const keys = data.variables.map((v) => `${v.key_name}:${v.environment}`);

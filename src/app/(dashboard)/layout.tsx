@@ -7,6 +7,7 @@ import { AppSidebar } from '@/components/layout/app-sidebar';
 import { AppHeader } from '@/components/layout/app-header';
 import { ServiceDetailSheetGlobal } from '@/components/service-map/service-detail-sheet-global';
 import { ServiceDetailResolver } from '@/components/service-map/service-detail-resolver';
+import { FeedbackFab } from '@/components/layout/feedback-fab';
 import type { Profile } from '@/types';
 
 export default async function DashboardLayout({
@@ -42,6 +43,7 @@ export default async function DashboardLayout({
       </div>
       <ServiceDetailSheetGlobal />
       <ServiceDetailResolver />
+      <FeedbackFab />
     </SidebarProvider>
   );
 }

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { queryKeys } from './keys';
+import { staleTime } from './stale-time';
 import type { EnvironmentVariable, Environment } from '@/types';
 
 const supabase = createClient();
@@ -8,6 +9,7 @@ const supabase = createClient();
 export function useEnvVars(projectId: string) {
   return useQuery({
     queryKey: queryKeys.envVars.byProject(projectId),
+    staleTime: staleTime.envVar,
     queryFn: async (): Promise<EnvironmentVariable[]> => {
       const { data, error } = await supabase
         .from('environment_variables')
@@ -119,6 +121,7 @@ export function useUpdateEnvVar(projectId: string) {
 export function useEnvConflicts(projectId: string) {
   return useQuery({
     queryKey: queryKeys.envVars.conflicts(projectId),
+    staleTime: staleTime.envVar,
     queryFn: async () => {
       const res = await fetch(`/api/env/conflicts?project_id=${projectId}`);
       if (!res.ok) throw new Error('충돌 검사 실패');

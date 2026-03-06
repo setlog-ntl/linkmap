@@ -1,11 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { queryKeys } from './keys';
+import { staleTime } from './stale-time';
 import type { HealthCheck } from '@/types';
 
 export function useHealthChecks(projectServiceId: string) {
   return useQuery({
     queryKey: queryKeys.healthChecks.byProjectService(projectServiceId),
+    staleTime: staleTime.healthCheck,
     queryFn: async (): Promise<HealthCheck[]> => {
       const res = await fetch(`/api/health-check?project_service_id=${projectServiceId}`);
       if (!res.ok) throw new Error('Health check 이력 조회 실패');
@@ -21,6 +23,7 @@ export function useLatestHealthChecks(
 ) {
   return useQuery({
     queryKey: queryKeys.healthChecks.latestByProject(projectId),
+    staleTime: staleTime.healthCheck,
     initialData: initialData as Record<string, HealthCheck> | undefined,
     queryFn: async (): Promise<Record<string, HealthCheck>> => {
       const supabase = createClient();

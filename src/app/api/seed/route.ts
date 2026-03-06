@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { isAdmin } from '@/lib/admin';
-import { unauthorizedError, apiError } from '@/lib/api/errors';
+import { unauthorizedError, apiError, serverError } from '@/lib/api/errors';
 
 export async function POST() {
   // Only allow in development
   if (process.env.NODE_ENV === 'production') {
-    return NextResponse.json({ error: 'Not allowed in production' }, { status: 403 });
+    return apiError('Not allowed in production', 403);
   }
 
   // Lazy-load seed data (large files — not needed in production build startup)
@@ -46,7 +46,7 @@ export async function POST() {
       .upsert(domains.map((d) => ({ ...d })), { onConflict: 'id' });
 
     if (domainsError) {
-      return NextResponse.json({ error: `Domains: ${domainsError.message}` }, { status: 500 });
+      return serverError(`Domains: ${domainsError.message}`);
     }
 
     // 2. Seed subcategories (must be before services)
@@ -55,7 +55,7 @@ export async function POST() {
       .upsert(subcategories.map((s) => ({ ...s })), { onConflict: 'id' });
 
     if (subcatError) {
-      return NextResponse.json({ error: `Subcategories: ${subcatError.message}` }, { status: 500 });
+      return serverError(`Subcategories: ${subcatError.message}`);
     }
 
     // 3. Seed existing services (with v2 extended fields)
@@ -64,7 +64,7 @@ export async function POST() {
       .upsert(services.map((s) => ({ ...s })), { onConflict: 'slug' });
 
     if (servicesError) {
-      return NextResponse.json({ error: `Services: ${servicesError.message}` }, { status: 500 });
+      return serverError(`Services: ${servicesError.message}`);
     }
 
     // 4. Seed new v2 services
@@ -73,7 +73,7 @@ export async function POST() {
       .upsert(servicesV2.map((s) => ({ ...s })), { onConflict: 'slug' });
 
     if (servicesV2Error) {
-      return NextResponse.json({ error: `Services V2: ${servicesV2Error.message}` }, { status: 500 });
+      return serverError(`Services V2: ${servicesV2Error.message}`);
     }
 
     // 5. Seed checklist items
@@ -82,7 +82,7 @@ export async function POST() {
       .upsert(checklistItems.map((c) => ({ ...c })), { onConflict: 'id' });
 
     if (checklistError) {
-      return NextResponse.json({ error: `Checklist: ${checklistError.message}` }, { status: 500 });
+      return serverError(`Checklist: ${checklistError.message}`);
     }
 
     // 6. Seed templates
@@ -91,7 +91,7 @@ export async function POST() {
       .upsert(templates.map((t) => ({ ...t })), { onConflict: 'id' });
 
     if (templatesError) {
-      return NextResponse.json({ error: `Templates: ${templatesError.message}` }, { status: 500 });
+      return serverError(`Templates: ${templatesError.message}`);
     }
 
     // 7. Seed service guides
@@ -100,7 +100,7 @@ export async function POST() {
       .upsert(serviceGuides.map((g) => ({ ...g })), { onConflict: 'service_id' });
 
     if (guidesError) {
-      return NextResponse.json({ error: `Guides: ${guidesError.message}` }, { status: 500 });
+      return serverError(`Guides: ${guidesError.message}`);
     }
 
     // 8. Seed cost tiers (delete existing first to avoid duplicates)
@@ -118,7 +118,7 @@ export async function POST() {
       .insert(costTiers.map((c) => ({ ...c })));
 
     if (costError) {
-      return NextResponse.json({ error: `Cost Tiers: ${costError.message}` }, { status: 500 });
+      return serverError(`Cost Tiers: ${costError.message}`);
     }
 
     // 9. Seed dependencies (delete existing first to avoid duplicates)
@@ -132,7 +132,7 @@ export async function POST() {
       .insert(dependencies.map((d) => ({ ...d })));
 
     if (depsError) {
-      return NextResponse.json({ error: `Dependencies: ${depsError.message}` }, { status: 500 });
+      return serverError(`Dependencies: ${depsError.message}`);
     }
 
     // 10. Seed comparisons (delete all existing, then insert fresh)
@@ -143,7 +143,7 @@ export async function POST() {
       .insert(comparisons.map((c) => ({ ...c })));
 
     if (compError) {
-      return NextResponse.json({ error: `Comparisons: ${compError.message}` }, { status: 500 });
+      return serverError(`Comparisons: ${compError.message}`);
     }
 
     return NextResponse.json({
@@ -163,6 +163,6 @@ export async function POST() {
       },
     });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return serverError(String(err));
   }
 }

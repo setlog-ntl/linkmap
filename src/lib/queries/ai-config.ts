@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './keys';
+import { staleTime } from './stale-time';
 import type {
   AiAssistantConfig, AiPersona, AiProvider, AiGuardrails,
   AiPromptTemplate, AiUsageLog, AiUsageSummary,
@@ -31,6 +32,7 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
 export function useAiGlobalConfig() {
   return useQuery({
     queryKey: queryKeys.aiConfig.global,
+    staleTime: staleTime.aiConfig,
     queryFn: () => apiFetch<{ config: AiAssistantConfig | null }>('/api/admin/ai-config'),
     select: (data) => data.config,
   });
@@ -54,6 +56,7 @@ export function useUpdateAiGlobalConfig() {
 export function useAiPersonas() {
   return useQuery({
     queryKey: queryKeys.aiConfig.personas,
+    staleTime: staleTime.aiConfig,
     queryFn: () => apiFetch<{ personas: AiPersona[] }>('/api/admin/ai-personas'),
     select: (data) => data.personas,
   });
@@ -98,6 +101,7 @@ export function useDeleteAiPersona() {
 export function useAiProviders() {
   return useQuery({
     queryKey: queryKeys.aiConfig.providers,
+    staleTime: staleTime.aiConfig,
     queryFn: () => apiFetch<{ providers: AiProvider[] }>('/api/admin/ai-providers'),
     select: (data) => data.providers,
   });
@@ -121,6 +125,7 @@ export function useUpdateAiProvider() {
 export function useAiGuardrails() {
   return useQuery({
     queryKey: queryKeys.aiConfig.guardrails,
+    staleTime: staleTime.aiConfig,
     queryFn: () => apiFetch<{ guardrails: AiGuardrails | null }>('/api/admin/ai-guardrails'),
     select: (data) => data.guardrails,
   });
@@ -144,6 +149,7 @@ export function useUpdateAiGuardrails() {
 export function useAiTemplates() {
   return useQuery({
     queryKey: queryKeys.aiConfig.templates,
+    staleTime: staleTime.aiConfig,
     queryFn: () => apiFetch<{ templates: AiPromptTemplate[] }>('/api/admin/ai-templates'),
     select: (data) => data.templates,
   });
@@ -188,6 +194,7 @@ export function useDeleteAiTemplate() {
 export function useAiUsage(period?: string) {
   return useQuery({
     queryKey: queryKeys.aiConfig.usage(period),
+    staleTime: staleTime.aiConfig,
     queryFn: () =>
       apiFetch<{ summary: AiUsageSummary; logs: AiUsageLog[] }>(
         `/api/admin/ai-usage?period=${period || 'today'}`
@@ -218,6 +225,7 @@ export function useAiPlayground() {
 export function useAiFeaturePersonas() {
   return useQuery({
     queryKey: queryKeys.aiConfig.featurePersonas,
+    staleTime: staleTime.aiConfig,
     queryFn: () => apiFetch<{ features: AiFeaturePersona[] }>('/api/admin/ai-feature-personas'),
     select: (data) => data.features,
   });
@@ -241,6 +249,7 @@ export function useUpdateAiFeaturePersona() {
 export function useAiFeatureQna(slug: string) {
   return useQuery({
     queryKey: queryKeys.aiConfig.featureQna(slug),
+    staleTime: staleTime.aiConfig,
     queryFn: () =>
       apiFetch<{ qna: AiFeatureQna[] }>(`/api/admin/ai-feature-qna?feature_slug=${slug}`),
     select: (data) => data.qna,
@@ -299,6 +308,7 @@ interface PresetSummary {
 export function useAiFeaturePresets() {
   return useQuery({
     queryKey: queryKeys.aiConfig.featurePresets,
+    staleTime: staleTime.aiConfig,
     queryFn: () => apiFetch<{ presets: PresetSummary[] }>('/api/admin/ai-feature-presets'),
     select: (data) => data.presets,
   });

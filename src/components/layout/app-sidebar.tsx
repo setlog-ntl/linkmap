@@ -6,9 +6,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { LinkmapLogo } from '@/components/icons/linkmap-logo';
 import {
   Rocket, Search, Map as MapIcon,
-  List, Link2, Key, Settings, BookOpen, ChevronDown, ChevronRight,
+  List, Key, Settings, BookOpen, ChevronDown, ChevronRight,
   LogOut, Bot, User, GitBranch, Wrench, FolderKanban, Plus, LayoutDashboard,
-  Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight, Trash2, DollarSign, Users, MessageSquarePlus, BarChart3,
+  Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight, Trash2, Users, BarChart3, Lightbulb,
 } from 'lucide-react';
 import { GUIDE_CATEGORIES, getGuidesByCategory, type GuideCategory } from '@/data/ui/guide-meta';
 import { createClient } from '@/lib/supabase/client';
@@ -59,9 +59,7 @@ function getProjectSubNav(projectId: string) {
   return [
     { labelKey: 'project.overview', href: `/project/${projectId}`, icon: LayoutDashboard, exact: true },
     { labelKey: 'project.services', href: `/project/${projectId}/services`, icon: List },
-    { labelKey: 'project.connections', href: `/project/${projectId}/connections`, icon: Link2 },
     { labelKey: 'project.envVars', href: `/project/${projectId}/env`, icon: Key },
-    { labelKey: 'project.costs', href: `/project/${projectId}/costs`, icon: DollarSign },
     { labelKey: 'project.serviceMap', href: `/project/${projectId}/service-map`, icon: MapIcon },
     { labelKey: 'project.settings', href: `/project/${projectId}/settings`, icon: Settings },
   ];
@@ -117,10 +115,19 @@ export function AppSidebar({ profile }: AppSidebarProps) {
     router.refresh();
   };
 
-  const mainNav: { labelKey: string; label?: string; href: string; icon: React.ElementType }[] = [
+  const exploreNav: { labelKey: string; label?: string; href: string; icon: React.ElementType }[] = [
     { labelKey: 'nav.serviceCatalog', href: '/services', icon: Search },
-    { labelKey: 'nav.trash', label: '휴지통', href: '/trash', icon: Trash2 },
-    { labelKey: 'nav.feedback', label: '기능 요청', href: '/feedback', icon: MessageSquarePlus },
+  ];
+
+  const toolsNav: { label: string; href: string; icon: React.ElementType }[] = [
+    { label: '휴지통', href: '/trash', icon: Trash2 },
+  ];
+
+  const adminNav: { label: string; href: string; icon: React.ElementType }[] = [
+    { label: 'AI 설정', href: '/admin/ai-config', icon: Bot },
+    { label: '사용자 관리', href: '/admin/users', icon: Users },
+    { label: '기능 통계', href: '/admin/usage-stats', icon: BarChart3 },
+    { label: '개선사항 관리', href: '/admin/improvements', icon: Lightbulb },
   ];
 
   const guideCategoryOrder: GuideCategory[] = ['concept', 'service'];
@@ -506,12 +513,12 @@ export function AppSidebar({ profile }: AppSidebarProps) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* ③ 서비스탐색 + 휴지통 */}
+        {/* ③ 탐색: 서비스 카탈로그 + 가이드 */}
         <SidebarSeparator />
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainNav.map((item) => {
+              {exploreNav.map((item) => {
                 const label = item.label ?? t(locale, item.labelKey);
                 return (
                   <SidebarMenuItem key={item.href}>
@@ -528,15 +535,6 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                   </SidebarMenuItem>
                 );
               })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* ④ 가이드 */}
-        <SidebarSeparator />
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
               <Collapsible defaultOpen={false} className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
@@ -583,6 +581,67 @@ export function AppSidebar({ profile }: AppSidebarProps) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* ④ 도구: 휴지통 */}
+        <SidebarSeparator />
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {toolsNav.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.href)}
+                    tooltip={item.label}
+                  >
+                    <Link href={item.href}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* ⑤ 관리 (admin only) */}
+        {profile?.is_admin && (
+          <>
+            <SidebarSeparator />
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <Collapsible defaultOpen={pathname.startsWith('/admin')} className="group/collapsible">
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton tooltip="관리">
+                          <Settings className="h-4 w-4" />
+                          <span>관리</span>
+                          <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
+                          {adminNav.map((item) => (
+                            <SidebarMenuSubItem key={item.href}>
+                              <SidebarMenuSubButton asChild isActive={isActive(item.href)}>
+                                <Link href={item.href}>
+                                  <item.icon className="h-3.5 w-3.5" />
+                                  <span>{item.label}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </SidebarMenuItem>
+                  </Collapsible>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        )}
       </SidebarContent>
 
       {/* Footer: User */}
@@ -644,30 +703,6 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                       {t(locale, 'nav.settingsDeveloper')}
                     </Link>
                   </DropdownMenuItem>
-                  {profile.is_admin && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin/ai-config">
-                        <Bot className="mr-2 h-4 w-4" />
-                        {t(locale, 'nav.adminAi')}
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
-                  {profile.is_admin && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin/users">
-                        <Users className="mr-2 h-4 w-4" />
-                        사용자 관리
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
-                  {profile.is_admin && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin/usage-stats">
-                        <BarChart3 className="mr-2 h-4 w-4" />
-                        기능 통계
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
