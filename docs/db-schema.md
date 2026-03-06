@@ -1,7 +1,7 @@
 # Linkmap Database Schema Reference
 
-> **Last Updated**: 2026-03-05
-> **Migrations**: 001 ~ 069 (69 files)
+> **Last Updated**: 2026-03-06
+> **Migrations**: 001 ~ 071 (71 files)
 > **Engine**: Supabase (PostgreSQL 15+)
 
 이 문서는 바이브코딩 시 DB 구조를 빠르게 참조하기 위한 스키마 레퍼런스입니다.

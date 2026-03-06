@@ -54,17 +54,25 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Batch update service_id on matched env vars
+  // Batch update service_id on matched env vars (grouped by service_id)
   let updatedVars = 0;
   if (toUpdate.length > 0) {
+    const grouped = new Map<string, string[]>();
     for (const item of toUpdate) {
-      const { error } = await supabase
-        .from('environment_variables')
-        .update({ service_id: item.service_id })
-        .eq('id', item.id)
-        .eq('project_id', project_id);
-      if (!error) updatedVars++;
+      const ids = grouped.get(item.service_id) ?? [];
+      ids.push(item.id);
+      grouped.set(item.service_id, ids);
     }
+    const results = await Promise.all(
+      [...grouped.entries()].map(([serviceId, ids]) =>
+        supabase
+          .from('environment_variables')
+          .update({ service_id: serviceId })
+          .in('id', ids)
+          .eq('project_id', project_id)
+      )
+    );
+    updatedVars = toUpdate.length - results.filter((r) => r.error).length;
   }
 
   // Re-fetch env vars to get updated service_id assignments
@@ -130,7 +138,9 @@ export async function POST(request: NextRequest) {
     envKeysByService.get(ev.service_id)!.add(ev.key_name);
   }
 
-  let updatedStatuses = 0;
+  // Batch status updates: group service IDs by target status
+  const connectedIds: string[] = [];
+  const inProgressIds: string[] = [];
   for (const svc of matchedServices || []) {
     const requiredKeys = (svc.required_env_vars as { name: string }[] | null)?.map(
       (v) => v.name
@@ -139,50 +149,61 @@ export async function POST(request: NextRequest) {
 
     const existingKeys = envKeysByService.get(svc.id) ?? new Set();
     const allFulfilled = requiredKeys.every((k) => existingKeys.has(k));
-    const newStatus = allFulfilled ? 'connected' : 'in_progress';
-
-    const { data: updated } = await supabase
-      .from('project_services')
-      .update({ status: newStatus })
-      .eq('project_id', project_id)
-      .eq('service_id', svc.id)
-      .neq('status', newStatus)
-      .select();
-
-    if (updated && updated.length > 0) updatedStatuses++;
+    if (allFulfilled) connectedIds.push(svc.id);
+    else inProgressIds.push(svc.id);
   }
 
-  // Suggest auto connections
-  const { data: projectServices = [] } = await supabase
-    .from('project_services')
-    .select('service_id, id')
-    .eq('project_id', project_id);
+  let updatedStatuses = 0;
+  const statusUpdates = await Promise.all([
+    connectedIds.length > 0
+      ? supabase
+          .from('project_services')
+          .update({ status: 'connected' })
+          .eq('project_id', project_id)
+          .in('service_id', connectedIds)
+          .neq('status', 'connected')
+          .select()
+      : Promise.resolve({ data: [] }),
+    inProgressIds.length > 0
+      ? supabase
+          .from('project_services')
+          .update({ status: 'in_progress' })
+          .eq('project_id', project_id)
+          .in('service_id', inProgressIds)
+          .neq('status', 'in_progress')
+          .select()
+      : Promise.resolve({ data: [] }),
+  ]);
+  updatedStatuses = (statusUpdates[0].data?.length ?? 0) + (statusUpdates[1].data?.length ?? 0);
 
-  const { data: dependencies = [] } = await supabase
-    .from('service_dependencies')
-    .select('*');
-
-  const { data: existingConnections = [] } = await supabase
-    .from('user_connections')
-    .select('*')
-    .eq('project_id', project_id);
+  // Suggest auto connections (3 queries in parallel)
+  const [psResult, depsResult, connResult] = await Promise.all([
+    supabase.from('project_services').select('service_id, id').eq('project_id', project_id),
+    supabase.from('service_dependencies').select('*'),
+    supabase.from('user_connections').select('*').eq('project_id', project_id),
+  ]);
 
   const suggestions = suggestAutoConnections(
-    (projectServices || []).map((ps) => ({ serviceId: ps.service_id, slug: '' })),
-    dependencies || [],
-    existingConnections || []
+    (psResult.data || []).map((ps) => ({ serviceId: ps.service_id, slug: '' })),
+    depsResult.data || [],
+    connResult.data || []
   );
 
   let autoConnections = 0;
-  for (const suggestion of suggestions.slice(0, 10)) {
-    const { error } = await supabase.from('user_connections').insert({
-      project_id,
-      source_service_id: suggestion.source_service_id,
-      target_service_id: suggestion.target_service_id,
-      connection_type: suggestion.connection_type,
-      label: suggestion.reason,
-    });
-    if (!error) autoConnections++;
+  const toInsert = suggestions.slice(0, 10).map((s) => ({
+    project_id,
+    source_service_id: s.source_service_id,
+    target_service_id: s.target_service_id,
+    connection_type: s.connection_type,
+    label: s.reason,
+  }));
+  if (toInsert.length > 0) {
+    // Batch insert (UNIQUE constraint handles duplicates gracefully)
+    const { data: inserted } = await supabase
+      .from('user_connections')
+      .insert(toInsert)
+      .select('id');
+    autoConnections = inserted?.length ?? 0;
   }
 
   await logAudit(user.id, {
