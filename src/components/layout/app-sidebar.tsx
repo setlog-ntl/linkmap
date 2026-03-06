@@ -6,9 +6,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { LinkmapLogo } from '@/components/icons/linkmap-logo';
 import {
   Rocket, Search, Map as MapIcon,
-  List, Key, Settings, BookOpen, ChevronDown, ChevronRight,
+  List, Link2, Key, Settings, BookOpen, ChevronDown, ChevronRight,
   LogOut, Bot, User, GitBranch, Wrench, FolderKanban, Plus, LayoutDashboard,
-  Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight, Trash2, Users, BarChart3, Lightbulb,
+  Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight, Trash2, DollarSign, Users, BarChart3, Lightbulb,
 } from 'lucide-react';
 import { GUIDE_CATEGORIES, getGuidesByCategory, type GuideCategory } from '@/data/ui/guide-meta';
 import { createClient } from '@/lib/supabase/client';
@@ -59,7 +59,9 @@ function getProjectSubNav(projectId: string) {
   return [
     { labelKey: 'project.overview', href: `/project/${projectId}`, icon: LayoutDashboard, exact: true },
     { labelKey: 'project.services', href: `/project/${projectId}/services`, icon: List },
+    { labelKey: 'project.connections', href: `/project/${projectId}/connections`, icon: Link2 },
     { labelKey: 'project.envVars', href: `/project/${projectId}/env`, icon: Key },
+    { labelKey: 'project.costs', href: `/project/${projectId}/costs`, icon: DollarSign },
     { labelKey: 'project.serviceMap', href: `/project/${projectId}/service-map`, icon: MapIcon },
     { labelKey: 'project.settings', href: `/project/${projectId}/settings`, icon: Settings },
   ];
