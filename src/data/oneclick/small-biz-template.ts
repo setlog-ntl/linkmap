@@ -71,7 +71,35 @@ const globalsCss = `@import "tailwindcss";
 @theme {
   --font-sans: 'Pretendard Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
   --color-primary: #d47311;
+  --color-secondary: #e8934a;
   --color-warm: #fdf4e7;
+}
+
+:root {
+  /* Spacing */
+  --section-gap: clamp(4rem, 8vw, 7rem);
+  --section-padding-x: clamp(1rem, 4vw, 3rem);
+
+  /* Surface */
+  --surface-elevated: #ffffff;
+  --surface-sunken: #f8f9fa;
+  --surface-border: rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.04);
+
+  /* Unified Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+.dark {
+  --surface-elevated: #1a1a1a;
+  --surface-sunken: #141414;
+  --surface-border: rgba(255, 255, 255, 0.06);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
+  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2);
 }
 
 html {
@@ -103,13 +131,56 @@ html {
   .reveal-fade { opacity: 1; transform: none; transition: none; }
 }
 
-/* Card hover */
+/* Reveal variants */
+.reveal-slide-left { opacity: 0; transform: translateX(-32px); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-slide-left.revealed { opacity: 1; transform: translateX(0); }
+.reveal-slide-right { opacity: 0; transform: translateX(32px); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-slide-right.revealed { opacity: 1; transform: translateX(0); }
+.reveal-scale { opacity: 0; transform: scale(0.95); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-scale.revealed { opacity: 1; transform: scale(1); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal-slide-left, .reveal-slide-right, .reveal-scale { opacity: 1; transform: none; transition: none; }
+}
+
+/* Card hover (legacy) */
 .card-hover {
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .card-hover:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+/* Card lift */
+.card-lift { transition: transform 0.25s ease, box-shadow 0.25s ease; box-shadow: var(--shadow-card); }
+.card-lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-card-hover); }
+
+/* Button press */
+.btn-press { transition: transform 0.15s ease; }
+.btn-press:active { transform: scale(0.97); }
+
+/* Section gap */
+.section-gap { padding-top: var(--section-gap, 4rem); padding-bottom: var(--section-gap, 4rem); }
+
+/* Mobile sticky CTA */
+.mobile-cta {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: var(--surface-elevated, #ffffff);
+  border-top: 1px solid var(--surface-border, rgba(0,0,0,0.06));
+  z-index: 40;
+  display: flex;
+  gap: 8px;
+}
+@media (min-width: 640px) {
+  .mobile-cta { display: none; }
+}
+.dark .mobile-cta {
+  background: var(--surface-elevated, #1a1a1a);
+  border-top-color: var(--surface-border, rgba(255,255,255,0.06));
 }
 
 /* Scroll progress */
@@ -131,6 +202,11 @@ html {
 .animate-fade-up-d2 { animation-delay:300ms; opacity:0; }
 @media (prefers-reduced-motion:reduce) {
   .animate-fade-up { animation:none; opacity:1; transform:none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-lift:hover { transform: none; }
+  .btn-press:active { transform: none; }
 }
 `;
 
@@ -246,7 +322,7 @@ export default function Home() {
 // ──────────────────────────────────────────────
 const heroSection = `'use client';
 
-import { Phone } from 'lucide-react';
+import { Phone, MapPin } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
 
@@ -258,6 +334,7 @@ export function HeroSection({ config }: Props) {
   const { locale, t } = useLocale();
   const name = locale === 'en' && config.nameEn ? config.nameEn : config.name;
   const desc = locale === 'en' && config.descriptionEn ? config.descriptionEn : config.description;
+  const address = locale === 'en' && config.addressEn ? config.addressEn : config.address;
 
   return (
     <section
@@ -265,21 +342,36 @@ export function HeroSection({ config }: Props) {
       className="pt-20 pb-12 px-4 sm:px-6"
     >
       <div className="max-w-lg mx-auto text-center animate-fade-up">
-        <h1 className="text-3xl sm:text-4xl font-bold text-[#d47311] mb-3">
+        <h1 className="text-3xl sm:text-4xl font-bold text-[var(--color-primary,#d47311)] mb-3">
           {name}
         </h1>
-        <p className="text-base text-gray-600 dark:text-gray-400 mb-6 max-w-sm mx-auto">
+        <p className="text-base text-gray-600 dark:text-gray-400 mb-8 max-w-sm mx-auto leading-relaxed">
           {desc}
         </p>
-        {config.phone && (
-          <a
-            href={\`tel:\${config.phone.replace(/[^+\\d]/g, '')}\`}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#d47311] text-white font-medium hover:opacity-90 transition-opacity min-h-[44px]"
-          >
-            <Phone className="w-4 h-4" />
-            {t('hero.call')}
-          </a>
-        )}
+        <div className="flex items-center justify-center gap-3 flex-wrap">
+          {config.phone && (
+            <a
+              href={\`tel:\${config.phone.replace(/[^+\\d]/g, '')}\`}
+              className="btn-press inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-white font-semibold text-sm min-h-[48px] shadow-md hover:opacity-90 transition-opacity"
+              style={{ background: 'linear-gradient(135deg, var(--color-primary,#d47311), var(--color-secondary,#e8934a))' }}
+            >
+              <Phone className="w-4 h-4" />
+              {t('hero.call')}
+            </a>
+          )}
+          {address && (
+            <a
+              href={config.kakaoMapId ? \`https://place.map.kakao.com/\${config.kakaoMapId}\` : \`https://maps.google.com/?q=\${encodeURIComponent(address)}\`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-press inline-flex items-center gap-2 px-7 py-3.5 rounded-full border font-semibold text-sm min-h-[48px] text-gray-700 dark:text-gray-200 hover:border-[var(--color-primary,#d47311)] transition-colors"
+              style={{ borderColor: 'var(--surface-border, rgba(0,0,0,0.12))', background: 'var(--surface-elevated, #ffffff)' }}
+            >
+              <MapPin className="w-4 h-4 text-[var(--color-primary,#d47311)]" />
+              {t('quick.directions')}
+            </a>
+          )}
+        </div>
       </div>
     </section>
   );
@@ -330,7 +422,8 @@ export function QuickActions({ config }: Props) {
             href={action.href}
             target={action.href.startsWith('http') ? '_blank' : undefined}
             rel={action.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-            className="flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl border border-[#d47311]/20 bg-white dark:bg-gray-900 text-[#d47311] hover:bg-[#d47311]/5 transition-colors min-h-[44px]"
+            className="card-lift btn-press flex-1 flex flex-col items-center gap-1.5 py-3 rounded-[var(--radius-md,12px)] border min-h-[44px] transition-colors hover:opacity-80"
+            style={{ borderColor: 'color-mix(in srgb, var(--color-primary,#d47311) 20%, transparent)', background: 'var(--surface-elevated,#ffffff)', color: 'var(--color-primary,#d47311)' }}
           >
             <action.icon className="w-5 h-5" />
             <span className="text-xs font-medium">{action.label}</span>
@@ -384,19 +477,20 @@ export function MenuSection({ items }: Props) {
     return (
       <div
         key={i}
-        className="flex items-start gap-3 p-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-[#d47311]/30 transition-colors"
+        className="card-lift flex items-start gap-3 p-4 rounded-[var(--radius-md,12px)] border"
+        style={{ background: 'var(--surface-elevated,#ffffff)', borderColor: 'var(--surface-border,rgba(0,0,0,0.06))' }}
       >
-        <span className="text-2xl shrink-0">{item.emoji}</span>
+        <span className="text-2xl shrink-0 leading-none mt-0.5">{item.emoji || '🍽️'}</span>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{name}</h3>
               {item.isNew && <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-red-500 text-white leading-none">NEW</span>}
-              {item.isPopular && <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-[#d47311] text-white leading-none">{t('menu.popular')}</span>}
+              {item.isPopular && <span className="px-1.5 py-0.5 text-[10px] font-bold rounded text-white leading-none" style={{ background: 'var(--color-primary,#d47311)' }}>{t('menu.popular')}</span>}
             </div>
-            <span className="text-sm font-medium text-[#d47311] shrink-0">{item.price}</span>
+            <span className="text-sm font-semibold shrink-0" style={{ color: 'var(--color-primary,#d47311)' }}>{item.price}</span>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{desc}</p>
+          {desc && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">{desc}</p>}
         </div>
       </div>
     );
@@ -415,11 +509,15 @@ export function MenuSection({ items }: Props) {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={\`px-4 py-1.5 rounded-full text-sm transition-colors min-h-[44px] \${
+              className={\`btn-press px-4 py-1.5 rounded-full text-sm font-medium transition-colors min-h-[44px] \${
                 activeCategory === cat
-                  ? 'bg-[#d47311] text-white'
-                  : 'text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-700 hover:border-[#d47311]'
+                  ? 'text-white'
+                  : 'text-gray-600 dark:text-gray-400 border hover:opacity-80'
               }\`}
+              style={activeCategory === cat
+                ? { background: 'var(--color-primary,#d47311)' }
+                : { borderColor: 'var(--surface-border,rgba(0,0,0,0.12))' }
+              }
             >
               {cat}
             </button>
@@ -438,10 +536,10 @@ export function MenuSection({ items }: Props) {
             const isOpen = openCategories.has(cat);
             const catItems = grouped[cat] || [];
             return (
-              <div key={cat} className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+              <div key={cat} className="rounded-[var(--radius-md,12px)] border overflow-hidden" style={{ borderColor: 'var(--surface-border,rgba(0,0,0,0.08))', background: 'var(--surface-elevated,#ffffff)' }}>
                 <button
                   onClick={() => toggleAccordion(cat)}
-                  className="w-full flex items-center justify-between p-4 text-left bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors min-h-[44px]"
+                  className="w-full flex items-center justify-between p-4 text-left hover:opacity-80 transition-opacity min-h-[44px]"
                 >
                   <span className="font-semibold text-gray-900 dark:text-gray-100">
                     {cat}
@@ -498,7 +596,7 @@ export function HoursSection({ hours }: Props) {
           {t('hours.title')}
         </h2>
 
-        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden">
+        <div className="card-lift rounded-[var(--radius-lg,16px)] border overflow-hidden" style={{ borderColor: 'var(--surface-border,rgba(0,0,0,0.06))', background: 'var(--surface-elevated,#ffffff)' }}>
           {hours.map((hour, i) => {
             const day = locale === 'en' && hour.dayEn ? hour.dayEn : hour.day;
             const time = locale === 'en' && hour.hoursEn ? hour.hoursEn : hour.hours;
@@ -508,21 +606,25 @@ export function HoursSection({ hours }: Props) {
             return (
               <div
                 key={i}
-                className={\`flex items-center justify-between px-4 py-3 \${
-                  i < hours.length - 1 ? 'border-b border-gray-100 dark:border-gray-800' : ''
-                } \${isToday ? 'bg-[#d47311]/5' : ''}\`}
+                className={\`flex items-center justify-between px-5 py-3.5 \${
+                  i < hours.length - 1 ? 'border-b' : ''
+                }\`}
+                style={{
+                  borderBottomColor: 'var(--surface-border,rgba(0,0,0,0.06))',
+                  background: isToday ? 'color-mix(in srgb, var(--color-primary,#d47311) 6%, transparent)' : undefined,
+                }}
               >
-                <span className={\`text-sm \${isToday ? 'font-bold text-[#d47311]' : 'text-gray-700 dark:text-gray-300'}\`}>
+                <span className={\`text-sm \${isToday ? 'font-bold' : 'text-gray-700 dark:text-gray-300'}\`} style={isToday ? { color: 'var(--color-primary,#d47311)' } : undefined}>
                   {day}
-                  {isToday && <span className="ml-1.5 text-xs">({t('hours.today')})</span>}
+                  {isToday && <span className="ml-1.5 text-xs font-normal opacity-70">({t('hours.today')})</span>}
                 </span>
                 <span className={\`text-sm \${
                   hour.isHoliday
                     ? 'text-red-500 font-medium'
                     : isToday
-                      ? 'font-bold text-[#d47311]'
+                      ? 'font-bold'
                       : 'text-gray-600 dark:text-gray-400'
-                }\`}>
+                }\`} style={isToday && !hour.isHoliday ? { color: 'var(--color-primary,#d47311)' } : undefined}>
                   {time}
                 </span>
               </div>
@@ -561,7 +663,7 @@ export function LocationSection({ config }: Props) {
         </h2>
 
         {config.kakaoMapId && (
-          <div className="rounded-xl overflow-hidden mb-4 aspect-[4/3]">
+          <div className="card-lift rounded-[var(--radius-lg,16px)] overflow-hidden mb-4 aspect-[4/3]">
             <iframe
               src={\`https://map.kakao.com/?map_type=TYPE_MAP&itemId=\${config.kakaoMapId}\`}
               title="Map"
@@ -573,12 +675,13 @@ export function LocationSection({ config }: Props) {
         )}
 
         <a
-          href={\`https://maps.google.com/?q=\${encodeURIComponent(address)}\`}
+          href={config.kakaoMapId ? \`https://place.map.kakao.com/\${config.kakaoMapId}\` : \`https://maps.google.com/?q=\${encodeURIComponent(address)}\`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-[#d47311]/50 transition-colors"
+          className="card-lift btn-press flex items-center gap-3 p-4 rounded-[var(--radius-md,12px)] border transition-colors"
+          style={{ background: 'var(--surface-elevated,#ffffff)', borderColor: 'var(--surface-border,rgba(0,0,0,0.06))' }}
         >
-          <MapPin className="w-5 h-5 text-[#d47311] shrink-0" />
+          <MapPin className="w-5 h-5 shrink-0" style={{ color: 'var(--color-primary,#d47311)' }} />
           <span className="text-sm text-gray-700 dark:text-gray-300">{address}</span>
         </a>
       </div>
@@ -609,14 +712,14 @@ export function GallerySection({ images }: Props) {
           {t('gallery.title')}
         </h2>
 
-        <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+        <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-1 px-1">
           {images.map((src, i) => (
-            <AnimatedReveal key={i} delay={i * 50}>
-              <div className="shrink-0 w-64 h-64 rounded-xl overflow-hidden snap-center">
+            <AnimatedReveal key={i} delay={i * 60} variant="scale">
+              <div className="card-lift shrink-0 w-64 h-64 rounded-[var(--radius-lg,16px)] overflow-hidden snap-center">
                 <img
                   src={src}
                   alt=""
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                   loading="lazy"
                 />
               </div>
@@ -667,9 +770,10 @@ export function SnsSection({ config }: Props) {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-[#d47311]/50 transition-colors min-h-[44px]"
+              className="card-lift btn-press flex items-center gap-3 p-4 rounded-[var(--radius-md,12px)] border min-h-[44px] transition-colors"
+              style={{ background: 'var(--surface-elevated,#ffffff)', borderColor: 'var(--surface-border,rgba(0,0,0,0.06))' }}
             >
-              <link.icon className="w-5 h-5 text-[#d47311]" />
+              <link.icon className="w-5 h-5 shrink-0" style={{ color: 'var(--color-primary,#d47311)' }} />
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{link.label}</span>
             </a>
           ))}
@@ -688,7 +792,7 @@ export function SnsSection({ config }: Props) {
 // ──────────────────────────────────────────────
 const mobileBottomBar = `'use client';
 
-import { Phone, MessageCircle } from 'lucide-react';
+import { Phone, MapPin, MessageCircle } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
 
@@ -697,33 +801,45 @@ interface Props {
 }
 
 export function MobileBottomBar({ config }: Props) {
-  const { t } = useLocale();
+  const { locale, t } = useLocale();
   if (!config.phone && !config.kakaoChannelUrl) return null;
 
+  const address = locale === 'en' && config.addressEn ? config.addressEn : config.address;
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 sm:hidden">
-      <div className="flex border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-lg shadow-black/10">
-        {config.phone && (
-          <a
-            href={\`tel:\${config.phone.replace(/[^\\+\\d]/g, '')}\`}
-            className="flex-1 flex items-center justify-center gap-2 py-3.5 text-white font-semibold bg-[#d47311] active:bg-[#b56210]"
-          >
-            <Phone className="w-5 h-5" />
-            {t('bottom.call')}
-          </a>
-        )}
-        {config.kakaoChannelUrl && (
-          <a
-            href={config.kakaoChannelUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-2 py-3.5 text-[#391b1b] font-semibold bg-[#fee500] active:bg-[#e6cf00]"
-          >
-            <MessageCircle className="w-5 h-5" />
-            {t('bottom.kakao')}
-          </a>
-        )}
-      </div>
+    <div className="mobile-cta">
+      {config.phone && (
+        <a
+          href={\`tel:\${config.phone.replace(/[^+\\d]/g, '')}\`}
+          className="btn-press flex-1 flex items-center justify-center gap-2 py-3 rounded-[var(--radius-md,12px)] text-white font-semibold text-sm"
+          style={{ background: 'linear-gradient(135deg, var(--color-primary,#d47311), var(--color-secondary,#e8934a))' }}
+        >
+          <Phone className="w-4 h-4" />
+          {t('bottom.call')}
+        </a>
+      )}
+      {config.kakaoChannelUrl ? (
+        <a
+          href={config.kakaoChannelUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-press flex-1 flex items-center justify-center gap-2 py-3 rounded-[var(--radius-md,12px)] text-[#391b1b] font-semibold text-sm bg-[#fee500] active:bg-[#e6cf00]"
+        >
+          <MessageCircle className="w-4 h-4" />
+          {t('bottom.kakao')}
+        </a>
+      ) : address ? (
+        <a
+          href={config.kakaoMapId ? \`https://place.map.kakao.com/\${config.kakaoMapId}\` : \`https://maps.google.com/?q=\${encodeURIComponent(address)}\`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-press flex-1 flex items-center justify-center gap-2 py-3 rounded-[var(--radius-md,12px)] border font-semibold text-sm text-gray-700 dark:text-gray-200"
+          style={{ borderColor: 'var(--surface-border,rgba(0,0,0,0.12))', background: 'var(--surface-sunken,#f8f9fa)' }}
+        >
+          <MapPin className="w-4 h-4" style={{ color: 'var(--color-primary,#d47311)' }} />
+          {t('quick.directions')}
+        </a>
+      ) : null}
     </div>
   );
 }

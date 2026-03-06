@@ -23,4 +23,32 @@ export const digitalNamecardPresets: ModulePreset[] = [
       order: ['profile', 'contact', 'socials', 'theme'],
     },
   },
+  {
+    id: 'warm-earth',
+    name: '웜 어스',
+    nameEn: 'Warm Earth',
+    description: '따뜻한 어스톤 명함 — 자연스럽고 친근한 인상',
+    descriptionEn: 'Warm earth tone card — natural and friendly impression',
+    state: {
+      enabled: ['profile', 'contact', 'socials', 'theme'],
+      order: ['profile', 'contact', 'socials', 'theme'],
+      values: {
+        theme: { designPreset: 'warm-earth' },
+      },
+    },
+  },
+  {
+    id: 'midnight',
+    name: '미드나잇',
+    nameEn: 'Midnight',
+    description: '진한 다크 명함 — 세련된 나이트 모드',
+    descriptionEn: 'Deep dark card — sophisticated night mode',
+    state: {
+      enabled: ['profile', 'contact', 'socials', 'theme'],
+      order: ['profile', 'contact', 'socials', 'theme'],
+      values: {
+        theme: { designPreset: 'midnight' },
+      },
+    },
+  },
 ];

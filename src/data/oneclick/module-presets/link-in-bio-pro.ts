@@ -61,4 +61,42 @@ export const linkInBioProPresets: ModulePreset[] = [
       },
     },
   },
+  {
+    id: 'pastel-dream',
+    name: '파스텔 드림',
+    nameEn: 'Pastel Dream',
+    description: '연한 파스텔 배경 + pill 카드 + 부드러운 그림자',
+    descriptionEn: 'Soft pastel background + pill cards + gentle shadow',
+    state: {
+      enabled: ['profile', 'links', 'socials', 'theme'],
+      order: ['profile', 'links', 'socials', 'theme'],
+      values: {
+        theme: {
+          bgStyle: 'gradient',
+          cardStyle: 'pill',
+          primaryColor: '#f9a8d4',
+          fontFamily: 'system',
+        },
+      },
+    },
+  },
+  {
+    id: 'brutalist',
+    name: '브루탈리스트',
+    nameEn: 'Brutalist',
+    description: '검정 배경 + 흰 텍스트 + 두꺼운 테두리 — 대담한 스타일',
+    descriptionEn: 'Black background + white text + thick borders — bold style',
+    state: {
+      enabled: ['profile', 'links', 'socials', 'theme'],
+      order: ['profile', 'links', 'socials', 'theme'],
+      values: {
+        theme: {
+          bgStyle: 'dark',
+          cardStyle: 'outline',
+          primaryColor: '#ffffff',
+          fontFamily: 'mono',
+        },
+      },
+    },
+  },
 ];

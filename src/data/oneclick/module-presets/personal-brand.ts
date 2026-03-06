@@ -43,4 +43,46 @@ export const personalBrandPresets: ModulePreset[] = [
       order: ['hero', 'about', 'values', 'highlights', 'gallery', 'contact'],
     },
   },
+  {
+    id: 'magazine',
+    name: '매거진',
+    nameEn: 'Magazine',
+    description: 'serif 폰트 + 2단 레이아웃 — 에디토리얼 감성',
+    descriptionEn: 'Serif font + editorial layout — magazine aesthetic',
+    state: {
+      enabled: ['hero', 'about', 'highlights', 'gallery', 'contact'],
+      order: ['hero', 'about', 'highlights', 'gallery', 'contact'],
+      values: {
+        hero: { designPreset: 'magazine' },
+      },
+    },
+  },
+  {
+    id: 'warm-earth',
+    name: '웜 어스',
+    nameEn: 'Warm Earth',
+    description: '따뜻한 어스톤 + 세리프 폰트 — 자연스러운 감성',
+    descriptionEn: 'Warm earth tones + serif font — natural aesthetic',
+    state: {
+      enabled: ['hero', 'about', 'values', 'highlights', 'contact'],
+      order: ['hero', 'about', 'values', 'highlights', 'contact'],
+      values: {
+        hero: { designPreset: 'warm-earth' },
+      },
+    },
+  },
+  {
+    id: 'midnight',
+    name: '미드나잇',
+    nameEn: 'Midnight',
+    description: '진한 다크 + 인디고 악센트 — 모던 나이트 모드',
+    descriptionEn: 'Deep dark + indigo accent — modern night mode',
+    state: {
+      enabled: ['hero', 'about', 'values', 'highlights', 'gallery', 'contact'],
+      order: ['hero', 'about', 'values', 'highlights', 'gallery', 'contact'],
+      values: {
+        hero: { designPreset: 'midnight' },
+      },
+    },
+  },
 ];

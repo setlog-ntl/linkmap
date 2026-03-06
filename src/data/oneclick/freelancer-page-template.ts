@@ -84,6 +84,23 @@ const globalsCss = `@import "tailwindcss";
   --text-secondary: #52525b;
   --text-muted: #a1a1aa;
   --border-color: rgba(0, 0, 0, 0.08);
+
+  /* Spacing */
+  --section-gap: clamp(4rem, 8vw, 7rem);
+  --section-padding-x: clamp(1rem, 4vw, 3rem);
+
+  /* Surface */
+  --surface-elevated: #ffffff;
+  --surface-sunken: #f8f9fa;
+  --surface-border: rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.04);
+
+  /* Unified Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
 }
 
 .dark {
@@ -94,6 +111,12 @@ const globalsCss = `@import "tailwindcss";
   --text-secondary: #a1a1aa;
   --text-muted: #71717a;
   --border-color: rgba(255, 255, 255, 0.05);
+
+  --surface-elevated: #1a1a1a;
+  --surface-sunken: #141414;
+  --surface-border: rgba(255, 255, 255, 0.06);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
+  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2);
 }
 
 html {
@@ -125,7 +148,48 @@ html {
   .reveal-fade { opacity: 1; transform: none; transition: none; }
 }
 
-/* Card hover */
+/* Reveal variants */
+.reveal-slide-left { opacity: 0; transform: translateX(-32px); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-slide-left.revealed { opacity: 1; transform: translateX(0); }
+.reveal-slide-right { opacity: 0; transform: translateX(32px); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-slide-right.revealed { opacity: 1; transform: translateX(0); }
+.reveal-scale { opacity: 0; transform: scale(0.95); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-scale.revealed { opacity: 1; transform: scale(1); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal-slide-left, .reveal-slide-right, .reveal-scale { opacity: 1; transform: none; transition: none; }
+}
+
+/* Card lift */
+.card-lift { transition: transform 0.25s ease, box-shadow 0.25s ease; box-shadow: var(--shadow-card); }
+.card-lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-card-hover); }
+
+/* Button press */
+.btn-press { transition: transform 0.15s ease; }
+.btn-press:active { transform: scale(0.97); }
+
+/* Section gap */
+.section-gap { padding-top: var(--section-gap, 4rem); padding-bottom: var(--section-gap, 4rem); }
+
+/* Bento grid */
+.bento-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+@media (min-width: 768px) {
+  .bento-grid { grid-template-columns: repeat(3, 1fr); }
+  .bento-grid > *:first-child { grid-row: span 2; grid-column: span 2; }
+}
+.bento-grid > * { position: relative; overflow: hidden; border-radius: var(--radius-lg, 16px); }
+.bento-grid > * img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+.bento-grid > *:hover img { transform: scale(1.05); }
+
+/* Timeline (horizontal on desktop) */
+.process-timeline { display: flex; flex-direction: column; gap: 2rem; }
+@media (min-width: 768px) {
+  .process-timeline { flex-direction: row; position: relative; }
+  .process-timeline::before { content: ''; position: absolute; top: 24px; left: 24px; right: 24px; height: 2px; background: var(--surface-border); }
+  .process-timeline > * { flex: 1; text-align: center; position: relative; padding-top: 3rem; }
+  .process-timeline > *::before { content: ''; position: absolute; top: 17px; left: 50%; transform: translateX(-50%); width: 16px; height: 16px; border-radius: 50%; border: 3px solid var(--color-primary, #10b981); background: var(--surface-elevated); z-index: 1; }
+}
+
+/* Card hover (legacy) */
 .card-hover {
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
@@ -167,13 +231,6 @@ dialog.lightbox img {
   border-radius: 0.75rem;
 }
 
-/* Process stepper connector */
-.process-connector {
-  position: absolute;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
-  opacity: 0.3;
-}
-
 /* Hero load animation */
 @keyframes fade-up { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
 .animate-fade-up { animation: fade-up 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
@@ -181,6 +238,11 @@ dialog.lightbox img {
 .animate-fade-up-d2 { animation: fade-up 0.6s cubic-bezier(0.16,1,0.3,1) forwards; animation-delay:300ms; opacity:0; }
 @media (prefers-reduced-motion:reduce) {
   .animate-fade-up, .animate-fade-up-d1, .animate-fade-up-d2 { animation:none; opacity:1; transform:none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-lift:hover { transform: none; }
+  .btn-press:active { transform: none; }
 }
 `;
 
@@ -318,11 +380,14 @@ export function HeroSection({ config }: Props) {
 
       <div className="relative z-10 text-center max-w-3xl animate-fade-up">
         {config.avatarUrl && (
-          <img
-            src={config.avatarUrl}
-            alt={name}
-            className="w-28 h-28 rounded-full object-cover mx-auto mb-6 ring-2 ring-[#5b13ec]/50"
-          />
+          <div className="relative inline-block mb-6">
+            <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full bg-gradient-to-b from-[#5b13ec] to-[#06b6d4] -translate-x-3" />
+            <img
+              src={config.avatarUrl}
+              alt={name}
+              className="w-28 h-28 rounded-2xl object-cover ring-2 ring-[#5b13ec]/30"
+            />
+          </div>
         )}
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-3 bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent animate-fade-up-d1">
           {name}
@@ -335,7 +400,7 @@ export function HeroSection({ config }: Props) {
         </p>
         <a
           href="#services"
-          className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] text-white font-medium hover:opacity-90 transition-opacity animate-fade-up-d2"
+          className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] text-white font-medium hover:opacity-90 transition-opacity animate-fade-up-d2 btn-press"
         >
           {t('hero.cta')}
           <ArrowDown className="w-4 h-4" />
@@ -376,7 +441,7 @@ export function ServicesSection({ services }: Props) {
     <section id="services" className="py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
         <AnimatedReveal>
-          <h2 className="text-3xl font-bold mb-12 text-center bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold mb-12 text-center text-gray-900 dark:text-gray-100">
             {t('services.title')}
           </h2>
         </AnimatedReveal>
@@ -389,26 +454,15 @@ export function ServicesSection({ services }: Props) {
             const price = locale === 'en' && service.priceEn ? service.priceEn : service.price;
             return (
               <AnimatedReveal key={i} delay={i * 100}>
-                <div
-                  className="relative p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm group overflow-hidden"
-                  style={{ transition: 'border-color 0.3s ease, box-shadow 0.3s ease' }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(91,19,236,0.4)';
-                    e.currentTarget.style.boxShadow = '0 0 20px rgba(91,19,236,0.1), inset 0 0 20px rgba(6,182,212,0.05)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
-                >
+                <div className="relative p-6 rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-elevated)] group overflow-hidden card-lift">
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#5b13ec]/20 to-[#06b6d4]/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                       <Icon className="w-5 h-5 text-[#5b13ec]" />
                     </div>
                     <span className="text-sm font-semibold text-[#06b6d4]">{price}</span>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-100 mb-2">{title}</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed">{desc}</p>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">{title}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{desc}</p>
                 </div>
               </AnimatedReveal>
             );
@@ -463,7 +517,7 @@ export function PortfolioSection({ portfolio }: Props) {
     <section id="portfolio" className="py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
         <AnimatedReveal>
-          <h2 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">
             {t('portfolio.title')}
           </h2>
         </AnimatedReveal>
@@ -484,36 +538,31 @@ export function PortfolioSection({ portfolio }: Props) {
           ))}
         </div>
 
-        <div key={activeCategory} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-up">
+        <div key={activeCategory} className="bento-grid">
           {filtered.map((item, i) => {
             const title = locale === 'en' && item.titleEn ? item.titleEn : item.title;
             const desc = locale === 'en' && item.descEn ? item.descEn : item.desc;
             return (
-              <AnimatedReveal key={i} delay={i * 50}>
+              <AnimatedReveal key={i} delay={i * 50} variant="scale">
                 <div
-                  className="group rounded-2xl overflow-hidden border border-white/5 bg-white/[0.02] cursor-pointer"
+                  className="group cursor-pointer aspect-[4/3]"
                   onClick={() => openLightbox(item.imageUrl, title, desc)}
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <img
-                      src={item.imageUrl}
-                      alt={title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                      <div className="flex gap-1.5 flex-wrap">
-                        {item.tags.map((tag, j) => (
-                          <span key={j} className="px-2 py-0.5 rounded-full text-xs bg-white/20 text-white backdrop-blur-sm">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
+                  <img
+                    src={item.imageUrl}
+                    alt={title}
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                    <h3 className="font-semibold text-white text-sm mb-1 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">{title}</h3>
+                    <div className="flex gap-1.5 flex-wrap translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-75">
+                      {item.tags.map((tag, j) => (
+                        <span key={j} className="px-2 py-0.5 rounded-full text-xs bg-white/20 text-white backdrop-blur-sm">
+                          {tag}
+                        </span>
+                      ))}
                     </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-100 mb-1">{title}</h3>
-                    <p className="text-sm text-gray-400 line-clamp-2">{desc}</p>
+                    {desc && <p className="text-xs text-gray-200 mt-1.5 line-clamp-1 translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-100">{desc}</p>}
                   </div>
                 </div>
               </AnimatedReveal>
@@ -576,7 +625,7 @@ export function TestimonialsSection({ testimonials }: Props) {
     <section className="py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
         <AnimatedReveal>
-          <h2 className="text-3xl font-bold mb-12 text-center bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold mb-12 text-center text-gray-900 dark:text-gray-100">
             {t('testimonials.title')}
           </h2>
         </AnimatedReveal>
@@ -589,18 +638,19 @@ export function TestimonialsSection({ testimonials }: Props) {
             const content = locale === 'en' && item.contentEn ? item.contentEn : item.content;
             return (
               <AnimatedReveal key={i} delay={i * 100}>
-                <div className="p-6 rounded-2xl border border-white/5 bg-white/[0.02]">
+                <div className="p-6 rounded-2xl bg-[var(--surface-elevated)] border-l-4 border-[#5b13ec] card-lift">
+                  <span className="text-4xl font-serif text-[#5b13ec] opacity-30 leading-none block mb-2">&ldquo;</span>
                   <div className="flex gap-0.5 mb-3">
                     {Array.from({ length: item.rating }).map((_, j) => (
                       <Star key={j} className="w-4 h-4 fill-[#f59e0b] text-[#f59e0b]" />
                     ))}
                   </div>
-                  <p className="text-sm text-gray-300 mb-4 leading-relaxed italic">
-                    &ldquo;{content}&rdquo;
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                    {content}
                   </p>
                   <div>
-                    <p className="font-medium text-gray-100 text-sm">{author}</p>
-                    <p className="text-xs text-gray-500">{role}, {company}</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{author}</p>
+                    <p className="text-xs text-gray-500">{role}{role && company ? ', ' : ''}{company}</p>
                   </div>
                 </div>
               </AnimatedReveal>
@@ -633,63 +683,33 @@ export function ProcessSection({ process }: Props) {
     <section id="process" className="py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
         <AnimatedReveal>
-          <h2 className="text-3xl font-bold mb-16 text-center bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold mb-16 text-center text-gray-900 dark:text-gray-100">
             {t('process.title')}
           </h2>
         </AnimatedReveal>
 
-        {/* Desktop: horizontal stepper */}
-        <div className="hidden lg:block">
-          <div className="relative flex items-start justify-between">
-            {/* Connector line */}
-            <div className="absolute top-6 left-[calc(12.5%+16px)] right-[calc(12.5%+16px)] h-px bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] opacity-30" />
-
-            {process.map((step, i) => {
-              const title = locale === 'en' && step.titleEn ? step.titleEn : step.title;
-              const desc = locale === 'en' && step.descEn ? step.descEn : step.desc;
-              return (
-                <AnimatedReveal key={i} delay={i * 150}>
-                  <div className="relative flex flex-col items-center text-center flex-1 px-4">
-                    {/* Step circle */}
-                    <div className="relative z-10 w-12 h-12 rounded-full bg-gradient-to-br from-[#5b13ec] to-[#06b6d4] flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-[#5b13ec]/20 mb-4">
+        <div className="process-timeline">
+          {process.map((step, i) => {
+            const title = locale === 'en' && step.titleEn ? step.titleEn : step.title;
+            const desc = locale === 'en' && step.descEn ? step.descEn : step.desc;
+            return (
+              <AnimatedReveal key={i} delay={i * 120}>
+                <div className="flex md:flex-col items-start md:items-center gap-4 md:gap-0">
+                  {/* Mobile: badge inline, Desktop: handled by CSS ::before */}
+                  <div className="md:hidden w-10 h-10 rounded-full bg-gradient-to-br from-[#5b13ec] to-[#06b6d4] flex items-center justify-center text-white font-bold text-sm shadow-md shadow-[#5b13ec]/20 flex-shrink-0">
+                    {step.number}
+                  </div>
+                  <div className="md:text-center">
+                    <div className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-[#5b13ec] to-[#06b6d4] text-white font-bold text-base shadow-md shadow-[#5b13ec]/20 mx-auto mb-4">
                       {step.number}
                     </div>
-                    <h3 className="text-base font-semibold text-gray-100 mb-2">{title}</h3>
-                    <p className="text-sm text-gray-400 leading-relaxed max-w-[200px]">{desc}</p>
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">{title}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed md:max-w-[180px]">{desc}</p>
                   </div>
-                </AnimatedReveal>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Mobile + Tablet: vertical stepper */}
-        <div className="lg:hidden">
-          <div className="relative pl-8 sm:pl-12">
-            {/* Vertical connector line */}
-            <div className="absolute left-[15px] sm:left-[23px] top-6 bottom-6 w-px bg-gradient-to-b from-[#5b13ec] to-[#06b6d4] opacity-30" />
-
-            <div className="space-y-10">
-              {process.map((step, i) => {
-                const title = locale === 'en' && step.titleEn ? step.titleEn : step.title;
-                const desc = locale === 'en' && step.descEn ? step.descEn : step.desc;
-                return (
-                  <AnimatedReveal key={i} delay={i * 100}>
-                    <div className="relative flex items-start gap-4 sm:gap-6">
-                      {/* Step circle (positioned on the line) */}
-                      <div className="absolute -left-8 sm:-left-12 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-[#5b13ec] to-[#06b6d4] flex items-center justify-center text-white font-bold text-sm sm:text-base shadow-lg shadow-[#5b13ec]/20 flex-shrink-0">
-                        {step.number}
-                      </div>
-                      <div className="pt-0.5">
-                        <h3 className="text-lg font-semibold text-gray-100 mb-1">{title}</h3>
-                        <p className="text-sm text-gray-400 leading-relaxed">{desc}</p>
-                      </div>
-                    </div>
-                  </AnimatedReveal>
-                );
-              })}
-            </div>
-          </div>
+                </div>
+              </AnimatedReveal>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -718,13 +738,13 @@ export function ContactSection({ config }: Props) {
     <section id="contact" className="py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-3xl mx-auto text-center">
         <AnimatedReveal>
-          <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">
             {t('contact.title')}
           </h2>
         </AnimatedReveal>
 
         <AnimatedReveal delay={100}>
-          <p className="text-gray-400 mb-8 max-w-md mx-auto">
+          <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto">
             {t('contact.desc')}
           </p>
         </AnimatedReveal>
@@ -733,7 +753,7 @@ export function ContactSection({ config }: Props) {
           <AnimatedReveal delay={200}>
             <a
               href={\`mailto:\${config.email}\`}
-              className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] text-white font-medium hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] text-white font-medium hover:opacity-90 transition-opacity btn-press"
             >
               <Mail className="w-4 h-4" />
               {t('contact.email')}

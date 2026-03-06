@@ -34,4 +34,32 @@ export const freelancerPagePresets: ModulePreset[] = [
       order: ['hero', 'services', 'portfolio', 'testimonials', 'process', 'contact'],
     },
   },
+  {
+    id: 'warm-earth',
+    name: '웜 어스',
+    nameEn: 'Warm Earth',
+    description: '따뜻한 어스톤 + 세리프 폰트 — 감성 포트폴리오',
+    descriptionEn: 'Warm earth tones + serif font — emotional portfolio',
+    state: {
+      enabled: ['hero', 'services', 'portfolio', 'testimonials', 'contact'],
+      order: ['hero', 'services', 'portfolio', 'testimonials', 'contact'],
+      values: {
+        hero: { designPreset: 'warm-earth' },
+      },
+    },
+  },
+  {
+    id: 'midnight',
+    name: '미드나잇',
+    nameEn: 'Midnight',
+    description: '진한 다크 + 인디고 악센트 — 모던 크리에이터 무드',
+    descriptionEn: 'Deep dark + indigo accent — modern creator mood',
+    state: {
+      enabled: ['hero', 'services', 'portfolio', 'testimonials', 'process', 'contact'],
+      order: ['hero', 'services', 'portfolio', 'testimonials', 'process', 'contact'],
+      values: {
+        hero: { designPreset: 'midnight' },
+      },
+    },
+  },
 ];

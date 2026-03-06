@@ -97,6 +97,32 @@ const globalsCss = `@import "tailwindcss";
   --text-secondary: #52525b;
   --text-muted: #a1a1aa;
   --border-color: rgba(0, 0, 0, 0.08);
+
+  /* Spacing */
+  --section-gap: clamp(4rem, 8vw, 7rem);
+  --section-padding-x: clamp(1rem, 4vw, 3rem);
+
+  /* Color States */
+  --brand-primary-hover: color-mix(in oklch, var(--brand-primary) 85%, white);
+  --brand-primary-subtle: color-mix(in oklch, var(--brand-primary) 8%, transparent);
+
+  /* Surface */
+  --surface-elevated: #ffffff;
+  --surface-sunken: #f8f9fa;
+  --surface-border: rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.04);
+
+  /* Fluid Typography */
+  --text-hero: clamp(2.5rem, 6vw, 5rem);
+  --text-section: clamp(1.75rem, 3vw, 2.5rem);
+  --text-body: clamp(0.9375rem, 1vw, 1.0625rem);
+
+  /* Unified Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
 }
 
 /* ── Preset: Storyteller ── */
@@ -116,6 +142,11 @@ const globalsCss = `@import "tailwindcss";
   --text-secondary: #a1a1aa;
   --text-muted: #71717a;
   --border-color: rgba(255, 255, 255, 0.05);
+  --surface-elevated: #1a1a1a;
+  --surface-sunken: #141414;
+  --surface-border: rgba(255, 255, 255, 0.06);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
+  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2);
 }
 
 html {
@@ -124,27 +155,18 @@ html {
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .floating-orb { animation: none !important; }
-}
-
-/* Floating orbs */
-@keyframes float-orb {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -40px) scale(1.1); }
-  66% { transform: translate(-20px, 20px) scale(0.9); }
-}
-
-.floating-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  pointer-events: none;
-  animation: float-orb 20s ease-in-out infinite;
 }
 
 /* Section alternating backgrounds */
 .section-alt {
   background: var(--bg-surface);
+}
+
+/* Mesh gradient background */
+.mesh-gradient-bg {
+  background:
+    radial-gradient(ellipse at 20% 30%, var(--brand-primary-subtle, rgba(238,91,43,0.08)), transparent 50%),
+    radial-gradient(ellipse at 80% 70%, color-mix(in oklch, var(--brand-secondary, #f59e0b) 6%, transparent), transparent 50%);
 }
 
 *:focus-visible {
@@ -166,7 +188,18 @@ html {
   .reveal-fade { opacity: 1; transform: none; transition: none; }
 }
 
-/* Card hover */
+/* Reveal variants */
+.reveal-slide-left { opacity: 0; transform: translateX(-32px); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-slide-left.revealed { opacity: 1; transform: translateX(0); }
+.reveal-slide-right { opacity: 0; transform: translateX(32px); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-slide-right.revealed { opacity: 1; transform: translateX(0); }
+.reveal-scale { opacity: 0; transform: scale(0.95); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-scale.revealed { opacity: 1; transform: scale(1); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal-slide-left, .reveal-slide-right, .reveal-scale { opacity: 1; transform: none; transition: none; }
+}
+
+/* Card hover (legacy — kept for compatibility) */
 .card-hover {
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
@@ -176,6 +209,66 @@ html {
 }
 .dark .card-hover:hover {
   box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+}
+
+/* Card lift */
+.card-lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: var(--shadow-card);
+}
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Button press */
+.btn-press { transition: transform 0.15s ease; }
+.btn-press:active { transform: scale(0.97); }
+
+/* Stagger children */
+.stagger-children > *:nth-child(1) { transition-delay: 0ms; }
+.stagger-children > *:nth-child(2) { transition-delay: 80ms; }
+.stagger-children > *:nth-child(3) { transition-delay: 160ms; }
+.stagger-children > *:nth-child(4) { transition-delay: 240ms; }
+.stagger-children > *:nth-child(5) { transition-delay: 320ms; }
+.stagger-children > *:nth-child(6) { transition-delay: 400ms; }
+
+/* Section gap utility */
+.section-gap { padding-top: var(--section-gap, 4rem); padding-bottom: var(--section-gap, 4rem); }
+
+@media (prefers-reduced-motion: reduce) {
+  .card-lift:hover { transform: none; }
+  .btn-press:active { transform: none; }
+}
+
+/* Bento grid */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .bento-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .bento-grid > *:first-child {
+    grid-row: span 2;
+    grid-column: span 2;
+  }
+}
+.bento-grid > * {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg, 16px);
+}
+.bento-grid > * img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.bento-grid > *:hover img {
+  transform: scale(1.05);
 }
 
 /* Scroll progress */
@@ -356,12 +449,7 @@ export function HeroSection({ config }: Props) {
       )}
 
       {!config.heroImageUrl && (
-        <>
-          <div className="absolute inset-0 z-0" style={{ background: 'radial-gradient(ellipse at 30% 20%, rgba(238,91,43,0.12) 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, rgba(245,158,11,0.08) 0%, transparent 60%)' }} />
-          <div className="floating-orb" style={{ width: 400, height: 400, top: '10%', left: '5%', background: 'rgba(238,91,43,0.06)', animationDelay: '0s' }} />
-          <div className="floating-orb" style={{ width: 300, height: 300, bottom: '15%', right: '10%', background: 'rgba(245,158,11,0.05)', animationDelay: '-7s' }} />
-          <div className="floating-orb" style={{ width: 200, height: 200, top: '50%', left: '60%', background: 'rgba(238,91,43,0.04)', animationDelay: '-13s' }} />
-        </>
+        <div className="absolute inset-0 z-0 mesh-gradient-bg" />
       )}
 
       <div
@@ -380,10 +468,16 @@ export function HeroSection({ config }: Props) {
         </p>
         <a
           href="#about"
-          className="inline-block px-10 py-4 rounded-full bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] text-white font-semibold text-lg shadow-lg shadow-[#ee5b2b]/20 hover:shadow-[#ee5b2b]/30 hover:scale-105 transition-all duration-300 animate-fade-up animate-fade-up-d2"
+          className="inline-block px-10 py-4 rounded-full bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] text-white font-semibold text-lg shadow-lg shadow-[#ee5b2b]/20 hover:shadow-[#ee5b2b]/30 hover:scale-105 transition-all duration-300 animate-fade-up animate-fade-up-d2 btn-press"
         >
           {t('hero.cta')}
         </a>
+      </div>
+
+      <div className="absolute bottom-0 left-0 right-0 z-10">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-[60px] sm:h-[80px]" fill="currentColor" style={{ color: 'var(--bg-primary, #ffffff)' }}>
+          <path d="M0,0 C300,100 900,20 1200,80 L1200,120 L0,120 Z" className="dark:fill-[#0f0f0f]" />
+        </svg>
       </div>
     </section>
   );
@@ -410,20 +504,20 @@ export function AboutSection({ config }: Props) {
   return (
     <section id="about" className="py-20 sm:py-28 px-4 sm:px-6 section-alt">
       <div className="max-w-3xl mx-auto">
-        <AnimatedReveal>
-          <h2
-            className="text-3xl sm:text-4xl font-bold mb-8 text-center bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
-          >
-            {t('about.title')}
-          </h2>
-        </AnimatedReveal>
+        <AnimatedReveal variant="slide-left">
+          <div className="border-l-4 pl-6" style={{ borderColor: 'var(--brand-primary)' }}>
+            <h2
+              className="text-3xl sm:text-4xl font-bold mb-8 text-gray-900 dark:text-gray-100"
+            >
+              {t('about.title')}
+            </h2>
 
-        <AnimatedReveal delay={100}>
-          <p
-            className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line"
-          >
-            {story}
-          </p>
+            <p
+              className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line"
+            >
+              {story}
+            </p>
+          </div>
         </AnimatedReveal>
       </div>
     </section>
@@ -452,22 +546,28 @@ export function ValuesSection({ values }: Props) {
       <div className="max-w-5xl mx-auto">
         <AnimatedReveal>
           <h2
-            className="text-3xl sm:text-4xl font-bold mb-12 text-center bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
+            className="text-3xl sm:text-4xl font-bold mb-12 text-center text-gray-900 dark:text-gray-100"
           >
             {t('values.title')}
           </h2>
         </AnimatedReveal>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-6 stagger-children">
           {values.map((value, i) => {
             const title = locale === 'en' && value.titleEn ? value.titleEn : value.title;
             const desc = locale === 'en' && value.descEn ? value.descEn : value.desc;
             return (
-              <AnimatedReveal key={i} delay={i * 100}>
+              <AnimatedReveal key={i} delay={i * 100} variant="scale">
                 <div
-                  className="p-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] hover:border-black/10 dark:hover:border-white/15 transition-all duration-300 group"
+                  className="p-6 rounded-2xl card-lift"
+                  style={{ background: 'var(--surface-elevated)', border: '1px solid var(--surface-border)' }}
                 >
-                  <span className="text-3xl mb-4 block group-hover:scale-110 transition-transform duration-300">{value.emoji}</span>
+                  <div
+                    className="w-12 h-12 flex items-center justify-center rounded-full mb-4 group-hover:scale-110 transition-transform duration-300"
+                    style={{ background: 'var(--brand-primary-subtle)' }}
+                  >
+                    <span className="text-2xl">{value.emoji}</span>
+                  </div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">{title}</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{desc}</p>
                 </div>
@@ -502,7 +602,7 @@ export function HighlightsSection({ highlights }: Props) {
       <div className="max-w-4xl mx-auto">
         <AnimatedReveal>
           <h2
-            className="text-3xl font-bold mb-12 text-center bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
+            className="text-3xl font-bold mb-12 text-center text-gray-900 dark:text-gray-100"
           >
             {t('highlights.title')}
           </h2>
@@ -515,9 +615,13 @@ export function HighlightsSection({ highlights }: Props) {
             return (
               <AnimatedReveal key={i} delay={i * 100}>
                 <div
-                  className="text-center p-8 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl hover:border-[#ee5b2b]/20 transition-all duration-300"
+                  className="text-center p-8 rounded-2xl card-lift"
+                  style={{ background: 'var(--surface-elevated)', border: '1px solid var(--surface-border)' }}
                 >
-                  <p className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent mb-2">
+                  <p
+                    className="text-4xl sm:text-5xl font-bold mb-2"
+                    style={{ color: 'var(--brand-primary)' }}
+                  >
                     {value}
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
@@ -552,24 +656,22 @@ export function GallerySection({ images }: Props) {
       <div className="max-w-5xl mx-auto">
         <AnimatedReveal>
           <h2
-            className="text-3xl font-bold mb-12 text-center bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] bg-clip-text text-transparent"
+            className="text-3xl font-bold mb-12 text-center text-gray-900 dark:text-gray-100"
           >
             {t('gallery.title')}
           </h2>
         </AnimatedReveal>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="bento-grid">
           {images.map((src, i) => (
             <AnimatedReveal key={i} delay={i * 50}>
-              <div
-                className="aspect-square rounded-xl overflow-hidden group border border-black/5 dark:border-white/5 hover:border-[#ee5b2b]/20 transition-colors duration-300"
-              >
+              <div className="aspect-square group">
                 <img
                   src={src}
                   alt=""
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
                   loading="lazy"
                 />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
               </div>
             </AnimatedReveal>
           ))}
@@ -618,7 +720,7 @@ export function ContactSection({ config }: Props) {
           <AnimatedReveal delay={200}>
             <a
               href={\`mailto:\${config.email}\`}
-              className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] text-white font-medium hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] text-white font-medium hover:opacity-90 transition-opacity btn-press"
             >
               <Mail className="w-4 h-4" />
               {t('contact.email')}
@@ -635,7 +737,7 @@ export function ContactSection({ config }: Props) {
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-full border border-black/10 dark:border-white/10 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-black/30 dark:hover:border-white/30 transition-colors capitalize"
+                  className="px-4 py-2 rounded-full border border-black/10 dark:border-white/10 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-black/30 dark:hover:border-white/30 hover:ring-2 hover:ring-[var(--brand-primary)]/30 transition-all capitalize"
                 >
                   {social.platform}
                 </a>

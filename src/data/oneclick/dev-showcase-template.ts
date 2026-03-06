@@ -79,6 +79,29 @@ const globalsCss = `@import "tailwindcss";
   --color-primary: #58a6ff;
 }
 
+/* ── Design Tokens ── */
+:root {
+  /* Spacing */
+  --section-gap: clamp(4rem, 8vw, 7rem);
+  --section-padding-x: clamp(1rem, 4vw, 3rem);
+
+  /* Surface */
+  --surface-elevated: #1a1a2e;
+  --surface-sunken: #0f0f1a;
+  --surface-border: rgba(255, 255, 255, 0.06);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
+  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2);
+
+  /* Fluid Typography */
+  --text-hero: clamp(2.5rem, 6vw, 5rem);
+  --text-section: clamp(1.75rem, 3vw, 2.5rem);
+
+  /* Unified Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+
 /* ── Preset: GitHub Dark (default) ── */
 :root, [data-preset="github-dark"] {
   --gh-bg: #0d1117;
@@ -190,7 +213,49 @@ html {
   .reveal-fade { opacity: 1; transform: none; transition: none; }
 }
 
-/* Card hover */
+/* Reveal variants */
+.reveal-slide-left { opacity: 0; transform: translateX(-32px); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-slide-left.revealed { opacity: 1; transform: translateX(0); }
+.reveal-slide-right { opacity: 0; transform: translateX(32px); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-slide-right.revealed { opacity: 1; transform: translateX(0); }
+.reveal-scale { opacity: 0; transform: scale(0.95); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-scale.revealed { opacity: 1; transform: scale(1); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal-slide-left, .reveal-slide-right, .reveal-scale { opacity: 1; transform: none; transition: none; }
+}
+
+/* Card lift */
+.card-lift { transition: transform 0.25s ease, box-shadow 0.25s ease; box-shadow: var(--shadow-card); }
+.card-lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-card-hover); }
+
+/* Button press */
+.btn-press { transition: transform 0.15s ease; }
+.btn-press:active { transform: scale(0.97); }
+
+/* Section gap */
+.section-gap { padding-top: var(--section-gap, 4rem); padding-bottom: var(--section-gap, 4rem); }
+
+/* Timeline */
+.timeline { position: relative; padding-left: 2rem; }
+.timeline::before { content: ''; position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; background: var(--surface-border, rgba(255,255,255,0.1)); }
+.timeline-item { position: relative; padding-bottom: 2rem; }
+.timeline-item::before { content: ''; position: absolute; left: -2rem; top: 6px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--color-primary, #60a5fa); background: var(--surface-sunken, #0f0f1a); z-index: 1; }
+@media (min-width: 768px) {
+  .timeline-md { padding-left: 0; }
+  .timeline-md::before { left: 50%; transform: translateX(-50%); }
+  .timeline-md .timeline-item { width: 45%; }
+  .timeline-md .timeline-item:nth-child(odd) { margin-left: auto; padding-left: 2rem; }
+  .timeline-md .timeline-item:nth-child(odd)::before { left: -8px; }
+  .timeline-md .timeline-item:nth-child(even) { padding-right: 2rem; text-align: right; }
+  .timeline-md .timeline-item:nth-child(even)::before { right: -8px; left: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-lift:hover { transform: none; }
+  .btn-press:active { transform: none; }
+}
+
+/* Card hover (legacy) */
 .card-hover {
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
@@ -362,7 +427,7 @@ export function AboutSection({ config }: Props) {
     <section id="about" className="py-20 sm:py-24 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
         <AnimatedReveal>
-          <h2 className="text-3xl font-bold mb-12 text-center">
+          <h2 className="text-3xl font-bold mb-12 text-center text-white">
             {t('about.title')}
           </h2>
         </AnimatedReveal>
@@ -423,7 +488,7 @@ export function BlogSection({ posts }: Props) {
     <section className="py-20 sm:py-24 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
         <AnimatedReveal>
-          <h2 className="text-3xl font-bold mb-12 text-center">
+          <h2 className="text-3xl font-bold mb-12 text-center text-white">
             {t('blog.title')}
           </h2>
         </AnimatedReveal>
@@ -478,50 +543,59 @@ export function ContactSection({ config }: Props) {
     <section id="contact" className="py-20 sm:py-24 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto text-center">
         <AnimatedReveal>
-          <h2 className="text-3xl font-bold mb-4">
+          <h2 className="text-3xl font-bold mb-4 text-white">
             {t('contact.title')}
           </h2>
         </AnimatedReveal>
 
         <AnimatedReveal delay={100}>
-          <p className="text-gray-400 dark:text-gray-400 mb-8 max-w-md mx-auto">
+          <p className="mb-8 max-w-md mx-auto" style={{ color: 'var(--gh-muted)' }}>
             {t('contact.desc')}
           </p>
         </AnimatedReveal>
 
         <AnimatedReveal delay={200}>
-          <div className="flex items-center justify-center gap-4">
-            {config.email && (
-              <a
-                href={\`mailto:\${config.email}\`}
-                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium hover:opacity-90 transition-opacity"
-              >
-                <Mail className="w-4 h-4" />
-                {t('contact.email')}
-              </a>
-            )}
-            {config.githubUsername && (
-              <a
-                href={\`https://github.com/\${config.githubUsername}\`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub"
-                className="p-3 rounded-xl border border-gray-800 text-gray-400 hover:text-white hover:border-gray-600 transition-colors"
-              >
-                <Github className="w-5 h-5" />
-              </a>
-            )}
-            {config.linkedinUrl && (
-              <a
-                href={config.linkedinUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-                className="p-3 rounded-xl border border-gray-800 text-gray-400 hover:text-white hover:border-gray-600 transition-colors"
-              >
-                <Linkedin className="w-5 h-5" />
-              </a>
-            )}
+          <div className="inline-block card-lift p-6 sm:p-8" style={{ background: 'var(--surface-elevated)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-lg)' }}>
+            <div className="flex items-center justify-center gap-4 flex-wrap">
+              {config.email && (
+                <a
+                  href={\`mailto:\${config.email}\`}
+                  className="btn-press flex items-center gap-2 px-6 py-3 font-medium text-white hover:opacity-90 transition-opacity"
+                  style={{ background: 'linear-gradient(135deg, var(--gh-blue), var(--gh-purple))', borderRadius: 'var(--radius-md)' }}
+                >
+                  <Mail className="w-4 h-4" />
+                  {t('contact.email')}
+                </a>
+              )}
+              {config.githubUsername && (
+                <a
+                  href={\`https://github.com/\${config.githubUsername}\`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="GitHub"
+                  className="btn-press p-3 transition-colors"
+                  style={{ border: '1px solid var(--gh-border)', borderRadius: 'var(--radius-md)', color: 'var(--gh-muted)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--gh-text)'; e.currentTarget.style.borderColor = 'var(--gh-blue)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--gh-muted)'; e.currentTarget.style.borderColor = 'var(--gh-border)'; }}
+                >
+                  <Github className="w-5 h-5" />
+                </a>
+              )}
+              {config.linkedinUrl && (
+                <a
+                  href={config.linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn"
+                  className="btn-press p-3 transition-colors"
+                  style={{ border: '1px solid var(--gh-border)', borderRadius: 'var(--radius-md)', color: 'var(--gh-muted)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--gh-text)'; e.currentTarget.style.borderColor = 'var(--gh-blue)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--gh-muted)'; e.currentTarget.style.borderColor = 'var(--gh-border)'; }}
+                >
+                  <Linkedin className="w-5 h-5" />
+                </a>
+              )}
+            </div>
           </div>
         </AnimatedReveal>
       </div>
@@ -550,49 +624,44 @@ export function ExperienceTimeline({ experience }: Props) {
     <section id="experience" className="py-20 sm:py-24 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
         <AnimatedReveal>
-          <h2 className="text-3xl font-bold mb-12 text-center">
+          <h2 className="text-3xl font-bold mb-12 text-center text-white">
             {t('experience.title')}
           </h2>
         </AnimatedReveal>
 
-        <div className="relative ml-4 sm:ml-8">
-          {/* Timeline line */}
-          <div className="absolute left-0 top-0 bottom-0 w-0.5" style={{ background: 'var(--gh-blue)', opacity: 0.3 }} />
+        <div className="timeline timeline-md">
+          {experience.map((item, i) => {
+            const title = locale === 'en' && item.titleEn ? item.titleEn : item.title;
+            const company = locale === 'en' && item.companyEn ? item.companyEn : item.company;
+            const period = locale === 'en' && item.periodEn ? item.periodEn : item.period;
+            const description = locale === 'en' && item.descriptionEn ? item.descriptionEn : item.description;
+            const revealVariant = i % 2 === 0 ? 'slide-left' : 'slide-right';
 
-          <div className="space-y-8">
-            {experience.map((item, i) => {
-              const title = locale === 'en' && item.titleEn ? item.titleEn : item.title;
-              const company = locale === 'en' && item.companyEn ? item.companyEn : item.company;
-              const period = locale === 'en' && item.periodEn ? item.periodEn : item.period;
-              const description = locale === 'en' && item.descriptionEn ? item.descriptionEn : item.description;
-
-              return (
-                <AnimatedReveal key={i} delay={i * 100}>
-                  <div className="relative pl-8">
-                    {/* Node dot */}
-                    <div className="absolute left-0 top-1.5 w-3 h-3 rounded-full -translate-x-[5px] ring-4" style={{ background: 'var(--gh-blue)', '--tw-ring-color': 'var(--gh-bg)' } as Record<string, string>} />
-
-                    <div className="p-4 rounded-xl" style={{ border: '1px solid var(--gh-border)', background: 'var(--gh-surface)' }}>
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-2">
-                        <h3 className="font-semibold text-gray-100">
-                          {title}
-                        </h3>
-                        <span className="font-mono text-xs text-gray-500">
-                          {period}
-                        </span>
-                      </div>
-                      <p className="text-sm text-blue-400/80 mb-2">
-                        {company}
-                      </p>
-                      <p className="text-sm text-gray-400 dark:text-gray-400">
+            return (
+              <AnimatedReveal key={i} delay={i * 100} variant={revealVariant as 'slide-left' | 'slide-right'}>
+                <div className="timeline-item">
+                  <div className="card-lift p-4" style={{ border: '1px solid var(--surface-border)', background: 'var(--surface-elevated)', borderRadius: 'var(--radius-md)' }}>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-2">
+                      <h3 className="font-semibold text-gray-100">
+                        {title}
+                      </h3>
+                      <span className="font-mono text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(88,166,255,0.1)', color: 'var(--gh-blue)' }}>
+                        {period}
+                      </span>
+                    </div>
+                    <p className="text-sm mb-2" style={{ color: 'var(--gh-blue)' }}>
+                      {company}
+                    </p>
+                    {description && (
+                      <p className="text-sm" style={{ color: 'var(--gh-muted)' }}>
                         {description}
                       </p>
-                    </div>
+                    )}
                   </div>
-                </AnimatedReveal>
-              );
-            })}
-          </div>
+                </div>
+              </AnimatedReveal>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -765,6 +834,11 @@ export function HeroSection({ config }: Props) {
           <div className="terminal-dot" style={{ background: '#febc2e' }} />
           <div className="terminal-dot" style={{ background: '#28c840' }} />
           <span className="font-mono text-xs ml-2" style={{ color: 'var(--gh-muted)' }}>~/{name.toLowerCase().replace(/\\s+/g, '-')}</span>
+        </div>
+        <div className="flex items-center gap-0 border-b text-xs" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+          <span className="px-4 py-2 border-r text-green-400" style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.05)' }}>index.ts</span>
+          <span className="px-4 py-2" style={{ color: 'var(--gh-muted)' }}>package.json</span>
+          <span className="px-4 py-2" style={{ color: 'var(--gh-muted)' }}>README.md</span>
         </div>
         <div className="p-6 sm:p-8 text-center">
           <p className="font-mono text-sm mb-4" style={{ color: 'var(--gh-green)' }}>
@@ -951,7 +1025,7 @@ export function ProjectsSection({ projects }: Props) {
     <section id="projects" className="py-20 sm:py-24 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
         <AnimatedReveal>
-          <h2 className="text-3xl font-bold mb-12 text-center">
+          <h2 className="text-3xl font-bold mb-12 text-center text-white">
             {t('projects.title')}
           </h2>
         </AnimatedReveal>
@@ -960,13 +1034,13 @@ export function ProjectsSection({ projects }: Props) {
           {projects.map((project, i) => {
             const desc = locale === 'en' && project.descriptionEn ? project.descriptionEn : project.description;
             return (
-              <AnimatedReveal key={i} delay={i * 50}>
+              <AnimatedReveal key={i} delay={i * 50} variant="scale">
                 <a
                   href={project.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="relative block p-4 rounded-xl border transition-all duration-200 group hover:scale-[1.02]"
-                  style={{ borderColor: 'var(--gh-border)', background: 'var(--gh-surface)' }}
+                  className="relative block p-4 group card-lift"
+                  style={{ background: 'var(--surface-elevated)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-lg)' }}
                 >
                   <div className="lang-line" style={{ background: languageColors[project.language] || '#6b7280' }} />
                   <div className="flex items-start justify-between mb-2">
@@ -990,11 +1064,11 @@ export function ProjectsSection({ projects }: Props) {
                       <span className="font-mono">{project.language}</span>
                     </span>
                     <span className="flex items-center gap-1">
-                      <Star className="w-3 h-3" style={{ color: 'var(--gh-orange)' }} />
+                      <Star className="w-3.5 h-3.5" style={{ color: 'var(--gh-orange)' }} />
                       {project.stars}
                     </span>
                     <span className="flex items-center gap-1">
-                      <GitFork className="w-3 h-3" />
+                      <GitFork className="w-3.5 h-3.5" />
                       {project.forks}
                     </span>
                   </div>

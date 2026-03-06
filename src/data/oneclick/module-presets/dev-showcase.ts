@@ -34,4 +34,32 @@ export const devShowcasePresets: ModulePreset[] = [
       order: ['hero', 'about', 'projects', 'experience', 'blog', 'contact'],
     },
   },
+  {
+    id: 'warm-earth',
+    name: '웜 어스',
+    nameEn: 'Warm Earth',
+    description: '따뜻한 어스톤 배경 — 차분한 개발자 포트폴리오',
+    descriptionEn: 'Warm earth tones — calm developer portfolio',
+    state: {
+      enabled: ['hero', 'about', 'projects', 'experience', 'contact'],
+      order: ['hero', 'about', 'projects', 'experience', 'contact'],
+      values: {
+        hero: { designPreset: 'warm-earth' },
+      },
+    },
+  },
+  {
+    id: 'midnight',
+    name: '미드나잇',
+    nameEn: 'Midnight',
+    description: '진한 다크 + 인디고 악센트 — 몰입감 있는 터미널 무드',
+    descriptionEn: 'Deep dark + indigo accent — immersive terminal mood',
+    state: {
+      enabled: ['hero', 'about', 'projects', 'experience', 'blog', 'contact'],
+      order: ['hero', 'about', 'projects', 'experience', 'blog', 'contact'],
+      values: {
+        hero: { designPreset: 'midnight' },
+      },
+    },
+  },
 ];

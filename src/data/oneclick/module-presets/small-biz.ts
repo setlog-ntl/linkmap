@@ -45,4 +45,32 @@ export const smallBizPresets: ModulePreset[] = [
       order: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
     },
   },
+  {
+    id: 'warm-earth',
+    name: '웜 어스',
+    nameEn: 'Warm Earth',
+    description: '따뜻한 어스톤 — 카페/베이커리에 잘 어울리는 감성',
+    descriptionEn: 'Warm earth tones — perfect for cafes and bakeries',
+    state: {
+      enabled: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
+      order: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
+      values: {
+        hero: { designPreset: 'warm-earth' },
+      },
+    },
+  },
+  {
+    id: 'midnight',
+    name: '미드나잇',
+    nameEn: 'Midnight',
+    description: '진한 다크 + 인디고 악센트 — 세련된 바/레스토랑 무드',
+    descriptionEn: 'Deep dark + indigo accent — sophisticated bar/restaurant mood',
+    state: {
+      enabled: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
+      order: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
+      values: {
+        hero: { designPreset: 'midnight' },
+      },
+    },
+  },
 ];
