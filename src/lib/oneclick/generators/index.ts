@@ -23,7 +23,7 @@ export {
 
 import { personalBrandGenerator } from './personal-brand';
 import { devShowcaseGenerator } from './dev-showcase';
-import { linkInBioProGenerator } from './link-in-bio-pro';
+import { linkCardGenerator } from './link-card';
 import { digitalNamecardGenerator } from './digital-namecard';
 import { freelancerPageGenerator } from './freelancer-page';
 import { smallBizGenerator } from './small-biz';
@@ -33,7 +33,7 @@ import type { TemplateGenerator } from './base-generator';
 const generators: TemplateGenerator[] = [
   personalBrandGenerator,
   devShowcaseGenerator,
-  linkInBioProGenerator,
+  linkCardGenerator,
   digitalNamecardGenerator,
   freelancerPageGenerator,
   smallBizGenerator,
@@ -53,7 +53,7 @@ export function getGenerator(slug?: string): TemplateGenerator {
 // 개별 generator re-export
 export { personalBrandGenerator } from './personal-brand';
 export { devShowcaseGenerator } from './dev-showcase';
-export { linkInBioProGenerator } from './link-in-bio-pro';
+export { linkCardGenerator } from './link-card';
 export { digitalNamecardGenerator } from './digital-namecard';
 export { freelancerPageGenerator } from './freelancer-page';
 export { smallBizGenerator } from './small-biz';

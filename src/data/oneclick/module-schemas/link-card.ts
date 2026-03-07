@@ -1,7 +1,7 @@
 import type { TemplateModuleSchema } from '@/lib/module-schema';
 
-export const linkInBioProModuleSchema: TemplateModuleSchema = {
-  templateSlug: 'link-in-bio-pro',
+export const linkCardModuleSchema: TemplateModuleSchema = {
+  templateSlug: 'link-card',
   modules: [
     {
       id: 'profile',

@@ -18,8 +18,8 @@ export function generateDevShowcaseConfigTs(state: ModuleConfigState): string {
   return getGenerator('dev-showcase').generateConfigTs(state);
 }
 
-export function generateLinkInBioProConfigTs(state: ModuleConfigState): string {
-  return getGenerator('link-in-bio-pro').generateConfigTs(state);
+export function generateLinkCardConfigTs(state: ModuleConfigState): string {
+  return getGenerator('link-card').generateConfigTs(state);
 }
 
 export function generateDigitalNamecardConfigTs(state: ModuleConfigState): string {
@@ -151,7 +151,7 @@ export function generateFiles(
   const isDevShowcase = templateSlug === 'dev-showcase';
   const isDigitalNamecard = templateSlug === 'digital-namecard';
   const isFreelancer = templateSlug === 'freelancer-page';
-  const isLinkInBio = templateSlug === 'link-in-bio-pro';
+  const isLinkCard = templateSlug === 'link-card';
   const isSmallBiz = templateSlug === 'small-biz';
 
   const files: GeneratedFile[] = [
@@ -160,7 +160,7 @@ export function generateFiles(
   ];
 
   // Phase 2: 컴포넌트 파일 변경 (personal-brand + freelancer-page)
-  if (currentFiles && !isDevShowcase && !isDigitalNamecard && !isLinkInBio && !isSmallBiz) {
+  if (currentFiles && !isDevShowcase && !isDigitalNamecard && !isLinkCard && !isSmallBiz) {
     const hero = state.values.hero || {};
 
     const defaultFrom = isFreelancer ? '#5b13ec' : '#ee5b2b';
@@ -291,7 +291,7 @@ export function parsePageToEnabledModules(
   }
 
   // theme 모듈은 컴포넌트가 없으므로 항상 enabled
-  if ((templateSlug === 'digital-namecard' || templateSlug === 'link-in-bio-pro') && !enabled.includes('theme')) {
+  if ((templateSlug === 'digital-namecard' || templateSlug === 'link-card') && !enabled.includes('theme')) {
     enabled.push('theme');
   }
 

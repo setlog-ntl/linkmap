@@ -25,7 +25,7 @@ export function WireframeSVG({ slug }: { slug: string }) {
 
   switch (slug) {
     // 원형 아바타 + 수평 링크 바 + 소셜 아이콘
-    case 'link-in-bio-pro':
+    case 'link-card':
       return (
         <svg viewBox="0 0 200 120" className={common} fill="currentColor" opacity={0.18}>
           <circle cx="100" cy="24" r="14" />

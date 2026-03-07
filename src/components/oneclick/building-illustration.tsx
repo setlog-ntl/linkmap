@@ -73,7 +73,7 @@ function Sparkle({ cx, cy }: { cx: number; cy: number }) {
 
 // ── 템플릿별 일러스트레이션 ──
 
-function LinkInBioPro() {
+function LinkCard() {
   return (
     <motion.svg
       viewBox="0 0 200 120"
@@ -367,7 +367,7 @@ function DefaultBuilding() {
 // ── slug → 컴포넌트 매핑 ──
 
 const ILLUSTRATION_MAP: Record<string, React.FC> = {
-  'link-in-bio-pro': LinkInBioPro,
+  'link-card': LinkCard,
   'digital-namecard': DigitalNamecard,
   'dev-showcase': DevShowcase,
   'small-biz': SmallBiz,

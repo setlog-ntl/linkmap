@@ -284,7 +284,7 @@ html {
   pointer-events: none;
 }
 
-/* Hero load animation (framer initial/animate replacement) */
+/* Hero load animation (CSS-only fade-up) */
 @keyframes fade-up { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
 .animate-fade-up { animation: fade-up 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
 .animate-fade-up-d1 { animation-delay:150ms; opacity:0; }

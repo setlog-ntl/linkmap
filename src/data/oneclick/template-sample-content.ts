@@ -920,7 +920,7 @@ export const smallBizSample: { ko: SmallBizContent; en: SmallBizContent } = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 6. 내 링크 모음 (link-in-bio-pro)
+// 6. 내 링크 카드 (link-card)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface LinkHubLink {
@@ -1080,7 +1080,7 @@ export const templateSampleContent = {
   'dev-showcase': devShowcaseSample,
   'freelancer-page': freelancerSample,
   'small-biz': smallBizSample,
-  'link-in-bio-pro': linkHubSample,
+  'link-card': linkHubSample,
 } as const;
 
 export type TemplateSampleSlug = keyof typeof templateSampleContent;

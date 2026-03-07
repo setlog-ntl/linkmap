@@ -35,16 +35,16 @@ export interface HomepageTemplateSeed {
 export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
   {
     id: 'b2c3d4e5-0003-4000-9000-000000000003',
-    slug: 'link-in-bio-pro',
+    slug: 'link-card',
     name: 'Link Card',
     name_ko: '링크 카드',
     description:
-      'Your personal card page — collect all your links in one place. Animated backgrounds, custom themes, and visitor analytics with full code ownership.',
+      'Your personal link card — share your profile and all links on a single page you fully own. Animated backgrounds, custom themes, bilingual support, and analytics built in.',
     description_ko:
-      '나만의 링크 카드. 프로필과 링크를 한 곳에 모아 한 번에 공유하세요. 애니메이션 배경, 커스텀 테마, 방문자 통계 포함.',
+      '나만의 링크 카드 페이지. 프로필과 링크를 한 페이지에 모아 공유하세요. 애니메이션 배경, 커스텀 테마, 한/영 전환, 방문자 통계까지 코드 소유.',
     preview_image_url: null,
     github_owner: 'linkmap-templates',
-    github_repo: 'link-in-bio-pro',
+    github_repo: 'link-card',
     default_branch: 'main',
     framework: 'nextjs',
     required_env_vars: [
@@ -57,7 +57,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
       { key: 'NEXT_PUBLIC_YOUTUBE_URL', description: '유튜브 임베드 URL', required: false },
       { key: 'NEXT_PUBLIC_GA_ID', description: 'Google Analytics 4 ID', required: false },
     ],
-    tags: ['link-in-bio', 'social', 'creator', 'animated', 'themes', 'nextjs'],
+    tags: ['link-card', 'social', 'creator', 'animated', 'themes', 'nextjs'],
     is_premium: false,
     is_active: true,
     display_order: 6,
@@ -383,9 +383,9 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     name: 'Newsletter Landing',
     name_ko: '뉴스레터 랜딩',
     description:
-      'Newsletter landing page with archive, subscribe CTA, author intro, and testimonials. Substack/Beehiiv alternative with full code ownership.',
+      'Newsletter landing page with archive, subscribe CTA, author intro, and testimonials. Own your audience with full code ownership.',
     description_ko:
-      '뉴스레터 랜딩 페이지. 아카이브, 구독 CTA, 작가 소개, 추천사. 코드 완전 소유 Substack 대안.',
+      '뉴스레터 랜딩 페이지. 아카이브, 구독 CTA, 작가 소개, 추천사. 코드 완전 소유로 독립적인 뉴스레터 운영.',
     preview_image_url: null,
     github_owner: 'linkmap-templates',
     github_repo: 'newsletter-landing',

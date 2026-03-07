@@ -3,7 +3,7 @@ import { personalBrandPresets } from './personal-brand';
 import { devShowcasePresets } from './dev-showcase';
 import { freelancerPagePresets } from './freelancer-page';
 import { digitalNamecardPresets } from './digital-namecard';
-import { linkInBioProPresets } from './link-in-bio-pro';
+import { linkCardPresets } from './link-card';
 import { smallBizPresets } from './small-biz';
 
 const PRESET_MAP: Record<string, ModulePreset[]> = {
@@ -11,7 +11,7 @@ const PRESET_MAP: Record<string, ModulePreset[]> = {
   'dev-showcase': devShowcasePresets,
   'freelancer-page': freelancerPagePresets,
   'digital-namecard': digitalNamecardPresets,
-  'link-in-bio-pro': linkInBioProPresets,
+  'link-card': linkCardPresets,
   'small-biz': smallBizPresets,
 };
 

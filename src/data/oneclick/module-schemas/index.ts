@@ -1,7 +1,7 @@
 import type { TemplateModuleSchema } from '@/lib/module-schema';
 import { personalBrandModuleSchema } from './personal-brand';
 import { devShowcaseModuleSchema } from './dev-showcase';
-import { linkInBioProModuleSchema } from './link-in-bio-pro';
+import { linkCardModuleSchema } from './link-card';
 import { digitalNamecardModuleSchema } from './digital-namecard';
 import { freelancerPageModuleSchema } from './freelancer-page';
 import { smallBizModuleSchema } from './small-biz';
@@ -9,7 +9,7 @@ import { smallBizModuleSchema } from './small-biz';
 const schemaMap: Record<string, TemplateModuleSchema> = {
   'personal-brand': personalBrandModuleSchema,
   'dev-showcase': devShowcaseModuleSchema,
-  'link-in-bio-pro': linkInBioProModuleSchema,
+  'link-card': linkCardModuleSchema,
   'digital-namecard': digitalNamecardModuleSchema,
   'freelancer-page': freelancerPageModuleSchema,
   'small-biz': smallBizModuleSchema,

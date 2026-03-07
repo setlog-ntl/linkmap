@@ -31,11 +31,11 @@ export interface HomepageTemplateContent {
 }
 
 // ──────────────────────────────────────────────
-// 6. My Link Page (MVP)
+// 6. Link Card (MVP)
 // ──────────────────────────────────────────────
-const linkInBioPackageJson = makePackageJson('link-in-bio-pro');
+const linkCardPackageJson = makePackageJson('link-card');
 
-const linkInBioOgRoute = `import { ImageResponse } from 'next/og';
+const linkCardOgRoute = `import { ImageResponse } from 'next/og';
 import { siteConfig } from '@/lib/config';
 import { getTheme } from '@/lib/themes';
 
@@ -95,7 +95,7 @@ export async function GET() {
   );
 }`;
 
-const linkInBioGlobalsCss = `@import "tailwindcss";
+const linkCardGlobalsCss = `@import "tailwindcss";
 
 @theme {
   --font-sans: 'Pretendard Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
@@ -172,7 +172,7 @@ const linkInBioGlobalsCss = `@import "tailwindcss";
   .btn-press:active { transform: none; }
 }`;
 
-const linkInBioLayout = `import type { Metadata } from 'next';
+const linkCardLayout = `import type { Metadata } from 'next';
 import { siteConfig } from '@/lib/config';
 import './globals.css';
 
@@ -234,7 +234,7 @@ export default function RootLayout({
   );
 }`;
 
-const linkInBioPage = `import { siteConfig } from '@/lib/config';
+const linkCardPage = `import { siteConfig } from '@/lib/config';
 import { getTheme, getBackground } from '@/lib/themes';
 import { ProfileSection } from '@/components/profile-section';
 import { LinkList } from '@/components/link-list';
@@ -266,7 +266,7 @@ export default function Home() {
   );
 }`;
 
-const linkInBioContentEmbed = `'use client';
+const linkCardContentEmbed = `'use client';
 
 interface Props {
   youtubeUrl: string;
@@ -298,7 +298,7 @@ export function ContentEmbed({ youtubeUrl }: Props) {
   );
 }`;
 
-const linkInBioFooter = `import { ThemeToggle } from './theme-toggle';
+const linkCardFooter = `import { ThemeToggle } from './theme-toggle';
 import { LanguageToggle } from './language-toggle';
 import type { ThemePreset } from '@/lib/themes';
 
@@ -313,7 +313,7 @@ export function Footer({ theme }: Props) {
       style={{ color: theme.textMuted }}
     >
       <a
-        href="https://www.linkmap.biz/sites?utm_source=badge&utm_medium=referral&utm_campaign=link-in-bio-pro"
+        href="https://www.linkmap.biz/sites?utm_source=badge&utm_medium=referral&utm_campaign=link-card"
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-[11px] font-medium hover:opacity-80"
@@ -329,7 +329,7 @@ export function Footer({ theme }: Props) {
   );
 }`;
 
-const linkInBioLanguageToggle = `'use client';
+const linkCardLanguageToggle = `'use client';
 
 import { useLocale } from '@/lib/i18n';
 import { Globe } from 'lucide-react';
@@ -355,7 +355,7 @@ export function LanguageToggle({ theme }: Props) {
   );
 }`;
 
-const linkInBioLinkList = `'use client';
+const linkCardLinkList = `'use client';
 
 import {
   Youtube,
@@ -417,7 +417,7 @@ export function LinkList({ links, theme }: Props) {
   );
 }`;
 
-const linkInBioProfileSection = `'use client';
+const linkCardProfileSection = `'use client';
 
 import type { SiteConfig } from '@/lib/config';
 import type { ThemePreset } from '@/lib/themes';
@@ -477,7 +477,7 @@ export function ProfileSection({ config, theme }: Props) {
   );
 }`;
 
-const linkInBioSocialBar = `'use client';
+const linkCardSocialBar = `'use client';
 
 import {
   Instagram,
@@ -529,7 +529,7 @@ export function SocialBar({ socials, theme }: Props) {
   );
 }`;
 
-const linkInBioThemeToggle = `'use client';
+const linkCardThemeToggle = `'use client';
 
 import { useState, useEffect } from 'react';
 import { Sun, Moon } from 'lucide-react';
@@ -563,7 +563,7 @@ export function ThemeToggle() {
   );
 }`;
 
-const linkInBioConfig = `export interface LinkItem {
+const linkCardConfig = `export interface LinkItem {
   title: string;
   titleEn?: string;
   url: string;
@@ -609,7 +609,7 @@ export const siteConfig = {
 
 export type SiteConfig = typeof siteConfig;`;
 
-const linkInBioI18n = `'use client';
+const linkCardI18n = `'use client';
 
 import { useSyncExternalStore } from 'react';
 
@@ -655,7 +655,7 @@ export function useLocale() {
   return { locale, setLocale, t };
 }`;
 
-const linkInBioThemes = `export interface ThemePreset {
+const linkCardThemes = `export interface ThemePreset {
   name: string;
   label: string;
   backgroundFrom: string;
@@ -1368,31 +1368,31 @@ export function getDeployWorkflow(): string {
 // ──────────────────────────────────────────────
 export const homepageTemplates: HomepageTemplateContent[] = [
   {
-    slug: 'link-in-bio-pro',
-    repoName: 'link-in-bio-pro',
-    description: '내링크모음 - Linkmap으로 생성',
+    slug: 'link-card',
+    repoName: 'link-card',
+    description: '내 링크 카드 - Linkmap으로 생성',
     files: [
       { path: '.gitignore', content: sharedGitignore },
       { path: '.github/workflows/deploy.yml', content: deployWorkflow },
-      { path: 'package.json', content: linkInBioPackageJson },
+      { path: 'package.json', content: linkCardPackageJson },
       { path: 'tsconfig.json', content: sharedTsConfig },
       { path: 'postcss.config.mjs', content: sharedPostcssConfig },
       { path: 'next.config.ts', content: sharedNextConfig },
-      { path: 'src/app/api/og/route.tsx', content: linkInBioOgRoute },
-      { path: 'src/app/globals.css', content: linkInBioGlobalsCss },
-      { path: 'src/app/layout.tsx', content: linkInBioLayout },
-      { path: 'src/app/page.tsx', content: linkInBioPage },
+      { path: 'src/app/api/og/route.tsx', content: linkCardOgRoute },
+      { path: 'src/app/globals.css', content: linkCardGlobalsCss },
+      { path: 'src/app/layout.tsx', content: linkCardLayout },
+      { path: 'src/app/page.tsx', content: linkCardPage },
       { path: 'src/components/animated-reveal.tsx', content: sharedAnimatedReveal },
-      { path: 'src/components/content-embed.tsx', content: linkInBioContentEmbed },
-      { path: 'src/components/footer.tsx', content: linkInBioFooter },
-      { path: 'src/components/language-toggle.tsx', content: linkInBioLanguageToggle },
-      { path: 'src/components/link-list.tsx', content: linkInBioLinkList },
-      { path: 'src/components/profile-section.tsx', content: linkInBioProfileSection },
-      { path: 'src/components/social-bar.tsx', content: linkInBioSocialBar },
-      { path: 'src/components/theme-toggle.tsx', content: linkInBioThemeToggle },
-      { path: 'src/lib/config.ts', content: linkInBioConfig },
-      { path: 'src/lib/i18n.tsx', content: linkInBioI18n },
-      { path: 'src/lib/themes.ts', content: linkInBioThemes },
+      { path: 'src/components/content-embed.tsx', content: linkCardContentEmbed },
+      { path: 'src/components/footer.tsx', content: linkCardFooter },
+      { path: 'src/components/language-toggle.tsx', content: linkCardLanguageToggle },
+      { path: 'src/components/link-list.tsx', content: linkCardLinkList },
+      { path: 'src/components/profile-section.tsx', content: linkCardProfileSection },
+      { path: 'src/components/social-bar.tsx', content: linkCardSocialBar },
+      { path: 'src/components/theme-toggle.tsx', content: linkCardThemeToggle },
+      { path: 'src/lib/config.ts', content: linkCardConfig },
+      { path: 'src/lib/i18n.tsx', content: linkCardI18n },
+      { path: 'src/lib/themes.ts', content: linkCardThemes },
     ],
   },
   {

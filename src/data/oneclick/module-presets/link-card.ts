@@ -1,6 +1,6 @@
 import type { ModulePreset } from './personal-brand';
 
-export const linkInBioProPresets: ModulePreset[] = [
+export const linkCardPresets: ModulePreset[] = [
   {
     id: 'minimal',
     name: '미니멀',

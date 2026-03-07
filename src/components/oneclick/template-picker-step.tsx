@@ -49,7 +49,7 @@ import type { GitHubConnection } from '@/types';
 
 // 템플릿 slug → 기본 사이트 이름 (GitHub repo 이름이 되므로 a-z0-9- 형식)
 const TEMPLATE_DEFAULT_NAMES: Record<string, string> = {
-  'link-in-bio-pro': 'linkcard',
+  'link-card': 'linkcard',
   'digital-namecard': 'namecard',
   'dev-showcase': 'devfolio',
   'small-biz': 'myshop',
@@ -68,7 +68,7 @@ const TEMPLATE_DEFAULT_NAMES: Record<string, string> = {
 
 // 템플릿 slug → 대표 아이콘 (lucide-react)
 const TEMPLATE_ICONS: Record<string, LucideIcon> = {
-  'link-in-bio-pro': Link2,
+  'link-card': Link2,
   'digital-namecard': CreditCard,
   'dev-showcase': Code2,
   'small-biz': Store,
@@ -215,11 +215,11 @@ export function TemplatePickerStep({
     }
   }, [selectedTemplate, siteName, siteNameTouched, templates, existingSiteNames, checkRepoAvailability]);
 
-  // Sort templates: link-in-bio-pro 상단 고정 → 나머지 원본 순서 유지
+  // Sort templates: link-card 상단 고정 → 나머지 원본 순서 유지
   const sortedTemplates = useMemo(() => {
     return [...templates].sort((a, b) => {
-      if (a.slug === 'link-in-bio-pro') return -1;
-      if (b.slug === 'link-in-bio-pro') return 1;
+      if (a.slug === 'link-card') return -1;
+      if (b.slug === 'link-card') return 1;
       return 0;
     });
   }, [templates]);

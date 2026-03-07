@@ -1,5 +1,5 @@
 // ──────────────────────────────────────────────
-// Link-in-Bio Pro Generator
+// Link Card Generator
 // ──────────────────────────────────────────────
 
 import type { ModuleConfigState, TemplateModuleSchema } from '@/lib/module-schema';
@@ -65,8 +65,8 @@ function generateConfigTs(state: ModuleConfigState): string {
   const socials = state.values.socials || {};
   const theme = state.values.theme || {};
 
-  const siteName = (profile.name as string) || '내 링크 페이지';
-  const siteNameEn = (profile.nameEn as string) || 'My Link Page';
+  const siteName = (profile.name as string) || '내 링크 카드';
+  const siteNameEn = (profile.nameEn as string) || 'My Link Card';
   const bio = (profile.bio as string) || '안녕하세요! 여기서 저의 모든 링크를 확인하세요.';
   const bioEn = (profile.bioEn as string) || 'Hello! Check out all my links here.';
   const avatarUrl = normalizeImagePath((profile.avatarUrl as string) || '');
@@ -252,8 +252,8 @@ function parseConfigToState(
 
 // ─── Export ──────────────────────────────────
 
-export const linkInBioProGenerator: TemplateGenerator = {
-  slug: 'link-in-bio-pro',
+export const linkCardGenerator: TemplateGenerator = {
+  slug: 'link-card',
   generateConfigTs,
   generatePageTsx,
   parseConfigToState,
