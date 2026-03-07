@@ -6,6 +6,7 @@ import { createRepo, pushFilesAtomically, deleteRepo, enableGitHubPagesWithActio
 import { getTemplateBySlug } from '@/data/oneclick/homepage-template-content';
 import { safeDecryptToken } from '@/lib/github/token';
 import { deployPagesRequestSchema } from '@/lib/validations/oneclick';
+import { logDeployError } from '@/lib/oneclick/deploy-error-logger';
 
 function humanizeSlug(slug: string): string {
   return slug
@@ -96,6 +97,10 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (!ghAccount) {
+    void logDeployError({
+      userId: user.id, templateId: template_id, errorMessage: 'GitHub 계정이 연결되어 있지 않습니다',
+      failedStep: '준비 중', httpStatus: 404,
+    });
     return apiError('GitHub 계정이 연결되어 있지 않습니다. 먼저 GitHub를 연결해주세요.', 404);
   }
 
@@ -105,6 +110,10 @@ export async function POST(request: NextRequest) {
     ghAccount.id
   );
   if ('error' in decryptResult) {
+    void logDeployError({
+      userId: user.id, templateId: template_id, errorMessage: decryptResult.error,
+      failedStep: '준비 중', httpStatus: 401,
+    });
     return apiError(decryptResult.error, 401);
   }
   const githubToken = decryptResult.token;
@@ -151,6 +160,10 @@ export async function POST(request: NextRequest) {
   const templateContent = getTemplateBySlug(template.slug);
   if (!templateContent) {
     await cleanupResources(supabase, project.id, copiedServiceAccountId);
+    void logDeployError({
+      userId: user.id, templateId: template_id, templateSlug: template.slug, siteName: site_name,
+      errorMessage: `템플릿 번들을 찾을 수 없습니다 (${template.slug})`, failedStep: '준비 중', httpStatus: 404,
+    });
     return apiError(`템플릿 번들을 찾을 수 없습니다 (${template.slug}). 관리자에게 문의하세요.`, 404);
   }
 
@@ -178,17 +191,33 @@ export async function POST(request: NextRequest) {
       }
       await cleanupResources(supabase, project.id, copiedServiceAccountId);
       if (err instanceof GitHubApiError) {
+        const errMsg = err.status === 403
+          ? 'GitHub 권한이 부족합니다'
+          : `GitHub 레포지토리 생성 실패: ${err.message}`;
+        void logDeployError({
+          userId: user.id, templateId: template_id, templateSlug: template.slug, siteName: site_name,
+          errorMessage: errMsg, failedStep: '준비 중', httpStatus: err.status,
+          errorContext: { attemptName: nameAttempt === 0 ? site_name : `${site_name}-${nameAttempt}` },
+        });
         if (err.status === 403) {
           return apiError('GitHub 권한이 부족합니다. GitHub 연결을 해제 후 다시 연결해주세요.', 403);
         }
         return apiError(`GitHub 레포지토리 생성 실패: ${err.message}`, 502);
       }
+      void logDeployError({
+        userId: user.id, templateId: template_id, templateSlug: template.slug, siteName: site_name,
+        errorMessage: 'GitHub 레포지토리 생성 중 알 수 없는 오류', failedStep: '준비 중', httpStatus: 500,
+      });
       return serverError('GitHub 레포지토리 생성 중 오류가 발생했습니다');
     }
   }
 
   if (!repoResult) {
     await cleanupResources(supabase, project.id, copiedServiceAccountId);
+    void logDeployError({
+      userId: user.id, templateId: template_id, templateSlug: template.slug, siteName: site_name,
+      errorMessage: `'${site_name}' 및 대체 이름이 모두 사용 중`, failedStep: '준비 중', httpStatus: 409,
+    });
     return apiError(`'${site_name}' 및 대체 이름이 모두 사용 중입니다. 다른 이름을 입력해주세요.`, 409);
   }
 
@@ -225,12 +254,23 @@ export async function POST(request: NextRequest) {
       await cleanupResources(supabase, project.id, copiedServiceAccountId, githubToken, repoResult.owner.login, repoResult.name);
 
       const errMsg = err instanceof GitHubApiError ? err.message : 'GitHub Pages 활성화 실패';
+      void logDeployError({
+        userId: user.id, templateId: template_id, templateSlug: template.slug, siteName: finalSiteName,
+        errorMessage: `GitHub Pages 활성화 실패: ${errMsg}`, failedStep: '설정 중',
+        httpStatus: err instanceof GitHubApiError ? err.status : 502,
+        errorContext: { repo: repoResult.full_name },
+      });
       return apiError(`GitHub Pages 활성화 실패: ${errMsg}`, 502);
     }
   }
 
   if (!pagesEnabled) {
     await cleanupResources(supabase, project.id, copiedServiceAccountId, githubToken, repoResult.owner.login, repoResult.name);
+    void logDeployError({
+      userId: user.id, templateId: template_id, templateSlug: template.slug, siteName: finalSiteName,
+      errorMessage: 'GitHub Pages 활성화 시간 초과', failedStep: '설정 중', httpStatus: 502,
+      errorContext: { repo: repoResult.full_name },
+    });
     return apiError('GitHub Pages 활성화 시간 초과. 다시 시도해주세요.', 502);
   }
 
@@ -263,6 +303,16 @@ export async function POST(request: NextRequest) {
   if (pushError) {
     // Clean up: delete the created repo, service account, and project
     await cleanupResources(supabase, project.id, copiedServiceAccountId, githubToken, repoResult.owner.login, repoResult.name);
+
+    const pushErrMsg = pushError instanceof GitHubApiError
+      ? `파일 업로드 실패: ${pushError.message}`
+      : '템플릿 파일 업로드 중 오류가 발생했습니다';
+    void logDeployError({
+      userId: user.id, templateId: template_id, templateSlug: template.slug, siteName: finalSiteName,
+      errorMessage: pushErrMsg, failedStep: '준비 중',
+      httpStatus: pushError instanceof GitHubApiError ? pushError.status : 502,
+      errorContext: { repo: repoResult.full_name },
+    });
 
     if (pushError instanceof GitHubApiError) {
       return apiError(`파일 업로드 실패: ${pushError.message}`, 502);

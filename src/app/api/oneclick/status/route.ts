@@ -4,6 +4,7 @@ import { unauthorizedError, apiError, notFoundError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 import { safeDecryptToken } from '@/lib/github/token';
 import { resolveDeployStatus, buildDeploySteps } from '@/lib/oneclick/deploy-status';
+import { logDeployError } from '@/lib/oneclick/deploy-error-logger';
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -60,6 +61,12 @@ export async function GET(request: NextRequest) {
             .eq('id', deployId);
           deploy.deploy_status = 'error';
           deploy.deploy_error_message = 'GitHub 토큰 복호화 실패. GitHub를 다시 연결해주세요.';
+          void logDeployError({
+            deployId: deploy.id, userId: user.id, templateId: deploy.template_id,
+            siteName: deploy.site_name,
+            errorMessage: 'GitHub 토큰 복호화 실패', failedStep: '설정 중',
+            errorContext: { repo: deploy.forked_repo_full_name },
+          });
         } else {
           const result = await resolveDeployStatus(
             decryptResult.token,
@@ -105,6 +112,15 @@ export async function GET(request: NextRequest) {
                 updateData.deploy_error_message = result.errorMessage;
               } else if (deploy.deploy_error_message) {
                 updateData.deploy_error_message = deploy.deploy_error_message;
+              }
+              const errorMsg = (result.errorMessage || deploy.deploy_error_message) as string;
+              if (errorMsg) {
+                void logDeployError({
+                  deployId: deploy.id, userId: user.id, templateId: deploy.template_id,
+                  siteName: deploy.site_name, errorMessage: errorMsg,
+                  failedStep: result.pagesStatus === 'errored' ? '설정 중' : '게시 완료',
+                  errorContext: { repo: deploy.forked_repo_full_name, retryCount: deploy.retry_count },
+                });
               }
               await logAudit(user.id, {
                 action: 'oneclick.deploy_error',

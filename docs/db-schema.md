@@ -1,7 +1,7 @@
 # Linkmap Database Schema Reference
 
-> **Last Updated**: 2026-03-06
-> **Migrations**: 001 ~ 071 (71 files)
+> **Last Updated**: 2026-03-07
+> **Migrations**: 001 ~ 072 (72 files)
 > **Engine**: Supabase (PostgreSQL 15+)
 
 이 문서는 바이브코딩 시 DB 구조를 빠르게 참조하기 위한 스키마 레퍼런스입니다.
@@ -646,6 +646,49 @@
 **CHECK status**: healthy\|unhealthy\|degraded\|unknown
 **RLS**: 프로젝트 소유자 + 팀 멤버 조회, service_role INSERT
 **TS Type**: `HealthCheck` (`src/types/env.ts`)
+
+### deploy_error_patterns
+
+| Column | Type | Nullable | Default |
+|--------|------|----------|---------|
+| id | UUID PK | NO | gen_random_uuid() |
+| fingerprint | TEXT UNIQUE | NO | - |
+| error_category | TEXT | NO | - |
+| failed_step | TEXT | YES | NULL |
+| sample_message | TEXT | NO | - |
+| cause | TEXT | YES | NULL |
+| solution | TEXT | YES | NULL |
+| occurrence_count | INT | NO | 1 |
+| first_seen_at | TIMESTAMPTZ | NO | now() |
+| last_seen_at | TIMESTAMPTZ | NO | now() |
+| is_resolved | BOOLEAN | NO | false |
+| resolution_note | TEXT | YES | NULL |
+| created_at | TIMESTAMPTZ | NO | now() |
+| updated_at | TIMESTAMPTZ | NO | now() |
+
+**Indexes**: `idx_deploy_error_patterns_category`, `idx_deploy_error_patterns_last_seen`
+**RLS**: service_role only (관리자 전용)
+
+### deploy_error_logs
+
+| Column | Type | Nullable | Default |
+|--------|------|----------|---------|
+| id | UUID PK | NO | gen_random_uuid() |
+| deploy_id | UUID FK | YES | → homepage_deploys(id) ON DELETE SET NULL |
+| pattern_id | UUID FK | YES | → deploy_error_patterns(id) ON DELETE SET NULL |
+| user_id | UUID FK | NO | → auth.users(id) ON DELETE CASCADE |
+| template_id | UUID FK | YES | → homepage_templates(id) ON DELETE SET NULL |
+| template_slug | TEXT | YES | NULL |
+| site_name | TEXT | YES | NULL |
+| error_message | TEXT | NO | - |
+| error_category | TEXT | NO | - |
+| failed_step | TEXT | YES | NULL |
+| http_status | INT | YES | NULL |
+| error_context | JSONB | YES | '{}' |
+| created_at | TIMESTAMPTZ | NO | now() |
+
+**Indexes**: `idx_deploy_error_logs_user_id`, `idx_deploy_error_logs_pattern_id`, `idx_deploy_error_logs_created_at`, `idx_deploy_error_logs_category`
+**RLS**: service_role only (관리자 전용)
 
 ---
 
