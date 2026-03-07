@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
             .eq('service_id', githubService.id)
             .eq('connection_type', 'oauth')
             .eq('status', 'active')
-            .order('project_id', { ascending: false, nullsFirst: false })
+            .order('project_id', { ascending: true, nullsFirst: true })
             .limit(1)
             .single()
         : { data: null };

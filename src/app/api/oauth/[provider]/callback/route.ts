@@ -238,7 +238,7 @@ export async function GET(
     if (oauthState.flow_context === 'settings') {
       redirectUrl = `/settings/github?oauth_success=${provider}`;
     } else if (oauthState.flow_context === 'oneclick') {
-      redirectUrl = `/oneclick?oauth_success=${provider}`;
+      redirectUrl = `/sites/new?oauth_success=${provider}`;
     } else if (oauthState.redirect_url.includes('/service-map')) {
       redirectUrl = `${oauthState.redirect_url}?oauth_success=${provider}&show_repo_selector=true`;
     } else {

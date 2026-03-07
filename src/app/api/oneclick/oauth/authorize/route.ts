@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     project_id: null,
     service_slug: 'github',
     state_token: stateToken,
-    redirect_url: '/oneclick',
+    redirect_url: '/sites/new',
     flow_context: 'oneclick',
   });
 
