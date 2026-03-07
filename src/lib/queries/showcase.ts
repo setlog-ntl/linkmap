@@ -75,6 +75,31 @@ export function useMyShowcases() {
   });
 }
 
+export interface ProjectDeployShowcase {
+  id: string;
+  site_name: string;
+  deploy_status: string;
+  is_showcase: boolean;
+  showcase_description: string | null;
+  showcase_tags: string[];
+  showcase_category: ShowcaseCategory | null;
+  pages_url: string | null;
+  deployment_url: string | null;
+}
+
+export function useProjectShowcaseDeploy(projectId: string) {
+  return useQuery({
+    queryKey: queryKeys.showcase.byProject(projectId),
+    queryFn: async (): Promise<ProjectDeployShowcase | null> => {
+      const res = await fetch(`/api/showcase/project/${projectId}`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.deploy;
+    },
+    enabled: !!projectId,
+  });
+}
+
 export interface ShowcaseRegisterPayload {
   deployId: string;
   description?: string;

@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { Plus, Map as MapIcon, Boxes, Key, TrendingUp, DollarSign, ExternalLink, Link as LinkIcon, Check, X } from 'lucide-react';
+import { Plus, Map as MapIcon, Boxes, Key, TrendingUp, DollarSign, ExternalLink, Link as LinkIcon, Check, X, Trophy, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,11 +10,14 @@ import { ServiceIcon } from '@/components/ui/service-icon';
 import { SystemStatusBadge } from './system-status-badge';
 import { MetricPill } from './metric-pill';
 import { ProjectIconPicker } from '@/components/project/project-icon-picker';
+import { ShowcaseRegisterDialog } from '@/components/showcase/showcase-register-dialog';
 import { useUpdateProject } from '@/lib/queries/projects';
+import { useProjectShowcaseDeploy, useRegisterShowcase, useUnregisterShowcase } from '@/lib/queries/showcase';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queries/keys';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 import type { Project, DashboardMetrics, ServiceCardData } from '@/types';
 
 interface ProjectHeroCardProps {
@@ -35,6 +38,12 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
   const updateProject = useUpdateProject();
   const queryClient = useQueryClient();
   const { locale } = useLocaleStore();
+
+  // 쇼케이스: 프로젝트에 연결된 배포 조회
+  const { data: showcaseDeploy } = useProjectShowcaseDeploy(project.id);
+  const registerShowcase = useRegisterShowcase();
+  const unregisterShowcase = useUnregisterShowcase();
+  const [showcaseDialogOpen, setShowcaseDialogOpen] = useState(false);
 
   const [editingName, setEditingName] = useState(false);
   const [nameValue, setNameValue] = useState(project.name);
@@ -314,7 +323,7 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
           )}
 
           {/* CTA buttons */}
-          <div className="flex gap-2 pt-1">
+          <div className="flex flex-wrap gap-2 pt-1">
             <Button size="sm" className="h-8 text-xs" asChild>
               <Link href={`/project/${project.id}/integrations`}>
                 <Plus className="mr-1 h-3.5 w-3.5" />
@@ -327,9 +336,70 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
                 맵 보기
               </Link>
             </Button>
+
+            {/* 쇼케이스 버튼 — 연결된 ready 배포가 있을 때만 표시 */}
+            {showcaseDeploy && (
+              <Button
+                variant={showcaseDeploy.is_showcase ? 'default' : 'outline'}
+                size="sm"
+                className={cn(
+                  'h-8 text-xs',
+                  showcaseDeploy.is_showcase && 'bg-brand-blue hover:bg-brand-blue/90'
+                )}
+                disabled={registerShowcase.isPending || unregisterShowcase.isPending}
+                onClick={() => {
+                  if (showcaseDeploy.is_showcase) {
+                    unregisterShowcase.mutate(showcaseDeploy.id, {
+                      onSuccess: () => {
+                        toast.success('쇼케이스에서 해제되었습니다');
+                        queryClient.invalidateQueries({ queryKey: queryKeys.showcase.byProject(project.id) });
+                      },
+                      onError: (err) => toast.error(err instanceof Error ? err.message : '해제 실패'),
+                    });
+                  } else {
+                    setShowcaseDialogOpen(true);
+                  }
+                }}
+              >
+                {(registerShowcase.isPending || unregisterShowcase.isPending) ? (
+                  <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Trophy className="mr-1 h-3.5 w-3.5" />
+                )}
+                {showcaseDeploy.is_showcase ? '쇼케이스 등록됨' : '쇼케이스'}
+              </Button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* 쇼케이스 등록 다이얼로그 */}
+      {showcaseDeploy && (
+        <ShowcaseRegisterDialog
+          open={showcaseDialogOpen}
+          onOpenChange={setShowcaseDialogOpen}
+          onSubmit={(data) => {
+            registerShowcase.mutate(
+              {
+                deployId: showcaseDeploy.id,
+                description: data.description || undefined,
+                tags: data.tags.length > 0 ? data.tags : undefined,
+                category: data.category,
+              },
+              {
+                onSuccess: () => {
+                  toast.success('쇼케이스에 등록되었습니다');
+                  setShowcaseDialogOpen(false);
+                  queryClient.invalidateQueries({ queryKey: queryKeys.showcase.byProject(project.id) });
+                },
+                onError: (err) => toast.error(err instanceof Error ? err.message : '등록 실패'),
+              }
+            );
+          }}
+          isLoading={registerShowcase.isPending}
+          mode="register"
+        />
+      )}
     </div>
   );
 }

@@ -71,6 +71,7 @@ export const queryKeys = {
     list: ['showcase'] as const,
     detail: (id: string) => ['showcase', id] as const,
     mine: ['showcase', 'mine'] as const,
+    byProject: (projectId: string) => ['showcase', 'project', projectId] as const,
   },
   account: {
     connectedAccounts: ['account', 'connected-accounts'] as const,
