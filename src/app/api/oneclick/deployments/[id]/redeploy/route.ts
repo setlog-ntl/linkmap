@@ -34,7 +34,7 @@ export async function POST(
   }
 
   // Resolve GitHub token
-  const githubToken = await resolveUserGitHubToken(supabase, user.id);
+  const githubToken = await resolveUserGitHubToken(supabase, user.id, { preferUserLevel: true });
   if (!githubToken) {
     return apiError('GitHub 연결이 필요합니다. GitHub를 다시 연결해주세요.', 400);
   }

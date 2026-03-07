@@ -8,7 +8,7 @@ export async function GET() {
   if (!user) return unauthorizedError();
 
   // 1. 배포 기반 쇼케이스
-  const { data: deployShowcases } = await supabase
+  const { data: deployShowcases, error: deployError } = await supabase
     .from('homepage_deploys')
     .select(`
       id,
@@ -41,7 +41,7 @@ export async function GET() {
     .order('deployed_at', { ascending: false });
 
   // 2. 프로젝트 기반 쇼케이스
-  const { data: projectShowcases } = await supabase
+  const { data: projectShowcases, error: projectError } = await supabase
     .from('projects')
     .select(`
       id,
@@ -62,7 +62,12 @@ export async function GET() {
     `)
     .eq('user_id', user.id)
     .eq('is_showcase', true)
+    .is('deleted_at', null)
     .order('created_at', { ascending: false });
+
+  if (deployError || projectError) {
+    console.error('[Showcase Mine API] deploy error:', deployError?.message, '| project error:', projectError?.message);
+  }
 
   const combined = [
     ...(deployShowcases || []).map((d) => ({

@@ -34,7 +34,8 @@ export async function safeDecryptToken(
  */
 export async function resolveUserGitHubToken(
   supabase: SupabaseClient,
-  userId: string
+  userId: string,
+  options?: { preferUserLevel?: boolean }
 ): Promise<string | null> {
   const { data: githubService } = await supabase
     .from('services')
@@ -51,7 +52,10 @@ export async function resolveUserGitHubToken(
     .eq('service_id', githubService.id)
     .eq('connection_type', 'oauth')
     .eq('status', 'active')
-    .order('project_id', { ascending: false, nullsFirst: false })
+    .order('project_id', {
+      ascending: options?.preferUserLevel ? true : false,
+      nullsFirst: options?.preferUserLevel ? true : false,
+    })
     .limit(1)
     .single();
 

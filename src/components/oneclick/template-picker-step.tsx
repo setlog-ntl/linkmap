@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -155,6 +155,33 @@ export function TemplatePickerStep({
   );
   const [siteNameTouched, setSiteNameTouched] = useState(!!defaultSiteName);
   const [siteNameError, setSiteNameError] = useState<string | null>(null);
+  const [siteNameWarning, setSiteNameWarning] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  // GitHub 레포 중복 체크 (디바운스)
+  const checkRepoAvailability = useCallback((name: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setSiteNameWarning(null);
+
+    if (name.length < 2 || !SITE_NAME_REGEX.test(name)) return;
+
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/oneclick/preflight?site_name=${encodeURIComponent(name)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.siteNameAvailable === false) {
+          setSiteNameWarning(`GitHub에 '${name}' 레포가 이미 존재합니다. 배포 시 자동으로 다른 이름이 지정됩니다.`);
+        }
+      } catch { /* non-critical */ }
+    }, 500);
+  }, []);
 
   // 기존 배포 목록이 비동기 로딩 후 도착하면 사이트 이름 재계산
   const prevExistingCountRef = useRef(existingSiteNames.length);
@@ -208,8 +235,10 @@ export function TemplatePickerStep({
     }
     if (lowered.length >= 2) {
       setSiteNameError(validateSiteName(lowered));
+      checkRepoAvailability(lowered);
     } else {
       setSiteNameError(null);
+      setSiteNameWarning(null);
     }
   };
 
@@ -355,6 +384,9 @@ export function TemplatePickerStep({
             </div>
             {siteNameError && (
               <p className="text-sm text-red-500">{siteNameError}</p>
+            )}
+            {!siteNameError && siteNameWarning && (
+              <p className="text-sm text-amber-600 dark:text-amber-400">{siteNameWarning}</p>
             )}
           </div>
           <Button

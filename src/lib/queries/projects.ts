@@ -93,6 +93,8 @@ export function useDeleteProject() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.list });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.mine });
     },
   });
 }
@@ -131,6 +133,8 @@ export function usePermanentDeleteProject() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.trash.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.list });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.mine });
     },
   });
 }

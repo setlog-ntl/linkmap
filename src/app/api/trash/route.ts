@@ -99,8 +99,14 @@ export async function DELETE() {
 
   const projectIds = (userProjects ?? []).map((p) => p.id);
 
-  // connections → env_vars → projects 순서로 영구 삭제
+  // homepage_deploys → connections → env_vars → projects 순서로 영구 삭제
   if (projectIds.length > 0) {
+    // 연결된 배포 기록 삭제 (원클릭배포 + 쇼케이스 동기화)
+    await supabase
+      .from('homepage_deploys')
+      .delete()
+      .in('project_id', projectIds);
+
     await supabase
       .from('user_connections')
       .delete()

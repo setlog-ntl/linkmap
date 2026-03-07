@@ -5,7 +5,7 @@ export async function GET() {
   const supabase = await createClient();
 
   // 1. 배포 기반 쇼케이스
-  const { data: deployShowcases } = await supabase
+  const { data: deployShowcases, error: deployError } = await supabase
     .from('homepage_deploys')
     .select(`
       id,
@@ -38,7 +38,7 @@ export async function GET() {
     .limit(50);
 
   // 2. 프로젝트 기반 쇼케이스
-  const { data: projectShowcases } = await supabase
+  const { data: projectShowcases, error: projectError } = await supabase
     .from('projects')
     .select(`
       id,
@@ -58,8 +58,13 @@ export async function GET() {
       )
     `)
     .eq('is_showcase', true)
+    .is('deleted_at', null)
     .order('created_at', { ascending: false })
     .limit(50);
+
+  if (deployError || projectError) {
+    console.error('[Showcase API] deploy error:', deployError?.message, '| project error:', projectError?.message);
+  }
 
   // 통합 결과: 배포 기반 + 프로젝트 기반을 source 필드로 구분
   const combined = [

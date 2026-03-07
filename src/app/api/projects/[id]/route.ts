@@ -91,9 +91,16 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
 
   if (!existing) return notFoundError('프로젝트');
 
+  // 연결된 homepage_deploys 먼저 삭제 (원클릭배포 + 쇼케이스 동기화)
+  await supabase
+    .from('homepage_deploys')
+    .delete()
+    .eq('project_id', id)
+    .eq('user_id', user.id);
+
   const { error } = await supabase
     .from('projects')
-    .update({ deleted_at: new Date().toISOString() })
+    .update({ deleted_at: new Date().toISOString(), is_showcase: false })
     .eq('id', id)
     .eq('user_id', user.id);
   if (error) return serverError(error.message);

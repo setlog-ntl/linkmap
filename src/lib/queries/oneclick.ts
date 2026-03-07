@@ -43,6 +43,7 @@ export interface DeployPagesResult {
   repo_url: string;
   pages_url: string;
   pages_status: string;
+  site_name?: string;
 }
 
 // ---------- Templates (bundle-sourced, no API call) ----------
@@ -191,6 +192,8 @@ export function useDeleteDeployment() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.list });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.mine });
       // 연결된 프로젝트도 삭제됐으면 프로젝트 목록 캐시도 갱신
       if (data.deleted_project_id) {
         queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });

@@ -378,6 +378,7 @@ export async function POST(request: NextRequest) {
       repo_url: repoResult.html_url,
       pages_url: pagesUrl,
       pages_status: pagesStatus,
+      site_name: finalSiteName,
     },
     { status: 201 }
   );

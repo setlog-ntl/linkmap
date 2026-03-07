@@ -59,7 +59,7 @@ export async function GET(
   const redirectUrl = flowContext === 'settings'
     ? '/settings/github'
     : flowContext === 'oneclick'
-      ? '/oneclick'
+      ? '/sites/new'
       : `/project/${projectId}/service-map`;
 
   // Store state in DB — RLS policy: user_id = auth.uid()

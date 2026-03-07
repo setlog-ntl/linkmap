@@ -54,7 +54,7 @@ export async function GET() {
   );
 
   if (stuckDeploys.length > 0) {
-    const githubToken = await resolveUserGitHubToken(supabase, user.id);
+    const githubToken = await resolveUserGitHubToken(supabase, user.id, { preferUserLevel: true });
 
     if (githubToken) {
       await Promise.allSettled(

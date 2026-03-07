@@ -289,6 +289,10 @@ export function useDeployMachine({ isAuthenticated }: UseDeployMachineOptions) {
         site_name: siteName,
         ...(accountId ? { github_service_account_id: accountId } : {}),
       });
+      // 서버에서 레포명 충돌로 다른 이름이 지정된 경우 알림
+      if (result.site_name && result.site_name !== siteName) {
+        toast.info(`레포 이름이 '${result.site_name}'(으)로 자동 변경되었습니다.`);
+      }
       dispatch({
         type: 'DEPLOY_SUCCESS',
         deployId: result.deploy_id,
