@@ -376,6 +376,11 @@ export function ModuleDeployDialog({
                 ? t(locale, 'moduleDeployDialog.completedApply')
                 : t(locale, 'moduleDeployDialog.completedDeploy')}
             </p>
+            {state.mode === 'apply-and-deploy' && (
+              <p className="text-xs text-muted-foreground text-center">
+                GitHub Actions 빌드 특성상 실제 사이트 반영까지 1~3분 정도 걸릴 수 있어요
+              </p>
+            )}
             <div className="flex items-center justify-center gap-3 text-sm">
               <span className="text-muted-foreground">
                 {state.diffStats.fileCount}{t(locale, 'moduleDeployDialog.filesChanged')}

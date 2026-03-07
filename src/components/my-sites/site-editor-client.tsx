@@ -249,6 +249,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const [showLiveAfterDeploy, setShowLiveAfterDeploy] = useState(false);
   const [mobileTab, setMobileTab] = useState<MobileTab>('code');
   const [showMobileFiles, setShowMobileFiles] = useState(false);
+  const [showFileSidebar, setShowFileSidebar] = useState(true);
   const [previewViewport, setPreviewViewport] = useState<PreviewViewport>('desktop');
   const previewRef = useRef<HTMLIFrameElement>(null);
   const liveIframeRef = useRef<HTMLIFrameElement>(null);
@@ -334,7 +335,9 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       if (deployOrigin === 'module-deploy') {
         setRightPanel('preview');
       }
-      toast.success(t(locale, 'editor.deployed'));
+      toast.success(t(locale, 'editor.deployed'), {
+        description: '실제 사이트 반영까지 1~3분 정도 걸릴 수 있어요',
+      });
       setTimeout(() => setDeployState('idle'), 3000);
       cleanup();
     } else if (status === 'error' || status === 'timeout') {
@@ -814,7 +817,10 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           </span>
         </p>
         <p className="text-xs text-muted-foreground mt-1">
-          완료 후 자동으로 최신 화면을 표시합니다
+          GitHub Actions로 빌드 중이며, 보통 1~3분 정도 걸려요
+        </p>
+        <p className="text-xs text-muted-foreground/60 mt-0.5">
+          완료되면 자동으로 최신 화면을 표시합니다
         </p>
       </div>
     );
@@ -1058,9 +1064,9 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           {/* 데스크탑: 미리보기/모듈 세그먼트 토글 */}
           <div className="hidden md:flex items-center border rounded-lg p-0.5 bg-muted/50 h-8">
             <button
-              onClick={() => setRightPanel(rightPanel === 'preview' ? null : 'preview')}
+              onClick={() => setRightPanel(rightPanel ? null : 'preview')}
               className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
-                rightPanel === 'preview'
+                rightPanel
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
@@ -1070,7 +1076,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
             </button>
             {moduleSchema && (
               <button
-                onClick={() => setRightPanel(rightPanel === 'modules' ? null : 'modules')}
+                onClick={() => setRightPanel(rightPanel === 'modules' ? 'preview' : 'modules')}
                 className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
                   rightPanel === 'modules'
                     ? 'bg-background text-foreground shadow-sm'
@@ -1223,27 +1229,50 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           </div>
         )}
 
-        {/* 데스크탑 파일 사이드바 */}
-        <div className="hidden md:flex md:flex-col w-56 border-r bg-muted/20 flex-shrink-0">
-          <div className="px-3 py-2.5 border-b flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              {t(locale, 'editor.files')}
-            </span>
-            {files && (
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
-                {files.length}
-              </Badge>
+        {/* 데스크탑 파일 사이드바 (접기/펼치기) */}
+        <div className={`hidden md:flex md:flex-col border-r bg-muted/20 flex-shrink-0 transition-[width] duration-200 ${showFileSidebar ? 'w-48' : 'w-10'}`}>
+          <div className="px-2 py-2.5 border-b flex items-center justify-between gap-1">
+            {showFileSidebar ? (
+              <>
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider pl-1">
+                  {t(locale, 'editor.files')}
+                </span>
+                <div className="flex items-center gap-1">
+                  {files && (
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
+                      {files.length}
+                    </Badge>
+                  )}
+                  <button
+                    onClick={() => setShowFileSidebar(false)}
+                    className="h-5 w-5 flex items-center justify-center rounded hover:bg-muted transition-colors"
+                    title="파일 목록 접기"
+                  >
+                    <ChevronRight className="h-3 w-3 rotate-180" />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <button
+                onClick={() => setShowFileSidebar(true)}
+                className="h-5 w-5 mx-auto flex items-center justify-center rounded hover:bg-muted transition-colors"
+                title="파일 목록 펼치기"
+              >
+                <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
             )}
           </div>
-          <div className="flex-1 overflow-y-auto">
-            {renderFileList()}
-          </div>
+          {showFileSidebar && (
+            <div className="flex-1 overflow-y-auto">
+              {renderFileList()}
+            </div>
+          )}
         </div>
 
         {/* ===== 데스크탑: 에디터 + 미리보기 가로 분할 ===== */}
         <div className="hidden md:flex flex-1 overflow-hidden">
           {/* 코드 에디터 */}
-          <div className={`flex flex-col overflow-hidden ${rightPanel ? 'w-1/2 border-r' : 'w-full'}`}>
+          <div className={`flex flex-col overflow-hidden ${rightPanel ? 'w-2/5 min-w-[320px] border-r' : 'w-full'}`}>
             <div className="border-b px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground flex-shrink-0 h-9">
               <Code className="h-3.5 w-3.5" />
               <span className="truncate font-medium">{selectedFileName || ''}</span>
@@ -1263,9 +1292,10 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
             {renderEditor()}
           </div>
 
-          {/* 우측 패널: 미리보기 또는 모듈 */}
-          {rightPanel === 'preview' && (
-            <div className="w-1/2 flex flex-col overflow-hidden">
+          {/* 우측 패널: 미리보기 (항상 표시, rightPanel이 있을 때) */}
+          {rightPanel && (
+            <div className="w-3/5 flex flex-col overflow-hidden relative">
+              {/* 미리보기 헤더 */}
               <div className="border-b px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground flex-shrink-0 h-9">
                 <Eye className="h-3.5 w-3.5" />
                 <span className="font-medium">{t(locale, 'editor.preview')}</span>
@@ -1334,7 +1364,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                   </a>
                 )}
               </div>
-              {/* 반응형 뷰포트 래퍼 */}
+              {/* 미리보기 본문 */}
               <div className={`flex-1 overflow-auto relative ${previewViewport !== 'desktop' ? 'bg-muted/20 flex justify-center items-start py-6' : ''}`}>
                 {renderBuildOverlay()}
                 <div
@@ -1350,21 +1380,41 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                   {renderPreview()}
                 </div>
               </div>
-            </div>
-          )}
-          {rightPanel === 'modules' && moduleSchema && moduleState && (
-            <div className="w-1/2 flex flex-col overflow-hidden border-l-0">
-              <ModulePanel
-                schema={moduleSchema}
-                state={moduleState}
-                onStateChange={setModuleState}
-                onSaveOnly={handleApplyModulesToCode}
-                onSaveAndDeploy={handleApplyModulesAndDeploy}
-                isApplying={isApplyingModules}
-                isDeploying={isDeployingModules || isDeploying}
-                locale={locale}
-                deployId={deployId}
-              />
+
+              {/* 모듈 패널: 미리보기 위에 슬라이드 오버레이 */}
+              {rightPanel === 'modules' && moduleSchema && moduleState && (
+                <div className="absolute inset-0 z-20 flex">
+                  {/* 모듈 패널 본체 */}
+                  <div className="w-full max-w-md bg-background border-l shadow-xl flex flex-col overflow-hidden ml-auto">
+                    <div className="px-3 py-2 border-b flex items-center justify-between bg-muted/20">
+                      <div className="flex items-center gap-2 text-xs font-medium">
+                        <Blocks className="h-3.5 w-3.5" />
+                        모듈 편집
+                      </div>
+                      <button
+                        onClick={() => setRightPanel('preview')}
+                        className="h-6 w-6 flex items-center justify-center rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                        title="모듈 패널 닫기"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <ModulePanel
+                        schema={moduleSchema}
+                        state={moduleState}
+                        onStateChange={setModuleState}
+                        onSaveOnly={handleApplyModulesToCode}
+                        onSaveAndDeploy={handleApplyModulesAndDeploy}
+                        isApplying={isApplyingModules}
+                        isDeploying={isDeployingModules || isDeploying}
+                        locale={locale}
+                        deployId={deployId}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
