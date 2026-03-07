@@ -46,7 +46,8 @@ export async function GET(
   }
 
   // 2. 프로젝트 기반 쇼케이스 시도
-  const { data: project } = await supabase
+  let project = null;
+  const { data: projectWithProfiles, error: projectError } = await supabase
     .from('projects')
     .select(`
       id,
@@ -68,6 +69,26 @@ export async function GET(
     .eq('id', id)
     .eq('is_showcase', true)
     .maybeSingle();
+
+  if (projectWithProfiles) {
+    project = projectWithProfiles;
+  } else if (projectError) {
+    // profiles join 실패 시 profiles 없이 재시도
+    console.error('[Showcase Detail API] project query error (retrying without profiles):', projectError.message);
+    const { data: fallback } = await supabase
+      .from('projects')
+      .select(`
+        id, name, link_url, description, icon_type, icon_value,
+        showcase_description, showcase_tags, showcase_category,
+        created_at, user_id
+      `)
+      .eq('id', id)
+      .eq('is_showcase', true)
+      .maybeSingle();
+    if (fallback) {
+      project = { ...fallback, profiles: null };
+    }
+  }
 
   if (project) {
     return NextResponse.json({

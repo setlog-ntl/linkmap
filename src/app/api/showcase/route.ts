@@ -62,8 +62,34 @@ export async function GET() {
     .order('created_at', { ascending: false })
     .limit(50);
 
-  if (deployError || projectError) {
-    console.error('[Showcase API] deploy error:', deployError?.message, '| project error:', projectError?.message);
+  // profiles join 실패 시 profiles 없이 재시도
+  let projectData = projectShowcases;
+  if (projectError && !projectShowcases) {
+    console.error('[Showcase API] project query error (retrying without profiles):', projectError.message);
+    const { data: fallback } = await supabase
+      .from('projects')
+      .select(`
+        id,
+        name,
+        link_url,
+        description,
+        icon_type,
+        icon_value,
+        showcase_description,
+        showcase_tags,
+        showcase_category,
+        created_at,
+        user_id
+      `)
+      .eq('is_showcase', true)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false })
+      .limit(50);
+    projectData = fallback?.map((p) => ({ ...p, profiles: null as unknown as { name: string; avatar_url: string }[] })) ?? null;
+  }
+
+  if (deployError) {
+    console.error('[Showcase API] deploy error:', deployError.message);
   }
 
   // 통합 결과: 배포 기반 + 프로젝트 기반을 source 필드로 구분
@@ -72,7 +98,7 @@ export async function GET() {
       ...d,
       source: 'deploy' as const,
     })),
-    ...(projectShowcases || []).map((p) => ({
+    ...(projectData || []).map((p) => ({
       id: p.id,
       site_name: p.name,
       pages_url: p.link_url,

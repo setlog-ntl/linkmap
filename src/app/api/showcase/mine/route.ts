@@ -65,8 +65,26 @@ export async function GET() {
     .is('deleted_at', null)
     .order('created_at', { ascending: false });
 
-  if (deployError || projectError) {
-    console.error('[Showcase Mine API] deploy error:', deployError?.message, '| project error:', projectError?.message);
+  // profiles join 실패 시 profiles 없이 재시도
+  let projectData = projectShowcases;
+  if (projectError && !projectShowcases) {
+    console.error('[Showcase Mine API] project query error (retrying without profiles):', projectError.message);
+    const { data: fallback } = await supabase
+      .from('projects')
+      .select(`
+        id, name, link_url, description, icon_type, icon_value,
+        showcase_description, showcase_tags, showcase_category,
+        created_at, user_id
+      `)
+      .eq('user_id', user.id)
+      .eq('is_showcase', true)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false });
+    projectData = fallback?.map((p) => ({ ...p, profiles: null as unknown as { name: string; avatar_url: string }[] })) ?? null;
+  }
+
+  if (deployError) {
+    console.error('[Showcase Mine API] deploy error:', deployError.message);
   }
 
   const combined = [
@@ -74,7 +92,7 @@ export async function GET() {
       ...d,
       source: 'deploy' as const,
     })),
-    ...(projectShowcases || []).map((p) => ({
+    ...(projectData || []).map((p) => ({
       id: p.id,
       site_name: p.name,
       pages_url: p.link_url,
