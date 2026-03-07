@@ -47,6 +47,7 @@ npm run dev / build / typecheck / lint / test / test:coverage
 - `build:cf`는 WSL/Linux에서만 가능
 - lucide-react `Map` → `Map as MapIcon` (전역 Map 섀도잉)
 - Sentry/Logger 제거됨 (Workers 호환 문제)
+- **원클릭 템플릿 패키지 버전**: `shared-template-files.ts`와 하드코딩 package.json의 버전은 반드시 npm 레지스트리에 실제 존재하는 정식 릴리스여야 함 (캐럿`^` 금지, `-dev`/`-rc` 금지). 변경 시 `npm view <pkg>@<ver> version`으로 검증 필수
 
 ## MCP Supabase 사용 규칙
 - DB 마이그레이션(`apply_migration`), SQL 실행(`execute_sql`), 스키마 조회 등 **Supabase MCP 툴이 필요한 시점**에는 즉시 실행하지 말고 먼저 아래 메시지로 확인을 요청할 것:
