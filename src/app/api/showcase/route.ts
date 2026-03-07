@@ -94,28 +94,36 @@ export async function GET() {
 
   // 통합 결과: 배포 기반 + 프로젝트 기반을 source 필드로 구분
   const combined = [
-    ...(deployShowcases || []).map((d) => ({
-      ...d,
-      source: 'deploy' as const,
-    })),
-    ...(projectData || []).map((p) => ({
-      id: p.id,
-      site_name: p.name,
-      pages_url: p.link_url,
-      deployment_url: null,
-      deploy_method: null,
-      deployed_at: null,
-      created_at: p.created_at,
-      user_id: p.user_id,
-      showcase_description: p.showcase_description || p.description,
-      showcase_tags: p.showcase_tags,
-      showcase_category: p.showcase_category,
-      homepage_templates: null,
-      profiles: p.profiles,
-      project_icon_type: p.icon_type,
-      project_icon_value: p.icon_value,
-      source: 'project' as const,
-    })),
+    ...(deployShowcases || []).map((d) => {
+      const dProf = Array.isArray(d.profiles) ? d.profiles[0] ?? null : d.profiles ?? null;
+      return {
+        ...d,
+        profiles: dProf as { name: string | null; avatar_url: string | null } | null,
+        source: 'deploy' as const,
+      };
+    }),
+    ...(projectData || []).map((p) => {
+      // PostgREST가 profiles를 배열로 반환할 수 있음 (FK가 auth.users 경유)
+      const prof = Array.isArray(p.profiles) ? p.profiles[0] ?? null : p.profiles ?? null;
+      return {
+        id: p.id,
+        site_name: p.name,
+        pages_url: p.link_url,
+        deployment_url: null,
+        deploy_method: null,
+        deployed_at: null,
+        created_at: p.created_at,
+        user_id: p.user_id,
+        showcase_description: p.showcase_description || p.description,
+        showcase_tags: p.showcase_tags,
+        showcase_category: p.showcase_category,
+        homepage_templates: null,
+        profiles: prof as { name: string | null; avatar_url: string | null } | null,
+        project_icon_type: p.icon_type,
+        project_icon_value: p.icon_value,
+        source: 'project' as const,
+      };
+    }),
   ];
 
   // 최신순 정렬

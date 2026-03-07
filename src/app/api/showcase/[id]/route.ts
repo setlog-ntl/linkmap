@@ -42,7 +42,8 @@ export async function GET(
     .maybeSingle();
 
   if (deploy) {
-    return NextResponse.json({ showcase: { ...deploy, source: 'deploy' } });
+    const deployProf = Array.isArray(deploy.profiles) ? deploy.profiles[0] ?? null : deploy.profiles ?? null;
+    return NextResponse.json({ showcase: { ...deploy, profiles: deployProf, source: 'deploy' } });
   }
 
   // 2. 프로젝트 기반 쇼케이스 시도
@@ -91,6 +92,7 @@ export async function GET(
   }
 
   if (project) {
+    const prof = Array.isArray(project.profiles) ? project.profiles[0] ?? null : project.profiles ?? null;
     return NextResponse.json({
       showcase: {
         id: project.id,
@@ -105,7 +107,7 @@ export async function GET(
         showcase_tags: project.showcase_tags,
         showcase_category: project.showcase_category,
         homepage_templates: null,
-        profiles: project.profiles,
+        profiles: prof,
         project_icon_type: project.icon_type,
         project_icon_value: project.icon_value,
         source: 'project',
