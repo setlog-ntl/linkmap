@@ -154,6 +154,7 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
     description: string;
     tags: string[];
     category: ShowcaseCategory | undefined;
+    image_url: string | null;
   }) => {
     registerShowcase.mutate(
       {
@@ -161,6 +162,7 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
         description: data.description || undefined,
         tags: data.tags.length > 0 ? data.tags : undefined,
         category: data.category,
+        image_url: data.image_url,
       },
       {
         onSuccess: () => {
@@ -234,16 +236,28 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
             />
           </div>
 
-          {/* 배포 중 플레이스홀더 (iframe 없을 때) — deploying이면서 URL은 있는 케이스 */}
+          {/* 배포 중 플레이스홀더 — 진행 단계 표시 */}
           {isDeploying && !iframeLoaded && (
-            <div className="absolute left-0 right-0 bottom-0 top-7 flex flex-col items-center justify-center bg-muted gap-2">
+            <div className="absolute left-0 right-0 bottom-0 top-7 flex flex-col items-center justify-center bg-muted gap-3">
               <span className="relative">
-                <Github className="h-6 w-6 text-muted-foreground/60 animate-github-wiggle" />
-                <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                <Github className="h-7 w-7 text-muted-foreground/60 animate-github-wiggle" />
+                <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse" />
               </span>
-              <span className="text-[11px] text-muted-foreground">
-                {t(locale, 'deploySiteCard.preparing')}
-              </span>
+              <div className="flex flex-col items-center gap-1.5">
+                <span className="text-xs font-medium text-foreground/80">
+                  사이트 생성 중...
+                </span>
+                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                  {(['creating', 'pending'].includes(deploy.deploy_status)
+                    ? '레포지토리 준비 중'
+                    : 'GitHub Actions 빌드 중'
+                  )}
+                </div>
+                {/* 진행 바 */}
+                <div className="w-24 h-1 bg-muted-foreground/10 rounded-full overflow-hidden mt-0.5">
+                  <div className="h-full bg-amber-500/70 rounded-full animate-pulse" style={{ width: deploy.deploy_status === 'building' ? '60%' : '20%' }} />
+                </div>
+              </div>
             </div>
           )}
 
@@ -269,7 +283,9 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
           <div className="absolute top-0 left-0 right-0 h-7 bg-muted/90 border-b z-20 flex items-center px-2 gap-1.5">
             <div className="flex-1 h-4 bg-background/70 rounded flex items-center gap-1 px-1.5 text-muted-foreground/50">
               <Globe className="h-2 w-2 shrink-0" />
-              <span className="text-[8px] font-mono">준비 중...</span>
+              <span className="text-[8px] font-mono">
+                {isDeploying ? '준비 중...' : deploy.deploy_status === 'error' ? '오류 발생' : '준비 중...'}
+              </span>
             </div>
             <div className={cn('flex items-center gap-1 shrink-0 px-1.5 py-0.5 rounded-full text-[8px] font-medium', badge.pillClass)}>
               <Github className={cn('h-2 w-2', isDeploying && 'animate-github-wiggle')} />
@@ -277,12 +293,35 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
               <span className="whitespace-nowrap">{badge.label}</span>
             </div>
           </div>
-          <Globe className="h-10 w-10 text-muted-foreground/40" />
-          <span className="text-xs text-muted-foreground">
-            {deploy.deploy_status === 'error'
-              ? t(locale, 'deploySiteCard.deployError')
-              : t(locale, 'deploySiteCard.preparing')}
-          </span>
+          {deploy.deploy_status === 'error' ? (
+            <>
+              <Globe className="h-10 w-10 text-muted-foreground/40" />
+              <span className="text-xs text-muted-foreground">
+                {t(locale, 'deploySiteCard.deployError')}
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="relative">
+                <Github className="h-7 w-7 text-muted-foreground/60 animate-github-wiggle" />
+                <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse" />
+              </span>
+              <div className="flex flex-col items-center gap-1.5">
+                <span className="text-xs font-medium text-foreground/80">
+                  사이트 생성 중...
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  {(['creating', 'pending'].includes(deploy.deploy_status)
+                    ? '레포지토리 준비 중'
+                    : 'GitHub Actions 빌드 중'
+                  )}
+                </span>
+                <div className="w-24 h-1 bg-muted-foreground/10 rounded-full overflow-hidden mt-0.5">
+                  <div className="h-full bg-amber-500/70 rounded-full animate-pulse" style={{ width: deploy.deploy_status === 'building' ? '60%' : '20%' }} />
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 

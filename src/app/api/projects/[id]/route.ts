@@ -50,6 +50,25 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   if (error) return serverError(error.message);
 
+  // 프로젝트 이름 변경 시 연결된 homepage_deploys의 site_name도 동기화
+  if (parsed.data.name) {
+    const newSiteName = parsed.data.name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 100);
+    if (newSiteName.length >= 2) {
+      await supabase
+        .from('homepage_deploys')
+        .update({ site_name: newSiteName })
+        .eq('project_id', id)
+        .eq('user_id', user.id);
+    }
+  }
+
   const updatedFields = Object.keys(parsed.data);
   const auditAction = updatedFields.includes('is_favorited')
     ? 'project.toggle_favorite'

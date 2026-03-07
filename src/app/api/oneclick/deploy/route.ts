@@ -320,6 +320,14 @@ export async function POST(request: NextRequest) {
     return serverError('템플릿 파일 업로드 중 오류가 발생했습니다');
   }
 
+  // 6.5. 자동채번으로 site_name이 변경된 경우 프로젝트 이름도 업데이트
+  if (finalSiteName !== site_name) {
+    await supabase
+      .from('projects')
+      .update({ name: humanizeSlug(finalSiteName) })
+      .eq('id', project.id);
+  }
+
   // 7-9. Create deploy record, link repo, add service (parallel where possible)
   // Deploy record must come first (we need deploy.id for audit log)
   const { data: deploy, error: deployError } = await supabase
