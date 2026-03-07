@@ -19,6 +19,7 @@ export async function GET() {
       showcase_description,
       showcase_tags,
       showcase_category,
+      showcase_image_url,
       homepage_templates (
         id,
         slug,
@@ -50,6 +51,7 @@ export async function GET() {
       showcase_description,
       showcase_tags,
       showcase_category,
+      showcase_image_url,
       created_at,
       user_id,
       profiles:user_id (
@@ -78,6 +80,7 @@ export async function GET() {
         showcase_description,
         showcase_tags,
         showcase_category,
+        showcase_image_url,
         created_at,
         user_id
       `)
@@ -117,6 +120,7 @@ export async function GET() {
         showcase_description: p.showcase_description || p.description,
         showcase_tags: p.showcase_tags,
         showcase_category: p.showcase_category,
+        showcase_image_url: p.showcase_image_url,
         homepage_templates: null,
         profiles: prof as { name: string | null; avatar_url: string | null } | null,
         project_icon_type: p.icon_type,

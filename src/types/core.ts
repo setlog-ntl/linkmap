@@ -162,6 +162,7 @@ export interface HomepageDeploy {
   showcase_description: string | null;
   showcase_tags: string[];
   showcase_category: ShowcaseCategory | null;
+  showcase_image_url: string | null;
   created_at: string;
   updated_at: string;
   deployed_at: string | null;

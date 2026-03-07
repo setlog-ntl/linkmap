@@ -67,6 +67,7 @@
 | showcase_description | TEXT | YES | NULL | M074 |
 | showcase_tags | TEXT[] | YES | '{}' | M074 |
 | showcase_category | TEXT | YES | NULL | M074. CHECK: portfolio,business,blog,landing,community,ecommerce,other |
+| showcase_image_url | TEXT | YES | NULL | M076 |
 | monthly_budget | NUMERIC(10,2) | YES | NULL | 월간 예산, M060 |
 | budget_currency | TEXT | NO | 'USD' | 'USD'\|'KRW', M060 |
 | created_at | TIMESTAMPTZ | NO | now() | |
@@ -522,6 +523,7 @@
 | showcase_description | TEXT | YES | NULL | M073 |
 | showcase_tags | TEXT[] | YES | '{}' | M073 |
 | showcase_category | TEXT | YES | NULL | M073. CHECK: portfolio,business,blog,landing,community,ecommerce,other |
+| showcase_image_url | TEXT | YES | NULL | M076 |
 | created_at | TIMESTAMPTZ | NO | now() |
 | updated_at | TIMESTAMPTZ | NO | now() |
 | deployed_at | TIMESTAMPTZ | YES | NULL |

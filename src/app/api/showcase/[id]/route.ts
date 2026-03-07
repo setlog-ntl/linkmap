@@ -23,6 +23,7 @@ export async function GET(
       showcase_description,
       showcase_tags,
       showcase_category,
+      showcase_image_url,
       homepage_templates (
         id,
         slug,
@@ -60,6 +61,7 @@ export async function GET(
       showcase_description,
       showcase_tags,
       showcase_category,
+      showcase_image_url,
       created_at,
       user_id,
       profiles:user_id (
@@ -80,7 +82,7 @@ export async function GET(
       .from('projects')
       .select(`
         id, name, link_url, description, icon_type, icon_value,
-        showcase_description, showcase_tags, showcase_category,
+        showcase_description, showcase_tags, showcase_category, showcase_image_url,
         created_at, user_id
       `)
       .eq('id', id)
@@ -106,6 +108,7 @@ export async function GET(
         showcase_description: project.showcase_description || project.description,
         showcase_tags: project.showcase_tags,
         showcase_category: project.showcase_category,
+        showcase_image_url: project.showcase_image_url,
         homepage_templates: null,
         profiles: prof,
         project_icon_type: project.icon_type,

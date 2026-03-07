@@ -76,6 +76,7 @@ export default function ShowcaseDetailPage({
   }
 
   const liveUrl = item.pages_url || item.deployment_url;
+  const previewImage = item.showcase_image_url || item.homepage_templates?.preview_image_url;
   const templateName = item.homepage_templates
     ? (locale === 'ko' ? item.homepage_templates.name_ko : item.homepage_templates.name)
     : null;
@@ -102,8 +103,42 @@ export default function ShowcaseDetailPage({
         갤러리로 돌아가기
       </Link>
 
-      {/* Live Preview */}
-      {liveUrl && (
+      {/* Preview: image or iframe */}
+      {previewImage ? (
+        <div className="relative rounded-xl border overflow-hidden bg-muted mb-8">
+          {/* Chrome bar */}
+          <div className="h-9 bg-muted/90 border-b flex items-center px-3 gap-2">
+            <div className="flex gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-red-400/60" />
+              <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/60" />
+              <span className="h-2.5 w-2.5 rounded-full bg-green-400/60" />
+            </div>
+            {liveUrl && (
+              <div className="flex-1 h-5 bg-background/70 rounded flex items-center gap-1.5 px-2 text-muted-foreground truncate min-w-0 ml-1">
+                <Globe className="h-3 w-3 shrink-0" />
+                <span className="text-xs font-mono truncate">
+                  {liveUrl.replace('https://', '').replace('http://', '')}
+                </span>
+              </div>
+            )}
+            {liveUrl && (
+              <a
+                href={liveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            )}
+          </div>
+          <img
+            src={previewImage}
+            alt={`${item.site_name} 미리보기`}
+            className="w-full max-h-[480px] object-cover"
+          />
+        </div>
+      ) : liveUrl ? (
         <div className="relative rounded-xl border overflow-hidden bg-muted mb-8">
           {/* Chrome bar */}
           <div className="h-9 bg-muted/90 border-b flex items-center px-3 gap-2">
@@ -128,10 +163,9 @@ export default function ShowcaseDetailPage({
             </a>
           </div>
 
-          {/* iframe 또는 폴백 UI */}
+          {/* iframe or fallback */}
           <div className="relative" style={{ height: '480px' }}>
             {iframeFailed ? (
-              /* iframe 차단 시 폴백 UI */
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted gap-4 p-8">
                 <div className="h-16 w-16 rounded-2xl bg-background/80 flex items-center justify-center shadow-sm">
                   {item.source === 'project' && item.project_icon_type === 'emoji' && item.project_icon_value ? (
@@ -180,7 +214,7 @@ export default function ShowcaseDetailPage({
             )}
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* Info Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

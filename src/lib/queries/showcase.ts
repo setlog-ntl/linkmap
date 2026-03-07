@@ -14,6 +14,7 @@ export interface ShowcaseItem {
   showcase_description: string | null;
   showcase_tags: string[];
   showcase_category: ShowcaseCategory | null;
+  showcase_image_url: string | null;
   source?: 'deploy' | 'project';
   project_icon_type?: string | null;
   project_icon_value?: string | null;
@@ -111,6 +112,7 @@ export interface ProjectShowcasePayload {
   description?: string;
   tags?: string[];
   category?: ShowcaseCategory;
+  image_url?: string | null;
 }
 
 export function useProjectShowcase() {
@@ -125,6 +127,7 @@ export function useProjectShowcase() {
           description: payload.description,
           tags: payload.tags,
           category: payload.category,
+          image_url: payload.image_url,
         }),
       });
       if (!res.ok) {
@@ -150,6 +153,7 @@ export interface ShowcaseRegisterPayload {
   description?: string;
   tags?: string[];
   category?: ShowcaseCategory;
+  image_url?: string | null;
 }
 
 export function useRegisterShowcase() {
@@ -164,6 +168,7 @@ export function useRegisterShowcase() {
           description: payload.description,
           tags: payload.tags,
           category: payload.category,
+          image_url: payload.image_url,
         }),
       });
       if (!res.ok) {
@@ -192,6 +197,7 @@ export function useUpdateShowcase() {
           description: payload.description,
           tags: payload.tags,
           category: payload.category,
+          image_url: payload.image_url,
         }),
       });
       if (!res.ok) {

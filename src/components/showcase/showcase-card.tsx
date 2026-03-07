@@ -48,71 +48,92 @@ export function ShowcaseCard({ item }: ShowcaseCardProps) {
 
   const isProject = item.source === 'project';
   const gradient = CATEGORY_GRADIENTS[item.showcase_category || 'other'] || CATEGORY_GRADIENTS.other;
+  const previewImage = item.showcase_image_url || item.homepage_templates?.preview_image_url;
 
   return (
     <Card className="overflow-hidden group hover:shadow-md transition-shadow">
-      {/* Preview Area — 시각적 카드 (iframe 대신) */}
+      {/* Preview Area */}
       <Link
         href={`/showcase/${item.id}`}
         className="block relative w-full border-b cursor-pointer"
         style={{ height: '200px' }}
       >
-        {/* Gradient background */}
-        <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
-
-        {/* Pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
-          backgroundSize: '20px 20px',
-        }} />
-
-        {/* Mini browser bar */}
-        <div className="absolute top-0 left-0 right-0 h-7 bg-muted/90 border-b z-20 flex items-center px-2 gap-1.5 rounded-t-[inherit]">
-          <div className="flex gap-1">
-            <span className="h-2 w-2 rounded-full bg-red-400/60" />
-            <span className="h-2 w-2 rounded-full bg-yellow-400/60" />
-            <span className="h-2 w-2 rounded-full bg-green-400/60" />
-          </div>
-          {liveUrl && (
-            <div className="flex-1 h-4 bg-background/70 rounded flex items-center gap-1 px-1.5 text-muted-foreground truncate min-w-0 ml-1">
-              <Globe className="h-2 w-2 shrink-0" />
-              <span className="text-[8px] font-mono truncate">
-                {liveUrl.replace('https://', '').replace('http://', '')}
+        {previewImage ? (
+          /* 이미지가 있을 때 */
+          <>
+            <img
+              src={previewImage}
+              alt={item.site_name || '쇼케이스'}
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
+            {/* Hover overlay */}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+              <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white bg-black/60 px-3 py-1.5 rounded-md text-sm font-medium">
+                상세보기
               </span>
             </div>
-          )}
-        </div>
+          </>
+        ) : (
+          /* 이미지 없을 때 기존 시각적 카드 */
+          <>
+            {/* Gradient background */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
 
-        {/* Center content */}
-        <div className="absolute inset-0 top-7 flex flex-col items-center justify-center gap-3 p-4">
-          {/* Project icon or deploy icon */}
-          {isProject && item.project_icon_type === 'emoji' && item.project_icon_value ? (
-            <span className="text-4xl">{item.project_icon_value}</span>
-          ) : (
-            <div className="h-12 w-12 rounded-xl bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-sm">
-              {isProject ? (
-                <FolderKanban className="h-6 w-6 text-muted-foreground" />
-              ) : (
-                <Rocket className="h-6 w-6 text-muted-foreground" />
+            {/* Pattern overlay */}
+            <div className="absolute inset-0 opacity-[0.03]" style={{
+              backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
+              backgroundSize: '20px 20px',
+            }} />
+
+            {/* Mini browser bar */}
+            <div className="absolute top-0 left-0 right-0 h-7 bg-muted/90 border-b z-20 flex items-center px-2 gap-1.5 rounded-t-[inherit]">
+              <div className="flex gap-1">
+                <span className="h-2 w-2 rounded-full bg-red-400/60" />
+                <span className="h-2 w-2 rounded-full bg-yellow-400/60" />
+                <span className="h-2 w-2 rounded-full bg-green-400/60" />
+              </div>
+              {liveUrl && (
+                <div className="flex-1 h-4 bg-background/70 rounded flex items-center gap-1 px-1.5 text-muted-foreground truncate min-w-0 ml-1">
+                  <Globe className="h-2 w-2 shrink-0" />
+                  <span className="text-[8px] font-mono truncate">
+                    {liveUrl.replace('https://', '').replace('http://', '')}
+                  </span>
+                </div>
               )}
             </div>
-          )}
-          <span className="text-sm font-semibold text-foreground/80 text-center line-clamp-1 max-w-[80%]">
-            {item.site_name}
-          </span>
-          {categoryLabel && (
-            <Badge variant="secondary" className="text-[10px]">
-              {categoryLabel}
-            </Badge>
-          )}
-        </div>
 
-        {/* Hover overlay */}
-        <div className="absolute inset-0 top-7 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-          <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white bg-black/60 px-3 py-1.5 rounded-md text-sm font-medium">
-            상세보기
-          </span>
-        </div>
+            {/* Center content */}
+            <div className="absolute inset-0 top-7 flex flex-col items-center justify-center gap-3 p-4">
+              {isProject && item.project_icon_type === 'emoji' && item.project_icon_value ? (
+                <span className="text-4xl">{item.project_icon_value}</span>
+              ) : (
+                <div className="h-12 w-12 rounded-xl bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-sm">
+                  {isProject ? (
+                    <FolderKanban className="h-6 w-6 text-muted-foreground" />
+                  ) : (
+                    <Rocket className="h-6 w-6 text-muted-foreground" />
+                  )}
+                </div>
+              )}
+              <span className="text-sm font-semibold text-foreground/80 text-center line-clamp-1 max-w-[80%]">
+                {item.site_name}
+              </span>
+              {categoryLabel && (
+                <Badge variant="secondary" className="text-[10px]">
+                  {categoryLabel}
+                </Badge>
+              )}
+            </div>
+
+            {/* Hover overlay */}
+            <div className="absolute inset-0 top-7 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+              <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white bg-black/60 px-3 py-1.5 rounded-md text-sm font-medium">
+                상세보기
+              </span>
+            </div>
+          </>
+        )}
       </Link>
 
       {/* Info */}

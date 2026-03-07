@@ -8,6 +8,7 @@ const showcaseSchema = z.object({
   description: z.string().max(500).optional(),
   tags: z.array(z.string().max(30)).max(5).optional(),
   category: z.enum(['portfolio', 'business', 'blog', 'landing', 'community', 'ecommerce', 'other']).optional(),
+  image_url: z.string().url().max(2000).nullable().optional(),
 });
 
 export async function PATCH(
@@ -25,7 +26,7 @@ export async function PATCH(
     return NextResponse.json({ error: parsed.error.issues[0]?.message || '잘못된 요청' }, { status: 400 });
   }
 
-  const { action, description, tags, category } = parsed.data;
+  const { action, description, tags, category, image_url } = parsed.data;
 
   // 소유권 확인
   const { data: project } = await supabase
@@ -45,6 +46,7 @@ export async function PATCH(
         showcase_description: description || null,
         showcase_tags: tags || [],
         showcase_category: category || null,
+        showcase_image_url: image_url ?? null,
       })
       .eq('id', id);
 
@@ -60,6 +62,7 @@ export async function PATCH(
         showcase_description: null,
         showcase_tags: [],
         showcase_category: null,
+        showcase_image_url: null,
       })
       .eq('id', id);
 
@@ -76,6 +79,7 @@ export async function PATCH(
     if (description !== undefined) updateData.showcase_description = description || null;
     if (tags !== undefined) updateData.showcase_tags = tags;
     if (category !== undefined) updateData.showcase_category = category || null;
+    if (image_url !== undefined) updateData.showcase_image_url = image_url;
 
     const { error } = await supabase
       .from('projects')

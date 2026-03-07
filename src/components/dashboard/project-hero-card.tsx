@@ -398,6 +398,7 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
                 description: data.description || undefined,
                 tags: data.tags.length > 0 ? data.tags : undefined,
                 category: data.category,
+                image_url: data.image_url,
               },
               {
                 onSuccess: () => {
@@ -417,6 +418,7 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
                 description: data.description || undefined,
                 tags: data.tags.length > 0 ? data.tags : undefined,
                 category: data.category,
+                image_url: data.image_url,
               },
               {
                 onSuccess: () => {

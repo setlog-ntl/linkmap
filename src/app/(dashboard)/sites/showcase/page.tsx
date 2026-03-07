@@ -54,6 +54,7 @@ export default function MyShowcasePage() {
     description: string;
     tags: string[];
     category: ShowcaseCategory | undefined;
+    image_url: string | null;
   }) => {
     if (!editTarget) return;
 
@@ -65,6 +66,7 @@ export default function MyShowcasePage() {
           description: data.description || undefined,
           tags: data.tags.length > 0 ? data.tags : undefined,
           category: data.category,
+          image_url: data.image_url,
         },
         {
           onSuccess: () => {
@@ -81,6 +83,7 @@ export default function MyShowcasePage() {
           description: data.description || undefined,
           tags: data.tags.length > 0 ? data.tags : undefined,
           category: data.category,
+          image_url: data.image_url,
         },
         {
           onSuccess: () => {
@@ -286,6 +289,7 @@ export default function MyShowcasePage() {
             description: editTarget.showcase_description,
             tags: editTarget.showcase_tags,
             category: editTarget.showcase_category,
+            image_url: editTarget.showcase_image_url,
           }}
         />
       )}

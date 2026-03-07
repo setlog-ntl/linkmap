@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,9 +14,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, X, Plus } from 'lucide-react';
+import { Loader2, X, Plus, ImagePlus, Trash2 } from 'lucide-react';
 import { SHOWCASE_CATEGORIES, type ShowcaseCategory } from '@/types/core';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface ShowcaseRegisterDialogProps {
   open: boolean;
@@ -25,6 +26,7 @@ interface ShowcaseRegisterDialogProps {
     description: string;
     tags: string[];
     category: ShowcaseCategory | undefined;
+    image_url: string | null;
   }) => void;
   isLoading?: boolean;
   mode?: 'register' | 'edit';
@@ -32,6 +34,7 @@ interface ShowcaseRegisterDialogProps {
     description?: string | null;
     tags?: string[];
     category?: ShowcaseCategory | null;
+    image_url?: string | null;
   };
 }
 
@@ -49,6 +52,9 @@ export function ShowcaseRegisterDialog({
   const [category, setCategory] = useState<ShowcaseCategory | undefined>(
     initialData?.category || undefined
   );
+  const [imageUrl, setImageUrl] = useState<string | null>(initialData?.image_url || null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddTag = () => {
     const trimmed = tagInput.trim();
@@ -69,8 +75,45 @@ export function ShowcaseRegisterDialog({
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('PNG, JPG, WebP, GIF 파일만 업로드할 수 있습니다');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('파일 크기는 5MB 이하여야 합니다');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/showcase/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || '업로드 실패');
+      }
+
+      setImageUrl(data.url);
+      toast.success('이미지가 업로드되었습니다');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '이미지 업로드 실패');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = () => {
-    onSubmit({ description, tags, category });
+    onSubmit({ description, tags, category, image_url: imageUrl });
   };
 
   return (
@@ -88,6 +131,50 @@ export function ShowcaseRegisterDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-2">
+          {/* Showcase Image */}
+          <div className="space-y-2">
+            <Label>대표 이미지 (선택)</Label>
+            {imageUrl ? (
+              <div className="relative rounded-lg border overflow-hidden group">
+                <img
+                  src={imageUrl}
+                  alt="쇼케이스 미리보기"
+                  className="w-full h-40 object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => setImageUrl(null)}
+                  className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="w-full h-32 rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 transition-colors flex flex-col items-center justify-center gap-2 text-muted-foreground"
+              >
+                {uploading ? (
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
+                  <ImagePlus className="h-6 w-6" />
+                )}
+                <span className="text-xs">
+                  {uploading ? '업로드 중...' : '클릭하여 이미지 업로드 (PNG, JPG, WebP, GIF / 5MB)'}
+                </span>
+              </button>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+          </div>
+
           {/* Category */}
           <div className="space-y-2">
             <Label>카테고리</Label>
@@ -175,7 +262,7 @@ export function ShowcaseRegisterDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             취소
           </Button>
-          <Button onClick={handleSubmit} disabled={isLoading}>
+          <Button onClick={handleSubmit} disabled={isLoading || uploading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {mode === 'register' ? '등록하기' : '수정하기'}
           </Button>
