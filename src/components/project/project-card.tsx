@@ -212,6 +212,21 @@ export function ProjectCard({ project, onDelete, onToggleFavorite, deploy, baseP
               </CardDescription>
             )}
           </div>
+          <div className="flex items-center gap-0.5 shrink-0">
+            {basePath === '/project' && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setConfirmOpen(true);
+                }}
+                aria-label="프로젝트 삭제"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild data-radix-dropdown-menu-trigger>
               <Button
@@ -273,6 +288,7 @@ export function ProjectCard({ project, onDelete, onToggleFavorite, deploy, baseP
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          </div>
         </div>
       </CardHeader>
 

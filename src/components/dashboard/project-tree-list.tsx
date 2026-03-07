@@ -181,6 +181,20 @@ function ProjectTreeItem({
             />
           </Button>
 
+          {/* Delete button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            onClick={(e) => {
+              e.stopPropagation();
+              setConfirmOpen(true);
+            }}
+            aria-label="프로젝트 삭제"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+
           {/* More menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
