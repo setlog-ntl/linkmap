@@ -14,10 +14,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ExternalLink, Github, Globe, LayoutDashboard, Loader2, Pencil, RefreshCw, Trash2 } from 'lucide-react';
+import { ExternalLink, Github, Globe, LayoutDashboard, Loader2, Pencil, RefreshCw, Trash2, Trophy } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { useDeleteDeployment, useRedeployDeployment, type HomepageDeploy } from '@/lib/queries/oneclick';
+import { useToggleShowcase } from '@/lib/queries/showcase';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -65,6 +66,7 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
   const { locale } = useLocaleStore();
   const deleteMutation = useDeleteDeployment();
   const redeployMutation = useRedeployDeployment();
+  const toggleShowcase = useToggleShowcase();
   const [open, setOpen] = useState(false);
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
@@ -128,6 +130,15 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
       toast.success('재배포가 시작되었습니다');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '재배포 실패');
+    }
+  };
+
+  const handleToggleShowcase = async () => {
+    try {
+      const result = await toggleShowcase.mutateAsync(deploy.id);
+      toast.success(result.is_showcase ? '쇼케이스에 등록되었습니다' : '쇼케이스에서 해제되었습니다');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '쇼케이스 토글 실패');
     }
   };
 
@@ -305,6 +316,26 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
                 <LayoutDashboard className="mr-1 h-3 w-3" />
                 {t(locale, 'deploySiteCard.manage')}
               </Link>
+            </Button>
+          )}
+
+          {/* 쇼케이스 토글 */}
+          {deploy.deploy_status === 'ready' && (
+            <Button
+              size="sm"
+              variant={deploy.is_showcase ? 'default' : 'outline'}
+              onClick={handleToggleShowcase}
+              disabled={toggleShowcase.isPending}
+              className={cn(
+                deploy.is_showcase && 'bg-brand-blue hover:bg-brand-blue/90'
+              )}
+            >
+              {toggleShowcase.isPending ? (
+                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+              ) : (
+                <Trophy className="mr-1 h-3 w-3" />
+              )}
+              {deploy.is_showcase ? '쇼케이스 등록됨' : '쇼케이스'}
             </Button>
           )}
 

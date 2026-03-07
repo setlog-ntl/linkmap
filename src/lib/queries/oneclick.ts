@@ -112,6 +112,7 @@ export interface HomepageDeploy {
   forked_repo_full_name: string | null;
   deploy_error_message: string | null;
   retry_count?: number;
+  is_showcase?: boolean;
   created_at: string;
   deployed_at: string | null;
   template_id: string;

@@ -158,6 +158,7 @@ export interface HomepageDeploy {
   site_name: string | null;
   custom_domain: string | null;
   config_data: Record<string, unknown>;
+  is_showcase: boolean;
   created_at: string;
   updated_at: string;
   deployed_at: string | null;

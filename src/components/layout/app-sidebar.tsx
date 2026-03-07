@@ -8,7 +8,7 @@ import {
   Rocket, Search, Map as MapIcon,
   List, Link2, Key, Settings, BookOpen, ChevronDown, ChevronRight,
   LogOut, Bot, User, GitBranch, Wrench, FolderKanban, Plus, LayoutDashboard,
-  Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight, Trash2, DollarSign, Users, BarChart3, Lightbulb,
+  Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight, Trash2, DollarSign, Users, BarChart3, Lightbulb, Trophy,
 } from 'lucide-react';
 import { GUIDE_CATEGORIES, getGuidesByCategory, type GuideCategory } from '@/data/ui/guide-meta';
 import { createClient } from '@/lib/supabase/client';
@@ -119,6 +119,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
 
   const exploreNav: { labelKey: string; label?: string; href: string; icon: React.ElementType }[] = [
     { labelKey: 'nav.serviceCatalog', href: '/services', icon: Search },
+    { labelKey: '', label: '쇼케이스', href: '/showcase', icon: Trophy },
   ];
 
   const toolsNav: { label: string; href: string; icon: React.ElementType }[] = [

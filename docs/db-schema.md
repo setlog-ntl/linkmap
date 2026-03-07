@@ -514,11 +514,12 @@
 | custom_domain | TEXT | YES | NULL |
 | config_data | JSONB | YES | '{}' |
 | retry_count | SMALLINT | NO | 0 | M069 |
+| is_showcase | BOOLEAN | NO | false | M072 |
 | created_at | TIMESTAMPTZ | NO | now() |
 | updated_at | TIMESTAMPTZ | NO | now() |
 | deployed_at | TIMESTAMPTZ | YES | NULL |
 
-**RLS**: 본인만 관리
+**RLS**: 본인만 관리 + 쇼케이스 공개 읽기 (is_showcase=true, deploy_status='ready')
 **TS Type**: `HomepageDeploy` (`src/types/core.ts`)
 
 ---
@@ -727,8 +728,8 @@ CREATE TYPE team_role AS ENUM ('admin', 'editor', 'viewer');
 ```
 supabase/migrations/NNN_description.sql
 ```
-- NNN: 3자리 숫자 (001~046)
-- 다음 마이그레이션: **047**
+- NNN: 3자리 숫자 (001~072)
+- 다음 마이그레이션: **073**
 
 ### 마이그레이션 작성 규칙
 1. **IF NOT EXISTS / IF EXISTS** 사용 → idempotent하게

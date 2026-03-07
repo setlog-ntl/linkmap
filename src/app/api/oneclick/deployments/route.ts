@@ -23,6 +23,7 @@ export async function GET() {
       forked_repo_full_name,
       deploy_error_message,
       retry_count,
+      is_showcase,
       created_at,
       deployed_at,
       template_id,

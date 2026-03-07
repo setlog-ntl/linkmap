@@ -1,0 +1,41 @@
+import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+
+export async function GET() {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('homepage_deploys')
+    .select(`
+      id,
+      site_name,
+      pages_url,
+      deployment_url,
+      deploy_method,
+      deployed_at,
+      created_at,
+      user_id,
+      homepage_templates (
+        id,
+        slug,
+        name,
+        name_ko,
+        framework,
+        preview_image_url
+      ),
+      profiles:user_id (
+        name,
+        avatar_url
+      )
+    `)
+    .eq('is_showcase', true)
+    .eq('deploy_status', 'ready')
+    .order('deployed_at', { ascending: false })
+    .limit(50);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ showcases: data || [] });
+}
