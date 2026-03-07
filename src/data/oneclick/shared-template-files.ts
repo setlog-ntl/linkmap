@@ -99,10 +99,10 @@ export default nextConfig;
 /** 템플릿별 name만 바꿔서 package.json 생성 */
 export function makePackageJson(name: string): string {
   const deps: Record<string, string> = {
-    next: '^15.1.0',
-    react: '^19.0.0',
-    'react-dom': '^19.0.0',
-    'lucide-react': '^0.468.0',
+    next: '15.1.0',
+    react: '19.0.0',
+    'react-dom': '19.0.0',
+    'lucide-react': '0.468.0',
   };
 
   return JSON.stringify(
@@ -118,13 +118,13 @@ export function makePackageJson(name: string): string {
       },
       dependencies: deps,
       devDependencies: {
-        '@types/node': '^22.0.0',
-        '@types/react': '^19.0.0',
-        '@types/react-dom': '^19.0.0',
-        typescript: '^5.7.0',
-        tailwindcss: '^4.0.0',
-        '@tailwindcss/postcss': '^4.0.0',
-        postcss: '^8.5.0',
+        '@types/node': '22.0.0',
+        '@types/react': '19.0.0',
+        '@types/react-dom': '19.0.0',
+        typescript: '5.7.0',
+        tailwindcss: '4.0.0',
+        '@tailwindcss/postcss': '4.0.0',
+        postcss: '8.5.0',
       },
     },
     null,
