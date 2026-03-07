@@ -15,9 +15,12 @@ import {
   Loader2,
   Calendar,
   Tag,
+  AlertTriangle,
+  FolderKanban,
+  Rocket,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 
 export default function ShowcaseDetailPage({
@@ -29,6 +32,20 @@ export default function ShowcaseDetailPage({
   const { data: item, isLoading } = useShowcaseDetail(id);
   const { locale } = useLocaleStore();
   const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [iframeFailed, setIframeFailed] = useState(false);
+
+  // iframe 로드 실패 감지: 타임아웃 기반
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!iframeLoaded) setIframeFailed(true);
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, [iframeLoaded]);
+
+  const handleIframeLoad = useCallback(() => {
+    setIframeLoaded(true);
+    setIframeFailed(false);
+  }, []);
 
   if (isLoading) {
     return (
@@ -98,7 +115,7 @@ export default function ShowcaseDetailPage({
             <div className="flex-1 h-5 bg-background/70 rounded flex items-center gap-1.5 px-2 text-muted-foreground truncate min-w-0 ml-1">
               <Globe className="h-3 w-3 shrink-0" />
               <span className="text-xs font-mono truncate">
-                {liveUrl.replace('https://', '')}
+                {liveUrl.replace('https://', '').replace('http://', '')}
               </span>
             </div>
             <a
@@ -111,23 +128,55 @@ export default function ShowcaseDetailPage({
             </a>
           </div>
 
-          {/* iframe */}
+          {/* iframe 또는 폴백 UI */}
           <div className="relative" style={{ height: '480px' }}>
-            <iframe
-              src={liveUrl}
-              title={`${item.site_name} 미리보기`}
-              className={cn(
-                'w-full h-full border-0 transition-opacity duration-700',
-                iframeLoaded ? 'opacity-100' : 'opacity-50'
-              )}
-              sandbox="allow-scripts allow-same-origin"
-              loading="lazy"
-              onLoad={() => setIframeLoaded(true)}
-            />
-            {!iframeLoaded && (
-              <div className="absolute inset-0 flex items-center justify-center bg-muted">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            {iframeFailed ? (
+              /* iframe 차단 시 폴백 UI */
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted gap-4 p-8">
+                <div className="h-16 w-16 rounded-2xl bg-background/80 flex items-center justify-center shadow-sm">
+                  {item.source === 'project' && item.project_icon_type === 'emoji' && item.project_icon_value ? (
+                    <span className="text-3xl">{item.project_icon_value}</span>
+                  ) : item.source === 'project' ? (
+                    <FolderKanban className="h-8 w-8 text-muted-foreground" />
+                  ) : (
+                    <Rocket className="h-8 w-8 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="text-center space-y-2">
+                  <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>이 사이트는 미리보기를 지원하지 않습니다</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground/70">
+                    보안 정책(X-Frame-Options)으로 인해 미리보기가 차단되었습니다
+                  </p>
+                </div>
+                <Button asChild size="lg" className="mt-2">
+                  <a href={liveUrl} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    사이트 직접 방문하기
+                  </a>
+                </Button>
               </div>
+            ) : (
+              <>
+                <iframe
+                  src={liveUrl}
+                  title={`${item.site_name} 미리보기`}
+                  className={cn(
+                    'w-full h-full border-0 transition-opacity duration-700',
+                    iframeLoaded ? 'opacity-100' : 'opacity-50'
+                  )}
+                  sandbox="allow-scripts allow-same-origin"
+                  loading="lazy"
+                  onLoad={handleIframeLoad}
+                />
+                {!iframeLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-muted">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

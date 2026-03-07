@@ -1,15 +1,24 @@
 'use client';
 
-import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Globe, Loader2 } from 'lucide-react';
+import { ExternalLink, Globe, FolderKanban, Rocket } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { SHOWCASE_CATEGORIES } from '@/types/core';
-import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import type { ShowcaseItem } from '@/lib/queries/showcase';
+
+// 카테고리별 그라데이션 색상
+const CATEGORY_GRADIENTS: Record<string, string> = {
+  portfolio: 'from-violet-500/20 to-purple-600/20',
+  business: 'from-blue-500/20 to-cyan-600/20',
+  blog: 'from-emerald-500/20 to-teal-600/20',
+  landing: 'from-orange-500/20 to-amber-600/20',
+  community: 'from-pink-500/20 to-rose-600/20',
+  ecommerce: 'from-indigo-500/20 to-blue-600/20',
+  other: 'from-slate-500/20 to-gray-600/20',
+};
 
 interface ShowcaseCardProps {
   item: ShowcaseItem;
@@ -17,7 +26,6 @@ interface ShowcaseCardProps {
 
 export function ShowcaseCard({ item }: ShowcaseCardProps) {
   const { locale } = useLocaleStore();
-  const [iframeLoaded, setIframeLoaded] = useState(false);
   const liveUrl = item.pages_url || item.deployment_url;
 
   const templateName = item.homepage_templates
@@ -38,71 +46,73 @@ export function ShowcaseCard({ item }: ShowcaseCardProps) {
       )
     : null;
 
+  const isProject = item.source === 'project';
+  const gradient = CATEGORY_GRADIENTS[item.showcase_category || 'other'] || CATEGORY_GRADIENTS.other;
+
   return (
     <Card className="overflow-hidden group hover:shadow-md transition-shadow">
-      {/* Preview - 클릭 시 상세 페이지 이동 */}
+      {/* Preview Area — 시각적 카드 (iframe 대신) */}
       <Link
         href={`/showcase/${item.id}`}
-        className="block relative w-full bg-muted border-b cursor-pointer"
+        className="block relative w-full border-b cursor-pointer"
         style={{ height: '200px' }}
       >
-        {liveUrl ? (
-          <>
-            {/* Mini browser bar */}
-            <div className="absolute top-0 left-0 right-0 h-7 bg-muted/90 border-b z-20 flex items-center px-2 gap-1.5 rounded-t-[inherit]">
-              <div className="flex gap-1">
-                <span className="h-2 w-2 rounded-full bg-red-400/60" />
-                <span className="h-2 w-2 rounded-full bg-yellow-400/60" />
-                <span className="h-2 w-2 rounded-full bg-green-400/60" />
-              </div>
-              <div className="flex-1 h-4 bg-background/70 rounded flex items-center gap-1 px-1.5 text-muted-foreground truncate min-w-0 ml-1">
-                <Globe className="h-2 w-2 shrink-0" />
-                <span className="text-[8px] font-mono truncate">
-                  {liveUrl.replace('https://', '')}
-                </span>
-              </div>
-            </div>
+        {/* Gradient background */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
 
-            {/* Scaled iframe */}
-            <div className="absolute left-0 right-0 bottom-0 top-7 overflow-hidden pointer-events-none">
-              <iframe
-                src={liveUrl}
-                title={`${item.site_name} 미리보기`}
-                className={cn(
-                  'absolute top-0 left-0 border-0 transition-opacity duration-700',
-                  iframeLoaded ? 'opacity-100' : 'opacity-80'
-                )}
-                style={{
-                  width: '1280px',
-                  height: '800px',
-                  transform: 'scale(0.25)',
-                  transformOrigin: 'top left',
-                }}
-                sandbox="allow-scripts allow-same-origin"
-                loading="lazy"
-                onLoad={() => setIframeLoaded(true)}
-              />
-            </div>
+        {/* Pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
+        }} />
 
-            {/* Loading overlay */}
-            {!iframeLoaded && (
-              <div className="absolute left-0 right-0 bottom-0 top-7 flex items-center justify-center bg-muted">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              </div>
-            )}
-
-            {/* Hover overlay */}
-            <div className="absolute inset-0 top-7 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-              <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white bg-black/60 px-3 py-1.5 rounded-md text-sm font-medium">
-                상세보기
+        {/* Mini browser bar */}
+        <div className="absolute top-0 left-0 right-0 h-7 bg-muted/90 border-b z-20 flex items-center px-2 gap-1.5 rounded-t-[inherit]">
+          <div className="flex gap-1">
+            <span className="h-2 w-2 rounded-full bg-red-400/60" />
+            <span className="h-2 w-2 rounded-full bg-yellow-400/60" />
+            <span className="h-2 w-2 rounded-full bg-green-400/60" />
+          </div>
+          {liveUrl && (
+            <div className="flex-1 h-4 bg-background/70 rounded flex items-center gap-1 px-1.5 text-muted-foreground truncate min-w-0 ml-1">
+              <Globe className="h-2 w-2 shrink-0" />
+              <span className="text-[8px] font-mono truncate">
+                {liveUrl.replace('https://', '').replace('http://', '')}
               </span>
             </div>
-          </>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Globe className="h-10 w-10 text-muted-foreground/30" />
-          </div>
-        )}
+          )}
+        </div>
+
+        {/* Center content */}
+        <div className="absolute inset-0 top-7 flex flex-col items-center justify-center gap-3 p-4">
+          {/* Project icon or deploy icon */}
+          {isProject && item.project_icon_type === 'emoji' && item.project_icon_value ? (
+            <span className="text-4xl">{item.project_icon_value}</span>
+          ) : (
+            <div className="h-12 w-12 rounded-xl bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-sm">
+              {isProject ? (
+                <FolderKanban className="h-6 w-6 text-muted-foreground" />
+              ) : (
+                <Rocket className="h-6 w-6 text-muted-foreground" />
+              )}
+            </div>
+          )}
+          <span className="text-sm font-semibold text-foreground/80 text-center line-clamp-1 max-w-[80%]">
+            {item.site_name}
+          </span>
+          {categoryLabel && (
+            <Badge variant="secondary" className="text-[10px]">
+              {categoryLabel}
+            </Badge>
+          )}
+        </div>
+
+        {/* Hover overlay */}
+        <div className="absolute inset-0 top-7 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+          <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white bg-black/60 px-3 py-1.5 rounded-md text-sm font-medium">
+            상세보기
+          </span>
+        </div>
       </Link>
 
       {/* Info */}
@@ -123,11 +133,14 @@ export function ShowcaseCard({ item }: ShowcaseCardProps) {
               </p>
             )}
           </div>
-          {categoryLabel && (
-            <Badge variant="outline" className="text-[10px] shrink-0">
-              {categoryLabel}
-            </Badge>
-          )}
+          {/* Source badge */}
+          <Badge variant="outline" className="text-[10px] shrink-0 gap-1">
+            {isProject ? (
+              <><FolderKanban className="h-2.5 w-2.5" /> 프로젝트</>
+            ) : (
+              <><Rocket className="h-2.5 w-2.5" /> 배포</>
+            )}
+          </Badge>
         </div>
 
         {/* Description */}
