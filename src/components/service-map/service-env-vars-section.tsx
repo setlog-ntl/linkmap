@@ -82,11 +82,15 @@ export function ServiceEnvVarsSection({
     (ev) => ev.service_id === serviceId && ev.environment === activeEnv
   );
 
+  // Split required vs optional templates
+  const mandatoryVars = requiredEnvVars.filter((t) => !t.optional);
+  const optionalVars = requiredEnvVars.filter((t) => t.optional);
+
   // Count configured across all environments for this service
   const allServiceVars = envVars.filter((ev) => ev.service_id === serviceId);
   const uniqueKeys = new Set(allServiceVars.map((ev) => ev.key_name));
   const configuredCount = uniqueKeys.size;
-  const totalRequired = requiredEnvVars.length;
+  const totalRequired = mandatoryVars.length;
 
   // Map key_name to env var for current environment
   const varByKey = new Map<string, EnvironmentVariable>();
@@ -457,20 +461,19 @@ export function ServiceEnvVarsSection({
         </div>
       )}
 
-      {/* Required env vars (from catalog template) */}
-      {!rawEditorMode && requiredEnvVars.length > 0 && (
+      {/* Required env vars (mandatory — from catalog template) */}
+      {!rawEditorMode && mandatoryVars.length > 0 && (
         <div className="space-y-0.5">
           <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-1">
             필수
           </p>
-          {requiredEnvVars.map((template) => {
+          {mandatoryVars.map((template) => {
             const existing = varByKey.get(template.name);
 
             if (existing) {
               return renderEnvVarRow(existing);
             }
 
-            // Not set — show add button or add form
             if (addingKey === template.name) {
               return (
                 <div key={template.name}>
@@ -503,6 +506,56 @@ export function ServiceEnvVarsSection({
             );
           })}
         </div>
+      )}
+
+      {/* Optional env vars (from catalog template) */}
+      {!rawEditorMode && optionalVars.length > 0 && (
+        <>
+          {mandatoryVars.length > 0 && <Separator className="my-2" />}
+          <div className="space-y-0.5">
+            <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-1">
+              선택
+            </p>
+            {optionalVars.map((template) => {
+              const existing = varByKey.get(template.name);
+
+              if (existing) {
+                return renderEnvVarRow(existing);
+              }
+
+              if (addingKey === template.name) {
+                return (
+                  <div key={template.name}>
+                    {renderAddForm(template.name, !template.public, template.description_ko || template.description)}
+                  </div>
+                );
+              }
+
+              return (
+                <div key={template.name} className="flex items-center gap-1.5 py-1.5">
+                  <span className="text-xs font-mono truncate flex-1 min-w-0 text-muted-foreground/60">
+                    {template.name}
+                  </span>
+                  <Badge variant="outline" className="text-[10px] h-4 px-1 text-muted-foreground/50">
+                    선택
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-5 w-5"
+                    onClick={() => {
+                      setAddingKey(template.name);
+                      setFormValue('');
+                    }}
+                    title="추가"
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </>
       )}
 
       {/* Additional env vars (user-added, not in template) */}

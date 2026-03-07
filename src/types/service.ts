@@ -14,6 +14,8 @@ export interface EnvVarTemplate {
   public: boolean;
   description: string;
   description_ko?: string;
+  /** true면 선택 항목 — 미입력해도 저장 가능 */
+  optional?: boolean;
 }
 
 export interface Service {

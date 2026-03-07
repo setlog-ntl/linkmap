@@ -148,6 +148,7 @@ export const servicesV2: ServiceSeedV2[] = [
       {
         name: 'GITHUB_TOKEN',
         public: false,
+        optional: true,
         description: 'GitHub 개인 액세스 토큰 (워크플로우에서 자동 생성됨)',
         description_ko: 'GitHub 개인 액세스 토큰 (워크플로우에서 자동 생성됨)',
       },

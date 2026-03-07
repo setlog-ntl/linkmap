@@ -78,7 +78,9 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
     staleTime: Infinity,
   });
 
-  const requiredVars = service.required_env_vars || [];
+  const allVars = service.required_env_vars || [];
+  const requiredVars = allVars; // 전체 목록 (UI 표시용)
+  const mandatoryVars = allVars.filter((v) => !v.optional);
   const stepIndex = steps.indexOf(currentStep);
   const progressPercent = ((stepIndex + 1) / steps.length) * 100;
 
@@ -136,7 +138,8 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
     onOpenChange(false);
   };
 
-  const hasFilledValues = requiredVars.some((v) => envValues[v.name]?.trim());
+  // 필수 항목이 없으면 무조건 진행 가능, 있으면 하나라도 입력 시 진행 가능
+  const hasFilledValues = mandatoryVars.length === 0 || requiredVars.some((v) => envValues[v.name]?.trim());
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -262,12 +265,35 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
               )}
 
               <div className="space-y-3 max-h-[200px] overflow-y-auto">
-                {requiredVars.map((v) => (
+                {mandatoryVars.length > 0 && (
+                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">필수</p>
+                )}
+                {mandatoryVars.map((v) => (
                   <div key={v.name} className="space-y-1.5">
                     <div className="flex items-center gap-2">
                       <Label className="text-xs font-mono">{v.name}</Label>
                       <Badge variant={v.public ? 'secondary' : 'destructive'} className="text-[10px]">
                         {v.public ? '공개' : '비밀'}
+                      </Badge>
+                    </div>
+                    <Input
+                      type={v.public ? 'text' : 'password'}
+                      placeholder={v.description_ko || v.description}
+                      value={envValues[v.name] || ''}
+                      onChange={(e) => setEnvValues((prev) => ({ ...prev, [v.name]: e.target.value }))}
+                      className="font-mono text-sm"
+                    />
+                  </div>
+                ))}
+                {allVars.filter((v) => v.optional).length > 0 && (
+                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider pt-2">선택</p>
+                )}
+                {allVars.filter((v) => v.optional).map((v) => (
+                  <div key={v.name} className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs font-mono text-muted-foreground">{v.name}</Label>
+                      <Badge variant="outline" className="text-[10px]">
+                        선택
                       </Badge>
                     </div>
                     <Input
@@ -304,8 +330,14 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
                   {requiredVars.map((v) => (
                     <div key={v.name} className="flex justify-between text-xs">
                       <code className="font-mono text-muted-foreground">{v.name}</code>
-                      <span className={envValues[v.name]?.trim() ? 'text-green-600' : 'text-yellow-600'}>
-                        {envValues[v.name]?.trim() ? '입력됨' : '미입력'}
+                      <span className={
+                        envValues[v.name]?.trim()
+                          ? 'text-green-600'
+                          : v.optional
+                            ? 'text-muted-foreground'
+                            : 'text-yellow-600'
+                      }>
+                        {envValues[v.name]?.trim() ? '입력됨' : v.optional ? '선택 (미입력)' : '미입력'}
                       </span>
                     </div>
                   ))}
