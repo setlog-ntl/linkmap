@@ -168,13 +168,26 @@ export async function POST(request: NextRequest) {
   }
 
   // 5a. Create repo — auto-suffix on name collision (422)
-  // e.g. my-site → my-site-1 → my-site-2 … up to REPO_NAME_MAX_ATTEMPTS
+  // 원본 → 랜덤 2자리 영숫자(20회) → 랜덤 3자리 영숫자(10회)
+  const SUFFIX_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  function randomSuffix(len: number): string {
+    let s = '';
+    for (let i = 0; i < len; i++) {
+      s += SUFFIX_CHARS[Math.floor(Math.random() * SUFFIX_CHARS.length)];
+    }
+    return s;
+  }
+
+  // 시도 순서: [원본, 2자리×20, 3자리×10] = 최대 31회
+  const nameCandidates: string[] = [site_name];
+  for (let i = 0; i < 20; i++) nameCandidates.push(`${site_name}-${randomSuffix(2)}`);
+  for (let i = 0; i < 10; i++) nameCandidates.push(`${site_name}-${randomSuffix(3)}`);
+
   let repoResult;
   let finalSiteName = site_name;
-  const REPO_NAME_MAX_ATTEMPTS = 10;
 
-  for (let nameAttempt = 0; nameAttempt < REPO_NAME_MAX_ATTEMPTS; nameAttempt++) {
-    const attemptName = nameAttempt === 0 ? site_name : `${site_name}-${nameAttempt}`;
+  for (let idx = 0; idx < nameCandidates.length; idx++) {
+    const attemptName = nameCandidates[idx];
     try {
       repoResult = await createRepo(
         githubToken,
@@ -185,8 +198,8 @@ export async function POST(request: NextRequest) {
       finalSiteName = attemptName;
       break;
     } catch (err) {
-      // Name already taken — try next suffix
-      if (err instanceof GitHubApiError && err.status === 422 && nameAttempt < REPO_NAME_MAX_ATTEMPTS - 1) {
+      // Name already taken — try next candidate
+      if (err instanceof GitHubApiError && err.status === 422 && idx < nameCandidates.length - 1) {
         continue;
       }
       await cleanupResources(supabase, project.id, copiedServiceAccountId);
@@ -197,7 +210,7 @@ export async function POST(request: NextRequest) {
         void logDeployError({
           userId: user.id, templateId: template_id, templateSlug: template.slug, siteName: site_name,
           errorMessage: errMsg, failedStep: '준비 중', httpStatus: err.status,
-          errorContext: { attemptName: nameAttempt === 0 ? site_name : `${site_name}-${nameAttempt}` },
+          errorContext: { attemptName },
         });
         if (err.status === 403) {
           return apiError('GitHub 권한이 부족합니다. GitHub 연결을 해제 후 다시 연결해주세요.', 403);
