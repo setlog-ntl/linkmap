@@ -189,15 +189,31 @@ export function TemplatePickerStep({
     // 배포 목록이 0 → N으로 로딩 완료된 시점에만 실행
     if (prevExistingCountRef.current === 0 && existingSiteNames.length > 0 && !siteNameTouched && selectedTemplate) {
       const autoName = resolveDefaultSiteName(selectedTemplate, templates, existingSiteNames);
-      if (autoName) setSiteName(autoName);
+      if (autoName) {
+        setSiteName(autoName);
+        checkRepoAvailability(autoName);
+      }
     }
     prevExistingCountRef.current = existingSiteNames.length;
-  }, [existingSiteNames, siteNameTouched, selectedTemplate, templates]);
+  }, [existingSiteNames, siteNameTouched, selectedTemplate, templates, checkRepoAvailability]);
 
-  // Re-apply recommended template when templates load
-  if (!selectedTemplate && recommendedTemplateId && templates.length > 0) {
-    setSelectedTemplate(recommendedTemplateId);
-  }
+  // 템플릿 로딩 완료 시 추천 템플릿 자동 선택 + 사이트 이름 자동 생성
+  useEffect(() => {
+    if (!selectedTemplate && recommendedTemplateId && templates.length > 0) {
+      setSelectedTemplate(recommendedTemplateId);
+    }
+  }, [selectedTemplate, recommendedTemplateId, templates.length]);
+
+  // 템플릿이 선택되었는데 사이트 이름이 아직 비어있으면 자동 생성
+  useEffect(() => {
+    if (selectedTemplate && !siteName && !siteNameTouched && templates.length > 0) {
+      const autoName = resolveDefaultSiteName(selectedTemplate, templates, existingSiteNames);
+      if (autoName) {
+        setSiteName(autoName);
+        checkRepoAvailability(autoName);
+      }
+    }
+  }, [selectedTemplate, siteName, siteNameTouched, templates, existingSiteNames, checkRepoAvailability]);
 
   // Sort templates: link-in-bio-pro 상단 고정 → 나머지 원본 순서 유지
   const sortedTemplates = useMemo(() => {
@@ -247,7 +263,10 @@ export function TemplatePickerStep({
     // 사용자가 이름을 직접 수정하지 않은 경우에만 자동 네이밍 적용
     if (!siteNameTouched) {
       const autoName = resolveDefaultSiteName(id, templates, existingSiteNames);
-      if (autoName) setSiteName(autoName);
+      if (autoName) {
+        setSiteName(autoName);
+        checkRepoAvailability(autoName);
+      }
     }
   };
 
