@@ -320,6 +320,21 @@ export default function DashboardPage() {
 
           {viewMode === 'list' ? (
             <div className="space-y-8">
+              {manualProjects.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <FolderOpen className="h-4 w-4 text-brand-green" />
+                    <h2 className="text-sm font-semibold">직접 구성한 프로젝트</h2>
+                    <span className="text-xs text-muted-foreground">서비스와 환경변수를 직접 설계한 프로젝트</span>
+                  </div>
+                  <ProjectTreeList
+                    projects={manualProjects}
+                    onDelete={handleDeleteProject}
+                    onToggleFavorite={handleToggleFavorite}
+                    deployByProjectId={deployByProjectId}
+                  />
+                </div>
+              )}
               {deployedProjects.length > 0 && (
                 <div>
                   <div className="flex items-center gap-2 mb-3">
@@ -335,24 +350,28 @@ export default function DashboardPage() {
                   />
                 </div>
               )}
+            </div>
+          ) : (
+            <div className="space-y-8">
               {manualProjects.length > 0 && (
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <FolderOpen className="h-4 w-4 text-brand-green" />
                     <h2 className="text-sm font-semibold">직접 구성한 프로젝트</h2>
-                    <span className="text-xs text-muted-foreground">서비스와 환경변수를 직접 관리하는 프로젝트</span>
+                    <span className="text-xs text-muted-foreground">서비스와 환경변수를 직접 설계한 프로젝트</span>
                   </div>
-                  <ProjectTreeList
-                    projects={manualProjects}
-                    onDelete={handleDeleteProject}
-                    onToggleFavorite={handleToggleFavorite}
-                    deployByProjectId={deployByProjectId}
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {manualProjects.map((project) => (
+                      <ProjectCard
+                        key={project.id}
+                        project={project}
+                        onDelete={handleDeleteProject}
+                        onToggleFavorite={handleToggleFavorite}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
-            </div>
-          ) : (
-            <div className="space-y-8">
               {deployedProjects.length > 0 && (
                 <div>
                   <div className="flex items-center gap-2 mb-3">
@@ -368,25 +387,6 @@ export default function DashboardPage() {
                         onDelete={handleDeleteProject}
                         onToggleFavorite={handleToggleFavorite}
                         deploy={deployByProjectId.get(project.id)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-              {manualProjects.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <FolderOpen className="h-4 w-4 text-brand-green" />
-                    <h2 className="text-sm font-semibold">직접 구성한 프로젝트</h2>
-                    <span className="text-xs text-muted-foreground">서비스와 환경변수를 직접 관리하는 프로젝트</span>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {manualProjects.map((project) => (
-                      <ProjectCard
-                        key={project.id}
-                        project={project}
-                        onDelete={handleDeleteProject}
-                        onToggleFavorite={handleToggleFavorite}
                       />
                     ))}
                   </div>

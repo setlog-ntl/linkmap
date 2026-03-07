@@ -169,12 +169,124 @@ export function AppSidebar({ profile }: AppSidebarProps) {
   const visibleProjects = sortedProjects.slice(0, MAX_VISIBLE_PROJECTS);
   const hasMoreProjects = (projects?.length ?? 0) > MAX_VISIBLE_PROJECTS;
 
+  const { sidebarManualProjects, sidebarDeployedProjects } = useMemo(() => {
+    const manual: typeof visibleProjects = [];
+    const deployed: typeof visibleProjects = [];
+    for (const p of visibleProjects) {
+      if (deployByProjectId.has(p.id)) {
+        deployed.push(p);
+      } else {
+        manual.push(p);
+      }
+    }
+    return { sidebarManualProjects: manual, sidebarDeployedProjects: deployed };
+  }, [visibleProjects, deployByProjectId]);
+
   const visibleSites = deployments?.slice(0, MAX_VISIBLE_SITES) ?? [];
   const hasMoreSites = (deployments?.length ?? 0) > MAX_VISIBLE_SITES;
 
   // 원클릭 배포 여부: ready 상태 사이트가 하나라도 있으면 배포됨
   const hasReadySite = deployments?.some((d) => d.deploy_status === 'ready') ?? false;
   const oneclickColorClass = !isDeploymentsLoading && hasReadySite ? 'text-green-500' : 'text-yellow-500';
+
+  const renderProjectItem = (project: NonNullable<typeof projects>[number]) => {
+    const isExpanded = expandedProjects.has(project.id);
+    const isActiveProject = activeProjectId === project.id;
+    const subNav = getProjectSubNav(project.id);
+    const latestDeploy = deployByProjectId.get(project.id);
+    const deploySiteUrl = latestDeploy
+      ? latestDeploy.pages_url || latestDeploy.deployment_url
+      : null;
+
+    return (
+      <Collapsible
+        key={project.id}
+        open={isExpanded}
+        onOpenChange={() => toggleProject(project.id)}
+        className="group/project"
+      >
+        <SidebarMenuSubItem>
+          <div className="flex items-center group/project-row">
+            <CollapsibleTrigger asChild>
+              <button
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm hover:bg-sidebar-accent"
+                aria-label={`Toggle ${project.name}`}
+              >
+                <ChevronRight className={`h-3 w-3 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+              </button>
+            </CollapsibleTrigger>
+            <SidebarMenuSubButton
+              asChild
+              isActive={isActiveProject && pathname === `/project/${project.id}`}
+              className="flex-1 min-w-0"
+            >
+              <Link href={`/project/${project.id}`}>
+                <span className="truncate">{project.name}</span>
+              </Link>
+            </SidebarMenuSubButton>
+            {latestDeploy && (
+              <span
+                className="flex h-5 w-5 shrink-0 items-center justify-center"
+                title={`원클릭 배포 · ${latestDeploy.deploy_status === 'ready' ? '배포됨' : latestDeploy.deploy_status === 'error' ? '오류' : '배포 중'}`}
+              >
+                <Rocket className={`h-3 w-3 ${latestDeploy.deploy_status === 'ready' ? 'text-green-500' : latestDeploy.deploy_status === 'error' ? 'text-red-500' : 'text-yellow-500 animate-pulse'}`} />
+              </span>
+            )}
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleFavorite({ id: project.id, isFavorited: !project.is_favorited });
+              }}
+              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-sm hover:bg-sidebar-accent transition-opacity ${project.is_favorited ? 'opacity-100' : 'opacity-0 group-hover/project-row:opacity-100'}`}
+              title={project.is_favorited ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+            >
+              <Star className={`h-3 w-3 ${project.is_favorited ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`} />
+            </button>
+          </div>
+          <CollapsibleContent>
+            <SidebarMenuSub>
+              {subNav.map((item) => (
+                <SidebarMenuSubItem key={item.href}>
+                  <SidebarMenuSubButton
+                    asChild
+                    isActive={isActive(item.href, item.exact)}
+                  >
+                    <Link href={item.href}>
+                      <item.icon className="h-3.5 w-3.5" />
+                      <span>{t(locale, item.labelKey)}</span>
+                    </Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              ))}
+              {latestDeploy && (
+                <>
+                  {latestDeploy.deploy_status === 'ready' && deploySiteUrl && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <a href={deploySiteUrl} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          <span>사이트 열기</span>
+                        </a>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild isActive={activeDeployId === latestDeploy.id}>
+                      <Link href={`/sites/${latestDeploy.id}/edit`}>
+                        <Pencil className="h-3.5 w-3.5" />
+                        <span>사이트 편집</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                </>
+              )}
+            </SidebarMenuSub>
+          </CollapsibleContent>
+        </SidebarMenuSubItem>
+      </Collapsible>
+    );
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r">
@@ -395,108 +507,33 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                         </SidebarMenuSubItem>
                       )}
 
-                      {/* Project list */}
-                      {visibleProjects.map((project) => {
-                        const isExpanded = expandedProjects.has(project.id);
-                        const isActiveProject = activeProjectId === project.id;
-                        const subNav = getProjectSubNav(project.id);
-                        const latestDeploy = deployByProjectId.get(project.id);
-                        const deploySiteUrl = latestDeploy
-                          ? latestDeploy.pages_url || latestDeploy.deployment_url
-                          : null;
-
-                        return (
-                          <Collapsible
-                            key={project.id}
-                            open={isExpanded}
-                            onOpenChange={() => toggleProject(project.id)}
-                            className="group/project"
-                          >
+                      {/* 직접 구성한 프로젝트 */}
+                      {sidebarManualProjects.length > 0 && (
+                        <>
+                          {(sidebarDeployedProjects.length > 0) && (
                             <SidebarMenuSubItem>
-                              <div className="flex items-center group/project-row">
-                                <CollapsibleTrigger asChild>
-                                  <button
-                                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm hover:bg-sidebar-accent"
-                                    aria-label={`Toggle ${project.name}`}
-                                  >
-                                    <ChevronRight className={`h-3 w-3 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                                  </button>
-                                </CollapsibleTrigger>
-                                <SidebarMenuSubButton
-                                  asChild
-                                  isActive={isActiveProject && pathname === `/project/${project.id}`}
-                                  className="flex-1 min-w-0"
-                                >
-                                  <Link href={`/project/${project.id}`}>
-                                    <span className="truncate">{project.name}</span>
-                                  </Link>
-                                </SidebarMenuSubButton>
-                                {/* 원클릭 배포 아이콘 */}
-                                {latestDeploy && (
-                                  <span
-                                    className="flex h-5 w-5 shrink-0 items-center justify-center"
-                                    title={`원클릭 배포 · ${latestDeploy.deploy_status === 'ready' ? '배포됨' : latestDeploy.deploy_status === 'error' ? '오류' : '배포 중'}`}
-                                  >
-                                    <Rocket className={`h-3 w-3 ${latestDeploy.deploy_status === 'ready' ? 'text-green-500' : latestDeploy.deploy_status === 'error' ? 'text-red-500' : 'text-yellow-500 animate-pulse'}`} />
-                                  </span>
-                                )}
-                              {/* 즐겨찾기 버튼 */}
-                                <button
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    toggleFavorite({ id: project.id, isFavorited: !project.is_favorited });
-                                  }}
-                                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-sm hover:bg-sidebar-accent transition-opacity ${project.is_favorited ? 'opacity-100' : 'opacity-0 group-hover/project-row:opacity-100'}`}
-                                  title={project.is_favorited ? '즐겨찾기 해제' : '즐겨찾기 추가'}
-                                >
-                                  <Star className={`h-3 w-3 ${project.is_favorited ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`} />
-                                </button>
-                              </div>
-                              <CollapsibleContent>
-                                <SidebarMenuSub>
-                                  {subNav.map((item) => (
-                                    <SidebarMenuSubItem key={item.href}>
-                                      <SidebarMenuSubButton
-                                        asChild
-                                        isActive={isActive(item.href, item.exact)}
-                                      >
-                                        <Link href={item.href}>
-                                          <item.icon className="h-3.5 w-3.5" />
-                                          <span>{t(locale, item.labelKey)}</span>
-                                        </Link>
-                                      </SidebarMenuSubButton>
-                                    </SidebarMenuSubItem>
-                                  ))}
-                                  {/* 배포 연결 시 추가 서브메뉴 */}
-                                  {latestDeploy && (
-                                    <>
-                                      {latestDeploy.deploy_status === 'ready' && deploySiteUrl && (
-                                        <SidebarMenuSubItem>
-                                          <SidebarMenuSubButton asChild>
-                                            <a href={deploySiteUrl} target="_blank" rel="noopener noreferrer">
-                                              <ExternalLink className="h-3.5 w-3.5" />
-                                              <span>사이트 열기</span>
-                                            </a>
-                                          </SidebarMenuSubButton>
-                                        </SidebarMenuSubItem>
-                                      )}
-                                      <SidebarMenuSubItem>
-                                        <SidebarMenuSubButton asChild isActive={activeDeployId === latestDeploy.id}>
-                                          <Link href={`/sites/${latestDeploy.id}/edit`}>
-                                            <Pencil className="h-3.5 w-3.5" />
-                                            <span>사이트 편집</span>
-                                          </Link>
-                                        </SidebarMenuSubButton>
-                                      </SidebarMenuSubItem>
-                                    </>
-                                  )}
-                                </SidebarMenuSub>
-                              </CollapsibleContent>
+                              <span className="flex items-center gap-1.5 px-2 pt-1.5 pb-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                                <FolderKanban className="h-3 w-3" />
+                                직접 구성
+                              </span>
                             </SidebarMenuSubItem>
-                          </Collapsible>
-                        );
-                      })}
+                          )}
+                          {sidebarManualProjects.map((project) => renderProjectItem(project))}
+                        </>
+                      )}
+
+                      {/* 원클릭 배포 사이트 */}
+                      {sidebarDeployedProjects.length > 0 && (
+                        <>
+                          <SidebarMenuSubItem>
+                            <span className="flex items-center gap-1.5 px-2 pt-2.5 pb-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                              <Rocket className="h-3 w-3" />
+                              원클릭 배포
+                            </span>
+                          </SidebarMenuSubItem>
+                          {sidebarDeployedProjects.map((project) => renderProjectItem(project))}
+                        </>
+                      )}
 
                       {/* View all link */}
                       {hasMoreProjects && (
