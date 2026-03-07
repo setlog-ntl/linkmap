@@ -1,5 +1,6 @@
 import type { HomepageTemplateContent } from './homepage-template-content';
 import {
+  sharedGitignore as gitignore,
   sharedDeployYml as deployYml,
   sharedTsconfigJson as tsconfigJson,
   sharedPostcssConfig as postcssConfig,
@@ -1200,6 +1201,7 @@ export const smallBizTemplate: HomepageTemplateContent = {
   repoName: 'small-biz',
   description: '우리가게 홍보 페이지 - Linkmap으로 생성',
   files: [
+    { path: '.gitignore', content: gitignore },
     { path: '.github/workflows/deploy.yml', content: deployYml },
     { path: 'package.json', content: packageJson },
     { path: 'tsconfig.json', content: tsconfigJson },

@@ -7,6 +7,38 @@
 // Build / Config Files
 // ──────────────────────────────────────────────
 
+export const sharedGitignore = `# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# next.js
+.next/
+out/
+
+# production
+build/
+dist/
+
+# misc
+.DS_Store
+*.pem
+*.tsbuildinfo
+next-env.d.ts
+
+# env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+`;
+
 export const sharedDeployYml = `name: Deploy to GitHub Pages
 on:
   push:
@@ -121,7 +153,7 @@ export function makePackageJson(name: string): string {
         '@types/node': '22.0.0',
         '@types/react': '19.0.0',
         '@types/react-dom': '19.0.0',
-        typescript: '5.7.0',
+        typescript: '5.7.2',
         tailwindcss: '4.0.0',
         '@tailwindcss/postcss': '4.0.0',
         postcss: '8.5.0',

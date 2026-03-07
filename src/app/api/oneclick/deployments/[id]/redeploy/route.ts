@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, notFoundError, apiError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 import { resolveUserGitHubToken } from '@/lib/github/token';
-import { triggerWorkflowDispatch } from '@/lib/github/api';
+import { triggerWorkflowDispatch, getFileContent, createOrUpdateFileContent } from '@/lib/github/api';
 
 export async function POST(
   _request: NextRequest,
@@ -39,8 +39,34 @@ export async function POST(
     return apiError('GitHub 연결이 필요합니다. GitHub를 다시 연결해주세요.', 400);
   }
 
-  // Trigger workflow dispatch
   const [owner, repo] = deploy.forked_repo_full_name.split('/');
+
+  // 기존 레포의 package.json에 존재하지 않는 패키지 버전이 있으면 자동 패치
+  try {
+    const file = await getFileContent(githubToken, owner, repo, 'package.json');
+    const content = Buffer.from(file.content, 'base64').toString('utf-8');
+    const pkg = JSON.parse(content);
+    let patched = false;
+
+    // typescript@5.7.0은 npm에 존재하지 않음 → 5.7.2로 패치
+    if (pkg.devDependencies?.typescript === '5.7.0') {
+      pkg.devDependencies.typescript = '5.7.2';
+      patched = true;
+    }
+
+    if (patched) {
+      await createOrUpdateFileContent(
+        githubToken, owner, repo, 'package.json',
+        JSON.stringify(pkg, null, 2) + '\n',
+        file.sha,
+        'fix: patch invalid package versions for build compatibility'
+      );
+    }
+  } catch {
+    // 패치 실패는 무시 — 워크플로우 트리거로 진행
+  }
+
+  // Trigger workflow dispatch
   try {
     await triggerWorkflowDispatch(githubToken, owner, repo);
   } catch {

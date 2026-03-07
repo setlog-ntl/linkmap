@@ -13,6 +13,7 @@ import {
   sharedTsconfigJson as sharedTsConfig,
   sharedPostcssConfig,
   sharedNextConfig,
+  sharedGitignore,
   sharedAnimatedReveal,
   makePackageJson,
 } from './shared-template-files';
@@ -735,7 +736,7 @@ const namecardPackageJson = `{
     "@types/node": "22.0.0",
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0",
-    "typescript": "5.7.0",
+    "typescript": "5.7.2",
     "tailwindcss": "4.0.0",
     "@tailwindcss/postcss": "4.0.0",
     "postcss": "8.5.0"
@@ -1371,6 +1372,7 @@ export const homepageTemplates: HomepageTemplateContent[] = [
     repoName: 'link-in-bio-pro',
     description: '내링크모음 - Linkmap으로 생성',
     files: [
+      { path: '.gitignore', content: sharedGitignore },
       { path: '.github/workflows/deploy.yml', content: deployWorkflow },
       { path: 'package.json', content: linkInBioPackageJson },
       { path: 'tsconfig.json', content: sharedTsConfig },
@@ -1398,6 +1400,7 @@ export const homepageTemplates: HomepageTemplateContent[] = [
     repoName: 'digital-namecard',
     description: '디지털 명함 - Linkmap으로 생성',
     files: [
+      { path: '.gitignore', content: sharedGitignore },
       { path: '.github/workflows/deploy.yml', content: deployWorkflow },
       { path: 'package.json', content: namecardPackageJson },
       { path: 'tsconfig.json', content: sharedTsConfig },

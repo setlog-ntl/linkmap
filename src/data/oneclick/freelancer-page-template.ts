@@ -1,5 +1,6 @@
 import type { HomepageTemplateContent } from './homepage-template-content';
 import {
+  sharedGitignore as gitignore,
   sharedDeployYml as deployYml,
   sharedTsconfigJson as tsconfigJson,
   sharedPostcssConfig as postcssConfig,
@@ -1208,6 +1209,7 @@ export const freelancerPageTemplate: HomepageTemplateContent = {
   repoName: 'freelancer-page',
   description: '프리랜서 포트폴리오 - Linkmap으로 생성',
   files: [
+    { path: '.gitignore', content: gitignore },
     { path: '.github/workflows/deploy.yml', content: deployYml },
     { path: 'package.json', content: packageJson },
     { path: 'tsconfig.json', content: tsconfigJson },
