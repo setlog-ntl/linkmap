@@ -7,13 +7,16 @@ export interface ShowcaseItem {
   site_name: string;
   pages_url: string | null;
   deployment_url: string | null;
-  deploy_method: string;
+  deploy_method: string | null;
   deployed_at: string | null;
   created_at: string;
   user_id: string;
   showcase_description: string | null;
   showcase_tags: string[];
   showcase_category: ShowcaseCategory | null;
+  source?: 'deploy' | 'project';
+  project_icon_type?: string | null;
+  project_icon_value?: string | null;
   homepage_templates: {
     id: string;
     slug: string;
@@ -99,6 +102,48 @@ export function useProjectShowcaseDeploy(projectId: string) {
     enabled: !!projectId,
   });
 }
+
+// ---------- Project Showcase ----------
+
+export interface ProjectShowcasePayload {
+  projectId: string;
+  action: 'register' | 'unregister' | 'update';
+  description?: string;
+  tags?: string[];
+  category?: ShowcaseCategory;
+}
+
+export function useProjectShowcase() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: ProjectShowcasePayload): Promise<{ is_showcase?: boolean; success?: boolean }> => {
+      const res = await fetch(`/api/projects/${payload.projectId}/showcase`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: payload.action,
+          description: payload.description,
+          tags: payload.tags,
+          category: payload.category,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '쇼케이스 처리 실패');
+      }
+      return res.json();
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.list });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.mine });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.byProject(variables.projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all(variables.projectId) });
+    },
+  });
+}
+
+// ---------- Deploy Showcase ----------
 
 export interface ShowcaseRegisterPayload {
   deployId: string;

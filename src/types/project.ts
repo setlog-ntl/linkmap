@@ -1,4 +1,4 @@
-import type { ServiceStatus } from './core';
+import type { ServiceStatus, ShowcaseCategory } from './core';
 import type { Service } from './service';
 
 export type BudgetCurrency = 'USD' | 'KRW';
@@ -15,6 +15,10 @@ export interface Project {
   icon_value: string | null;
   link_url: string | null;
   is_favorited: boolean;
+  is_showcase: boolean;
+  showcase_description: string | null;
+  showcase_tags: string[];
+  showcase_category: ShowcaseCategory | null;
   monthly_budget: number | null;
   budget_currency: BudgetCurrency;
   created_at: string;
