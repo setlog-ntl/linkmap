@@ -123,6 +123,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
   ];
 
   const toolsNav: { label: string; href: string; icon: React.ElementType }[] = [
+    { label: '내 쇼케이스', href: '/sites/showcase', icon: Trophy },
     { label: '휴지통', href: '/trash', icon: Trash2 },
   ];
 

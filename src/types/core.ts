@@ -159,7 +159,29 @@ export interface HomepageDeploy {
   custom_domain: string | null;
   config_data: Record<string, unknown>;
   is_showcase: boolean;
+  showcase_description: string | null;
+  showcase_tags: string[];
+  showcase_category: ShowcaseCategory | null;
   created_at: string;
   updated_at: string;
   deployed_at: string | null;
 }
+
+export type ShowcaseCategory =
+  | 'portfolio'
+  | 'business'
+  | 'blog'
+  | 'landing'
+  | 'community'
+  | 'ecommerce'
+  | 'other';
+
+export const SHOWCASE_CATEGORIES: { value: ShowcaseCategory; label: string }[] = [
+  { value: 'portfolio', label: '포트폴리오' },
+  { value: 'business', label: '비즈니스' },
+  { value: 'blog', label: '블로그' },
+  { value: 'landing', label: '랜딩페이지' },
+  { value: 'community', label: '커뮤니티' },
+  { value: 'ecommerce', label: '쇼핑몰' },
+  { value: 'other', label: '기타' },
+];

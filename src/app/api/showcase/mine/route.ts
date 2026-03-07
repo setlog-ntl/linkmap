@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { unauthorizedError } from '@/lib/api/errors';
 
 export async function GET() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return unauthorizedError();
 
   const { data, error } = await supabase
     .from('homepage_deploys')
@@ -31,10 +34,10 @@ export async function GET() {
         avatar_url
       )
     `)
+    .eq('user_id', user.id)
     .eq('is_showcase', true)
     .eq('deploy_status', 'ready')
-    .order('deployed_at', { ascending: false })
-    .limit(50);
+    .order('deployed_at', { ascending: false });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

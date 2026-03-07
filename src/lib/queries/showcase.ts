@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './keys';
+import type { ShowcaseCategory } from '@/types/core';
 
 export interface ShowcaseItem {
   id: string;
@@ -10,6 +11,9 @@ export interface ShowcaseItem {
   deployed_at: string | null;
   created_at: string;
   user_id: string;
+  showcase_description: string | null;
+  showcase_tags: string[];
+  showcase_category: ShowcaseCategory | null;
   homepage_templates: {
     id: string;
     slug: string;
@@ -40,12 +44,133 @@ export function useShowcaseList() {
   });
 }
 
+export function useShowcaseDetail(id: string) {
+  return useQuery({
+    queryKey: queryKeys.showcase.detail(id),
+    queryFn: async (): Promise<ShowcaseItem> => {
+      const res = await fetch(`/api/showcase/${id}`);
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '쇼케이스 조회 실패');
+      }
+      const data = await res.json();
+      return data.showcase;
+    },
+    enabled: !!id,
+  });
+}
+
+export function useMyShowcases() {
+  return useQuery({
+    queryKey: queryKeys.showcase.mine,
+    queryFn: async (): Promise<ShowcaseItem[]> => {
+      const res = await fetch('/api/showcase/mine');
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '내 쇼케이스 조회 실패');
+      }
+      const data = await res.json();
+      return data.showcases;
+    },
+  });
+}
+
+export interface ShowcaseRegisterPayload {
+  deployId: string;
+  description?: string;
+  tags?: string[];
+  category?: ShowcaseCategory;
+}
+
+export function useRegisterShowcase() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: ShowcaseRegisterPayload): Promise<{ is_showcase: boolean }> => {
+      const res = await fetch(`/api/oneclick/deployments/${payload.deployId}/showcase`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'register',
+          description: payload.description,
+          tags: payload.tags,
+          category: payload.category,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '쇼케이스 등록 실패');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.list });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.mine });
+      queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
+    },
+  });
+}
+
+export function useUpdateShowcase() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: ShowcaseRegisterPayload): Promise<{ success: boolean }> => {
+      const res = await fetch(`/api/oneclick/deployments/${payload.deployId}/showcase`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          description: payload.description,
+          tags: payload.tags,
+          category: payload.category,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '쇼케이스 수정 실패');
+      }
+      return res.json();
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.list });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.mine });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.detail(variables.deployId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
+    },
+  });
+}
+
+export function useUnregisterShowcase() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (deployId: string): Promise<{ is_showcase: boolean }> => {
+      const res = await fetch(`/api/oneclick/deployments/${deployId}/showcase`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'unregister' }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '쇼케이스 해제 실패');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.list });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.mine });
+      queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
+    },
+  });
+}
+
+// Legacy: keep for backward compat with deploy-site-card toggle
 export function useToggleShowcase() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (deployId: string): Promise<{ is_showcase: boolean }> => {
       const res = await fetch(`/api/oneclick/deployments/${deployId}/showcase`, {
         method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'toggle' }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -55,6 +180,7 @@ export function useToggleShowcase() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.showcase.list });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.mine });
       queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
     },
   });

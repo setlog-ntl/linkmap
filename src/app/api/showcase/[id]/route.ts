@@ -1,7 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-export async function GET() {
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -31,14 +35,14 @@ export async function GET() {
         avatar_url
       )
     `)
+    .eq('id', id)
     .eq('is_showcase', true)
     .eq('deploy_status', 'ready')
-    .order('deployed_at', { ascending: false })
-    .limit(50);
+    .single();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error || !data) {
+    return NextResponse.json({ error: '쇼케이스를 찾을 수 없습니다' }, { status: 404 });
   }
 
-  return NextResponse.json({ showcases: data || [] });
+  return NextResponse.json({ showcase: data });
 }

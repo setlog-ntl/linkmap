@@ -113,6 +113,9 @@ export interface HomepageDeploy {
   deploy_error_message: string | null;
   retry_count?: number;
   is_showcase?: boolean;
+  showcase_description?: string | null;
+  showcase_tags?: string[];
+  showcase_category?: string | null;
   created_at: string;
   deployed_at: string | null;
   template_id: string;

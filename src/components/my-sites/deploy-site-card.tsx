@@ -18,10 +18,12 @@ import { ExternalLink, Github, Globe, LayoutDashboard, Loader2, Pencil, RefreshC
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { useDeleteDeployment, useRedeployDeployment, type HomepageDeploy } from '@/lib/queries/oneclick';
-import { useToggleShowcase } from '@/lib/queries/showcase';
+import { useRegisterShowcase, useUnregisterShowcase } from '@/lib/queries/showcase';
+import { ShowcaseRegisterDialog } from '@/components/showcase/showcase-register-dialog';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import type { ShowcaseCategory } from '@/types/core';
 
 interface DeploySiteCardProps {
   deploy: HomepageDeploy;
@@ -66,8 +68,10 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
   const { locale } = useLocaleStore();
   const deleteMutation = useDeleteDeployment();
   const redeployMutation = useRedeployDeployment();
-  const toggleShowcase = useToggleShowcase();
+  const registerShowcase = useRegisterShowcase();
+  const unregisterShowcase = useUnregisterShowcase();
   const [open, setOpen] = useState(false);
+  const [showcaseDialogOpen, setShowcaseDialogOpen] = useState(false);
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
 
@@ -133,13 +137,39 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
     }
   };
 
-  const handleToggleShowcase = async () => {
-    try {
-      const result = await toggleShowcase.mutateAsync(deploy.id);
-      toast.success(result.is_showcase ? '쇼케이스에 등록되었습니다' : '쇼케이스에서 해제되었습니다');
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : '쇼케이스 토글 실패');
+  const handleShowcaseClick = () => {
+    if (deploy.is_showcase) {
+      // 이미 등록됨 → 해제
+      unregisterShowcase.mutate(deploy.id, {
+        onSuccess: () => toast.success('쇼케이스에서 해제되었습니다'),
+        onError: (err) => toast.error(err instanceof Error ? err.message : '쇼케이스 해제 실패'),
+      });
+    } else {
+      // 미등록 → 다이얼로그 열기
+      setShowcaseDialogOpen(true);
     }
+  };
+
+  const handleShowcaseRegister = (data: {
+    description: string;
+    tags: string[];
+    category: ShowcaseCategory | undefined;
+  }) => {
+    registerShowcase.mutate(
+      {
+        deployId: deploy.id,
+        description: data.description || undefined,
+        tags: data.tags.length > 0 ? data.tags : undefined,
+        category: data.category,
+      },
+      {
+        onSuccess: () => {
+          toast.success('쇼케이스에 등록되었습니다');
+          setShowcaseDialogOpen(false);
+        },
+        onError: (err) => toast.error(err instanceof Error ? err.message : '쇼케이스 등록 실패'),
+      }
+    );
   };
 
   const deployDate = new Date(deploy.created_at).toLocaleDateString(
@@ -319,18 +349,18 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
             </Button>
           )}
 
-          {/* 쇼케이스 토글 */}
+          {/* 쇼케이스 등록/해제 */}
           {deploy.deploy_status === 'ready' && (
             <Button
               size="sm"
               variant={deploy.is_showcase ? 'default' : 'outline'}
-              onClick={handleToggleShowcase}
-              disabled={toggleShowcase.isPending}
+              onClick={handleShowcaseClick}
+              disabled={registerShowcase.isPending || unregisterShowcase.isPending}
               className={cn(
                 deploy.is_showcase && 'bg-brand-blue hover:bg-brand-blue/90'
               )}
             >
-              {toggleShowcase.isPending ? (
+              {(registerShowcase.isPending || unregisterShowcase.isPending) ? (
                 <Loader2 className="mr-1 h-3 w-3 animate-spin" />
               ) : (
                 <Trophy className="mr-1 h-3 w-3" />
@@ -393,6 +423,15 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
           </AlertDialog>
         </div>
       </CardContent>
+
+      {/* 쇼케이스 등록 다이얼로그 */}
+      <ShowcaseRegisterDialog
+        open={showcaseDialogOpen}
+        onOpenChange={setShowcaseDialogOpen}
+        onSubmit={handleShowcaseRegister}
+        isLoading={registerShowcase.isPending}
+        mode="register"
+      />
     </Card>
   );
 }

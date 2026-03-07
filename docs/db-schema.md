@@ -515,6 +515,9 @@
 | config_data | JSONB | YES | '{}' |
 | retry_count | SMALLINT | NO | 0 | M069 |
 | is_showcase | BOOLEAN | NO | false | M072 |
+| showcase_description | TEXT | YES | NULL | M073 |
+| showcase_tags | TEXT[] | YES | '{}' | M073 |
+| showcase_category | TEXT | YES | NULL | M073. CHECK: portfolio,business,blog,landing,community,ecommerce,other |
 | created_at | TIMESTAMPTZ | NO | now() |
 | updated_at | TIMESTAMPTZ | NO | now() |
 | deployed_at | TIMESTAMPTZ | YES | NULL |
