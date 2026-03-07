@@ -1,7 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useMyShowcases, useUpdateShowcase, useUnregisterShowcase, type ShowcaseItem } from '@/lib/queries/showcase';
+import {
+  useMyShowcases,
+  useUpdateShowcase,
+  useUnregisterShowcase,
+  useProjectShowcase,
+  type ShowcaseItem,
+} from '@/lib/queries/showcase';
 import { ShowcaseRegisterDialog } from '@/components/showcase/showcase-register-dialog';
 import { useLocaleStore } from '@/stores/locale-store';
 import { SHOWCASE_CATEGORIES, type ShowcaseCategory } from '@/types/core';
@@ -28,6 +34,8 @@ import {
   Globe,
   Loader2,
   Sparkles,
+  FolderKanban,
+  Rocket,
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -36,6 +44,7 @@ export default function MyShowcasePage() {
   const { data: showcases, isLoading } = useMyShowcases();
   const updateShowcase = useUpdateShowcase();
   const unregisterShowcase = useUnregisterShowcase();
+  const projectShowcase = useProjectShowcase();
   const { locale } = useLocaleStore();
 
   const [editTarget, setEditTarget] = useState<ShowcaseItem | null>(null);
@@ -47,33 +56,70 @@ export default function MyShowcasePage() {
     category: ShowcaseCategory | undefined;
   }) => {
     if (!editTarget) return;
-    updateShowcase.mutate(
-      {
-        deployId: editTarget.id,
-        description: data.description || undefined,
-        tags: data.tags.length > 0 ? data.tags : undefined,
-        category: data.category,
-      },
-      {
-        onSuccess: () => {
-          toast.success('쇼케이스 정보가 수정되었습니다');
-          setEditTarget(null);
+
+    if (editTarget.source === 'project') {
+      projectShowcase.mutate(
+        {
+          projectId: editTarget.id,
+          action: 'update',
+          description: data.description || undefined,
+          tags: data.tags.length > 0 ? data.tags : undefined,
+          category: data.category,
         },
-        onError: (err) => toast.error(err instanceof Error ? err.message : '수정 실패'),
-      }
-    );
+        {
+          onSuccess: () => {
+            toast.success('쇼케이스 정보가 수정되었습니다');
+            setEditTarget(null);
+          },
+          onError: (err) => toast.error(err instanceof Error ? err.message : '수정 실패'),
+        }
+      );
+    } else {
+      updateShowcase.mutate(
+        {
+          deployId: editTarget.id,
+          description: data.description || undefined,
+          tags: data.tags.length > 0 ? data.tags : undefined,
+          category: data.category,
+        },
+        {
+          onSuccess: () => {
+            toast.success('쇼케이스 정보가 수정되었습니다');
+            setEditTarget(null);
+          },
+          onError: (err) => toast.error(err instanceof Error ? err.message : '수정 실패'),
+        }
+      );
+    }
   };
 
   const handleUnregister = () => {
     if (!deleteTarget) return;
-    unregisterShowcase.mutate(deleteTarget.id, {
-      onSuccess: () => {
-        toast.success('쇼케이스에서 해제되었습니다');
-        setDeleteTarget(null);
-      },
-      onError: (err) => toast.error(err instanceof Error ? err.message : '해제 실패'),
-    });
+
+    if (deleteTarget.source === 'project') {
+      projectShowcase.mutate(
+        { projectId: deleteTarget.id, action: 'unregister' },
+        {
+          onSuccess: () => {
+            toast.success('쇼케이스에서 해제되었습니다');
+            setDeleteTarget(null);
+          },
+          onError: (err) => toast.error(err instanceof Error ? err.message : '해제 실패'),
+        }
+      );
+    } else {
+      unregisterShowcase.mutate(deleteTarget.id, {
+        onSuccess: () => {
+          toast.success('쇼케이스에서 해제되었습니다');
+          setDeleteTarget(null);
+        },
+        onError: (err) => toast.error(err instanceof Error ? err.message : '해제 실패'),
+      });
+    }
   };
+
+  const isLoading2 = updateShowcase.isPending || projectShowcase.isPending;
+  const isUnregistering = unregisterShowcase.isPending || projectShowcase.isPending;
 
   return (
     <div className="container py-8 max-w-5xl">
@@ -113,6 +159,7 @@ export default function MyShowcasePage() {
               : null;
             const authorName = item.profiles?.name || '익명';
             const authorInitial = authorName.charAt(0).toUpperCase();
+            const isProject = item.source === 'project';
 
             return (
               <Card key={item.id}>
@@ -133,8 +180,16 @@ export default function MyShowcasePage() {
                         >
                           {item.site_name}
                         </Link>
+                        {/* source badge */}
+                        <Badge variant="outline" className="text-[10px] shrink-0 gap-1">
+                          {isProject ? (
+                            <><FolderKanban className="h-2.5 w-2.5" /> 프로젝트</>
+                          ) : (
+                            <><Rocket className="h-2.5 w-2.5" /> 배포</>
+                          )}
+                        </Badge>
                         {categoryLabel && (
-                          <Badge variant="outline" className="text-[10px] shrink-0">
+                          <Badge variant="secondary" className="text-[10px] shrink-0">
                             {categoryLabel}
                           </Badge>
                         )}
@@ -206,11 +261,16 @@ export default function MyShowcasePage() {
             등록한 쇼케이스가 없습니다
           </h3>
           <p className="text-sm text-muted-foreground mb-4">
-            내 사이트 관리에서 배포된 사이트를 쇼케이스에 등록해보세요!
+            프로젝트 대시보드 또는 내 사이트 관리에서 쇼케이스에 등록해보세요!
           </p>
-          <Button variant="outline" asChild>
-            <Link href="/sites/manage">내 사이트 관리</Link>
-          </Button>
+          <div className="flex justify-center gap-3">
+            <Button variant="outline" asChild>
+              <Link href="/sites/manage">내 사이트 관리</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/dashboard">프로젝트 목록</Link>
+            </Button>
+          </div>
         </div>
       )}
 
@@ -220,7 +280,7 @@ export default function MyShowcasePage() {
           open={!!editTarget}
           onOpenChange={(open) => !open && setEditTarget(null)}
           onSubmit={handleUpdate}
-          isLoading={updateShowcase.isPending}
+          isLoading={isLoading2}
           mode="edit"
           initialData={{
             description: editTarget.showcase_description,
@@ -237,17 +297,19 @@ export default function MyShowcasePage() {
             <AlertDialogTitle>쇼케이스에서 해제할까요?</AlertDialogTitle>
             <AlertDialogDescription>
               &quot;{deleteTarget?.site_name}&quot;을(를) 쇼케이스 갤러리에서 제거합니다.
-              사이트 자체는 삭제되지 않으며, 나중에 다시 등록할 수 있습니다.
+              {deleteTarget?.source === 'project'
+                ? ' 프로젝트 자체는 삭제되지 않으며, 나중에 다시 등록할 수 있습니다.'
+                : ' 사이트 자체는 삭제되지 않으며, 나중에 다시 등록할 수 있습니다.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>취소</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleUnregister}
-              disabled={unregisterShowcase.isPending}
+              disabled={isUnregistering}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {unregisterShowcase.isPending && (
+              {isUnregistering && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
               해제하기
