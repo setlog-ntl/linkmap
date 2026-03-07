@@ -48,10 +48,21 @@ export async function POST(
     const pkg = JSON.parse(content);
     let patched = false;
 
-    // typescript@5.7.0은 npm에 존재하지 않음 → 5.7.2로 패치
-    if (pkg.devDependencies?.typescript === '5.7.0') {
-      pkg.devDependencies.typescript = '5.7.2';
-      patched = true;
+    // 빌드 실패를 유발하는 알려진 버전 문제 패치
+    const fixes: Record<string, Record<string, [string, string]>> = {
+      devDependencies: {
+        typescript: ['5.7.0', '5.7.2'],           // 5.7.0 미존재
+        tailwindcss: ['4.0.0', '4.0.17'],          // 4.0.0 negated 버그
+        '@tailwindcss/postcss': ['4.0.0', '4.0.17'],
+      },
+    };
+    for (const [section, entries] of Object.entries(fixes)) {
+      for (const [pkgName, [bad, good]] of Object.entries(entries)) {
+        if ((pkg as Record<string, Record<string, string>>)[section]?.[pkgName] === bad) {
+          (pkg as Record<string, Record<string, string>>)[section][pkgName] = good;
+          patched = true;
+        }
+      }
     }
 
     if (patched) {

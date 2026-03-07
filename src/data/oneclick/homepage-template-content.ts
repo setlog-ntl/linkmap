@@ -737,8 +737,8 @@ const namecardPackageJson = `{
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0",
     "typescript": "5.7.2",
-    "tailwindcss": "4.0.0",
-    "@tailwindcss/postcss": "4.0.0",
+    "tailwindcss": "4.0.17",
+    "@tailwindcss/postcss": "4.0.17",
     "postcss": "8.5.0"
   }
 }`;
