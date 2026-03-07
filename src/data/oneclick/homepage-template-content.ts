@@ -443,7 +443,7 @@ export function ProfileSection({ config, theme }: Props) {
   return (
     <div className="flex flex-col items-center gap-3 text-center">
       {config.avatarUrl ? (
-        <div className="avatar-ring" style={{ ['--color-primary' as string]: theme.primary, ['--color-secondary' as string]: theme.secondary ?? theme.primary }}>
+        <div className="avatar-ring" style={{ ['--color-primary' as string]: theme.primary, ['--color-secondary' as string]: theme.primary }}>
           <img
             src={config.avatarUrl}
             alt={name}
@@ -456,7 +456,7 @@ export function ProfileSection({ config, theme }: Props) {
       ) : (
         <div
           className="avatar-ring w-24 h-24"
-          style={{ ['--color-primary' as string]: theme.primary, ['--color-secondary' as string]: theme.secondary ?? theme.primary }}
+          style={{ ['--color-primary' as string]: theme.primary, ['--color-secondary' as string]: theme.primary }}
         >
           <div
             className="w-24 h-24 rounded-full flex items-center justify-center text-2xl font-bold"
