@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { CheckCircle2, XCircle, ArrowRight, ArrowLeft, ExternalLink, KeyRound, ClipboardPaste } from 'lucide-react';
+import { CheckCircle2, XCircle, ArrowRight, ArrowLeft, ExternalLink, KeyRound, ClipboardPaste, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { parseEnvContent } from '@/lib/utils/parse-env';
 import { useAddEnvVar } from '@/lib/queries/env-vars';
@@ -60,6 +60,7 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
   const [verifySuccess, setVerifySuccess] = useState<boolean | null>(null);
   const [showPaste, setShowPaste] = useState(false);
   const [pasteText, setPasteText] = useState('');
+  const [dismissedKeys, setDismissedKeys] = useState<Set<string>>(new Set());
 
   const addEnvVar = useAddEnvVar(projectId);
   const runHealthCheck = useRunHealthCheck();
@@ -285,16 +286,33 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
                     />
                   </div>
                 ))}
-                {allVars.filter((v) => v.optional).length > 0 && (
+                {allVars.filter((v) => v.optional && !dismissedKeys.has(v.name)).length > 0 && (
                   <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider pt-2">선택</p>
                 )}
-                {allVars.filter((v) => v.optional).map((v) => (
+                {allVars.filter((v) => v.optional && !dismissedKeys.has(v.name)).map((v) => (
                   <div key={v.name} className="space-y-1.5">
                     <div className="flex items-center gap-2">
                       <Label className="text-xs font-mono text-muted-foreground">{v.name}</Label>
                       <Badge variant="outline" className="text-[10px]">
                         선택
                       </Badge>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-4 w-4 ml-auto text-muted-foreground/50 hover:text-destructive"
+                        onClick={() => {
+                          setDismissedKeys((prev) => new Set([...prev, v.name]));
+                          setEnvValues((prev) => {
+                            const next = { ...prev };
+                            delete next[v.name];
+                            return next;
+                          });
+                        }}
+                        title="이 항목 필요 없음"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
                     </div>
                     <Input
                       type={v.public ? 'text' : 'password'}
@@ -325,9 +343,11 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">입력된 변수</span>
-                    <span className="font-medium">{requiredVars.filter((v) => envValues[v.name]?.trim()).length} / {requiredVars.length}</span>
+                    <span className="font-medium">
+                      {requiredVars.filter((v) => !dismissedKeys.has(v.name) && envValues[v.name]?.trim()).length} / {requiredVars.filter((v) => !dismissedKeys.has(v.name)).length}
+                    </span>
                   </div>
-                  {requiredVars.map((v) => (
+                  {requiredVars.filter((v) => !dismissedKeys.has(v.name)).map((v) => (
                     <div key={v.name} className="flex justify-between text-xs">
                       <code className="font-mono text-muted-foreground">{v.name}</code>
                       <span className={
@@ -341,6 +361,11 @@ export function SetupWizard({ open, onOpenChange, service, projectService, proje
                       </span>
                     </div>
                   ))}
+                  {dismissedKeys.size > 0 && (
+                    <div className="text-xs text-muted-foreground/60 pt-1">
+                      제외됨: {Array.from(dismissedKeys).join(', ')}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

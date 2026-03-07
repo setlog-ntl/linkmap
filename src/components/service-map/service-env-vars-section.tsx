@@ -22,6 +22,10 @@ import {
   X,
   Loader2,
   FileText,
+  AlertCircle,
+  CheckCircle2,
+  ChevronDown,
+  RotateCcw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { parseEnvLine, parseEnvContent } from '@/lib/utils/parse-env';
@@ -57,6 +61,8 @@ export function ServiceEnvVarsSection({
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [rawEditorMode, setRawEditorMode] = useState(false);
   const [rawEditorText, setRawEditorText] = useState('');
+  const [dismissedKeys, setDismissedKeys] = useState<Set<string>>(new Set());
+  const [showOptional, setShowOptional] = useState(false);
 
   // M2: Clear decrypted values on unmount
   useEffect(() => {
@@ -509,54 +515,96 @@ export function ServiceEnvVarsSection({
       )}
 
       {/* Optional env vars (from catalog template) */}
-      {!rawEditorMode && optionalVars.length > 0 && (
-        <>
-          {mandatoryVars.length > 0 && <Separator className="my-2" />}
-          <div className="space-y-0.5">
-            <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-1">
-              선택
-            </p>
-            {optionalVars.map((template) => {
-              const existing = varByKey.get(template.name);
+      {!rawEditorMode && optionalVars.length > 0 && (() => {
+        const configuredOptional = optionalVars.filter((t) => varByKey.has(t.name));
+        const unconfiguredOptional = optionalVars.filter((t) => !varByKey.has(t.name) && !dismissedKeys.has(t.name));
+        const visibleCount = configuredOptional.length + unconfiguredOptional.length;
+        const hasDismissed = dismissedKeys.size > 0;
 
-              if (existing) {
-                return renderEnvVarRow(existing);
-              }
+        if (visibleCount === 0 && !hasDismissed) return null;
 
-              if (addingKey === template.name) {
-                return (
-                  <div key={template.name}>
-                    {renderAddForm(template.name, !template.public, template.description_ko || template.description)}
-                  </div>
-                );
-              }
-
-              return (
-                <div key={template.name} className="flex items-center gap-1.5 py-1.5">
-                  <span className="text-xs font-mono truncate flex-1 min-w-0 text-muted-foreground/60">
-                    {template.name}
-                  </span>
-                  <Badge variant="outline" className="text-[10px] h-4 px-1 text-muted-foreground/50">
-                    선택
-                  </Badge>
+        return (
+          <>
+            {mandatoryVars.length > 0 && <Separator className="my-2" />}
+            <div className="space-y-0.5">
+              <button
+                onClick={() => setShowOptional((v) => !v)}
+                className="flex items-center gap-1 w-full text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-1 hover:text-foreground transition-colors"
+              >
+                <ChevronDown className={`h-3 w-3 transition-transform ${showOptional ? '' : '-rotate-90'}`} />
+                선택 ({configuredOptional.length}/{optionalVars.length})
+                {hasDismissed && (
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-5 w-5"
-                    onClick={() => {
-                      setAddingKey(template.name);
-                      setFormValue('');
+                    className="h-4 w-4 ml-auto"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDismissedKeys(new Set());
                     }}
-                    title="추가"
+                    title="숨긴 항목 되돌리기"
                   >
-                    <Plus className="h-3 w-3" />
+                    <RotateCcw className="h-2.5 w-2.5" />
                   </Button>
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
+                )}
+              </button>
+              {showOptional && (
+                <>
+                  {/* Configured optional vars */}
+                  {configuredOptional.map((template) => {
+                    const existing = varByKey.get(template.name)!;
+                    return renderEnvVarRow(existing);
+                  })}
+                  {/* Unconfigured optional vars (not dismissed) */}
+                  {unconfiguredOptional.map((template) => {
+                    if (addingKey === template.name) {
+                      return (
+                        <div key={template.name}>
+                          {renderAddForm(template.name, !template.public, template.description_ko || template.description)}
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div key={template.name} className="flex items-center gap-1.5 py-1.5 group">
+                        <span className="text-xs font-mono truncate flex-1 min-w-0 text-muted-foreground/60">
+                          {template.name}
+                        </span>
+                        <Badge variant="outline" className="text-[10px] h-4 px-1 text-muted-foreground/50">
+                          선택
+                        </Badge>
+                        <div className="flex gap-0.5">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5"
+                            onClick={() => {
+                              setAddingKey(template.name);
+                              setFormValue('');
+                            }}
+                            title="추가"
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground"
+                            onClick={() => setDismissedKeys((prev) => new Set([...prev, template.name]))}
+                            title="목록에서 숨기기"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+            </div>
+          </>
+        );
+      })()}
 
       {/* Additional env vars (user-added, not in template) */}
       {!rawEditorMode && additionalVars.length > 0 && (
@@ -645,6 +693,57 @@ export function ServiceEnvVarsSection({
         <p className="text-xs text-muted-foreground py-2">
           등록된 환경변수가 없습니다
         </p>
+      )}
+
+      {/* Config status summary */}
+      {!rawEditorMode && requiredEnvVars.length > 0 && (
+        (() => {
+          const mandatoryConfigured = mandatoryVars.filter((t) => varByKey.has(t.name));
+          const mandatoryMissing = mandatoryVars.filter((t) => !varByKey.has(t.name));
+          const optionalConfigured = optionalVars.filter((t) => varByKey.has(t.name));
+          const allMandatoryDone = mandatoryMissing.length === 0;
+
+          return (
+            <>
+              <Separator className="my-2" />
+              <div className={`rounded-md px-2.5 py-2 text-xs space-y-1 ${
+                allMandatoryDone
+                  ? 'bg-green-500/5 border border-green-500/20'
+                  : 'bg-amber-500/5 border border-amber-500/20'
+              }`}>
+                <div className="flex items-center gap-1.5 font-medium">
+                  {allMandatoryDone ? (
+                    <>
+                      <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
+                      <span className="text-green-700 dark:text-green-400">필수 설정 완료</span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="h-3.5 w-3.5 text-amber-600" />
+                      <span className="text-amber-700 dark:text-amber-400">
+                        필수 {mandatoryMissing.length}개 미설정
+                      </span>
+                    </>
+                  )}
+                </div>
+                <div className="flex gap-3 text-muted-foreground">
+                  <span>필수 {mandatoryConfigured.length}/{mandatoryVars.length}</span>
+                  {optionalVars.length > 0 && (
+                    <span>선택 {optionalConfigured.length}/{optionalVars.length}</span>
+                  )}
+                  {additionalVars.length > 0 && (
+                    <span>추가 {additionalVars.length}</span>
+                  )}
+                </div>
+                {!allMandatoryDone && (
+                  <div className="text-muted-foreground/80 pt-0.5">
+                    {mandatoryMissing.map((t) => t.name).join(', ')}
+                  </div>
+                )}
+              </div>
+            </>
+          );
+        })()
       )}
     </div>
   );
