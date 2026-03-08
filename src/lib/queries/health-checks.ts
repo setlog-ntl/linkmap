@@ -9,9 +9,16 @@ export function useHealthChecks(projectServiceId: string) {
     queryKey: queryKeys.healthChecks.byProjectService(projectServiceId),
     staleTime: staleTime.healthCheck,
     queryFn: async (): Promise<HealthCheck[]> => {
-      const res = await fetch(`/api/health-check?project_service_id=${projectServiceId}`);
-      if (!res.ok) throw new Error('Health check 이력 조회 실패');
-      return res.json();
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('health_checks')
+        .select('*')
+        .eq('project_service_id', projectServiceId)
+        .order('checked_at', { ascending: false })
+        .limit(20);
+
+      if (error) throw new Error('Health check 이력 조회 실패');
+      return (data ?? []) as HealthCheck[];
     },
     enabled: !!projectServiceId,
   });
