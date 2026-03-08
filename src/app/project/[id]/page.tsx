@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { useDashboard } from '@/lib/queries/dashboard';
 import { useProjectStore } from '@/stores/project-store';
 import { BentoDashboardSkeleton } from '@/components/dashboard/bento-dashboard-skeleton';
@@ -35,6 +36,14 @@ export default function ProjectDashboardPage() {
       <BentoDashboardLayout data={data} />
       <div className="mt-8">
         <HealthContent projectId={projectId} />
+        <div className="mt-3 text-right">
+          <Link
+            href={`/project/${projectId}/monitoring`}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            상세 모니터링 보기 →
+          </Link>
+        </div>
       </div>
       <AiChatPanel data={data} />
     </>

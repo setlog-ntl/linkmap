@@ -1,10 +1,11 @@
-import { redirect } from 'next/navigation';
+'use client';
 
-export default async function MonitoringPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  redirect(`/project/${id}`);
+import { useParams } from 'next/navigation';
+import { MonitoringDashboard } from '@/components/project/monitoring-dashboard';
+
+export default function MonitoringPage() {
+  const params = useParams();
+  const projectId = params.id as string;
+
+  return <MonitoringDashboard projectId={projectId} />;
 }
