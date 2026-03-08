@@ -62,4 +62,26 @@ export const freelancerPagePresets: ModulePreset[] = [
       },
     },
   },
+  {
+    id: 'agency',
+    name: '에이전시',
+    nameEn: 'Agency',
+    description: '테이블 서비스 + 대형 인용문 — 전문 에이전시 스타일',
+    descriptionEn: 'Table services + pull quotes — professional agency style',
+    state: {
+      enabled: ['hero', 'services', 'portfolio', 'testimonials', 'process', 'contact'],
+      order: ['hero', 'services', 'portfolio', 'testimonials', 'process', 'contact'],
+    },
+  },
+  {
+    id: 'creative-minimal',
+    name: '크리에이티브 미니멀',
+    nameEn: 'Creative Minimal',
+    description: '히어로 + 포트폴리오 + 연락처만 — 작업물 중심',
+    descriptionEn: 'Hero + Portfolio + Contact only — work-focused',
+    state: {
+      enabled: ['hero', 'portfolio', 'contact'],
+      order: ['hero', 'portfolio', 'contact'],
+    },
+  },
 ];

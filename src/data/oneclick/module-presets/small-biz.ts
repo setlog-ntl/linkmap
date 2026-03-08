@@ -73,4 +73,32 @@ export const smallBizPresets: ModulePreset[] = [
       },
     },
   },
+  {
+    id: 'warm-serif',
+    name: '따뜻한 세리프',
+    nameEn: 'Warm Serif',
+    description: '세리프 폰트 + 따뜻한 베이지톤 — 프리미엄 감성',
+    descriptionEn: 'Serif font + warm beige tones — premium aesthetic',
+    state: {
+      enabled: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
+      order: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
+      values: {
+        hero: { fontFamily: 'Nanum Myeongjo' },
+      },
+    },
+  },
+  {
+    id: 'modern-minimal',
+    name: '모던 미니멀',
+    nameEn: 'Modern Minimal',
+    description: '깔끔한 산세리프 + 화이트 배경 — 카페/브런치 가게',
+    descriptionEn: 'Clean sans-serif + white background — cafe style',
+    state: {
+      enabled: ['hero', 'menu', 'hours', 'location', 'sns'],
+      order: ['hero', 'menu', 'hours', 'location', 'sns'],
+      values: {
+        hero: { primaryColor: '#18181b', fontFamily: 'Pretendard' },
+      },
+    },
+  },
 ];

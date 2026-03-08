@@ -85,4 +85,18 @@ export const personalBrandPresets: ModulePreset[] = [
       },
     },
   },
+  {
+    id: 'editorial',
+    name: '에디토리얼',
+    nameEn: 'Editorial',
+    description: '2열 매거진 레이아웃 — 전문 포트폴리오 감성',
+    descriptionEn: 'Two-column magazine layout — professional portfolio aesthetic',
+    state: {
+      enabled: ['hero', 'about', 'values', 'highlights', 'gallery', 'contact'],
+      order: ['hero', 'about', 'values', 'highlights', 'gallery', 'contact'],
+      values: {
+        hero: { designPreset: 'editorial' },
+      },
+    },
+  },
 ];

@@ -393,3 +393,227 @@ export function SectionHeading({
   );
 }
 `;
+
+// ──────────────────────────────────────────────
+// Premium Components (2026 고도화)
+// ──────────────────────────────────────────────
+
+/** CountUp 애니메이션 — 숫자가 0에서 목표값까지 올라가는 효과 */
+export const sharedCountUp = `'use client';
+
+import { useEffect, useRef, useState } from 'react';
+
+interface Props {
+  end: number;
+  suffix?: string;
+  prefix?: string;
+  duration?: number;
+  className?: string;
+}
+
+export function CountUp({ end, suffix = '', prefix = '', duration = 2000, className = '' }: Props) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) { setCount(end); return; }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !started) {
+          setStarted(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [end, started]);
+
+  useEffect(() => {
+    if (!started) return;
+    const startTime = performance.now();
+    const step = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.round(eased * end));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [started, end, duration]);
+
+  return (
+    <span ref={ref} className={className}>
+      {prefix}{count.toLocaleString()}{suffix}
+    </span>
+  );
+}
+`;
+
+/** RotatingText — 텍스트가 순환하며 바뀌는 Kinetic Typography 효과 */
+export const sharedRotatingText = `'use client';
+
+import { useState, useEffect } from 'react';
+
+interface Props {
+  words: string[];
+  interval?: number;
+  className?: string;
+}
+
+export function RotatingText({ words, interval = 3000, className = '' }: Props) {
+  const [index, setIndex] = useState(0);
+  const [fade, setFade] = useState(true);
+
+  useEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+
+    const timer = setInterval(() => {
+      setFade(false);
+      setTimeout(() => {
+        setIndex((prev) => (prev + 1) % words.length);
+        setFade(true);
+      }, 400);
+    }, interval);
+    return () => clearInterval(timer);
+  }, [words.length, interval]);
+
+  return (
+    <span
+      className={\`inline-block transition-all duration-400 \${fade ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'} \${className}\`}
+    >
+      {words[index]}
+    </span>
+  );
+}
+`;
+
+/** CardFlip3D — 앞뒤 전환 3D 카드 컴포넌트 */
+export const sharedCardFlip3D = `'use client';
+
+import { useState, type ReactNode } from 'react';
+
+interface Props {
+  front: ReactNode;
+  back: ReactNode;
+  className?: string;
+}
+
+export function CardFlip3D({ front, back, className = '' }: Props) {
+  const [flipped, setFlipped] = useState(false);
+
+  return (
+    <div
+      className={\`card-flip-container cursor-pointer \${className}\`}
+      onClick={() => setFlipped(!flipped)}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFlipped(!flipped); } }}
+      tabIndex={0}
+      role="button"
+      aria-label={flipped ? '앞면 보기' : '뒷면 보기'}
+    >
+      <div className={\`card-flip-inner \${flipped ? 'card-flipped' : ''}\`}>
+        <div className="card-flip-front">{front}</div>
+        <div className="card-flip-back">{back}</div>
+      </div>
+    </div>
+  );
+}
+`;
+
+/** 공유 프리미엄 CSS 애니메이션 — 각 템플릿의 globals.css에 추가 */
+export const sharedPremiumAnimations = `/* ── Premium Animations (2026) ── */
+
+/* Card flip 3D */
+.card-flip-container {
+  perspective: 1200px;
+}
+.card-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.card-flipped {
+  transform: rotateY(180deg);
+}
+.card-flip-front, .card-flip-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: var(--radius-lg, 16px);
+  overflow: hidden;
+}
+.card-flip-back {
+  transform: rotateY(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-flip-inner { transition: none; }
+}
+
+/* Typing cursor blink */
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.typing-cursor::after {
+  content: '|';
+  animation: blink-cursor 1s step-end infinite;
+  color: var(--color-primary, #3b82f6);
+}
+
+/* Gradient text shimmer */
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.text-shimmer {
+  background-size: 200% auto;
+  animation: shimmer 4s linear infinite;
+}
+
+/* Marquee scroll */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee { animation: none; }
+  .text-shimmer { animation: none; }
+  .typing-cursor::after { animation: none; }
+}
+
+/* Hover glow effect */
+.hover-glow {
+  transition: box-shadow 0.3s ease;
+}
+.hover-glow:hover {
+  box-shadow: 0 0 20px color-mix(in oklch, var(--color-primary, #3b82f6) 30%, transparent),
+              0 0 40px color-mix(in oklch, var(--color-primary, #3b82f6) 10%, transparent);
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-float { animation: none; }
+  .hover-glow:hover { box-shadow: none; }
+}
+`;

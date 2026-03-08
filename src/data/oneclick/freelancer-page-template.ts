@@ -245,6 +245,80 @@ dialog.lightbox img {
   .card-lift:hover { transform: none; }
   .btn-press:active { transform: none; }
 }
+
+/* ── Rotating Text ── */
+.rotating-text-wrapper {
+  display: inline-block;
+  min-width: 200px;
+  text-align: left;
+}
+
+/* ── Service Table ── */
+.service-table {
+  width: 100%;
+}
+.service-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1.5rem;
+  padding: 2rem 0;
+  border-bottom: 1px solid var(--surface-border);
+  align-items: start;
+}
+.service-row:last-child {
+  border-bottom: none;
+}
+.service-number {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  padding-top: 0.25rem;
+}
+.service-price {
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+
+/* ── Pull Quote (대형 인용문) ── */
+.pull-quote {
+  position: relative;
+  padding: 3rem 2rem;
+}
+.pull-quote::before {
+  content: '\\201C';
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 6rem;
+  line-height: 1;
+  color: var(--color-primary);
+  opacity: 0.15;
+  font-family: Georgia, serif;
+}
+.pull-quote blockquote {
+  font-size: 1.25rem;
+  line-height: 1.75;
+  font-style: italic;
+  color: var(--text-primary);
+}
+.pull-quote cite {
+  display: block;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  font-style: normal;
+  color: var(--text-muted);
+}
+
+/* Premium hover */
+.hover-glow { transition: box-shadow 0.3s ease; }
+.hover-glow:hover {
+  box-shadow: 0 0 20px color-mix(in oklch, var(--color-primary, #5b13ec) 30%, transparent),
+              0 0 40px color-mix(in oklch, var(--color-primary, #5b13ec) 10%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hover-glow:hover { box-shadow: none; }
+}
 `;
 
 // ──────────────────────────────────────────────
@@ -358,6 +432,7 @@ export default function Home() {
 // ──────────────────────────────────────────────
 const heroSection = `'use client';
 
+import { useState, useEffect } from 'react';
 import { ArrowDown } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
@@ -366,11 +441,39 @@ interface Props {
   config: SiteConfig;
 }
 
+function RotatingText({ words }: { words: string[] }) {
+  const [index, setIndex] = useState(0);
+  const [fade, setFade] = useState(true);
+
+  useEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+    const timer = setInterval(() => {
+      setFade(false);
+      setTimeout(() => {
+        setIndex((prev) => (prev + 1) % words.length);
+        setFade(true);
+      }, 400);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [words.length]);
+
+  return (
+    <span className={\`inline-block transition-all duration-400 \${fade ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}\`}>
+      {words[index]}
+    </span>
+  );
+}
+
 export function HeroSection({ config }: Props) {
   const { locale, t } = useLocale();
   const name = locale === 'en' && config.nameEn ? config.nameEn : config.name;
   const title = locale === 'en' && config.titleEn ? config.titleEn : config.title;
   const tagline = locale === 'en' && config.taglineEn ? config.taglineEn : config.tagline;
+
+  const rotatingWords = config.rotatingWords && config.rotatingWords.length > 0
+    ? config.rotatingWords
+    : ['Brand Identity', 'Packaging', 'Social Media', 'Web Design'];
 
   return (
     <section
@@ -396,9 +499,12 @@ export function HeroSection({ config }: Props) {
         {title && (
           <p className="text-lg text-[#06b6d4] mb-4 font-medium animate-fade-up-d1">{title}</p>
         )}
-        <p className="text-xl text-gray-400 mb-8 max-w-xl mx-auto animate-fade-up-d2">
+        <p className="text-xl text-gray-400 mb-4 max-w-xl mx-auto animate-fade-up-d2">
           {tagline}
         </p>
+        <div className="text-base text-gray-500 dark:text-gray-400 mb-8 animate-fade-up-d2">
+          <RotatingText words={rotatingWords} />
+        </div>
         <a
           href="#services"
           className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] text-white font-medium hover:opacity-90 transition-opacity animate-fade-up-d2 btn-press"
@@ -417,19 +523,9 @@ export function HeroSection({ config }: Props) {
 // ──────────────────────────────────────────────
 const servicesSection = `'use client';
 
-import { Palette, Package, Image, Layout, Zap, Component, type LucideIcon } from 'lucide-react';
 import type { ServiceItem } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
 import { AnimatedReveal } from './animated-reveal';
-
-const iconMap: Record<string, LucideIcon> = {
-  palette: Palette,
-  package: Package,
-  image: Image,
-  layout: Layout,
-  zap: Zap,
-  component: Component,
-};
 
 interface Props {
   services: ServiceItem[];
@@ -440,30 +536,29 @@ export function ServicesSection({ services }: Props) {
 
   return (
     <section id="services" className="py-20 sm:py-28 px-4 sm:px-6">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <AnimatedReveal>
           <h2 className="text-3xl font-bold mb-12 text-center text-gray-900 dark:text-gray-100">
             {t('services.title')}
           </h2>
         </AnimatedReveal>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="service-table">
           {services.map((service, i) => {
-            const Icon = iconMap[service.icon] || Palette;
             const title = locale === 'en' && service.titleEn ? service.titleEn : service.title;
             const desc = locale === 'en' && service.descEn ? service.descEn : service.desc;
             const price = locale === 'en' && service.priceEn ? service.priceEn : service.price;
             return (
-              <AnimatedReveal key={i} delay={i * 100}>
-                <div className="relative p-6 rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-elevated)] group overflow-hidden card-lift">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#5b13ec]/20 to-[#06b6d4]/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <Icon className="w-5 h-5 text-[#5b13ec]" />
-                    </div>
-                    <span className="text-sm font-semibold text-[#06b6d4]">{price}</span>
+              <AnimatedReveal key={i} delay={i * 80}>
+                <div className="service-row group hover-glow">
+                  <span className="service-number">{String(i + 1).padStart(2, '0')}</span>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-[var(--color-primary)] transition-colors duration-200">
+                      {title}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">{desc}</p>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">{title}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{desc}</p>
+                  {price && <span className="service-price">{price}</span>}
                 </div>
               </AnimatedReveal>
             );
@@ -610,7 +705,6 @@ export function PortfolioSection({ portfolio }: Props) {
 // ──────────────────────────────────────────────
 const testimonialsSection = `'use client';
 
-import { Star } from 'lucide-react';
 import type { TestimonialItem } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
 import { AnimatedReveal } from './animated-reveal';
@@ -624,35 +718,35 @@ export function TestimonialsSection({ testimonials }: Props) {
 
   return (
     <section className="py-20 sm:py-28 px-4 sm:px-6">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         <AnimatedReveal>
           <h2 className="text-3xl font-bold mb-12 text-center text-gray-900 dark:text-gray-100">
             {t('testimonials.title')}
           </h2>
         </AnimatedReveal>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-8">
           {testimonials.map((item, i) => {
             const author = locale === 'en' && item.authorEn ? item.authorEn : item.author;
             const role = locale === 'en' && item.roleEn ? item.roleEn : item.role;
             const company = locale === 'en' && item.companyEn ? item.companyEn : item.company;
             const content = locale === 'en' && item.contentEn ? item.contentEn : item.content;
+            const rating = Math.min(5, Math.max(1, item.rating));
             return (
-              <AnimatedReveal key={i} delay={i * 100}>
-                <div className="p-6 rounded-2xl bg-[var(--surface-elevated)] border-l-4 border-[#5b13ec] card-lift">
-                  <span className="text-4xl font-serif text-[#5b13ec] opacity-30 leading-none block mb-2">&ldquo;</span>
-                  <div className="flex gap-0.5 mb-3">
-                    {Array.from({ length: item.rating }).map((_, j) => (
-                      <Star key={j} className="w-4 h-4 fill-[#f59e0b] text-[#f59e0b]" />
-                    ))}
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                    {content}
-                  </p>
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{author}</p>
-                    <p className="text-xs text-gray-500">{role}{role && company ? ', ' : ''}{company}</p>
-                  </div>
+              <AnimatedReveal key={i} delay={i * 150}>
+                <div
+                  className="pull-quote rounded-2xl"
+                  style={{ background: 'var(--surface-elevated)', border: '1px solid var(--surface-border)' }}
+                >
+                  <blockquote>{content}</blockquote>
+                  <cite>
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">{author}</span>
+                    {(role || company) && ' · '}
+                    <span>{role}{role && company ? ', ' : ''}{company}</span>
+                    <span className="ml-2 text-[#f59e0b]" aria-label={\`별점 \${rating}점\`}>
+                      {'★'.repeat(rating)}{'☆'.repeat(5 - rating)}
+                    </span>
+                  </cite>
                 </div>
               </AnimatedReveal>
             );
@@ -1119,6 +1213,7 @@ export const siteConfig = {
   gradientTo: '#06b6d4',
   fontFamily: 'Pretendard',
   portfolioColumns: '3',
+  rotatingWords: parseJSON<string[]>(process.env.NEXT_PUBLIC_ROTATING_WORDS, []),
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 

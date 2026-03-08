@@ -285,6 +285,96 @@ html {
 @media (prefers-reduced-motion:reduce) {
   .animate-fade-up { animation:none; opacity:1; transform:none; }
 }
+
+/* ── Terminal Window ── */
+.terminal-window {
+  background: #0d1117;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.terminal-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.terminal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.terminal-dot-red { background: #ff5f57; }
+.terminal-dot-yellow { background: #febc2e; }
+.terminal-dot-green { background: #28c840; }
+.terminal-body {
+  padding: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.8;
+}
+
+/* ── Typing cursor ── */
+.typing-cursor::after {
+  content: '|';
+  animation: blink-cursor 1s step-end infinite;
+  color: #4ade80;
+}
+
+/* ── Syntax highlighting colors ── */
+.syntax-keyword { color: #ff7b72; }
+.syntax-string { color: #a5d6ff; }
+.syntax-comment { color: #8b949e; }
+.syntax-function { color: #d2a8ff; }
+.syntax-variable { color: #ffa657; }
+.syntax-type { color: #79c0ff; }
+
+/* ── GitHub-style Repo Card ── */
+.repo-card {
+  background: var(--surface-elevated);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md, 12px);
+  padding: 1.5rem;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.repo-card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+.repo-lang-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* ── Skill bar animation ── */
+@keyframes fill-bar {
+  from { width: 0; }
+}
+.skill-bar-fill {
+  animation: fill-bar 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-play-state: paused;
+}
+.skill-bar-fill.animate {
+  animation-play-state: running;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skill-bar-fill { animation: none; width: var(--skill-level) !important; }
+  .typing-cursor::after { animation: none; }
+}
+
+/* ── Premium hover glow ── */
+.hover-glow { transition: box-shadow 0.3s ease; }
+.hover-glow:hover {
+  box-shadow: 0 0 20px color-mix(in oklch, var(--color-primary, #58a6ff) 30%, transparent),
+              0 0 40px color-mix(in oklch, var(--color-primary, #58a6ff) 10%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hover-glow:hover { box-shadow: none; }
+}
 `;
 
 // ──────────────────────────────────────────────
@@ -406,14 +496,15 @@ export default function Home() {
 // ──────────────────────────────────────────────
 const aboutSection = `'use client';
 
+import { useEffect, useRef, type CSSProperties } from 'react';
 import { AnimatedReveal } from './animated-reveal';
 import type { SiteConfig } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
 
-const levelWidth: Record<string, string> = {
-  beginner: 'w-1/3',
-  intermediate: 'w-2/3',
-  advanced: 'w-full',
+const levelPercent: Record<string, number> = {
+  beginner: 33,
+  intermediate: 67,
+  advanced: 100,
 };
 
 interface Props {
@@ -423,6 +514,26 @@ interface Props {
 export function AboutSection({ config }: Props) {
   const { locale, t } = useLocale();
   const about = locale === 'en' && config.aboutEn ? config.aboutEn : config.about;
+  const skillsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = skillsRef.current;
+    if (!el) return;
+    const bars = el.querySelectorAll<HTMLElement>('.skill-bar-fill');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            bars.forEach((bar) => bar.classList.add('animate'));
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section id="about" className="py-20 sm:py-24 px-4 sm:px-6">
@@ -441,24 +552,33 @@ export function AboutSection({ config }: Props) {
           </AnimatedReveal>
 
           <AnimatedReveal delay={100}>
-            <div className="space-y-3">
+            <div ref={skillsRef} className="space-y-4">
               <h3 className="text-lg font-semibold mb-4">{t('about.skills')}</h3>
-              {config.skills.map((skill, i) => (
-                <div key={i} className="group">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-mono text-sm">{skill.name}</span>
-                    <span className="text-xs text-gray-500">
-                      {t(\`level.\${skill.level}\`)}
-                    </span>
+              {config.skills.map((skill, i) => {
+                const pct = levelPercent[skill.level] ?? 50;
+                return (
+                  <div key={i} className="group" style={{ animationDelay: \`\${i * 80}ms\` }}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="font-mono text-sm">{skill.name}</span>
+                      <span className="text-xs" style={{ color: 'var(--gh-muted)' }}>
+                        {t(\`level.\${skill.level}\`)}
+                      </span>
+                    </div>
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--gh-border)' }}>
+                      <div
+                        className="skill-bar-fill h-full rounded-full"
+                        style={{
+                          '--skill-level': \`\${pct}%\`,
+                          width: \`\${pct}%\`,
+                          animationDelay: \`\${i * 80}ms\`,
+                          animationDuration: '1s',
+                          background: 'linear-gradient(90deg, var(--gh-blue), var(--gh-purple))',
+                        } as CSSProperties}
+                      />
+                    </div>
                   </div>
-                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--gh-border)' }}>
-                    <div
-                      className={\`h-full rounded-full \${levelWidth[skill.level]}\`}
-                      style={{ background: 'linear-gradient(90deg, var(--gh-blue), var(--gh-purple))' }}
-                    />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </AnimatedReveal>
         </div>
@@ -999,7 +1119,7 @@ export function NavHeader() {
 const projectsSection = `'use client';
 
 import { AnimatedReveal } from './animated-reveal';
-import { Star, GitFork, ExternalLink } from 'lucide-react';
+import { Star, GitFork, BookMarked } from 'lucide-react';
 import type { ProjectItem } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
 
@@ -1034,33 +1154,34 @@ export function ProjectsSection({ projects }: Props) {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {projects.map((project, i) => {
             const desc = locale === 'en' && project.descriptionEn ? project.descriptionEn : project.description;
+            const langColor = languageColors[project.language] || '#6b7280';
             return (
               <AnimatedReveal key={i} delay={i * 50} variant="scale">
                 <a
                   href={project.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="relative block p-4 group card-lift"
-                  style={{ background: 'var(--surface-elevated)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-lg)' }}
+                  className="repo-card hover-glow flex flex-col gap-3 block"
                 >
-                  <div className="lang-line" style={{ background: languageColors[project.language] || '#6b7280' }} />
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-mono text-sm font-semibold truncate" style={{ color: 'var(--gh-blue)' }}>
+                  {/* Header: icon + repo name */}
+                  <div className="flex items-start gap-2">
+                    <BookMarked className="w-4 h-4 shrink-0 mt-0.5" style={{ color: 'var(--gh-blue)' }} />
+                    <h3 className="font-mono text-sm font-semibold leading-snug" style={{ color: 'var(--gh-blue)' }}>
                       {project.name}
                     </h3>
-                    <ExternalLink className="w-3.5 h-3.5 shrink-0 ml-2" style={{ color: 'var(--gh-muted)' }} />
                   </div>
-                  <p className="text-xs mb-3 line-clamp-2" style={{ color: 'var(--gh-muted)' }}>
+
+                  {/* Description */}
+                  <p className="text-xs leading-relaxed line-clamp-2 flex-1" style={{ color: 'var(--gh-muted)' }}>
                     {desc}
                   </p>
+
+                  {/* Footer: language + stars + forks */}
                   <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--gh-muted)' }}>
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1.5">
                       <span
-                        className="w-2.5 h-2.5 rounded-full"
-                        style={{
-                          backgroundColor:
-                            languageColors[project.language] || '#6b7280',
-                        }}
+                        className="repo-lang-dot"
+                        style={{ backgroundColor: langColor }}
                       />
                       <span className="font-mono">{project.language}</span>
                     </span>

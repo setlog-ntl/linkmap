@@ -51,4 +51,46 @@ export const digitalNamecardPresets: ModulePreset[] = [
       },
     },
   },
+  {
+    id: 'corporate',
+    name: '기업용',
+    nameEn: 'Corporate',
+    description: '네이비 블루 + 골드 악센트 — 비즈니스 미팅용',
+    descriptionEn: 'Navy blue + gold accent — for business meetings',
+    state: {
+      enabled: ['profile', 'contact', 'socials', 'theme'],
+      order: ['profile', 'contact', 'socials', 'theme'],
+      values: {
+        theme: { accentColor: '#1e3a5f' },
+      },
+    },
+  },
+  {
+    id: 'creative',
+    name: '크리에이티브',
+    nameEn: 'Creative',
+    description: '그래디언트 + 둥근 모서리 — 디자이너/아티스트용',
+    descriptionEn: 'Gradient + rounded — for designers and artists',
+    state: {
+      enabled: ['profile', 'contact', 'socials', 'theme'],
+      order: ['profile', 'contact', 'socials', 'theme'],
+      values: {
+        theme: { accentColor: '#8b5cf6' },
+      },
+    },
+  },
+  {
+    id: 'minimal-dark',
+    name: '미니멀 다크',
+    nameEn: 'Minimal Dark',
+    description: '다크 배경 + 흰 텍스트 — 모던 미니멀',
+    descriptionEn: 'Dark background + white text — modern minimal',
+    state: {
+      enabled: ['profile', 'contact', 'theme'],
+      order: ['profile', 'contact', 'theme'],
+      values: {
+        theme: { accentColor: '#e5e7eb' },
+      },
+    },
+  },
 ];

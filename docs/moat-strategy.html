@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Linkmap 경쟁 해자(Moat) 전략</title>
+  <style>
+    :root {
+      --brand-blue: #2563eb;
+      --brand-green: #10b981;
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #334155;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-heading: #f1f5f9;
+      --border: #334155;
+      --accent: #38bdf8;
+      --danger: #f87171;
+      --warning: #fbbf24;
+      --success: #34d399;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0;
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 4rem 2rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 50%, rgba(37, 99, 235, 0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 50%, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
+      animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-2%, 2%); }
+    }
+
+    .hero-content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(37, 99, 235, 0.15);
+      border: 1px solid rgba(37, 99, 235, 0.3);
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.3rem 1rem;
+      border-radius: 999px;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--text-heading);
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .hero-date {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 1.5rem;
+      opacity: 0.7;
+    }
+
+    /* Container */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 3rem 2rem 4rem;
+    }
+
+    /* Section */
+    section { margin-bottom: 4rem; }
+
+    .section-label {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--brand-green);
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-heading);
+      margin-bottom: 1rem;
+      margin-top: 2rem;
+    }
+
+    p {
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    .muted { color: var(--text-muted); }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    .card:hover { border-color: rgba(37, 99, 235, 0.4); }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .card-icon.blue { background: rgba(37, 99, 235, 0.15); }
+    .card-icon.green { background: rgba(16, 185, 129, 0.15); }
+    .card-icon.purple { background: rgba(139, 92, 246, 0.15); }
+    .card-icon.orange { background: rgba(251, 146, 60, 0.15); }
+    .card-icon.cyan { background: rgba(56, 189, 248, 0.15); }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-heading);
+    }
+
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* Grid */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 700px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 1.75rem; }
+    }
+
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    thead { background: var(--bg-card); }
+
+    th {
+      text-align: left;
+      padding: 0.85rem 1rem;
+      font-weight: 600;
+      color: var(--text-heading);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(37, 99, 235, 0.03); }
+
+    .asset-name {
+      font-weight: 600;
+      color: var(--text-heading);
+    }
+
+    /* Tags */
+    .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      letter-spacing: 0.03em;
+    }
+
+    .tag-hard {
+      background: rgba(37, 99, 235, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(37, 99, 235, 0.3);
+    }
+
+    .tag-easy {
+      background: rgba(251, 191, 36, 0.12);
+      color: var(--warning);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .tag-p0 { background: rgba(248, 113, 113, 0.15); color: var(--danger); border: 1px solid rgba(248, 113, 113, 0.3); }
+    .tag-p1 { background: rgba(251, 146, 60, 0.15); color: #fb923c; border: 1px solid rgba(251, 146, 60, 0.3); }
+    .tag-p2 { background: rgba(56, 189, 248, 0.15); color: var(--accent); border: 1px solid rgba(56, 189, 248, 0.3); }
+    .tag-p3 { background: rgba(148, 163, 184, 0.15); color: var(--text-muted); border: 1px solid rgba(148, 163, 184, 0.3); }
+
+    .difficulty-low { color: var(--success); }
+    .difficulty-mid { color: var(--warning); }
+    .difficulty-high { color: var(--danger); }
+
+    /* Strategy number */
+    .strategy-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* Warning box */
+    .warning-box {
+      background: rgba(251, 191, 36, 0.06);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .warning-box h3 {
+      color: var(--warning);
+      margin-top: 0;
+      font-size: 1.1rem;
+    }
+
+    .warning-item {
+      display: flex;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(251, 191, 36, 0.08);
+    }
+
+    .warning-item:last-child { border-bottom: none; }
+
+    .warning-mistake {
+      color: var(--text-heading);
+      font-weight: 500;
+      min-width: 180px;
+      flex-shrink: 0;
+    }
+
+    .warning-reality { color: var(--text-muted); }
+
+    /* Real moat list */
+    .moat-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .moat-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.6rem 0;
+      color: var(--text);
+    }
+
+    .moat-list .num {
+      color: var(--brand-green);
+      font-weight: 700;
+      font-size: 0.9rem;
+      min-width: 20px;
+    }
+
+    /* Blockquote */
+    .quote {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(16, 185, 129, 0.08));
+      border-left: 3px solid var(--brand-blue);
+      border-radius: 0 12px 12px 0;
+      padding: 1.5rem 2rem;
+      margin: 2rem 0;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--text-heading);
+      line-height: 1.8;
+    }
+
+    /* Action items in strategy cards */
+    .action-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 0.75rem;
+    }
+
+    .action-list li {
+      position: relative;
+      padding: 0.4rem 0 0.4rem 1.2rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .action-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.85rem;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--brand-green);
+    }
+
+    .effect-badge {
+      display: inline-block;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: var(--brand-green);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.2rem 0.7rem;
+      border-radius: 6px;
+      margin-top: 0.75rem;
+    }
+
+    /* Conclusion */
+    .conclusion {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+    }
+
+    .conclusion h2 {
+      margin-bottom: 1rem;
+    }
+
+    .conclusion p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 700px;
+      margin: 0 auto 1rem;
+    }
+
+    .conclusion strong { color: var(--text-heading); }
+
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 3rem 0;
+    }
+
+    /* TOC */
+    .toc {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .toc-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .toc-list {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.3rem 2rem;
+    }
+
+    @media (max-width: 700px) {
+      .toc-list { grid-template-columns: 1fr; }
+    }
+
+    .toc-list li a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      padding: 0.3rem 0;
+      display: block;
+      transition: color 0.15s;
+    }
+
+    .toc-list li a:hover { color: var(--accent); }
+    .toc-list li a span { color: var(--brand-green); margin-right: 0.5rem; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">STRATEGY DOCUMENT</div>
+      <h1>Linkmap <span>경쟁 해자(Moat)</span> 전략</h1>
+      <p class="hero-desc">
+        해커톤 공개 이후, 경쟁자가 코드를 복제해도 이길 수 있는 구조를 만들기 위한 전략 분석
+      </p>
+      <p class="hero-date">Last updated: 2026-03-05</p>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- TOC -->
+    <nav class="toc">
+      <div class="toc-title">목차</div>
+      <ol class="toc-list">
+        <li><a href="#overview"><span>01</span> 왜 이 문서가 필요한가</a></li>
+        <li><a href="#assets"><span>02</span> 현재 자산 평가</a></li>
+        <li><a href="#strategies"><span>03</span> 5대 해자 전략</a></li>
+        <li><a href="#warning"><span>04</span> 해자가 아닌 것</a></li>
+        <li><a href="#roadmap"><span>05</span> 실행 로드맵</a></li>
+        <li><a href="#conclusion"><span>06</span> 핵심 메시지</a></li>
+      </ol>
+    </nav>
+
+    <!-- 1. Overview -->
+    <section id="overview">
+      <div class="section-label">Section 01</div>
+      <h2>왜 이 문서가 필요한가</h2>
+      <p>
+        해커톤에서 Linkmap을 공개한 이후, 개발자 참여자들이 핵심 기능(서비스맵 시각화, .env 관리, 원클릭 배포)을
+        비교적 빠르게 재현할 수 있는 상황이다. 이 문서는 <strong>Linkmap만의 방어 가능한 경쟁 우위</strong>가 무엇인지
+        분석하고, 이를 어떻게 강화할 수 있는지 전략적 로드맵을 제시한다.
+      </p>
+      <div class="quote">
+        핵심 질문: "경쟁자가 우리 코드를 그대로 복제했을 때, 그래도 이길 수 있는가?"
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- 2. Asset Evaluation -->
+    <section id="assets">
+      <div class="section-label">Section 02</div>
+      <h2>현재 자산 평가</h2>
+
+      <h3>따라하기 어려운 것 <span class="tag tag-hard">12개월+</span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>자산</th>
+              <th>규모</th>
+              <th>왜 어려운가</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="asset-name">서비스 가이드 데이터</td>
+              <td>24,831줄, 50+ 서비스</td>
+              <td>서비스당 40시간 손작업 (실제 API 테스트+가입+검증). AI 생성 불가. 한글 특화.</td>
+            </tr>
+            <tr>
+              <td class="asset-name">GitHub 자동화 정교함</td>
+              <td>13개 모듈, NaCl 암호화</td>
+              <td>env&rarr;Secret 자동매핑, 다중계정(OAuth/PAT/App/Deploy Key), 수백 엣지케이스</td>
+            </tr>
+            <tr>
+              <td class="asset-name">DB 설계 + 보안 레이어</td>
+              <td>70 migrations, 25 RLS 정책</td>
+              <td>advisory lock, 이중 방어(RLS+API), 감사로그 등 1년 축적</td>
+            </tr>
+            <tr>
+              <td class="asset-name">서비스 의존성 그래프</td>
+              <td>50+ 서비스 간 관계</td>
+              <td>"Stripe&rarr;Supabase", "Clerk&rarr;Supabase" 등 실제 패턴 기반</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>따라하기 쉬운 것 <span class="tag tag-easy">1~3개월</span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>기능</th>
+              <th>왜 쉬운가</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>AI 통합 (OpenAI/Anthropic)</td><td>공개 API, 공식 SDK 있음</td></tr>
+            <tr><td>기본 템플릿 5개</td><td>Next.js + GitHub Pages = 표준 패턴</td></tr>
+            <tr><td>서비스맵 시각화 UI</td><td>React Flow 라이브러리 공개</td></tr>
+            <tr><td>.env 암호화 저장</td><td>AES-256-GCM = 표준 구현</td></tr>
+            <tr><td>원클릭 배포 기본 플로우</td><td>Fork&rarr;Build&rarr;Deploy = GitHub Actions 문서화됨</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- 3. Strategies -->
+    <section id="strategies">
+      <div class="section-label">Section 03</div>
+      <h2>5대 해자 전략</h2>
+
+      <!-- Strategy 1 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon blue">
+            <span class="strategy-num" style="background:rgba(37,99,235,0.2);color:var(--accent);">1</span>
+          </div>
+          <div>
+            <div class="card-title">데이터 네트워크 효과 활성화</div>
+            <div class="muted" style="font-size:0.85rem;">최우선 전략 &mdash; 도구에서 플랫폼으로</div>
+          </div>
+        </div>
+        <p class="card-desc">
+          현재 Linkmap은 <strong>"좋은 도구"</strong>이지 <strong>"플랫폼"</strong>이 아니다.
+          플랫폼이 되려면 사용자 데이터가 서비스를 개선하는 피드백 루프가 필요하다.
+        </p>
+        <ul class="action-list">
+          <li><strong>"자주 함께 쓰는 서비스" 추천</strong> &mdash; "Supabase 쓰는 프로젝트의 80%가 Stripe도 사용" 같은 인사이트. 경쟁자는 이 데이터가 없다.</li>
+          <li><strong>인기 스택 조합 순위</strong> &mdash; "Next.js + Supabase + Vercel" 조합이 1위 &rarr; 신규 사용자 온보딩 가속</li>
+          <li><strong>가이드 피드백 루프</strong> &mdash; "이 단계가 도움됐나요?" &rarr; 가이드 품질 자동 개선</li>
+        </ul>
+        <div class="effect-badge">사용자&uarr; &rarr; 데이터&uarr; &rarr; 추천 정확도&uarr; &rarr; 사용자&uarr;</div>
+      </div>
+
+      <!-- Strategy 2 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon green">
+            <span class="strategy-num" style="background:rgba(16,185,129,0.2);color:var(--brand-green);">2</span>
+          </div>
+          <div>
+            <div class="card-title">전환 비용(Switching Cost) 심화</div>
+            <div class="muted" style="font-size:0.85rem;">떠나기 어렵게 만들기</div>
+          </div>
+        </div>
+        <p class="card-desc">
+          <strong>현재:</strong> 프로젝트 설정 데이터(env vars, 서비스 연결, 체크리스트 진행도)가 Linkmap에 저장됨.
+        </p>
+        <ul class="action-list">
+          <li><strong>프로젝트 히스토리</strong> &mdash; API 키 교체 시점, 서비스 추가/제거 타임라인</li>
+          <li><strong>팀 공유 설정</strong> &mdash; 팀원이 축적한 설정을 다른 도구로 이전하기 어렵게 구조화</li>
+          <li><strong>GitHub Secrets 양방향 동기화</strong> &mdash; Linkmap = "진실의 원천(Source of Truth)"</li>
+        </ul>
+      </div>
+
+      <!-- Strategy 3 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon purple">
+            <span class="strategy-num" style="background:rgba(139,92,246,0.2);color:#a78bfa;">3</span>
+          </div>
+          <div>
+            <div class="card-title">콘텐츠 해자 확대</div>
+            <div class="muted" style="font-size:0.85rem;">50개 &rarr; 150개 서비스 가이드</div>
+          </div>
+        </div>
+        <p class="card-desc">
+          가이드 수 자체가 진입장벽. 경쟁자가 150개를 만들려면 약 <strong>6,000시간</strong>이 소요된다.
+          <strong>한국어 우선</strong> = 글로벌 경쟁자가 한국 시장 진입 시 별도 현지화 팀 필요.
+        </p>
+        <ul class="action-list">
+          <li><strong>커뮤니티 기여 시스템</strong> &mdash; 사용자가 가이드 수정/추가 &rarr; PR 방식 승인</li>
+          <li><strong>기여자 배지/크레딧</strong> &mdash; 커뮤니티 형성 + 자발적 콘텐츠 확장</li>
+          <li><strong>100개 전환점</strong> &mdash; 자체 생산보다 커뮤니티 기여가 더 빠른 시점</li>
+        </ul>
+      </div>
+
+      <!-- Strategy 4 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon orange">
+            <span class="strategy-num" style="background:rgba(251,146,60,0.2);color:#fb923c;">4</span>
+          </div>
+          <div>
+            <div class="card-title">독점적 통합 깊이</div>
+            <div class="muted" style="font-size:0.85rem;">"넓게"가 아니라 "깊게" 파기</div>
+          </div>
+        </div>
+        <ul class="action-list">
+          <li><strong>공식 파트너십</strong> &mdash; Supabase, Vercel, Cloudflare와 공식 통합 추진</li>
+          <li><strong>직접 프로비저닝</strong> &mdash; "Linkmap에서 Supabase 프로젝트 생성" (API 직접 호출)</li>
+          <li><strong>공식 추천 도구</strong> &mdash; 서비스 제공사 문서에 Linkmap이 등재되면 최강의 해자</li>
+        </ul>
+      </div>
+
+      <!-- Strategy 5 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon cyan">
+            <span class="strategy-num" style="background:rgba(56,189,248,0.2);color:var(--accent);">5</span>
+          </div>
+          <div>
+            <div class="card-title">템플릿 마켓플레이스 (플랫폼화)</div>
+            <div class="muted" style="font-size:0.85rem;">5개 &rarr; 500개 템플릿 생태계</div>
+          </div>
+        </div>
+        <p class="card-desc">
+          사용자/개발자가 템플릿을 만들고 공유/판매. 템플릿이 500개로 성장하면
+          Linkmap 없이는 이 생태계에 접근 불가. 경쟁자가 코드를 복제해도 <strong>생태계(콘텐츠+사용자)</strong>는 복제 불가.
+        </p>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- 4. Warning -->
+    <section id="warning">
+      <div class="section-label">Section 04</div>
+      <h2>"해자가 아닌 것" 주의</h2>
+
+      <div class="warning-box">
+        <h3>흔한 착각 vs 현실</h3>
+        <div class="warning-item">
+          <span class="warning-mistake">"코드가 복잡해서 못 따라옴"</span>
+          <span class="warning-reality">오픈소스 시대에 코드 복잡도는 해자가 아님</span>
+        </div>
+        <div class="warning-item">
+          <span class="warning-mistake">"먼저 만들었으니 1등"</span>
+          <span class="warning-reality">First-mover advantage는 6개월이면 소멸</span>
+        </div>
+        <div class="warning-item">
+          <span class="warning-mistake">"기능이 많아서"</span>
+          <span class="warning-reality">기능 수는 팀 규모에 비례, 큰 팀이 쉽게 추월</span>
+        </div>
+        <div class="warning-item">
+          <span class="warning-mistake">"UI가 예뻐서"</span>
+          <span class="warning-reality">디자인은 1~2주면 벤치마킹 가능</span>
+        </div>
+      </div>
+
+      <h3>진짜 해자 = 시간이 지날수록 강해지는 것</h3>
+      <ul class="moat-list">
+        <li><span class="num">1.</span> 축적된 데이터 (가이드, 의존성 그래프, 사용 패턴)</li>
+        <li><span class="num">2.</span> 네트워크 효과 (사용자 증가 &rarr; 데이터 증가 &rarr; 추천 정확도 향상 &rarr; 사용자 증가)</li>
+        <li><span class="num">3.</span> 전환 비용 (프로젝트 설정이 Linkmap에 종속)</li>
+        <li><span class="num">4.</span> 브랜드/커뮤니티 (한국 바이브코딩 = Linkmap)</li>
+      </ul>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- 5. Roadmap -->
+    <section id="roadmap">
+      <div class="section-label">Section 05</div>
+      <h2>실행 로드맵</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>우선순위</th>
+              <th>액션</th>
+              <th>예상 효과</th>
+              <th>난이도</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tag tag-p0">P0</span></td>
+              <td class="asset-name">서비스 조합 추천 ("함께 쓰는 서비스")</td>
+              <td>데이터 해자 시작</td>
+              <td class="difficulty-mid">중</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-p0">P0</span></td>
+              <td class="asset-name">가이드 피드백 버튼 ("도움됐나요?")</td>
+              <td>콘텐츠 품질 루프</td>
+              <td class="difficulty-low">하</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-p1">P1</span></td>
+              <td class="asset-name">가이드 100개로 확대</td>
+              <td>콘텐츠 해자 2배</td>
+              <td class="difficulty-high">상</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-p1">P1</span></td>
+              <td class="asset-name">팀 공유 설정 강화</td>
+              <td>전환 비용 증가</td>
+              <td class="difficulty-mid">중</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-p2">P2</span></td>
+              <td class="asset-name">커뮤니티 가이드 기여 시스템</td>
+              <td>콘텐츠 자동 확장</td>
+              <td class="difficulty-high">상</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-p2">P2</span></td>
+              <td class="asset-name">템플릿 마켓플레이스 MVP</td>
+              <td>플랫폼화 시작</td>
+              <td class="difficulty-high">상</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-p3">P3</span></td>
+              <td class="asset-name">서비스 제공사 파트너십</td>
+              <td>독점 통합</td>
+              <td class="muted">영업</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- 6. Conclusion -->
+    <section id="conclusion">
+      <div class="section-label">Section 06</div>
+      <div class="conclusion">
+        <h2>핵심 메시지</h2>
+        <div class="quote" style="text-align:left;margin:0 0 1.5rem;">
+          코드는 복제 가능하지만,<br/>
+          <strong>"50개 서비스의 검증된 한글 가이드 + 수천 프로젝트의 사용 패턴 데이터 + 활성 커뮤니티"</strong>는<br/>
+          복제 불가능하다.
+        </div>
+        <p>
+          Linkmap의 해자는 <strong>"도구"에서 "플랫폼"으로의 전환</strong>에 달려있다.
+          지금은 데이터 자산이 강하지만 네트워크 효과가 미활성 상태다.
+        </p>
+        <p>
+          <strong>P0 액션 2개만 실행해도 경쟁자와의 격차가 시간이 지날수록 벌어지는 구조</strong>를 만들 수 있다.
+        </p>
+      </div>
+    </section>
+
+  </div>
+
+</body>
+</html>

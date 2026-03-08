@@ -1,9 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { unauthorizedError, notFoundError } from '@/lib/api/errors';
+import { unauthorizedError, notFoundError, apiError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 import { deleteRepo } from '@/lib/github/api';
 import { safeDecryptToken } from '@/lib/github/token';
+import { z } from 'zod';
+
+const patchSchema = z.object({
+  site_name: z.string().min(1, '사이트 이름은 필수입니다').max(100, '사이트 이름은 100자 이내여야 합니다'),
+});
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return unauthorizedError();
+
+  const body = await request.json();
+  const parsed = patchSchema.safeParse(body);
+  if (!parsed.success) {
+    const messages = parsed.error.issues.map((e) => e.message).join(', ');
+    return apiError(messages, 400);
+  }
+
+  const { site_name } = parsed.data;
+
+  // Verify ownership
+  const { data: deploy } = await supabase
+    .from('homepage_deploys')
+    .select('id, site_name')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .single();
+
+  if (!deploy) return notFoundError('배포');
+
+  const { error } = await supabase
+    .from('homepage_deploys')
+    .update({ site_name })
+    .eq('id', id)
+    .eq('user_id', user.id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  await logAudit(user.id, {
+    action: 'oneclick.deploy_rename',
+    resourceType: 'homepage_deploy',
+    resourceId: id,
+    details: { old_name: deploy.site_name, new_name: site_name },
+  });
+
+  return NextResponse.json({ success: true, site_name });
+}
 
 export async function DELETE(
   _request: NextRequest,

@@ -43,6 +43,7 @@ export type AuditAction =
   | 'oneclick.file_edit'
   | 'oneclick.file_create'
   | 'oneclick.batch_update'
+  | 'oneclick.deploy_rename'
   | 'oneclick.image_upload'
   | 'connection.auto_create'
   | 'layer_override.upsert'

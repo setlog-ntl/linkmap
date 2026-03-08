@@ -202,6 +202,7 @@ export const linkCardModuleSchema: TemplateModuleSchema = {
             { value: 'square', label: '직각' },
             { value: 'glass', label: '유리 카드' },
             { value: 'neon', label: '네온 테두리' },
+            { value: 'outline', label: '아웃라인 (두꺼운 테두리)' },
           ],
         },
         {

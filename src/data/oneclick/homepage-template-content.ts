@@ -170,6 +170,68 @@ const linkCardGlobalsCss = `@import "tailwindcss";
 @media (prefers-reduced-motion: reduce) {
   .card-lift:hover { transform: none; }
   .btn-press:active { transform: none; }
+}
+
+/* Hover glow */
+.hover-glow { transition: box-shadow 0.3s ease; }
+.hover-glow:hover {
+  box-shadow: 0 0 20px color-mix(in oklch, var(--color-primary, #6366f1) 30%, transparent),
+              0 0 40px color-mix(in oklch, var(--color-primary, #6366f1) 10%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hover-glow:hover { box-shadow: none; }
+}
+
+/* Arrow icon — hover slide right */
+.arrow-slide {
+  transition: transform 0.2s ease;
+}
+.group:hover .arrow-slide {
+  transform: translateX(3px);
+}
+
+/* ── Preset-specific theming ── */
+
+[data-theme="aurora"] {
+  --card-bg: rgba(255,255,255,0.08);
+  --card-border: rgba(255,255,255,0.12);
+  --card-shadow: 0 8px 32px rgba(129,140,248,0.15);
+}
+[data-theme="aurora"] .link-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(129,140,248,0.25);
+}
+[data-theme="aurora"]::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 20%, rgba(129,140,248,0.15), transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(192,132,252,0.1), transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+[data-theme="neon"] .link-card {
+  border: 1px solid var(--color-primary);
+  box-shadow: 0 0 8px color-mix(in oklch, var(--color-primary) 30%, transparent),
+              inset 0 0 8px color-mix(in oklch, var(--color-primary) 5%, transparent);
+}
+[data-theme="neon"] .link-card:hover {
+  box-shadow: 0 0 16px color-mix(in oklch, var(--color-primary) 50%, transparent),
+              0 0 32px color-mix(in oklch, var(--color-primary) 20%, transparent);
+  transform: translateY(-2px);
+}
+
+[data-theme="brutalist"] .link-card {
+  border: 3px solid currentColor;
+  border-radius: 0;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+[data-theme="brutalist"] .link-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 3px 3px 0 currentColor;
 }`;
 
 const linkCardLayout = `import type { Metadata } from 'next';
@@ -395,7 +457,7 @@ export function LinkList({ links, theme }: Props) {
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="card-lift btn-press flex items-center gap-3 px-5 py-3.5 backdrop-blur-sm shadow-sm group"
+            className={\`link-card card-lift btn-press flex items-center gap-3 px-5 py-3.5 backdrop-blur-sm shadow-sm group transition-all duration-200\${(siteConfig.cardStyle === 'glass' || siteConfig.cardStyle === 'neon') ? ' hover-glow' : ''}\`}
             style={{
               backgroundColor: theme.cardBg,
               border: \`1px solid \${theme.cardBorder}\`,
@@ -409,7 +471,7 @@ export function LinkList({ links, theme }: Props) {
             <span className="text-sm sm:text-base font-medium flex-1">
               {title}
             </span>
-            <ExternalLink className="w-4 h-4 opacity-40 shrink-0" />
+            <ExternalLink className="w-4 h-4 opacity-40 shrink-0 arrow-slide" />
           </a>
         );
       })}
@@ -449,8 +511,8 @@ export function ProfileSection({ config, theme }: Props) {
             alt={name}
             width={96}
             height={96}
-            className="w-24 h-24 rounded-full object-cover"
-            style={{ boxShadow: \`0 0 30px \${theme.primary}66\` }}
+            className="w-24 h-24 rounded-full object-cover ring-2 ring-[var(--color-primary)]/20 transition-transform duration-200 hover:scale-105"
+            style={{ ['--color-primary' as string]: theme.primary, boxShadow: \`0 0 30px \${theme.primary}66\` }}
           />
         </div>
       ) : (
@@ -459,8 +521,8 @@ export function ProfileSection({ config, theme }: Props) {
           style={{ ['--color-primary' as string]: theme.primary, ['--color-secondary' as string]: theme.primary }}
         >
           <div
-            className="w-24 h-24 rounded-full flex items-center justify-center text-2xl font-bold"
-            style={{ backgroundColor: theme.primary, color: '#fff', boxShadow: \`0 0 30px \${theme.primary}66\` }}
+            className="w-24 h-24 rounded-full flex items-center justify-center text-2xl font-bold ring-2 ring-[var(--color-primary)]/20 transition-transform duration-200 hover:scale-105"
+            style={{ ['--color-primary' as string]: theme.primary, backgroundColor: theme.primary, color: '#fff', boxShadow: \`0 0 30px \${theme.primary}66\` }}
             aria-label={name}
           >
             {initials}
@@ -470,7 +532,7 @@ export function ProfileSection({ config, theme }: Props) {
       <h1 className="text-2xl font-bold" style={{ color: theme.text }}>
         {name}
       </h1>
-      <p className="text-base max-w-xs" style={{ color: theme.textMuted }}>
+      <p className="text-base max-w-xs text-balance" style={{ color: theme.textMuted }}>
         {bio}
       </p>
     </div>
@@ -708,6 +770,7 @@ export function getCardRadius(cardStyle: string): string {
   switch (cardStyle) {
     case 'pill': return '9999px';
     case 'square': return '0px';
+    case 'outline': return '0px';
     default: return '12px';
   }
 }`;
@@ -855,11 +918,11 @@ const namecardGlobalsCss = `@import "tailwindcss";
 }
 
 /* Card flip */
-.card-flip-container { perspective: 1000px; cursor: pointer; }
+.card-flip-container { perspective: 1200px; cursor: pointer; }
 .card-flip-inner {
   position: relative;
   width: 100%;
-  transition: transform 0.6s ease;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
 }
 .card-flip-container.flipped .card-flip-inner { transform: rotateY(180deg); }
@@ -871,6 +934,25 @@ const namecardGlobalsCss = `@import "tailwindcss";
   transform: rotateY(180deg);
 }
 
+/* Namecard premium hover */
+.namecard-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.namecard-hover:hover {
+  transform: translateY(-4px) rotateX(2deg);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+
+/* Shimmer effect for accent bar */
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.accent-shimmer {
+  background-size: 200% auto;
+  animation: shimmer 4s linear infinite;
+}
+
 /* Section gap */
 .section-gap {
   padding-top: var(--section-gap, 4rem);
@@ -879,7 +961,9 @@ const namecardGlobalsCss = `@import "tailwindcss";
 
 @media (prefers-reduced-motion: reduce) {
   .card-lift:hover { transform: none; }
+  .namecard-hover:hover { transform: none; }
   .card-flip-inner { transition: none; }
+  .accent-shimmer { animation: none; }
 }`;
 
 const namecardLayout = `import type { Metadata } from 'next';
@@ -1265,11 +1349,11 @@ export function FlippableCard({ config }: Props) {
       >
         <div className="card-flip-inner" style={{ minHeight: '480px' }}>
           {/* ── FRONT ── */}
-          <div className="card-flip-front print-card rounded-[var(--radius-xl)] overflow-hidden bg-[var(--surface-elevated)] shadow-[var(--shadow-card-hover)]">
+          <div className="card-flip-front namecard-hover print-card rounded-[var(--radius-xl)] overflow-hidden bg-[var(--surface-elevated)] shadow-[var(--shadow-card-hover)]">
             {/* Accent bar */}
             <div
-              className="h-1 w-full"
-              style={{ background: \`linear-gradient(90deg, \${config.accentColor}, \${config.accentColor}cc)\` }}
+              className="h-1.5 w-full accent-shimmer"
+              style={{ background: \`linear-gradient(90deg, \${config.accentColor}, \${config.accentColor}aa, \${config.accentColor})\` }}
             />
             {/* Hero gradient header */}
             <div
@@ -1298,8 +1382,8 @@ export function FlippableCard({ config }: Props) {
           <div className="card-flip-back rounded-[var(--radius-xl)] overflow-hidden bg-[var(--surface-elevated)] shadow-[var(--shadow-card-hover)]">
             {/* Accent bar */}
             <div
-              className="h-1 w-full"
-              style={{ background: \`linear-gradient(90deg, \${config.accentColor}, \${config.accentColor}cc)\` }}
+              className="h-1.5 w-full accent-shimmer"
+              style={{ background: \`linear-gradient(90deg, \${config.accentColor}, \${config.accentColor}aa, \${config.accentColor})\` }}
             />
             <div className="p-6 flex flex-col items-center gap-5">
               <div className="text-center space-y-1 pt-2">

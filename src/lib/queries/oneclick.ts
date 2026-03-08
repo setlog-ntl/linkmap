@@ -177,6 +177,27 @@ export function useMyDeployments() {
   });
 }
 
+export function useRenameDeploy() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, site_name }: { id: string; site_name: string }) => {
+      const res = await fetch(`/api/oneclick/deployments/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ site_name }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '이름 변경 실패');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
+    },
+  });
+}
+
 export function useDeleteDeployment() {
   const queryClient = useQueryClient();
   return useMutation({

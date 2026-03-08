@@ -8,14 +8,14 @@ import {
   Rocket, Search, Map as MapIcon,
   List, Link2, Key, Settings, BookOpen, ChevronDown, ChevronRight,
   LogOut, Bot, User, GitBranch, Wrench, FolderKanban, Plus, LayoutDashboard,
-  Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight, Trash2, DollarSign, Users, BarChart3, Lightbulb, Trophy, Bug,
+  Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight, Trash2, DollarSign, Users, BarChart3, Lightbulb, Trophy, Bug, Check, X,
 } from 'lucide-react';
 import { GUIDE_CATEGORIES, getGuidesByCategory, type GuideCategory } from '@/data/ui/guide-meta';
 import { createClient } from '@/lib/supabase/client';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
-import { useProjects, useToggleFavoriteProject } from '@/lib/queries/projects';
-import { useMyDeployments, type HomepageDeploy } from '@/lib/queries/oneclick';
+import { useProjects, useToggleFavoriteProject, useUpdateProject } from '@/lib/queries/projects';
+import { useMyDeployments, useRenameDeploy, type HomepageDeploy } from '@/lib/queries/oneclick';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Sidebar,
@@ -67,6 +67,88 @@ function getProjectSubNav(projectId: string) {
   ];
 }
 
+function InlineEditableName({
+  name,
+  onSave,
+  className,
+}: {
+  name: string;
+  onSave: (newName: string) => void;
+  className?: string;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(name);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isEditing) {
+      setEditValue(name);
+      // Delay focus to ensure input is rendered
+      requestAnimationFrame(() => inputRef.current?.select());
+    }
+  }, [isEditing, name]);
+
+  const handleSave = () => {
+    const trimmed = editValue.trim();
+    if (trimmed && trimmed !== name) {
+      onSave(trimmed);
+    }
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSave();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setIsEditing(false);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <div className="flex items-center gap-0.5 min-w-0 flex-1" onClick={(e) => e.stopPropagation()}>
+        <input
+          ref={inputRef}
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onBlur={handleSave}
+          className="h-5 min-w-0 flex-1 rounded border border-border bg-background px-1 text-xs outline-none focus:ring-1 focus:ring-ring"
+          maxLength={100}
+        />
+        <button
+          onMouseDown={(e) => { e.preventDefault(); handleSave(); }}
+          className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm hover:bg-sidebar-accent"
+        >
+          <Check className="h-3 w-3 text-green-500" />
+        </button>
+        <button
+          onMouseDown={(e) => { e.preventDefault(); setIsEditing(false); }}
+          className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm hover:bg-sidebar-accent"
+        >
+          <X className="h-3 w-3 text-muted-foreground" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <span
+      className={`truncate ${className ?? ''}`}
+      onDoubleClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsEditing(true);
+      }}
+      title="더블클릭하여 이름 수정"
+    >
+      {name}
+    </span>
+  );
+}
+
 export function AppSidebar({ profile }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -77,6 +159,8 @@ export function AppSidebar({ profile }: AppSidebarProps) {
   const { data: projects, isLoading: isProjectsLoading } = useProjects();
   const { data: deployments, isLoading: isDeploymentsLoading } = useMyDeployments();
   const { mutate: toggleFavorite } = useToggleFavoriteProject();
+  const { mutate: updateProject } = useUpdateProject();
+  const { mutate: renameDeploy } = useRenameDeploy();
 
   // Extract active project ID from URL
   const activeProjectId = pathname.match(/^\/project\/([^/]+)/)?.[1] ?? null;
@@ -223,7 +307,10 @@ export function AppSidebar({ profile }: AppSidebarProps) {
               className="flex-1 min-w-0"
             >
               <Link href={`/project/${project.id}`}>
-                <span className="truncate">{project.name}</span>
+                <InlineEditableName
+                  name={project.name}
+                  onSave={(newName) => updateProject({ id: project.id, name: newName })}
+                />
               </Link>
             </SidebarMenuSubButton>
             {latestDeploy && (
@@ -397,7 +484,10 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                                   >
                                     <Link href={`/sites/${deploy.id}/edit`}>
                                       <StatusIcon className={`h-3.5 w-3.5 ${statusClass}`} />
-                                      <span className="truncate">{deploy.site_name}</span>
+                                      <InlineEditableName
+                                        name={deploy.site_name}
+                                        onSave={(newName) => renameDeploy({ id: deploy.id, site_name: newName })}
+                                      />
                                     </Link>
                                   </SidebarMenuSubButton>
                                 </div>
@@ -438,7 +528,10 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                             >
                               <Link href={`/sites/${deploy.id}/edit`}>
                                 <StatusIcon className={`h-3.5 w-3.5 ${statusClass}`} />
-                                <span className="truncate">{deploy.site_name}</span>
+                                <InlineEditableName
+                                  name={deploy.site_name}
+                                  onSave={(newName) => renameDeploy({ id: deploy.id, site_name: newName })}
+                                />
                               </Link>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>

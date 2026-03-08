@@ -62,4 +62,29 @@ export const devShowcasePresets: ModulePreset[] = [
       },
     },
   },
+  {
+    id: 'terminal',
+    name: '터미널',
+    nameEn: 'Terminal',
+    description: '터미널 히어로 + GitHub 카드 — 해커 감성',
+    descriptionEn: 'Terminal hero + GitHub cards — hacker aesthetic',
+    state: {
+      enabled: ['hero', 'about', 'projects', 'experience', 'contact'],
+      order: ['hero', 'about', 'projects', 'experience', 'contact'],
+      values: {
+        hero: { designPreset: 'github-dark' },
+      },
+    },
+  },
+  {
+    id: 'portfolio-focus',
+    name: '포트폴리오 중심',
+    nameEn: 'Portfolio Focus',
+    description: '프로젝트 + 블로그 강조 — 기술 블로거',
+    descriptionEn: 'Projects + Blog highlighted — tech blogger',
+    state: {
+      enabled: ['hero', 'projects', 'blog', 'contact'],
+      order: ['hero', 'projects', 'blog', 'contact'],
+    },
+  },
 ];

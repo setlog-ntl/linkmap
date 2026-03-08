@@ -9,6 +9,8 @@ import {
   sharedSectionWrapper as sectionWrapper,
   sharedThemeToggle as themeToggle,
   sharedLanguageToggle as languageToggle,
+  sharedCountUp as countUp,
+  sharedPremiumAnimations,
   makePackageJson,
 } from './shared-template-files';
 
@@ -133,6 +135,15 @@ const globalsCss = `@import "tailwindcss";
   --brand-glow: rgba(99, 102, 241, 0.15);
   --color-primary: #6366f1;
   --color-secondary: #8b5cf6;
+}
+
+/* ── Preset: Editorial ── */
+[data-preset="editorial"] {
+  --brand-primary: #1c1c1e;
+  --brand-secondary: #3a3a3c;
+  --brand-glow: rgba(28, 28, 30, 0.12);
+  --color-primary: #1c1c1e;
+  --color-secondary: #3a3a3c;
 }
 
 .dark {
@@ -292,7 +303,38 @@ html {
 @media (prefers-reduced-motion:reduce) {
   .animate-fade-up { animation:none; opacity:1; transform:none; }
 }
+
+/* Editorial Hero */
+.hero-editorial {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+@media (min-width: 768px) {
+  .hero-editorial {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Masonry gallery */
+.masonry-gallery {
+  columns: 2;
+  column-gap: 1rem;
+}
+@media (min-width: 768px) {
+  .masonry-gallery {
+    columns: 3;
+  }
+}
+.masonry-gallery > * {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+}
 `;
+
+// premium animations are appended at runtime via template literal
+const globalsCssWithPremium = globalsCss + sharedPremiumAnimations;
 
 // ──────────────────────────────────────────────
 // src/app/layout.tsx
@@ -407,6 +449,118 @@ interface Props {
   config: SiteConfig;
 }
 
+function HeroDefault({ config, name, tagline, parallaxY, fadeOpacity, t }: {
+  config: SiteConfig;
+  name: string;
+  tagline: string;
+  parallaxY: string;
+  fadeOpacity: number;
+  t: (key: string) => string;
+}) {
+  return (
+    <>
+      {config.heroImageUrl && (
+        <div
+          className="absolute inset-0 z-0"
+          style={{ transform: \`translateY(\${parallaxY})\` }}
+        >
+          <img src={config.heroImageUrl} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/60" />
+        </div>
+      )}
+      {!config.heroImageUrl && (
+        <div className="absolute inset-0 z-0 mesh-gradient-bg" />
+      )}
+      <div
+        className="relative z-10 text-center px-4 sm:px-6 max-w-4xl"
+        style={{ opacity: fadeOpacity }}
+      >
+        <h1
+          className="text-5xl sm:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-[var(--brand-primary)] via-[var(--brand-secondary)] to-[var(--brand-primary)] bg-[length:200%_auto] bg-clip-text text-transparent animate-fade-up"
+        >
+          {name}
+        </h1>
+        <p className="text-xl sm:text-2xl lg:text-3xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto animate-fade-up animate-fade-up-d1">
+          {tagline}
+        </p>
+        <a
+          href="#about"
+          className="inline-block px-10 py-4 rounded-full bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-secondary)] text-white font-semibold text-lg shadow-lg hover:scale-105 transition-all duration-300 animate-fade-up animate-fade-up-d2 btn-press hover-glow"
+        >
+          {t('hero.cta')}
+        </a>
+      </div>
+      <div className="absolute bottom-0 left-0 right-0 z-10">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-[60px] sm:h-[80px]" fill="currentColor" style={{ color: 'var(--bg-primary, #ffffff)' }}>
+          <path d="M0,0 C300,100 900,20 1200,80 L1200,120 L0,120 Z" className="dark:fill-[#0f0f0f]" />
+        </svg>
+      </div>
+    </>
+  );
+}
+
+function HeroEditorial({ config, name, tagline, parallaxY, fadeOpacity, t }: {
+  config: SiteConfig;
+  name: string;
+  tagline: string;
+  parallaxY: string;
+  fadeOpacity: number;
+  t: (key: string) => string;
+}) {
+  return (
+    <>
+      <div className="absolute inset-0 z-0 mesh-gradient-bg" />
+      <div
+        className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-8 hero-editorial"
+        style={{ opacity: fadeOpacity }}
+      >
+        {/* Left: text */}
+        <div className="flex flex-col justify-center">
+          <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-4 animate-fade-up">
+            Personal Brand
+          </p>
+          <h1
+            className="text-7xl lg:text-9xl font-bold leading-none mb-6 bg-gradient-to-r from-[var(--brand-primary)] via-[var(--brand-secondary)] to-[var(--brand-primary)] bg-[length:200%_auto] bg-clip-text text-transparent animate-fade-up"
+          >
+            {name}
+          </h1>
+          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-sm animate-fade-up animate-fade-up-d1">
+            {tagline}
+          </p>
+          <a
+            href="#about"
+            className="self-start inline-block px-8 py-3 rounded-full bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-secondary)] text-white font-semibold text-base shadow-lg hover:scale-105 transition-all duration-300 animate-fade-up animate-fade-up-d2 btn-press hover-glow"
+          >
+            {t('hero.cta')}
+          </a>
+        </div>
+
+        {/* Right: hero image or decorative block */}
+        <div
+          className="relative overflow-hidden rounded-2xl animate-fade-up animate-fade-up-d1"
+          style={{ transform: \`translateY(\${parallaxY})\` }}
+        >
+          {config.heroImageUrl ? (
+            <img
+              src={config.heroImageUrl}
+              alt={name}
+              className="w-full h-full object-cover aspect-[4/5]"
+            />
+          ) : (
+            <div
+              className="aspect-[4/5] w-full rounded-2xl"
+              style={{
+                background: 'linear-gradient(135deg, var(--brand-primary-subtle, rgba(238,91,43,0.08)) 0%, color-mix(in oklch, var(--brand-secondary, #f59e0b) 10%, transparent) 100%)',
+                border: '1px solid var(--surface-border)',
+              }}
+            />
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function HeroSection({ config }: Props) {
   const ref = useRef<HTMLElement>(null);
   const [scrollY, setScrollY] = useState(0);
@@ -428,6 +582,7 @@ export function HeroSection({ config }: Props) {
 
   const parallaxY = \`\${scrollY * 30}%\`;
   const fadeOpacity = Math.max(0, 1 - scrollY * 1.25);
+  const isEditorial = config.designPreset === 'editorial';
 
   return (
     <section
@@ -435,51 +590,25 @@ export function HeroSection({ config }: Props) {
       ref={ref}
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      {config.heroImageUrl && (
-        <div
-          className="absolute inset-0 z-0"
-          style={{ transform: \`translateY(\${parallaxY})\` }}
-        >
-          <img
-            src={config.heroImageUrl}
-            alt=""
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black/60" />
-        </div>
+      {isEditorial ? (
+        <HeroEditorial
+          config={config}
+          name={name}
+          tagline={tagline}
+          parallaxY={parallaxY}
+          fadeOpacity={fadeOpacity}
+          t={t}
+        />
+      ) : (
+        <HeroDefault
+          config={config}
+          name={name}
+          tagline={tagline}
+          parallaxY={parallaxY}
+          fadeOpacity={fadeOpacity}
+          t={t}
+        />
       )}
-
-      {!config.heroImageUrl && (
-        <div className="absolute inset-0 z-0 mesh-gradient-bg" />
-      )}
-
-      <div
-        className="relative z-10 text-center px-4 sm:px-6 max-w-4xl"
-        style={{ opacity: fadeOpacity }}
-      >
-        <h1
-          className="text-5xl sm:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-[#ee5b2b] via-[#f59e0b] to-[#ee5b2b] bg-[length:200%_auto] bg-clip-text text-transparent animate-fade-up"
-        >
-          {name}
-        </h1>
-        <p
-          className="text-xl sm:text-2xl lg:text-3xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto animate-fade-up animate-fade-up-d1"
-        >
-          {tagline}
-        </p>
-        <a
-          href="#about"
-          className="inline-block px-10 py-4 rounded-full bg-gradient-to-r from-[#ee5b2b] to-[#f59e0b] text-white font-semibold text-lg shadow-lg shadow-[#ee5b2b]/20 hover:shadow-[#ee5b2b]/30 hover:scale-105 transition-all duration-300 animate-fade-up animate-fade-up-d2 btn-press"
-        >
-          {t('hero.cta')}
-        </a>
-      </div>
-
-      <div className="absolute bottom-0 left-0 right-0 z-10">
-        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-[60px] sm:h-[80px]" fill="currentColor" style={{ color: 'var(--bg-primary, #ffffff)' }}>
-          <path d="M0,0 C300,100 900,20 1200,80 L1200,120 L0,120 Z" className="dark:fill-[#0f0f0f]" />
-        </svg>
-      </div>
     </section>
   );
 }
@@ -588,11 +717,21 @@ export function ValuesSection({ values }: Props) {
 const highlightsSection = `'use client';
 
 import { AnimatedReveal } from './animated-reveal';
+import { CountUp } from './count-up';
 import type { HighlightItem } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
 
 interface Props {
   highlights: HighlightItem[];
+}
+
+/** "84,000+" → { num: 84000, suffix: "+" } / "312주" → { num: 312, suffix: "주" } */
+function parseNumericValue(raw: string): { num: number; suffix: string } | null {
+  const match = raw.match(/^([\\d,]+)(.*)$/);
+  if (!match) return null;
+  const num = parseInt(match[1].replace(/,/g, ''), 10);
+  if (isNaN(num)) return null;
+  return { num, suffix: match[2] ?? '' };
 }
 
 export function HighlightsSection({ highlights }: Props) {
@@ -612,7 +751,8 @@ export function HighlightsSection({ highlights }: Props) {
         <div className="grid sm:grid-cols-3 gap-6">
           {highlights.map((item, i) => {
             const label = locale === 'en' && item.labelEn ? item.labelEn : item.label;
-            const value = locale === 'en' && item.valueEn ? item.valueEn : item.value;
+            const rawValue = locale === 'en' && item.valueEn ? item.valueEn : item.value;
+            const parsed = parseNumericValue(rawValue);
             return (
               <AnimatedReveal key={i} delay={i * 100}>
                 <div
@@ -623,7 +763,11 @@ export function HighlightsSection({ highlights }: Props) {
                     className="text-4xl sm:text-5xl font-bold mb-2"
                     style={{ color: 'var(--brand-primary)' }}
                   >
-                    {value}
+                    {parsed ? (
+                      <CountUp end={parsed.num} suffix={parsed.suffix} />
+                    ) : (
+                      rawValue
+                    )}
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
                 </div>
@@ -663,14 +807,15 @@ export function GallerySection({ images }: Props) {
           </h2>
         </AnimatedReveal>
 
-        <div className="bento-grid">
+        <div className="masonry-gallery">
           {images.map((src, i) => (
             <AnimatedReveal key={i} delay={i * 50}>
-              <div className="aspect-square group">
+              <div className="relative group break-inside-avoid mb-4 rounded-xl overflow-hidden">
                 <img
                   src={src}
                   alt=""
                   loading="lazy"
+                  className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
               </div>
@@ -1096,11 +1241,12 @@ export const personalBrandTemplate: HomepageTemplateContent = {
     { path: 'postcss.config.mjs', content: postcssConfig },
     { path: 'next.config.ts', content: nextConfig },
     { path: 'src/app/api/og/route.tsx', content: ogRoute },
-    { path: 'src/app/globals.css', content: globalsCss },
+    { path: 'src/app/globals.css', content: globalsCssWithPremium },
     { path: 'src/app/layout.tsx', content: layoutTsx },
     { path: 'src/app/page.tsx', content: pageTsx },
     { path: 'src/components/animated-reveal.tsx', content: animatedReveal },
     { path: 'src/components/section-wrapper.tsx', content: sectionWrapper },
+    { path: 'src/components/count-up.tsx', content: countUp },
     { path: 'src/components/hero-section.tsx', content: heroSection },
     { path: 'src/components/about-section.tsx', content: aboutSection },
     { path: 'src/components/values-section.tsx', content: valuesSection },

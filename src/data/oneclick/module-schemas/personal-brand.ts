@@ -25,6 +25,7 @@ export const personalBrandModuleSchema: TemplateModuleSchema = {
             { value: 'minimal', label: '미니멀 (Minimal)' },
             { value: 'creator', label: '크리에이터 (Creator)' },
             { value: 'storyteller', label: '풀 프로필 (Storyteller)' },
+            { value: 'editorial', label: '에디토리얼 (Editorial)' },
           ],
         },
         {

@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Linkmap 서비스 카탈로그 Gap Analysis</title>
+  <style>
+    :root {
+      --brand-blue: #2563eb;
+      --brand-green: #10b981;
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #334155;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-heading: #f1f5f9;
+      --border: #334155;
+      --accent: #38bdf8;
+      --danger: #f87171;
+      --warning: #fbbf24;
+      --success: #34d399;
+    }
+    .light {
+      --bg: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f1f5f9;
+      --text: #334155;
+      --text-muted: #64748b;
+      --text-heading: #0f172a;
+      --border: #e2e8f0;
+    }
+    @media (prefers-color-scheme: light) {
+      :root:not(.dark) {
+        --bg: #f8fafc;
+        --bg-card: #ffffff;
+        --bg-card-hover: #f1f5f9;
+        --text: #334155;
+        --text-muted: #64748b;
+        --text-heading: #0f172a;
+        --border: #e2e8f0;
+      }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 4rem 2rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .light .hero { background: linear-gradient(135deg, #eff6ff 0%, #ecfdf5 50%, #eff6ff 100%); }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle at 30% 50%, rgba(37,99,235,0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 50%, rgba(16,185,129,0.06) 0%, transparent 50%);
+      animation: float 20s ease-in-out infinite;
+    }
+    @keyframes float { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-2%,2%)} }
+    .hero-content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(37,99,235,0.15);
+      border: 1px solid rgba(37,99,235,0.3);
+      color: var(--accent);
+      font-size: 0.8rem; font-weight: 600;
+      padding: 0.3rem 1rem; border-radius: 999px;
+      margin-bottom: 1.5rem; letter-spacing: 0.05em;
+    }
+    .light .hero-badge { color: var(--brand-blue); }
+    .hero h1 {
+      font-size: 2.5rem; font-weight: 800;
+      color: var(--text-heading);
+      margin-bottom: 1rem; letter-spacing: -0.02em;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-desc { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+    .hero-date { color: var(--text-muted); font-size: 0.85rem; margin-top: 1.5rem; opacity: 0.7; }
+    /* Theme toggle */
+    .theme-toggle {
+      position: fixed; top: 1rem; right: 1rem; z-index: 100;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.5rem 0.75rem;
+      color: var(--text); cursor: pointer; font-size: 1.1rem;
+    }
+    .theme-toggle:hover { border-color: var(--brand-blue); }
+    /* Container & Section */
+    .container { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem 4rem; }
+    section { margin-bottom: 4rem; }
+    .section-label {
+      display: inline-block; font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--brand-green); margin-bottom: 0.5rem;
+    }
+    h2 { font-size: 1.75rem; font-weight: 700; color: var(--text-heading); margin-bottom: 1.5rem; letter-spacing: -0.01em; }
+    h3 { font-size: 1.25rem; font-weight: 600; color: var(--text-heading); margin-bottom: 1rem; margin-top: 2rem; }
+    p { color: var(--text); margin-bottom: 1rem; }
+    .muted { color: var(--text-muted); }
+    /* KPI Cards */
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;
+    }
+    .kpi-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.25rem; text-align: center;
+    }
+    .kpi-card:hover { border-color: rgba(37,99,235,0.4); }
+    .kpi-value {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .kpi-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+    /* Cards */
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: rgba(37,99,235,0.4); }
+    /* Insights */
+    .insight-list { list-style: none; padding: 0; }
+    .insight-list li {
+      padding: 0.75rem 1rem; margin-bottom: 0.5rem;
+      background: var(--bg-card); border-left: 3px solid var(--brand-green);
+      border-radius: 0 8px 8px 0; font-size: 0.95rem;
+    }
+    /* Tabs */
+    .tab-bar { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .tab-btn {
+      padding: 0.5rem 1.25rem; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--bg-card); color: var(--text-muted); cursor: pointer;
+      font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
+    }
+    .tab-btn:hover { border-color: var(--brand-blue); color: var(--text); }
+    .tab-btn.active { background: var(--brand-blue); color: #fff; border-color: var(--brand-blue); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    /* Tables */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .data-table th {
+      text-align: left; padding: 0.75rem 0.5rem; border-bottom: 2px solid var(--border);
+      color: var(--text-muted); font-weight: 600; font-size: 0.75rem;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      cursor: pointer; user-select: none; white-space: nowrap;
+    }
+    .data-table th:hover { color: var(--brand-blue); }
+    .data-table th .sort-arrow { margin-left: 4px; opacity: 0.4; }
+    .data-table th.sorted .sort-arrow { opacity: 1; color: var(--brand-blue); }
+    .data-table td { padding: 0.6rem 0.5rem; border-bottom: 1px solid var(--border); }
+    .data-table tr:hover td { background: var(--bg-card-hover); }
+    .data-table .overflow-wrap { max-width: 0; overflow: hidden; }
+    /* Badges */
+    .badge {
+      display: inline-block; font-size: 0.7rem; font-weight: 600;
+      padding: 0.15rem 0.5rem; border-radius: 4px;
+    }
+    .badge-v1 { background: rgba(37,99,235,0.15); color: #60a5fa; }
+    .badge-v2 { background: rgba(16,185,129,0.15); color: #34d399; }
+    .badge-p1 { background: rgba(248,113,113,0.15); color: #f87171; }
+    .badge-p2 { background: rgba(251,191,36,0.15); color: #fbbf24; }
+    .badge-p3 { background: rgba(148,163,184,0.15); color: #94a3b8; }
+    .badge-cat {
+      display: inline-block; font-size: 0.7rem; font-weight: 600;
+      padding: 0.15rem 0.5rem; border-radius: 4px;
+      background: rgba(99,102,241,0.15); color: #818cf8;
+    }
+    /* Bar chart */
+    .bar-chart { margin: 1.5rem 0; }
+    .bar-row { display: flex; align-items: center; margin-bottom: 0.5rem; }
+    .bar-label { width: 140px; font-size: 0.8rem; color: var(--text-muted); flex-shrink: 0; text-align: right; padding-right: 0.75rem; }
+    .bar-track { flex: 1; height: 24px; background: var(--bg-card); border-radius: 4px; overflow: hidden; position: relative; }
+    .bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; display: flex; align-items: center; padding-left: 8px; font-size: 0.7rem; font-weight: 600; color: #fff; min-width: fit-content; }
+    .bar-fill.green { background: linear-gradient(90deg, #10b981, #34d399); }
+    .bar-fill.yellow { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .bar-fill.red { background: linear-gradient(90deg, #ef4444, #f87171); }
+    .bar-fill.blue { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+    /* Heatmap */
+    .heatmap-grid { display: grid; gap: 2px; margin: 1.5rem 0; }
+    .heatmap-cell {
+      aspect-ratio: 1; border-radius: 4px; display: flex; align-items: center;
+      justify-content: center; font-size: 0.7rem; font-weight: 700; color: #fff;
+      min-width: 28px; min-height: 28px;
+    }
+    .heatmap-label {
+      font-size: 0.7rem; color: var(--text-muted); display: flex; align-items: center;
+      justify-content: flex-end; padding-right: 6px; text-align: right;
+    }
+    /* Comparison table */
+    .cmp-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .cmp-table th, .cmp-table td { padding: 0.6rem 0.5rem; border-bottom: 1px solid var(--border); text-align: center; }
+    .cmp-table th { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+    .cmp-table td:first-child, .cmp-table th:first-child { text-align: left; }
+    .cmp-check { color: var(--success); }
+    .cmp-x { color: var(--danger); opacity: 0.5; }
+    .cmp-partial { color: var(--warning); }
+    /* Roadmap */
+    .roadmap { position: relative; padding-left: 2rem; }
+    .roadmap::before {
+      content: ''; position: absolute; left: 0.55rem; top: 0; bottom: 0;
+      width: 2px; background: var(--border);
+    }
+    .roadmap-item { position: relative; margin-bottom: 2rem; }
+    .roadmap-dot {
+      position: absolute; left: -1.7rem; top: 0.35rem;
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid var(--brand-blue); background: var(--bg);
+    }
+    .roadmap-item.phase1 .roadmap-dot { background: var(--brand-blue); }
+    .roadmap-item.phase2 .roadmap-dot { background: var(--brand-green); border-color: var(--brand-green); }
+    .roadmap-item.phase3 .roadmap-dot { background: var(--warning); border-color: var(--warning); }
+    .roadmap-phase { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+    .roadmap-phase.p1 { color: var(--brand-blue); }
+    .roadmap-phase.p2 { color: var(--brand-green); }
+    .roadmap-phase.p3 { color: var(--warning); }
+    .roadmap-title { font-size: 1.1rem; font-weight: 600; color: var(--text-heading); margin-bottom: 0.5rem; }
+    .roadmap-desc { color: var(--text-muted); font-size: 0.9rem; }
+    .roadmap-tags { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.25rem; }
+    .roadmap-tag {
+      font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 4px;
+      background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted);
+    }
+    /* Donut chart */
+    .chart-container { display: flex; justify-content: center; align-items: center; gap: 2rem; flex-wrap: wrap; margin: 2rem 0; }
+    .donut-wrap { position: relative; width: 220px; height: 220px; }
+    .donut-center {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .donut-center .val { font-size: 2rem; font-weight: 800; color: var(--text-heading); }
+    .donut-center .lbl { font-size: 0.75rem; color: var(--text-muted); }
+    .legend { list-style: none; padding: 0; }
+    .legend li { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--text); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    /* Filter */
+    .filter-bar { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+    .filter-input {
+      padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--bg-card); color: var(--text); font-size: 0.85rem; width: 200px;
+    }
+    .filter-input::placeholder { color: var(--text-muted); }
+    .filter-select {
+      padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--bg-card); color: var(--text); font-size: 0.85rem;
+    }
+    /* Responsive */
+    @media (max-width: 768px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .hero h1 { font-size: 1.75rem; }
+      .bar-label { width: 100px; font-size: 0.7rem; }
+      .chart-container { flex-direction: column; align-items: center; }
+      .data-table { font-size: 0.75rem; }
+      .cmp-table { font-size: 0.75rem; }
+    }
+    @media (max-width: 480px) {
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+      .container { padding: 2rem 1rem; }
+      .tab-btn { padding: 0.4rem 0.75rem; font-size: 0.8rem; }
+    }
+    /* Print */
+    @media print {
+      .hero { background: #fff !important; color: #000 !important; padding: 2rem 1rem; }
+      .hero h1 span { -webkit-text-fill-color: #2563eb; }
+      body { background: #fff; color: #000; }
+      .card, .kpi-card { border: 1px solid #ddd; }
+      .theme-toggle { display: none; }
+      .tab-panel { display: block !important; }
+      .tab-bar { display: none; }
+      section { page-break-inside: avoid; }
+    }
+    /* Scroll to top */
+    .scroll-top {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 99;
+      background: var(--brand-blue); color: #fff; border: none;
+      width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+      font-size: 1.2rem; display: none; align-items: center; justify-content: center;
+    }
+    /* Nav */
+    .nav-toc {
+      position: fixed; top: 50%; right: 1rem; transform: translateY(-50%);
+      z-index: 50; display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .nav-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--border);
+      cursor: pointer; transition: all 0.2s; border: none;
+    }
+    .nav-dot:hover, .nav-dot.active { background: var(--brand-blue); transform: scale(1.4); }
+    .nav-dot[title]::after { content: attr(title); }
+    @media (max-width: 768px) { .nav-toc { display: none; } }
+    /* Radar chart */
+    .radar-wrap { display: flex; justify-content: center; margin: 2rem 0; }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()" title="라이트/다크 모드 전환">🌓</button>
+  <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+  <nav class="nav-toc" id="navToc"></nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">GAP ANALYSIS REPORT</div>
+      <h1>서비스 카탈로그 <span>Gap Analysis</span></h1>
+      <p class="hero-desc">Linkmap 서비스 카탈로그(127개)의 현황을 분석하고, 추가 권장 서비스를 우선순위별로 정리한 전략 보고서</p>
+      <p class="hero-date">2026-03-06 | Linkmap Internal</p>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Section 1: Executive Summary -->
+    <section id="sec-summary">
+      <div class="section-label">Section 01</div>
+      <h2>Executive Summary</h2>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-value">127</div>
+          <div class="kpi-label">총 서비스</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value">8</div>
+          <div class="kpi-label">도메인</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value">31</div>
+          <div class="kpi-label">카테고리</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value">62%</div>
+          <div class="kpi-label">커버리지 점수</div>
+        </div>
+      </div>
+
+      <!-- Donut Chart -->
+      <div class="chart-container">
+        <div class="donut-wrap">
+          <svg viewBox="0 0 200 200" id="donutChart"></svg>
+          <div class="donut-center">
+            <div class="val">127</div>
+            <div class="lbl">Services</div>
+          </div>
+        </div>
+        <ul class="legend" id="donutLegend"></ul>
+      </div>
+
+      <h3>핵심 인사이트</h3>
+      <ul class="insight-list">
+        <li><strong>AI/ML 과포화:</strong> 전체 서비스의 37%(47개)가 AI/ML 도메인에 집중. 다른 핵심 도메인 대비 불균형 심각</li>
+        <li><strong>인프라/엔터프라이즈 공백:</strong> 메시징/큐, CI/CD, 검색, CMS, 이커머스 카테고리의 서비스가 1~3개로 현저히 부족</li>
+        <li><strong>클라우드 제공자 부재:</strong> AWS/GCP/Azure 핵심 서비스(Lambda, Cloud Run, ECS 등)가 거의 등록되지 않아 엔터프라이즈 사용자 유치 제한</li>
+      </ul>
+    </section>
+
+    <!-- Section 2: 현재 서비스 카탈로그 현황 -->
+    <section id="sec-catalog">
+      <div class="section-label">Section 02</div>
+      <h2>현재 서비스 카탈로그 현황</h2>
+
+      <div class="filter-bar">
+        <input type="text" class="filter-input" id="catalogSearch" placeholder="서비스명 검색..." oninput="filterCatalog()">
+        <select class="filter-select" id="catalogDomain" onchange="filterCatalog()">
+          <option value="">전체 도메인</option>
+        </select>
+        <select class="filter-select" id="catalogCategory" onchange="filterCatalog()">
+          <option value="">전체 카테고리</option>
+        </select>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table class="data-table" id="catalogTable">
+          <thead>
+            <tr>
+              <th onclick="sortTable('catalogTable',0)">서비스명 <span class="sort-arrow">↕</span></th>
+              <th onclick="sortTable('catalogTable',1)">카테고리 <span class="sort-arrow">↕</span></th>
+              <th onclick="sortTable('catalogTable',2)">도메인 <span class="sort-arrow">↕</span></th>
+              <th onclick="sortTable('catalogTable',3)">난이도 <span class="sort-arrow">↕</span></th>
+              <th onclick="sortTable('catalogTable',4)">무료티어 <span class="sort-arrow">↕</span></th>
+              <th onclick="sortTable('catalogTable',5)">인기도 <span class="sort-arrow">↕</span></th>
+              <th>소스</th>
+            </tr>
+          </thead>
+          <tbody id="catalogBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 3: Gap Analysis -->
+    <section id="sec-gap">
+      <div class="section-label">Section 03</div>
+      <h2>Gap Analysis</h2>
+      <p class="muted">카테고리별 충족도를 시각화합니다. 각 카테고리에 이상적으로 필요한 서비스 수 대비 현재 등록된 서비스 비율을 표시합니다.</p>
+      <div class="bar-chart" id="gapChart"></div>
+    </section>
+
+    <!-- Section 4: 추가 권장 서비스 -->
+    <section id="sec-recommend">
+      <div class="section-label">Section 04</div>
+      <h2>추가 권장 서비스 목록</h2>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('p1')">P1 높음 (~40개)</button>
+        <button class="tab-btn" onclick="switchTab('p2')">P2 중간 (~25개)</button>
+        <button class="tab-btn" onclick="switchTab('p3')">P3 낮음 (~15개)</button>
+      </div>
+
+      <div class="tab-panel active" id="panel-p1">
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>서비스</th><th>카테고리</th><th>근거</th></tr></thead>
+            <tbody id="p1Body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="tab-panel" id="panel-p2">
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>서비스</th><th>카테고리</th><th>근거</th></tr></thead>
+            <tbody id="p2Body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="tab-panel" id="panel-p3">
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>서비스</th><th>카테고리</th><th>근거</th></tr></thead>
+            <tbody id="p3Body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: 히트맵 -->
+    <section id="sec-heatmap">
+      <div class="section-label">Section 05</div>
+      <h2>카테고리 커버리지 히트맵</h2>
+      <p class="muted">도메인(행) × 카테고리(열) 매트릭스. 셀 색상은 서비스 밀도를 나타냅니다.</p>
+      <div style="overflow-x:auto;">
+        <div id="heatmapContainer"></div>
+      </div>
+
+      <h3>도메인별 서비스 분포 (방사형)</h3>
+      <div class="radar-wrap">
+        <svg viewBox="0 0 400 400" width="400" height="400" id="radarChart"></svg>
+      </div>
+    </section>
+
+    <!-- Section 6: 경쟁사 대비 분석 -->
+    <section id="sec-compete">
+      <div class="section-label">Section 06</div>
+      <h2>경쟁사 대비 분석</h2>
+      <p class="muted">주요 경쟁/유사 플랫폼과의 카테고리별 서비스 지원 비교</p>
+
+      <div style="overflow-x:auto;">
+        <table class="cmp-table" id="cmpTable">
+          <thead>
+            <tr>
+              <th>카테고리</th>
+              <th>Linkmap</th>
+              <th>Doppler</th>
+              <th>Vercel</th>
+              <th>Railway</th>
+              <th>Infisical</th>
+            </tr>
+          </thead>
+          <tbody id="cmpBody"></tbody>
+        </table>
+      </div>
+
+      <h3>총점 비교</h3>
+      <div class="bar-chart" id="cmpBarChart"></div>
+    </section>
+
+    <!-- Section 7: 실행 로드맵 -->
+    <section id="sec-roadmap">
+      <div class="section-label">Section 07</div>
+      <h2>실행 로드맵</h2>
+
+      <div class="roadmap">
+        <div class="roadmap-item phase1">
+          <div class="roadmap-dot"></div>
+          <div class="roadmap-phase p1">Phase 1 — 1~2주</div>
+          <div class="roadmap-title">P1 서비스 추가 + 카테고리 정규화</div>
+          <div class="roadmap-desc">메시징/큐, CI/CD, 검색, 모니터링, 클라우드 핵심 서비스 약 40개 추가. 카테고리 명명 규칙 통일 및 빈 카테고리 해소.</div>
+          <div class="roadmap-tags">
+            <span class="roadmap-tag">Kafka</span>
+            <span class="roadmap-tag">RabbitMQ</span>
+            <span class="roadmap-tag">Elasticsearch</span>
+            <span class="roadmap-tag">Kubernetes</span>
+            <span class="roadmap-tag">AWS Lambda</span>
+            <span class="roadmap-tag">Prometheus</span>
+            <span class="roadmap-tag">GitLab CI</span>
+            <span class="roadmap-tag">Okta</span>
+            <span class="roadmap-tag">Jira</span>
+            <span class="roadmap-tag">Zapier</span>
+          </div>
+        </div>
+
+        <div class="roadmap-item phase2">
+          <div class="roadmap-dot"></div>
+          <div class="roadmap-phase p2">Phase 2 — 3~4주</div>
+          <div class="roadmap-title">P2 서비스 추가 + 가이드 작성</div>
+          <div class="roadmap-desc">CDN, CMS, 애널리틱스, 이커머스, 비밀관리 등 약 25개 서비스 추가 및 연동 가이드 작성.</div>
+          <div class="roadmap-tags">
+            <span class="roadmap-tag">Fastly</span>
+            <span class="roadmap-tag">WordPress</span>
+            <span class="roadmap-tag">Amplitude</span>
+            <span class="roadmap-tag">Segment</span>
+            <span class="roadmap-tag">HashiCorp Vault</span>
+            <span class="roadmap-tag">BigCommerce</span>
+          </div>
+        </div>
+
+        <div class="roadmap-item phase3">
+          <div class="roadmap-dot"></div>
+          <div class="roadmap-phase p3">Phase 3 — 5~8주</div>
+          <div class="roadmap-title">P3 서비스 + 파트너십</div>
+          <div class="roadmap-desc">VCS, 블록체인, IoT, 저코드 등 약 15개 서비스 추가. 핵심 서비스 제공사와 파트너십 협의.</div>
+          <div class="roadmap-tags">
+            <span class="roadmap-tag">GitLab</span>
+            <span class="roadmap-tag">Bitbucket</span>
+            <span class="roadmap-tag">Alchemy</span>
+            <span class="roadmap-tag">Retool</span>
+            <span class="roadmap-tag">AWS IoT Core</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- .container -->
+
+  <script>
+  // ============================
+  // DATA
+  // ============================
+  const SERVICES = [
+    // V1 (60 services)
+    {n:'Supabase',cat:'database',dom:'backend',diff:'beginner',free:'excellent',pop:92,src:'V1'},
+    {n:'Firebase',cat:'database',dom:'backend',diff:'beginner',free:'excellent',pop:90,src:'V1'},
+    {n:'Vercel',cat:'deploy',dom:'infrastructure',diff:'beginner',free:'excellent',pop:95,src:'V1'},
+    {n:'Netlify',cat:'deploy',dom:'infrastructure',diff:'beginner',free:'excellent',pop:82,src:'V1'},
+    {n:'Stripe',cat:'payment',dom:'business',diff:'intermediate',free:'good',pop:96,src:'V1'},
+    {n:'Clerk',cat:'auth',dom:'backend',diff:'beginner',free:'excellent',pop:85,src:'V1'},
+    {n:'NextAuth / Auth.js',cat:'auth',dom:'backend',diff:'intermediate',free:'excellent',pop:80,src:'V1'},
+    {n:'Resend',cat:'email',dom:'communication',diff:'beginner',free:'good',pop:78,src:'V1'},
+    {n:'SendGrid',cat:'email',dom:'communication',diff:'intermediate',free:'good',pop:75,src:'V1'},
+    {n:'OpenAI',cat:'ai',dom:'ai_ml',diff:'beginner',free:'limited',pop:98,src:'V1'},
+    {n:'Anthropic',cat:'ai',dom:'ai_ml',diff:'beginner',free:'limited',pop:88,src:'V1'},
+    {n:'Cloudinary',cat:'storage',dom:'business',diff:'intermediate',free:'good',pop:80,src:'V1'},
+    {n:'Sentry',cat:'monitoring',dom:'observability',diff:'beginner',free:'good',pop:90,src:'V1'},
+    {n:'PlanetScale',cat:'database',dom:'backend',diff:'intermediate',free:'good',pop:78,src:'V1'},
+    {n:'Neon',cat:'database',dom:'backend',diff:'beginner',free:'excellent',pop:82,src:'V1'},
+    {n:'Railway',cat:'deploy',dom:'infrastructure',diff:'beginner',free:'limited',pop:80,src:'V1'},
+    {n:'Lemon Squeezy',cat:'payment',dom:'business',diff:'beginner',free:'good',pop:70,src:'V1'},
+    {n:'UploadThing',cat:'storage',dom:'backend',diff:'beginner',free:'good',pop:72,src:'V1'},
+    {n:'PostHog',cat:'monitoring',dom:'observability',diff:'beginner',free:'excellent',pop:82,src:'V1'},
+    {n:'AWS S3',cat:'storage',dom:'infrastructure',diff:'intermediate',free:'good',pop:95,src:'V1'},
+    {n:'GitHub',cat:'cicd',dom:'devtools',diff:'beginner',free:'excellent',pop:98,src:'V1'},
+    {n:'Claude Code',cat:'ai',dom:'ai_ml',diff:'beginner',free:'none',pop:88,src:'V1'},
+    {n:'Google Gemini',cat:'ai',dom:'ai_ml',diff:'beginner',free:'excellent',pop:85,src:'V1'},
+    {n:'Kakao Login',cat:'social_login',dom:'backend',diff:'beginner',free:'excellent',pop:92,src:'V1'},
+    {n:'Google OAuth',cat:'social_login',dom:'backend',diff:'beginner',free:'excellent',pop:95,src:'V1'},
+    {n:'Naver Login',cat:'social_login',dom:'backend',diff:'beginner',free:'excellent',pop:88,src:'V1'},
+    {n:'Apple Login',cat:'social_login',dom:'backend',diff:'intermediate',free:'good',pop:82,src:'V1'},
+    {n:'GitHub OAuth',cat:'social_login',dom:'backend',diff:'beginner',free:'excellent',pop:85,src:'V1'},
+    {n:'Auth0',cat:'auth',dom:'backend',diff:'intermediate',free:'good',pop:88,src:'V1'},
+    {n:'Convex',cat:'database',dom:'backend',diff:'beginner',free:'good',pop:78,src:'V1'},
+    {n:'Drizzle ORM',cat:'database',dom:'backend',diff:'intermediate',free:'excellent',pop:85,src:'V1'},
+    {n:'Prisma',cat:'database',dom:'backend',diff:'beginner',free:'excellent',pop:90,src:'V1'},
+    {n:'Turso',cat:'database',dom:'backend',diff:'beginner',free:'excellent',pop:76,src:'V1'},
+    {n:'Redis Cloud',cat:'cache',dom:'backend',diff:'intermediate',free:'limited',pop:86,src:'V1'},
+    {n:'Vercel KV',cat:'cache',dom:'backend',diff:'beginner',free:'good',pop:72,src:'V1'},
+    {n:'Pinecone',cat:'ai',dom:'backend',diff:'intermediate',free:'good',pop:82,src:'V1'},
+    {n:'LangChain',cat:'ai',dom:'backend',diff:'advanced',free:'excellent',pop:88,src:'V1'},
+    {n:'Replicate',cat:'ai',dom:'backend',diff:'beginner',free:'none',pop:80,src:'V1'},
+    {n:'Hugging Face',cat:'ai',dom:'backend',diff:'intermediate',free:'good',pop:90,src:'V1'},
+    {n:'Stability AI',cat:'ai',dom:'backend',diff:'beginner',free:'limited',pop:78,src:'V1'},
+    {n:'Notion API',cat:'automation',dom:'backend',diff:'beginner',free:'good',pop:82,src:'V1'},
+    {n:'Linear',cat:'automation',dom:'backend',diff:'beginner',free:'good',pop:80,src:'V1'},
+    {n:'토스페이먼츠',cat:'payment',dom:'backend',diff:'intermediate',free:'none',pop:85,src:'V1'},
+    {n:'PayPal',cat:'payment',dom:'backend',diff:'intermediate',free:'none',pop:88,src:'V1'},
+    {n:'AWS SES',cat:'email',dom:'backend',diff:'intermediate',free:'good',pop:82,src:'V1'},
+    {n:'Mailchimp',cat:'email',dom:'backend',diff:'beginner',free:'good',pop:84,src:'V1'},
+    {n:'ImageKit',cat:'storage',dom:'backend',diff:'beginner',free:'good',pop:74,src:'V1'},
+    {n:'Cloudflare R2',cat:'storage',dom:'backend',diff:'intermediate',free:'excellent',pop:80,src:'V1'},
+    {n:'Grafana',cat:'monitoring',dom:'devtools',diff:'intermediate',free:'good',pop:88,src:'V1'},
+    {n:'New Relic',cat:'monitoring',dom:'devtools',diff:'intermediate',free:'excellent',pop:84,src:'V1'},
+    {n:'GitHub Copilot',cat:'ai',dom:'devtools',diff:'beginner',free:'good',pop:92,src:'V1'},
+    {n:'Cursor',cat:'ai',dom:'devtools',diff:'beginner',free:'good',pop:88,src:'V1'},
+    {n:'Vitest',cat:'testing',dom:'devtools',diff:'beginner',free:'excellent',pop:86,src:'V1'},
+    {n:'Storybook',cat:'testing',dom:'devtools',diff:'beginner',free:'excellent',pop:84,src:'V1'},
+    {n:'Docker',cat:'deploy',dom:'devtools',diff:'intermediate',free:'good',pop:94,src:'V1'},
+    {n:'가비아',cat:'domain',dom:'infrastructure',diff:'beginner',free:'none',pop:88,src:'V1'},
+    {n:'후이즈',cat:'domain',dom:'infrastructure',diff:'beginner',free:'none',pop:78,src:'V1'},
+    {n:'카페24',cat:'domain',dom:'infrastructure',diff:'beginner',free:'limited',pop:83,src:'V1'},
+    {n:'아이네임즈',cat:'domain',dom:'infrastructure',diff:'beginner',free:'none',pop:68,src:'V1'},
+    {n:'Namecheap',cat:'domain',dom:'infrastructure',diff:'beginner',free:'none',pop:85,src:'V1'},
+    // V2 (67 services)
+    {n:'GitHub Actions',cat:'cicd',dom:'devtools',diff:'intermediate',free:'excellent',pop:95,src:'V2'},
+    {n:'Twilio',cat:'sms',dom:'communication',diff:'intermediate',free:'limited',pop:88,src:'V2'},
+    {n:'OneSignal',cat:'push',dom:'communication',diff:'beginner',free:'excellent',pop:75,src:'V2'},
+    {n:'Algolia',cat:'search',dom:'business',diff:'intermediate',free:'good',pop:82,src:'V2'},
+    {n:'Sanity',cat:'cms',dom:'business',diff:'intermediate',free:'good',pop:78,src:'V2'},
+    {n:'GA4',cat:'analytics',dom:'business',diff:'beginner',free:'excellent',pop:97,src:'V2'},
+    {n:'Upstash Redis',cat:'cache',dom:'backend',diff:'beginner',free:'good',pop:76,src:'V2'},
+    {n:'Cloudflare',cat:'cdn',dom:'infrastructure',diff:'intermediate',free:'excellent',pop:93,src:'V2'},
+    {n:'Fly.io',cat:'deploy',dom:'infrastructure',diff:'intermediate',free:'good',pop:72,src:'V2'},
+    {n:'Datadog',cat:'logging',dom:'observability',diff:'advanced',free:'limited',pop:90,src:'V2'},
+    {n:'Mixpanel',cat:'analytics',dom:'business',diff:'beginner',free:'excellent',pop:80,src:'V2'},
+    {n:'Contentful',cat:'cms',dom:'business',diff:'intermediate',free:'good',pop:80,src:'V2'},
+    {n:'Meilisearch',cat:'search',dom:'business',diff:'beginner',free:'good',pop:68,src:'V2'},
+    {n:'Pusher',cat:'push',dom:'communication',diff:'beginner',free:'good',pop:70,src:'V2'},
+    {n:'Trigger.dev',cat:'scheduling',dom:'integration',diff:'intermediate',free:'good',pop:62,src:'V2'},
+    {n:'LaunchDarkly',cat:'feature_flags',dom:'observability',diff:'intermediate',free:'limited',pop:74,src:'V2'},
+    {n:'Groq',cat:'ai',dom:'ai_ml',diff:'beginner',free:'excellent',pop:70,src:'V2'},
+    {n:'Render',cat:'deploy',dom:'infrastructure',diff:'beginner',free:'good',pop:73,src:'V2'},
+    {n:'LogRocket',cat:'logging',dom:'observability',diff:'beginner',free:'limited',pop:65,src:'V2'},
+    {n:'Playwright',cat:'testing',dom:'devtools',diff:'intermediate',free:'excellent',pop:85,src:'V2'},
+    {n:'Slack API',cat:'chat',dom:'communication',diff:'intermediate',free:'good',pop:88,src:'V2'},
+    {n:'Discord API',cat:'chat',dom:'communication',diff:'intermediate',free:'excellent',pop:84,src:'V2'},
+    {n:'Mapbox',cat:'other',dom:'business',diff:'intermediate',free:'excellent',pop:78,src:'V2'},
+    {n:'ElevenLabs',cat:'ai',dom:'ai_ml',diff:'beginner',free:'good',pop:72,src:'V2'},
+    {n:'Inngest',cat:'scheduling',dom:'integration',diff:'intermediate',free:'good',pop:60,src:'V2'},
+    {n:'Strapi',cat:'cms',dom:'business',diff:'intermediate',free:'excellent',pop:77,src:'V2'},
+    {n:'Plausible',cat:'analytics',dom:'business',diff:'beginner',free:'none',pop:58,src:'V2'},
+    {n:'Cypress',cat:'testing',dom:'devtools',diff:'beginner',free:'excellent',pop:82,src:'V2'},
+    {n:'BullMQ',cat:'queue',dom:'integration',diff:'intermediate',free:'excellent',pop:65,src:'V2'},
+    {n:'Shopify API',cat:'ecommerce',dom:'business',diff:'intermediate',free:'good',pop:90,src:'V2'},
+    {n:'Cloudflare Registrar',cat:'domain',dom:'infrastructure',diff:'intermediate',free:'none',pop:75,src:'V2'},
+    {n:'GoDaddy',cat:'domain',dom:'infrastructure',diff:'beginner',free:'good',pop:90,src:'V2'},
+    {n:'HostingKR',cat:'domain',dom:'infrastructure',diff:'beginner',free:'none',pop:78,src:'V2'},
+    {n:'DotName',cat:'domain',dom:'infrastructure',diff:'beginner',free:'excellent',pop:72,src:'V2'},
+    {n:'Google AdSense',cat:'advertising',dom:'business',diff:'beginner',free:'excellent',pop:90,src:'V2'},
+    {n:'Kakao AdFit',cat:'advertising',dom:'business',diff:'beginner',free:'excellent',pop:72,src:'V2'},
+    {n:'Criteo',cat:'advertising',dom:'business',diff:'intermediate',free:'none',pop:68,src:'V2'},
+    {n:'Taboola',cat:'advertising',dom:'business',diff:'beginner',free:'none',pop:62,src:'V2'},
+    {n:'Amazon Publisher Services',cat:'advertising',dom:'business',diff:'advanced',free:'none',pop:58,src:'V2'},
+    {n:'Google Ad Manager',cat:'advertising',dom:'business',diff:'advanced',free:'good',pop:75,src:'V2'},
+    {n:'Grok',cat:'ai',dom:'ai_ml',diff:'beginner',free:'good',pop:75,src:'V2'},
+    {n:'Mistral AI',cat:'ai',dom:'ai_ml',diff:'beginner',free:'none',pop:78,src:'V2'},
+    {n:'Cohere',cat:'ai',dom:'ai_ml',diff:'beginner',free:'good',pop:72,src:'V2'},
+    {n:'DeepSeek',cat:'ai',dom:'ai_ml',diff:'beginner',free:'none',pop:82,src:'V2'},
+    {n:'Perplexity AI',cat:'ai',dom:'ai_ml',diff:'beginner',free:'none',pop:80,src:'V2'},
+    {n:'AI21 Labs',cat:'ai',dom:'ai_ml',diff:'beginner',free:'good',pop:60,src:'V2'},
+    {n:'Midjourney',cat:'ai',dom:'ai_ml',diff:'beginner',free:'none',pop:90,src:'V2'},
+    {n:'Runway ML',cat:'ai',dom:'ai_ml',diff:'beginner',free:'limited',pop:78,src:'V2'},
+    {n:'Sora',cat:'ai',dom:'ai_ml',diff:'beginner',free:'none',pop:85,src:'V2'},
+    {n:'Leonardo AI',cat:'ai',dom:'ai_ml',diff:'beginner',free:'good',pop:72,src:'V2'},
+    {n:'Deepgram',cat:'ai',dom:'ai_ml',diff:'beginner',free:'excellent',pop:75,src:'V2'},
+    {n:'AssemblyAI',cat:'ai',dom:'ai_ml',diff:'beginner',free:'good',pop:73,src:'V2'},
+    {n:'PlayHT',cat:'ai',dom:'ai_ml',diff:'beginner',free:'limited',pop:65,src:'V2'},
+    {n:'Windsurf',cat:'ai',dom:'ai_ml',diff:'beginner',free:'excellent',pop:75,src:'V2'},
+    {n:'Tabnine',cat:'ai',dom:'ai_ml',diff:'beginner',free:'good',pop:68,src:'V2'},
+    {n:'Amazon Q Developer',cat:'ai',dom:'ai_ml',diff:'beginner',free:'good',pop:70,src:'V2'},
+    {n:'Weaviate',cat:'ai',dom:'ai_ml',diff:'intermediate',free:'excellent',pop:76,src:'V2'},
+    {n:'Qdrant',cat:'ai',dom:'ai_ml',diff:'intermediate',free:'good',pop:74,src:'V2'},
+    {n:'Chroma',cat:'ai',dom:'ai_ml',diff:'beginner',free:'excellent',pop:72,src:'V2'},
+    {n:'CrewAI',cat:'ai',dom:'ai_ml',diff:'intermediate',free:'excellent',pop:76,src:'V2'},
+    {n:'Dify',cat:'ai',dom:'ai_ml',diff:'beginner',free:'good',pop:78,src:'V2'},
+    {n:'Together AI',cat:'ai',dom:'ai_ml',diff:'beginner',free:'good',pop:74,src:'V2'},
+    {n:'Fireworks AI',cat:'ai',dom:'ai_ml',diff:'beginner',free:'limited',pop:70,src:'V2'},
+    {n:'Modal',cat:'ai',dom:'ai_ml',diff:'intermediate',free:'excellent',pop:72,src:'V2'},
+    {n:'Weights & Biases',cat:'ai',dom:'ai_ml',diff:'intermediate',free:'excellent',pop:80,src:'V2'},
+  ];
+
+  // Category hex colors from category-styles.ts
+  const CAT_COLORS = {
+    auth:'#6366f1', social_login:'#8b5cf6', database:'#3b82f6', deploy:'#22c55e',
+    email:'#f59e0b', payment:'#ef4444', storage:'#06b6d4', monitoring:'#f97316',
+    ai:'#a855f7', other:'#6b7280', cdn:'#14b8a6', cicd:'#64748b', testing:'#84cc16',
+    sms:'#f59e0b', push:'#f43f5e', chat:'#8b5cf6', search:'#0ea5e9', cms:'#d946ef',
+    analytics:'#ec4899', media:'#ef4444', queue:'#f97316', cache:'#eab308',
+    logging:'#78716c', feature_flags:'#71717a', scheduling:'#6366f1', ecommerce:'#10b981',
+    serverless:'#0ea5e9', code_quality:'#22c55e', automation:'#8b5cf6', domain:'#0d9488',
+    advertising:'#f97316'
+  };
+
+  const DOMAIN_COLORS = {
+    infrastructure:'#3b82f6', backend:'#10b981', devtools:'#f59e0b',
+    communication:'#8b5cf6', business:'#ef4444', ai_ml:'#a855f7',
+    observability:'#f97316', integration:'#06b6d4'
+  };
+
+  const DOMAIN_LABELS = {
+    infrastructure:'인프라', backend:'백엔드', devtools:'개발도구',
+    communication:'커뮤니케이션', business:'비즈니스', ai_ml:'AI/ML',
+    observability:'관측성', integration:'통합'
+  };
+
+  const CAT_LABELS = {
+    auth:'인증', social_login:'소셜로그인', database:'데이터베이스', deploy:'배포',
+    email:'이메일', payment:'결제', storage:'스토리지', monitoring:'모니터링',
+    ai:'AI', other:'기타', cdn:'CDN', cicd:'CI/CD', testing:'테스팅',
+    sms:'SMS', push:'푸시', chat:'채팅', search:'검색', cms:'CMS',
+    analytics:'분석', media:'미디어', queue:'큐', cache:'캐시',
+    logging:'로깅', feature_flags:'피처플래그', scheduling:'스케줄링',
+    ecommerce:'이커머스', serverless:'서버리스', code_quality:'코드품질',
+    automation:'자동화', domain:'도메인', advertising:'광고'
+  };
+
+  // Ideal service counts per category (for gap analysis)
+  const IDEAL_COUNTS = {
+    auth:5, social_login:6, database:10, deploy:8, email:5, payment:6,
+    storage:6, monitoring:6, ai:15, other:3, cdn:4, cicd:6, testing:5,
+    sms:3, push:3, chat:3, search:5, cms:5, analytics:5, media:3,
+    queue:4, cache:4, logging:3, feature_flags:3, scheduling:3,
+    ecommerce:4, serverless:4, code_quality:4, automation:5, domain:8, advertising:6
+  };
+
+  // P1 recommended services
+  const P1_SERVICES = [
+    {n:'Apache Kafka',cat:'queue',reason:'엔터프라이즈 메시징 표준, 이벤트 스트리밍 핵심'},
+    {n:'RabbitMQ',cat:'queue',reason:'가장 대중적인 메시지 브로커'},
+    {n:'AWS SQS',cat:'queue',reason:'AWS 네이티브 메시지 큐'},
+    {n:'AWS SNS',cat:'push',reason:'AWS 네이티브 알림 서비스'},
+    {n:'Google Pub/Sub',cat:'queue',reason:'GCP 네이티브 메시징'},
+    {n:'GitLab CI',cat:'cicd',reason:'GitLab 통합 CI/CD, 셀프호스팅 지원'},
+    {n:'CircleCI',cat:'cicd',reason:'클라우드 CI/CD 선두 주자'},
+    {n:'BitBucket Pipelines',cat:'cicd',reason:'Atlassian 생태계 CI/CD'},
+    {n:'ArgoCD',cat:'cicd',reason:'GitOps 기반 K8s 배포 표준'},
+    {n:'Elasticsearch',cat:'search',reason:'검색 엔진 산업 표준'},
+    {n:'Typesense',cat:'search',reason:'오픈소스 Algolia 대안'},
+    {n:'OpenSearch',cat:'search',reason:'AWS 관리형 검색 (ES fork)'},
+    {n:'Prometheus',cat:'monitoring',reason:'메트릭 수집 표준, K8s 네이티브'},
+    {n:'Jaeger',cat:'monitoring',reason:'분산 추적(Tracing) 표준'},
+    {n:'Honeycomb',cat:'monitoring',reason:'Observability 선도 SaaS'},
+    {n:'AWS Lambda',cat:'serverless',reason:'서버리스 시장 1위'},
+    {n:'Azure Functions',cat:'serverless',reason:'MS 생태계 서버리스'},
+    {n:'Google Cloud Run',cat:'serverless',reason:'GCP 컨테이너 서버리스'},
+    {n:'AWS Bedrock',cat:'ai',reason:'AWS 통합 AI/Foundation Model'},
+    {n:'Vertex AI',cat:'ai',reason:'GCP AI 플랫폼'},
+    {n:'Kubernetes',cat:'deploy',reason:'컨테이너 오케스트레이션 표준'},
+    {n:'AWS ECS',cat:'deploy',reason:'AWS 컨테이너 서비스'},
+    {n:'AWS EKS',cat:'deploy',reason:'AWS 관리형 Kubernetes'},
+    {n:'AWS Cognito',cat:'auth',reason:'AWS 네이티브 인증'},
+    {n:'Okta',cat:'auth',reason:'엔터프라이즈 IAM 표준'},
+    {n:'Keycloak',cat:'auth',reason:'오픈소스 IAM, 셀프호스팅'},
+    {n:'Jira',cat:'automation',reason:'프로젝트 관리 산업 표준'},
+    {n:'Figma API',cat:'automation',reason:'디자인 연동 핵심 API'},
+    {n:'Asana',cat:'automation',reason:'프로젝트/작업 관리 대안'},
+    {n:'Zapier',cat:'automation',reason:'노코드 자동화 시장 1위'},
+    {n:'Make (Integromat)',cat:'automation',reason:'고급 자동화 워크플로우'},
+    {n:'n8n',cat:'automation',reason:'오픈소스 자동화, 셀프호스팅'},
+    {n:'SonarQube',cat:'code_quality',reason:'코드 품질 분석 표준'},
+    {n:'Snyk',cat:'code_quality',reason:'보안 취약점 스캐닝 선두'},
+    {n:'CodeClimate',cat:'code_quality',reason:'코드 품질 자동 리뷰'},
+    {n:'ELK Stack',cat:'logging',reason:'로그 관리 표준 스택'},
+    {n:'Terraform',cat:'deploy',reason:'IaC 표준, 멀티클라우드'},
+    {n:'Pulumi',cat:'deploy',reason:'프로그래밍 언어 기반 IaC'},
+    {n:'Jenkins',cat:'cicd',reason:'가장 널리 사용되는 CI/CD 서버'},
+    {n:'Vercel Edge Config',cat:'feature_flags',reason:'Vercel 네이티브 피처 관리'},
+  ];
+
+  const P2_SERVICES = [
+    {n:'Fastly',cat:'cdn',reason:'고성능 엣지 CDN'},
+    {n:'Akamai',cat:'cdn',reason:'엔터프라이즈 CDN 표준'},
+    {n:'Bunny CDN',cat:'cdn',reason:'가성비 CDN'},
+    {n:'AWS CloudFront',cat:'cdn',reason:'AWS 네이티브 CDN'},
+    {n:'WordPress',cat:'cms',reason:'세계 CMS 시장 점유율 1위'},
+    {n:'Webflow',cat:'cms',reason:'노코드 웹 빌더'},
+    {n:'Payload CMS',cat:'cms',reason:'최신 헤드리스 CMS'},
+    {n:'Framer',cat:'cms',reason:'디자인-to-코드 퍼블리싱'},
+    {n:'Amplitude',cat:'analytics',reason:'프로덕트 분석 선두'},
+    {n:'Segment',cat:'analytics',reason:'CDP/데이터 파이프라인 표준'},
+    {n:'Hotjar',cat:'analytics',reason:'히트맵/세션 리플레이'},
+    {n:'FullStory',cat:'analytics',reason:'디지털 경험 분석'},
+    {n:'WooCommerce',cat:'ecommerce',reason:'WP 기반 이커머스'},
+    {n:'BigCommerce',cat:'ecommerce',reason:'중대형 이커머스 플랫폼'},
+    {n:'Square',cat:'ecommerce',reason:'오프라인+온라인 결제'},
+    {n:'HashiCorp Vault',cat:'other',reason:'비밀 관리 산업 표준'},
+    {n:'AWS Secrets Manager',cat:'other',reason:'AWS 네이티브 비밀 관리'},
+    {n:'Google Cloud Secret Manager',cat:'other',reason:'GCP 비밀 관리'},
+    {n:'Pagerduty',cat:'monitoring',reason:'인시던트 관리 표준'},
+    {n:'Opsgenie',cat:'monitoring',reason:'Atlassian 인시던트 관리'},
+    {n:'Vonage',cat:'sms',reason:'커뮤니케이션 API (Nexmo)'},
+    {n:'MessageBird',cat:'sms',reason:'글로벌 메시징 API'},
+    {n:'Imgix',cat:'media',reason:'이미지 CDN/최적화'},
+    {n:'Mux',cat:'media',reason:'비디오 API 플랫폼'},
+    {n:'Transloadit',cat:'media',reason:'파일 처리 파이프라인'},
+  ];
+
+  const P3_SERVICES = [
+    {n:'GitLab',cat:'cicd',reason:'올인원 DevOps 플랫폼'},
+    {n:'Bitbucket',cat:'cicd',reason:'Atlassian VCS + CI/CD'},
+    {n:'Gitea',cat:'cicd',reason:'경량 셀프호스팅 Git'},
+    {n:'Alchemy',cat:'other',reason:'Web3 개발 플랫폼'},
+    {n:'Infura',cat:'other',reason:'이더리움 노드 API'},
+    {n:'Moralis',cat:'other',reason:'Web3 백엔드 BaaS'},
+    {n:'AWS IoT Core',cat:'other',reason:'IoT 디바이스 관리'},
+    {n:'Retool',cat:'automation',reason:'내부 도구 빌더'},
+    {n:'Appsmith',cat:'automation',reason:'오픈소스 내부 도구'},
+    {n:'Supabase Realtime',cat:'chat',reason:'실시간 WebSocket'},
+    {n:'Ably',cat:'chat',reason:'실시간 메시징 인프라'},
+    {n:'Novu',cat:'push',reason:'오픈소스 알림 인프라'},
+    {n:'Knock',cat:'push',reason:'알림 API 플랫폼'},
+    {n:'Temporal',cat:'scheduling',reason:'내구 워크플로우 엔진'},
+    {n:'Quirrel',cat:'scheduling',reason:'서버리스 잡 스케줄러'},
+  ];
+
+  // Competition comparison data
+  const CMP_CATEGORIES = [
+    'database','deploy','auth','payment','email','ai','monitoring','cicd',
+    'search','cms','analytics','queue','ecommerce','storage','cdn','automation'
+  ];
+  // check=full, partial=partial, x=none
+  const CMP_DATA = {
+    Linkmap:   ['check','check','check','check','check','check','check','partial','partial','partial','check','partial','partial','check','partial','check'],
+    Doppler:   ['partial','partial','x','x','x','x','check','check','x','x','x','x','x','x','x','partial'],
+    Vercel:    ['check','check','partial','partial','partial','check','partial','check','x','x','check','x','partial','check','check','partial'],
+    Railway:   ['check','check','partial','x','x','partial','partial','partial','x','x','x','partial','x','check','x','x'],
+    Infisical: ['partial','x','check','x','x','x','partial','check','x','x','x','x','x','x','x','partial'],
+  };
+
+  // ============================
+  // RENDER FUNCTIONS
+  // ============================
+
+  function init() {
+    renderDonut();
+    renderCatalog();
+    renderGapChart();
+    renderRecommendations();
+    renderHeatmap();
+    renderRadar();
+    renderComparison();
+    buildNav();
+    populateFilters();
+  }
+
+  function renderDonut() {
+    const domainCounts = {};
+    SERVICES.forEach(s => {
+      domainCounts[s.dom] = (domainCounts[s.dom] || 0) + 1;
+    });
+    const entries = Object.entries(domainCounts).sort((a,b) => b[1] - a[1]);
+    const total = SERVICES.length;
+    let cumAngle = -90;
+    const svg = document.getElementById('donutChart');
+    const legend = document.getElementById('donutLegend');
+    let paths = '';
+    let legendHtml = '';
+
+    entries.forEach(([dom, count]) => {
+      const pct = count / total;
+      const angle = pct * 360;
+      const color = DOMAIN_COLORS[dom] || '#6b7280';
+      const label = DOMAIN_LABELS[dom] || dom;
+
+      // SVG arc
+      const startAngle = cumAngle * Math.PI / 180;
+      const endAngle = (cumAngle + angle) * Math.PI / 180;
+      const cx = 100, cy = 100, r = 80, ir = 55;
+      const x1 = cx + r * Math.cos(startAngle), y1 = cy + r * Math.sin(startAngle);
+      const x2 = cx + r * Math.cos(endAngle), y2 = cy + r * Math.sin(endAngle);
+      const ix1 = cx + ir * Math.cos(endAngle), iy1 = cy + ir * Math.sin(endAngle);
+      const ix2 = cx + ir * Math.cos(startAngle), iy2 = cy + ir * Math.sin(startAngle);
+      const large = angle > 180 ? 1 : 0;
+
+      paths += `<path d="M${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} L${ix1},${iy1} A${ir},${ir} 0 ${large},0 ${ix2},${iy2} Z" fill="${color}" opacity="0.85"><title>${label}: ${count}개 (${(pct*100).toFixed(1)}%)</title></path>`;
+      cumAngle += angle;
+
+      legendHtml += `<li><span class="legend-dot" style="background:${color}"></span>${label} <strong>${count}</strong> (${(pct*100).toFixed(1)}%)</li>`;
+    });
+
+    svg.innerHTML = paths;
+    legend.innerHTML = legendHtml;
+  }
+
+  function renderCatalog() {
+    const tbody = document.getElementById('catalogBody');
+    tbody.innerHTML = SERVICES.map(s => `<tr data-name="${s.n.toLowerCase()}" data-dom="${s.dom}" data-cat="${s.cat}">
+      <td><strong>${s.n}</strong></td>
+      <td><span class="badge-cat" style="background:${CAT_COLORS[s.cat]||'#6b7280'}20;color:${CAT_COLORS[s.cat]||'#6b7280'}">${CAT_LABELS[s.cat]||s.cat}</span></td>
+      <td>${DOMAIN_LABELS[s.dom]||s.dom}</td>
+      <td>${s.diff==='beginner'?'초급':s.diff==='intermediate'?'중급':'고급'}</td>
+      <td>${s.free}</td>
+      <td>${s.pop}</td>
+      <td><span class="badge ${s.src==='V1'?'badge-v1':'badge-v2'}">${s.src}</span></td>
+    </tr>`).join('');
+  }
+
+  function populateFilters() {
+    const domains = [...new Set(SERVICES.map(s=>s.dom))].sort();
+    const cats = [...new Set(SERVICES.map(s=>s.cat))].sort();
+    const domSel = document.getElementById('catalogDomain');
+    const catSel = document.getElementById('catalogCategory');
+    domains.forEach(d => domSel.innerHTML += `<option value="${d}">${DOMAIN_LABELS[d]||d}</option>`);
+    cats.forEach(c => catSel.innerHTML += `<option value="${c}">${CAT_LABELS[c]||c}</option>`);
+  }
+
+  function filterCatalog() {
+    const q = document.getElementById('catalogSearch').value.toLowerCase();
+    const dom = document.getElementById('catalogDomain').value;
+    const cat = document.getElementById('catalogCategory').value;
+    document.querySelectorAll('#catalogBody tr').forEach(tr => {
+      const matchName = !q || tr.dataset.name.includes(q);
+      const matchDom = !dom || tr.dataset.dom === dom;
+      const matchCat = !cat || tr.dataset.cat === cat;
+      tr.style.display = matchName && matchDom && matchCat ? '' : 'none';
+    });
+  }
+
+  function renderGapChart() {
+    const catCounts = {};
+    SERVICES.forEach(s => { catCounts[s.cat] = (catCounts[s.cat] || 0) + 1; });
+    const container = document.getElementById('gapChart');
+
+    const cats = Object.keys(IDEAL_COUNTS).sort((a,b) => {
+      const ra = (catCounts[a]||0)/IDEAL_COUNTS[a];
+      const rb = (catCounts[b]||0)/IDEAL_COUNTS[b];
+      return ra - rb;
+    });
+
+    container.innerHTML = cats.map(cat => {
+      const actual = catCounts[cat] || 0;
+      const ideal = IDEAL_COUNTS[cat];
+      const pct = Math.min(100, Math.round((actual / ideal) * 100));
+      const cls = pct >= 80 ? 'green' : pct >= 50 ? 'yellow' : 'red';
+      return `<div class="bar-row">
+        <div class="bar-label">${CAT_LABELS[cat]||cat}</div>
+        <div class="bar-track">
+          <div class="bar-fill ${cls}" style="width:${pct}%">${actual}/${ideal}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderRecommendations() {
+    const render = (data, id, badge) => {
+      document.getElementById(id).innerHTML = data.map(s =>
+        `<tr><td><strong>${s.n}</strong></td><td><span class="badge-cat" style="background:${CAT_COLORS[s.cat]||'#6b7280'}20;color:${CAT_COLORS[s.cat]||'#6b7280'}">${CAT_LABELS[s.cat]||s.cat}</span></td><td class="muted">${s.reason}</td></tr>`
+      ).join('');
+    };
+    render(P1_SERVICES, 'p1Body', 'badge-p1');
+    render(P2_SERVICES, 'p2Body', 'badge-p2');
+    render(P3_SERVICES, 'p3Body', 'badge-p3');
+  }
+
+  function renderHeatmap() {
+    const domains = Object.keys(DOMAIN_LABELS);
+    const cats = Object.keys(CAT_LABELS);
+    const matrix = {};
+    SERVICES.forEach(s => {
+      const key = s.dom + '|' + s.cat;
+      matrix[key] = (matrix[key] || 0) + 1;
+    });
+
+    const cols = cats.length + 1;
+    const container = document.getElementById('heatmapContainer');
+    let html = `<div class="heatmap-grid" style="grid-template-columns: 90px repeat(${cats.length}, 1fr);">`;
+
+    // Header row
+    html += `<div class="heatmap-label"></div>`;
+    cats.forEach(c => {
+      html += `<div class="heatmap-label" style="font-size:0.6rem;text-align:center;justify-content:center;writing-mode:vertical-lr;transform:rotate(180deg);height:60px;">${CAT_LABELS[c]||c}</div>`;
+    });
+
+    domains.forEach(dom => {
+      html += `<div class="heatmap-label">${DOMAIN_LABELS[dom]}</div>`;
+      cats.forEach(cat => {
+        const count = matrix[dom+'|'+cat] || 0;
+        const opacity = count === 0 ? 0.05 : Math.min(1, 0.2 + count * 0.15);
+        const color = count === 0 ? 'var(--border)' : (DOMAIN_COLORS[dom] || '#6b7280');
+        html += `<div class="heatmap-cell" style="background:${color};opacity:${count===0?0.15:opacity}" title="${DOMAIN_LABELS[dom]} × ${CAT_LABELS[cat]}: ${count}개">${count||''}</div>`;
+      });
+    });
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  function renderRadar() {
+    const svg = document.getElementById('radarChart');
+    const domains = Object.keys(DOMAIN_LABELS);
+    const domainCounts = {};
+    SERVICES.forEach(s => { domainCounts[s.dom] = (domainCounts[s.dom] || 0) + 1; });
+    const maxVal = Math.max(...Object.values(domainCounts));
+    const cx = 200, cy = 200, maxR = 150;
+    const n = domains.length;
+    let gridLines = '', labels = '', polygon = '', dots = '';
+
+    // Grid circles
+    for (let i = 1; i <= 4; i++) {
+      const r = maxR * i / 4;
+      gridLines += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="0.5" opacity="0.5"/>`;
+    }
+
+    // Axes & data
+    const points = [];
+    domains.forEach((dom, i) => {
+      const angle = (2 * Math.PI * i / n) - Math.PI / 2;
+      const axX = cx + maxR * Math.cos(angle);
+      const axY = cy + maxR * Math.sin(angle);
+      gridLines += `<line x1="${cx}" y1="${cy}" x2="${axX}" y2="${axY}" stroke="var(--border)" stroke-width="0.5" opacity="0.3"/>`;
+
+      const lx = cx + (maxR + 25) * Math.cos(angle);
+      const ly = cy + (maxR + 25) * Math.sin(angle);
+      const count = domainCounts[dom] || 0;
+      labels += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" fill="var(--text-muted)" font-size="11">${DOMAIN_LABELS[dom]} (${count})</text>`;
+
+      const val = count / maxVal;
+      const px = cx + maxR * val * Math.cos(angle);
+      const py = cy + maxR * val * Math.sin(angle);
+      points.push(`${px},${py}`);
+      dots += `<circle cx="${px}" cy="${py}" r="4" fill="${DOMAIN_COLORS[dom]}" stroke="#fff" stroke-width="1.5"/>`;
+    });
+
+    polygon = `<polygon points="${points.join(' ')}" fill="rgba(37,99,235,0.15)" stroke="var(--brand-blue)" stroke-width="2"/>`;
+
+    svg.innerHTML = gridLines + polygon + dots + labels;
+  }
+
+  function renderComparison() {
+    const tbody = document.getElementById('cmpBody');
+    const symbols = {check:'✓', partial:'◐', x:'✗'};
+    const classes = {check:'cmp-check', partial:'cmp-partial', x:'cmp-x'};
+    const competitors = Object.keys(CMP_DATA);
+
+    tbody.innerHTML = CMP_CATEGORIES.map((cat, i) =>
+      `<tr><td>${CAT_LABELS[cat]||cat}</td>${competitors.map(c =>
+        `<td class="${classes[CMP_DATA[c][i]]}">${symbols[CMP_DATA[c][i]]}</td>`
+      ).join('')}</tr>`
+    ).join('');
+
+    // Score bar chart
+    const scores = {};
+    competitors.forEach(c => {
+      scores[c] = CMP_DATA[c].reduce((sum, v) => sum + (v==='check'?2:v==='partial'?1:0), 0);
+    });
+    const maxScore = CMP_CATEGORIES.length * 2;
+    const barChart = document.getElementById('cmpBarChart');
+    barChart.innerHTML = competitors.map(c => {
+      const pct = Math.round(scores[c] / maxScore * 100);
+      return `<div class="bar-row">
+        <div class="bar-label">${c}</div>
+        <div class="bar-track">
+          <div class="bar-fill blue" style="width:${pct}%">${scores[c]}/${maxScore} (${pct}%)</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function buildNav() {
+    const sections = [
+      {id:'sec-summary',t:'요약'},{id:'sec-catalog',t:'현황'},{id:'sec-gap',t:'Gap'},
+      {id:'sec-recommend',t:'권장'},{id:'sec-heatmap',t:'히트맵'},{id:'sec-compete',t:'경쟁사'},{id:'sec-roadmap',t:'로드맵'}
+    ];
+    document.getElementById('navToc').innerHTML = sections.map(s =>
+      `<button class="nav-dot" title="${s.t}" onclick="document.getElementById('${s.id}').scrollIntoView({behavior:'smooth'})"></button>`
+    ).join('');
+  }
+
+  // ============================
+  // INTERACTIONS
+  // ============================
+
+  function switchTab(panel) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-'+panel).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function sortTable(tableId, colIdx) {
+    const table = document.getElementById(tableId);
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const th = table.querySelectorAll('th')[colIdx];
+    const asc = !th.classList.contains('sorted') || th.dataset.dir === 'desc';
+
+    table.querySelectorAll('th').forEach(h => { h.classList.remove('sorted'); delete h.dataset.dir; });
+    th.classList.add('sorted');
+    th.dataset.dir = asc ? 'asc' : 'desc';
+
+    rows.sort((a, b) => {
+      let va = a.cells[colIdx].textContent.trim();
+      let vb = b.cells[colIdx].textContent.trim();
+      const na = parseFloat(va), nb = parseFloat(vb);
+      if (!isNaN(na) && !isNaN(nb)) return asc ? na - nb : nb - na;
+      return asc ? va.localeCompare(vb, 'ko') : vb.localeCompare(va, 'ko');
+    });
+    rows.forEach(r => tbody.appendChild(r));
+  }
+
+  function toggleTheme() {
+    document.documentElement.classList.toggle('light');
+    document.documentElement.classList.toggle('dark');
+  }
+
+  // Scroll to top button
+  window.addEventListener('scroll', () => {
+    const btn = document.getElementById('scrollTop');
+    btn.style.display = window.scrollY > 400 ? 'flex' : 'none';
+  });
+
+  // Init
+  document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

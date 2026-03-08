@@ -143,6 +143,101 @@ html {
   .reveal-slide-left, .reveal-slide-right, .reveal-scale { opacity: 1; transform: none; transition: none; }
 }
 
+/* ── Serif Typography Option ── */
+.font-serif h1, .font-serif h2, .font-serif h3 {
+  font-family: 'Nanum Myeongjo', 'Georgia', serif;
+  letter-spacing: -0.02em;
+}
+
+/* ── Table Menu Style ── */
+.menu-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.menu-table tr {
+  border-bottom: 1px solid var(--surface-border);
+}
+.menu-table tr:last-child {
+  border-bottom: none;
+}
+.menu-table td {
+  padding: 1rem 0;
+  vertical-align: top;
+}
+.menu-table .menu-name {
+  font-weight: 600;
+  font-size: 1rem;
+}
+.menu-table .menu-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted, #a1a1aa);
+  margin-top: 0.25rem;
+}
+.menu-table .menu-price {
+  text-align: right;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* ── Business Status Indicator ── */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.status-open {
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+.status-closed {
+  background: #ef4444;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .status-open { animation: none; }
+}
+
+/* ── Category Divider ── */
+.category-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0 1rem;
+}
+.category-divider::before,
+.category-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--surface-border);
+}
+.category-divider span {
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-primary);
+}
+
+/* Premium hover glow */
+.hover-glow {
+  transition: box-shadow 0.3s ease;
+}
+.hover-glow:hover {
+  box-shadow: 0 0 20px color-mix(in oklch, var(--color-primary, #d47311) 30%, transparent),
+              0 0 40px color-mix(in oklch, var(--color-primary, #d47311) 10%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hover-glow:hover { box-shadow: none; }
+}
+
 /* Card hover (legacy) */
 .card-hover {
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
@@ -250,6 +345,12 @@ export default function RootLayout({
           crossOrigin="anonymous"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
+        {siteConfig.fontFamily === 'Nanum Myeongjo' && (
+          <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap"
+          />
+        )}
         <script dangerouslySetInnerHTML={{ __html: "(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}})()" }} />
         <script
           type="application/ld+json"
@@ -331,18 +432,60 @@ interface Props {
   config: SiteConfig;
 }
 
+const DAY_EN_ORDER = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const DAY_MAP: Record<string, number> = Object.fromEntries(DAY_EN_ORDER.map((d, i) => [d, i]));
+
+function getBusinessStatus(hours: SiteConfig['businessHours']): { isOpen: boolean; closeTime: string } {
+  const now = new Date();
+  const todayIndex = now.getDay();
+  const todayHour = hours.find((h) => DAY_MAP[h.dayEn ?? ''] === todayIndex);
+  if (!todayHour || todayHour.isHoliday) return { isOpen: false, closeTime: '' };
+
+  const timeStr = todayHour.hoursEn || todayHour.hours;
+  const match = timeStr.match(/(\\d{1,2}):(\\d{2})\\s*-\\s*(\\d{1,2}):(\\d{2})/);
+  if (!match) return { isOpen: false, closeTime: '' };
+
+  const [, sh, sm, eh, em] = match;
+  const start = parseInt(sh) * 60 + parseInt(sm);
+  const end = parseInt(eh) * 60 + parseInt(em);
+  const current = now.getHours() * 60 + now.getMinutes();
+  return { isOpen: current >= start && current < end, closeTime: \`\${eh}:\${em}\` };
+}
+
 export function HeroSection({ config }: Props) {
   const { locale, t } = useLocale();
   const name = locale === 'en' && config.nameEn ? config.nameEn : config.name;
   const desc = locale === 'en' && config.descriptionEn ? config.descriptionEn : config.description;
   const address = locale === 'en' && config.addressEn ? config.addressEn : config.address;
+  const isSerif = config.fontFamily === 'Nanum Myeongjo';
+
+  const { isOpen, closeTime } = config.businessHours?.length
+    ? getBusinessStatus(config.businessHours)
+    : { isOpen: false, closeTime: '' };
 
   return (
     <section
       id="hero"
-      className="pt-20 pb-12 px-4 sm:px-6"
+      className={\`pt-20 pb-12 px-4 sm:px-6\${isSerif ? ' font-serif' : ''}\`}
     >
       <div className="max-w-lg mx-auto text-center animate-fade-up">
+        {/* Business status badge */}
+        {config.businessHours?.length > 0 && (
+          <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border text-xs font-medium"
+            style={{
+              borderColor: isOpen ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)',
+              background: isOpen ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+              color: isOpen ? '#16a34a' : '#dc2626',
+            }}
+          >
+            <span className={\`status-dot \${isOpen ? 'status-open' : 'status-closed'}\`} />
+            {isOpen
+              ? (locale === 'en' ? \`Open · Closes \${closeTime}\` : \`영업 중 · \${closeTime} 마감\`)
+              : (locale === 'en' ? 'Closed now' : '영업 종료')
+            }
+          </div>
+        )}
+
         <h1 className="text-3xl sm:text-4xl font-bold text-[var(--color-primary,#d47311)] mb-3">
           {name}
         </h1>
@@ -458,8 +601,7 @@ export function MenuSection({ items }: Props) {
     return acc;
   }, {});
 
-  const [activeCategory, setActiveCategory] = useState(categories[0] || '');
-  const [openCategories, setOpenCategories] = useState<Set<string>>(new Set(categories.slice(0, 1)));
+  const [openCategories, setOpenCategories] = useState<Set<string>>(new Set(categories));
 
   const toggleAccordion = useCallback((cat: string) => {
     setOpenCategories((prev) => {
@@ -470,32 +612,37 @@ export function MenuSection({ items }: Props) {
     });
   }, []);
 
-  const filtered = items.filter((item) => item.category === activeCategory);
-
-  const renderItem = (item: MenuItem, i: number) => {
-    const name = locale === 'en' && item.nameEn ? item.nameEn : item.name;
-    const desc = locale === 'en' && item.descEn ? item.descEn : item.desc;
-    return (
-      <div
-        key={i}
-        className="card-lift flex items-start gap-3 p-4 rounded-[var(--radius-md,12px)] border"
-        style={{ background: 'var(--surface-elevated,#ffffff)', borderColor: 'var(--surface-border,rgba(0,0,0,0.06))' }}
-      >
-        <span className="text-2xl shrink-0 leading-none mt-0.5">{item.emoji || '🍽️'}</span>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{name}</h3>
-              {item.isNew && <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-red-500 text-white leading-none">NEW</span>}
-              {item.isPopular && <span className="px-1.5 py-0.5 text-[10px] font-bold rounded text-white leading-none" style={{ background: 'var(--color-primary,#d47311)' }}>{t('menu.popular')}</span>}
+  const renderTableRows = (catItems: MenuItem[]) =>
+    catItems.map((item, i) => {
+      const name = locale === 'en' && item.nameEn ? item.nameEn : item.name;
+      const desc = locale === 'en' && item.descEn ? item.descEn : item.desc;
+      return (
+        <tr key={i}>
+          <td style={{ width: '100%' }}>
+            <div className="flex items-start gap-2">
+              <span className="text-xl shrink-0 leading-none mt-0.5">{item.emoji || '\\uD83C\\uDF7D\\uFE0F'}</span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="menu-name text-gray-900 dark:text-gray-100">{name}</span>
+                  {item.isNew && (
+                    <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-red-500 text-white leading-none">NEW</span>
+                  )}
+                  {item.isPopular && (
+                    <span className="px-1.5 py-0.5 text-[10px] font-bold rounded text-white leading-none" style={{ background: 'var(--color-primary,#d47311)' }}>
+                      {t('menu.popular')}
+                    </span>
+                  )}
+                </div>
+                {desc && <p className="menu-desc dark:text-gray-400">{desc}</p>}
+              </div>
             </div>
-            <span className="text-sm font-semibold shrink-0" style={{ color: 'var(--color-primary,#d47311)' }}>{item.price}</span>
-          </div>
-          {desc && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">{desc}</p>}
-        </div>
-      </div>
-    );
-  };
+          </td>
+          <td style={{ paddingLeft: '1rem', verticalAlign: 'middle' }}>
+            <span className="menu-price" style={{ color: 'var(--color-primary,#d47311)' }}>{item.price}</span>
+          </td>
+        </tr>
+      );
+    });
 
   return (
     <section id="menu" className="py-12 px-4 sm:px-6">
@@ -504,54 +651,37 @@ export function MenuSection({ items }: Props) {
           {t('menu.title')}
         </h2>
 
-        {/* Desktop: Tab pills */}
-        <div className="hidden sm:flex gap-2 justify-center mb-6 flex-wrap">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={\`btn-press px-4 py-1.5 rounded-full text-sm font-medium transition-colors min-h-[44px] \${
-                activeCategory === cat
-                  ? 'text-white'
-                  : 'text-gray-600 dark:text-gray-400 border hover:opacity-80'
-              }\`}
-              style={activeCategory === cat
-                ? { background: 'var(--color-primary,#d47311)' }
-                : { borderColor: 'var(--surface-border,rgba(0,0,0,0.12))' }
-              }
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        <div className="hidden sm:block">
-          <div key={activeCategory} className="space-y-3 animate-fade-up">
-            {filtered.map(renderItem)}
-          </div>
-        </div>
-
-        {/* Mobile: Accordion by category */}
-        <div className="sm:hidden space-y-3">
-          {categories.map((cat) => {
+        <div className="rounded-[var(--radius-lg,16px)] border overflow-hidden"
+          style={{ borderColor: 'var(--surface-border,rgba(0,0,0,0.06))', background: 'var(--surface-elevated,#ffffff)' }}
+        >
+          {categories.map((cat, catIdx) => {
             const isOpen = openCategories.has(cat);
             const catItems = grouped[cat] || [];
             return (
-              <div key={cat} className="rounded-[var(--radius-md,12px)] border overflow-hidden" style={{ borderColor: 'var(--surface-border,rgba(0,0,0,0.08))', background: 'var(--surface-elevated,#ffffff)' }}>
+              <div key={cat}>
+                {/* Category header — acts as accordion toggle on mobile */}
                 <button
                   onClick={() => toggleAccordion(cat)}
-                  className="w-full flex items-center justify-between p-4 text-left hover:opacity-80 transition-opacity min-h-[44px]"
+                  className="w-full flex items-center justify-between px-5 py-3 text-left hover:opacity-80 transition-opacity min-h-[44px]"
+                  style={{
+                    borderTop: catIdx > 0 ? '1px solid var(--surface-border,rgba(0,0,0,0.06))' : undefined,
+                    background: 'color-mix(in srgb, var(--color-primary,#d47311) 5%, transparent)',
+                  }}
                 >
-                  <span className="font-semibold text-gray-900 dark:text-gray-100">
+                  <span className="text-sm font-bold tracking-widest uppercase" style={{ color: 'var(--color-primary,#d47311)' }}>
                     {cat}
-                    <span className="ml-2 text-xs font-normal text-gray-500">({catItems.length})</span>
+                    <span className="ml-2 text-xs font-normal text-gray-500 normal-case tracking-normal">({catItems.length})</span>
                   </span>
                   <ChevronDown className={\`w-4 h-4 text-gray-400 transition-transform duration-200 \${isOpen ? 'rotate-180' : ''}\`} />
                 </button>
+
+                {/* Table rows */}
                 <div className={\`grid transition-[grid-template-rows] duration-250 ease-in-out overflow-hidden \${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}\`}>
                   <div className="min-h-0">
-                    <div className="px-3 pb-3 space-y-2">
-                      {catItems.map(renderItem)}
+                    <div className="px-5">
+                      <table className="menu-table">
+                        <tbody>{renderTableRows(catItems)}</tbody>
+                      </table>
                     </div>
                   </div>
                 </div>
@@ -586,16 +716,48 @@ function getTodayIndex(): number {
   return new Date().getDay();
 }
 
+function getIsOpenNow(hour: BusinessHour): boolean {
+  if (hour.isHoliday) return false;
+  const timeStr = hour.hoursEn || hour.hours;
+  const match = timeStr.match(/(\\d{1,2}):(\\d{2})\\s*-\\s*(\\d{1,2}):(\\d{2})/);
+  if (!match) return false;
+  const [, sh, sm, eh, em] = match;
+  const now = new Date();
+  const current = now.getHours() * 60 + now.getMinutes();
+  const start = parseInt(sh) * 60 + parseInt(sm);
+  const end = parseInt(eh) * 60 + parseInt(em);
+  return current >= start && current < end;
+}
+
 export function HoursSection({ hours }: Props) {
   const { locale, t } = useLocale();
   const todayIndex = getTodayIndex();
+  const todayHour = hours.find((h) => (DAY_MAP[h.dayEn ?? ''] ?? -1) === todayIndex);
+  const isOpenNow = todayHour ? getIsOpenNow(todayHour) : false;
 
   return (
     <section id="hours" className="py-12 px-4 sm:px-6">
       <div className="max-w-lg mx-auto">
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-gray-50 mb-6">
-          {t('hours.title')}
-        </h2>
+        <div className="flex items-center justify-center gap-3 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">
+            {t('hours.title')}
+          </h2>
+          {todayHour && (
+            <span
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+              style={{
+                background: isOpenNow ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
+                color: isOpenNow ? '#16a34a' : '#dc2626',
+              }}
+            >
+              <span className={\`status-dot \${isOpenNow ? 'status-open' : 'status-closed'}\`} />
+              {isOpenNow
+                ? (locale === 'en' ? 'Open Now' : '영업 중')
+                : (locale === 'en' ? 'Closed' : '영업 종료')
+              }
+            </span>
+          )}
+        </div>
 
         <div className="card-lift rounded-[var(--radius-lg,16px)] border overflow-hidden" style={{ borderColor: 'var(--surface-border,rgba(0,0,0,0.06))', background: 'var(--surface-elevated,#ffffff)' }}>
           {hours.map((hour, i) => {
@@ -1100,7 +1262,7 @@ export const siteConfig = {
   naverBlogUrl: process.env.NEXT_PUBLIC_NAVER_BLOG_URL || '',
   kakaoChannelUrl: process.env.NEXT_PUBLIC_KAKAO_CHANNEL_URL || '',
   primaryColor: process.env.NEXT_PUBLIC_PRIMARY_COLOR || '#d47311',
-  fontFamily: 'Pretendard',
+  fontFamily: process.env.NEXT_PUBLIC_FONT_FAMILY || 'Pretendard',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 

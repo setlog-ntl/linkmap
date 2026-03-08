@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dev Showcase - Premium Preview</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== Reset & Base ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #030712;
+    --bg-card: #0d1117;
+    --bg-card-hover: #161b22;
+    --border: rgba(255,255,255,0.08);
+    --border-hover: rgba(255,255,255,0.16);
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #484f58;
+    --primary: #58a6ff;
+    --primary-glow: rgba(88,166,255,0.15);
+    --syntax-keyword: #ff7b72;
+    --syntax-string: #a5d6ff;
+    --syntax-comment: #8b949e;
+    --syntax-func: #d2a8ff;
+    --syntax-number: #79c0ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --orange: #f0883e;
+    --terminal-bg: #0d1117;
+    --terminal-border: rgba(255,255,255,0.08);
+    --font-body: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  [data-theme="light"] {
+    --bg-primary: #ffffff;
+    --bg-card: #f6f8fa;
+    --bg-card-hover: #eaeef2;
+    --border: rgba(0,0,0,0.1);
+    --border-hover: rgba(0,0,0,0.2);
+    --text-primary: #1f2328;
+    --text-secondary: #656d76;
+    --text-muted: #8b949e;
+    --primary: #0969da;
+    --primary-glow: rgba(9,105,218,0.1);
+    --terminal-bg: #24292f;
+    --terminal-border: rgba(0,0,0,0.15);
+    --syntax-keyword: #cf222e;
+    --syntax-string: #0a3069;
+    --syntax-comment: #6e7781;
+    --syntax-func: #8250df;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== Theme Toggle ===== */
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: all var(--transition);
+    backdrop-filter: blur(8px);
+  }
+  .theme-toggle:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0 20px var(--primary-glow);
+    transform: scale(1.05);
+  }
+  [data-theme="dark"] .theme-toggle .icon-light { display: none; }
+  [data-theme="light"] .theme-toggle .icon-dark { display: none; }
+
+  /* ===== Layout ===== */
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  section {
+    margin-bottom: 56px;
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before {
+    content: '';
+    display: block;
+    width: 16px;
+    height: 2px;
+    background: var(--primary);
+    border-radius: 1px;
+  }
+
+  /* ===== Terminal Hero ===== */
+  .terminal {
+    background: var(--terminal-bg);
+    border: 1px solid var(--terminal-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 32px;
+    transition: box-shadow var(--transition);
+  }
+  .terminal:hover {
+    box-shadow: 0 0 30px var(--primary-glow), 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .terminal-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--terminal-border);
+  }
+  .terminal-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+  .terminal-dot.red { background: var(--red); }
+  .terminal-dot.yellow { background: var(--yellow); }
+  .terminal-dot.green { background: var(--green); }
+  .terminal-title {
+    flex: 1;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .terminal-body {
+    padding: 24px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text-primary);
+    min-height: 180px;
+  }
+
+  .terminal-line {
+    margin-bottom: 4px;
+    opacity: 0;
+    transform: translateY(4px);
+    animation: termFadeIn 0.4s forwards;
+  }
+  .terminal-line:nth-child(1) { animation-delay: 0.3s; }
+  .terminal-line:nth-child(2) { animation-delay: 0.8s; }
+  .terminal-line:nth-child(3) { animation-delay: 1.4s; }
+  .terminal-line:nth-child(4) { animation-delay: 2.0s; }
+  .terminal-line:nth-child(5) { animation-delay: 2.6s; }
+
+  @keyframes termFadeIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .prompt { color: var(--green); }
+  .command { color: var(--syntax-keyword); }
+  .output { color: var(--syntax-string); padding-left: 4px; }
+  .comment { color: var(--syntax-comment); }
+
+  .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 18px;
+    background: var(--primary);
+    vertical-align: text-bottom;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* ===== Typing Section ===== */
+  .typing-section {
+    text-align: center;
+    padding: 24px 0;
+    min-height: 60px;
+  }
+  .typing-text {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--primary);
+  }
+  .typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 24px;
+    background: var(--primary);
+    vertical-align: text-bottom;
+    margin-left: 2px;
+    animation: blink 0.7s step-end infinite;
+  }
+
+  /* ===== About ===== */
+  .about-text {
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    padding: 20px 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--primary);
+  }
+
+  /* ===== Skills ===== */
+  .skills-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .skill-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .skill-name {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    min-width: 100px;
+    text-align: right;
+  }
+  .skill-bar-bg {
+    flex: 1;
+    height: 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  [data-theme="light"] .skill-bar-bg {
+    background: rgba(0,0,0,0.06);
+  }
+  .skill-bar {
+    height: 100%;
+    border-radius: 4px;
+    width: 0;
+    transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    background: linear-gradient(90deg, var(--primary), var(--syntax-func));
+  }
+  .skill-bar.animated {
+    /* width set by JS */
+  }
+  .skill-percent {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    min-width: 36px;
+  }
+
+  /* ===== Repo Cards ===== */
+  .repo-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 640px) {
+    .repo-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .repo-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    transition: all var(--transition);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .repo-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-sm);
+    opacity: 0;
+    transition: opacity var(--transition);
+    background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), var(--primary-glow), transparent 40%);
+    pointer-events: none;
+  }
+  .repo-card:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  }
+  .repo-card:hover::before { opacity: 1; }
+
+  .repo-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .repo-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+  }
+  .repo-name {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary);
+  }
+  .repo-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .repo-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .repo-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .lang-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .lang-dot.ts { background: #3178c6; }
+  .lang-dot.js { background: #f1e05a; }
+  .lang-dot.py { background: #3572A5; }
+
+  /* ===== Timeline ===== */
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--primary), var(--primary-glow), transparent);
+    border-radius: 1px;
+  }
+  .timeline-item {
+    position: relative;
+    padding-bottom: 32px;
+  }
+  .timeline-item:last-child { padding-bottom: 0; }
+
+  .timeline-dot {
+    position: absolute;
+    left: -29px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--bg-primary);
+    border: 2px solid var(--primary);
+    z-index: 1;
+    transition: all var(--transition);
+  }
+  .timeline-item:hover .timeline-dot {
+    background: var(--primary);
+    box-shadow: 0 0 12px var(--primary-glow);
+  }
+
+  .timeline-content {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    transition: all var(--transition);
+  }
+  .timeline-item:hover .timeline-content {
+    border-color: var(--border-hover);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  }
+
+  .timeline-period {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--primary);
+    margin-bottom: 4px;
+  }
+  .timeline-role {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+  .timeline-company {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  /* ===== Contact ===== */
+  .contact-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    transition: all var(--transition);
+  }
+  .contact-link:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: 0 0 20px var(--primary-glow);
+    transform: translateY(-2px);
+  }
+  .contact-link svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* ===== Footer ===== */
+  .footer {
+    text-align: center;
+    padding: 32px 0 0;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+  .footer-text {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ===== Badge ===== */
+  .preview-badge {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--primary);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+    z-index: 100;
+    letter-spacing: 0.05em;
+    box-shadow: 0 4px 16px rgba(88,166,255,0.3);
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 480px) {
+    .container { padding: 24px 16px 60px; }
+    .terminal-body { padding: 16px; font-size: 13px; }
+    .typing-text { font-size: 16px; }
+    .skill-name { min-width: 80px; font-size: 12px; }
+    .repo-grid { grid-template-columns: 1fr; }
+    .timeline { padding-left: 28px; }
+  }
+</style>
+</head>
+<body>
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="테마 전환">
+    <span class="icon-dark">&#9790;</span>
+    <span class="icon-light">&#9728;</span>
+  </button>
+
+  <div class="container">
+
+    <!-- Terminal Hero -->
+    <section>
+      <div class="terminal">
+        <div class="terminal-header">
+          <div class="terminal-dot red"></div>
+          <div class="terminal-dot yellow"></div>
+          <div class="terminal-dot green"></div>
+          <div class="terminal-title">gaebal@dev ~ zsh</div>
+          <div style="width: 36px;"></div>
+        </div>
+        <div class="terminal-body">
+          <div class="terminal-line">
+            <span class="prompt">$</span> <span class="command">whoami</span>
+          </div>
+          <div class="terminal-line">
+            <span class="output">김개발 (Gaebal Kim)</span>
+          </div>
+          <div class="terminal-line">
+            <span class="prompt">$</span> <span class="command">cat</span> <span class="syntax-string">tagline.txt</span>
+          </div>
+          <div class="terminal-line">
+            <span class="output">풀스택 개발자 | 오픈소스 기여자</span>
+          </div>
+          <div class="terminal-line">
+            <span class="prompt">$</span> <span class="cursor"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typing Animation -->
+      <div class="typing-section">
+        <span class="typing-text" id="typingTarget"></span><span class="typing-cursor"></span>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section>
+      <div class="section-title">About</div>
+      <div class="about-text">
+        웹 기술에 열정을 가진 풀스택 개발자입니다. 사용자 경험을 중시하며, 클린 코드와 모던 아키텍처를 추구합니다. 오픈소스 커뮤니티에 활발히 기여하고 있으며, 새로운 기술을 배우고 공유하는 것을 좋아합니다.
+      </div>
+    </section>
+
+    <!-- Skills -->
+    <section>
+      <div class="section-title">Skills</div>
+      <div class="skills-grid" id="skillsGrid">
+        <div class="skill-item">
+          <span class="skill-name">TypeScript</span>
+          <div class="skill-bar-bg"><div class="skill-bar" data-width="90"></div></div>
+          <span class="skill-percent">90%</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">React</span>
+          <div class="skill-bar-bg"><div class="skill-bar" data-width="85"></div></div>
+          <span class="skill-percent">85%</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">Node.js</span>
+          <div class="skill-bar-bg"><div class="skill-bar" data-width="80"></div></div>
+          <span class="skill-percent">80%</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">Python</span>
+          <div class="skill-bar-bg"><div class="skill-bar" data-width="70"></div></div>
+          <span class="skill-percent">70%</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">Docker</span>
+          <div class="skill-bar-bg"><div class="skill-bar" data-width="65"></div></div>
+          <span class="skill-percent">65%</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects -->
+    <section>
+      <div class="section-title">Projects</div>
+      <div class="repo-grid">
+        <div class="repo-card" onmousemove="trackMouse(event, this)">
+          <div class="repo-header">
+            <svg class="repo-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>
+            <span class="repo-name">devflow</span>
+          </div>
+          <div class="repo-desc">개발 워크플로우를 자동화하는 CLI 도구. Git hooks, linting, 배포 파이프라인 통합.</div>
+          <div class="repo-meta">
+            <span class="repo-meta-item"><span class="lang-dot ts"></span> TypeScript</span>
+            <span class="repo-meta-item">&#9733; 342</span>
+            <span class="repo-meta-item">&#9735; 28</span>
+          </div>
+        </div>
+
+        <div class="repo-card" onmousemove="trackMouse(event, this)">
+          <div class="repo-header">
+            <svg class="repo-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>
+            <span class="repo-name">react-data-grid</span>
+          </div>
+          <div class="repo-desc">고성능 가상화 데이터 그리드 컴포넌트. 100만 행 렌더링, 정렬/필터/그룹핑 지원.</div>
+          <div class="repo-meta">
+            <span class="repo-meta-item"><span class="lang-dot ts"></span> TypeScript</span>
+            <span class="repo-meta-item">&#9733; 187</span>
+            <span class="repo-meta-item">&#9735; 15</span>
+          </div>
+        </div>
+
+        <div class="repo-card" onmousemove="trackMouse(event, this)">
+          <div class="repo-header">
+            <svg class="repo-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>
+            <span class="repo-name">api-bench</span>
+          </div>
+          <div class="repo-desc">REST API 부하 테스트 프레임워크. 시나리오 기반 테스트와 실시간 대시보드 제공.</div>
+          <div class="repo-meta">
+            <span class="repo-meta-item"><span class="lang-dot js"></span> JavaScript</span>
+            <span class="repo-meta-item">&#9733; 95</span>
+            <span class="repo-meta-item">&#9735; 8</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Experience Timeline -->
+    <section>
+      <div class="section-title">Experience</div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-period">2022 &mdash; 현재</div>
+            <div class="timeline-role">시니어 프론트엔드 개발자</div>
+            <div class="timeline-company">테크 주식회사</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-period">2019 &mdash; 2022</div>
+            <div class="timeline-role">풀스택 개발자</div>
+            <div class="timeline-company">스타트업</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section>
+      <div class="section-title">Contact</div>
+      <div class="contact-grid">
+        <a href="mailto:dev@example.com" class="contact-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          dev@example.com
+        </a>
+        <a href="#" class="contact-link">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12Z"/></svg>
+          GitHub
+        </a>
+        <a href="#" class="contact-link">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065Zm1.782 13.019H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003Z"/></svg>
+          LinkedIn
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-text">Built with Linkmap &middot; Dev Showcase Template</div>
+    </div>
+  </div>
+
+  <!-- Preview Badge -->
+  <div class="preview-badge">PREMIUM PREVIEW</div>
+
+<script>
+// ===== Theme Toggle =====
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+}
+
+// ===== Typing Animation =====
+(function() {
+  const words = [
+    'Full-stack Developer',
+    'Open Source Contributor',
+    'TypeScript Enthusiast'
+  ];
+  const target = document.getElementById('typingTarget');
+  if (!target) return;
+
+  // Respect reduced motion
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReducedMotion) {
+    target.textContent = words[0];
+    return;
+  }
+
+  let wordIndex = 0;
+  let charIndex = 0;
+  let isDeleting = false;
+  let timeout;
+
+  function type() {
+    const currentWord = words[wordIndex];
+
+    if (isDeleting) {
+      charIndex--;
+      target.textContent = currentWord.substring(0, charIndex);
+    } else {
+      charIndex++;
+      target.textContent = currentWord.substring(0, charIndex);
+    }
+
+    let delay = isDeleting ? 40 : 80;
+
+    if (!isDeleting && charIndex === currentWord.length) {
+      delay = 2000;
+      isDeleting = true;
+    } else if (isDeleting && charIndex === 0) {
+      isDeleting = false;
+      wordIndex = (wordIndex + 1) % words.length;
+      delay = 500;
+    }
+
+    timeout = setTimeout(type, delay);
+  }
+
+  // Start after terminal animation
+  setTimeout(type, 3200);
+})();
+
+// ===== Skill Bar Animation =====
+(function() {
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        const bars = entry.target.querySelectorAll('.skill-bar');
+        bars.forEach(function(bar, i) {
+          setTimeout(function() {
+            bar.style.width = bar.getAttribute('data-width') + '%';
+            bar.classList.add('animated');
+          }, i * 150);
+        });
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  const grid = document.getElementById('skillsGrid');
+  if (grid) observer.observe(grid);
+})();
+
+// ===== Hover Glow (Repo Cards) =====
+function trackMouse(e, card) {
+  const rect = card.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  card.style.setProperty('--mouse-x', x + 'px');
+  card.style.setProperty('--mouse-y', y + 'px');
+}
+</script>
+</body>
+</html>
