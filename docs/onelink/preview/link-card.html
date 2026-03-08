@@ -83,6 +83,12 @@
     font-weight: 700;
     margin-bottom: 16px;
     transition: all var(--transition-speed) ease;
+    overflow: hidden;
+  }
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .profile-name {
@@ -567,7 +573,7 @@
 <main class="container">
   <!-- Profile -->
   <section class="profile">
-    <div class="avatar">M</div>
+    <div class="avatar"><img src="https://plus.unsplash.com/premium_photo-1664475228198-ffce9c2b6a41?w=200&q=85&auto=format&fit=crop&crop=faces&facepad=2" alt="민지 프로필"></div>
     <h1 class="profile-name">민지 (Minji)</h1>
     <p class="profile-bio">일상을 기록하는 콘텐츠 크리에이터</p>
   </section>
@@ -625,9 +631,9 @@
     <a class="social-link" href="#" aria-label="YouTube">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
     </a>
-    <!-- Twitter -->
-    <a class="social-link" href="#" aria-label="Twitter">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
+    <!-- X (formerly Twitter) -->
+    <a class="social-link" href="#" aria-label="X">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
     </a>
   </div>
 </main>
@@ -651,5 +657,8 @@
     });
   })();
 </script>
+<footer style="text-align:center;padding:24px 16px 16px;font-size:.7rem;color:#999;letter-spacing:.02em;">
+  Powered by <a href="https://linkmap.biz/sites/new" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Linkmap</a>
+</footer>
 </body>
 </html>

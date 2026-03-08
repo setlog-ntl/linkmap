@@ -83,7 +83,7 @@ export const personalBrandSample: { ko: PersonalBrandContent; en: PersonalBrandC
     socials: [
       { platform: 'youtube', url: 'https://youtube.com/@jiwonlee' },
       { platform: 'instagram', url: 'https://instagram.com/jiwon.creates' },
-      { platform: 'twitter', url: 'https://twitter.com/jiwonlee_kr' },
+      { platform: 'twitter', url: 'https://x.com/jiwonlee_kr' },
     ],
     email: 'hello@jiwonlee.kr',
   },
@@ -125,7 +125,7 @@ export const personalBrandSample: { ko: PersonalBrandContent; en: PersonalBrandC
       { labelKo: '뉴스레터 독자', labelEn: 'Newsletter Readers', valueKo: '22,000+', valueEn: '22,000+' },
     ],
     socials: [
-      { platform: 'twitter', url: 'https://twitter.com/alexchen_data' },
+      { platform: 'twitter', url: 'https://x.com/alexchen_data' },
       { platform: 'linkedin', url: 'https://linkedin.com/in/alexchen-data' },
       { platform: 'github', url: 'https://github.com/alexchen-data' },
     ],
@@ -187,7 +187,7 @@ export const namecardSample: { ko: NamecardContent; en: NamecardContent } = {
     accentColor: '#0ea5e9',
     socials: [
       { platform: 'linkedin', url: 'https://linkedin.com/in/jwhitfield-pm' },
-      { platform: 'twitter', url: 'https://twitter.com/jwhitfield_pm' },
+      { platform: 'twitter', url: 'https://x.com/jwhitfield_pm' },
     ],
   },
 };
@@ -714,7 +714,7 @@ export const freelancerSample: { ko: FreelancerContent; en: FreelancerContent } 
     ],
     email: 'hello@marcuswebb.design',
     socials: [
-      { platform: 'twitter', url: 'https://twitter.com/marcuswebb_ux' },
+      { platform: 'twitter', url: 'https://x.com/marcuswebb_ux' },
       { platform: 'linkedin', url: 'https://linkedin.com/in/marcus-webb-design' },
     ],
   },
@@ -1001,7 +1001,7 @@ export const linkHubSample: { ko: LinkHubContent; en: LinkHubContent } = {
     socials: [
       { platform: 'youtube', url: 'https://youtube.com/@yujinchoilife' },
       { platform: 'instagram', url: 'https://instagram.com/yujin.travels' },
-      { platform: 'twitter', url: 'https://twitter.com/yujin_kr' },
+      { platform: 'twitter', url: 'https://x.com/yujin_kr' },
     ],
     youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     viewCountKo: '누적 조회수 1,240,000',
@@ -1030,8 +1030,8 @@ export const linkHubSample: { ko: LinkHubContent; en: LinkHubContent } = {
       },
       {
         titleKo: '🐦 개발 일상 트위터',
-        titleEn: '🐦 Dev Life on Twitter/X',
-        url: 'https://twitter.com/taylorryan_dev',
+        titleEn: '🐦 Dev Life on X',
+        url: 'https://x.com/taylorryan_dev',
         icon: 'pen-line',
       },
       {
@@ -1061,7 +1061,7 @@ export const linkHubSample: { ko: LinkHubContent; en: LinkHubContent } = {
     ],
     socials: [
       { platform: 'youtube', url: 'https://youtube.com/@taylorryan_dev' },
-      { platform: 'twitter', url: 'https://twitter.com/taylorryan_dev' },
+      { platform: 'twitter', url: 'https://x.com/taylorryan_dev' },
       { platform: 'github', url: 'https://github.com/taylorryan-dev' },
     ],
     youtubeUrl: null,

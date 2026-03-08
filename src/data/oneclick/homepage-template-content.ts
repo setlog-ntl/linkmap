@@ -8,6 +8,7 @@ import { devShowcaseTemplate } from './dev-showcase-template';
 import { personalBrandTemplate } from './personal-brand-template';
 import { freelancerPageTemplate } from './freelancer-page-template';
 import { smallBizTemplate } from './small-biz-template';
+import { smallBizCafeTemplate } from './small-biz-cafe-template';
 import {
   sharedDeployYml as deployWorkflow,
   sharedTsconfigJson as sharedTsConfig,
@@ -1513,4 +1514,5 @@ export const homepageTemplates: HomepageTemplateContent[] = [
   personalBrandTemplate,
   freelancerPageTemplate,
   smallBizTemplate,
+  smallBizCafeTemplate,
 ];

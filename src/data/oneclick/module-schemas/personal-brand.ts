@@ -26,6 +26,9 @@ export const personalBrandModuleSchema: TemplateModuleSchema = {
             { value: 'creator', label: '크리에이터 (Creator)' },
             { value: 'storyteller', label: '풀 프로필 (Storyteller)' },
             { value: 'editorial', label: '에디토리얼 (Editorial)' },
+            { value: 'magazine', label: '매거진 (Magazine)' },
+            { value: 'warm-earth', label: '웜 어스 (Warm Earth)' },
+            { value: 'midnight', label: '미드나잇 (Midnight)' },
           ],
         },
         {

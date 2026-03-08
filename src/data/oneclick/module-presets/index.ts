@@ -5,6 +5,7 @@ import { freelancerPagePresets } from './freelancer-page';
 import { digitalNamecardPresets } from './digital-namecard';
 import { linkCardPresets } from './link-card';
 import { smallBizPresets } from './small-biz';
+import { smallBizCafePresets } from './small-biz-cafe';
 
 const PRESET_MAP: Record<string, ModulePreset[]> = {
   'personal-brand': personalBrandPresets,
@@ -13,6 +14,7 @@ const PRESET_MAP: Record<string, ModulePreset[]> = {
   'digital-namecard': digitalNamecardPresets,
   'link-card': linkCardPresets,
   'small-biz': smallBizPresets,
+  'small-biz-cafe': smallBizCafePresets,
 };
 
 export function getModulePresets(templateSlug: string): ModulePreset[] {

@@ -70,6 +70,8 @@ export function genBasePathConst(): string {
 /** 로컬 이미지 경로 → basePath 포함 template literal 표현식 생성 */
 export function imagePathExpr(path: string): string {
   if (!path) return 'null';
+  // 절대 URL(http/https)은 basePath 없이 그대로 사용
+  if (/^https?:\/\//.test(path)) return `'${esc(path)}'`;
   return `\`\${_basePath}${esc(path)}\``;
 }
 
@@ -170,7 +172,7 @@ export function parseArrayConstant(
   let m;
   while ((m = objRe.exec(match[1])) !== null) {
     const obj: Record<string, string> = {};
-    const fieldRe = /(\w+):\s*'([^']*)'/g;
+    const fieldRe = /(\w+):\s*'((?:[^'\\]|\\.)*)'/g;
     let fm;
     while ((fm = fieldRe.exec(m[1])) !== null) {
       obj[fm[1]] = unescapeString(fm[2]);

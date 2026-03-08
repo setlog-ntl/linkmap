@@ -98,6 +98,12 @@ function buildProcessArray(items: unknown[]): string {
   return `[\n${entries.join(',\n')}\n]`;
 }
 
+function buildRotatingWordsLiteral(raw: string): string {
+  const words = raw.split(',').map((w) => w.trim()).filter(Boolean);
+  if (words.length > 0) return `[${words.map((w) => `'${esc(w)}'`).join(', ')}]`;
+  return `['Brand Identity', 'Packaging', 'Social Media', 'Web Design']`;
+}
+
 // ─── 모듈 컴포넌트 매핑 ─────────────────────
 
 const MODULE_COMPONENTS: Record<string, ComponentMapping> = {
@@ -153,6 +159,8 @@ function generateConfigTs(state: ModuleConfigState): string {
   const gradientFrom = (hero.gradientFrom as string) || '#5b13ec';
   const gradientTo = (hero.gradientTo as string) || '#06b6d4';
   const fontFamily = (hero.fontFamily as string) || 'Pretendard';
+  const designPreset = (hero.designPreset as string) || 'default';
+  const rotatingWordsRaw = (hero.rotatingWords as string) || '';
   const email = (contact.email as string) || 'haeun@jung-design.kr';
   const portfolioColumns = (portfolio.columns as string) || '3';
 
@@ -245,6 +253,8 @@ export const siteConfig = {
   gradientTo: '${esc(gradientTo)}',
   fontFamily: '${esc(fontFamily)}',
   portfolioColumns: '${esc(portfolioColumns)}',
+  designPreset: '${esc(designPreset)}',
+  rotatingWords: parseJSON<string[]>(process.env.NEXT_PUBLIC_ROTATING_WORDS, ${buildRotatingWordsLiteral(rotatingWordsRaw)}),
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 
@@ -318,6 +328,24 @@ function parseConfigToState(
   if (gradientTo !== null) state.values.hero.gradientTo = gradientTo;
   const fontFamily = extractString('fontFamily');
   if (fontFamily !== null) state.values.hero.fontFamily = fontFamily;
+  const designPreset = extractString('designPreset');
+  if (designPreset !== null) state.values.hero.designPreset = designPreset;
+
+  // rotatingWords
+  try {
+    const rwMatch = configContent.match(/rotatingWords:\s*parseJSON<string\[\]>\([^,]+,\s*\[([\s\S]*?)\]\s*\)/);
+    if (rwMatch?.[1]) {
+      const words: string[] = [];
+      const wordRe = /'([^']*)'/g;
+      let wm;
+      while ((wm = wordRe.exec(rwMatch[1])) !== null) {
+        words.push(unescapeString(wm[1]));
+      }
+      if (words.length > 0) {
+        state.values.hero.rotatingWords = words.join(', ');
+      }
+    }
+  } catch { /* 기본값 유지 */ }
 
   // Services
   try {
@@ -334,7 +362,7 @@ function parseConfigToState(
       let m;
       while ((m = objRe.exec(match[1])) !== null) {
         const obj: Record<string, string> = {};
-        const fieldRe = /(\w+):\s*'([^']*)'/g;
+        const fieldRe = /(\w+):\s*'((?:[^'\\]|\\.)*)'/g;
         let fm;
         while ((fm = fieldRe.exec(m[1])) !== null) {
           obj[fm[1]] = unescapeString(fm[2]);
@@ -374,7 +402,7 @@ function parseConfigToState(
       let m;
       while ((m = objRe.exec(match[1])) !== null) {
         const obj: Record<string, string> = {};
-        const fieldRe = /(\w+):\s*'([^']*)'/g;
+        const fieldRe = /(\w+):\s*'((?:[^'\\]|\\.)*)'/g;
         let fm;
         while ((fm = fieldRe.exec(m[1])) !== null) {
           obj[fm[1]] = unescapeString(fm[2]);

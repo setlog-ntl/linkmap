@@ -107,6 +107,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const phone = (hero.phone as string) || '02-334-5870';
   const primaryColor = (hero.primaryColor as string) || '#d47311';
   const fontFamily = (hero.fontFamily as string) || 'Pretendard';
+  const designPreset = (hero.designPreset as string) || 'default';
 
   const address = (location.address as string) || '서울 마포구 연남동 239-10';
   const addressEn = (location.addressEn as string) || '239-10, Yeonnam-dong, Mapo-gu, Seoul';
@@ -174,6 +175,7 @@ export const siteConfig = {
   naverBlogUrl: process.env.NEXT_PUBLIC_NAVER_BLOG_URL || ${naverBlogUrl ? `'${esc(naverBlogUrl)}'` : `''`},
   kakaoChannelUrl: process.env.NEXT_PUBLIC_KAKAO_CHANNEL_URL || ${kakaoChannelUrl ? `'${esc(kakaoChannelUrl)}'` : `''`},
   fontFamily: '${esc(fontFamily)}',
+  designPreset: '${esc(designPreset)}',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 
@@ -250,6 +252,8 @@ function parseConfigToState(
   if (primaryColor !== null) state.values.hero.primaryColor = primaryColor;
   const fontFamily = extractString('fontFamily');
   if (fontFamily !== null) state.values.hero.fontFamily = fontFamily;
+  const designPreset = extractString('designPreset');
+  if (designPreset !== null) state.values.hero.designPreset = designPreset;
 
   // Location
   const address = extractString('address');
@@ -283,7 +287,7 @@ function parseConfigToState(
       let m;
       while ((m = objRe.exec(match[1])) !== null) {
         const obj: Record<string, unknown> = {};
-        const fieldRe = /(\w+):\s*'([^']*)'/g;
+        const fieldRe = /(\w+):\s*'((?:[^'\\]|\\.)*)'/g;
         let fm;
         while ((fm = fieldRe.exec(m[1])) !== null) {
           obj[fm[1]] = unescapeString(fm[2]);

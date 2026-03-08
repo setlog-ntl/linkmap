@@ -68,6 +68,28 @@ export const freelancerPageModuleSchema: TemplateModuleSchema = {
           defaultValue: '',
         },
         {
+          key: 'designPreset',
+          type: 'select',
+          label: '디자인 프리셋',
+          labelEn: 'Design Preset',
+          defaultValue: 'default',
+          options: [
+            { value: 'default', label: '기본 (Default)' },
+            { value: 'agency', label: '에이전시 (Agency)' },
+            { value: 'creative-minimal', label: '크리에이티브 미니멀' },
+            { value: 'warm-earth', label: '웜 어스 (Warm Earth)' },
+            { value: 'midnight', label: '미드나잇 (Midnight)' },
+          ],
+        },
+        {
+          key: 'rotatingWords',
+          type: 'text',
+          label: '순환 키워드 (콤마 구분)',
+          labelEn: 'Rotating Words (comma separated)',
+          defaultValue: 'Brand Identity, Packaging, Social Media, Web Design',
+          placeholder: 'Brand Identity, Packaging, ...',
+        },
+        {
           key: 'gradientFrom',
           type: 'color',
           label: '그래디언트 시작색',

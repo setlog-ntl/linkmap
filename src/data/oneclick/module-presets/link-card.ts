@@ -43,7 +43,7 @@ export const linkCardPresets: ModulePreset[] = [
     },
   },
   {
-    id: 'neon-dark',
+    id: 'neon',
     name: '네온 다크',
     nameEn: 'Neon Dark',
     description: '다크 배경 + 네온 카드 — 인디 크리에이터 스타일',
@@ -62,7 +62,7 @@ export const linkCardPresets: ModulePreset[] = [
     },
   },
   {
-    id: 'pastel-dream',
+    id: 'pastel',
     name: '파스텔 드림',
     nameEn: 'Pastel Dream',
     description: '연한 파스텔 배경 + pill 카드 + 부드러운 그림자',
