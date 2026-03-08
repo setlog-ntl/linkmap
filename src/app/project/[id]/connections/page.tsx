@@ -1,6 +1,11 @@
-import { redirect } from 'next/navigation';
+'use client';
 
-export default async function ConnectionsPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  redirect(`/project/${id}/services`);
+import { useParams } from 'next/navigation';
+import { ConnectionsContent } from '@/components/project/connections-content';
+
+export default function ConnectionsPage() {
+  const params = useParams();
+  const projectId = params.id as string;
+
+  return <ConnectionsContent projectId={projectId} />;
 }
