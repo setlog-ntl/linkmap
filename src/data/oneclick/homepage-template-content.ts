@@ -838,21 +838,69 @@ const namecardGlobalsCss = `@import "tailwindcss";
   --section-gap: clamp(4rem, 8vw, 7rem);
   --section-padding-x: clamp(1rem, 4vw, 3rem);
 
+  /* Card design tokens */
+  --card-bg: #ffffff;
+  --card-text: #1a1a1a;
+  --card-sub: #555555;
+  --card-border: rgba(0, 0, 0, 0.06);
+  --card-radius: 16px;
+  --card-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+  --page-bg: #f0f2f5;
+  --page-text: #1a1a1a;
+  --flip-duration: 0.7s;
+
   /* Surface */
   --surface-elevated: #ffffff;
   --surface-sunken: #f8f9fa;
   --surface-border: rgba(0, 0, 0, 0.06);
   --shadow-card: 0 2px 8px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.04);
-  --shadow-card-hover: 0 8px 32px rgba(0,0,0,0.1), 0 16px 48px rgba(0,0,0,0.06);
+  --shadow-card-hover: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
 
   /* Unified Radius */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-xl: 16px;
+}
+
+/* ── Design Preset overrides ── */
+[data-preset="pro"] {
+  --accent: #3b82f6;
+  --accent-end: #60a5fa;
+}
+[data-preset="corporate"] {
+  --accent: #1e3a5f;
+  --accent-end: #2d5a8e;
+}
+[data-preset="creative"] {
+  --accent: #8b5cf6;
+  --accent-end: #a78bfa;
+}
+[data-preset="minimal-dark"] {
+  --accent: #888888;
+  --accent-end: #aaaaaa;
+  --card-bg: #1a1a1a;
+  --card-text: #f0f0f0;
+  --card-sub: #999999;
+  --card-border: rgba(255,255,255,0.1);
+  --card-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
+  --page-bg: #111111;
+  --page-text: #e0e0e0;
+  --surface-elevated: #1a1a1a;
+  --surface-sunken: #141414;
+  --surface-border: rgba(255, 255, 255, 0.06);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.2);
+  --shadow-card-hover: 0 8px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .dark {
+  --card-bg: #1a1a1a;
+  --card-text: #f0f0f0;
+  --card-sub: #999999;
+  --card-border: rgba(255,255,255,0.1);
+  --card-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
+  --page-bg: #111111;
+  --page-text: #e0e0e0;
   --surface-elevated: #1a1a1a;
   --surface-sunken: #141414;
   --surface-border: rgba(255, 255, 255, 0.06);
@@ -882,30 +930,8 @@ const namecardGlobalsCss = `@import "tailwindcss";
   transform: translateY(0);
 }
 
-/* Reveal variants */
-.reveal-slide-left {
-  opacity: 0;
-  transform: translateX(-32px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.reveal-slide-left.revealed {
-  opacity: 1;
-  transform: translateX(0);
-}
-.reveal-scale {
-  opacity: 0;
-  transform: scale(0.95);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.reveal-scale.revealed {
-  opacity: 1;
-  transform: scale(1);
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .reveal-fade,
-  .reveal-slide-left,
-  .reveal-scale { opacity: 1; transform: none; transition: none; }
+  .reveal-fade { opacity: 1; transform: none; transition: none; }
 }
 
 /* Card lift */
@@ -918,53 +944,127 @@ const namecardGlobalsCss = `@import "tailwindcss";
   box-shadow: var(--shadow-card-hover);
 }
 
-/* Card flip */
-.card-flip-container { perspective: 1200px; cursor: pointer; }
+/* ── 3D Card Flip ── */
+.card-flip-container {
+  perspective: 1200px;
+  cursor: pointer;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
 .card-flip-inner {
   position: relative;
   width: 100%;
-  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
+  transition: transform var(--flip-duration) cubic-bezier(0.4, 0.2, 0.2, 1);
+  border-radius: var(--card-radius);
 }
-.card-flip-container.flipped .card-flip-inner { transform: rotateY(180deg); }
+.card-flip-container.flipped .card-flip-inner {
+  transform: rotateY(180deg);
+}
 .card-flip-front,
-.card-flip-back { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.card-flip-back {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: var(--card-radius);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  transition: background 0.4s, color 0.4s;
+}
+.card-flip-front {
+  position: relative;
+}
 .card-flip-back {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100%;
   transform: rotateY(180deg);
 }
 
-/* Namecard premium hover */
-.namecard-hover {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+/* Namecard premium hover (앞면 비플립 상태에서만) */
+.card-flip-container:hover .card-flip-inner:not(.flipping) {
+  transform: translateY(-4px) rotateX(3deg);
 }
-.namecard-hover:hover {
-  transform: translateY(-4px) rotateX(2deg);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+.card-flip-container.flipped:hover .card-flip-inner {
+  transform: rotateY(180deg) translateY(-4px) rotateX(3deg);
 }
 
-/* Shimmer effect for accent bar */
-@keyframes shimmer {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
+/* Paper texture overlay */
+.card-flip-front::after,
+.card-flip-back::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--card-radius);
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  opacity: 0.5;
+}
+
+/* Shimmer accent bar */
+@keyframes shimmer-bar {
+  0% { background-position: 100% 0; }
+  50% { background-position: 0 0; }
+  100% { background-position: 100% 0; }
 }
 .accent-shimmer {
-  background-size: 200% auto;
-  animation: shimmer 4s linear infinite;
+  height: 6px;
+  background-size: 200% 100%;
+  animation: shimmer-bar 2.5s ease-in-out infinite;
+  border-radius: var(--card-radius) var(--card-radius) 0 0;
 }
 
-/* Section gap */
-.section-gap {
-  padding-top: var(--section-gap, 4rem);
-  padding-bottom: var(--section-gap, 4rem);
+/* Social chip style */
+.social-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--accent, #3b82f6);
+  color: var(--accent, #3b82f6);
+  background: transparent;
+  transition: all 0.25s;
+  text-decoration: none;
+}
+.social-chip:hover {
+  background: var(--accent, #3b82f6);
+  color: #fff;
+}
+
+/* QR wrapper */
+.qr-box {
+  background: #ffffff;
+  padding: 8px;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  display: inline-flex;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .card-flip-inner { transition: none !important; }
+  .card-flip-front, .card-flip-back {
+    backface-visibility: visible !important;
+    -webkit-backface-visibility: visible !important;
+    transform: none !important;
+    transition: opacity 0.3s;
+  }
+  .card-flip-container.flipped .card-flip-front { opacity: 0; position: absolute; pointer-events: none; }
+  .card-flip-container.flipped .card-flip-back { opacity: 1; position: relative; }
+  .card-flip-container:not(.flipped) .card-flip-front { opacity: 1; position: relative; }
+  .card-flip-container:not(.flipped) .card-flip-back { opacity: 0; position: absolute; pointer-events: none; }
+  .accent-shimmer { animation: none !important; }
   .card-lift:hover { transform: none; }
-  .namecard-hover:hover { transform: none; }
-  .card-flip-inner { transition: none; }
-  .accent-shimmer { animation: none; }
+}
+
+@media (max-width: 460px) {
+  .card-front-body { padding: 24px 20px 20px !important; }
+  .card-back-body { padding: 20px 16px 16px !important; }
 }`;
 
 const namecardLayout = `import type { Metadata } from 'next';
@@ -985,10 +1085,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko" suppressHydrationWarning>
       <head>
         <link rel="stylesheet" as="style" crossOrigin="anonymous" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+        {/* Dark mode init — run before first paint */}
         <script dangerouslySetInnerHTML={{ __html: "(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}})()" }} />
+        {/* Hint pulse keyframe */}
+        <style dangerouslySetInnerHTML={{ __html: "@keyframes pulse-hint{0%,100%{opacity:.6}50%{opacity:1}}" }} />
+        {/* Google Analytics */}
+        {siteConfig.gaId && (
+          <>
+            <script async src={\`https://www.googletagmanager.com/gtag/js?id=\${siteConfig.gaId}\`} />
+            <script dangerouslySetInnerHTML={{ __html: \`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','\${siteConfig.gaId}')\` }} />
+          </>
+        )}
+        {/* Structured data */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Person', name: siteConfig.name, jobTitle: siteConfig.title, ...(siteConfig.company ? { worksFor: { '@type': 'Organization', name: siteConfig.company } } : {}), ...(siteConfig.email || siteConfig.phone ? { contactPoint: { '@type': 'ContactPoint', ...(siteConfig.email ? { email: siteConfig.email } : {}), ...(siteConfig.phone ? { telephone: siteConfig.phone } : {}) } } : {}), ...(siteConfig.website ? { url: siteConfig.website } : {}), ...(siteConfig.socials?.length ? { sameAs: siteConfig.socials.map((s: { url: string }) => s.url) } : {}) }) }} />
       </head>
-      <body className="antialiased bg-gray-50 dark:bg-gray-900">
+      <body className="antialiased" style={{ fontFamily: \`'\${siteConfig.fontFamily}', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif\` }}>
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:shadow-lg focus:text-sm">본문으로 바로가기</a>
         {children}
       </body>
@@ -1002,8 +1113,12 @@ import { Footer } from '@/components/footer';
 
 export default function Home() {
   return (
-    <main id="main" className="min-h-screen flex flex-col items-center justify-center p-4 bg-[var(--surface-sunken)] dark:bg-gray-950">
-      <div className="w-full max-w-sm mx-auto">
+    <main
+      id="main"
+      data-preset={siteConfig.designPreset}
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', background: 'var(--page-bg)', color: 'var(--page-text)', transition: 'background 0.4s, color 0.4s' }}
+    >
+      <div style={{ width: '100%', maxWidth: 400 }}>
         <FlippableCard config={siteConfig} />
         <Footer />
       </div>
@@ -1024,27 +1139,29 @@ export function ContactInfo({ config, accentColor }: Props) {
   const address = locale === 'en' && config.addressEn ? config.addressEn : config.address;
   const accent = accentColor || config.accentColor;
   const items = [
-    config.phone ? { icon: Phone, label: config.phone, href: \`tel:\${config.phone.replace(/[^+\\d]/g, '')}\`, ariaLabel: t('contact.call') } : null,
-    config.email ? { icon: Mail, label: config.email, href: \`mailto:\${config.email}\`, ariaLabel: t('contact.email') } : null,
-    address ? { icon: MapPin, label: address, href: \`https://maps.google.com/?q=\${encodeURIComponent(address)}\`, ariaLabel: t('contact.map') } : null,
-    config.website ? { icon: Globe, label: config.website.replace(/^https?:\\/\\//, ''), href: config.website, ariaLabel: t('contact.website') } : null,
-  ].filter(Boolean) as Array<{ icon: typeof Phone; label: string; href: string; ariaLabel: string }>;
+    config.email ? { icon: Mail, label: config.email, href: \`mailto:\${config.email}\`, isExternal: false, ariaLabel: t('contact.email') } : null,
+    config.phone ? { icon: Phone, label: config.phone, href: \`tel:\${config.phone.replace(/[^+\\d]/g, '')}\`, isExternal: false, ariaLabel: t('contact.call') } : null,
+    address ? { icon: MapPin, label: address, href: \`https://maps.google.com/?q=\${encodeURIComponent(address)}\`, isExternal: true, ariaLabel: t('contact.map') } : null,
+    config.website ? { icon: Globe, label: config.website.replace(/^https?:\\/\\//, ''), href: config.website, isExternal: true, ariaLabel: t('contact.website') } : null,
+  ].filter(Boolean) as Array<{ icon: typeof Phone; label: string; href: string; isExternal: boolean; ariaLabel: string }>;
   if (items.length === 0) return null;
   return (
-    <div className="divide-y divide-[var(--surface-border)]">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {items.map((item, i) => (
         <a
           key={i}
           href={item.href}
-          target={item.icon === Globe || item.icon === MapPin ? '_blank' : undefined}
-          rel={item.icon === Globe || item.icon === MapPin ? 'noopener noreferrer' : undefined}
+          target={item.isExternal ? '_blank' : undefined}
+          rel={item.isExternal ? 'noopener noreferrer' : undefined}
           aria-label={item.ariaLabel}
-          className="group flex items-center gap-3 py-3 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+          style={{ display: 'flex', alignItems: 'flex-start', gap: 10, lineHeight: 1.5, color: 'var(--card-text)', textDecoration: 'none' }}
         >
-          <span className="flex-shrink-0 w-8 h-8 rounded-[var(--radius-sm)] flex items-center justify-center transition-colors" style={{ backgroundColor: \`\${accent}18\` }}>
-            <item.icon className="w-4 h-4" style={{ color: accent }} />
-          </span>
-          <span className="text-sm truncate">{item.label}</span>
+          <item.icon
+            size={18}
+            style={{ flexShrink: 0, color: accent, marginTop: 2 }}
+            aria-hidden="true"
+          />
+          <span style={{ wordBreak: 'break-all', fontSize: '0.85rem' }}>{item.label}</span>
         </a>
       ))}
     </div>
@@ -1085,24 +1202,83 @@ import { useLocale } from '@/lib/i18n';
 
 interface Props { config: SiteConfig; }
 
+function AvatarSvg({ accentColor }: { accentColor: string }) {
+  const accentEnd = accentColor + 'aa';
+  return (
+    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+      <defs>
+        <linearGradient id="avatarGrad" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor={accentColor} />
+          <stop offset="100%" stopColor={accentEnd} />
+        </linearGradient>
+      </defs>
+      <circle cx="60" cy="60" r="60" fill="url(#avatarGrad)" />
+      {/* Body */}
+      <ellipse cx="60" cy="108" rx="32" ry="18" fill="#4a5568" />
+      {/* Neck */}
+      <rect x="52" y="78" width="16" height="10" rx="4" fill="#fcd5b4" />
+      {/* Shirt */}
+      <path d="M34 108 C34 90 46 82 60 82 C74 82 86 90 86 108" fill="#fff" stroke="#e2e8f0" strokeWidth="1" />
+      {/* Collar */}
+      <path d="M50 82 L60 94 L70 82" fill="none" stroke={accentColor} strokeWidth="2.5" strokeLinecap="round" />
+      {/* Head */}
+      <ellipse cx="60" cy="52" rx="26" ry="30" fill="#fcd5b4" />
+      {/* Hair */}
+      <path d="M34 46 C34 28 46 16 60 16 C74 16 86 28 86 46 C86 38 80 24 60 24 C40 24 34 38 34 46Z" fill="#2d3748" />
+      <path d="M34 46 C32 52 32 42 34 36" fill="#2d3748" />
+      <path d="M86 46 C88 52 88 42 86 36" fill="#2d3748" />
+      {/* Eyes */}
+      <ellipse cx="48" cy="52" rx="3.5" ry="4" fill="#2d3748" />
+      <ellipse cx="72" cy="52" rx="3.5" ry="4" fill="#2d3748" />
+      <circle cx="49.5" cy="50.5" r="1.2" fill="#fff" />
+      <circle cx="73.5" cy="50.5" r="1.2" fill="#fff" />
+      {/* Eyebrows */}
+      <path d="M42 44 Q48 40 54 44" fill="none" stroke="#2d3748" strokeWidth="2" strokeLinecap="round" />
+      <path d="M66 44 Q72 40 78 44" fill="none" stroke="#2d3748" strokeWidth="2" strokeLinecap="round" />
+      {/* Nose */}
+      <path d="M58 58 Q60 62 62 58" fill="none" stroke="#e8b796" strokeWidth="1.5" strokeLinecap="round" />
+      {/* Smile */}
+      <path d="M50 66 Q60 74 70 66" fill="none" stroke="#c5705d" strokeWidth="2" strokeLinecap="round" />
+      {/* Cheeks */}
+      <circle cx="42" cy="62" r="5" fill="#fdb4b4" opacity="0.35" />
+      <circle cx="78" cy="62" r="5" fill="#fdb4b4" opacity="0.35" />
+      {/* Glasses */}
+      <rect x="38" y="46" width="18" height="14" rx="5" fill="none" stroke={accentColor} strokeWidth="2" />
+      <rect x="64" y="46" width="18" height="14" rx="5" fill="none" stroke={accentColor} strokeWidth="2" />
+      <path d="M56 52 L64 52" stroke={accentColor} strokeWidth="2" />
+    </svg>
+  );
+}
+
 export function ProfileCard({ config }: Props) {
   const { locale } = useLocale();
   const name = locale === 'en' && config.nameEn ? config.nameEn : config.name;
+  const nameSecondary = locale === 'ko' && config.nameEn ? config.nameEn : (locale === 'en' && config.name !== name ? config.name : null);
   const title = locale === 'en' && config.titleEn ? config.titleEn : config.title;
   const company = locale === 'en' && config.companyEn ? config.companyEn : config.company;
-  const initials = name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
   return (
-    <div className="flex flex-col items-center text-center gap-2 pt-2">
-      {config.avatarUrl
-        ? (<img src={config.avatarUrl} alt={name} width={96} height={96} className="w-24 h-24 rounded-full object-cover -mt-16 ring-4 ring-[var(--surface-elevated)] shadow-md" />)
-        : (<div className="w-24 h-24 rounded-full flex items-center justify-center text-2xl font-bold text-white -mt-16 ring-4 ring-[var(--surface-elevated)] shadow-md shrink-0" style={{ backgroundColor: config.accentColor }} aria-label={name}>{initials}</div>)
-      }
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mt-1">{name}</h1>
-      <p className="text-base font-medium text-gray-600 dark:text-gray-400">{title}</p>
+    <div className="flex flex-col items-center text-center gap-1 py-8 px-6">
+      {/* Avatar */}
+      <div
+        className="w-22 h-22 rounded-full overflow-hidden mb-3 shadow-md"
+        style={{ width: 88, height: 88, flexShrink: 0 }}
+        aria-label={name}
+      >
+        {config.avatarUrl
+          ? (<img src={config.avatarUrl} alt={name} width={88} height={88} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />)
+          : (<AvatarSvg accentColor={config.accentColor} />)
+        }
+      </div>
+      {/* Name */}
+      <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--card-text)' }}>{name}</h1>
+      {nameSecondary && (
+        <p style={{ fontSize: '0.8125rem', color: 'var(--card-sub)', marginBottom: 4 }}>{nameSecondary}</p>
+      )}
+      {/* Title */}
+      <p style={{ fontSize: '0.9375rem', fontWeight: 600, color: config.accentColor }}>{title}</p>
+      {/* Company */}
       {company && (
-        <span className="inline-flex items-center px-3 py-0.5 rounded-full text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800">
-          {company}
-        </span>
+        <p style={{ fontSize: '0.8125rem', color: 'var(--card-sub)', marginTop: 2 }}>{company}</p>
       )}
     </div>
   );
@@ -1113,20 +1289,27 @@ const namecardQrCode = `'use client';
 import { QRCodeSVG } from 'qrcode.react';
 import { generateVCard } from '@/lib/vcard';
 import type { SiteConfig } from '@/lib/config';
-import { useLocale } from '@/lib/i18n';
 
 interface Props { config: SiteConfig; }
 
 export function QrCode({ config }: Props) {
-  const { t } = useLocale();
-  const vcard = generateVCard({ name: config.name, title: config.title, company: config.company, email: config.email, phone: config.phone, address: config.address, website: config.website });
+  const vcard = generateVCard({
+    name: config.name,
+    title: config.title,
+    company: config.company,
+    email: config.email,
+    phone: config.phone,
+    address: config.address,
+    website: config.website,
+  });
   return (
-    <div className="flex flex-col items-center gap-3">
-      <div className="p-4 bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-card)]">
-        <QRCodeSVG value={vcard} size={152} level="M" bgColor="#ffffff" fgColor="#111827" />
-      </div>
-      <p className="text-xs text-gray-400 dark:text-gray-500 text-center leading-relaxed">{t('qr.hint')}</p>
-    </div>
+    <QRCodeSVG
+      value={vcard}
+      size={88}
+      level="M"
+      bgColor="#ffffff"
+      fgColor="#111827"
+    />
   );
 }`;
 
@@ -1156,10 +1339,30 @@ export function SaveContactButton({ config }: Props) {
   return (
     <button
       onClick={handleSave}
-      className="w-full py-3 rounded-[var(--radius-md)] text-white font-semibold flex items-center justify-center gap-2 transition-all duration-200 hover:opacity-90 active:scale-[0.98] shadow-md"
-      style={{ backgroundColor: config.accentColor, boxShadow: \`0 4px 14px \${config.accentColor}40\` }}
+      style={{
+        width: '100%',
+        padding: '12px 0',
+        borderRadius: 12,
+        border: 'none',
+        background: config.accentColor,
+        color: '#ffffff',
+        fontFamily: 'inherit',
+        fontSize: '0.875rem',
+        fontWeight: 700,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        cursor: 'pointer',
+        transition: 'opacity 0.2s, transform 0.15s',
+        boxShadow: \`0 4px 14px \${config.accentColor}40\`,
+      }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.88'; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '1'; }}
+      onMouseDown={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(0.98)'; }}
+      onMouseUp={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'; }}
     >
-      <Download className="w-4 h-4" />
+      <Download size={16} aria-hidden="true" />
       {t('save.contact')}
     </button>
   );
@@ -1167,36 +1370,71 @@ export function SaveContactButton({ config }: Props) {
 
 const namecardSocialLinks = `'use client';
 
-import { Linkedin, Twitter, Instagram, Github, Facebook, Youtube, Globe, type LucideIcon } from 'lucide-react';
+import { Linkedin, Instagram, Github, Facebook, Youtube, Globe, type LucideIcon } from 'lucide-react';
 import type { SocialItem } from '@/lib/config';
+
+/* X (formerly Twitter) inline SVG icon */
+function XIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.856L1.548 2.25h6.89l4.261 5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
+function TikTokIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.24 8.24 0 0 0 4.82 1.55V6.79a4.85 4.85 0 0 1-1.05-.1z" />
+    </svg>
+  );
+}
 
 const socialIcons: Record<string, LucideIcon> = {
   linkedin: Linkedin,
-  twitter: Twitter,
   instagram: Instagram,
   github: Github,
   facebook: Facebook,
   youtube: Youtube,
 };
 
+const socialLabels: Record<string, string> = {
+  linkedin: 'LinkedIn',
+  twitter: 'X',
+  x: 'X',
+  instagram: 'Instagram',
+  github: 'GitHub',
+  facebook: 'Facebook',
+  youtube: 'YouTube',
+  tiktok: 'TikTok',
+};
+
 interface Props { socials: SocialItem[]; accentColor: string; }
 
 export function SocialLinks({ socials, accentColor }: Props) {
+  if (!socials.length) return null;
   return (
-    <div className="flex items-center justify-center gap-3 flex-wrap">
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
       {socials.map((social, i) => {
-        const Icon = socialIcons[social.platform] ?? Globe;
+        const platform = social.platform.toLowerCase();
+        const label = socialLabels[platform] ?? social.platform;
+        const isX = platform === 'twitter' || platform === 'x';
+        const isTikTok = platform === 'tiktok';
+        const Icon = (isX || isTikTok) ? null : (socialIcons[platform] ?? Globe);
         return (
           <a
             key={i}
             href={social.url}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={social.platform}
-            className="w-10 h-10 rounded-[var(--radius-sm)] flex items-center justify-center transition-all duration-200 hover:scale-110 hover:shadow-md"
-            style={{ backgroundColor: \`\${accentColor}15\`, color: accentColor }}
+            aria-label={label}
+            className="social-chip"
+            style={{ borderColor: accentColor, color: accentColor }}
           >
-            <Icon className="w-5 h-5" />
+            {isX && <XIcon size={14} />}
+            {isTikTok && <TikTokIcon size={14} />}
+            {Icon && <Icon size={14} />}
+            {label}
           </a>
         );
       })}
@@ -1240,9 +1478,16 @@ export function ThemeToggle() {
 
 const namecardConfig = `export interface SocialItem { platform: string; url: string; }
 
+export type DesignPreset = 'pro' | 'corporate' | 'creative' | 'minimal-dark';
+
 function parseJSON<T>(raw: string | undefined, fallback: T): T {
   if (!raw) return fallback;
   try { return JSON.parse(raw) as T; } catch { return fallback; }
+}
+
+function parsePreset(raw: string | undefined): DesignPreset {
+  const valid: DesignPreset[] = ['pro', 'corporate', 'creative', 'minimal-dark'];
+  return valid.includes(raw as DesignPreset) ? (raw as DesignPreset) : 'pro';
 }
 
 export const siteConfig = {
@@ -1260,6 +1505,8 @@ export const siteConfig = {
   socials: parseJSON<SocialItem[]>(process.env.NEXT_PUBLIC_SOCIALS, []),
   avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || null,
   accentColor: process.env.NEXT_PUBLIC_ACCENT_COLOR || '#3b82f6',
+  designPreset: parsePreset(process.env.NEXT_PUBLIC_DESIGN_PRESET),
+  fontFamily: process.env.NEXT_PUBLIC_FONT_FAMILY || 'Pretendard Variable',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 
@@ -1272,8 +1519,8 @@ import { useSyncExternalStore } from 'react';
 export type Locale = 'ko' | 'en';
 
 const translations: Record<Locale, Record<string, string>> = {
-  ko: { 'contact.call': '전화하기', 'contact.email': '이메일 보내기', 'contact.map': '지도에서 보기', 'contact.website': '웹사이트 방문', 'qr.hint': 'QR 코드를 스캔하면 연락처가 저장됩니다', 'save.contact': '연락처에 저장', 'theme.light': '라이트 모드로 전환', 'theme.dark': '다크 모드로 전환', 'footer.powered': 'Powered by', 'lang.switchLabel': 'Switch to English', 'lang.toggle': 'EN', 'card.showQr': '탭하면 QR 코드가 표시됩니다', 'card.showProfile': '탭하면 프로필로 돌아갑니다', 'card.tapToFlip': '탭하여 뒤집기' },
-  en: { 'contact.call': 'Call', 'contact.email': 'Send email', 'contact.map': 'View on map', 'contact.website': 'Visit website', 'qr.hint': 'Scan QR code to save contact', 'save.contact': 'Save Contact', 'theme.light': 'Switch to light mode', 'theme.dark': 'Switch to dark mode', 'footer.powered': 'Powered by', 'lang.switchLabel': '한국어로 전환', 'lang.toggle': '한국어', 'card.showQr': 'Tap to show QR code', 'card.showProfile': 'Tap to return to profile', 'card.tapToFlip': 'Tap to flip' },
+  ko: { 'contact.call': '전화하기', 'contact.email': '이메일 보내기', 'contact.map': '지도에서 보기', 'contact.website': '웹사이트 방문', 'qr.hint': '명함 공유 QR', 'save.contact': '연락처에 저장', 'theme.light': '라이트 모드로 전환', 'theme.dark': '다크 모드로 전환', 'footer.powered': 'Powered by', 'lang.switchLabel': 'Switch to English', 'lang.toggle': 'EN', 'card.showProfile': '탭하여 앞면 보기', 'card.tapToFlip': '카드를 클릭하여 뒤집기' },
+  en: { 'contact.call': 'Call', 'contact.email': 'Send email', 'contact.map': 'View on map', 'contact.website': 'Visit website', 'qr.hint': 'Share QR', 'save.contact': 'Save Contact', 'theme.light': 'Switch to light mode', 'theme.dark': 'Switch to dark mode', 'footer.powered': 'Powered by', 'lang.switchLabel': '한국어로 전환', 'lang.toggle': '한국어', 'card.showProfile': 'Tap to see front', 'card.tapToFlip': 'Click to flip card' },
 };
 
 let _locale: Locale = 'ko';
@@ -1317,7 +1564,7 @@ export function generateVCardDataUrl(data: VCardData): string { return generateV
 
 const namecardFlippableCard = `'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { SiteConfig } from '@/lib/config';
 import { ProfileCard } from '@/components/profile-card';
 import { ContactInfo } from '@/components/contact-info';
@@ -1325,83 +1572,93 @@ import { SocialLinks } from '@/components/social-links';
 import { QrCode } from '@/components/qr-code';
 import { SaveContactButton } from '@/components/save-contact-button';
 import { useLocale } from '@/lib/i18n';
-import { ScanLine, User } from 'lucide-react';
 
 interface Props { config: SiteConfig; }
 
 export function FlippableCard({ config }: Props) {
   const [flipped, setFlipped] = useState(false);
   const { t } = useLocale();
+  const frontRef = useRef<HTMLDivElement>(null);
+  const backRef = useRef<HTMLDivElement>(null);
+
+  /* Sync back face min-height to front face height */
+  useEffect(() => {
+    function sync() {
+      if (frontRef.current && backRef.current) {
+        backRef.current.style.minHeight = frontRef.current.offsetHeight + 'px';
+      }
+    }
+    sync();
+    window.addEventListener('resize', sync);
+    return () => window.removeEventListener('resize', sync);
+  }, []);
+
+  const accentGradient = \`linear-gradient(90deg, \${config.accentColor}, \${config.accentColor}aa, \${config.accentColor})\`;
 
   return (
-    <div className="w-full">
+    <div style={{ width: '100%' }}>
       {/* Flip hint */}
-      <p className="text-center text-xs text-gray-400 dark:text-gray-500 mb-3 select-none">
-        {flipped ? t('card.showProfile') : t('card.showQr')}
+      <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--card-sub)', marginBottom: 12, userSelect: 'none', animation: 'pulse-hint 2s ease-in-out infinite' }}>
+        {flipped ? t('card.showProfile') : t('card.tapToFlip')}
       </p>
 
       <div
-        className={\`card-flip-container \${flipped ? 'flipped' : ''}\`}
+        className={\`card-flip-container\${flipped ? ' flipped' : ''}\`}
         onClick={() => setFlipped((v) => !v)}
         role="button"
         tabIndex={0}
-        aria-label={flipped ? t('card.showProfile') : t('card.showQr')}
+        aria-label={flipped ? t('card.showProfile') : t('card.tapToFlip')}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFlipped((v) => !v); } }}
+        data-preset={config.designPreset}
       >
-        <div className="card-flip-inner" style={{ minHeight: '480px' }}>
-          {/* ── FRONT ── */}
-          <div className="card-flip-front namecard-hover print-card rounded-[var(--radius-xl)] overflow-hidden bg-[var(--surface-elevated)] shadow-[var(--shadow-card-hover)]">
-            {/* Accent bar */}
+        <div className="card-flip-inner">
+
+          {/* ── FRONT: Profile ── */}
+          <div className="card-flip-front print-card" ref={frontRef}>
+            {/* Shimmer accent bar */}
             <div
-              className="h-1.5 w-full accent-shimmer"
-              style={{ background: \`linear-gradient(90deg, \${config.accentColor}, \${config.accentColor}aa, \${config.accentColor})\` }}
+              className="accent-shimmer"
+              style={{ background: accentGradient }}
             />
-            {/* Hero gradient header */}
+            {/* Profile section */}
+            <ProfileCard config={config} />
+          </div>
+
+          {/* ── BACK: Contact + Social + QR ── */}
+          <div className="card-flip-back" ref={backRef}>
+            {/* Shimmer accent bar */}
             <div
-              className="h-24 w-full"
-              style={{ background: \`linear-gradient(160deg, \${config.accentColor}22 0%, \${config.accentColor}08 100%)\` }}
+              className="accent-shimmer"
+              style={{ background: accentGradient }}
             />
-            <div className="px-6 pb-6 space-y-5">
-              <ProfileCard config={config} />
-              <div className="border-t border-[var(--surface-border)]" />
+            <div className="card-back-body" style={{ padding: '28px 24px 24px', display: 'flex', flexDirection: 'column', gap: 12, fontSize: '0.85rem', color: 'var(--card-text)' }}>
+              {/* Contact section */}
+              <p style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: config.accentColor, marginBottom: 2 }}>Contact</p>
               <ContactInfo config={config} accentColor={config.accentColor} />
+
+              {/* Social section */}
               {config.socials.length > 0 && (
                 <>
-                  <div className="border-t border-[var(--surface-border)]" />
+                  <p style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: config.accentColor, marginTop: 4, marginBottom: 2 }}>Social</p>
                   <SocialLinks socials={config.socials} accentColor={config.accentColor} />
                 </>
               )}
-            </div>
-            {/* Flip indicator */}
-            <div className="flex items-center justify-center gap-1.5 py-3 border-t border-[var(--surface-border)]">
-              <ScanLine className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600" />
-              <span className="text-[10px] text-gray-300 dark:text-gray-600 select-none">{t('card.tapToFlip')}</span>
-            </div>
-          </div>
 
-          {/* ── BACK ── */}
-          <div className="card-flip-back rounded-[var(--radius-xl)] overflow-hidden bg-[var(--surface-elevated)] shadow-[var(--shadow-card-hover)]">
-            {/* Accent bar */}
-            <div
-              className="h-1.5 w-full accent-shimmer"
-              style={{ background: \`linear-gradient(90deg, \${config.accentColor}, \${config.accentColor}aa, \${config.accentColor})\` }}
-            />
-            <div className="p-6 flex flex-col items-center gap-5">
-              <div className="text-center space-y-1 pt-2">
-                <p className="text-base font-bold text-gray-900 dark:text-gray-50">{config.name}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{config.title}</p>
+              {/* QR Code */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                <div className="qr-box">
+                  <QrCode config={config} />
+                </div>
+                <span style={{ fontSize: '0.625rem', color: 'var(--card-sub)', letterSpacing: '0.04em' }}>{t('qr.hint')}</span>
               </div>
-              <QrCode config={config} />
-              <div className="w-full" onClick={(e) => e.stopPropagation()}>
+
+              {/* Save Contact */}
+              <div onClick={(e) => e.stopPropagation()}>
                 <SaveContactButton config={config} />
               </div>
             </div>
-            {/* Flip indicator */}
-            <div className="flex items-center justify-center gap-1.5 py-3 border-t border-[var(--surface-border)]">
-              <User className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600" />
-              <span className="text-[10px] text-gray-300 dark:text-gray-600 select-none">{t('card.tapToFlip')}</span>
-            </div>
           </div>
+
         </div>
       </div>
     </div>

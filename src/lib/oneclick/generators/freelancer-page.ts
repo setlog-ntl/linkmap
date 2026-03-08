@@ -120,7 +120,7 @@ const MODULE_COMPONENTS: Record<string, ComponentMapping> = {
   portfolio: {
     importName: 'PortfolioSection',
     importPath: '@/components/portfolio-section',
-    render: '        <PortfolioSection portfolio={siteConfig.portfolio} />',
+    render: "        <PortfolioSection portfolio={siteConfig.portfolio} columns={siteConfig.portfolioColumns as '2' | '3' | '4'} />",
   },
   testimonials: {
     importName: 'TestimonialsSection',

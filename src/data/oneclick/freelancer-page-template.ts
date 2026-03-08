@@ -9,6 +9,7 @@ import {
   sharedSectionWrapper as sectionWrapper,
   sharedThemeToggle as themeToggle,
   sharedLanguageToggle as languageToggle,
+  sharedRotatingText as rotatingText,
   makePackageJson,
 } from './shared-template-files';
 
@@ -241,6 +242,12 @@ dialog.lightbox img {
   .animate-fade-up, .animate-fade-up-d1, .animate-fade-up-d2 { animation:none; opacity:1; transform:none; }
 }
 
+/* Scroll indicator float */
+@keyframes float {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(8px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card-lift:hover { transform: none; }
   .btn-press:active { transform: none; }
@@ -248,9 +255,12 @@ dialog.lightbox img {
 
 /* ── Rotating Text ── */
 .rotating-text-wrapper {
-  display: inline-block;
-  min-width: 200px;
-  text-align: left;
+  height: 2em;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ── Service Table ── */
@@ -259,55 +269,229 @@ dialog.lightbox img {
 }
 .service-row {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 60px 1fr auto;
   gap: 1.5rem;
   padding: 2rem 0;
   border-bottom: 1px solid var(--surface-border);
   align-items: start;
+  transition: background 0.2s ease;
+}
+.service-row:first-child {
+  border-top: 1px solid var(--surface-border);
 }
 .service-row:last-child {
   border-bottom: none;
 }
 .service-number {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 700;
-  color: var(--color-primary);
+  color: var(--text-muted, #a1a1aa);
   padding-top: 0.25rem;
 }
 .service-price {
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   white-space: nowrap;
-  color: var(--text-secondary);
+  padding-top: 0.25rem;
+  background: linear-gradient(135deg, var(--color-primary, #5b13ec), var(--color-accent, #06b6d4));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+@media (max-width: 640px) {
+  .service-row {
+    grid-template-columns: 40px 1fr;
+    gap: 0.75rem;
+  }
+  .service-price {
+    grid-column: 2;
+    padding-top: 0;
+  }
 }
 
-/* ── Pull Quote (대형 인용문) ── */
-.pull-quote {
+/* ── Portfolio Card ── */
+.portfolio-card {
   position: relative;
-  padding: 3rem 2rem;
+  border-radius: 16px;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  cursor: pointer;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
-.pull-quote::before {
+.portfolio-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 60px color-mix(in oklch, var(--color-primary, #5b13ec) 20%, transparent);
+}
+.portfolio-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+  display: block;
+}
+.portfolio-card:hover img {
+  transform: scale(1.08);
+}
+.portfolio-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.82) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.5rem;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.portfolio-card:hover .portfolio-overlay {
+  opacity: 1;
+}
+.portfolio-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  margin-bottom: 8px;
+  width: fit-content;
+}
+.portfolio-overlay h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+/* ── Testimonial Pull-Quote ── */
+.testimonial-card {
+  position: relative;
+  background: var(--surface-elevated);
+  border-radius: 20px;
+  padding: 3rem 2.25rem 2.25rem;
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.testimonial-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+}
+.testimonial-card::before {
   content: '\\201C';
   position: absolute;
-  top: 0;
-  left: 0;
+  top: -8px;
+  left: 28px;
   font-size: 6rem;
   line-height: 1;
-  color: var(--color-primary);
+  font-family: Georgia, 'Times New Roman', serif;
+  color: var(--color-primary, #5b13ec);
   opacity: 0.15;
-  font-family: Georgia, serif;
+  pointer-events: none;
 }
-.pull-quote blockquote {
-  font-size: 1.25rem;
-  line-height: 1.75;
+.testimonial-body {
+  font-size: 1.0625rem;
   font-style: italic;
-  color: var(--text-primary);
+  line-height: 1.8;
+  color: var(--text-secondary, #52525b);
+  margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 1;
 }
-.pull-quote cite {
-  display: block;
-  margin-top: 1rem;
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+.testimonial-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary, #5b13ec), var(--color-accent, #06b6d4));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
   font-size: 0.875rem;
-  font-style: normal;
-  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* ── Process Steps ── */
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  position: relative;
+}
+.process-grid::before {
+  content: '';
+  position: absolute;
+  top: 28px;
+  left: calc(12.5% + 12px);
+  right: calc(12.5% + 12px);
+  height: 2px;
+  background: var(--surface-border);
+}
+.process-step {
+  text-align: center;
+  position: relative;
+}
+.process-num {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--surface-elevated);
+  border: 2px solid var(--surface-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--color-primary, #5b13ec);
+  margin: 0 auto 1.25rem;
+  position: relative;
+  z-index: 1;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+.process-step:hover .process-num {
+  border-color: var(--color-primary, #5b13ec);
+  box-shadow: 0 0 20px color-mix(in oklch, var(--color-primary, #5b13ec) 25%, transparent);
+  transform: scale(1.1);
+}
+@media (max-width: 768px) {
+  .process-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+  .process-grid::before { display: none; }
+}
+@media (max-width: 480px) {
+  .process-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Contact Social Links ── */
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: 1px solid var(--surface-border);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  color: inherit;
+}
+.social-link:hover {
+  border-color: var(--color-primary, #5b13ec);
+  box-shadow: 0 0 20px color-mix(in oklch, var(--color-primary, #5b13ec) 20%, transparent);
+  transform: translateY(-2px);
 }
 
 /* Premium hover */
@@ -318,6 +502,10 @@ dialog.lightbox img {
 }
 @media (prefers-reduced-motion: reduce) {
   .hover-glow:hover { box-shadow: none; }
+  .portfolio-card:hover { transform: none; }
+  .testimonial-card:hover { transform: none; }
+  .process-step:hover .process-num { transform: none; }
+  .social-link:hover { transform: none; }
 }
 `;
 
@@ -411,14 +599,23 @@ export default function Home() {
   return (
     <>
       <NavHeader />
-      <main>
+      <main id="main">
         <HeroSection config={siteConfig} />
-        <ServicesSection services={siteConfig.services} />
-        <PortfolioSection portfolio={siteConfig.portfolio} />
+        {siteConfig.services.length > 0 && (
+          <ServicesSection services={siteConfig.services} />
+        )}
+        {siteConfig.portfolio.length > 0 && (
+          <PortfolioSection
+            portfolio={siteConfig.portfolio}
+            columns={siteConfig.portfolioColumns as '2' | '3' | '4'}
+          />
+        )}
         {siteConfig.testimonials.length > 0 && (
           <TestimonialsSection testimonials={siteConfig.testimonials} />
         )}
-        <ProcessSection process={siteConfig.process} />
+        {siteConfig.process.length > 0 && (
+          <ProcessSection process={siteConfig.process} />
+        )}
         <ContactSection config={siteConfig} />
       </main>
       <Footer />
@@ -432,37 +629,13 @@ export default function Home() {
 // ──────────────────────────────────────────────
 const heroSection = `'use client';
 
-import { useState, useEffect } from 'react';
 import { ArrowDown } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
+import { RotatingText } from './rotating-text';
 
 interface Props {
   config: SiteConfig;
-}
-
-function RotatingText({ words }: { words: string[] }) {
-  const [index, setIndex] = useState(0);
-  const [fade, setFade] = useState(true);
-
-  useEffect(() => {
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) return;
-    const timer = setInterval(() => {
-      setFade(false);
-      setTimeout(() => {
-        setIndex((prev) => (prev + 1) % words.length);
-        setFade(true);
-      }, 400);
-    }, 3000);
-    return () => clearInterval(timer);
-  }, [words.length]);
-
-  return (
-    <span className={\`inline-block transition-all duration-400 \${fade ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}\`}>
-      {words[index]}
-    </span>
-  );
 }
 
 export function HeroSection({ config }: Props) {
@@ -478,40 +651,77 @@ export function HeroSection({ config }: Props) {
   return (
     <section
       id="hero"
-      className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 relative"
+      className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 relative overflow-hidden"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-[#5b13ec]/10 via-transparent to-[#06b6d4]/10" />
+      {/* Glow background */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-[-200px] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full"
+        style={{ background: 'radial-gradient(circle, color-mix(in oklch, var(--color-primary, #5b13ec) 15%, transparent) 0%, transparent 70%)' }}
+      />
 
       <div className="relative z-10 text-center max-w-3xl animate-fade-up">
+        {/* Avatar */}
         {config.avatarUrl && (
-          <div className="relative inline-block mb-6">
-            <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full bg-gradient-to-b from-[#5b13ec] to-[#06b6d4] -translate-x-3" />
+          <div className="relative inline-block mb-8">
             <img
               src={config.avatarUrl}
               alt={name}
-              className="w-28 h-28 rounded-2xl object-cover ring-2 ring-[#5b13ec]/30"
+              className="w-28 h-28 rounded-2xl object-cover ring-2 ring-[#5b13ec]/30 mx-auto"
             />
           </div>
         )}
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-3 bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent animate-fade-up-d1">
+
+        {/* Name — small uppercase label */}
+        <p className="text-sm font-semibold tracking-[0.2em] uppercase text-gray-400 dark:text-gray-500 mb-4 animate-fade-up">
           {name}
+        </p>
+
+        {/* Title — large gradient headline */}
+        <h1
+          className="font-extrabold leading-[1.1] mb-6 bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] bg-clip-text text-transparent animate-fade-up-d1"
+          style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)' }}
+        >
+          {title || name}
         </h1>
-        {title && (
-          <p className="text-lg text-[#06b6d4] mb-4 font-medium animate-fade-up-d1">{title}</p>
-        )}
-        <p className="text-xl text-gray-400 mb-4 max-w-xl mx-auto animate-fade-up-d2">
+
+        {/* Tagline */}
+        <p
+          className="text-gray-500 dark:text-gray-400 mb-6 mx-auto animate-fade-up-d1"
+          style={{ fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', maxWidth: '560px', lineHeight: '1.7' }}
+        >
           {tagline}
         </p>
-        <div className="text-base text-gray-500 dark:text-gray-400 mb-8 animate-fade-up-d2">
-          <RotatingText words={rotatingWords} />
+
+        {/* Rotating words */}
+        <div
+          className="rotating-text-wrapper mb-10 animate-fade-up-d2"
+          aria-live="polite"
+        >
+          <RotatingText
+            words={rotatingWords}
+            className="text-lg font-semibold text-[#06b6d4] whitespace-nowrap"
+          />
         </div>
+
+        {/* CTA */}
         <a
-          href="#services"
-          className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] text-white font-medium hover:opacity-90 transition-opacity animate-fade-up-d2 btn-press"
+          href="#contact"
+          className="inline-flex items-center gap-2 px-10 py-4 rounded-full bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] text-white text-base font-semibold hover:opacity-90 transition-opacity animate-fade-up-d2 btn-press"
         >
           {t('hero.cta')}
           <ArrowDown className="w-4 h-4" />
         </a>
+      </div>
+
+      {/* Scroll indicator */}
+      <div
+        aria-hidden="true"
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[0.75rem] tracking-[0.15em] text-gray-400"
+        style={{ animation: 'float 2s ease-in-out infinite' }}
+      >
+        SCROLL
+        <span className="block w-px h-8 bg-gray-300 dark:bg-gray-700" />
       </div>
     </section>
   );
@@ -534,13 +744,21 @@ interface Props {
 export function ServicesSection({ services }: Props) {
   const { locale, t } = useLocale();
 
+  if (!services || services.length === 0) return null;
+
   return (
-    <section id="services" className="py-20 sm:py-28 px-4 sm:px-6">
+    <section id="services" className="py-20 sm:py-28 px-4 sm:px-6 bg-gray-50/60 dark:bg-[#1a1a1a]/60">
       <div className="max-w-4xl mx-auto">
         <AnimatedReveal>
-          <h2 className="text-3xl font-bold mb-12 text-center text-gray-900 dark:text-gray-100">
+          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#5b13ec] mb-3">
+            Services
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900 dark:text-gray-100">
             {t('services.title')}
           </h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-12 max-w-lg leading-relaxed">
+            {t('services.desc')}
+          </p>
         </AnimatedReveal>
 
         <div className="service-table">
@@ -553,10 +771,10 @@ export function ServicesSection({ services }: Props) {
                 <div className="service-row group hover-glow">
                   <span className="service-number">{String(i + 1).padStart(2, '0')}</span>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-[var(--color-primary)] transition-colors duration-200">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-[#5b13ec] transition-colors duration-200 mb-1">
                       {title}
                     </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">{desc}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{desc}</p>
                   </div>
                   {price && <span className="service-price">{price}</span>}
                 </div>
@@ -583,13 +801,23 @@ import { AnimatedReveal } from './animated-reveal';
 
 interface Props {
   portfolio: PortfolioItem[];
+  columns?: '2' | '3' | '4';
 }
 
-export function PortfolioSection({ portfolio }: Props) {
+const colClass: Record<string, string> = {
+  '2': 'grid-cols-1 sm:grid-cols-2',
+  '3': 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+  '4': 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4',
+};
+
+export function PortfolioSection({ portfolio, columns = '3' }: Props) {
   const { locale, t } = useLocale();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [lightboxItem, setLightboxItem] = useState<{ src: string; alt: string; desc: string } | null>(null);
-  const categories = ['all', ...new Set(portfolio.map((p) => locale === 'en' && p.categoryEn ? p.categoryEn : p.category))];
+
+  const allCats = ['all', ...Array.from(new Set(
+    portfolio.map((p) => (locale === 'en' && p.categoryEn ? p.categoryEn : p.category))
+  ))];
   const [activeCategory, setActiveCategory] = useState('all');
 
   const filtered = activeCategory === 'all'
@@ -609,24 +837,35 @@ export function PortfolioSection({ portfolio }: Props) {
     setLightboxItem(null);
   }, []);
 
+  if (!portfolio || portfolio.length === 0) return null;
+
+  const gridCols = colClass[columns] ?? colClass['3'];
+
   return (
     <section id="portfolio" className="py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
         <AnimatedReveal>
-          <h2 className="text-3xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">
+          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#5b13ec] mb-3">
+            Portfolio
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900 dark:text-gray-100">
             {t('portfolio.title')}
           </h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-lg leading-relaxed">
+            {t('portfolio.desc')}
+          </p>
         </AnimatedReveal>
 
-        <div className="flex items-center justify-center gap-2 mb-10 flex-wrap">
-          {categories.map((cat) => (
+        {/* Category filter */}
+        <div className="flex items-center gap-2 mb-10 flex-wrap">
+          {allCats.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={\`px-4 py-1.5 rounded-full text-sm transition-colors \${
+              className={\`px-4 py-1.5 rounded-full text-sm font-medium transition-colors \${
                 activeCategory === cat
                   ? 'bg-[#5b13ec] text-white'
-                  : 'text-gray-400 border border-white/10 hover:text-white'
+                  : 'text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700 hover:border-[#5b13ec] hover:text-[#5b13ec]'
               }\`}
             >
               {cat === 'all' ? t('portfolio.all') : cat}
@@ -634,31 +873,30 @@ export function PortfolioSection({ portfolio }: Props) {
           ))}
         </div>
 
-        <div key={activeCategory} className="bento-grid">
+        {/* Grid */}
+        <div key={activeCategory} className={\`grid \${gridCols} gap-6\`}>
           {filtered.map((item, i) => {
             const title = locale === 'en' && item.titleEn ? item.titleEn : item.title;
-            const desc = locale === 'en' && item.descEn ? item.descEn : item.desc;
+            const desc = locale === 'en' && item.descEn ? item.descEn : (item.desc ?? '');
+            const category = locale === 'en' && item.categoryEn ? item.categoryEn : item.category;
             return (
-              <AnimatedReveal key={i} delay={i * 50} variant="scale">
+              <AnimatedReveal key={i} delay={i * 60} variant="scale">
                 <div
-                  className="group cursor-pointer aspect-[4/3]"
+                  className="portfolio-card"
                   onClick={() => openLightbox(item.imageUrl, title, desc)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openLightbox(item.imageUrl, title, desc); }}
+                  aria-label={\`\${title} 상세보기\`}
                 >
                   <img
                     src={item.imageUrl}
                     alt={title}
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                    <h3 className="font-semibold text-white text-sm mb-1 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">{title}</h3>
-                    <div className="flex gap-1.5 flex-wrap translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-75">
-                      {item.tags.map((tag, j) => (
-                        <span key={j} className="px-2 py-0.5 rounded-full text-xs bg-white/20 text-white backdrop-blur-sm">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    {desc && <p className="text-xs text-gray-200 mt-1.5 line-clamp-1 translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-100">{desc}</p>}
+                  <div className="portfolio-overlay">
+                    <span className="portfolio-tag">{category}</span>
+                    <h3>{title}</h3>
                   </div>
                 </div>
               </AnimatedReveal>
@@ -667,7 +905,7 @@ export function PortfolioSection({ portfolio }: Props) {
         </div>
       </div>
 
-      {/* Lightbox dialog */}
+      {/* Lightbox */}
       <dialog
         ref={dialogRef}
         className="lightbox"
@@ -679,7 +917,7 @@ export function PortfolioSection({ portfolio }: Props) {
             <button
               onClick={closeLightbox}
               className="absolute -top-3 -right-3 z-10 w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-              aria-label="Close"
+              aria-label="닫기"
             >
               <X className="w-4 h-4" />
             </button>
@@ -690,7 +928,9 @@ export function PortfolioSection({ portfolio }: Props) {
             />
             <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent rounded-b-xl">
               <h3 className="text-white font-semibold">{lightboxItem.alt}</h3>
-              <p className="text-gray-300 text-sm mt-1">{lightboxItem.desc}</p>
+              {lightboxItem.desc && (
+                <p className="text-gray-300 text-sm mt-1">{lightboxItem.desc}</p>
+              )}
             </div>
           </div>
         )}
@@ -716,37 +956,59 @@ interface Props {
 export function TestimonialsSection({ testimonials }: Props) {
   const { locale, t } = useLocale();
 
+  if (!testimonials || testimonials.length === 0) return null;
+
   return (
-    <section className="py-20 sm:py-28 px-4 sm:px-6">
-      <div className="max-w-3xl mx-auto">
+    <section id="testimonials" className="py-20 sm:py-28 px-4 sm:px-6 bg-gray-50/60 dark:bg-[#1a1a1a]/60">
+      <div className="max-w-5xl mx-auto">
         <AnimatedReveal>
-          <h2 className="text-3xl font-bold mb-12 text-center text-gray-900 dark:text-gray-100">
+          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#5b13ec] mb-3">
+            Testimonials
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900 dark:text-gray-100">
             {t('testimonials.title')}
           </h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-12 max-w-lg leading-relaxed">
+            {t('testimonials.desc')}
+          </p>
         </AnimatedReveal>
 
-        <div className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {testimonials.map((item, i) => {
             const author = locale === 'en' && item.authorEn ? item.authorEn : item.author;
             const role = locale === 'en' && item.roleEn ? item.roleEn : item.role;
             const company = locale === 'en' && item.companyEn ? item.companyEn : item.company;
             const content = locale === 'en' && item.contentEn ? item.contentEn : item.content;
             const rating = Math.min(5, Math.max(1, item.rating));
+            // 이름 첫 글자 (아바타 이니셜)
+            const initial = author ? author.charAt(0) : '?';
             return (
-              <AnimatedReveal key={i} delay={i * 150}>
-                <div
-                  className="pull-quote rounded-2xl"
-                  style={{ background: 'var(--surface-elevated)', border: '1px solid var(--surface-border)' }}
-                >
-                  <blockquote>{content}</blockquote>
-                  <cite>
-                    <span className="font-semibold text-gray-900 dark:text-gray-100">{author}</span>
-                    {(role || company) && ' · '}
-                    <span>{role}{role && company ? ', ' : ''}{company}</span>
-                    <span className="ml-2 text-[#f59e0b]" aria-label={\`별점 \${rating}점\`}>
-                      {'★'.repeat(rating)}{'☆'.repeat(5 - rating)}
-                    </span>
-                  </cite>
+              <AnimatedReveal key={i} delay={i * 120}>
+                <div className="testimonial-card">
+                  {/* 본문 */}
+                  <p className="testimonial-body">{content}</p>
+
+                  {/* 별점 */}
+                  <div className="flex gap-0.5 mb-4" aria-label={\`별점 \${rating}점\`}>
+                    {Array.from({ length: 5 }).map((_, j) => (
+                      <span key={j} className={\`text-base \${j < rating ? 'text-[#f59e0b]' : 'text-gray-300 dark:text-gray-600'}\`}>
+                        ★
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* 작성자 */}
+                  <div className="testimonial-author">
+                    <div className="testimonial-avatar" aria-hidden="true">{initial}</div>
+                    <div>
+                      <strong className="block text-[0.9375rem] font-bold text-gray-900 dark:text-gray-100">
+                        {author}
+                      </strong>
+                      <span className="text-[0.8125rem] text-gray-500 dark:text-gray-400">
+                        {role}{role && company ? ' · ' : ''}{company}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </AnimatedReveal>
             );
@@ -774,33 +1036,37 @@ interface Props {
 export function ProcessSection({ process }: Props) {
   const { locale, t } = useLocale();
 
+  if (!process || process.length === 0) return null;
+
   return (
     <section id="process" className="py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
         <AnimatedReveal>
-          <h2 className="text-3xl font-bold mb-16 text-center text-gray-900 dark:text-gray-100">
+          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#5b13ec] mb-3 text-center">
+            Process
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-center text-gray-900 dark:text-gray-100">
             {t('process.title')}
           </h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-14 text-center max-w-lg mx-auto leading-relaxed">
+            {t('process.desc')}
+          </p>
         </AnimatedReveal>
 
-        <div className="process-timeline">
+        <div className="process-grid">
           {process.map((step, i) => {
             const title = locale === 'en' && step.titleEn ? step.titleEn : step.title;
             const desc = locale === 'en' && step.descEn ? step.descEn : step.desc;
             return (
-              <AnimatedReveal key={i} delay={i * 120}>
-                <div className="flex md:flex-col items-start md:items-center gap-4 md:gap-0">
-                  {/* Mobile: badge inline, Desktop: handled by CSS ::before */}
-                  <div className="md:hidden w-10 h-10 rounded-full bg-gradient-to-br from-[#5b13ec] to-[#06b6d4] flex items-center justify-center text-white font-bold text-sm shadow-md shadow-[#5b13ec]/20 flex-shrink-0">
-                    {step.number}
-                  </div>
-                  <div className="md:text-center">
-                    <div className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-[#5b13ec] to-[#06b6d4] text-white font-bold text-base shadow-md shadow-[#5b13ec]/20 mx-auto mb-4">
-                      {step.number}
-                    </div>
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">{title}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed md:max-w-[180px]">{desc}</p>
-                  </div>
+              <AnimatedReveal key={i} delay={i * 100}>
+                <div className="process-step">
+                  <div className="process-num">{step.number}</div>
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
+                    {title}
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-[180px] mx-auto">
+                    {desc}
+                  </p>
                 </div>
               </AnimatedReveal>
             );
@@ -817,7 +1083,8 @@ export function ProcessSection({ process }: Props) {
 // ──────────────────────────────────────────────
 const contactSection = `'use client';
 
-import { Mail } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { Mail, Instagram, Linkedin, Twitter, Youtube, Github } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
 import { AnimatedReveal } from './animated-reveal';
@@ -826,50 +1093,65 @@ interface Props {
   config: SiteConfig;
 }
 
+const PLATFORM_ICONS: Record<string, ReactNode> = {
+  instagram: <Instagram className="w-4 h-4" />,
+  linkedin: <Linkedin className="w-4 h-4" />,
+  twitter: <Twitter className="w-4 h-4" />,
+  youtube: <Youtube className="w-4 h-4" />,
+  github: <Github className="w-4 h-4" />,
+  // behance, dribbble: lucide-react에 없으므로 아이콘 없이 텍스트만
+};
+
 export function ContactSection({ config }: Props) {
   const { t } = useLocale();
 
   return (
-    <section id="contact" className="py-20 sm:py-28 px-4 sm:px-6">
-      <div className="max-w-3xl mx-auto text-center">
+    <section id="contact" className="py-24 sm:py-32 px-4 sm:px-6 text-center">
+      <div className="max-w-2xl mx-auto">
         <AnimatedReveal>
-          <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">
+          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#5b13ec] mb-3">
+            Contact
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900 dark:text-gray-100">
             {t('contact.title')}
           </h2>
-        </AnimatedReveal>
-
-        <AnimatedReveal delay={100}>
-          <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto">
+          <p className="text-gray-500 dark:text-gray-400 mb-10 max-w-md mx-auto leading-relaxed">
             {t('contact.desc')}
           </p>
         </AnimatedReveal>
 
         {config.email && (
-          <AnimatedReveal delay={200}>
+          <AnimatedReveal delay={150}>
             <a
               href={\`mailto:\${config.email}\`}
-              className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] text-white font-medium hover:opacity-90 transition-opacity btn-press"
+              className="inline-flex items-center gap-2 px-10 py-4 rounded-full bg-gradient-to-r from-[#5b13ec] to-[#06b6d4] text-white text-base font-semibold hover:opacity-90 transition-opacity btn-press mb-8"
             >
-              <Mail className="w-4 h-4" />
-              {t('contact.email')}
+              <Mail className="w-5 h-5" />
+              {config.email}
             </a>
           </AnimatedReveal>
         )}
 
-        {config.socials.length > 0 && (
-          <AnimatedReveal delay={300}>
-            <div className="flex items-center justify-center gap-4 mt-6">
-              {config.socials.map((social, i) => (
-                <a
-                  key={i}
-                  href={social.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-full border border-white/10 text-sm text-gray-400 hover:text-white hover:border-white/30 transition-colors capitalize"
-                >
-                  {social.platform}
-                </a>
-              ))}
+        {config.socials && config.socials.length > 0 && (
+          <AnimatedReveal delay={250}>
+            <div className="flex items-center justify-center gap-3 flex-wrap mt-2">
+              {config.socials.map((social, i) => {
+                const icon = PLATFORM_ICONS[social.platform.toLowerCase()];
+                const label = social.platform.charAt(0).toUpperCase() + social.platform.slice(1);
+                return (
+                  <a
+                    key={i}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-link"
+                    aria-label={label}
+                  >
+                    {icon}
+                    <span className="capitalize">{label}</span>
+                  </a>
+                );
+              })}
             </div>
           </AnimatedReveal>
         )}
@@ -1213,6 +1495,7 @@ export const siteConfig = {
   gradientTo: '#06b6d4',
   fontFamily: 'Pretendard',
   portfolioColumns: '3',
+  designPreset: 'default',
   rotatingWords: parseJSON<string[]>(process.env.NEXT_PUBLIC_ROTATING_WORDS, []),
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
@@ -1236,13 +1519,17 @@ const translations: Record<Locale, Record<string, string>> = {
     'nav.portfolio': '포트폴리오',
     'nav.process': '진행 방식',
     'nav.contact': '연락하기',
-    'hero.cta': '서비스 보기',
-    'services.title': '서비스',
-    'portfolio.title': '포트폴리오',
+    'hero.cta': '프로젝트 의뢰하기',
+    'services.title': '제공 서비스',
+    'services.desc': '각 프로젝트의 맥락과 목표에 맞춰 최적의 솔루션을 설계합니다.',
+    'portfolio.title': '선택된 작업들',
+    'portfolio.desc': '브랜드의 본질을 시각 언어로 번역한 프로젝트 모음입니다.',
     'portfolio.all': '전체',
-    'testimonials.title': '고객 후기',
-    'process.title': '진행 방식',
-    'contact.title': '프로젝트 시작하기',
+    'testimonials.title': '클라이언트 후기',
+    'testimonials.desc': '함께 일한 분들이 남긴 이야기입니다.',
+    'process.title': '작업 프로세스',
+    'process.desc': '체계적인 프로세스로 최상의 결과물을 만들어냅니다.',
+    'contact.title': '함께 만들어요',
     'contact.desc': '새로운 프로젝트나 협업 제안은 언제든 환영합니다.',
     'contact.email': '이메일 보내기',
     'theme.light': '라이트 모드로 전환',
@@ -1256,13 +1543,17 @@ const translations: Record<Locale, Record<string, string>> = {
     'nav.portfolio': 'Portfolio',
     'nav.process': 'Process',
     'nav.contact': 'Contact',
-    'hero.cta': 'View Services',
+    'hero.cta': 'Start a Project',
     'services.title': 'Services',
-    'portfolio.title': 'Portfolio',
+    'services.desc': 'Tailored visual solutions designed to match your project context and goals.',
+    'portfolio.title': 'Selected Works',
+    'portfolio.desc': 'A collection of projects that translate brand essence into visual language.',
     'portfolio.all': 'All',
-    'testimonials.title': 'Testimonials',
+    'testimonials.title': 'Client Testimonials',
+    'testimonials.desc': 'Stories from those I have had the pleasure of working with.',
     'process.title': 'How I Work',
-    'contact.title': 'Start a Project',
+    'process.desc': 'A systematic process to deliver the best results for every project.',
+    'contact.title': "Let's Work Together",
     'contact.desc': 'Open to new projects and collaboration opportunities.',
     'contact.email': 'Send Email',
     'theme.light': 'Switch to light mode',
@@ -1316,6 +1607,7 @@ export const freelancerPageTemplate: HomepageTemplateContent = {
     { path: 'src/app/page.tsx', content: pageTsx },
     { path: 'src/components/animated-reveal.tsx', content: animatedReveal },
     { path: 'src/components/section-wrapper.tsx', content: sectionWrapper },
+    { path: 'src/components/rotating-text.tsx', content: rotatingText },
     { path: 'src/components/hero-section.tsx', content: heroSection },
     { path: 'src/components/services-section.tsx', content: servicesSection },
     { path: 'src/components/portfolio-section.tsx', content: portfolioSection },

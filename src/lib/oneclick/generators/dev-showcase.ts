@@ -126,7 +126,8 @@ function generateConfigTs(state: ModuleConfigState): string {
   return `export interface SkillItem {
   name: string;
   icon?: string;
-  level: 'beginner' | 'intermediate' | 'advanced';
+  /** numeric 0-100 OR legacy string level */
+  level: number | 'beginner' | 'intermediate' | 'advanced';
 }
 
 export interface ExperienceItem {

@@ -33,26 +33,28 @@ export async function GET() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'linear-gradient(135deg, #fdf4e7, #fff7ed)',
+          background: 'linear-gradient(160deg, #92400e 0%, #b45309 35%, #d97706 70%, #fbbf24 100%)',
           fontFamily: 'sans-serif',
         }}
       >
         <div
           style={{
             fontSize: 64,
-            fontWeight: 700,
-            color: '#d47311',
+            fontWeight: 400,
+            color: '#ffffff',
+            letterSpacing: '-0.01em',
           }}
         >
           {siteConfig.name}
         </div>
         <div
           style={{
-            fontSize: 28,
-            color: '#78716c',
-            marginTop: 12,
-            maxWidth: 600,
+            fontSize: 24,
+            color: 'rgba(255,255,255,0.75)',
+            marginTop: 16,
+            maxWidth: 640,
             textAlign: 'center',
+            fontStyle: 'italic',
           }}
         >
           {siteConfig.description}
@@ -69,240 +71,859 @@ export async function GET() {
 // ──────────────────────────────────────────────
 const globalsCss = `@import "tailwindcss";
 
-@theme {
-  --font-sans: 'Pretendard Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --color-primary: #d47311;
-  --color-secondary: #e8934a;
-  --color-warm: #fdf4e7;
-}
-
+/* ─── CSS 변수 ─────────────────────────────── */
 :root {
-  /* Spacing */
-  --section-gap: clamp(4rem, 8vw, 7rem);
-  --section-padding-x: clamp(1rem, 4vw, 3rem);
+  --brand-primary:   #92400e;
+  --brand-secondary: #d97706;
+  --accent:          #065f46;
+  --bg-page:         #fdf6ee;
+  --bg-card:         #fffaf4;
+  --bg-card-border:  #f0e4d0;
+  --text-dark:       #451a03;
+  --text-mid:        #78350f;
+  --text-muted:      rgba(146, 64, 14, 0.53);
+  --text-light:      #b45309;
 
-  /* Surface */
-  --surface-elevated: #ffffff;
-  --surface-sunken: #f8f9fa;
-  --surface-border: rgba(0, 0, 0, 0.06);
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
-  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.04);
+  --font-display: 'Georgia', 'Times New Roman', serif;
+  --font-body: 'Pretendard Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  /* Unified Radius */
-  --radius-sm: 8px;
+  --radius-sm: 6px;
   --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-lg: 20px;
+
+  --section-gap: 5rem;
+  --content-max: 900px;
+
+  /* Primary color override via config */
+  --color-primary: #92400e;
+  --color-secondary: #d97706;
 }
 
-.dark {
-  --surface-elevated: #1a1a1a;
-  --surface-sunken: #141414;
-  --surface-border: rgba(255, 255, 255, 0.06);
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
-  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2);
-}
+/* ─── Reset & Base ─────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+  html { scroll-behavior: auto; }
 }
 
+body {
+  background: var(--bg-page);
+  color: var(--text-dark);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+
 *:focus-visible {
-  outline: 2px solid var(--color-primary, #3b82f6);
+  outline: 2px solid var(--brand-secondary);
   outline-offset: 2px;
 }
 
-/* Reveal animation */
-.reveal-fade {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.reveal-fade.revealed {
-  opacity: 1;
-  transform: translateY(0);
-}
-@media (prefers-reduced-motion: reduce) {
-  .reveal-fade { opacity: 1; transform: none; transition: none; }
-}
-
-/* Reveal variants */
-.reveal-slide-left { opacity: 0; transform: translateX(-32px); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
-.reveal-slide-left.revealed { opacity: 1; transform: translateX(0); }
-.reveal-slide-right { opacity: 0; transform: translateX(32px); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
-.reveal-slide-right.revealed { opacity: 1; transform: translateX(0); }
-.reveal-scale { opacity: 0; transform: scale(0.95); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
-.reveal-scale.revealed { opacity: 1; transform: scale(1); }
-@media (prefers-reduced-motion: reduce) {
-  .reveal-slide-left, .reveal-slide-right, .reveal-scale { opacity: 1; transform: none; transition: none; }
-}
-
-/* ── Serif Typography Option ── */
-.font-serif h1, .font-serif h2, .font-serif h3 {
-  font-family: 'Nanum Myeongjo', 'Georgia', serif;
-  letter-spacing: -0.02em;
-}
-
-/* ── Table Menu Style ── */
-.menu-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-.menu-table tr {
-  border-bottom: 1px solid var(--surface-border);
-}
-.menu-table tr:last-child {
-  border-bottom: none;
-}
-.menu-table td {
-  padding: 1rem 0;
-  vertical-align: top;
-}
-.menu-table .menu-name {
-  font-weight: 600;
-  font-size: 1rem;
-}
-.menu-table .menu-desc {
-  font-size: 0.85rem;
-  color: var(--text-muted, #a1a1aa);
-  margin-top: 0.25rem;
-}
-.menu-table .menu-price {
-  text-align: right;
-  white-space: nowrap;
-  font-weight: 600;
-  color: var(--color-primary);
-}
-
-/* ── Business Status Indicator ── */
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-}
-.status-open {
-  background: #22c55e;
-  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
-  animation: pulse-dot 2s ease-in-out infinite;
-}
-.status-closed {
-  background: #ef4444;
-}
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .status-open { animation: none; }
-}
-
-/* ── Category Divider ── */
-.category-divider {
+/* ─── Nav ──────────────────────────────────── */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin: 2rem 0 1rem;
-}
-.category-divider::before,
-.category-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--surface-border);
-}
-.category-divider span {
-  font-weight: 600;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-primary);
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 56px;
+  background: rgba(253, 246, 238, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--bg-card-border);
+  transition: background 0.3s;
 }
 
-/* Premium hover glow */
-.hover-glow {
-  transition: box-shadow 0.3s ease;
-}
-.hover-glow:hover {
-  box-shadow: 0 0 20px color-mix(in oklch, var(--color-primary, #d47311) 30%, transparent),
-              0 0 40px color-mix(in oklch, var(--color-primary, #d47311) 10%, transparent);
-}
-@media (prefers-reduced-motion: reduce) {
-  .hover-glow:hover { box-shadow: none; }
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--brand-primary);
+  letter-spacing: 0.02em;
 }
 
-/* Card hover (legacy) */
-.card-hover {
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-.card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-}
-
-/* Card lift */
-.card-lift { transition: transform 0.25s ease, box-shadow 0.25s ease; box-shadow: var(--shadow-card); }
-.card-lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-card-hover); }
-
-/* Button press */
-.btn-press { transition: transform 0.15s ease; }
-.btn-press:active { transform: scale(0.97); }
-
-/* Section gap */
-.section-gap { padding-top: var(--section-gap, 4rem); padding-bottom: var(--section-gap, 4rem); }
-
-/* Mobile sticky CTA */
-.mobile-cta {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
-  background: var(--surface-elevated, #ffffff);
-  border-top: 1px solid var(--surface-border, rgba(0,0,0,0.06));
-  z-index: 40;
+.nav-links {
   display: flex;
-  gap: 8px;
-}
-@media (min-width: 640px) {
-  .mobile-cta { display: none; }
-}
-.dark .mobile-cta {
-  background: var(--surface-elevated, #1a1a1a);
-  border-top-color: var(--surface-border, rgba(255,255,255,0.06));
+  gap: 1.5rem;
+  list-style: none;
+  font-size: 0.875rem;
+  color: var(--text-mid);
 }
 
-/* Scroll progress */
-.scroll-progress {
-  position: fixed;
-  top: 56px;
-  left: 0;
-  height: 2px;
-  background: var(--color-primary, #f97316);
-  z-index: 100;
-  transition: width 0.1s linear;
+.nav-links a {
+  position: relative;
+  padding-bottom: 2px;
+  transition: color 0.2s;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 1px;
+  background: var(--brand-secondary);
+  transition: width 0.25s ease;
+}
+.nav-links a:hover { color: var(--brand-primary); }
+.nav-links a:hover::after { width: 100%; }
+
+.nav-cta {
+  font-size: 0.8125rem;
+  padding: 6px 18px;
+  background: var(--brand-primary);
+  color: #fff;
+  border-radius: 999px;
+  transition: background 0.2s, transform 0.1s;
+  white-space: nowrap;
+}
+.nav-cta:hover { background: var(--text-dark); transform: translateY(-1px); }
+
+/* ─── Hero ─────────────────────────────────── */
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 5rem 2rem 4rem;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, #92400e 0%, #b45309 35%, #d97706 70%, #fbbf24 100%);
+}
+
+.hero-circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.15;
   pointer-events: none;
 }
+.hero-circle-1 {
+  width: 600px; height: 600px;
+  top: -200px; right: -150px;
+  background: radial-gradient(circle, #fde68a, transparent 70%);
+}
+.hero-circle-2 {
+  width: 400px; height: 400px;
+  bottom: -100px; left: -80px;
+  background: radial-gradient(circle, #fef3c7, transparent 70%);
+  opacity: 0.12;
+}
+.hero-circle-3 {
+  width: 200px; height: 200px;
+  top: 30%; left: 10%;
+  background: radial-gradient(circle, #fffbeb, transparent 70%);
+  opacity: 0.08;
+}
 
-/* Hero load animation */
-@keyframes fade-up { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
-.animate-fade-up { animation: fade-up 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
-.animate-fade-up-d1 { animation-delay:150ms; opacity:0; }
-.animate-fade-up-d2 { animation-delay:300ms; opacity:0; }
-@media (prefers-reduced-motion:reduce) {
-  .animate-fade-up { animation:none; opacity:1; transform:none; }
+.hero-noise {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.3;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 680px;
+  color: #fff;
+}
+
+.hero-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.2s forwards;
+}
+.hero-category-dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.6);
+}
+
+.hero-name {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 7vw, 4.5rem);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.5rem;
+  opacity: 0;
+  animation: fadeUp 0.7s ease 0.4s forwards;
+}
+
+.hero-name-en {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  font-weight: 400;
+  letter-spacing: 0.25em;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 2rem;
+  opacity: 0;
+  animation: fadeUp 0.7s ease 0.5s forwards;
+}
+
+.hero-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  color: rgba(255,255,255,0.5);
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.65s forwards;
+}
+.hero-divider-line {
+  width: 48px;
+  height: 1px;
+  background: rgba(255,255,255,0.4);
+}
+
+.hero-slogan {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  font-style: italic;
+  color: rgba(255,255,255,0.9);
+  font-weight: 400;
+  margin-bottom: 3rem;
+  line-height: 1.6;
+  opacity: 0;
+  animation: fadeUp 0.7s ease 0.8s forwards;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeUp 0.7s ease 1s forwards;
+}
+
+.hero-scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.5);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  animation: fadeIn 1s ease 1.5s forwards;
+}
+.hero-scroll-arrow {
+  width: 20px; height: 20px;
+  border-right: 1.5px solid rgba(255,255,255,0.4);
+  border-bottom: 1.5px solid rgba(255,255,255,0.4);
+  transform: rotate(45deg);
+  animation: scrollBounce 1.4s ease-in-out infinite;
+}
+
+/* ─── Buttons ──────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+  border: none;
+}
+.btn:hover { transform: translateY(-2px); }
+
+.btn-primary {
+  background: #fff;
+  color: var(--brand-primary);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.btn-primary:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+
+.btn-outline {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  backdrop-filter: blur(8px);
+}
+.btn-outline:hover { background: rgba(255,255,255,0.2); }
+
+/* ─── Quick Actions ─────────────────────────── */
+.quick-actions {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--bg-card-border);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.quick-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-mid);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s, color 0.2s;
+}
+.quick-action:hover {
+  background: rgba(146, 64, 14, 0.08);
+  color: var(--brand-primary);
+}
+.quick-action-icon { font-size: 1.1rem; }
+
+.quick-action-tel {
+  position: relative;
+}
+.quick-action-tel::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 1rem; right: 1rem;
+  height: 1px;
+  background: var(--brand-secondary);
+  transform: scaleX(0);
+  transition: transform 0.25s ease;
+}
+.quick-action-tel:hover::after { transform: scaleX(1); }
+
+/* ─── Section Common ────────────────────────── */
+.section {
+  padding: 5rem 2rem;
+}
+.section-inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--brand-secondary);
+  margin-bottom: 0.5rem;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 400;
+  color: var(--text-dark);
+  margin-bottom: 0.75rem;
+  line-height: 1.25;
+}
+.section-desc {
+  font-size: 0.9375rem;
+  color: var(--text-light);
+  margin-bottom: 2.5rem;
+}
+
+/* ─── Menu ─────────────────────────────────── */
+.menu-section {
+  background: var(--bg-page);
+}
+
+.menu-category + .menu-category { margin-top: 3rem; }
+
+.menu-category-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.menu-category-emoji { font-size: 1.5rem; }
+.menu-category-name {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--text-dark);
+}
+
+.menu-divider {
+  height: 1px;
+  background: linear-gradient(to right, var(--bg-card-border), transparent);
+  margin-bottom: 0.5rem;
+}
+
+.menu-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: 1.5rem;
+  padding: 0.875rem 0;
+  border-bottom: 1px solid rgba(240, 228, 208, 0.6);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s ease, transform 0.4s ease, background 0.15s;
+}
+.menu-item:last-child { border-bottom: none; }
+.menu-item:hover { background: rgba(146, 64, 14, 0.025); }
+.menu-item.visible {
+  opacity: 1;
+  transform: none;
+}
+
+.menu-item-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  grid-column: 1;
+  grid-row: 1;
+}
+.menu-item-name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+.menu-item-name-en {
+  font-size: 0.8125rem;
+  color: var(--text-light);
+  font-style: italic;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 1.4;
+}
+.badge-new {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+  animation: badgePulse 2s ease-in-out infinite;
+}
+.badge-popular {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+.menu-item-desc {
+  grid-column: 1;
+  grid-row: 2;
+  font-size: 0.8125rem;
+  color: var(--text-light);
+  margin-top: 0.2rem;
+}
+
+.menu-item-price {
+  grid-column: 2;
+  grid-row: 1;
+  font-size: 1rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--brand-primary);
+  white-space: nowrap;
+  align-self: start;
+  padding-top: 2px;
+}
+
+/* ─── Info (2열) ────────────────────────────── */
+.info-section {
+  background: var(--bg-card);
+  border-top: 1px solid var(--bg-card-border);
+  border-bottom: 1px solid var(--bg-card-border);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 640px) {
+  .info-grid { grid-template-columns: 1fr; }
+}
+
+.info-card {
+  background: var(--bg-page);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+}
+
+.info-card-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--text-dark);
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--bg-card-border);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* 영업시간 */
+.hours-list { list-style: none; }
+.hours-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+  border-bottom: 1px dashed rgba(240, 228, 208, 0.8);
+  transition: background 0.15s;
+}
+.hours-item:last-child { border-bottom: none; }
+.hours-item.today {
+  font-weight: 700;
+  color: var(--brand-primary);
+}
+.hours-item.holiday .hours-time {
+  color: #dc2626;
+  font-size: 0.8125rem;
+}
+.hours-day { min-width: 4.5rem; }
+.hours-time { text-align: right; }
+
+.open-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 1.25rem;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.open-badge.open {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+.open-badge.closed {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+.open-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+}
+.open-badge.open .open-dot {
+  background: #065f46;
+  animation: blink 1.4s ease-in-out infinite;
+}
+.open-badge.closed .open-dot { background: #dc2626; }
+
+.phone-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--brand-primary);
+  position: relative;
+  padding-bottom: 1px;
+}
+.phone-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 1.5px;
+  background: var(--brand-secondary);
+  transition: width 0.3s ease;
+}
+.phone-link:hover::after { width: 100%; }
+
+/* 위치 */
+.address-text {
+  font-size: 0.9375rem;
+  color: var(--text-mid);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+.address-text-en {
+  font-size: 0.8125rem;
+  color: var(--text-light);
+  margin-top: 0.25rem;
+}
+
+.map-placeholder {
+  width: 100%;
+  aspect-ratio: 16/10;
+  background: linear-gradient(135deg, #fef3c7, #fde68a, #fcd34d);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--brand-primary);
+  font-size: 0.8125rem;
+  margin-bottom: 1rem;
+  border: 1px solid #fcd34d;
+  position: relative;
+  overflow: hidden;
+}
+.map-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 20px,
+    rgba(146, 64, 14, 0.04) 20px,
+    rgba(146, 64, 14, 0.04) 40px
+  );
+}
+.map-icon { font-size: 2rem; position: relative; z-index: 1; }
+.map-label { font-weight: 600; position: relative; z-index: 1; }
+.map-sub { color: var(--text-light); font-size: 0.75rem; position: relative; z-index: 1; }
+
+.kakao-map-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8125rem;
+  color: var(--brand-primary);
+  font-weight: 600;
+  margin-top: 0.5rem;
+  transition: color 0.2s;
+}
+.kakao-map-link:hover { color: var(--brand-secondary); }
+
+/* ─── Gallery ────────────────────────────────── */
+.gallery-section {
+  background: var(--bg-page);
+  padding-bottom: 3rem;
+}
+
+.gallery-scroll {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 0.5rem 0 1.5rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-card-border) transparent;
+}
+.gallery-scroll::-webkit-scrollbar { height: 4px; }
+.gallery-scroll::-webkit-scrollbar-track { background: transparent; }
+.gallery-scroll::-webkit-scrollbar-thumb {
+  background: var(--bg-card-border);
+  border-radius: 999px;
+}
+
+.gallery-item {
+  flex: 0 0 280px;
+  aspect-ratio: 4/3;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  scroll-snap-align: start;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+.gallery-item:hover {
+  transform: scale(1.03);
+  box-shadow: 0 12px 32px rgba(146, 64, 14, 0.15);
+}
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery-caption {
+  font-size: 0.8125rem;
+  color: var(--text-light);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* ─── SNS ────────────────────────────────────── */
+.sns-section {
+  background: var(--bg-card);
+  border-top: 1px solid var(--bg-card-border);
+}
+
+.sns-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 560px) {
+  .sns-grid { grid-template-columns: 1fr; }
+}
+
+.sns-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1.5px solid transparent;
+  background: var(--bg-page);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  cursor: pointer;
+}
+.sns-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+.sns-instagram:hover { border-color: #e1306c; }
+.sns-naver:hover     { border-color: #03c75a; }
+.sns-kakao:hover     { border-color: #fee500; }
+
+.sns-icon-wrap {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+.sns-instagram .sns-icon-wrap {
+  background: linear-gradient(135deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);
+  color: #fff;
+}
+.sns-naver .sns-icon-wrap {
+  background: #03c75a;
+  color: #fff;
+}
+.sns-kakao .sns-icon-wrap {
+  background: #fee500;
+  color: #3c1e1e;
+}
+
+.sns-name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--text-dark);
+}
+.sns-handle {
+  font-size: 0.8125rem;
+  color: var(--text-light);
+  text-align: center;
+}
+
+/* ─── Footer ─────────────────────────────────── */
+.site-footer {
+  background: var(--text-dark);
+  color: rgba(255,255,255,0.6);
+  padding: 3rem 2rem 2rem;
+  text-align: center;
+}
+
+.footer-name {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 0.75rem;
+}
+.footer-info {
+  font-size: 0.875rem;
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}
+.footer-divider {
+  width: 40px;
+  height: 1px;
+  background: rgba(255,255,255,0.15);
+  margin: 1.5rem auto;
+}
+.footer-copy {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 1rem;
+}
+.footer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+  color: rgba(255,255,255,0.3);
+  transition: color 0.2s;
+}
+.footer-badge:hover { color: rgba(255,255,255,0.6); }
+
+/* ─── Reveal 애니메이션 ──────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card-lift:hover { transform: none; }
-  .btn-press:active { transform: none; }
+  .reveal, .menu-item { opacity: 1; transform: none; transition: none; animation: none; }
+}
+
+/* ─── Keyframes ──────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.06); }
+}
+@keyframes scrollBounce {
+  0%, 100% { transform: rotate(45deg) translateY(0); }
+  50%       { transform: rotate(45deg) translateY(4px); }
+}
+
+/* ─── Mobile ─────────────────────────────────── */
+@media (max-width: 480px) {
+  .nav-links { display: none; }
+  .section { padding: 3.5rem 1.25rem; }
+  .info-card { padding: 1.5rem; }
+  .hero-actions .btn { padding: 0.65rem 1.5rem; font-size: 0.875rem; }
 }
 `;
 
@@ -351,7 +972,16 @@ export default function RootLayout({
             href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap"
           />
         )}
-        <script dangerouslySetInnerHTML={{ __html: "(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}})()" }} />
+        {siteConfig.gaId && (
+          <>
+            <script async src={\`https://www.googletagmanager.com/gtag/js?id=\${siteConfig.gaId}\`} />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: \`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','\${siteConfig.gaId}');\`,
+              }}
+            />
+          </>
+        )}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -373,7 +1003,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased bg-[#fdf4e7] text-gray-900 dark:bg-gray-950 dark:text-gray-50">
+      <body>
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:shadow-lg focus:text-sm">본문으로 바로가기</a>
         {children}
       </body>
@@ -390,31 +1020,81 @@ import { NavHeader } from '@/components/nav-header';
 import { HeroSection } from '@/components/hero-section';
 import { QuickActions } from '@/components/quick-actions';
 import { MenuSection } from '@/components/menu-section';
-import { HoursSection } from '@/components/hours-section';
-import { LocationSection } from '@/components/location-section';
+import { InfoSection } from '@/components/info-section';
 import { GallerySection } from '@/components/gallery-section';
 import { SnsSection } from '@/components/sns-section';
 import { Footer } from '@/components/footer';
-import { MobileBottomBar } from '@/components/mobile-bottom-bar';
 
 export default function Home() {
   return (
     <>
-      <NavHeader />
-      <main>
+      <NavHeader config={siteConfig} />
+      <main id="main">
         <HeroSection config={siteConfig} />
         <QuickActions config={siteConfig} />
-        <MenuSection items={siteConfig.menuItems} />
-        <HoursSection hours={siteConfig.businessHours} />
-        <LocationSection config={siteConfig} />
+        {siteConfig.menuItems.length > 0 && (
+          <MenuSection items={siteConfig.menuItems} />
+        )}
+        <InfoSection config={siteConfig} />
         {siteConfig.galleryImages.length > 0 && (
           <GallerySection images={siteConfig.galleryImages} />
         )}
         <SnsSection config={siteConfig} />
       </main>
-      <Footer />
-      <MobileBottomBar config={siteConfig} />
+      <Footer config={siteConfig} />
     </>
+  );
+}
+`;
+
+// ──────────────────────────────────────────────
+// src/components/nav-header.tsx
+// ──────────────────────────────────────────────
+const navHeader = `'use client';
+
+import { useState, useEffect } from 'react';
+import type { SiteConfig } from '@/lib/config';
+
+interface Props {
+  config: SiteConfig;
+}
+
+export function NavHeader({ config }: Props) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileOpen(false); };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, []);
+
+  const navLinks = [
+    { href: '#menu', label: '메뉴' },
+    { href: '#info', label: '영업시간' },
+    { href: '#location', label: '위치' },
+    { href: '#gallery', label: '갤러리' },
+  ].filter((link) => {
+    if (link.href === '#menu' && config.menuItems.length === 0) return false;
+    if (link.href === '#gallery' && config.galleryImages.length === 0) return false;
+    return true;
+  });
+
+  return (
+    <nav className="nav" role="navigation" aria-label="주 메뉴">
+      <a href="#hero" className="nav-logo">{config.name}</a>
+      <ul className="nav-links">
+        {navLinks.map((link) => (
+          <li key={link.href}>
+            <a href={link.href}>{link.label}</a>
+          </li>
+        ))}
+      </ul>
+      {config.phone && (
+        <a href={\`tel:\${config.phone.replace(/[^+\\d]/g, '')}\`} className="nav-cta">
+          전화하기
+        </a>
+      )}
+    </nav>
   );
 }
 `;
@@ -424,98 +1104,66 @@ export default function Home() {
 // ──────────────────────────────────────────────
 const heroSection = `'use client';
 
-import { Phone, MapPin } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
-import { useLocale } from '@/lib/i18n';
 
 interface Props {
   config: SiteConfig;
 }
 
-const DAY_EN_ORDER = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const DAY_MAP: Record<string, number> = Object.fromEntries(DAY_EN_ORDER.map((d, i) => [d, i]));
-
-function getBusinessStatus(hours: SiteConfig['businessHours']): { isOpen: boolean; closeTime: string } {
-  const now = new Date();
-  const todayIndex = now.getDay();
-  const todayHour = hours.find((h) => DAY_MAP[h.dayEn ?? ''] === todayIndex);
-  if (!todayHour || todayHour.isHoliday) return { isOpen: false, closeTime: '' };
-
-  const timeStr = todayHour.hoursEn || todayHour.hours;
-  const match = timeStr.match(/(\\d{1,2}):(\\d{2})\\s*-\\s*(\\d{1,2}):(\\d{2})/);
-  if (!match) return { isOpen: false, closeTime: '' };
-
-  const [, sh, sm, eh, em] = match;
-  const start = parseInt(sh) * 60 + parseInt(sm);
-  const end = parseInt(eh) * 60 + parseInt(em);
-  const current = now.getHours() * 60 + now.getMinutes();
-  return { isOpen: current >= start && current < end, closeTime: \`\${eh}:\${em}\` };
-}
-
 export function HeroSection({ config }: Props) {
-  const { locale, t } = useLocale();
-  const name = locale === 'en' && config.nameEn ? config.nameEn : config.name;
-  const desc = locale === 'en' && config.descriptionEn ? config.descriptionEn : config.description;
-  const address = locale === 'en' && config.addressEn ? config.addressEn : config.address;
-  const isSerif = config.fontFamily === 'Nanum Myeongjo';
-
-  const { isOpen, closeTime } = config.businessHours?.length
-    ? getBusinessStatus(config.businessHours)
-    : { isOpen: false, closeTime: '' };
-
   return (
-    <section
-      id="hero"
-      className={\`pt-20 pb-12 px-4 sm:px-6\${isSerif ? ' font-serif' : ''}\`}
-    >
-      <div className="max-w-lg mx-auto text-center animate-fade-up">
-        {/* Business status badge */}
-        {config.businessHours?.length > 0 && (
-          <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border text-xs font-medium"
-            style={{
-              borderColor: isOpen ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)',
-              background: isOpen ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
-              color: isOpen ? '#16a34a' : '#dc2626',
-            }}
-          >
-            <span className={\`status-dot \${isOpen ? 'status-open' : 'status-closed'}\`} />
-            {isOpen
-              ? (locale === 'en' ? \`Open · Closes \${closeTime}\` : \`영업 중 · \${closeTime} 마감\`)
-              : (locale === 'en' ? 'Closed now' : '영업 종료')
-            }
-          </div>
+    <section className="hero" id="hero">
+      <div className="hero-bg" />
+      <div className="hero-circle hero-circle-1" />
+      <div className="hero-circle hero-circle-2" />
+      <div className="hero-circle hero-circle-3" />
+      <div className="hero-noise" />
+
+      <div className="hero-content">
+        {config.description && (
+          <p className="hero-category">
+            소상공인
+            <span className="hero-category-dot" />
+            {config.name}
+          </p>
         )}
 
-        <h1 className="text-3xl sm:text-4xl font-bold text-[var(--color-primary,#d47311)] mb-3">
-          {name}
-        </h1>
-        <p className="text-base text-gray-600 dark:text-gray-400 mb-8 max-w-sm mx-auto leading-relaxed">
-          {desc}
-        </p>
-        <div className="flex items-center justify-center gap-3 flex-wrap">
-          {config.phone && (
+        <h1 className="hero-name">{config.name}</h1>
+
+        {config.nameEn && (
+          <p className="hero-name-en">{config.nameEn}</p>
+        )}
+
+        <div className="hero-divider">
+          <span className="hero-divider-line" />
+          <span style={{ fontSize: '0.625rem' }}>✦</span>
+          <span className="hero-divider-line" />
+        </div>
+
+        {config.description && (
+          <p className="hero-slogan">"{config.description}"</p>
+        )}
+
+        <div className="hero-actions">
+          {config.menuItems.length > 0 && (
+            <a href="#menu" className="btn btn-primary">메뉴 보기</a>
+          )}
+          {config.address && (
+            <a href="#location" className="btn btn-outline">오시는 길</a>
+          )}
+          {!config.menuItems.length && config.phone && (
             <a
               href={\`tel:\${config.phone.replace(/[^+\\d]/g, '')}\`}
-              className="btn-press inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-white font-semibold text-sm min-h-[48px] shadow-md hover:opacity-90 transition-opacity"
-              style={{ background: 'linear-gradient(135deg, var(--color-primary,#d47311), var(--color-secondary,#e8934a))' }}
+              className="btn btn-primary"
             >
-              <Phone className="w-4 h-4" />
-              {t('hero.call')}
-            </a>
-          )}
-          {address && (
-            <a
-              href={config.kakaoMapId ? \`https://place.map.kakao.com/\${config.kakaoMapId}\` : \`https://maps.google.com/?q=\${encodeURIComponent(address)}\`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-press inline-flex items-center gap-2 px-7 py-3.5 rounded-full border font-semibold text-sm min-h-[48px] text-gray-700 dark:text-gray-200 hover:border-[var(--color-primary,#d47311)] transition-colors"
-              style={{ borderColor: 'var(--surface-border, rgba(0,0,0,0.12))', background: 'var(--surface-elevated, #ffffff)' }}
-            >
-              <MapPin className="w-4 h-4 text-[var(--color-primary,#d47311)]" />
-              {t('quick.directions')}
+              📞 전화하기
             </a>
           )}
         </div>
+      </div>
+
+      <div className="hero-scroll-hint" aria-hidden="true">
+        <div className="hero-scroll-arrow" />
       </div>
     </section>
   );
@@ -527,53 +1175,69 @@ export function HeroSection({ config }: Props) {
 // ──────────────────────────────────────────────
 const quickActions = `'use client';
 
-import { Phone, MapPin, Calendar } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import type { SiteConfig } from '@/lib/config';
-import { useLocale } from '@/lib/i18n';
 
 interface Props {
   config: SiteConfig;
 }
 
-export function QuickActions({ config }: Props) {
-  const { locale, t } = useLocale();
-  const address = locale === 'en' && config.addressEn ? config.addressEn : config.address;
+const DAY_MAP: Record<string, number> = {
+  Sunday: 0, Monday: 1, Tuesday: 2, Wednesday: 3,
+  Thursday: 4, Friday: 5, Saturday: 6,
+};
 
-  const actions = [
-    config.phone ? {
-      icon: Phone,
-      label: t('quick.call'),
-      href: \`tel:\${config.phone.replace(/[^+\\d]/g, '')}\`,
-    } : null,
-    address ? {
-      icon: MapPin,
-      label: t('quick.directions'),
-      href: \`https://maps.google.com/?q=\${encodeURIComponent(address)}\`,
-    } : null,
-    {
-      icon: Calendar,
-      label: t('quick.hours'),
-      href: '#hours',
-    },
-  ].filter(Boolean) as Array<{ icon: typeof Phone; label: string; href: string }>;
+function getStatusText(hours: SiteConfig['businessHours']): string {
+  const now = new Date();
+  const todayIdx = now.getDay();
+  const todayHour = hours.find((h) => (DAY_MAP[h.dayEn ?? ''] ?? -1) === todayIdx);
+  if (!todayHour) return '';
+  if (todayHour.isHoliday) return '오늘 휴무';
+  const timeStr = todayHour.hoursEn || todayHour.hours;
+  const match = timeStr.match(/(\\d{1,2}):(\\d{2})\\s*-\\s*(\\d{1,2}):(\\d{2})/);
+  if (!match) return '';
+  const [, sh, sm, eh, em] = match;
+  const cur = now.getHours() * 60 + now.getMinutes();
+  const start = parseInt(sh) * 60 + parseInt(sm);
+  const end = parseInt(eh) * 60 + parseInt(em);
+  if (cur >= start && cur < end) return '현재 영업 중';
+  return '영업 종료';
+}
+
+export function QuickActions({ config }: Props) {
+  const [statusText, setStatusText] = useState('');
+
+  useEffect(() => {
+    if (config.businessHours?.length) {
+      setStatusText(getStatusText(config.businessHours));
+    }
+  }, [config.businessHours]);
+
+  const address = config.address;
 
   return (
-    <div className="px-4 sm:px-6 pb-8">
-      <div className="max-w-lg mx-auto flex gap-3 justify-center">
-        {actions.map((action, i) => (
-          <a
-            key={i}
-            href={action.href}
-            target={action.href.startsWith('http') ? '_blank' : undefined}
-            rel={action.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-            className="card-lift btn-press flex-1 flex flex-col items-center gap-1.5 py-3 rounded-[var(--radius-md,12px)] border min-h-[44px] transition-colors hover:opacity-80"
-            style={{ borderColor: 'color-mix(in srgb, var(--color-primary,#d47311) 20%, transparent)', background: 'var(--surface-elevated,#ffffff)', color: 'var(--color-primary,#d47311)' }}
-          >
-            <action.icon className="w-5 h-5" />
-            <span className="text-xs font-medium">{action.label}</span>
-          </a>
-        ))}
-      </div>
+    <div className="quick-actions">
+      {config.phone && (
+        <a
+          href={\`tel:\${config.phone.replace(/[^+\\d]/g, '')}\`}
+          className="quick-action quick-action-tel"
+        >
+          <span className="quick-action-icon">📞</span>
+          {config.phone}
+        </a>
+      )}
+      {address && (
+        <span className="quick-action">
+          <span className="quick-action-icon">📍</span>
+          {address}
+        </span>
+      )}
+      {statusText && (
+        <span className="quick-action">
+          <span className="quick-action-icon">🕐</span>
+          {statusText}
+        </span>
+      )}
     </div>
   );
 }
@@ -584,111 +1248,97 @@ export function QuickActions({ config }: Props) {
 // ──────────────────────────────────────────────
 const menuSection = `'use client';
 
-import { useState, useCallback } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import type { MenuItem } from '@/lib/config';
-import { useLocale } from '@/lib/i18n';
 
 interface Props {
   items: MenuItem[];
 }
 
 export function MenuSection({ items }: Props) {
-  const { locale, t } = useLocale();
+  const sectionRef = useRef<HTMLElement>(null);
+
   const categories = [...new Set(items.map((item) => item.category))];
   const grouped = categories.reduce<Record<string, MenuItem[]>>((acc, cat) => {
     acc[cat] = items.filter((item) => item.category === cat);
     return acc;
   }, {});
 
-  const [openCategories, setOpenCategories] = useState<Set<string>>(new Set(categories));
+  useEffect(() => {
+    const revealEls = sectionRef.current?.querySelectorAll<HTMLElement>('.reveal');
+    const menuItems = sectionRef.current?.querySelectorAll<HTMLElement>('.menu-item');
 
-  const toggleAccordion = useCallback((cat: string) => {
-    setOpenCategories((prev) => {
-      const next = new Set(prev);
-      if (next.has(cat)) next.delete(cat);
-      else next.add(cat);
-      return next;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    revealEls?.forEach((el) => observer.observe(el));
+
+    const menuObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const siblings = entry.target.parentElement?.querySelectorAll<HTMLElement>('.menu-item');
+            siblings?.forEach((item, i) => {
+              setTimeout(() => item.classList.add('visible'), i * 80);
+            });
+            menuObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.05 }
+    );
+
+    sectionRef.current?.querySelectorAll<HTMLElement>('.menu-category').forEach((cat) => {
+      const first = cat.querySelector<HTMLElement>('.menu-item');
+      if (first) menuObserver.observe(first);
     });
+
+    return () => { observer.disconnect(); menuObserver.disconnect(); };
   }, []);
 
-  const renderTableRows = (catItems: MenuItem[]) =>
-    catItems.map((item, i) => {
-      const name = locale === 'en' && item.nameEn ? item.nameEn : item.name;
-      const desc = locale === 'en' && item.descEn ? item.descEn : item.desc;
-      return (
-        <tr key={i}>
-          <td style={{ width: '100%' }}>
-            <div className="flex items-start gap-2">
-              <span className="text-xl shrink-0 leading-none mt-0.5">{item.emoji || '\\uD83C\\uDF7D\\uFE0F'}</span>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="menu-name text-gray-900 dark:text-gray-100">{name}</span>
-                  {item.isNew && (
-                    <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-red-500 text-white leading-none">NEW</span>
-                  )}
-                  {item.isPopular && (
-                    <span className="px-1.5 py-0.5 text-[10px] font-bold rounded text-white leading-none" style={{ background: 'var(--color-primary,#d47311)' }}>
-                      {t('menu.popular')}
-                    </span>
-                  )}
-                </div>
-                {desc && <p className="menu-desc dark:text-gray-400">{desc}</p>}
-              </div>
-            </div>
-          </td>
-          <td style={{ paddingLeft: '1rem', verticalAlign: 'middle' }}>
-            <span className="menu-price" style={{ color: 'var(--color-primary,#d47311)' }}>{item.price}</span>
-          </td>
-        </tr>
-      );
-    });
-
   return (
-    <section id="menu" className="py-12 px-4 sm:px-6">
-      <div className="max-w-lg mx-auto">
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-gray-50 mb-6">
-          {t('menu.title')}
-        </h2>
+    <section className="section menu-section" id="menu" ref={sectionRef}>
+      <div className="section-inner">
+        <p className="section-label reveal">메뉴</p>
+        <h2 className="section-title reveal">오늘의 메뉴</h2>
 
-        <div className="rounded-[var(--radius-lg,16px)] border overflow-hidden"
-          style={{ borderColor: 'var(--surface-border,rgba(0,0,0,0.06))', background: 'var(--surface-elevated,#ffffff)' }}
-        >
-          {categories.map((cat, catIdx) => {
-            const isOpen = openCategories.has(cat);
-            const catItems = grouped[cat] || [];
-            return (
-              <div key={cat}>
-                {/* Category header — acts as accordion toggle on mobile */}
-                <button
-                  onClick={() => toggleAccordion(cat)}
-                  className="w-full flex items-center justify-between px-5 py-3 text-left hover:opacity-80 transition-opacity min-h-[44px]"
-                  style={{
-                    borderTop: catIdx > 0 ? '1px solid var(--surface-border,rgba(0,0,0,0.06))' : undefined,
-                    background: 'color-mix(in srgb, var(--color-primary,#d47311) 5%, transparent)',
-                  }}
-                >
-                  <span className="text-sm font-bold tracking-widest uppercase" style={{ color: 'var(--color-primary,#d47311)' }}>
-                    {cat}
-                    <span className="ml-2 text-xs font-normal text-gray-500 normal-case tracking-normal">({catItems.length})</span>
-                  </span>
-                  <ChevronDown className={\`w-4 h-4 text-gray-400 transition-transform duration-200 \${isOpen ? 'rotate-180' : ''}\`} />
-                </button>
-
-                {/* Table rows */}
-                <div className={\`grid transition-[grid-template-rows] duration-250 ease-in-out overflow-hidden \${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}\`}>
-                  <div className="min-h-0">
-                    <div className="px-5">
-                      <table className="menu-table">
-                        <tbody>{renderTableRows(catItems)}</tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
+        {categories.map((cat) => {
+          const catItems = grouped[cat] || [];
+          const catEmoji = catItems[0]?.emoji || '🍽️';
+          return (
+            <div key={cat} className="menu-category reveal">
+              <div className="menu-category-header">
+                <span className="menu-category-emoji">{catEmoji}</span>
+                <span className="menu-category-name">{cat}</span>
               </div>
-            );
-          })}
-        </div>
+              <div className="menu-divider" />
+
+              {catItems.map((item, i) => (
+                <div key={i} className="menu-item">
+                  <div className="menu-item-name-row">
+                    <span className="menu-item-name">{item.name}</span>
+                    {item.nameEn && (
+                      <span className="menu-item-name-en">{item.nameEn}</span>
+                    )}
+                    {item.isNew && <span className="badge badge-new">NEW</span>}
+                    {item.isPopular && <span className="badge badge-popular">인기</span>}
+                  </div>
+                  {item.desc && <div className="menu-item-desc">{item.desc}</div>}
+                  <span className="menu-item-price">{item.price}</span>
+                </div>
+              ))}
+            </div>
+          );
+        })}
       </div>
     </section>
   );
@@ -696,15 +1346,16 @@ export function MenuSection({ items }: Props) {
 `;
 
 // ──────────────────────────────────────────────
-// src/components/hours-section.tsx
+// src/components/info-section.tsx
+// (영업시간 + 위치를 2열 카드로 통합)
 // ──────────────────────────────────────────────
-const hoursSection = `'use client';
+const infoSection = `'use client';
 
-import type { BusinessHour } from '@/lib/config';
-import { useLocale } from '@/lib/i18n';
+import { useEffect, useRef, useState } from 'react';
+import type { SiteConfig, BusinessHour } from '@/lib/config';
 
 interface Props {
-  hours: BusinessHour[];
+  config: SiteConfig;
 }
 
 const DAY_MAP: Record<string, number> = {
@@ -716,137 +1367,165 @@ function getTodayIndex(): number {
   return new Date().getDay();
 }
 
-function getIsOpenNow(hour: BusinessHour): boolean {
-  if (hour.isHoliday) return false;
-  const timeStr = hour.hoursEn || hour.hours;
-  const match = timeStr.match(/(\\d{1,2}):(\\d{2})\\s*-\\s*(\\d{1,2}):(\\d{2})/);
-  if (!match) return false;
-  const [, sh, sm, eh, em] = match;
+function getOpenStatus(hours: BusinessHour[]): { isOpen: boolean; isHoliday: boolean; closeTime: string } {
   const now = new Date();
-  const current = now.getHours() * 60 + now.getMinutes();
+  const todayIdx = now.getDay();
+  const todayHour = hours.find((h) => (DAY_MAP[h.dayEn ?? ''] ?? -1) === todayIdx);
+  if (!todayHour) return { isOpen: false, isHoliday: false, closeTime: '' };
+  if (todayHour.isHoliday) return { isOpen: false, isHoliday: true, closeTime: '' };
+  const timeStr = todayHour.hoursEn || todayHour.hours;
+  const match = timeStr.match(/(\\d{1,2}):(\\d{2})\\s*-\\s*(\\d{1,2}):(\\d{2})/);
+  if (!match) return { isOpen: false, isHoliday: false, closeTime: '' };
+  const [, sh, sm, eh, em] = match;
+  const cur = now.getHours() * 60 + now.getMinutes();
   const start = parseInt(sh) * 60 + parseInt(sm);
   const end = parseInt(eh) * 60 + parseInt(em);
-  return current >= start && current < end;
+  return { isOpen: cur >= start && cur < end, isHoliday: false, closeTime: \`\${eh}:\${em}\` };
 }
 
-export function HoursSection({ hours }: Props) {
-  const { locale, t } = useLocale();
+function getDayDataIndex(dayEn: string | undefined): number {
+  if (!dayEn) return -1;
+  const jsDay = DAY_MAP[dayEn] ?? -1;
+  // 월=0...일=6 순서로 표시 (data-day 속성용)
+  return jsDay === 0 ? 6 : jsDay - 1;
+}
+
+export function InfoSection({ config }: Props) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [openStatus, setOpenStatus] = useState<{ isOpen: boolean; isHoliday: boolean; closeTime: string } | null>(null);
   const todayIndex = getTodayIndex();
-  const todayHour = hours.find((h) => (DAY_MAP[h.dayEn ?? ''] ?? -1) === todayIndex);
-  const isOpenNow = todayHour ? getIsOpenNow(todayHour) : false;
+
+  useEffect(() => {
+    if (config.businessHours?.length) {
+      setOpenStatus(getOpenStatus(config.businessHours));
+    }
+
+    const revealEls = sectionRef.current?.querySelectorAll<HTMLElement>('.reveal');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    revealEls?.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [config.businessHours]);
+
+  const hasHours = config.businessHours?.length > 0;
+  const hasLocation = !!config.address;
+  if (!hasHours && !hasLocation) return null;
+
+  const mapUrl = config.kakaoMapId
+    ? \`https://place.map.kakao.com/\${config.kakaoMapId}\`
+    : config.address
+    ? \`https://maps.google.com/?q=\${encodeURIComponent(config.address)}\`
+    : null;
 
   return (
-    <section id="hours" className="py-12 px-4 sm:px-6">
-      <div className="max-w-lg mx-auto">
-        <div className="flex items-center justify-center gap-3 mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">
-            {t('hours.title')}
-          </h2>
-          {todayHour && (
-            <span
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
-              style={{
-                background: isOpenNow ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
-                color: isOpenNow ? '#16a34a' : '#dc2626',
-              }}
-            >
-              <span className={\`status-dot \${isOpenNow ? 'status-open' : 'status-closed'}\`} />
-              {isOpenNow
-                ? (locale === 'en' ? 'Open Now' : '영업 중')
-                : (locale === 'en' ? 'Closed' : '영업 종료')
-              }
-            </span>
+    <section className="section info-section" id="info" ref={sectionRef}>
+      <div className="section-inner">
+        <p className="section-label reveal">정보</p>
+        <h2 className="section-title reveal">영업시간 &amp; 오시는 길</h2>
+
+        <div className="info-grid reveal">
+          {/* 영업시간 카드 */}
+          {hasHours && (
+            <div className="info-card" id="hours">
+              <h3 className="info-card-title">
+                <span>🕐</span>
+                영업시간
+              </h3>
+              <ul className="hours-list">
+                {config.businessHours.map((hour, i) => {
+                  const dayIdx = DAY_MAP[hour.dayEn ?? ''] ?? -1;
+                  const isToday = dayIdx === todayIndex;
+                  const dataIdx = getDayDataIndex(hour.dayEn);
+                  return (
+                    <li
+                      key={i}
+                      className={\`hours-item\${isToday ? ' today' : ''}\${hour.isHoliday ? ' holiday' : ''}\`}
+                      data-day={dataIdx}
+                    >
+                      <span className="hours-day">{hour.day}</span>
+                      <span className="hours-time">{hour.isHoliday ? '휴무' : hour.hours}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              {openStatus !== null && (
+                <div className={\`open-badge \${openStatus.isOpen ? 'open' : 'closed'}\`}>
+                  <span className="open-dot" />
+                  {openStatus.isOpen
+                    ? '현재 영업 중'
+                    : openStatus.isHoliday
+                    ? '오늘은 휴무입니다'
+                    : \`영업 종료 (\${openStatus.closeTime} 마감)\`}
+                </div>
+              )}
+
+              {config.phone && (
+                <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--bg-card-border)' }}>
+                  <a
+                    href={\`tel:\${config.phone.replace(/[^+\\d]/g, '')}\`}
+                    className="phone-link"
+                  >
+                    <span>📞</span>
+                    {config.phone}
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 위치 카드 */}
+          {hasLocation && (
+            <div className="info-card" id="location">
+              <h3 className="info-card-title">
+                <span>📍</span>
+                오시는 길
+              </h3>
+              <p className="address-text">{config.address}</p>
+              {config.addressEn && (
+                <p className="address-text-en">{config.addressEn}</p>
+              )}
+
+              {config.kakaoMapId ? (
+                <div style={{ marginBottom: '1rem', borderRadius: 'var(--radius-sm)', overflow: 'hidden', aspectRatio: '16/10' }}>
+                  <iframe
+                    src={\`https://map.kakao.com/?map_type=TYPE_MAP&itemId=\${config.kakaoMapId}\`}
+                    title="카카오맵"
+                    style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                    loading="lazy"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <div className="map-placeholder">
+                  <span className="map-icon">🗺️</span>
+                  <span className="map-label">지도 보기</span>
+                  <span className="map-sub">카카오맵 장소 ID 등록 시 지도가 표시됩니다</span>
+                </div>
+              )}
+
+              {mapUrl && (
+                <a
+                  href={mapUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="kakao-map-link"
+                >
+                  📍 지도 앱으로 열기
+                </a>
+              )}
+            </div>
           )}
         </div>
-
-        <div className="card-lift rounded-[var(--radius-lg,16px)] border overflow-hidden" style={{ borderColor: 'var(--surface-border,rgba(0,0,0,0.06))', background: 'var(--surface-elevated,#ffffff)' }}>
-          {hours.map((hour, i) => {
-            const day = locale === 'en' && hour.dayEn ? hour.dayEn : hour.day;
-            const time = locale === 'en' && hour.hoursEn ? hour.hoursEn : hour.hours;
-            const dayNumber = DAY_MAP[hour.dayEn || ''] ?? -1;
-            const isToday = dayNumber === todayIndex;
-
-            return (
-              <div
-                key={i}
-                className={\`flex items-center justify-between px-5 py-3.5 \${
-                  i < hours.length - 1 ? 'border-b' : ''
-                }\`}
-                style={{
-                  borderBottomColor: 'var(--surface-border,rgba(0,0,0,0.06))',
-                  background: isToday ? 'color-mix(in srgb, var(--color-primary,#d47311) 6%, transparent)' : undefined,
-                }}
-              >
-                <span className={\`text-sm \${isToday ? 'font-bold' : 'text-gray-700 dark:text-gray-300'}\`} style={isToday ? { color: 'var(--color-primary,#d47311)' } : undefined}>
-                  {day}
-                  {isToday && <span className="ml-1.5 text-xs font-normal opacity-70">({t('hours.today')})</span>}
-                </span>
-                <span className={\`text-sm \${
-                  hour.isHoliday
-                    ? 'text-red-500 font-medium'
-                    : isToday
-                      ? 'font-bold'
-                      : 'text-gray-600 dark:text-gray-400'
-                }\`} style={isToday && !hour.isHoliday ? { color: 'var(--color-primary,#d47311)' } : undefined}>
-                  {time}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
-`;
-
-// ──────────────────────────────────────────────
-// src/components/location-section.tsx
-// ──────────────────────────────────────────────
-const locationSection = `'use client';
-
-import { MapPin } from 'lucide-react';
-import type { SiteConfig } from '@/lib/config';
-import { useLocale } from '@/lib/i18n';
-
-interface Props {
-  config: SiteConfig;
-}
-
-export function LocationSection({ config }: Props) {
-  const { locale, t } = useLocale();
-  const address = locale === 'en' && config.addressEn ? config.addressEn : config.address;
-  if (!address) return null;
-
-  return (
-    <section id="location" className="py-12 px-4 sm:px-6">
-      <div className="max-w-lg mx-auto">
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-gray-50 mb-6">
-          {t('location.title')}
-        </h2>
-
-        {config.kakaoMapId && (
-          <div className="card-lift rounded-[var(--radius-lg,16px)] overflow-hidden mb-4 aspect-[4/3]">
-            <iframe
-              src={\`https://map.kakao.com/?map_type=TYPE_MAP&itemId=\${config.kakaoMapId}\`}
-              title="Map"
-              className="w-full h-full border-0"
-              loading="lazy"
-              allowFullScreen
-            />
-          </div>
-        )}
-
-        <a
-          href={config.kakaoMapId ? \`https://place.map.kakao.com/\${config.kakaoMapId}\` : \`https://maps.google.com/?q=\${encodeURIComponent(address)}\`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="card-lift btn-press flex items-center gap-3 p-4 rounded-[var(--radius-md,12px)] border transition-colors"
-          style={{ background: 'var(--surface-elevated,#ffffff)', borderColor: 'var(--surface-border,rgba(0,0,0,0.06))' }}
-        >
-          <MapPin className="w-5 h-5 shrink-0" style={{ color: 'var(--color-primary,#d47311)' }} />
-          <span className="text-sm text-gray-700 dark:text-gray-300">{address}</span>
-        </a>
       </div>
     </section>
   );
@@ -858,37 +1537,49 @@ export function LocationSection({ config }: Props) {
 // ──────────────────────────────────────────────
 const gallerySection = `'use client';
 
-import { AnimatedReveal } from './animated-reveal';
-import { useLocale } from '@/lib/i18n';
+import { useEffect, useRef } from 'react';
 
 interface Props {
   images: string[];
 }
 
 export function GallerySection({ images }: Props) {
-  const { t } = useLocale();
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const revealEls = sectionRef.current?.querySelectorAll<HTMLElement>('.reveal');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+    revealEls?.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
+  if (images.length === 0) return null;
 
   return (
-    <section className="py-12 px-4 sm:px-6">
-      <div className="max-w-lg mx-auto">
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-gray-50 mb-6">
-          {t('gallery.title')}
-        </h2>
-
-        <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-1 px-1">
+    <section className="section gallery-section" id="gallery" ref={sectionRef}>
+      <div className="section-inner">
+        <p className="section-label reveal">갤러리</p>
+        <h2 className="section-title reveal">매장 &amp; 메뉴 사진</h2>
+      </div>
+      <div style={{ padding: '0 2rem' }}>
+        <div className="gallery-scroll reveal">
           {images.map((src, i) => (
-            <AnimatedReveal key={i} delay={i * 60} variant="scale">
-              <div className="card-lift shrink-0 w-64 h-64 rounded-[var(--radius-lg,16px)] overflow-hidden snap-center">
-                <img
-                  src={src}
-                  alt=""
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
-                />
-              </div>
-            </AnimatedReveal>
+            <div key={i} className="gallery-item">
+              <img src={src} alt={\`갤러리 이미지 \${i + 1}\`} loading="lazy" />
+            </div>
           ))}
         </div>
+        <p className="gallery-caption reveal">좌우로 스크롤하여 더 많은 사진을 확인하세요</p>
       </div>
     </section>
   );
@@ -900,46 +1591,118 @@ export function GallerySection({ images }: Props) {
 // ──────────────────────────────────────────────
 const snsSection = `'use client';
 
-import { Instagram, Globe } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import type { SiteConfig } from '@/lib/config';
-import { useLocale } from '@/lib/i18n';
 
 interface Props {
   config: SiteConfig;
 }
 
+const InstagramIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="2" width="20" height="20" rx="5" stroke="white" strokeWidth="2"/>
+    <circle cx="12" cy="12" r="4" stroke="white" strokeWidth="2"/>
+    <circle cx="17.5" cy="6.5" r="1.2" fill="white"/>
+  </svg>
+);
+
+const NaverIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3 3h6.5l5.5 8V3H19v16h-6.5L7 11v8H3V3z" fill="white"/>
+  </svg>
+);
+
+const KakaoIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 3C7.03 3 3 6.36 3 10.5c0 2.65 1.6 4.97 4.01 6.33L6 21l4.5-2.5c.49.07.99.1 1.5.1 4.97 0 9-3.36 9-7.5S16.97 3 12 3z" fill="#3c1e1e"/>
+  </svg>
+);
+
 export function SnsSection({ config }: Props) {
-  const { t } = useLocale();
+  const sectionRef = useRef<HTMLElement>(null);
 
-  const links = [
-    config.instagramUrl ? { icon: Instagram, label: 'Instagram', url: config.instagramUrl } : null,
-    config.naverBlogUrl ? { icon: Globe, label: t('sns.naver'), url: config.naverBlogUrl } : null,
-    config.kakaoChannelUrl ? { icon: Globe, label: t('sns.kakao'), url: config.kakaoChannelUrl } : null,
-  ].filter(Boolean) as Array<{ icon: typeof Instagram; label: string; url: string }>;
+  useEffect(() => {
+    const revealEls = sectionRef.current?.querySelectorAll<HTMLElement>('.reveal');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    revealEls?.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
-  if (links.length === 0) return null;
+  const hasAnySns = config.instagramUrl || config.naverBlogUrl || config.kakaoChannelUrl;
+  if (!hasAnySns) return null;
+
+  const getHandle = (url: string): string => {
+    try {
+      const u = new URL(url);
+      const parts = u.pathname.split('/').filter(Boolean);
+      return parts[parts.length - 1] ? \`@\${parts[parts.length - 1]}\` : u.hostname;
+    } catch {
+      return url;
+    }
+  };
 
   return (
-    <section className="py-12 px-4 sm:px-6">
-      <div className="max-w-lg mx-auto">
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-gray-50 mb-6">
-          {t('sns.title')}
-        </h2>
+    <section className="section sns-section" id="sns" ref={sectionRef}>
+      <div className="section-inner">
+        <p className="section-label reveal">소셜 미디어</p>
+        <h2 className="section-title reveal">SNS &amp; 채널</h2>
+        <p className="section-desc reveal">최신 소식과 이벤트를 팔로우하세요.</p>
 
-        <div className="flex flex-col gap-3">
-          {links.map((link, i) => (
+        <div className="sns-grid reveal">
+          {config.instagramUrl && (
             <a
-              key={i}
-              href={link.url}
+              href={config.instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="card-lift btn-press flex items-center gap-3 p-4 rounded-[var(--radius-md,12px)] border min-h-[44px] transition-colors"
-              style={{ background: 'var(--surface-elevated,#ffffff)', borderColor: 'var(--surface-border,rgba(0,0,0,0.06))' }}
+              className="sns-card sns-instagram"
             >
-              <link.icon className="w-5 h-5 shrink-0" style={{ color: 'var(--color-primary,#d47311)' }} />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{link.label}</span>
+              <div className="sns-icon-wrap">
+                <InstagramIcon />
+              </div>
+              <span className="sns-name">인스타그램</span>
+              <span className="sns-handle">{getHandle(config.instagramUrl)}</span>
             </a>
-          ))}
+          )}
+
+          {config.naverBlogUrl && (
+            <a
+              href={config.naverBlogUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="sns-card sns-naver"
+            >
+              <div className="sns-icon-wrap">
+                <NaverIcon />
+              </div>
+              <span className="sns-name">네이버 블로그</span>
+              <span className="sns-handle">공식 블로그</span>
+            </a>
+          )}
+
+          {config.kakaoChannelUrl && (
+            <a
+              href={config.kakaoChannelUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="sns-card sns-kakao"
+            >
+              <div className="sns-icon-wrap">
+                <KakaoIcon />
+              </div>
+              <span className="sns-name">카카오톡 채널</span>
+              <span className="sns-handle">채널 추가하기</span>
+            </a>
+          )}
         </div>
       </div>
     </section>
@@ -950,195 +1713,42 @@ export function SnsSection({ config }: Props) {
 // ──────────────────────────────────────────────
 // src/components/footer.tsx
 // ──────────────────────────────────────────────
-// ──────────────────────────────────────────────
-// src/components/mobile-bottom-bar.tsx
-// ──────────────────────────────────────────────
-const mobileBottomBar = `'use client';
-
-import { Phone, MapPin, MessageCircle } from 'lucide-react';
-import type { SiteConfig } from '@/lib/config';
-import { useLocale } from '@/lib/i18n';
+const footerComponent = `import type { SiteConfig } from '@/lib/config';
 
 interface Props {
   config: SiteConfig;
 }
 
-export function MobileBottomBar({ config }: Props) {
-  const { locale, t } = useLocale();
-  if (!config.phone && !config.kakaoChannelUrl) return null;
-
-  const address = locale === 'en' && config.addressEn ? config.addressEn : config.address;
+export function Footer({ config }: Props) {
+  const year = new Date().getFullYear();
 
   return (
-    <div className="mobile-cta">
-      {config.phone && (
-        <a
-          href={\`tel:\${config.phone.replace(/[^+\\d]/g, '')}\`}
-          className="btn-press flex-1 flex items-center justify-center gap-2 py-3 rounded-[var(--radius-md,12px)] text-white font-semibold text-sm"
-          style={{ background: 'linear-gradient(135deg, var(--color-primary,#d47311), var(--color-secondary,#e8934a))' }}
-        >
-          <Phone className="w-4 h-4" />
-          {t('bottom.call')}
-        </a>
+    <footer className="site-footer">
+      <p className="footer-name">
+        {config.name}{config.nameEn ? \` \${config.nameEn}\` : ''}
+      </p>
+      {(config.address || config.phone) && (
+        <p className="footer-info">
+          {config.address && <>{config.address}<br /></>}
+          {config.phone && <>📞 {config.phone}</>}
+        </p>
       )}
-      {config.kakaoChannelUrl ? (
-        <a
-          href={config.kakaoChannelUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-press flex-1 flex items-center justify-center gap-2 py-3 rounded-[var(--radius-md,12px)] text-[#391b1b] font-semibold text-sm bg-[#fee500] active:bg-[#e6cf00]"
-        >
-          <MessageCircle className="w-4 h-4" />
-          {t('bottom.kakao')}
-        </a>
-      ) : address ? (
-        <a
-          href={config.kakaoMapId ? \`https://place.map.kakao.com/\${config.kakaoMapId}\` : \`https://maps.google.com/?q=\${encodeURIComponent(address)}\`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-press flex-1 flex items-center justify-center gap-2 py-3 rounded-[var(--radius-md,12px)] border font-semibold text-sm text-gray-700 dark:text-gray-200"
-          style={{ borderColor: 'var(--surface-border,rgba(0,0,0,0.12))', background: 'var(--surface-sunken,#f8f9fa)' }}
-        >
-          <MapPin className="w-4 h-4" style={{ color: 'var(--color-primary,#d47311)' }} />
-          {t('quick.directions')}
-        </a>
-      ) : null}
-    </div>
-  );
-}
-`;
-
-// ──────────────────────────────────────────────
-// src/components/footer.tsx
-// ──────────────────────────────────────────────
-const footerComponent = `import { ThemeToggle } from './theme-toggle';
-
-export function Footer() {
-  return (
-    <footer className="border-t border-gray-200 dark:border-gray-800 py-8 px-4 sm:px-6">
-      <div className="max-w-lg mx-auto flex items-center justify-center gap-2 text-gray-400 text-xs">
-        <a
-          href="https://www.linkmap.biz/sites?utm_source=badge&utm_medium=referral&utm_campaign=small-biz"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 transition-all text-[11px] font-medium"
-          aria-label="Made with Linkmap"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-          Made with Linkmap
-        </a>
-        <ThemeToggle />
-      </div>
+      <div className="footer-divider" />
+      <p className="footer-copy">© {year} {config.name}. All rights reserved.</p>
+      <a
+        href="https://www.linkmap.biz/sites?utm_source=badge&utm_medium=referral&utm_campaign=small-biz"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="footer-badge"
+        aria-label="Made with Linkmap"
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+        Powered by Linkmap
+      </a>
     </footer>
-  );
-}
-`;
-
-// ──────────────────────────────────────────────
-// src/components/nav-header.tsx
-// ──────────────────────────────────────────────
-const navHeader = `'use client';
-
-import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
-import { useLocale } from '@/lib/i18n';
-import { LanguageToggle } from './language-toggle';
-
-const sectionIds = ['hero', 'menu', 'hours', 'location'];
-
-const sectionKeys: Record<string, string> = {
-  hero: 'nav.home',
-  menu: 'nav.menu',
-  hours: 'nav.hours',
-  location: 'nav.location',
-};
-
-export function NavHeader() {
-  const [active, setActive] = useState('hero');
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const { t } = useLocale();
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActive(entry.target.id);
-          }
-        });
-      },
-      { rootMargin: '-50% 0px -50% 0px' }
-    );
-
-    sectionIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-
-    const handleScroll = () => {
-      const h = document.documentElement.scrollHeight - window.innerHeight;
-      if (h > 0) setProgress((window.scrollY / h) * 100);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
-  return (
-    <>
-    <header className="fixed top-0 w-full z-50 backdrop-blur-md bg-[#fdf4e7]/80 dark:bg-gray-950/80 border-b border-gray-200/50 dark:border-gray-800/50">
-      <nav className="max-w-lg mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-        <div className="hidden sm:flex items-center gap-1">
-          {sectionIds.map((id) => (
-            <a
-              key={id}
-              href={\`#\${id}\`}
-              className={\`px-3 py-1.5 rounded-full text-sm transition-colors \${
-                active === id
-                  ? 'text-[#d47311] bg-[#d47311]/10 font-medium'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }\`}
-            >
-              {t(sectionKeys[id])}
-            </a>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-2">
-          <LanguageToggle />
-          <button
-            className="sm:hidden p-2 text-gray-600 dark:text-gray-400"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-        </div>
-      </nav>
-
-      {mobileOpen && (
-        <div className="sm:hidden border-t border-gray-200/50 dark:border-gray-800/50 bg-[#fdf4e7]/95 dark:bg-gray-950/95 backdrop-blur-md">
-          {sectionIds.map((id) => (
-            <a
-              key={id}
-              href={\`#\${id}\`}
-              onClick={() => setMobileOpen(false)}
-              className={\`block px-6 py-3 text-sm \${
-                active === id ? 'text-[#d47311] font-medium' : 'text-gray-600 dark:text-gray-400'
-              }\`}
-            >
-              {t(sectionKeys[id])}
-            </a>
-          ))}
-        </div>
-      )}
-    </header>
-    <div className="scroll-progress" style={{ width: \`\${progress}%\` }} />
-    </>
   );
 }
 `;
@@ -1168,69 +1778,72 @@ export interface BusinessHour {
 
 const DEMO_MENU: MenuItem[] = [
   {
-    name: '\\uB974\\uBC29 \\uAE50\\uBE60\\uB274',
-    nameEn: 'Levain Campagne',
-    desc: '72\\uC2DC\\uAC04 \\uBC1C\\uD6A8 \\uCC9C\\uC5F0 \\uB974\\uBC29 \\uC2DD\\uBE75. \\uCD09\\uCD09\\uD558\\uACE0 \\uC945\\uC945\\uD55C \\uC2DD\\uAC10.',
-    descEn: '72-hour fermented sourdough. Moist, chewy texture.',
-    price: '\\u20A97,500',
-    category: '\\uBE75',
-    emoji: '\\uD83C\\uDF5E',
+    name: '\\uC544\\uBA54\\uB9AC\\uCE74\\uB178',
+    nameEn: 'Americano',
+    desc: '\\uC5D0\\uD2F0\\uC624\\uD53C\\uC544 \\uC608\\uAC00\\uCCB4\\uD504 \\uC2F1\\uAE00 \\uC624\\uB9AC\\uC9C4, \\uD654\\uC0AC\\uD55C \\uACFC\\uC77C \\uC0B0\\uBBF8',
+    descEn: 'Ethiopia Yirgacheffe single origin, bright fruity acidity',
+    price: '\\u20A94,500',
+    category: '\\uCEE4\\uD53C',
+    emoji: '\\u2615',
   },
   {
-    name: '\\uD06C\\uB8E8\\uC544\\uC0C1',
-    nameEn: 'Croissant',
-    desc: '\\uBC84\\uD130 48\\uACA9 \\uC218\\uC81C \\uD06C\\uB8E8\\uC544\\uC0C1. \\uBC14\\uC0AD\\uD558\\uACE0 \\uD48D\\uBD80\\uD55C \\uBC84\\uD130\\uD5A5.',
-    descEn: '48-layer handmade croissant. Crispy with rich butter aroma.',
-    price: '\\u20A94,800',
-    category: '\\uBE75',
-    emoji: '\\uD83E\\uDD50',
-  },
-  {
-    name: '\\uBD09\\uBD09 \\uC1FC\\uCF5C\\uB77C',
-    nameEn: 'Bonbon Chocolat',
-    desc: '\\uBC1C\\uB85C\\uB098 \\uCD08\\uCF5C\\uB9BF\\uC744 \\uB123\\uC740 \\uBC18\\uC219 \\uB9C8\\uB4E4\\uB80C. 1\\uC778 2\\uAC1C \\uD55C\\uC815.',
-    descEn: 'Molten madeleine with Valrhona chocolate. Limited to 2 per person.',
-    price: '\\u20A93,500',
-    category: '\\uACFC\\uC790',
-    emoji: '\\uD83C\\uDF6B',
+    name: '\\uCE74\\uD398\\uB77C\\uB5BC',
+    nameEn: 'Cafe Latte',
+    desc: '\\uC2A4\\uD300 \\uBC00\\uD06C\\uC640 \\uC5D0\\uC2A4\\uD504\\uB808\\uC18C\\uC758 \\uC644\\uBCF5\\uD55C \\uADE0\\uD615',
+    descEn: 'Perfect balance of steamed milk and espresso',
+    price: '\\u20A95,000',
+    category: '\\uCEE4\\uD53C',
+    emoji: '\\u2615',
   },
   {
     name: '\\uD50C\\uB7AB \\uD654\\uC774\\uD2B8',
     nameEn: 'Flat White',
-    desc: '\\uC2F1\\uAE00 \\uC624\\uB9AC\\uC9C4 \\uC6D0\\uB450, \\uB9C8\\uC774\\uD06C\\uB85C\\uD3FC \\uBC00\\uD06C\\uB85C \\uB9CC\\uB4E0 \\uC9C4\\uD55C \\uCEE4\\uD53C.',
-    descEn: 'Single-origin espresso with microfoam milk.',
-    price: '\\u20A96,000',
-    category: '\\uC74C\\uB8CC',
+    desc: '\\uB9AC\\uC2A4\\uD2B8\\uB808\\uD1A0 \\uB354\\uBE14\\uC0F7 + \\uB9C8\\uC774\\uD06C\\uB85C\\uD3FC, \\uC9C4\\uD55C \\uCEE4\\uD53C \\uD48D\\uBBF8',
+    descEn: 'Ristretto double shot + microfoam, intense coffee flavour',
+    price: '\\u20A95,800',
+    category: '\\uCEE4\\uD53C',
     emoji: '\\u2615',
+    isPopular: true,
   },
   {
-    name: '\\uC5BC \\uADF8\\uB808\\uC774 \\uB77C\\uB760',
-    nameEn: 'Earl Grey Latte',
-    desc: '\\uBCA0\\uB974\\uAC00\\uBABB \\uD5A5\\uC774 \\uC0B4\\uC544\\uC788\\uB294 \\uB530\\uB73B\\uD55C \\uC5BC \\uADF8\\uB808\\uC774 \\uBC00\\uD06C\\uD2F0.',
-    descEn: 'Warm Earl Grey milk tea with vibrant bergamot aroma.',
-    price: '\\u20A95,500',
-    category: '\\uC74C\\uB8CC',
-    emoji: '\\uD83E\\uDED6',
+    name: '\\uB2F9\\uADFC \\uCF00\\uC774\\uD06C',
+    nameEn: 'Carrot Cake',
+    desc: '\\uD06C\\uB9BC\\uCE58\\uC988 \\uD504\\uB85C\\uC2A4\\uD305, \\uCD09\\uCD09\\uD55C \\uB2F9\\uADFC \\uCF00\\uC774\\uD06C 1\\uC870\\uAC01',
+    descEn: 'Cream cheese frosting, moist carrot cake slice',
+    price: '\\u20A96,500',
+    category: '\\uB514\\uC800\\uD2B8',
+    emoji: '\\uD83C\\uDF70',
+    isPopular: true,
   },
   {
-    name: '\\uACC4\\uC808 \\uACFC\\uC77C \\uD0C0\\uB974\\uD2B8',
-    nameEn: 'Seasonal Fruit Tart',
-    desc: '\\uB9E4\\uC8FC \\uBC14\\uB00C\\uB294 \\uC81C\\uCCA0 \\uACFC\\uC77C \\uD0C0\\uB974\\uD2B8.',
-    descEn: 'Weekly seasonal fruit tart.',
-    price: '\\u20A99,000',
-    category: '\\uCF00\\uC774\\uD06C',
-    emoji: '\\uD83C\\uDF53',
+    name: '\\uD2F0\\uB77C\\uBBF8\\uC218',
+    nameEn: 'Tiramisu',
+    desc: '\\uB9C8\\uC2A4\\uCE74\\uD3EC\\uB124 \\uD06C\\uB9BC, \\uC774\\uD0C8\\uB9AC\\uC544 \\uB808\\uC2DC\\uD53C \\uC815\\uD1B5 \\uD2F0\\uB77C\\uBBF8\\uC218',
+    descEn: 'Mascarpone cream, authentic Italian recipe tiramisu',
+    price: '\\u20A97,000',
+    category: '\\uB514\\uC800\\uD2B8',
+    emoji: '\\uD83C\\uDF70',
+    isNew: true,
+  },
+  {
+    name: '\\uB9D0\\uCC28 \\uB77C\\uB5BC',
+    nameEn: 'Matcha Latte',
+    desc: '\\uAD50\\uD1A0 \\uC6B0\\uC9C0 \\uB9D0\\uCC28 1\\uB4F1\\uAE09, \\uBD80\\uB4DC\\uB7EC\\uC6B4 \\uBC00\\uD06C\\uD3FC',
+    descEn: 'Kyoto Uji matcha grade 1, smooth milk foam',
+    price: '\\u20A96,000',
+    category: '\\uB17C\\uCEE4\\uD53C',
+    emoji: '\\uD83C\\uDF75',
   },
 ];
 
 const DEMO_HOURS: BusinessHour[] = [
-  { day: '\\uC6D4\\uC694\\uC77C', dayEn: 'Monday', hours: '08:00 - 19:00', hoursEn: '08:00 - 19:00' },
-  { day: '\\uD654\\uC694\\uC77C', dayEn: 'Tuesday', hours: '08:00 - 19:00', hoursEn: '08:00 - 19:00' },
-  { day: '\\uC218\\uC694\\uC77C', dayEn: 'Wednesday', hours: '08:00 - 19:00', hoursEn: '08:00 - 19:00' },
-  { day: '\\uBAA9\\uC694\\uC77C', dayEn: 'Thursday', hours: '08:00 - 19:00', hoursEn: '08:00 - 19:00' },
-  { day: '\\uAE08\\uC694\\uC77C', dayEn: 'Friday', hours: '08:00 - 20:00', hoursEn: '08:00 - 20:00' },
-  { day: '\\uD1A0\\uC694\\uC77C', dayEn: 'Saturday', hours: '09:00 - 20:00', hoursEn: '09:00 - 20:00' },
-  { day: '\\uC77C\\uC694\\uC77C', dayEn: 'Sunday', hours: '09:00 - 17:00', hoursEn: '09:00 - 17:00' },
+  { day: '\\uC6D4\\uC694\\uC77C', dayEn: 'Monday', hours: '09:00 - 21:00', hoursEn: '09:00 - 21:00' },
+  { day: '\\uD654\\uC694\\uC77C', dayEn: 'Tuesday', hours: '09:00 - 21:00', hoursEn: '09:00 - 21:00' },
+  { day: '\\uC218\\uC694\\uC77C', dayEn: 'Wednesday', hours: '09:00 - 21:00', hoursEn: '09:00 - 21:00' },
+  { day: '\\uBAA9\\uC694\\uC77C', dayEn: 'Thursday', hours: '09:00 - 21:00', hoursEn: '09:00 - 21:00' },
+  { day: '\\uAE08\\uC694\\uC77C', dayEn: 'Friday', hours: '09:00 - 21:00', hoursEn: '09:00 - 21:00' },
+  { day: '\\uD1A0\\uC694\\uC77C', dayEn: 'Saturday', hours: '10:00 - 22:00', hoursEn: '10:00 - 22:00' },
+  { day: '\\uC77C\\uC694\\uC77C', dayEn: 'Sunday', hours: '\\uD734\\uBB34', isHoliday: true },
 ];
 
 function parseJSON<T>(raw: string | undefined, fallback: T): T {
@@ -1243,14 +1856,14 @@ function parseJSON<T>(raw: string | undefined, fallback: T): T {
 }
 
 export const siteConfig = {
-  name: process.env.NEXT_PUBLIC_SITE_NAME || '\\uC628\\uAE30 \\uBCA0\\uC774\\uCEE4\\uB9AC',
-  nameEn: process.env.NEXT_PUBLIC_SITE_NAME_EN || 'Ongi Bakery',
+  name: process.env.NEXT_PUBLIC_SITE_NAME || '\\uC628\\uAE30 \\uCE74\\uD398',
+  nameEn: process.env.NEXT_PUBLIC_SITE_NAME_EN || 'Ongi Cafe',
   description:
     process.env.NEXT_PUBLIC_DESCRIPTION ||
-    '\\uB9E4\\uC77C \\uC544\\uCE68 \\uC9C1\\uC811 \\uAD6C\\uC6B4 \\uBE75 \\uD55C \\uC870\\uAC01\\uC73C\\uB85C \\uD558\\uB8E8\\uB97C \\uC2DC\\uC791\\uD558\\uC138\\uC694.',
+    '\\uC815\\uC131\\uC744 \\uB2F4\\uC740 \\uD55C \\uC794\\uC758 \\uB530\\uB73B\\uD568',
   descriptionEn:
     process.env.NEXT_PUBLIC_DESCRIPTION_EN ||
-    'Start your day with a freshly baked loaf every morning.',
+    'A warm cup of sincerity in every sip.',
   phone: process.env.NEXT_PUBLIC_PHONE || '02-334-5870',
   address: process.env.NEXT_PUBLIC_ADDRESS || '\\uC11C\\uC6B8 \\uB9C8\\uD3EC\\uAD6C \\uC5F0\\uB0A8\\uB3D9 239-10',
   addressEn: process.env.NEXT_PUBLIC_ADDRESS_EN || '239-10, Yeonnam-dong, Mapo-gu, Seoul',
@@ -1258,10 +1871,10 @@ export const siteConfig = {
   menuItems: parseJSON<MenuItem[]>(process.env.NEXT_PUBLIC_MENU_ITEMS, DEMO_MENU),
   businessHours: parseJSON<BusinessHour[]>(process.env.NEXT_PUBLIC_BUSINESS_HOURS, DEMO_HOURS),
   galleryImages: parseJSON<string[]>(process.env.NEXT_PUBLIC_GALLERY_IMAGES, []),
-  instagramUrl: process.env.NEXT_PUBLIC_INSTAGRAM_URL || 'https://instagram.com/ongi_bakery',
+  instagramUrl: process.env.NEXT_PUBLIC_INSTAGRAM_URL || '',
   naverBlogUrl: process.env.NEXT_PUBLIC_NAVER_BLOG_URL || '',
   kakaoChannelUrl: process.env.NEXT_PUBLIC_KAKAO_CHANNEL_URL || '',
-  primaryColor: process.env.NEXT_PUBLIC_PRIMARY_COLOR || '#d47311',
+  primaryColor: process.env.NEXT_PUBLIC_PRIMARY_COLOR || '#92400e',
   fontFamily: process.env.NEXT_PUBLIC_FONT_FAMILY || 'Pretendard',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
@@ -1375,16 +1988,14 @@ export const smallBizTemplate: HomepageTemplateContent = {
     { path: 'src/app/page.tsx', content: pageTsx },
     { path: 'src/components/animated-reveal.tsx', content: animatedReveal },
     { path: 'src/components/section-wrapper.tsx', content: sectionWrapper },
+    { path: 'src/components/nav-header.tsx', content: navHeader },
     { path: 'src/components/hero-section.tsx', content: heroSection },
     { path: 'src/components/quick-actions.tsx', content: quickActions },
     { path: 'src/components/menu-section.tsx', content: menuSection },
-    { path: 'src/components/hours-section.tsx', content: hoursSection },
-    { path: 'src/components/location-section.tsx', content: locationSection },
+    { path: 'src/components/info-section.tsx', content: infoSection },
     { path: 'src/components/gallery-section.tsx', content: gallerySection },
     { path: 'src/components/sns-section.tsx', content: snsSection },
-    { path: 'src/components/mobile-bottom-bar.tsx', content: mobileBottomBar },
     { path: 'src/components/footer.tsx', content: footerComponent },
-    { path: 'src/components/nav-header.tsx', content: navHeader },
     { path: 'src/components/theme-toggle.tsx', content: themeToggle },
     { path: 'src/components/language-toggle.tsx', content: languageToggle },
     { path: 'src/lib/config.ts', content: libConfig },
