@@ -170,7 +170,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     deploy_target: 'github_pages',
   },
   {
-    id: 'b2c3d4e5-0021-4000-9000-000000000021',
+    id: '23894799-8de1-48ce-ae12-0acd5bede853',
     slug: 'small-biz-cafe',
     name: 'Small Business - Cafe',
     name_ko: '카페/음료 전문점',
