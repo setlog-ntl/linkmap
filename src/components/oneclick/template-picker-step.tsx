@@ -37,6 +37,7 @@ import {
   BookOpen,
   Calendar,
   Heart,
+  Coffee,
   type LucideIcon,
 } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
@@ -53,6 +54,7 @@ const TEMPLATE_DEFAULT_NAMES: Record<string, string> = {
   'digital-namecard': 'namecard',
   'dev-showcase': 'devfolio',
   'small-biz': 'myshop',
+  'small-biz-cafe': 'mycafe',
   'personal-brand': 'mypage',
   'freelancer-page': 'mywork',
   'product-landing': 'myprod',
@@ -72,6 +74,7 @@ const TEMPLATE_ICONS: Record<string, LucideIcon> = {
   'digital-namecard': CreditCard,
   'dev-showcase': Code2,
   'small-biz': Store,
+  'small-biz-cafe': Coffee,
   'personal-brand': User,
   'freelancer-page': Briefcase,
   'product-landing': Package,

@@ -462,6 +462,12 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale }
           onChange={handleUpload}
         />
       </div>
+      {/* 샘플 이미지 안내 */}
+      {value && (value.includes('unsplash.com') || value.includes('placeholder')) && (
+        <p className="text-[11px] text-muted-foreground">
+          현재 샘플 이미지입니다. URL을 변경하거나 이미지를 업로드하여 교체하세요.
+        </p>
+      )}
       {/* 업로드 중 상태 텍스트 */}
       {uploading && (
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">

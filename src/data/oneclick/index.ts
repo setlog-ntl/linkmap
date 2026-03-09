@@ -4,3 +4,4 @@ export { devShowcaseTemplate } from './dev-showcase-template';
 export { personalBrandTemplate } from './personal-brand-template';
 export { freelancerPageTemplate } from './freelancer-page-template';
 export { smallBizTemplate } from './small-biz-template';
+export { smallBizCafeTemplate } from './small-biz-cafe-template';

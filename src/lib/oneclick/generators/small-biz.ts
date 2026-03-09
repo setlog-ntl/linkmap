@@ -30,6 +30,7 @@ function buildMenuItemsArray(items: unknown[]): string {
     lines.push(`    price: '${esc(String(v.price || ''))}',`);
     lines.push(`    category: '${esc(String(v.category || ''))}',`);
     lines.push(`    emoji: '${esc(String(v.emoji || '🍽️'))}',`);
+    if (v.imageUrl) lines.push(`    imageUrl: '${esc(String(v.imageUrl))}',`);
     if (v.isNew) lines.push('    isNew: true,');
     if (v.isPopular) lines.push('    isPopular: true,');
     return `  {\n${lines.join('\n')}\n  }`;
@@ -100,17 +101,17 @@ function generateConfigTs(state: ModuleConfigState): string {
   const gallery = state.values.gallery || {};
   const sns = state.values.sns || {};
 
-  const name = (hero.name as string) || '온기 베이커리';
-  const nameEn = (hero.nameEn as string) || 'Ongi Bakery';
-  const description = (hero.description as string) || '매일 아침 직접 구운 빵 한 조각으로 하루를 시작하세요.';
-  const descriptionEn = (hero.descriptionEn as string) || 'Start your day with a freshly baked loaf every morning.';
-  const phone = (hero.phone as string) || '02-334-5870';
-  const primaryColor = (hero.primaryColor as string) || '#d47311';
-  const fontFamily = (hero.fontFamily as string) || 'Pretendard';
+  const name = (hero.name as string) || '연남 사케하우스 夜宴';
+  const nameEn = (hero.nameEn as string) || 'Yeonnam Sake House';
+  const description = (hero.description as string) || '프리미엄 사시미와 사케를 즐기는 모던 요리주점';
+  const descriptionEn = (hero.descriptionEn as string) || 'Modern Japanese dining with premium sashimi and sake';
+  const phone = (hero.phone as string) || '02-335-7890';
+  const primaryColor = (hero.primaryColor as string) || '#c8a97e';
+  const fontFamily = (hero.fontFamily as string) || 'Nanum Myeongjo';
   const designPreset = (hero.designPreset as string) || 'default';
 
-  const address = (location.address as string) || '서울 마포구 연남동 239-10';
-  const addressEn = (location.addressEn as string) || '239-10, Yeonnam-dong, Mapo-gu, Seoul';
+  const address = (location.address as string) || '서울 마포구 연남로 23길 12, 1층';
+  const addressEn = (location.addressEn as string) || '1F, 12, Yeonnam-ro 23-gil, Mapo-gu, Seoul';
   const kakaoMapId = (location.kakaoMapId as string) || '';
 
   const menuItems = (menu.items as unknown[]) || [];
@@ -131,6 +132,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   price: string;
   category: string;
   emoji: string;
+  imageUrl?: string;
   isNew?: boolean;
   isPopular?: boolean;
 }

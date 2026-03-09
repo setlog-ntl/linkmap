@@ -325,7 +325,7 @@ export const devShowcaseModuleSchema: TemplateModuleSchema = {
           type: 'url',
           label: 'GitHub URL',
           labelEn: 'GitHub URL',
-          defaultValue: '',
+          defaultValue: 'https://github.com',
           placeholder: 'https://github.com/username',
         },
         {
@@ -333,7 +333,7 @@ export const devShowcaseModuleSchema: TemplateModuleSchema = {
           type: 'url',
           label: 'LinkedIn URL',
           labelEn: 'LinkedIn URL',
-          defaultValue: '',
+          defaultValue: 'https://linkedin.com',
           placeholder: 'https://linkedin.com/in/username',
         },
       ],

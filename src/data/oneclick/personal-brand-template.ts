@@ -1485,7 +1485,7 @@ export const siteConfig = {
   nameEn: process.env.NEXT_PUBLIC_SITE_NAME_EN || 'Jiwon Lee',
   tagline: process.env.NEXT_PUBLIC_TAGLINE || '\\uCF58\\uD150\\uCE20\\uB85C \\uC138\\uC0C1\\uC744 \\uC5F0\\uACB0\\uD558\\uB294 \\uD06C\\uB9AC\\uC5D0\\uC774\\uD130',
   taglineEn: process.env.NEXT_PUBLIC_TAGLINE_EN || 'Creator who connects the world through content',
-  heroImageUrl: process.env.NEXT_PUBLIC_HERO_IMAGE_URL || null,
+  heroImageUrl: process.env.NEXT_PUBLIC_HERO_IMAGE_URL || 'https://plus.unsplash.com/premium_photo-1679079456083-9f288e224e96?w=1200&q=85&auto=format&fit=crop&crop=faces',
   story:
     process.env.NEXT_PUBLIC_STORY ||
     '\\uC548\\uB155\\uD558\\uC138\\uC694, \\uC800\\uB294 \\uC774\\uC9C0\\uC6D0\\uC785\\uB2C8\\uB2E4. 5\\uB144\\uC0B4 \\uB514\\uC9C0\\uD138 \\uCF58\\uD150\\uCE20\\uB97C \\uB9CC\\uB4E4\\uBA70 \\uBE0C\\uB79C\\uB4DC\\uC640 \\uC0AC\\uB78C \\uC0AC\\uC774\\uC758 \\uB2E4\\uB9AC\\uB97C \\uB193\\uACE0 \\uC788\\uC5B4\\uC694.',
@@ -1494,7 +1494,14 @@ export const siteConfig = {
     "Hi, I'm Jiwon Lee. For the past five years I've been building bridges between brands and people through digital content.",
   values: parseJSON<ValueItem[]>(process.env.NEXT_PUBLIC_VALUES, DEMO_VALUES),
   highlights: parseJSON<HighlightItem[]>(process.env.NEXT_PUBLIC_HIGHLIGHTS, DEMO_HIGHLIGHTS),
-  galleryImages: parseJSON<string[]>(process.env.NEXT_PUBLIC_GALLERY_IMAGES, []),
+  galleryImages: parseJSON<string[]>(process.env.NEXT_PUBLIC_GALLERY_IMAGES, [
+    'https://plus.unsplash.com/premium_photo-1679079456083-9f288e224e96?w=600&q=85&auto=format&fit=crop&crop=faces',
+    'https://images.unsplash.com/photo-1541823709867-1b206113eafd?w=600&h=900&q=85&auto=format&fit=crop&crop=faces',
+    'https://images.unsplash.com/photo-1602492665157-639323eadd31?w=600&q=85&auto=format&fit=crop',
+    'https://plus.unsplash.com/premium_photo-1661407583811-f39558a8e0cd?w=600&h=400&q=85&auto=format&fit=crop',
+    'https://plus.unsplash.com/premium_photo-1661412988741-45fcf3074878?w=600&h=800&q=85&auto=format&fit=crop',
+    'https://plus.unsplash.com/premium_photo-1664476946415-19cdad721c53?w=600&q=85&auto=format&fit=crop&crop=faces',
+  ]),
   email: process.env.NEXT_PUBLIC_EMAIL || 'hello@jiwonlee.kr',
   socials: parseJSON<SocialItem[]>(process.env.NEXT_PUBLIC_SOCIALS, [
     { platform: 'youtube', url: 'https://youtube.com' },

@@ -67,7 +67,7 @@ export const personalBrandModuleSchema: TemplateModuleSchema = {
           label: '배경 이미지 URL',
           labelEn: 'Hero Image URL',
           placeholder: 'https://example.com/hero.jpg',
-          defaultValue: '',
+          defaultValue: 'https://plus.unsplash.com/premium_photo-1679079456083-9f288e224e96?w=1200&q=85&auto=format&fit=crop&crop=faces',
         },
         {
           key: 'gradientFrom',
@@ -317,7 +317,14 @@ export const personalBrandModuleSchema: TemplateModuleSchema = {
           type: 'array',
           label: '이미지 URL 목록',
           labelEn: 'Image URLs',
-          defaultValue: [],
+          defaultValue: [
+            { url: 'https://plus.unsplash.com/premium_photo-1679079456083-9f288e224e96?w=600&q=85&auto=format&fit=crop&crop=faces' },
+            { url: 'https://images.unsplash.com/photo-1541823709867-1b206113eafd?w=600&h=900&q=85&auto=format&fit=crop&crop=faces' },
+            { url: 'https://images.unsplash.com/photo-1602492665157-639323eadd31?w=600&q=85&auto=format&fit=crop' },
+            { url: 'https://plus.unsplash.com/premium_photo-1661407583811-f39558a8e0cd?w=600&h=400&q=85&auto=format&fit=crop' },
+            { url: 'https://plus.unsplash.com/premium_photo-1661412988741-45fcf3074878?w=600&h=800&q=85&auto=format&fit=crop' },
+            { url: 'https://plus.unsplash.com/premium_photo-1664476946415-19cdad721c53?w=600&q=85&auto=format&fit=crop&crop=faces' },
+          ],
           maxItems: 12,
           itemSchema: [
             {

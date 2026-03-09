@@ -182,6 +182,14 @@ export const smallBizCafeModuleSchema: TemplateModuleSchema = {
               validation: { maxLength: 4 },
             },
             {
+              key: 'imageUrl',
+              type: 'url',
+              label: '메뉴 이미지 URL',
+              labelEn: 'Menu Image URL',
+              defaultValue: '',
+              placeholder: 'https://images.unsplash.com/...',
+            },
+            {
               key: 'isNew',
               type: 'boolean',
               label: 'NEW 뱃지',

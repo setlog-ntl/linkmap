@@ -1384,7 +1384,7 @@ const DEMO_PORTFOLIO: PortfolioItem[] = [
     categoryEn: 'Brand Identity',
     desc: '\\uC131\\uC218 \\uC2A4\\uD398\\uC15C\\uD2F0 \\uCE74\\uD398\\uC758 \\uBE0C\\uB79C\\uB4DC \\uC804\\uBA74 \\uAC1C\\uD3B8.',
     descEn: 'Complete brand overhaul for a Seongsu specialty cafe.',
-    imageUrl: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600',
+    imageUrl: 'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?w=600',
     tags: ['\\uB85C\\uACE0', '\\uD328\\uD0A4\\uC9C0', '\\uBE0C\\uB79C\\uB529'],
   },
   {
@@ -1394,7 +1394,7 @@ const DEMO_PORTFOLIO: PortfolioItem[] = [
     categoryEn: 'Packaging Design',
     desc: '\\uBBF8\\uB2C8\\uBA40 \\uB7ED\\uC154\\uB9AC \\uCEE8\\uC149\\uC758 \\uC2A4\\uD0A8\\uCF00\\uC5B4 \\uB77C\\uC778 \\uD328\\uD0A4\\uC9C0 \\uB514\\uC790\\uC778.',
     descEn: 'Minimal-luxury skincare packaging that secured retail placement post-launch.',
-    imageUrl: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600',
+    imageUrl: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=600',
     tags: ['\\uD328\\uD0A4\\uC9C0', '\\uB7ED\\uC154\\uB9AC', '\\uBDF0\\uD2F0'],
   },
   {
@@ -1404,7 +1404,7 @@ const DEMO_PORTFOLIO: PortfolioItem[] = [
     categoryEn: 'Social Media Kit',
     desc: '\\uD658\\uACBD \\uBE44\\uC601\\uB9AC \\uB2E8\\uCCB4\\uC758 \\uCEA0\\uD398\\uC778 \\uBE44\\uC8FC\\uC5BC \\uC81C\\uC791.',
     descEn: 'Campaign visuals for an environmental NGO.',
-    imageUrl: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600',
+    imageUrl: 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=600',
     tags: ['\\uC18C\\uC15C', 'NGO', '\\uD658\\uACBD'],
   },
 ];
@@ -1496,7 +1496,7 @@ export const siteConfig = {
   fontFamily: 'Pretendard',
   portfolioColumns: '3',
   designPreset: 'default',
-  rotatingWords: parseJSON<string[]>(process.env.NEXT_PUBLIC_ROTATING_WORDS, []),
+  rotatingWords: parseJSON<string[]>(process.env.NEXT_PUBLIC_ROTATING_WORDS, ['Brand Identity', 'Packaging', 'Social Media', 'Web Design']),
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 

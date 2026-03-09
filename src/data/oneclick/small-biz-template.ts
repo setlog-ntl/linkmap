@@ -33,7 +33,7 @@ export async function GET() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'linear-gradient(160deg, #92400e 0%, #b45309 35%, #d97706 70%, #fbbf24 100%)',
+          background: 'linear-gradient(160deg, #1a1a1a 0%, #2a2520 35%, #3a302a 70%, #c8a97e 100%)',
           fontFamily: 'sans-serif',
         }}
       >
@@ -73,19 +73,19 @@ const globalsCss = `@import "tailwindcss";
 
 /* ─── CSS 변수 ─────────────────────────────── */
 :root {
-  --brand-primary:   #92400e;
-  --brand-secondary: #d97706;
-  --accent:          #065f46;
-  --bg-page:         #fdf6ee;
-  --bg-card:         #fffaf4;
-  --bg-card-border:  #f0e4d0;
-  --text-dark:       #451a03;
-  --text-mid:        #78350f;
-  --text-muted:      rgba(146, 64, 14, 0.53);
-  --text-light:      #b45309;
+  --brand-primary:   #c8a97e;
+  --brand-secondary: #e8d5b0;
+  --accent:          #a88b5e;
+  --bg-page:         #1a1a1a;
+  --bg-card:         #242424;
+  --bg-card-border:  #333333;
+  --text-dark:       #f5f0e8;
+  --text-mid:        #d4c8b0;
+  --text-muted:      rgba(200, 169, 126, 0.53);
+  --text-light:      #c8a97e;
 
-  --font-display: 'Georgia', 'Times New Roman', serif;
-  --font-body: 'Pretendard Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Nanum Myeongjo', 'Georgia', 'Times New Roman', serif;
+  --font-body: 'Nanum Myeongjo', 'Pretendard Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --radius-sm: 6px;
   --radius-md: 12px;
@@ -95,8 +95,8 @@ const globalsCss = `@import "tailwindcss";
   --content-max: 900px;
 
   /* Primary color override via config */
-  --color-primary: #92400e;
-  --color-secondary: #d97706;
+  --color-primary: #c8a97e;
+  --color-secondary: #e8d5b0;
 }
 
 /* ─── Reset & Base ─────────────────────────── */
@@ -135,7 +135,7 @@ img { display: block; max-width: 100%; }
   justify-content: space-between;
   padding: 0 2rem;
   height: 56px;
-  background: rgba(253, 246, 238, 0.85);
+  background: rgba(26, 26, 26, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--bg-card-border);
@@ -200,7 +200,7 @@ img { display: block; max-width: 100%; }
 .hero-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(160deg, #92400e 0%, #b45309 35%, #d97706 70%, #fbbf24 100%);
+  background: linear-gradient(160deg, #1a1a1a 0%, #2a2520 35%, #3a302a 70%, #4a3f35 100%);
 }
 
 .hero-circle {
@@ -474,10 +474,9 @@ img { display: block; max-width: 100%; }
 }
 
 .menu-item {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
-  column-gap: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   padding: 0.875rem 0;
   border-bottom: 1px solid rgba(240, 228, 208, 0.6);
   opacity: 0;
@@ -485,6 +484,29 @@ img { display: block; max-width: 100%; }
   transition: opacity 0.4s ease, transform 0.4s ease, background 0.15s;
 }
 .menu-item:last-child { border-bottom: none; }
+.menu-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--bg-card);
+}
+.menu-thumb-emoji {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+.menu-item-info {
+  flex: 1;
+  min-width: 0;
+}
 .menu-item:hover { background: rgba(146, 64, 14, 0.025); }
 .menu-item.visible {
   opacity: 1;
@@ -496,8 +518,6 @@ img { display: block; max-width: 100%; }
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
-  grid-column: 1;
-  grid-row: 1;
 }
 .menu-item-name {
   font-size: 1rem;
@@ -533,22 +553,18 @@ img { display: block; max-width: 100%; }
 }
 
 .menu-item-desc {
-  grid-column: 1;
-  grid-row: 2;
   font-size: 0.8125rem;
   color: var(--text-light);
   margin-top: 0.2rem;
 }
 
 .menu-item-price {
-  grid-column: 2;
-  grid-row: 1;
   font-size: 1rem;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   color: var(--brand-primary);
   white-space: nowrap;
-  align-self: start;
+  flex-shrink: 0;
   padding-top: 2px;
 }
 
@@ -1324,15 +1340,22 @@ export function MenuSection({ items }: Props) {
 
               {catItems.map((item, i) => (
                 <div key={i} className="menu-item">
-                  <div className="menu-item-name-row">
-                    <span className="menu-item-name">{item.name}</span>
-                    {item.nameEn && (
-                      <span className="menu-item-name-en">{item.nameEn}</span>
-                    )}
-                    {item.isNew && <span className="badge badge-new">NEW</span>}
-                    {item.isPopular && <span className="badge badge-popular">인기</span>}
+                  {item.imageUrl ? (
+                    <img className="menu-thumb" src={item.imageUrl} alt={item.name} loading="lazy" />
+                  ) : (
+                    <span className="menu-thumb-emoji">{item.emoji}</span>
+                  )}
+                  <div className="menu-item-info">
+                    <div className="menu-item-name-row">
+                      <span className="menu-item-name">{item.name}</span>
+                      {item.nameEn && (
+                        <span className="menu-item-name-en">{item.nameEn}</span>
+                      )}
+                      {item.isNew && <span className="badge badge-new">NEW</span>}
+                      {item.isPopular && <span className="badge badge-popular">인기</span>}
+                    </div>
+                    {item.desc && <div className="menu-item-desc">{item.desc}</div>}
                   </div>
-                  {item.desc && <div className="menu-item-desc">{item.desc}</div>}
                   <span className="menu-item-price">{item.price}</span>
                 </div>
               ))}
@@ -1764,6 +1787,7 @@ const libConfig = `export interface MenuItem {
   price: string;
   category: string;
   emoji: string;
+  imageUrl?: string;
   isNew?: boolean;
   isPopular?: boolean;
 }
@@ -1778,72 +1802,119 @@ export interface BusinessHour {
 
 const DEMO_MENU: MenuItem[] = [
   {
-    name: '\\uC544\\uBA54\\uB9AC\\uCE74\\uB178',
-    nameEn: 'Americano',
-    desc: '\\uC5D0\\uD2F0\\uC624\\uD53C\\uC544 \\uC608\\uAC00\\uCCB4\\uD504 \\uC2F1\\uAE00 \\uC624\\uB9AC\\uC9C4, \\uD654\\uC0AC\\uD55C \\uACFC\\uC77C \\uC0B0\\uBBF8',
-    descEn: 'Ethiopia Yirgacheffe single origin, bright fruity acidity',
-    price: '\\u20A94,500',
-    category: '\\uCEE4\\uD53C',
-    emoji: '\\u2615',
-  },
-  {
-    name: '\\uCE74\\uD398\\uB77C\\uB5BC',
-    nameEn: 'Cafe Latte',
-    desc: '\\uC2A4\\uD300 \\uBC00\\uD06C\\uC640 \\uC5D0\\uC2A4\\uD504\\uB808\\uC18C\\uC758 \\uC644\\uBCF5\\uD55C \\uADE0\\uD615',
-    descEn: 'Perfect balance of steamed milk and espresso',
-    price: '\\u20A95,000',
-    category: '\\uCEE4\\uD53C',
-    emoji: '\\u2615',
-  },
-  {
-    name: '\\uD50C\\uB7AB \\uD654\\uC774\\uD2B8',
-    nameEn: 'Flat White',
-    desc: '\\uB9AC\\uC2A4\\uD2B8\\uB808\\uD1A0 \\uB354\\uBE14\\uC0F7 + \\uB9C8\\uC774\\uD06C\\uB85C\\uD3FC, \\uC9C4\\uD55C \\uCEE4\\uD53C \\uD48D\\uBBF8',
-    descEn: 'Ristretto double shot + microfoam, intense coffee flavour',
-    price: '\\u20A95,800',
-    category: '\\uCEE4\\uD53C',
-    emoji: '\\u2615',
+    name: '\\uBAA8\\uB461\\uC0AC\\uC2DC\\uBBF8',
+    nameEn: 'Assorted Sashimi',
+    desc: '\\uC624\\uB298\\uC758 \\uC2E0\\uC120\\uD55C \\uC0DD\\uC120 5\\uC885, \\uC170\\uD504\\uAC00 \\uC9C1\\uC811 \\uC120\\uBCC4',
+    descEn: 'Daily selection of 5 fresh fish by our chef',
+    price: '\\u20A938,000',
+    category: '\\uC0AC\\uC2DC\\uBBF8',
+    emoji: '\\uD83D\\uDC1F',
+    imageUrl: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=200&h=200&q=80&auto=format&fit=crop',
     isPopular: true,
   },
   {
-    name: '\\uB2F9\\uADFC \\uCF00\\uC774\\uD06C',
-    nameEn: 'Carrot Cake',
-    desc: '\\uD06C\\uB9BC\\uCE58\\uC988 \\uD504\\uB85C\\uC2A4\\uD305, \\uCD09\\uCD09\\uD55C \\uB2F9\\uADFC \\uCF00\\uC774\\uD06C 1\\uC870\\uAC01',
-    descEn: 'Cream cheese frosting, moist carrot cake slice',
-    price: '\\u20A96,500',
-    category: '\\uB514\\uC800\\uD2B8',
-    emoji: '\\uD83C\\uDF70',
-    isPopular: true,
+    name: '\\uC5F0\\uC5B4 \\uC0AC\\uC2DC\\uBBF8',
+    nameEn: 'Salmon Sashimi',
+    desc: '\\uB178\\uB974\\uC6E8\\uC774\\uC0B0 \\uD504\\uB9AC\\uBBF8\\uC5C4 \\uC5F0\\uC5B4 12\\uC810',
+    descEn: 'Premium Norwegian salmon, 12 slices',
+    price: '\\u20A928,000',
+    category: '\\uC0AC\\uC2DC\\uBBF8',
+    emoji: '\\uD83C\\uDF63',
+    imageUrl: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=200&h=200&q=80&auto=format&fit=crop',
   },
   {
-    name: '\\uD2F0\\uB77C\\uBBF8\\uC218',
-    nameEn: 'Tiramisu',
-    desc: '\\uB9C8\\uC2A4\\uCE74\\uD3EC\\uB124 \\uD06C\\uB9BC, \\uC774\\uD0C8\\uB9AC\\uC544 \\uB808\\uC2DC\\uD53C \\uC815\\uD1B5 \\uD2F0\\uB77C\\uBBF8\\uC218',
-    descEn: 'Mascarpone cream, authentic Italian recipe tiramisu',
-    price: '\\u20A97,000',
-    category: '\\uB514\\uC800\\uD2B8',
-    emoji: '\\uD83C\\uDF70',
+    name: '\\uAD11\\uC5B4 \\uC6B0\\uC2A4\\uC988\\uCFE0\\uB9AC',
+    nameEn: 'Hirame Usuzukuri',
+    desc: '\\uC587\\uAC8C \\uC36C \\uAD11\\uC5B4\\uC5D0 \\uD3F0\\uC988 \\uC18C\\uC2A4\\uC640 \\uC720\\uC790 \\uD5A5',
+    descEn: 'Thin-sliced flounder with ponzu and yuzu',
+    price: '\\u20A932,000',
+    category: '\\uC0AC\\uC2DC\\uBBF8',
+    emoji: '\\uD83D\\uDC1F',
+    imageUrl: 'https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56?w=200&h=200&q=80&auto=format&fit=crop',
     isNew: true,
   },
   {
-    name: '\\uB9D0\\uCC28 \\uB77C\\uB5BC',
-    nameEn: 'Matcha Latte',
-    desc: '\\uAD50\\uD1A0 \\uC6B0\\uC9C0 \\uB9D0\\uCC28 1\\uB4F1\\uAE09, \\uBD80\\uB4DC\\uB7EC\\uC6B4 \\uBC00\\uD06C\\uD3FC',
-    descEn: 'Kyoto Uji matcha grade 1, smooth milk foam',
-    price: '\\u20A96,000',
-    category: '\\uB17C\\uCEE4\\uD53C',
-    emoji: '\\uD83C\\uDF75',
+    name: '\\uB2F7\\uC0AC\\uC774 23 \\uC900\\uB9C8\\uC774\\uB2E4\\uC774\\uAE34\\uC870',
+    nameEn: 'Dassai 23 Junmai Daiginjo',
+    desc: '\\uC57C\\uB9C8\\uAD6C\\uCE58\\uD604, \\uC815\\uBBF8\\uC728 23%. \\uB9D1\\uACE0 \\uACFC\\uC77C \\uD5A5\\uC774 \\uD48D\\uBD80',
+    descEn: 'Yamaguchi, 23% polish. Clear, fruity aroma',
+    price: '\\u20A945,000',
+    category: '\\uC0AC\\uCF00',
+    emoji: '\\uD83C\\uDF76',
+    imageUrl: 'https://images.unsplash.com/photo-1516100882582-96c3a05fe590?w=200&h=200&q=80&auto=format&fit=crop',
+    isPopular: true,
+  },
+  {
+    name: '\\uAD6C\\uBCF4\\uD0C0 \\uB9CC\\uC8FC',
+    nameEn: 'Kubota Manju',
+    desc: '\\uB2C8\\uC774\\uAC00\\uD0C0\\uD604, \\uBD80\\uB4DC\\uB7FD\\uACE0 \\uAE4A\\uC740 \\uB9DB\\uC758 \\uC900\\uB9C8\\uC774\\uB2E4\\uC774\\uAE34\\uC870',
+    descEn: 'Niigata, smooth and deep Junmai Daiginjo',
+    price: '\\u20A938,000',
+    category: '\\uC0AC\\uCF00',
+    emoji: '\\uD83C\\uDF76',
+    imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=200&h=200&q=80&auto=format&fit=crop',
+  },
+  {
+    name: '\\uD558\\uC774\\uBCFC',
+    nameEn: 'Highball',
+    desc: '\\uC0B0\\uD1A0\\uB9AC \\uC704\\uC2A4\\uD0A4 + \\uAC15\\uD0C4\\uC0B0, \\uB808\\uBAAC \\uD2B8\\uC704\\uC2A4\\uD2B8',
+    descEn: 'Suntory whisky + strong soda, lemon twist',
+    price: '\\u20A912,000',
+    category: '\\uC74C\\uB8CC',
+    emoji: '\\uD83E\\uDD43',
+    imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=200&h=200&q=80&auto=format&fit=crop',
+  },
+  {
+    name: '\\uC2A4\\uD398\\uC15C \\uB864 \\uC138\\uD2B8',
+    nameEn: 'Special Roll Set',
+    desc: '\\uC170\\uD504 \\uCD94\\uCC9C \\uC2DC\\uADF8\\uB2C8\\uCC98 \\uB864 3\\uC885 \\uBAA8\\uC74C',
+    descEn: "Chef's signature roll trio",
+    price: '\\u20A935,000',
+    category: '\\uC694\\uB9AC',
+    emoji: '\\uD83C\\uDF71',
+    imageUrl: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=200&h=200&q=80&auto=format&fit=crop',
+    isNew: true,
+  },
+  {
+    name: '\\uC640\\uADDC \\uD0C0\\uD0C0\\uD0A4',
+    nameEn: 'Wagyu Tataki',
+    desc: 'A5 \\uC640\\uADDC\\uB97C \\uC0B4\\uC9DD \\uAD6C\\uC6CC \\uD3F0\\uC988 \\uC18C\\uC2A4\\uC5D0 \\uACC1\\uB4E4\\uC784',
+    descEn: 'Lightly seared A5 wagyu with ponzu sauce',
+    price: '\\u20A942,000',
+    category: '\\uC694\\uB9AC',
+    emoji: '\\uD83E\\uDD69',
+    imageUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&h=200&q=80&auto=format&fit=crop',
+    isPopular: true,
+  },
+  {
+    name: '\\uC0C8\\uC6B0 \\uD150\\uD478\\uB77C',
+    nameEn: 'Shrimp Tempura',
+    desc: '\\uBC14\\uC0AD\\uD55C \\uC0C8\\uC6B0 \\uD150\\uD478\\uB77C 5\\uB9C8\\uB9AC, \\uD150\\uCE20\\uC720 \\uC18C\\uC2A4',
+    descEn: 'Crispy shrimp tempura (5pcs) with tentsuyu',
+    price: '\\u20A918,000',
+    category: '\\uC694\\uB9AC',
+    emoji: '\\uD83C\\uDF64',
+    imageUrl: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=200&h=200&q=80&auto=format&fit=crop',
+  },
+  {
+    name: '\\uC720\\uC790 \\uC154\\uBD07',
+    nameEn: 'Yuzu Sorbet',
+    desc: '\\uC2DD\\uD6C4 \\uC785\\uAC00\\uC2EC, \\uC0C1\\uD07C\\uD55C \\uC720\\uC790 \\uC154\\uBD07',
+    descEn: 'Refreshing yuzu sorbet palate cleanser',
+    price: '\\u20A98,000',
+    category: '\\uB514\\uC800\\uD2B8',
+    emoji: '\\uD83C\\uDF4B',
   },
 ];
 
 const DEMO_HOURS: BusinessHour[] = [
-  { day: '\\uC6D4\\uC694\\uC77C', dayEn: 'Monday', hours: '09:00 - 21:00', hoursEn: '09:00 - 21:00' },
-  { day: '\\uD654\\uC694\\uC77C', dayEn: 'Tuesday', hours: '09:00 - 21:00', hoursEn: '09:00 - 21:00' },
-  { day: '\\uC218\\uC694\\uC77C', dayEn: 'Wednesday', hours: '09:00 - 21:00', hoursEn: '09:00 - 21:00' },
-  { day: '\\uBAA9\\uC694\\uC77C', dayEn: 'Thursday', hours: '09:00 - 21:00', hoursEn: '09:00 - 21:00' },
-  { day: '\\uAE08\\uC694\\uC77C', dayEn: 'Friday', hours: '09:00 - 21:00', hoursEn: '09:00 - 21:00' },
-  { day: '\\uD1A0\\uC694\\uC77C', dayEn: 'Saturday', hours: '10:00 - 22:00', hoursEn: '10:00 - 22:00' },
-  { day: '\\uC77C\\uC694\\uC77C', dayEn: 'Sunday', hours: '\\uD734\\uBB34', isHoliday: true },
+  { day: '\\uC6D4\\uC694\\uC77C', dayEn: 'Monday', hours: '\\uC815\\uAE30\\uD734\\uBB34', isHoliday: true },
+  { day: '\\uD654\\uC694\\uC77C', dayEn: 'Tuesday', hours: '17:00 - 24:00', hoursEn: '17:00 - 24:00' },
+  { day: '\\uC218\\uC694\\uC77C', dayEn: 'Wednesday', hours: '17:00 - 24:00', hoursEn: '17:00 - 24:00' },
+  { day: '\\uBAA9\\uC694\\uC77C', dayEn: 'Thursday', hours: '17:00 - 24:00', hoursEn: '17:00 - 24:00' },
+  { day: '\\uAE08\\uC694\\uC77C', dayEn: 'Friday', hours: '17:00 - 01:00', hoursEn: '17:00 - 01:00' },
+  { day: '\\uD1A0\\uC694\\uC77C', dayEn: 'Saturday', hours: '17:00 - 01:00', hoursEn: '17:00 - 01:00' },
+  { day: '\\uC77C\\uC694\\uC77C', dayEn: 'Sunday', hours: '17:00 - 23:00', hoursEn: '17:00 - 23:00' },
 ];
 
 function parseJSON<T>(raw: string | undefined, fallback: T): T {
@@ -1856,26 +1927,30 @@ function parseJSON<T>(raw: string | undefined, fallback: T): T {
 }
 
 export const siteConfig = {
-  name: process.env.NEXT_PUBLIC_SITE_NAME || '\\uC628\\uAE30 \\uCE74\\uD398',
-  nameEn: process.env.NEXT_PUBLIC_SITE_NAME_EN || 'Ongi Cafe',
+  name: process.env.NEXT_PUBLIC_SITE_NAME || '\\uC5F0\\uB0A8 \\uC0AC\\uCF00\\uD558\\uC6B0\\uC2A4 \\u591C\\u5BB4',
+  nameEn: process.env.NEXT_PUBLIC_SITE_NAME_EN || 'Yeonnam Sake House',
   description:
     process.env.NEXT_PUBLIC_DESCRIPTION ||
-    '\\uC815\\uC131\\uC744 \\uB2F4\\uC740 \\uD55C \\uC794\\uC758 \\uB530\\uB73B\\uD568',
+    '\\uD504\\uB9AC\\uBBF8\\uC5C4 \\uC0AC\\uC2DC\\uBBF8\\uC640 \\uC0AC\\uCF00\\uB97C \\uC990\\uAE30\\uB294 \\uBAA8\\uB358 \\uC694\\uB9AC\\uC8FC\\uC810',
   descriptionEn:
     process.env.NEXT_PUBLIC_DESCRIPTION_EN ||
-    'A warm cup of sincerity in every sip.',
-  phone: process.env.NEXT_PUBLIC_PHONE || '02-334-5870',
-  address: process.env.NEXT_PUBLIC_ADDRESS || '\\uC11C\\uC6B8 \\uB9C8\\uD3EC\\uAD6C \\uC5F0\\uB0A8\\uB3D9 239-10',
-  addressEn: process.env.NEXT_PUBLIC_ADDRESS_EN || '239-10, Yeonnam-dong, Mapo-gu, Seoul',
+    'Modern Japanese dining with premium sashimi and sake',
+  phone: process.env.NEXT_PUBLIC_PHONE || '02-335-7890',
+  address: process.env.NEXT_PUBLIC_ADDRESS || '\\uC11C\\uC6B8 \\uB9C8\\uD3EC\\uAD6C \\uC5F0\\uB0A8\\uB85C 23\\uAE38 12, 1\\uCE35',
+  addressEn: process.env.NEXT_PUBLIC_ADDRESS_EN || '1F, 12, Yeonnam-ro 23-gil, Mapo-gu, Seoul',
   kakaoMapId: process.env.NEXT_PUBLIC_KAKAO_MAP_ID || '',
   menuItems: parseJSON<MenuItem[]>(process.env.NEXT_PUBLIC_MENU_ITEMS, DEMO_MENU),
   businessHours: parseJSON<BusinessHour[]>(process.env.NEXT_PUBLIC_BUSINESS_HOURS, DEMO_HOURS),
-  galleryImages: parseJSON<string[]>(process.env.NEXT_PUBLIC_GALLERY_IMAGES, []),
+  galleryImages: parseJSON<string[]>(process.env.NEXT_PUBLIC_GALLERY_IMAGES, [
+    'https://images.unsplash.com/photo-1578474846511-04ba529f0b88?w=600&q=80&fit=crop',
+    'https://images.unsplash.com/photo-1559410545-0bdcd187e0a6?w=400&q=80&fit=crop',
+    'https://images.unsplash.com/photo-1607301405752-8e2a79fe4a84?w=400&q=80&fit=crop',
+  ]),
   instagramUrl: process.env.NEXT_PUBLIC_INSTAGRAM_URL || '',
   naverBlogUrl: process.env.NEXT_PUBLIC_NAVER_BLOG_URL || '',
   kakaoChannelUrl: process.env.NEXT_PUBLIC_KAKAO_CHANNEL_URL || '',
-  primaryColor: process.env.NEXT_PUBLIC_PRIMARY_COLOR || '#92400e',
-  fontFamily: process.env.NEXT_PUBLIC_FONT_FAMILY || 'Pretendard',
+  primaryColor: process.env.NEXT_PUBLIC_PRIMARY_COLOR || '#c8a97e',
+  fontFamily: process.env.NEXT_PUBLIC_FONT_FAMILY || 'Nanum Myeongjo',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 
