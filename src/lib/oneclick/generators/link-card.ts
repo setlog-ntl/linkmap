@@ -65,10 +65,10 @@ function generateConfigTs(state: ModuleConfigState): string {
   const socials = state.values.socials || {};
   const theme = state.values.theme || {};
 
-  const siteName = (profile.name as string) || '내 링크 카드';
-  const siteNameEn = (profile.nameEn as string) || 'My Link Card';
-  const bio = (profile.bio as string) || '안녕하세요! 여기서 저의 모든 링크를 확인하세요.';
-  const bioEn = (profile.bioEn as string) || 'Hello! Check out all my links here.';
+  const siteName = (profile.name as string) || '민지 (Minji)';
+  const siteNameEn = (profile.nameEn as string) || 'Minji';
+  const bio = (profile.bio as string) || '일상을 기록하는 콘텐츠 크리에이터';
+  const bioEn = (profile.bioEn as string) || 'Content creator documenting everyday life';
   const avatarUrl = normalizeImagePath((profile.avatarUrl as string) || '');
   const bgStyle = (theme.bgStyle as string) || 'gradient';
   const primaryColor = (theme.primaryColor as string) || '#6366f1';

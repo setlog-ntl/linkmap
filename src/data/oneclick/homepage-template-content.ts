@@ -639,10 +639,11 @@ export interface SocialItem {
 }
 
 const DEMO_LINKS: LinkItem[] = [
-  { title: '내 유튜브 채널', titleEn: 'My YouTube Channel', url: 'https://youtube.com', icon: 'youtube' },
-  { title: '블로그 구경하기', titleEn: 'Visit My Blog', url: 'https://blog.example.com', icon: 'pen-line' },
+  { title: '내 블로그', titleEn: 'My Blog', url: 'https://blog.example.com', icon: 'pen-line' },
+  { title: 'YouTube 채널', titleEn: 'YouTube Channel', url: 'https://youtube.com', icon: 'youtube' },
+  { title: '인스타그램', titleEn: 'Instagram', url: 'https://instagram.com', icon: 'instagram' },
   { title: '포트폴리오', titleEn: 'Portfolio', url: 'https://portfolio.example.com', icon: 'briefcase' },
-  { title: '할인 이벤트 바로가기', titleEn: 'Special Offers', url: 'https://shop.example.com', icon: 'shopping-bag' },
+  { title: '커피챗 예약', titleEn: 'Book a Coffee Chat', url: 'https://calendly.com', icon: 'coffee' },
 ];
 
 function parseJSON<T>(raw: string | undefined, fallback: T): T {
@@ -655,12 +656,12 @@ function parseJSON<T>(raw: string | undefined, fallback: T): T {
 }
 
 export const siteConfig = {
-  siteName: process.env.NEXT_PUBLIC_SITE_NAME || '내 링크 페이지',
-  siteNameEn: process.env.NEXT_PUBLIC_SITE_NAME_EN || 'My Link Page',
-  bio: process.env.NEXT_PUBLIC_BIO || '안녕하세요! 여기서 저의 모든 링크를 확인하세요.',
-  bioEn: process.env.NEXT_PUBLIC_BIO_EN || 'Hello! Check out all my links here.',
-  avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || null,
-  theme: process.env.NEXT_PUBLIC_THEME || 'gradient',
+  siteName: process.env.NEXT_PUBLIC_SITE_NAME || '민지 (Minji)',
+  siteNameEn: process.env.NEXT_PUBLIC_SITE_NAME_EN || 'Minji',
+  bio: process.env.NEXT_PUBLIC_BIO || '일상을 기록하는 콘텐츠 크리에이터',
+  bioEn: process.env.NEXT_PUBLIC_BIO_EN || 'Content creator documenting everyday life',
+  avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || 'https://plus.unsplash.com/premium_photo-1664475228198-ffce9c2b6a41?w=200&q=85&auto=format&fit=crop&crop=faces&facepad=2',
+  theme: process.env.NEXT_PUBLIC_THEME || 'minimal',
   bgStyle: process.env.NEXT_PUBLIC_BG_STYLE || 'gradient',
   cardStyle: process.env.NEXT_PUBLIC_CARD_STYLE || 'rounded',
   primaryColor: '#6366f1',
