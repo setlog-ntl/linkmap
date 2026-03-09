@@ -106,10 +106,10 @@ function SortableModuleCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={`rounded-lg border p-2 cursor-pointer transition-colors ${
+      className={`rounded-lg border p-2 cursor-pointer transition-all duration-200 ${
         isSelected
-          ? 'border-primary bg-primary/5'
-          : 'border-transparent hover:bg-muted/50'
+          ? 'border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20'
+          : 'border-transparent hover:bg-muted/50 hover:border-border'
       }`}
       onClick={() => onSelect(moduleId)}
     >
@@ -396,14 +396,17 @@ export function ModulePanel({
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* 패널 헤더 */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b flex-shrink-0">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b flex-shrink-0 bg-muted/30">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-3.5 w-3.5 text-muted-foreground" />
+          <Sparkles className="h-3.5 w-3.5 text-primary" />
           <span className="text-xs font-semibold">모듈 편집</span>
           <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
             {state.enabled.length}/{schema.modules.length}
           </Badge>
         </div>
+        <span className="text-[10px] text-muted-foreground">
+          수정 후 적용 클릭
+        </span>
       </div>
 
       {/* 스크롤 가능 영역 */}
@@ -416,7 +419,7 @@ export function ModulePanel({
               {presets.map((preset) => (
                 <button
                   key={preset.id}
-                  className="text-[10px] px-2 py-0.5 rounded-full border hover:bg-primary/10 hover:border-primary transition-colors"
+                  className="text-[10px] px-2.5 py-1 rounded-full border hover:bg-primary/10 hover:border-primary hover:shadow-sm transition-all duration-200 font-medium"
                   onClick={() => handleApplyPreset(preset)}
                   title={
                     locale === 'en'
@@ -498,17 +501,25 @@ export function ModulePanel({
         {/* 구분선 + 선택된 모듈 편집 폼 */}
         {selectedModule && state.enabled.includes(selectedModule.id) ? (
           <div className="px-4 pb-4 border-t pt-3">
-            <div className="mb-3">
-              <h3 className="text-sm font-semibold">
-                {locale === 'en' && selectedModule.nameEn
-                  ? selectedModule.nameEn
-                  : selectedModule.name}
-              </h3>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {locale === 'en' && selectedModule.descriptionEn
-                  ? selectedModule.descriptionEn
-                  : selectedModule.description}
-              </p>
+            <div className="mb-4 flex items-start gap-2">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                {(() => {
+                  const Icon = ICON_MAP[selectedModule.icon] ?? Sparkles;
+                  return <Icon className="h-4 w-4 text-primary" />;
+                })()}
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-sm font-semibold leading-tight">
+                  {locale === 'en' && selectedModule.nameEn
+                    ? selectedModule.nameEn
+                    : selectedModule.name}
+                </h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                  {locale === 'en' && selectedModule.descriptionEn
+                    ? selectedModule.descriptionEn
+                    : selectedModule.description}
+                </p>
+              </div>
             </div>
             <ModuleForm
               fields={selectedModule.fields}

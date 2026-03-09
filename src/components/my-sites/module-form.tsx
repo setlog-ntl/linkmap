@@ -27,8 +27,23 @@ interface ModuleFormProps {
 }
 
 export function ModuleForm({ fields, values, onChange, locale, deployId }: ModuleFormProps) {
+  // 그래디언트 색상 쌍 감지 (gradientFrom + gradientTo)
+  const gradientFrom = values['gradientFrom'] as string | undefined;
+  const gradientTo = values['gradientTo'] as string | undefined;
+  const hasGradient = fields.some(f => f.key === 'gradientFrom') && fields.some(f => f.key === 'gradientTo');
+
   return (
     <div className="space-y-4">
+      {/* 그래디언트 실시간 미리보기 */}
+      {hasGradient && gradientFrom && gradientTo && (
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium text-muted-foreground">그래디언트 미리보기</Label>
+          <div
+            className="h-10 rounded-lg border shadow-inner transition-all duration-300"
+            style={{ background: `linear-gradient(135deg, ${gradientFrom}, ${gradientTo})` }}
+          />
+        </div>
+      )}
       {fields.map((field) => (
         <FieldRenderer
           key={field.key}
@@ -103,19 +118,24 @@ function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRender
       );
     }
 
-    case 'color':
+    case 'color': {
+      const colorVal = (value as string) ?? '#000000';
       return (
         <div className="space-y-1.5">
           <Label className="text-xs font-medium">{label}</Label>
           <div className="flex items-center gap-2">
-            <input
-              type="color"
-              value={(value as string) ?? '#000000'}
-              onChange={(e) => onChange(e.target.value)}
-              className="h-8 w-10 rounded border cursor-pointer"
-            />
+            <div className="relative h-9 w-12 rounded-lg border overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-shadow"
+              style={{ backgroundColor: colorVal }}
+            >
+              <input
+                type="color"
+                value={colorVal}
+                onChange={(e) => onChange(e.target.value)}
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+              />
+            </div>
             <Input
-              value={(value as string) ?? ''}
+              value={colorVal}
               onChange={(e) => onChange(e.target.value)}
               className="h-8 text-sm font-mono flex-1"
               placeholder="#000000"
@@ -123,6 +143,7 @@ function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRender
           </div>
         </div>
       );
+    }
 
     case 'number':
       return (
@@ -150,12 +171,14 @@ function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRender
         </div>
       );
 
-    case 'select':
+    case 'select': {
+      const isFontField = field.key === 'fontFamily' || field.key.toLowerCase().includes('font');
+      const selectedFont = (value as string) ?? '';
       return (
         <div className="space-y-1.5">
           <Label className="text-xs font-medium">{label}</Label>
           <Select
-            value={(value as string) ?? ''}
+            value={selectedFont}
             onValueChange={(v) => onChange(v)}
           >
             <SelectTrigger className="h-8 text-sm">
@@ -164,13 +187,28 @@ function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRender
             <SelectContent>
               {field.options?.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
+                  {isFontField ? (
+                    <span style={{ fontFamily: opt.value }}>{opt.label}</span>
+                  ) : (
+                    opt.label
+                  )}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+          {/* 폰트 실시간 미리보기 */}
+          {isFontField && selectedFont && (
+            <div
+              className="mt-1 px-3 py-2 rounded-md border bg-muted/30 text-sm transition-all"
+              style={{ fontFamily: selectedFont }}
+            >
+              <p className="text-foreground">가나다라마바사 ABCDEF 012345</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{selectedFont}</p>
+            </div>
+          )}
         </div>
       );
+    }
 
     case 'array':
       return (
