@@ -11,7 +11,6 @@ import {
   genBasePathConst,
   createExtractors,
   extractSiteBlock,
-  parseArrayConstant,
   buildInitialState,
   unescapeString,
 } from './base-generator';
@@ -32,8 +31,8 @@ function buildMenuItemsArray(items: unknown[]): string {
     lines.push(`    category: '${esc(String(v.category || ''))}',`);
     lines.push(`    emoji: '${esc(String(v.emoji || '☕'))}',`);
     if (v.imageUrl) lines.push(`    imageUrl: '${esc(String(v.imageUrl))}',`);
-    if (v.isNew) lines.push('    isNew: true,');
-    if (v.isPopular) lines.push('    isPopular: true,');
+    if (v.isNew === true || v.isNew === 'true') lines.push('    isNew: true,');
+    if (v.isPopular === true || v.isPopular === 'true') lines.push('    isPopular: true,');
     return `  {\n${lines.join('\n')}\n  }`;
   });
   return `[\n${entries.join(',\n')}\n]`;
@@ -268,16 +267,24 @@ function parseConfigToState(
 
   // Menu items
   try {
-    const items = parseArrayConstant(
-      configContent,
-      /const DEMO_MENU:.*?=\s*(\[[\s\S]*?\n\]);/,
-      'name',
-      (_match, obj) => {
-        if (_match && /isNew:\s*true/.test(_match)) obj.isNew = 'true';
-        if (_match && /isPopular:\s*true/.test(_match)) obj.isPopular = 'true';
+    const menuMatch = configContent.match(/const DEMO_MENU:.*?=\s*(\[[\s\S]*?\n\]);/);
+    if (menuMatch?.[1]) {
+      const items: Record<string, unknown>[] = [];
+      const objRe = /\{([\s\S]*?)\}/g;
+      let m;
+      while ((m = objRe.exec(menuMatch[1])) !== null) {
+        const obj: Record<string, unknown> = {};
+        const fieldRe = /(\w+):\s*'((?:[^'\\]|\\.)*)'/g;
+        let fm;
+        while ((fm = fieldRe.exec(m[1])) !== null) {
+          obj[fm[1]] = unescapeString(fm[2]);
+        }
+        if (/isNew:\s*true/.test(m[1])) obj.isNew = true;
+        if (/isPopular:\s*true/.test(m[1])) obj.isPopular = true;
+        if (obj.name) items.push(obj);
       }
-    );
-    if (items.length > 0) state.values.menu.items = items;
+      if (items.length > 0) state.values.menu.items = items;
+    }
   } catch { /* 기본값 유지 */ }
 
   // Business hours

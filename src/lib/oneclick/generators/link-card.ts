@@ -91,8 +91,8 @@ export interface SocialItem {
 
 /** 배경 스타일: light | gradient | solid | mesh | aurora | glass | dark */
 export type BgStyle = 'light' | 'gradient' | 'solid' | 'mesh' | 'aurora' | 'glass' | 'dark';
-/** 카드 스타일: rounded | pill | square | glass | neon */
-export type CardStyle = 'rounded' | 'pill' | 'square' | 'glass' | 'neon';
+/** 카드 스타일: rounded | pill | square | glass | neon | outline */
+export type CardStyle = 'rounded' | 'pill' | 'square' | 'glass' | 'neon' | 'outline';
 /** 폰트 패밀리: system | serif | mono | display */
 export type FontFamily = 'system' | 'serif' | 'mono' | 'display';
 

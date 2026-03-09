@@ -71,6 +71,9 @@ export const freelancerPagePresets: ModulePreset[] = [
     state: {
       enabled: ['hero', 'services', 'portfolio', 'testimonials', 'process', 'contact'],
       order: ['hero', 'services', 'portfolio', 'testimonials', 'process', 'contact'],
+      values: {
+        hero: { designPreset: 'agency' },
+      },
     },
   },
   {
@@ -82,6 +85,9 @@ export const freelancerPagePresets: ModulePreset[] = [
     state: {
       enabled: ['hero', 'portfolio', 'contact'],
       order: ['hero', 'portfolio', 'contact'],
+      values: {
+        hero: { designPreset: 'creative-minimal' },
+      },
     },
   },
 ];

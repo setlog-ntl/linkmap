@@ -33,7 +33,7 @@ export const digitalNamecardPresets: ModulePreset[] = [
       enabled: ['profile', 'contact', 'socials', 'theme'],
       order: ['profile', 'contact', 'socials', 'theme'],
       values: {
-        theme: { designPreset: 'warm-earth' },
+        theme: { accentColor: '#d97706' },
       },
     },
   },
@@ -47,7 +47,7 @@ export const digitalNamecardPresets: ModulePreset[] = [
       enabled: ['profile', 'contact', 'socials', 'theme'],
       order: ['profile', 'contact', 'socials', 'theme'],
       values: {
-        theme: { designPreset: 'midnight' },
+        theme: { accentColor: '#1e1b4b' },
       },
     },
   },

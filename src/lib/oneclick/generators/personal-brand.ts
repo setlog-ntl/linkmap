@@ -24,13 +24,14 @@ function buildValuesArray(items: unknown[]): string {
   if (!Array.isArray(items) || items.length === 0) return '[]';
   const entries = items.map((item) => {
     const v = item as Record<string, string>;
-    return `  {
-    emoji: '${esc(v.emoji || '✦')}',
-    title: '${esc(v.title || '')}',
-    ${v.titleEn ? `titleEn: '${esc(v.titleEn)}',` : ''}
-    desc: '${esc(v.desc || '')}',
-    ${v.descEn ? `descEn: '${esc(v.descEn)}',` : ''}
-  }`;
+    const lines = [
+      `    emoji: '${esc(v.emoji || '✦')}',`,
+      `    title: '${esc(v.title || '')}',`,
+      ...(v.titleEn ? [`    titleEn: '${esc(v.titleEn)}',`] : []),
+      `    desc: '${esc(v.desc || '')}',`,
+      ...(v.descEn ? [`    descEn: '${esc(v.descEn)}',`] : []),
+    ];
+    return `  {\n${lines.join('\n')}\n  }`;
   });
   return `[\n${entries.join(',\n')}\n]`;
 }
@@ -39,7 +40,13 @@ function buildHighlightsArray(items: unknown[]): string {
   if (!Array.isArray(items) || items.length === 0) return '[]';
   const entries = items.map((item) => {
     const v = item as Record<string, string>;
-    return `  { label: '${esc(v.label || '')}', ${v.labelEn ? `labelEn: '${esc(v.labelEn)}', ` : ''}value: '${esc(v.value || '')}', ${v.valueEn ? `valueEn: '${esc(v.valueEn)}', ` : ''}}`;
+    const fields = [
+      `label: '${esc(v.label || '')}'`,
+      ...(v.labelEn ? [`labelEn: '${esc(v.labelEn)}'`] : []),
+      `value: '${esc(v.value || '')}'`,
+      ...(v.valueEn ? [`valueEn: '${esc(v.valueEn)}'`] : []),
+    ];
+    return `  { ${fields.join(', ')} }`;
   });
   return `[\n${entries.join(',\n')}\n]`;
 }

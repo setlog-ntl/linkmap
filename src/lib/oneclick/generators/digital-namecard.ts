@@ -52,7 +52,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const companyEn = (profile.companyEn as string) || '';
   const avatarUrl = normalizeImagePath((profile.avatarUrl as string) || '');
   const email = (contact.email as string) || 'hello@example.com';
-  const phone = (contact.phone as string) || '010-1234-5678';
+  const phone = contact.phone != null ? (contact.phone as string) : '';
   const address = (contact.address as string) || '';
   const addressEn = (contact.addressEn as string) || '';
   const website = (contact.website as string) || '';
@@ -169,8 +169,15 @@ function parseConfigToState(
   // Contact
   const email = extractString('email');
   if (email !== null) state.values.contact.email = email;
+  // extractNullable은 null 리터럴과 키 미존재 둘 다 null 반환.
+  // phone은 defaultValue가 비어있지 않으므로, null 리터럴(빈 값 의도) 여부를
+  // 직접 확인해 빈 문자열로 복원한다.
   const phone = extractNullable('phone');
-  if (phone !== null) state.values.contact.phone = phone;
+  if (phone !== null) {
+    state.values.contact.phone = phone;
+  } else if (/(?<!\w)phone:\s*(?:process\.env\.\w+\s*\|\|\s*)?null/.test(siteBlock)) {
+    state.values.contact.phone = '';
+  }
   const address = extractNullable('address');
   if (address !== null) state.values.contact.address = address;
   const addressEn = extractNullable('addressEn');

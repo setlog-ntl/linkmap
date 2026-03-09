@@ -72,7 +72,7 @@ export const devShowcasePresets: ModulePreset[] = [
       enabled: ['hero', 'about', 'projects', 'experience', 'contact'],
       order: ['hero', 'about', 'projects', 'experience', 'contact'],
       values: {
-        hero: { designPreset: 'github-dark' },
+        hero: { designPreset: 'terminal' },
       },
     },
   },

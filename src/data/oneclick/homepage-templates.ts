@@ -314,7 +314,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
       'Storytelling-driven personal branding page with fullscreen hero, parallax scroll, values showcase, and smooth animations. Express your identity.',
     description_ko:
       '나다움을 표현하는 홈페이지. 풀스크린 히어로, 패럴렉스 스크롤, 가치관 쇼케이스와 부드러운 애니메이션.',
-    preview_image_url: null,
+    preview_image_url: '/img/templates/personal-brand-hero.png',
     github_owner: 'linkmap-templates',
     github_repo: 'personal-brand',
     default_branch: 'main',

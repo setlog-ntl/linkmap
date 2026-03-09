@@ -50,7 +50,7 @@ function buildPortfolioArray(items: unknown[]): string {
     if (v.categoryEn) lines.push(`    categoryEn: '${esc(v.categoryEn)}',`);
     lines.push(`    desc: '${esc(v.desc || '')}',`);
     if (v.descEn) lines.push(`    descEn: '${esc(v.descEn)}',`);
-    lines.push(`    imageUrl: \`\${_basePath}${esc(normalizeImagePath(v.imageUrl || ''))}\`,`);
+    lines.push(`    imageUrl: ${imagePathExpr(normalizeImagePath(v.imageUrl || ''))},`);
     const tagsStr = v.tags || '';
     const tagsArr = tagsStr
       .split(',')

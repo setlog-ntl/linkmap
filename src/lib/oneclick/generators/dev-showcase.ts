@@ -113,7 +113,8 @@ function generateConfigTs(state: ModuleConfigState): string {
   const aboutEn = (about.storyEn as string) || '';
   const githubUsername = (projects.githubUsername as string) || '';
   const typingWords = (hero.typingWords as string) || '';
-  const maxRepos = (projects.maxRepos as number) ?? 6;
+  const maxReposRaw = (projects.maxRepos as string | number | undefined);
+  const maxRepos = maxReposRaw !== undefined && maxReposRaw !== '' ? parseInt(String(maxReposRaw), 10) : 6;
   const email = (contact.email as string) || '';
   const githubUrl = (contact.github as string) || '';
   const linkedinUrl = (contact.linkedin as string) || '';
@@ -248,7 +249,7 @@ export const siteConfig = {
   email: process.env.NEXT_PUBLIC_EMAIL || ${email ? `'${esc(email)}'` : 'null'},
   githubUrl: process.env.NEXT_PUBLIC_GITHUB_URL || ${githubUrl ? `'${esc(githubUrl)}'` : 'null'},
   linkedinUrl: process.env.NEXT_PUBLIC_LINKEDIN_URL || ${linkedinUrl ? `'${esc(linkedinUrl)}'` : 'null'},
-  typingWords: ${typingWords ? `'${esc(typingWords)}'` : 'null'},
+  typingWords: ${typingWords.trim() ? `'${esc(typingWords)}'` : 'null'},
   maxRepos: ${maxRepos},
   designPreset: '${esc(designPreset)}',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
@@ -345,7 +346,7 @@ function parseConfigToState(
   const githubUsername = extractNullable('githubUsername');
   if (githubUsername !== null) state.values.projects.githubUsername = githubUsername;
   const maxReposMatch = configContent.match(/maxRepos:\s*(\d+)/);
-  if (maxReposMatch) state.values.projects.maxRepos = Number(maxReposMatch[1]);
+  if (maxReposMatch) state.values.projects.maxRepos = maxReposMatch[1];
 
   // Experience
   try {

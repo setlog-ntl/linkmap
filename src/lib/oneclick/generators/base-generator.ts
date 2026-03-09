@@ -101,6 +101,10 @@ export function buildGalleryArray(items: unknown[]): string {
     const v = item as Record<string, string>;
     const raw = v.url || (v as unknown as string);
     const normalized = normalizeImagePath(raw);
+    // 절대 URL(http/https)은 basePath 없이 그대로 사용
+    if (/^https?:\/\//.test(normalized)) {
+      return `  '${esc(normalized)}'`;
+    }
     return `  \`\${_basePath}${esc(normalized)}\``;
   });
   return `[\n${urls.join(',\n')}\n]`;

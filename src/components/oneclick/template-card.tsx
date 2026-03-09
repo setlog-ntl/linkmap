@@ -313,7 +313,16 @@ export function TemplateCard({ template, isSelected, locale, onSelect }: Templat
       <CardContent className="p-0">
         {/* Preview area */}
         <div className="h-28 sm:h-36 rounded-t-xl bg-muted/50 flex items-center justify-center relative overflow-hidden px-4 sm:px-6">
-          <WireframeSVG slug={template.slug} />
+          {template.preview_image_url ? (
+            <img
+              src={template.preview_image_url}
+              alt={locale === 'ko' ? template.name_ko : template.name}
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <WireframeSVG slug={template.slug} />
+          )}
 
           {/* Recommended badge — top left */}
           {isRecommended && (
