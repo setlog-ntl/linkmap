@@ -307,7 +307,7 @@ import { Footer } from '@/components/footer';
 
 export default function Home() {
   const theme = getTheme(siteConfig.theme);
-  const bgStyle = siteConfig.bgStyle || 'gradient';
+  const bgStyle = siteConfig.bgStyle || 'light';
 
   return (
     <main id="main"
@@ -662,7 +662,7 @@ export const siteConfig = {
   bioEn: process.env.NEXT_PUBLIC_BIO_EN || 'Content creator documenting everyday life',
   avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || 'https://plus.unsplash.com/premium_photo-1664475228198-ffce9c2b6a41?w=200&q=85&auto=format&fit=crop&crop=faces&facepad=2',
   theme: process.env.NEXT_PUBLIC_THEME || 'minimal',
-  bgStyle: process.env.NEXT_PUBLIC_BG_STYLE || 'solid',
+  bgStyle: process.env.NEXT_PUBLIC_BG_STYLE || 'light',
   cardStyle: process.env.NEXT_PUBLIC_CARD_STYLE || 'rounded',
   primaryColor: '#6366f1',
   links: parseJSON<LinkItem[]>(process.env.NEXT_PUBLIC_LINKS, DEMO_LINKS),
@@ -750,6 +750,8 @@ export function getTheme(name: string): ThemePreset {
 
 export function getBackground(theme: ThemePreset, bgStyle: string): Record<string, string> {
   switch (bgStyle) {
+    case 'light':
+      return { background: \`linear-gradient(180deg, \${theme.backgroundFrom}, \${theme.backgroundTo})\` };
     case 'solid':
       return { background: theme.primary };
     case 'mesh':
@@ -759,6 +761,12 @@ export function getBackground(theme: ThemePreset, bgStyle: string): Record<strin
     case 'aurora':
       return {
         background: \`radial-gradient(ellipse at top left, \${theme.backgroundFrom}cc 0%, transparent 60%), radial-gradient(ellipse at top right, \${theme.primary}99 0%, transparent 60%), radial-gradient(ellipse at bottom center, \${theme.backgroundTo}bb 0%, transparent 65%), #090d18\`,
+      };
+    case 'dark':
+      return { background: \`linear-gradient(135deg, #0f172a, #1e1b4b)\` };
+    case 'glass':
+      return {
+        background: \`linear-gradient(135deg, \${theme.backgroundFrom}ee, \${theme.backgroundTo}ee)\`,
       };
     default:
       return {

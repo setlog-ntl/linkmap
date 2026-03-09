@@ -183,10 +183,11 @@ export const linkCardModuleSchema: TemplateModuleSchema = {
           type: 'select',
           label: '배경 스타일',
           labelEn: 'Background Style',
-          defaultValue: 'solid',
+          defaultValue: 'light',
           options: [
+            { value: 'light', label: '밝은 배경 (기본)' },
             { value: 'gradient', label: '그래디언트' },
-            { value: 'solid', label: '단색' },
+            { value: 'solid', label: '단색 (메인 컬러)' },
             { value: 'mesh', label: '메쉬' },
             { value: 'aurora', label: '오로라 (2025 트렌드)' },
             { value: 'glass', label: '유리 효과' },

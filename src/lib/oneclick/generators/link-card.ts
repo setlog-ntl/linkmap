@@ -70,7 +70,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const bio = (profile.bio as string) || '일상을 기록하는 콘텐츠 크리에이터';
   const bioEn = (profile.bioEn as string) || 'Content creator documenting everyday life';
   const avatarUrl = normalizeImagePath((profile.avatarUrl as string) || '');
-  const bgStyle = (theme.bgStyle as string) || 'solid';
+  const bgStyle = (theme.bgStyle as string) || 'light';
   const primaryColor = (theme.primaryColor as string) || '#6366f1';
   const cardStyle = (theme.cardStyle as string) || 'rounded';
   const fontFamily = (theme.fontFamily as string) || 'system';
@@ -89,8 +89,8 @@ export interface SocialItem {
   url: string;
 }
 
-/** 배경 스타일: gradient | solid | mesh | aurora | glass | dark */
-export type BgStyle = 'gradient' | 'solid' | 'mesh' | 'aurora' | 'glass' | 'dark';
+/** 배경 스타일: light | gradient | solid | mesh | aurora | glass | dark */
+export type BgStyle = 'light' | 'gradient' | 'solid' | 'mesh' | 'aurora' | 'glass' | 'dark';
 /** 카드 스타일: rounded | pill | square | glass | neon */
 export type CardStyle = 'rounded' | 'pill' | 'square' | 'glass' | 'neon';
 /** 폰트 패밀리: system | serif | mono | display */
@@ -169,7 +169,7 @@ function getFontClass(fontFamily: string): string {
 
 export default function Home() {
   const theme = getTheme(siteConfig.theme);
-  const bgStyle = siteConfig.bgStyle || 'gradient';
+  const bgStyle = siteConfig.bgStyle || 'light';
   const fontClass = getFontClass(siteConfig.fontFamily || 'system');
   const isAnimated = bgStyle === 'gradient' || bgStyle === 'aurora';
   const isDark = bgStyle === 'dark';
