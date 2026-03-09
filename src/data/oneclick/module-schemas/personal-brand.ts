@@ -67,7 +67,7 @@ export const personalBrandModuleSchema: TemplateModuleSchema = {
           label: '배경 이미지 URL',
           labelEn: 'Hero Image URL',
           placeholder: 'https://example.com/hero.jpg',
-          defaultValue: 'https://plus.unsplash.com/premium_photo-1679079456083-9f288e224e96?w=1200&q=85&auto=format&fit=crop&crop=faces',
+          defaultValue: 'https://plus.unsplash.com/premium_photo-1661402218542-58a4bb86e492?w=1200&q=85&auto=format&fit=crop',
         },
         {
           key: 'gradientFrom',

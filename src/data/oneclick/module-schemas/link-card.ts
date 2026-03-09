@@ -183,7 +183,7 @@ export const linkCardModuleSchema: TemplateModuleSchema = {
           type: 'select',
           label: '배경 스타일',
           labelEn: 'Background Style',
-          defaultValue: 'gradient',
+          defaultValue: 'solid',
           options: [
             { value: 'gradient', label: '그래디언트' },
             { value: 'solid', label: '단색' },

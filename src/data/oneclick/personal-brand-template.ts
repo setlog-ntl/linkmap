@@ -1485,7 +1485,7 @@ export const siteConfig = {
   nameEn: process.env.NEXT_PUBLIC_SITE_NAME_EN || 'Jiwon Lee',
   tagline: process.env.NEXT_PUBLIC_TAGLINE || '\\uCF58\\uD150\\uCE20\\uB85C \\uC138\\uC0C1\\uC744 \\uC5F0\\uACB0\\uD558\\uB294 \\uD06C\\uB9AC\\uC5D0\\uC774\\uD130',
   taglineEn: process.env.NEXT_PUBLIC_TAGLINE_EN || 'Creator who connects the world through content',
-  heroImageUrl: process.env.NEXT_PUBLIC_HERO_IMAGE_URL || 'https://plus.unsplash.com/premium_photo-1679079456083-9f288e224e96?w=1200&q=85&auto=format&fit=crop&crop=faces',
+  heroImageUrl: process.env.NEXT_PUBLIC_HERO_IMAGE_URL || 'https://plus.unsplash.com/premium_photo-1661402218542-58a4bb86e492?w=1200&q=85&auto=format&fit=crop',
   story:
     process.env.NEXT_PUBLIC_STORY ||
     '\\uC548\\uB155\\uD558\\uC138\\uC694, \\uC800\\uB294 \\uC774\\uC9C0\\uC6D0\\uC785\\uB2C8\\uB2E4. 5\\uB144\\uC0B4 \\uB514\\uC9C0\\uD138 \\uCF58\\uD150\\uCE20\\uB97C \\uB9CC\\uB4E4\\uBA70 \\uBE0C\\uB79C\\uB4DC\\uC640 \\uC0AC\\uB78C \\uC0AC\\uC774\\uC758 \\uB2E4\\uB9AC\\uB97C \\uB193\\uACE0 \\uC788\\uC5B4\\uC694.',

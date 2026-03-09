@@ -662,7 +662,7 @@ export const siteConfig = {
   bioEn: process.env.NEXT_PUBLIC_BIO_EN || 'Content creator documenting everyday life',
   avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || 'https://plus.unsplash.com/premium_photo-1664475228198-ffce9c2b6a41?w=200&q=85&auto=format&fit=crop&crop=faces&facepad=2',
   theme: process.env.NEXT_PUBLIC_THEME || 'minimal',
-  bgStyle: process.env.NEXT_PUBLIC_BG_STYLE || 'gradient',
+  bgStyle: process.env.NEXT_PUBLIC_BG_STYLE || 'solid',
   cardStyle: process.env.NEXT_PUBLIC_CARD_STYLE || 'rounded',
   primaryColor: '#6366f1',
   links: parseJSON<LinkItem[]>(process.env.NEXT_PUBLIC_LINKS, DEMO_LINKS),

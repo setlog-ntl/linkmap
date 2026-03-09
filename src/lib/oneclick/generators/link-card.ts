@@ -70,7 +70,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const bio = (profile.bio as string) || '일상을 기록하는 콘텐츠 크리에이터';
   const bioEn = (profile.bioEn as string) || 'Content creator documenting everyday life';
   const avatarUrl = normalizeImagePath((profile.avatarUrl as string) || '');
-  const bgStyle = (theme.bgStyle as string) || 'gradient';
+  const bgStyle = (theme.bgStyle as string) || 'solid';
   const primaryColor = (theme.primaryColor as string) || '#6366f1';
   const cardStyle = (theme.cardStyle as string) || 'rounded';
   const fontFamily = (theme.fontFamily as string) || 'system';
