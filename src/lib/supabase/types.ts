@@ -32,3 +32,22 @@ export interface DbEnvironmentVariable {
 export interface DbEnvVarWithProject extends DbEnvironmentVariable {
   project: { user_id: string };
 }
+
+export interface DbServiceCredential {
+  id: string;
+  project_id: string;
+  service_id: string | null;
+  label: string;
+  encrypted_username: string;
+  encrypted_password: string | null;
+  purpose: string;
+  environment: string;
+  website_url: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DbCredentialWithProject extends DbServiceCredential {
+  project: { user_id: string };
+}

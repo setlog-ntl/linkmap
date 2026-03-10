@@ -113,7 +113,11 @@ export type AuditAction =
   | 'feedback.update'
   | 'feedback.delete'
   | 'feedback.admin_update'
-  | 'feedback.comment_create';
+  | 'feedback.comment_create'
+  | 'credential.create'
+  | 'credential.update'
+  | 'credential.delete'
+  | 'credential.decrypt';
 
 interface AuditLogEntry {
   action: AuditAction;

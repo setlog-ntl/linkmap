@@ -9,3 +9,4 @@ export * from './service-account';
 export * from './dashboard';
 export * from './team';
 export * from './feedback';
+export * from './credential';

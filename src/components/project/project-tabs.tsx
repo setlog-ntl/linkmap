@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Map, List, Key, Settings, Link2, DollarSign, Activity } from 'lucide-react';
+import { LayoutDashboard, Map, List, Key, Settings, Link2, DollarSign, Activity, UserCheck } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
@@ -16,6 +16,7 @@ interface Tab {
   labelKey: string;
   href: string;
   icon: LucideIcon;
+  fallbackLabel?: string;
 }
 
 const tabGroups: Tab[][] = [
@@ -24,6 +25,7 @@ const tabGroups: Tab[][] = [
     { labelKey: 'project.services', href: '/services', icon: List },
     { labelKey: 'project.connections', href: '/connections', icon: Link2 },
     { labelKey: 'project.envVars', href: '/env', icon: Key },
+    { labelKey: 'project.credentials', href: '/credentials', icon: UserCheck, fallbackLabel: '계정 관리' },
     { labelKey: 'project.costs', href: '/costs', icon: DollarSign },
     { labelKey: 'project.monitoring', href: '/monitoring', icon: Activity },
   ],
@@ -52,7 +54,8 @@ export function ProjectTabs({ projectId }: ProjectTabsProps) {
             const isActive = tab.href === ''
               ? pathname === basePath
               : pathname.startsWith(tabPath);
-            const label = t(locale, tab.labelKey);
+            const translated = t(locale, tab.labelKey);
+            const label = translated === tab.labelKey && tab.fallbackLabel ? tab.fallbackLabel : translated;
 
             return (
               <Link
