@@ -76,6 +76,9 @@ function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRender
   switch (field.type) {
     case 'text': {
       const textVal = (value as string) ?? '';
+      const isRequired = field.validation?.required;
+      const maxLen = field.validation?.maxLength;
+      const showError = isRequired && !textVal.trim();
       return (
         <div className="space-y-1.5">
           <Label className="text-xs font-medium">{label}</Label>
@@ -84,8 +87,12 @@ function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRender
             value={textVal}
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder}
-            className="h-8 text-sm"
+            className={`h-8 text-sm ${showError ? 'border-destructive' : ''}`}
+            maxLength={maxLen}
           />
+          {showError && (
+            <p className="text-[11px] text-destructive">필수 입력 항목입니다</p>
+          )}
         </div>
       );
     }
@@ -104,6 +111,8 @@ function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRender
 
     case 'textarea': {
       const textareaVal = (value as string) ?? '';
+      const isRequired = field.validation?.required;
+      const showError = isRequired && !textareaVal.trim();
       return (
         <div className="space-y-1.5">
           <Label className="text-xs font-medium">{label}</Label>
@@ -111,25 +120,30 @@ function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRender
             value={textareaVal}
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder}
-            className="text-sm min-h-[80px] resize-y"
+            className={`text-sm min-h-[80px] resize-y ${showError ? 'border-destructive' : ''}`}
             maxLength={field.validation?.maxLength}
           />
+          {showError && (
+            <p className="text-[11px] text-destructive">필수 입력 항목입니다</p>
+          )}
         </div>
       );
     }
 
     case 'color': {
       const colorVal = (value as string) ?? '#000000';
+      const isValidHex = /^#[0-9a-fA-F]{6}$/.test(colorVal);
+      const showColorError = colorVal.length > 0 && !isValidHex;
       return (
         <div className="space-y-1.5">
           <Label className="text-xs font-medium">{label}</Label>
           <div className="flex items-center gap-2">
             <div className="relative h-9 w-12 rounded-lg border overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-shadow"
-              style={{ backgroundColor: colorVal }}
+              style={{ backgroundColor: isValidHex ? colorVal : '#000000' }}
             >
               <input
                 type="color"
-                value={colorVal}
+                value={isValidHex ? colorVal : '#000000'}
                 onChange={(e) => onChange(e.target.value)}
                 className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
               />
@@ -137,10 +151,13 @@ function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRender
             <Input
               value={colorVal}
               onChange={(e) => onChange(e.target.value)}
-              className="h-8 text-sm font-mono flex-1"
+              className={`h-8 text-sm font-mono flex-1 ${showColorError ? 'border-destructive' : ''}`}
               placeholder="#000000"
             />
           </div>
+          {showColorError && (
+            <p className="text-[11px] text-destructive">올바른 HEX 색상을 입력하세요 (예: #FF5733)</p>
+          )}
         </div>
       );
     }
@@ -173,12 +190,12 @@ function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRender
 
     case 'select': {
       const isFontField = field.key === 'fontFamily' || field.key.toLowerCase().includes('font');
-      const selectedFont = (value as string) ?? '';
+      const selectedValue = (value as string) ?? '';
       return (
         <div className="space-y-1.5">
           <Label className="text-xs font-medium">{label}</Label>
           <Select
-            value={selectedFont}
+            value={selectedValue}
             onValueChange={(v) => onChange(v)}
           >
             <SelectTrigger className="h-8 text-sm">
@@ -197,13 +214,13 @@ function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRender
             </SelectContent>
           </Select>
           {/* 폰트 실시간 미리보기 */}
-          {isFontField && selectedFont && (
+          {isFontField && selectedValue && (
             <div
               className="mt-1 px-3 py-2 rounded-md border bg-muted/30 text-sm transition-all"
-              style={{ fontFamily: selectedFont }}
+              style={{ fontFamily: selectedValue }}
             >
               <p className="text-foreground">가나다라마바사 ABCDEF 012345</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{selectedFont}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{selectedValue}</p>
             </div>
           )}
         </div>
@@ -261,7 +278,7 @@ function ArrayFieldRenderer({
 
   const handleAdd = useCallback(() => {
     if (!canAdd || !field.itemSchema) return;
-    const newItem: Record<string, unknown> = {};
+    const newItem: Record<string, unknown> = { _id: crypto.randomUUID() };
     for (const subField of field.itemSchema) {
       newItem[subField.key] = subField.defaultValue;
     }
@@ -286,7 +303,7 @@ function ArrayFieldRenderer({
 
       {items.map((item, index) => (
         <div
-          key={index}
+          key={((item as Record<string, unknown>)?._id as string) || `item-${index}`}
           className="border rounded-lg p-3 space-y-2 bg-muted/20 relative group"
         >
           <div className="flex items-center justify-between mb-1">
@@ -314,6 +331,12 @@ function ArrayFieldRenderer({
           ))}
         </div>
       ))}
+
+      {items.length === 0 && (
+        <p className="text-xs text-muted-foreground text-center py-3">
+          항목이 없습니다. 추가 버튼을 눌러주세요
+        </p>
+      )}
 
       {canAdd && (
         <Button

@@ -230,6 +230,349 @@ export interface ComponentMapping {
   render: string;
 }
 
+// ─── Small-Biz 공통 빌더/파서 ────────────────
+
+export function buildMenuItemsArray(items: unknown[], defaultEmoji = '🍽️'): string {
+  if (!Array.isArray(items) || items.length === 0) return '[]';
+  const entries = items.map((item) => {
+    const v = item as Record<string, unknown>;
+    const lines: string[] = [
+      `    name: '${esc(String(v.name || ''))}',`,
+    ];
+    if (v.nameEn) lines.push(`    nameEn: '${esc(String(v.nameEn))}',`);
+    lines.push(`    desc: '${esc(String(v.desc || ''))}',`);
+    if (v.descEn) lines.push(`    descEn: '${esc(String(v.descEn))}',`);
+    lines.push(`    price: '${esc(String(v.price || ''))}',`);
+    lines.push(`    category: '${esc(String(v.category || ''))}',`);
+    lines.push(`    emoji: '${esc(String(v.emoji || defaultEmoji))}',`);
+    if (v.imageUrl) lines.push(`    imageUrl: '${esc(String(v.imageUrl))}',`);
+    if (v.isNew === true || v.isNew === 'true') lines.push('    isNew: true,');
+    if (v.isPopular === true || v.isPopular === 'true') lines.push('    isPopular: true,');
+    return `  {\n${lines.join('\n')}\n  }`;
+  });
+  return `[\n${entries.join(',\n')}\n]`;
+}
+
+export function buildBusinessHoursArray(items: unknown[]): string {
+  if (!Array.isArray(items) || items.length === 0) return '[]';
+  const entries = items.map((item) => {
+    const v = item as Record<string, string>;
+    const lines: string[] = [
+      `    day: '${esc(v.day || '')}',`,
+    ];
+    if (v.dayEn) lines.push(`    dayEn: '${esc(v.dayEn)}',`);
+    lines.push(`    hours: '${esc(v.hours || '')}',`);
+    if (v.hoursEn) lines.push(`    hoursEn: '${esc(v.hoursEn)}',`);
+    if ((item as Record<string, unknown>).isHoliday) lines.push('    isHoliday: true,');
+    return `  {\n${lines.join('\n')}\n  }`;
+  });
+  return `[\n${entries.join(',\n')}\n]`;
+}
+
+/** Menu items 파싱 (DEMO_MENU 상수에서) */
+export function parseMenuFromConfig(configContent: string): Record<string, unknown>[] {
+  return parseArrayConstant(
+    configContent,
+    /const DEMO_MENU:.*?=\s*(\[[\s\S]*?\n\]);/,
+    'name',
+    (match, obj) => {
+      if (/isNew:\s*true/.test(match)) (obj as Record<string, unknown>).isNew = true;
+      if (/isPopular:\s*true/.test(match)) (obj as Record<string, unknown>).isPopular = true;
+    }
+  ) as Record<string, unknown>[];
+}
+
+/** Business hours 파싱 (DEMO_HOURS 상수에서) */
+export function parseHoursFromConfig(configContent: string): Record<string, unknown>[] {
+  return parseArrayConstant(
+    configContent,
+    /const DEMO_HOURS:.*?=\s*(\[[\s\S]*?\n\]);/,
+    'day',
+    (match, obj) => {
+      if (/isHoliday:\s*true/.test(match)) (obj as Record<string, unknown>).isHoliday = true;
+    }
+  ) as Record<string, unknown>[];
+}
+
+/** Gallery images 파싱 (parseJSON 패턴) */
+export function parseGalleryFromConfig(configContent: string): Record<string, string>[] {
+  const galMatch = configContent.match(
+    /galleryImages:\s*parseJSON<string\[\]>\([^,]+,\s*(\[[\s\S]*?\])\s*\)/
+  );
+  if (!galMatch) return [];
+  const items: Record<string, string>[] = [];
+  const urlRe = /(?:'([^']+)'|`\$\{_basePath\}([^`]+)`)/g;
+  let m;
+  while ((m = urlRe.exec(galMatch[1])) !== null) {
+    items.push({ url: m[1] || m[2] });
+  }
+  return items;
+}
+
+/** Small-Biz 계열 MODULE_COMPONENTS (small-biz, small-biz-cafe 공통) */
+export const SMALL_BIZ_MODULE_COMPONENTS: Record<string, ComponentMapping> = {
+  hero: {
+    importName: 'HeroSection',
+    importPath: '@/components/hero-section',
+    render: '        <HeroSection config={siteConfig} />',
+  },
+  menu: {
+    importName: 'MenuSection',
+    importPath: '@/components/menu-section',
+    render: '        <MenuSection items={siteConfig.menuItems} />',
+  },
+  hours: {
+    importName: 'HoursSection',
+    importPath: '@/components/hours-section',
+    render: '        <HoursSection hours={siteConfig.businessHours} />',
+  },
+  location: {
+    importName: 'LocationSection',
+    importPath: '@/components/location-section',
+    render: '        <LocationSection config={siteConfig} />',
+  },
+  gallery: {
+    importName: 'GallerySection',
+    importPath: '@/components/gallery-section',
+    render: `        {siteConfig.galleryImages.length > 0 && (\n          <GallerySection images={siteConfig.galleryImages} />\n        )}`,
+  },
+  sns: {
+    importName: 'SnsSection',
+    importPath: '@/components/sns-section',
+    render: '        <SnsSection config={siteConfig} />',
+  },
+};
+
+export const SMALL_BIZ_IMPORT_TO_MODULE_MAP: Record<string, string> = {
+  HeroSection: 'hero',
+  MenuSection: 'menu',
+  HoursSection: 'hours',
+  LocationSection: 'location',
+  GallerySection: 'gallery',
+  SnsSection: 'sns',
+};
+
+interface SmallBizDefaults {
+  name: string;
+  nameEn: string;
+  description: string;
+  descriptionEn: string;
+  phone: string;
+  primaryColor: string;
+  address: string;
+  addressEn: string;
+  defaultEmoji: string;
+}
+
+/** Small-Biz 계열 제너레이터 팩토리 */
+export function createSmallBizGenerator(slug: string, defaults: SmallBizDefaults): TemplateGenerator {
+  function generateConfigTs(state: ModuleConfigState): string {
+    const hero = state.values.hero || {};
+    const menu = state.values.menu || {};
+    const hours = state.values.hours || {};
+    const location = state.values.location || {};
+    const gallery = state.values.gallery || {};
+    const sns = state.values.sns || {};
+
+    const name = (hero.name as string) || defaults.name;
+    const nameEn = (hero.nameEn as string) || defaults.nameEn;
+    const description = (hero.description as string) || defaults.description;
+    const descriptionEn = (hero.descriptionEn as string) || defaults.descriptionEn;
+    const phone = (hero.phone as string) || defaults.phone;
+    const primaryColor = (hero.primaryColor as string) || defaults.primaryColor;
+    const fontFamily = (hero.fontFamily as string) || 'Pretendard';
+    const designPreset = (hero.designPreset as string) || 'default';
+
+    const address = (location.address as string) || defaults.address;
+    const addressEn = (location.addressEn as string) || defaults.addressEn;
+    const kakaoMapId = (location.kakaoMapId as string) || '';
+
+    const menuItems = (menu.items as unknown[]) || [];
+    const hoursItems = (hours.items as unknown[]) || [];
+    const galleryImages = (gallery.images as { url: string }[]) || [];
+
+    const instagramUrl = (sns.instagramUrl as string) || '';
+    const naverBlogUrl = (sns.naverBlogUrl as string) || '';
+    const kakaoChannelUrl = (sns.kakaoChannelUrl as string) || '';
+
+    const galleryArr = buildGalleryArray(galleryImages);
+
+    return `export interface MenuItem {
+  name: string;
+  nameEn?: string;
+  desc: string;
+  descEn?: string;
+  price: string;
+  category: string;
+  emoji: string;
+  imageUrl?: string;
+  isNew?: boolean;
+  isPopular?: boolean;
+}
+
+export interface BusinessHour {
+  day: string;
+  dayEn?: string;
+  hours: string;
+  hoursEn?: string;
+  isHoliday?: boolean;
+}
+
+const DEMO_MENU: MenuItem[] = ${buildMenuItemsArray(menuItems, defaults.defaultEmoji)};
+
+const DEMO_HOURS: BusinessHour[] = ${buildBusinessHoursArray(hoursItems)};
+
+${genBasePathConst()}
+
+function parseJSON<T>(raw: string | undefined, fallback: T): T {
+  if (!raw) return fallback;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+export const siteConfig = {
+  name: process.env.NEXT_PUBLIC_SITE_NAME || '${esc(name)}',
+  nameEn: process.env.NEXT_PUBLIC_SITE_NAME_EN || '${esc(nameEn)}',
+  description: process.env.NEXT_PUBLIC_DESCRIPTION || '${esc(description)}',
+  descriptionEn: process.env.NEXT_PUBLIC_DESCRIPTION_EN || '${esc(descriptionEn)}',
+  phone: process.env.NEXT_PUBLIC_PHONE || ${phone ? `'${esc(phone)}'` : 'null'},
+  primaryColor: process.env.NEXT_PUBLIC_PRIMARY_COLOR || '${esc(primaryColor)}',
+  address: process.env.NEXT_PUBLIC_ADDRESS || '${esc(address)}',
+  addressEn: process.env.NEXT_PUBLIC_ADDRESS_EN || '${esc(addressEn)}',
+  kakaoMapId: process.env.NEXT_PUBLIC_KAKAO_MAP_ID || ${kakaoMapId ? `'${esc(kakaoMapId)}'` : `''`},
+  menuItems: parseJSON<MenuItem[]>(process.env.NEXT_PUBLIC_MENU_ITEMS, DEMO_MENU),
+  businessHours: parseJSON<BusinessHour[]>(process.env.NEXT_PUBLIC_BUSINESS_HOURS, DEMO_HOURS),
+  galleryImages: parseJSON<string[]>(process.env.NEXT_PUBLIC_GALLERY_IMAGES, ${galleryArr}),
+  instagramUrl: process.env.NEXT_PUBLIC_INSTAGRAM_URL || ${instagramUrl ? `'${esc(instagramUrl)}'` : `''`},
+  naverBlogUrl: process.env.NEXT_PUBLIC_NAVER_BLOG_URL || ${naverBlogUrl ? `'${esc(naverBlogUrl)}'` : `''`},
+  kakaoChannelUrl: process.env.NEXT_PUBLIC_KAKAO_CHANNEL_URL || ${kakaoChannelUrl ? `'${esc(kakaoChannelUrl)}'` : `''`},
+  fontFamily: '${esc(fontFamily)}',
+  designPreset: '${esc(designPreset)}',
+  gaId: process.env.NEXT_PUBLIC_GA_ID || null,
+};
+
+export type SiteConfig = typeof siteConfig;
+`;
+  }
+
+  function generatePageTsx(state: ModuleConfigState): string {
+    const activeModules = state.order.filter((id) => state.enabled.includes(id));
+    const imports: string[] = [
+      "import { siteConfig } from '@/lib/config';",
+      "import { NavHeader } from '@/components/nav-header';",
+    ];
+    const renders: string[] = [];
+
+    for (const id of activeModules) {
+      const comp = SMALL_BIZ_MODULE_COMPONENTS[id];
+      if (!comp) continue;
+      imports.push(`import { ${comp.importName} } from '${comp.importPath}';`);
+      renders.push(comp.render);
+    }
+
+    // QuickActions: hero 활성화 시 hero 바로 뒤에 자동 삽입
+    if (state.enabled.includes('hero')) {
+      imports.push("import { QuickActions } from '@/components/quick-actions';");
+      const heroIdx = renders.findIndex((r) => r.includes('HeroSection'));
+      if (heroIdx >= 0) {
+        renders.splice(heroIdx + 1, 0, '        <QuickActions config={siteConfig} />');
+      }
+    }
+
+    imports.push("import { Footer } from '@/components/footer';");
+
+    return `${imports.join('\n')}
+
+export default function Home() {
+  return (
+    <>
+      <NavHeader />
+      <main id="main">
+${renders.join('\n')}
+      </main>
+      <Footer />
+    </>
+  );
+}
+`;
+  }
+
+  function parseConfigToState(
+    configContent: string,
+    schema: TemplateModuleSchema
+  ): ModuleConfigState {
+    const state = buildInitialState(schema);
+    const siteBlock = extractSiteBlock(configContent);
+    const { extractString, extractNullable } = createExtractors(siteBlock);
+
+    // Hero
+    const name = extractString('name');
+    if (name !== null) state.values.hero.name = name;
+    const nameEn = extractString('nameEn');
+    if (nameEn !== null) state.values.hero.nameEn = nameEn;
+    const description = extractString('description');
+    if (description !== null) state.values.hero.description = description;
+    const descriptionEn = extractString('descriptionEn');
+    if (descriptionEn !== null) state.values.hero.descriptionEn = descriptionEn;
+    const phone = extractNullable('phone');
+    if (phone !== null) state.values.hero.phone = phone;
+    const primaryColor = extractString('primaryColor');
+    if (primaryColor !== null) state.values.hero.primaryColor = primaryColor;
+    const fontFamily = extractString('fontFamily');
+    if (fontFamily !== null) state.values.hero.fontFamily = fontFamily;
+    const designPreset = extractString('designPreset');
+    if (designPreset !== null) state.values.hero.designPreset = designPreset;
+
+    // Location
+    const address = extractString('address');
+    if (address !== null) state.values.location.address = address;
+    const addressEn = extractString('addressEn');
+    if (addressEn !== null) state.values.location.addressEn = addressEn;
+    const kakaoMapId = extractString('kakaoMapId');
+    if (kakaoMapId !== null) state.values.location.kakaoMapId = kakaoMapId;
+
+    // Menu items
+    try {
+      const items = parseMenuFromConfig(configContent);
+      if (items.length > 0) state.values.menu.items = items;
+    } catch { /* 기본값 유지 */ }
+
+    // Business hours
+    try {
+      const items = parseHoursFromConfig(configContent);
+      if (items.length > 0) state.values.hours.items = items;
+    } catch { /* 기본값 유지 */ }
+
+    // Gallery images
+    try {
+      const items = parseGalleryFromConfig(configContent);
+      if (items.length > 0) state.values.gallery.images = items;
+    } catch { /* 기본값 유지 */ }
+
+    // SNS
+    const instagramUrl = extractString('instagramUrl');
+    if (instagramUrl !== null) state.values.sns.instagramUrl = instagramUrl;
+    const naverBlogUrl = extractString('naverBlogUrl');
+    if (naverBlogUrl !== null) state.values.sns.naverBlogUrl = naverBlogUrl;
+    const kakaoChannelUrl = extractString('kakaoChannelUrl');
+    if (kakaoChannelUrl !== null) state.values.sns.kakaoChannelUrl = kakaoChannelUrl;
+
+    return state;
+  }
+
+  return {
+    slug,
+    generateConfigTs,
+    generatePageTsx,
+    parseConfigToState,
+    moduleComponents: SMALL_BIZ_MODULE_COMPONENTS,
+    importToModuleMap: SMALL_BIZ_IMPORT_TO_MODULE_MAP,
+  };
+}
+
 // ─── TemplateGenerator 인터페이스 ─────────────
 
 export interface TemplateGenerator {

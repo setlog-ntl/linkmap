@@ -564,8 +564,8 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   }, [selectedPath, fileDetail, hasUnsavedChanges, editorContent, deployId, updateFile, locale, queryClient]);
 
 
-  // ── 모듈 → 코드에 적용 (다이얼로그 통합) ──
-  const handleApplyModulesToCode = useCallback(async () => {
+  // ── 모듈 → 코드에 적용 (공통 로직) ──
+  const applyModuleChanges = useCallback(async (options?: { deploy?: boolean }) => {
     if (!moduleState || !moduleSchema) return;
     dispatchDialog({ type: 'START', mode: 'apply-only' });
 
@@ -612,97 +612,43 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       setHasUnsavedChanges(false);
       setLastSavedAt(new Date());
 
-      // Complete
-      dispatchDialog({
-        type: 'COMPLETE',
-        diffStats: {
-          fileCount: generatedFiles.length,
-          added: totalAdded,
-          removed: totalRemoved,
-        },
-      });
-
-      // 미리보기 갱신
-      setLivePreviewKey((k) => k + 1);
-      if (liveUrl) {
-        setShowLiveAfterDeploy(true);
-      }
-    } catch (err) {
-      dispatchDialog({
-        type: 'ERROR',
-        message: err instanceof Error ? err.message : t(locale, 'editor.applyFailed'),
-      });
-    }
-  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, fileCache, templateSlug, locale]);
-
-  // ── 모듈 → 코드 적용 + 배포 (다이얼로그 통합) ──
-  const handleApplyModulesAndDeploy = useCallback(async () => {
-    if (!moduleState || !moduleSchema) return;
-    dispatchDialog({ type: 'START', mode: 'apply-only' });
-
-    try {
-      // Step 1: 코드 생성
-      const generatedFiles = generateFiles(moduleState, fileCache, templateSlug ?? undefined);
-
-      let totalAdded = 0;
-      let totalRemoved = 0;
-      for (const gf of generatedFiles) {
-        const stats = computeDiffStats(fileCache[gf.path], gf.content);
-        totalAdded += stats.added;
-        totalRemoved += stats.removed;
-      }
-
-      for (const gf of generatedFiles) {
-        setFileCache((prev) => ({ ...prev, [gf.path]: gf.content }));
-        if (gf.path === selectedPath) {
-          setEditorContent(gf.content);
-        }
-      }
-
-      dispatchDialog({ type: 'ADVANCE_STEP', stepId: 'generate' });
-
-      // Step 2: GitHub 커밋
-      const filesToSave = generatedFiles.map((gf) => ({
-        path: gf.path,
-        content: gf.content,
-      }));
-
-      try {
-        await batchApply.mutateAsync({
-          deployId,
-          files: filesToSave,
-        });
-      } catch (err) {
-        if (err instanceof Error && (err.message.includes('409') || err.message.includes('conflict'))) {
-          queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.files(deployId) });
-          throw new Error('파일 충돌이 발생했습니다. 잠시 후 다시 시도해주세요.');
-        }
-        throw err;
-      }
-
-      setHasUnsavedChanges(false);
-      setLastSavedAt(new Date());
-
-      // 커밋 완료 → 다이얼로그 즉시 COMPLETE (빌드 대기는 미리보기에서만)
       dispatchDialog({
         type: 'COMPLETE',
         diffStats: { fileCount: generatedFiles.length, added: totalAdded, removed: totalRemoved },
       });
 
-      // 빌드 추적은 미리보기 오버레이에서만 표시
-      queryClient.removeQueries({ queryKey: queryKeys.oneclick.status(deployId) });
-      deployStartedAtRef.current = Date.now();
-      seenBuildingRef.current = false;
-      setDeployState('deploying');
-      setDeployOrigin('module-deploy');
-      setAwaitingDeploy(true);
+      if (options?.deploy) {
+        // 빌드 추적은 미리보기 오버레이에서만 표시
+        queryClient.removeQueries({ queryKey: queryKeys.oneclick.status(deployId) });
+        deployStartedAtRef.current = Date.now();
+        seenBuildingRef.current = false;
+        setDeployState('deploying');
+        setDeployOrigin('module-deploy');
+        setAwaitingDeploy(true);
+      } else {
+        // 미리보기 갱신
+        setLivePreviewKey((k) => k + 1);
+        if (liveUrl) {
+          setShowLiveAfterDeploy(true);
+        }
+      }
     } catch (err) {
       dispatchDialog({
         type: 'ERROR',
         message: err instanceof Error ? err.message : t(locale, 'editor.applyFailed'),
       });
     }
-  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, fileCache, templateSlug, locale, queryClient]);
+  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, fileCache, templateSlug, locale, queryClient]);
+
+  // ── 모듈 → 코드에 적용 (다이얼로그 통합) ──
+  const handleApplyModulesToCode = useCallback(async () => {
+    await applyModuleChanges();
+  }, [applyModuleChanges]);
+
+  // ── 모듈 → 코드 적용 + 배포 (다이얼로그 통합) ──
+  const handleApplyModulesAndDeploy = useCallback(async () => {
+    await applyModuleChanges({ deploy: true });
+  }, [applyModuleChanges]);
 
   // ── 배포 리트라이 (상태 초기화 포함) ──
   const handleRetryDeploy = useCallback(() => {
