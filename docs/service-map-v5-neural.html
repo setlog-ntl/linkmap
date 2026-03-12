@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linkmap Service Map — Variant 5: Neural Grid</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0e1a;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; overflow: hidden; color: #e2e8f0;
+  }
+  .canvas-wrap {
+    position: relative; width: 1200px; height: 700px;
+    border-radius: 16px; overflow: hidden;
+    background: #0a0e1a;
+  }
+  svg.bg-layer, svg.main-layer {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  }
+  svg.bg-layer { z-index: 0; }
+  svg.main-layer { z-index: 1; }
+
+  /* Hex grid */
+  .hex-cell {
+    fill: none; stroke: #1e293b; stroke-width: 0.5; opacity: 0.35;
+  }
+
+  /* Edges */
+  .edge-path {
+    fill: none; opacity: 0.35;
+    transition: opacity 0.4s, stroke-width 0.4s, filter 0.4s;
+  }
+  .edge-path.status-connected   { stroke: #3b82f6; stroke-width: 3; }
+  .edge-path.status-in_progress { stroke: #eab308; stroke-width: 2.5; }
+  .edge-path.status-error       { stroke: #f97316; stroke-width: 2.5; }
+  .edge-path.status-not_started { stroke: #475569; stroke-width: 1.2; stroke-dasharray: 5 4; }
+  .edge-path.highlight { opacity: 0.95; filter: drop-shadow(0 0 6px currentColor); }
+
+  /* Pulse particles */
+  .pulse-dot { opacity: 0; }
+  @keyframes synapseFire {
+    0%   { offset-distance: 0%;   opacity: 0; }
+    8%   { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { offset-distance: 100%; opacity: 0; }
+  }
+
+  /* Dendrite lines from hub */
+  .dendrite {
+    stroke: #3b82f620; stroke-width: 1; fill: none;
+  }
+
+  /* Hub */
+  .hub-outer { fill: url(#hubNeuronGrad); }
+  .hub-core  { fill: url(#hubNeuronCore); }
+  @keyframes neuronPulse {
+    0%,100% { r: 40; opacity: 0.12; }
+    50%     { r: 48; opacity: 0.22; }
+  }
+  .hub-pulse { animation: neuronPulse 2.5s ease-in-out infinite; }
+  .hub-health-ring {
+    fill: none; stroke-width: 3; stroke-linecap: round;
+  }
+  .hub-label {
+    font-size: 13px; font-weight: 700; fill: #e2e8f0;
+    text-anchor: middle; dominant-baseline: central; pointer-events: none;
+  }
+  .hub-sub {
+    font-size: 8px; fill: #64748b; text-anchor: middle; pointer-events: none;
+  }
+
+  /* Service nodes */
+  .svc-node { cursor: pointer; }
+  .svc-bg {
+    rx: 10; ry: 10; fill: #0f172a; stroke-width: 1.5;
+    transition: filter 0.3s, stroke-width 0.3s;
+  }
+  .svc-node:hover .svc-bg {
+    filter: drop-shadow(0 0 14px currentColor); stroke-width: 2.5;
+  }
+  .svc-bar { rx: 4; ry: 4; }
+  .svc-icon {
+    font-size: 18px; text-anchor: middle; dominant-baseline: central; pointer-events: none;
+  }
+  .svc-name {
+    font-size: 11px; font-weight: 600; fill: #e2e8f0;
+    pointer-events: none;
+  }
+  .svc-sub-label {
+    font-size: 9px; fill: #64748b; pointer-events: none;
+  }
+  .svc-status-dot {
+    stroke: #0a0e1a; stroke-width: 2;
+  }
+
+  /* Tooltip */
+  .tooltip {
+    position: absolute; pointer-events: none;
+    background: #1e293bee; border: 1px solid #334155;
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 12px; line-height: 1.6;
+    opacity: 0; transition: opacity 0.2s;
+    backdrop-filter: blur(8px); z-index: 20;
+    max-width: 220px;
+  }
+  .tooltip.visible { opacity: 1; }
+  .tooltip .t-name { font-weight: 700; color: #f8fafc; }
+  .tooltip .t-status { font-size: 11px; }
+
+  /* Legend */
+  .legend {
+    position: absolute; bottom: 16px; left: 16px;
+    display: flex; gap: 16px; font-size: 11px; color: #94a3b8; z-index: 10;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .title-bar {
+    position: absolute; top: 16px; left: 20px; z-index: 10;
+    font-size: 14px; font-weight: 700; color: #3b82f640;
+    letter-spacing: 2px; text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+<div class="canvas-wrap" id="canvas">
+  <div class="title-bar">NEURAL GRID</div>
+
+  <!-- Background hex grid -->
+  <svg class="bg-layer" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <pattern id="hexPattern" width="52" height="60" patternUnits="userSpaceOnUse"
+               patternTransform="translate(10,5)">
+        <polygon class="hex-cell" points="26,0 52,15 52,45 26,60 0,45 0,15"/>
+      </pattern>
+    </defs>
+    <rect width="1200" height="700" fill="url(#hexPattern)"/>
+  </svg>
+
+  <!-- Main interactive layer -->
+  <svg class="main-layer" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="hubNeuronGrad" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.4"/>
+        <stop offset="60%" stop-color="#8b5cf6" stop-opacity="0.15"/>
+        <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="hubNeuronCore" cx="40%" cy="35%" r="55%">
+        <stop offset="0%" stop-color="#818cf8"/>
+        <stop offset="50%" stop-color="#6366f1"/>
+        <stop offset="100%" stop-color="#4f46e5"/>
+      </radialGradient>
+      <linearGradient id="healthGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#4ade80"/>
+        <stop offset="65%" stop-color="#3b82f6"/>
+        <stop offset="80%" stop-color="#eab308"/>
+        <stop offset="90%" stop-color="#f97316"/>
+        <stop offset="100%" stop-color="#64748b"/>
+      </linearGradient>
+      <linearGradient id="barGreen" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#22c55e"/>
+      </linearGradient>
+      <linearGradient id="barBlue" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#60a5fa"/><stop offset="100%" stop-color="#3b82f6"/>
+      </linearGradient>
+      <linearGradient id="barYellow" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#facc15"/><stop offset="100%" stop-color="#eab308"/>
+      </linearGradient>
+      <linearGradient id="barOrange" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#fb923c"/><stop offset="100%" stop-color="#f97316"/>
+      </linearGradient>
+      <linearGradient id="barGray" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#94a3b8"/><stop offset="100%" stop-color="#64748b"/>
+      </linearGradient>
+      <filter id="pulseGlow">
+        <feGaussianBlur stdDeviation="4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="softGlow">
+        <feGaussianBlur stdDeviation="10"/>
+      </filter>
+    </defs>
+
+    <!-- Dendrites (decorative branching lines from hub) -->
+    <g id="dendrites"></g>
+
+    <!-- Edges -->
+    <g id="edges"></g>
+
+    <!-- Pulse particles -->
+    <g id="pulses"></g>
+
+    <!-- Hub neuron -->
+    <g id="hub">
+      <circle class="hub-pulse" cx="600" cy="350" r="40" fill="#6366f1" opacity="0.12" filter="url(#softGlow)"/>
+      <circle class="hub-outer" cx="600" cy="350" r="42"/>
+      <circle class="hub-core" cx="600" cy="350" r="28"/>
+      <circle class="hub-health-ring" cx="600" cy="350" r="35"
+              stroke="url(#healthGrad)" stroke-dasharray="180 40"/>
+      <text class="hub-label" x="600" y="347">My Project</text>
+      <text class="hub-sub" x="600" y="363">5 of 8 active</text>
+    </g>
+
+    <!-- Service nodes -->
+    <g id="nodes"></g>
+  </svg>
+
+  <div class="tooltip" id="tooltip">
+    <div class="t-name"></div>
+    <div class="t-status"></div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Connected</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#eab308"></div>In Progress</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div>Error</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#64748b"></div>Not Started</div>
+  </div>
+</div>
+
+<script>
+const CX = 600, CY = 350;
+const services = [
+  { name: 'Supabase',   sub: 'Database', icon: '🗄️', status: 'connected',   barGrad: 'url(#barGreen)' },
+  { name: 'Vercel',     sub: 'Deploy',   icon: '▲',  status: 'connected',   barGrad: 'url(#barBlue)' },
+  { name: 'Stripe',     sub: 'Payment',  icon: '💳', status: 'connected',   barGrad: 'url(#barGreen)' },
+  { name: 'Resend',     sub: 'Email',    icon: '✉️', status: 'connected',   barGrad: 'url(#barBlue)' },
+  { name: 'Clerk',      sub: 'Auth',     icon: '🔐', status: 'connected',   barGrad: 'url(#barGreen)' },
+  { name: 'OpenAI',     sub: 'AI',       icon: '🧠', status: 'in_progress', barGrad: 'url(#barYellow)' },
+  { name: 'Sentry',     sub: 'Monitor',  icon: '🔍', status: 'error',       barGrad: 'url(#barOrange)' },
+  { name: 'CloudFlare', sub: 'CDN',      icon: '☁️', status: 'not_started', barGrad: 'url(#barGray)' },
+];
+
+const statusColors = {
+  connected: '#22c55e', in_progress: '#eab308', error: '#f97316', not_started: '#64748b'
+};
+const statusLabels = {
+  connected: 'Connected', in_progress: 'In Progress', error: 'Error', not_started: 'Not Started'
+};
+const statusPulseColors = {
+  connected: '#60a5fa', in_progress: '#facc15', error: '#fb923c', not_started: '#94a3b8'
+};
+
+const ns = 'http://www.w3.org/2000/svg';
+const edgesG = document.getElementById('edges');
+const pulsesG = document.getElementById('pulses');
+const nodesG = document.getElementById('nodes');
+const dendritesG = document.getElementById('dendrites');
+const tooltip = document.getElementById('tooltip');
+const tName = tooltip.querySelector('.t-name');
+const tStatus = tooltip.querySelector('.t-status');
+
+// Calculate positions (radial)
+const radius = 240;
+const positions = services.map((_, i) => {
+  const angle = (i * 360 / services.length - 90) * Math.PI / 180;
+  return { x: CX + radius * Math.cos(angle), y: CY + radius * Math.sin(angle) };
+});
+
+// Draw decorative dendrites from hub
+for (let i = 0; i < 16; i++) {
+  const angle = (i * 22.5) * Math.PI / 180;
+  const len = 55 + Math.random() * 30;
+  const ex = CX + len * Math.cos(angle);
+  const ey = CY + len * Math.sin(angle);
+  const cpx = CX + (len * 0.6) * Math.cos(angle + 0.3);
+  const cpy = CY + (len * 0.6) * Math.sin(angle + 0.3);
+  const d = document.createElementNS(ns, 'path');
+  d.setAttribute('d', `M ${CX} ${CY} Q ${cpx} ${cpy} ${ex} ${ey}`);
+  d.classList.add('dendrite');
+  dendritesG.appendChild(d);
+}
+
+// Edge path IDs and node references for hover
+const edgeEls = [];
+const nodeEls = [];
+
+services.forEach((svc, i) => {
+  const pos = positions[i];
+  const color = statusColors[svc.status];
+
+  // Curved edge path
+  const mx = (CX + pos.x) / 2;
+  const my = (CY + pos.y) / 2;
+  const dx = pos.x - CX, dy = pos.y - CY;
+  const perpX = -dy * 0.12, perpY = dx * 0.12;
+  const cpx = mx + perpX, cpy = my + perpY;
+  const pathD = `M ${CX} ${CY} Q ${cpx} ${cpy} ${pos.x} ${pos.y}`;
+
+  const edge = document.createElementNS(ns, 'path');
+  edge.setAttribute('d', pathD);
+  edge.classList.add('edge-path', `status-${svc.status}`);
+  edge.dataset.index = i;
+  edgesG.appendChild(edge);
+  edgeEls.push(edge);
+
+  // Synapse pulse particles
+  if (svc.status !== 'not_started') {
+    for (let p = 0; p < 3; p++) {
+      const dot = document.createElementNS(ns, 'circle');
+      dot.setAttribute('r', svc.status === 'connected' ? '4' : '3');
+      dot.setAttribute('fill', statusPulseColors[svc.status]);
+      dot.setAttribute('filter', 'url(#pulseGlow)');
+      dot.classList.add('pulse-dot');
+      dot.dataset.index = i;
+      const dur = (2 + Math.random() * 1.5).toFixed(1);
+      const delay = (p * 0.9).toFixed(1);
+      dot.style.offsetPath = `path("${pathD}")`;
+      dot.style.offsetRotate = '0deg';
+      dot.style.animation = `synapseFire ${dur}s ${delay}s ease-in-out infinite`;
+      pulsesG.appendChild(dot);
+    }
+  }
+
+  // Service node (rounded square)
+  const nodeW = 110, nodeH = 52;
+  const g = document.createElementNS(ns, 'g');
+  g.classList.add('svc-node');
+  g.setAttribute('transform', `translate(${pos.x - nodeW/2}, ${pos.y - nodeH/2})`);
+  g.style.color = color;
+  g.dataset.index = i;
+
+  // Background
+  const bg = document.createElementNS(ns, 'rect');
+  bg.setAttribute('width', nodeW); bg.setAttribute('height', nodeH);
+  bg.setAttribute('fill', '#0f172a'); bg.setAttribute('stroke', color + '80');
+  bg.classList.add('svc-bg');
+  g.appendChild(bg);
+
+  // Left gradient bar
+  const bar = document.createElementNS(ns, 'rect');
+  bar.setAttribute('x', '0'); bar.setAttribute('y', '0');
+  bar.setAttribute('width', '5'); bar.setAttribute('height', nodeH);
+  bar.setAttribute('fill', svc.barGrad);
+  bar.classList.add('svc-bar');
+  g.appendChild(bar);
+
+  // Icon
+  const icon = document.createElementNS(ns, 'text');
+  icon.classList.add('svc-icon');
+  icon.setAttribute('x', '24'); icon.setAttribute('y', String(nodeH/2));
+  icon.textContent = svc.icon;
+  g.appendChild(icon);
+
+  // Name
+  const name = document.createElementNS(ns, 'text');
+  name.classList.add('svc-name');
+  name.setAttribute('x', '42'); name.setAttribute('y', '21');
+  name.textContent = svc.name;
+  g.appendChild(name);
+
+  // Sub
+  const sub = document.createElementNS(ns, 'text');
+  sub.classList.add('svc-sub-label');
+  sub.setAttribute('x', '42'); sub.setAttribute('y', '36');
+  sub.textContent = svc.sub;
+  g.appendChild(sub);
+
+  // Status dot
+  const dot = document.createElementNS(ns, 'circle');
+  dot.setAttribute('cx', String(nodeW - 10)); dot.setAttribute('cy', '10');
+  dot.setAttribute('r', '4'); dot.setAttribute('fill', color);
+  dot.classList.add('svc-status-dot');
+  g.appendChild(dot);
+
+  // Hover: synapse fire effect
+  g.addEventListener('mouseenter', () => {
+    edgeEls[i].classList.add('highlight');
+    edgeEls[i].style.stroke = svc.status === 'not_started' ? '#94a3b8' : '#818cf8';
+    edgeEls[i].style.opacity = '0.95';
+    edgeEls[i].style.strokeWidth = svc.status === 'connected' ? '5' : '4';
+    // Show tooltip
+    tName.textContent = `${svc.name} - ${svc.sub}`;
+    tStatus.textContent = `Status: ${statusLabels[svc.status]}`;
+    tStatus.style.color = color;
+    tooltip.classList.add('visible');
+  });
+  g.addEventListener('mousemove', (e) => {
+    const rect = document.getElementById('canvas').getBoundingClientRect();
+    tooltip.style.left = (e.clientX - rect.left + 14) + 'px';
+    tooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+  });
+  g.addEventListener('mouseleave', () => {
+    edgeEls[i].classList.remove('highlight');
+    edgeEls[i].style.stroke = '';
+    edgeEls[i].style.opacity = '';
+    edgeEls[i].style.strokeWidth = '';
+    tooltip.classList.remove('visible');
+  });
+
+  nodesG.appendChild(g);
+  nodeEls.push(g);
+});
+
+// Subtle ambient hex grid flicker
+const hexCells = document.querySelectorAll('.hex-cell');
+setInterval(() => {
+  const idx = Math.floor(Math.random() * hexCells.length);
+  const cell = hexCells[idx];
+  if (cell) {
+    cell.style.stroke = '#3b82f6';
+    cell.style.opacity = '0.6';
+    setTimeout(() => {
+      cell.style.stroke = '#1e293b';
+      cell.style.opacity = '0.35';
+    }, 400);
+  }
+}, 300);
+</script>
+</body>
+</html>
