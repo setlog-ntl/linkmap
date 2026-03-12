@@ -4,20 +4,20 @@ import { memo, useState } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { NodeTooltip } from '@/components/service-map/node-tooltip';
-import type { ServiceCategory, ViewGroup } from '@/types';
-import { getCategoryStyle } from '@/lib/constants/category-styles';
-import { VIEW_GROUP_META } from '@/lib/layout/view-group';
+import type { ServiceCategory } from '@/types';
+import { getServiceBrand } from '@/lib/constants/service-brands';
 
 /** Compact rounded-rect node dimensions */
 const NODE_W = 160;
 const NODE_H = 72;
 const BORDER_RADIUS = 14;
 
-const STATUS_CONFIG: Record<string, { hex: string; label: string }> = {
-  connected:   { hex: '#22c55e', label: '연결됨' },
-  in_progress: { hex: '#f59e0b', label: '진행 중' },
-  not_started: { hex: '#64748b', label: '시작 전' },
-  error:       { hex: '#f97316', label: '오류' },
+/** Status → color mapping (border glow + status dot) */
+const STATUS_CONFIG: Record<string, { hex: string; bright: string; label: string }> = {
+  connected:   { hex: '#22c55e', bright: '#86efac', label: '연결됨' },
+  in_progress: { hex: '#f59e0b', bright: '#fde68a', label: '진행 중' },
+  not_started: { hex: '#64748b', bright: '#94a3b8', label: '시작 전' },
+  error:       { hex: '#f97316', bright: '#fdba74', label: '오류' },
 };
 
 const CATEGORY_LABELS: Partial<Record<ServiceCategory, string>> = {
@@ -36,13 +36,13 @@ interface ServiceNodeData {
   label: string;
   category: ServiceCategory;
   status: string;
-  iconSlug?: string;
+  slug?: string;
   highlighted?: boolean;
   focusOpacity?: number;
   domain?: string;
   isMainService?: boolean;
   isFocusTarget?: boolean;
-  viewGroup?: ViewGroup;
+  brandColor?: string;
   enterDelay?: number;
   [key: string]: unknown;
 }
@@ -51,10 +51,11 @@ function ServiceNode({ data }: NodeProps) {
   const d = data as unknown as ServiceNodeData;
   const [hovered, setHovered] = useState(false);
   const category = d.category as ServiceCategory;
-  const { gradientFrom } = getCategoryStyle(category);
   const status = STATUS_CONFIG[d.status] || STATUS_CONFIG.not_started;
-  const vg = d.viewGroup ?? 'infra';
-  const meta = VIEW_GROUP_META[vg];
+
+  // Brand color from service-brands registry, fallback to status color
+  const brand = d.slug ? getServiceBrand(d.slug) : undefined;
+  const brandColor = d.brandColor || brand?.darkColor || status.hex;
 
   const isHighlighted = d.highlighted !== false;
   const focusOpacity = d.focusOpacity ?? 1;
@@ -64,6 +65,7 @@ function ServiceNode({ data }: NodeProps) {
 
   const glowIntensity = isFocusTarget ? 18 : hovered ? 12 : 4;
   const glowAlpha = isFocusTarget ? '55' : hovered ? '40' : '18';
+  const strokeColor = isFocusTarget ? status.bright : hovered ? status.hex : `${status.hex}80`;
   const strokeW = isFocusTarget ? 2 : hovered ? 1.8 : 1.5;
   const enterDelay = (d.enterDelay as number) ?? 0;
 
@@ -82,12 +84,12 @@ function ServiceNode({ data }: NodeProps) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* SVG border with gradient stroke */}
+      {/* SVG border with status-based stroke */}
       <svg
         viewBox={`0 0 ${NODE_W} ${NODE_H}`}
         className="absolute inset-0 w-full h-full overflow-visible"
         style={{
-          filter: `drop-shadow(0 0 ${glowIntensity}px ${gradientFrom}${glowAlpha})`,
+          filter: `drop-shadow(0 0 ${glowIntensity}px ${status.hex}${glowAlpha})`,
           transition: 'filter 0.3s ease',
         }}
       >
@@ -98,30 +100,30 @@ function ServiceNode({ data }: NodeProps) {
             width={NODE_W + 8} height={NODE_H + 8}
             rx={BORDER_RADIUS + 4}
             fill="none"
-            stroke={`url(#${meta.gradientId})`}
+            stroke={status.bright}
             strokeWidth="1"
             opacity="0.4"
             className="animate-mesh-pulse"
           />
         )}
 
-        {/* Main rounded rect with gradient border */}
+        {/* Main rounded rect with status-colored border */}
         <rect
           x="0.75" y="0.75"
           width={NODE_W - 1.5} height={NODE_H - 1.5}
           rx={BORDER_RADIUS}
           className="fill-card"
-          stroke={`url(#${meta.gradientId})`}
+          stroke={strokeColor}
           strokeWidth={strokeW}
         />
 
-        {/* Left accent bar (gradient) */}
+        {/* Left accent bar (brand color) */}
         <rect
           x="0" y={16}
           width="3" height={NODE_H - 32}
           rx="1.5"
-          fill={`url(#${meta.gradientId})`}
-          opacity="0.8"
+          fill={brandColor}
+          opacity="0.85"
         />
       </svg>
 
@@ -133,13 +135,13 @@ function ServiceNode({ data }: NodeProps) {
 
       {/* Content — horizontal layout: icon left, text right */}
       <div className="absolute inset-0 flex items-center gap-2.5 z-10 pointer-events-none px-4">
-        {/* Icon */}
+        {/* Service brand icon */}
         <div
           className="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center"
-          style={{ background: `${gradientFrom}15` }}
+          style={{ background: `${brandColor}18` }}
         >
-          {d.iconSlug ? (
-            <ServiceIcon serviceId={d.iconSlug} size={20} />
+          {d.slug ? (
+            <ServiceIcon serviceId={d.slug} size={20} />
           ) : (
             <span className="text-sm text-muted-foreground">&#9881;</span>
           )}

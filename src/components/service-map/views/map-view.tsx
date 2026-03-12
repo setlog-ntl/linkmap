@@ -23,16 +23,12 @@ import { Search, Maximize2, Download, X } from 'lucide-react';
 import ServiceNode from '@/components/service-map/service-node';
 import ProjectNode from '@/components/service-map/project-node';
 import RadialEdge from '@/components/service-map/radial-edge';
-import { GradientMeshDefs } from '@/components/service-map/gradient-mesh-defs';
-import { SectorArcLayer } from '@/components/service-map/sector-arc-layer';
 import { useRadialMapNodes } from '@/components/service-map/hooks/useRadialMapNodes';
 import { useLocaleStore } from '@/stores/locale-store';
 import { useServiceDetailStore } from '@/stores/service-detail-store';
 import { useServiceMapStore } from '@/stores/service-map-store';
-import { VIEW_GROUP_META, VIEW_GROUP_ORDER } from '@/lib/layout/view-group';
 import { t } from '@/lib/i18n';
 import type { ServiceMapData } from '@/components/service-map/hooks/useServiceMapData';
-import type { ViewGroup } from '@/types';
 
 const nodeTypes = {
   service: ServiceNode,
@@ -43,10 +39,29 @@ const edgeTypes = {
   radial: RadialEdge,
 };
 
-// ViewGroup gradient start colors for MiniMap
-const VG_MINIMAP_COLORS: Record<string, string> = {
-  core: '#2563eb', runtime: '#059669', growth: '#7c3aed',
-  intelligence: '#8b5cf6', infra: '#475569',
+/** Status-based colors for MiniMap nodes */
+const STATUS_MINIMAP_COLORS: Record<string, string> = {
+  connected: '#4ade80',
+  in_progress: '#facc15',
+  error: '#fb923c',
+  not_started: '#475569',
+};
+
+/** Status filter options (4 statuses only — simplified from 5 ViewGroups + 4 statuses) */
+const STATUS_FILTER_OPTIONS = [
+  { key: 'connected', label: '연결됨', color: '#4ade80' },
+  { key: 'in_progress', label: '진행 중', color: '#facc15' },
+  { key: 'error', label: '오류', color: '#fb923c' },
+  { key: 'not_started', label: '시작 전', color: '#64748b' },
+] as const;
+
+/** Status-based arrow marker colors */
+const MARKER_COLORS: Record<string, string> = {
+  connected: '#4ade80',
+  in_progress: '#facc15',
+  error: '#fb923c',
+  not_started: '#475569',
+  default: '#475569',
 };
 
 interface MapViewProps {
@@ -63,9 +78,7 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
   const openSheet = useServiceDetailStore((s) => s.openSheet);
   const focusedNodeId = useServiceMapStore((s) => s.focusedNodeId);
   const setFocusedNodeId = useServiceMapStore((s) => s.setFocusedNodeId);
-  const filterGroups = useServiceMapStore((s) => s.filterGroups);
   const filterStatuses = useServiceMapStore((s) => s.filterStatuses);
-  const toggleFilterGroup = useServiceMapStore((s) => s.toggleFilterGroup);
   const toggleFilterStatus = useServiceMapStore((s) => s.toggleFilterStatus);
   const [searchQuery, setSearchQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
@@ -76,7 +89,6 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
     projectName: data.projectName,
     searchQuery,
     focusedNodeId,
-    filterGroups: filterGroups.length > 0 ? filterGroups : undefined,
     filterStatuses: filterStatuses.length > 0 ? filterStatuses : undefined,
   });
 
@@ -166,7 +178,6 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
   // Keyboard shortcuts
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      // Don't intercept if user is typing in an input
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
         if (e.key === 'Escape') {
@@ -220,19 +231,12 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
     ? data.services.find((s) => s.id === focusedNodeId)
     : null;
 
-  // MiniMap node color callback
+  // MiniMap node color: status-based
   const miniMapNodeColor = useCallback((node: Node) => {
-    if (node.type === 'project') return '#2563eb';
-    const vg = (node.data as Record<string, unknown>)?.viewGroup as string | undefined;
-    return VG_MINIMAP_COLORS[vg ?? 'infra'] ?? '#475569';
+    if (node.type === 'project') return '#00d4ff';
+    const nodeStatus = (node.data as Record<string, unknown>)?.status as string | undefined;
+    return STATUS_MINIMAP_COLORS[nodeStatus ?? 'not_started'] ?? '#475569';
   }, []);
-
-  const STATUS_FILTER_OPTIONS = [
-    { key: 'connected', label: '연결됨', color: '#22c55e' },
-    { key: 'in_progress', label: '진행 중', color: '#f59e0b' },
-    { key: 'error', label: '오류', color: '#f97316' },
-    { key: 'not_started', label: '시작 전', color: '#64748b' },
-  ];
 
   return (
     <div className="flex-1 w-full relative min-h-0">
@@ -269,44 +273,18 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
         </Button>
       </div>
 
-      {/* Filter chips — below toolbar */}
-      <div className="absolute top-16 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 flex-wrap justify-center">
-        {/* ViewGroup filter chips */}
-        {VIEW_GROUP_ORDER.map((group) => {
-          const meta = VIEW_GROUP_META[group];
-          const isActive = filterGroups.includes(group);
-          return (
-            <button
-              key={group}
-              onClick={() => toggleFilterGroup(group)}
-              className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border transition-all"
-              style={{
-                borderColor: isActive ? meta.gradientFrom : 'var(--border)',
-                background: isActive ? `${meta.gradientFrom}15` : 'var(--background)',
-                color: isActive ? meta.gradientFrom : 'var(--muted-foreground)',
-                opacity: isActive ? 1 : 0.7,
-              }}
-            >
-              <span
-                className="w-2 h-2 rounded-full"
-                style={{ background: `linear-gradient(135deg, ${meta.gradientFrom}, ${meta.gradientTo})` }}
-              />
-              {meta.label}
-            </button>
-          );
-        })}
-        <div className="w-px h-4 bg-border/30 mx-0.5" />
-        {/* Status filter chips */}
+      {/* Status filter chips — simplified (4 statuses only, no ViewGroup) */}
+      <div className="absolute top-16 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5">
         {STATUS_FILTER_OPTIONS.map((opt) => {
           const isActive = filterStatuses.includes(opt.key);
           return (
             <button
               key={opt.key}
               onClick={() => toggleFilterStatus(opt.key)}
-              className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border transition-all"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium border transition-all"
               style={{
                 borderColor: isActive ? opt.color : 'var(--border)',
-                background: isActive ? `${opt.color}15` : 'var(--background)',
+                background: isActive ? `${opt.color}18` : 'var(--background)',
                 color: isActive ? opt.color : 'var(--muted-foreground)',
                 opacity: isActive ? 1 : 0.7,
               }}
@@ -340,31 +318,18 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
         </div>
       )}
 
-      {/* Canvas — React Flow requires parent with explicit width+height */}
+      {/* Canvas */}
       <div className="absolute inset-0 z-0 bg-background/50 service-map-canvas" style={{ width: '100%', height: '100%' }}>
-        {/* Gradient Mesh SVG Defs — shared across all nodes/edges */}
-        <GradientMeshDefs isDark={isDark} />
-
-        {/* Ambient mesh gradient (dark mode only) */}
+        {/* Ambient glow (dark mode only) */}
         {isDark && (
           <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
             <defs>
-              <radialGradient id="mesh-ambient-bl" cx="15%" cy="20%" r="50%">
-                <stop offset="0%" stopColor="#2563eb" stopOpacity="0.04" />
-                <stop offset="100%" stopColor="#2563eb" stopOpacity="0" />
-              </radialGradient>
-              <radialGradient id="mesh-ambient-br" cx="85%" cy="80%" r="50%">
-                <stop offset="0%" stopColor="#059669" stopOpacity="0.03" />
-                <stop offset="100%" stopColor="#059669" stopOpacity="0" />
-              </radialGradient>
-              <radialGradient id="mesh-ambient-ct" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.02" />
-                <stop offset="100%" stopColor="#7c3aed" stopOpacity="0" />
+              <radialGradient id="mesh-ambient-center" cx="50%" cy="48%" r="40%">
+                <stop offset="0%" stopColor="#00d4ff" stopOpacity="0.04" />
+                <stop offset="100%" stopColor="#00d4ff" stopOpacity="0" />
               </radialGradient>
             </defs>
-            <rect width="100%" height="100%" fill="url(#mesh-ambient-bl)" />
-            <rect width="100%" height="100%" fill="url(#mesh-ambient-br)" />
-            <rect width="100%" height="100%" fill="url(#mesh-ambient-ct)" />
+            <rect width="100%" height="100%" fill="url(#mesh-ambient-center)" />
           </svg>
         )}
 
@@ -397,33 +362,14 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
             <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="var(--border)" style={{ opacity: 0.5 }} />
           )}
 
-          {/* Sector arc layer */}
-          <SectorArcLayer isDark={isDark} />
-
-          {/* SVG defs for arrow markers + gradient mesh */}
+          {/* SVG defs for arrow markers + glow filters */}
           <svg>
             <defs>
-              {['connected', 'in_progress', 'error', 'not_started', 'default'].map((status) => {
-                const colors: Record<string, string> = {
-                  connected: 'oklch(0.70 0.12 255)', in_progress: 'oklch(0.75 0.15 80)',
-                  error: 'oklch(0.65 0.18 25)', not_started: 'oklch(0.45 0.02 250)', default: 'oklch(0.45 0.02 250)',
-                };
-                return (
-                  <marker key={status} id={`radial-arrow-${status}`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
-                    <path d="M 0 0 L 10 5 L 0 10 z" fill={colors[status]} opacity="0.5" />
-                  </marker>
-                );
-              })}
-              {/* ViewGroup gradients inside ReactFlow SVG context */}
-              {VIEW_GROUP_ORDER.map((group) => {
-                const meta = VIEW_GROUP_META[group];
-                return (
-                  <linearGradient key={`rf-${meta.gradientId}`} id={meta.gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor={meta.gradientFrom} />
-                    <stop offset="100%" stopColor={meta.gradientTo} />
-                  </linearGradient>
-                );
-              })}
+              {Object.entries(MARKER_COLORS).map(([status, color]) => (
+                <marker key={status} id={`radial-arrow-${status}`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill={color} opacity="0.5" />
+                </marker>
+              ))}
               {/* Glow filters */}
               {[
                 { id: 'gm-glow-sm', std: 4, opacity: isDark ? 0.3 : 0.15 },

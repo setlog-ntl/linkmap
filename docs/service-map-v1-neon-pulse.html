@@ -3,229 +3,409 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Linkmap Service Map — Neon Pulse</title>
+<title>Linkmap Service Map — Neon Pulse v3</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    background: radial-gradient(ellipse at center, #0f172a 0%, #000000 70%);
+    background: #060a14;
     min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     overflow: hidden; color: #e2e8f0;
   }
-  .canvas { position: relative; width: 1200px; height: 700px; }
 
-  /* Hub */
-  .hub {
-    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-    width: 120px; height: 120px; z-index: 10;
+  .canvas { position: relative; width: 1200px; height: 720px; border-radius: 20px; overflow: hidden; }
+
+  /* === Background === */
+  .bg-base { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 50% 48%, #0c1629 0%, #060a14 100%); }
+  .bg-grid { position: absolute; inset: 0; background-image: radial-gradient(circle 1px at center, rgba(96,165,250,0.06) 0%, transparent 100%); background-size: 32px 32px; }
+  .bg-glow { position: absolute; inset: 0; background: radial-gradient(circle 300px at 50% 48%, rgba(0,212,255,0.05) 0%, transparent 100%); }
+
+  /* === Toolbar === */
+  .toolbar {
+    position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 50;
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(10,15,30,0.85); backdrop-filter: blur(16px);
+    border: 1px solid rgba(96,165,250,0.1); border-radius: 999px; padding: 4px 6px;
   }
+  .search-box { display: flex; align-items: center; gap: 6px; padding: 0 10px; color: #64748b; font-size: 12px; width: 180px; }
+  .search-box svg { width: 14px; height: 14px; stroke: #475569; fill: none; stroke-width: 2; }
+  .toolbar-divider { width: 1px; height: 20px; background: rgba(96,165,250,0.1); }
+  .toolbar-btn {
+    width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer;
+    background: transparent; color: #64748b; font-size: 14px;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+  }
+  .toolbar-btn:hover { background: rgba(96,165,250,0.1); color: #94a3b8; }
+
+  /* === Status filter (4개만) === */
+  .filters {
+    position: absolute; top: 58px; left: 50%; transform: translateX(-50%); z-index: 50;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .chip {
+    display: flex; align-items: center; gap: 5px;
+    padding: 4px 12px; border-radius: 999px; font-size: 10px; font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.06); cursor: pointer;
+    background: rgba(10,15,30,0.6); color: #536079; transition: all 0.25s; backdrop-filter: blur(8px);
+  }
+  .chip:hover { border-color: rgba(255,255,255,0.12); color: #94a3b8; }
+  .chip.active { border-color: var(--c); color: var(--c); background: rgba(10,15,30,0.9); }
+  .chip-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  /* === Hub === */
+  .hub { position: absolute; left: 50%; top: 48%; transform: translate(-50%, -50%); width: 130px; height: 130px; z-index: 20; cursor: pointer; }
+  .hub-breath { position: absolute; inset: -14px; border-radius: 50%; border: 1px solid rgba(0,212,255,0.1); animation: breath 4s ease-in-out infinite; }
+  @keyframes breath { 0%,100%{transform:scale(1);opacity:.3} 50%{transform:scale(1.06);opacity:.7} }
   .hub-ring {
-    width: 120px; height: 120px; border-radius: 50%;
-    background: conic-gradient(
-      #22c55e 0deg, #22c55e 225deg,
-      #facc15 225deg, #facc15 270deg,
-      #f97316 270deg, #f97316 315deg,
-      #64748b 315deg, #64748b 360deg
-    );
-    padding: 4px; display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 40px rgba(0,245,255,0.35), 0 0 80px rgba(0,245,255,0.15);
-    animation: hubPulse 3s ease-in-out infinite;
+    width: 130px; height: 130px; border-radius: 50%; padding: 3px;
+    background: conic-gradient(#4ade80 0deg,#4ade80 225deg, #facc15 225deg,#facc15 270deg, #fb923c 270deg,#fb923c 315deg, #334155 315deg,#334155 360deg);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 30px rgba(0,212,255,0.18), 0 0 60px rgba(0,212,255,0.06);
+    animation: hubGlow 3s ease-in-out infinite;
   }
-  @keyframes hubPulse {
-    0%, 100% { box-shadow: 0 0 40px rgba(0,245,255,0.35), 0 0 80px rgba(0,245,255,0.15); }
-    50% { box-shadow: 0 0 55px rgba(0,245,255,0.5), 0 0 100px rgba(0,245,255,0.25); }
+  @keyframes hubGlow {
+    0%,100%{ box-shadow: 0 0 30px rgba(0,212,255,0.18), 0 0 60px rgba(0,212,255,0.06); }
+    50%{ box-shadow: 0 0 40px rgba(0,212,255,0.3), 0 0 80px rgba(0,212,255,0.12); }
   }
   .hub-inner {
     width: 100%; height: 100%; border-radius: 50%;
-    background: linear-gradient(135deg, #0c1527, #0f1d35);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 2px;
+    background: linear-gradient(145deg, #0a1628, #0d1a30);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
   }
-  .hub-icon { font-size: 28px; filter: drop-shadow(0 0 6px rgba(0,245,255,0.6)); }
-  .hub-label { font-size: 11px; font-weight: 700; color: #00f5ff; letter-spacing: 0.5px; }
+  .hub-logo {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, #00d4ff, #3b82f6);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 16px; color: #fff;
+    box-shadow: 0 0 14px rgba(0,212,255,0.35);
+  }
+  .hub-name { font-size: 11px; font-weight: 700; color: #e2e8f0; }
+  .hub-stats { font-size: 9px; color: #00d4ff; font-weight: 600; opacity: 0.7; }
 
-  /* Service Nodes */
+  /* === Service nodes === */
   .service-node {
-    position: absolute; width: 150px; z-index: 10;
-    background: rgba(10,14,30,0.92); border: 1.5px solid; border-radius: 10px;
-    padding: 0; overflow: hidden; cursor: pointer;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    position: absolute; width: 152px; height: 66px; z-index: 20;
+    border-radius: 12px; overflow: hidden; cursor: pointer;
+    background: rgba(8,12,24,0.92); border: 1.5px solid rgba(255,255,255,0.05);
+    backdrop-filter: blur(6px);
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    opacity: 0; animation: nodeIn 0.45s ease-out forwards;
+  }
+  @keyframes nodeIn {
+    from { opacity:0; transform:scale(0.85) translateY(6px); filter:blur(3px); }
+    to { opacity:1; transform:scale(1) translateY(0); filter:blur(0); }
   }
   .service-node:hover {
-    transform: scale(1.08);
-    z-index: 20;
+    transform: translateY(-2px) scale(1.04);
+    border-color: var(--brand);
+    box-shadow: 0 0 20px var(--brand-g), 0 6px 16px rgba(0,0,0,0.3);
+    z-index: 30;
   }
-  .node-accent { width: 100%; height: 3px; }
-  .node-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
-  .node-header { display: flex; align-items: center; gap: 8px; }
-  .node-icon { font-size: 20px; }
-  .node-name { font-size: 12px; font-weight: 700; color: #f1f5f9; }
-  .node-category { font-size: 10px; color: #94a3b8; font-weight: 500; }
-  .node-status { display: flex; align-items: center; gap: 5px; margin-top: 2px; }
-  .status-dot { width: 7px; height: 7px; border-radius: 50%; }
-  .status-label { font-size: 10px; font-weight: 600; }
-  .status-connected .status-dot { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
-  .status-connected .status-label { color: #4ade80; }
-  .status-progress .status-dot { background: #facc15; box-shadow: 0 0 6px #facc15; animation: blink 1.5s infinite; }
-  .status-progress .status-label { color: #fde047; }
-  .status-error .status-dot { background: #f97316; box-shadow: 0 0 6px #f97316; animation: blink 1s infinite; }
-  .status-error .status-label { color: #fb923c; }
-  .status-notstarted .status-dot { background: #64748b; }
-  .status-notstarted .status-label { color: #94a3b8; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .service-node.focused { border-color: var(--brand); box-shadow: 0 0 28px var(--brand-g), 0 0 56px var(--brand-g2); }
+  .service-node.dimmed { opacity: 0.1; filter: blur(1px) grayscale(0.5); pointer-events: none; }
+  .node-bar { position: absolute; left: 0; top: 13px; bottom: 13px; width: 3px; border-radius: 0 2px 2px 0; }
+  .node-body { display: flex; align-items: center; gap: 10px; padding: 0 12px 0 14px; height: 100%; }
+  .node-icon { width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; }
+  .node-info { min-width: 0; flex: 1; }
+  .node-name { font-size: 12px; font-weight: 700; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .node-cat { font-size: 9px; color: #536079; margin-top: 1px; }
+  .node-dot { position: absolute; top: 7px; right: 7px; width: 6px; height: 6px; border-radius: 50%; }
+  .node-dot.pulse { animation: dotPulse 2s ease-out infinite; }
+  @keyframes dotPulse { 0%{box-shadow:0 0 0 0 currentColor} 70%{box-shadow:0 0 0 5px transparent} 100%{box-shadow:0 0 0 0 transparent} }
 
-  /* SVG layer */
-  .edge-layer {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    pointer-events: none; z-index: 1;
+  /* === Focus panel === */
+  .fp {
+    position: absolute; top: 16px; right: 16px; z-index: 50; width: 210px;
+    background: rgba(10,15,30,0.92); backdrop-filter: blur(16px);
+    border: 1px solid rgba(96,165,250,0.1); border-radius: 14px; padding: 14px;
+    opacity: 0; transform: translateX(8px); transition: all 0.3s ease; pointer-events: none;
   }
+  .fp.show { opacity: 1; transform: translateX(0); pointer-events: auto; }
+  .fp-x { position: absolute; top: 8px; right: 8px; background: none; border: none; color: #475569; cursor: pointer; font-size: 14px; }
+  .fp-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .fp-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .fp-name { font-size: 13px; font-weight: 700; }
+  .fp-cat { font-size: 10px; color: #536079; }
+  .fp-row { display: flex; justify-content: space-between; font-size: 11px; padding: 3px 0; }
+  .fp-l { color: #536079; }
+  .fp-v { font-weight: 600; }
 
-  /* Tooltip */
+  /* === Legend === */
+  .legend { position: absolute; bottom: 16px; left: 16px; z-index: 50; display: flex; gap: 14px; font-size: 10px; color: #3b4563; }
+  .legend-i { display: flex; align-items: center; gap: 4px; }
+  .legend-d { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* === Kbd hints === */
+  .kbd-bar { position: absolute; bottom: 16px; right: 16px; z-index: 50; display: flex; gap: 8px; font-size: 9px; color: #2a3348; }
+  .kbd { padding: 2px 5px; border: 1px solid #1a2238; border-radius: 3px; font-family: monospace; }
+
+  /* === SVG & Tooltip === */
+  .edge-layer { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
   .tooltip {
-    position: absolute; background: rgba(15,23,42,0.95); border: 1px solid #334155;
-    border-radius: 8px; padding: 10px 14px; font-size: 11px; color: #cbd5e1;
-    pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 100;
-    max-width: 200px; line-height: 1.5; backdrop-filter: blur(8px);
+    position: absolute; background: rgba(8,12,24,0.95); border: 1px solid rgba(96,165,250,0.12);
+    border-radius: 10px; padding: 10px 14px; font-size: 11px; color: #cbd5e1;
+    pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 100;
+    max-width: 210px; line-height: 1.6; backdrop-filter: blur(12px); box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   }
+  .tooltip strong { display: block; margin-bottom: 2px; font-size: 12px; }
+  .tt-row { display: flex; justify-content: space-between; gap: 12px; font-size: 10px; color: #7a8ba8; margin-top: 4px; }
 </style>
 </head>
 <body>
-
 <div class="canvas" id="canvas">
-  <svg class="edge-layer" id="edgeSvg"></svg>
-  <div class="hub">
+  <div class="bg-base"></div><div class="bg-grid"></div><div class="bg-glow"></div>
+  <svg class="edge-layer" id="svg" viewBox="0 0 1200 720"></svg>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <span>서비스 검색...</span>
+    </div>
+    <div class="toolbar-divider"></div>
+    <button class="toolbar-btn" title="전체보기 (F)">&#x26F6;</button>
+    <button class="toolbar-btn" title="PNG">&#x2B07;</button>
+  </div>
+
+  <!-- Status filter only (4개) -->
+  <div class="filters" id="filters"></div>
+
+  <!-- Hub -->
+  <div class="hub" id="hub">
+    <div class="hub-breath"></div>
     <div class="hub-ring"><div class="hub-inner">
-      <div class="hub-icon">&#x1F310;</div>
-      <div class="hub-label">My Project</div>
+      <div class="hub-logo">L</div>
+      <div class="hub-name">My Project</div>
+      <div class="hub-stats">5/8 connected</div>
     </div></div>
   </div>
-  <div class="tooltip" id="tooltip"></div>
+
+  <!-- Focus panel -->
+  <div class="fp" id="fp">
+    <button class="fp-x" id="fpX">&times;</button>
+    <div class="fp-head">
+      <div class="fp-icon" id="fpI"></div>
+      <div><div class="fp-name" id="fpN"></div><div class="fp-cat" id="fpC"></div></div>
+    </div>
+    <div class="fp-row"><span class="fp-l">상태</span><span class="fp-v" id="fpS"></span></div>
+    <div class="fp-row"><span class="fp-l">환경변수</span><span class="fp-v" id="fpE"></span></div>
+    <div class="fp-row" style="margin-top:6px;color:#3b4563;font-size:10px">더블클릭으로 상세 보기</div>
+  </div>
+
+  <div class="tooltip" id="tip"></div>
+
+  <!-- Legend: 상태만 -->
+  <div class="legend">
+    <div class="legend-i"><div class="legend-d" style="background:#4ade80"></div>연결됨</div>
+    <div class="legend-i"><div class="legend-d" style="background:#facc15"></div>진행 중</div>
+    <div class="legend-i"><div class="legend-d" style="background:#fb923c"></div>오류</div>
+    <div class="legend-i"><div class="legend-d" style="background:#475569"></div>시작 전</div>
+  </div>
+
+  <div class="kbd-bar">
+    <span><span class="kbd">Esc</span> 초기화</span>
+    <span><span class="kbd">Tab</span> 순회</span>
+  </div>
 </div>
 
 <script>
-const SERVICES = [
-  { id:'supabase', name:'Supabase',   cat:'Database',  icon:'&#x1F5C4;', color:'#3ecf8e', status:'connected',  tip:'PostgreSQL DB — 42 tables, healthy' },
-  { id:'vercel',   name:'Vercel',     cat:'Deploy',    icon:'&#x25B2;',  color:'#ffffff', status:'connected',  tip:'Production deployment — v2.4.1 live' },
-  { id:'stripe',   name:'Stripe',     cat:'Payment',   icon:'&#x1F4B3;', color:'#635bff', status:'connected',  tip:'Payment processing — 12 webhooks active' },
-  { id:'resend',   name:'Resend',     cat:'Email',     icon:'&#x2709;',  color:'#8b5cf6', status:'progress',   tip:'Email service — configuring templates' },
-  { id:'clerk',    name:'Clerk',      cat:'Auth',      icon:'&#x1F512;', color:'#6c47ff', status:'connected',  tip:'Authentication — Google & GitHub OAuth' },
-  { id:'openai',   name:'OpenAI',     cat:'AI',        icon:'&#x1F916;', color:'#10a37f', status:'connected',  tip:'GPT-4 — module analysis pipeline' },
-  { id:'sentry',   name:'Sentry',     cat:'Monitor',   icon:'&#x1F6E1;', color:'#f97316', status:'error',      tip:'Error tracking — API key expired' },
-  { id:'cloudflare',name:'CloudFlare',cat:'CDN',       icon:'&#x2601;',  color:'#f6821f', status:'notstarted', tip:'CDN & Workers — not configured' },
-];
-
-const CX = 600, CY = 350, RADIUS = 250;
-const canvas = document.getElementById('canvas');
-const svg = document.getElementById('edgeSvg');
-const tooltip = document.getElementById('tooltip');
-
-const statusMap = {
-  connected: { cls:'status-connected', label:'Connected' },
-  progress:  { cls:'status-progress',  label:'In Progress' },
-  error:     { cls:'status-error',     label:'Error' },
-  notstarted:{ cls:'status-notstarted',label:'Not Started' },
+// ===== 상태 기반 색상 (엣지 색상의 유일한 기준) =====
+const ST = {
+  connected:  { color: '#4ade80', glow: '#4ade8040', label: '연결됨',  bright: '#86efac' },
+  progress:   { color: '#facc15', glow: '#facc1540', label: '진행 중', bright: '#fde68a' },
+  error:      { color: '#fb923c', glow: '#fb923c40', label: '오류',    bright: '#fdba74' },
+  notstarted: { color: '#475569', glow: '#47556920', label: '시작 전', bright: '#64748b' },
 };
 
-// Place nodes
+// ===== 서비스 데이터: 브랜드 색상 + 상태만 =====
+const SERVICES = [
+  { id:'supabase',   name:'Supabase',   cat:'Database',  icon:'S',  brand:'#3ecf8e', status:'connected',  env:[8,8] },
+  { id:'clerk',      name:'Clerk',      cat:'Auth',      icon:'C',  brand:'#6c47ff', status:'connected',  env:[4,5] },
+  { id:'vercel',     name:'Vercel',     cat:'Deploy',    icon:'V',  brand:'#ffffff', status:'connected',  env:[3,3] },
+  { id:'cloudflare', name:'CloudFlare', cat:'CDN',       icon:'CF', brand:'#f6821f', status:'notstarted', env:[0,4] },
+  { id:'stripe',     name:'Stripe',     cat:'Payment',   icon:'$',  brand:'#635bff', status:'connected',  env:[6,6] },
+  { id:'resend',     name:'Resend',     cat:'Email',     icon:'R',  brand:'#8b5cf6', status:'progress',   env:[2,5] },
+  { id:'openai',     name:'OpenAI',     cat:'AI/ML',     icon:'AI', brand:'#10a37f', status:'connected',  env:[3,3] },
+  { id:'sentry',     name:'Sentry',     cat:'Monitoring',icon:'!',  brand:'#f97316', status:'error',      env:[1,3] },
+];
+
+const CX = 600, CY = 355, R = 240;
+const NS = 'http://www.w3.org/2000/svg';
+const canvas = document.getElementById('canvas');
+const svg = document.getElementById('svg');
+const tip = document.getElementById('tip');
+const fp = document.getElementById('fp');
+let focusId = null;
+
+// ===== Filter chips: 상태 4개만 =====
+const filtersEl = document.getElementById('filters');
+Object.entries(ST).forEach(([k, v]) => {
+  const c = document.createElement('div');
+  c.className = 'chip'; c.style.setProperty('--c', v.color);
+  c.innerHTML = `<span class="chip-dot" style="background:${v.color}"></span>${v.label}`;
+  c.onclick = () => c.classList.toggle('active');
+  filtersEl.appendChild(c);
+});
+
+// ===== SVG Defs =====
+const defs = document.createElementNS(NS, 'defs');
+// Status gradients (hub → service 방향, 상태색 기반)
+Object.entries(ST).forEach(([k, v]) => {
+  const g = document.createElementNS(NS, 'linearGradient');
+  g.id = `eg-${k}`; g.setAttribute('gradientUnits', 'userSpaceOnUse');
+  g.innerHTML = `<stop offset="0%" stop-color="${v.bright}" stop-opacity="0.8"/>
+                  <stop offset="100%" stop-color="${v.color}" stop-opacity="0.45"/>`;
+  defs.appendChild(g);
+});
+// Particle glow
+const pf = document.createElementNS(NS, 'filter');
+pf.id = 'pg'; pf.setAttribute('x','-100%'); pf.setAttribute('y','-100%');
+pf.setAttribute('width','300%'); pf.setAttribute('height','300%');
+pf.innerHTML = '<feGaussianBlur stdDeviation="3"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>';
+defs.appendChild(pf);
+svg.appendChild(defs);
+
+// ===== Ambient orbit ring =====
+const orbit = document.createElementNS(NS, 'circle');
+orbit.setAttribute('cx', CX); orbit.setAttribute('cy', CY); orbit.setAttribute('r', R);
+orbit.setAttribute('fill', 'none'); orbit.setAttribute('stroke', '#60a5fa');
+orbit.setAttribute('stroke-width', '0.5'); orbit.setAttribute('stroke-opacity', '0.06');
+orbit.setAttribute('stroke-dasharray', '3 8');
+svg.appendChild(orbit);
+
+// ===== Place nodes & edges =====
+const nodes = {};
 SERVICES.forEach((s, i) => {
-  const angle = (i / SERVICES.length) * Math.PI * 2 - Math.PI / 2;
-  const x = CX + Math.cos(angle) * RADIUS;
-  const y = CY + Math.sin(angle) * RADIUS;
+  const a = (i / SERVICES.length) * Math.PI * 2 - Math.PI / 2;
+  const x = CX + Math.cos(a) * R, y = CY + Math.sin(a) * R;
   s.x = x; s.y = y;
 
-  const st = statusMap[s.status];
-  const node = document.createElement('div');
-  node.className = 'service-node';
-  node.style.left = (x - 75) + 'px';
-  node.style.top = (y - 42) + 'px';
-  node.style.borderColor = s.color + '66';
-  node.style.boxShadow = `0 0 15px ${s.color}22`;
-  node.innerHTML = `
-    <div class="node-accent" style="background:${s.color}"></div>
+  const st = ST[s.status];
+  const gradId = `eg-${s.status}`;
+
+  // Update gradient endpoints
+  const g = document.getElementById(gradId);
+  if (g) { g.setAttribute('x1', CX); g.setAttribute('y1', CY); g.setAttribute('x2', x); g.setAttribute('y2', y); }
+
+  // Bezier path
+  const mx = (CX+x)/2, my = (CY+y)/2;
+  const px = -(y-CY)*0.08, py = (x-CX)*0.08;
+  const d = `M${CX},${CY} Q${mx+px},${my+py} ${x},${y}`;
+
+  // Edge: 상태 색상 기반
+  const edge = document.createElementNS(NS, 'path');
+  edge.setAttribute('d', d); edge.setAttribute('fill', 'none');
+  edge.setAttribute('stroke', `url(#${gradId})`);
+  edge.setAttribute('stroke-width', s.status === 'connected' ? '2' : s.status === 'notstarted' ? '1' : '1.5');
+  if (s.status === 'notstarted') { edge.setAttribute('stroke-dasharray', '4 6'); edge.setAttribute('stroke-opacity', '0.3'); }
+  svg.appendChild(edge);
+
+  // Glow underlay (connected only)
+  if (s.status === 'connected') {
+    const gl = document.createElementNS(NS, 'path');
+    gl.setAttribute('d', d); gl.setAttribute('fill', 'none');
+    gl.setAttribute('stroke', st.color); gl.setAttribute('stroke-width', '5');
+    gl.setAttribute('stroke-opacity', '0.05'); gl.setAttribute('filter', 'url(#pg)');
+    svg.insertBefore(gl, svg.firstChild.nextSibling);
+  }
+
+  // Particles (상태색 기반, not_started 제외)
+  if (s.status !== 'notstarted') {
+    const dur = s.status === 'error' ? '2.5s' : s.status === 'progress' ? '4s' : '3.5s';
+    [{ r:3, o:0.85, dl:0 }, { r:2, o:0.35, dl:0.7 }, { r:1.2, o:0.12, dl:1.4 }].forEach(p => {
+      const c = document.createElementNS(NS, 'circle');
+      c.setAttribute('r', p.r); c.setAttribute('fill', st.bright);
+      c.setAttribute('opacity', p.o); c.setAttribute('filter', 'url(#pg)');
+      c.classList.add('flow-particle');
+      c.innerHTML = `<animateMotion dur="${dur}" repeatCount="indefinite" begin="${p.dl}s" path="${d}"/>`;
+      svg.appendChild(c);
+    });
+  }
+
+  // HTML Node
+  const nd = document.createElement('div');
+  nd.className = 'service-node'; nd.id = `n-${s.id}`;
+  nd.style.left = (x-76)+'px'; nd.style.top = (y-33)+'px';
+  nd.style.setProperty('--brand', s.brand+'80');
+  nd.style.setProperty('--brand-g', s.brand+'28');
+  nd.style.setProperty('--brand-g2', s.brand+'10');
+  nd.style.animationDelay = (i*60)+'ms';
+  const pulse = (s.status==='progress'||s.status==='error') ? 'pulse' : '';
+  nd.innerHTML = `
+    <div class="node-bar" style="background:${s.brand}"></div>
+    <div class="node-dot ${pulse}" style="background:${st.color};color:${st.color}"></div>
     <div class="node-body">
-      <div class="node-header">
-        <span class="node-icon">${s.icon}</span>
-        <div><div class="node-name">${s.name}</div><div class="node-category">${s.cat}</div></div>
-      </div>
-      <div class="node-status ${st.cls}">
-        <div class="status-dot"></div>
-        <span class="status-label">${st.label}</span>
+      <div class="node-icon" style="background:${s.brand}10;color:${s.brand}">${s.icon}</div>
+      <div class="node-info">
+        <div class="node-name">${s.name}</div>
+        <div class="node-cat">${s.cat}</div>
       </div>
     </div>`;
-  node.addEventListener('mouseenter', e => {
-    node.style.boxShadow = `0 0 30px ${s.color}55, 0 0 60px ${s.color}22`;
-    tooltip.style.opacity = '1';
-    tooltip.innerHTML = `<strong style="color:${s.color}">${s.name}</strong><br>${s.tip}`;
-    const r = node.getBoundingClientRect(), cr = canvas.getBoundingClientRect();
-    tooltip.style.left = (r.left - cr.left + 75 - 100) + 'px';
-    tooltip.style.top = (r.top - cr.top - 50) + 'px';
-  });
-  node.addEventListener('mouseleave', () => {
-    node.style.boxShadow = `0 0 15px ${s.color}22`;
-    tooltip.style.opacity = '0';
-  });
-  canvas.appendChild(node);
+
+  nd.onclick = e => { e.stopPropagation(); setFocus(s.id); };
+  nd.onmouseenter = () => {
+    tip.style.opacity = '1';
+    tip.innerHTML = `<strong style="color:${s.brand}">${s.name}</strong>
+      <span style="font-size:10px;color:#536079">${s.cat}</span>
+      <div class="tt-row"><span>상태</span><span style="color:${st.color};font-weight:600">${st.label}</span></div>
+      <div class="tt-row"><span>환경변수</span><span>${s.env[0]}/${s.env[1]}</span></div>`;
+    const r = nd.getBoundingClientRect(), cr = canvas.getBoundingClientRect();
+    tip.style.left = (r.left-cr.left+76-105)+'px';
+    tip.style.top = (r.top-cr.top-86)+'px';
+  };
+  nd.onmouseleave = () => { tip.style.opacity = '0'; };
+
+  canvas.appendChild(nd);
+  nodes[s.id] = nd;
 });
 
-// Draw edges + particles
-const NS = 'http://www.w3.org/2000/svg';
-svg.setAttribute('viewBox', '0 0 1200 700');
+// ===== Focus =====
+function setFocus(id) {
+  if (focusId === id) { clearFocus(); return; }
+  focusId = id;
+  const s = SERVICES.find(x => x.id === id);
+  if (!s) return;
+  const st = ST[s.status];
 
-SERVICES.forEach((s, i) => {
-  const edgeColor = s.color;
-  const opacity = s.status === 'notstarted' ? 0.3 : 0.8;
+  SERVICES.forEach(o => {
+    const el = nodes[o.id];
+    if (o.id === id) { el.classList.remove('dimmed'); el.classList.add('focused'); }
+    else { el.classList.remove('focused'); el.classList.add('dimmed'); }
+  });
 
-  // Edge line
-  const line = document.createElementNS(NS, 'line');
-  line.setAttribute('x1', CX); line.setAttribute('y1', CY);
-  line.setAttribute('x2', s.x); line.setAttribute('y2', s.y);
-  line.setAttribute('stroke', edgeColor);
-  line.setAttribute('stroke-width', '2');
-  line.setAttribute('stroke-opacity', opacity);
-  if (s.status === 'notstarted') {
-    line.setAttribute('stroke-dasharray', '6 4');
+  fp.classList.add('show');
+  document.getElementById('fpI').style.background = `${s.brand}15`;
+  document.getElementById('fpI').innerHTML = `<span style="color:${s.brand};font-weight:800;font-size:14px">${s.icon}</span>`;
+  document.getElementById('fpN').textContent = s.name;
+  document.getElementById('fpN').style.color = s.brand;
+  document.getElementById('fpC').textContent = s.cat;
+  document.getElementById('fpS').textContent = st.label;
+  document.getElementById('fpS').style.color = st.color;
+  document.getElementById('fpE').textContent = `${s.env[0]}/${s.env[1]}`;
+  document.getElementById('fpE').style.color = s.env[0]===s.env[1] ? '#4ade80' : '#facc15';
+}
+function clearFocus() {
+  focusId = null;
+  SERVICES.forEach(s => { nodes[s.id].classList.remove('dimmed','focused'); });
+  fp.classList.remove('show');
+}
+
+canvas.onclick = e => {
+  if (['bg-base','bg-grid','bg-glow'].some(c => e.target.classList.contains(c)) || e.target === canvas) clearFocus();
+};
+document.getElementById('fpX').onclick = clearFocus;
+document.getElementById('hub').onclick = clearFocus;
+
+document.onkeydown = e => {
+  if (e.key === 'Escape') clearFocus();
+  if (e.key === 'f' || e.key === '0') clearFocus();
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const ids = SERVICES.map(s => s.id);
+    const ci = focusId ? ids.indexOf(focusId) : -1;
+    setFocus(ids[e.shiftKey ? (ci<=0?ids.length-1:ci-1) : (ci>=ids.length-1?0:ci+1)]);
   }
-  svg.appendChild(line);
-
-  // Glow filter
-  if (i === 0) {
-    const defs = document.createElementNS(NS, 'defs');
-    const filter = document.createElementNS(NS, 'filter');
-    filter.id = 'glow';
-    filter.innerHTML = '<feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>';
-    defs.appendChild(filter);
-    svg.insertBefore(defs, svg.firstChild);
-  }
-
-  // Animated particles (skip not-started)
-  if (s.status !== 'notstarted') {
-    const count = s.status === 'error' ? 1 : 2;
-    for (let p = 0; p < count; p++) {
-      const circle = document.createElementNS(NS, 'circle');
-      circle.setAttribute('r', s.status === 'error' ? '3' : '3.5');
-      circle.setAttribute('fill', edgeColor);
-      circle.setAttribute('filter', 'url(#glow)');
-      circle.setAttribute('opacity', '0.9');
-
-      const anim = document.createElementNS(NS, 'animateMotion');
-      const dur = s.status === 'progress' ? '4s' : '3s';
-      anim.setAttribute('dur', dur);
-      anim.setAttribute('repeatCount', 'indefinite');
-      anim.setAttribute('begin', (p * 1.5) + 's');
-      anim.setAttribute('path', `M${CX},${CY} L${s.x},${s.y}`);
-      circle.appendChild(anim);
-      svg.appendChild(circle);
-    }
-  }
-});
-
-// Hub center marker in SVG
-const hubGlow = document.createElementNS(NS, 'circle');
-hubGlow.setAttribute('cx', CX); hubGlow.setAttribute('cy', CY);
-hubGlow.setAttribute('r', '65'); hubGlow.setAttribute('fill', 'none');
-hubGlow.setAttribute('stroke', '#00f5ff'); hubGlow.setAttribute('stroke-width', '1');
-hubGlow.setAttribute('stroke-opacity', '0.15');
-svg.appendChild(hubGlow);
+};
 </script>
 </body>
 </html>

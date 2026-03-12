@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import type { Node, Edge } from '@xyflow/react';
 import { computeRadialLayout, PROJECT_NODE_ID, getHandleFromAngle } from '@/lib/layout/radial-layout';
-import { categoryToViewGroup } from '@/lib/layout/view-group';
-import type { ProjectService, Service, UserConnection, ServiceCategory, ViewGroup } from '@/types';
+import type { ProjectService, Service, UserConnection, ServiceCategory } from '@/types';
+import { getServiceBrand } from '@/lib/constants/service-brands';
 
 interface UseRadialMapNodesInput {
   services: (ProjectService & { service: Service })[];
@@ -11,12 +11,11 @@ interface UseRadialMapNodesInput {
   projectIconUrl?: string | null;
   searchQuery?: string;
   focusedNodeId?: string | null;
-  filterGroups?: ViewGroup[];
   filterStatuses?: string[];
 }
 
 export function useRadialMapNodes(input: UseRadialMapNodesInput) {
-  const { services, userConnections, projectName, projectIconUrl, searchQuery, focusedNodeId, filterGroups, filterStatuses } = input;
+  const { services, userConnections, projectName, projectIconUrl, searchQuery, focusedNodeId, filterStatuses } = input;
 
   return useMemo(() => {
     if (services.length === 0) return { nodes: [] as Node[], edges: [] as Edge[] };
@@ -28,13 +27,6 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
           s.service.slug.toLowerCase().includes(searchQuery.toLowerCase())
         )
       : services;
-
-    // Filter by ViewGroup
-    if (filterGroups && filterGroups.length > 0) {
-      filteredServices = filteredServices.filter((s) =>
-        filterGroups.includes(categoryToViewGroup(s.service.category))
-      );
-    }
 
     // Filter by connection status
     if (filterStatuses && filterStatuses.length > 0) {
@@ -49,9 +41,7 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
     const focus2hopIds = new Set<string>();
 
     if (focusedNodeId && focusedNodeId !== PROJECT_NODE_ID) {
-      // Hub is always connected to focused node
       focus1hopIds.add(PROJECT_NODE_ID);
-      // Find direct s2s connections (1-hop)
       userConnections.forEach((c) => {
         if (c.source_service_id === focusedNodeId && filteredIds.has(c.target_service_id)) {
           focus1hopIds.add(c.target_service_id);
@@ -61,7 +51,6 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
         }
       });
 
-      // Find 2-hop connections
       for (const hop1Id of focus1hopIds) {
         if (hop1Id === PROJECT_NODE_ID) continue;
         userConnections.forEach((c) => {
@@ -89,6 +78,10 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
         ? (isFocusTarget || is1hop ? 1 : is2hop ? 0.6 : 0.1)
         : 1;
 
+      // Brand color for accent bar
+      const brand = getServiceBrand(s.service.slug);
+      const brandColor = brand?.darkColor;
+
       return {
         id: s.id,
         type: 'service',
@@ -99,7 +92,7 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
           category: s.service.category,
           status: s.status,
           iconUrl: s.service.icon_url ?? null,
-          viewGroup: categoryToViewGroup(s.service.category),
+          brandColor,
           highlighted: !isFocusMode || isFocusTarget || is1hop || is2hop,
           focusOpacity,
           isFocusTarget,
@@ -138,13 +131,7 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
       if (angleDeg != null) nodeAngleMap.set(n.id, angleDeg);
     }
 
-    // Build viewGroup map for edge gradient
-    const nodeViewGroupMap = new Map<string, ViewGroup>();
-    for (const s of filteredServices) {
-      nodeViewGroupMap.set(s.id, categoryToViewGroup(s.service.category));
-    }
-
-    // Hub edges: project → each service (with angle-based handle selection)
+    // Hub edges: project → each service
     const hubEdges: Edge[] = filteredServices.map((s) => {
       const isFocusRelated = !isFocusMode || s.id === focusedNodeId || focus1hopIds.has(s.id);
       const angleDeg = nodeAngleMap.get(s.id);
@@ -159,12 +146,11 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
         data: {
           status: s.status,
           focusHighlighted: isFocusRelated,
-          targetViewGroup: nodeViewGroupMap.get(s.id),
         },
       };
     });
 
-    // Service-to-service edges (compute optimal handles from relative positions)
+    // Service-to-service edges
     const S2S_NODE_W = 160;
     const S2S_NODE_H = 72;
     const nodePositionMap = new Map<string, { x: number; y: number }>();
@@ -179,7 +165,6 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
           c.source_service_id === focusedNodeId ||
           c.target_service_id === focusedNodeId;
 
-        // Compute handle based on relative angle between source and target
         const srcPos = nodePositionMap.get(c.source_service_id);
         const tgtPos = nodePositionMap.get(c.target_service_id);
         let s2sSourceHandle: string | undefined;
@@ -204,12 +189,11 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
             connectionType: c.connection_type,
             connectionStatus: c.connection_status,
             focusHighlighted: isFocusRelated,
-            targetViewGroup: nodeViewGroupMap.get(c.target_service_id),
           },
           style: { strokeDasharray: '4 4' },
         };
       });
 
     return { nodes: positionedNodes, edges: [...hubEdges, ...s2sEdges] };
-  }, [services, userConnections, projectName, projectIconUrl, searchQuery, focusedNodeId, filterGroups, filterStatuses]);
+  }, [services, userConnections, projectName, projectIconUrl, searchQuery, focusedNodeId, filterStatuses]);
 }

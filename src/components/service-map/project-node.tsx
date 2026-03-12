@@ -59,11 +59,11 @@ function ProjectNodeComponent({ data }: NodeProps) {
           strokeWidth="4"
           opacity="0.15"
         />
-        {/* Health ring foreground — gradient */}
+        {/* Health ring foreground — status green */}
         <circle
           r={ringR}
           fill="none"
-          stroke="url(#gm-runtime)"
+          stroke="#4ade80"
           strokeWidth="4"
           strokeDasharray={`${ringFill} ${ringCirc - ringFill}`}
           strokeLinecap="round"
@@ -71,12 +71,13 @@ function ProjectNodeComponent({ data }: NodeProps) {
           opacity="0.7"
           className="animate-hub-glow"
         />
-        {/* Hub hexagon with gradient border */}
+        {/* Hub hexagon with cyan border */}
         <polygon
           points={hexPoints(HUB_R)}
           className="fill-card"
-          stroke="url(#gm-core)"
+          stroke="#00d4ff"
           strokeWidth="2"
+          opacity="0.6"
         />
       </svg>
 
