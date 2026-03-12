@@ -249,12 +249,22 @@
   animation: node-enter 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
-/* Service map: dark mode node glow on hover */
+/* Service map: hex node pulse animation */
+@keyframes hex-pulse {
+  0%, 100% { stroke-opacity: 0.4; }
+  50% { stroke-opacity: 1; }
+}
+.animate-hex-pulse {
+  animation: hex-pulse 1.5s ease-in-out infinite;
+}
+
+/* Service map: hex node glow (legacy card-based support) */
 .service-node-card {
   --node-glow: transparent;
 }
 .dark .service-node-card:hover {
   box-shadow: 0 0 20px -4px var(--node-glow), 0 0 8px -2px var(--node-glow);
+  border-color: color-mix(in oklch, var(--node-glow) 30%, oklch(0.30 0.02 250));
 }
 
 /* Service map: dark mode canvas radial gradient */
@@ -482,6 +492,7 @@
   .animate-ai-fade-in,
   .animate-ai-reveal,
   .animate-edge-glow-pulse,
+  .animate-hex-pulse,
   .animate-github-wiggle,
   .animate-code-blink,
   .animate-node-enter {

@@ -53,16 +53,16 @@ function ZoneNode({ data }: NodeProps) {
   const bgClass = bgColors[d.domain] || '';
 
   return (
-    <div className={`w-full h-full rounded-2xl border transition-colors ${bgClass} ${
+    <div className={`w-full h-full rounded-[18px] border transition-colors ${bgClass} ${
       editMode ? 'border-primary/40' : borderClass
     }`}>
       {/* Zone label chip — absolute positioned at top */}
       <div className="absolute -top-3 left-4 z-10">
-        <div className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-xs font-medium shadow-sm ${chipClass}`}>
-          <Icon className="h-3 w-3" />
+        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] border text-[10px] font-semibold tracking-wide shadow-sm backdrop-blur-sm ${chipClass}`}>
+          <Icon className="h-3.5 w-3.5 opacity-75" />
           <span>{d.label}</span>
-          {subtitle && <span className="text-[10px] opacity-70">{subtitle}</span>}
-          <Badge variant="secondary" className="text-[9px] h-3.5 px-1 ml-0.5">
+          {subtitle && <span className="text-[8.5px] font-medium opacity-55 tracking-normal">{subtitle}</span>}
+          <Badge variant="secondary" className="text-[9px] h-4 px-1.5 ml-0.5 rounded-[5px]">
             {d.count}
           </Badge>
         </div>

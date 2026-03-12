@@ -5,10 +5,12 @@ import { categoryToViewGroup, VIEW_GROUP_ORDER } from '@/lib/layout/view-group';
 const CENTER_X = 600;
 const CENTER_Y = 400;
 const PROJECT_NODE_ID = 'project-center';
-const INNER_RADIUS = 240;
-const OUTER_RADIUS = 400;
-const NODE_WIDTH = 180;
-const NODE_HEIGHT = 72;
+const INNER_RADIUS = 260;
+const OUTER_RADIUS = 420;
+const NODE_WIDTH = 150;
+const NODE_HEIGHT = 120;
+const HUB_WIDTH = 160;
+const HUB_HEIGHT = 130;
 
 const SECTOR_START_ANGLES = VIEW_GROUP_ORDER.reduce<Record<ViewGroup, number>>((acc, group, i) => {
   acc[group] = -90 + i * 72;
@@ -35,7 +37,7 @@ export function computeRadialLayout(input: RadialLayoutInput): RadialLayoutResul
 
   resultNodes.push({
     id: PROJECT_NODE_ID, type: 'project',
-    position: { x: CENTER_X - 100, y: CENTER_Y - 40 },
+    position: { x: CENTER_X - HUB_WIDTH / 2, y: CENTER_Y - HUB_HEIGHT / 2 },
     data: { label: projectName, iconUrl: projectIconUrl ?? null },
   });
 

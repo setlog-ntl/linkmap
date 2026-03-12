@@ -47,20 +47,24 @@ function RadialEdgeComponent({
   const status = edgeData?.status as string | undefined;
   const connectionStatus = edgeData?.connectionStatus as string | undefined;
   const connectionType = edgeData?.connectionType as string | undefined;
+  const focusHighlighted = edgeData?.focusHighlighted as boolean | undefined;
 
-  // Determine stroke color: connectionStatus (s2s) takes priority over hub status
+  // Focus mode: if focusHighlighted is explicitly false, dim the edge
+  const isFocusFaded = focusHighlighted === false;
+
+  // Determine stroke color
   const strokeColor = connectionStatus
     ? (CONNECTION_STATUS_COLORS[connectionStatus] ?? '#94a3b8')
     : (STATUS_COLORS[status ?? ''] ?? STATUS_COLORS.not_started);
 
-  // Compute marker key for SVG defs (defined in map-view.tsx)
+  // Compute marker key
   const markerKey = connectionStatus
     ? (CONNECTION_STATUS_TO_MARKER[connectionStatus] ?? 'not_started')
     : (VALID_HUB_STATUSES.has(status ?? '') ? (status as string) : 'not_started');
 
   const isInactive = connectionStatus === 'inactive';
   const isHubEdge = !connectionStatus;
-  const showParticle = !isInactive && isHubEdge && status === 'connected';
+  const showParticle = !isInactive && isHubEdge && status === 'connected' && !isFocusFaded;
 
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -72,16 +76,20 @@ function RadialEdgeComponent({
     curvature: 0.3,
   });
 
+  // Opacity: focus-aware
+  const baseOpacity = isInactive ? 0.3 : (hovered ? 1 : 0.6);
+  const edgeOpacity = isFocusFaded ? 0.04 : baseOpacity;
+
   return (
     <g
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Gradient definition for this edge */}
+      {/* Gradient definition */}
       <defs>
         <linearGradient id={gradId} x1={sourceX} y1={sourceY} x2={targetX} y2={targetY} gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor={strokeColor} stopOpacity={0.9} />
-          <stop offset="100%" stopColor={strokeColor} stopOpacity={0.3} />
+          <stop offset="100%" stopColor={strokeColor} stopOpacity={0.25} />
         </linearGradient>
       </defs>
       <BaseEdge
@@ -89,20 +97,31 @@ function RadialEdgeComponent({
         path={edgePath}
         style={{
           stroke: `url(#${gradId})`,
-          strokeWidth: hovered ? 2.5 : 1.5,
-          opacity: isInactive ? 0.3 : (hovered ? 1 : 0.7),
-          transition: 'opacity 0.2s ease, stroke-width 0.2s ease',
+          strokeWidth: hovered ? 2.5 : (isFocusFaded ? 1 : 1.8),
+          opacity: edgeOpacity,
+          transition: 'opacity 0.3s ease, stroke-width 0.2s ease',
           ...style,
         }}
         markerEnd={`url(#radial-arrow-${markerKey})`}
       />
+      {/* Glow overlay for highlighted edges */}
+      {focusHighlighted && !isFocusFaded && isHubEdge && (
+        <path
+          d={edgePath}
+          fill="none"
+          stroke={strokeColor}
+          strokeWidth="4"
+          opacity="0.08"
+          style={{ filter: `blur(4px)` }}
+        />
+      )}
       {/* Flow particle for connected hub edges */}
       {showParticle && (
         <circle
           r={2.5}
           fill={strokeColor}
           className="flow-particle"
-          style={{ filter: `drop-shadow(0 0 3px ${strokeColor})` }}
+          style={{ filter: `drop-shadow(0 0 4px ${strokeColor})` }}
         >
           <animateMotion dur="3s" repeatCount="indefinite" path={edgePath} />
         </circle>
