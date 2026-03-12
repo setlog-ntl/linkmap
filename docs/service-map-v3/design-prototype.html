@@ -3,644 +3,553 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Service Map V3 - Design Prototype</title>
+<title>Service Map V3 — Design Prototype</title>
 <style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  :root{
-    --bg:#f3f4f6;--bg-card:#ffffff;--bg-muted:#f1f5f9;--text:#1e293b;--text-muted:#94a3b8;
-    --border:#e2e8f0;--brand:#2563eb;--grid-color:rgba(148,163,184,0.18);
-    --zone-auth:rgba(99,102,241,0.06);--zone-deploy:rgba(34,197,94,0.06);--zone-data:rgba(59,130,246,0.06);
-    --zone-border-auth:rgba(99,102,241,0.25);--zone-border-deploy:rgba(34,197,94,0.25);--zone-border-data:rgba(59,130,246,0.25);
-    --shadow:0 1px 3px rgba(0,0,0,0.08);--glow:none;
-    --radial:none;
-  }
-  .dark{
-    --bg:#1a2332;--bg-card:#1e2d3d;--bg-muted:#253548;--text:#e2e8f0;--text-muted:#64748b;
-    --border:#334155;--brand:#60a5fa;--grid-color:rgba(100,116,139,0.12);
-    --zone-auth:rgba(99,102,241,0.08);--zone-deploy:rgba(34,197,94,0.08);--zone-data:rgba(59,130,246,0.08);
-    --zone-border-auth:rgba(99,102,241,0.35);--zone-border-deploy:rgba(34,197,94,0.35);--zone-border-data:rgba(59,130,246,0.35);
-    --shadow:0 1px 4px rgba(0,0,0,0.3);
-    --radial:radial-gradient(ellipse 600px 400px at 50% 50%, rgba(37,99,235,0.07) 0%, transparent 70%);
-  }
-  body{font-family:'Pretendard Variable',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s;overflow-x:hidden}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f3f4f6;--card:#fff;--muted:#f1f5f9;--text:#1e293b;--text2:#94a3b8;
+  --border:#e2e8f0;--brand:#2563eb;--grid:rgba(148,163,184,0.15);
+  --shadow:0 1px 3px rgba(0,0,0,0.07);
+  --canvas-glow:none;
+}
+.dark{
+  --bg:#141e2e;--card:#1b2738;--muted:#253548;--text:#e2e8f0;--text2:#64748b;
+  --border:#2d3d50;--brand:#60a5fa;--grid:rgba(100,116,139,0.10);
+  --shadow:0 1px 4px rgba(0,0,0,0.4);
+  --canvas-glow:radial-gradient(ellipse 50% 45% at 50% 50%,rgba(96,165,250,0.06) 0%,transparent 70%);
+}
+body{font-family:'Pretendard Variable',system-ui,sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s}
 
-  /* Top Bar */
-  .topbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:var(--bg-card);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);transition:all .3s}
-  .topbar h1{font-size:18px;font-weight:700;letter-spacing:-0.02em}
-  .topbar h1 span{color:var(--brand);font-weight:800}
-  .controls{display:flex;gap:8px;align-items:center}
-  .btn{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
-  .btn:hover{background:var(--bg-muted);transform:translateY(-1px)}
-  .btn.active{background:var(--brand);color:#fff;border-color:var(--brand)}
-  .badge{display:inline-block;padding:2px 8px;border-radius:9999px;font-size:10px;font-weight:600;background:var(--brand);color:#fff;margin-left:8px}
+/* ─── Toolbar ─── */
+.toolbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;background:var(--card);border-bottom:1px solid var(--border);backdrop-filter:blur(10px)}
+.toolbar h1{font-size:16px;font-weight:700;white-space:nowrap}
+.toolbar h1 b{color:var(--brand)}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+.b{padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:12px;font-weight:500;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.b:hover{background:var(--muted)}
+.b.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.tag{font-size:9px;padding:1px 6px;border-radius:99px;background:var(--brand);color:#fff;font-weight:600}
 
-  /* Canvas */
-  .canvas-wrap{position:relative;width:100%;min-height:calc(100vh - 56px);overflow:hidden}
-  .canvas{position:relative;width:100%;height:700px;background:var(--bg);transition:background .3s}
-  .canvas::before{
-    content:'';position:absolute;inset:0;pointer-events:none;
-    background-image:
-      linear-gradient(var(--grid-color) 1px, transparent 1px),
-      linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-    background-size:32px 32px;
-  }
-  .dark .canvas::after{
-    content:'';position:absolute;inset:0;pointer-events:none;
-    background:var(--radial);
-  }
+/* ─── Canvas ─── */
+.canvas-wrap{display:flex;justify-content:center;padding:20px}
+.canvas{position:relative;width:1100px;height:680px;background:var(--bg);border-radius:16px;border:1px solid var(--border);overflow:hidden;transition:background .3s}
+.canvas::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:32px 32px}
+.canvas::after{content:'';position:absolute;inset:0;pointer-events:none;background:var(--canvas-glow)}
 
-  /* Zones */
-  .zone{position:absolute;border-radius:16px;border:1.5px solid;transition:all .3s}
-  .zone-label{position:absolute;top:-12px;left:16px;padding:2px 10px;border-radius:6px;font-size:11px;font-weight:600;letter-spacing:0.02em;color:#fff;display:flex;align-items:center;gap:4px}
-  .zone-auth{background:var(--zone-auth);border-color:var(--zone-border-auth)}
-  .zone-auth .zone-label{background:#6366f1}
-  .zone-deploy{background:var(--zone-deploy);border-color:var(--zone-border-deploy)}
-  .zone-deploy .zone-label{background:#22c55e}
-  .zone-data{background:var(--zone-data);border-color:var(--zone-border-data)}
-  .zone-data .zone-label{background:#3b82f6}
+/* ─── Edges SVG ─── */
+.edge-layer{position:absolute;inset:0;pointer-events:none;z-index:2}
+.edge-line{fill:none;stroke-width:1.8;transition:opacity .3s}
+.edge-line.dim{opacity:0.06!important}
+.particle{transition:opacity .3s}
+.particle.dim{opacity:0}
+.dark .particle{filter:drop-shadow(0 0 4px var(--pc))}
 
-  /* Service Node (Circuit Chip) */
-  .node{
-    position:absolute;width:180px;height:72px;background:var(--bg-card);border-radius:12px;
-    box-shadow:var(--shadow);cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);
-    display:flex;align-items:center;gap:10px;padding:0 14px 0 0;overflow:visible;
-    border:1px solid var(--border);z-index:5;
-  }
-  .node:hover{transform:scale(1.03) translateY(-2px);z-index:10}
-  .dark .node:hover{box-shadow:var(--shadow), 0 0 18px var(--node-glow, rgba(99,102,241,0.25))}
-  .node .color-bar{width:4px;min-width:4px;height:100%;border-radius:12px 0 0 12px;flex-shrink:0}
-  .node .icon-wrap{width:32px;height:32px;min-width:32px;border-radius:10px;background:var(--bg-muted);display:flex;align-items:center;justify-content:center;font-size:16px;transition:background .3s}
-  .node .info{flex:1;min-width:0}
-  .node .name{font-size:13px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .node .cat{font-size:10px;color:var(--text-muted);margin-top:1px}
-  .node .status{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%}
-  .status-connected{background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,0.5)}
-  .status-progress{background:#f59e0b;box-shadow:0 0 6px rgba(245,158,11,0.5)}
-  .status-error{background:#ef4444;box-shadow:0 0 6px rgba(239,68,68,0.5)}
-  .status-idle{background:#94a3b8}
+/* ─── Hub Node ─── */
+.hub{position:absolute;z-index:10;width:180px;height:72px;background:var(--card);border-radius:14px;
+  border:2px solid var(--brand);box-shadow:var(--shadow);cursor:pointer;transition:.25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;gap:10px;padding:0 14px}
+.hub:hover{transform:scale(1.04)}
+.dark .hub{animation:glow 3.5s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 22px rgba(96,165,250,0.25),var(--shadow)}}
+.hub-icon{width:36px;height:36px;border-radius:10px;background:var(--muted);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+.hub-icon svg{width:22px;height:22px}
+.hub-name{font-size:13px;font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hub-sub{font-size:10px;color:var(--text2)}
 
-  /* Main Service Node — same size as normal nodes, no special decoration */
+/* ─── Service Node ─── */
+.snode{position:absolute;z-index:5;width:180px;height:72px;background:var(--card);border-radius:12px;
+  border:1px solid var(--border);box-shadow:var(--shadow);cursor:pointer;
+  display:flex;align-items:center;gap:0;padding:0;overflow:visible;
+  transition:all .25s cubic-bezier(.4,0,.2,1)}
+.snode:hover{transform:scale(1.04) translateY(-2px);z-index:15}
+.dark .snode:hover{box-shadow:var(--shadow),0 0 16px var(--ng,rgba(99,102,241,0.2))}
+.snode.dim{opacity:0.3;transform:scale(0.97);filter:blur(0.4px);z-index:3}
+.snode .bar{width:4px;min-width:4px;align-self:stretch;border-radius:12px 0 0 12px;flex-shrink:0}
+.snode .ico{width:30px;height:30px;min-width:30px;border-radius:9px;background:var(--muted);display:flex;align-items:center;justify-content:center;font-size:15px;margin:0 8px}
+.snode .nfo{flex:1;min-width:0;padding-right:20px}
+.snode .nm{font-size:12.5px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.snode .ct{font-size:9.5px;color:var(--text2);margin-top:1px}
+.snode .dot{position:absolute;top:8px;right:8px;width:7px;height:7px;border-radius:50%}
+/* Handle dots (connection ports) */
+.snode .port{position:absolute;width:6px;height:6px;border-radius:50%;background:rgba(96,165,250,0.5);transition:.15s}
+.snode .port.t{top:-3px;left:50%;transform:translateX(-50%)}
+.snode .port.b{bottom:-3px;left:50%;transform:translateX(-50%)}
+.snode .port.l{left:-3px;top:50%;transform:translateY(-50%)}
+.snode .port.r{right:-3px;top:50%;transform:translateY(-50%)}
+.hub .port{position:absolute;width:6px;height:6px;border-radius:50%;background:var(--brand);opacity:.6}
+.hub .port.t{top:-3px;left:50%;transform:translateX(-50%)}
+.hub .port.b{bottom:-3px;left:50%;transform:translateX(-50%)}
+.hub .port.l{left:-3px;top:50%;transform:translateY(-50%)}
+.hub .port.r{right:-3px;top:50%;transform:translateY(-50%)}
 
-  /* Project Hub Node (central, shows project registered image) */
-  .hub{
-    position:absolute;width:200px;height:80px;background:var(--bg-card);border-radius:14px;
-    box-shadow:var(--shadow);cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);
-    display:flex;align-items:center;gap:12px;padding:0 16px;overflow:visible;
-    border:2px solid var(--brand);z-index:8;
-  }
-  .hub:hover{transform:scale(1.03);z-index:12}
-  .dark .hub{animation:hubGlow 3s ease-in-out infinite}
-  @keyframes hubGlow{
-    0%,100%{box-shadow:0 0 8px rgba(96,165,250,0.15),var(--shadow)}
-    50%{box-shadow:0 0 24px rgba(96,165,250,0.35),var(--shadow)}
-  }
-  .hub .project-img{width:40px;height:40px;border-radius:10px;object-fit:contain;background:var(--bg-muted);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
-  .hub .project-img img{width:100%;height:100%;object-fit:contain}
-  .hub .project-img .fallback{font-size:16px;font-weight:700;color:var(--brand)}
-  .hub .hub-info{flex:1;min-width:0}
-  .hub .hub-info .hub-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .hub .hub-info .hub-sub{font-size:10px;color:var(--text-muted)}
-  .hub .hub-handles{position:absolute}
+/* ─── Zone (Dependency view) ─── */
+.zone{position:absolute;border-radius:14px;border:1.5px solid;z-index:1;transition:.3s}
+.zone-chip{position:absolute;top:-11px;left:14px;padding:2px 10px;border-radius:6px;font-size:10px;font-weight:600;color:#fff;display:flex;align-items:center;gap:4px;z-index:2}
 
-  /* Focus Mode */
-  .canvas.focus-mode .node:not(.focused){opacity:0.35;transform:scale(0.97);filter:blur(0.3px)}
-  .canvas.focus-mode .hub:not(.focused){opacity:0.35;transform:scale(0.97);filter:blur(0.3px)}
-  .canvas.focus-mode .node.focused{z-index:20}
-  .canvas.focus-mode .hub.focused{z-index:20}
-  .canvas.focus-mode .edge-path:not(.edge-focused){opacity:0.08!important}
+/* ─── Connection banner ─── */
+.conn-bar{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:50;
+  display:flex;align-items:center;gap:7px;padding:7px 16px;border-radius:99px;
+  background:var(--brand);color:#fff;font-size:12px;font-weight:500;box-shadow:0 4px 14px rgba(37,99,235,0.3);
+  opacity:0;pointer-events:none;transition:.3s}
+.conn-bar.show{opacity:1;pointer-events:auto}
+.pd{position:relative;width:7px;height:7px;flex-shrink:0}
+.pd::before{content:'';position:absolute;inset:0;border-radius:50%;background:#fff}
+.pd::after{content:'';position:absolute;inset:-3px;border-radius:50%;background:#fff;opacity:.4;animation:pp 1.4s infinite}
+@keyframes pp{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:0;transform:scale(2.2)}}
+.kbd{padding:1px 5px;border-radius:3px;font-size:9px;font-family:monospace;background:rgba(255,255,255,0.2)}
 
-  /* Connection Banner */
-  .conn-banner{
-    position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:50;
-    display:flex;align-items:center;gap:8px;padding:8px 18px;border-radius:9999px;
-    background:var(--brand);color:#fff;font-size:13px;font-weight:500;
-    box-shadow:0 4px 16px rgba(37,99,235,0.3);opacity:0;pointer-events:none;transition:opacity .3s
-  }
-  .conn-banner.show{opacity:1;pointer-events:auto}
-  .pulse-dot{position:relative;width:8px;height:8px;flex-shrink:0}
-  .pulse-dot::before{content:'';position:absolute;inset:0;border-radius:50%;background:#fff}
-  .pulse-dot::after{content:'';position:absolute;inset:-2px;border-radius:50%;background:#fff;opacity:0.5;animation:pdot 1.5s infinite}
-  @keyframes pdot{0%,100%{opacity:0.5;transform:scale(1)}50%{opacity:0;transform:scale(2)}}
-  .kbd{padding:1px 6px;border-radius:4px;font-size:10px;font-family:monospace;background:rgba(255,255,255,0.2)}
+/* ─── View tabs ─── */
+.view-tabs{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:30;display:flex;background:var(--card);border:1px solid var(--border);border-radius:9px;overflow:hidden;box-shadow:var(--shadow)}
+.vtab{padding:6px 16px;font-size:12px;font-weight:500;cursor:pointer;transition:.2s;border:none;background:transparent;color:var(--text)}
+.vtab:hover{background:var(--muted)}
+.vtab.on{background:var(--brand);color:#fff}
 
-  /* SVG Edges */
-  .edges-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:4}
-  .edge-path{fill:none;stroke-width:2}
-  .dark .edge-particle{filter:drop-shadow(0 0 4px var(--particle-color, #60a5fa))}
+/* ─── Legend ─── */
+.legend{display:flex;gap:14px;justify-content:center;padding:12px 20px;font-size:11px;color:var(--text2);flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:4px}
+.legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 
-  /* Comparison Panel */
-  .comparison{padding:32px 24px;display:flex;gap:24px;flex-wrap:wrap;justify-content:center}
-  .compare-card{flex:1;min-width:320px;max-width:520px;border-radius:16px;border:1px solid var(--border);background:var(--bg-card);overflow:hidden;transition:all .3s}
-  .compare-card h3{padding:14px 18px;font-size:15px;font-weight:600;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
-  .compare-card .preview{padding:20px;position:relative;min-height:260px;background:var(--bg);overflow:hidden}
-  .compare-card .preview::before{
-    content:'';position:absolute;inset:0;pointer-events:none;
-    background-image:
-      linear-gradient(var(--grid-color) 1px, transparent 1px),
-      linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-    background-size:32px 32px;
-  }
+/* ─── Section ─── */
+.sec{padding:20px 20px 8px;display:flex;align-items:center;gap:8px}
+.sec h2{font-size:18px;font-weight:700}
+.divider{height:1px;background:var(--border);margin:0 20px}
 
-  /* Old Node Style */
-  .old-node{width:140px;height:56px;background:var(--bg-card);border:2px dashed var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;position:absolute}
-  .old-zone{position:absolute;border:2px dashed;border-radius:12px;padding:8px}
-  .old-zone-label{font-size:10px;font-weight:600;opacity:0.6;margin-bottom:4px}
+/* ─── Micro cards ─── */
+.micros{display:flex;gap:14px;padding:12px 20px 24px;flex-wrap:wrap;justify-content:center}
+.mc{flex:1;min-width:260px;max-width:380px;border-radius:14px;border:1px solid var(--border);background:var(--card);padding:16px}
+.mc h4{font-size:13px;font-weight:600;margin-bottom:10px}
+.mc p{font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.5}
 
-  /* Section Headers */
-  .section-header{padding:24px 24px 8px;display:flex;align-items:center;gap:10px}
-  .section-header h2{font-size:20px;font-weight:700;letter-spacing:-0.02em}
-  .section-divider{width:100%;height:1px;background:var(--border);margin:8px 24px;max-width:calc(100% - 48px)}
-
-  /* Micro Demo */
-  .micro-section{padding:16px 24px 32px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
-  .micro-card{flex:1;min-width:280px;max-width:480px;border-radius:16px;border:1px solid var(--border);background:var(--bg-card);padding:18px;transition:all .3s}
-  .micro-card h4{font-size:14px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px}
-
-  /* Arrow markers */
-  .arrow-marker{fill:currentColor}
+@media (prefers-reduced-motion:reduce){
+  .particle,.dark .hub{animation:none!important}
+  .particle{display:none}
+}
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <h1><span>Service Map</span> V3 Design Prototype</h1>
-  <div class="controls">
-    <button class="btn" id="toggleTheme" onclick="toggleDark()">
-      <span id="themeIcon">&#9790;</span> 다크 모드
-    </button>
-    <button class="btn" id="focusBtn" onclick="toggleFocus()">
-      <span>&#9673;</span> 포커스 모드
-    </button>
-    <button class="btn" id="connBtn" onclick="toggleConn()">
-      <span>&#9889;</span> 연결 모드
-    </button>
+<div class="toolbar">
+  <h1><b>Service Map</b> V3</h1>
+  <div class="btns">
+    <button class="b" onclick="toggleDark()" id="themeBtn">&#9790; 다크</button>
+    <button class="b" onclick="toggleFocus()" id="focusBtn">&#9673; 포커스</button>
+    <button class="b" onclick="toggleConn()" id="connBtn">&#9889; 연결모드</button>
   </div>
 </div>
 
-<!-- Before/After Comparison -->
-<div class="section-header">
-  <h2>Before / After 비교</h2>
-  <span class="badge">V2 vs V3</span>
-</div>
-<div class="comparison">
-  <!-- OLD -->
-  <div class="compare-card">
-    <h3>&#128308; V2 (기존)</h3>
-    <div class="preview" style="min-height:240px">
-      <!-- Old hub -->
-      <div class="old-node" style="top:100px;left:170px;width:120px;height:52px;border-color:var(--brand);border-style:solid;font-size:11px">
-        <div style="display:flex;align-items:center;gap:6px"><div style="width:22px;height:22px;border-radius:4px;background:var(--bg-muted);display:flex;align-items:center;justify-content:center;font-size:11px">L</div>내 프로젝트</div>
-      </div>
-      <div class="old-node" style="top:20px;left:40px;border-color:#6366f1">
-        <span style="font-size:14px;margin-right:4px">&#128274;</span>Supabase Auth
-      </div>
-      <div class="old-node" style="top:20px;left:260px;border-color:#3b82f6">
-        <span style="font-size:14px;margin-right:4px">&#128451;</span>PostgreSQL
-      </div>
-      <div class="old-node" style="top:190px;left:40px;border-color:#22c55e">
-        <span style="font-size:14px;margin-right:4px">&#9729;</span>Cloudflare
-      </div>
-      <div class="old-node" style="top:190px;left:260px;border-color:#ef4444">
-        <span style="font-size:14px;margin-right:4px">&#128179;</span>Stripe
-      </div>
-      <svg style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none">
-        <!-- hub→auth -->
-        <line x1="230" y1="100" x2="110" y2="76" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4"/>
-        <!-- hub→db -->
-        <line x1="230" y1="100" x2="330" y2="76" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4"/>
-        <!-- hub→deploy -->
-        <line x1="230" y1="152" x2="110" y2="190" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4"/>
-        <!-- hub→stripe -->
-        <line x1="230" y1="152" x2="330" y2="190" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4"/>
-      </svg>
-    </div>
-  </div>
-  <!-- NEW -->
-  <div class="compare-card">
-    <h3>&#128994; V3 (신규 디자인)</h3>
-    <div class="preview" id="compareNew" style="min-height:240px">
-      <!-- Mini Hub with project image -->
-      <div style="position:absolute;top:88px;left:155px;width:150px;height:60px;background:var(--bg-card);border-radius:12px;border:2px solid var(--brand);display:flex;align-items:center;gap:8px;padding:0 12px;box-shadow:var(--shadow);z-index:5">
-        <div style="width:30px;height:30px;border-radius:8px;background:var(--bg-muted);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9l9-6 9 6"/><path d="M9 21V12h6v9"/></svg>
-        </div>
-        <div><div style="font-size:12px;font-weight:600">내 프로젝트</div><div style="font-size:9px;color:var(--text-muted)">Project</div></div>
-      </div>
-      <!-- Mini nodes (V3 style) -->
-      <div style="position:absolute;top:16px;left:20px;width:140px;height:52px;background:var(--bg-card);border-radius:10px;border:1px solid var(--border);display:flex;align-items:center;padding:0 10px 0 0;box-shadow:var(--shadow);overflow:hidden">
-        <div style="width:3px;min-width:3px;height:100%;background:#6366f1;border-radius:10px 0 0 10px"></div>
-        <div style="width:26px;height:26px;border-radius:7px;background:var(--bg-muted);display:flex;align-items:center;justify-content:center;font-size:12px;margin:0 8px">&#128274;</div>
-        <div><div style="font-size:11px;font-weight:500">Supabase Auth</div><div style="font-size:8px;color:var(--text-muted)">인증</div></div>
-        <div style="position:absolute;top:5px;right:5px;width:5px;height:5px;border-radius:50%;background:#22c55e"></div>
-      </div>
-      <div style="position:absolute;top:16px;left:292px;width:140px;height:52px;background:var(--bg-card);border-radius:10px;border:1px solid var(--border);display:flex;align-items:center;padding:0 10px 0 0;box-shadow:var(--shadow);overflow:hidden">
-        <div style="width:3px;min-width:3px;height:100%;background:#3b82f6;border-radius:10px 0 0 10px"></div>
-        <div style="width:26px;height:26px;border-radius:7px;background:var(--bg-muted);display:flex;align-items:center;justify-content:center;font-size:12px;margin:0 8px">&#128451;</div>
-        <div><div style="font-size:11px;font-weight:500">PostgreSQL</div><div style="font-size:8px;color:var(--text-muted)">데이터베이스</div></div>
-        <div style="position:absolute;top:5px;right:5px;width:5px;height:5px;border-radius:50%;background:#22c55e"></div>
-      </div>
-      <div style="position:absolute;top:176px;left:44px;width:140px;height:52px;background:var(--bg-card);border-radius:10px;border:1px solid var(--border);display:flex;align-items:center;padding:0 10px 0 0;box-shadow:var(--shadow);overflow:hidden">
-        <div style="width:3px;min-width:3px;height:100%;background:#22c55e;border-radius:10px 0 0 10px"></div>
-        <div style="width:26px;height:26px;border-radius:7px;background:var(--bg-muted);display:flex;align-items:center;justify-content:center;font-size:12px;margin:0 8px">&#9729;</div>
-        <div><div style="font-size:11px;font-weight:500">Cloudflare</div><div style="font-size:8px;color:var(--text-muted)">배포</div></div>
-        <div style="position:absolute;top:5px;right:5px;width:5px;height:5px;border-radius:50%;background:#f59e0b"></div>
-      </div>
-      <div style="position:absolute;top:176px;left:272px;width:140px;height:52px;background:var(--bg-card);border-radius:10px;border:1px solid var(--border);display:flex;align-items:center;padding:0 10px 0 0;box-shadow:var(--shadow);overflow:hidden">
-        <div style="width:3px;min-width:3px;height:100%;background:#ef4444;border-radius:10px 0 0 10px"></div>
-        <div style="width:26px;height:26px;border-radius:7px;background:var(--bg-muted);display:flex;align-items:center;justify-content:center;font-size:12px;margin:0 8px">&#128179;</div>
-        <div><div style="font-size:11px;font-weight:500">Stripe</div><div style="font-size:8px;color:var(--text-muted)">결제</div></div>
-        <div style="position:absolute;top:5px;right:5px;width:5px;height:5px;border-radius:50%;background:#ef4444"></div>
-      </div>
-      <!-- Edges with flow particles -->
-      <svg style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2">
-        <defs>
-          <linearGradient id="cg1" x1="230" y1="88" x2="90" y2="42" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#6366f1" stop-opacity="0.7"/><stop offset="100%" stop-color="#6366f1" stop-opacity="0.2"/></linearGradient>
-          <linearGradient id="cg2" x1="230" y1="88" x2="362" y2="42" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#3b82f6" stop-opacity="0.7"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0.2"/></linearGradient>
-          <linearGradient id="cg3" x1="230" y1="148" x2="114" y2="176" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient>
-          <linearGradient id="cg4" x1="230" y1="148" x2="342" y2="176" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#ef4444" stop-opacity="0.7"/><stop offset="100%" stop-color="#ef4444" stop-opacity="0.2"/></linearGradient>
-        </defs>
-        <!-- hub(230,118) → auth(90,42) -->
-        <path id="ce1" d="M 230 88 C 180 65, 130 50, 90 42" stroke="url(#cg1)" stroke-width="1.5" fill="none"/>
-        <circle r="2" fill="#6366f1"><animateMotion dur="2.5s" repeatCount="indefinite"><mpath href="#ce1"/></animateMotion></circle>
-        <!-- hub → db(362,42) -->
-        <path id="ce2" d="M 230 88 C 280 65, 330 50, 362 42" stroke="url(#cg2)" stroke-width="1.5" fill="none"/>
-        <circle r="2" fill="#3b82f6"><animateMotion dur="2.8s" repeatCount="indefinite"><mpath href="#ce2"/></animateMotion></circle>
-        <!-- hub → deploy(114,176) -->
-        <path id="ce3" d="M 230 148 C 190 165, 150 172, 114 176" stroke="url(#cg3)" stroke-width="1.5" fill="none"/>
-        <circle r="2" fill="#22c55e"><animateMotion dur="2.2s" repeatCount="indefinite"><mpath href="#ce3"/></animateMotion></circle>
-        <!-- hub → stripe(342,202) -->
-        <path id="ce4" d="M 230 148 C 270 165, 310 180, 342 202" stroke="url(#cg4)" stroke-width="1.5" fill="none"/>
-        <circle r="2" fill="#ef4444"><animateMotion dur="2.6s" repeatCount="indefinite"><mpath href="#ce4"/></animateMotion></circle>
-      </svg>
-    </div>
-  </div>
-</div>
-
-<div class="section-divider"></div>
-
-<!-- Main Canvas -->
-<div class="section-header">
-  <h2>인터랙티브 캔버스</h2>
-  <span class="badge">Live Demo</span>
-</div>
-
+<!-- ═══ Main Canvas ═══ -->
 <div class="canvas-wrap">
-  <div class="canvas" id="mainCanvas">
-    <!-- Connection Banner -->
-    <div class="conn-banner" id="connBanner">
-      <div class="pulse-dot"></div>
-      대상 서비스를 클릭하세요
-      <span class="kbd">ESC</span>
+  <div class="canvas" id="canvas">
+    <!-- View tabs -->
+    <div class="view-tabs">
+      <button class="vtab on" id="tabRadial" onclick="switchView('radial')">Radial Map</button>
+      <button class="vtab" id="tabDep" onclick="switchView('dependency')">Dependency</button>
     </div>
-
-    <!--
-      Layout:
-      Hub center: (550, 350)
-      Auth:       (160, 160)  center=(250, 196)
-      DB:         (370, 130)  center=(460, 166)
-      CDN:        (760, 140)  center=(850, 176)
-      Deploy:     (160, 480)  center=(250, 516)
-      GitHub:     (380, 510)  center=(470, 546)
-      Email:      (800, 320)  center=(890, 356)
-      Stripe:     (730, 480)  center=(820, 516)  ← main service
-    -->
-
-    <!-- SVG Edges (z-index 4, between zones z-index 1~3 and nodes z-index 5+) -->
-    <svg class="edges-svg" id="edgesSvg">
-      <defs>
-        <linearGradient id="g1" gradientUnits="userSpaceOnUse" x1="550" y1="350" x2="250" y2="196">
-          <stop offset="0%" stop-color="#6366f1" stop-opacity="0.8"/>
-          <stop offset="100%" stop-color="#6366f1" stop-opacity="0.2"/>
-        </linearGradient>
-        <linearGradient id="g2" gradientUnits="userSpaceOnUse" x1="550" y1="350" x2="460" y2="166">
-          <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.8"/>
-          <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.2"/>
-        </linearGradient>
-        <linearGradient id="g3" gradientUnits="userSpaceOnUse" x1="550" y1="350" x2="850" y2="176">
-          <stop offset="0%" stop-color="#14b8a6" stop-opacity="0.8"/>
-          <stop offset="100%" stop-color="#14b8a6" stop-opacity="0.2"/>
-        </linearGradient>
-        <linearGradient id="g4" gradientUnits="userSpaceOnUse" x1="550" y1="350" x2="250" y2="516">
-          <stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/>
-          <stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/>
-        </linearGradient>
-        <linearGradient id="g5" gradientUnits="userSpaceOnUse" x1="550" y1="350" x2="470" y2="546">
-          <stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/>
-          <stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/>
-        </linearGradient>
-        <linearGradient id="g6" gradientUnits="userSpaceOnUse" x1="550" y1="350" x2="890" y2="356">
-          <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.8"/>
-          <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.2"/>
-        </linearGradient>
-        <linearGradient id="g7" gradientUnits="userSpaceOnUse" x1="550" y1="350" x2="820" y2="516">
-          <stop offset="0%" stop-color="#ef4444" stop-opacity="0.8"/>
-          <stop offset="100%" stop-color="#ef4444" stop-opacity="0.2"/>
-        </linearGradient>
-        <!-- Arrow markers -->
-        <marker id="arr-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#22c55e"/></marker>
-        <marker id="arr-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#3b82f6"/></marker>
-        <marker id="arr-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6366f1"/></marker>
-        <marker id="arr-teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#14b8a6"/></marker>
-        <marker id="arr-yellow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#f59e0b"/></marker>
-        <marker id="arr-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#ef4444"/></marker>
-      </defs>
-
-      <!-- Hub(550,350) → Auth(250,196) -->
-      <path id="e1" class="edge-path edge-focused" d="M 550 330 C 450 280, 320 220, 250 196" stroke="url(#g1)" stroke-width="2" marker-end="url(#arr-purple)"/>
-      <circle r="3" fill="#6366f1" class="edge-particle" style="--particle-color:#6366f1">
-        <animateMotion dur="3s" repeatCount="indefinite"><mpath href="#e1"/></animateMotion>
-      </circle>
-
-      <!-- Hub → DB(460,166) -->
-      <path id="e2" class="edge-path edge-focused" d="M 540 330 C 520 270, 480 210, 460 176" stroke="url(#g2)" stroke-width="2" marker-end="url(#arr-blue)"/>
-      <circle r="3" fill="#3b82f6" class="edge-particle" style="--particle-color:#3b82f6">
-        <animateMotion dur="3.2s" repeatCount="indefinite"><mpath href="#e2"/></animateMotion>
-      </circle>
-
-      <!-- Hub → CDN(850,176) -->
-      <path id="e3" class="edge-path edge-focused" d="M 620 330 C 700 270, 790 210, 850 186" stroke="url(#g3)" stroke-width="2" marker-end="url(#arr-teal)"/>
-      <circle r="3" fill="#14b8a6" class="edge-particle" style="--particle-color:#14b8a6">
-        <animateMotion dur="3.4s" repeatCount="indefinite"><mpath href="#e3"/></animateMotion>
-      </circle>
-
-      <!-- Hub → Deploy(250,516) -->
-      <path id="e4" class="edge-path edge-focused" d="M 530 380 C 430 440, 320 480, 260 510" stroke="url(#g4)" stroke-width="2" marker-end="url(#arr-green)"/>
-      <circle r="3" fill="#22c55e" class="edge-particle" style="--particle-color:#22c55e">
-        <animateMotion dur="2.8s" repeatCount="indefinite"><mpath href="#e4"/></animateMotion>
-      </circle>
-
-      <!-- Hub → GitHub(470,546) -->
-      <path id="e5" class="edge-path edge-focused" d="M 545 385 C 520 440, 490 500, 475 536" stroke="url(#g5)" stroke-width="2" marker-end="url(#arr-green)"/>
-      <circle r="3" fill="#22c55e" class="edge-particle" style="--particle-color:#22c55e">
-        <animateMotion dur="2.6s" repeatCount="indefinite"><mpath href="#e5"/></animateMotion>
-      </circle>
-
-      <!-- Hub → Email(890,356) -->
-      <path id="e6" class="edge-path edge-focused" d="M 650 350 C 720 350, 810 352, 880 354" stroke="url(#g6)" stroke-width="2" marker-end="url(#arr-yellow)"/>
-      <circle r="3" fill="#f59e0b" class="edge-particle" style="--particle-color:#f59e0b">
-        <animateMotion dur="2.5s" repeatCount="indefinite"><mpath href="#e6"/></animateMotion>
-      </circle>
-
-      <!-- Hub → Stripe(820,516) — main service edge, thicker -->
-      <path id="e7" class="edge-path edge-focused" d="M 620 380 C 700 430, 760 470, 810 506" stroke="url(#g7)" stroke-width="2.5" marker-end="url(#arr-red)"/>
-      <circle r="3.5" fill="#ef4444" class="edge-particle" style="--particle-color:#ef4444">
-        <animateMotion dur="2.8s" repeatCount="indefinite"><mpath href="#e7"/></animateMotion>
-      </circle>
-    </svg>
-
-    <!-- Zones -->
-    <div class="zone zone-auth" style="top:100px;left:90px;width:430px;height:150px;z-index:1">
-      <div class="zone-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> 인증 & 데이터</div>
-    </div>
-    <div class="zone zone-deploy" style="top:430px;left:90px;width:480px;height:170px;z-index:1">
-      <div class="zone-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> 배포 & CI/CD</div>
-    </div>
-
-    <!-- ===== Project Hub Node (Central) ===== -->
-    <div class="hub focused" id="hubNode" style="top:310px;left:450px" onclick="handleNodeClick(this)">
-      <div class="project-img">
-        <!-- Project registered image placeholder — in real app, shows uploaded project icon -->
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="1.8" stroke-linecap="round">
-          <rect x="3" y="3" width="18" height="18" rx="3"/>
-          <path d="M3 9l9-6 9 6"/>
-          <path d="M9 21V12h6v9"/>
-        </svg>
-      </div>
-      <div class="hub-info">
-        <div class="hub-name">내 프로젝트</div>
-        <div class="hub-sub">Project Hub</div>
-      </div>
-    </div>
-
-    <!-- ===== Service Nodes ===== -->
-
-    <!-- Auth: Supabase Auth -->
-    <div class="node focused" data-id="auth" style="top:160px;left:160px;--node-glow:rgba(99,102,241,0.3)" onclick="handleNodeClick(this)">
-      <div class="color-bar" style="background:#6366f1"></div>
-      <div class="icon-wrap">&#128274;</div>
-      <div class="info">
-        <div class="name">Supabase Auth</div>
-        <div class="cat">인증</div>
-      </div>
-      <div class="status status-connected"></div>
-    </div>
-
-    <!-- Database: PostgreSQL -->
-    <div class="node focused" data-id="db" style="top:130px;left:370px;--node-glow:rgba(59,130,246,0.3)" onclick="handleNodeClick(this)">
-      <div class="color-bar" style="background:#3b82f6"></div>
-      <div class="icon-wrap">&#128451;</div>
-      <div class="info">
-        <div class="name">PostgreSQL</div>
-        <div class="cat">데이터베이스</div>
-      </div>
-      <div class="status status-connected"></div>
-    </div>
-
-    <!-- CDN: Cloudflare CDN -->
-    <div class="node focused" data-id="cdn" style="top:140px;left:760px;--node-glow:rgba(20,184,166,0.3)" onclick="handleNodeClick(this)">
-      <div class="color-bar" style="background:#14b8a6"></div>
-      <div class="icon-wrap">&#127760;</div>
-      <div class="info">
-        <div class="name">Cloudflare CDN</div>
-        <div class="cat">CDN</div>
-      </div>
-      <div class="status status-connected"></div>
-    </div>
-
-    <!-- Deploy: Cloudflare Workers -->
-    <div class="node focused" data-id="deploy" style="top:480px;left:160px;--node-glow:rgba(34,197,94,0.3)" onclick="handleNodeClick(this)">
-      <div class="color-bar" style="background:#22c55e"></div>
-      <div class="icon-wrap">&#9729;</div>
-      <div class="info">
-        <div class="name">Cloudflare Workers</div>
-        <div class="cat">배포</div>
-      </div>
-      <div class="status status-progress"></div>
-    </div>
-
-    <!-- CI/CD: GitHub Actions -->
-    <div class="node focused" data-id="github" style="top:510px;left:380px;--node-glow:rgba(34,197,94,0.3)" onclick="handleNodeClick(this)">
-      <div class="color-bar" style="background:#22c55e"></div>
-      <div class="icon-wrap">&#128230;</div>
-      <div class="info">
-        <div class="name">GitHub Actions</div>
-        <div class="cat">CI/CD</div>
-      </div>
-      <div class="status status-connected"></div>
-    </div>
-
-    <!-- Email: Resend -->
-    <div class="node focused" data-id="email" style="top:320px;left:800px;--node-glow:rgba(245,158,11,0.3)" onclick="handleNodeClick(this)">
-      <div class="color-bar" style="background:#f59e0b"></div>
-      <div class="icon-wrap">&#9993;</div>
-      <div class="info">
-        <div class="name">Resend</div>
-        <div class="cat">이메일</div>
-      </div>
-      <div class="status status-idle"></div>
-    </div>
-
-    <!-- Payment: Stripe -->
-    <div class="node focused" data-id="stripe" style="top:480px;left:730px;--node-glow:rgba(239,68,68,0.3)" onclick="handleNodeClick(this)">
-      <div class="color-bar" style="background:#ef4444"></div>
-      <div class="icon-wrap">&#128179;</div>
-      <div class="info">
-        <div class="name">Stripe</div>
-        <div class="cat">결제</div>
-      </div>
-      <div class="status status-error"></div>
-    </div>
+    <!-- Connection banner -->
+    <div class="conn-bar" id="connBanner"><div class="pd"></div>대상 서비스를 클릭하세요 <span class="kbd">ESC</span></div>
+    <!-- Edge SVG layer — drawn by JS -->
+    <svg class="edge-layer" id="edgeSvg"></svg>
+    <!-- Nodes are rendered by JS into #canvas -->
   </div>
 </div>
 
-<div class="section-divider"></div>
-
-<!-- Micro Interactions -->
-<div class="section-header">
-  <h2>마이크로 인터랙션</h2>
-  <span class="badge">Demos</span>
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item"><div style="width:14px;height:14px;border-radius:5px;border:2px solid var(--brand);display:flex;align-items:center;justify-content:center"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="3"><rect x="3" y="3" width="18" height="18" rx="3"/></svg></div> 프로젝트 허브</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#22c55e;box-shadow:0 0 5px rgba(34,197,94,.4)"></div> 연결됨</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f59e0b;box-shadow:0 0 5px rgba(245,158,11,.4)"></div> 진행 중</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ef4444;box-shadow:0 0 5px rgba(239,68,68,.4)"></div> 오류</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#94a3b8"></div> 미설정</div>
+  <div class="legend-item"><svg width="30" height="8"><line x1="0" y1="4" x2="30" y2="4" stroke="var(--text2)" stroke-width="1.5"/><circle cx="15" cy="4" r="2.5" fill="var(--brand)"/></svg> 흐름 파티클</div>
 </div>
-<div class="micro-section">
-  <div class="micro-card">
+
+<div class="divider"></div>
+
+<!-- Micro demos -->
+<div class="sec"><h2>마이크로 인터랙션</h2><span class="tag">Demo</span></div>
+<div class="micros">
+  <div class="mc">
     <h4>&#127919; 포커스 모드</h4>
-    <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">선택하지 않은 노드는 흐려지고 축소됩니다. 캔버스에서 <strong>포커스 모드</strong>를 켜고 노드를 클릭해보세요.</p>
-    <div style="display:flex;gap:12px;align-items:center;justify-content:center;padding:8px">
-      <div style="width:80px;height:40px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;box-shadow:var(--shadow)">선택됨</div>
-      <div style="width:80px;height:40px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;opacity:0.35;transform:scale(0.97);filter:blur(0.3px)">비선택</div>
-      <div style="width:80px;height:40px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;opacity:0.35;transform:scale(0.97);filter:blur(0.3px)">비선택</div>
+    <p>포커스 버튼을 켜고 캔버스 노드를 클릭하면, 선택된 노드와 연결된 엣지만 하이라이트됩니다.</p>
+    <div style="display:flex;gap:10px;align-items:center;justify-content:center">
+      <div style="width:70px;height:36px;background:var(--card);border:1px solid var(--border);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;box-shadow:var(--shadow)">선택됨</div>
+      <div style="width:70px;height:36px;background:var(--card);border:1px solid var(--border);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;opacity:.3;transform:scale(.97);filter:blur(.3px)">비선택</div>
     </div>
   </div>
-  <div class="micro-card">
+  <div class="mc">
     <h4>&#9889; 연결 생성 모드</h4>
-    <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">상단 <strong>연결 모드</strong> 버튼을 누르면 연결 배너가 나타납니다.</p>
-    <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--brand);color:#fff;border-radius:999px;font-size:12px;font-weight:500;width:fit-content;margin:0 auto">
-      <div class="pulse-dot"></div>
-      대상 서비스를 클릭하세요
-      <span class="kbd">ESC</span>
+    <p>상단 연결모드 버튼을 누르면 연결 배너가 나타납니다.</p>
+    <div style="display:flex;align-items:center;gap:7px;padding:8px 14px;background:var(--brand);color:#fff;border-radius:99px;font-size:11px;width:fit-content;margin:0 auto">
+      <div class="pd"></div>대상 서비스를 클릭하세요 <span class="kbd">ESC</span>
     </div>
   </div>
-  <div class="micro-card">
-    <h4>&#10024; 호버 글로우 (다크 모드)</h4>
-    <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">다크 모드에서 노드에 호버하면 카테고리 색상 글로우가 나타납니다.</p>
-    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;padding:8px">
-      <div style="width:48px;height:48px;border-radius:10px;background:var(--bg-card);border:1px solid var(--border);box-shadow:0 0 16px rgba(99,102,241,0.35);display:flex;align-items:center;justify-content:center;font-size:10px;border-left:3px solid #6366f1">&#128274;</div>
-      <div style="width:48px;height:48px;border-radius:10px;background:var(--bg-card);border:1px solid var(--border);box-shadow:0 0 16px rgba(59,130,246,0.35);display:flex;align-items:center;justify-content:center;font-size:10px;border-left:3px solid #3b82f6">&#128451;</div>
-      <div style="width:48px;height:48px;border-radius:10px;background:var(--bg-card);border:1px solid var(--border);box-shadow:0 0 16px rgba(34,197,94,0.35);display:flex;align-items:center;justify-content:center;font-size:10px;border-left:3px solid #22c55e">&#9729;</div>
-      <div style="width:48px;height:48px;border-radius:10px;background:var(--bg-card);border:1px solid var(--border);box-shadow:0 0 16px rgba(239,68,68,0.35);display:flex;align-items:center;justify-content:center;font-size:10px;border-left:3px solid #ef4444">&#128179;</div>
-      <div style="width:48px;height:48px;border-radius:10px;background:var(--bg-card);border:1px solid var(--border);box-shadow:0 0 16px rgba(245,158,11,0.35);display:flex;align-items:center;justify-content:center;font-size:10px;border-left:3px solid #f59e0b">&#9993;</div>
-      <div style="width:48px;height:48px;border-radius:10px;background:var(--bg-card);border:1px solid var(--border);box-shadow:0 0 16px rgba(20,184,166,0.35);display:flex;align-items:center;justify-content:center;font-size:10px;border-left:3px solid #14b8a6">&#127760;</div>
+  <div class="mc">
+    <h4>&#10024; 호버 글로우</h4>
+    <p>다크 모드에서 노드 호버 시 카테고리 색상 글로우가 표시됩니다.</p>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <div style="width:40px;height:40px;border-radius:9px;background:var(--card);border:1px solid var(--border);box-shadow:0 0 14px rgba(99,102,241,.3);display:flex;align-items:center;justify-content:center;font-size:14px;border-left:3px solid #6366f1">&#128274;</div>
+      <div style="width:40px;height:40px;border-radius:9px;background:var(--card);border:1px solid var(--border);box-shadow:0 0 14px rgba(59,130,246,.3);display:flex;align-items:center;justify-content:center;font-size:14px;border-left:3px solid #3b82f6">&#128451;</div>
+      <div style="width:40px;height:40px;border-radius:9px;background:var(--card);border:1px solid var(--border);box-shadow:0 0 14px rgba(34,197,94,.3);display:flex;align-items:center;justify-content:center;font-size:14px;border-left:3px solid #22c55e">&#9729;</div>
+      <div style="width:40px;height:40px;border-radius:9px;background:var(--card);border:1px solid var(--border);box-shadow:0 0 14px rgba(239,68,68,.3);display:flex;align-items:center;justify-content:center;font-size:14px;border-left:3px solid #ef4444">&#128179;</div>
     </div>
   </div>
 </div>
-
-<!-- Info Note -->
-<div style="padding:16px 24px;display:flex;gap:12px;align-items:center;justify-content:center;font-size:12px;color:var(--text-muted);border-top:1px solid var(--border)">
-  <div style="display:flex;align-items:center;gap:4px"><div style="width:16px;height:16px;border-radius:4px;border:2px solid var(--brand);display:flex;align-items:center;justify-content:center;font-size:7px">
-    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
-  </div> 프로젝트 허브 (등록 이미지)</div>
-  <div style="width:1px;height:12px;background:var(--border)"></div>
-  <div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,0.5)"></div> 연결됨</div>
-  <div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:#f59e0b;box-shadow:0 0 6px rgba(245,158,11,0.5)"></div> 진행 중</div>
-  <div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 6px rgba(239,68,68,0.5)"></div> 오류</div>
-  <div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:#94a3b8"></div> 미설정</div>
-</div>
-
-<div style="height:24px"></div>
 
 <script>
-  let isDark = false;
-  let isFocus = false;
-  let isConn = false;
+// ═══════════════════════════════════════════════
+// Service data
+// ═══════════════════════════════════════════════
+const SERVICES = [
+  { id:'auth',   name:'Supabase Auth',     cat:'인증',       icon:'&#128274;', color:'#6366f1', status:'connected' },
+  { id:'db',     name:'PostgreSQL',         cat:'데이터베이스', icon:'&#128451;', color:'#3b82f6', status:'connected' },
+  { id:'cdn',    name:'Cloudflare CDN',     cat:'CDN',        icon:'&#127760;', color:'#14b8a6', status:'connected' },
+  { id:'deploy', name:'Cloudflare Workers', cat:'배포',       icon:'&#9729;',   color:'#22c55e', status:'in_progress' },
+  { id:'cicd',   name:'GitHub Actions',     cat:'CI/CD',      icon:'&#128230;', color:'#22c55e', status:'connected' },
+  { id:'email',  name:'Resend',             cat:'이메일',     icon:'&#9993;',   color:'#f59e0b', status:'not_started' },
+  { id:'pay',    name:'Stripe',             cat:'결제',       icon:'&#128179;', color:'#ef4444', status:'error' },
+];
 
-  function toggleDark() {
-    isDark = !isDark;
-    document.body.classList.toggle('dark', isDark);
-    const btn = document.getElementById('toggleTheme');
-    if (isDark) {
-      btn.innerHTML = '<span id="themeIcon">&#9788;</span> 라이트 모드';
-    } else {
-      btn.innerHTML = '<span id="themeIcon">&#9790;</span> 다크 모드';
-    }
-  }
+const STATUS_CLASS = {
+  connected:'background:#22c55e;box-shadow:0 0 5px rgba(34,197,94,.5)',
+  in_progress:'background:#f59e0b;box-shadow:0 0 5px rgba(245,158,11,.5)',
+  error:'background:#ef4444;box-shadow:0 0 5px rgba(239,68,68,.5)',
+  not_started:'background:#94a3b8',
+};
 
-  function toggleFocus() {
-    isFocus = !isFocus;
-    const canvas = document.getElementById('mainCanvas');
-    const btn = document.getElementById('focusBtn');
-    canvas.classList.toggle('focus-mode', isFocus);
-    btn.classList.toggle('active', isFocus);
+const CX = 550, CY = 340, NW = 180, NH = 72, HW = 180, HH = 72;
 
-    if (isFocus) {
-      // Focus only hub + first two services initially
-      document.querySelectorAll('#mainCanvas .node, #mainCanvas .hub').forEach(n => n.classList.remove('focused'));
-      document.getElementById('hubNode').classList.add('focused');
-    } else {
-      document.querySelectorAll('#mainCanvas .node, #mainCanvas .hub').forEach(n => n.classList.add('focused'));
-      // Reset all edge visibility
-      document.querySelectorAll('#mainCanvas .edge-path').forEach(e => e.classList.add('edge-focused'));
-    }
-  }
+// ─── Radial positions ───
+function radialPositions() {
+  const R = 235;
+  const n = SERVICES.length;
+  const pos = {};
+  SERVICES.forEach((s, i) => {
+    const angle = -90 + (360 / n) * i;
+    const rad = angle * Math.PI / 180;
+    pos[s.id] = {
+      x: CX + R * Math.cos(rad) - NW / 2,
+      y: CY + R * Math.sin(rad) - NH / 2,
+    };
+  });
+  return pos;
+}
 
-  function toggleConn() {
-    isConn = !isConn;
-    const banner = document.getElementById('connBanner');
-    const btn = document.getElementById('connBtn');
-    banner.classList.toggle('show', isConn);
-    btn.classList.toggle('active', isConn);
-  }
-
-  // Map of node data-id to connected edge IDs
-  const nodeEdgeMap = {
-    'auth':   ['e1'],
-    'db':     ['e2'],
-    'cdn':    ['e3'],
-    'deploy': ['e4'],
-    'github': ['e5'],
-    'email':  ['e6'],
-    'stripe': ['e7'],
+// ─── Dependency (zone) positions ───
+function depPositions() {
+  const zones = {
+    frontend: { ids:['auth','cdn'],         label:'FRONTEND', sub:'UI & Client', color:'#6366f1', bg:'rgba(99,102,241,0.05)', bc:'rgba(99,102,241,0.2)' },
+    backend:  { ids:['db','email','pay'],   label:'BACKEND',  sub:'Server & API', color:'#8b5cf6', bg:'rgba(139,92,246,0.05)', bc:'rgba(139,92,246,0.2)' },
+    devtools: { ids:['deploy','cicd'],      label:'DEVTOOLS', sub:'Build & Test', color:'#eab308', bg:'rgba(234,179,8,0.05)',  bc:'rgba(234,179,8,0.2)' },
   };
+  const zoneGap = 28, zonePad = 22, headerH = 40, nodeGapX = 14, nodeGapY = 10, cols = 3;
+  const zoneOrder = ['frontend','backend','devtools'];
+  const pos = {};
+  const zoneMeta = [];
+  let xOff = 40;
 
-  function handleNodeClick(el) {
-    if (!isFocus) return;
-    const wasFocused = el.classList.contains('focused');
+  for (const zk of zoneOrder) {
+    const z = zones[zk];
+    const count = z.ids.length;
+    const rows = Math.max(1, Math.ceil(count / cols));
+    const c = Math.min(count || 1, cols);
+    const zw = Math.max(c * NW + (c-1)*nodeGapX + 2*zonePad, 1*NW + 2*zonePad + 40);
+    const zh = headerH + rows * NH + (rows-1)*nodeGapY + 2*zonePad;
+    zoneMeta.push({ key:zk, x:xOff, y:80, w:zw, h:zh, ...z });
+    z.ids.forEach((id, idx) => {
+      const row = Math.floor(idx/cols), col = idx%cols;
+      pos[id] = {
+        x: xOff + zonePad + col*(NW+nodeGapX),
+        y: 80 + headerH + zonePad + row*(NH+nodeGapY),
+      };
+    });
+    xOff += zw + zoneGap;
+  }
+  // Equalize zone heights
+  const maxH = Math.max(...zoneMeta.map(z=>z.h));
+  zoneMeta.forEach(z => z.h = maxH);
+  return { pos, zones: zoneMeta };
+}
 
-    if (wasFocused) {
-      // Unfocus this node
-      el.classList.remove('focused');
-      updateFocusedEdges();
-    } else {
-      // Focus this node
-      el.classList.add('focused');
-      updateFocusedEdges();
+// ═══════════════════════════════════════════════
+// Rendering
+// ═══════════════════════════════════════════════
+let currentView = 'radial';
+let focusMode = false;
+let focusedId = null;
+let connMode = false;
+let isDark = false;
+
+const canvas = document.getElementById('canvas');
+const edgeSvg = document.getElementById('edgeSvg');
+
+function center(pos) { return { x: pos.x + NW/2, y: pos.y + NH/2 }; }
+function hubCenter() { return { x: CX, y: CY }; }
+
+function render() {
+  // Clear old nodes (keep svg, tabs, banner)
+  canvas.querySelectorAll('.snode,.hub,.zone').forEach(e => e.remove());
+  edgeSvg.innerHTML = '';
+
+  if (currentView === 'radial') renderRadial();
+  else renderDependency();
+}
+
+function renderRadial() {
+  const positions = radialPositions();
+  const hc = hubCenter();
+
+  // ─── Hub node ───
+  const hub = el('div','hub',`
+    <div class="port t"></div><div class="port b"></div><div class="port l"></div><div class="port r"></div>
+    <div class="hub-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9l9-6 9 6"/><path d="M9 21V12h6v9"/></svg></div>
+    <div><div class="hub-name">내 프로젝트</div><div class="hub-sub">Project Hub</div></div>
+  `);
+  hub.style.cssText = `left:${CX-HW/2}px;top:${CY-HH/2}px`;
+  hub.onclick = () => onNodeClick('hub');
+  canvas.appendChild(hub);
+
+  // ─── Defs: gradients + markers ───
+  let defs = '<defs>';
+  SERVICES.forEach(s => {
+    const p = positions[s.id];
+    const nc = center(p);
+    defs += `<linearGradient id="eg-${s.id}" gradientUnits="userSpaceOnUse" x1="${hc.x}" y1="${hc.y}" x2="${nc.x}" y2="${nc.y}">
+      <stop offset="0%" stop-color="${s.color}" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="${s.color}" stop-opacity="0.15"/>
+    </linearGradient>`;
+    defs += `<marker id="am-${s.id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 1L8 5L0 9z" fill="${s.color}" opacity="0.6"/></marker>`;
+  });
+  defs += '</defs>';
+  edgeSvg.innerHTML = defs;
+
+  // ─── Edges ───
+  SERVICES.forEach(s => {
+    const p = positions[s.id];
+    const nc = center(p);
+    // Bezier: from hub edge toward node, curving slightly
+    const dx = nc.x - hc.x, dy = nc.y - hc.y;
+    const dist = Math.sqrt(dx*dx+dy*dy);
+    const ux = dx/dist, uy = dy/dist;
+    // Start at hub border (offset ~40px)
+    const sx = hc.x + ux*42, sy = hc.y + uy*42;
+    // End at node border (offset ~40px back)
+    const ex = nc.x - ux*42, ey = nc.y - uy*42;
+    // Control point: perpendicular offset for gentle curve
+    const mx = (sx+ex)/2, my = (sy+ey)/2;
+    const perpX = -uy * 25, perpY = ux * 25;
+    const path = `M${sx.toFixed(1)} ${sy.toFixed(1)} Q${(mx+perpX).toFixed(1)} ${(my+perpY).toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`;
+
+    const pathEl = svgEl('path');
+    pathEl.setAttribute('d', path);
+    pathEl.setAttribute('stroke', `url(#eg-${s.id})`);
+    pathEl.setAttribute('marker-end', `url(#am-${s.id})`);
+    pathEl.classList.add('edge-line');
+    pathEl.dataset.sid = s.id;
+    pathEl.id = `edge-${s.id}`;
+    edgeSvg.appendChild(pathEl);
+
+    // Flow particle
+    if (s.status === 'connected' || s.status === 'in_progress') {
+      const circle = svgEl('circle');
+      circle.setAttribute('r','3');
+      circle.setAttribute('fill', s.color);
+      circle.classList.add('particle');
+      circle.dataset.sid = s.id;
+      circle.style.setProperty('--pc', s.color);
+      const anim = svgEl('animateMotion');
+      anim.setAttribute('dur', (2.2 + Math.random()*1.2).toFixed(1) + 's');
+      anim.setAttribute('repeatCount','indefinite');
+      anim.setAttribute('path', path);
+      circle.appendChild(anim);
+      edgeSvg.appendChild(circle);
     }
+  });
+
+  // ─── Service nodes ───
+  SERVICES.forEach(s => {
+    const p = positions[s.id];
+    const node = el('div','snode',`
+      <div class="port t"></div><div class="port b"></div><div class="port l"></div><div class="port r"></div>
+      <div class="bar" style="background:${s.color}"></div>
+      <div class="ico">${s.icon}</div>
+      <div class="nfo"><div class="nm">${s.name}</div><div class="ct">${s.cat}</div></div>
+      <div class="dot" style="${STATUS_CLASS[s.status]}"></div>
+    `);
+    node.style.cssText = `left:${p.x}px;top:${p.y}px;--ng:${s.color}33`;
+    node.dataset.id = s.id;
+    node.onclick = () => onNodeClick(s.id);
+    canvas.appendChild(node);
+  });
+
+  applyFocus();
+}
+
+function renderDependency() {
+  const { pos, zones } = depPositions();
+
+  // ─── Zones ───
+  zones.forEach(z => {
+    const zone = el('div','zone','');
+    zone.style.cssText = `left:${z.x}px;top:${z.y}px;width:${z.w}px;height:${z.h}px;border-color:${z.bc};background:${z.bg}`;
+    const chip = el('div','zone-chip',`<span>${z.label}</span> <span style="opacity:.7;font-size:8px">${z.sub}</span>`);
+    chip.style.background = z.color;
+    zone.appendChild(chip);
+    canvas.appendChild(zone);
+  });
+
+  // ─── Edges (SmoothStep-like between services) ───
+  // A few example connections
+  const connections = [
+    { from:'auth', to:'db',     color:'#6366f1' },
+    { from:'db',   to:'deploy', color:'#3b82f6' },
+    { from:'deploy',to:'cicd',  color:'#22c55e' },
+    { from:'db',   to:'pay',    color:'#ef4444' },
+    { from:'email',to:'auth',   color:'#f59e0b' },
+  ];
+
+  let defs = '<defs>';
+  connections.forEach((c,i) => {
+    defs += `<marker id="dm-${i}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 1L8 5L0 9z" fill="${c.color}" opacity="0.5"/></marker>`;
+  });
+  defs += '</defs>';
+  edgeSvg.innerHTML = defs;
+
+  connections.forEach((c, i) => {
+    const from = center(pos[c.from]), to = center(pos[c.to]);
+    const midY = (from.y + to.y) / 2;
+    const path = `M${from.x} ${from.y} C${from.x} ${midY}, ${to.x} ${midY}, ${to.x} ${to.y}`;
+
+    const pathEl = svgEl('path');
+    pathEl.setAttribute('d', path);
+    pathEl.setAttribute('stroke', c.color);
+    pathEl.setAttribute('stroke-opacity', '0.4');
+    pathEl.setAttribute('marker-end', `url(#dm-${i})`);
+    pathEl.classList.add('edge-line');
+    pathEl.dataset.sid = `${c.from}-${c.to}`;
+    edgeSvg.appendChild(pathEl);
+
+    const circle = svgEl('circle');
+    circle.setAttribute('r','2.5');
+    circle.setAttribute('fill', c.color);
+    circle.classList.add('particle');
+    circle.style.setProperty('--pc', c.color);
+    const anim = svgEl('animateMotion');
+    anim.setAttribute('dur', (2.5 + Math.random()).toFixed(1) + 's');
+    anim.setAttribute('repeatCount','indefinite');
+    anim.setAttribute('path', path);
+    circle.appendChild(anim);
+    edgeSvg.appendChild(circle);
+  });
+
+  // ─── Service nodes ───
+  SERVICES.forEach(s => {
+    if (!pos[s.id]) return;
+    const p = pos[s.id];
+    const node = el('div','snode',`
+      <div class="port t"></div><div class="port b"></div><div class="port l"></div><div class="port r"></div>
+      <div class="bar" style="background:${s.color}"></div>
+      <div class="ico">${s.icon}</div>
+      <div class="nfo"><div class="nm">${s.name}</div><div class="ct">${s.cat}</div></div>
+      <div class="dot" style="${STATUS_CLASS[s.status]}"></div>
+    `);
+    node.style.cssText = `left:${p.x}px;top:${p.y}px;--ng:${s.color}33`;
+    node.dataset.id = s.id;
+    node.onclick = () => onNodeClick(s.id);
+    canvas.appendChild(node);
+  });
+
+  applyFocus();
+}
+
+// ═══════════════════════════════════════════════
+// Interactions
+// ═══════════════════════════════════════════════
+function onNodeClick(id) {
+  if (!focusMode) return;
+  if (focusedId === id) focusedId = null;
+  else focusedId = id;
+  applyFocus();
+}
+
+function applyFocus() {
+  if (!focusMode || !focusedId) {
+    canvas.querySelectorAll('.snode').forEach(n => n.classList.remove('dim'));
+    canvas.querySelector('.hub')?.classList.remove('dim');
+    edgeSvg.querySelectorAll('.edge-line').forEach(e => e.classList.remove('dim'));
+    edgeSvg.querySelectorAll('.particle').forEach(p => p.classList.remove('dim'));
+    return;
   }
 
-  function updateFocusedEdges() {
-    // Get all focused node data-ids
-    const focusedIds = new Set();
-    document.querySelectorAll('#mainCanvas .node.focused').forEach(n => {
-      const id = n.getAttribute('data-id');
-      if (id) focusedIds.add(id);
+  // In radial view: focused node + hub are bright, others dim
+  if (currentView === 'radial') {
+    canvas.querySelectorAll('.snode').forEach(n => {
+      n.classList.toggle('dim', n.dataset.id !== focusedId && focusedId !== 'hub');
     });
-    const hubFocused = document.getElementById('hubNode').classList.contains('focused');
-
-    // Update edge visibility
-    document.querySelectorAll('#mainCanvas .edge-path').forEach(edge => {
-      const edgeId = edge.id;
-      // Find which node this edge connects to
-      let isConnectedToFocused = false;
-      for (const [nodeId, edgeIds] of Object.entries(nodeEdgeMap)) {
-        if (edgeIds.includes(edgeId)) {
-          // This edge connects hub ↔ nodeId — show if both are focused
-          if (hubFocused && focusedIds.has(nodeId)) {
-            isConnectedToFocused = true;
-          }
-          break;
-        }
-      }
-      edge.classList.toggle('edge-focused', isConnectedToFocused);
+    canvas.querySelector('.hub')?.classList.remove('dim');
+    edgeSvg.querySelectorAll('.edge-line').forEach(e => {
+      const sid = e.dataset.sid;
+      e.classList.toggle('dim', sid !== focusedId && focusedId !== 'hub');
     });
+    edgeSvg.querySelectorAll('.particle').forEach(p => {
+      const sid = p.dataset.sid;
+      p.classList.toggle('dim', sid !== focusedId && focusedId !== 'hub');
+    });
+  } else {
+    // Dependency: highlight connected
+    const connMap = { auth:['db','email'], db:['deploy','pay','auth'], deploy:['cicd','db'], cicd:['deploy'], email:['auth'], pay:['db'] };
+    const neighbors = new Set([focusedId, ...(connMap[focusedId]||[])]);
+    canvas.querySelectorAll('.snode').forEach(n => {
+      n.classList.toggle('dim', !neighbors.has(n.dataset.id));
+    });
+    edgeSvg.querySelectorAll('.edge-line').forEach(e => {
+      const parts = (e.dataset.sid||'').split('-');
+      const relevant = parts.length === 2 ? (neighbors.has(parts[0]) && neighbors.has(parts[1])) : neighbors.has(parts[0]);
+      e.classList.toggle('dim', !relevant);
+    });
+    edgeSvg.querySelectorAll('.particle').forEach(p => p.classList.toggle('dim', true));
   }
+}
+
+function switchView(view) {
+  currentView = view;
+  focusedId = null;
+  document.getElementById('tabRadial').classList.toggle('on', view==='radial');
+  document.getElementById('tabDep').classList.toggle('on', view==='dependency');
+  render();
+}
+
+function toggleDark() {
+  isDark = !isDark;
+  document.body.classList.toggle('dark', isDark);
+  document.getElementById('themeBtn').innerHTML = isDark ? '&#9788; 라이트' : '&#9790; 다크';
+}
+function toggleFocus() {
+  focusMode = !focusMode;
+  focusedId = null;
+  document.getElementById('focusBtn').classList.toggle('on', focusMode);
+  applyFocus();
+}
+function toggleConn() {
+  connMode = !connMode;
+  document.getElementById('connBtn').classList.toggle('on', connMode);
+  document.getElementById('connBanner').classList.toggle('show', connMode);
+}
+
+// ─── Helpers ───
+function el(tag, cls, html) {
+  const e = document.createElement(tag);
+  e.className = cls;
+  e.innerHTML = html;
+  return e;
+}
+function svgEl(tag) {
+  return document.createElementNS('http://www.w3.org/2000/svg', tag);
+}
+
+// ─── Init ───
+render();
 </script>
 </body>
 </html>
