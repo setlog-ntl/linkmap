@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   ReactFlow,
   Controls,
@@ -12,6 +12,7 @@ import {
   type Node,
   type NodeChange,
   type EdgeChange,
+  type ReactFlowInstance,
   BackgroundVariant,
   useReactFlow,
 } from '@xyflow/react';
@@ -64,15 +65,30 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
 
   const [nodes, setNodes] = useState<Node[]>(layoutNodes);
   const [edges, setEdges] = useState<Edge[]>(layoutEdges);
+  const rfInstanceRef = useRef<ReactFlowInstance | null>(null);
+  const initialFitDone = useRef(false);
 
   useEffect(() => {
     setNodes(layoutNodes);
     setEdges(layoutEdges);
-    // Re-fit view when layout changes (search filter, focus change)
-    requestAnimationFrame(() => {
-      fitView({ padding: 0.3 });
-    });
+  }, [layoutNodes, layoutEdges]);
+
+  // Fit view when layout changes (search, focus) — skip initial (handled by onInit)
+  useEffect(() => {
+    if (!initialFitDone.current) return;
+    const timer = setTimeout(() => fitView({ padding: 0.3 }), 50);
+    return () => clearTimeout(timer);
   }, [layoutNodes, layoutEdges, fitView]);
+
+  // onInit: called once when React Flow is ready and nodes are measured
+  const handleInit = useCallback((instance: ReactFlowInstance) => {
+    rfInstanceRef.current = instance;
+    // Delay slightly to ensure node dimensions are measured
+    setTimeout(() => {
+      instance.fitView({ padding: 0.3 });
+      initialFitDone.current = true;
+    }, 100);
+  }, []);
 
   const onNodesChange = useCallback((changes: NodeChange<Node>[]) => {
     setNodes((nds) => applyNodeChanges(changes, nds));
@@ -207,10 +223,9 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
           onNodeClick={handleNodeClick}
           onNodeDoubleClick={handleNodeDoubleClick}
           onPaneClick={handlePaneClick}
+          onInit={handleInit}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
-          fitView
-          fitViewOptions={{ padding: 0.3 }}
           proOptions={{ hideAttribution: true }}
         >
           <Controls />

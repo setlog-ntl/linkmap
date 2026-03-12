@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   ReactFlow,
   Controls,
@@ -12,6 +12,7 @@ import {
   type Node,
   type NodeChange,
   type EdgeChange,
+  type ReactFlowInstance,
   type Connection,
   BackgroundVariant,
 } from '@xyflow/react';
@@ -107,11 +108,16 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
 
   const [nodes, setNodes] = useState<Node[]>(layoutedNodes);
   const [edges, setEdges] = useState<Edge[]>(layoutedEdges);
+  const initialFitDone = useRef(false);
 
   const onNodesChange = useCallback((changes: NodeChange<Node>[]) => { setNodes((nds) => applyNodeChanges(changes, nds)); }, []);
   const onEdgesChange = useCallback((changes: EdgeChange<Edge>[]) => { setEdges((eds) => applyEdgeChanges(changes, eds)); }, []);
 
   useEffect(() => { setNodes(layoutedNodes); setEdges(layoutedEdges); }, [layoutedNodes, layoutedEdges]);
+
+  const handleInit = useCallback((instance: ReactFlowInstance) => {
+    setTimeout(() => { instance.fitView({ padding: 0.2 }); initialFitDone.current = true; }, 100);
+  }, []);
 
   const handleNativeConnect = useCallback((connection: Connection) => {
     if (!connection.source || !connection.target || connection.source === connection.target) return;
@@ -180,7 +186,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
             onPaneClick={isReadOnly ? undefined : interactions.handlePaneClick}
             onNodeContextMenu={isReadOnly ? undefined : interactions.handleNodeContextMenu}
             onPaneContextMenu={isReadOnly ? undefined : interactions.handlePaneContextMenu}
-            nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView fitViewOptions={{ padding: 0.2 }}
+            nodeTypes={nodeTypes} edgeTypes={edgeTypes} onInit={handleInit}
             nodesDraggable={!isReadOnly}
             nodesConnectable={!isReadOnly}
           >
