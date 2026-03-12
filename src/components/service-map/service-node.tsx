@@ -7,10 +7,10 @@ import { NodeTooltip } from '@/components/service-map/node-tooltip';
 import type { ServiceCategory } from '@/types';
 import { getCategoryStyle } from '@/lib/constants/category-styles';
 
-/** Hex node dimensions */
-const HEX_W = 150;
-const HEX_H = 120;
-const HEX_R = 42;
+/** Hex node dimensions — enlarged for readability */
+const HEX_W = 176;
+const HEX_H = 148;
+const HEX_R = 52;
 
 /** Generate flat-top hexagon SVG points centered at (0,0) with given radius */
 function hexPoints(r: number): string {
@@ -20,11 +20,11 @@ function hexPoints(r: number): string {
   }).join(' ');
 }
 
-const STATUS_CONFIG: Record<string, { hex: string; pulse: boolean; label: string }> = {
-  connected:   { hex: '#22c55e', pulse: false, label: '연결됨' },
-  in_progress: { hex: '#f59e0b', pulse: true,  label: '진행 중' },
-  not_started: { hex: '#94a3b8', pulse: false, label: '시작 전' },
-  error:       { hex: '#ef4444', pulse: true,  label: '오류' },
+const STATUS_CONFIG: Record<string, { hex: string; label: string }> = {
+  connected:   { hex: '#22c55e', label: '연결됨' },
+  in_progress: { hex: '#f59e0b', label: '진행 중' },
+  not_started: { hex: '#64748b', label: '시작 전' },
+  error:       { hex: '#f97316', label: '오류' },
 };
 
 const CATEGORY_LABELS: Partial<Record<ServiceCategory, string>> = {
@@ -65,8 +65,8 @@ function ServiceNode({ data }: NodeProps) {
   const isMain = d.isMainService === true;
   const isFaded = !isHighlighted || focusOpacity < 1;
 
-  const glowIntensity = isFocusTarget ? 16 : hovered ? 14 : 6;
-  const glowAlpha = isFocusTarget ? '60' : hovered ? '50' : '25';
+  const glowIntensity = isFocusTarget ? 18 : hovered ? 14 : 6;
+  const glowAlpha = isFocusTarget ? '55' : hovered ? '45' : '20';
   const strokeW = isFocusTarget ? 2.5 : hovered ? 2 : 1.5;
 
   const nodeContent = (
@@ -94,11 +94,11 @@ function ServiceNode({ data }: NodeProps) {
         {/* Focus outer ring */}
         {isFocusTarget && (
           <polygon
-            points={hexPoints(HEX_R + 6)}
+            points={hexPoints(HEX_R + 8)}
             fill="none"
             stroke={hexColor}
-            strokeWidth="1.5"
-            opacity="0.4"
+            strokeWidth="1"
+            opacity="0.35"
             className="animate-hex-pulse"
           />
         )}
@@ -111,50 +111,37 @@ function ServiceNode({ data }: NodeProps) {
           strokeWidth={strokeW}
         />
 
-        {/* Status bar (top of hex) */}
-        <line
-          x1="-20" y1={-HEX_R + 6}
-          x2="20" y2={-HEX_R + 6}
-          stroke={status.hex}
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          opacity={status.pulse ? undefined : 0.8}
-        >
-          {status.pulse && (
-            <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite" />
-          )}
-        </line>
-
-        {/* Status dot (top-right) */}
-        <g transform={`translate(${HEX_R - 10}, ${-HEX_R + 14})`}>
-          <circle r="6" className="fill-card" stroke="currentColor" strokeWidth="1" opacity="0.15" />
-          <circle r="3" fill={status.hex}>
-            {status.pulse && (
-              <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite" />
-            )}
-          </circle>
-        </g>
+        {/* Status pill (bottom center inside hex) */}
+        <rect
+          x="-24"
+          y={HEX_R - 14}
+          width="48"
+          height="7"
+          rx="3.5"
+          fill={status.hex}
+          opacity={d.status === 'not_started' ? 0.3 : 0.7}
+        />
       </svg>
 
       {/* Content overlay */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none px-3">
+      <div className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none px-4">
         {/* Icon */}
         <div
-          className="w-7 h-7 rounded-lg flex items-center justify-center mb-1"
+          className="w-9 h-9 rounded-lg flex items-center justify-center mb-1.5"
           style={{ background: `${hexColor}15` }}
         >
           {d.iconSlug ? (
-            <ServiceIcon serviceId={d.iconSlug} size={16} />
+            <ServiceIcon serviceId={d.iconSlug} size={20} />
           ) : (
-            <span className="text-xs text-muted-foreground">&#9881;</span>
+            <span className="text-sm text-muted-foreground">&#9881;</span>
           )}
         </div>
         {/* Service name */}
-        <span className="font-semibold text-[10.5px] truncate max-w-[100px] text-center leading-tight tracking-tight">
+        <span className="font-semibold text-[12px] truncate max-w-[120px] text-center leading-tight tracking-tight">
           {d.label}
         </span>
         {/* Category */}
-        <span className="text-[8px] text-muted-foreground mt-0.5">
+        <span className="text-[10px] text-muted-foreground mt-0.5">
           {CATEGORY_LABELS[category] || category}
         </span>
       </div>

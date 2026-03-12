@@ -125,8 +125,8 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
     });
 
     // Service-to-service edges (compute optimal handles from relative positions)
-    const S2S_NODE_W = 150;
-    const S2S_NODE_H = 120;
+    const S2S_NODE_W = 176;
+    const S2S_NODE_H = 148;
     const nodePositionMap = new Map<string, { x: number; y: number }>();
     for (const n of positionedNodes) {
       nodePositionMap.set(n.id, { x: n.position.x + S2S_NODE_W / 2, y: n.position.y + S2S_NODE_H / 2 });

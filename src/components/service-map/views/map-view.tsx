@@ -246,11 +246,12 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
             <defs>
               {['connected', 'in_progress', 'error', 'not_started', 'default'].map((status) => {
                 const colors: Record<string, string> = {
-                  connected: '#22c55e', in_progress: '#f59e0b', error: '#ef4444', not_started: '#9ca3af', default: '#9ca3af',
+                  connected: 'oklch(0.70 0.12 255)', in_progress: 'oklch(0.75 0.15 80)',
+                  error: 'oklch(0.65 0.18 25)', not_started: 'oklch(0.45 0.02 250)', default: 'oklch(0.45 0.02 250)',
                 };
                 return (
-                  <marker key={status} id={`radial-arrow-${status}`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                    <path d="M 0 0 L 10 5 L 0 10 z" fill={colors[status]} opacity="0.7" />
+                  <marker key={status} id={`radial-arrow-${status}`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill={colors[status]} opacity="0.5" />
                   </marker>
                 );
               })}

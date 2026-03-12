@@ -4,23 +4,23 @@ import { memo, useState, useId } from 'react';
 import { BaseEdge, getBezierPath } from '@xyflow/react';
 import type { EdgeProps } from '@xyflow/react';
 
-// Hub edge status colors (project → service)
+// Hub edge status colors — softer tones
 const STATUS_COLORS: Record<string, string> = {
-  connected: '#22c55e',
-  in_progress: '#f59e0b',
-  error: '#ef4444',
-  not_started: '#94a3b8',
+  connected: 'oklch(0.70 0.12 255)',   // brand-blue
+  in_progress: 'oklch(0.75 0.15 80)',  // warm gold
+  error: 'oklch(0.65 0.18 25)',        // soft orange-red
+  not_started: 'oklch(0.45 0.02 250)', // quiet slate
 };
 
-// User connection status colors (service → service)
+// User connection status colors
 const CONNECTION_STATUS_COLORS: Record<string, string> = {
-  active: '#22c55e',
-  inactive: '#94a3b8',
-  error: '#ef4444',
-  pending: '#f59e0b',
+  active: 'oklch(0.70 0.12 255)',
+  inactive: 'oklch(0.40 0.02 250)',
+  error: 'oklch(0.65 0.18 25)',
+  pending: 'oklch(0.75 0.15 80)',
 };
 
-// Map to marker key matching map-view.tsx SVG defs (radial-arrow-{key})
+// Map to marker key matching map-view.tsx SVG defs
 const CONNECTION_STATUS_TO_MARKER: Record<string, string> = {
   active: 'connected',
   inactive: 'not_started',
@@ -49,15 +49,12 @@ function RadialEdgeComponent({
   const connectionType = edgeData?.connectionType as string | undefined;
   const focusHighlighted = edgeData?.focusHighlighted as boolean | undefined;
 
-  // Focus mode: if focusHighlighted is explicitly false, dim the edge
   const isFocusFaded = focusHighlighted === false;
 
-  // Determine stroke color
   const strokeColor = connectionStatus
-    ? (CONNECTION_STATUS_COLORS[connectionStatus] ?? '#94a3b8')
+    ? (CONNECTION_STATUS_COLORS[connectionStatus] ?? 'oklch(0.45 0.02 250)')
     : (STATUS_COLORS[status ?? ''] ?? STATUS_COLORS.not_started);
 
-  // Compute marker key
   const markerKey = connectionStatus
     ? (CONNECTION_STATUS_TO_MARKER[connectionStatus] ?? 'not_started')
     : (VALID_HUB_STATUSES.has(status ?? '') ? (status as string) : 'not_started');
@@ -73,12 +70,13 @@ function RadialEdgeComponent({
     targetY,
     sourcePosition,
     targetPosition,
-    curvature: 0.3,
+    curvature: 0.2,
   });
 
-  // Opacity: focus-aware
-  const baseOpacity = isInactive ? 0.3 : (hovered ? 1 : 0.6);
+  const baseOpacity = isInactive ? 0.25 : (hovered ? 0.9 : 0.5);
   const edgeOpacity = isFocusFaded ? 0.04 : baseOpacity;
+  const baseWidth = isHubEdge ? 1.5 : 1;
+  const edgeWidth = hovered ? baseWidth + 1 : (isFocusFaded ? 0.8 : baseWidth);
 
   return (
     <g
@@ -88,8 +86,8 @@ function RadialEdgeComponent({
       {/* Gradient definition */}
       <defs>
         <linearGradient id={gradId} x1={sourceX} y1={sourceY} x2={targetX} y2={targetY} gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor={strokeColor} stopOpacity={0.9} />
-          <stop offset="100%" stopColor={strokeColor} stopOpacity={0.25} />
+          <stop offset="0%" stopColor={strokeColor} stopOpacity={0.7} />
+          <stop offset="100%" stopColor={strokeColor} stopOpacity={0.2} />
         </linearGradient>
       </defs>
       <BaseEdge
@@ -97,7 +95,7 @@ function RadialEdgeComponent({
         path={edgePath}
         style={{
           stroke: `url(#${gradId})`,
-          strokeWidth: hovered ? 2.5 : (isFocusFaded ? 1 : 1.8),
+          strokeWidth: edgeWidth,
           opacity: edgeOpacity,
           transition: 'opacity 0.3s ease, stroke-width 0.2s ease',
           ...style,
@@ -110,20 +108,20 @@ function RadialEdgeComponent({
           d={edgePath}
           fill="none"
           stroke={strokeColor}
-          strokeWidth="4"
-          opacity="0.08"
-          style={{ filter: `blur(4px)` }}
+          strokeWidth="3"
+          opacity="0.06"
+          style={{ filter: 'blur(3px)' }}
         />
       )}
       {/* Flow particle for connected hub edges */}
       {showParticle && (
         <circle
-          r={2.5}
+          r={2}
           fill={strokeColor}
           className="flow-particle"
-          style={{ filter: `drop-shadow(0 0 4px ${strokeColor})` }}
+          style={{ filter: `drop-shadow(0 0 3px ${strokeColor})` }}
         >
-          <animateMotion dur="3s" repeatCount="indefinite" path={edgePath} />
+          <animateMotion dur="3.5s" repeatCount="indefinite" path={edgePath} />
         </circle>
       )}
       {hovered && connectionType && (
