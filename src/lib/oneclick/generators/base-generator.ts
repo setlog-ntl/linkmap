@@ -309,7 +309,8 @@ export function parseGalleryFromConfig(configContent: string): Record<string, st
   return items;
 }
 
-/** Small-Biz 계열 MODULE_COMPONENTS (small-biz, small-biz-cafe 공통) */
+/** Small-Biz 계열 MODULE_COMPONENTS (small-biz, small-biz-cafe 공통)
+ * hours와 location은 실제 템플릿에서 InfoSection으로 통합되어 있음 */
 export const SMALL_BIZ_MODULE_COMPONENTS: Record<string, ComponentMapping> = {
   hero: {
     importName: 'HeroSection',
@@ -322,14 +323,14 @@ export const SMALL_BIZ_MODULE_COMPONENTS: Record<string, ComponentMapping> = {
     render: '        <MenuSection items={siteConfig.menuItems} />',
   },
   hours: {
-    importName: 'HoursSection',
-    importPath: '@/components/hours-section',
-    render: '        <HoursSection hours={siteConfig.businessHours} />',
+    importName: 'InfoSection',
+    importPath: '@/components/info-section',
+    render: '        <InfoSection config={siteConfig} />',
   },
   location: {
-    importName: 'LocationSection',
-    importPath: '@/components/location-section',
-    render: '        <LocationSection config={siteConfig} />',
+    importName: 'InfoSection',
+    importPath: '@/components/info-section',
+    render: '        <InfoSection config={siteConfig} />',
   },
   gallery: {
     importName: 'GallerySection',
@@ -343,11 +344,11 @@ export const SMALL_BIZ_MODULE_COMPONENTS: Record<string, ComponentMapping> = {
   },
 };
 
-export const SMALL_BIZ_IMPORT_TO_MODULE_MAP: Record<string, string> = {
+/** import 이름 → 모듈 ID 매핑 (다대일: InfoSection → hours+location) */
+export const SMALL_BIZ_IMPORT_TO_MODULE_MAP: Record<string, string | string[]> = {
   HeroSection: 'hero',
   MenuSection: 'menu',
-  HoursSection: 'hours',
-  LocationSection: 'location',
+  InfoSection: ['hours', 'location'],
   GallerySection: 'gallery',
   SnsSection: 'sns',
 };
@@ -364,8 +365,25 @@ interface SmallBizDefaults {
   defaultEmoji: string;
 }
 
+interface SmallBizGeneratorOptions {
+  extraModuleComponents?: Record<string, ComponentMapping>;
+  extraImportMap?: Record<string, string | string[]>;
+}
+
 /** Small-Biz 계열 제너레이터 팩토리 */
-export function createSmallBizGenerator(slug: string, defaults: SmallBizDefaults): TemplateGenerator {
+export function createSmallBizGenerator(
+  slug: string,
+  defaults: SmallBizDefaults,
+  options?: SmallBizGeneratorOptions
+): TemplateGenerator {
+  const mergedModuleComponents: Record<string, ComponentMapping> = {
+    ...SMALL_BIZ_MODULE_COMPONENTS,
+    ...options?.extraModuleComponents,
+  };
+  const mergedImportToModuleMap: Record<string, string | string[]> = {
+    ...SMALL_BIZ_IMPORT_TO_MODULE_MAP,
+    ...options?.extraImportMap,
+  };
   function generateConfigTs(state: ModuleConfigState): string {
     const hero = state.values.hero || {};
     const menu = state.values.menu || {};
@@ -466,9 +484,13 @@ export type SiteConfig = typeof siteConfig;
     ];
     const renders: string[] = [];
 
+    // 중복 import/render 방지 (hours+location → InfoSection 통합)
+    const importedComponents = new Set<string>();
     for (const id of activeModules) {
-      const comp = SMALL_BIZ_MODULE_COMPONENTS[id];
+      const comp = mergedModuleComponents[id];
       if (!comp) continue;
+      if (importedComponents.has(comp.importName)) continue;
+      importedComponents.add(comp.importName);
       imports.push(`import { ${comp.importName} } from '${comp.importPath}';`);
       renders.push(comp.render);
     }
@@ -568,8 +590,8 @@ ${renders.join('\n')}
     generateConfigTs,
     generatePageTsx,
     parseConfigToState,
-    moduleComponents: SMALL_BIZ_MODULE_COMPONENTS,
-    importToModuleMap: SMALL_BIZ_IMPORT_TO_MODULE_MAP,
+    moduleComponents: mergedModuleComponents,
+    importToModuleMap: mergedImportToModuleMap,
   };
 }
 
@@ -581,6 +603,6 @@ export interface TemplateGenerator {
   generatePageTsx(state: ModuleConfigState): string;
   parseConfigToState(configContent: string, schema: TemplateModuleSchema): ModuleConfigState;
   moduleComponents: Record<string, ComponentMapping>;
-  /** import 이름 → 모듈 ID 매핑 (parsePageToEnabledModules 용) */
-  importToModuleMap: Record<string, string>;
+  /** import 이름 → 모듈 ID 매핑 (parsePageToEnabledModules 용, 다대일 지원) */
+  importToModuleMap: Record<string, string | string[]>;
 }

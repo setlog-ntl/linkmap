@@ -152,7 +152,7 @@ export function generateFiles(
   const isDigitalNamecard = templateSlug === 'digital-namecard';
   const isFreelancer = templateSlug === 'freelancer-page';
   const isLinkCard = templateSlug === 'link-card';
-  const isSmallBiz = templateSlug === 'small-biz';
+  const isSmallBiz = templateSlug === 'small-biz' || templateSlug === 'small-biz-cafe';
 
   const files: GeneratedFile[] = [
     { path: 'src/lib/config.ts', content: generator.generateConfigTs(state) },
@@ -285,8 +285,11 @@ export function parsePageToEnabledModules(
   let m;
   while ((m = importRe.exec(pageContent)) !== null) {
     const modId = generator.importToModuleMap[m[1]];
-    if (modId && !enabled.includes(modId)) {
-      enabled.push(modId);
+    if (!modId) continue;
+    // 다대일 매핑 지원: InfoSection → ['hours', 'location']
+    const ids = Array.isArray(modId) ? modId : [modId];
+    for (const id of ids) {
+      if (!enabled.includes(id)) enabled.push(id);
     }
   }
 

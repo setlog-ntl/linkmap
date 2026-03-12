@@ -19,8 +19,8 @@ export const smallBizCafePresets: ModulePreset[] = [
     description: '모든 모듈 활성화 — 완전한 카페 홍보 페이지',
     descriptionEn: 'All modules enabled — complete cafe page',
     state: {
-      enabled: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
-      order: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
+      enabled: ['hero', 'about', 'menu', 'hours', 'location', 'gallery', 'sns'],
+      order: ['hero', 'about', 'menu', 'hours', 'location', 'gallery', 'sns'],
     },
   },
   {
@@ -30,8 +30,8 @@ export const smallBizCafePresets: ModulePreset[] = [
     description: '라이트톤 + Pretendard — 깔끔한 카페 느낌',
     descriptionEn: 'Light tone + Pretendard — clean cafe style',
     state: {
-      enabled: ['hero', 'menu', 'hours', 'location', 'sns'],
-      order: ['hero', 'menu', 'hours', 'location', 'sns'],
+      enabled: ['hero', 'about', 'menu', 'hours', 'location', 'sns'],
+      order: ['hero', 'about', 'menu', 'hours', 'location', 'sns'],
       values: {
         hero: { primaryColor: '#18181b', fontFamily: 'Pretendard', designPreset: 'modern-minimal' },
       },
@@ -44,8 +44,8 @@ export const smallBizCafePresets: ModulePreset[] = [
     description: '세리프 폰트 + 따뜻한 톤 — 감성 카페 무드',
     descriptionEn: 'Serif font + warm tones — vintage cafe mood',
     state: {
-      enabled: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
-      order: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
+      enabled: ['hero', 'about', 'menu', 'hours', 'location', 'gallery', 'sns'],
+      order: ['hero', 'about', 'menu', 'hours', 'location', 'gallery', 'sns'],
       values: {
         hero: { fontFamily: 'Nanum Myeongjo', designPreset: 'warm-serif' },
       },
@@ -58,8 +58,8 @@ export const smallBizCafePresets: ModulePreset[] = [
     description: '따뜻한 어스톤 — 로스터리 카페에 딱 맞는 감성',
     descriptionEn: 'Warm earth tones — perfect for roastery cafes',
     state: {
-      enabled: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
-      order: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
+      enabled: ['hero', 'about', 'menu', 'hours', 'location', 'gallery', 'sns'],
+      order: ['hero', 'about', 'menu', 'hours', 'location', 'gallery', 'sns'],
       values: {
         hero: { designPreset: 'warm-earth' },
       },
@@ -72,8 +72,8 @@ export const smallBizCafePresets: ModulePreset[] = [
     description: '다크 + 인디고 악센트 — 야간 무드 카페',
     descriptionEn: 'Dark + indigo accent — night mood cafe',
     state: {
-      enabled: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
-      order: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
+      enabled: ['hero', 'about', 'menu', 'hours', 'location', 'gallery', 'sns'],
+      order: ['hero', 'about', 'menu', 'hours', 'location', 'gallery', 'sns'],
       values: {
         hero: { designPreset: 'midnight' },
       },
