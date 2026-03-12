@@ -87,6 +87,7 @@
 </head>
 <body>
 <div class="canvas" id="canvas">
+  <canvas id="bgCanvas"></canvas>
   <canvas id="mapCanvas"></canvas>
 
   <div class="toolbar">
@@ -125,17 +126,17 @@
 // ══════════════════════════════════════════════════
 const services = [
   { id: 'auth',      name: 'Supabase Auth',    cat: '인증',       icon: '\u{1F512}', status: 'connected',   color: '#6366f1', group: 'core',         metric: '99.9% up' },
-  { id: 'db',        name: 'Supabase DB',      cat: '데이터베이스', icon: '\u{1F5C4}', status: 'connected',   color: '#3b82f6', group: 'core',         metric: '35 tables' },
+  { id: 'db',        name: 'Supabase DB',      cat: '데이터베이스', icon: '\u{1F5C4}', status: 'connected',   color: '#818cf8', group: 'core',         metric: '35 tables' },
   { id: 'storage',   name: 'Storage',          cat: '파일 저장',   icon: '\u{1F4E6}', status: 'in_progress', color: '#06b6d4', group: 'core',         metric: '설정 중' },
-  { id: 'stripe',    name: 'Stripe',           cat: '결제',       icon: '\u{1F4B3}', status: 'not_started', color: '#ef4444', group: 'core',         metric: '미연결' },
+  { id: 'stripe',    name: 'Stripe',           cat: '결제',       icon: '\u{1F4B3}', status: 'not_started', color: '#f87171', group: 'core',         metric: '미연결' },
   { id: 'cf',        name: 'Cloudflare',       cat: '엣지 배포',   icon: '\u2601',    status: 'connected',   color: '#f97316', group: 'runtime',      metric: '12ms avg' },
-  { id: 'vercel',    name: 'Vercel',           cat: '프리뷰',     icon: '\u25B2',    status: 'connected',   color: '#a3a3a3', group: 'runtime',      metric: 'Active' },
+  { id: 'vercel',    name: 'Vercel',           cat: '프리뷰',     icon: '\u25B2',    status: 'connected',   color: '#c084fc', group: 'runtime',      metric: 'Active' },
   { id: 'github',    name: 'GitHub',           cat: 'CI/CD',     icon: '\u{1F419}', status: 'connected',   color: '#8b5cf6', group: 'runtime',      metric: '12 repos' },
-  { id: 'ga',        name: 'Google Analytics',  cat: '분석',       icon: '\u{1F4CA}', status: 'connected',   color: '#f59e0b', group: 'growth',       metric: '2.1K/day' },
-  { id: 'resend',    name: 'Resend',           cat: '이메일',     icon: '\u{1F4E7}', status: 'in_progress', color: '#f59e0b', group: 'growth',       metric: '설정 중' },
+  { id: 'ga',        name: 'Google Analytics',  cat: '분석',       icon: '\u{1F4CA}', status: 'connected',   color: '#fbbf24', group: 'growth',       metric: '2.1K/day' },
+  { id: 'resend',    name: 'Resend',           cat: '이메일',     icon: '\u{1F4E7}', status: 'in_progress', color: '#fb923c', group: 'growth',       metric: '설정 중' },
   { id: 'openai',    name: 'OpenAI',           cat: 'AI 엔진',    icon: '\u{1F916}', status: 'connected',   color: '#a855f7', group: 'intelligence', metric: 'GPT-4o' },
   { id: 'anthropic', name: 'Anthropic',        cat: 'Claude API', icon: '\u{1F9E0}', status: 'connected',   color: '#ec4899', group: 'intelligence', metric: 'Opus' },
-  { id: 'perplexity',name: 'Perplexity',       cat: 'AI 검색',    icon: '\u{1F50D}', status: 'not_started', color: '#ec4899', group: 'intelligence', metric: '미연결' },
+  { id: 'perplexity',name: 'Perplexity',       cat: 'AI 검색',    icon: '\u{1F50D}', status: 'not_started', color: '#f472b6', group: 'intelligence', metric: '미연결' },
 ];
 
 const s2sConns = [
@@ -169,67 +170,79 @@ const groupMeta = {
 let focusedId = null;
 let searchQuery = '';
 let hoveredId = null;
-let nodeHitAreas = []; // {id, x, y, r} for click detection
+let nodeHitAreas = [];
+let dirty = true;
+let lastW = 0, lastH = 0;
 
 // ══════════════════════════════════════════════════
-// Canvas setup
+// Canvas setup — 2-layer: bgCanvas (static) + mapCanvas (dynamic)
 // ══════════════════════════════════════════════════
+const bgEl = document.getElementById('bgCanvas');
+const bgCtx = bgEl.getContext('2d');
 const canvasEl = document.getElementById('mapCanvas');
 const ctx = canvasEl.getContext('2d');
 
-function resize() {
+function setupCanvases(w, h) {
   const r = window.devicePixelRatio || 1;
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  canvasEl.width = w * r;
-  canvasEl.height = h * r;
-  canvasEl.style.width = w + 'px';
-  canvasEl.style.height = h + 'px';
+  for (const c of [bgEl, canvasEl]) {
+    c.width = w * r;
+    c.height = h * r;
+    c.style.width = w + 'px';
+    c.style.height = h + 'px';
+  }
+  bgCtx.setTransform(r, 0, 0, r, 0, 0);
   ctx.setTransform(r, 0, 0, r, 0, 0);
 }
 
 // ══════════════════════════════════════════════════
 // Drawing helpers
 // ══════════════════════════════════════════════════
-function hexPath(cx, cy, r) {
-  ctx.beginPath();
+function hexPath(c, cx, cy, r) {
+  c.beginPath();
   for (let i = 0; i < 6; i++) {
     const a = Math.PI / 3 * i - Math.PI / 6;
     const px = cx + r * Math.cos(a);
     const py = cy + r * Math.sin(a);
-    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    if (i === 0) c.moveTo(px, py); else c.lineTo(px, py);
   }
-  ctx.closePath();
+  c.closePath();
 }
 
-function roundRect(x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
+function roundRect(c, x, y, w, h, r) {
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.lineTo(x + w - r, y);
+  c.quadraticCurveTo(x + w, y, x + w, y + r);
+  c.lineTo(x + w, y + h - r);
+  c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  c.lineTo(x + r, y + h);
+  c.quadraticCurveTo(x, y + h, x, y + h - r);
+  c.lineTo(x, y + r);
+  c.quadraticCurveTo(x, y, x + r, y);
+  c.closePath();
 }
 
-function bezierPath(x1, y1, x2, y2) {
+// [P0-fix7] Bezier with direction-aware perpendicular offset
+function drawBezier(x1, y1, x2, y2, color, width, opacity, dash, endOffset) {
   const dx = x2 - x1, dy = y2 - y1;
   const len = Math.sqrt(dx * dx + dy * dy) || 1;
-  const nx = -dy / len, ny = dx / len;
-  const off = len * 0.15;
-  const cp1x = x1 + dx * 0.35 + nx * off * 0.3;
-  const cp1y = y1 + dy * 0.35 + ny * off * 0.3;
-  const cp2x = x1 + dx * 0.65 - nx * off * 0.1;
-  const cp2y = y1 + dy * 0.65 - ny * off * 0.1;
-  return { cp1x, cp1y, cp2x, cp2y };
-}
+  // Direction: sign based on cross product with "up" vector for consistent curvature
+  const cross = dx * 1 - dy * 0; // cross with (0, -1) simplified
+  const dir = cross >= 0 ? 1 : -1;
+  const nx = (-dy / len) * dir, ny = (dx / len) * dir;
+  const off = len * 0.10;
+  const cp1x = x1 + dx * 0.35 + nx * off;
+  const cp1y = y1 + dy * 0.35 + ny * off;
+  const cp2x = x1 + dx * 0.65 + nx * off * 0.3;
+  const cp2y = y1 + dy * 0.65 + ny * off * 0.3;
 
-function drawBezier(x1, y1, x2, y2, color, width, opacity, dash) {
-  const { cp1x, cp1y, cp2x, cp2y } = bezierPath(x1, y1, x2, y2);
+  // [P0-fix4] Compute endpoint offset from target center
+  let ex = x2, ey = y2;
+  if (endOffset > 0) {
+    ex = x2 - (dx / len) * endOffset;
+    ey = y2 - (dy / len) * endOffset;
+  }
+
   ctx.save();
   ctx.globalAlpha = opacity;
   ctx.strokeStyle = color;
@@ -238,27 +251,29 @@ function drawBezier(x1, y1, x2, y2, color, width, opacity, dash) {
   if (dash) ctx.setLineDash(dash);
   ctx.beginPath();
   ctx.moveTo(x1, y1);
-  ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x2, y2);
+  ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, ex, ey);
   ctx.stroke();
   ctx.restore();
+
+  return { ex, ey, dx, dy, len };
 }
 
-function drawArrow(x1, y1, x2, y2, color, size, opacity) {
-  const a = Math.atan2(y2 - y1, x2 - x1);
+function drawArrow(fromX, fromY, toX, toY, color, size, opacity) {
+  const dx = toX - fromX, dy = toY - fromY;
+  const a = Math.atan2(dy, dx);
   ctx.save();
   ctx.fillStyle = color;
   ctx.globalAlpha = opacity || 0.6;
   ctx.beginPath();
-  ctx.moveTo(x2, y2);
-  ctx.lineTo(x2 - size * Math.cos(a - 0.35), y2 - size * Math.sin(a - 0.35));
-  ctx.lineTo(x2 - size * Math.cos(a + 0.35), y2 - size * Math.sin(a + 0.35));
+  ctx.moveTo(toX, toY);
+  ctx.lineTo(toX - size * Math.cos(a - 0.4), toY - size * Math.sin(a - 0.4));
+  ctx.lineTo(toX - size * Math.cos(a + 0.4), toY - size * Math.sin(a + 0.4));
   ctx.closePath();
   ctx.fill();
   ctx.restore();
 }
 
 function colorAlpha(color, alpha) {
-  // Convert hex to rgba
   const r = parseInt(color.slice(1, 3), 16);
   const g = parseInt(color.slice(3, 5), 16);
   const b = parseInt(color.slice(5, 7), 16);
@@ -266,44 +281,103 @@ function colorAlpha(color, alpha) {
 }
 
 // ══════════════════════════════════════════════════
-// Layout
+// [P0-fix8] Static background — drawn once, reused via drawImage
+// ══════════════════════════════════════════════════
+function drawBackground(w, h, cx, cy) {
+  bgCtx.fillStyle = '#0c1220';
+  bgCtx.fillRect(0, 0, w, h);
+
+  // Dot grid — single path, single fill (optimized)
+  bgCtx.save();
+  bgCtx.fillStyle = 'rgba(148,163,184,0.06)';
+  bgCtx.beginPath();
+  for (let x = 12; x < w; x += 24) {
+    for (let y = 12; y < h; y += 24) {
+      bgCtx.rect(x - 0.5, y - 0.5, 1, 1);
+    }
+  }
+  bgCtx.fill();
+  bgCtx.restore();
+
+  // Ambient glow
+  const hubGrad = bgCtx.createRadialGradient(cx, cy, 0, cx, cy, 250);
+  hubGrad.addColorStop(0, 'rgba(59,130,246,0.07)');
+  hubGrad.addColorStop(1, 'rgba(59,130,246,0)');
+  bgCtx.fillStyle = hubGrad;
+  bgCtx.fillRect(0, 0, w, h);
+
+  // Guide rings
+  bgCtx.save();
+  bgCtx.strokeStyle = 'rgba(148,163,184,0.04)';
+  bgCtx.lineWidth = 0.5;
+  bgCtx.setLineDash([6, 4]);
+  for (const r of [160, 280, 380]) {
+    bgCtx.beginPath();
+    bgCtx.arc(cx, cy, r, 0, Math.PI * 2);
+    bgCtx.stroke();
+  }
+  bgCtx.restore();
+}
+
+// ══════════════════════════════════════════════════
+// [P1-fix2] Layout — improved node spacing to prevent overlap
 // ══════════════════════════════════════════════════
 function computeLayout() {
   const w = window.innerWidth, h = window.innerHeight;
   const cx = w / 2, cy = h / 2;
   const minDim = Math.min(w, h);
 
-  // 4 sectors only (no empty infra)
   const groupOrder = ['core', 'runtime', 'growth', 'intelligence'];
   const groups = {};
   services.forEach(s => { if (!groups[s.group]) groups[s.group] = []; groups[s.group].push(s); });
   const sectorSpan = 360 / groupOrder.length;
 
+  // Adaptive radii based on viewport
+  const baseInner = Math.max(minDim * 0.24, 140);
+  const baseOuter = Math.max(minDim * 0.40, 240);
+
   groupOrder.forEach((group, gi) => {
     const nodes = groups[group] || [];
     if (nodes.length === 0) return;
-    const startAngle = -90 + gi * sectorSpan + 12;
-    const endAngle = -90 + (gi + 1) * sectorSpan - 12;
+    const sectorStart = -90 + gi * sectorSpan;
+    const padding = 14;
+    const startAngle = sectorStart + padding;
+    const endAngle = sectorStart + sectorSpan - padding;
     const range = endAngle - startAngle;
-    const innerR = minDim * 0.22;
-    const outerR = minDim * 0.36;
 
     nodes.forEach((svc, i) => {
-      const angle = nodes.length === 1
-        ? startAngle + range / 2
-        : startAngle + (range / (nodes.length - 1)) * i;
-      const r = nodes.length <= 3 ? innerR + (i % 2) * (outerR - innerR) * 0.4 : (i % 2 === 0 ? innerR : outerR);
+      // For groups with 4+ nodes: 2-ring stagger (inner/outer alternating)
+      // For groups with 2-3 nodes: spread evenly at consistent radius with slight stagger
+      let angle, r;
+      if (nodes.length >= 4) {
+        const row = i % 2; // 0=inner, 1=outer
+        const col = Math.floor(i / 2);
+        const rowCount = Math.ceil(nodes.length / 2);
+        angle = rowCount === 1 ? startAngle + range / 2 : startAngle + (range / (rowCount - 1)) * col;
+        r = row === 0 ? baseInner : baseOuter;
+        // Offset outer ring angle slightly to avoid vertical alignment
+        if (row === 1) angle += range / (rowCount * 2.5);
+      } else {
+        angle = nodes.length === 1
+          ? startAngle + range / 2
+          : startAngle + (range / (nodes.length - 1)) * i;
+        // Alternate between two radii for visual variety
+        const midR = (baseInner + baseOuter) / 2;
+        const spread = (baseOuter - baseInner) * 0.3;
+        r = midR + (i % 2 === 0 ? -spread : spread);
+      }
+
       const rad = (angle * Math.PI) / 180;
       svc._x = cx + r * Math.cos(rad);
       svc._y = cy + r * Math.sin(rad);
     });
   });
 
-  return { cx, cy, w, h, minDim };
+  return { cx, cy, w, h, minDim, baseOuter };
 }
 
 // ══════════════════════════════════════════════════
-// Get S2S connected IDs for a given node
+// Helpers
 // ══════════════════════════════════════════════════
 function getS2SConnectedIds(id) {
   const ids = new Set();
@@ -315,12 +389,22 @@ function getS2SConnectedIds(id) {
 }
 
 // ══════════════════════════════════════════════════
-// Render
+// Main render
 // ══════════════════════════════════════════════════
 let animFrame = 0;
+
 function render() {
-  resize();
-  const { cx, cy, w, h } = computeLayout();
+  const w = window.innerWidth, h = window.innerHeight;
+
+  // Rebuild bg only on resize
+  if (w !== lastW || h !== lastH) {
+    lastW = w; lastH = h;
+    setupCanvases(w, h);
+    const { cx, cy } = computeLayout();
+    drawBackground(w, h, cx, cy);
+  }
+
+  const { cx, cy, minDim, baseOuter } = computeLayout();
   nodeHitAreas = [];
 
   const isFocusMode = !!focusedId;
@@ -330,64 +414,81 @@ function render() {
     : services;
   const filteredIds = new Set(filtered.map(s => s.id));
 
-  // ── Background ──
-  ctx.fillStyle = '#0c1220';
-  ctx.fillRect(0, 0, w, h);
+  // Clear dynamic layer
+  ctx.clearRect(0, 0, w, h);
 
-  // Dot grid
-  ctx.save();
-  ctx.fillStyle = 'rgba(148,163,184,0.06)';
-  for (let x = 12; x < w; x += 24) {
-    for (let y = 12; y < h; y += 24) {
-      ctx.beginPath();
-      ctx.arc(x, y, 0.6, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-  ctx.restore();
+  // ── [P2-fix6] Group sector arcs + labels ──
+  const groupOrder = ['core', 'runtime', 'growth', 'intelligence'];
+  const sectorSpan = 360 / groupOrder.length;
+  groupOrder.forEach((group, gi) => {
+    const gm = groupMeta[group];
+    if (!gm) return;
+    const sectorStart = -90 + gi * sectorSpan;
+    const s = (sectorStart + 2) * Math.PI / 180;
+    const e = (sectorStart + sectorSpan - 2) * Math.PI / 180;
+    const arcR = baseOuter + 30;
 
-  // Ambient glow behind hub
-  const hubGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 220);
-  hubGrad.addColorStop(0, 'rgba(59,130,246,0.08)');
-  hubGrad.addColorStop(1, 'rgba(59,130,246,0)');
-  ctx.fillStyle = hubGrad;
-  ctx.fillRect(0, 0, w, h);
-
-  // Guide rings
-  ctx.save();
-  ctx.strokeStyle = 'rgba(148,163,184,0.04)';
-  ctx.lineWidth = 0.5;
-  ctx.setLineDash([6, 4]);
-  for (const r of [160, 280, 380]) {
+    // Sector wedge background
+    ctx.save();
+    ctx.globalAlpha = 0.025;
+    ctx.fillStyle = gm.color;
     ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, arcR, s, e);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // Sector arc line
+    ctx.save();
+    ctx.strokeStyle = gm.color;
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.08;
+    ctx.beginPath();
+    ctx.arc(cx, cy, arcR, s, e);
     ctx.stroke();
-  }
-  ctx.restore();
+    ctx.restore();
+
+    // Sector label
+    const midAngle = (sectorStart + sectorSpan / 2) * Math.PI / 180;
+    const labelR = arcR + 18;
+    const lx = cx + labelR * Math.cos(midAngle);
+    const ly = cy + labelR * Math.sin(midAngle);
+    ctx.save();
+    ctx.font = '600 9px Pretendard Variable, sans-serif';
+    ctx.fillStyle = gm.color;
+    ctx.globalAlpha = 0.45;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.letterSpacing = '1px';
+    ctx.fillText(gm.label.toUpperCase(), lx, ly);
+    ctx.restore();
+  });
 
   // ── Hub edges ──
+  const hexR = 42;
   services.forEach(svc => {
     if (!filteredIds.has(svc.id)) return;
     const isRelated = !isFocusMode || focusedId === svc.id || s2sConnIds.has(svc.id);
     const edgeColor = svc.color;
 
-    // Glow underlay
+    // Glow underlay (wider, blurred)
     if (isRelated) {
-      drawBezier(cx, cy, svc._x, svc._y, edgeColor, 8, isFocusMode ? 0.07 : 0.04, null);
+      drawBezier(cx, cy, svc._x, svc._y, edgeColor, 8, isFocusMode ? 0.06 : 0.03, null, hexR + 4);
     }
 
-    // Main edge
-    const opacity = isFocusMode ? (isRelated ? 0.6 : 0.03) : 0.45;
+    // Main edge — [P0-fix4] ends at hex boundary
+    const opacity = isFocusMode ? (isRelated ? 0.55 : 0.025) : 0.4;
     const width = isRelated && isFocusMode ? 2.2 : 1.6;
-    drawBezier(cx, cy, svc._x, svc._y, edgeColor, width, opacity, null);
+    const { ex, ey } = drawBezier(cx, cy, svc._x, svc._y, edgeColor, width, opacity, null, hexR + 4);
 
-    // Arrow
-    if (opacity > 0.1) {
-      drawArrow(cx, cy, svc._x, svc._y, edgeColor, 7, opacity * 0.8);
+    // Arrow at hex boundary
+    if (opacity > 0.08) {
+      drawArrow(cx, cy, ex, ey, edgeColor, 7, Math.min(opacity * 1.2, 0.7));
     }
 
-    // Status indicator dot on non-connected edges
-    if (isRelated && svc.status !== 'connected') {
+    // Status dot on non-connected edges
+    if (isRelated && svc.status !== 'connected' && opacity > 0.1) {
       const st = statusMeta[svc.status];
       const mx = cx + (svc._x - cx) * 0.5;
       const my = cy + (svc._y - cy) * 0.5;
@@ -395,7 +496,7 @@ function render() {
       ctx.fillStyle = st.color;
       ctx.globalAlpha = 0.7;
       ctx.beginPath();
-      ctx.arc(mx, my, 3, 0, Math.PI * 2);
+      ctx.arc(mx, my, 3.5, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
@@ -409,17 +510,22 @@ function render() {
     if (!filteredIds.has(from.id) || !filteredIds.has(to.id)) return;
 
     const isRelated = !isFocusMode || focusedId === conn.from || focusedId === conn.to;
-    const opacity = isFocusMode ? (isRelated ? 0.5 : 0.02) : 0.2;
+    const opacity = isFocusMode ? (isRelated ? 0.45 : 0.015) : 0.18;
     const edgeColor = isRelated ? '#94a3b8' : '#1e293b';
 
-    // Slight perpendicular offset for S2S
     const mx = (from._x + to._x) / 2;
     const my = (from._y + to._y) / 2;
     const dx = to._x - from._x, dy = to._y - from._y;
     const len = Math.sqrt(dx * dx + dy * dy) || 1;
-    const off = Math.min(len * 0.15, 35);
+    const off = Math.min(len * 0.18, 40);
     const cpx = mx + (-dy / len) * off;
     const cpy = my + (dx / len) * off;
+
+    // Endpoint offset from node centers
+    const fromEx = from._x + (dx / len) * (hexR + 2);
+    const fromEy = from._y + (dy / len) * (hexR + 2);
+    const toEx = to._x - (dx / len) * (hexR + 2);
+    const toEy = to._y - (dy / len) * (hexR + 2);
 
     ctx.save();
     ctx.globalAlpha = opacity;
@@ -428,28 +534,28 @@ function render() {
     ctx.setLineDash([5, 3]);
     ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.moveTo(from._x, from._y);
-    ctx.quadraticCurveTo(cpx, cpy, to._x, to._y);
+    ctx.moveTo(fromEx, fromEy);
+    ctx.quadraticCurveTo(cpx, cpy, toEx, toEy);
     ctx.stroke();
     ctx.restore();
 
-    if (opacity > 0.1) {
-      drawArrow(from._x, from._y, to._x, to._y, edgeColor, 6, opacity * 0.7);
+    if (opacity > 0.08) {
+      drawArrow(fromEx, fromEy, toEx, toEy, edgeColor, 5, opacity * 0.7);
     }
 
-    // S2S label at midpoint (only in focus mode when related)
+    // S2S label (focus mode only)
     if (isRelated && isFocusMode) {
       const labelText = conn.label || conn.type;
       ctx.save();
-      ctx.font = '7.5px Pretendard Variable, sans-serif';
-      const tw = ctx.measureText(labelText).width + 12;
-      ctx.fillStyle = 'rgba(17,24,39,0.9)';
+      ctx.font = '500 8px Pretendard Variable, sans-serif';
+      const tw = ctx.measureText(labelText).width + 14;
+      ctx.fillStyle = 'rgba(17,24,39,0.92)';
       ctx.strokeStyle = 'rgba(148,163,184,0.15)';
       ctx.lineWidth = 0.5;
-      roundRect(cpx - tw / 2, cpy - 8, tw, 16, 4);
+      roundRect(ctx, cpx - tw / 2, cpy - 9, tw, 18, 5);
       ctx.fill();
       ctx.stroke();
-      ctx.fillStyle = '#94a3b8';
+      ctx.fillStyle = '#cbd5e1';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(labelText, cpx, cpy);
@@ -472,34 +578,47 @@ function render() {
   ctx.stroke();
   ctx.restore();
 
-  // Health ring fg
+  // Health ring fg (animated subtle rotation)
   ctx.save();
   ctx.strokeStyle = '#22c55e';
   ctx.lineWidth = 3;
   ctx.lineCap = 'round';
-  ctx.globalAlpha = 0.6;
+  ctx.globalAlpha = 0.55;
+  const ringOffset = animFrame * 0.003;
   ctx.beginPath();
-  ctx.arc(cx, cy, ringR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * hPct);
+  ctx.arc(cx, cy, ringR, -Math.PI / 2 + ringOffset, -Math.PI / 2 + ringOffset + Math.PI * 2 * hPct);
   ctx.stroke();
   ctx.restore();
 
-  // Hub hex with glow
+  // Hub hex with gradient fill
   ctx.save();
-  ctx.shadowColor = 'rgba(59,130,246,0.35)';
-  ctx.shadowBlur = 20;
-  ctx.fillStyle = '#111827';
+  ctx.shadowColor = 'rgba(59,130,246,0.3)';
+  ctx.shadowBlur = 22;
+  const hubGrad = ctx.createRadialGradient(cx, cy - 5, 0, cx, cy + 10, 45);
+  hubGrad.addColorStop(0, '#1a2744');
+  hubGrad.addColorStop(1, '#111827');
+  ctx.fillStyle = hubGrad;
   ctx.strokeStyle = '#3b82f6';
   ctx.lineWidth = 2.5;
-  hexPath(cx, cy, 40);
+  hexPath(ctx, cx, cy, 40);
   ctx.fill();
   ctx.stroke();
   ctx.shadowBlur = 0;
   ctx.restore();
 
+  // Hub inner accent line
+  ctx.save();
+  ctx.strokeStyle = '#3b82f6';
+  ctx.lineWidth = 0.5;
+  ctx.globalAlpha = 0.15;
+  hexPath(ctx, cx, cy, 32);
+  ctx.stroke();
+  ctx.restore();
+
   // Hub text
   ctx.save();
   ctx.fillStyle = '#fff';
-  ctx.font = '700 11px Pretendard Variable, sans-serif';
+  ctx.font = '700 12px Pretendard Variable, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText('My Project', cx, cy - 4);
@@ -508,11 +627,9 @@ function render() {
   ctx.fillText(`${connSvc}/${totalSvc} connected`, cx, cy + 12);
   ctx.restore();
 
-  // Hub hit area
   nodeHitAreas.push({ id: '__hub__', x: cx, y: cy, r: 52 });
 
   // ── Service nodes ──
-  const hexR = 42;
   services.forEach(svc => {
     if (!filteredIds.has(svc.id)) return;
     const isFocused = focusedId === svc.id;
@@ -523,47 +640,62 @@ function render() {
     const isHovered = hoveredId === svc.id;
 
     // Fade non-related in focus mode
-    if (isFocusMode && !isRelated) {
-      ctx.save();
-      ctx.globalAlpha = 0.06;
-    }
+    const nodeAlpha = (isFocusMode && !isRelated) ? 0.06 : 1;
+    ctx.save();
+    if (nodeAlpha < 1) ctx.globalAlpha = nodeAlpha;
 
-    // Focus outer glow ring
+    // Focus outer pulse ring
     if (isFocused) {
       ctx.save();
       ctx.strokeStyle = svc.color;
       ctx.lineWidth = 1.5;
-      ctx.globalAlpha = 0.3 + 0.15 * Math.sin(animFrame * 0.05);
-      hexPath(svc._x, svc._y, 52);
+      ctx.globalAlpha = 0.25 + 0.15 * Math.sin(animFrame * 0.06);
+      hexPath(ctx, svc._x, svc._y, 54);
       ctx.stroke();
       ctx.restore();
     }
 
-    // Connected highlight ring
+    // Connected node ring (S2S)
     if (isS2SConn && isFocusMode && !isFocused) {
       ctx.save();
       ctx.strokeStyle = svc.color;
       ctx.lineWidth = 1;
       ctx.globalAlpha = 0.2;
-      hexPath(svc._x, svc._y, 48);
+      hexPath(ctx, svc._x, svc._y, 48);
       ctx.stroke();
       ctx.restore();
     }
 
-    // Main hex with glow
+    // [P2-fix3] Main hex with gradient fill + enhanced hover
     ctx.save();
-    if (isFocused || isHovered) {
-      ctx.shadowColor = colorAlpha(svc.color, 0.4);
-      ctx.shadowBlur = isFocused ? 20 : 12;
+    if (isFocused) {
+      ctx.shadowColor = colorAlpha(svc.color, 0.45);
+      ctx.shadowBlur = 24;
+    } else if (isHovered) {
+      ctx.shadowColor = colorAlpha(svc.color, 0.35);
+      ctx.shadowBlur = 16;
     }
-    ctx.fillStyle = '#151e2e';
+    // Subtle radial gradient inside hex for depth
+    const nodeGrad = ctx.createRadialGradient(svc._x, svc._y - 6, 0, svc._x, svc._y + 12, hexR + 4);
+    nodeGrad.addColorStop(0, isHovered ? '#1e2d45' : '#182438');
+    nodeGrad.addColorStop(1, '#111827');
+    ctx.fillStyle = nodeGrad;
     ctx.strokeStyle = svc.color;
-    ctx.lineWidth = isFocused ? 2.5 : (isHovered ? 2 : 1.5);
-    hexPath(svc._x, svc._y, hexR);
+    ctx.lineWidth = isFocused ? 2.5 : (isHovered ? 2.2 : 1.5);
+    hexPath(ctx, svc._x, svc._y, hexR);
     ctx.fill();
     ctx.stroke();
     ctx.shadowBlur = 0;
     ctx.restore();
+
+    // [P2-fix3] Hover fill overlay for better state feedback
+    if (isHovered && !isFocused) {
+      ctx.save();
+      ctx.fillStyle = colorAlpha(svc.color, 0.05);
+      hexPath(ctx, svc._x, svc._y, hexR - 1);
+      ctx.fill();
+      ctx.restore();
+    }
 
     // Status bar at top
     ctx.save();
@@ -571,9 +703,9 @@ function render() {
     ctx.lineWidth = 2.5;
     ctx.lineCap = 'round';
     if (svc.status === 'in_progress' || svc.status === 'error') {
-      ctx.globalAlpha = 0.5 + 0.5 * Math.abs(Math.sin(animFrame * 0.04));
+      ctx.globalAlpha = 0.45 + 0.45 * Math.abs(Math.sin(animFrame * 0.045));
     } else {
-      ctx.globalAlpha = 0.8;
+      ctx.globalAlpha = 0.75;
     }
     ctx.beginPath();
     ctx.moveTo(svc._x - 22, svc._y - hexR + 6);
@@ -581,10 +713,10 @@ function render() {
     ctx.stroke();
     ctx.restore();
 
-    // Icon background
+    // Icon bg
     ctx.save();
     ctx.fillStyle = colorAlpha(svc.color, 0.1);
-    roundRect(svc._x - 14, svc._y - 20, 28, 28, 8);
+    roundRect(ctx, svc._x - 14, svc._y - 20, 28, 28, 8);
     ctx.fill();
     ctx.restore();
 
@@ -602,13 +734,13 @@ function render() {
     ctx.font = '600 10px Pretendard Variable, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    const displayName = svc.name.length > 15 ? svc.name.slice(0, 13) + '..' : svc.name;
+    const displayName = svc.name.length > 14 ? svc.name.slice(0, 12) + '..' : svc.name;
     ctx.fillText(displayName, svc._x, svc._y + 18);
     ctx.restore();
 
-    // Category
+    // [P1-fix1-A] Category — improved contrast (#94a3b8 instead of #64748b)
     ctx.save();
-    ctx.fillStyle = '#64748b';
+    ctx.fillStyle = '#94a3b8';
     ctx.font = '8px Pretendard Variable, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -617,7 +749,7 @@ function render() {
 
     // Status dot (top-right)
     ctx.save();
-    ctx.fillStyle = '#111827';
+    ctx.fillStyle = '#0f1629';
     ctx.strokeStyle = 'rgba(148,163,184,0.15)';
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -626,65 +758,71 @@ function render() {
     ctx.stroke();
     ctx.fillStyle = st.color;
     if (svc.status === 'in_progress' || svc.status === 'error') {
-      ctx.globalAlpha = 0.5 + 0.5 * Math.abs(Math.sin(animFrame * 0.04));
+      ctx.globalAlpha = 0.45 + 0.45 * Math.abs(Math.sin(animFrame * 0.045));
     }
     ctx.beginPath();
     ctx.arc(svc._x + hexR - 10, svc._y - hexR + 14, 3, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
-    // Metric badge
-    ctx.save();
-    ctx.font = '500 7.5px Pretendard Variable, sans-serif';
-    const metricText = svc.metric;
-    const badgeW = ctx.measureText(metricText).width + 16;
-    const badgeX = svc._x - badgeW / 2;
-    const badgeY = svc._y + hexR + 6;
-    ctx.fillStyle = colorAlpha(st.color, 0.08);
-    ctx.strokeStyle = colorAlpha(st.color, 0.18);
-    ctx.lineWidth = 0.5;
-    roundRect(badgeX, badgeY, badgeW, 16, 4);
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = st.color;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(metricText, svc._x, badgeY + 8);
-    ctx.restore();
+    // [P2-fix6] Metric badge — hover/focus only for readability, larger font
+    const showBadge = isHovered || isFocused || !isFocusMode;
+    if (showBadge) {
+      ctx.save();
+      ctx.font = '500 9px Pretendard Variable, sans-serif';
+      const metricText = svc.metric;
+      const badgeW = ctx.measureText(metricText).width + 16;
+      const badgeX = svc._x - badgeW / 2;
+      const badgeY = svc._y + hexR + 8;
+      const badgeAlpha = (isHovered || isFocused) ? 1 : 0.7;
+      ctx.globalAlpha = badgeAlpha;
+      ctx.fillStyle = colorAlpha(st.color, 0.1);
+      ctx.strokeStyle = colorAlpha(st.color, 0.2);
+      ctx.lineWidth = 0.5;
+      roundRect(ctx, badgeX, badgeY, badgeW, 18, 5);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = st.color;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(metricText, svc._x, badgeY + 9);
+      ctx.restore();
+    }
 
-    // Group indicator line at bottom
+    // Group indicator line
     if (gm) {
       ctx.save();
       ctx.strokeStyle = gm.color;
       ctx.lineWidth = 1.5;
       ctx.lineCap = 'round';
-      ctx.globalAlpha = 0.4;
+      ctx.globalAlpha = 0.35;
       ctx.beginPath();
-      ctx.moveTo(svc._x - 12, svc._y + hexR - 3);
-      ctx.lineTo(svc._x + 12, svc._y + hexR - 3);
+      ctx.moveTo(svc._x - 14, svc._y + hexR - 3);
+      ctx.lineTo(svc._x + 14, svc._y + hexR - 3);
       ctx.stroke();
       ctx.restore();
     }
 
     // Restore from faded
-    if (isFocusMode && !isRelated) {
-      ctx.restore();
-    }
+    ctx.restore();
 
     // Hit area
-    nodeHitAreas.push({ id: svc.id, x: svc._x, y: svc._y, r: hexR });
+    nodeHitAreas.push({ id: svc.id, x: svc._x, y: svc._y, r: hexR + 8 });
   });
 
   animFrame++;
 }
 
 // ══════════════════════════════════════════════════
-// Animation loop (for pulsing effects)
+// [P0-fix8] Conditional animation loop — only animate when needed
 // ══════════════════════════════════════════════════
-let running = true;
 function loop() {
-  if (!running) return;
-  render();
+  // Always render if there are pulsing elements (in_progress/error status exist)
+  const hasPulse = services.some(s => s.status === 'in_progress' || s.status === 'error');
+  if (dirty || hoveredId !== null || focusedId !== null || hasPulse) {
+    render();
+    dirty = false;
+  }
   requestAnimationFrame(loop);
 }
 
@@ -693,11 +831,12 @@ function loop() {
 // ══════════════════════════════════════════════════
 function toggleFocus(id) {
   if (focusedId === id) resetFocus();
-  else { focusedId = id; showFocusPanel(id); }
+  else { focusedId = id; dirty = true; showFocusPanel(id); }
 }
 
 function resetFocus() {
   focusedId = null;
+  dirty = true;
   document.getElementById('focusPanel').classList.remove('visible');
 }
 
@@ -719,11 +858,10 @@ function showFocusPanel(id) {
   const section = document.getElementById('fpConnectionsSection');
   section.innerHTML = '';
 
-  // S2S connections
   const s2sIds = getS2SConnectedIds(id);
   if (s2sIds.size > 0) {
     const h4 = document.createElement('h4');
-    h4.textContent = `\uC11C\uBE44\uC2A4 \uAC04 \uC5F0\uACB0 (${s2sIds.size})`;
+    h4.textContent = `서비스 간 연결 (${s2sIds.size})`;
     h4.style.cssText = 'font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:#475569;margin-bottom:8px;font-weight:600';
     section.appendChild(h4);
 
@@ -745,10 +883,9 @@ function showFocusPanel(id) {
     });
   }
 
-  // Hub connection
   const hubLabel = document.createElement('div');
   hubLabel.style.cssText = 'font-size:10px;color:#475569;margin:12px 0 6px;font-weight:600;letter-spacing:0.3px;border-top:1px solid rgba(148,163,184,0.12);padding-top:10px';
-  hubLabel.textContent = 'Hub \uC5F0\uACB0';
+  hubLabel.textContent = 'Hub 연결';
   section.appendChild(hubLabel);
 
   const hubItem = document.createElement('div');
@@ -760,7 +897,7 @@ function showFocusPanel(id) {
   const total = s2sIds.size + 1;
   const countLabel = document.createElement('div');
   countLabel.style.cssText = 'font-size:10px;color:#475569;margin-top:10px;text-align:center;padding-top:8px;border-top:1px solid rgba(148,163,184,0.08)';
-  countLabel.textContent = `\uCD1D ${total}\uAC1C \uC5F0\uACB0`;
+  countLabel.textContent = `총 ${total}개 연결`;
   section.appendChild(countLabel);
 
   panel.classList.add('visible');
@@ -776,10 +913,10 @@ function updateStats() {
   const inProgress = services.filter(s => s.status === 'in_progress').length;
   const totalEdges = services.length + s2sConns.length;
   panel.innerHTML = `
-    <div><div class="stat-val">${total}</div>\uC11C\uBE44\uC2A4</div>
-    <div><div class="stat-val" style="color:#22c55e">${connected}</div>\uC5F0\uACB0\uB428</div>
-    <div><div class="stat-val" style="color:#f59e0b">${inProgress}</div>\uC9C4\uD589\uC911</div>
-    <div><div class="stat-val">${totalEdges}</div>\uC5F0\uACB0</div>
+    <div><div class="stat-val">${total}</div>서비스</div>
+    <div><div class="stat-val" style="color:#22c55e">${connected}</div>연결됨</div>
+    <div><div class="stat-val" style="color:#f59e0b">${inProgress}</div>진행중</div>
+    <div><div class="stat-val">${totalEdges}</div>연결</div>
   `;
 }
 
@@ -787,7 +924,6 @@ function updateStats() {
 // Event handlers
 // ══════════════════════════════════════════════════
 function getHitNode(mx, my) {
-  // Check in reverse order (top-most first)
   for (let i = nodeHitAreas.length - 1; i >= 0; i--) {
     const n = nodeHitAreas[i];
     const dx = mx - n.x, dy = my - n.y;
@@ -798,54 +934,38 @@ function getHitNode(mx, my) {
 
 canvasEl.addEventListener('click', (e) => {
   const rect = canvasEl.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-  const hit = getHitNode(mx, my);
-  if (hit === '__hub__') {
-    resetFocus();
-  } else if (hit) {
-    toggleFocus(hit);
-  } else {
-    // Clicked empty space
-    if (focusedId) resetFocus();
-  }
+  const hit = getHitNode(e.clientX - rect.left, e.clientY - rect.top);
+  if (hit === '__hub__') resetFocus();
+  else if (hit) toggleFocus(hit);
+  else if (focusedId) resetFocus();
 });
 
 canvasEl.addEventListener('mousemove', (e) => {
   const rect = canvasEl.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-  const hit = getHitNode(mx, my);
-  hoveredId = hit && hit !== '__hub__' ? hit : null;
-  canvasEl.style.cursor = hit ? 'pointer' : 'default';
-});
-
-canvasEl.addEventListener('dblclick', (e) => {
-  const rect = canvasEl.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-  const hit = getHitNode(mx, my);
-  if (hit && hit !== '__hub__') {
-    // Double-click: could open detail (placeholder)
-    toggleFocus(hit);
+  const hit = getHitNode(e.clientX - rect.left, e.clientY - rect.top);
+  const newHover = hit && hit !== '__hub__' ? hit : null;
+  if (newHover !== hoveredId) {
+    hoveredId = newHover;
+    dirty = true;
   }
+  canvasEl.style.cursor = hit ? 'pointer' : 'default';
 });
 
 document.getElementById('searchInput').addEventListener('input', (e) => {
   searchQuery = e.target.value.toLowerCase();
+  dirty = true;
 });
 
 document.getElementById('btnReset').addEventListener('click', resetFocus);
 document.getElementById('btnFit').addEventListener('click', resetFocus);
 document.getElementById('fpClose').addEventListener('click', resetFocus);
-
-// Prevent canvas clicks from reaching focus panel
 document.getElementById('focusPanel').addEventListener('click', (e) => e.stopPropagation());
+
+window.addEventListener('resize', () => { lastW = 0; dirty = true; });
 
 // ══════════════════════════════════════════════════
 // Init
 // ══════════════════════════════════════════════════
-window.addEventListener('resize', () => { /* render is called in loop */ });
 updateStats();
 loop();
 </script>
