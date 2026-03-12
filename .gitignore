@@ -67,6 +67,9 @@ docs/benchmarking-*.html
 # Strategy & competitive intelligence (internal — not for sharing)
 docs/strategy-private/
 
+# VC application materials (contains personal info)
+docs/vc/Primer/
+
 # Design captures & tools (internal dev artifacts)
 docs/captures/
 docs/tools/
