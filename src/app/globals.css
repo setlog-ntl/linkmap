@@ -234,6 +234,42 @@
   display: none;
 }
 
+/* Service map: node enter animation */
+@keyframes node-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.85) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.animate-node-enter {
+  animation: node-enter 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Service map: dark mode node glow on hover */
+.service-node-card {
+  --node-glow: transparent;
+}
+.dark .service-node-card:hover {
+  box-shadow: 0 0 20px -4px var(--node-glow), 0 0 8px -2px var(--node-glow);
+}
+
+/* Service map: dark mode canvas radial gradient */
+.service-map-canvas {
+  position: relative;
+}
+.dark .service-map-canvas::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, oklch(0.25 0.06 255 / 0.3) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
 /* Service map: status dot pulse */
 @keyframes status-pulse {
   0% { box-shadow: 0 0 0 0 currentColor; }
@@ -447,8 +483,15 @@
   .animate-ai-reveal,
   .animate-edge-glow-pulse,
   .animate-github-wiggle,
-  .animate-code-blink {
+  .animate-code-blink,
+  .animate-node-enter {
     animation: none;
+  }
+  .dark .service-node-card:hover {
+    box-shadow: none;
+  }
+  .flow-particle {
+    display: none;
   }
 }
 @keyframes edge-glow-pulse {

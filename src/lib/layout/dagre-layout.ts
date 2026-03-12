@@ -18,8 +18,8 @@ export function getLayoutedElements(
 ): { nodes: Node[]; edges: Edge[] } {
   const {
     direction = 'TB',
-    nodeWidth = 200,
-    nodeHeight = 80,
+    nodeWidth = 180,
+    nodeHeight = 72,
     rankSep = 100,
     nodeSep = 60,
     nodeHeights = {},

@@ -16,6 +16,7 @@ import {
   BackgroundVariant,
 } from '@xyflow/react';
 import { toast } from 'sonner';
+import { useTheme } from 'next-themes';
 import ServiceNode from '@/components/service-map/service-node';
 import ZoneNode from '@/components/service-map/zone-node';
 import ConnectionEdge from '@/components/service-map/connection-edge';
@@ -52,6 +53,9 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     editMode, pendingOverrides, pendingMainServiceId,
     setPendingMainServiceId, clearPendingChanges, setEditMode,
   } = useServiceMapStore();
+
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showAiPanel, setShowAiPanel] = useState(false);
@@ -158,10 +162,15 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
         {!isReadOnly && (
           <CatalogSidebar projectId={projectId} catalogServices={data.catalogServices} projectServices={data.services} isLoading={data.catalogLoading} />
         )}
-        <div className="flex-1 relative">
+        <div className="flex-1 relative service-map-canvas">
           {!isReadOnly && connectingFrom && (
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-blue-600 text-white text-xs px-3 py-1.5 rounded-full shadow-lg">
-              대상 서비스를 클릭하세요 (ESC로 취소)
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-primary text-primary-foreground text-xs px-4 py-2 rounded-full shadow-lg">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-foreground opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-foreground" />
+              </span>
+              대상 서비스를 클릭하세요
+              <kbd className="ml-1 px-1.5 py-0.5 rounded bg-primary-foreground/20 text-[10px] font-mono">ESC</kbd>
             </div>
           )}
           <ReactFlow
@@ -176,8 +185,19 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
             nodesConnectable={!isReadOnly}
           >
             <Controls />
-            <MiniMap nodeStrokeWidth={3} nodeColor={interactions.getNodeColor} zoomable pannable />
-            <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
+            <MiniMap
+              nodeStrokeWidth={3}
+              nodeColor={interactions.getNodeColor}
+              zoomable
+              pannable
+              maskColor={isDark ? 'rgba(15, 29, 47, 0.85)' : undefined}
+              style={isDark ? { backgroundColor: 'var(--card)' } : undefined}
+            />
+            {isDark ? (
+              <Background variant={BackgroundVariant.Lines} gap={40} color="oklch(0.35 0.02 250)" style={{ opacity: 0.3 }} />
+            ) : (
+              <Background variant={BackgroundVariant.Cross} gap={32} color="var(--border)" style={{ opacity: 0.5 }} />
+            )}
           </ReactFlow>
           {!isReadOnly && <EditSaveBar onSave={handleSaveChanges} saving={saving} />}
           {showLegend && <MapLegend onClose={() => setShowLegend(false)} />}

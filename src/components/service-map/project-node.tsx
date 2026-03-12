@@ -14,7 +14,7 @@ function ProjectNodeComponent({ data }: NodeProps) {
   const { label, iconUrl } = data as ProjectNodeData;
 
   return (
-    <div className="relative flex items-center gap-3 rounded-xl border-2 border-primary/30 bg-background px-5 py-3 shadow-lg">
+    <div className="relative flex items-center gap-3 rounded-xl border-2 border-primary/30 bg-card px-5 py-3 shadow-lg dark:shadow-[0_0_24px_-4px_oklch(0.70_0.12_255_/_0.3)] animate-node-enter">
       {/* Handles for radial connections */}
       <Handle type="source" position={Position.Top} id="top" className="!bg-primary !w-2 !h-2" />
       <Handle type="source" position={Position.Right} id="right" className="!bg-primary !w-2 !h-2" />

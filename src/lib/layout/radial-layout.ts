@@ -5,10 +5,10 @@ import { categoryToViewGroup, VIEW_GROUP_ORDER } from '@/lib/layout/view-group';
 const CENTER_X = 600;
 const CENTER_Y = 400;
 const PROJECT_NODE_ID = 'project-center';
-const INNER_RADIUS = 220;
-const OUTER_RADIUS = 380;
-const NODE_WIDTH = 160;
-const NODE_HEIGHT = 64;
+const INNER_RADIUS = 240;
+const OUTER_RADIUS = 400;
+const NODE_WIDTH = 180;
+const NODE_HEIGHT = 72;
 
 const SECTOR_START_ANGLES = VIEW_GROUP_ORDER.reduce<Record<ViewGroup, number>>((acc, group, i) => {
   acc[group] = -90 + i * 72;

@@ -53,7 +53,7 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
         ...node,
         data: {
           ...node.data,
-          focusOpacity: highlighted ? 1 : 0.2,
+          focusOpacity: highlighted ? 1 : 0.35,
         },
       };
     });

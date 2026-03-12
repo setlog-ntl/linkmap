@@ -15,6 +15,7 @@ import {
   BackgroundVariant,
   useReactFlow,
 } from '@xyflow/react';
+import { useTheme } from 'next-themes';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Maximize2, Download } from 'lucide-react';
@@ -45,6 +46,8 @@ interface MapViewProps {
 function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
   const { locale } = useLocaleStore();
   const { fitView } = useReactFlow();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
   const openSheet = useServiceDetailStore((s) => s.openSheet);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -129,7 +132,7 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
         </Button>
       </div>
 
-      <div className="absolute inset-0 z-0 bg-background/50">
+      <div className="absolute inset-0 z-0 bg-background/50 service-map-canvas">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -143,8 +146,18 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
           proOptions={{ hideAttribution: true }}
         >
           <Controls />
-          <MiniMap nodeStrokeWidth={3} zoomable pannable />
-          <Background variant={BackgroundVariant.Dots} gap={20} size={1} />
+          <MiniMap
+            nodeStrokeWidth={3}
+            zoomable
+            pannable
+            maskColor={isDark ? 'rgba(15, 29, 47, 0.85)' : undefined}
+            style={isDark ? { backgroundColor: 'var(--card)' } : undefined}
+          />
+          {isDark ? (
+            <Background variant={BackgroundVariant.Lines} gap={40} color="oklch(0.35 0.02 250)" style={{ opacity: 0.3 }} />
+          ) : (
+            <Background variant={BackgroundVariant.Cross} gap={32} color="var(--border)" style={{ opacity: 0.5 }} />
+          )}
           <svg>
             <defs>
               {['connected', 'in_progress', 'error', 'not_started', 'default'].map((status) => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useState } from 'react';
+import { memo, useState, useId } from 'react';
 import { BaseEdge, getBezierPath } from '@xyflow/react';
 import type { EdgeProps } from '@xyflow/react';
 
@@ -42,6 +42,7 @@ function RadialEdgeComponent({
   style,
 }: EdgeProps) {
   const [hovered, setHovered] = useState(false);
+  const gradId = useId();
   const edgeData = data as Record<string, unknown>;
   const status = edgeData?.status as string | undefined;
   const connectionStatus = edgeData?.connectionStatus as string | undefined;
@@ -58,6 +59,8 @@ function RadialEdgeComponent({
     : (VALID_HUB_STATUSES.has(status ?? '') ? (status as string) : 'not_started');
 
   const isInactive = connectionStatus === 'inactive';
+  const isHubEdge = !connectionStatus;
+  const showParticle = !isInactive && isHubEdge && status === 'connected';
 
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -74,11 +77,18 @@ function RadialEdgeComponent({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
+      {/* Gradient definition for this edge */}
+      <defs>
+        <linearGradient id={gradId} x1={sourceX} y1={sourceY} x2={targetX} y2={targetY} gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor={strokeColor} stopOpacity={0.9} />
+          <stop offset="100%" stopColor={strokeColor} stopOpacity={0.3} />
+        </linearGradient>
+      </defs>
       <BaseEdge
         id={id}
         path={edgePath}
         style={{
-          stroke: strokeColor,
+          stroke: `url(#${gradId})`,
           strokeWidth: hovered ? 2.5 : 1.5,
           opacity: isInactive ? 0.3 : (hovered ? 1 : 0.7),
           transition: 'opacity 0.2s ease, stroke-width 0.2s ease',
@@ -86,6 +96,17 @@ function RadialEdgeComponent({
         }}
         markerEnd={`url(#radial-arrow-${markerKey})`}
       />
+      {/* Flow particle for connected hub edges */}
+      {showParticle && (
+        <circle
+          r={2.5}
+          fill={strokeColor}
+          className="flow-particle"
+          style={{ filter: `drop-shadow(0 0 3px ${strokeColor})` }}
+        >
+          <animateMotion dur="3s" repeatCount="indefinite" path={edgePath} />
+        </circle>
+      )}
       {hovered && connectionType && (
         <foreignObject
           x={labelX - 40}

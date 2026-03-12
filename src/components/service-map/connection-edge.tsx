@@ -63,6 +63,7 @@ function ConnectionEdge({
   });
 
   const showLabel = hovered || editMode;
+  const showParticle = s.weight >= 2 && s.dash === '0';
 
   // Marching ants on hover: override dash to animated pattern
   const isStaticDashed = s.dash !== '0';
@@ -92,6 +93,17 @@ function ConnectionEdge({
         }}
         className={hovered && !isStaticDashed ? 'animate-edge-march' : ''}
       />
+      {/* Flow particle — animate a dot along the edge path for active connections */}
+      {showParticle && (
+        <circle
+          r={3}
+          fill={s.color}
+          className="flow-particle"
+          style={{ filter: `drop-shadow(0 0 4px ${s.color})` }}
+        >
+          <animateMotion dur="2.5s" repeatCount="indefinite" path={edgePath} />
+        </circle>
+      )}
       {showLabel && (
         <EdgeLabelRenderer>
           <div
