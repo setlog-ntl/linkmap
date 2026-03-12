@@ -213,9 +213,10 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
         </div>
       )}
 
-      {/* Canvas */}
-      <div className="absolute inset-0 z-0 bg-background/50 service-map-canvas">
+      {/* Canvas — React Flow requires parent with explicit width+height */}
+      <div className="absolute inset-0 z-0 bg-background/50 service-map-canvas" style={{ width: '100%', height: '100%' }}>
         <ReactFlow
+          style={{ width: '100%', height: '100%' }}
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}

@@ -168,7 +168,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
         {!isReadOnly && (
           <CatalogSidebar projectId={projectId} catalogServices={data.catalogServices} projectServices={data.services} isLoading={data.catalogLoading} />
         )}
-        <div className="flex-1 relative service-map-canvas">
+        <div className="flex-1 relative service-map-canvas" style={{ width: '100%', height: '100%' }}>
           {!isReadOnly && connectingFrom && (
             <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-primary text-primary-foreground text-xs px-4 py-2 rounded-full shadow-lg">
               <span className="relative flex h-2 w-2">
@@ -180,6 +180,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
             </div>
           )}
           <ReactFlow
+            style={{ width: '100%', height: '100%' }}
             nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
             onConnect={isReadOnly ? undefined : handleNativeConnect}
             onNodeClick={isReadOnly ? undefined : interactions.handleNodeClick}
