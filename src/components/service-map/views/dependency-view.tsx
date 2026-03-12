@@ -18,6 +18,7 @@ import {
 } from '@xyflow/react';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
+import { GradientMeshDefs } from '@/components/service-map/gradient-mesh-defs';
 import ServiceNode from '@/components/service-map/service-node';
 import ZoneNode from '@/components/service-map/zone-node';
 import ConnectionEdge from '@/components/service-map/connection-edge';
@@ -179,6 +180,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
               <kbd className="ml-1 px-1.5 py-0.5 rounded bg-primary-foreground/20 text-[10px] font-mono">ESC</kbd>
             </div>
           )}
+          <GradientMeshDefs isDark={isDark} />
           <ReactFlow
             style={{ width: '100%', height: '100%' }}
             nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}

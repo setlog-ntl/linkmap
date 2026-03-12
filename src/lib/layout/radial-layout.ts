@@ -5,8 +5,8 @@ import { categoryToViewGroup, VIEW_GROUP_ORDER } from '@/lib/layout/view-group';
 const CENTER_X = 600;
 const CENTER_Y = 400;
 const PROJECT_NODE_ID = 'project-center';
-const NODE_WIDTH = 176;
-const NODE_HEIGHT = 148;
+const NODE_WIDTH = 160;
+const NODE_HEIGHT = 72;
 const HUB_WIDTH = 200;
 const HUB_HEIGHT = 170;
 
@@ -18,12 +18,12 @@ const SECTOR_START_ANGLES = VIEW_GROUP_ORDER.reduce<Record<ViewGroup, number>>((
 const SECTOR_SPAN = 72;
 const SECTOR_PADDING = 12;
 
-/** Adaptive radius based on node count — enlarged for bigger nodes */
+/** Adaptive radius based on node count — compact nodes allow tighter radii */
 function getRadii(totalNodes: number): { inner: number; outer: number } {
-  if (totalNodes <= 3) return { inner: 220, outer: 220 };
-  if (totalNodes <= 6) return { inner: 270, outer: 270 };
-  if (totalNodes <= 10) return { inner: 290, outer: 450 };
-  return { inner: 310, outer: 490 };
+  if (totalNodes <= 3) return { inner: 200, outer: 200 };
+  if (totalNodes <= 6) return { inner: 240, outer: 240 };
+  if (totalNodes <= 10) return { inner: 260, outer: 380 };
+  return { inner: 280, outer: 420 };
 }
 
 interface RadialLayoutInput {

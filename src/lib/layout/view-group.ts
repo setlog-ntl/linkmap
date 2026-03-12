@@ -15,14 +15,17 @@ export interface ViewGroupMeta {
   icon: string;
   color: string;
   bgColor: string;
+  gradientFrom: string;
+  gradientTo: string;
+  gradientId: string;
 }
 
 export const VIEW_GROUP_META: Record<ViewGroup, ViewGroupMeta> = {
-  core: { key: 'core', label: '핵심', labelEn: 'Core', icon: 'Database', color: 'border-blue-500/30', bgColor: 'bg-blue-500/5' },
-  runtime: { key: 'runtime', label: '런타임', labelEn: 'Runtime', icon: 'Rocket', color: 'border-green-500/30', bgColor: 'bg-green-500/5' },
-  growth: { key: 'growth', label: '그로스', labelEn: 'Growth', icon: 'TrendingUp', color: 'border-purple-500/30', bgColor: 'bg-purple-500/5' },
-  intelligence: { key: 'intelligence', label: '인텔리전스', labelEn: 'Intelligence', icon: 'Brain', color: 'border-amber-500/30', bgColor: 'bg-amber-500/5' },
-  infra: { key: 'infra', label: '인프라', labelEn: 'Infra', icon: 'Server', color: 'border-gray-500/30', bgColor: 'bg-gray-500/5' },
+  core: { key: 'core', label: '핵심', labelEn: 'Core', icon: 'Database', color: 'border-blue-500/30', bgColor: 'bg-blue-500/5', gradientFrom: '#2563eb', gradientTo: '#7c3aed', gradientId: 'gm-core' },
+  runtime: { key: 'runtime', label: '런타임', labelEn: 'Runtime', icon: 'Rocket', color: 'border-green-500/30', bgColor: 'bg-green-500/5', gradientFrom: '#059669', gradientTo: '#0891b2', gradientId: 'gm-runtime' },
+  growth: { key: 'growth', label: '그로스', labelEn: 'Growth', icon: 'TrendingUp', color: 'border-purple-500/30', bgColor: 'bg-purple-500/5', gradientFrom: '#7c3aed', gradientTo: '#db2777', gradientId: 'gm-growth' },
+  intelligence: { key: 'intelligence', label: '인텔리전스', labelEn: 'Intelligence', icon: 'Brain', color: 'border-amber-500/30', bgColor: 'bg-amber-500/5', gradientFrom: '#8b5cf6', gradientTo: '#ec4899', gradientId: 'gm-intel' },
+  infra: { key: 'infra', label: '인프라', labelEn: 'Infra', icon: 'Server', color: 'border-gray-500/30', bgColor: 'bg-gray-500/5', gradientFrom: '#475569', gradientTo: '#64748b', gradientId: 'gm-infra' },
 };
 
 export const VIEW_GROUP_ORDER: ViewGroup[] = ['core', 'runtime', 'growth', 'intelligence', 'infra'];

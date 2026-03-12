@@ -16,6 +16,9 @@ interface NodeTooltipProps {
   domain?: string;
   category?: string;
   isMainService?: boolean;
+  envFilled?: number;
+  envTotal?: number;
+  lastHealthCheck?: string;
 }
 
 const statusLabels: Record<string, { label: string; color: string }> = {
@@ -25,7 +28,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
   error:       { label: '오류',    color: 'text-red-500' },
 };
 
-export function NodeTooltip({ children, label, status, domain, category, isMainService }: NodeTooltipProps) {
+export function NodeTooltip({ children, label, status, domain, category, isMainService, envFilled, envTotal, lastHealthCheck }: NodeTooltipProps) {
   const statusInfo = statusLabels[status] || statusLabels.not_started;
   const categoryLabel = category ? allCategoryLabels[category as ServiceCategory] : undefined;
   const domainLabel = domain ? domainLabels[domain as ServiceDomain] : undefined;
@@ -64,6 +67,22 @@ export function NodeTooltip({ children, label, status, domain, category, isMainS
             <div className="flex justify-between gap-4">
               <span className="text-muted-foreground">도메인</span>
               <span>{domainLabel}</span>
+            </div>
+          )}
+
+          {envTotal != null && envTotal > 0 && (
+            <div className="flex justify-between gap-4">
+              <span className="text-muted-foreground">환경변수</span>
+              <span className={envFilled === envTotal ? 'text-green-500' : 'text-yellow-500'}>
+                {envFilled ?? 0}/{envTotal}
+              </span>
+            </div>
+          )}
+
+          {lastHealthCheck && (
+            <div className="flex justify-between gap-4">
+              <span className="text-muted-foreground">마지막 체크</span>
+              <span className="text-muted-foreground">{lastHealthCheck}</span>
             </div>
           )}
         </div>

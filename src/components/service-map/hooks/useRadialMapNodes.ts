@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import type { Node, Edge } from '@xyflow/react';
 import { computeRadialLayout, PROJECT_NODE_ID, getHandleFromAngle } from '@/lib/layout/radial-layout';
 import { categoryToViewGroup } from '@/lib/layout/view-group';
-import type { ProjectService, Service, UserConnection, ServiceCategory } from '@/types';
+import type { ProjectService, Service, UserConnection, ServiceCategory, ViewGroup } from '@/types';
 
 interface UseRadialMapNodesInput {
   services: (ProjectService & { service: Service })[];
@@ -11,37 +11,68 @@ interface UseRadialMapNodesInput {
   projectIconUrl?: string | null;
   searchQuery?: string;
   focusedNodeId?: string | null;
+  filterGroups?: ViewGroup[];
+  filterStatuses?: string[];
 }
 
 export function useRadialMapNodes(input: UseRadialMapNodesInput) {
-  const { services, userConnections, projectName, projectIconUrl, searchQuery, focusedNodeId } = input;
+  const { services, userConnections, projectName, projectIconUrl, searchQuery, focusedNodeId, filterGroups, filterStatuses } = input;
 
   return useMemo(() => {
     if (services.length === 0) return { nodes: [] as Node[], edges: [] as Edge[] };
 
     // Filter by search query
-    const filteredServices = searchQuery
+    let filteredServices = searchQuery
       ? services.filter((s) =>
           s.service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           s.service.slug.toLowerCase().includes(searchQuery.toLowerCase())
         )
       : services;
 
-    // Build connected set for focus highlight
+    // Filter by ViewGroup
+    if (filterGroups && filterGroups.length > 0) {
+      filteredServices = filteredServices.filter((s) =>
+        filterGroups.includes(categoryToViewGroup(s.service.category))
+      );
+    }
+
+    // Filter by connection status
+    if (filterStatuses && filterStatuses.length > 0) {
+      filteredServices = filteredServices.filter((s) =>
+        filterStatuses.includes(s.status)
+      );
+    }
+
+    // Build connected set for focus highlight (2-hop)
     const filteredIds = new Set(filteredServices.map((s) => s.id));
-    const focusConnectedIds = new Set<string>();
+    const focus1hopIds = new Set<string>();
+    const focus2hopIds = new Set<string>();
+
     if (focusedNodeId && focusedNodeId !== PROJECT_NODE_ID) {
       // Hub is always connected to focused node
-      focusConnectedIds.add(PROJECT_NODE_ID);
-      // Find s2s connections
+      focus1hopIds.add(PROJECT_NODE_ID);
+      // Find direct s2s connections (1-hop)
       userConnections.forEach((c) => {
         if (c.source_service_id === focusedNodeId && filteredIds.has(c.target_service_id)) {
-          focusConnectedIds.add(c.target_service_id);
+          focus1hopIds.add(c.target_service_id);
         }
         if (c.target_service_id === focusedNodeId && filteredIds.has(c.source_service_id)) {
-          focusConnectedIds.add(c.source_service_id);
+          focus1hopIds.add(c.source_service_id);
         }
       });
+
+      // Find 2-hop connections
+      for (const hop1Id of focus1hopIds) {
+        if (hop1Id === PROJECT_NODE_ID) continue;
+        userConnections.forEach((c) => {
+          if (c.source_service_id === hop1Id && filteredIds.has(c.target_service_id) && c.target_service_id !== focusedNodeId && !focus1hopIds.has(c.target_service_id)) {
+            focus2hopIds.add(c.target_service_id);
+          }
+          if (c.target_service_id === hop1Id && filteredIds.has(c.source_service_id) && c.source_service_id !== focusedNodeId && !focus1hopIds.has(c.source_service_id)) {
+            focus2hopIds.add(c.source_service_id);
+          }
+        });
+      }
     }
 
     const isFocusMode = !!focusedNodeId && focusedNodeId !== PROJECT_NODE_ID;
@@ -50,11 +81,12 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
     const connectedCount = filteredServices.filter((s) => s.status === 'connected').length;
     const totalCount = filteredServices.length;
 
-    const serviceNodes: Node[] = filteredServices.map((s) => {
+    const serviceNodes: Node[] = filteredServices.map((s, idx) => {
       const isFocusTarget = isFocusMode && s.id === focusedNodeId;
-      const isConnectedToFocus = isFocusMode && focusConnectedIds.has(s.id);
+      const is1hop = isFocusMode && focus1hopIds.has(s.id);
+      const is2hop = isFocusMode && focus2hopIds.has(s.id);
       const focusOpacity = isFocusMode
-        ? (isFocusTarget || isConnectedToFocus ? 1 : 0.12)
+        ? (isFocusTarget || is1hop ? 1 : is2hop ? 0.6 : 0.1)
         : 1;
 
       return {
@@ -68,9 +100,10 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
           status: s.status,
           iconUrl: s.service.icon_url ?? null,
           viewGroup: categoryToViewGroup(s.service.category),
-          highlighted: !isFocusMode || isFocusTarget || isConnectedToFocus,
+          highlighted: !isFocusMode || isFocusTarget || is1hop || is2hop,
           focusOpacity,
           isFocusTarget,
+          enterDelay: idx * 50,
         },
       };
     });
@@ -105,9 +138,15 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
       if (angleDeg != null) nodeAngleMap.set(n.id, angleDeg);
     }
 
+    // Build viewGroup map for edge gradient
+    const nodeViewGroupMap = new Map<string, ViewGroup>();
+    for (const s of filteredServices) {
+      nodeViewGroupMap.set(s.id, categoryToViewGroup(s.service.category));
+    }
+
     // Hub edges: project → each service (with angle-based handle selection)
     const hubEdges: Edge[] = filteredServices.map((s) => {
-      const isFocusRelated = !isFocusMode || s.id === focusedNodeId || focusConnectedIds.has(s.id);
+      const isFocusRelated = !isFocusMode || s.id === focusedNodeId || focus1hopIds.has(s.id);
       const angleDeg = nodeAngleMap.get(s.id);
       const handles = angleDeg != null ? getHandleFromAngle(angleDeg) : { sourceHandle: undefined, targetHandle: undefined };
       return {
@@ -120,13 +159,14 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
         data: {
           status: s.status,
           focusHighlighted: isFocusRelated,
+          targetViewGroup: nodeViewGroupMap.get(s.id),
         },
       };
     });
 
     // Service-to-service edges (compute optimal handles from relative positions)
-    const S2S_NODE_W = 176;
-    const S2S_NODE_H = 148;
+    const S2S_NODE_W = 160;
+    const S2S_NODE_H = 72;
     const nodePositionMap = new Map<string, { x: number; y: number }>();
     for (const n of positionedNodes) {
       nodePositionMap.set(n.id, { x: n.position.x + S2S_NODE_W / 2, y: n.position.y + S2S_NODE_H / 2 });
@@ -164,11 +204,12 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
             connectionType: c.connection_type,
             connectionStatus: c.connection_status,
             focusHighlighted: isFocusRelated,
+            targetViewGroup: nodeViewGroupMap.get(c.target_service_id),
           },
           style: { strokeDasharray: '4 4' },
         };
       });
 
     return { nodes: positionedNodes, edges: [...hubEdges, ...s2sEdges] };
-  }, [services, userConnections, projectName, projectIconUrl, searchQuery, focusedNodeId]);
+  }, [services, userConnections, projectName, projectIconUrl, searchQuery, focusedNodeId, filterGroups, filterStatuses]);
 }

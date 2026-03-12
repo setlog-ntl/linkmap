@@ -34,9 +34,6 @@ function ProjectNodeComponent({ data }: NodeProps) {
   const ringCirc = 2 * Math.PI * ringR;
   const ringFill = healthPct * ringCirc;
 
-  // Health ring color based on percentage
-  const ringColor = healthPct >= 0.7 ? '#22c55e' : healthPct >= 0.3 ? '#f59e0b' : '#ef4444';
-
   return (
     <div
       className="hex-hub-node animate-node-enter relative"
@@ -52,9 +49,7 @@ function ProjectNodeComponent({ data }: NodeProps) {
       <svg
         viewBox={`${-HUB_W / 2} ${-HUB_H / 2} ${HUB_W} ${HUB_H}`}
         className="absolute inset-0 w-full h-full overflow-visible"
-        style={{
-          filter: 'drop-shadow(0 0 20px oklch(0.70 0.12 255 / 0.25)) drop-shadow(0 0 40px oklch(0.70 0.12 255 / 0.10))',
-        }}
+        style={{ filter: 'url(#gm-glow-lg)' }}
       >
         {/* Health ring background */}
         <circle
@@ -64,11 +59,11 @@ function ProjectNodeComponent({ data }: NodeProps) {
           strokeWidth="4"
           opacity="0.15"
         />
-        {/* Health ring foreground */}
+        {/* Health ring foreground — gradient */}
         <circle
           r={ringR}
           fill="none"
-          stroke={ringColor}
+          stroke="url(#gm-runtime)"
           strokeWidth="4"
           strokeDasharray={`${ringFill} ${ringCirc - ringFill}`}
           strokeLinecap="round"
@@ -76,10 +71,11 @@ function ProjectNodeComponent({ data }: NodeProps) {
           opacity="0.7"
           className="animate-hub-glow"
         />
-        {/* Hub hexagon */}
+        {/* Hub hexagon with gradient border */}
         <polygon
           points={hexPoints(HUB_R)}
-          className="fill-card stroke-primary"
+          className="fill-card"
+          stroke="url(#gm-core)"
           strokeWidth="2"
         />
       </svg>

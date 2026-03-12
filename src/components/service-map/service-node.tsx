@@ -4,21 +4,14 @@ import { memo, useState } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { NodeTooltip } from '@/components/service-map/node-tooltip';
-import type { ServiceCategory } from '@/types';
+import type { ServiceCategory, ViewGroup } from '@/types';
 import { getCategoryStyle } from '@/lib/constants/category-styles';
+import { VIEW_GROUP_META } from '@/lib/layout/view-group';
 
-/** Hex node dimensions — enlarged for readability */
-const HEX_W = 176;
-const HEX_H = 148;
-const HEX_R = 52;
-
-/** Generate flat-top hexagon SVG points centered at (0,0) with given radius */
-function hexPoints(r: number): string {
-  return Array.from({ length: 6 }, (_, i) => {
-    const a = (Math.PI / 3) * i - Math.PI / 6;
-    return `${r * Math.cos(a)},${r * Math.sin(a)}`;
-  }).join(' ');
-}
+/** Compact rounded-rect node dimensions */
+const NODE_W = 160;
+const NODE_H = 72;
+const BORDER_RADIUS = 14;
 
 const STATUS_CONFIG: Record<string, { hex: string; label: string }> = {
   connected:   { hex: '#22c55e', label: '연결됨' },
@@ -49,6 +42,8 @@ interface ServiceNodeData {
   domain?: string;
   isMainService?: boolean;
   isFocusTarget?: boolean;
+  viewGroup?: ViewGroup;
+  enterDelay?: number;
   [key: string]: unknown;
 }
 
@@ -56,8 +51,10 @@ function ServiceNode({ data }: NodeProps) {
   const d = data as unknown as ServiceNodeData;
   const [hovered, setHovered] = useState(false);
   const category = d.category as ServiceCategory;
-  const { hexColor } = getCategoryStyle(category);
+  const { gradientFrom } = getCategoryStyle(category);
   const status = STATUS_CONFIG[d.status] || STATUS_CONFIG.not_started;
+  const vg = d.viewGroup ?? 'infra';
+  const meta = VIEW_GROUP_META[vg];
 
   const isHighlighted = d.highlighted !== false;
   const focusOpacity = d.focusOpacity ?? 1;
@@ -65,70 +62,81 @@ function ServiceNode({ data }: NodeProps) {
   const isMain = d.isMainService === true;
   const isFaded = !isHighlighted || focusOpacity < 1;
 
-  const glowIntensity = isFocusTarget ? 18 : hovered ? 14 : 6;
-  const glowAlpha = isFocusTarget ? '55' : hovered ? '45' : '20';
-  const strokeW = isFocusTarget ? 2.5 : hovered ? 2 : 1.5;
+  const glowIntensity = isFocusTarget ? 18 : hovered ? 12 : 4;
+  const glowAlpha = isFocusTarget ? '55' : hovered ? '40' : '18';
+  const strokeW = isFocusTarget ? 2 : hovered ? 1.8 : 1.5;
+  const enterDelay = (d.enterDelay as number) ?? 0;
 
   const nodeContent = (
     <div
-      className="hex-service-node animate-node-enter relative"
+      className="relative"
       style={{
-        width: HEX_W,
-        height: HEX_H,
+        width: NODE_W,
+        height: NODE_H,
         opacity: isHighlighted ? focusOpacity : 0.12,
-        filter: isFaded && focusOpacity < 1 ? 'blur(0.5px) grayscale(0.3)' : undefined,
+        filter: isFaded && focusOpacity < 1 ? 'blur(1px) grayscale(0.4)' : undefined,
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        animation: `node-mesh-enter 0.4s ease-out ${enterDelay}ms both`,
+        contain: 'layout style paint',
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* SVG Hexagon */}
+      {/* SVG border with gradient stroke */}
       <svg
-        viewBox={`${-HEX_W / 2} ${-HEX_H / 2} ${HEX_W} ${HEX_H}`}
+        viewBox={`0 0 ${NODE_W} ${NODE_H}`}
         className="absolute inset-0 w-full h-full overflow-visible"
         style={{
-          filter: `drop-shadow(0 0 ${glowIntensity}px ${hexColor}${glowAlpha})`,
+          filter: `drop-shadow(0 0 ${glowIntensity}px ${gradientFrom}${glowAlpha})`,
           transition: 'filter 0.3s ease',
         }}
       >
-        {/* Focus outer ring */}
+        {/* Focus pulse ring */}
         {isFocusTarget && (
-          <polygon
-            points={hexPoints(HEX_R + 8)}
+          <rect
+            x="-4" y="-4"
+            width={NODE_W + 8} height={NODE_H + 8}
+            rx={BORDER_RADIUS + 4}
             fill="none"
-            stroke={hexColor}
+            stroke={`url(#${meta.gradientId})`}
             strokeWidth="1"
-            opacity="0.35"
-            className="animate-hex-pulse"
+            opacity="0.4"
+            className="animate-mesh-pulse"
           />
         )}
 
-        {/* Main hex */}
-        <polygon
-          points={hexPoints(HEX_R)}
+        {/* Main rounded rect with gradient border */}
+        <rect
+          x="0.75" y="0.75"
+          width={NODE_W - 1.5} height={NODE_H - 1.5}
+          rx={BORDER_RADIUS}
           className="fill-card"
-          stroke={hexColor}
+          stroke={`url(#${meta.gradientId})`}
           strokeWidth={strokeW}
         />
 
-        {/* Status pill (bottom center inside hex) */}
+        {/* Left accent bar (gradient) */}
         <rect
-          x="-24"
-          y={HEX_R - 14}
-          width="48"
-          height="7"
-          rx="3.5"
-          fill={status.hex}
-          opacity={d.status === 'not_started' ? 0.3 : 0.7}
+          x="0" y={16}
+          width="3" height={NODE_H - 32}
+          rx="1.5"
+          fill={`url(#${meta.gradientId})`}
+          opacity="0.8"
         />
       </svg>
 
-      {/* Content overlay */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none px-4">
+      {/* Status dot — top right */}
+      <div
+        className="absolute top-2.5 right-2.5 w-[6px] h-[6px] rounded-full"
+        style={{ backgroundColor: status.hex, opacity: d.status === 'not_started' ? 0.4 : 1 }}
+      />
+
+      {/* Content — horizontal layout: icon left, text right */}
+      <div className="absolute inset-0 flex items-center gap-2.5 z-10 pointer-events-none px-4">
         {/* Icon */}
         <div
-          className="w-9 h-9 rounded-lg flex items-center justify-center mb-1.5"
-          style={{ background: `${hexColor}15` }}
+          className="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center"
+          style={{ background: `${gradientFrom}15` }}
         >
           {d.iconSlug ? (
             <ServiceIcon serviceId={d.iconSlug} size={20} />
@@ -136,14 +144,15 @@ function ServiceNode({ data }: NodeProps) {
             <span className="text-sm text-muted-foreground">&#9881;</span>
           )}
         </div>
-        {/* Service name */}
-        <span className="font-semibold text-[12px] truncate max-w-[120px] text-center leading-tight tracking-tight">
-          {d.label}
-        </span>
-        {/* Category */}
-        <span className="text-[10px] text-muted-foreground mt-0.5">
-          {CATEGORY_LABELS[category] || category}
-        </span>
+        {/* Name + Category */}
+        <div className="min-w-0 flex flex-col">
+          <span className="font-semibold text-[12px] truncate max-w-[90px] leading-tight tracking-tight">
+            {d.label}
+          </span>
+          <span className="text-[10px] text-muted-foreground mt-0.5 truncate max-w-[90px]">
+            {CATEGORY_LABELS[category] || category}
+          </span>
+        </div>
       </div>
 
       {/* Handles — transparent, all 4 directions for both source and target */}

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { ZoneKey } from '@/lib/layout/zone-layout';
-import type { ViewLevel } from '@/types';
+import type { ViewLevel, ViewGroup } from '@/types';
 
 interface ContextMenuState {
   x: number;
@@ -14,6 +14,8 @@ interface ServiceMapState {
   focusedNodeId: string | null;
   contextMenu: ContextMenuState | null;
   connectingFrom: string | null;
+  filterGroups: ViewGroup[];
+  filterStatuses: string[];
 
   editMode: boolean;
   pendingOverrides: Record<string, ZoneKey>;
@@ -25,6 +27,8 @@ interface ServiceMapState {
   setFocusedNodeId: (id: string | null) => void;
   setContextMenu: (menu: ContextMenuState | null) => void;
   setConnectingFrom: (id: string | null) => void;
+  toggleFilterGroup: (group: ViewGroup) => void;
+  toggleFilterStatus: (status: string) => void;
 
   setEditMode: (mode: boolean) => void;
   setPendingOverride: (nodeId: string, zone: ZoneKey) => void;
@@ -39,6 +43,8 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
   focusedNodeId: null,
   contextMenu: null,
   connectingFrom: null,
+  filterGroups: [],
+  filterStatuses: [],
 
   editMode: false,
   pendingOverrides: {},
@@ -50,6 +56,16 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
   setFocusedNodeId: (id) => set((s) => ({ focusedNodeId: s.focusedNodeId === id ? null : id })),
   setContextMenu: (menu) => set({ contextMenu: menu }),
   setConnectingFrom: (id) => set({ connectingFrom: id }),
+  toggleFilterGroup: (group) => set((s) => ({
+    filterGroups: s.filterGroups.includes(group)
+      ? s.filterGroups.filter((g) => g !== group)
+      : [...s.filterGroups, group],
+  })),
+  toggleFilterStatus: (status) => set((s) => ({
+    filterStatuses: s.filterStatuses.includes(status)
+      ? s.filterStatuses.filter((st) => st !== status)
+      : [...s.filterStatuses, status],
+  })),
 
   setEditMode: (mode) => set({
     editMode: mode,
