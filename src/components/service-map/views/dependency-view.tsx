@@ -105,8 +105,8 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     focusedNodeId, getDomain: nodesResult.getDomain, mainServiceId: effectiveMainServiceId,
   });
 
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
+  const [nodes, setNodes] = useState<Node[]>(layoutedNodes);
+  const [edges, setEdges] = useState<Edge[]>(layoutedEdges);
 
   const onNodesChange = useCallback((changes: NodeChange<Node>[]) => { setNodes((nds) => applyNodeChanges(changes, nds)); }, []);
   const onEdgesChange = useCallback((changes: EdgeChange<Edge>[]) => { setEdges((eds) => applyEdgeChanges(changes, eds)); }, []);

@@ -62,13 +62,17 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
     focusedNodeId,
   });
 
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
+  const [nodes, setNodes] = useState<Node[]>(layoutNodes);
+  const [edges, setEdges] = useState<Edge[]>(layoutEdges);
 
   useEffect(() => {
     setNodes(layoutNodes);
     setEdges(layoutEdges);
-  }, [layoutNodes, layoutEdges]);
+    // Re-fit view when layout changes (search filter, focus change)
+    requestAnimationFrame(() => {
+      fitView({ padding: 0.3 });
+    });
+  }, [layoutNodes, layoutEdges, fitView]);
 
   const onNodesChange = useCallback((changes: NodeChange<Node>[]) => {
     setNodes((nds) => applyNodeChanges(changes, nds));
