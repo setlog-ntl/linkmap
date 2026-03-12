@@ -138,7 +138,7 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
     : null;
 
   return (
-    <div className="flex-1 w-full h-full relative">
+    <div className="flex-1 w-full relative min-h-0">
       {/* Toolbar */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-background/80 backdrop-blur-md rounded-full border shadow-sm p-1">
         <div className="relative flex-1 w-[200px]">

@@ -156,7 +156,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
   }, [pendingOverrides, pendingMainServiceId, data.services, projectId, upsertLayerOverride, updateProject, clearPendingChanges, setEditMode]);
 
   return (
-    <div className="flex-1 w-full h-full relative border-none bg-background overflow-hidden flex flex-col">
+    <div className="flex-1 w-full relative min-h-0 border-none bg-background overflow-hidden flex flex-col">
       <MapToolbar searchQuery={searchQuery} onSearchChange={setSearchQuery} onExportPng={interactions.handleExportPng} onAiAnalyze={() => setShowAiPanel(!showAiPanel)} onToggleLegend={() => setShowLegend(!showLegend)} />
       <div className="flex-1 flex overflow-hidden">
         {!isReadOnly && (

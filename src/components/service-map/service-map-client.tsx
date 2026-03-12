@@ -68,7 +68,7 @@ function ServiceMapInner({ isReadOnly = false }: ServiceMapInnerProps) {
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col h-full w-full relative">
+      <div className="flex flex-col w-full relative h-[calc(100vh-3.5rem)] min-h-[500px]">
         <div className="absolute top-4 right-4 z-10 flex items-center justify-between gap-4">
           <ViewLevelSwitcher />
         </div>
