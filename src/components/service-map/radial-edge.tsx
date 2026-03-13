@@ -89,7 +89,8 @@ function RadialEdgeComponent({
       <defs>
         <linearGradient id={gradId} x1={sourceX} y1={sourceY} x2={targetX} y2={targetY} gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor={colors.bright} stopOpacity={0.6} />
-          <stop offset="100%" stopColor={colors.base} stopOpacity={0.15} />
+          <stop offset="80%" stopColor={colors.base} stopOpacity={0.25} />
+          <stop offset="100%" stopColor={colors.base} stopOpacity={0.4} />
         </linearGradient>
       </defs>
       <BaseEdge

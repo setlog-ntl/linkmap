@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { Node, Edge } from '@xyflow/react';
 import { computeRadialLayout, PROJECT_NODE_ID, getHandleFromAngle, getHubSourceHandle, getTargetHandleFromAngle } from '@/lib/layout/radial-layout';
-import type { ProjectService, Service, UserConnection, ServiceCategory } from '@/types';
+import type { ProjectService, Service, UserConnection } from '@/types';
 import { getServiceBrand } from '@/lib/constants/service-brands';
 
 interface UseRadialMapNodesInput {
@@ -71,6 +71,7 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
     const inProgressCount = filteredServices.filter((s) => s.status === 'in_progress').length;
     const errorCount = filteredServices.filter((s) => s.status === 'error').length;
     const totalCount = filteredServices.length;
+    const notStartedCount = totalCount - connectedCount - inProgressCount - errorCount;
 
     const serviceNodes: Node[] = filteredServices.map((s, idx) => {
       const isFocusTarget = isFocusMode && s.id === focusedNodeId;
@@ -103,15 +104,15 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
       };
     });
 
-    const getCategory = (nodeId: string): ServiceCategory => {
+    const getStatus = (nodeId: string): string => {
       const svc = filteredServices.find((s) => s.id === nodeId);
-      return svc?.service.category ?? 'other';
+      return svc?.status ?? 'not_started';
     };
 
-    // Compute radial layout
+    // Compute radial layout (status-based: connected=top, in_progress=sides, error=bottom)
     const { nodes: positionedNodes } = computeRadialLayout({
       serviceNodes,
-      getCategory,
+      getStatus,
       projectName,
       projectIconUrl,
     });
@@ -124,6 +125,7 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
         connectedCount,
         inProgressCount,
         errorCount,
+        notStartedCount,
         totalCount,
       };
     }

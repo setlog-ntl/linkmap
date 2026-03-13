@@ -366,8 +366,8 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
           <svg>
             <defs>
               {Object.entries(MARKER_COLORS).map(([status, color]) => (
-                <marker key={status} id={`radial-arrow-${status}`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
-                  <path d="M 0 0 L 10 5 L 0 10 z" fill={color} opacity="0.5" />
+                <marker key={status} id={`radial-arrow-${status}`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill={color} opacity="0.65" />
                 </marker>
               ))}
               {/* Glow filters */}

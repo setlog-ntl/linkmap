@@ -83,6 +83,7 @@ interface ProjectNodeData {
   connectedCount?: number;
   inProgressCount?: number;
   errorCount?: number;
+  notStartedCount?: number;
   totalCount?: number;
   [key: string]: unknown;
 }
@@ -94,19 +95,28 @@ function ProjectNodeComponent({ data }: NodeProps) {
   const inProgressCount = (d.inProgressCount as number) ?? 0;
   const errorCount = (d.errorCount as number) ?? 0;
   const totalCount = (d.totalCount as number) ?? 0;
+  const notStartedCount = (d.notStartedCount as number) ?? (totalCount - connectedCount - inProgressCount - errorCount);
 
   const ringR = 68;
   const ringCirc = 2 * Math.PI * ringR;
 
-  // Multi-segment ring: connected → in_progress → error (rest = empty)
-  const connectedArc = totalCount > 0 ? (connectedCount / totalCount) * ringCirc : 0;
-  const inProgressArc = totalCount > 0 ? (inProgressCount / totalCount) * ringCirc : 0;
-  const errorArc = totalCount > 0 ? (errorCount / totalCount) * ringCirc : 0;
+  // Direction-aligned ring: matches node layout
+  // Clockwise from top: connected → ipRight → error → not_started(gap) → ipLeft
+  const ipRightCount = Math.ceil(inProgressCount / 2);
+  const ipLeftCount = inProgressCount - ipRightCount;
+  const arcPerNode = totalCount > 0 ? ringCirc / totalCount : 0;
 
-  // Cumulative offsets (rotate each segment after the previous)
+  const connectedArc = connectedCount * arcPerNode;
+  const ipRightArc = ipRightCount * arcPerNode;
+  const errorArc = errorCount * arcPerNode;
+  const notStartedArc = notStartedCount * arcPerNode;
+  const ipLeftArc = ipLeftCount * arcPerNode;
+
+  // Cumulative offsets from top (clockwise)
   const connectedOffset = 0;
-  const inProgressOffset = connectedArc;
-  const errorOffset = connectedArc + inProgressArc;
+  const ipRightOffset = connectedArc;
+  const errorOffset = connectedArc + ipRightArc;
+  const ipLeftOffset = connectedArc + ipRightArc + errorArc + notStartedArc;
 
   const hexPath = roundedHexPath(HUB_R, CORNER_R);
 
@@ -141,7 +151,7 @@ function ProjectNodeComponent({ data }: NodeProps) {
           strokeWidth="2.5"
           opacity="0.15"
         />
-        {/* Health ring — connected (green) */}
+        {/* Health ring — connected (green, top) */}
         {connectedArc > 0 && (
           <circle
             r={ringR}
@@ -156,22 +166,22 @@ function ProjectNodeComponent({ data }: NodeProps) {
             className="animate-hub-glow"
           />
         )}
-        {/* Health ring — in_progress (amber, subtle) */}
-        {inProgressArc > 0 && (
+        {/* Health ring — in_progress right half (amber, right side) */}
+        {ipRightArc > 0 && (
           <circle
             r={ringR}
             fill="none"
             stroke={SEGMENT_COLORS.in_progress}
             strokeWidth="2.5"
-            strokeDasharray={`${inProgressArc} ${ringCirc - inProgressArc}`}
-            strokeDashoffset={-inProgressOffset}
+            strokeDasharray={`${ipRightArc} ${ringCirc - ipRightArc}`}
+            strokeDashoffset={-ipRightOffset}
             strokeLinecap="round"
             transform="rotate(-90)"
             opacity="0.4"
             className="animate-hub-glow"
           />
         )}
-        {/* Health ring — error (red, subtle) */}
+        {/* Health ring — error (red, bottom) */}
         {errorArc > 0 && (
           <circle
             r={ringR}
@@ -180,6 +190,21 @@ function ProjectNodeComponent({ data }: NodeProps) {
             strokeWidth="2.5"
             strokeDasharray={`${errorArc} ${ringCirc - errorArc}`}
             strokeDashoffset={-errorOffset}
+            strokeLinecap="round"
+            transform="rotate(-90)"
+            opacity="0.4"
+            className="animate-hub-glow"
+          />
+        )}
+        {/* Health ring — in_progress left half (amber, left side) */}
+        {ipLeftArc > 0 && (
+          <circle
+            r={ringR}
+            fill="none"
+            stroke={SEGMENT_COLORS.in_progress}
+            strokeWidth="2.5"
+            strokeDasharray={`${ipLeftArc} ${ringCirc - ipLeftArc}`}
+            strokeDashoffset={-ipLeftOffset}
             strokeLinecap="round"
             transform="rotate(-90)"
             opacity="0.4"

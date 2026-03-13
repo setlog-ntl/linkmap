@@ -1,6 +1,4 @@
 import type { Node } from '@xyflow/react';
-import type { ServiceCategory, ViewGroup } from '@/types';
-import { categoryToViewGroup, VIEW_GROUP_ORDER } from '@/lib/layout/view-group';
 
 const CENTER_X = 600;
 const CENTER_Y = 400;
@@ -9,14 +7,6 @@ const NODE_WIDTH = 160;
 const NODE_HEIGHT = 72;
 const HUB_WIDTH = 200;
 const HUB_HEIGHT = 170;
-
-/** Sector-based layout constants */
-const SECTOR_START_ANGLES = VIEW_GROUP_ORDER.reduce<Record<ViewGroup, number>>((acc, group, i) => {
-  acc[group] = -90 + i * 72;
-  return acc;
-}, {} as Record<ViewGroup, number>);
-const SECTOR_SPAN = 72;
-const SECTOR_PADDING = 12;
 
 /** Adaptive radius based on node count — compact nodes allow tighter radii */
 function getRadii(totalNodes: number): { inner: number; outer: number } {
@@ -28,7 +18,7 @@ function getRadii(totalNodes: number): { inner: number; outer: number } {
 
 interface RadialLayoutInput {
   serviceNodes: Node[];
-  getCategory: (nodeId: string) => ServiceCategory;
+  getStatus: (nodeId: string) => string;
   projectName: string;
   projectIconUrl?: string | null;
 }
@@ -82,8 +72,33 @@ export function getTargetHandleFromAngle(angleDeg: number): string {
   return 'bottom';
 }
 
+/**
+ * Sort nodes by status zone for directional consistency:
+ * top(connected) → right(in_progress half) → bottom(error+not_started) → left(in_progress half)
+ * This ensures the health ring segments align with node positions.
+ */
+function sortByStatusZone(nodes: Node[], getStatus: (id: string) => string): Node[] {
+  const connected: Node[] = [];
+  const inProgress: Node[] = [];
+  const bottom: Node[] = []; // error + not_started
+
+  for (const node of nodes) {
+    const s = getStatus(node.id);
+    if (s === 'connected') connected.push(node);
+    else if (s === 'in_progress') inProgress.push(node);
+    else bottom.push(node);
+  }
+
+  // Split in_progress symmetrically: first half → right side, second half → left side (reversed)
+  const ipRight = inProgress.slice(0, Math.ceil(inProgress.length / 2));
+  const ipLeft = inProgress.slice(Math.ceil(inProgress.length / 2)).reverse();
+
+  // Clockwise from top: connected → ipRight → bottom → ipLeft
+  return [...connected, ...ipRight, ...bottom, ...ipLeft];
+}
+
 export function computeRadialLayout(input: RadialLayoutInput): RadialLayoutResult {
-  const { serviceNodes, getCategory, projectName, projectIconUrl } = input;
+  const { serviceNodes, getStatus, projectName, projectIconUrl } = input;
   const resultNodes: Node[] = [];
   const totalNodes = serviceNodes.length;
   const { inner: INNER_RADIUS, outer: OUTER_RADIUS } = getRadii(totalNodes);
@@ -94,53 +109,26 @@ export function computeRadialLayout(input: RadialLayoutInput): RadialLayoutResul
     data: { label: projectName, iconUrl: projectIconUrl ?? null },
   });
 
-  // For few nodes (≤6), use even circular distribution instead of sector-based
-  if (totalNodes <= 6 && totalNodes > 0) {
-    const angleStep = 360 / totalNodes;
-    serviceNodes.forEach((node, i) => {
-      const angle = -90 + i * angleStep; // Start from top
-      const x = CENTER_X + INNER_RADIUS * Math.cos(degToRad(angle)) - NODE_WIDTH / 2;
-      const y = CENTER_Y + INNER_RADIUS * Math.sin(degToRad(angle)) - NODE_HEIGHT / 2;
-      const handles = getHandleFromAngle(angle);
-      resultNodes.push({
-        ...node,
-        position: { x, y },
-        data: { ...(node.data as Record<string, unknown>), _angleDeg: angle, ...handles },
-      });
+  if (totalNodes === 0) return { nodes: resultNodes };
+
+  // Sort by status zone: connected(top) → in_progress(sides) → error+not_started(bottom)
+  const orderedNodes = sortByStatusZone(serviceNodes, getStatus);
+  const angleStep = 360 / totalNodes;
+
+  orderedNodes.forEach((node, i) => {
+    const angle = -90 + i * angleStep; // Start from top
+    const radius = totalNodes <= 6
+      ? INNER_RADIUS
+      : (i % 2 === 0 ? INNER_RADIUS : OUTER_RADIUS);
+    const x = CENTER_X + radius * Math.cos(degToRad(angle)) - NODE_WIDTH / 2;
+    const y = CENTER_Y + radius * Math.sin(degToRad(angle)) - NODE_HEIGHT / 2;
+    const handles = getHandleFromAngle(angle);
+    resultNodes.push({
+      ...node,
+      position: { x, y },
+      data: { ...(node.data as Record<string, unknown>), _angleDeg: angle, ...handles },
     });
-    return { nodes: resultNodes };
-  }
-
-  // Sector-based layout for 7+ nodes
-  const groups = new Map<ViewGroup, Node[]>();
-  for (const g of VIEW_GROUP_ORDER) groups.set(g, []);
-  for (const node of serviceNodes) {
-    const cat = (node.data as Record<string, unknown>).category as ServiceCategory;
-    const group = categoryToViewGroup(cat);
-    groups.get(group)!.push(node);
-  }
-
-  for (const group of VIEW_GROUP_ORDER) {
-    const nodes = groups.get(group)!;
-    if (nodes.length === 0) continue;
-    const startAngle = SECTOR_START_ANGLES[group] + SECTOR_PADDING;
-    const endAngle = SECTOR_START_ANGLES[group] + SECTOR_SPAN - SECTOR_PADDING;
-    const angleRange = endAngle - startAngle;
-
-    nodes.forEach((node, i) => {
-      const angleStep = nodes.length === 1 ? 0 : angleRange / (nodes.length - 1);
-      const angle = nodes.length === 1 ? startAngle + angleRange / 2 : startAngle + i * angleStep;
-      const radius = nodes.length <= 3 ? INNER_RADIUS : i % 2 === 0 ? INNER_RADIUS : OUTER_RADIUS;
-      const x = CENTER_X + radius * Math.cos(degToRad(angle)) - NODE_WIDTH / 2;
-      const y = CENTER_Y + radius * Math.sin(degToRad(angle)) - NODE_HEIGHT / 2;
-      const handles = getHandleFromAngle(angle);
-      resultNodes.push({
-        ...node,
-        position: { x, y },
-        data: { ...(node.data as Record<string, unknown>), _angleDeg: angle, ...handles },
-      });
-    });
-  }
+  });
 
   return { nodes: resultNodes };
 }
