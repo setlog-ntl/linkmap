@@ -105,7 +105,14 @@ function ProjectNodeComponent({ data }: NodeProps) {
   // Clockwise from top: connected → ipRight → error → not_started → ipLeft
   const ipRightCount = Math.ceil(inProgressCount / 2);
   const ipLeftCount = inProgressCount - ipRightCount;
-  const arcPerNode = totalCount > 0 ? ringCirc / totalCount : 0;
+
+  // Count active segments for gap calculation
+  const segmentCounts = [connectedCount, ipRightCount, errorCount, notStartedCount, ipLeftCount];
+  const activeSegments = segmentCounts.filter(c => c > 0).length;
+  const GAP = activeSegments > 1 ? 4 : 0; // 4px gap between segments
+  const totalGap = GAP * activeSegments;
+  const usableCirc = ringCirc - totalGap;
+  const arcPerNode = totalCount > 0 ? usableCirc / totalCount : 0;
 
   const connectedArc = connectedCount * arcPerNode;
   const ipRightArc = ipRightCount * arcPerNode;
@@ -113,12 +120,13 @@ function ProjectNodeComponent({ data }: NodeProps) {
   const notStartedArc = notStartedCount * arcPerNode;
   const ipLeftArc = ipLeftCount * arcPerNode;
 
-  // Cumulative offsets from top (clockwise)
-  const connectedOffset = 0;
-  const ipRightOffset = connectedArc;
-  const errorOffset = connectedArc + ipRightArc;
-  const notStartedOffset = connectedArc + ipRightArc + errorArc;
-  const ipLeftOffset = connectedArc + ipRightArc + errorArc + notStartedArc;
+  // Cumulative offsets from top (clockwise, with gaps)
+  let offset = 0;
+  const connectedOffset = offset; offset += connectedArc + (connectedCount > 0 ? GAP : 0);
+  const ipRightOffset = offset; offset += ipRightArc + (ipRightCount > 0 ? GAP : 0);
+  const errorOffset = offset; offset += errorArc + (errorCount > 0 ? GAP : 0);
+  const notStartedOffset = offset; offset += notStartedArc + (notStartedCount > 0 ? GAP : 0);
+  const ipLeftOffset = offset;
 
   const hexPath = roundedHexPath(HUB_R, CORNER_R);
 
@@ -162,7 +170,7 @@ function ProjectNodeComponent({ data }: NodeProps) {
             strokeWidth="2.5"
             strokeDasharray={`${connectedArc} ${ringCirc - connectedArc}`}
             strokeDashoffset={-connectedOffset}
-            strokeLinecap="round"
+            strokeLinecap="butt"
             transform="rotate(-90)"
             opacity="0.55"
             className="animate-hub-glow"
@@ -177,7 +185,7 @@ function ProjectNodeComponent({ data }: NodeProps) {
             strokeWidth="2.5"
             strokeDasharray={`${ipRightArc} ${ringCirc - ipRightArc}`}
             strokeDashoffset={-ipRightOffset}
-            strokeLinecap="round"
+            strokeLinecap="butt"
             transform="rotate(-90)"
             opacity="0.4"
             className="animate-hub-glow"
@@ -192,7 +200,7 @@ function ProjectNodeComponent({ data }: NodeProps) {
             strokeWidth="2.5"
             strokeDasharray={`${errorArc} ${ringCirc - errorArc}`}
             strokeDashoffset={-errorOffset}
-            strokeLinecap="round"
+            strokeLinecap="butt"
             transform="rotate(-90)"
             opacity="0.4"
             className="animate-hub-glow"
@@ -207,7 +215,7 @@ function ProjectNodeComponent({ data }: NodeProps) {
             strokeWidth="2"
             strokeDasharray={`${notStartedArc} ${ringCirc - notStartedArc}`}
             strokeDashoffset={-notStartedOffset}
-            strokeLinecap="round"
+            strokeLinecap="butt"
             transform="rotate(-90)"
             opacity="0.2"
           />
@@ -221,7 +229,7 @@ function ProjectNodeComponent({ data }: NodeProps) {
             strokeWidth="2.5"
             strokeDasharray={`${ipLeftArc} ${ringCirc - ipLeftArc}`}
             strokeDashoffset={-ipLeftOffset}
-            strokeLinecap="round"
+            strokeLinecap="butt"
             transform="rotate(-90)"
             opacity="0.4"
             className="animate-hub-glow"
