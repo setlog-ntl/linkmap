@@ -32,6 +32,9 @@ export default async function DemoConnectionsPage({
 }) {
   const { id } = await params;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- demo page data
+  let allConnections: any[] = [];
+
   try {
     const admin = createAdminClient();
 
@@ -63,64 +66,64 @@ export default async function DemoConnectionsPage({
       .eq('project_id', id)
       .order('created_at');
 
-    const allConnections = connections ?? [];
-
-    return (
-      <div className="space-y-6">
-        {/* 읽기 전용 안내 */}
-        <div className="rounded-lg border border-brand-blue/20 bg-brand-blue/[0.05] px-4 py-3 flex items-center gap-2">
-          <Eye className="h-4 w-4 text-brand-blue shrink-0" />
-          <p className="text-sm text-muted-foreground">
-            데모 모드에서는 서비스 연결을 추가하거나 수정할 수 없습니다.
-          </p>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">서비스 연결 ({allConnections.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {allConnections.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Link2 className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                <p className="text-sm">정의된 서비스 연결이 없습니다.</p>
-              </div>
-            ) : (
-              <div className="divide-y">
-                {allConnections.map((conn) => {
-                  const statusConfig = STATUS_CONFIG[conn.connection_status ?? 'active'] ?? STATUS_CONFIG.active;
-                  const typeLabel = CONNECTION_TYPE_LABELS[conn.connection_type] ?? conn.connection_type;
-                  const source = conn.source as { name?: string } | null;
-                  const target = conn.target as { name?: string } | null;
-
-                  return (
-                    <div key={conn.id} className="flex items-center justify-between py-3 gap-4">
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <span className="text-sm font-medium truncate">{source?.name ?? '?'}</span>
-                        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                        <span className="text-sm font-medium truncate">{target?.name ?? '?'}</span>
-                        {conn.label && (
-                          <span className="text-xs text-muted-foreground truncate">({conn.label})</span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Badge variant="outline" className="text-xs">
-                          {typeLabel}
-                        </Badge>
-                        <Badge variant="outline" className={`text-xs ${statusConfig.className}`}>
-                          {statusConfig.label}
-                        </Badge>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    );
+    allConnections = connections ?? [];
   } catch {
     redirect('/demo');
   }
+
+  return (
+    <div className="space-y-6">
+      {/* 읽기 전용 안내 */}
+      <div className="rounded-lg border border-brand-blue/20 bg-brand-blue/[0.05] px-4 py-3 flex items-center gap-2">
+        <Eye className="h-4 w-4 text-brand-blue shrink-0" />
+        <p className="text-sm text-muted-foreground">
+          데모 모드에서는 서비스 연결을 추가하거나 수정할 수 없습니다.
+        </p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">서비스 연결 ({allConnections.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {allConnections.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Link2 className="h-8 w-8 mx-auto mb-2 opacity-30" />
+              <p className="text-sm">정의된 서비스 연결이 없습니다.</p>
+            </div>
+          ) : (
+            <div className="divide-y">
+              {allConnections.map((conn) => {
+                const statusConfig = STATUS_CONFIG[conn.connection_status ?? 'active'] ?? STATUS_CONFIG.active;
+                const typeLabel = CONNECTION_TYPE_LABELS[conn.connection_type] ?? conn.connection_type;
+                const source = conn.source as { name?: string } | null;
+                const target = conn.target as { name?: string } | null;
+
+                return (
+                  <div key={conn.id} className="flex items-center justify-between py-3 gap-4">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <span className="text-sm font-medium truncate">{source?.name ?? '?'}</span>
+                      <ArrowRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <span className="text-sm font-medium truncate">{target?.name ?? '?'}</span>
+                      {conn.label && (
+                        <span className="text-xs text-muted-foreground truncate">({conn.label})</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge variant="outline" className="text-xs">
+                        {typeLabel}
+                      </Badge>
+                      <Badge variant="outline" className={`text-xs ${statusConfig.className}`}>
+                        {statusConfig.label}
+                      </Badge>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
 }

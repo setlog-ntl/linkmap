@@ -32,7 +32,7 @@ export function useProjects() {
   }, [supabase]);
 
   useEffect(() => {
-    fetchProjects();
+    void fetchProjects(); // eslint-disable-line react-hooks/set-state-in-effect -- initial data fetch on mount
   }, [fetchProjects]);
 
   const createProject = async (name: string, description?: string, techStack?: Record<string, string>) => {

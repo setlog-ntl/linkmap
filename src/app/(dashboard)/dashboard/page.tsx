@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, startTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useProjects, useCreateProject, useDeleteProject, useToggleFavoriteProject } from '@/lib/queries/projects';
 import { useMyDeployments, type HomepageDeploy } from '@/lib/queries/oneclick';
@@ -71,7 +71,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const saved = localStorage.getItem(VIEW_STORAGE_KEY);
     if (saved === 'card' || saved === 'list') {
-      setViewMode(saved);
+      startTransition(() => setViewMode(saved));
     }
   }, []);
 

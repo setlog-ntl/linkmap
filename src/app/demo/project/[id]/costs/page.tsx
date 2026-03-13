@@ -19,6 +19,11 @@ export default async function DemoCostsPage({
 }) {
   const { id } = await params;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- demo page data
+  let project: any = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- demo page data
+  let allServices: any[] = [];
+
   try {
     const admin = createAdminClient();
 
@@ -30,7 +35,7 @@ export default async function DemoCostsPage({
 
     if (!demoProfile) redirect('/demo');
 
-    const { data: project } = await admin
+    const { data: projectData } = await admin
       .from('projects')
       .select('id, monthly_budget, budget_currency')
       .eq('id', id)
@@ -38,7 +43,8 @@ export default async function DemoCostsPage({
       .is('deleted_at', null)
       .single();
 
-    if (!project) redirect('/demo');
+    if (!projectData) redirect('/demo');
+    project = projectData;
 
     const { data: services } = await admin
       .from('project_services')
@@ -46,11 +52,14 @@ export default async function DemoCostsPage({
       .eq('project_id', id)
       .order('created_at');
 
-    const allServices = services ?? [];
+    allServices = services ?? [];
+  } catch {
+    redirect('/demo');
+  }
 
-    return (
-      <div className="space-y-6">
-        {/* Header: 읽기 전용 안내 + AI 리포트 보기 */}
+  return (
+    <div className="space-y-6">
+      {/* Header: 읽기 전용 안내 + AI 리포트 보기 */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 rounded-lg border border-brand-blue/20 bg-brand-blue/[0.05] px-4 py-2.5 flex-1">
             <Eye className="h-4 w-4 text-brand-blue shrink-0" />
@@ -145,8 +154,5 @@ export default async function DemoCostsPage({
           </CardContent>
         </Card>
       </div>
-    );
-  } catch {
-    redirect('/demo');
-  }
+  );
 }

@@ -21,6 +21,10 @@ export default async function DemoEnvPage({
   const { env } = await searchParams;
   const activeEnv: Environment = ENVIRONMENTS.includes(env as Environment) ? (env as Environment) : 'development';
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- demo page data
+  let allVars: any[] = [];
+  let filteredVars: typeof allVars = [];
+
   try {
     const admin = createAdminClient();
 
@@ -50,23 +54,26 @@ export default async function DemoEnvPage({
       .eq('project_id', id)
       .order('key_name');
 
-    const allVars = envVars ?? [];
-    const filteredVars = allVars.filter((v) => v.environment === activeEnv);
+    allVars = envVars ?? [];
+    filteredVars = allVars.filter((v) => v.environment === activeEnv);
+  } catch {
+    redirect('/demo');
+  }
 
-    const envCounts: Record<Environment, number> = {
-      development: allVars.filter((v) => v.environment === 'development').length,
-      staging: allVars.filter((v) => v.environment === 'staging').length,
-      production: allVars.filter((v) => v.environment === 'production').length,
-    };
+  const envCounts: Record<Environment, number> = {
+    development: allVars.filter((v: { environment: string }) => v.environment === 'development').length,
+    staging: allVars.filter((v: { environment: string }) => v.environment === 'staging').length,
+    production: allVars.filter((v: { environment: string }) => v.environment === 'production').length,
+  };
 
-    const envLabels: Record<Environment, string> = {
-      development: '개발',
-      staging: '스테이징',
-      production: '프로덕션',
-    };
+  const envLabels: Record<Environment, string> = {
+    development: '개발',
+    staging: '스테이징',
+    production: '프로덕션',
+  };
 
-    return (
-      <div className="space-y-6">
+  return (
+    <div className="space-y-6">
         {/* 읽기 전용 안내 */}
         <div className="rounded-lg border border-brand-blue/20 bg-brand-blue/[0.05] px-4 py-3 flex items-center gap-2">
           <Eye className="h-4 w-4 text-brand-blue shrink-0" />
@@ -131,8 +138,5 @@ export default async function DemoEnvPage({
           </CardContent>
         </Card>
       </div>
-    );
-  } catch {
-    redirect('/demo');
-  }
+  );
 }

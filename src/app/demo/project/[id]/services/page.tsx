@@ -25,6 +25,9 @@ export default async function DemoServicesPage({
 }) {
   const { id } = await params;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- demo page data
+  let allServices: any[] = [];
+
   try {
     const admin = createAdminClient();
 
@@ -52,11 +55,14 @@ export default async function DemoServicesPage({
       .eq('project_id', id)
       .order('created_at');
 
-    const allServices = services ?? [];
+    allServices = services ?? [];
+  } catch {
+    redirect('/demo');
+  }
 
-    return (
-      <div className="space-y-6">
-        {/* 읽기 전용 안내 */}
+  return (
+    <div className="space-y-6">
+      {/* 읽기 전용 안내 */}
         <div className="rounded-lg border border-brand-blue/20 bg-brand-blue/[0.05] px-4 py-3 flex items-center gap-2">
           <Eye className="h-4 w-4 text-brand-blue shrink-0" />
           <p className="text-sm text-muted-foreground">
@@ -110,8 +116,5 @@ export default async function DemoServicesPage({
           </CardContent>
         </Card>
       </div>
-    );
-  } catch {
-    redirect('/demo');
-  }
+  );
 }
