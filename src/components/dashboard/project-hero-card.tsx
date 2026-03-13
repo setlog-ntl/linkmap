@@ -297,14 +297,12 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
             <MetricPill icon={Boxes} value={metrics.totalServices} label="서비스" />
             <MetricPill icon={Key} value={metrics.totalEnvVars} label="ENV" />
             <MetricPill icon={TrendingUp} value={`${metrics.progressPercent}%`} label="진행률" />
-            {metrics.totalMonthlyCost != null && metrics.totalMonthlyCost > 0 && (
-              <MetricPill
-                icon={DollarSign}
-                value={`$${metrics.totalMonthlyCost.toFixed(0)}`}
-                label="월 비용"
-                href={`/project/${project.id}/costs`}
-              />
-            )}
+            <MetricPill
+              icon={DollarSign}
+              value={`$${(metrics.totalMonthlyCost ?? 0).toFixed(0)}`}
+              label="월 비용"
+              href={`/project/${project.id}/costs`}
+            />
           </div>
 
           {/* Service icon grid */}
