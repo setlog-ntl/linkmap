@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { Node, Edge } from '@xyflow/react';
-import { computeRadialLayout, PROJECT_NODE_ID, getHandleFromAngle } from '@/lib/layout/radial-layout';
+import { computeRadialLayout, PROJECT_NODE_ID, getHandleFromAngle, getHubSourceHandle, getTargetHandleFromAngle } from '@/lib/layout/radial-layout';
 import type { ProjectService, Service, UserConnection, ServiceCategory } from '@/types';
 import { getServiceBrand } from '@/lib/constants/service-brands';
 
@@ -135,14 +135,15 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
     const hubEdges: Edge[] = filteredServices.map((s) => {
       const isFocusRelated = !isFocusMode || s.id === focusedNodeId || focus1hopIds.has(s.id);
       const angleDeg = nodeAngleMap.get(s.id);
-      const handles = angleDeg != null ? getHandleFromAngle(angleDeg) : { sourceHandle: undefined, targetHandle: undefined };
+      const hubSource = angleDeg != null ? getHubSourceHandle(angleDeg) : undefined;
+      const target = angleDeg != null ? getTargetHandleFromAngle(angleDeg) : undefined;
       return {
         id: `hub-${s.id}`,
         source: PROJECT_NODE_ID,
         target: s.id,
         type: 'radial',
-        sourceHandle: handles.sourceHandle,
-        targetHandle: handles.targetHandle,
+        sourceHandle: hubSource,
+        targetHandle: target,
         data: {
           status: s.status,
           focusHighlighted: isFocusRelated,

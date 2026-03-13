@@ -38,14 +38,28 @@ export interface RadialLayoutResult { nodes: Node[]; }
 function degToRad(deg: number): number { return (deg * Math.PI) / 180; }
 
 /**
- * Determine the best handle direction based on the angle from center to node.
- * Returns the handle id for source (hub) and target (service).
+ * 8-direction hub source handle for project node (hexagon boundary).
+ * Maps angle to one of 8 handles positioned on the rounded hexagon edge.
+ */
+export function getHubSourceHandle(angleDeg: number): string {
+  const a = ((angleDeg % 360) + 360) % 360;
+  if (a >= 337.5 || a < 22.5) return 'h-right';
+  if (a < 67.5) return 'h-br';
+  if (a < 112.5) return 'h-bottom';
+  if (a < 157.5) return 'h-bl';
+  if (a < 202.5) return 'h-left';
+  if (a < 247.5) return 'h-tl';
+  if (a < 292.5) return 'h-top';
+  return 'h-tr';
+}
+
+/**
+ * 4-direction handle for service nodes.
+ * sourceHandle = direction on source service node (for S2S edges).
+ * targetHandle = which side of target node faces the source.
  */
 export function getHandleFromAngle(angleDeg: number): { sourceHandle: string; targetHandle: string } {
-  // Normalize to 0-360
   const a = ((angleDeg % 360) + 360) % 360;
-  // Source handle = direction FROM hub TO node
-  // Target handle = direction FROM node TO hub (opposite)
   if (a >= 315 || a < 45) {
     return { sourceHandle: 'right', targetHandle: 'left' };
   } else if (a >= 45 && a < 135) {
@@ -55,6 +69,17 @@ export function getHandleFromAngle(angleDeg: number): { sourceHandle: string; ta
   } else {
     return { sourceHandle: 'top', targetHandle: 'bottom' };
   }
+}
+
+/**
+ * Get target handle on service node for hub→service edges (4 directions).
+ */
+export function getTargetHandleFromAngle(angleDeg: number): string {
+  const a = ((angleDeg % 360) + 360) % 360;
+  if (a >= 315 || a < 45) return 'left';
+  if (a < 135) return 'top';
+  if (a < 225) return 'right';
+  return 'bottom';
 }
 
 export function computeRadialLayout(input: RadialLayoutInput): RadialLayoutResult {
