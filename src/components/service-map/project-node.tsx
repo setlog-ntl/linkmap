@@ -109,7 +109,7 @@ function ProjectNodeComponent({ data }: NodeProps) {
   // Count active segments for gap calculation
   const segmentCounts = [connectedCount, ipRightCount, errorCount, notStartedCount, ipLeftCount];
   const activeSegments = segmentCounts.filter(c => c > 0).length;
-  const GAP = activeSegments > 1 ? 4 : 0; // 4px gap between segments
+  const GAP = activeSegments > 1 ? 6 : 0; // 6px gap (round linecap extends ~1.25px each side → visual gap ≈3.5px)
   const totalGap = GAP * activeSegments;
   const usableCirc = ringCirc - totalGap;
   const arcPerNode = totalCount > 0 ? usableCirc / totalCount : 0;
@@ -153,13 +153,13 @@ function ProjectNodeComponent({ data }: NodeProps) {
         className="absolute inset-0 w-full h-full overflow-visible"
         style={{ filter: 'url(#gm-glow-lg)' }}
       >
-        {/* Health ring background */}
+        {/* Health ring background — always visible for complete circle feel */}
         <circle
           r={ringR}
           fill="none"
           className="stroke-border"
           strokeWidth="2.5"
-          opacity="0.15"
+          opacity="0.22"
         />
         {/* Health ring — connected (green, top) */}
         {connectedArc > 0 && (
@@ -170,7 +170,7 @@ function ProjectNodeComponent({ data }: NodeProps) {
             strokeWidth="2.5"
             strokeDasharray={`${connectedArc} ${ringCirc - connectedArc}`}
             strokeDashoffset={-connectedOffset}
-            strokeLinecap="butt"
+            strokeLinecap="round"
             transform="rotate(-90)"
             opacity="0.55"
             className="animate-hub-glow"
@@ -185,7 +185,7 @@ function ProjectNodeComponent({ data }: NodeProps) {
             strokeWidth="2.5"
             strokeDasharray={`${ipRightArc} ${ringCirc - ipRightArc}`}
             strokeDashoffset={-ipRightOffset}
-            strokeLinecap="butt"
+            strokeLinecap="round"
             transform="rotate(-90)"
             opacity="0.4"
             className="animate-hub-glow"
@@ -200,7 +200,7 @@ function ProjectNodeComponent({ data }: NodeProps) {
             strokeWidth="2.5"
             strokeDasharray={`${errorArc} ${ringCirc - errorArc}`}
             strokeDashoffset={-errorOffset}
-            strokeLinecap="butt"
+            strokeLinecap="round"
             transform="rotate(-90)"
             opacity="0.4"
             className="animate-hub-glow"
@@ -212,12 +212,13 @@ function ProjectNodeComponent({ data }: NodeProps) {
             r={ringR}
             fill="none"
             stroke={SEGMENT_COLORS.not_started}
-            strokeWidth="2"
+            strokeWidth="2.5"
             strokeDasharray={`${notStartedArc} ${ringCirc - notStartedArc}`}
             strokeDashoffset={-notStartedOffset}
-            strokeLinecap="butt"
+            strokeLinecap="round"
             transform="rotate(-90)"
-            opacity="0.2"
+            opacity="0.35"
+            className="animate-hub-glow"
           />
         )}
         {/* Health ring — in_progress left half (amber, left side) */}
@@ -229,7 +230,7 @@ function ProjectNodeComponent({ data }: NodeProps) {
             strokeWidth="2.5"
             strokeDasharray={`${ipLeftArc} ${ringCirc - ipLeftArc}`}
             strokeDashoffset={-ipLeftOffset}
-            strokeLinecap="butt"
+            strokeLinecap="round"
             transform="rotate(-90)"
             opacity="0.4"
             className="animate-hub-glow"
