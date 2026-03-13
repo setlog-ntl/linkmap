@@ -160,6 +160,20 @@ function ServiceNode({ data }: NodeProps) {
             className="animate-mesh-pulse"
           />
         )}
+
+        {/* Not-started: subtle dashed border (dormant feel) */}
+        {d.status === 'not_started' && (
+          <rect
+            x="0.75" y="0.75"
+            width={NODE_W - 1.5} height={NODE_H - 1.5}
+            rx={BORDER_RADIUS}
+            fill="none"
+            stroke={status.hex}
+            strokeWidth="0.8"
+            strokeDasharray="4 6"
+            opacity="0.25"
+          />
+        )}
       </svg>
 
       {/* Status dot — top right */}

@@ -99,7 +99,7 @@ function RadialEdgeComponent({
         style={{
           stroke: `url(#${gradId})`,
           strokeWidth: edgeWidth,
-          strokeDasharray: resolvedStatus === 'in_progress' ? '6 4' : undefined,
+          strokeDasharray: resolvedStatus === 'in_progress' ? '6 4' : resolvedStatus === 'not_started' ? '3 6' : undefined,
           opacity: edgeOpacity,
           transition: 'opacity 0.3s ease, stroke-width 0.2s ease',
           ...style,
@@ -141,6 +141,17 @@ function RadialEdgeComponent({
             repeatCount="indefinite"
           />
         </path>
+      )}
+      {/* Not-started: faint dashed line (dormant) */}
+      {resolvedStatus === 'not_started' && !isFocusFaded && (
+        <path
+          d={edgePath}
+          fill="none"
+          stroke={colors.base}
+          strokeWidth={edgeWidth}
+          strokeDasharray="3 6"
+          opacity={edgeOpacity * 0.4}
+        />
       )}
       {/* Glow overlay for highlighted edges */}
       {focusHighlighted && !isFocusFaded && isHubEdge && (

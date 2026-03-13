@@ -80,21 +80,24 @@ export function getTargetHandleFromAngle(angleDeg: number): string {
 function sortByStatusZone(nodes: Node[], getStatus: (id: string) => string): Node[] {
   const connected: Node[] = [];
   const inProgress: Node[] = [];
-  const bottom: Node[] = []; // error + not_started
+  const error: Node[] = [];
+  const notStarted: Node[] = [];
 
   for (const node of nodes) {
     const s = getStatus(node.id);
     if (s === 'connected') connected.push(node);
     else if (s === 'in_progress') inProgress.push(node);
-    else bottom.push(node);
+    else if (s === 'error') error.push(node);
+    else notStarted.push(node);
   }
 
   // Split in_progress symmetrically: first half → right side, second half → left side (reversed)
   const ipRight = inProgress.slice(0, Math.ceil(inProgress.length / 2));
   const ipLeft = inProgress.slice(Math.ceil(inProgress.length / 2)).reverse();
 
-  // Clockwise from top: connected → ipRight → bottom → ipLeft
-  return [...connected, ...ipRight, ...bottom, ...ipLeft];
+  // Clockwise from top: connected → ipRight → error → notStarted → ipLeft
+  // Matches health ring segment order exactly
+  return [...connected, ...ipRight, ...error, ...notStarted, ...ipLeft];
 }
 
 export function computeRadialLayout(input: RadialLayoutInput): RadialLayoutResult {

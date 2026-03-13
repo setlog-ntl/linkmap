@@ -75,6 +75,7 @@ const SEGMENT_COLORS = {
   connected:   '#4ade80', // green-400
   in_progress: '#fbbf24', // amber-400
   error:       '#f87171', // red-400
+  not_started: '#94a3b8', // slate-400
 } as const;
 
 interface ProjectNodeData {
@@ -101,7 +102,7 @@ function ProjectNodeComponent({ data }: NodeProps) {
   const ringCirc = 2 * Math.PI * ringR;
 
   // Direction-aligned ring: matches node layout
-  // Clockwise from top: connected → ipRight → error → not_started(gap) → ipLeft
+  // Clockwise from top: connected → ipRight → error → not_started → ipLeft
   const ipRightCount = Math.ceil(inProgressCount / 2);
   const ipLeftCount = inProgressCount - ipRightCount;
   const arcPerNode = totalCount > 0 ? ringCirc / totalCount : 0;
@@ -116,6 +117,7 @@ function ProjectNodeComponent({ data }: NodeProps) {
   const connectedOffset = 0;
   const ipRightOffset = connectedArc;
   const errorOffset = connectedArc + ipRightArc;
+  const notStartedOffset = connectedArc + ipRightArc + errorArc;
   const ipLeftOffset = connectedArc + ipRightArc + errorArc + notStartedArc;
 
   const hexPath = roundedHexPath(HUB_R, CORNER_R);
@@ -196,6 +198,20 @@ function ProjectNodeComponent({ data }: NodeProps) {
             className="animate-hub-glow"
           />
         )}
+        {/* Health ring — not_started (slate, between error and ipLeft) */}
+        {notStartedArc > 0 && (
+          <circle
+            r={ringR}
+            fill="none"
+            stroke={SEGMENT_COLORS.not_started}
+            strokeWidth="2"
+            strokeDasharray={`${notStartedArc} ${ringCirc - notStartedArc}`}
+            strokeDashoffset={-notStartedOffset}
+            strokeLinecap="round"
+            transform="rotate(-90)"
+            opacity="0.2"
+          />
+        )}
         {/* Health ring — in_progress left half (amber, left side) */}
         {ipLeftArc > 0 && (
           <circle
@@ -262,6 +278,12 @@ function ProjectNodeComponent({ data }: NodeProps) {
                 <>
                   <span className="opacity-30">/</span>
                   <span style={{ color: SEGMENT_COLORS.error }}>{errorCount}</span>
+                </>
+              )}
+              {notStartedCount > 0 && (
+                <>
+                  <span className="opacity-30">/</span>
+                  <span style={{ color: SEGMENT_COLORS.not_started, opacity: 0.7 }}>{notStartedCount}</span>
                 </>
               )}
               <span className="opacity-40">of {totalCount}</span>
