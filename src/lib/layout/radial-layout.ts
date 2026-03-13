@@ -74,7 +74,7 @@ export function getTargetHandleFromAngle(angleDeg: number): string {
 
 /**
  * Sort nodes by status zone for directional consistency:
- * top(connected) → right(in_progress half) → bottom(error+not_started) → left(in_progress half)
+ * Clockwise from top: connected(top) → error(right) → not_started(bottom) → in_progress(left)
  * This ensures the health ring segments align with node positions.
  */
 function sortByStatusZone(nodes: Node[], getStatus: (id: string) => string): Node[] {
@@ -91,13 +91,9 @@ function sortByStatusZone(nodes: Node[], getStatus: (id: string) => string): Nod
     else notStarted.push(node);
   }
 
-  // Split in_progress symmetrically: first half → right side, second half → left side (reversed)
-  const ipRight = inProgress.slice(0, Math.ceil(inProgress.length / 2));
-  const ipLeft = inProgress.slice(Math.ceil(inProgress.length / 2)).reverse();
-
-  // Clockwise from top: connected → ipRight → error → notStarted → ipLeft
+  // Clockwise from top: connected(상단) → error(우측) → not_started(하단) → in_progress(좌측)
   // Matches health ring segment order exactly
-  return [...connected, ...ipRight, ...error, ...notStarted, ...ipLeft];
+  return [...connected, ...error, ...notStarted, ...inProgress];
 }
 
 export function computeRadialLayout(input: RadialLayoutInput): RadialLayoutResult {
