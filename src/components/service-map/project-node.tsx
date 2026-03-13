@@ -100,39 +100,33 @@ function ProjectNodeComponent({ data }: NodeProps) {
 
   const ringR = 68;
   const ringCirc = 2 * Math.PI * ringR;
+  // Quarter circumference: SVG circle starts at 3 o'clock, shift by 1/4 to align with 12 o'clock
+  const quarterCirc = ringCirc / 4;
 
   // Direction-aligned ring: arc positions synced with radial layout angles
   // Layout uses angleStep = 360/totalCount, ring uses arcStep = ringCirc/totalCount
-  // This ensures each ring segment covers exactly the same angular zone as its nodes
   // Clockwise from top: connected(상단) → error(우측) → not_started(하단) → in_progress(좌측)
   const arcStep = totalCount > 0 ? ringCirc / totalCount : 0;
   const segmentCounts = [connectedCount, errorCount, notStartedCount, inProgressCount];
   const activeSegments = segmentCounts.filter(c => c > 0).length;
-  const GAP = activeSegments > 1 ? 4 : 0; // inset gap per segment side
+  const GAP = activeSegments > 1 ? 4 : 0;
 
-  // Each segment: starts at nodeIndex * arcStep, spans count * arcStep, with GAP inset
+  // Each segment starts at nodeIndex * arcStep from 12 o'clock, with GAP inset
   let nodeIdx = 0;
   const makeSegment = (count: number) => {
     const startArc = nodeIdx * arcStep;
     const fullArc = count * arcStep;
     nodeIdx += count;
-    if (count === 0) return { arc: 0, offset: startArc };
-    return { arc: fullArc - GAP, offset: startArc + GAP / 2 };
+    if (count === 0) return { arc: 0, dashOffset: 0 };
+    // dashOffset: positive = shift CCW from 3 o'clock origin
+    // quarterCirc shifts from 3→12 o'clock, then subtract CW position from 12 o'clock
+    return { arc: fullArc - GAP, dashOffset: quarterCirc - (startArc + GAP / 2) };
   };
 
   const connectedSeg = makeSegment(connectedCount);
   const errorSeg = makeSegment(errorCount);
   const notStartedSeg = makeSegment(notStartedCount);
   const inProgressSeg = makeSegment(inProgressCount);
-
-  const connectedArc = connectedSeg.arc;
-  const connectedOffset = connectedSeg.offset;
-  const errorArc = errorSeg.arc;
-  const errorOffset = errorSeg.offset;
-  const notStartedArc = notStartedSeg.arc;
-  const notStartedOffset = notStartedSeg.offset;
-  const inProgressArc = inProgressSeg.arc;
-  const inProgressOffset = inProgressSeg.offset;
 
   const hexPath = roundedHexPath(HUB_R, CORNER_R);
 
@@ -168,61 +162,57 @@ function ProjectNodeComponent({ data }: NodeProps) {
           opacity="0.22"
         />
         {/* Health ring — connected (green, 상단) */}
-        {connectedArc > 0 && (
+        {connectedSeg.arc > 0 && (
           <circle
             r={ringR}
             fill="none"
             stroke={SEGMENT_COLORS.connected}
             strokeWidth="2.5"
-            strokeDasharray={`${connectedArc} ${ringCirc - connectedArc}`}
-            strokeDashoffset={-connectedOffset}
+            strokeDasharray={`${connectedSeg.arc} ${ringCirc - connectedSeg.arc}`}
+            strokeDashoffset={connectedSeg.dashOffset}
             strokeLinecap="round"
-            transform="rotate(-90)"
             opacity="0.55"
             className="animate-hub-glow"
           />
         )}
         {/* Health ring — error (red, 우측) */}
-        {errorArc > 0 && (
+        {errorSeg.arc > 0 && (
           <circle
             r={ringR}
             fill="none"
             stroke={SEGMENT_COLORS.error}
             strokeWidth="2.5"
-            strokeDasharray={`${errorArc} ${ringCirc - errorArc}`}
-            strokeDashoffset={-errorOffset}
+            strokeDasharray={`${errorSeg.arc} ${ringCirc - errorSeg.arc}`}
+            strokeDashoffset={errorSeg.dashOffset}
             strokeLinecap="round"
-            transform="rotate(-90)"
             opacity="0.4"
             className="animate-hub-glow"
           />
         )}
         {/* Health ring — not_started (slate, 하단) */}
-        {notStartedArc > 0 && (
+        {notStartedSeg.arc > 0 && (
           <circle
             r={ringR}
             fill="none"
             stroke={SEGMENT_COLORS.not_started}
             strokeWidth="2.5"
-            strokeDasharray={`${notStartedArc} ${ringCirc - notStartedArc}`}
-            strokeDashoffset={-notStartedOffset}
+            strokeDasharray={`${notStartedSeg.arc} ${ringCirc - notStartedSeg.arc}`}
+            strokeDashoffset={notStartedSeg.dashOffset}
             strokeLinecap="round"
-            transform="rotate(-90)"
             opacity="0.35"
             className="animate-hub-glow"
           />
         )}
         {/* Health ring — in_progress (amber, 좌측) */}
-        {inProgressArc > 0 && (
+        {inProgressSeg.arc > 0 && (
           <circle
             r={ringR}
             fill="none"
             stroke={SEGMENT_COLORS.in_progress}
             strokeWidth="2.5"
-            strokeDasharray={`${inProgressArc} ${ringCirc - inProgressArc}`}
-            strokeDashoffset={-inProgressOffset}
+            strokeDasharray={`${inProgressSeg.arc} ${ringCirc - inProgressSeg.arc}`}
+            strokeDashoffset={inProgressSeg.dashOffset}
             strokeLinecap="round"
-            transform="rotate(-90)"
             opacity="0.4"
             className="animate-hub-glow"
           />
