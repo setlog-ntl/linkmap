@@ -110,7 +110,7 @@ export function computeRadialLayout(input: RadialLayoutInput): RadialLayoutResul
 
   if (totalNodes === 0) return { nodes: resultNodes };
 
-  // Sort by status zone: connected(top) → in_progress(sides) → error+not_started(bottom)
+  // Sort by status zone: connected(top) → error(right) → not_started(bottom) → in_progress(left)
   const orderedNodes = sortByStatusZone(serviceNodes, getStatus);
   const angleStep = 360 / totalNodes;
 

@@ -101,26 +101,38 @@ function ProjectNodeComponent({ data }: NodeProps) {
   const ringR = 68;
   const ringCirc = 2 * Math.PI * ringR;
 
-  // Direction-aligned ring: matches node layout
+  // Direction-aligned ring: arc positions synced with radial layout angles
+  // Layout uses angleStep = 360/totalCount, ring uses arcStep = ringCirc/totalCount
+  // This ensures each ring segment covers exactly the same angular zone as its nodes
   // Clockwise from top: connected(상단) → error(우측) → not_started(하단) → in_progress(좌측)
+  const arcStep = totalCount > 0 ? ringCirc / totalCount : 0;
   const segmentCounts = [connectedCount, errorCount, notStartedCount, inProgressCount];
   const activeSegments = segmentCounts.filter(c => c > 0).length;
-  const GAP = activeSegments > 1 ? 6 : 0;
-  const totalGap = GAP * activeSegments;
-  const usableCirc = ringCirc - totalGap;
-  const arcPerNode = totalCount > 0 ? usableCirc / totalCount : 0;
+  const GAP = activeSegments > 1 ? 4 : 0; // inset gap per segment side
 
-  const connectedArc = connectedCount * arcPerNode;
-  const errorArc = errorCount * arcPerNode;
-  const notStartedArc = notStartedCount * arcPerNode;
-  const inProgressArc = inProgressCount * arcPerNode;
+  // Each segment: starts at nodeIndex * arcStep, spans count * arcStep, with GAP inset
+  let nodeIdx = 0;
+  const makeSegment = (count: number) => {
+    const startArc = nodeIdx * arcStep;
+    const fullArc = count * arcStep;
+    nodeIdx += count;
+    if (count === 0) return { arc: 0, offset: startArc };
+    return { arc: fullArc - GAP, offset: startArc + GAP / 2 };
+  };
 
-  // Cumulative offsets from top (clockwise, with gaps)
-  let offset = 0;
-  const connectedOffset = offset; offset += connectedArc + (connectedCount > 0 ? GAP : 0);
-  const errorOffset = offset; offset += errorArc + (errorCount > 0 ? GAP : 0);
-  const notStartedOffset = offset; offset += notStartedArc + (notStartedCount > 0 ? GAP : 0);
-  const inProgressOffset = offset;
+  const connectedSeg = makeSegment(connectedCount);
+  const errorSeg = makeSegment(errorCount);
+  const notStartedSeg = makeSegment(notStartedCount);
+  const inProgressSeg = makeSegment(inProgressCount);
+
+  const connectedArc = connectedSeg.arc;
+  const connectedOffset = connectedSeg.offset;
+  const errorArc = errorSeg.arc;
+  const errorOffset = errorSeg.offset;
+  const notStartedArc = notStartedSeg.arc;
+  const notStartedOffset = notStartedSeg.offset;
+  const inProgressArc = inProgressSeg.arc;
+  const inProgressOffset = inProgressSeg.offset;
 
   const hexPath = roundedHexPath(HUB_R, CORNER_R);
 
