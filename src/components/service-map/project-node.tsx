@@ -70,10 +70,19 @@ const HUB_HANDLES = [
   { id: 'h-tl',     pos: Position.Top,    left: '32.5%', top: '29.4%' },
 ] as const;
 
+/** Status segment colors */
+const SEGMENT_COLORS = {
+  connected:   '#4ade80', // green-400
+  in_progress: '#fbbf24', // amber-400
+  error:       '#f87171', // red-400
+} as const;
+
 interface ProjectNodeData {
   label: string;
   iconUrl: string | null;
   connectedCount?: number;
+  inProgressCount?: number;
+  errorCount?: number;
   totalCount?: number;
   [key: string]: unknown;
 }
@@ -82,12 +91,22 @@ function ProjectNodeComponent({ data }: NodeProps) {
   const d = data as ProjectNodeData;
   const { label, iconUrl } = d;
   const connectedCount = (d.connectedCount as number) ?? 0;
+  const inProgressCount = (d.inProgressCount as number) ?? 0;
+  const errorCount = (d.errorCount as number) ?? 0;
   const totalCount = (d.totalCount as number) ?? 0;
-  const healthPct = totalCount > 0 ? connectedCount / totalCount : 0;
 
   const ringR = 68;
   const ringCirc = 2 * Math.PI * ringR;
-  const ringFill = healthPct * ringCirc;
+
+  // Multi-segment ring: connected → in_progress → error (rest = empty)
+  const connectedArc = totalCount > 0 ? (connectedCount / totalCount) * ringCirc : 0;
+  const inProgressArc = totalCount > 0 ? (inProgressCount / totalCount) * ringCirc : 0;
+  const errorArc = totalCount > 0 ? (errorCount / totalCount) * ringCirc : 0;
+
+  // Cumulative offsets (rotate each segment after the previous)
+  const connectedOffset = 0;
+  const inProgressOffset = connectedArc;
+  const errorOffset = connectedArc + inProgressArc;
 
   const hexPath = roundedHexPath(HUB_R, CORNER_R);
 
@@ -122,18 +141,51 @@ function ProjectNodeComponent({ data }: NodeProps) {
           strokeWidth="2.5"
           opacity="0.15"
         />
-        {/* Health ring foreground */}
-        <circle
-          r={ringR}
-          fill="none"
-          stroke="#4ade80"
-          strokeWidth="2.5"
-          strokeDasharray={`${ringFill} ${ringCirc - ringFill}`}
-          strokeLinecap="round"
-          transform="rotate(-90)"
-          opacity="0.5"
-          className="animate-hub-glow"
-        />
+        {/* Health ring — connected (green) */}
+        {connectedArc > 0 && (
+          <circle
+            r={ringR}
+            fill="none"
+            stroke={SEGMENT_COLORS.connected}
+            strokeWidth="2.5"
+            strokeDasharray={`${connectedArc} ${ringCirc - connectedArc}`}
+            strokeDashoffset={-connectedOffset}
+            strokeLinecap="round"
+            transform="rotate(-90)"
+            opacity="0.55"
+            className="animate-hub-glow"
+          />
+        )}
+        {/* Health ring — in_progress (amber, subtle) */}
+        {inProgressArc > 0 && (
+          <circle
+            r={ringR}
+            fill="none"
+            stroke={SEGMENT_COLORS.in_progress}
+            strokeWidth="2.5"
+            strokeDasharray={`${inProgressArc} ${ringCirc - inProgressArc}`}
+            strokeDashoffset={-inProgressOffset}
+            strokeLinecap="round"
+            transform="rotate(-90)"
+            opacity="0.4"
+            className="animate-hub-glow"
+          />
+        )}
+        {/* Health ring — error (red, subtle) */}
+        {errorArc > 0 && (
+          <circle
+            r={ringR}
+            fill="none"
+            stroke={SEGMENT_COLORS.error}
+            strokeWidth="2.5"
+            strokeDasharray={`${errorArc} ${ringCirc - errorArc}`}
+            strokeDashoffset={-errorOffset}
+            strokeLinecap="round"
+            transform="rotate(-90)"
+            opacity="0.4"
+            className="animate-hub-glow"
+          />
+        )}
         {/* Rounded hexagon */}
         <path
           d={hexPath}
@@ -171,8 +223,25 @@ function ProjectNodeComponent({ data }: NodeProps) {
           </div>
         )}
         <span className="text-[13px] font-bold tracking-tight truncate max-w-[140px]">{label}</span>
-        <span className="text-[11px] text-muted-foreground mt-0.5">
-          {totalCount > 0 ? `${connectedCount}/${totalCount} connected` : 'Hub'}
+        <span className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1">
+          {totalCount > 0 ? (
+            <>
+              <span style={{ color: SEGMENT_COLORS.connected }}>{connectedCount}</span>
+              {inProgressCount > 0 && (
+                <>
+                  <span className="opacity-30">/</span>
+                  <span style={{ color: SEGMENT_COLORS.in_progress }}>{inProgressCount}</span>
+                </>
+              )}
+              {errorCount > 0 && (
+                <>
+                  <span className="opacity-30">/</span>
+                  <span style={{ color: SEGMENT_COLORS.error }}>{errorCount}</span>
+                </>
+              )}
+              <span className="opacity-40">of {totalCount}</span>
+            </>
+          ) : 'Hub'}
         </span>
       </div>
     </div>

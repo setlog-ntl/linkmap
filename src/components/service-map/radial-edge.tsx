@@ -61,7 +61,11 @@ function RadialEdgeComponent({
   const colors = STATUS_COLORS[resolvedStatus] ?? STATUS_COLORS.not_started;
 
   const showParticle = !isInactive && isHubEdge && status === 'connected' && !isFocusFaded;
+  const showInProgressParticle = !isInactive && isHubEdge && status === 'in_progress' && !isFocusFaded;
+  const showErrorParticle = !isInactive && isHubEdge && status === 'error' && !isFocusFaded;
   const showS2sParticle = !isInactive && !isHubEdge && connectionStatus === 'active' && !isFocusFaded;
+  const showS2sInProgress = !isInactive && !isHubEdge && connectionStatus === 'pending' && !isFocusFaded;
+  const showS2sError = !isInactive && !isHubEdge && connectionStatus === 'error' && !isFocusFaded;
 
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX, sourceY, targetX, targetY,
@@ -94,12 +98,49 @@ function RadialEdgeComponent({
         style={{
           stroke: `url(#${gradId})`,
           strokeWidth: edgeWidth,
+          strokeDasharray: resolvedStatus === 'in_progress' ? '6 4' : undefined,
           opacity: edgeOpacity,
           transition: 'opacity 0.3s ease, stroke-width 0.2s ease',
           ...style,
         }}
         markerEnd={`url(#radial-arrow-${resolvedStatus})`}
       />
+      {/* In-progress: animated dashed overlay */}
+      {resolvedStatus === 'in_progress' && !isFocusFaded && (
+        <path
+          d={edgePath}
+          fill="none"
+          stroke={colors.base}
+          strokeWidth={edgeWidth}
+          strokeDasharray="6 4"
+          opacity={edgeOpacity * 0.6}
+        >
+          <animate
+            attributeName="stroke-dashoffset"
+            values="0;-20"
+            dur="1.5s"
+            repeatCount="indefinite"
+          />
+        </path>
+      )}
+      {/* Error: pulsing glow overlay */}
+      {resolvedStatus === 'error' && !isFocusFaded && (
+        <path
+          d={edgePath}
+          fill="none"
+          stroke={colors.bright}
+          strokeWidth="3"
+          opacity="0.15"
+          style={{ filter: 'blur(3px)' }}
+        >
+          <animate
+            attributeName="opacity"
+            values="0.05;0.2;0.05"
+            dur="2s"
+            repeatCount="indefinite"
+          />
+        </path>
+      )}
       {/* Glow overlay for highlighted edges */}
       {focusHighlighted && !isFocusFaded && isHubEdge && (
         <path
@@ -125,10 +166,39 @@ function RadialEdgeComponent({
           </circle>
         </>
       )}
+      {/* In-progress hub: slow single particle (intermittent feel) */}
+      {showInProgressParticle && (
+        <circle r={2} fill={colors.bright} opacity="0.6" style={{ filter: `drop-shadow(0 0 3px ${colors.base})` }}>
+          <animateMotion dur="5s" repeatCount="indefinite" path={edgePath} />
+          <animate attributeName="opacity" values="0.2;0.7;0.2" dur="2s" repeatCount="indefinite" />
+        </circle>
+      )}
+      {/* Error hub: flickering warning particle */}
+      {showErrorParticle && (
+        <circle r={2.5} fill={colors.bright} style={{ filter: `drop-shadow(0 0 5px ${colors.base})` }}>
+          <animateMotion dur="3s" repeatCount="indefinite" path={edgePath} />
+          <animate attributeName="opacity" values="0.1;0.8;0.1;0.6;0.1" dur="1.2s" repeatCount="indefinite" />
+          <animate attributeName="r" values="1.5;3;1.5" dur="1.2s" repeatCount="indefinite" />
+        </circle>
+      )}
       {/* S2S active connection particle */}
       {showS2sParticle && (
         <circle r={pConfig.r} fill={colors.bright} className="flow-particle" style={{ filter: `drop-shadow(0 0 3px ${colors.bright})` }}>
           <animateMotion dur={pConfig.dur} repeatCount="indefinite" path={edgePath} />
+        </circle>
+      )}
+      {/* S2S pending (in-progress) particle */}
+      {showS2sInProgress && (
+        <circle r={pConfig.r * 0.8} fill={colors.bright} opacity="0.5" style={{ filter: `drop-shadow(0 0 2px ${colors.base})` }}>
+          <animateMotion dur="5s" repeatCount="indefinite" path={edgePath} />
+          <animate attributeName="opacity" values="0.2;0.6;0.2" dur="2s" repeatCount="indefinite" />
+        </circle>
+      )}
+      {/* S2S error particle */}
+      {showS2sError && (
+        <circle r={pConfig.r} fill={colors.bright} style={{ filter: `drop-shadow(0 0 4px ${colors.base})` }}>
+          <animateMotion dur="3s" repeatCount="indefinite" path={edgePath} />
+          <animate attributeName="opacity" values="0.1;0.7;0.1" dur="1s" repeatCount="indefinite" />
         </circle>
       )}
       {hovered && connectionType && (

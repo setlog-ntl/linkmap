@@ -68,6 +68,8 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
 
     // Build service nodes
     const connectedCount = filteredServices.filter((s) => s.status === 'connected').length;
+    const inProgressCount = filteredServices.filter((s) => s.status === 'in_progress').length;
+    const errorCount = filteredServices.filter((s) => s.status === 'error').length;
     const totalCount = filteredServices.length;
 
     const serviceNodes: Node[] = filteredServices.map((s, idx) => {
@@ -120,6 +122,8 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
       hubNode.data = {
         ...hubNode.data as Record<string, unknown>,
         connectedCount,
+        inProgressCount,
+        errorCount,
         totalCount,
       };
     }

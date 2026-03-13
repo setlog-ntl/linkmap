@@ -125,6 +125,41 @@ function ServiceNode({ data }: NodeProps) {
           fill={brandColor}
           opacity="0.85"
         />
+
+        {/* In-progress: animated dashed border overlay */}
+        {d.status === 'in_progress' && (
+          <rect
+            x="0.75" y="0.75"
+            width={NODE_W - 1.5} height={NODE_H - 1.5}
+            rx={BORDER_RADIUS}
+            fill="none"
+            stroke={status.hex}
+            strokeWidth="1"
+            strokeDasharray="6 4"
+            opacity="0.35"
+          >
+            <animate
+              attributeName="stroke-dashoffset"
+              values="0;-20"
+              dur="1.5s"
+              repeatCount="indefinite"
+            />
+          </rect>
+        )}
+
+        {/* Error: subtle pulsing border overlay */}
+        {d.status === 'error' && (
+          <rect
+            x="0.75" y="0.75"
+            width={NODE_W - 1.5} height={NODE_H - 1.5}
+            rx={BORDER_RADIUS}
+            fill="none"
+            stroke={status.hex}
+            strokeWidth="1.2"
+            opacity="0.3"
+            className="animate-mesh-pulse"
+          />
+        )}
       </svg>
 
       {/* Status dot — top right */}
@@ -132,6 +167,17 @@ function ServiceNode({ data }: NodeProps) {
         className="absolute top-2.5 right-2.5 w-[6px] h-[6px] rounded-full"
         style={{ backgroundColor: status.hex, opacity: d.status === 'not_started' ? 0.4 : 1 }}
       />
+
+      {/* Subtle status indicator ring for in_progress / error */}
+      {(d.status === 'in_progress' || d.status === 'error') && (
+        <div
+          className="absolute top-2.5 right-2.5 w-[6px] h-[6px] rounded-full animate-ping"
+          style={{
+            backgroundColor: status.hex,
+            opacity: 0.3,
+          }}
+        />
+      )}
 
       {/* Content — horizontal layout: icon left, text right */}
       <div className="absolute inset-0 flex items-center gap-2.5 z-10 pointer-events-none px-4">
