@@ -26,7 +26,7 @@ const plans: Plan[] = [
   {
     nameKey: 'pricing.planFree',
     price: '$0',
-    featureKeys: ['pricing.freeF1', 'pricing.freeF2', 'pricing.freeF3', 'pricing.freeF4', 'pricing.freeF5'],
+    featureKeys: ['pricing.freeF1', 'pricing.freeF2', 'pricing.freeF3', 'pricing.freeF4', 'pricing.freeF5', 'pricing.freeF6', 'pricing.freeF7'],
     isFree: true,
     popular: false,
     planKey: 'free',
