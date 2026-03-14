@@ -59,103 +59,35 @@ export async function getUserQuota(userId: string): Promise<PlanQuota> {
   return (quota as PlanQuota) || DEFAULT_QUOTA;
 }
 
-/** Atomically checks homepage deploy quota using a DB-level advisory lock.
- *  Falls back to the legacy two-query approach if the RPC is unavailable. */
+// TODO: 결제 시스템 연동 후 실제 쿼터 체크 로직 복원
+// 현재는 모든 쿼터를 무제한으로 허용
+
+/** 홈페이지 배포 쿼터 체크 — 현재 무제한 */
 export async function checkHomepageDeployQuota(
-  userId: string,
+  _userId: string,
 ): Promise<{ allowed: boolean; current: number; max: number }> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase.rpc('check_homepage_deploy_quota', {
-    p_user_id: userId,
-  });
-
-  if (!error && data) {
-    const result = data as { allowed: boolean; current: number; max: number };
-    return result;
-  }
-
-  // Fallback: legacy two-query approach (used before migration 052 is applied)
-  const quota = await getUserQuota(userId);
-  const { count } = await supabase
-    .from('homepage_deploys')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId);
-
-  return {
-    allowed: (count || 0) < quota.max_homepage_deploys,
-    current: count || 0,
-    max: quota.max_homepage_deploys,
-  };
+  return { allowed: true, current: 0, max: 999999 };
 }
 
-/** Atomically checks project quota using a DB-level advisory lock.
- *  Falls back to the legacy two-query approach if the RPC is unavailable. */
+/** 프로젝트 쿼터 체크 — 현재 무제한 */
 export async function checkProjectQuota(
-  userId: string,
+  _userId: string,
 ): Promise<{ allowed: boolean; current: number; max: number }> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase.rpc('check_project_quota', {
-    p_user_id: userId,
-  });
-
-  if (!error && data) {
-    const result = data as { allowed: boolean; current: number; max: number };
-    return result;
-  }
-
-  // Fallback: legacy two-query approach
-  const quota = await getUserQuota(userId);
-  const { count } = await supabase
-    .from('projects')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId);
-
-  return {
-    allowed: (count || 0) < quota.max_projects,
-    current: count || 0,
-    max: quota.max_projects,
-  };
+  return { allowed: true, current: 0, max: 999999 };
 }
 
-/** 프로젝트 내 환경변수 개수 쿼터 체크 */
+/** 환경변수 쿼터 체크 — 현재 무제한 */
 export async function checkEnvVarQuota(
-  userId: string,
-  projectId: string,
+  _userId: string,
+  _projectId: string,
 ): Promise<{ allowed: boolean; current: number; max: number }> {
-  const supabase = await createClient();
-  const quota = await getUserQuota(userId);
-
-  const { count } = await supabase
-    .from('environment_variables')
-    .select('*', { count: 'exact', head: true })
-    .eq('project_id', projectId)
-    .is('deleted_at', null);
-
-  return {
-    allowed: (count || 0) < quota.max_env_vars_per_project,
-    current: count || 0,
-    max: quota.max_env_vars_per_project,
-  };
+  return { allowed: true, current: 0, max: 999999 };
 }
 
-/** 프로젝트 내 서비스 개수 쿼터 체크 */
+/** 서비스 쿼터 체크 — 현재 무제한 */
 export async function checkServiceQuota(
-  userId: string,
-  projectId: string,
+  _userId: string,
+  _projectId: string,
 ): Promise<{ allowed: boolean; current: number; max: number }> {
-  const supabase = await createClient();
-  const quota = await getUserQuota(userId);
-
-  const { count } = await supabase
-    .from('project_services')
-    .select('*', { count: 'exact', head: true })
-    .eq('project_id', projectId);
-
-  return {
-    allowed: (count || 0) < quota.max_services_per_project,
-    current: count || 0,
-    max: quota.max_services_per_project,
-  };
+  return { allowed: true, current: 0, max: 999999 };
 }
