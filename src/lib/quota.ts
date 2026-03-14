@@ -10,13 +10,14 @@ export interface PlanQuota {
   max_homepage_deploys: number;
 }
 
+// TODO: 결제 시스템 연동 후 실제 한도로 복원
 const DEFAULT_QUOTA: PlanQuota = {
   plan: 'free',
-  max_projects: 3,
-  max_env_vars_per_project: 20,
-  max_services_per_project: 10,
-  max_team_members: 0,
-  max_homepage_deploys: 5,
+  max_projects: 999999,
+  max_env_vars_per_project: 999999,
+  max_services_per_project: 999999,
+  max_team_members: 999999,
+  max_homepage_deploys: 999999,
 };
 
 /** 사용자의 활성 구독 플랜을 반환 (없으면 'free') */
@@ -31,10 +32,10 @@ export async function getUserPlan(userId: string): Promise<SubscriptionPlan> {
   return (subscription?.plan as SubscriptionPlan) || 'free';
 }
 
-/** Pro 이상 플랜인지 확인 */
-export async function isProOrAbove(userId: string): Promise<boolean> {
-  const plan = await getUserPlan(userId);
-  return plan === 'pro' || plan === 'team';
+/** Pro 이상 플랜인지 확인
+ *  TODO: 결제 시스템 연동 후 실제 플랜 체크로 복원 */
+export async function isProOrAbove(_userId: string): Promise<boolean> {
+  return true;
 }
 
 export async function getUserQuota(userId: string): Promise<PlanQuota> {
