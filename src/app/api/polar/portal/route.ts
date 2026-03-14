@@ -29,10 +29,20 @@ export async function POST(request: NextRequest) {
   const polar = new Polar({ accessToken });
   const origin = request.headers.get('origin') || 'https://www.linkmap.biz';
 
-  const portal = await polar.customerSessions.create({
-    customerId: subscription.polar_customer_id,
-    returnUrl: `${origin}/settings/billing`,
-  });
+  let portal;
+  try {
+    portal = await polar.customerSessions.create({
+      customerId: subscription.polar_customer_id,
+      returnUrl: `${origin}/settings/billing`,
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : '결제 관리 세션 생성에 실패했습니다';
+    return apiError(message, 502);
+  }
+
+  if (!portal?.customerPortalUrl) {
+    return apiError('결제 관리 URL을 받지 못했습니다', 502);
+  }
 
   // Step 5: 감사 로그
   await logAudit(user.id, {

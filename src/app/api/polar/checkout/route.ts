@@ -26,16 +26,26 @@ export async function POST(request: NextRequest) {
   const origin = request.headers.get('origin') || 'https://www.linkmap.biz';
   const successUrl = process.env.POLAR_SUCCESS_URL || `${origin}/dashboard?upgraded=true`;
 
-  const checkout = await polar.checkouts.create({
-    products: [productId],
-    successUrl,
-    customerEmail: user.email ?? undefined,
-    externalCustomerId: user.id,
-    allowTrial: true,
-    metadata: {
-      user_id: user.id,
-    },
-  });
+  let checkout;
+  try {
+    checkout = await polar.checkouts.create({
+      products: [productId],
+      successUrl,
+      customerEmail: user.email ?? undefined,
+      externalCustomerId: user.id,
+      allowTrial: true,
+      metadata: {
+        user_id: user.id,
+      },
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : '결제 세션 생성에 실패했습니다';
+    return apiError(message, 502);
+  }
+
+  if (!checkout?.url) {
+    return apiError('결제 URL을 받지 못했습니다', 502);
+  }
 
   // Step 5: 감사 로그
   await logAudit(user.id, {
