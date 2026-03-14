@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { encrypt, decrypt } from '@/lib/crypto';
 import { createEnvVarSchema, updateEnvVarSchema } from '@/lib/validations/env';
-import { unauthorizedError, notFoundError, validationError } from '@/lib/api/errors';
+import { unauthorizedError, notFoundError, validationError, quotaExceededError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 import { triggerAutoSync } from '@/lib/github/auto-sync';
+import { checkEnvVarQuota } from '@/lib/quota';
 import type { DbEnvVarWithProject } from '@/lib/supabase/types';
 
 export async function POST(request: NextRequest) {
@@ -26,6 +27,10 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (!project) return notFoundError('프로젝트');
+
+  // 쿼터 체크
+  const quota = await checkEnvVarQuota(user.id, project_id);
+  if (!quota.allowed) return quotaExceededError('환경변수', quota.current, quota.max);
 
   const encrypted_value = encrypt(value);
 

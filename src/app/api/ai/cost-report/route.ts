@@ -5,7 +5,9 @@ import {
   validationError,
   notFoundError,
   serverError,
+  proRequiredError,
 } from '@/lib/api/errors';
+import { isProOrAbove } from '@/lib/quota';
 import {
   costReportSchema,
   COST_REPORT_JSON_SCHEMA,
@@ -102,6 +104,9 @@ export async function POST(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
+
+  // Pro 플랜 체크
+  if (!await isProOrAbove(user.id)) return proRequiredError('AI 비용 리포트');
 
   try {
     // 2. Validation

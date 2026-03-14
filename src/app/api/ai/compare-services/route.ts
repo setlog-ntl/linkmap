@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { unauthorizedError, validationError, serverError, configurationError } from '@/lib/api/errors';
+import { unauthorizedError, validationError, serverError, configurationError, proRequiredError } from '@/lib/api/errors';
+import { isProOrAbove } from '@/lib/quota';
 import { compareServicesSchema } from '@/lib/validations/ai-compare';
 import { resolveOpenAIKey, AIKeyNotConfiguredError } from '@/lib/ai/resolve-key';
 import { callOpenAIStructured } from '@/lib/ai/openai';
@@ -10,6 +11,9 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
+
+  // Pro 플랜 체크
+  if (!await isProOrAbove(user.id)) return proRequiredError('AI 서비스 비교');
 
   try {
     const body = await request.json();

@@ -25,3 +25,26 @@ export function configurationError(message: string, code: string) {
 export function serverError(message = '서버 오류가 발생했습니다') {
   return apiError(message, 500);
 }
+
+export function quotaExceededError(resource: string, current: number, max: number) {
+  return NextResponse.json(
+    {
+      error: `${resource} 한도를 초과했습니다 (${current}/${max})`,
+      code: 'QUOTA_EXCEEDED',
+      current,
+      max,
+    },
+    { status: 403 },
+  );
+}
+
+export function proRequiredError(feature: string) {
+  return NextResponse.json(
+    {
+      error: `${feature} 기능은 Pro 플랜에서 사용할 수 있습니다`,
+      code: 'PRO_REQUIRED',
+      upgradeUrl: '/pricing',
+    },
+    { status: 403 },
+  );
+}

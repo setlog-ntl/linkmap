@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { unauthorizedError, validationError, serverError, apiError, notFoundError } from '@/lib/api/errors';
+import { unauthorizedError, validationError, serverError, apiError, notFoundError, quotaExceededError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 import { createRepo, pushFilesAtomically, deleteRepo, enableGitHubPagesWithActions, GitHubApiError } from '@/lib/github/api';
 import { getTemplateBySlug } from '@/data/oneclick/homepage-template-content';
 import { safeDecryptToken } from '@/lib/github/token';
 import { deployPagesRequestSchema } from '@/lib/validations/oneclick';
 import { logDeployError } from '@/lib/oneclick/deploy-error-logger';
+import { checkHomepageDeployQuota } from '@/lib/quota';
 
 function humanizeSlug(slug: string): string {
   return slug
@@ -49,6 +50,10 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) return validationError(parsed.error);
 
   const { template_id, site_name: rawSiteName, github_service_account_id } = parsed.data;
+
+  // 쿼터 체크
+  const deployQuota = await checkHomepageDeployQuota(user.id);
+  if (!deployQuota.allowed) return quotaExceededError('사이트 배포', deployQuota.current, deployQuota.max);
 
   // Sanitize site_name: strip anything not lowercase alphanumeric or hyphens
   const site_name = rawSiteName.replace(/[^a-z0-9-]/g, '').slice(0, 100);

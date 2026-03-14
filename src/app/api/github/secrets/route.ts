@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { unauthorizedError, apiError, validationError } from '@/lib/api/errors';
+import { unauthorizedError, apiError, validationError, proRequiredError } from '@/lib/api/errors';
+import { isProOrAbove } from '@/lib/quota';
 import { logAudit } from '@/lib/audit';
 import { decrypt } from '@/lib/crypto';
 import { safeDecryptToken } from '@/lib/github/token';
@@ -76,6 +77,9 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
+
+  // Pro 플랜 체크
+  if (!await isProOrAbove(user.id)) return proRequiredError('GitHub Secrets 동기화');
 
   const body = await request.json();
   const parsed = pushSecretsSchema.safeParse(body);

@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { resolveOpenAIKey, AIKeyNotConfiguredError } from '@/lib/ai/resolve-key';
 import { callOpenAIStream } from '@/lib/ai/openai';
 import { logAudit } from '@/lib/audit';
+import { proRequiredError } from '@/lib/api/errors';
+import { isProOrAbove } from '@/lib/quota';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -10,6 +12,9 @@ export async function POST(request: NextRequest) {
   if (!user) {
     return new Response(JSON.stringify({ error: '인증이 필요합니다' }), { status: 401 });
   }
+
+  // Pro 플랜 체크
+  if (!await isProOrAbove(user.id)) return proRequiredError('AI 맵 분석');
 
   try {
     const { project_id, nodes, edges, health } = await request.json();

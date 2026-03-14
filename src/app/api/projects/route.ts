@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createProjectSchema } from '@/lib/validations/project';
-import { unauthorizedError, validationError, serverError } from '@/lib/api/errors';
+import { unauthorizedError, validationError, serverError, quotaExceededError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
+import { checkProjectQuota } from '@/lib/quota';
 
 export async function GET() {
   const supabase = await createClient();
@@ -25,6 +26,10 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
+
+  // 쿼터 체크
+  const quota = await checkProjectQuota(user.id);
+  if (!quota.allowed) return quotaExceededError('프로젝트', quota.current, quota.max);
 
   const body = await request.json();
   const parsed = createProjectSchema.safeParse(body);
