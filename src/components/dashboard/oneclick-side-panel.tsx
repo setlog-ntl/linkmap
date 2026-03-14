@@ -81,15 +81,13 @@ export function OneclickSidePanel({ deployments }: OneclickSidePanelProps) {
           </div>
           <span className="text-sm font-semibold">원클릭 배포</span>
         </div>
-        {deployments.length > 0 && (
-          <Link
-            href="/sites/manage"
-            className="text-[11px] text-muted-foreground hover:text-foreground flex items-center gap-0.5 transition-colors"
-          >
-            전체보기
-            <ChevronRight className="h-3 w-3" />
-          </Link>
-        )}
+        <Link
+          href="/sites/manage"
+          className="text-[11px] text-muted-foreground hover:text-foreground flex items-center gap-0.5 transition-colors"
+        >
+          전체보기
+          <ChevronRight className="h-3 w-3" />
+        </Link>
       </div>
 
       {/* Body */}

@@ -538,8 +538,8 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                         );
                       })}
 
-                      {/* View all link */}
-                      {hasMoreSites && (
+                      {/* View all link — 사이트 1개 이상이면 항상 표시 */}
+                      {visibleSites.length > 0 && (
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton asChild>
                             <Link href="/sites/manage" className="text-muted-foreground">
