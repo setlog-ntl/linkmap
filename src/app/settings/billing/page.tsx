@@ -19,12 +19,14 @@ const planLabel: Record<SubscriptionPlan, string> = {
 
 const statusLabel: Record<string, string> = {
   active: '활성',
+  trialing: '무료 체험 중',
   past_due: '결제 미납',
   canceled: '해지됨',
 };
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive'> = {
   active: 'default',
+  trialing: 'default',
   past_due: 'destructive',
   canceled: 'secondary',
 };
@@ -98,7 +100,26 @@ export default function BillingPage() {
             </Badge>
           </div>
 
-          {isPaid && subscription?.current_period_end && (
+          {status === 'trialing' && subscription?.current_period_end && (
+            <div className="rounded-md border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
+              <p className="font-medium text-primary">
+                무료 체험 기간:{' '}
+                {(() => {
+                  const endDate = new Date(subscription.current_period_end);
+                  const remaining = Math.max(0, Math.ceil((endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+                  return `${remaining}일 남음`;
+                })()}
+              </p>
+              <p className="text-muted-foreground mt-1">
+                {new Date(subscription.current_period_end).toLocaleDateString('ko-KR', {
+                  year: 'numeric', month: 'long', day: 'numeric',
+                })}
+                부터 자동 결제됩니다. 언제든 취소할 수 있습니다.
+              </p>
+            </div>
+          )}
+
+          {isPaid && status !== 'trialing' && subscription?.current_period_end && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Calendar className="h-4 w-4" />
               <span>
