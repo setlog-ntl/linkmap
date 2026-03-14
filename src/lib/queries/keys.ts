@@ -101,6 +101,9 @@ export const queryKeys = {
   trash: {
     all: ['trash'] as const,
   },
+  analyze: {
+    result: (projectId: string) => ['analyze', 'result', projectId] as const,
+  },
   admin: {
     users: ['admin', 'users'] as const,
     visitors: ['admin', 'visitors'] as const,

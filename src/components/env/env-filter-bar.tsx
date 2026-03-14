@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Plus, Download, Upload } from 'lucide-react';
+import { Search, Plus, Download, Upload, Sparkles } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import type { Environment } from '@/types';
@@ -29,6 +29,7 @@ interface EnvFilterBarProps {
   onAddClick: () => void;
   onExportClick?: () => void;
   onImportClick?: () => void;
+  onAnalyzeClick?: () => void;
   envCounts: Record<Environment, number>;
 }
 
@@ -40,6 +41,7 @@ export function EnvFilterBar({
   onAddClick,
   onExportClick,
   onImportClick,
+  onAnalyzeClick,
   envCounts,
 }: EnvFilterBarProps) {
   const { locale } = useLocaleStore();
@@ -81,6 +83,11 @@ export function EnvFilterBar({
       </div>
 
       <div className="flex gap-2">
+        {onAnalyzeClick && (
+          <Button variant="outline" size="icon" onClick={onAnalyzeClick} title="키 분석">
+            <Sparkles className="h-4 w-4" />
+          </Button>
+        )}
         {onImportClick && (
           <Button variant="outline" size="icon" onClick={onImportClick} title={t(locale, 'envVar.import')}>
             <Upload className="h-4 w-4" />

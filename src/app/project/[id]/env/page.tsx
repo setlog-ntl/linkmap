@@ -55,6 +55,7 @@ import { EnvStatsHeader } from '@/components/env/env-stats-header';
 import { EnvFilterBar } from '@/components/env/env-filter-bar';
 import { EnvDataTable } from '@/components/env/env-data-table';
 import { EnvDoctorPanel } from '@/components/ai/env-doctor-panel';
+import { SmartKeyAnalyzerDialog } from '@/components/env/smart-key-analyzer';
 import type { Environment, EnvironmentVariable } from '@/types';
 
 export default function ProjectEnvPage() {
@@ -94,6 +95,7 @@ export default function ProjectEnvPage() {
   const [autoDetectedService, setAutoDetectedService] = useState<EnvServiceMatch | null>(null);
   const [manualServiceSelect, setManualServiceSelect] = useState(false);
   const [editServiceId, setEditServiceId] = useState<string | null>(null);
+  const [analyzerOpen, setAnalyzerOpen] = useState(false);
 
   const envKeyServiceMap = useMemo(
     () => buildEnvKeyServiceMap(catalogServices),
@@ -296,6 +298,7 @@ export default function ProjectEnvPage() {
         onAddClick={() => setAddOpen(true)}
         onExportClick={handleDownload}
         onImportClick={() => setImportOpen(true)}
+        onAnalyzeClick={() => setAnalyzerOpen(true)}
         envCounts={envCounts}
       />
 
@@ -310,6 +313,13 @@ export default function ProjectEnvPage() {
         onEdit={openEditDialog}
         onDelete={handleDelete}
         onCopy={handleCopy}
+      />
+
+      {/* Smart Key Analyzer */}
+      <SmartKeyAnalyzerDialog
+        projectId={projectId}
+        open={analyzerOpen}
+        onOpenChange={setAnalyzerOpen}
       />
 
       {/* Import Dialog (externally controlled) */}
