@@ -45,12 +45,30 @@ export function HealthContent({ projectId }: HealthContentProps) {
 
   useEffect(() => {
     if (serverLatestChecks) {
-      setLocalChecks((prev) => ({ ...serverLatestChecks, ...prev }));
+      setLocalChecks((prev) => {
+        // 서버 데이터와 로컬 데이터를 병합할 때, 더 최신인 것을 우선
+        const merged = { ...prev };
+        for (const [key, serverCheck] of Object.entries(serverLatestChecks)) {
+          const localCheck = prev[key];
+          if (!localCheck || new Date(serverCheck.checked_at) >= new Date(localCheck.checked_at)) {
+            merged[key] = serverCheck;
+          }
+        }
+        return merged;
+      });
     }
   }, [serverLatestChecks]);
 
   const latestChecks = useMemo(() => {
-    return { ...serverLatestChecks, ...localChecks };
+    // 서버 데이터를 기반으로, 로컬에서 더 최신인 것만 덮어쓰기
+    const merged = { ...serverLatestChecks };
+    for (const [key, localCheck] of Object.entries(localChecks)) {
+      const serverCheck = serverLatestChecks?.[key];
+      if (!serverCheck || new Date(localCheck.checked_at) >= new Date(serverCheck.checked_at)) {
+        merged[key] = localCheck;
+      }
+    }
+    return merged;
   }, [serverLatestChecks, localChecks]);
 
   const { data: selectedChecks = [] } = useHealthChecks(selectedPsId || '');

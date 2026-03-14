@@ -65,10 +65,13 @@ describe('computeHealthScore', () => {
   });
 
   it('returns 100 for all connected, all healthy, all env filled', () => {
-    const services = [mockService('connected'), mockService('connected')];
+    const s1 = mockService('connected');
+    const s2 = mockService('connected');
+    const services = [s1, s2];
+    // healthChecks 키를 서비스 id와 매칭해야 함
     const healthChecks: Record<string, HealthCheck> = {
-      'hc-1': mockHealthCheck('healthy'),
-      'hc-2': mockHealthCheck('healthy'),
+      [s1.id]: mockHealthCheck('healthy'),
+      [s2.id]: mockHealthCheck('healthy'),
     };
     const envVars = [mockEnvVar(true)];
 
@@ -80,15 +83,17 @@ describe('computeHealthScore', () => {
   });
 
   it('returns partial score for mixed states', () => {
-    const services = [mockService('connected'), mockService('not_started')];
+    const s1 = mockService('connected');
+    const s2 = mockService('not_started');
+    const services = [s1, s2];
     const healthChecks: Record<string, HealthCheck> = {
-      'hc-1': mockHealthCheck('unhealthy'),
+      [s1.id]: mockHealthCheck('unhealthy'),
     };
     const envVars = [mockEnvVar(true), mockEnvVar(false)];
 
     const result = computeHealthScore(services, healthChecks, envVars);
     // connected: 1/2 = 50% → 50*0.4 = 20
-    // healthy: 0/1 = 0% → 0*0.3 = 0
+    // healthy: 0 healthy / 2 services = 0% → 0*0.3 = 0
     // env: 1/2 = 50% → 50*0.3 = 15
     // total = 35
     expect(result.overall).toBe(35);
@@ -97,11 +102,12 @@ describe('computeHealthScore', () => {
     expect(result.breakdown.envComplete).toBe(50);
   });
 
-  it('handles no health checks as 100% healthy', () => {
+  it('handles no health checks as 0% healthy (미검증)', () => {
     const services = [mockService('connected')];
     const result = computeHealthScore(services, {}, []);
-    // connected: 100% → 40, healthy: 100% (no checks) → 30, env: 100% (no vars) → 30
-    expect(result.overall).toBe(100);
+    // connected: 100% → 40, healthy: 0% (미검증) → 0, env: 100% (no vars) → 30
+    expect(result.overall).toBe(70);
+    expect(result.breakdown.healthy).toBe(0);
   });
 });
 

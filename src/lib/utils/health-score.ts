@@ -16,10 +16,20 @@ export function computeHealthScore(
   const connectedCount = services.filter((s) => s.status === 'connected').length;
   const connectedRatio = connectedCount / services.length;
 
-  const healthCheckEntries = Object.values(healthChecks);
-  const healthyRatio = healthCheckEntries.length > 0
-    ? healthCheckEntries.filter((hc) => hc.status === 'healthy').length / healthCheckEntries.length
-    : 1;
+  // 서비스 단위로 헬스 체크를 매칭하여 계산
+  // 체크가 있는 서비스만 대상으로 healthy 비율 산출 (없으면 미검증으로 0% 처리)
+  let checkedCount = 0;
+  let healthyCount = 0;
+  for (const svc of services) {
+    const check = healthChecks[svc.id];
+    if (check) {
+      checkedCount++;
+      if (check.status === 'healthy') healthyCount++;
+    }
+  }
+  const healthyRatio = checkedCount > 0
+    ? healthyCount / services.length
+    : 0;
 
   const totalEnv = envVars.length;
   const filledEnv = envVars.filter((e) => e.encrypted_value != null && e.encrypted_value !== '').length;
