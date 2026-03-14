@@ -26,6 +26,8 @@ import {
   CheckCircle2,
   ChevronDown,
   RotateCcw,
+  Copy,
+  Download,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { parseEnvLine, parseEnvContent } from '@/lib/utils/parse-env';
@@ -221,6 +223,69 @@ export function ServiceEnvVarsSection({
     }
   };
 
+  const [copyingId, setCopyingId] = useState<string | null>(null);
+  const [downloadingEnv, setDownloadingEnv] = useState(false);
+
+  const handleCopyEnvVar = async (ev: EnvironmentVariable) => {
+    setCopyingId(ev.id);
+    try {
+      let value = decryptedValues[ev.id];
+      if (!value) {
+        value = await new Promise<string>((resolve, reject) => {
+          decryptEnvVar.mutate(ev.id, {
+            onSuccess: (v) => resolve(v),
+            onError: () => reject(new Error('복호화 실패')),
+          });
+        });
+      }
+      await navigator.clipboard.writeText(`${ev.key_name}=${value}`);
+      toast.success(`${ev.key_name} 복사됨`);
+    } catch {
+      toast.error('복사에 실패했습니다');
+    } finally {
+      setTimeout(() => setCopyingId(null), 1500);
+    }
+  };
+
+  const handleDownloadEnvLocal = async () => {
+    if (filteredVars.length === 0) {
+      toast.error('다운로드할 환경변수가 없습니다');
+      return;
+    }
+    setDownloadingEnv(true);
+    try {
+      const lines = await Promise.all(
+        filteredVars.map(async (ev) => {
+          let value = decryptedValues[ev.id];
+          if (!value) {
+            value = await new Promise<string>((resolve, reject) => {
+              decryptEnvVar.mutate(ev.id, {
+                onSuccess: (v) => resolve(v),
+                onError: () => reject(new Error('복호화 실패')),
+              });
+            });
+          }
+          return `${ev.key_name}=${value}`;
+        })
+      );
+      const content = lines.join('\n') + '\n';
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '.env.local';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('.env.local 다운로드 완료');
+    } catch {
+      toast.error('다운로드에 실패했습니다');
+    } finally {
+      setDownloadingEnv(false);
+    }
+  };
+
   const maskValue = (encrypted: string) => {
     return '••••' + encrypted.slice(-4);
   };
@@ -276,6 +341,20 @@ export function ServiceEnvVarsSection({
           {decrypted || maskValue(ev.encrypted_value)}
         </span>
         <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-5 w-5"
+            onClick={() => handleCopyEnvVar(ev)}
+            disabled={copyingId === ev.id}
+            title="복사"
+          >
+            {copyingId === ev.id ? (
+              <Check className="h-3 w-3 text-green-600" />
+            ) : (
+              <Copy className="h-3 w-3" />
+            )}
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -369,6 +448,20 @@ export function ServiceEnvVarsSection({
           )}
         </h4>
         <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            onClick={handleDownloadEnvLocal}
+            disabled={downloadingEnv || filteredVars.length === 0}
+            title=".env.local 다운로드"
+          >
+            {downloadingEnv ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <Download className="h-3 w-3" />
+            )}
+          </Button>
           <Button
             variant={rawEditorMode ? 'default' : 'ghost'}
             size="icon"
