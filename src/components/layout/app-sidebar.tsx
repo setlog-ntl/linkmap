@@ -59,10 +59,10 @@ function getProjectSubNav(projectId: string) {
   return [
     { labelKey: 'project.overview', href: `/project/${projectId}`, icon: LayoutDashboard, exact: true },
     { labelKey: 'project.services', href: `/project/${projectId}/services`, icon: List },
+    { labelKey: 'project.serviceMap', href: `/project/${projectId}/service-map`, icon: MapIcon },
+    { labelKey: 'project.costs', href: `/project/${projectId}/costs`, icon: DollarSign },
     { labelKey: 'project.connections', href: `/project/${projectId}/connections`, icon: Link2 },
     { labelKey: 'project.envVars', href: `/project/${projectId}/env`, icon: Key },
-    { labelKey: 'project.costs', href: `/project/${projectId}/costs`, icon: DollarSign },
-    { labelKey: 'project.serviceMap', href: `/project/${projectId}/service-map`, icon: MapIcon },
     { labelKey: 'project.settings', href: `/project/${projectId}/settings`, icon: Settings },
   ];
 }

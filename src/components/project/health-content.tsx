@@ -16,11 +16,14 @@ import {
 import { HealthSummaryCard } from '@/components/project/health-summary-card';
 import { HealthTimeline } from '@/components/project/health-timeline';
 import { HealthSparkline } from '@/components/project/health-sparkline';
+import { HealthScoreRing } from '@/components/service-map/views/health-score-ring';
+import { computeHealthScore } from '@/lib/utils/health-score';
+import { useEnvVars } from '@/lib/queries/env-vars';
 import { Activity, Loader2, CheckCircle2, XCircle, HelpCircle } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
-import type { HealthCheckStatus, HealthCheck } from '@/types';
+import type { HealthCheckStatus, HealthCheck, ProjectService, Service } from '@/types';
 
 interface HealthContentProps {
   projectId: string;
@@ -30,6 +33,7 @@ export function HealthContent({ projectId }: HealthContentProps) {
   const { locale } = useLocaleStore();
   const { data: services = [], isLoading } = useProjectServices(projectId);
   const { data: serverLatestChecks } = useLatestHealthChecks(projectId);
+  const { data: envVars = [] } = useEnvVars(projectId);
   const runHealthCheck = useRunHealthCheck();
   const [selectedPsId, setSelectedPsId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -105,6 +109,15 @@ export function HealthContent({ projectId }: HealthContentProps) {
     });
   }, [services, statusFilter, latestChecks]);
 
+  const healthScore = useMemo(
+    () => computeHealthScore(
+      services as (ProjectService & { service: Service })[],
+      latestChecks,
+      envVars,
+    ),
+    [services, latestChecks, envVars],
+  );
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -146,6 +159,16 @@ export function HealthContent({ projectId }: HealthContentProps) {
           </Button>
         </div>
       </div>
+
+      {/* Health Score Ring — 서비스맵과 동일 */}
+      {services.length > 0 && (
+        <div className="rounded-2xl border bg-card/80 dark:bg-zinc-900/60 backdrop-blur-sm p-6">
+          <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">
+            {t(locale, 'serviceMap.healthScore.title')}
+          </h3>
+          <HealthScoreRing score={healthScore} />
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-3 sm:gap-6">
         <Card className="border-green-500/10 bg-gradient-to-br from-green-500/10 via-green-500/5 to-transparent shadow-[0_4px_24px_rgba(34,197,94,0.05)] backdrop-blur-md">
