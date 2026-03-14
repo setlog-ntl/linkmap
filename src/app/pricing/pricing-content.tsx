@@ -70,7 +70,7 @@ export function PricingContent() {
 
     const productId = productIdMap[plan.productEnvKey];
     if (!productId) {
-      toast.error('결제 설정이 준비 중입니다');
+      toast.info('서비스 안정화 후 결제가 연결될 예정입니다. 조금만 기다려 주세요!');
       return;
     }
 
