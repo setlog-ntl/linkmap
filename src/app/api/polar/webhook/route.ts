@@ -23,7 +23,8 @@ export const POST = Webhooks({
 
     const adminClient = createAdminClient();
 
-    // 구독 레코드 upsert (plan → pro 활성화)
+    // 구독 레코드 upsert (plan → pro 활성화, trial 포함)
+    const subStatus = sub.status === 'trialing' ? 'trialing' : 'active';
     await adminClient
       .from('subscriptions')
       .upsert({
@@ -31,7 +32,7 @@ export const POST = Webhooks({
         polar_customer_id: sub.customerId,
         polar_subscription_id: sub.id,
         plan: 'pro',
-        status: 'active',
+        status: subStatus,
         payment_provider: 'polar',
         current_period_start: sub.currentPeriodStart.toISOString(),
         current_period_end: sub.currentPeriodEnd.toISOString(),
@@ -77,7 +78,8 @@ export const POST = Webhooks({
     if (!userId) return;
 
     const adminClient = createAdminClient();
-    const status = sub.status === 'active' ? 'active' : 'past_due';
+    const statusMap: Record<string, string> = { active: 'active', trialing: 'trialing', past_due: 'past_due' };
+    const status = statusMap[sub.status] ?? 'past_due';
 
     await adminClient
       .from('subscriptions')

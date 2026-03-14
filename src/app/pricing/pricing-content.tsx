@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Check, Loader2 } from 'lucide-react';
+import { Check, Loader2, Gift } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { toast } from 'sonner';
@@ -20,6 +20,7 @@ interface Plan {
   popular: boolean;
   planKey: SubscriptionPlan;
   productEnvKey: string;
+  trialDays: number;
 }
 
 const plans: Plan[] = [
@@ -31,6 +32,7 @@ const plans: Plan[] = [
     popular: false,
     planKey: 'free',
     productEnvKey: '',
+    trialDays: 0,
   },
   {
     nameKey: 'pricing.planPro',
@@ -40,6 +42,7 @@ const plans: Plan[] = [
     popular: true,
     planKey: 'pro',
     productEnvKey: 'NEXT_PUBLIC_POLAR_PRODUCT_PRO',
+    trialDays: 7,
   },
   {
     nameKey: 'pricing.planTeam',
@@ -49,6 +52,7 @@ const plans: Plan[] = [
     popular: false,
     planKey: 'team',
     productEnvKey: 'NEXT_PUBLIC_POLAR_PRODUCT_TEAM',
+    trialDays: 0,
   },
 ];
 
@@ -102,9 +106,12 @@ export function PricingContent() {
   }
 
   function getButtonLabel(plan: Plan): string {
-    if (plan.planKey === 'team') return '준비 중';
+    if (plan.planKey === 'team') return t(locale, 'pricing.comingSoon');
     if (plan.planKey === currentPlan) return t(locale, 'pricing.currentPlan');
     if (plan.isFree) return t(locale, 'pricing.currentPlan');
+    if (plan.trialDays > 0 && currentPlan === 'free') {
+      return t(locale, 'pricing.startTrial');
+    }
     return t(locale, 'pricing.upgrade');
   }
 
@@ -128,7 +135,7 @@ export function PricingContent() {
               <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">{t(locale, 'pricing.recommended')}</Badge>
             )}
             {plan.planKey === 'team' && (
-              <Badge variant="secondary" className="absolute -top-3 left-1/2 -translate-x-1/2">준비 중</Badge>
+              <Badge variant="secondary" className="absolute -top-3 left-1/2 -translate-x-1/2">{t(locale, 'pricing.comingSoon')}</Badge>
             )}
             <CardHeader className="text-center pb-2">
               <CardTitle className="text-lg">{t(locale, plan.nameKey)}</CardTitle>
@@ -136,6 +143,12 @@ export function PricingContent() {
                 <span className="text-4xl font-bold">{plan.price}</span>
                 {!plan.isFree && <span className="text-muted-foreground">{t(locale, 'pricing.perMonth')}</span>}
               </div>
+              {plan.trialDays > 0 && (
+                <div className="mt-3 flex items-center justify-center gap-1.5 text-sm font-medium text-primary">
+                  <Gift className="h-4 w-4" />
+                  {t(locale, 'pricing.trialBadge')}
+                </div>
+              )}
             </CardHeader>
             <CardContent className="space-y-4">
               <ul className="space-y-3">
@@ -158,6 +171,11 @@ export function PricingContent() {
                   getButtonLabel(plan)
                 )}
               </Button>
+              {plan.trialDays > 0 && currentPlan === 'free' && (
+                <p className="text-xs text-center text-muted-foreground">
+                  {t(locale, 'pricing.trialNote')}
+                </p>
+              )}
             </CardContent>
           </Card>
         ))}

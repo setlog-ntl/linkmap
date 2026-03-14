@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { isAdmin } from '@/lib/admin';
 import type { SubscriptionPlan } from '@/types';
 
 export interface PlanQuota {
@@ -10,9 +11,18 @@ export interface PlanQuota {
   max_homepage_deploys: number;
 }
 
-// TODO: 결제 시스템 연동 후 실제 한도로 복원
 const DEFAULT_QUOTA: PlanQuota = {
   plan: 'free',
+  max_projects: 3,
+  max_env_vars_per_project: 20,
+  max_services_per_project: 10,
+  max_team_members: 0,
+  max_homepage_deploys: 3,
+};
+
+/** 관리자 무제한 쿼터 */
+const UNLIMITED_QUOTA: PlanQuota = {
+  plan: 'admin',
   max_projects: 999999,
   max_env_vars_per_project: 999999,
   max_services_per_project: 999999,
@@ -27,25 +37,28 @@ export async function getUserPlan(userId: string): Promise<SubscriptionPlan> {
     .from('subscriptions')
     .select('plan')
     .eq('user_id', userId)
-    .eq('status', 'active')
+    .in('status', ['active', 'trialing'])
     .single();
   return (subscription?.plan as SubscriptionPlan) || 'free';
 }
 
-/** Pro 이상 플랜인지 확인
- *  TODO: 결제 시스템 연동 후 실제 플랜 체크로 복원 */
-export async function isProOrAbove(_userId: string): Promise<boolean> {
-  return true;
+/** Pro 이상 플랜인지 확인 (trialing도 Pro로 인정, 관리자는 항상 true) */
+export async function isProOrAbove(userId: string): Promise<boolean> {
+  if (await isAdmin(userId)) return true;
+  const plan = await getUserPlan(userId);
+  return plan === 'pro' || plan === 'team';
 }
 
 export async function getUserQuota(userId: string): Promise<PlanQuota> {
+  if (await isAdmin(userId)) return UNLIMITED_QUOTA;
+
   const supabase = await createClient();
 
   const { data: subscription } = await supabase
     .from('subscriptions')
     .select('plan')
     .eq('user_id', userId)
-    .eq('status', 'active')
+    .in('status', ['active', 'trialing'])
     .single();
 
   const plan = subscription?.plan || 'free';
@@ -59,35 +72,68 @@ export async function getUserQuota(userId: string): Promise<PlanQuota> {
   return (quota as PlanQuota) || DEFAULT_QUOTA;
 }
 
-// TODO: 결제 시스템 연동 후 실제 쿼터 체크 로직 복원
-// 현재는 모든 쿼터를 무제한으로 허용
-
-/** 홈페이지 배포 쿼터 체크 — 현재 무제한 */
+/** 홈페이지 배포 쿼터 체크 */
 export async function checkHomepageDeployQuota(
-  _userId: string,
+  userId: string,
 ): Promise<{ allowed: boolean; current: number; max: number }> {
-  return { allowed: true, current: 0, max: 999999 };
+  const supabase = await createClient();
+  const quota = await getUserQuota(userId);
+
+  const { count } = await supabase
+    .from('homepage_deploys')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+
+  const current = count ?? 0;
+  return { allowed: current < quota.max_homepage_deploys, current, max: quota.max_homepage_deploys };
 }
 
-/** 프로젝트 쿼터 체크 — 현재 무제한 */
+/** 프로젝트 쿼터 체크 */
 export async function checkProjectQuota(
-  _userId: string,
+  userId: string,
 ): Promise<{ allowed: boolean; current: number; max: number }> {
-  return { allowed: true, current: 0, max: 999999 };
+  const supabase = await createClient();
+  const quota = await getUserQuota(userId);
+
+  const { count } = await supabase
+    .from('projects')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+
+  const current = count ?? 0;
+  return { allowed: current < quota.max_projects, current, max: quota.max_projects };
 }
 
-/** 환경변수 쿼터 체크 — 현재 무제한 */
+/** 환경변수 쿼터 체크 */
 export async function checkEnvVarQuota(
-  _userId: string,
-  _projectId: string,
+  userId: string,
+  projectId: string,
 ): Promise<{ allowed: boolean; current: number; max: number }> {
-  return { allowed: true, current: 0, max: 999999 };
+  const supabase = await createClient();
+  const quota = await getUserQuota(userId);
+
+  const { count } = await supabase
+    .from('environment_variables')
+    .select('*', { count: 'exact', head: true })
+    .eq('project_id', projectId);
+
+  const current = count ?? 0;
+  return { allowed: current < quota.max_env_vars_per_project, current, max: quota.max_env_vars_per_project };
 }
 
-/** 서비스 쿼터 체크 — 현재 무제한 */
+/** 서비스 쿼터 체크 */
 export async function checkServiceQuota(
-  _userId: string,
-  _projectId: string,
+  userId: string,
+  projectId: string,
 ): Promise<{ allowed: boolean; current: number; max: number }> {
-  return { allowed: true, current: 0, max: 999999 };
+  const supabase = await createClient();
+  const quota = await getUserQuota(userId);
+
+  const { count } = await supabase
+    .from('project_services')
+    .select('*', { count: 'exact', head: true })
+    .eq('project_id', projectId);
+
+  const current = count ?? 0;
+  return { allowed: current < quota.max_services_per_project, current, max: quota.max_services_per_project };
 }

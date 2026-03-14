@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
     successUrl,
     customerEmail: user.email ?? undefined,
     externalCustomerId: user.id,
+    allowTrial: true,
     metadata: {
       user_id: user.id,
     },
