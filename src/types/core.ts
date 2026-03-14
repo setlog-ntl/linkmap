@@ -78,12 +78,17 @@ export interface Profile {
   updated_at: string;
 }
 
+export type PaymentProvider = 'none' | 'stripe' | 'polar';
+
 export interface Subscription {
   id: string;
   user_id: string;
   plan: SubscriptionPlan;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
+  polar_customer_id: string | null;
+  polar_subscription_id: string | null;
+  payment_provider: PaymentProvider;
   status: string;
   current_period_start: string | null;
   current_period_end: string | null;

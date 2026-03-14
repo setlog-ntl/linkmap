@@ -85,6 +85,7 @@ export type AuditAction =
   | 'payment.subscription_updated'
   | 'payment.subscription_canceled'
   | 'payment.portal_access'
+  | 'payment.order_created'
   | 'payment.invoice_failed'
   | 'email.welcome'
   | 'email.health_alert'

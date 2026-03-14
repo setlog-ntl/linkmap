@@ -41,7 +41,7 @@ export default function BillingPage() {
   async function handlePortal() {
     setPortalLoading(true);
     try {
-      const res = await fetch('/api/stripe/portal', { method: 'POST' });
+      const res = await fetch('/api/polar/portal', { method: 'POST' });
       const data = await res.json();
       if (!res.ok || !data.url) {
         toast.error(data.error || '결제 관리 페이지 이동에 실패했습니다');

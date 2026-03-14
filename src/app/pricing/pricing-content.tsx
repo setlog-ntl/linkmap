@@ -19,7 +19,7 @@ interface Plan {
   isFree: boolean;
   popular: boolean;
   planKey: SubscriptionPlan;
-  priceEnvKey: string;
+  productEnvKey: string;
 }
 
 const plans: Plan[] = [
@@ -30,7 +30,7 @@ const plans: Plan[] = [
     isFree: true,
     popular: false,
     planKey: 'free',
-    priceEnvKey: '',
+    productEnvKey: '',
   },
   {
     nameKey: 'pricing.planPro',
@@ -39,7 +39,7 @@ const plans: Plan[] = [
     isFree: false,
     popular: true,
     planKey: 'pro',
-    priceEnvKey: 'NEXT_PUBLIC_STRIPE_PRICE_PRO',
+    productEnvKey: 'NEXT_PUBLIC_POLAR_PRODUCT_PRO',
   },
   {
     nameKey: 'pricing.planTeam',
@@ -48,13 +48,13 @@ const plans: Plan[] = [
     isFree: false,
     popular: false,
     planKey: 'team',
-    priceEnvKey: 'NEXT_PUBLIC_STRIPE_PRICE_TEAM',
+    productEnvKey: 'NEXT_PUBLIC_POLAR_PRODUCT_TEAM',
   },
 ];
 
-const priceIdMap: Record<string, string | undefined> = {
-  NEXT_PUBLIC_STRIPE_PRICE_PRO: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO,
-  NEXT_PUBLIC_STRIPE_PRICE_TEAM: process.env.NEXT_PUBLIC_STRIPE_PRICE_TEAM,
+const productIdMap: Record<string, string | undefined> = {
+  NEXT_PUBLIC_POLAR_PRODUCT_PRO: process.env.NEXT_PUBLIC_POLAR_PRODUCT_PRO,
+  NEXT_PUBLIC_POLAR_PRODUCT_TEAM: process.env.NEXT_PUBLIC_POLAR_PRODUCT_TEAM,
 };
 
 export function PricingContent() {
@@ -68,18 +68,18 @@ export function PricingContent() {
   async function handleUpgrade(plan: Plan) {
     if (plan.isFree) return;
 
-    const priceId = priceIdMap[plan.priceEnvKey];
-    if (!priceId) {
+    const productId = productIdMap[plan.productEnvKey];
+    if (!productId) {
       toast.error('결제 설정이 준비 중입니다');
       return;
     }
 
     setLoadingPlan(plan.planKey);
     try {
-      const res = await fetch('/api/stripe/checkout', {
+      const res = await fetch('/api/polar/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId }),
+        body: JSON.stringify({ productId }),
       });
 
       if (res.status === 401) {
