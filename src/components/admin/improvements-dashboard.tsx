@@ -198,7 +198,7 @@ function CommunityTab() {
               초보자들은 자신이 만든 결과물을 자랑하고 싶어 함
             </p>
             <ul className="text-sm space-y-1.5 list-disc list-inside text-muted-foreground">
-              <li>"LinkmapHero로 3분 만에 만든 홈페이지"를 커뮤니티에 공유</li>
+              <li>{'"LinkmapHero로 3분 만에 만든 홈페이지"를 커뮤니티에 공유'}</li>
               <li>서로 피드백을 주고받는 문화 조성</li>
               <li>공유 → 유입 → 가입의 바이럴 루프</li>
             </ul>
@@ -235,12 +235,12 @@ function MarketingTab() {
         <CardContent className="space-y-3">
           <div className="rounded-lg border p-4 space-y-2">
             <p className="text-lg font-semibold text-brand-blue">
-              "AI와 함께 11일 만에 서비스를 뽑아내는 새로운 개발 방식"
+              {'"AI와 함께 11일 만에 서비스를 뽑아내는 새로운 개발 방식"'}
             </p>
           </div>
           <div className="rounded-lg border p-4 space-y-2">
             <p className="text-lg font-semibold text-brand-green">
-              "코딩 몰라도 서비스 사장이 될 수 있다"
+              {'"코딩 몰라도 서비스 사장이 될 수 있다"'}
             </p>
           </div>
         </CardContent>

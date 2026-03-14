@@ -111,22 +111,21 @@ function ProjectNodeComponent({ data }: NodeProps) {
   const activeSegments = segmentCounts.filter(c => c > 0).length;
   const GAP = activeSegments > 1 ? 4 : 0;
 
-  // Each segment starts at nodeIndex * arcStep from 12 o'clock, with GAP inset
-  let nodeIdx = 0;
-  const makeSegment = (count: number) => {
-    const startArc = nodeIdx * arcStep;
-    const fullArc = count * arcStep;
-    nodeIdx += count;
+  // Each segment starts at cumulative index * arcStep from 12 o'clock, with GAP inset
+  const buildSegment = (offset: number, count: number) => {
     if (count === 0) return { arc: 0, dashOffset: 0 };
-    // dashOffset: positive = shift CCW from 3 o'clock origin
-    // quarterCirc shifts from 3→12 o'clock, then subtract CW position from 12 o'clock
+    const startArc = offset * arcStep;
+    const fullArc = count * arcStep;
     return { arc: fullArc - GAP, dashOffset: quarterCirc - (startArc + GAP / 2) };
   };
-
-  const connectedSeg = makeSegment(connectedCount);
-  const errorSeg = makeSegment(errorCount);
-  const notStartedSeg = makeSegment(notStartedCount);
-  const inProgressSeg = makeSegment(inProgressCount);
+  const off0 = 0;
+  const off1 = off0 + connectedCount;
+  const off2 = off1 + errorCount;
+  const off3 = off2 + notStartedCount;
+  const connectedSeg = buildSegment(off0, connectedCount);
+  const errorSeg = buildSegment(off1, errorCount);
+  const notStartedSeg = buildSegment(off2, notStartedCount);
+  const inProgressSeg = buildSegment(off3, inProgressCount);
 
   const hexPath = roundedHexPath(HUB_R, CORNER_R);
 
