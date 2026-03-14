@@ -92,7 +92,9 @@ export function useDeployToGitHubPages() {
       });
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || '배포 실패');
+        const err = new Error(data.error || '배포 실패');
+        (err as Error & { code?: string }).code = data.code;
+        throw err;
       }
       return res.json();
     },

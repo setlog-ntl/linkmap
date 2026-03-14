@@ -16,7 +16,7 @@ const DEFAULT_QUOTA: PlanQuota = {
   max_env_vars_per_project: 20,
   max_services_per_project: 10,
   max_team_members: 0,
-  max_homepage_deploys: 3,
+  max_homepage_deploys: 5,
 };
 
 /** 사용자의 활성 구독 플랜을 반환 (없으면 'free') */

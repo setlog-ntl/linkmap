@@ -12,6 +12,7 @@ import {
   Globe,
   LayoutDashboard,
   GitFork,
+  Crown,
 } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
@@ -40,6 +41,7 @@ export function DeployStep({ status, isLoading, error, template, onRetry }: Depl
         onRetry={onRetry}
         locale={locale}
         errorMessage={error.message}
+        errorCode={(error as Error & { code?: string }).code}
       />
     );
   }
@@ -187,6 +189,7 @@ interface ErrorCardProps {
   onRetry?: () => void;
   locale: Locale;
   errorMessage?: string | null;
+  errorCode?: string | null;
   deployStatus?: DeployStatus | null;
 }
 
@@ -194,8 +197,50 @@ function ErrorCard({
   onRetry,
   locale,
   errorMessage,
+  errorCode,
   deployStatus,
 }: ErrorCardProps) {
+  const isQuotaExceeded = errorCode === 'QUOTA_EXCEEDED' || errorMessage?.includes('한도를 초과');
+
+  // 쿼터 초과 전용 UI
+  if (isQuotaExceeded) {
+    return (
+      <Card className="border-brand-blue/30 dark:border-brand-blue/20 bg-brand-blue/5 dark:bg-brand-blue/5">
+        <CardContent className="py-8 space-y-5">
+          <div className="text-center space-y-3">
+            <div className="mx-auto w-16 h-16 rounded-full bg-brand-blue/10 dark:bg-brand-blue/20 flex items-center justify-center">
+              <Crown className="h-8 w-8 text-brand-blue" />
+            </div>
+            <h3 className="text-lg font-semibold">
+              무료 배포 한도에 도달했습니다
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              {errorMessage || '사이트 배포 한도를 초과했습니다'}
+            </p>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              Pro 플랜으로 업그레이드하면 무제한 배포가 가능합니다.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3 justify-center pt-1">
+            <Button size="sm" asChild>
+              <Link href="/pricing">
+                <Crown className="mr-2 h-4 w-4" />
+                Pro 플랜 보기
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/sites">
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                내 사이트 관리
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const details = errorMessage
     ? getErrorDetails(errorMessage, deployStatus ?? null, locale)
     : null;
