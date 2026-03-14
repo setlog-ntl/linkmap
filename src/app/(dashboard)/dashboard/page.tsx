@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, startTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useProjects, useCreateProject, useDeleteProject, useToggleFavoriteProject } from '@/lib/queries/projects';
 import { useMyDeployments, type HomepageDeploy } from '@/lib/queries/oneclick';
 import { ProjectCard } from '@/components/project/project-card';
@@ -11,6 +11,7 @@ import { TemplateDialog } from '@/components/project/template-dialog';
 import { QuickActions } from '@/components/dashboard/quick-actions';
 import { createClient } from '@/lib/supabase/client';
 import { FolderOpen, Layers, Puzzle, GitBranch, LayoutGrid, List, Rocket, BookOpen, Link2, CheckCircle2, DollarSign } from 'lucide-react';
+import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,6 +24,7 @@ const VIEW_STORAGE_KEY = 'linkmap-dashboard-view';
 
 export default function DashboardPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
   const { locale } = useLocaleStore();
   const { data: projects = [], isLoading } = useProjects();
@@ -74,6 +76,13 @@ export default function DashboardPage() {
       startTransition(() => setViewMode(saved));
     }
   }, []);
+
+  useEffect(() => {
+    if (searchParams.get('upgraded') === 'true') {
+      toast.success('Pro 플랜으로 업그레이드되었습니다! 모든 프리미엄 기능을 이용할 수 있습니다.');
+      router.replace('/dashboard', { scroll: false });
+    }
+  }, [searchParams, router]);
 
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);

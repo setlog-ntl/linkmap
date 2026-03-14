@@ -61,6 +61,12 @@ export function EnvDoctorPanel({ projectId }: { projectId: string }) {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+        if (err.code === 'PRO_REQUIRED') {
+          toast.error(err.error || 'Pro 플랜에서 사용할 수 있는 기능입니다', {
+            action: { label: '업그레이드', onClick: () => window.location.href = '/pricing' },
+          });
+          return;
+        }
         throw new Error(err.error || `HTTP ${res.status}`);
       }
 

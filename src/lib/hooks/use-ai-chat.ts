@@ -69,6 +69,11 @@ export function useAiChat({ projectId, featureSlug = 'overview_chat', context }:
 
       if (!response.ok) {
         const errData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        if (errData.code === 'PRO_REQUIRED') {
+          setIsStreaming(false);
+          window.location.href = '/pricing';
+          return;
+        }
         throw new Error(errData.error || `HTTP ${response.status}`);
       }
 

@@ -42,7 +42,14 @@ export function useAddEnvVar(projectId: string) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ project_id: projectId, ...vars }),
       });
-      if (!res.ok) throw new Error('환경변수 추가 실패');
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const err = new Error(data.error || '환경변수 추가 실패');
+        (err as unknown as Record<string, unknown>).code = data.code;
+        (err as unknown as Record<string, unknown>).current = data.current;
+        (err as unknown as Record<string, unknown>).max = data.max;
+        throw err;
+      }
       return res.json();
     },
     onMutate: async (vars) => {

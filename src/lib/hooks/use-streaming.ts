@@ -33,6 +33,14 @@ export function useStreaming(options: UseStreamingOptions = {}) {
 
       if (!response.ok) {
         const errData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        if (errData.code === 'PRO_REQUIRED') {
+          const proMsg = errData.error || 'Pro 플랜에서 사용할 수 있는 기능입니다';
+          setError(proMsg);
+          options.onError?.(proMsg);
+          setIsStreaming(false);
+          window.location.href = '/pricing';
+          return;
+        }
         throw new Error(errData.error || `HTTP ${response.status}`);
       }
 

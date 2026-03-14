@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queries/keys';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEnvVars, useAddEnvVar, useDeleteEnvVar, useDecryptEnvVar, useUpdateEnvVar, useSyncEnvServices } from '@/lib/queries/env-vars';
 import { useProjectServices, useCatalogServices } from '@/lib/queries/services';
 import { Button } from '@/components/ui/button';
@@ -60,6 +60,7 @@ import type { Environment, EnvironmentVariable } from '@/types';
 
 export default function ProjectEnvPage() {
   const params = useParams();
+  const router = useRouter();
   const projectId = params.id as string;
   const queryClient = useQueryClient();
   const { data: envVars = [], isLoading } = useEnvVars(projectId);
@@ -137,22 +138,33 @@ export default function ProjectEnvPage() {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newKey.trim()) return;
-    await addEnvVar.mutateAsync({
-      key_name: newKey.trim(),
-      value: newValue,
-      environment: activeEnv,
-      is_secret: newIsSecret,
-      description: newDesc.trim() || null,
-      service_id: newServiceId,
-    });
-    setAddOpen(false);
-    setNewKey('');
-    setNewValue('');
-    setNewDesc('');
-    setNewIsSecret(true);
-    setNewServiceId(null);
-    setAutoDetectedService(null);
-    setManualServiceSelect(false);
+    try {
+      await addEnvVar.mutateAsync({
+        key_name: newKey.trim(),
+        value: newValue,
+        environment: activeEnv,
+        is_secret: newIsSecret,
+        description: newDesc.trim() || null,
+        service_id: newServiceId,
+      });
+      setAddOpen(false);
+      setNewKey('');
+      setNewValue('');
+      setNewDesc('');
+      setNewIsSecret(true);
+      setNewServiceId(null);
+      setAutoDetectedService(null);
+      setManualServiceSelect(false);
+    } catch (err: unknown) {
+      const error = err as { code?: string; message?: string };
+      if (error.code === 'QUOTA_EXCEEDED') {
+        toast.error(error.message || '환경변수 한도를 초과했습니다', {
+          action: { label: 'Pro 플랜 보기', onClick: () => router.push('/pricing') },
+        });
+      } else {
+        toast.error(error.message || '환경변수 추가에 실패했습니다');
+      }
+    }
   };
 
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);

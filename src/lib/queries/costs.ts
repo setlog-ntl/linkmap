@@ -220,10 +220,14 @@ export function useGenerateCostReport(projectId: string) {
         body: JSON.stringify({ project_id: projectId }),
       });
       if (!res.ok) {
-        const json = await res.json().catch(() => ({}));
-        if ((json as { code?: string }).code === 'ai_key_not_configured')
+        const json = await res.json().catch(() => ({})) as { code?: string; error?: string };
+        if (json.code === 'PRO_REQUIRED') {
+          window.location.href = '/pricing';
+          throw new Error(json.error || 'Pro 플랜에서 사용할 수 있는 기능입니다');
+        }
+        if (json.code === 'ai_key_not_configured')
           throw new Error('ai_key_not_configured');
-        throw new Error((json as { error?: string }).error ?? 'AI 리포트 생성 실패');
+        throw new Error(json.error ?? 'AI 리포트 생성 실패');
       }
       return res.json();
     },

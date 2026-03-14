@@ -55,21 +55,20 @@ export function useCreateProject() {
       description?: string;
       techStack?: Record<string, string>;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('로그인이 필요합니다.');
-
-      const { data, error } = await supabase
-        .from('projects')
-        .insert({
-          user_id: user.id,
-          name,
-          description: description || null,
-          tech_stack: techStack || {},
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
+      const res = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, description: description || null, tech_stack: techStack || {} }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        const err = new Error(data.error || '프로젝트 생성 실패');
+        (err as unknown as Record<string, unknown>).code = data.code;
+        (err as unknown as Record<string, unknown>).upgradeUrl = data.upgradeUrl;
+        (err as unknown as Record<string, unknown>).current = data.current;
+        (err as unknown as Record<string, unknown>).max = data.max;
+        throw err;
+      }
       return data as Project;
     },
     onSuccess: () => {

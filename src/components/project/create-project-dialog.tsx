@@ -15,6 +15,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Plus } from 'lucide-react';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 interface CreateProjectDialogProps {
   onSubmit: (name: string, description?: string) => Promise<void>;
@@ -29,6 +31,7 @@ export function CreateProjectDialog({ onSubmit, externalOpen, onExternalOpenChan
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,8 +43,15 @@ export function CreateProjectDialog({ onSubmit, externalOpen, onExternalOpenChan
       setOpen(false);
       setName('');
       setDescription('');
-    } catch (err) {
-      console.error(err);
+    } catch (err: unknown) {
+      const error = err as { code?: string; message?: string };
+      if (error.code === 'QUOTA_EXCEEDED') {
+        toast.error(error.message || '프로젝트 한도를 초과했습니다', {
+          action: { label: 'Pro 플랜 보기', onClick: () => router.push('/pricing') },
+        });
+      } else {
+        toast.error(error.message || '프로젝트 생성에 실패했습니다');
+      }
     } finally {
       setLoading(false);
     }
