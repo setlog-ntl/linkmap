@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: ['/', '/services', '/pricing', '/guides', '/guides/', '/faq', '/glossary'],
+        allow: ['/', '/services', '/pricing', '/guides', '/guides/', '/blog', '/blog/', '/faq', '/glossary'],
         disallow: [
           '/dashboard',
           '/project/',
@@ -25,7 +25,7 @@ export default function robots(): MetadataRoute.Robots {
           'Applebot-Extended',
           'Yeti',
         ],
-        allow: ['/', '/services', '/pricing', '/guides/', '/faq', '/glossary', '/llms.txt'],
+        allow: ['/', '/services', '/pricing', '/guides/', '/blog/', '/faq', '/glossary', '/llms.txt'],
         disallow: ['/dashboard', '/project/', '/settings/', '/api/', '/auth/', '/admin/'],
       },
     ],

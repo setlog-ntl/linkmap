@@ -16,7 +16,7 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { Menu, Globe, Search, BookOpen, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench, ArrowRight, Rocket, BarChart3, Trophy } from 'lucide-react';
+import { Menu, Globe, Search, BookOpen, PenLine, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench, ArrowRight, Rocket, BarChart3, Trophy } from 'lucide-react';
 import { GUIDE_CATEGORIES, getGuidesByCategory } from '@/data/ui/guide-meta';
 import { useUIStore } from '@/stores/ui-store';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -96,6 +96,15 @@ export function Header({ profile }: HeaderProps) {
       >
         <Trophy className="h-3.5 w-3.5" />
         쇼케이스
+      </Link>
+
+      <Link
+        href="/blog"
+        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+        onClick={() => setSidebarOpen(false)}
+      >
+        <PenLine className="h-3.5 w-3.5" />
+        블로그
       </Link>
 
       {/* Guides dropdown */}
@@ -342,6 +351,15 @@ export function Header({ profile }: HeaderProps) {
                 >
                   <Trophy className="h-4 w-4" />
                   쇼케이스
+                </Link>
+
+                <Link
+                  href="/blog"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <PenLine className="h-4 w-4" />
+                  블로그
                 </Link>
 
                 <div className="border-t my-2" />

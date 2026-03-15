@@ -1,4 +1,5 @@
 import { GUIDE_LIST } from '@/data/ui/guide-meta';
+import { getPublishedPosts } from '@/data/blog/posts';
 
 const SITE_URL = 'https://www.linkmap.biz';
 
@@ -6,6 +7,13 @@ export function GET() {
   const guideLines = GUIDE_LIST.map(
     (g) => `- ${g.title}: ${g.description} → ${SITE_URL}${g.href}`
   ).join('\n');
+
+  const publishedPosts = getPublishedPosts();
+  const blogLines = publishedPosts.length > 0
+    ? publishedPosts.map(
+        (p) => `- ${p.title}: ${p.description} → ${SITE_URL}/blog/${p.slug}`
+      ).join('\n')
+    : '- 곧 발행 예정';
 
   const body = `# Linkmap
 > 바이브 코딩 플랫폼 — 서비스 연결 시각화, API 키 암호화 관리, 환경변수 자동 설정, 원클릭 배포
@@ -42,6 +50,9 @@ ${guideLines}
 - 검색: Algolia, Meilisearch
 - CMS: Sanity, Contentful, Strapi
 
+## 블로그
+${blogLines}
+
 ## 기술 스택
 Next.js (App Router) + Supabase + TypeScript + Tailwind CSS + shadcn/ui
 배포: Cloudflare Workers (@opennextjs/cloudflare)
@@ -52,6 +63,7 @@ Next.js (App Router) + Supabase + TypeScript + Tailwind CSS + shadcn/ui
 - 요금제: ${SITE_URL}/pricing
 - 가이드: ${SITE_URL}/guides
 - FAQ: ${SITE_URL}/faq
+- 블로그: ${SITE_URL}/blog
 - 용어집: ${SITE_URL}/glossary
 `;
 

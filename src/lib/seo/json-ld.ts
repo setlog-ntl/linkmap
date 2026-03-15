@@ -114,6 +114,53 @@ export function generateGuideJsonLd(input: GuideJsonLdInput) {
 }
 
 // ---------------------------------------------------------------------------
+// Blog — Article (with datePublished/dateModified for GEO)
+// ---------------------------------------------------------------------------
+
+interface BlogJsonLdInput {
+  slug: string;
+  title: string;
+  description: string;
+  publishedAt: string;
+  updatedAt?: string;
+  readingTime?: string;
+  tags?: string[];
+}
+
+export function generateBlogJsonLd(input: BlogJsonLdInput) {
+  const url = `${SITE_URL}/blog/${input.slug}`;
+  const readMin = input.readingTime ? parseInt(input.readingTime) : undefined;
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BlogPosting',
+        headline: input.title,
+        description: input.description,
+        url,
+        author: organizationJsonLd(),
+        publisher: organizationJsonLd(),
+        mainEntityOfPage: url,
+        inLanguage: 'ko',
+        datePublished: input.publishedAt,
+        dateModified: input.updatedAt ?? input.publishedAt,
+        ...(readMin && { timeRequired: `PT${readMin}M` }),
+        ...(input.tags && input.tags.length > 0 && { keywords: input.tags.join(', ') }),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '홈', item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: '블로그', item: `${SITE_URL}/blog` },
+          { '@type': 'ListItem', position: 3, name: input.title, item: url },
+        ],
+      },
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Service — SoftwareApplication
 // ---------------------------------------------------------------------------
 

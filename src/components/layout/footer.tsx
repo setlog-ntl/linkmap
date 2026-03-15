@@ -11,7 +11,7 @@ export function Footer() {
   return (
     <footer className="bg-[var(--circuit-950)] text-muted-foreground">
       <div className="container py-8 md:py-12">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-7 gap-8">
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-1 font-bold text-lg mb-3">
               <span className="text-brand-green">Link</span>
@@ -50,6 +50,14 @@ export function Footer() {
               </div>
             );
           })}
+          <div>
+            <h4 className="font-semibold text-sm mb-3 text-white">콘텐츠</h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link href="/blog" className="hover:text-white transition-colors">블로그</Link></li>
+              <li><Link href="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
+              <li><Link href="/glossary" className="hover:text-white transition-colors">용어집</Link></li>
+            </ul>
+          </div>
           <div>
             <h4 className="font-semibold text-sm mb-3 text-white">{t(locale, 'landing.footerLegal')}</h4>
             <ul className="space-y-2 text-sm">
