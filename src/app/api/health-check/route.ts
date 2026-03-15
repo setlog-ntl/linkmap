@@ -19,13 +19,20 @@ export async function POST(request: NextRequest) {
   const { project_service_id, environment } = parsed.data;
 
   // Verify ownership: project_service → project → user
-  const { data: projectService } = await supabase
+  const { data: projectService, error: psError } = await supabase
     .from('project_services')
     .select('*, service:services(*), project:projects!inner(user_id, name)')
     .eq('id', project_service_id)
     .single();
 
-  if (!projectService || projectService.project.user_id !== user.id) {
+  if (psError || !projectService) {
+    return apiError(
+      `서비스를 찾을 수 없습니다 (${psError?.code || 'NOT_FOUND'})`,
+      404,
+    );
+  }
+
+  if (projectService.project.user_id !== user.id) {
     return notFoundError('서비스');
   }
 
