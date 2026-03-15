@@ -46,12 +46,13 @@ interface ServicesContentProps {
   projectId: string;
 }
 
-function AccountIdentifierField({ projectServiceId, projectId, currentValue }: {
+function AccountIdentifierField({ projectServiceId, projectId, currentValue, autoEdit = false }: {
   projectServiceId: string;
   projectId: string;
   currentValue: string | null;
+  autoEdit?: boolean;
 }) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(autoEdit && !currentValue);
   const [value, setValue] = useState(currentValue || '');
   const updateAccount = useUpdateProjectServiceAccount(projectId);
 
@@ -70,41 +71,47 @@ function AccountIdentifierField({ projectServiceId, projectId, currentValue }: {
   }, [currentValue]);
 
   if (!isEditing) {
-    return (
+    return currentValue ? (
       <button
         type="button"
         onClick={() => setIsEditing(true)}
-        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors group"
+        className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors group"
       >
-        <User className="h-3 w-3" />
-        {currentValue ? (
-          <span className="font-mono">{currentValue}</span>
-        ) : (
-          <span className="italic group-hover:underline">계정 아이디 입력</span>
-        )}
+        <User className="h-3.5 w-3.5" />
+        <span className="font-mono">{currentValue}</span>
+        <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">수정</span>
+      </button>
+    ) : (
+      <button
+        type="button"
+        onClick={() => setIsEditing(true)}
+        className="flex items-center gap-2 w-full rounded-md border border-dashed border-amber-400/60 bg-amber-50/50 dark:bg-amber-950/20 px-3 py-2 text-xs text-amber-700 dark:text-amber-400 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+      >
+        <User className="h-3.5 w-3.5 shrink-0" />
+        <span>계정 아이디를 입력하세요 (이메일, 사용자명 등)</span>
       </button>
     );
   }
 
   return (
     <div className="flex items-center gap-1.5">
-      <User className="h-3 w-3 text-muted-foreground shrink-0" />
+      <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
       <Input
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="계정 아이디 또는 이메일"
-        className="h-7 text-xs font-mono max-w-[240px]"
+        className="h-8 text-xs font-mono max-w-[280px]"
         autoFocus
         onKeyDown={(e) => {
           if (e.key === 'Enter') handleSave();
           if (e.key === 'Escape') handleCancel();
         }}
       />
-      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleSave}>
-        <Check className="h-3 w-3" />
+      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleSave}>
+        <Check className="h-3.5 w-3.5" />
       </Button>
-      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCancel}>
-        <X className="h-3 w-3" />
+      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleCancel}>
+        <X className="h-3.5 w-3.5" />
       </Button>
     </div>
   );
@@ -145,14 +152,14 @@ function ServiceAccordionItem({
               {ps.service?.description_ko || ps.service?.description}
             </p>
             {ps.account_identifier ? (
-              <span className="inline-flex items-center gap-1 mt-0.5 font-mono text-[11px] text-foreground bg-muted border rounded px-1.5 py-0.5">
-                <User className="h-3 w-3" />
+              <span className="inline-flex items-center gap-1 mt-1 font-mono text-[11px] text-foreground bg-muted border rounded px-1.5 py-0.5">
+                <User className="h-3 w-3 shrink-0" />
                 {ps.account_identifier}
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 mt-0.5 text-[11px] text-muted-foreground italic">
-                <User className="h-3 w-3" />
-                계정 미설정
+              <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-300/50 dark:border-amber-700/50 rounded px-1.5 py-0.5">
+                <User className="h-3 w-3 shrink-0" />
+                계정 미설정 — 펼쳐서 입력
               </span>
             )}
           </div>
@@ -163,11 +170,12 @@ function ServiceAccordionItem({
       </AccordionTrigger>
       <AccordionContent className="pb-4">
         <div className="space-y-4 pt-2">
-          <div className="pb-2 border-b">
+          <div className={`pb-3 border-b ${!ps.account_identifier ? 'pt-1' : ''}`}>
             <AccountIdentifierField
               projectServiceId={ps.id}
               projectId={projectId}
               currentValue={ps.account_identifier}
+              autoEdit
             />
           </div>
           <div className="flex gap-2 flex-wrap">
