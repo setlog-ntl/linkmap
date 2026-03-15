@@ -1,13 +1,26 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Clock } from 'lucide-react';
-import { GUIDE_CATEGORIES, GUIDE_LIST, type GuideCategory } from '@/data/ui/guide-meta';
+import { ArrowRight, Clock, ChevronDown } from 'lucide-react';
+import { GUIDE_CATEGORIES, GUIDE_LIST, getSubGuides, type GuideCategory } from '@/data/ui/guide-meta';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 const categoryOrder: GuideCategory[] = ['concept', 'service'];
 
 export function GuidesHub() {
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+
+  function toggleCard(slug: string) {
+    setExpandedCards(prev => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
+    });
+  }
+
   return (
     <div className="py-12 md:py-16 space-y-12">
       {/* Hero */}
@@ -39,45 +52,101 @@ export function GuidesHub() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {guides.map((guide) => {
                 const Icon = guide.icon;
+                const subGuides = getSubGuides(guide.slug);
+                const isExpanded = expandedCards.has(guide.slug);
+                const hasChildren = subGuides.length > 0;
+
                 return (
-                  <Link
+                  <div
                     key={guide.slug}
-                    href={guide.href}
-                    className="group relative flex flex-col gap-3 rounded-lg border bg-card p-5 shadow-sm transition-all hover:border-brand-blue/50 hover:shadow-md"
+                    className={cn(
+                      'group relative flex flex-col rounded-lg border bg-card shadow-sm transition-all',
+                      isExpanded ? 'border-brand-blue/50 shadow-md' : 'hover:border-brand-blue/50 hover:shadow-md'
+                    )}
                   >
-                    {/* Icon + Badge row */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-                        <Icon className="h-5 w-5 text-brand-blue" />
+                    {/* Card Main — 클릭 시 개요 페이지 이동 */}
+                    <Link
+                      href={guide.href}
+                      className="flex flex-col gap-3 p-5"
+                    >
+                      {/* Icon + Badge row */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                          <Icon className="h-5 w-5 text-brand-blue" />
+                        </div>
+                        {guide.badge && (
+                          <Badge variant="secondary" className="text-xs">
+                            {guide.badge}
+                          </Badge>
+                        )}
                       </div>
-                      {guide.badge && (
-                        <Badge variant="secondary" className="text-xs">
-                          {guide.badge}
-                        </Badge>
-                      )}
-                    </div>
 
-                    {/* Title + Description */}
-                    <div className="space-y-1.5">
-                      <h3 className="font-semibold group-hover:text-brand-blue transition-colors">
-                        {guide.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {guide.description}
-                      </p>
-                    </div>
+                      {/* Title + Description */}
+                      <div className="space-y-1.5">
+                        <h3 className="font-semibold group-hover:text-brand-blue transition-colors">
+                          {guide.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {guide.description}
+                        </p>
+                      </div>
 
-                    {/* Footer */}
-                    <div className="mt-auto flex items-center justify-between pt-2">
-                      {guide.readingTime && (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          {guide.readingTime}
-                        </span>
-                      )}
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-brand-blue group-hover:translate-x-0.5 transition-all ml-auto" />
-                    </div>
-                  </Link>
+                      {/* Footer — readingTime */}
+                      <div className="mt-auto flex items-center justify-between pt-2">
+                        {guide.readingTime && (
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            {guide.readingTime}
+                          </span>
+                        )}
+                        {!hasChildren && (
+                          <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-brand-blue group-hover:translate-x-0.5 transition-all ml-auto" />
+                        )}
+                      </div>
+                    </Link>
+
+                    {/* Sub Guide Toggle + List */}
+                    {hasChildren && (
+                      <>
+                        <button
+                          onClick={() => toggleCard(guide.slug)}
+                          className="flex items-center gap-1.5 px-5 py-2.5 text-xs font-medium text-brand-blue hover:bg-muted/50 transition-colors border-t cursor-pointer"
+                        >
+                          <span>하위 가이드 {subGuides.length}개</span>
+                          <ChevronDown className={cn(
+                            'h-3 w-3 transition-transform duration-200',
+                            isExpanded && 'rotate-180'
+                          )} />
+                        </button>
+                        <div className={cn(
+                          'overflow-hidden transition-all duration-300',
+                          isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                        )}>
+                          <div className="border-t px-2 py-1.5">
+                            {subGuides.map((sub) => {
+                              const SubIcon = sub.icon;
+                              return (
+                                <Link
+                                  key={sub.slug}
+                                  href={sub.href}
+                                  className="flex items-center gap-2.5 px-3 py-2 rounded-md hover:bg-muted/50 transition-colors"
+                                >
+                                  <div className="flex h-6 w-6 items-center justify-center rounded bg-muted/70 shrink-0">
+                                    <SubIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium truncate">{sub.title}</p>
+                                    <p className="text-[11px] text-muted-foreground truncate">{sub.description}</p>
+                                  </div>
+                                  <ArrowRight className="h-3 w-3 text-muted-foreground shrink-0" />
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 );
               })}
             </div>

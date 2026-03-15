@@ -17,7 +17,8 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Menu, Globe, Search, BookOpen, PenLine, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench, ArrowRight, Rocket, BarChart3, Trophy } from 'lucide-react';
-import { GUIDE_CATEGORIES, getGuidesByCategory } from '@/data/ui/guide-meta';
+import { GUIDE_CATEGORIES, getGuidesByCategory, getSubGuides } from '@/data/ui/guide-meta';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useUIStore } from '@/stores/ui-store';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t, localeNames } from '@/lib/i18n';
@@ -107,14 +108,14 @@ export function Header({ profile }: HeaderProps) {
         블로그
       </Link>
 
-      {/* Guides dropdown */}
+      {/* Guides dropdown — 2레벨 트리 */}
       <DropdownMenu>
         <DropdownMenuTrigger className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 outline-none">
           <BookOpen className="h-3.5 w-3.5" />
           {t(locale, 'nav.guides')}
           <ChevronDown className="h-3 w-3" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56">
+        <DropdownMenuContent align="start" className="w-72 max-h-[70vh] overflow-y-auto">
           {(['concept', 'service'] as const).map((catKey, idx) => {
             const cat = GUIDE_CATEGORIES[catKey];
             const CatIcon = cat.icon;
@@ -126,13 +127,40 @@ export function Header({ profile }: HeaderProps) {
                   <CatIcon className="h-3.5 w-3.5" />
                   {cat.label}
                 </DropdownMenuLabel>
-                {guides.map((guide) => (
-                  <DropdownMenuItem key={guide.slug} asChild>
-                    <Link href={guide.href} onClick={() => setSidebarOpen(false)}>
-                      {guide.title}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
+                {guides.map((guide) => {
+                  const subGuides = getSubGuides(guide.slug);
+                  const GuideIcon = guide.icon;
+                  if (subGuides.length === 0) {
+                    return (
+                      <DropdownMenuItem key={guide.slug} asChild>
+                        <Link href={guide.href} onClick={() => setSidebarOpen(false)}>
+                          <GuideIcon className="h-3.5 w-3.5 mr-2 opacity-60" />
+                          {guide.title}
+                        </Link>
+                      </DropdownMenuItem>
+                    );
+                  }
+                  return (
+                    <Collapsible key={guide.slug}>
+                      <CollapsibleTrigger className="flex items-center gap-2 w-full px-2 py-1.5 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground cursor-pointer">
+                        <GuideIcon className="h-3.5 w-3.5 opacity-60 shrink-0" />
+                        <span className="flex-1 text-left">{guide.title}</span>
+                        <ChevronDown className="h-3 w-3 opacity-50 transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="ml-4 border-l border-border/50 pl-2 py-0.5">
+                          {subGuides.map((sub) => (
+                            <DropdownMenuItem key={sub.slug} asChild className="text-xs h-7">
+                              <Link href={sub.href} onClick={() => setSidebarOpen(false)}>
+                                {sub.title}
+                              </Link>
+                            </DropdownMenuItem>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  );
+                })}
               </div>
             );
           })}
@@ -371,16 +399,46 @@ export function Header({ profile }: HeaderProps) {
                       <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold px-2.5 mb-1 mt-2">
                         {cat.label}
                       </p>
-                      {guides.map((guide) => (
-                        <Link
-                          key={guide.slug}
-                          href={guide.href}
-                          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 block"
-                          onClick={() => setSidebarOpen(false)}
-                        >
-                          {guide.title}
-                        </Link>
-                      ))}
+                      {guides.map((guide) => {
+                        const subGuides = getSubGuides(guide.slug);
+                        const GuideIcon = guide.icon;
+                        if (subGuides.length === 0) {
+                          return (
+                            <Link
+                              key={guide.slug}
+                              href={guide.href}
+                              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2"
+                              onClick={() => setSidebarOpen(false)}
+                            >
+                              <GuideIcon className="h-3.5 w-3.5 opacity-60" />
+                              {guide.title}
+                            </Link>
+                          );
+                        }
+                        return (
+                          <Collapsible key={guide.slug}>
+                            <CollapsibleTrigger className="w-full text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2 cursor-pointer">
+                              <GuideIcon className="h-3.5 w-3.5 opacity-60 shrink-0" />
+                              <span className="flex-1 text-left">{guide.title}</span>
+                              <ChevronDown className="h-3 w-3 opacity-50 transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <div className="ml-7 border-l border-border/50 pl-2 py-0.5">
+                                {subGuides.map((sub) => (
+                                  <Link
+                                    key={sub.slug}
+                                    href={sub.href}
+                                    className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 block"
+                                    onClick={() => setSidebarOpen(false)}
+                                  >
+                                    {sub.title}
+                                  </Link>
+                                ))}
+                              </div>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        );
+                      })}
                     </div>
                   );
                 })}
