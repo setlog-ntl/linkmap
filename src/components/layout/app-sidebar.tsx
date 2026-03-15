@@ -456,12 +456,18 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {/* 사이트 만들기 — 최상단 */}
+                      {/* 전체 보기 / 사이트 추가 — 최상단 */}
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton asChild>
-                          <Link href="/sites/new">
-                            <Plus className="h-3.5 w-3.5" />
-                            <span>사이트 만들기</span>
+                          <Link href="/sites/manage" className="flex items-center justify-between w-full group/site-action">
+                            <span className="flex items-center gap-1">
+                              <LayoutGrid className="h-3.5 w-3.5" />
+                              <span>전체 보기</span>
+                            </span>
+                            <span className="flex items-center gap-0.5 text-muted-foreground group-hover/site-action:text-brand-blue transition-colors">
+                              <Plus className="h-3 w-3" />
+                              <span className="text-[11px]">추가</span>
+                            </span>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -584,16 +590,6 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                         );
                       })}
 
-                      {/* View all link — 사이트 1개 이상이면 항상 표시 */}
-                      {visibleSites.length > 0 && (
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton asChild>
-                            <Link href="/sites/manage" className="text-muted-foreground">
-                              <span>전체 보기</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      )}
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>
@@ -698,16 +694,6 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                         </>
                       )}
 
-                      {/* View all link */}
-                      {hasMoreProjects && (
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton asChild>
-                            <Link href="/dashboard" className="text-muted-foreground">
-                              <span>전체 보기</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      )}
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>
