@@ -34,6 +34,8 @@ import { Input } from '@/components/ui/input';
 import { useUpdateProjectServiceAccount } from '@/lib/queries/services';
 import { cn } from '@/lib/utils';
 import { useState, useCallback } from 'react';
+import Link from 'next/link';
+import { SERVICE_GUIDE_HREF } from '@/data/ui/guide-meta';
 import type { ProjectService, Service, ServiceDependency, ServiceCategory, ServiceDomain, EnvironmentVariable, ServiceGuide, ServiceFeatureGuide, ServiceSignupGuide } from '@/types';
 
 interface ServiceDetailSheetProps {
@@ -285,31 +287,53 @@ export function ServiceDetailSheet({
               )}
 
               {/* 가이드 연결 */}
-              {hasGuideContent && (
-                <>
-                  <Separator />
-                  <div>
-                    <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
-                      <BookOpen className="h-3.5 w-3.5 text-primary" />
-                      설정 가이드
-                    </h4>
-                    {guide.quick_start && (
-                      <p className="text-xs text-muted-foreground mb-2.5 line-clamp-2">
-                        {guide.quick_start}
-                      </p>
-                    )}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-center gap-2 text-primary border-primary/30 hover:bg-primary/5"
-                      onClick={() => setActiveTab('guide')}
-                    >
-                      <BookOpen className="h-3.5 w-3.5" />
-                      가이드 보기
-                    </Button>
-                  </div>
-                </>
-              )}
+              {hasGuideContent && (() => {
+                const guideHref = svc?.slug ? SERVICE_GUIDE_HREF[svc.slug] : undefined;
+                return (
+                  <>
+                    <Separator />
+                    <div>
+                      <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
+                        <BookOpen className="h-3.5 w-3.5 text-primary" />
+                        설정 가이드
+                      </h4>
+                      {guide.quick_start && (
+                        <p className="text-xs text-muted-foreground mb-2.5 line-clamp-2">
+                          {guide.quick_start}
+                        </p>
+                      )}
+                      <div className="flex gap-2">
+                        {guideHref && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                            className="flex-1 justify-center gap-2 text-primary border-primary/30 hover:bg-primary/5"
+                          >
+                            <Link href={guideHref}>
+                              <BookOpen className="h-3.5 w-3.5" />
+                              상세 가이드
+                              <ExternalLink className="h-3 w-3" />
+                            </Link>
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={cn(
+                            'justify-center gap-2 text-primary border-primary/30 hover:bg-primary/5',
+                            guideHref ? 'flex-1' : 'w-full',
+                          )}
+                          onClick={() => setActiveTab('guide')}
+                        >
+                          <Lightbulb className="h-3.5 w-3.5" />
+                          빠른 설정
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </ScrollArea>
         </TabsContent>
@@ -348,6 +372,17 @@ export function ServiceDetailSheet({
                     </div>
                     <p className="text-sm text-muted-foreground">{guide.quick_start}</p>
                   </div>
+                )}
+
+                {/* 0-1. 상세 가이드 페이지 링크 */}
+                {svc?.slug && SERVICE_GUIDE_HREF[svc.slug] && (
+                  <Button variant="outline" size="sm" asChild className="w-full justify-start gap-2 text-primary border-primary/30 hover:bg-primary/5">
+                    <Link href={SERVICE_GUIDE_HREF[svc.slug]}>
+                      <BookOpen className="h-3.5 w-3.5" />
+                      스크린샷 포함 상세 가이드 보기
+                      <ExternalLink className="ml-auto h-3 w-3" />
+                    </Link>
+                  </Button>
                 )}
 
                 {/* 2. 가입 안내 (signup 있을 때) */}

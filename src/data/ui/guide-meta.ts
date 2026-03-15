@@ -81,3 +81,14 @@ export function getGuidesByCategory(category: GuideCategory): GuideMeta[] {
 export function getSubGuides(parentSlug: string): SubGuideMeta[] {
   return SUB_GUIDE_LIST.filter(g => g.parentSlug === parentSlug);
 }
+
+/** 서비스 slug → 가이드 페이지 href 매핑 */
+export const SERVICE_GUIDE_HREF: Record<string, string> = {
+  supabase: '/guides/supabase',
+  vercel: '/guides/vercel',
+  openai: '/guides/openai',
+  github: '/guides/github',
+  cloudflare: '/guides/cloudflare',
+  'kakao-login': '/guides/auth/kakao',
+  'google-oauth': '/guides/auth/google',
+};
