@@ -247,14 +247,30 @@ function UsersTab() {
                   const badgeVariant = PLAN_BADGE_VARIANT[u.plan] ?? 'secondary';
                   return (
                     <li key={u.id} className="flex items-center gap-3">
-                      <Avatar className="h-7 w-7">
-                        <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                      <Avatar className="h-8 w-8">
+                        {u.avatarUrl ? (
+                          <img src={u.avatarUrl} alt="" className="h-full w-full rounded-full object-cover" />
+                        ) : (
+                          <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                        )}
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{u.name ?? u.email}</p>
-                        {u.name && (
-                          <p className="text-xs text-muted-foreground truncate">{u.email}</p>
-                        )}
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-sm font-medium truncate">{u.name ?? u.email}</p>
+                          {u.provider && (
+                            <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 shrink-0">
+                              {u.provider}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {u.email}
+                          {u.lastSignInAt && (
+                            <span className="ml-2 text-green-600 dark:text-green-400">
+                              마지막 로그인: {formatDateTime(u.lastSignInAt)}
+                            </span>
+                          )}
+                        </p>
                       </div>
                       <Badge
                         variant={badgeVariant}

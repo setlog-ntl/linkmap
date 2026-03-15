@@ -21,9 +21,12 @@ export interface AdminUserStats {
     id: string;
     email: string;
     name: string | null;
+    avatarUrl: string | null;
+    provider: string | null;
     plan: string;
     projectCount: number;
     createdAt: string;
+    lastSignInAt: string | null;
   }>;
 }
 
@@ -70,9 +73,25 @@ export async function GET() {
     return serverError('프로젝트 조회에 실패했습니다');
   }
 
+  // auth.users에서 로그인 메타데이터 조회 (admin API)
+  const { data: authUsersData } = await adminSupabase.auth.admin.listUsers({ perPage: 1000 });
+
   const allProfiles = profiles ?? [];
   const allSubscriptions = subscriptions ?? [];
   const allProjects = projects ?? [];
+
+  // auth.users 메타데이터 맵
+  interface AuthMeta { lastSignInAt: string | null; provider: string | null; avatarUrl: string | null }
+  const authMetaMap = new Map<string, AuthMeta>();
+  if (authUsersData?.users) {
+    for (const au of authUsersData.users) {
+      authMetaMap.set(au.id, {
+        lastSignInAt: au.last_sign_in_at ?? null,
+        provider: (au.app_metadata?.provider as string) ?? null,
+        avatarUrl: (au.user_metadata?.avatar_url as string) ?? null,
+      });
+    }
+  }
 
   // user_id → plan 맵
   const planMap = new Map<string, string>();
@@ -150,14 +169,20 @@ export async function GET() {
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 10);
 
-  const recentUsers = recentProfiles.map((p) => ({
-    id: p.id,
-    email: p.email,
-    name: p.name,
-    plan: planMap.get(p.id) ?? 'free',
-    projectCount: projectCountMap.get(p.id) ?? 0,
-    createdAt: p.created_at,
-  }));
+  const recentUsers = recentProfiles.map((p) => {
+    const meta = authMetaMap.get(p.id);
+    return {
+      id: p.id,
+      email: p.email,
+      name: p.name,
+      avatarUrl: meta?.avatarUrl ?? null,
+      provider: meta?.provider ?? null,
+      plan: planMap.get(p.id) ?? 'free',
+      projectCount: projectCountMap.get(p.id) ?? 0,
+      createdAt: p.created_at,
+      lastSignInAt: meta?.lastSignInAt ?? null,
+    };
+  });
 
   await logAudit(user.id, {
     action: 'admin.users_stats_view',

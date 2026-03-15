@@ -108,7 +108,8 @@ export function PricingContent() {
   function getButtonLabel(plan: Plan): string {
     if (plan.planKey === 'team') return t(locale, 'pricing.comingSoon');
     if (plan.planKey === currentPlan) return t(locale, 'pricing.currentPlan');
-    if (plan.isFree) return t(locale, 'pricing.currentPlan');
+    if (plan.isFree && currentPlan === 'free') return t(locale, 'pricing.currentPlan');
+    if (plan.isFree) return '무료 플랜';
     if (plan.trialDays > 0 && currentPlan === 'free') {
       return t(locale, 'pricing.startTrial');
     }
@@ -116,7 +117,7 @@ export function PricingContent() {
   }
 
   function isButtonDisabled(plan: Plan): boolean {
-    return plan.isFree || plan.planKey === currentPlan || plan.planKey === 'team' || loadingPlan !== null;
+    return plan.planKey === currentPlan || (plan.isFree && currentPlan !== 'free') || plan.planKey === 'team' || loadingPlan !== null;
   }
 
   return (
@@ -130,11 +131,14 @@ export function PricingContent() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
         {plans.map((plan) => (
-          <Card key={plan.nameKey} className={`${plan.popular ? 'border-primary shadow-lg' : ''} ${plan.planKey === 'team' ? 'opacity-60' : ''} relative`}>
-            {plan.popular && (
+          <Card key={plan.nameKey} className={`${plan.planKey === currentPlan ? 'border-primary shadow-lg ring-2 ring-primary/20' : plan.popular && currentPlan === 'free' ? 'border-primary shadow-lg' : ''} ${plan.planKey === 'team' && currentPlan !== 'team' ? 'opacity-60' : ''} relative`}>
+            {plan.planKey === currentPlan && (
+              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 hover:bg-green-600">{t(locale, 'pricing.currentPlan')}</Badge>
+            )}
+            {plan.popular && plan.planKey !== currentPlan && currentPlan === 'free' && (
               <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">{t(locale, 'pricing.recommended')}</Badge>
             )}
-            {plan.planKey === 'team' && (
+            {plan.planKey === 'team' && plan.planKey !== currentPlan && (
               <Badge variant="secondary" className="absolute -top-3 left-1/2 -translate-x-1/2">{t(locale, 'pricing.comingSoon')}</Badge>
             )}
             <CardHeader className="text-center pb-2">
