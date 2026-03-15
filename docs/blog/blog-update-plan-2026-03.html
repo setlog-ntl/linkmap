@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>블로그 전체 업데이트 기획 — Linkmap 2026.03</title>
+<style>
+  :root {
+    --blue: #2563eb; --green: #10b981; --amber: #f59e0b; --red: #ef4444; --purple: #8b5cf6;
+    --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-300: #d1d5db;
+    --gray-500: #6b7280; --gray-600: #4b5563; --gray-700: #374151; --gray-800: #1f2937; --gray-900: #111827;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard Variable', -apple-system, sans-serif; background: var(--gray-50); color: var(--gray-800); line-height: 1.7; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+
+  /* Header */
+  .page-header { margin-bottom: 40px; border-bottom: 2px solid var(--gray-200); padding-bottom: 24px; }
+  .page-header h1 { font-size: 2rem; color: var(--gray-900); margin-bottom: 6px; }
+  .page-header .sub { color: var(--gray-500); font-size: 1rem; }
+
+  /* TOC */
+  .toc { background: white; border: 1px solid var(--gray-200); border-radius: 12px; padding: 20px 24px; margin-bottom: 32px; }
+  .toc h2 { font-size: 1rem; margin-bottom: 10px; color: var(--gray-700); }
+  .toc ol { padding-left: 20px; }
+  .toc li { margin-bottom: 4px; font-size: 0.9rem; }
+  .toc a { color: var(--blue); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  /* Sections */
+  .section { margin-bottom: 48px; }
+  .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--gray-200); }
+  .section-desc { color: var(--gray-600); font-size: 0.95rem; margin-bottom: 20px; }
+
+  /* Summary Cards */
+  .overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 28px; }
+  .ov-card { background: white; border: 1px solid var(--gray-200); border-radius: 10px; padding: 16px; text-align: center; }
+  .ov-card .num { font-size: 2rem; font-weight: 800; }
+  .ov-card .num.blue { color: var(--blue); }
+  .ov-card .num.green { color: var(--green); }
+  .ov-card .num.amber { color: var(--amber); }
+  .ov-card .num.purple { color: var(--purple); }
+  .ov-card .lbl { font-size: 0.8rem; color: var(--gray-500); margin-top: 2px; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-bottom: 16px; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--gray-200); }
+  th { background: var(--gray-100); font-weight: 700; font-size: 0.78rem; text-transform: uppercase; color: var(--gray-600); }
+  tr:hover { background: var(--gray-50); }
+
+  /* Post cards */
+  .post-card { background: white; border: 1px solid var(--gray-200); border-radius: 12px; margin-bottom: 20px; overflow: hidden; }
+  .post-card-header { display: flex; align-items: stretch; }
+  .post-card-img { width: 280px; min-height: 180px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; position: relative; }
+  .post-card-img .img-label { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,.6); color: white; font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; }
+  .post-card-img .emoji-icon { font-size: 3.5rem; margin-bottom: 8px; }
+  .post-card-img .img-title { font-size: 0.75rem; color: white; text-align: center; font-weight: 600; line-height: 1.3; }
+  .post-card-body { flex: 1; padding: 20px 24px; }
+  .post-card-body h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; color: var(--gray-900); }
+  .post-meta-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 16px; font-size: 0.7rem; font-weight: 600; }
+  .b-cat { background: #dbeafe; color: var(--blue); }
+  .b-new { background: #dcfce7; color: #16a34a; }
+  .b-time { background: var(--gray-100); color: var(--gray-600); }
+  .b-priority-h { background: #fef2f2; color: var(--red); }
+  .b-priority-m { background: #fffbeb; color: #b45309; }
+  .post-card-body .desc { color: var(--gray-600); font-size: 0.88rem; margin-bottom: 10px; }
+  .h2-list { font-size: 0.82rem; color: var(--gray-700); padding-left: 16px; margin-bottom: 10px; }
+  .h2-list li { margin-bottom: 2px; }
+  .linkmap-tag { background: #ecfdf5; border-left: 3px solid var(--green); padding: 8px 12px; border-radius: 0 6px 6px 0; font-size: 0.82rem; color: var(--gray-700); }
+  .tag-row { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px; }
+  .tag { background: var(--gray-100); color: var(--gray-600); padding: 1px 6px; border-radius: 3px; font-size: 0.7rem; }
+
+  /* Image strategy */
+  .img-strategy { background: white; border: 1px solid var(--gray-200); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .img-strategy h3 { font-size: 1.1rem; margin-bottom: 12px; }
+  .img-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .img-card { border: 1px solid var(--gray-200); border-radius: 10px; overflow: hidden; }
+  .img-preview { height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+  .img-preview .emoji-icon { font-size: 3rem; margin-bottom: 6px; }
+  .img-preview .preview-title { font-size: 0.8rem; color: white; text-align: center; font-weight: 600; padding: 0 12px; line-height: 1.3; }
+  .img-preview .preview-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,.5); color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 3px; }
+  .img-card-body { padding: 12px; }
+  .img-card-body .img-name { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+  .img-card-body .img-spec { font-size: 0.75rem; color: var(--gray-500); }
+
+  /* Timeline */
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--gray-200); }
+  .tl-item { position: relative; margin-bottom: 24px; }
+  .tl-dot { position: absolute; left: -24px; top: 4px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; }
+  .tl-dot.blue { background: var(--blue); }
+  .tl-dot.green { background: var(--green); }
+  .tl-dot.amber { background: var(--amber); }
+  .tl-item h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 2px; }
+  .tl-item .tl-desc { font-size: 0.85rem; color: var(--gray-600); }
+  .tl-item .tl-posts { font-size: 0.82rem; color: var(--gray-700); margin-top: 4px; padding-left: 16px; }
+
+  /* Impact */
+  .impact-box { background: linear-gradient(135deg, #eff6ff, #ecfdf5); border: 1px solid var(--gray-200); border-radius: 12px; padding: 24px; }
+  .impact-box h3 { font-size: 1.1rem; margin-bottom: 12px; color: var(--blue); }
+  .impact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .impact-card { background: white; border-radius: 8px; padding: 16px; }
+  .impact-card h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 6px; }
+  .impact-card p { font-size: 0.82rem; color: var(--gray-600); }
+  .impact-card .metric { font-size: 1.5rem; font-weight: 800; color: var(--blue); }
+
+  /* Checklist */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; border-bottom: 1px solid var(--gray-100); font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+  .checklist .check-box { width: 18px; height: 18px; border: 2px solid var(--gray-300); border-radius: 4px; flex-shrink: 0; }
+
+  /* Alert boxes */
+  .alert { padding: 14px 18px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; }
+  .alert-blue { background: #eff6ff; border-left: 4px solid var(--blue); }
+  .alert-green { background: #ecfdf5; border-left: 4px solid var(--green); }
+  .alert-amber { background: #fffbeb; border-left: 4px solid var(--amber); }
+
+  footer { text-align: center; color: var(--gray-500); font-size: 0.8rem; margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--gray-200); }
+
+  @media (max-width: 768px) {
+    .post-card-header { flex-direction: column; }
+    .post-card-img { width: 100%; min-height: 120px; }
+    .img-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ========== HEADER ========== -->
+<div class="page-header">
+  <h1>Linkmap 블로그 전체 업데이트 기획</h1>
+  <p class="sub">2026-03-15 | 바이브코딩 7편 신규 + OG 이미지 16장 + 카드 썸네일 시스템 도입</p>
+</div>
+
+<!-- ========== TOC ========== -->
+<div class="toc">
+  <h2>목차</h2>
+  <ol>
+    <li><a href="#overview">업데이트 개요</a></li>
+    <li><a href="#current">현재 블로그 현황 (AS-IS)</a></li>
+    <li><a href="#posts">신규 블로그 글 7편 상세</a></li>
+    <li><a href="#images">이미지 전략 (OG + 카드 썸네일)</a></li>
+    <li><a href="#category">카테고리별 분포 (업데이트 후)</a></li>
+    <li><a href="#timeline">게시 타임라인</a></li>
+    <li><a href="#impact">예상 임팩트</a></li>
+    <li><a href="#checklist">의사결정 체크리스트</a></li>
+  </ol>
+</div>
+
+<!-- ========== 1. OVERVIEW ========== -->
+<div class="section" id="overview">
+  <h2 class="section-title">1. 업데이트 개요</h2>
+  <div class="overview-grid">
+    <div class="ov-card"><div class="num blue">7</div><div class="lbl">신규 블로그 글</div></div>
+    <div class="ov-card"><div class="num green">16</div><div class="lbl">총 블로그 글 (업데이트 후)</div></div>
+    <div class="ov-card"><div class="num amber">16</div><div class="lbl">OG 이미지 (전체 포스트)</div></div>
+    <div class="ov-card"><div class="num purple">5</div><div class="lbl">카테고리 커버리지</div></div>
+  </div>
+
+  <div class="alert alert-blue">
+    <strong>핵심 변경:</strong> (1) 바이브코딩 보안 관점 7편 추가 → 총 16편 (2) 전체 16편에 OG 이미지 적용 (소셜 공유 최적화) (3) PostCard에 그라데이션 썸네일 시스템 도입 고려
+  </div>
+</div>
+
+<!-- ========== 2. AS-IS ========== -->
+<div class="section" id="current">
+  <h2 class="section-title">2. 현재 블로그 현황 (AS-IS)</h2>
+
+  <table>
+    <thead>
+      <tr><th>#</th><th>제목</th><th>카테고리</th><th>발행일</th><th>OG 이미지</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>바이브 코딩이란 무엇인가</td><td>vibe-coding</td><td>2025-04-07</td><td style="color:var(--red)">없음</td></tr>
+      <tr><td>2</td><td>.env 파일은 왜 위험한가</td><td>env-management</td><td>2025-04-14</td><td style="color:var(--red)">없음</td></tr>
+      <tr><td>3</td><td>바이브 코딩으로 SaaS 만들기</td><td>vibe-coding</td><td>2025-04-21</td><td style="color:var(--red)">없음</td></tr>
+      <tr><td>4</td><td>서비스맵 3분 튜토리얼</td><td>tutorial</td><td>2025-05-05</td><td style="color:var(--red)">없음</td></tr>
+      <tr><td>5</td><td>.env 안전 관리 5가지 방법</td><td>env-management</td><td>2025-05-12</td><td style="color:var(--red)">없음</td></tr>
+      <tr><td>6</td><td>GitHub Secrets 자동화</td><td>tutorial</td><td>2025-05-19</td><td style="color:var(--red)">없음</td></tr>
+      <tr><td>7</td><td>API 키 유출 사고 대응</td><td>env-management</td><td>2026-03-15</td><td style="color:var(--red)">없음</td></tr>
+      <tr><td>8</td><td>MSA 의존성 관리 + 서비스맵</td><td>insight</td><td>2026-03-15</td><td style="color:var(--red)">없음</td></tr>
+      <tr><td>9</td><td>환경변수 관리 도구 비교 2026</td><td>comparison</td><td>2026-03-15</td><td style="color:var(--red)">없음</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert alert-amber">
+    <strong>현재 문제점:</strong> (1) OG 이미지 0/9편 — 소셜 공유 시 미리보기 없음 (2) 카드에 시각 요소 없음 — 텍스트만으로 구분 어려움 (3) 바이브코딩 보안 콘텐츠 부재 — 가장 검색 수요 높은 주제
+  </div>
+</div>
+
+<!-- ========== 3. NEW POSTS ========== -->
+<div class="section" id="posts">
+  <h2 class="section-title">3. 신규 블로그 글 7편 상세</h2>
+  <p class="section-desc">각 글의 내용, 구조, OG 이미지 컨셉, Linkmap 연결점을 포함합니다.</p>
+
+  <!-- POST 1 -->
+  <div class="post-card">
+    <div class="post-card-header">
+      <div class="post-card-img" style="background: linear-gradient(135deg, #1e1b4b, #312e81, #4338ca);">
+        <span class="img-label">OG IMAGE</span>
+        <div class="emoji-icon">&#x1F6A8;</div>
+        <div class="img-title">2,380만 시크릿이<br>유출되고 있다</div>
+      </div>
+      <div class="post-card-body">
+        <div class="post-meta-row">
+          <span class="badge b-new">NEW</span>
+          <span class="badge b-cat">vibe-coding</span>
+          <span class="badge b-priority-h">1차 게시</span>
+          <span class="badge b-time">6분</span>
+        </div>
+        <h3>#10 바이브 코딩 시대, 2,380만 개의 시크릿이 유출되고 있다</h3>
+        <p class="desc">AI 도구 사용 시 시크릿 유출률 40% 증가, GitHub 연간 2,380만 건 유출. 바이브 코더가 알아야 할 시크릿 관리 전략과 실제 유출 사례를 분석합니다.</p>
+        <ol class="h2-list">
+          <li>바이브 코딩이 시크릿 유출을 가속화하는 3가지 이유</li>
+          <li>실제 사례: MoltBook 150만 API 키, Common Crawl 12,000 시크릿</li>
+          <li>AI 코딩 에이전트의 .env 자동 로드 문제</li>
+          <li>바이브 코더를 위한 시크릿 관리 5단계</li>
+          <li>Pre-commit 훅에서 시크릿 매니저까지</li>
+        </ol>
+        <div class="linkmap-tag">
+          <strong>Linkmap:</strong> AES-256-GCM 암호화, 감사 로그, .env 대체 솔루션
+        </div>
+        <div class="tag-row">
+          <span class="tag">바이브 코딩</span><span class="tag">API 키 유출</span><span class="tag">시크릿 관리</span><span class="tag">보안</span><span class="tag">GitHub</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST 2 -->
+  <div class="post-card">
+    <div class="post-card-header">
+      <div class="post-card-img" style="background: linear-gradient(135deg, #7f1d1d, #991b1b, #dc2626);">
+        <span class="img-label">OG IMAGE</span>
+        <div class="emoji-icon">&#x1F6E1;&#xFE0F;</div>
+        <div class="img-title">Supabase RLS 미설정<br>가장 위험한 실수</div>
+      </div>
+      <div class="post-card-body">
+        <div class="post-meta-row">
+          <span class="badge b-new">NEW</span>
+          <span class="badge b-cat">vibe-coding</span>
+          <span class="badge b-priority-h">2차 게시</span>
+          <span class="badge b-time">7분</span>
+        </div>
+        <h3>#11 Supabase RLS 미설정 — 바이브 코딩의 가장 위험한 실수</h3>
+        <p class="desc">Lovable로 만든 170+ 프로덕션 앱에서 RLS 미설정 데이터 노출(CVE-2025-48757). 노출 Supabase DB의 83%가 RLS 미설정이라는 현실과 보안 체크리스트.</p>
+        <ol class="h2-list">
+          <li>CVE-2025-48757: 170개 앱이 한꺼번에 뚫린 날</li>
+          <li>왜 AI는 RLS를 빼먹는가 — LLM의 보안 컨텍스트 한계</li>
+          <li>RLS가 꺼진 Supabase는 공개 API와 같다</li>
+          <li>바이브 코더를 위한 Supabase 보안 체크리스트 7가지</li>
+          <li>RLS + API 이중 방어: Linkmap이 선택한 아키텍처</li>
+        </ol>
+        <div class="linkmap-tag">
+          <strong>Linkmap:</strong> RLS + API 이중 방어 아키텍처 실전 사례, /guides/auth 연결
+        </div>
+        <div class="tag-row">
+          <span class="tag">Supabase</span><span class="tag">RLS</span><span class="tag">바이브 코딩</span><span class="tag">보안</span><span class="tag">Lovable</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST 3 -->
+  <div class="post-card">
+    <div class="post-card-header">
+      <div class="post-card-img" style="background: linear-gradient(135deg, #1e3a5f, #1e40af, #3b82f6);">
+        <span class="img-label">OG IMAGE</span>
+        <div class="emoji-icon">&#x1F50D;</div>
+        <div class="img-title">AI 코드의 45%는<br>보안 결함</div>
+      </div>
+      <div class="post-card-body">
+        <div class="post-meta-row">
+          <span class="badge b-new">NEW</span>
+          <span class="badge b-cat">insight</span>
+          <span class="badge b-priority-m">3차 게시</span>
+          <span class="badge b-time">7분</span>
+        </div>
+        <h3>#12 AI가 만든 코드의 45%는 보안 결함이 있다</h3>
+        <p class="desc">Veracode, CrowdStrike, CSA 보고서 종합 분석. XSS 방어 실패율 86%, SQL 인젝션 20%. 바이브 코더의 보안 검증 파이프라인 제안.</p>
+        <ol class="h2-list">
+          <li>숫자로 보는 AI 코드 보안 현실</li>
+          <li>왜 LLM은 보안 코드를 못 만드는가 — 3가지 근본 원인</li>
+          <li>실제 침해 사례: 5건 중 1건이 AI 코드 원인</li>
+          <li>바이브 코더의 보안 검증 4단계</li>
+          <li>AI 코드를 프로덕션에 올리기 전 체크리스트</li>
+        </ol>
+        <div class="linkmap-tag">
+          <strong>Linkmap:</strong> Zod safeParse 필수 정책, API 5단계 패턴을 "실전 보안 패턴"으로 소개
+        </div>
+        <div class="tag-row">
+          <span class="tag">AI 코드 보안</span><span class="tag">XSS</span><span class="tag">SQL 인젝션</span><span class="tag">Veracode</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST 4 -->
+  <div class="post-card">
+    <div class="post-card-header">
+      <div class="post-card-img" style="background: linear-gradient(135deg, #064e3b, #047857, #10b981);">
+        <span class="img-label">OG IMAGE</span>
+        <div class="emoji-icon">&#x1F4C2;</div>
+        <div class="img-title">1,200만 .env 파일이<br>노출되어 있다</div>
+      </div>
+      <div class="post-card-body">
+        <div class="post-meta-row">
+          <span class="badge b-new">NEW</span>
+          <span class="badge b-cat">env-management</span>
+          <span class="badge b-priority-h">1차 게시</span>
+          <span class="badge b-time">6분</span>
+        </div>
+        <h3>#13 1,200만 개의 .env 파일이 인터넷에 노출되어 있다</h3>
+        <p class="desc">2026.03 충격 보고서. Unit 42의 2.3억 타겟 스캔 클라우드 갈취 캠페인의 실체. .env 파일 시대의 종말을 선언합니다.</p>
+        <ol class="h2-list">
+          <li>1,200만 IP의 .env 노출 — 어떻게 발견되었나</li>
+          <li>Unit 42 추적: 2.3억 타겟 클라우드 갈취 캠페인</li>
+          <li>.env 파일이 위험한 5가지 구조적 이유</li>
+          <li>.env를 넘어서: 시크릿 관리 3단계 진화</li>
+          <li>실습: .env를 안전하게 대체하는 방법</li>
+        </ol>
+        <div class="linkmap-tag">
+          <strong>Linkmap:</strong> 기존 글 ".env 위험" 후속편, 암호화 환경변수 관리 구체적 대안
+        </div>
+        <div class="tag-row">
+          <span class="tag">.env</span><span class="tag">환경변수 유출</span><span class="tag">클라우드 보안</span><span class="tag">Unit 42</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST 5 -->
+  <div class="post-card">
+    <div class="post-card-header">
+      <div class="post-card-img" style="background: linear-gradient(135deg, #581c87, #7c3aed, #a78bfa);">
+        <span class="img-label">OG IMAGE</span>
+        <div class="emoji-icon">&#x2696;&#xFE0F;</div>
+        <div class="img-title">AI 코딩 도구 비교<br>보안 관점 2026</div>
+      </div>
+      <div class="post-card-body">
+        <div class="post-meta-row">
+          <span class="badge b-new">NEW</span>
+          <span class="badge b-cat">comparison</span>
+          <span class="badge b-priority-m">3차 게시</span>
+          <span class="badge b-time">8분</span>
+        </div>
+        <h3>#14 2026 AI 코딩 도구 비교 — 보안과 환경변수 관점에서</h3>
+        <p class="desc">Claude Code, Cursor, Windsurf, Copilot의 보안 차이. .env 파일 처리 방식, 생성 코드 보안 품질, 도구 자체 CVE까지 객관 비교.</p>
+        <ol class="h2-list">
+          <li>2026 AI 코딩 도구 4대장 한눈에 비교</li>
+          <li>보안 관점: 각 도구의 .env 처리 방식</li>
+          <li>생성 코드 보안 품질 비교 (XSS, 인증, 입력 검증)</li>
+          <li>CVE-2025-55284, CVE-2025-54135: AI 도구 자체 취약점</li>
+          <li>어떤 도구를 쓰든 환경변수는 별도 관리해야 한다</li>
+        </ol>
+        <div class="linkmap-tag">
+          <strong>Linkmap:</strong> "AI 코딩 도구의 보안 파트너" 포지셔닝
+        </div>
+        <div class="tag-row">
+          <span class="tag">Claude Code</span><span class="tag">Cursor</span><span class="tag">Windsurf</span><span class="tag">도구 비교</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST 6 -->
+  <div class="post-card">
+    <div class="post-card-header">
+      <div class="post-card-img" style="background: linear-gradient(135deg, #78350f, #b45309, #f59e0b);">
+        <span class="img-label">OG IMAGE</span>
+        <div class="emoji-icon">&#x1F441;&#xFE0F;</div>
+        <div class="img-title">AI 코딩 에이전트가<br>.env를 읽고 있다</div>
+      </div>
+      <div class="post-card-body">
+        <div class="post-meta-row">
+          <span class="badge b-new">NEW</span>
+          <span class="badge b-cat">env-management</span>
+          <span class="badge b-priority-h">1차 게시</span>
+          <span class="badge b-time">6분</span>
+        </div>
+        <h3>#15 AI 코딩 에이전트가 당신의 .env를 읽고 있다</h3>
+        <p class="desc">Claude Code, Cursor가 .env 시크릿을 자동 로드하고 외부 전송할 수 있다는 Knostic 연구. 개발 편의성과 시크릿 보안의 딜레마와 해결책.</p>
+        <ol class="h2-list">
+          <li>AI 코딩 에이전트의 파일 접근 범위</li>
+          <li>Knostic 연구: .env 자동 로드 메커니즘</li>
+          <li>CVE-2025-55284: Claude Code DNS 유출 취약점</li>
+          <li>AI 시대의 시크릿 격리 전략 4가지</li>
+          <li>환경변수를 코드에서 완전히 분리하는 방법</li>
+        </ol>
+        <div class="linkmap-tag">
+          <strong>Linkmap:</strong> 암호화 중앙 저장소 → AI 에이전트 접근 불가 구조, 복호화 값 로깅 금지 정책
+        </div>
+        <div class="tag-row">
+          <span class="tag">AI 코딩 에이전트</span><span class="tag">.env</span><span class="tag">Claude Code</span><span class="tag">Cursor</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST 7 -->
+  <div class="post-card">
+    <div class="post-card-header">
+      <div class="post-card-img" style="background: linear-gradient(135deg, #0f766e, #14b8a6, #5eead4);">
+        <span class="img-label">OG IMAGE</span>
+        <div class="emoji-icon">&#x2705;</div>
+        <div class="img-title">바이브 코딩<br>보안 체크리스트 15</div>
+      </div>
+      <div class="post-card-body">
+        <div class="post-meta-row">
+          <span class="badge b-new">NEW</span>
+          <span class="badge b-cat">tutorial</span>
+          <span class="badge b-priority-m">2차 게시</span>
+          <span class="badge b-time">6분</span>
+        </div>
+        <h3>#16 바이브 코딩 보안 체크리스트 — 배포 전 반드시 확인할 15가지</h3>
+        <p class="desc">15개 앱에서 발견된 69개 취약점(6개 치명적). 인증, 입력 검증, 환경변수, 배포 4파트로 나눈 실용 체크리스트.</p>
+        <ol class="h2-list">
+          <li>15개 앱 69개 취약점 — 가장 흔한 5가지 패턴</li>
+          <li>Part 1: 인증 & 인가 (RLS, JWT, 세션)</li>
+          <li>Part 2: 입력 & 출력 (Zod, XSS, SQL)</li>
+          <li>Part 3: 환경변수 & 시크릿 (암호화, 접근 제어)</li>
+          <li>Part 4: 배포 & 운영 (CORS, Rate Limit, 로깅)</li>
+        </ol>
+        <div class="linkmap-tag">
+          <strong>Linkmap:</strong> CLAUDE.md Critical Rules를 "실전 적용 사례"로 제시
+        </div>
+        <div class="tag-row">
+          <span class="tag">체크리스트</span><span class="tag">프로덕션 배포</span><span class="tag">보안</span><span class="tag">RLS</span><span class="tag">Zod</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 4. IMAGE STRATEGY ========== -->
+<div class="section" id="images">
+  <h2 class="section-title">4. 이미지 전략</h2>
+  <p class="section-desc">OG 이미지(소셜 공유용)를 전체 16편에 적용합니다. 본문 내 이미지는 현재 아키텍처 유지(미사용).</p>
+
+  <div class="alert alert-blue">
+    <strong>이미지 시스템 설계:</strong> <code>ogImage</code> 필드(BlogPost 인터페이스에 이미 존재)를 활용.
+    SVG 기반 OG 이미지를 <code>/public/blog/og/</code> 디렉토리에 저장. 1200x630px (OG 표준). 각 카테고리별 그라데이션 테마 적용.
+  </div>
+
+  <!-- 카테고리별 컬러 테마 -->
+  <div class="img-strategy">
+    <h3>카테고리별 OG 이미지 컬러 테마</h3>
+    <table>
+      <thead>
+        <tr><th>카테고리</th><th>그라데이션</th><th>테마색</th><th>비주얼 미리보기</th><th>글 수</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>vibe-coding</td>
+          <td>Indigo → Purple</td>
+          <td>#4338ca → #7c3aed</td>
+          <td><div style="width:120px;height:24px;border-radius:4px;background:linear-gradient(90deg,#4338ca,#7c3aed)"></div></td>
+          <td>4편</td>
+        </tr>
+        <tr>
+          <td>env-management</td>
+          <td>Emerald → Teal</td>
+          <td>#047857 → #0d9488</td>
+          <td><div style="width:120px;height:24px;border-radius:4px;background:linear-gradient(90deg,#047857,#0d9488)"></div></td>
+          <td>5편</td>
+        </tr>
+        <tr>
+          <td>comparison</td>
+          <td>Purple → Violet</td>
+          <td>#7c3aed → #8b5cf6</td>
+          <td><div style="width:120px;height:24px;border-radius:4px;background:linear-gradient(90deg,#7c3aed,#8b5cf6)"></div></td>
+          <td>2편</td>
+        </tr>
+        <tr>
+          <td>tutorial</td>
+          <td>Teal → Cyan</td>
+          <td>#0d9488 → #06b6d4</td>
+          <td><div style="width:120px;height:24px;border-radius:4px;background:linear-gradient(90deg,#0d9488,#06b6d4)"></div></td>
+          <td>3편</td>
+        </tr>
+        <tr>
+          <td>insight</td>
+          <td>Blue → Indigo</td>
+          <td>#2563eb → #4338ca</td>
+          <td><div style="width:120px;height:24px;border-radius:4px;background:linear-gradient(90deg,#2563eb,#4338ca)"></div></td>
+          <td>2편</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- OG 이미지 전체 목록 -->
+  <div class="img-strategy">
+    <h3>전체 16편 OG 이미지 목록</h3>
+    <p style="font-size:0.85rem;color:var(--gray-600);margin-bottom:16px;">파일 경로: <code>/public/blog/og/{slug}.png</code> | 사이즈: 1200x630px</p>
+
+    <div class="img-grid">
+      <!-- 기존 9편 -->
+      <div class="img-card">
+        <div class="img-preview" style="background:linear-gradient(135deg,#4338ca,#7c3aed);">
+          <div class="emoji-icon">&#x2728;</div>
+          <div class="preview-title">바이브 코딩이란<br>무엇인가</div>
+          <span class="preview-badge">기존 #1</span>
+        </div>
+        <div class="img-card-body">
+          <div class="img-name">what-is-vibe-coding.png</div>
+          <div class="img-spec">vibe-coding | Indigo→Purple</div>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <div class="img-preview" style="background:linear-gradient(135deg,#047857,#0d9488);">
+          <div class="emoji-icon">&#x26A0;&#xFE0F;</div>
+          <div class="preview-title">.env 파일은<br>왜 위험한가</div>
+          <span class="preview-badge">기존 #2</span>
+        </div>
+        <div class="img-card-body">
+          <div class="img-name">why-dotenv-is-dangerous.png</div>
+          <div class="img-spec">env-management | Emerald→Teal</div>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <div class="img-preview" style="background:linear-gradient(135deg,#4338ca,#7c3aed);">
+          <div class="emoji-icon">&#x1F680;</div>
+          <div class="preview-title">바이브 코딩으로<br>SaaS 만들기</div>
+          <span class="preview-badge">기존 #3</span>
+        </div>
+        <div class="img-card-body">
+          <div class="img-name">vibe-coding-can-you-build-saas.png</div>
+          <div class="img-spec">vibe-coding | Indigo→Purple</div>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <div class="img-preview" style="background:linear-gradient(135deg,#0d9488,#06b6d4);">
+          <div class="emoji-icon">&#x1F5FA;&#xFE0F;</div>
+          <div class="preview-title">서비스맵<br>3분 튜토리얼</div>
+          <span class="preview-badge">기존 #4</span>
+        </div>
+        <div class="img-card-body">
+          <div class="img-name">service-map-tutorial.png</div>
+          <div class="img-spec">tutorial | Teal→Cyan</div>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <div class="img-preview" style="background:linear-gradient(135deg,#047857,#0d9488);">
+          <div class="emoji-icon">&#x1F512;</div>
+          <div class="preview-title">.env 안전 관리<br>5가지 방법</div>
+          <span class="preview-badge">기존 #5</span>
+        </div>
+        <div class="img-card-body">
+          <div class="img-name">dotenv-safe-management-tips.png</div>
+          <div class="img-spec">env-management | Emerald→Teal</div>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <div class="img-preview" style="background:linear-gradient(135deg,#0d9488,#06b6d4);">
+          <div class="emoji-icon">&#x2699;&#xFE0F;</div>
+          <div class="preview-title">GitHub Secrets<br>자동화</div>
+          <span class="preview-badge">기존 #6</span>
+        </div>
+        <div class="img-card-body">
+          <div class="img-name">github-secrets-automation.png</div>
+          <div class="img-spec">tutorial | Teal→Cyan</div>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <div class="img-preview" style="background:linear-gradient(135deg,#047857,#0d9488);">
+          <div class="emoji-icon">&#x1F6A8;</div>
+          <div class="preview-title">API 키 유출<br>사고 대응</div>
+          <span class="preview-badge">기존 #7</span>
+        </div>
+        <div class="img-card-body">
+          <div class="img-name">api-key-leak-incident-response.png</div>
+          <div class="img-spec">env-management | Emerald→Teal</div>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <div class="img-preview" style="background:linear-gradient(135deg,#2563eb,#4338ca);">
+          <div class="emoji-icon">&#x1F310;</div>
+          <div class="preview-title">MSA 의존성 관리<br>+ 서비스맵</div>
+          <span class="preview-badge">기존 #8</span>
+        </div>
+        <div class="img-card-body">
+          <div class="img-name">microservice-dependency-service-map.png</div>
+          <div class="img-spec">insight | Blue→Indigo</div>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <div class="img-preview" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);">
+          <div class="emoji-icon">&#x2696;&#xFE0F;</div>
+          <div class="preview-title">환경변수 관리 도구<br>비교 2026</div>
+          <span class="preview-badge">기존 #9</span>
+        </div>
+        <div class="img-card-body">
+          <div class="img-name">doppler-vs-infisical-vs-linkmap-comparison.png</div>
+          <div class="img-spec">comparison | Purple→Violet</div>
+        </div>
+      </div>
+
+      <!-- 신규 7편 -->
+      <div class="img-card" style="border-color: var(--green);">
+        <div class="img-preview" style="background:linear-gradient(135deg,#1e1b4b,#312e81,#4338ca);">
+          <div class="emoji-icon">&#x1F6A8;</div>
+          <div class="preview-title">2,380만 시크릿이<br>유출되고 있다</div>
+          <span class="preview-badge" style="background:var(--green);">NEW #10</span>
+        </div>
+        <div class="img-card-body">
+          <div class="img-name">vibe-coding-secret-leak-crisis.png</div>
+          <div class="img-spec">vibe-coding | Deep Indigo</div>
+        </div>
+      </div>
+
+      <div class="img-card" style="border-color: var(--green);">
+        <div class="img-preview" style="background:linear-gradient(135deg,#7f1d1d,#991b1b,#dc2626);">
+          <div class="emoji-icon">&#x1F6E1;&#xFE0F;</div>
+          <div class="preview-title">Supabase RLS<br>가장 위험한 실수</div>
+          <span class="preview-badge" style="background:var(--green);">NEW #11</span>
+        </div>
+        <div class="img-card-body">
+          <div class="img-name">supabase-rls-vibe-coding-risk.png</div>
+          <div class="img-spec">vibe-coding | Alert Red</div>
+        </div>
+      </div>
+
+      <div class="img-card" style="border-color: var(--green);">
+        <div class="img-preview" style="background:linear-gradient(135deg,#1e3a5f,#1e40af,#3b82f6);">
+          <div class="emoji-icon">&#x1F50D;</div>
+          <div class="preview-title">AI 코드의 45%는<br>보안 결함</div>
+          <span class="preview-badge" style="background:var(--green);">NEW #12</span>
+        </div>
+        <div class="img-card-body">
+          <div class="img-name">ai-code-security-reality.png</div>
+          <div class="img-spec">insight | Navy→Blue</div>
+        </div>
+      </div>
+
+      <div class="img-card" style="border-color: var(--green);">
+        <div class="img-preview" style="background:linear-gradient(135deg,#064e3b,#047857,#10b981);">
+          <div class="emoji-icon">&#x1F4C2;</div>
+          <div class="preview-title">1,200만 .env<br>노출</div>
+          <span class="preview-badge" style="background:var(--green);">NEW #13</span>
+        </div>
+        <div class="img-card-body">
+          <div class="img-name">env-file-exposure-crisis.png</div>
+          <div class="img-spec">env-management | Deep Emerald</div>
+        </div>
+      </div>
+
+      <div class="img-card" style="border-color: var(--green);">
+        <div class="img-preview" style="background:linear-gradient(135deg,#581c87,#7c3aed,#a78bfa);">
+          <div class="emoji-icon">&#x2696;&#xFE0F;</div>
+          <div class="preview-title">AI 코딩 도구 비교<br>보안 관점</div>
+          <span class="preview-badge" style="background:var(--green);">NEW #14</span>
+        </div>
+        <div class="img-card-body">
+          <div class="img-name">ai-coding-tools-security-comparison.png</div>
+          <div class="img-spec">comparison | Deep Purple</div>
+        </div>
+      </div>
+
+      <div class="img-card" style="border-color: var(--green);">
+        <div class="img-preview" style="background:linear-gradient(135deg,#78350f,#b45309,#f59e0b);">
+          <div class="emoji-icon">&#x1F441;&#xFE0F;</div>
+          <div class="preview-title">AI가 .env를<br>읽고 있다</div>
+          <span class="preview-badge" style="background:var(--green);">NEW #15</span>
+        </div>
+        <div class="img-card-body">
+          <div class="img-name">ai-agent-reads-your-env.png</div>
+          <div class="img-spec">env-management | Amber Warning</div>
+        </div>
+      </div>
+
+      <div class="img-card" style="border-color: var(--green);">
+        <div class="img-preview" style="background:linear-gradient(135deg,#0f766e,#14b8a6,#5eead4);">
+          <div class="emoji-icon">&#x2705;</div>
+          <div class="preview-title">바이브 코딩<br>보안 체크리스트</div>
+          <span class="preview-badge" style="background:var(--green);">NEW #16</span>
+        </div>
+        <div class="img-card-body">
+          <div class="img-name">vibe-coding-security-checklist.png</div>
+          <div class="img-spec">tutorial | Teal Bright</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OG 이미지 생성 방안 -->
+  <div class="img-strategy">
+    <h3>OG 이미지 생성 방안 (의사결정 필요)</h3>
+    <table>
+      <thead>
+        <tr><th>방안</th><th>설명</th><th>장점</th><th>단점</th><th>추천</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>A. 코드 생성 (SVG→PNG)</strong></td>
+          <td>Node.js 스크립트로 SVG 템플릿 → sharp/puppeteer로 PNG 변환. 카테고리 그라데이션 + 제목 + Linkmap 로고</td>
+          <td>일관성, 자동화 가능, 새 글 추가 시 자동 생성</td>
+          <td>초기 스크립트 작성 필요</td>
+          <td style="color:var(--green);font-weight:700">추천</td>
+        </tr>
+        <tr>
+          <td><strong>B. 디자인 도구</strong></td>
+          <td>Figma/Canva로 수동 제작</td>
+          <td>디자인 품질 높음</td>
+          <td>매번 수동 작업, 일관성 유지 어려움</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td><strong>C. Next.js OG (동적)</strong></td>
+          <td><code>next/og</code> (ImageResponse)로 요청 시 동적 생성</td>
+          <td>빌드 불필요, 항상 최신</td>
+          <td>Cloudflare Workers 호환성 불확실, 런타임 비용</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td><strong>D. 정적 CSS 이미지</strong></td>
+          <td>HTML/CSS로 카드 디자인 → 스크린샷 저장</td>
+          <td>빠른 구현</td>
+          <td>품질 한계</td>
+          <td>-</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ========== 5. CATEGORY DISTRIBUTION ========== -->
+<div class="section" id="category">
+  <h2 class="section-title">5. 카테고리별 분포 (업데이트 후)</h2>
+
+  <table>
+    <thead>
+      <tr><th>카테고리</th><th>기존</th><th>신규</th><th>합계</th><th>비율</th><th>구성</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>vibe-coding</strong> (바이브 코딩)</td>
+        <td>2</td><td style="color:var(--green);font-weight:700">+2</td><td>4</td><td>25%</td>
+        <td>
+          <div style="background:var(--gray-100);border-radius:4px;height:20px;width:100%;">
+            <div style="background:linear-gradient(90deg,#4338ca,#7c3aed);height:100%;width:25%;border-radius:4px;"></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>env-management</strong> (환경변수)</td>
+        <td>3</td><td style="color:var(--green);font-weight:700">+2</td><td>5</td><td>31%</td>
+        <td>
+          <div style="background:var(--gray-100);border-radius:4px;height:20px;width:100%;">
+            <div style="background:linear-gradient(90deg,#047857,#0d9488);height:100%;width:31%;border-radius:4px;"></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>comparison</strong> (비교 분석)</td>
+        <td>1</td><td style="color:var(--green);font-weight:700">+1</td><td>2</td><td>13%</td>
+        <td>
+          <div style="background:var(--gray-100);border-radius:4px;height:20px;width:100%;">
+            <div style="background:linear-gradient(90deg,#7c3aed,#8b5cf6);height:100%;width:13%;border-radius:4px;"></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>tutorial</strong> (튜토리얼)</td>
+        <td>2</td><td style="color:var(--green);font-weight:700">+1</td><td>3</td><td>19%</td>
+        <td>
+          <div style="background:var(--gray-100);border-radius:4px;height:20px;width:100%;">
+            <div style="background:linear-gradient(90deg,#0d9488,#06b6d4);height:100%;width:19%;border-radius:4px;"></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>insight</strong> (인사이트)</td>
+        <td>1</td><td style="color:var(--green);font-weight:700">+1</td><td>2</td><td>13%</td>
+        <td>
+          <div style="background:var(--gray-100);border-radius:4px;height:20px;width:100%;">
+            <div style="background:linear-gradient(90deg,#2563eb,#4338ca);height:100%;width:13%;border-radius:4px;"></div>
+          </div>
+        </td>
+      </tr>
+      <tr style="font-weight:700;background:var(--gray-50);">
+        <td>합계</td><td>9</td><td style="color:var(--green);">+7</td><td>16</td><td>100%</td><td></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alert alert-green">
+    <strong>균형 분석:</strong> env-management(31%)와 vibe-coding(25%)이 주력. Linkmap 핵심 가치(환경변수 관리 + 바이브코딩)에 56%의 콘텐츠가 집중되어 GEO 전략에 부합합니다.
+  </div>
+</div>
+
+<!-- ========== 6. TIMELINE ========== -->
+<div class="section" id="timeline">
+  <h2 class="section-title">6. 게시 타임라인</h2>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot blue"></div>
+      <h4>1차 게시 — 즉시 (2026-03-15 ~ 03-17)</h4>
+      <p class="tl-desc">데이터 강도 최고, Linkmap 핵심 가치 직결. 충격적 숫자로 관심 유도.</p>
+      <ul class="tl-posts">
+        <li><strong>#10</strong> 2,380만 시크릿 유출 (vibe-coding)</li>
+        <li><strong>#13</strong> 1,200만 .env 노출 (env-management)</li>
+        <li><strong>#15</strong> AI가 .env를 읽고 있다 (env-management)</li>
+      </ul>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot green"></div>
+      <h4>2차 게시 — 1~2주 후 (2026-03-22 ~ 03-29)</h4>
+      <p class="tl-desc">실용적 콘텐츠. 검색 수요 높은 Supabase RLS + 체크리스트.</p>
+      <ul class="tl-posts">
+        <li><strong>#11</strong> Supabase RLS 미설정 (vibe-coding)</li>
+        <li><strong>#16</strong> 보안 체크리스트 15가지 (tutorial)</li>
+      </ul>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot amber"></div>
+      <h4>3차 게시 — 3~4주 후 (2026-04-05 ~ 04-12)</h4>
+      <p class="tl-desc">심층 분석. 작성 시간 더 필요하지만 SEO 가치 매우 높음.</p>
+      <ul class="tl-posts">
+        <li><strong>#12</strong> AI 코드 45% 보안 결함 (insight)</li>
+        <li><strong>#14</strong> AI 코딩 도구 보안 비교 (comparison)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="alert alert-blue" style="margin-top: 16px;">
+    <strong>OG 이미지 작업:</strong> 전체 16장은 1차 게시 전에 일괄 생성하여 기존 9편에도 소급 적용합니다. 소셜 공유 효과를 극대화합니다.
+  </div>
+</div>
+
+<!-- ========== 7. IMPACT ========== -->
+<div class="section" id="impact">
+  <h2 class="section-title">7. 예상 임팩트</h2>
+
+  <div class="impact-box">
+    <h3>업데이트 전후 비교</h3>
+    <div class="impact-grid">
+      <div class="impact-card">
+        <h4>블로그 글 수</h4>
+        <p>9편 → <span class="metric">16편</span></p>
+        <p>+78% 증가</p>
+      </div>
+      <div class="impact-card">
+        <h4>OG 이미지 커버리지</h4>
+        <p>0/9편 → <span class="metric">16/16편</span></p>
+        <p>소셜 공유 CTR 2~3배 기대</p>
+      </div>
+      <div class="impact-card">
+        <h4>GEO 키워드 커버리지</h4>
+        <p>Tier 1~2 키워드 <span class="metric">+12개</span></p>
+        <p>바이브 코딩 보안, AI 코딩 도구 비교 등</p>
+      </div>
+      <div class="impact-card">
+        <h4>교차 링크 밀도</h4>
+        <p>기존 글 간 연결 <span class="metric">3배</span></p>
+        <p>신규 7편이 기존 9편과 상호 참조</p>
+      </div>
+      <div class="impact-card">
+        <h4>타겟 독자 확대</h4>
+        <p>기존: 바이브 코더 + 인디 개발자</p>
+        <p>추가: <span class="metric">보안 의식 있는 개발자</span></p>
+      </div>
+      <div class="impact-card">
+        <h4>콘텐츠 시리즈화</h4>
+        <p>"바이브코딩 보안" 시리즈 <span class="metric">5편</span></p>
+        <p>카테고리 소유 전략 강화</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 8. DECISION CHECKLIST ========== -->
+<div class="section" id="checklist">
+  <h2 class="section-title">8. 의사결정 체크리스트</h2>
+  <p class="section-desc">아래 항목을 확인하고 진행 여부를 결정해주세요.</p>
+
+  <div style="background:white;border:1px solid var(--gray-200);border-radius:12px;padding:24px;">
+    <h3 style="font-size:1rem;margin-bottom:16px;">콘텐츠 결정</h3>
+    <ul class="checklist">
+      <li><span class="check-box"></span> 7편 전체 게시 승인 / 일부만 선택 (번호 지정: ___)</li>
+      <li><span class="check-box"></span> 1차 게시 3편 (#10, #13, #15) 즉시 작성 시작</li>
+      <li><span class="check-box"></span> 발행일 전략: 즉시 게시 / 주 1~2편 순차 게시</li>
+      <li><span class="check-box"></span> 글 톤: 현재 기존 글과 동일한 톤 유지 확인</li>
+    </ul>
+
+    <h3 style="font-size:1rem;margin:20px 0 16px;">이미지 결정</h3>
+    <ul class="checklist">
+      <li><span class="check-box"></span> OG 이미지 생성 방안 선택: A(코드 생성) / B(디자인 도구) / C(동적) / D(CSS)</li>
+      <li><span class="check-box"></span> 카테고리별 그라데이션 컬러 테마 승인</li>
+      <li><span class="check-box"></span> 기존 9편에도 OG 이미지 소급 적용 승인</li>
+      <li><span class="check-box"></span> PostCard 컴포넌트 썸네일 추가는 별도 결정 (현재 텍스트만)</li>
+    </ul>
+
+    <h3 style="font-size:1rem;margin:20px 0 16px;">기술 결정</h3>
+    <ul class="checklist">
+      <li><span class="check-box"></span> <code>public/blog/og/</code> 디렉토리 생성 승인</li>
+      <li><span class="check-box"></span> 기존 posts.ts에 ogImage 필드 추가 (기존 9편 포함)</li>
+      <li><span class="check-box"></span> 신규 7편 slug 네이밍 확인</li>
+    </ul>
+  </div>
+
+  <div class="alert alert-amber" style="margin-top: 20px;">
+    <strong>참고:</strong> OG 이미지 없이도 블로그 글 7편은 독립적으로 게시 가능합니다. 이미지 작업은 글 작성과 병렬로 진행할 수 있으므로, 먼저 콘텐츠 승인 후 이미지는 후속 작업으로 분리해도 됩니다.
+  </div>
+</div>
+
+<footer>
+  Linkmap Blog Full Update Plan | 2026-03-15 | 7 new posts + 16 OG images + category enhancement
+</footer>
+
+</div>
+</body>
+</html>

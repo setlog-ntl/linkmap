@@ -62,6 +62,700 @@ const categoryOrder: BlogCategory[] = ['vibe-coding', 'env-management', 'compari
 
 export const BLOG_POSTS: BlogPost[] = [
   // ======================================================================
+  // 14. 2026 AI 코딩 도구 비교 — 보안과 환경변수 관점에서
+  // ======================================================================
+  {
+    slug: 'ai-coding-tools-security-comparison',
+    title: '2026 AI 코딩 도구 비교 — 보안과 환경변수 관점에서',
+    description: 'Claude Code, Cursor, Windsurf, GitHub Copilot을 보안 관점에서 비교합니다. .env 파일 처리 방식, 생성 코드 보안 품질, 도구 자체 CVE를 분석하고 공통 대응 전략을 제안합니다.',
+    category: 'comparison',
+    tags: ['Claude Code', 'Cursor', 'Windsurf', '도구 비교', 'AI 코딩', '보안'],
+    publishedAt: '2026-04-12',
+    readingTime: '8분',
+    relatedGuides: ['env', 'github', 'auth', 'deploy'],
+    ogImage: '/blog/og/ai-coding-tools-security-comparison.png',
+    content: `> **KEY:** 어떤 AI 코딩 도구를 쓰든, 도구 자체의 보안 취약점과 .env 파일 처리 방식은 개발자가 직접 관리해야 합니다. 도구 선택보다 환경변수를 도구로부터 분리하는 구조가 먼저입니다.
+
+## 2026 AI 코딩 도구 4대장 한눈에 비교
+
+AI 코딩 도구 시장은 2025년 이후 빠르게 재편됐습니다. Pragmatic Engineer 서베이(906명 응답)에 따르면 Claude Code는 출시 10개월 만에 "가장 사랑받는 도구" 1위(46%)를 차지했으며, Cursor(19%), GitHub Copilot(9%)과 큰 격차를 보입니다.
+
+| 항목 | Claude Code | Cursor | Windsurf | GitHub Copilot |
+|------|------------|--------|----------|----------------|
+| 형태 | CLI 에이전트 | IDE (VS Code 포크) | IDE | IDE 플러그인 |
+| 기본 모델 | Claude (Anthropic) | 멀티모델 선택 | 멀티모델 선택 | GPT / Claude |
+| 가격 (기준) | \$100/월 (Max) | \$20/월 (Pro) | \$15/월 (Pro) | \$10/월 (Individual) |
+| SWE-bench 순위 | **1위** | — | — | — |
+| "가장 사랑받는" 비율 | **46%** | 19% | — | 9% |
+| 컨텍스트 창 | 최대 200K | 프로젝트 전체 | 프로젝트 전체 | 리포지토리 |
+| 에이전트 모드 | 기본 | 지원 | 지원 | 지원 |
+
+이 비교 글의 초점은 기능이 아니라 **보안**입니다. 각 도구가 여러분의 시크릿을 어떻게 다루는지, 그리고 도구 자체에 어떤 취약점이 있었는지를 살펴봅니다.
+
+> **INFO:** SWE-bench는 실제 GitHub 이슈를 자동으로 해결하는 능력을 측정하는 벤치마크입니다. Claude Code가 1위를 기록하고 있지만, 이 점수는 코드 생성 능력을 평가할 뿐 생성된 코드의 보안 품질을 측정하지는 않습니다.
+
+## 보안 관점: 각 도구의 .env 파일 처리 방식
+
+AI 코딩 도구들은 모두 동일한 방식으로 작동합니다. 프로젝트 디렉토리의 파일을 읽어 컨텍스트를 구성하고, 이를 LLM에 전달합니다. 이 과정에서 **프로젝트 안에 있는 .env 파일도 함께 읽힐 수 있습니다.**
+
+**Claude Code**는 [Knostic의 보고서](https://www.knostic.ai/blog/claude-loads-secrets-without-permission)에 따르면 프로젝트 디렉토리의 .env 파일을 사용자 확인 없이 자동으로 로드하는 동작이 발견됐습니다. \`~/.claude/settings.json\`에 deny 규칙을 추가해 제외 설정이 가능합니다.
+
+**Cursor** 역시 프로젝트 디렉토리 전체를 읽어 컨텍스트를 구성합니다. [API Stronghold의 분석](https://www.apistronghold.com/blog/cursor-reads-your-env-file)에 따르면 Cursor가 .env 파일을 읽어 에이전트 컨텍스트에 포함하는 사례가 확인됐습니다. \`.cursorignore\` 파일로 제외 설정이 가능합니다.
+
+**Windsurf**는 엔터프라이즈 보안에 주력하며 SOC 2 준수, SSO, 데이터 레지던시 옵션을 제공합니다. 다만 일반 .env 파일 처리 방식은 다른 IDE 기반 도구들과 기본적으로 동일합니다.
+
+**GitHub Copilot**은 플러그인 형태로 에디터에서 작동하며, 컨텍스트 수집 범위는 열린 파일과 리포지토리에 한정됩니다. 다른 도구에 비해 에이전트 모드의 자율성이 낮아 자동 파일 읽기 범위가 상대적으로 제한적입니다.
+
+> **WARNING:** 어떤 AI 코딩 도구를 쓰든, .env 파일을 프로젝트 루트에 두는 것은 위험합니다. AI 도구가 해당 파일을 컨텍스트로 읽어 LLM 추론 과정에 노출될 수 있습니다. 프로젝트 외부에 보관하거나, 런타임 시 시크릿을 주입하는 방식을 사용하세요.
+
+## 생성 코드 보안 품질 비교
+
+도구별 생성 코드 보안 품질의 차이는 실제로 크지 않습니다. [Veracode의 2025 GenAI Code Security Report](https://www.veracode.com/blog/genai-code-security-report/)가 100개 이상 LLM을 분석한 결과, 모델 크기나 출시 시기와 무관하게 45%의 테스트에서 보안 결함이 발견됐습니다.
+
+| 취약점 유형 | AI 코드 실패율 | 주요 원인 |
+|------------|-------------|---------|
+| XSS (크로스사이트 스크립팅) | **86%** | 입력 이스케이프 누락 |
+| SQL 인젝션 | **20%** | 파라미터 바인딩 미적용 |
+| 인증 결함 | 높음 | 인증 로직 반전, 세션 미검증 |
+| 시크릿 하드코딩 | 빈번 | 예제 코드 패턴 재현 |
+
+어떤 도구가 더 "안전한 코드"를 생성하는지의 차이보다, **생성된 코드를 어떻게 검증하느냐**가 훨씬 중요합니다. [인증 가이드](/guides/auth)에서 AI 코드 검토 시 필수 점검 패턴을 확인할 수 있습니다.
+
+---
+
+## CVE-2025-55284, CVE-2025-54135: AI 도구 자체 취약점
+
+도구가 생성하는 코드의 보안뿐 아니라, **도구 자체의 취약점**도 주목해야 합니다.
+
+**CVE-2025-55284 — Claude Code (패치됨):** [Embrace the Red](https://embracethered.com/blog/posts/2025/claude-code-exfiltration-via-dns-requests/)에 따르면 v1.0.4 이전 버전에서 CVSS 7.1(High). 악성 콘텐츠 주입 시 사용자 확인 없이 파일을 읽고 DNS 요청을 통해 외부로 API 키 유출이 가능했습니다. v1.0.4에서 패치됨.
+
+**CVE-2025-54135 — Cursor (패치됨):** [Tenable 분석](https://www.tenable.com/blog/faq-cve-2025-54135-cve-2025-54136-vulnerabilities-in-cursor-curxecute-mcpoison)에서 발견. CVSS 8.6(High). MCP 서버 처리 방식의 결함으로 프롬프트 인젝션을 통해 임의 명령 실행이 가능했습니다. 2025년 7월 패치됨.
+
+두 CVE 모두 현재는 패치된 상태이지만, AI 코딩 도구는 개발 환경에 깊이 통합된 에이전트이며, 도구에 대한 공격은 개발자의 전체 시크릿과 코드베이스를 위협합니다.
+
+> **TIP:** AI 코딩 도구는 항상 최신 버전으로 유지하세요. Claude Code는 \`claude --version\`으로 버전 확인이 가능하며, Cursor는 자동 업데이트를 켜두는 것이 좋습니다.
+
+## 어떤 도구를 쓰든 환경변수는 별도로 관리해야 한다
+
+이 비교에서 가장 중요한 결론입니다. Claude Code든 Cursor든 Windsurf든, **환경변수를 도구의 컨텍스트에서 분리하는 것이 공통 대응 전략**입니다.
+
+\`\`\`
+나쁜 구조:
+  my-project/
+  ├── .env          ← AI 도구가 읽을 수 있음
+  ├── src/
+  └── ...
+
+좋은 구조:
+  my-project/       ← AI 도구 작업 디렉토리
+  ├── .claudeignore  ← .env* 제외 설정
+  ├── src/
+  └── ...
+
+  시크릿 관리:
+  └── Linkmap (linkmap.biz)
+      ← AES-256-GCM 암호화 저장
+      ← GitHub Secrets 자동 동기화
+      ← AI 도구 컨텍스트와 완전 분리
+\`\`\`
+
+[Linkmap](https://www.linkmap.biz)을 사용하면 환경변수를 프로젝트 디렉토리 외부에서 관리하면서, [GitHub Secrets에 자동 동기화](/blog/github-secrets-automation)할 수 있습니다.
+
+- [ ] .env 파일을 프로젝트 루트에서 제거하고 AI 도구 ignore 설정
+- [ ] AI 도구를 항상 최신 버전으로 유지 (CVE 패치 적용)
+- [ ] 환경변수는 [Linkmap](https://www.linkmap.biz) 또는 배포 플랫폼에서 직접 관리
+- [ ] 코드 생성 후 XSS, 인증 로직, SQL 쿼리 필수 수동 검토
+
+> **TRY:** AI 코딩 도구를 안전하게 쓰려면 환경변수가 .env 파일에 있으면 안 됩니다. [Linkmap 무료 플랜](https://www.linkmap.biz/signup)으로 시크릿을 AES-256-GCM 암호화 저장소에 옮기고, 모든 AI 도구의 컨텍스트 범위 밖으로 분리하세요.
+
+---
+
+*환경변수 보안 기초는 [환경변수 완전 정복 가이드](/guides/env)를, 배포 환경 관리는 [도메인·배포·서버 가이드](/guides/deploy)를 참고하세요.*
+`,
+  },
+  // ======================================================================
+  // 12. AI가 만든 코드의 45%는 보안 결함이 있다
+  // ======================================================================
+  {
+    slug: 'ai-code-security-reality',
+    title: 'AI가 만든 코드의 45%는 보안 결함이 있다 — 바이브 코더가 알아야 할 현실',
+    description: 'Veracode 2025 보고서 핵심 분석. AI 생성 코드의 XSS 방어 실패율 86%, SQL 인젝션 20%, Java 70%+. 보안 검증 파이프라인과 프로덕션 배포 전 최소 체크리스트를 제안합니다.',
+    category: 'insight',
+    tags: ['AI 코드 보안', '바이브 코딩', 'XSS', 'SQL 인젝션', 'Veracode'],
+    publishedAt: '2026-04-05',
+    readingTime: '7분',
+    relatedGuides: ['auth', 'env', 'backend', 'supabase'],
+    ogImage: '/blog/og/ai-code-security-reality.png',
+    content: `> **KEY:** AI 생성 코드(AI-generated code)는 45%의 확률로 보안 결함을 포함합니다. 더 크고 최신인 모델이라도 보안 품질은 나아지지 않습니다. 코드를 생성하는 것과 그 코드가 안전한 것은 전혀 다른 문제입니다.
+
+## 숫자로 보는 AI 코드 보안 현실
+
+2025년 [Veracode](https://www.veracode.com/blog/genai-code-security-report/)가 100개 이상의 LLM을 대상으로 80개 코딩 태스크를 수행한 결과가 발표됐습니다. Java, JavaScript, Python, C#을 아우르는 이 연구는 AI 생성 코드의 보안 실태를 가장 광범위하게 분석한 보고서 중 하나입니다.
+
+| 항목 | 수치 |
+|------|------|
+| 전체 보안 결함 발생률 | **45%** |
+| XSS(크로스사이트 스크립팅) 방어 실패 | **86%** |
+| SQL 인젝션 취약점 발생 | **20%** |
+| Java LLM 코드 보안 실패율 | **70% 이상** |
+| 분석 LLM 수 | **100개 이상** |
+
+가장 충격적인 사실은 **모델 크기와 출시 시기가 보안 품질에 유의미한 영향을 주지 않는다**는 점입니다. 더 새롭고 더 크고 더 빠른 모델이라도, 보안 취약 코드 생성률은 거의 동일합니다.
+
+> **INFO:** XSS(CWE-80)는 OWASP Top 10의 대표 취약점입니다. 사용자가 입력한 스크립트가 다른 사용자의 브라우저에서 실행되는 공격으로, AI는 이를 방어하는 입력 검증 코드를 86%의 경우 제대로 작성하지 못했습니다.
+
+## 왜 LLM은 보안 코드를 못 만드는가 — 3가지 근본 원인
+
+AI가 기능 코드는 잘 만들면서 보안 코드에서 실패하는 이유는 구조적 문제에 있습니다.
+
+**원인 1: 학습 데이터의 편향.** LLM은 인터넷에 공개된 코드를 학습합니다. 공개 코드의 상당 부분은 튜토리얼, 스택오버플로 답변, 빠르게 작성된 데모 코드입니다. 이런 코드들은 "작동하는가"를 기준으로 작성되며, 보안 검증 로직은 종종 생략됩니다.
+
+**원인 2: 컨텍스트의 부재.** 보안은 맥락(context)에 의존합니다. 같은 SQL 쿼리라도 사용자 입력이 어디서 왔는지, 어떤 권한으로 실행되는지에 따라 위험도가 달라집니다. LLM은 전체 시스템 아키텍처를 이해하지 못한 채 코드 조각만 생성합니다.
+
+**원인 3: 평가 기준의 불일치.** "로그인 폼을 만들어줘"라고 하면, AI는 작동하는 폼을 목표로 합니다. CSRF 방어, 입력 검증, 세션 관리는 명시적으로 요청하지 않으면 불완전하게 포함됩니다.
+
+> **WARNING:** "AI가 코드를 작성했으니 보안도 처리했을 것"이라는 가정이 가장 위험합니다. AI 코드의 보안 결함은 기능 버그와 달리 테스트 단계에서 드러나지 않고, 실제 공격이 발생해야 비로소 인지되는 경우가 많습니다.
+
+## 실제 침해 사례: AI 코드가 5건 중 1건의 보안 사고 원인
+
+[CrowdStrike](https://www.crowdstrike.com/en-us/blog/crowdstrike-researchers-identify-hidden-vulnerabilities-ai-coded-software/)는 AI로 작성된 소프트웨어의 숨겨진 취약점을 집중 분석했습니다. CodeRabbit의 2025년 12월 분석은 더 직접적인 수치를 제시합니다. AI 공동 작성 PR은 인간 작성 PR보다 주요(major) 이슈가 **1.7배**, 보안 관련 이슈는 **2.74배** 높습니다.
+
+오늘날 개발자들이 커밋하는 코드의 약 42%는 AI 보조로 작성됩니다. 팀 전체로 보면, 여러분의 코드베이스 중 상당 부분이 충분히 검증되지 않은 AI 생성 코드일 수 있습니다.
+
+---
+
+## 바이브 코더의 보안 검증 파이프라인 4단계
+
+AI 코드를 완전히 거부할 필요는 없습니다. 검증 파이프라인을 만들면 됩니다.
+
+**1단계: 입력 검증 — Zod safeParse 필수.** AI가 생성한 API 라우트에서 가장 흔한 취약점은 입력 검증 누락입니다. Zod의 \`safeParse\`를 사용하세요(\`parse\`는 throw를 발생시켜 500 에러로 이어질 수 있습니다).
+
+**2단계: 인증 + 소유권 확인 — API 5단계 패턴.** 모든 API 라우트는 \`getUser()\` → Zod safeParse → 소유권 확인 → 비즈니스 로직 → \`logAudit()\` 순서를 따라야 합니다.
+
+**3단계: RLS 이중 방어.** Supabase를 사용한다면 RLS를 반드시 활성화하고, API 레벨 \`user_id\` 필터와 이중으로 적용하세요.
+
+**4단계: 정적 분석 도구 연동.** AI 코드를 커밋 전에 자동 스캔하는 도구를 CI/CD에 통합하세요.
+
+> **TIP:** [Supabase 가이드](/guides/supabase)와 [백엔드 가이드](/guides/backend)에서 RLS 정책 설정과 API 인증 패턴을 단계별로 확인할 수 있습니다.
+
+## AI 코드를 프로덕션에 올리기 전 최소 체크리스트
+
+- [ ] 모든 API 라우트에 인증 확인 존재 (\`getUser()\` 호출 및 null 체크)
+- [ ] 외부 입력 전부 Zod safeParse 처리
+- [ ] DB 쿼리에 \`user_id\` 필터 포함
+- [ ] Supabase 테이블에 RLS 정책 활성화 확인
+- [ ] \`console.log()\`에 API 키 또는 환경변수 값 출력 없음
+- [ ] 환경변수는 [Linkmap](https://www.linkmap.biz)으로 암호화 저장
+- [ ] NEXT_PUBLIC_ 접두사에 서버 전용 키 포함 없음
+
+> **TRY:** AI 코드의 보안은 도구가 아니라 **프로세스**로 지킵니다. 환경변수 관리부터 시작한다면 [Linkmap 무료 플랜](https://www.linkmap.biz/signup)으로 모든 시크릿을 AES-256-GCM으로 암호화하고 GitHub Secrets에 자동 동기화하세요. 프로젝트 3개, 환경변수 50개까지 무료입니다.
+
+---
+
+*인증 패턴과 API 보안은 [인증 가이드](/guides/auth)를, 환경변수 보안 실천법은 [API 키 유출 사고 대응](/blog/api-key-leak-incident-response)을 참고하세요.*
+`,
+  },
+  // ======================================================================
+  // 16. 바이브 코딩 보안 체크리스트 — 프로덕션 배포 전 반드시 확인할 15가지
+  // ======================================================================
+  {
+    slug: 'vibe-coding-security-checklist',
+    title: '바이브 코딩 보안 체크리스트 — 프로덕션 배포 전 반드시 확인할 15가지',
+    description: '바이브 코딩 앱의 보안 체크리스트 15가지. AI가 빠뜨리기 쉬운 인증, 입력 검증, 환경변수, RLS, CORS까지.',
+    category: 'tutorial',
+    tags: ['체크리스트', '프로덕션 배포', '보안', '바이브 코딩', 'RLS', 'Zod'],
+    publishedAt: '2026-03-29',
+    readingTime: '6분',
+    relatedGuides: ['auth', 'env', 'deploy', 'supabase'],
+    ogImage: '/blog/og/vibe-coding-security-checklist.png',
+    content: `> **KEY:** 바이브 코딩 앱의 보안 취약점은 AI가 "작동하는 코드"를 우선시하기 때문에 발생합니다. 2025년 연구에 따르면 AI가 생성한 코드의 45%에 보안 결함이 존재하며, XSS 방어 실패가 86%, SQL 인젝션 취약점이 20%에 달합니다. 프로덕션 배포 전 이 15가지를 직접 확인해야 합니다.
+
+## 15개 앱 69개 취약점 — 가장 흔한 5가지 패턴
+
+[Invicti의 2025년 연구](https://www.invicti.com/blog/web-security/vibe-coding-security-checklist-how-to-secure-ai-generated-apps)에서 바이브 코딩 앱 15개를 분석한 결과 69개의 취약점이 발견되었고, 그 중 6개는 치명적(Critical) 등급이었습니다.
+
+| 패턴 | 발생 비율 | 위험 수준 |
+|------|---------|---------|
+| XSS 방어 누락 | 86% | 높음 |
+| 인증 없는 API 엔드포인트 | 과반수 | 심각 |
+| SQL 인젝션 취약점 | 20% | 심각 |
+| 환경변수 클라이언트 노출 | 다수 | 높음 |
+| RLS 미설정 (Supabase) | 10.3%+ | 심각 |
+
+> **WARNING:** 바이브 코딩으로 만든 앱을 "AI가 다 알아서 해줬으니 안전하다"고 가정하는 것이 가장 위험합니다. AI는 보안 감사를 수행하지 않습니다.
+
+## 체크리스트 Part 1: 인증 & 인가
+
+**1. 모든 보호된 라우트에 인증 미들웨어가 있는가** — 로그인 없이 /dashboard, /settings, /api/* 직접 접근 시 401이 아닌 200 응답이 오면 인증 누락입니다.
+
+**2. Supabase RLS가 모든 테이블에 활성화되어 있는가** — [CVE-2025-48757](/blog/supabase-rls-vibe-coding-risk)에서 확인된 것처럼 RLS 미설정은 전체 데이터베이스 노출로 이어집니다.
+
+**3. RLS 정책이 user_id 소유권을 검증하는가** — RLS가 활성화되어 있어도 정책이 \`true\`로만 설정된 경우 모든 사용자가 타인 데이터에 접근 가능합니다.
+
+**4. SUPABASE_SERVICE_ROLE_KEY가 서버에서만 사용되는가** — service_role key는 RLS를 우회합니다. \`NEXT_PUBLIC_\` 접두사가 붙으면 즉시 위험합니다.
+
+**5. 세션 만료 및 토큰 갱신이 처리되어 있는가** — AI가 생성한 코드는 초기 로그인만 처리하고 세션 만료를 무시하는 경우가 많습니다.
+
+---
+
+## 체크리스트 Part 2: 입력 & 출력
+
+**6. 모든 API 입력에 Zod safeParse가 적용되어 있는가** — AI가 생성하는 API 라우트는 입력 검증 없이 \`req.body\`를 직접 사용하는 경우가 흔합니다.
+
+\`\`\`
+나쁜 패턴:
+  const { name } = await req.json(); // 검증 없음
+
+올바른 패턴:
+  const result = schema.safeParse(await req.json());
+  if (!result.success) return new Response('Bad Request', { status: 400 });
+\`\`\`
+
+**7. 사용자 입력이 그대로 렌더링되지 않는가** — React는 기본적으로 XSS를 방어하지만, \`dangerouslySetInnerHTML\`을 사용하는 코드가 있다면 즉시 제거하세요.
+
+**8. ORM이나 파라미터화된 쿼리를 사용하는가** — AI가 raw SQL을 생성할 때 사용자 입력을 문자열 연결로 처리하면 SQL 인젝션이 가능합니다.
+
+> **INFO:** Supabase JavaScript SDK는 내부적으로 파라미터화된 쿼리를 사용하기 때문에 \`.from('table').select().eq('id', id)\` 패턴은 SQL 인젝션으로부터 안전합니다.
+
+## 체크리스트 Part 3: 환경변수 & 시크릿
+
+**9. 서버 전용 키에 NEXT_PUBLIC_ 접두사가 없는가** — \`OPENAI_API_KEY\`, \`STRIPE_SECRET_KEY\`, \`SUPABASE_SERVICE_ROLE_KEY\`는 절대로 공개되어서는 안 됩니다.
+
+**10. .env 파일이 Git에 커밋되지 않았는가** — \`git log --all --full-history -- .env\`로 히스토리를 확인하세요.
+
+**11. 환경변수가 암호화 저장소에서 관리되는가** — [Linkmap](https://www.linkmap.biz)은 모든 환경변수를 **AES-256-GCM**으로 암호화하여 저장하고, GitHub Secrets에 1클릭으로 동기화합니다.
+
+> **TIP:** [환경변수 완전 정복 가이드](/guides/env)에서 개발·스테이징·프로덕션 환경별 키 분리 방법을 확인할 수 있습니다.
+
+---
+
+## 체크리스트 Part 4: 배포 & 운영
+
+**12. API 라우트에 CORS 설정이 올바른가** — \`Access-Control-Allow-Origin: *\`으로 모든 출처를 허용하는 경우가 있습니다. 허용 도메인을 명시하세요.
+
+**13. Rate Limiting이 적용되어 있는가** — 인증 관련 엔드포인트에 Rate Limit이 없으면 무차별 대입 공격에 취약합니다.
+
+**14. 에러 메시지에 내부 정보가 노출되지 않는가** — DB 스키마, 파일 경로, 스택 트레이스가 API 응답에 포함되면 공격자에게 유용한 정보가 됩니다.
+
+**15. 민감한 작업에 감사 로그가 남는가** — 로그인, 데이터 삭제, 결제 등 중요한 이벤트는 감사 로그가 있어야 합니다.
+
+> **TIP:** [Linkmap의 감사 로그](https://www.linkmap.biz)는 환경변수 접근·변경·삭제 이력을 모두 기록합니다.
+
+## 배포 전 최종 체크리스트
+
+- [x] Supabase RLS 활성화 + user_id 정책 확인
+- [x] SUPABASE_SERVICE_ROLE_KEY 서버 전용 사용 확인
+- [ ] 모든 API 라우트 인증 미들웨어 확인
+- [ ] Zod safeParse 입력 검증 적용 여부 확인
+- [ ] .env 파일 Git 히스토리 노출 여부 확인
+- [ ] NEXT_PUBLIC_ 접두사 오용 여부 확인
+- [ ] CORS, Rate Limiting, 에러 메시지 점검
+
+> **TRY:** 이 체크리스트를 CI 파이프라인에 포함하세요. 환경변수와 API 키 보안은 [Linkmap 무료 플랜](https://www.linkmap.biz/signup)으로 시작하세요. 프로젝트 3개, 환경변수 50개까지 무료입니다.
+
+---
+
+*인증 설정 전반은 [인증 가이드](/guides/auth)를, Supabase RLS 사례는 [Supabase RLS 미설정](/blog/supabase-rls-vibe-coding-risk)을 참고하세요.*
+`,
+  },
+  // ======================================================================
+  // 11. Supabase RLS 미설정 — 바이브 코딩의 가장 위험한 실수
+  // ======================================================================
+  {
+    slug: 'supabase-rls-vibe-coding-risk',
+    title: 'Supabase RLS 미설정 — 바이브 코딩의 가장 위험한 실수',
+    description: 'Lovable로 만든 170+ 앱에서 Supabase RLS 미설정 데이터 노출(CVE-2025-48757). 바이브 코더를 위한 Supabase 보안 체크리스트.',
+    category: 'vibe-coding',
+    tags: ['Supabase', 'RLS', '바이브 코딩', '보안', 'Lovable', 'CVE'],
+    publishedAt: '2026-03-22',
+    readingTime: '7분',
+    relatedGuides: ['supabase', 'auth', 'env', 'backend'],
+    ogImage: '/blog/og/supabase-rls-vibe-coding-risk.png',
+    content: `> **KEY:** Supabase RLS(Row Level Security)가 꺼진 데이터베이스는 anon key를 아는 누구나 전체 테이블을 읽고 쓸 수 있는 공개 API와 같습니다. AI는 작동하는 코드를 만드는 데 집중하기 때문에 RLS를 빠뜨리는 경우가 많습니다.
+
+## CVE-2025-48757: 170개 앱이 한꺼번에 뚫린 날
+
+2025년 5월, 보안 연구자 Matt Palmer는 [CVE-2025-48757](https://mattpalmer.io/posts/2025/05/CVE-2025-48757/)을 공개했습니다. AI 기반 앱 빌더 [Lovable](https://lovable.dev)로 만든 앱 1,645개를 분석한 결과, **170개(10.3%)** 에서 RLS 미설정으로 인한 심각한 데이터 노출이 확인됐습니다.
+
+노출된 데이터는 실명, 이메일, 전화번호 같은 개인정보와 결제 정보, 거래 내역, 그리고 Google Maps·Stripe·Gemini API 키 같은 크리덴셜까지 포함되어 있었습니다. 피해 추정 비용은 2,000만~3,500만 달러입니다.
+
+> **WARNING:** CVE-2025-48757는 Lovable만의 문제가 아닙니다. Cursor, Claude, v0, Bolt 등 어떤 AI 도구로 만든 Supabase 앱이든 RLS를 직접 설정하지 않으면 동일한 위험에 노출됩니다.
+
+## 왜 AI는 RLS를 빠뜨리는가 — LLM의 보안 컨텍스트 한계
+
+첫째, **AI는 "작동하는 코드"를 목표로 합니다.** RLS가 없어도 기능은 정상 동작합니다. 개발 환경에서는 anon key로 테이블을 읽고 쓰는 것이 편리하기 때문에, AI는 이 상태로 코드를 완성합니다.
+
+둘째, **보안 정책은 코드 파일이 아닌 Supabase 대시보드에서 설정합니다.** 마이그레이션 SQL을 생성해도 \`enable row level security\`와 정책 정의를 누락하면 의미가 없습니다.
+
+셋째, **반복적인 수정 과정에서 RLS가 지워질 수 있습니다.** "데이터가 안 불러와진다"는 프롬프트에 AI가 RLS를 임시로 비활성화하는 코드를 제안하고, 그 상태로 배포되는 경우가 있습니다.
+
+> **INFO:** [Supabase 공식 문서](https://supabase.com/docs/guides/database/postgres/row-level-security)는 새 테이블을 만들 때 항상 RLS를 활성화할 것을 권장합니다.
+
+## RLS가 꺼진 Supabase는 공개 API와 같다
+
+Supabase는 PostgreSQL 위에 REST API를 자동 생성합니다. anon key는 공개된 키로, 브라우저 소스 코드에서 확인할 수 있습니다.
+
+\`\`\`
+RLS OFF (위험):
+  SELECT * FROM users;     ← 전체 데이터 반환
+  DELETE FROM payments ... ← 데이터 삭제 가능
+
+RLS ON (안전):
+  SELECT * FROM users WHERE auth.uid() = user_id;
+  ← 본인 데이터만 반환
+\`\`\`
+
+---
+
+## 바이브 코더를 위한 Supabase 보안 체크리스트 7가지
+
+**1. RLS 활성화 여부 확인** — Supabase 대시보드 → Table Editor → 각 테이블의 방패 아이콘이 빨간색이면 RLS가 꺼진 상태입니다.
+
+**2. RLS 정책이 실제로 동작하는지 테스트** — 로그인한 사용자로, 비로그인 상태로 각각 테스트하세요.
+
+**3. anon key의 권한 범위 확인** — 공개 데이터만 anon으로 읽을 수 있어야 합니다.
+
+**4. service_role key를 클라이언트에 노출하지 않는다** — \`NEXT_PUBLIC_\` 접두사와 함께 노출되면 모든 RLS 정책이 무력화됩니다.
+
+**5. 인증 없는 쓰기 작업 차단** — 회원가입, 주문, 결제 등 쓰기 작업은 반드시 \`auth.uid()\`가 존재하는 인증된 사용자만 실행할 수 있도록 설정하세요.
+
+**6. 데이터 소유권 정책 추가** — 모든 사용자 데이터 테이블에 \`user_id = auth.uid()\` 조건을 포함한 정책을 추가하세요.
+
+**7. Supabase 보안 어드바이저 실행** — Database → Database Health에서 보안 어드바이저를 실행하면 RLS 미설정, 인덱스 누락, 권한 이슈를 자동으로 감지합니다.
+
+> **TIP:** AI에게 RLS 마이그레이션을 요청할 때는 "RLS를 활성화하고 인증된 사용자만 자신의 데이터에 접근할 수 있는 정책도 함께 생성해줘"라고 명시적으로 요청하세요.
+
+## RLS + API 이중 방어: Linkmap이 선택한 아키텍처
+
+[Linkmap](https://www.linkmap.biz)은 바이브 코딩으로 시작한 프로덕션 서비스이지만, 보안 아키텍처는 RLS 하나에 의존하지 않습니다. **RLS + API 레벨 user_id 이중 방어** 구조입니다.
+
+\`\`\`
+Linkmap API 라우트 5단계:
+  1. getUser()          ← 인증 확인
+  2. Zod safeParse()    ← 입력값 검증
+  3. 소유권 확인        ← user_id 대조
+  4. 비즈니스 로직      ← 실제 처리
+  5. logAudit()         ← 감사 로그
+\`\`\`
+
+RLS만으로는 부족합니다. RLS 정책에 논리 오류가 있거나, 새 테이블에 정책 추가를 깜빡했거나, service_role을 잘못 사용하는 경우에 API 레벨 방어가 마지막 보호막이 됩니다.
+
+> **TRY:** 지금 프로젝트의 Supabase 대시보드를 열고 Table Editor에서 RLS 상태를 확인하세요. 환경변수와 API 키 보안이 걱정된다면 [Linkmap](https://www.linkmap.biz/signup)으로 AES-256-GCM 암호화 저장소를 무료로 시작하세요.
+
+---
+
+*Supabase 설정 전반은 [Supabase 시작하기 가이드](/guides/supabase)를, 프로덕션 배포 전 전체 보안 점검은 [바이브 코딩 보안 체크리스트](/blog/vibe-coding-security-checklist)를 참고하세요.*
+`,
+  },
+  // ======================================================================
+  // 15. AI 코딩 에이전트가 당신의 .env를 읽고 있다
+  // ======================================================================
+  {
+    slug: 'ai-agent-reads-your-env',
+    title: 'AI 코딩 에이전트가 당신의 .env를 읽고 있다',
+    description: 'Claude Code, Cursor 등 AI 코딩 어시스턴트가 .env 시크릿을 자동 로드하고 외부 전송할 수 있다는 Knostic 연구. 시크릿 격리 전략.',
+    category: 'env-management',
+    tags: ['AI 코딩 에이전트', '.env', '시크릿 유출', 'Claude Code', 'Cursor'],
+    publishedAt: '2026-03-15',
+    readingTime: '6분',
+    relatedGuides: ['env', 'auth', 'github', 'supabase'],
+    ogImage: '/blog/og/ai-agent-reads-your-env.png',
+    content: `> **KEY:** AI 코딩 에이전트(AI Coding Agent)는 프로젝트 디렉터리 전체를 컨텍스트로 읽으며, 여기에는 .env 파일의 시크릿도 포함됩니다. Knostic 연구에 따르면 AI 앱의 72%에 하드코딩된 시크릿이 있으며, 앱당 평균 5.1개의 시크릿이 노출되어 있습니다.
+
+## AI 코딩 에이전트의 파일 접근 범위 — 당신이 모르는 사실
+
+Claude Code, Cursor, GitHub Copilot, Windsurf 같은 AI 코딩 에이전트는 코드를 이해하기 위해 프로젝트 파일을 읽습니다. 그런데 그 범위가 어디까지인지 정확히 아는 개발자는 많지 않습니다.
+
+대부분의 AI 에이전트는 프로젝트 루트의 모든 파일을 컨텍스트로 수집합니다. .gitignore에 등록된 파일도, .env 파일도 예외가 아닙니다. 에이전트가 "프로젝트를 분석"하는 순간 DATABASE_URL, OPENAI_API_KEY, SUPABASE_SERVICE_ROLE_KEY 같은 시크릿이 모델 컨텍스트 안으로 들어갑니다.
+
+> **WARNING:** .gitignore에 .env를 등록해도 AI 에이전트의 로컬 파일 접근을 막지 못합니다. .gitignore는 Git 추적에서만 제외할 뿐, 로컬 파일 시스템 접근 권한과는 무관합니다.
+
+## Knostic 연구: Claude Code, Cursor의 .env 자동 로드 메커니즘
+
+보안 연구소 Knostic이 2025년 발표한 연구에서 주요 AI 코딩 에이전트의 파일 접근 패턴을 분석한 결과, 충격적인 수치가 나왔습니다.
+
+분석 대상 AI 앱의 **72%에 하드코딩된 시크릿**이 존재했으며, 앱당 평균 **5.1개의 시크릿**이 코드베이스 어딘가에 노출된 상태였습니다. 이 중 상당수는 AI 에이전트가 코드를 생성하는 과정에서 .env 값을 실수로 코드에 삽입하거나, 에이전트의 컨텍스트 창에 평문으로 전달된 경우였습니다.
+
+Claude Code의 경우, 기본 설정에서 프로젝트 루트를 기준으로 파일을 탐색하며 .env, .env.local, .env.production 등을 자동으로 인식합니다. Cursor는 \`@workspace\` 명령 시 전체 파일 트리를 인덱싱하는데, 이 과정에서 .env 내용이 포함될 수 있습니다.
+
+## CVE-2025-55284: Claude Code DNS 유출 취약점의 실체
+
+2025년에 공개된 CVE-2025-55284는 Claude Code의 DNS 기반 정보 유출 취약점입니다. 특정 조건에서 AI 에이전트가 처리 중인 데이터(환경변수 포함)가 DNS 쿼리를 통해 외부로 유출될 수 있다는 내용입니다.
+
+같은 시기 Cursor에서도 CVE-2025-54135가 발견되었습니다. 악의적으로 조작된 프로젝트 파일을 통해 임의 명령을 실행할 수 있는 취약점으로, 공격자가 .env 내용을 탈취하는 벡터로 활용될 수 있습니다.
+
+> **INFO:** CVE(Common Vulnerabilities and Exposures)는 공식 보안 취약점 데이터베이스입니다. [CVE-2025-55284](https://nvd.nist.gov/vuln/detail/CVE-2025-55284)와 CVE-2025-54135는 AI 코딩 도구 생태계에서 발견된 최초의 주요 시크릿 유출 관련 CVE로 기록되었습니다. [Knostic 연구 원문](https://knostic.ai/blog/ai-coding-agents-security)에서 상세 분석을 확인할 수 있습니다.
+
+## AI 시대의 시크릿 격리 전략 4가지
+
+AI 에이전트의 파일 접근을 막는 가장 근본적인 방법은 **시크릿을 프로젝트 디렉터리 밖으로 꺼내는 것**입니다.
+
+**전략 1: 시스템 환경변수 사용**
+.env 파일 대신 OS 레벨 환경변수를 사용하면 AI 에이전트가 파일로 접근할 수 없습니다. \`export DATABASE_URL=...\`을 셸 프로파일(.bashrc, .zshrc)에 등록하거나, 운영체제의 환경변수 관리 UI를 활용합니다.
+
+**전략 2: .env 파일 권한 제한**
+\`chmod 600 .env\`로 파일 권한을 소유자 읽기 전용으로 설정합니다. 일부 AI 에이전트는 권한이 제한된 파일의 내용을 컨텍스트에 포함하지 않습니다.
+
+**전략 3: AI 에이전트 무시 파일 설정**
+Claude Code는 \`.claudeignore\` 파일을 지원하며, Cursor는 \`.cursorignore\`를 통해 특정 파일을 인덱싱에서 제외할 수 있습니다. .env를 이 파일에 명시적으로 추가하세요.
+
+**전략 4: 중앙 집중형 시크릿 관리 도구 전환**
+가장 확실한 방법은 .env 파일 자체를 없애는 것입니다. [Linkmap](https://www.linkmap.biz)의 환경변수 관리 기능은 AES-256-GCM으로 암호화된 시크릿을 중앙 서버에 저장하고, 런타임 시 안전하게 주입합니다. 프로젝트 디렉터리에는 시크릿이 존재하지 않으므로 AI 에이전트가 접근할 파일 자체가 없습니다.
+
+---
+
+## 환경변수를 코드에서 완전히 분리하는 방법
+
+코드와 시크릿의 분리는 Twelve-Factor App 방법론의 핵심 원칙(Factor III: Config)입니다. AI 코딩 에이전트 시대에는 이 원칙이 선택이 아닌 필수가 되었습니다.
+
+실전 체크리스트:
+
+- [x] .claudeignore / .cursorignore에 .env 추가
+- [x] .env.production, .env.staging 등 환경별 파일 모두 포함
+- [ ] 시크릿 관리 도구로 전환 (.env 파일 삭제)
+- [ ] 런타임 주입 방식으로 변경 (빌드 타임 하드코딩 제거)
+- [ ] 팀 전체 .env 공유 관행 중단
+
+[Linkmap 환경변수 관리](https://www.linkmap.biz/services)는 암호화 저장 + 감사 로그 + GitHub Secrets 동기화를 한 번에 제공합니다. [환경변수 완전 정복 가이드](/guides/env)에서 전환 절차를 단계별로 안내합니다. [Supabase 가이드](/guides/supabase)에서는 Supabase 시크릿을 안전하게 관리하는 방법도 확인할 수 있습니다.
+
+AI 에이전트가 코드를 잘 만들어줄수록, 시크릿 관리는 더 엄격해야 합니다. 에이전트는 당신의 프로젝트를 이해하기 위해 최대한 많은 파일을 읽으려 합니다. 그 경계를 설정하는 것은 개발자의 몫입니다. [Linkmap 서비스 연결 현황](https://www.linkmap.biz/services)에서 128개 서비스의 시크릿 관리 패턴을 확인하세요.
+
+> **TRY:** .env 파일을 삭제하고 싶다면 [Linkmap 무료로 시작하기](https://www.linkmap.biz/signup)에서 암호화 환경변수 관리를 무료로 체험해보세요. AI 에이전트가 읽을 수 없는 구조로 시크릿을 관리합니다.
+
+---
+
+*시크릿 유출 대응 방법은 [API 키 유출 대응 가이드](/blog/api-key-leaked-what-to-do)를, 환경변수 기초는 [환경변수 완전 정복 가이드](/guides/env)를 참고하세요.*`,
+  },
+
+  // ======================================================================
+  // 13. 1,200만 개의 .env 파일이 인터넷에 노출되어 있다
+  // ======================================================================
+  {
+    slug: 'env-file-exposure-crisis',
+    title: '1,200만 개의 .env 파일이 인터넷에 노출되어 있다',
+    description: '2026년 3월 보고서 — 전 세계 1,200만 IP에서 .env 파일 노출. Unit 42가 추적한 2.3억 타겟 클라우드 갈취 캠페인의 실체.',
+    category: 'env-management',
+    tags: ['.env', '환경변수 유출', '클라우드 보안', '시크릿 관리', 'Unit 42'],
+    publishedAt: '2026-03-15',
+    readingTime: '6분',
+    relatedGuides: ['env', 'deploy', 'cloudflare', 'github'],
+    ogImage: '/blog/og/env-file-exposure-crisis.png',
+    content: `> **KEY:** .env 파일은 2026년 3월 기준 전 세계 1,200만 IP에서 인터넷에 노출되어 있습니다. Palo Alto Networks Unit 42가 추적한 클라우드 갈취 캠페인은 2.3억 개의 고유 IP를 스캔하며 노출된 .env 파일을 통해 AWS 키, GitHub 토큰, 결제 API 키를 탈취했습니다.
+
+## 1,200만 IP의 .env 노출 — 어떻게 발견되었나
+
+2026년 초 보안 연구자들이 인터넷 전체를 대상으로 HTTP 접근 가능한 .env 파일을 스캔한 결과, 약 1,200만 개의 IP 주소에서 .env 파일이 직접 노출된 것이 확인되었습니다. [Shodan](https://www.shodan.io) 같은 인터넷 스캐너를 이용하면 누구든 노출된 .env 파일을 검색할 수 있습니다.
+
+이 수치는 단순한 설정 실수의 결과입니다. 개발자가 웹 루트에 .env 파일을 배치한 채 웹 서버를 구성할 때 해당 파일을 숨기지 않으면, \`https://yourdomain.com/.env\`로 누구나 접근할 수 있습니다. 특히 Laravel, WordPress, Django 같은 프레임워크를 사용하는 서버에서 이 실수가 빈번합니다.
+
+문제는 이것이 개인의 실수만이 아니라는 점입니다. 클라우드 서버 이미지, Docker 공개 이미지, GitHub 공개 저장소를 통한 .env 유출도 전체 수치에 상당 부분 기여합니다.
+
+> **WARNING:** AWS S3 퍼블릭 버킷, GitHub 공개 저장소, Docker Hub 공개 이미지 — 이 세 경로는 .env 파일이 가장 많이 유출되는 채널입니다. 배포 전 반드시 .gitignore, .dockerignore 설정을 확인하세요.
+
+## Unit 42 추적: 2.3억 타겟 클라우드 갈취 캠페인의 전모
+
+Palo Alto Networks의 위협 인텔리전스팀 [Unit 42](https://unit42.paloaltonetworks.com)는 조직적인 .env 파일 탈취 캠페인을 추적했습니다. 이 캠페인의 규모는 전례 없는 수준이었습니다.
+
+공격자들은 자동화 도구를 이용해 **2억 3,000만 개의 고유 IP**와 **11만 개 이상의 도메인**을 스캔했습니다. 수집한 .env 파일에서 추출한 정보는 다음과 같습니다:
+
+| 시크릿 유형 | 탈취 건수 |
+|-----------|---------|
+| 환경변수 전체 | 9만 개 이상 |
+| AWS 액세스 키 | 1,185개 |
+| PayPal 토큰 | 333개 |
+| GitHub 토큰 | 235개 |
+| Mailgun API 키 | 다수 |
+
+탈취된 AWS 키는 즉시 EC2 인스턴스를 생성하는 데 사용되었습니다. 공격자들은 크립토 마이닝, 데이터 수집, 추가 공격의 발판으로 활용했습니다. 피해 기업들이 AWS 청구서를 받고 나서야 침해를 인식한 경우가 대부분이었습니다.
+
+## .env 파일이 위험한 5가지 구조적 이유
+
+.env 파일이 이토록 광범위하게 유출되는 데는 파일 형식 자체의 구조적 한계가 있습니다.
+
+**1. 평문 저장**: .env 파일의 값은 암호화 없이 텍스트로 저장됩니다. 파일에 접근하면 시크릿이 즉시 노출됩니다.
+
+**2. 복사본 문제**: 개발자들은 .env.example, .env.backup, .env.old 같은 변형 파일을 만듭니다. 원본은 gitignore에 등록해도 변형 파일은 놓치기 쉽습니다.
+
+**3. 팀 공유의 어려움**: 팀원에게 .env를 전달할 때 Slack, 이메일, 카카오톡을 사용하는 경우가 많습니다. 이 전달 과정 자체가 유출 벡터입니다.
+
+**4. 환경별 관리 복잡성**: 개발, 스테이징, 프로덕션 환경마다 다른 .env 파일이 필요하며, 이를 동기화하는 과정에서 실수가 발생합니다.
+
+**5. 감사 로그 부재**: 누가 언제 .env를 수정했는지 추적할 방법이 없습니다. 유출이 발생해도 언제, 어디서인지 파악하기 어렵습니다.
+
+[.env 파일이 위험한 이유](/blog/why-dotenv-is-dangerous)에서 이 구조적 문제를 더 상세히 다룹니다.
+
+---
+
+## .env를 넘어서: 시크릿 관리의 3가지 진화 단계
+
+보안 성숙도에 따라 시크릿 관리는 세 단계로 발전합니다.
+
+**1단계 — .env 파일 (현재 대부분의 팀)**
+개발 편의성이 높지만 보안 위험이 큽니다. 팀 규모가 작고 프로젝트 초기에는 허용 가능하지만, 프로덕션 환경에는 적합하지 않습니다.
+
+**2단계 — 플랫폼 네이티브 시크릿**
+Vercel Environment Variables, GitHub Secrets, AWS Secrets Manager 등을 활용합니다. 플랫폼에 종속되며 여러 환경을 통합 관리하기 어렵습니다.
+
+**3단계 — 전용 시크릿 관리 플랫폼**
+AES-256-GCM 암호화, 감사 로그, 팀 권한 제어, 환경별 관리를 통합 제공합니다. [Linkmap](https://www.linkmap.biz)은 이 3단계를 한국어 환경에 최적화하여 제공하는 플랫폼입니다.
+
+> **TIP:** [Linkmap 환경변수 관리](https://www.linkmap.biz/services)는 .env 파일을 대체합니다. 시크릿은 AES-256-GCM으로 암호화되어 저장되며, GitHub Secrets와 자동 동기화되어 배포 환경에 바로 반영됩니다. 감사 로그로 누가 언제 접근했는지 추적할 수 있습니다.
+
+## 실습: .env 파일을 안전하게 대체하는 방법
+
+지금 당장 시작할 수 있는 3단계 전환 방법입니다.
+
+**Step 1: 현재 유출 상태 확인**
+
+\`\`\`bash
+# 프로젝트에서 .env 파일 위치 전체 확인
+find . -name ".env*" -not -path "./.git/*"
+
+# Git 히스토리에서 .env 노출 여부 확인
+git log --all --full-history -- .env
+\`\`\`
+
+**Step 2: 즉각적인 위험 제거**
+
+\`\`\`bash
+# .gitignore에 모든 .env 변형 추가
+echo ".env*" >> .gitignore
+echo "!.env.example" >> .gitignore
+
+# 이미 추적 중인 경우 캐시 삭제
+git rm --cached .env
+\`\`\`
+
+**Step 3: 전용 관리 도구로 전환**
+
+[Linkmap 무료로 시작하기](https://www.linkmap.biz/signup)에서 프로젝트를 생성하고, 기존 .env 파일의 키-값을 암호화 저장소로 이전합니다. [환경변수 완전 정복 가이드](/guides/env)가 전환 절차를 안내합니다.
+
+1,200만 IP의 .env 노출이 보여주는 것은 명확합니다. .env 파일은 편리하지만, 프로덕션 환경에서 사용하기엔 구조적으로 안전하지 않습니다.
+
+> **TRY:** [Linkmap 무료로 시작하기](https://www.linkmap.biz/signup) — .env 파일 없이 시크릿을 관리하는 방법을 지금 바로 체험하세요.
+
+---
+
+*안전한 .env 관리 팁은 [.env 파일 안전 관리 가이드](/blog/dotenv-safe-management-tips)를, 시크릿 유출 대응은 [API 키 유출 대응 가이드](/blog/api-key-leaked-what-to-do)를 참고하세요.*`,
+  },
+
+  // ======================================================================
+  // 10. 바이브 코딩 시대, 2,380만 개의 시크릿이 유출되고 있다
+  // ======================================================================
+  {
+    slug: 'vibe-coding-secret-leak-crisis',
+    title: '바이브 코딩 시대, 2,380만 개의 시크릿이 유출되고 있다',
+    description: 'AI 도구 사용 시 시크릿 유출률 40% 증가, GitHub 연간 2,380만 건 유출 데이터. 바이브 코더를 위한 시크릿 관리 전략.',
+    category: 'vibe-coding',
+    tags: ['바이브 코딩', 'API 키 유출', '시크릿 관리', '보안', 'GitHub'],
+    publishedAt: '2026-03-15',
+    readingTime: '6분',
+    relatedGuides: ['env', 'github', 'auth', 'deploy'],
+    ogImage: '/blog/og/vibe-coding-secret-leak-crisis.png',
+    content: `> **KEY:** GitHub의 연간 시크릿 유출 건수는 2,380만 건에 달하며, AI 코딩 도구를 사용하는 개발자는 그렇지 않은 개발자보다 유출률이 40% 높습니다. 유출된 시크릿의 70%는 2년이 지나도 여전히 유효하며, 평균 교정 기간은 94일입니다.
+
+## 바이브 코딩이 시크릿 유출을 가속화하는 3가지 이유
+
+바이브 코딩(Vibe Coding)은 AI에게 자연어로 요청해 코드를 생성하는 개발 방식입니다. 개발 속도를 비약적으로 높여주지만, 보안 관점에서 새로운 위험을 만들어냅니다.
+
+**이유 1: 컨텍스트에 시크릿이 포함된다**
+
+AI 에이전트에게 "이 오류를 수정해줘"라고 요청할 때, 에이전트는 프로젝트 파일 전체를 컨텍스트로 읽습니다. .env 파일, 설정 파일, 하드코딩된 API 키가 모두 모델로 전달됩니다. 이 데이터가 AI 제공사 서버로 전송된다는 사실을 인식하는 바이브 코더는 많지 않습니다.
+
+**이유 2: AI가 시크릿을 코드에 삽입한다**
+
+AI가 생성한 코드에 API 키가 직접 포함되는 경우가 있습니다. 특히 "빠르게 동작하는 예제를 만들어줘"처럼 요청하면 AI는 종종 하드코딩된 시크릿을 포함한 코드를 생성합니다. 개발자가 이를 검토하지 않고 그대로 커밋하면 GitHub에 시크릿이 노출됩니다.
+
+**이유 3: 빠른 배포 사이클이 검토 시간을 줄인다**
+
+바이브 코딩은 개발 속도를 높이는 만큼, 코드 검토 시간은 줄어듭니다. 시크릿이 코드에 섞여 있어도 빠른 배포 압박 속에서 놓치기 쉽습니다.
+
+> **INFO:** [GitGuardian](https://www.gitguardian.com)의 2025년 연간 보고서에 따르면 GitHub에서 한 해 동안 탐지된 시크릿 유출은 2,380만 건입니다. 이 중 AI 코딩 도구를 사용하는 저장소의 유출률은 그렇지 않은 저장소보다 40% 높게 나타났습니다. [GitHub 공식 블로그](https://github.blog/security/application-security/secret-scanning-now-available-on-all-free-repositories/)에서 시크릿 스캐닝 기능을 무료로 활성화하는 방법을 안내합니다.
+
+## 실제 사례: MoltBook 150만 API 키 유출, Common Crawl 12,000 유효 시크릿
+
+실제 사례는 위험성을 더 명확하게 보여줍니다.
+
+**MoltBook 사례**: AI 스타트업 MoltBook은 개발 과정에서 AI 에이전트가 생성한 코드를 충분한 검토 없이 배포했습니다. 결과적으로 GitHub 공개 저장소에 **150만 개의 API 키와 35,000개의 이메일 주소**가 노출되었습니다. 이 데이터는 다크웹에서 판매되었고, 피해 복구에 수 개월이 소요되었습니다.
+
+**Common Crawl 사례**: 웹 크롤링 데이터셋 Common Crawl을 분석한 보안 연구에서 약 **12,000개의 유효한 시크릿**이 발견되었습니다. AWS 키, OpenAI API 키, Stripe 비밀 키 등이 포함되어 있었으며, 상당수는 수집 시점에도 여전히 활성 상태였습니다.
+
+유출된 시크릿은 빠르게 교체되지 않습니다. 데이터에 따르면 유출된 시크릿의 **70%가 2년 후에도 여전히 유효**하며, 평균 교정 기간은 **94일**입니다. 이 기간 동안 공격자는 해당 시크릿으로 시스템에 접근할 수 있습니다.
+
+## AI 코딩 에이전트의 .env 자동 로드 문제 (Knostic 연구)
+
+Knostic 연구소의 분석은 AI 코딩 에이전트의 파일 접근 패턴에 새로운 시각을 제공합니다.
+
+연구에 따르면 주요 AI 코딩 에이전트들은 프로젝트 디렉터리의 .env 파일을 자동으로 컨텍스트에 포함합니다. 개발자가 명시적으로 지시하지 않아도, 에이전트가 코드를 이해하는 과정에서 .env 파일을 읽는 것입니다.
+
+더 우려스러운 것은 이 동작이 사용자에게 명확히 고지되지 않는 경우가 많다는 점입니다. 개발자는 "AI에게 버그를 물어봤을 뿐"이라고 생각하지만, 실제로는 데이터베이스 비밀번호와 API 키가 AI 서버로 전송되고 있을 수 있습니다.
+
+> **WARNING:** AI 에이전트 사용 전 프로젝트에 .env 파일이 있는지 확인하세요. Claude Code는 .claudeignore 파일로, Cursor는 .cursorignore 파일로 특정 파일의 컨텍스트 포함을 차단할 수 있습니다.
+
+## 바이브 코더를 위한 시크릿 관리 5단계 전략
+
+바이브 코딩의 속도를 유지하면서 보안을 지키는 실용적인 전략입니다.
+
+**1단계: .env 파일을 AI 에이전트에서 격리**
+
+Claude Code, Cursor 등의 무시 파일에 .env를 등록합니다.
+
+\`\`\`bash
+# .claudeignore 또는 .cursorignore 생성
+echo ".env" >> .claudeignore
+echo ".env.*" >> .claudeignore
+echo "!.env.example" >> .claudeignore
+\`\`\`
+
+**2단계: Pre-commit 훅으로 자동 검사**
+
+커밋 전 시크릿을 자동으로 탐지하는 훅을 설정합니다.
+
+\`\`\`bash
+# detect-secrets 설치 및 훅 설정
+pip install detect-secrets
+detect-secrets scan > .secrets.baseline
+\`\`\`
+
+**3단계: GitHub 시크릿 스캐닝 활성화**
+
+GitHub 저장소 Settings → Code security에서 Secret Scanning과 Push Protection을 활성화합니다. 시크릿이 포함된 커밋을 푸시 시점에 차단합니다.
+
+**4단계: 하드코딩 검토를 코드 리뷰에 포함**
+
+AI가 생성한 코드를 그대로 커밋하기 전, 반드시 API 키 패턴(sk-로 시작, AKIA로 시작 등)을 검색합니다.
+
+**5단계: 전용 시크릿 관리 도구로 전환**
+
+[Linkmap](https://www.linkmap.biz)의 환경변수 관리 기능을 사용하면 .env 파일 자체를 프로젝트에서 제거할 수 있습니다. 시크릿은 AES-256-GCM으로 암호화되어 저장되고, 런타임에 안전하게 주입됩니다.
+
+---
+
+## Pre-commit 훅에서 시크릿 매니저까지: 도구 체크리스트
+
+바이브 코더가 지금 바로 도입할 수 있는 도구 목록입니다.
+
+| 단계 | 도구 | 목적 |
+|-----|-----|-----|
+| 커밋 전 | detect-secrets, git-secrets | 시크릿 패턴 자동 탐지 |
+| 푸시 시 | GitHub Secret Scanning Push Protection | 저장소 레벨 차단 |
+| 런타임 | Linkmap 환경변수 관리, AWS Secrets Manager | 암호화 저장 + 주입 |
+| 모니터링 | GitGuardian, Trufflehog | 기존 저장소 스캔 |
+
+[GitHub 가이드](/guides/github)에서 GitHub Secrets 설정 방법을, [배포 가이드](/guides/deploy)에서 프로덕션 환경변수 관리를 확인할 수 있습니다.
+
+[Linkmap 감사 로그](https://www.linkmap.biz/services) 기능은 누가 언제 어떤 시크릿에 접근했는지 기록합니다. 유출 발생 시 신속한 원인 파악과 대응이 가능합니다.
+
+2,380만 건의 유출은 숫자에 불과하지 않습니다. 각각은 누군가의 서비스가 침해되고, 비용이 발생하고, 신뢰가 무너진 사건입니다. 바이브 코딩의 속도를 즐기되, 시크릿 관리만큼은 신중하게 접근해야 합니다.
+
+> **TRY:** [Linkmap 무료로 시작하기](https://www.linkmap.biz/signup) — 바이브 코딩 프로젝트의 시크릿을 안전하게 관리하세요. 암호화 저장, 감사 로그, GitHub Secrets 동기화를 무료로 체험할 수 있습니다.
+
+---
+
+*AI 에이전트의 .env 접근 문제는 [AI 코딩 에이전트가 당신의 .env를 읽고 있다](/blog/ai-agent-reads-your-env)를, 환경변수 기초는 [환경변수 완전 정복 가이드](/guides/env)를 참고하세요.*`,
+  },
+
+  // ======================================================================
   // 9. Doppler vs Infisical vs Linkmap — 환경변수 관리 도구 비교 2026
   // ======================================================================
   {
@@ -73,6 +767,7 @@ export const BLOG_POSTS: BlogPost[] = [
     publishedAt: '2026-03-15',
     readingTime: '6분',
     relatedGuides: ['env', 'github', 'deploy', 'cloudflare'],
+    ogImage: '/blog/og/doppler-vs-infisical-vs-linkmap-comparison.png',
     content: `> **KEY:** 환경변수 관리 도구(Secret Management Tool)는 API 키·시크릿을 암호화 저장하고 팀 간 안전하게 공유하는 플랫폼입니다. 2026년 주요 3종은 Doppler(엔터프라이즈 SaaS), Infisical(오픈소스), Linkmap(시각화 + 한국어 특화)으로, 팀 규모와 요구사항에 따라 선택이 달라집니다.
 
 ## 왜 .env 파일로는 부족한가
@@ -199,6 +894,7 @@ export const BLOG_POSTS: BlogPost[] = [
     publishedAt: '2026-03-15',
     readingTime: '5분',
     relatedGuides: ['backend', 'deploy', 'github', 'frontend'],
+    ogImage: '/blog/og/microservice-dependency-service-map.png',
     content: `> **KEY:** 마이크로서비스(MSA) 환경에서 서비스 의존성은 보이지 않는 순간 위험해집니다. 서비스가 10개를 넘으면 전체 연결 구조를 머릿속에 담아두는 것은 불가능합니다. 의존성 시각화는 선택이 아니라 생존 도구입니다.
 
 ## 의존성 문제는 서비스가 늘어날수록 기하급수적으로 커진다
@@ -309,6 +1005,7 @@ A → B → C → D 순서로 동기 HTTP 호출이 이어지면, D의 응답 �
     publishedAt: '2026-03-15',
     readingTime: '6분',
     relatedGuides: ['env', 'github', 'deploy', 'openai'],
+    ogImage: '/blog/og/api-key-leak-incident-response.png',
     content: `> **KEY:** API 키 유출은 "혹시 내 저장소에?"가 아니라 "언제 내 저장소에서?"의 문제입니다. GitHub 리포지터리에는 매년 수백만 건의 시크릿이 노출되며, 유출 후 평균 수 분 안에 자동화된 봇이 키를 스캔합니다. 유출이 확인되면 **삭제보다 교체가 먼저**입니다.
 
 ## API 키 유출 사고, 생각보다 흔하다
@@ -479,6 +1176,7 @@ trufflehog git https://github.com/your-org/your-repo
     publishedAt: '2025-04-07',
     readingTime: '8분',
     relatedGuides: ['env', 'github', 'supabase', 'vercel'],
+    ogImage: '/blog/og/what-is-vibe-coding.png',
     content: `> **KEY:** 바이브 코딩(Vibe Coding)은 AI에게 자연어로 코드를 생성시키는 새로운 개발 방식입니다. 코딩 경험 없이도 실제 서비스를 만들 수 있지만, **서비스 연결과 환경변수 설정**이라는 새로운 과제가 생깁니다.
 
 ## 바이브 코딩이란?
@@ -583,6 +1281,7 @@ AI가 코드를 잘 만들어줄수록, 남는 과제는 **코드 밖의 설정*
   // ======================================================================
   {
     slug: 'why-dotenv-is-dangerous',
+    ogImage: '/blog/og/why-dotenv-is-dangerous.png',
     title: '환경변수 관리, .env 파일은 왜 위험한가',
     description: '.env 파일의 보안 위험성과 API 키 유출 사례를 분석하고, 안전한 환경변수 관리 방법을 소개합니다.',
     category: 'env-management',
@@ -708,6 +1407,7 @@ API 키 유출
   // ======================================================================
   {
     slug: 'vibe-coding-can-you-build-saas',
+    ogImage: '/blog/og/vibe-coding-can-you-build-saas.png',
     title: '바이브 코딩으로 SaaS 만들기 — 진짜 가능할까?',
     description: 'AI로 실제 서비스를 만든 경험을 공유합니다. 가능한 것과 아직 어려운 것, 그리고 실전 팁.',
     category: 'vibe-coding',
@@ -801,6 +1501,7 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
   // ======================================================================
   {
     slug: 'service-map-tutorial',
+    ogImage: '/blog/og/service-map-tutorial.png',
     title: 'Linkmap으로 서비스맵 만들기 — 3분 튜토리얼',
     description: '프로젝트에 연결된 모든 외부 서비스를 시각화하는 서비스맵을 3분 만에 만드는 방법을 단계별로 안내합니다.',
     category: 'tutorial',
@@ -897,6 +1598,7 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
   // ======================================================================
   {
     slug: 'dotenv-safe-management-tips',
+    ogImage: '/blog/og/dotenv-safe-management-tips.png',
     title: '.env 파일 안전하게 관리하는 5가지 방법',
     description: '개발자가 반드시 알아야 할 .env 파일 보안 실천법. .gitignore 설정부터 환경변수 암호화 도구까지.',
     category: 'env-management',
@@ -1012,6 +1714,7 @@ Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 환경변수는 **브라우저
   // ======================================================================
   {
     slug: 'github-secrets-automation',
+    ogImage: '/blog/og/github-secrets-automation.png',
     title: 'GitHub Secrets 자동화 — 수동 설정은 이제 그만',
     description: 'GitHub Secrets를 하나하나 수동 설정하는 대신, Linkmap으로 환경변수를 자동 배포하는 방법을 소개합니다.',
     category: 'tutorial',
