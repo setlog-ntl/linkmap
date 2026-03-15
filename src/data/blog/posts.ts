@@ -139,25 +139,7 @@ AI 코딩 도구들은 모두 동일한 방식으로 작동합니다. 프로젝�
 
 이 비교에서 가장 중요한 결론입니다. Claude Code든 Cursor든 Windsurf든, **환경변수를 도구의 컨텍스트에서 분리하는 것이 공통 대응 전략**입니다.
 
-\`\`\`
-나쁜 구조:
-  my-project/
-  ├── .env          ← AI 도구가 읽을 수 있음
-  ├── src/
-  └── ...
-
-좋은 구조:
-  my-project/       ← AI 도구 작업 디렉토리
-  ├── .claudeignore  ← .env* 제외 설정
-  ├── src/
-  └── ...
-
-  시크릿 관리:
-  └── Linkmap (linkmap.biz)
-      ← AES-256-GCM 암호화 저장
-      ← GitHub Secrets 자동 동기화
-      ← AI 도구 컨텍스트와 완전 분리
-\`\`\`
+![환경변수 분리 아키텍처 — AI 도구 컨텍스트 밖으로](/blog/diagrams/env-separation-architecture.png)
 
 [Linkmap](https://www.linkmap.biz)을 사용하면 환경변수를 프로젝트 디렉토리 외부에서 관리하면서, [GitHub Secrets에 자동 동기화](/blog/github-secrets-automation)할 수 있습니다.
 
@@ -200,6 +182,8 @@ AI 코딩 도구들은 모두 동일한 방식으로 작동합니다. 프로젝�
 | Java LLM 코드 보안 실패율 | **70% 이상** |
 | 분석 LLM 수 | **100개 이상** |
 
+![AI 생성 코드 보안 현실 — Veracode 2025 보고서](/blog/diagrams/ai-code-security-stats.png)
+
 가장 충격적인 사실은 **모델 크기와 출시 시기가 보안 품질에 유의미한 영향을 주지 않는다**는 점입니다. 더 새롭고 더 크고 더 빠른 모델이라도, 보안 취약 코드 생성률은 거의 동일합니다.
 
 > **INFO:** XSS(CWE-80)는 OWASP Top 10의 대표 취약점입니다. 사용자가 입력한 스크립트가 다른 사용자의 브라우저에서 실행되는 공격으로, AI는 이를 방어하는 입력 검증 코드를 86%의 경우 제대로 작성하지 못했습니다.
@@ -227,6 +211,8 @@ AI가 기능 코드는 잘 만들면서 보안 코드에서 실패하는 이유�
 ## 바이브 코더의 보안 검증 파이프라인 4단계
 
 AI 코드를 완전히 거부할 필요는 없습니다. 검증 파이프라인을 만들면 됩니다.
+
+![바이브 코더의 보안 검증 파이프라인 4단계](/blog/diagrams/security-verification-pipeline.png)
 
 **1단계: 입력 검증 — Zod safeParse 필수.** AI가 생성한 API 라우트에서 가장 흔한 취약점은 입력 검증 누락입니다. Zod의 \`safeParse\`를 사용하세요(\`parse\`는 throw를 발생시켜 500 에러로 이어질 수 있습니다).
 
@@ -395,15 +381,7 @@ AI 코드를 완전히 거부할 필요는 없습니다. 검증 파이프라인�
 
 Supabase는 PostgreSQL 위에 REST API를 자동 생성합니다. anon key는 공개된 키로, 브라우저 소스 코드에서 확인할 수 있습니다.
 
-\`\`\`
-RLS OFF (위험):
-  SELECT * FROM users;     ← 전체 데이터 반환
-  DELETE FROM payments ... ← 데이터 삭제 가능
-
-RLS ON (안전):
-  SELECT * FROM users WHERE auth.uid() = user_id;
-  ← 본인 데이터만 반환
-\`\`\`
+![Supabase RLS ON vs OFF 비교](/blog/diagrams/rls-on-off-comparison.png)
 
 ---
 
@@ -429,14 +407,7 @@ RLS ON (안전):
 
 [Linkmap](https://www.linkmap.biz)은 바이브 코딩으로 시작한 프로덕션 서비스이지만, 보안 아키텍처는 RLS 하나에 의존하지 않습니다. **RLS + API 레벨 user_id 이중 방어** 구조입니다.
 
-\`\`\`
-Linkmap API 라우트 5단계:
-  1. getUser()          ← 인증 확인
-  2. Zod safeParse()    ← 입력값 검증
-  3. 소유권 확인        ← user_id 대조
-  4. 비즈니스 로직      ← 실제 처리
-  5. logAudit()         ← 감사 로그
-\`\`\`
+![API 라우트 보안 5단계 패턴](/blog/diagrams/api-5step-pipeline.png)
 
 RLS만으로는 부족합니다. RLS 정책에 논리 오류가 있거나, 새 테이블에 정책 추가를 깜빡했거나, service_role을 잘못 사용하는 경우에 API 레벨 방어가 마지막 보호막이 됩니다.
 
@@ -463,6 +434,8 @@ RLS만으로는 부족합니다. RLS 정책에 논리 오류가 있거나, 새 �
     content: `> **KEY:** AI 코딩 에이전트(AI Coding Agent)는 프로젝트 디렉터리 전체를 컨텍스트로 읽으며, 여기에는 .env 파일의 시크릿도 포함됩니다. Knostic 연구에 따르면 AI 앱의 72%에 하드코딩된 시크릿이 있으며, 앱당 평균 5.1개의 시크릿이 노출되어 있습니다.
 
 ## AI 코딩 에이전트의 파일 접근 범위 — 당신이 모르는 사실
+
+![AI 코딩 에이전트의 .env 파일 접근 경로](/blog/diagrams/ai-agent-env-access.png)
 
 Claude Code, Cursor, GitHub Copilot, Windsurf 같은 AI 코딩 에이전트는 코드를 이해하기 위해 프로젝트 파일을 읽습니다. 그런데 그 범위가 어디까지인지 정확히 아는 개발자는 많지 않습니다.
 
@@ -692,9 +665,13 @@ Knostic 연구소의 분석은 AI 코딩 에이전트의 파일 접근 패턴에
 
 > **WARNING:** AI 에이전트 사용 전 프로젝트에 .env 파일이 있는지 확인하세요. Claude Code는 .claudeignore 파일로, Cursor는 .cursorignore 파일로 특정 파일의 컨텍스트 포함을 차단할 수 있습니다.
 
+![바이브 코딩 시대의 시크릿 유출 현실](/blog/diagrams/secret-leak-stats.png)
+
 ## 바이브 코더를 위한 시크릿 관리 5단계 전략
 
 바이브 코딩의 속도를 유지하면서 보안을 지키는 실용적인 전략입니다.
+
+![바이브 코더를 위한 시크릿 관리 5단계](/blog/diagrams/secret-management-5steps.png)
 
 **1단계: .env 파일을 AI 에이전트에서 격리**
 
