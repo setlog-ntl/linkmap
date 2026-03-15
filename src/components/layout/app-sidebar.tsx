@@ -7,7 +7,7 @@ import { LinkmapLogo } from '@/components/icons/linkmap-logo';
 import {
   Rocket, Search, Map as MapIcon,
   List, Link2, Key, Settings, BookOpen, ChevronDown, ChevronRight,
-  LogOut, Bot, User, GitBranch, Wrench, FolderKanban, Plus, LayoutDashboard,
+  LogOut, Bot, User, GitBranch, Wrench, FolderKanban, Plus, LayoutDashboard, LayoutGrid,
   Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight, Trash2, DollarSign, Users, BarChart3, Lightbulb, Trophy, Bug, Check, X, GripVertical,
 } from 'lucide-react';
 import { GUIDE_CATEGORIES, getGuidesByCategory, type GuideCategory } from '@/data/ui/guide-meta';
@@ -618,12 +618,18 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {/* + 새 프로젝트 만들기 — 최상단 */}
+                      {/* 전체 보기 / 새 프로젝트 — 최상단 */}
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton asChild>
-                          <Link href="/dashboard">
-                            <Plus className="h-3.5 w-3.5" />
-                            <span>+ 새 프로젝트 만들기</span>
+                          <Link href="/dashboard" className="flex items-center justify-between w-full group/proj-action">
+                            <span className="flex items-center gap-1">
+                              <LayoutGrid className="h-3.5 w-3.5" />
+                              <span>전체 보기</span>
+                            </span>
+                            <span className="flex items-center gap-0.5 text-muted-foreground group-hover/proj-action:text-brand-blue transition-colors">
+                              <Plus className="h-3 w-3" />
+                              <span className="text-[11px]">추가</span>
+                            </span>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
