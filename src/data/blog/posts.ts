@@ -72,7 +72,7 @@ export const BLOG_POSTS: BlogPost[] = [
     tags: ['바이브 코딩', 'AI 코딩', 'Cursor', 'Claude', '노코드'],
     publishedAt: '2025-04-07',
     readingTime: '8분',
-    relatedGuides: ['env', 'github'],
+    relatedGuides: ['env', 'github', 'supabase', 'vercel', 'deploy'],
     content: `> **KEY:** 바이브 코딩(Vibe Coding)은 AI에게 자연어로 코드를 생성시키는 새로운 개발 방식입니다. 코딩 경험 없이도 실제 서비스를 만들 수 있지만, **서비스 연결과 환경변수 설정**이라는 새로운 과제가 생깁니다.
 
 ## 바이브 코딩이란?
@@ -90,10 +90,10 @@ export const BLOG_POSTS: BlogPost[] = [
 | 출력물 | 플랫폼 종속 앱 | **실제 코드 (GitHub 저장소)** |
 | 소유권 | 플랫폼 의존 | **코드 완전 소유** |
 | 확장성 | 플랫폼 한계 | 코드로 가능한 모든 것 |
-| 배포 | 플랫폼 내 | Vercel, Cloudflare 등 자유 선택 |
+| 배포 | 플랫폼 내 | [Vercel](/guides/vercel), [Cloudflare](/guides/cloudflare) 등 [자유 선택](/guides/deploy) |
 | 비용 구조 | 월 구독료 | 인프라 비용만 (대부분 무료 티어) |
 
-> **TIP:** 바이브 코딩의 결과물은 **진짜 코드**입니다. Next.js, React, Python 등 실제 프레임워크로 작성되어 GitHub에 저장되고, 원하는 곳에 배포됩니다.
+> **TIP:** 바이브 코딩의 결과물은 **진짜 코드**입니다. Next.js, React, Python 등 [실제 프레임워크](/guides/frontend)로 작성되어 [GitHub](/guides/github)에 저장되고, 원하는 곳에 [배포](/guides/deploy)됩니다.
 
 ## 바이브 코딩의 실전 워크플로
 
@@ -133,8 +133,8 @@ Supabase로 인증하고, Vercel에 배포할 거야."
 
 AI가 코드를 잘 만들어줄수록, 남는 과제는 **코드 밖의 설정**입니다:
 
-- **환경변수 관리** — [Supabase](/services/supabase) URL, [OpenAI](/services/openai) API 키, [Stripe](/services/stripe) 시크릿 키 등 수십 개
-- **서비스 연결** — 인증, DB, 결제, 이메일, 모니터링 등 평균 5~10개 외부 서비스
+- **[환경변수](/guides/env) 관리** — [Supabase](/services/supabase) URL, [OpenAI](/services/openai) API 키, [Stripe](/services/stripe) 시크릿 키 등 수십 개
+- **서비스 연결** — [인증](/guides/auth), [DB](/guides/backend), 결제, 이메일, 모니터링 등 평균 5~10개 외부 서비스
 - **보안** — API 키 유출 방지, 환경별 분리, 팀 공유
 
 > **INFO:** 평균적인 바이브 코딩 프로젝트는 **7개의 외부 서비스**를 연결합니다. 각 서비스마다 2~5개의 환경변수가 필요하므로, 총 15~35개의 환경변수를 관리해야 합니다. [Linkmap 서비스 카탈로그](https://www.linkmap.biz/services)에서 128개 서비스의 환경변수 정보를 확인하세요.
@@ -169,7 +169,7 @@ AI가 코드를 잘 만들어줄수록, 남는 과제는 **코드 밖의 설정*
 
 ---
 
-*환경변수가 처음이라면 [환경변수 완전 정복 가이드](/guides/env)를, GitHub 설정이 필요하면 [GitHub 시작하기 가이드](/guides/github)를 참고하세요. 바이브 코딩으로 실제 SaaS를 만든 이야기가 궁금하다면 [바이브 코딩으로 SaaS 만들기](/blog/vibe-coding-can-you-build-saas)도 읽어보세요.*
+*환경변수가 처음이라면 [환경변수 완전 정복 가이드](/guides/env)를, 인증이 궁금하면 [인증 가이드](/guides/auth)를, 배포 개념이 필요하면 [도메인·배포·서버 가이드](/guides/deploy)를 참고하세요. GitHub 설정은 [GitHub 시작하기 가이드](/guides/github), 바이브 코딩 실전기는 [바이브 코딩으로 SaaS 만들기](/blog/vibe-coding-can-you-build-saas)에서 확인하세요.*
 `,
   },
   // ======================================================================
@@ -183,12 +183,12 @@ AI가 코드를 잘 만들어줄수록, 남는 과제는 **코드 밖의 설정*
     tags: ['환경변수', '.env', 'API 키', '보안', '시크릿 관리'],
     publishedAt: '2025-04-14',
     readingTime: '7분',
-    relatedGuides: ['env', 'github'],
+    relatedGuides: ['env', 'github', 'auth', 'deploy', 'cloudflare', 'vercel'],
     content: `> **KEY:** \`.env\` 파일은 편리하지만 **암호화, 접근 제어, 감사 로그, 동기화가 전혀 없습니다.** GitHub에 따르면 매년 수백만 건의 시크릿이 공개 저장소에 노출됩니다.
 
 ## .env 파일, 왜 문제인가
 
-거의 모든 개발자가 \`.env\` 파일을 사용합니다. 간편하고, 프레임워크가 기본 지원하니까요. 하지만 \`.env\` 파일에는 심각한 보안 위험이 숨어 있습니다.
+거의 모든 개발자가 \`.env\` 파일을 사용합니다. 간편하고, 프레임워크가 기본 지원하니까요. 하지만 \`.env\` 파일에는 심각한 보안 위험이 숨어 있습니다. ([환경변수가 처음이라면 환경변수 완전 정복 가이드](/guides/env)를 먼저 읽어보세요.)
 
 ## 실제 발생하는 3가지 위험
 
@@ -253,21 +253,21 @@ API 키 유출
 ## 안전한 환경변수 관리 5가지 원칙
 
 ### 1. 암호화 저장
-환경변수는 반드시 암호화해서 저장해야 합니다. [Linkmap](https://www.linkmap.biz)은 **AES-256-GCM**으로 모든 시크릿을 암호화합니다.
+[환경변수](/guides/env)는 반드시 암호화해서 저장해야 합니다. [Linkmap](https://www.linkmap.biz)은 **AES-256-GCM**으로 모든 시크릿을 암호화합니다.
 
 ### 2. 접근 제어
-누가 어떤 키에 접근할 수 있는지 제어합니다. 개발자에게는 개발 키만, 운영팀에게는 프로덕션 키만.
+누가 어떤 키에 접근할 수 있는지 제어합니다. [인증 체계](/guides/auth)를 통해 개발자에게는 개발 키만, 운영팀에게는 프로덕션 키만.
 
 ### 3. 감사 로그
 모든 접근과 변경을 기록합니다. 문제 발생 시 "누가, 언제, 어떤 키를" 추적할 수 있어야 합니다.
 
 ### 4. 자동 동기화
-로컬에서 키를 변경하면 배포 환경([GitHub Secrets](/blog/github-secrets-automation), [Vercel](/services/vercel) 등)에 자동으로 반영되어야 합니다.
+로컬에서 키를 변경하면 [배포](/guides/deploy) 환경([GitHub Secrets](/blog/github-secrets-automation), [Vercel](/guides/vercel) 등)에 자동으로 반영되어야 합니다.
 
 ### 5. 유효성 자동 점검
 누락된 변수, 형식 오류, 만료된 키를 자동으로 감지합니다.
 
-> **TIP:** 이 5가지를 모두 만족하는 도구를 쓰면 \`.env\` 파일 관련 사고를 **99% 예방**할 수 있습니다. [Linkmap 서비스 카탈로그](https://www.linkmap.biz/services)에서 128개 서비스의 환경변수 가이드를 확인하세요.
+> **TIP:** 이 5가지를 모두 만족하는 도구를 쓰면 \`.env\` 파일 관련 사고를 **99% 예방**할 수 있습니다. [Linkmap 서비스 카탈로그](https://www.linkmap.biz/services)에서 128개 서비스의 환경변수 가이드를 확인하세요. 환경변수 개념이 생소하다면 [환경변수 완전 정복 가이드](/guides/env)를 추천합니다.
 
 ## .env 파일 대신 무엇을 쓸까
 
@@ -308,7 +308,7 @@ API 키 유출
     tags: ['바이브 코딩', 'SaaS', '사이드 프로젝트', 'AI 코딩', '경험담'],
     publishedAt: '2025-04-21',
     readingTime: '10분',
-    relatedGuides: ['env', 'supabase', 'vercel'],
+    relatedGuides: ['env', 'supabase', 'vercel', 'github', 'cloudflare', 'openai', 'auth', 'backend'],
     content: `> **KEY:** 바이브 코딩으로 SaaS를 만들 수 있습니다. [Linkmap](https://www.linkmap.biz) 자체가 그 증거입니다 — 70+ DB 마이그레이션, 45+ API 라우트, 128개 서비스 페이지. 다만 **"AI한테 시켜서 뚝딱"은 아닙니다.**
 
 ## 결론부터: 가능합니다, 조건부로
@@ -327,7 +327,7 @@ Linkmap (linkmap.biz)의 현재 규모 — 바이브 코딩으로 구축:
   └── 6개 원클릭 배포 템플릿
 \`\`\`
 
-> **INFO:** [Linkmap 서비스 카탈로그](https://www.linkmap.biz/services)에서 128개 서비스의 환경변수 가이드를 확인할 수 있고, [원클릭 배포](https://www.linkmap.biz/my-sites)로 6가지 템플릿(개발자 홈, 링크카드, 프리랜서 페이지, 디지털 명함, 내 홈페이지, 우리가게 홍보)을 즉시 시작할 수 있습니다.
+> **INFO:** [Linkmap 서비스 카탈로그](https://www.linkmap.biz/services)에서 128개 서비스의 환경변수 가이드를 확인할 수 있고, [원클릭 배포](https://www.linkmap.biz/my-sites)로 6가지 템플릿을 즉시 시작할 수 있습니다. 기술 스택 설명: [Cloudflare 배포 가이드](/guides/cloudflare), [Supabase 시작하기](/guides/supabase), [GitHub 연동 가이드](/guides/github).
 
 ## AI가 잘하는 것 vs 못하는 것
 
@@ -335,10 +335,10 @@ Linkmap (linkmap.biz)의 현재 규모 — 바이브 코딩으로 구축:
 |--|---------|---------------|
 | **코드** | 보일러플레이트, CRUD, 패턴 재현 | 아키텍처 의사결정 |
 | **디버깅** | 타입 에러, import 누락 | 비즈니스 로직 버그 |
-| **보안** | 기본 패턴 적용 | **보안 검증** (API 키 노출, XSS) |
-| **설정** | 코드 내 설정 | **서비스 연결** (API 키 발급, 환경변수) |
+| **보안** | 기본 패턴 적용 | **보안 검증** ([API 키 노출 위험](/blog/why-dotenv-is-dangerous), XSS) |
+| **설정** | 코드 내 설정 | **서비스 연결** ([API 키 발급](/guides/env), [환경변수](/guides/env)) |
 
-> **WARNING:** AI가 [Supabase](/services/supabase) 코드를 생성해줘도, 실제 프로젝트 생성, API 키 발급, 환경변수 설정은 직접 해야 합니다. **이것이 바이브 코딩의 가장 큰 병목입니다.** [Linkmap](https://www.linkmap.biz)이 이 병목을 해결합니다.
+> **WARNING:** AI가 [Supabase](/services/supabase) 코드를 생성해줘도, 실제 프로젝트 생성([Supabase 가이드](/guides/supabase) 참고), API 키 발급([환경변수 가이드](/guides/env) 참고), [GitHub 설정](/guides/github)은 직접 해야 합니다. **이것이 바이브 코딩의 가장 큰 병목입니다.** [Linkmap](https://www.linkmap.biz)이 이 병목을 해결합니다.
 
 ---
 
@@ -377,7 +377,7 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
 | 프레임워크 | Next.js | AI가 가장 잘 아는 프레임워크 | [원클릭 배포](https://www.linkmap.biz/my-sites) |
 | DB + 인증 | [Supabase](/services/supabase) | AI 코드 호환성 최고 | [Supabase 가이드](/guides/supabase) |
 | 배포 | [Vercel](/services/vercel) | 원클릭 배포, GitHub 연동 | [Vercel 가이드](/guides/vercel) |
-| AI 기능 | [OpenAI](/services/openai) | GPT API | [OpenAI 상세](/services/openai) |
+| AI 기능 | [OpenAI](/services/openai) | GPT API | [OpenAI 연동 가이드](/guides/openai) |
 | 결제 | [Stripe](/services/stripe) | 글로벌 결제 | [Stripe 상세](/services/stripe) |
 | **서비스 관리** | **[Linkmap](https://www.linkmap.biz)** | 연결 시각화 + 환경변수 암호화 | [무료 시작](https://www.linkmap.biz/signup) |
 
@@ -387,7 +387,7 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
 
 ---
 
-*[Supabase 설정이 필요하면](/guides/supabase), [Vercel 배포가 필요하면](/guides/vercel) 가이드를 참고하세요. 바이브 코딩의 기본 개념은 [바이브 코딩이란 무엇인가](/blog/what-is-vibe-coding)에서 확인하세요.*
+*[Supabase 설정](/guides/supabase), [Vercel 배포](/guides/vercel), [Cloudflare 배포](/guides/cloudflare), [OpenAI 연동](/guides/openai) — 각 서비스 가이드를 참고하세요. 인증이 궁금하면 [인증 가이드](/guides/auth), API 개념은 [백엔드 가이드](/guides/backend)를 추천합니다. 바이브 코딩의 기본 개념은 [바이브 코딩이란 무엇인가](/blog/what-is-vibe-coding)에서 확인하세요.*
 `,
   },
   // ======================================================================
@@ -401,7 +401,7 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
     tags: ['서비스맵', 'Linkmap', '튜토리얼', '시각화', '프로젝트 관리'],
     publishedAt: '2025-05-05',
     readingTime: '5분',
-    relatedGuides: ['env', 'supabase', 'vercel', 'github'],
+    relatedGuides: ['env', 'supabase', 'vercel', 'github', 'cloudflare', 'openai', 'auth', 'deploy'],
     content: `> **KEY:** 바이브 코딩 프로젝트는 평균 7개의 외부 서비스를 연결합니다. [Linkmap 서비스맵](https://www.linkmap.biz)은 이 연결을 **지도처럼 시각화**해서 "어떤 서비스가, 어떤 환경변수로, 어떻게 연결되어 있는지" 한눈에 보여줍니다.
 
 ## 서비스맵이 왜 필요한가
@@ -465,12 +465,12 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
 
 | 카테고리 | 주요 서비스 | Linkmap 상세 |
 |---------|-----------|-------------|
-| DB + 인증 | [Supabase](/services/supabase), [Firebase](/services/firebase) | 환경변수 가이드 포함 |
-| 배포 | [Vercel](/services/vercel), [Cloudflare](/services/cloudflare), [Netlify](/services/netlify) | 배포 설정 안내 |
-| AI | [OpenAI](/services/openai), [Anthropic](/services/anthropic) | API 키 발급 방법 |
-| 결제 | [Stripe](/services/stripe), [Toss Payments](/services/toss-payments) | 시크릿 키 관리 |
-| 이메일 | [Resend](/services/resend), [SendGrid](/services/sendgrid) | SMTP 설정 안내 |
-| 모니터링 | [PostHog](/services/posthog), [Sentry](/services/sentry) | DSN/키 설정 |
+| DB + 인증 | [Supabase](/services/supabase), [Firebase](/services/firebase) | [Supabase 가이드](/guides/supabase), [인증 가이드](/guides/auth) |
+| 배포 | [Vercel](/services/vercel), [Cloudflare](/services/cloudflare), [Netlify](/services/netlify) | [Vercel 가이드](/guides/vercel), [Cloudflare 가이드](/guides/cloudflare), [배포 개념](/guides/deploy) |
+| AI | [OpenAI](/services/openai), [Anthropic](/services/anthropic) | [OpenAI 연동 가이드](/guides/openai) |
+| 결제 | [Stripe](/services/stripe), [Toss Payments](/services/toss-payments) | [환경변수 가이드](/guides/env) (시크릿 키 관리) |
+| 이메일 | [Resend](/services/resend), [SendGrid](/services/sendgrid) | [환경변수 가이드](/guides/env) (SMTP 설정) |
+| 모니터링 | [PostHog](/services/posthog), [Sentry](/services/sentry) | [환경변수 가이드](/guides/env) (DSN/키) |
 
 ## 이런 분에게 추천합니다
 
@@ -483,7 +483,7 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
 
 ---
 
-*환경변수 개념이 처음이라면 [환경변수 완전 정복 가이드](/guides/env)를 먼저 읽어보세요. GitHub Secrets 자동화가 궁금하다면 [GitHub Secrets 자동화](/blog/github-secrets-automation)를 참고하세요.*
+*환경변수 개념이 처음이라면 [환경변수 완전 정복 가이드](/guides/env)를, 인증 설정은 [인증 가이드](/guides/auth)를, 배포 개념은 [도메인·배포·서버 가이드](/guides/deploy)를 참고하세요. GitHub Secrets 자동화가 궁금하다면 [GitHub Secrets 자동화](/blog/github-secrets-automation)를 참고하세요.*
 `,
   },
   // ======================================================================
@@ -497,7 +497,7 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
     tags: ['환경변수', '.env', '보안', 'gitignore', 'GitHub Secrets'],
     publishedAt: '2025-05-12',
     readingTime: '6분',
-    relatedGuides: ['env', 'github'],
+    relatedGuides: ['env', 'github', 'deploy', 'cloudflare', 'vercel', 'supabase', 'openai', 'frontend'],
     content: `> **KEY:** 5가지 실천법 요약 — (1) .gitignore 완벽 설정, (2) 커밋 히스토리 점검, (3) 환경별 분리, (4) NEXT_PUBLIC_ 접두사 주의, (5) [Linkmap](https://www.linkmap.biz) 같은 전용 관리 도구 사용. 지금 바로 적용하세요.
 
 ## .env 파일, 제대로 관리하고 있나요?
@@ -556,7 +556,7 @@ git log --all --full-history -- ".env*"
 
 ## 4. NEXT_PUBLIC_ 접두사 주의
 
-Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 환경변수는 **브라우저에 노출**됩니다:
+Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 [환경변수](/guides/env)는 **[브라우저](/guides/frontend)에 노출**됩니다 (CSR/SSR 차이는 [프론트엔드 가이드](/guides/frontend) 참고):
 
 \`\`\`
 공개 가능 (브라우저에 노출됨):
@@ -569,7 +569,7 @@ Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 환경변수는 **브라우저
   STRIPE_SECRET_KEY=sk_live_...
 \`\`\`
 
-> **WARNING:** **절대로** \`SUPABASE_SERVICE_ROLE_KEY\`, \`OPENAI_API_KEY\`, \`STRIPE_SECRET_KEY\`에 \`NEXT_PUBLIC_\` 접두사를 붙이면 안 됩니다. 브라우저 개발자 도구에서 **누구나** 볼 수 있게 됩니다. 각 서비스의 공개/비공개 키 구분은 [Linkmap 서비스 상세 페이지](https://www.linkmap.biz/services)에서 확인하세요.
+> **WARNING:** **절대로** \`SUPABASE_SERVICE_ROLE_KEY\`([Supabase 가이드](/guides/supabase) 참고), \`OPENAI_API_KEY\`([OpenAI 가이드](/guides/openai) 참고), \`STRIPE_SECRET_KEY\`에 \`NEXT_PUBLIC_\` 접두사를 붙이면 안 됩니다. 브라우저 개발자 도구에서 **누구나** 볼 수 있게 됩니다. 각 서비스의 공개/비공개 키 구분은 [Linkmap 서비스 상세 페이지](https://www.linkmap.biz/services)에서 확인하세요.
 
 ## 5. 환경변수 관리 도구 사용
 
@@ -599,7 +599,7 @@ Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 환경변수는 **브라우저
 
 ---
 
-*환경변수 기초가 필요하다면 [환경변수 완전 정복 가이드](/guides/env)를 참고하세요. .env 파일의 위험성에 대해 더 알고 싶다면 [.env 파일은 왜 위험한가](/blog/why-dotenv-is-dangerous)를 읽어보세요.*
+*환경변수 기초는 [환경변수 완전 정복 가이드](/guides/env), .env 위험성은 [.env 파일은 왜 위험한가](/blog/why-dotenv-is-dangerous), 배포 설정은 [배포 가이드](/guides/deploy), 프론트엔드 개념은 [프론트엔드 가이드](/guides/frontend)를 참고하세요. [Supabase](/guides/supabase)와 [OpenAI](/guides/openai) 설정이 필요하면 각 서비스 가이드를 확인하세요.*
 `,
   },
   // ======================================================================
@@ -613,12 +613,12 @@ Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 환경변수는 **브라우저
     tags: ['GitHub Secrets', '환경변수', '자동화', 'CI/CD', 'GitHub Actions'],
     publishedAt: '2025-05-19',
     readingTime: '6분',
-    relatedGuides: ['github', 'env'],
+    relatedGuides: ['github', 'env', 'deploy', 'supabase', 'openai', 'vercel', 'cloudflare'],
     content: `> **KEY:** GitHub Secrets를 수동으로 관리하면 동기화 누락, 변경 추적 불가, 확인 불가 문제가 생깁니다. [Linkmap](https://www.linkmap.biz)은 환경변수를 GitHub 저장소 시크릿에 **1클릭으로 자동 동기화**합니다.
 
 ## GitHub Secrets, 수동 관리의 한계
 
-[GitHub Actions](https://github.com/features/actions)로 CI/CD를 구성하면, 환경변수를 [GitHub](/services/github) Secrets에 등록해야 합니다.
+[GitHub Actions](https://github.com/features/actions)로 CI/CD를 구성하면([배포 파이프라인 개념은 배포 가이드](/guides/deploy) 참고), [환경변수](/guides/env)를 [GitHub](/guides/github) Secrets에 등록해야 합니다.
 
 \`\`\`
 수동 관리 흐름:
@@ -688,7 +688,7 @@ Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 환경변수는 **브라우저
 
 ### 시나리오 1: 새 서비스 추가
 
-[OpenAI](/services/openai) API를 프로젝트에 추가할 때:
+[OpenAI](/services/openai) API를 프로젝트에 추가할 때 ([OpenAI 연동 가이드](/guides/openai)도 참고):
 
 1. [Linkmap 서비스 카탈로그](https://www.linkmap.biz/services)에서 [OpenAI](/services/openai) 선택
 2. API 키 입력 (자동 AES-256 암호화)
@@ -697,7 +697,7 @@ Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 환경변수는 **브라우저
 
 ### 시나리오 2: 키 로테이션
 
-[Supabase](/services/supabase) 키를 변경할 때:
+[Supabase](/services/supabase) 키를 변경할 때 ([Supabase 시작하기 가이드](/guides/supabase)에서 키 발급 방법 확인):
 
 1. [Linkmap](https://www.linkmap.biz)에서 새 키로 업데이트
 2. GitHub 동기화 → 기존 시크릿 **자동 갱신**
@@ -737,7 +737,7 @@ jobs:
 
 ---
 
-*GitHub 설정이 처음이라면 [GitHub 시작하기 가이드](/guides/github)를 참고하세요. 환경변수 관리의 기본은 [환경변수 완전 정복 가이드](/guides/env)에서 배울 수 있습니다.*
+*GitHub 설정은 [GitHub 시작하기 가이드](/guides/github), 환경변수 기본은 [환경변수 완전 정복 가이드](/guides/env), 배포 파이프라인은 [배포 가이드](/guides/deploy)를 참고하세요. 연동 서비스별 가이드: [Supabase](/guides/supabase), [Vercel](/guides/vercel), [Cloudflare](/guides/cloudflare), [OpenAI](/guides/openai).*
 `,
   },
 ];
