@@ -144,7 +144,11 @@ export default function DashboardPage() {
   };
 
   const handleDeleteProject = async (id: string) => {
-    await deleteProject.mutateAsync(id);
+    try {
+      await deleteProject.mutateAsync(id);
+    } catch {
+      toast.error(t(locale, 'project.settingsDeleteFailed'));
+    }
   };
 
   return (

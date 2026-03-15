@@ -81,21 +81,26 @@ export function useCreateProject() {
 export function useDeleteProject() {
   const queryClient = useQueryClient();
 
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+    queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
+    queryClient.invalidateQueries({ queryKey: queryKeys.showcase.list });
+    queryClient.invalidateQueries({ queryKey: queryKeys.showcase.mine });
+  };
+
   return useMutation({
     mutationFn: async (id: string) => {
       const res = await fetch(`/api/projects/${id}`, { method: 'DELETE' });
+      // 404 = 이미 삭제된 프로젝트 → 성공으로 처리
+      if (res.status === 404) return { success: true, alreadyDeleted: true };
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || '프로젝트 삭제 실패');
       }
       return res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
-      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.list });
-      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.mine });
-    },
+    onSuccess: invalidateAll,
+    onError: invalidateAll,
   });
 }
 
