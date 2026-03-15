@@ -39,22 +39,39 @@ export function buildEnvPrefixServiceMap(
   services: Service[]
 ): Map<string, { serviceId: string; serviceName: string }> {
   const map = new Map<string, { serviceId: string; serviceName: string }>();
+  // 서비스 자체 이름/slug와 일치하는 prefix를 추적하여 우선권 부여
+  const ownedPrefixes = new Set<string>();
+
+  // 1차: 서비스 slug/name과 일치하는 prefix만 먼저 등록 (발급처 우선)
   for (const svc of services) {
     if (!svc.required_env_vars?.length) continue;
-    const prefixes = new Set<string>();
+    const svcSlug = svc.slug?.toUpperCase();
+    const svcName = svc.name?.toUpperCase().replace(/[^A-Z0-9]/g, '');
     for (const envTemplate of svc.required_env_vars) {
       if (!envTemplate.name) continue;
-      // Strip NEXT_PUBLIC_ / REACT_APP_ / VITE_ prefixes, then take first segment
       const stripped = envTemplate.name
         .replace(/^(NEXT_PUBLIC_|REACT_APP_|VITE_|NUXT_PUBLIC_)/, '');
       const firstSegment = stripped.split('_')[0];
-      if (firstSegment && firstSegment.length >= 2) {
-        prefixes.add(firstSegment);
+      if (!firstSegment || firstSegment.length < 2) continue;
+      // prefix가 서비스 자체 slug/name과 일치하면 즉시 등록
+      if (firstSegment === svcSlug || firstSegment === svcName) {
+        map.set(firstSegment, { serviceId: svc.id, serviceName: svc.name });
+        ownedPrefixes.add(firstSegment);
       }
     }
-    for (const prefix of prefixes) {
-      if (!map.has(prefix)) {
-        map.set(prefix, { serviceId: svc.id, serviceName: svc.name });
+  }
+
+  // 2차: 나머지 prefix 등록 (이미 소유된 prefix는 덮어쓰지 않음)
+  for (const svc of services) {
+    if (!svc.required_env_vars?.length) continue;
+    for (const envTemplate of svc.required_env_vars) {
+      if (!envTemplate.name) continue;
+      const stripped = envTemplate.name
+        .replace(/^(NEXT_PUBLIC_|REACT_APP_|VITE_|NUXT_PUBLIC_)/, '');
+      const firstSegment = stripped.split('_')[0];
+      if (!firstSegment || firstSegment.length < 2) continue;
+      if (!map.has(firstSegment)) {
+        map.set(firstSegment, { serviceId: svc.id, serviceName: svc.name });
       }
     }
   }
