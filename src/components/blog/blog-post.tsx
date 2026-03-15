@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback, type ReactNode, type ComponentPropsWithoutRef } from 'react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { ArrowLeft, ArrowRight, Calendar, Clock, Tag, ExternalLink, ChevronRight, List, Link2, Check, Share2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -440,7 +441,7 @@ export function BlogPostView({ post }: BlogPostViewProps) {
 
         {/* Content — first half */}
         <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-lg prose-h3:mt-6 prose-p:leading-relaxed prose-img:rounded-lg prose-strong:text-foreground">
-          <ReactMarkdown components={MD_COMPONENTS}>{firstHalf}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>{firstHalf}</ReactMarkdown>
         </div>
 
         {/* Mid-article CTA */}
@@ -449,7 +450,7 @@ export function BlogPostView({ post }: BlogPostViewProps) {
         {/* Content — second half */}
         {secondHalf && (
           <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-lg prose-h3:mt-6 prose-p:leading-relaxed prose-img:rounded-lg prose-strong:text-foreground">
-            <ReactMarkdown components={MD_COMPONENTS}>{secondHalf}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>{secondHalf}</ReactMarkdown>
           </div>
         )}
 
