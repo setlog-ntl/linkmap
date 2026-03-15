@@ -203,8 +203,8 @@ export function ServiceDetailSheet({
         </TabsList>
 
         {/* 개요 탭 */}
-        <TabsContent value="overview" className="flex-1 overflow-hidden m-0 data-[state=active]:flex data-[state=active]:flex-col">
-          <ScrollArea className="flex-1 w-full">
+        <TabsContent value="overview" className="flex-1 overflow-hidden min-h-0 m-0 data-[state=active]:flex data-[state=active]:flex-col">
+          <ScrollArea className="flex-1 w-full min-h-0">
             <div className="space-y-4 p-4 pt-2 pb-6">
               {/* Status & Category 배지 */}
               <div className="flex flex-wrap gap-2">
@@ -339,8 +339,8 @@ export function ServiceDetailSheet({
         </TabsContent>
 
         {/* 환경변수 탭 */}
-        <TabsContent value="envvars" className="flex-1 overflow-hidden m-0 data-[state=active]:flex data-[state=active]:flex-col">
-          <ScrollArea className="flex-1 w-full">
+        <TabsContent value="envvars" className="flex-1 overflow-hidden min-h-0 m-0 data-[state=active]:flex data-[state=active]:flex-col">
+          <ScrollArea className="flex-1 w-full min-h-0">
             <div className="p-4 pt-2 pb-6">
               {projectId ? (
                 <ServiceEnvVarsSection
@@ -360,8 +360,8 @@ export function ServiceDetailSheet({
 
         {/* 가이드 탭 */}
         {hasGuideContent && (
-          <TabsContent value="guide" className="flex-1 overflow-hidden m-0 data-[state=active]:flex data-[state=active]:flex-col">
-            <ScrollArea className="flex-1 w-full">
+          <TabsContent value="guide" className="flex-1 overflow-hidden min-h-0 m-0 data-[state=active]:flex data-[state=active]:flex-col">
+            <ScrollArea className="flex-1 w-full min-h-0">
               <div className="space-y-4 p-4 pt-2 pb-6">
                 {/* 0. 서비스 소개 + 외부 링크 */}
                 {guide.quick_start && (
@@ -536,8 +536,8 @@ export function ServiceDetailSheet({
         )}
 
         {/* 연결 탭 */}
-        <TabsContent value="connections" className="flex-1 overflow-hidden m-0 data-[state=active]:flex data-[state=active]:flex-col">
-          <ScrollArea className="flex-1 w-full">
+        <TabsContent value="connections" className="flex-1 overflow-hidden min-h-0 m-0 data-[state=active]:flex data-[state=active]:flex-col">
+          <ScrollArea className="flex-1 w-full min-h-0">
             <div className="space-y-4 p-4 pt-2 pb-6">
               {projectId && svc?.slug ? (
                 <ServiceAccountSection
@@ -627,8 +627,8 @@ export function ServiceDetailSheet({
         </TabsContent>
 
         {/* 상태 탭 */}
-        <TabsContent value="health" className="flex-1 overflow-hidden m-0 data-[state=active]:flex data-[state=active]:flex-col">
-          <ScrollArea className="flex-1 w-full">
+        <TabsContent value="health" className="flex-1 overflow-hidden min-h-0 m-0 data-[state=active]:flex data-[state=active]:flex-col">
+          <ScrollArea className="flex-1 w-full min-h-0">
             <div className="space-y-4 p-4 pt-2 pb-6">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-medium flex items-center gap-1.5">
@@ -787,16 +787,36 @@ function SheetAccountField({ projectServiceId, projectId, currentValue }: {
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(currentValue || '');
+  const [savedValue, setSavedValue] = useState(currentValue);
   const updateAccount = useUpdateProjectServiceAccount(projectId);
+
+  // prop이 서버에서 갱신되면 로컬 상태 동기화
+  if (currentValue !== savedValue && !isEditing) {
+    setSavedValue(currentValue);
+    setValue(currentValue || '');
+  }
+
+  const displayValue = isEditing ? null : (value || currentValue);
 
   const handleSave = useCallback(() => {
     const trimmed = value.trim();
-    updateAccount.mutate({
-      projectServiceId,
-      accountIdentifier: trimmed || null,
-    });
+    // optimistic: 즉시 로컬 반영
+    setValue(trimmed);
+    setSavedValue(trimmed || null);
     setIsEditing(false);
-  }, [value, projectServiceId, updateAccount]);
+    updateAccount.mutate(
+      { projectServiceId, accountIdentifier: trimmed || null },
+      {
+        onSuccess: () => toast.success('계정 정보가 저장되었습니다'),
+        onError: (err) => {
+          toast.error(`저장 실패: ${err.message}`);
+          // 롤백
+          setValue(currentValue || '');
+          setSavedValue(currentValue);
+        },
+      },
+    );
+  }, [value, projectServiceId, updateAccount, currentValue]);
 
   const handleCancel = useCallback(() => {
     setValue(currentValue || '');
@@ -827,14 +847,14 @@ function SheetAccountField({ projectServiceId, projectId, currentValue }: {
             <XIcon className="h-3.5 w-3.5" />
           </Button>
         </div>
-      ) : currentValue ? (
+      ) : displayValue ? (
         <button
           type="button"
           onClick={() => setIsEditing(true)}
           className="flex items-center gap-2 w-full rounded-md bg-muted/60 border px-3 py-2 group hover:border-foreground/30 transition-colors"
         >
           <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-          <span className="font-mono text-sm flex-1 text-left">{currentValue}</span>
+          <span className="font-mono text-sm flex-1 text-left">{displayValue}</span>
           <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
         </button>
       ) : (
