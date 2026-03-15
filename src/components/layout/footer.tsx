@@ -44,7 +44,7 @@ export function Footer() {
                     </li>
                   ))}
                   {catKey === 'concept' && (
-                    <li><a href="mailto:cdhrich2@gmail.com" className="hover:text-white transition-colors">Contact</a></li>
+                    <li><a href="mailto:cdhrich@naver.com" className="hover:text-white transition-colors">Contact</a></li>
                   )}
                 </ul>
               </div>
@@ -80,7 +80,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="mailto:cdhrich2@gmail.com"
+                  href="mailto:cdhrich@naver.com"
                   className="hover:text-white transition-colors"
                 >
                   Contact
