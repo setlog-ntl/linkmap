@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Key, RefreshCw, CloudCog, Clock, AlertTriangle } from 'lucide-react';
 import type { EnvironmentVariable } from '@/types';
 
@@ -23,10 +24,26 @@ export function EnvStatsHeader({ projectId, envVars, onSync, isSyncing }: EnvSta
       ? new Date(Math.max(...envVars.map((v) => new Date(v.updated_at).getTime())))
       : null;
 
+    // 충돌 개수 계산: 같은 key_name이 2개 이상 환경에 존재하면 충돌
+    const keyEnvMap = new Map<string, Set<string>>();
+    for (const v of envVars) {
+      const existing = keyEnvMap.get(v.key_name);
+      if (existing) {
+        existing.add(v.environment);
+      } else {
+        keyEnvMap.set(v.key_name, new Set([v.environment]));
+      }
+    }
+    let conflictCount = 0;
+    for (const envs of keyEnvMap.values()) {
+      if (envs.size > 1) conflictCount++;
+    }
+
     return {
       total: envVars.length,
       syncedServices: uniqueServices.size,
       lastSync: lastUpdated,
+      conflictCount,
     };
   }, [envVars]);
 
@@ -86,6 +103,7 @@ export function EnvStatsHeader({ projectId, envVars, onSync, isSyncing }: EnvSta
               className="h-8 w-8 ml-auto shrink-0"
               onClick={onSync}
               disabled={isSyncing}
+              aria-label="서비스 동기화"
             >
               <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
             </Button>
@@ -100,8 +118,19 @@ export function EnvStatsHeader({ projectId, envVars, onSync, isSyncing }: EnvSta
               <AlertTriangle className="h-5 w-5 text-orange-500" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold">충돌 검사</p>
-              <p className="text-xs text-muted-foreground">환경 간 비교</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-semibold">충돌 검사</p>
+                {stats.conflictCount > 0 && (
+                  <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
+                    {stats.conflictCount}
+                  </Badge>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {stats.conflictCount > 0
+                  ? `${stats.conflictCount}개 키가 환경 간 중복`
+                  : '환경 간 비교'}
+              </p>
             </div>
           </CardContent>
         </Link>

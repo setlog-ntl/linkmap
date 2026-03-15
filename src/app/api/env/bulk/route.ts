@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { encrypt } from '@/lib/crypto';
 import { bulkEnvVarSchema } from '@/lib/validations/env-bulk';
-import { unauthorizedError, notFoundError, validationError, apiError } from '@/lib/api/errors';
+import { unauthorizedError, notFoundError, validationError, apiError, quotaExceededError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
+import { checkEnvVarQuota } from '@/lib/quota';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -31,6 +32,12 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (!project) return notFoundError('프로젝트');
+
+  // 쿼터 체크: 현재 + 추가할 개수가 한도를 초과하는지 확인
+  const quota = await checkEnvVarQuota(user.id, project_id);
+  if (quota.current + variables.length > quota.max) {
+    return quotaExceededError('환경변수', quota.current, quota.max);
+  }
 
   // Insert all variables
   const records = variables.map((v) => ({

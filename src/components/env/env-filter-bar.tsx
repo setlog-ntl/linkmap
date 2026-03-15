@@ -10,6 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { Search, Plus, Download, Upload, Sparkles } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
@@ -82,27 +88,44 @@ export function EnvFilterBar({
         />
       </div>
 
-      <div className="flex gap-2">
-        {onAnalyzeClick && (
-          <Button variant="outline" size="icon" onClick={onAnalyzeClick} title="키 분석">
-            <Sparkles className="h-4 w-4" />
+      <TooltipProvider>
+        <div className="flex gap-2">
+          {onAnalyzeClick && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" onClick={onAnalyzeClick} aria-label="AI 키 분석">
+                  <Sparkles className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>AI 키 분석</TooltipContent>
+            </Tooltip>
+          )}
+          {onImportClick && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" onClick={onImportClick} aria-label={t(locale, 'envVar.import')}>
+                  <Upload className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>.env 파일 가져오기</TooltipContent>
+            </Tooltip>
+          )}
+          {onExportClick && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" onClick={onExportClick} aria-label={t(locale, 'envVar.download')}>
+                  <Download className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>.env 파일 다운로드</TooltipContent>
+            </Tooltip>
+          )}
+          <Button onClick={onAddClick}>
+            <Plus className="mr-2 h-4 w-4" />
+            {t(locale, 'envVar.addVar')}
           </Button>
-        )}
-        {onImportClick && (
-          <Button variant="outline" size="icon" onClick={onImportClick} title={t(locale, 'envVar.import')}>
-            <Upload className="h-4 w-4" />
-          </Button>
-        )}
-        {onExportClick && (
-          <Button variant="outline" size="icon" onClick={onExportClick} title={t(locale, 'envVar.download')}>
-            <Download className="h-4 w-4" />
-          </Button>
-        )}
-        <Button onClick={onAddClick}>
-          <Plus className="mr-2 h-4 w-4" />
-          {t(locale, 'envVar.addVar')}
-        </Button>
-      </div>
+        </div>
+      </TooltipProvider>
     </div>
   );
 }

@@ -104,7 +104,7 @@ export async function checkProjectQuota(
   return { allowed: current < quota.max_projects, current, max: quota.max_projects };
 }
 
-/** 환경변수 쿼터 체크 */
+/** 환경변수 쿼터 체크 (소프트 삭제된 항목 제외) */
 export async function checkEnvVarQuota(
   userId: string,
   projectId: string,
@@ -115,7 +115,8 @@ export async function checkEnvVarQuota(
   const { count } = await supabase
     .from('environment_variables')
     .select('*', { count: 'exact', head: true })
-    .eq('project_id', projectId);
+    .eq('project_id', projectId)
+    .is('deleted_at', null);
 
   const current = count ?? 0;
   return { allowed: current < quota.max_env_vars_per_project, current, max: quota.max_env_vars_per_project };

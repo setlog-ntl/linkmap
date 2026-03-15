@@ -107,6 +107,7 @@ export function useUpdateEnvVar(projectId: string) {
       id: string;
       key_name?: string;
       value?: string;
+      environment?: Environment;
       is_secret?: boolean;
       description?: string | null;
       service_id?: string | null;

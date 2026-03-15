@@ -25,6 +25,7 @@ interface EnvDataTableProps {
   onEdit: (envVar: EnvironmentVariable) => void;
   onDelete: (id: string) => void;
   onCopy: (envVar: EnvironmentVariable) => void;
+  onCopyValue?: (envVar: EnvironmentVariable) => void;
 }
 
 export function EnvDataTable({
@@ -37,6 +38,7 @@ export function EnvDataTable({
   onEdit,
   onDelete,
   onCopy,
+  onCopyValue,
 }: EnvDataTableProps) {
   const maskValue = (value: string) => {
     return '\u2022'.repeat(Math.min(value.length || 20, 30));
@@ -149,6 +151,12 @@ export function EnvDataTable({
                       <Copy className="mr-2 h-4 w-4" />
                       키 복사
                     </DropdownMenuItem>
+                    {onCopyValue && (
+                      <DropdownMenuItem onClick={() => onCopyValue(envVar)}>
+                        <Copy className="mr-2 h-4 w-4" />
+                        값 복사
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem
                       onClick={() => onDelete(envVar.id)}
                       className="text-destructive"

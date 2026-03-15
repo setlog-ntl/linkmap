@@ -96,6 +96,7 @@ export default function ProjectEnvPage() {
   const [autoDetectedService, setAutoDetectedService] = useState<EnvServiceMatch | null>(null);
   const [manualServiceSelect, setManualServiceSelect] = useState(false);
   const [editServiceId, setEditServiceId] = useState<string | null>(null);
+  const [editEnvironment, setEditEnvironment] = useState<Environment>('development');
   const [analyzerOpen, setAnalyzerOpen] = useState(false);
 
   const envKeyServiceMap = useMemo(
@@ -209,6 +210,7 @@ export default function ProjectEnvPage() {
     setEditDesc(envVar.description || '');
     setEditIsSecret(envVar.is_secret);
     setEditServiceId(envVar.service_id ?? null);
+    setEditEnvironment(envVar.environment as Environment);
     setEditValue('');
     try {
       const value = await decryptEnvVar.mutateAsync(envVar.id);
@@ -226,6 +228,7 @@ export default function ProjectEnvPage() {
       id: editTarget.id,
       key_name: editKey.trim() || undefined,
       value: editValue || undefined,
+      environment: editEnvironment !== editTarget.environment ? editEnvironment : undefined,
       is_secret: editIsSecret,
       description: editDesc.trim() || null,
       service_id: editServiceId,
@@ -242,7 +245,25 @@ export default function ProjectEnvPage() {
 
   const handleCopy = (envVar: EnvironmentVariable) => {
     navigator.clipboard.writeText(envVar.key_name);
+    toast.success('키 이름이 복사되었습니다');
   };
+
+  const handleCopyValue = useCallback(async (envVar: EnvironmentVariable) => {
+    // 이미 복호화된 값이 있으면 바로 복사
+    if (decryptedValues[envVar.id]) {
+      await navigator.clipboard.writeText(decryptedValues[envVar.id]);
+      toast.success('값이 복사되었습니다');
+      return;
+    }
+    // 없으면 복호화 후 복사
+    try {
+      const value = await decryptEnvVar.mutateAsync(envVar.id);
+      await navigator.clipboard.writeText(value);
+      toast.success('값이 복사되었습니다');
+    } catch {
+      toast.error('값 복호화에 실패했습니다');
+    }
+  }, [decryptedValues, decryptEnvVar]);
 
   if (isLoading) {
     return (
@@ -325,6 +346,7 @@ export default function ProjectEnvPage() {
         onEdit={openEditDialog}
         onDelete={handleDelete}
         onCopy={handleCopy}
+        onCopyValue={handleCopyValue}
       />
 
       {/* Smart Key Analyzer */}
@@ -584,6 +606,23 @@ export default function ProjectEnvPage() {
                 value={editDesc}
                 onChange={(e) => setEditDesc(e.target.value)}
               />
+            </div>
+            {/* Environment Selection */}
+            <div className="space-y-2">
+              <Label>환경</Label>
+              <Select
+                value={editEnvironment}
+                onValueChange={(v) => setEditEnvironment(v as Environment)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="development">개발 (Development)</SelectItem>
+                  <SelectItem value="staging">스테이징 (Staging)</SelectItem>
+                  <SelectItem value="production">프로덕션 (Production)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             {/* Edit Service Selection */}
             <div className="space-y-2">
