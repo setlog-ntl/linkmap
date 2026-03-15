@@ -20,6 +20,7 @@ export function useProjects() {
         .select(`*, project_services!project_services_project_id_fkey (*, service:services (*)), project_github_repos (id)`)
         .eq('user_id', user.id)
         .is('deleted_at', null)
+        .order('display_order', { ascending: true })
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
@@ -174,6 +175,47 @@ export function useUpdateProject() {
       return res.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+    },
+  });
+}
+
+export function useReorderProjects() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (orderedIds: string[]) => {
+      const res = await fetch('/api/projects/reorder', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderedIds }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || '프로젝트 순서 변경 실패');
+      }
+      return res.json();
+    },
+    onMutate: async (orderedIds) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.projects.all });
+      const previous = queryClient.getQueryData<ProjectWithServices[]>(queryKeys.projects.all);
+      if (previous) {
+        const orderMap = new Map(orderedIds.map((id, i) => [id, i]));
+        const reordered = [...previous].sort((a, b) => {
+          const oa = orderMap.get(a.id) ?? 9999;
+          const ob = orderMap.get(b.id) ?? 9999;
+          return oa - ob;
+        });
+        queryClient.setQueryData<ProjectWithServices[]>(queryKeys.projects.all, reordered);
+      }
+      return { previous };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous) {
+        queryClient.setQueryData(queryKeys.projects.all, ctx.previous);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
     },
   });

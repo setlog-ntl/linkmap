@@ -19,6 +19,7 @@ export interface Project {
   showcase_description: string | null;
   showcase_tags: string[];
   showcase_category: ShowcaseCategory | null;
+  display_order: number;
   monthly_budget: number | null;
   budget_currency: BudgetCurrency;
   created_at: string;

@@ -248,7 +248,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
     return [...projects].sort((a, b) => {
       if (a.is_favorited && !b.is_favorited) return -1;
       if (!a.is_favorited && b.is_favorited) return 1;
-      return 0;
+      return (a.display_order ?? 0) - (b.display_order ?? 0);
     });
   }, [projects]);
 

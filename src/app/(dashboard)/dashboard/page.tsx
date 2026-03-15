@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, startTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useProjects, useCreateProject, useDeleteProject, useToggleFavoriteProject } from '@/lib/queries/projects';
+import { useProjects, useCreateProject, useDeleteProject, useToggleFavoriteProject, useReorderProjects } from '@/lib/queries/projects';
 import { useMyDeployments, type HomepageDeploy } from '@/lib/queries/oneclick';
 import { ProjectCard } from '@/components/project/project-card';
 import { ProjectTreeList } from '@/components/dashboard/project-tree-list';
@@ -32,6 +32,7 @@ export default function DashboardPage() {
   const createProject = useCreateProject();
   const deleteProject = useDeleteProject();
   const toggleFavorite = useToggleFavoriteProject();
+  const reorderProjects = useReorderProjects();
   const [createOpen, setCreateOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('card');
 
@@ -49,7 +50,7 @@ export default function DashboardPage() {
     return [...projects].sort((a, b) => {
       if (a.is_favorited && !b.is_favorited) return -1;
       if (!a.is_favorited && b.is_favorited) return 1;
-      return 0;
+      return (a.display_order ?? 0) - (b.display_order ?? 0);
     });
   }, [projects]);
 
@@ -68,6 +69,10 @@ export default function DashboardPage() {
 
   const handleToggleFavorite = (id: string, isFavorited: boolean) => {
     toggleFavorite.mutate({ id, isFavorited });
+  };
+
+  const handleReorder = (orderedIds: string[]) => {
+    reorderProjects.mutate(orderedIds);
   };
 
   useEffect(() => {
@@ -344,6 +349,7 @@ export default function DashboardPage() {
                     projects={manualProjects}
                     onDelete={handleDeleteProject}
                     onToggleFavorite={handleToggleFavorite}
+                    onReorder={handleReorder}
                     deployByProjectId={deployByProjectId}
                   />
                 </div>
@@ -359,6 +365,7 @@ export default function DashboardPage() {
                     projects={deployedProjects}
                     onDelete={handleDeleteProject}
                     onToggleFavorite={handleToggleFavorite}
+                    onReorder={handleReorder}
                     deployByProjectId={deployByProjectId}
                   />
                 </div>

@@ -16,7 +16,26 @@ import {
   Loader2,
   Rocket,
   Star,
+  GripVertical,
 } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DraggableAttributes,
+} from '@dnd-kit/core';
+import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@/components/ui/button';
 import {
   Collapsible,
@@ -48,26 +67,55 @@ interface ProjectTreeListProps {
   projects: ProjectWithServices[];
   onDelete: (id: string) => void;
   onToggleFavorite: (id: string, isFavorited: boolean) => void;
+  onReorder?: (orderedIds: string[]) => void;
   deployByProjectId?: Map<string, HomepageDeploy>;
 }
 
-export function ProjectTreeList({ projects, onDelete, onToggleFavorite, deployByProjectId }: ProjectTreeListProps) {
+export function ProjectTreeList({ projects, onDelete, onToggleFavorite, onReorder, deployByProjectId }: ProjectTreeListProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id || !onReorder) return;
+
+    const oldIndex = projects.findIndex((p) => p.id === active.id);
+    const newIndex = projects.findIndex((p) => p.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = [...projects];
+    const [moved] = reordered.splice(oldIndex, 1);
+    reordered.splice(newIndex, 0, moved);
+
+    onReorder(reordered.map((p) => p.id));
+  }
+
   return (
-    <div className="space-y-2">
-      {projects.map((project) => (
-        <ProjectTreeItem
-          key={project.id}
-          project={project}
-          onDelete={onDelete}
-          onToggleFavorite={onToggleFavorite}
-          deploy={deployByProjectId?.get(project.id)}
-        />
-      ))}
-    </div>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext items={projects.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+        <div className="space-y-2">
+          {projects.map((project) => (
+            <SortableProjectTreeItem
+              key={project.id}
+              project={project}
+              onDelete={onDelete}
+              onToggleFavorite={onToggleFavorite}
+              deploy={deployByProjectId?.get(project.id)}
+            />
+          ))}
+        </div>
+      </SortableContext>
+    </DndContext>
   );
 }
 
-function ProjectTreeItem({
+function SortableProjectTreeItem({
   project,
   onDelete,
   onToggleFavorite,
@@ -77,6 +125,54 @@ function ProjectTreeItem({
   onDelete: (id: string) => void;
   onToggleFavorite: (id: string, isFavorited: boolean) => void;
   deploy?: HomepageDeploy;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: project.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+    opacity: isDragging ? 0.8 : undefined,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <ProjectTreeItem
+        project={project}
+        onDelete={onDelete}
+        onToggleFavorite={onToggleFavorite}
+        deploy={deploy}
+        dragAttributes={attributes}
+        dragListeners={listeners}
+        isDragging={isDragging}
+      />
+    </div>
+  );
+}
+
+function ProjectTreeItem({
+  project,
+  onDelete,
+  onToggleFavorite,
+  deploy,
+  dragAttributes,
+  dragListeners,
+  isDragging,
+}: {
+  project: ProjectWithServices;
+  onDelete: (id: string) => void;
+  onToggleFavorite: (id: string, isFavorited: boolean) => void;
+  deploy?: HomepageDeploy;
+  dragAttributes?: DraggableAttributes;
+  dragListeners?: SyntheticListenerMap;
+  isDragging?: boolean;
 }) {
   const router = useRouter();
   const { locale } = useLocaleStore();
@@ -134,9 +230,19 @@ function ProjectTreeItem({
 
   return (
     <Collapsible className="group/tree">
-      <div className="rounded-lg border bg-card transition-colors hover:bg-accent/50">
+      <div className={`rounded-lg border bg-card transition-colors hover:bg-accent/50 ${isDragging ? 'shadow-lg ring-2 ring-primary/20' : ''}`}>
         {/* Project row */}
         <div className="flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-3">
+          {/* Drag handle */}
+          <button
+            className="shrink-0 cursor-grab active:cursor-grabbing touch-none text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+            {...dragAttributes}
+            {...dragListeners}
+            aria-label="드래그하여 순서 변경"
+          >
+            <GripVertical className="h-4 w-4" />
+          </button>
+
           <CollapsibleTrigger asChild>
             <button className="flex flex-1 items-center gap-2 min-w-0 min-h-[40px] text-left">
               <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]/tree:rotate-90" />

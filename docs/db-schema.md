@@ -63,6 +63,7 @@
 | icon_value | TEXT | YES | NULL | slug\|char\|URL, M036 |
 | link_url | TEXT | YES | NULL | max 500 chars, M038 |
 | is_favorited | BOOLEAN | NO | false | 즐겨찾기 여부, M044 |
+| display_order | INTEGER | NO | 0 | 사용자 정의 표시 순서 (드래그 정렬) |
 | is_showcase | BOOLEAN | NO | false | M074 |
 | showcase_description | TEXT | YES | NULL | M074 |
 | showcase_tags | TEXT[] | YES | '{}' | M074 |
