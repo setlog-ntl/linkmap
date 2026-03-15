@@ -1211,18 +1211,7 @@ Supabase로 인증하고, Vercel에 배포할 거야."
 
 **이것이 바로 [Linkmap](https://www.linkmap.biz)이 해결하는 문제입니다.**
 
-\`\`\`
-바이브 코딩 워크플로:
-
-  AI 에디터 (Cursor/Claude)     Linkmap (linkmap.biz)
-  ┌─────────────────────┐     ┌──────────────────────┐
-  │  코드 생성           │     │  서비스 연결 관리      │
-  │  컴포넌트 작성        │ ──→ │  환경변수 암호화 저장   │
-  │  API 라우트          │     │  GitHub Secrets 동기화  │
-  │  테스트 코드          │     │  서비스맵 시각화       │
-  └─────────────────────┘     └──────────────────────┘
-        코드 영역                  인프라 영역
-\`\`\`
+![바이브 코딩 워크플로 — 코드 영역 vs 인프라 영역](/blog/diagrams/vibe-coding-architecture.png)
 
 ## 바이브 코딩의 진짜 과제: 서비스 연결
 
@@ -1414,28 +1403,11 @@ API 키 유출
 
 [Linkmap](https://www.linkmap.biz) 자체가 바이브 코딩으로 시작된 프로젝트입니다.
 
-\`\`\`
-Linkmap (linkmap.biz)의 현재 규모 — 바이브 코딩으로 구축:
-
-  코드베이스                        인프라
-  ├── 70+ DB 마이그레이션            ├── Cloudflare Workers 배포
-  ├── 45+ API 라우트                ├── Supabase (DB + Auth)
-  ├── 128개 서비스 카탈로그 페이지     ├── GitHub 연동 (13 모듈)
-  ├── 10개 인터랙티브 교육 가이드      ├── AES-256-GCM 암호화
-  ├── 102+ 테스트 케이스             └── 원클릭 배포 시스템
-  └── 6개 원클릭 배포 템플릿
-\`\`\`
+![Linkmap 현재 규모 — 바이브 코딩으로 구축](/blog/diagrams/linkmap-saas-scale.png)
 
 > **INFO:** [서비스 카탈로그](https://www.linkmap.biz/services)에서 128개 서비스의 환경변수 가이드를 확인하고, [원클릭 배포](https://www.linkmap.biz/my-sites)로 템플릿을 즉시 시작할 수 있습니다.
 
 ## AI가 잘하는 것 vs 못하는 것
-
-| | 잘하는 것 | 못하는 것 (아직) |
-|--|---------|---------------|
-| **코드** | 보일러플레이트, CRUD, 패턴 재현 | 아키텍처 의사결정 |
-| **디버깅** | 타입 에러, import 누락 | 비즈니스 로직 버그 |
-| **보안** | 기본 패턴 적용 | 보안 검증 (API 키 노출, XSS) |
-| **설정** | 코드 내 설정 | **서비스 연결** (API 키 발급, 환경변수) |
 
 ![바이브 코딩 AI 능력 매트릭스](/blog/diagrams/ai-capability-matrix.png)
 
@@ -1471,16 +1443,7 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
 
 ## 바이브 코딩 추천 스택
 
-| 용도 | 추천 | 왜? |
-|------|------|-----|
-| AI 에디터 | Cursor | AI 코드 생성 통합 |
-| LLM | Claude | 추론 품질, 긴 코드 생성 |
-| 프레임워크 | Next.js | AI가 가장 잘 아는 프레임워크 |
-| DB + 인증 | Supabase | AI 코드 호환성 최고 |
-| 배포 | Vercel | 원클릭 배포, GitHub 연동 |
-| AI 기능 | OpenAI | GPT API |
-| 결제 | Stripe | 글로벌 결제 |
-| **서비스 관리** | **[Linkmap](https://www.linkmap.biz)** | 연결 시각화 + 환경변수 암호화 |
+![바이브 코딩 추천 기술 스택](/blog/diagrams/vibe-coding-tech-stack.png)
 
 ---
 
@@ -1512,20 +1475,7 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
 
 [바이브 코딩으로 프로젝트를 만들면](/blog/what-is-vibe-coding), 보통 5~10개의 외부 서비스를 연결합니다:
 
-\`\`\`
-내 프로젝트의 서비스 연결 (예시):
-
-            ┌── Supabase (DB + Auth)
-            ├── Vercel (배포)
-  내 앱 ────├── OpenAI (AI 기능)
-            ├── Stripe (결제)
-            ├── Resend (이메일)
-            └── PostHog (분석)
-
-  → 환경변수 총 18개 필요
-  → 각각 다른 대시보드에서 관리
-  → 전체 구조가 머릿속에만 있음
-\`\`\`
+![내 프로젝트의 외부 서비스 연결](/blog/diagrams/service-connection-tree.png)
 
 > **INFO:** 이 서비스들이 어떻게 연결되어 있는지, 어떤 환경변수가 필요한지, 비용은 얼마인지 — **한눈에 보이지 않습니다.** [Linkmap](https://www.linkmap.biz)은 이 문제를 해결합니다.
 
