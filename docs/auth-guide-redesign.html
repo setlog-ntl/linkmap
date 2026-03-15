@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인증 가이드 리디자인 — IA · 와이어프레임 · 캡처 계획</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #161922;
+    --surface-2: #1e2130;
+    --border: #2a2d3a;
+    --text: #e4e4e7;
+    --text-muted: #9ca3af;
+    --accent: #3b82f6;
+    --accent-dim: #2563eb;
+    --green: #22c55e;
+    --green-dim: #16a34a;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --purple: #a78bfa;
+    --cyan: #06b6d4;
+    --pink: #ec4899;
+    --yellow: #eab308;
+    --radius: 8px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .top-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .top-bar .logo { font-size: 18px; font-weight: 700; color: var(--accent); }
+  .top-bar .divider { color: var(--border); }
+  .top-bar .doc-title { color: var(--text-muted); font-size: 14px; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px 80px; }
+  .hero { text-align: center; padding: 60px 0 48px; }
+  .hero h1 {
+    font-size: 36px; font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--cyan));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+  }
+  .hero p { color: var(--text-muted); font-size: 16px; max-width: 600px; margin: 0 auto; }
+  .hero .badge {
+    display: inline-block; margin-top: 16px; padding: 4px 14px;
+    border-radius: 20px; font-size: 12px; font-weight: 600;
+    background: rgba(59,130,246,.15); color: var(--accent); border: 1px solid rgba(59,130,246,.3);
+  }
+  .toc {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px 32px; margin-bottom: 48px;
+  }
+  .toc h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 16px; }
+  .toc ol { padding-left: 20px; }
+  .toc li { margin-bottom: 8px; }
+  .toc a { color: var(--accent); text-decoration: none; font-size: 15px; }
+  .toc a:hover { text-decoration: underline; }
+  section { margin-bottom: 56px; }
+  section > h2 {
+    font-size: 24px; font-weight: 700; padding-bottom: 12px;
+    border-bottom: 2px solid var(--accent); margin-bottom: 24px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  section > h2 .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--accent); color: #fff; font-size: 14px; font-weight: 700; flex-shrink: 0;
+  }
+  h3 { font-size: 18px; font-weight: 600; margin: 24px 0 12px; color: var(--text); }
+  h4 { font-size: 15px; font-weight: 600; margin: 16px 0 8px; color: var(--text-muted); }
+  p { margin-bottom: 12px; color: var(--text-muted); font-size: 15px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; margin-bottom: 20px;
+  }
+  .card.highlight { border-left: 3px solid var(--accent); }
+  .ia-tree {
+    font-family: 'Geist Mono', 'Fira Code', monospace; font-size: 14px; line-height: 2;
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px 32px; overflow-x: auto;
+  }
+  .ia-tree .route { color: var(--cyan); font-weight: 600; }
+  .ia-tree .desc { color: var(--text-muted); }
+  .ia-tree .tag {
+    display: inline-block; padding: 1px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 600; margin-left: 6px;
+  }
+  .tag-hub { background: rgba(34,197,94,.15); color: var(--green); }
+  .tag-sub { background: rgba(59,130,246,.15); color: var(--accent); }
+  .tag-plan { background: rgba(245,158,11,.15); color: var(--amber); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 20px; }
+  thead { background: var(--surface-2); }
+  th { text-align: left; padding: 12px 16px; font-weight: 600; color: var(--text); border-bottom: 2px solid var(--border); white-space: nowrap; }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--text-muted); vertical-align: top; }
+  tr:hover td { background: rgba(59,130,246,.04); }
+  .file-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 12px; font-family: 'Geist Mono', monospace;
+    background: rgba(6,182,212,.1); color: var(--cyan); margin: 2px 0;
+  }
+  .anno-click { background: rgba(239,68,68,.15); color: var(--red); }
+  .anno-input { background: rgba(59,130,246,.15); color: var(--accent); }
+  .anno-highlight { background: rgba(245,158,11,.15); color: var(--amber); }
+  .anno-area { background: rgba(167,139,250,.15); color: var(--purple); }
+  .wireframe {
+    background: var(--surface-2); border: 2px dashed var(--border);
+    border-radius: var(--radius); padding: 24px; margin: 16px 0 24px; position: relative;
+  }
+  .wireframe::before {
+    content: 'WIREFRAME'; position: absolute; top: -10px; left: 16px;
+    background: var(--surface-2); padding: 0 8px; font-size: 10px;
+    font-weight: 700; letter-spacing: 2px; color: var(--text-muted);
+  }
+  .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+  .breadcrumb span { color: var(--accent); cursor: pointer; }
+  .breadcrumb span:last-child { color: var(--text); font-weight: 600; }
+  .breadcrumb .sep { color: var(--border); }
+  .sub-nav { display: flex; gap: 8px; margin-bottom: 20px; }
+  .pill {
+    padding: 8px 20px; border-radius: 24px; font-size: 14px; font-weight: 500;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text-muted); cursor: pointer; transition: all .15s;
+  }
+  .pill.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .pill:hover:not(.active) { border-color: var(--accent); color: var(--text); }
+  .anno-demo { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin: 16px 0; }
+  .anno-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; text-align: center;
+  }
+  .anno-box .icon { width: 48px; height: 48px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px; }
+  .anno-box h4 { margin: 0 0 6px; color: var(--text); }
+  .anno-box p { font-size: 13px; margin: 0; }
+  .icon-click { background: rgba(239,68,68,.15); }
+  .icon-input { background: rgba(59,130,246,.15); }
+  .icon-highlight { background: rgba(245,158,11,.15); }
+  .icon-area { background: rgba(167,139,250,.15); }
+  .code-block {
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 24px;
+    font-family: 'Geist Mono', 'Fira Code', monospace; font-size: 13px;
+    line-height: 1.8; overflow-x: auto; color: var(--text-muted); margin: 12px 0 20px;
+  }
+  .code-block .comment { color: #6b7280; }
+  .code-block .keyword { color: var(--purple); }
+  .code-block .string { color: var(--green); }
+  .code-block .fn { color: var(--cyan); }
+  .callout { border-radius: var(--radius); padding: 16px 20px; margin: 16px 0; font-size: 14px; display: flex; gap: 12px; align-items: flex-start; }
+  .callout-warn { background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.25); color: var(--amber); }
+  .callout-info { background: rgba(59,130,246,.08); border: 1px solid rgba(59,130,246,.25); color: var(--accent); }
+  .callout-danger { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25); color: var(--red); }
+  .callout .icon-c { font-size: 18px; flex-shrink: 0; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin: 20px 0; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; }
+  .stat-card .value { font-size: 28px; font-weight: 800; color: var(--accent); }
+  .stat-card .label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+  footer { text-align: center; padding: 40px 0 20px; color: var(--text-muted); font-size: 13px; border-top: 1px solid var(--border); margin-top: 60px; }
+
+  /* ── Screenshot mockup ── */
+  .ss-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; margin: 16px 0 28px; }
+  .ss-mockup { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .ss-mockup .ss-titlebar {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 12px; background: var(--surface-2); border-bottom: 1px solid var(--border); font-size: 11px;
+  }
+  .ss-mockup .ss-titlebar .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .ss-mockup .ss-titlebar .dot-r { background: #ef4444; }
+  .ss-mockup .ss-titlebar .dot-y { background: #eab308; }
+  .ss-mockup .ss-titlebar .dot-g { background: #22c55e; }
+  .ss-mockup .ss-titlebar .url { margin-left: 8px; color: var(--text-muted); font-family: monospace; font-size: 11px; }
+  .ss-mockup .ss-body { position: relative; min-height: 200px; }
+  .ss-mockup .ss-body svg { display: block; width: 100%; height: auto; }
+  .ss-mockup .ss-caption { padding: 8px 12px; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
+  .ss-mockup .ss-caption .ss-tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; }
+
+  /* Step block */
+  .step-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 28px; overflow: hidden; }
+  .step-header { display: flex; align-items: center; gap: 14px; padding: 20px 24px; }
+  .step-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .step-num-blue { background: var(--accent); }
+  .step-num-yellow { background: var(--yellow); color: #1a1a1a; }
+  .step-info h4 { margin: 0; font-size: 16px; font-weight: 600; color: var(--text); }
+  .step-info p { margin: 4px 0 0; font-size: 13px; }
+  .step-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 0 24px 16px; font-size: 13px; }
+  .step-meta dt { color: var(--text-muted); font-weight: 600; margin-bottom: 2px; }
+  .step-meta dd { color: var(--text-muted); margin: 0; }
+  .step-screenshots { background: var(--surface-2); border-top: 1px solid var(--border); padding: 20px 24px; }
+
+  @media (max-width: 768px) {
+    .container { padding: 20px 16px 60px; }
+    .hero h1 { font-size: 26px; }
+    .ss-grid { grid-template-columns: 1fr; }
+    .step-meta { grid-template-columns: 1fr; }
+    table { font-size: 12px; }
+    th, td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <span class="logo">Linkmap</span>
+  <span class="divider">/</span>
+  <span class="doc-title">인증 가이드 리디자인 &mdash; 기획 문서 v1.0</span>
+</div>
+
+<div class="container">
+
+<div class="hero">
+  <h1>인증 가이드 리디자인</h1>
+  <p>허브 + 서브페이지 구조, 스크린샷 캡처 계획, 어노테이션 컴포넌트 디자인을 포함한 종합 기획 문서</p>
+  <div class="badge">Planning Document &middot; 2026-03-15</div>
+</div>
+
+<div class="stats">
+  <div class="stat-card"><div class="value">3</div><div class="label">페이지 (허브 + 서브 2)</div></div>
+  <div class="stat-card"><div class="value">13</div><div class="label">총 스텝 (구글 7 + 카카오 6)</div></div>
+  <div class="stat-card"><div class="value">26</div><div class="label">스크린샷 계획</div></div>
+  <div class="stat-card"><div class="value">3</div><div class="label">어노테이션 타입</div></div>
+</div>
+
+<div class="toc">
+  <h3>목차</h3>
+  <ol>
+    <li><a href="#ia">전체 IA (Information Architecture)</a></li>
+    <li><a href="#google">구글 로그인 가이드 — 7단계 스크린샷 목업</a></li>
+    <li><a href="#kakao">카카오 로그인 가이드 — 6단계 스크린샷 목업</a></li>
+    <li><a href="#annotation">어노테이션 컴포넌트 디자인</a></li>
+    <li><a href="#playwright">Playwright 캡처 계획 + 제약사항</a></li>
+    <li><a href="#navigation">네비게이션 와이어프레임</a></li>
+  </ol>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- Section 1: IA -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="ia">
+  <h2><span class="num">1</span> 전체 IA (Information Architecture)</h2>
+  <p>인증 가이드는 허브 페이지를 중심으로 각 프로바이더별 서브 가이드로 분기하는 구조입니다.</p>
+
+  <div class="ia-tree">
+<span class="route">/guides</span> <span class="desc">&mdash; 가이드 목록</span>
+<br>&nbsp;&nbsp;<span class="route">/guides/auth</span> <span class="desc">&mdash; 인증 가이드 허브</span> <span class="tag tag-hub">HUB</span>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;├─ HeroSection + TwoLayerDiagram
+<br>&nbsp;&nbsp;&nbsp;&nbsp;├─ AuthBasicsSection <span class="desc">&mdash; 두 가지 인증 레이어 설명</span>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;├─ GuideLinkCards <span class="desc">&mdash; 구글/카카오 상세 가이드 카드</span>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;├─ AppLoginSection + ServiceAuthSection
+<br>&nbsp;&nbsp;&nbsp;&nbsp;├─ ComparisonTable + GlossarySection
+<br>&nbsp;&nbsp;&nbsp;&nbsp;└─ FaqSection
+<br>
+<br>&nbsp;&nbsp;<span class="route">/guides/auth/google</span> <span class="desc">&mdash; 구글 로그인 설정</span> <span class="tag tag-sub">SUB</span>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;├─ 7 Steps + 12 Screenshots (어노테이션 포함)
+<br>&nbsp;&nbsp;&nbsp;&nbsp;├─ OAuth Flow Diagram
+<br>&nbsp;&nbsp;&nbsp;&nbsp;└─ Troubleshooting Accordion
+<br>
+<br>&nbsp;&nbsp;<span class="route">/guides/auth/kakao</span> <span class="desc">&mdash; 카카오 로그인 설정</span> <span class="tag tag-sub">SUB</span>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;├─ 6 Steps + 10 Screenshots (어노테이션 포함)
+<br>&nbsp;&nbsp;&nbsp;&nbsp;├─ 접근 방식 비교 (OIDC vs 직접 구현)
+<br>&nbsp;&nbsp;&nbsp;&nbsp;└─ Troubleshooting Accordion
+  </div>
+
+  <h3>허브 페이지 구성</h3>
+  <div class="card highlight">
+    <table>
+      <thead><tr><th>영역</th><th>컴포넌트</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td>상단</td><td>HeroSection</td><td>타이틀 + OAuth 흐름 다이어그램</td></tr>
+        <tr><td>상단</td><td>AuthBasicsSection</td><td>Layer 1(앱 로그인) / Layer 2(서비스 연동) 카드</td></tr>
+        <tr><td>중단</td><td>GuideLinkCards</td><td>구글/카카오 상세 가이드 링크 카드 (스크린샷 수, 소요시간 표시)</td></tr>
+        <tr><td>중단</td><td>AppLoginSection + ServiceAuthSection</td><td>기존 상세 설명 (간략화 + "상세 가이드 보기" 링크)</td></tr>
+        <tr><td>하단</td><td>ComparisonTable + GlossarySection + FaqSection</td><td>비교표, 용어집, FAQ</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- Section 2: Google Guide with Screenshot Mockups -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="google">
+  <h2><span class="num">2</span> 구글 로그인 가이드 — 7단계 스크린샷 목업</h2>
+  <p>각 단계별 스크린샷이 실제 가이드에 어떻게 표시되는지 시각적으로 보여줍니다. 빨간 원은 클릭 위치, 파란 테두리는 입력 필드, 노란 영역은 확인/복사 대상입니다.</p>
+
+  <!-- Step 1 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num step-num-blue">1</div>
+      <div class="step-info">
+        <h4>Google Cloud 프로젝트 생성</h4>
+        <p>Google Cloud Console에서 새 프로젝트를 생성합니다</p>
+      </div>
+    </div>
+    <div class="step-meta">
+      <div><dt>어디서?</dt><dd>console.cloud.google.com</dd></div>
+      <div><dt>무엇을?</dt><dd>새 프로젝트 만들기</dd></div>
+      <div><dt>왜?</dt><dd>OAuth 정보가 프로젝트 안에 생성됨</dd></div>
+    </div>
+    <div class="step-screenshots">
+      <div class="ss-grid">
+        <div class="ss-mockup">
+          <div class="ss-titlebar">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span class="url">console.cloud.google.com</span>
+          </div>
+          <div class="ss-body">
+            <svg viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
+              <!-- GCP Top bar -->
+              <rect width="500" height="48" fill="#1a73e8"/>
+              <text x="16" y="30" fill="white" font-size="14" font-weight="600">Google Cloud</text>
+              <!-- Project dropdown -->
+              <rect x="130" y="12" width="140" height="26" rx="4" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)"/>
+              <text x="142" y="30" fill="white" font-size="12">My First Project ▾</text>
+              <!-- Click annotation -->
+              <circle cx="200" cy="25" r="16" fill="none" stroke="#ef4444" stroke-width="2.5">
+                <animate attributeName="r" values="14;18;14" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="200" cy="25" r="10" fill="#ef4444"/>
+              <text x="197" y="29" fill="white" font-size="10" font-weight="700">1</text>
+              <!-- Sidebar -->
+              <rect x="0" y="48" width="60" height="232" fill="#202124"/>
+              <rect x="10" y="60" width="40" height="4" rx="2" fill="#5f6368"/>
+              <rect x="10" y="74" width="35" height="4" rx="2" fill="#5f6368"/>
+              <rect x="10" y="88" width="38" height="4" rx="2" fill="#5f6368"/>
+              <!-- Main content -->
+              <rect x="60" y="48" width="440" height="232" fill="#292a2d"/>
+              <text x="80" y="80" fill="#e8eaed" font-size="18" font-weight="600">Dashboard</text>
+              <rect x="80" y="100" width="200" height="60" rx="6" fill="#303134"/>
+              <text x="100" y="128" fill="#9aa0a6" font-size="12">Project info</text>
+              <text x="100" y="148" fill="#e8eaed" font-size="11">Project ID: my-first-project-123</text>
+              <rect x="300" y="100" width="180" height="60" rx="6" fill="#303134"/>
+              <text x="320" y="128" fill="#9aa0a6" font-size="12">Resources</text>
+              <rect x="80" y="180" width="400" height="80" rx="6" fill="#303134"/>
+              <text x="100" y="210" fill="#9aa0a6" font-size="12">Getting started</text>
+              <rect x="100" y="225" width="120" height="24" rx="4" fill="#1a73e8"/>
+              <text x="120" y="241" fill="white" font-size="11">Explore</text>
+            </svg>
+          </div>
+          <div class="ss-caption">
+            <span class="ss-tag anno-click">click</span>
+            01-project-dropdown.png — 프로젝트 선택 드롭다운 클릭
+          </div>
+        </div>
+
+        <div class="ss-mockup">
+          <div class="ss-titlebar">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span class="url">console.cloud.google.com/projectcreate</span>
+          </div>
+          <div class="ss-body">
+            <svg viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
+              <rect width="500" height="280" fill="#292a2d"/>
+              <!-- Modal overlay -->
+              <rect x="80" y="30" width="340" height="220" rx="8" fill="#303134" stroke="#5f6368" stroke-width="1"/>
+              <text x="110" y="60" fill="#e8eaed" font-size="16" font-weight="600">새 프로젝트</text>
+              <!-- Project name input -->
+              <text x="110" y="100" fill="#9aa0a6" font-size="12">프로젝트 이름 *</text>
+              <rect x="110" y="110" width="280" height="36" rx="4" fill="#202124" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,3"/>
+              <text x="120" y="133" fill="#e8eaed" font-size="13">my-linkmap-project</text>
+              <!-- Input annotation -->
+              <text x="110" y="160" fill="#3b82f6" font-size="10" font-weight="600">INPUT: 프로젝트 이름</text>
+              <!-- Organization -->
+              <text x="110" y="185" fill="#9aa0a6" font-size="12">조직</text>
+              <rect x="110" y="195" width="280" height="30" rx="4" fill="#202124"/>
+              <text x="120" y="215" fill="#9aa0a6" font-size="12">조직 없음</text>
+              <!-- Create button -->
+              <rect x="300" y="230" width="80" height="32" rx="4" fill="#1a73e8"/>
+              <text x="318" y="250" fill="white" font-size="12" font-weight="600">만들기</text>
+              <circle cx="340" cy="246" r="12" fill="none" stroke="#ef4444" stroke-width="2">
+                <animate attributeName="r" values="10;14;10" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="340" cy="246" r="8" fill="#ef4444"/>
+              <text x="337" y="250" fill="white" font-size="9" font-weight="700">2</text>
+            </svg>
+          </div>
+          <div class="ss-caption">
+            <span class="ss-tag anno-input">input</span>
+            <span class="ss-tag anno-click">click</span>
+            01-new-project-form.png — 이름 입력 후 "만들기" 클릭
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num step-num-blue">2</div>
+      <div class="step-info">
+        <h4>OAuth 동의 화면 설정</h4>
+        <p>External 선택 → 앱 이름, 지원 이메일 입력 → email, profile, openid 스코프 추가</p>
+      </div>
+    </div>
+    <div class="step-screenshots">
+      <div class="ss-grid">
+        <div class="ss-mockup">
+          <div class="ss-titlebar">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span class="url">console.cloud.google.com/apis/credentials/consent</span>
+          </div>
+          <div class="ss-body">
+            <svg viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
+              <rect width="500" height="48" fill="#1a73e8"/>
+              <text x="16" y="30" fill="white" font-size="14" font-weight="600">Google Cloud</text>
+              <!-- Sidebar with menu -->
+              <rect x="0" y="48" width="200" height="232" fill="#202124"/>
+              <text x="16" y="75" fill="#9aa0a6" font-size="11">API 및 서비스</text>
+              <rect x="8" y="82" width="184" height="28" rx="4" fill="#303134"/>
+              <text x="20" y="100" fill="#e8eaed" font-size="12">대시보드</text>
+              <text x="20" y="124" fill="#9aa0a6" font-size="12">라이브러리</text>
+              <text x="20" y="148" fill="#9aa0a6" font-size="12">사용자 인증 정보</text>
+              <!-- Active menu item -->
+              <rect x="8" y="158" width="184" height="28" rx="4" fill="rgba(66,133,244,0.15)"/>
+              <text x="20" y="176" fill="#8ab4f8" font-size="12" font-weight="600">OAuth 동의 화면</text>
+              <!-- Click annotation on menu -->
+              <circle cx="100" cy="172" r="12" fill="none" stroke="#ef4444" stroke-width="2">
+                <animate attributeName="r" values="10;14;10" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="100" cy="172" r="8" fill="#ef4444"/>
+              <text x="97" y="176" fill="white" font-size="9" font-weight="700">1</text>
+              <!-- Main content -->
+              <rect x="200" y="48" width="300" height="232" fill="#292a2d"/>
+              <text x="220" y="80" fill="#e8eaed" font-size="16" font-weight="600">OAuth 동의 화면</text>
+              <text x="220" y="110" fill="#9aa0a6" font-size="12">User Type</text>
+              <!-- Radio buttons -->
+              <circle cx="232" cy="135" r="8" fill="none" stroke="#5f6368" stroke-width="2"/>
+              <text x="248" y="139" fill="#e8eaed" font-size="12">내부 (Internal)</text>
+              <text x="248" y="155" fill="#9aa0a6" font-size="10">조직 내부 사용자만</text>
+              <circle cx="232" cy="185" r="8" fill="#1a73e8" stroke="#1a73e8" stroke-width="2"/>
+              <circle cx="232" cy="185" r="4" fill="white"/>
+              <text x="248" y="189" fill="#e8eaed" font-size="12" font-weight="600">외부 (External)</text>
+              <text x="248" y="205" fill="#9aa0a6" font-size="10">모든 Google 계정</text>
+              <!-- Highlight on External -->
+              <rect x="222" y="172" width="250" height="40" rx="4" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="5,3"/>
+              <rect x="340" y="230" width="80" height="30" rx="4" fill="#1a73e8"/>
+              <text x="360" y="249" fill="white" font-size="11" font-weight="600">만들기</text>
+            </svg>
+          </div>
+          <div class="ss-caption">
+            <span class="ss-tag anno-click">click</span>
+            <span class="ss-tag anno-highlight">highlight</span>
+            02-consent-menu.png + 02-external-select.png — External 선택
+          </div>
+        </div>
+
+        <div class="ss-mockup">
+          <div class="ss-titlebar">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span class="url">.../consent — 범위(Scopes) 추가</span>
+          </div>
+          <div class="ss-body">
+            <svg viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
+              <rect width="500" height="280" fill="#292a2d"/>
+              <text x="30" y="35" fill="#e8eaed" font-size="16" font-weight="600">범위 (Scopes)</text>
+              <text x="30" y="55" fill="#9aa0a6" font-size="12">사용자에게 요청할 데이터 범위를 설정합니다</text>
+              <!-- Scope table -->
+              <rect x="30" y="70" width="440" height="30" rx="0" fill="#303134"/>
+              <text x="40" y="90" fill="#9aa0a6" font-size="11" font-weight="600">API</text>
+              <text x="160" y="90" fill="#9aa0a6" font-size="11" font-weight="600">범위</text>
+              <text x="350" y="90" fill="#9aa0a6" font-size="11" font-weight="600">상태</text>
+              <!-- Rows with highlight -->
+              <rect x="30" y="100" width="440" height="140" rx="0" fill="none" stroke="#f59e0b" stroke-width="2"/>
+              <rect x="30" y="100" width="440" height="140" rx="0" fill="rgba(245,158,11,0.06)"/>
+              <rect x="30" y="100" width="440" height="35" fill="rgba(255,255,255,0.03)"/>
+              <text x="40" y="122" fill="#e8eaed" font-size="11">Google API</text>
+              <text x="160" y="122" fill="#8ab4f8" font-size="11">.../auth/userinfo.email</text>
+              <text x="350" y="122" fill="#81c995" font-size="11">추가됨</text>
+              <line x1="30" y1="135" x2="470" y2="135" stroke="#3c4043" stroke-width="1"/>
+              <text x="40" y="157" fill="#e8eaed" font-size="11">Google API</text>
+              <text x="160" y="157" fill="#8ab4f8" font-size="11">.../auth/userinfo.profile</text>
+              <text x="350" y="157" fill="#81c995" font-size="11">추가됨</text>
+              <line x1="30" y1="170" x2="470" y2="170" stroke="#3c4043" stroke-width="1"/>
+              <text x="40" y="192" fill="#e8eaed" font-size="11">Google API</text>
+              <text x="160" y="192" fill="#8ab4f8" font-size="11">openid</text>
+              <text x="350" y="192" fill="#81c995" font-size="11">추가됨</text>
+              <!-- Button -->
+              <rect x="350" y="248" width="120" height="28" rx="4" fill="#1a73e8"/>
+              <text x="375" y="266" fill="white" font-size="11" font-weight="600">저장 후 계속</text>
+            </svg>
+          </div>
+          <div class="ss-caption">
+            <span class="ss-tag anno-highlight">highlight</span>
+            02-scope-add.png — email, profile, openid 스코프 확인
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num step-num-blue">3</div>
+      <div class="step-info">
+        <h4>OAuth 클라이언트 ID 생성</h4>
+        <p>사용자 인증 정보 만들기 > OAuth 클라이언트 ID > 웹 애플리케이션</p>
+      </div>
+    </div>
+    <div class="step-screenshots">
+      <div class="ss-grid">
+        <div class="ss-mockup">
+          <div class="ss-titlebar">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span class="url">.../apis/credentials</span>
+          </div>
+          <div class="ss-body">
+            <svg viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
+              <rect width="500" height="250" fill="#292a2d"/>
+              <text x="30" y="35" fill="#e8eaed" font-size="16" font-weight="600">사용자 인증 정보</text>
+              <!-- Create button -->
+              <rect x="30" y="50" width="180" height="32" rx="4" fill="#1a73e8"/>
+              <text x="44" y="70" fill="white" font-size="12" font-weight="600">+ 사용자 인증 정보 만들기</text>
+              <circle cx="120" cy="66" r="14" fill="none" stroke="#ef4444" stroke-width="2.5">
+                <animate attributeName="r" values="12;16;12" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="120" cy="66" r="9" fill="#ef4444"/>
+              <text x="117" y="70" fill="white" font-size="10" font-weight="700">1</text>
+              <!-- Redirect URI section -->
+              <text x="30" y="115" fill="#e8eaed" font-size="13" font-weight="600">승인된 리디렉션 URI</text>
+              <text x="30" y="135" fill="#9aa0a6" font-size="11">인증 후 사용자가 리디렉션될 URI를 입력하세요</text>
+              <rect x="30" y="148" width="420" height="36" rx="4" fill="#202124" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,3"/>
+              <text x="40" y="170" fill="#8ab4f8" font-size="11">https://abc123.supabase.co/auth/v1/callback</text>
+              <text x="30" y="200" fill="#3b82f6" font-size="10" font-weight="600">INPUT: Supabase 콜백 URL</text>
+              <rect x="370" y="210" width="80" height="28" rx="4" fill="#1a73e8"/>
+              <text x="393" y="228" fill="white" font-size="11" font-weight="600">만들기</text>
+            </svg>
+          </div>
+          <div class="ss-caption">
+            <span class="ss-tag anno-click">click</span>
+            <span class="ss-tag anno-input">input</span>
+            03-credentials.png — 인증정보 만들기 + 리디렉션 URI 입력
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num step-num-blue">4</div>
+      <div class="step-info">
+        <h4>Client ID / Secret 복사</h4>
+        <p>생성 완료 모달에서 두 값을 복사합니다</p>
+      </div>
+    </div>
+    <div class="step-screenshots">
+      <div class="ss-grid">
+        <div class="ss-mockup">
+          <div class="ss-titlebar">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span class="url">OAuth 클라이언트 생성됨</span>
+          </div>
+          <div class="ss-body">
+            <svg viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
+              <rect width="500" height="250" fill="rgba(0,0,0,0.6)"/>
+              <!-- Modal -->
+              <rect x="70" y="20" width="360" height="210" rx="8" fill="#303134" stroke="#5f6368"/>
+              <text x="100" y="50" fill="#e8eaed" font-size="15" font-weight="600">OAuth 클라이언트가 생성되었습니다</text>
+              <!-- Client ID -->
+              <text x="100" y="80" fill="#9aa0a6" font-size="11">클라이언트 ID</text>
+              <rect x="100" y="88" width="280" height="30" rx="4" fill="#202124"/>
+              <text x="110" y="108" fill="#e8eaed" font-size="10">123456789-abc.apps.googleusercontent.com</text>
+              <rect x="100" y="88" width="280" height="30" rx="4" fill="none" stroke="#f59e0b" stroke-width="2"/>
+              <!-- Copy button 1 -->
+              <rect x="385" y="90" width="26" height="26" rx="3" fill="#5f6368"/>
+              <text x="392" y="107" fill="white" font-size="10">📋</text>
+              <circle cx="398" cy="103" r="10" fill="none" stroke="#ef4444" stroke-width="2">
+                <animate attributeName="r" values="8;12;8" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="398" cy="103" r="7" fill="#ef4444"/>
+              <text x="395" y="107" fill="white" font-size="8" font-weight="700">1</text>
+              <!-- Client Secret -->
+              <text x="100" y="140" fill="#9aa0a6" font-size="11">클라이언트 보안 비밀번호</text>
+              <rect x="100" y="148" width="280" height="30" rx="4" fill="#202124"/>
+              <text x="110" y="168" fill="#e8eaed" font-size="10">GOCSPX-xxxxxxxxxxxxxxxxxxxxxxxxxx</text>
+              <rect x="100" y="148" width="280" height="30" rx="4" fill="none" stroke="#f59e0b" stroke-width="2"/>
+              <!-- Copy button 2 -->
+              <rect x="385" y="150" width="26" height="26" rx="3" fill="#5f6368"/>
+              <text x="392" y="167" fill="white" font-size="10">📋</text>
+              <circle cx="398" cy="163" r="10" fill="none" stroke="#ef4444" stroke-width="2">
+                <animate attributeName="r" values="8;12;8" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="398" cy="163" r="7" fill="#ef4444"/>
+              <text x="395" y="167" fill="white" font-size="8" font-weight="700">2</text>
+              <!-- OK button -->
+              <rect x="340" y="195" width="60" height="28" rx="4" fill="#1a73e8"/>
+              <text x="360" y="213" fill="white" font-size="11">확인</text>
+            </svg>
+          </div>
+          <div class="ss-caption">
+            <span class="ss-tag anno-highlight">highlight</span>
+            <span class="ss-tag anno-click">click</span>
+            04-created-modal.png — ID와 Secret 각각 복사
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 5 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num step-num-blue">5</div>
+      <div class="step-info">
+        <h4>Supabase Google Provider 활성화</h4>
+        <p>Supabase Dashboard > Authentication > Providers > Google</p>
+      </div>
+    </div>
+    <div class="step-screenshots">
+      <div class="ss-grid">
+        <div class="ss-mockup">
+          <div class="ss-titlebar">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span class="url">supabase.com/dashboard/.../auth/providers</span>
+          </div>
+          <div class="ss-body">
+            <svg viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
+              <rect width="500" height="280" fill="#1c1c1c"/>
+              <!-- Supabase sidebar -->
+              <rect x="0" y="0" width="50" height="280" fill="#171717"/>
+              <circle cx="25" cy="25" r="12" fill="#3ecf8e"/>
+              <text x="20" y="29" fill="white" font-size="10" font-weight="700">S</text>
+              <!-- Main -->
+              <text x="70" y="30" fill="#ededed" font-size="16" font-weight="600">Authentication</text>
+              <text x="70" y="50" fill="#666" font-size="12">Providers</text>
+              <!-- Provider list -->
+              <rect x="70" y="65" width="410" height="40" rx="6" fill="#262626" stroke="#333"/>
+              <circle cx="90" cy="85" r="10" fill="#4285f4"/>
+              <text x="85" y="89" fill="white" font-size="10" font-weight="700">G</text>
+              <text x="110" y="89" fill="#ededed" font-size="13" font-weight="500">Google</text>
+              <rect x="410" y="75" width="50" height="20" rx="10" fill="#3ecf8e"/>
+              <text x="425" y="89" fill="white" font-size="9" font-weight="600">ON</text>
+              <!-- Google settings form -->
+              <rect x="70" y="115" width="410" height="150" rx="6" fill="#262626" stroke="#333"/>
+              <text x="90" y="140" fill="#999" font-size="11">Client ID</text>
+              <rect x="90" y="148" width="370" height="30" rx="4" fill="#1c1c1c" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,3"/>
+              <text x="100" y="167" fill="#ededed" font-size="10">123456789-abc.apps.googleusercontent.com</text>
+              <text x="90" y="195" fill="#999" font-size="11">Client Secret</text>
+              <rect x="90" y="203" width="370" height="30" rx="4" fill="#1c1c1c" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,3"/>
+              <text x="100" y="222" fill="#ededed" font-size="10">GOCSPX-xxxxxxxxxxxxxxxxxxxxxxxxxx</text>
+              <text x="90" y="250" fill="#3b82f6" font-size="10" font-weight="600">INPUT: GCP에서 복사한 값 붙여넣기</text>
+            </svg>
+          </div>
+          <div class="ss-caption">
+            <span class="ss-tag anno-click">click</span>
+            <span class="ss-tag anno-input">input</span>
+            providers-list.png + google-settings.png — Provider 설정
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 6 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num step-num-blue">6</div>
+      <div class="step-info">
+        <h4>URL Configuration 설정</h4>
+        <p>Site URL 입력 + Redirect URLs에 앱 도메인 추가</p>
+      </div>
+    </div>
+    <div class="step-screenshots">
+      <div class="ss-grid">
+        <div class="ss-mockup">
+          <div class="ss-titlebar">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span class="url">supabase.com/dashboard/.../auth/url-configuration</span>
+          </div>
+          <div class="ss-body">
+            <svg viewBox="0 0 500 240" xmlns="http://www.w3.org/2000/svg">
+              <rect width="500" height="240" fill="#1c1c1c"/>
+              <rect x="0" y="0" width="50" height="240" fill="#171717"/>
+              <text x="70" y="30" fill="#ededed" font-size="16" font-weight="600">URL Configuration</text>
+              <!-- Site URL -->
+              <text x="70" y="65" fill="#999" font-size="12">Site URL</text>
+              <text x="70" y="80" fill="#666" font-size="10">로그인 성공 후 기본 리디렉션 URL</text>
+              <rect x="70" y="90" width="400" height="32" rx="4" fill="#262626" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,3"/>
+              <text x="82" y="110" fill="#ededed" font-size="11">https://www.linkmap.biz</text>
+              <!-- Redirect URLs -->
+              <text x="70" y="148" fill="#999" font-size="12">Redirect URLs</text>
+              <text x="70" y="163" fill="#666" font-size="10">OAuth 콜백 허용 URL 목록</text>
+              <rect x="70" y="173" width="400" height="50" rx="4" fill="#262626" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,3"/>
+              <text x="82" y="192" fill="#ededed" font-size="11">https://www.linkmap.biz/auth/callback</text>
+              <text x="82" y="210" fill="#ededed" font-size="11">http://localhost:3000/auth/callback</text>
+            </svg>
+          </div>
+          <div class="ss-caption">
+            <span class="ss-tag anno-input">input</span>
+            url-config.png — Site URL과 Redirect URLs 설정
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 7 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num step-num-blue">7</div>
+      <div class="step-info">
+        <h4>동작 확인</h4>
+        <p>npm run dev → 로그인 페이지 → Google 로그인 클릭 → 대시보드 도착</p>
+      </div>
+    </div>
+    <div class="step-screenshots">
+      <div class="ss-grid">
+        <div class="ss-mockup">
+          <div class="ss-titlebar">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span class="url">localhost:3000/login → accounts.google.com → /dashboard</span>
+          </div>
+          <div class="ss-body">
+            <svg viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="500" height="200" fill="#0f1117"/>
+              <!-- Flow: 3 boxes with arrows -->
+              <!-- Box 1: Login page -->
+              <rect x="15" y="30" width="130" height="140" rx="8" fill="#161922" stroke="#2a2d3a"/>
+              <text x="40" y="55" fill="#e4e4e7" font-size="11" font-weight="600">Linkmap</text>
+              <rect x="30" y="70" width="100" height="24" rx="4" fill="#1a73e8"/>
+              <text x="38" y="86" fill="white" font-size="9">Google 로그인</text>
+              <rect x="30" y="100" width="100" height="24" rx="4" fill="#333"/>
+              <text x="38" y="116" fill="#999" font-size="9">GitHub 로그인</text>
+              <rect x="30" y="130" width="100" height="24" rx="4" fill="#fcd535"/>
+              <text x="38" y="146" fill="#3a1d1d" font-size="9">카카오 로그인</text>
+              <!-- Arrow 1 -->
+              <line x1="150" y1="100" x2="175" y2="100" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrowBlue)"/>
+              <!-- Box 2: Google consent -->
+              <rect x="180" y="30" width="130" height="140" rx="8" fill="#ffffff" stroke="#dadce0"/>
+              <text x="200" y="55" fill="#202124" font-size="11" font-weight="600">Google</text>
+              <circle cx="245" cy="52" r="8" fill="#4285f4"/>
+              <text x="200" y="80" fill="#5f6368" font-size="9">계정 선택</text>
+              <rect x="195" y="88" width="100" height="22" rx="4" fill="#f1f3f4"/>
+              <text x="205" y="103" fill="#202124" font-size="9">user@gmail.com</text>
+              <text x="200" y="130" fill="#5f6368" font-size="9">Linkmap이 액세스 요청</text>
+              <rect x="210" y="140" width="80" height="22" rx="4" fill="#1a73e8"/>
+              <text x="230" y="155" fill="white" font-size="9">허용</text>
+              <!-- Arrow 2 -->
+              <line x1="315" y1="100" x2="340" y2="100" stroke="#22c55e" stroke-width="2" marker-end="url(#arrowGreen)"/>
+              <!-- Box 3: Dashboard -->
+              <rect x="345" y="30" width="140" height="140" rx="8" fill="#161922" stroke="#22c55e" stroke-width="2"/>
+              <text x="365" y="55" fill="#22c55e" font-size="11" font-weight="600">Dashboard</text>
+              <text x="365" y="80" fill="#e4e4e7" font-size="9">환영합니다!</text>
+              <rect x="360" y="90" width="110" height="30" rx="4" fill="#1e2130"/>
+              <text x="370" y="110" fill="#9ca3af" font-size="9">프로젝트 3개</text>
+              <rect x="360" y="128" width="110" height="30" rx="4" fill="#1e2130"/>
+              <text x="370" y="148" fill="#9ca3af" font-size="9">서비스 12개 연결됨</text>
+              <defs>
+                <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#3b82f6"/></marker>
+                <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#22c55e"/></marker>
+              </defs>
+            </svg>
+          </div>
+          <div class="ss-caption">
+            <span class="ss-tag anno-area">flow</span>
+            07-login-flow.png — 전체 로그인 플로우 확인
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- Section 3: Kakao Guide with Screenshot Mockups -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="kakao">
+  <h2><span class="num">3</span> 카카오 로그인 가이드 — 6단계 스크린샷 목업</h2>
+  <p>카카오 개발자 콘솔에서 앱 생성부터 Supabase OIDC 연동까지의 각 단계 목업입니다.</p>
+
+  <!-- Kakao Step 1 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num step-num-yellow">1</div>
+      <div class="step-info">
+        <h4>카카오 앱 생성</h4>
+        <p>내 애플리케이션 → 추가하기 → REST API 키 복사</p>
+      </div>
+    </div>
+    <div class="step-screenshots">
+      <div class="ss-grid">
+        <div class="ss-mockup">
+          <div class="ss-titlebar">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span class="url">developers.kakao.com/console/app</span>
+          </div>
+          <div class="ss-body">
+            <svg viewBox="0 0 500 260" xmlns="http://www.w3.org/2000/svg">
+              <!-- Kakao header -->
+              <rect width="500" height="50" fill="#fee500"/>
+              <text x="20" y="32" fill="#3a1d1d" font-size="15" font-weight="700">Kakao Developers</text>
+              <rect x="360" y="14" width="120" height="26" rx="4" fill="#3a1d1d"/>
+              <text x="375" y="31" fill="#fee500" font-size="11" font-weight="600">내 애플리케이션</text>
+              <circle cx="420" cy="27" r="12" fill="none" stroke="#ef4444" stroke-width="2">
+                <animate attributeName="r" values="10;14;10" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="420" cy="27" r="8" fill="#ef4444"/>
+              <text x="417" y="31" fill="white" font-size="9" font-weight="700">1</text>
+              <!-- Content -->
+              <rect x="0" y="50" width="500" height="210" fill="#f9f9f9"/>
+              <text x="30" y="80" fill="#333" font-size="14" font-weight="600">내 애플리케이션</text>
+              <!-- Add app button -->
+              <rect x="370" y="65" width="110" height="28" rx="4" fill="#fee500"/>
+              <text x="380" y="83" fill="#3a1d1d" font-size="11" font-weight="600">+ 애플리케이션 추가</text>
+              <circle cx="435" cy="79" r="12" fill="none" stroke="#ef4444" stroke-width="2">
+                <animate attributeName="r" values="10;14;10" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="435" cy="79" r="8" fill="#ef4444"/>
+              <text x="432" y="83" fill="white" font-size="9" font-weight="700">2</text>
+              <!-- App card -->
+              <rect x="30" y="100" width="440" height="70" rx="6" fill="white" stroke="#e0e0e0"/>
+              <rect x="45" y="115" width="40" height="40" rx="8" fill="#fee500"/>
+              <text x="55" y="141" fill="#3a1d1d" font-size="14" font-weight="700">L</text>
+              <text x="100" y="130" fill="#333" font-size="13" font-weight="600">My Linkmap App</text>
+              <text x="100" y="148" fill="#999" font-size="11">앱 ID: 123456</text>
+              <!-- API Key section -->
+              <rect x="30" y="185" width="440" height="60" rx="6" fill="white" stroke="#e0e0e0"/>
+              <text x="50" y="208" fill="#999" font-size="11">REST API 키</text>
+              <rect x="140" y="195" width="280" height="26" rx="4" fill="#f5f5f5"/>
+              <text x="150" y="213" fill="#333" font-size="10" font-family="monospace">a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p</text>
+              <rect x="140" y="195" width="280" height="26" rx="4" fill="none" stroke="#f59e0b" stroke-width="2"/>
+              <rect x="425" y="197" width="24" height="22" rx="3" fill="#fee500"/>
+              <text x="432" y="212" fill="#3a1d1d" font-size="9">📋</text>
+              <circle cx="437" cy="208" r="9" fill="none" stroke="#ef4444" stroke-width="2">
+                <animate attributeName="r" values="7;11;7" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="437" cy="208" r="6" fill="#ef4444"/>
+              <text x="434" y="212" fill="white" font-size="8" font-weight="700">3</text>
+            </svg>
+          </div>
+          <div class="ss-caption">
+            <span class="ss-tag anno-click">click</span>
+            <span class="ss-tag anno-highlight">highlight</span>
+            01-console + 01-add-app + 01-rest-api-key — 앱 생성 후 키 복사
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kakao Step 2 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num step-num-yellow">2</div>
+      <div class="step-info">
+        <h4>카카오 로그인 활성화 + OpenID Connect</h4>
+        <p>활성화 설정 ON + OpenID Connect 활성화</p>
+      </div>
+    </div>
+    <div class="step-screenshots">
+      <div class="ss-grid">
+        <div class="ss-mockup">
+          <div class="ss-titlebar">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span class="url">developers.kakao.com/console/app/.../login</span>
+          </div>
+          <div class="ss-body">
+            <svg viewBox="0 0 500 240" xmlns="http://www.w3.org/2000/svg">
+              <rect width="500" height="240" fill="#f9f9f9"/>
+              <!-- Sidebar -->
+              <rect x="0" y="0" width="160" height="240" fill="white" stroke="#e0e0e0"/>
+              <text x="16" y="25" fill="#999" font-size="10">앱 설정</text>
+              <text x="20" y="48" fill="#333" font-size="12">일반</text>
+              <text x="20" y="72" fill="#333" font-size="12">플랫폼</text>
+              <text x="16" y="100" fill="#999" font-size="10">카카오 로그인</text>
+              <rect x="8" y="108" width="144" height="26" rx="4" fill="#fff3cd"/>
+              <text x="20" y="125" fill="#8a6d3b" font-size="12" font-weight="600">카카오 로그인</text>
+              <circle cx="80" cy="121" r="10" fill="none" stroke="#ef4444" stroke-width="2">
+                <animate attributeName="r" values="8;12;8" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="80" cy="121" r="7" fill="#ef4444"/>
+              <text x="77" y="125" fill="white" font-size="8" font-weight="700">1</text>
+              <!-- Main content -->
+              <text x="180" y="30" fill="#333" font-size="15" font-weight="600">카카오 로그인</text>
+              <!-- Toggle 1: 활성화 -->
+              <rect x="180" y="50" width="300" height="50" rx="6" fill="white" stroke="#e0e0e0"/>
+              <text x="200" y="72" fill="#333" font-size="12">활성화 설정</text>
+              <text x="200" y="88" fill="#999" font-size="10">카카오 로그인 사용 여부</text>
+              <!-- Toggle ON -->
+              <rect x="430" y="63" width="36" height="20" rx="10" fill="#22c55e"/>
+              <circle cx="452" cy="73" r="8" fill="white"/>
+              <circle cx="448" cy="73" r="12" fill="none" stroke="#ef4444" stroke-width="2">
+                <animate attributeName="r" values="10;14;10" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="448" cy="73" r="8" fill="#ef4444" fill-opacity="0.8"/>
+              <text x="445" y="77" fill="white" font-size="8" font-weight="700">2</text>
+              <!-- Toggle 2: OIDC -->
+              <rect x="180" y="115" width="300" height="50" rx="6" fill="white" stroke="#f59e0b" stroke-width="2"/>
+              <text x="200" y="137" fill="#333" font-size="12" font-weight="600">OpenID Connect</text>
+              <text x="200" y="153" fill="#999" font-size="10">OIDC 활성화 (Supabase 연동 필수)</text>
+              <rect x="430" y="128" width="36" height="20" rx="10" fill="#22c55e"/>
+              <circle cx="452" cy="138" r="8" fill="white"/>
+              <circle cx="448" cy="138" r="12" fill="none" stroke="#ef4444" stroke-width="2">
+                <animate attributeName="r" values="10;14;10" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="448" cy="138" r="8" fill="#ef4444" fill-opacity="0.8"/>
+              <text x="445" y="142" fill="white" font-size="8" font-weight="700">3</text>
+              <!-- Warning -->
+              <rect x="180" y="180" width="300" height="45" rx="6" fill="#fff3cd" stroke="#ffc107"/>
+              <text x="200" y="200" fill="#8a6d3b" font-size="11" font-weight="600">필수: OIDC 활성화하지 않으면</text>
+              <text x="200" y="215" fill="#8a6d3b" font-size="11">Supabase에서 id_token을 받지 못합니다</text>
+            </svg>
+          </div>
+          <div class="ss-caption">
+            <span class="ss-tag anno-click">click</span>
+            02-login-menu + 02-activation + 02-oidc — 로그인 활성화
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kakao Step 3-4 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num step-num-yellow">3</div>
+      <div class="step-info">
+        <h4>Redirect URI + 동의항목</h4>
+        <p>콜백 URL 등록 + 이메일 필수 동의 설정</p>
+      </div>
+    </div>
+    <div class="step-screenshots">
+      <div class="ss-grid">
+        <div class="ss-mockup">
+          <div class="ss-titlebar">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span class="url">developers.kakao.com/.../redirect</span>
+          </div>
+          <div class="ss-body">
+            <svg viewBox="0 0 500 180" xmlns="http://www.w3.org/2000/svg">
+              <rect width="500" height="180" fill="#f9f9f9"/>
+              <text x="30" y="30" fill="#333" font-size="14" font-weight="600">Redirect URI</text>
+              <text x="30" y="50" fill="#999" font-size="11">카카오 로그인 시 사용할 Redirect URI를 등록하세요</text>
+              <rect x="30" y="65" width="380" height="34" rx="4" fill="white" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,3"/>
+              <text x="42" y="87" fill="#333" font-size="11">https://abc123.supabase.co/auth/v1/callback</text>
+              <text x="30" y="115" fill="#3b82f6" font-size="10" font-weight="600">INPUT: Supabase 콜백 URL</text>
+              <rect x="420" y="70" width="50" height="26" rx="4" fill="#fee500"/>
+              <text x="433" y="87" fill="#3a1d1d" font-size="10" font-weight="600">저장</text>
+              <circle cx="445" cy="83" r="10" fill="none" stroke="#ef4444" stroke-width="2">
+                <animate attributeName="r" values="8;12;8" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="445" cy="83" r="7" fill="#ef4444"/>
+              <text x="442" y="87" fill="white" font-size="8" font-weight="700">1</text>
+            </svg>
+          </div>
+          <div class="ss-caption">
+            <span class="ss-tag anno-input">input</span>
+            <span class="ss-tag anno-click">click</span>
+            03-redirect-uri-input.png — 콜백 URL 등록
+          </div>
+        </div>
+
+        <div class="ss-mockup">
+          <div class="ss-titlebar">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span class="url">developers.kakao.com/.../consent</span>
+          </div>
+          <div class="ss-body">
+            <svg viewBox="0 0 500 180" xmlns="http://www.w3.org/2000/svg">
+              <rect width="500" height="180" fill="#f9f9f9"/>
+              <text x="30" y="30" fill="#333" font-size="14" font-weight="600">동의항목</text>
+              <!-- Table header -->
+              <rect x="30" y="45" width="440" height="25" fill="#f0f0f0"/>
+              <text x="40" y="62" fill="#666" font-size="10" font-weight="600">항목</text>
+              <text x="200" y="62" fill="#666" font-size="10" font-weight="600">동의 수준</text>
+              <text x="350" y="62" fill="#666" font-size="10" font-weight="600">필요 조건</text>
+              <!-- Rows -->
+              <rect x="30" y="70" width="440" height="30" fill="white" stroke="#e0e0e0"/>
+              <text x="40" y="90" fill="#333" font-size="11">닉네임</text>
+              <text x="200" y="90" fill="#22c55e" font-size="11" font-weight="600">필수 동의</text>
+              <text x="350" y="90" fill="#999" font-size="11">-</text>
+              <rect x="30" y="100" width="440" height="30" fill="white" stroke="#f59e0b" stroke-width="2"/>
+              <rect x="30" y="100" width="440" height="30" fill="rgba(245,158,11,0.06)"/>
+              <text x="40" y="120" fill="#333" font-size="11" font-weight="600">이메일</text>
+              <text x="200" y="120" fill="#f59e0b" font-size="11" font-weight="600">필수 동의</text>
+              <text x="350" y="120" fill="#ef4444" font-size="11" font-weight="600">비즈 앱 필요</text>
+              <rect x="30" y="130" width="440" height="30" fill="white" stroke="#e0e0e0"/>
+              <text x="40" y="150" fill="#333" font-size="11">프로필 사진</text>
+              <text x="200" y="150" fill="#999" font-size="11">선택 동의</text>
+              <text x="350" y="150" fill="#999" font-size="11">-</text>
+            </svg>
+          </div>
+          <div class="ss-caption">
+            <span class="ss-tag anno-highlight">highlight</span>
+            04-email-required.png — 이메일 필수 동의 (비즈 앱 전환 필요)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kakao Step 5-6 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num step-num-yellow">5</div>
+      <div class="step-info">
+        <h4>Client Secret + Supabase OIDC 등록</h4>
+        <p>보안 메뉴에서 시크릿 생성 → Supabase Custom OIDC Provider 설정</p>
+      </div>
+    </div>
+    <div class="step-screenshots">
+      <div class="ss-grid">
+        <div class="ss-mockup">
+          <div class="ss-titlebar">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span class="url">developers.kakao.com/.../security</span>
+          </div>
+          <div class="ss-body">
+            <svg viewBox="0 0 500 180" xmlns="http://www.w3.org/2000/svg">
+              <rect width="500" height="180" fill="#f9f9f9"/>
+              <text x="30" y="30" fill="#333" font-size="14" font-weight="600">보안</text>
+              <text x="30" y="55" fill="#999" font-size="12">Client Secret</text>
+              <rect x="30" y="65" width="340" height="34" rx="4" fill="white" stroke="#e0e0e0"/>
+              <text x="42" y="87" fill="#333" font-size="11" font-family="monospace">xYz1234567890AbCdEfGhIjKlMnOpQr</text>
+              <rect x="30" y="65" width="340" height="34" rx="4" fill="none" stroke="#f59e0b" stroke-width="2"/>
+              <rect x="380" y="68" width="90" height="28" rx="4" fill="#fee500"/>
+              <text x="395" y="86" fill="#3a1d1d" font-size="11" font-weight="600">코드 생성</text>
+              <circle cx="425" cy="82" r="11" fill="none" stroke="#ef4444" stroke-width="2">
+                <animate attributeName="r" values="9;13;9" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="425" cy="82" r="7" fill="#ef4444"/>
+              <text x="422" y="86" fill="white" font-size="8" font-weight="700">1</text>
+              <text x="30" y="125" fill="#999" font-size="12">활성화 상태</text>
+              <rect x="130" y="112" width="60" height="22" rx="4" fill="#22c55e"/>
+              <text x="142" y="127" fill="white" font-size="10" font-weight="600">사용함</text>
+            </svg>
+          </div>
+          <div class="ss-caption">
+            <span class="ss-tag anno-click">click</span>
+            <span class="ss-tag anno-highlight">highlight</span>
+            05-security-code-gen.png — 시크릿 생성 후 복사
+          </div>
+        </div>
+
+        <div class="ss-mockup">
+          <div class="ss-titlebar">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span class="url">supabase.com/dashboard/.../auth/providers — Custom OIDC</span>
+          </div>
+          <div class="ss-body">
+            <svg viewBox="0 0 500 240" xmlns="http://www.w3.org/2000/svg">
+              <rect width="500" height="240" fill="#1c1c1c"/>
+              <rect x="0" y="0" width="50" height="240" fill="#171717"/>
+              <text x="70" y="25" fill="#ededed" font-size="14" font-weight="600">Custom OIDC Provider</text>
+              <!-- Form fields -->
+              <text x="70" y="55" fill="#999" font-size="11">Name</text>
+              <rect x="70" y="62" width="400" height="28" rx="4" fill="#262626" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,3"/>
+              <text x="82" y="80" fill="#ededed" font-size="10">kakao</text>
+              <text x="70" y="108" fill="#999" font-size="11">Client ID (REST API 키)</text>
+              <rect x="70" y="115" width="400" height="28" rx="4" fill="#262626" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,3"/>
+              <text x="82" y="133" fill="#ededed" font-size="10">a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p</text>
+              <text x="70" y="160" fill="#999" font-size="11">Client Secret</text>
+              <rect x="70" y="167" width="400" height="28" rx="4" fill="#262626" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,3"/>
+              <text x="82" y="185" fill="#ededed" font-size="10">xYz1234567890AbCdEfGhIjKlMnOpQr</text>
+              <text x="70" y="212" fill="#999" font-size="11">Issuer URL</text>
+              <rect x="70" y="218" width="400" height="28" rx="4" fill="#262626" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,3"/>
+              <text x="82" y="236" fill="#3ecf8e" font-size="10">https://kauth.kakao.com</text>
+            </svg>
+          </div>
+          <div class="ss-caption">
+            <span class="ss-tag anno-input">input</span>
+            custom-oidc-form.png — OIDC Provider 정보 입력
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- Section 4: Annotation Components -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="annotation">
+  <h2><span class="num">4</span> 어노테이션 컴포넌트 디자인</h2>
+  <p>스크린샷 위에 오버레이되는 3가지 어노테이션 타입. 사용자에게 어떤 동작이 필요한지 직관적으로 전달합니다.</p>
+
+  <div class="anno-demo">
+    <div class="anno-box">
+      <div class="icon icon-click" style="color: var(--red);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><text x="9" y="16" fill="currentColor" font-size="12" font-weight="700" stroke="none">1</text></svg>
+      </div>
+      <h4>Click</h4>
+      <p>"이 버튼을 클릭하세요"<br>빨간 펄스 원형 + 번호 뱃지</p>
+      <div style="margin-top:12px; padding:8px; background:var(--surface-2); border-radius:4px;">
+        <svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="60" rx="4" fill="#303134"/>
+          <rect x="70" y="15" width="60" height="30" rx="4" fill="#1a73e8"/>
+          <text x="82" y="34" fill="white" font-size="11">버튼</text>
+          <circle cx="100" cy="30" r="14" fill="none" stroke="#ef4444" stroke-width="2">
+            <animate attributeName="r" values="12;16;12" dur="1.5s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="100" cy="30" r="9" fill="#ef4444"/>
+          <text x="96" y="34" fill="white" font-size="10" font-weight="700">1</text>
+        </svg>
+      </div>
+    </div>
+    <div class="anno-box">
+      <div class="icon icon-input" style="color: var(--accent);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="10" rx="2"/><line x1="7" y1="10" x2="7" y2="14"/></svg>
+      </div>
+      <h4>Input</h4>
+      <p>"이 필드에 값을 입력하세요"<br>파란 테두리 박스 + 라벨</p>
+      <div style="margin-top:12px; padding:8px; background:var(--surface-2); border-radius:4px;">
+        <svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="60" rx="4" fill="#303134"/>
+          <text x="15" y="18" fill="#3b82f6" font-size="9" font-weight="600">Client ID</text>
+          <rect x="15" y="23" width="170" height="26" rx="4" fill="#202124" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,3"/>
+          <text x="25" y="40" fill="#e8eaed" font-size="10">abc123.apps.google...</text>
+        </svg>
+      </div>
+    </div>
+    <div class="anno-box">
+      <div class="icon icon-highlight" style="color: var(--amber);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" fill="rgba(245,158,11,0.2)"/></svg>
+      </div>
+      <h4>Highlight</h4>
+      <p>"이 값을 확인/복사하세요"<br>노란 반투명 배경</p>
+      <div style="margin-top:12px; padding:8px; background:var(--surface-2); border-radius:4px;">
+        <svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="60" rx="4" fill="#303134"/>
+          <rect x="15" y="15" width="170" height="30" rx="4" fill="rgba(245,158,11,0.12)" stroke="#f59e0b" stroke-width="1.5"/>
+          <text x="25" y="34" fill="#e8eaed" font-size="10">GOCSPX-xxxxxxxxxxx</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- Section 5: Playwright Capture Plan -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="playwright">
+  <h2><span class="num">5</span> Playwright 캡처 계획 + 제약사항</h2>
+
+  <h3>캡처 대상 요약</h3>
+  <div class="card highlight">
+    <table>
+      <thead><tr><th>대상</th><th>캡처 수</th><th>접근 방식</th><th>제약</th></tr></thead>
+      <tbody>
+        <tr><td>Google Cloud Console</td><td>8장</td><td>수동 로그인 후 Playwright 캡처</td><td>2FA, 보안 챌린지</td></tr>
+        <tr><td>Supabase Dashboard</td><td>4장</td><td>수동 로그인 후 Playwright 캡처</td><td>프로젝트 필요</td></tr>
+        <tr><td>카카오 개발자 콘솔</td><td>10장</td><td>수동 로그인 후 Playwright 캡처</td><td>비즈 앱 전환 필요</td></tr>
+        <tr><td>Linkmap 로그인 플로우</td><td>4장</td><td>로컬 dev 서버 자동 캡처</td><td>없음</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-warn">
+    <span class="icon-c">!</span>
+    <div><strong>UI 변경 위험:</strong> GCP, Supabase, 카카오 콘솔의 UI는 수시로 변경됩니다. 스크린샷 촬영일을 기록하고, 분기별 갱신 리뷰를 권장합니다.</div>
+  </div>
+
+  <h3>스크립트</h3>
+  <div class="code-block">
+<span class="comment">// scripts/capture-guide-screenshots.ts</span>
+<span class="comment">// 실행: npx tsx scripts/capture-guide-screenshots.ts</span>
+<span class="comment">// headed 모드로 실행되며, 수동 로그인 후 자동 캡처</span>
+<span class="keyword">const</span> browser = <span class="keyword">await</span> chromium.<span class="fn">launch</span>({ headless: <span class="string">false</span> });
+<span class="keyword">const</span> context = <span class="keyword">await</span> browser.<span class="fn">newContext</span>({
+  viewport: { width: <span class="string">1280</span>, height: <span class="string">720</span> },
+  locale: <span class="string">'ko-KR'</span>,
+});
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- Section 6: Navigation Wireframe -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="navigation">
+  <h2><span class="num">6</span> 네비게이션 와이어프레임</h2>
+
+  <h3>허브 페이지 (/guides/auth)</h3>
+  <div class="wireframe">
+    <div class="breadcrumb">
+      <span>가이드</span> <span class="sep">&gt;</span> <span>인증 가이드</span>
+    </div>
+    <div class="sub-nav">
+      <div class="pill active">개요</div>
+      <div class="pill">구글 로그인</div>
+      <div class="pill">카카오 로그인</div>
+    </div>
+    <div style="border:1px dashed var(--border); border-radius:8px; padding:32px; text-align:center; color:var(--text-muted); margin-top:12px;">
+      <div style="font-size:18px; font-weight:600; color:var(--text); margin-bottom:8px;">인증의 모든 것: 개념부터 설정까지</div>
+      <div style="font-size:14px; margin-bottom:24px;">두 가지 인증 레이어를 이해하고, 서비스별 상세 설정 가이드로 이동하세요</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:500px; margin:0 auto;">
+        <div style="border:1px solid var(--accent); border-radius:8px; padding:20px; background:var(--surface);">
+          <div style="font-size:24px; margin-bottom:4px;">G</div>
+          <div style="font-weight:600; color:var(--text);">구글 로그인 설정</div>
+          <div style="font-size:12px; margin-top:4px;">7단계 · 스크린샷 12장 · 10분</div>
+        </div>
+        <div style="border:1px solid var(--yellow); border-radius:8px; padding:20px; background:var(--surface);">
+          <div style="font-size:24px; margin-bottom:4px;">K</div>
+          <div style="font-weight:600; color:var(--text);">카카오 로그인 설정</div>
+          <div style="font-size:12px; margin-top:4px;">6단계 · 스크린샷 10장 · 8분</div>
+        </div>
+      </div>
+      <div style="margin-top:24px; font-size:13px;">[앱 로그인] · [서비스 연동] · [비교표] · [용어집] · [FAQ]</div>
+    </div>
+  </div>
+
+  <h3>서브 페이지 (/guides/auth/google)</h3>
+  <div class="wireframe">
+    <div class="breadcrumb">
+      <span>가이드</span> <span class="sep">&gt;</span> <span>인증 가이드</span> <span class="sep">&gt;</span> <span>구글 로그인 설정</span>
+    </div>
+    <div class="sub-nav">
+      <div class="pill">개요</div>
+      <div class="pill active">구글 로그인</div>
+      <div class="pill">카카오 로그인</div>
+    </div>
+    <div style="border:1px dashed var(--border); border-radius:8px; padding:32px; margin-top:12px;">
+      <div style="font-size:18px; font-weight:600; color:var(--text); margin-bottom:16px;">구글 로그인 설정 가이드</div>
+      <div style="display:flex; gap:4px; margin-bottom:24px;">
+        <div style="flex:1; height:4px; border-radius:2px; background:var(--accent);"></div>
+        <div style="flex:1; height:4px; border-radius:2px; background:var(--accent);"></div>
+        <div style="flex:1; height:4px; border-radius:2px; background:var(--accent); opacity:.5;"></div>
+        <div style="flex:1; height:4px; border-radius:2px; background:var(--border);"></div>
+        <div style="flex:1; height:4px; border-radius:2px; background:var(--border);"></div>
+        <div style="flex:1; height:4px; border-radius:2px; background:var(--border);"></div>
+        <div style="flex:1; height:4px; border-radius:2px; background:var(--border);"></div>
+      </div>
+      <div style="border:1px solid var(--border); border-radius:8px; padding:20px; background:var(--surface); margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+          <div style="width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">1</div>
+          <div style="font-weight:600; color:var(--text);">GCP 프로젝트 생성</div>
+        </div>
+        <div style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">어디서? · 무엇을? · 왜?</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div style="border:1px dashed var(--border); border-radius:6px; height:100px; display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--text-muted); background:var(--surface-2);">
+            [스크린샷 + 어노테이션]
+          </div>
+          <div style="border:1px dashed var(--border); border-radius:6px; height:100px; display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--text-muted); background:var(--surface-2);">
+            [스크린샷 + 어노테이션]
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<footer>
+  Linkmap &mdash; 인증 가이드 리디자인 기획 문서 &middot; 2026-03-15 &middot; v1.0
+</footer>
+
+</div>
+</body>
+</html>

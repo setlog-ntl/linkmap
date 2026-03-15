@@ -10,6 +10,8 @@ import {
 } from '@/components/ui/accordion';
 import { ScrollReveal } from '@/components/landing/scroll-reveal';
 import { FlowDiagram, type FlowNode } from './flow-diagram';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import {
   Chrome,
   Settings,
@@ -21,6 +23,7 @@ import {
   ArrowRightLeft,
   LayoutDashboard,
   LogIn,
+  ArrowRight,
 } from 'lucide-react';
 
 interface SetupStep {
@@ -128,10 +131,16 @@ export function GoogleLoginSection() {
           <h2 className="text-2xl md:text-3xl font-bold mb-3">
             구글 로그인 설정 가이드
           </h2>
-          <p className="text-muted-foreground max-w-2xl">
+          <p className="text-muted-foreground max-w-2xl mb-4">
             Google Cloud Console에서 OAuth 클라이언트를 만들고 Supabase에
             등록하면, 클릭 한 번으로 구글 로그인을 사용할 수 있습니다.
           </p>
+          <Button asChild variant="outline" size="sm">
+            <Link href="/guides/auth/google" className="gap-1.5">
+              스크린샷 포함 상세 가이드 보기
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </Button>
         </div>
       </ScrollReveal>
 

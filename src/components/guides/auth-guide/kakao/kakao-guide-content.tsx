@@ -10,77 +10,19 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { ScrollReveal } from '@/components/landing/scroll-reveal';
-import { FlowDiagram, type FlowNode } from './flow-diagram';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { FlowDiagram, type FlowNode } from '../flow-diagram';
+import { StepCardWithScreenshot } from '../step-card-with-screenshot';
+import { kakaoSteps } from './kakao-screenshots';
 import {
   MessageCircle,
-  Settings,
   Shield,
   KeyRound,
-  ExternalLink,
   AlertTriangle,
   ArrowRightLeft,
   LayoutDashboard,
   LogIn,
   Info,
-  ArrowRight,
 } from 'lucide-react';
-
-interface SetupStep {
-  step: number;
-  title: string;
-  where: string;
-  whereUrl?: string;
-  what: string;
-  why: string;
-}
-
-const kakaoSteps: SetupStep[] = [
-  {
-    step: 1,
-    title: '카카오 앱 생성',
-    where: '카카오 개발자 콘솔',
-    whereUrl: 'https://developers.kakao.com',
-    what: '내 애플리케이션 → 애플리케이션 추가하기 → 앱 이름, 사업자명 입력 → REST API 키 복사',
-    why: 'REST API 키가 OAuth의 Client ID 역할을 합니다.',
-  },
-  {
-    step: 2,
-    title: '카카오 로그인 활성화',
-    where: '좌측 메뉴 > 카카오 로그인',
-    what: '활성화 설정 → ON + OpenID Connect → 활성화',
-    why: 'Supabase OIDC 연동을 위해 OpenID Connect가 반드시 필요합니다.',
-  },
-  {
-    step: 3,
-    title: 'Redirect URI 등록',
-    where: '카카오 로그인 > Redirect URI',
-    what: 'Supabase 콜백 URL 등록: https://<ref>.supabase.co/auth/v1/callback',
-    why: '인증 완료 후 사용자가 돌아올 주소를 미리 등록해야 합니다.',
-  },
-  {
-    step: 4,
-    title: '동의 항목 설정',
-    where: '좌측 메뉴 > 동의항목',
-    what: '닉네임: 필수, 이메일: 필수(비즈 앱 필요), 프로필 사진: 선택',
-    why: '사용자 로그인 시 어떤 정보를 수집할지 정합니다.',
-  },
-  {
-    step: 5,
-    title: 'Client Secret 생성',
-    where: '카카오 로그인 > 보안',
-    what: '코드 생성 → 시크릿 복사 → 활성화 상태: 사용함',
-    why: 'Supabase Provider 등록에 필요한 비밀키입니다.',
-  },
-  {
-    step: 6,
-    title: 'Supabase에 등록',
-    where: 'Supabase Dashboard > Authentication > Providers',
-    what: 'Custom OIDC Provider 추가 → Client ID(REST API 키), Secret, Issuer URL(https://kauth.kakao.com)',
-    why: 'Supabase가 카카오 인증을 대행할 수 있도록 연결합니다.',
-  },
-];
 
 const kakaoFlow: FlowNode[] = [
   { icon: LogIn, label: '카카오 로그인 클릭', sublabel: '앱 로그인 페이지' },
@@ -103,21 +45,9 @@ const approaches = [
 ];
 
 const keyTypes = [
-  {
-    name: 'JavaScript 키',
-    usage: '프론트엔드 SDK 전용',
-    exposure: '브라우저 노출 가능',
-  },
-  {
-    name: 'REST API 키',
-    usage: 'OAuth 인가 요청 (Client ID)',
-    exposure: '서버 권장',
-  },
-  {
-    name: 'Admin 키',
-    usage: '서버 전용 관리자 키',
-    exposure: '절대 클라이언트 노출 금지',
-  },
+  { name: 'JavaScript 키', usage: '프론트엔드 SDK 전용', exposure: '브라우저 노출 가능' },
+  { name: 'REST API 키', usage: 'OAuth 인가 요청 (Client ID)', exposure: '서버 권장' },
+  { name: 'Admin 키', usage: '서버 전용 관리자 키', exposure: '절대 클라이언트 노출 금지' },
 ];
 
 const troubleshooting = [
@@ -136,30 +66,30 @@ const troubleshooting = [
     content:
       '카카오 로그인 설정에서 OpenID Connect가 활성화되어 있는지 확인하세요. Supabase Provider 설정에서 "Skip nonce check"를 ON으로 설정하면 nonce 관련 오류를 해결할 수 있습니다.',
   },
+  {
+    title: '카카오톡으로 로그인이 안 됨',
+    content:
+      'PC 브라우저에서는 카카오 계정(이메일/비밀번호)으로만 로그인됩니다. 카카오톡 앱 연동은 모바일 환경에서만 동작하며, 웹에서는 QR 코드 로그인을 사용할 수 있습니다.',
+  },
 ];
 
-export function KakaoLoginSection() {
+export function KakaoGuideContent() {
   return (
-    <section id="kakao-login" className="scroll-mt-24 py-12 md:py-16">
+    <div>
+      {/* Hero */}
       <ScrollReveal>
-        <div className="mb-8">
+        <div className="py-12 md:py-16">
           <div className="inline-flex items-center gap-2 text-xs font-semibold text-yellow-600 dark:text-yellow-400 mb-2 tracking-wide uppercase">
             <MessageCircle className="w-3.5 h-3.5" />
             Kakao Login Setup
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold mb-3">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
             카카오 로그인 설정 가이드
-          </h2>
-          <p className="text-muted-foreground max-w-2xl mb-4">
-            한국에서 가장 많이 쓰이는 소셜 로그인. 카카오톡 계정으로 간편하게
-            로그인할 수 있습니다.
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl">
+            한국에서 가장 많이 쓰이는 소셜 로그인. 카카오 개발자 콘솔에서 앱을 만들고
+            Supabase OIDC Provider로 연결하는 전체 과정을 스크린샷과 함께 안내합니다.
           </p>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/guides/auth/kakao" className="gap-1.5">
-              스크린샷 포함 상세 가이드 보기
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </Button>
         </div>
       </ScrollReveal>
 
@@ -177,11 +107,8 @@ export function KakaoLoginSection() {
             >
               <CardContent className="pt-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <h4 className="font-semibold text-sm">{a.title}</h4>
-                  <Badge
-                    variant={a.badge === '권장' ? 'default' : 'secondary'}
-                    className="text-xs"
-                  >
+                  <h3 className="font-semibold text-sm">{a.title}</h3>
+                  <Badge variant={a.badge === '권장' ? 'default' : 'secondary'} className="text-xs">
                     {a.badge}
                   </Badge>
                 </div>
@@ -195,7 +122,7 @@ export function KakaoLoginSection() {
       {/* OAuth Flow */}
       <ScrollReveal delay={0.1}>
         <div className="mb-10">
-          <h3 className="text-lg font-semibold mb-4">카카오 OAuth 플로우</h3>
+          <h2 className="text-lg font-semibold mb-4">카카오 OAuth 플로우</h2>
           <div className="rounded-xl border bg-card p-6">
             <FlowDiagram nodes={kakaoFlow} colorScheme="blue" />
           </div>
@@ -207,9 +134,7 @@ export function KakaoLoginSection() {
         <Alert className="mb-10 border-blue-200 dark:border-blue-800/50 bg-blue-50/50 dark:bg-blue-950/20">
           <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           <AlertDescription>
-            <p className="font-medium text-sm mb-2">
-              카카오 앱 키 종류 구분
-            </p>
+            <p className="font-medium text-sm mb-2">카카오 앱 키 종류 구분</p>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
@@ -223,12 +148,8 @@ export function KakaoLoginSection() {
                   {keyTypes.map((k) => (
                     <tr key={k.name} className="border-b last:border-b-0">
                       <td className="py-1.5 pr-3 font-medium">{k.name}</td>
-                      <td className="py-1.5 pr-3 text-muted-foreground">
-                        {k.usage}
-                      </td>
-                      <td className="py-1.5 text-muted-foreground">
-                        {k.exposure}
-                      </td>
+                      <td className="py-1.5 pr-3 text-muted-foreground">{k.usage}</td>
+                      <td className="py-1.5 text-muted-foreground">{k.exposure}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -238,55 +159,13 @@ export function KakaoLoginSection() {
         </Alert>
       </ScrollReveal>
 
-      {/* Step-by-Step */}
+      {/* Step-by-Step with screenshots */}
       <ScrollReveal delay={0.15}>
         <div className="mb-10">
-          <h3 className="text-lg font-semibold mb-6">단계별 설정</h3>
-          <div className="space-y-4">
-            {kakaoSteps.map((s) => (
-              <div
-                key={s.step}
-                className="rounded-xl border bg-card p-5 flex gap-4"
-              >
-                <div className="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center shrink-0 text-sm font-bold text-yellow-700 dark:text-yellow-300">
-                  {s.step}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold mb-2">{s.title}</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
-                    <div>
-                      <span className="text-muted-foreground font-medium">
-                        어디서?{' '}
-                      </span>
-                      {s.whereUrl ? (
-                        <a
-                          href={s.whereUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-yellow-700 dark:text-yellow-400 hover:underline inline-flex items-center gap-1"
-                        >
-                          {s.where}
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      ) : (
-                        <span>{s.where}</span>
-                      )}
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground font-medium">
-                        무엇을?{' '}
-                      </span>
-                      <span>{s.what}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground font-medium">
-                        왜?{' '}
-                      </span>
-                      <span className="text-muted-foreground">{s.why}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <h2 className="text-lg font-semibold mb-6">단계별 설정</h2>
+          <div className="space-y-6">
+            {kakaoSteps.map((step) => (
+              <StepCardWithScreenshot key={step.step} data={step} colorScheme="yellow" />
             ))}
           </div>
         </div>
@@ -298,19 +177,19 @@ export function KakaoLoginSection() {
           <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
           <AlertDescription className="text-sm">
             <strong>이메일 필수 수집은 비즈 앱 전환이 필요합니다.</strong>{' '}
-            카카오 개발자 콘솔 → 앱 설정 → 비즈니스 → 개인 개발자 비즈 앱
-            전환을 완료해야 이메일을 필수 동의로 받을 수 있습니다.
+            카카오 개발자 콘솔 → 앱 설정 → 비즈니스 → 개인 개발자 비즈 앱 전환을
+            완료해야 이메일을 필수 동의로 받을 수 있습니다.
           </AlertDescription>
         </Alert>
       </ScrollReveal>
 
       {/* Troubleshooting */}
       <ScrollReveal delay={0.25}>
-        <div>
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <div className="pb-12">
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Shield className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
             트러블슈팅
-          </h3>
+          </h2>
           <Accordion type="single" collapsible className="space-y-2">
             {troubleshooting.map((item, i) => (
               <AccordionItem
@@ -332,6 +211,6 @@ export function KakaoLoginSection() {
           </Accordion>
         </div>
       </ScrollReveal>
-    </section>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { BookOpen, Wrench, Key, Shield, Monitor, Server, Globe, Github, Cloud, Bot, Database, Triangle } from 'lucide-react';
+import { BookOpen, Wrench, Key, Shield, Monitor, Server, Globe, Github, Cloud, Bot, Database, Triangle, Chrome, MessageCircle } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export type GuideCategory = 'concept' | 'service';
@@ -34,6 +34,50 @@ export const GUIDE_LIST: GuideMeta[] = [
   { slug: 'vercel', title: 'Vercel 배포하기', description: 'GitHub 연동부터 커스텀 도메인까지 15분 완성', category: 'service', icon: Triangle, badge: '단계별', readingTime: '15분', href: '/guides/vercel' },
 ];
 
+export interface SubGuideMeta {
+  slug: string;
+  parentSlug: string;
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  badge?: string;
+  readingTime?: string;
+  href: string;
+  steps: number;
+  screenshots: number;
+}
+
+export const SUB_GUIDE_LIST: SubGuideMeta[] = [
+  {
+    slug: 'google',
+    parentSlug: 'auth',
+    title: '구글 로그인 설정',
+    description: 'Google Cloud Console에서 OAuth 클라이언트 설정부터 Supabase 연동까지 스크린샷과 함께 안내',
+    icon: Chrome,
+    badge: '스크린샷 포함',
+    readingTime: '10분',
+    href: '/guides/auth/google',
+    steps: 7,
+    screenshots: 12,
+  },
+  {
+    slug: 'kakao',
+    parentSlug: 'auth',
+    title: '카카오 로그인 설정',
+    description: '카카오 개발자 콘솔에서 앱 생성부터 Supabase OIDC 연동까지 스크린샷과 함께 안내',
+    icon: MessageCircle,
+    badge: '스크린샷 포함',
+    readingTime: '8분',
+    href: '/guides/auth/kakao',
+    steps: 6,
+    screenshots: 10,
+  },
+];
+
 export function getGuidesByCategory(category: GuideCategory): GuideMeta[] {
   return GUIDE_LIST.filter(g => g.category === category);
+}
+
+export function getSubGuides(parentSlug: string): SubGuideMeta[] {
+  return SUB_GUIDE_LIST.filter(g => g.parentSlug === parentSlug);
 }

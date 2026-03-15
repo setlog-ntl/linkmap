@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HeroSection } from './auth-guide/hero-section';
+import { AuthBasicsSection } from './auth-guide/auth-basics-section';
+import { GuideLinkCards } from './auth-guide/guide-link-cards';
 import { AppLoginSection } from './auth-guide/app-login-section';
-import { GoogleLoginSection } from './auth-guide/google-login-section';
-import { KakaoLoginSection } from './auth-guide/kakao-login-section';
 import { ServiceAuthSection } from './auth-guide/service-auth-section';
 import { ComparisonTable } from './auth-guide/comparison-table';
 import { GlossarySection } from './auth-guide/glossary-section';
@@ -12,8 +12,6 @@ import { FaqSection } from './auth-guide/faq-section';
 
 const sections = [
   { id: 'app-login', label: '앱 로그인' },
-  { id: 'google-login', label: 'Google 설정' },
-  { id: 'kakao-login', label: '카카오 설정' },
   { id: 'service-auth', label: '서비스 연동' },
   { id: 'comparison', label: '비교' },
   { id: 'glossary', label: '용어 사전' },
@@ -55,8 +53,14 @@ export function AuthGuide() {
     <div>
       <HeroSection />
 
-      {/* Sticky section nav */}
-      <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">
+      {/* 핵심 개념: 두 가지 인증 레이어 */}
+      <AuthBasicsSection />
+
+      {/* 소셜 로그인 설정 가이드 링크 카드 */}
+      <GuideLinkCards />
+
+      {/* Section nav for remaining content */}
+      <nav className="sticky top-12 z-20 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">
         <div className="flex gap-1 overflow-x-auto py-3 scrollbar-hide">
           {sections.map((s) => (
             <button
@@ -75,8 +79,6 @@ export function AuthGuide() {
       </nav>
 
       <AppLoginSection />
-      <GoogleLoginSection />
-      <KakaoLoginSection />
       <ServiceAuthSection />
       <ComparisonTable />
       <GlossarySection />
