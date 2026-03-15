@@ -839,15 +839,18 @@ function SheetAccountField({ projectServiceId, projectId, currentValue }: {
           </Button>
         </div>
       ) : currentValue ? (
-        <button
-          type="button"
-          onClick={() => { setIsEditing(true); setValue(currentValue); }}
-          className="flex items-center gap-2 w-full rounded-md bg-muted/60 border px-3 py-2 group hover:border-foreground/30 transition-colors"
-        >
-          <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-          <span className="font-mono text-sm flex-1 text-left">{currentValue}</span>
-          <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => { setIsEditing(true); setValue(currentValue); }}
+            className="flex items-center gap-2 flex-1 min-w-0 rounded-md bg-muted/60 border px-3 py-2 group hover:border-foreground/30 transition-colors"
+          >
+            <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+            <span className="font-mono text-sm flex-1 text-left truncate">{currentValue}</span>
+            <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+          </button>
+          <CopyAccountButton value={currentValue} />
+        </div>
       ) : (
         <button
           type="button"
@@ -861,6 +864,22 @@ function SheetAccountField({ projectServiceId, projectId, currentValue }: {
         </button>
       )}
     </div>
+  );
+}
+
+function CopyAccountButton({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(value);
+    setCopied(true);
+    toast.success('계정 정보가 복사되었습니다');
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={handleCopy}>
+      {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
+    </Button>
   );
 }
 

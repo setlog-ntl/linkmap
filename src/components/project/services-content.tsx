@@ -16,7 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AddServiceDialog } from '@/components/service/add-service-dialog';
 import { ServiceChecklist } from '@/components/service/service-checklist';
 import { SetupWizard } from '@/components/service/setup-wizard';
-import { Trash2, ExternalLink, Wand2, List as ListIcon, User, Check, X, Activity, Loader2, Search, Layers } from 'lucide-react';
+import { Trash2, ExternalLink, Wand2, List as ListIcon, User, Check, X, Activity, Loader2, Search, Layers, Copy } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -152,9 +152,20 @@ function ServiceAccordionItem({
               {ps.service?.description_ko || ps.service?.description}
             </p>
             {ps.account_identifier ? (
-              <span className="inline-flex items-center gap-1 mt-1 font-mono text-[11px] text-foreground bg-muted border rounded px-1.5 py-0.5">
+              <span className="inline-flex items-center gap-1 mt-1 font-mono text-[11px] text-foreground bg-muted border rounded px-1.5 py-0.5 group/acct">
                 <User className="h-3 w-3 shrink-0" />
                 {ps.account_identifier}
+                <button
+                  type="button"
+                  className="ml-0.5 opacity-0 group-hover/acct:opacity-100 transition-opacity"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(ps.account_identifier!);
+                    toast.success('계정 정보가 복사되었습니다');
+                  }}
+                >
+                  <Copy className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                </button>
               </span>
             ) : (
               <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-300/50 dark:border-amber-700/50 rounded px-1.5 py-0.5">
