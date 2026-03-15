@@ -2,12 +2,13 @@
 
 import type { ReactNode } from 'react';
 import { ExternalLink } from 'lucide-react';
-import { AnnotatedScreenshot, type Annotation } from './annotated-screenshot';
+import { AnnotatedScreenshot, type Annotation, type MaskRegion } from './annotated-screenshot';
 
 export interface StepScreenshot {
   src?: string;
   alt: string;
   annotations?: Annotation[];
+  masks?: MaskRegion[];
   caption?: string;
   illustration?: ReactNode;
 }
@@ -101,6 +102,7 @@ export function StepCardWithScreenshot({
                 src={ss.src}
                 alt={ss.alt}
                 annotations={ss.annotations}
+                masks={ss.masks}
                 caption={ss.caption}
                 illustration={ss.illustration}
               />
