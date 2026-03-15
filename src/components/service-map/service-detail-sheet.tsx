@@ -23,15 +23,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { ExternalLink, BookOpen, GitFork, Activity, Loader2, X, KeyRound, Lightbulb, Copy, Check, UserPlus, User } from 'lucide-react';
+import { ExternalLink, BookOpen, GitFork, Activity, Loader2, X as XIcon, KeyRound, Lightbulb, Copy, Check, UserPlus, User, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { queryKeys } from '@/lib/queries/keys';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
+import { useUpdateProjectServiceAccount } from '@/lib/queries/services';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import type { ProjectService, Service, ServiceDependency, ServiceCategory, ServiceDomain, EnvironmentVariable, ServiceGuide, ServiceFeatureGuide, ServiceSignupGuide } from '@/types';
 
 interface ServiceDetailSheetProps {
@@ -108,7 +110,7 @@ export function ServiceDetailSheet({
             <Skeleton className="h-4 w-60" />
           </div>
           <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
-            <X className="h-4 w-4" />
+            <XIcon className="h-4 w-4" />
           </Button>
         </div>
         <div className="space-y-4 px-4 pb-4">
@@ -174,7 +176,7 @@ export function ServiceDetailSheet({
           </p>
         </div>
         <Button variant="ghost" size="icon" className="-mt-1 -mr-1" onClick={() => onOpenChange(false)}>
-          <X className="h-4 w-4" />
+          <XIcon className="h-4 w-4" />
         </Button>
       </div>
 
@@ -236,22 +238,13 @@ export function ServiceDetailSheet({
 
               {/* 계정 정보 */}
               <Separator />
-              <div>
-                <h4 className="text-sm font-medium mb-2">사용 계정</h4>
-                {service.account_identifier ? (
-                  <div className="flex items-center gap-2 rounded-md bg-muted/60 border px-3 py-2">
-                    <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                    <span className="font-mono text-sm">{service.account_identifier}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 rounded-md border border-dashed border-amber-400/60 bg-amber-50/50 dark:bg-amber-950/20 px-3 py-2">
-                    <User className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-                    <span className="text-xs text-amber-700 dark:text-amber-400">
-                      계정 미설정 — 서비스 목록에서 입력하세요
-                    </span>
-                  </div>
-                )}
-              </div>
+              {projectId && (
+                <SheetAccountField
+                  projectServiceId={service.id}
+                  projectId={projectId}
+                  currentValue={service.account_identifier}
+                />
+              )}
 
               {/* 링크 */}
               {(svc?.website_url || svc?.docs_url || guide?.api_key_url) && (
@@ -720,6 +713,80 @@ function SheetFeatureAccordion({ features }: { features: ServiceFeatureGuide[] }
         );
       })}
     </Accordion>
+  );
+}
+
+// ── 계정 인라인 편집 (시트용) ─────────────────────────────────────────────────
+function SheetAccountField({ projectServiceId, projectId, currentValue }: {
+  projectServiceId: string;
+  projectId: string;
+  currentValue: string | null;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [value, setValue] = useState(currentValue || '');
+  const updateAccount = useUpdateProjectServiceAccount(projectId);
+
+  const handleSave = useCallback(() => {
+    const trimmed = value.trim();
+    updateAccount.mutate({
+      projectServiceId,
+      accountIdentifier: trimmed || null,
+    });
+    setIsEditing(false);
+  }, [value, projectServiceId, updateAccount]);
+
+  const handleCancel = useCallback(() => {
+    setValue(currentValue || '');
+    setIsEditing(false);
+  }, [currentValue]);
+
+  return (
+    <div>
+      <h4 className="text-sm font-medium mb-2">사용 계정</h4>
+      {isEditing ? (
+        <div className="flex items-center gap-1.5">
+          <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <Input
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="계정 아이디 또는 이메일"
+            className="h-8 text-xs font-mono flex-1"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSave();
+              if (e.key === 'Escape') handleCancel();
+            }}
+          />
+          <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={handleSave}>
+            <Check className="h-3.5 w-3.5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={handleCancel}>
+            <XIcon className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      ) : currentValue ? (
+        <button
+          type="button"
+          onClick={() => setIsEditing(true)}
+          className="flex items-center gap-2 w-full rounded-md bg-muted/60 border px-3 py-2 group hover:border-foreground/30 transition-colors"
+        >
+          <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <span className="font-mono text-sm flex-1 text-left">{currentValue}</span>
+          <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setIsEditing(true)}
+          className="flex items-center gap-2 w-full rounded-md border border-dashed border-amber-400/60 bg-amber-50/50 dark:bg-amber-950/20 px-3 py-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+        >
+          <User className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+          <span className="text-xs text-amber-700 dark:text-amber-400">
+            클릭하여 계정 아이디 입력
+          </span>
+        </button>
+      )}
+    </div>
   );
 }
 
