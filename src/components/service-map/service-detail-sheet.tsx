@@ -23,7 +23,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { ExternalLink, BookOpen, GitFork, Activity, Loader2, X, KeyRound, Lightbulb, Copy, Check, UserPlus } from 'lucide-react';
+import { ExternalLink, BookOpen, GitFork, Activity, Loader2, X, KeyRound, Lightbulb, Copy, Check, UserPlus, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
@@ -232,6 +232,25 @@ export function ServiceDetailSheet({
                     <CostEstimateBadge estimate={svc?.monthly_cost_estimate} />
                   </div>
                 </div>
+              </div>
+
+              {/* 계정 정보 */}
+              <Separator />
+              <div>
+                <h4 className="text-sm font-medium mb-2">사용 계정</h4>
+                {service.account_identifier ? (
+                  <div className="flex items-center gap-2 rounded-md bg-muted/60 border px-3 py-2">
+                    <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="font-mono text-sm">{service.account_identifier}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 rounded-md border border-dashed border-amber-400/60 bg-amber-50/50 dark:bg-amber-950/20 px-3 py-2">
+                    <User className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                    <span className="text-xs text-amber-700 dark:text-amber-400">
+                      계정 미설정 — 서비스 목록에서 입력하세요
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* 링크 */}
