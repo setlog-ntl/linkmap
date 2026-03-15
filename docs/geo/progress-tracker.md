@@ -16,6 +16,8 @@
 - [x] 블로그 시각 강화 (콜아웃·TOC·읽기 진행바·CTA·포스트 네비게이션)
 - [x] 링크 복사 + 공유 기능 추가
 - [x] 블로그 글에 linkmap.biz 서비스 링크 전면 반영 (128개 서비스 카탈로그, 원클릭 배포 등)
+- [x] 가이드 10개 맥락별 교차 링크 전면 적용 (env, auth, frontend, backend, deploy, github, cloudflare, openai, supabase, vercel)
+- [x] relatedGuides 배열 확장 → 블로그 하단 관련 가이드 섹션 강화
 
 ---
 

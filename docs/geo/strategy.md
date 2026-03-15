@@ -13,6 +13,10 @@
 - [x] 용어집 (66개 기술 용어)
 - [x] 비교 매트릭스 (13개 카테고리)
 - [x] **자체 블로그 (`/blog`)** — BlogPosting JSON-LD, sitemap 통합, Phase 1 글 6편 초안 완료
+- [x] **블로그 시각 강화** — 5종 콜아웃(KEY/TIP/WARNING/INFO/TRY), TOC, 읽기 진행바, 중간 CTA, 이전/다음 포스트 네비게이션
+- [x] **외부 공유 기능** — 링크 복사(클립보드 API) + 네이티브 공유(Web Share API) 버튼
+- [x] **서비스 링크 전면 반영** — 6편 블로그 글에 linkmap.biz 서비스 카탈로그(128개), 원클릭 배포, 가격 페이지 등 링크 강화
+- [x] **가이드 교차 링크** — 10개 가이드(env, auth, frontend, backend, deploy, github, cloudflare, openai, supabase, vercel)를 블로그 글 맥락에 맞게 연결
 
 ### 외부 신호 (미비)
 | 신호 | 현재 | 문제 |
