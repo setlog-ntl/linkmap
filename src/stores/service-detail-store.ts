@@ -31,6 +31,8 @@ interface ServiceDetailState {
   openSheetById: (id: ServiceDetailPendingId) => void;
   /** Resolve pending identifier with fetched full data */
   resolvePending: (data: ServiceDetailFullData) => void;
+  /** Update account_identifier in current fullData */
+  updateAccountIdentifier: (value: string | null) => void;
   /** Close the sheet */
   closeSheet: () => void;
 }
@@ -48,6 +50,17 @@ export const useServiceDetailStore = create<ServiceDetailState>((set) => ({
 
   resolvePending: (data) =>
     set((s) => (s.pendingIdentifier ? { fullData: data, pendingIdentifier: null } : s)),
+
+  updateAccountIdentifier: (value) =>
+    set((s) => {
+      if (!s.fullData) return s;
+      return {
+        fullData: {
+          ...s.fullData,
+          service: { ...s.fullData.service, account_identifier: value },
+        },
+      };
+    }),
 
   closeSheet: () =>
     set({ fullData: null, pendingIdentifier: null, isOpen: false }),

@@ -36,6 +36,7 @@ import { cn } from '@/lib/utils';
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { SERVICE_GUIDE_HREF } from '@/data/ui/guide-meta';
+import { useServiceDetailStore } from '@/stores/service-detail-store';
 import type { ProjectService, Service, ServiceDependency, ServiceCategory, ServiceDomain, EnvironmentVariable, ServiceGuide, ServiceFeatureGuide, ServiceSignupGuide } from '@/types';
 
 interface ServiceDetailSheetProps {
@@ -787,36 +788,26 @@ function SheetAccountField({ projectServiceId, projectId, currentValue }: {
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(currentValue || '');
-  const [savedValue, setSavedValue] = useState(currentValue);
   const updateAccount = useUpdateProjectServiceAccount(projectId);
-
-  // prop이 서버에서 갱신되면 로컬 상태 동기화
-  if (currentValue !== savedValue && !isEditing) {
-    setSavedValue(currentValue);
-    setValue(currentValue || '');
-  }
-
-  const displayValue = isEditing ? null : (value || currentValue);
+  const updateStoreAccount = useServiceDetailStore((s) => s.updateAccountIdentifier);
 
   const handleSave = useCallback(() => {
     const trimmed = value.trim();
-    // optimistic: 즉시 로컬 반영
-    setValue(trimmed);
-    setSavedValue(trimmed || null);
     setIsEditing(false);
     updateAccount.mutate(
       { projectServiceId, accountIdentifier: trimmed || null },
       {
-        onSuccess: () => toast.success('계정 정보가 저장되었습니다'),
+        onSuccess: () => {
+          updateStoreAccount(trimmed || null);
+          toast.success('계정 정보가 저장되었습니다');
+        },
         onError: (err) => {
           toast.error(`저장 실패: ${err.message}`);
-          // 롤백
           setValue(currentValue || '');
-          setSavedValue(currentValue);
         },
       },
     );
-  }, [value, projectServiceId, updateAccount, currentValue]);
+  }, [value, projectServiceId, updateAccount, updateStoreAccount, currentValue]);
 
   const handleCancel = useCallback(() => {
     setValue(currentValue || '');
@@ -847,20 +838,20 @@ function SheetAccountField({ projectServiceId, projectId, currentValue }: {
             <XIcon className="h-3.5 w-3.5" />
           </Button>
         </div>
-      ) : displayValue ? (
+      ) : currentValue ? (
         <button
           type="button"
-          onClick={() => setIsEditing(true)}
+          onClick={() => { setIsEditing(true); setValue(currentValue); }}
           className="flex items-center gap-2 w-full rounded-md bg-muted/60 border px-3 py-2 group hover:border-foreground/30 transition-colors"
         >
           <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-          <span className="font-mono text-sm flex-1 text-left">{displayValue}</span>
+          <span className="font-mono text-sm flex-1 text-left">{currentValue}</span>
           <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
         </button>
       ) : (
         <button
           type="button"
-          onClick={() => setIsEditing(true)}
+          onClick={() => { setIsEditing(true); setValue(''); }}
           className="flex items-center gap-2 w-full rounded-md border border-dashed border-amber-400/60 bg-amber-50/50 dark:bg-amber-950/20 px-3 py-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
         >
           <User className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
