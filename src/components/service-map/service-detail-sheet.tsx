@@ -71,6 +71,7 @@ export function ServiceDetailSheet({
   envVars = [],
   loading = false,
 }: ServiceDetailSheetProps) {
+  const [activeTab, setActiveTab] = useState('overview');
   const psId = service?.id || '';
   const svcId = service?.service_id || '';
   const { data: healthChecks = [] } = useHealthChecks(psId);
@@ -181,7 +182,7 @@ export function ServiceDetailSheet({
       </div>
 
       {/* 탭 */}
-      <Tabs defaultValue="overview" className="flex flex-col flex-1 min-h-0">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 min-h-0">
         <TabsList className="mx-4 mb-1 flex h-8 shrink-0 gap-0">
           <TabsTrigger value="overview" className="text-xs flex-1">개요</TabsTrigger>
           <TabsTrigger value="envvars" className="text-xs flex-1">
@@ -282,6 +283,33 @@ export function ServiceDetailSheet({
                   </div>
                 </>
               )}
+
+              {/* 가이드 연결 */}
+              {hasGuideContent && (
+                <>
+                  <Separator />
+                  <div>
+                    <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
+                      <BookOpen className="h-3.5 w-3.5 text-primary" />
+                      설정 가이드
+                    </h4>
+                    {guide.quick_start && (
+                      <p className="text-xs text-muted-foreground mb-2.5 line-clamp-2">
+                        {guide.quick_start}
+                      </p>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full justify-center gap-2 text-primary border-primary/30 hover:bg-primary/5"
+                      onClick={() => setActiveTab('guide')}
+                    >
+                      <BookOpen className="h-3.5 w-3.5" />
+                      가이드 보기
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           </ScrollArea>
         </TabsContent>
@@ -311,7 +339,7 @@ export function ServiceDetailSheet({
           <TabsContent value="guide" className="flex-1 overflow-hidden m-0 data-[state=active]:flex data-[state=active]:flex-col">
             <ScrollArea className="flex-1 w-full">
               <div className="space-y-4 p-4 pt-2 pb-6">
-                {/* 1. 서비스 소개 */}
+                {/* 0. 서비스 소개 + 외부 링크 */}
                 {guide.quick_start && (
                   <div className="rounded-lg bg-primary/5 border border-primary/20 p-3">
                     <div className="flex items-center gap-2 mb-2">
