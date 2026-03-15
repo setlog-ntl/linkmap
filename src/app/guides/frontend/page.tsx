@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { FrontendGuide } from '@/components/guides/frontend-guide';
+import { JsonLdScript } from '@/components/seo/json-ld-script';
+import { generateGuideJsonLd } from '@/lib/seo/json-ld';
 
 export const metadata: Metadata = {
   title: '프론트엔드란? — 바이브 코더 가이드 | Linkmap',
@@ -9,5 +11,16 @@ export const metadata: Metadata = {
 };
 
 export default function FrontendGuidePage() {
-  return <FrontendGuide />;
+  const jsonLd = generateGuideJsonLd({
+    slug: 'frontend',
+    title: '프론트엔드란? — 바이브 코더 가이드',
+    description: '브라우저에서 실행되는 모든 것 — HTML·CSS·JavaScript부터 React·Next.js까지 초보자 눈높이로 설명합니다.',
+  });
+
+  return (
+    <>
+      <JsonLdScript data={jsonLd} />
+      <FrontendGuide />
+    </>
+  );
 }

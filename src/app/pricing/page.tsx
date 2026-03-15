@@ -12,6 +12,8 @@ import { createClient } from '@/lib/supabase/server';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { PricingContent } from './pricing-content';
+import { JsonLdScript } from '@/components/seo/json-ld-script';
+import { generatePricingJsonLd } from '@/lib/seo/json-ld';
 import type { Profile } from '@/types';
 
 export default async function PricingPage() {
@@ -23,8 +25,11 @@ export default async function PricingPage() {
     profile = data;
   }
 
+  const pricingJsonLd = generatePricingJsonLd();
+
   return (
     <div className="min-h-screen flex flex-col">
+      <JsonLdScript data={pricingJsonLd} />
       <Header profile={profile} />
       <main className="flex-1 container py-16">
         <PricingContent />

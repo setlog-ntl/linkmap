@@ -10,6 +10,8 @@ import { HowItWorks } from '@/components/landing/how-it-works';
 import { TemplateShowcase } from '@/components/landing/template-showcase';
 import { ServicesGrid } from '@/components/landing/services-grid';
 import { PricingSection, FinalCtaSection } from '@/components/landing/cta-section';
+import { JsonLdScript } from '@/components/seo/json-ld-script';
+import { generateWebAppJsonLd } from '@/lib/seo/json-ld';
 import type { Profile } from '@/types';
 
 export default async function LandingPage() {
@@ -26,8 +28,11 @@ export default async function LandingPage() {
     profile = null;
   }
 
+  const webAppJsonLd = generateWebAppJsonLd();
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
+      <JsonLdScript data={webAppJsonLd} />
       <Header profile={profile} />
 
       {/* Section 1: Hero */}

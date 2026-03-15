@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { OpenAIGuide } from '@/components/guides/openai-guide';
+import { JsonLdScript } from '@/components/seo/json-ld-script';
+import { generateGuideJsonLd } from '@/lib/seo/json-ld';
 
 export const metadata: Metadata = {
   title: 'OpenAI 연동 가이드 | Linkmap',
@@ -9,5 +11,16 @@ export const metadata: Metadata = {
 };
 
 export default function OpenAIGuidePage() {
-  return <OpenAIGuide />;
+  const jsonLd = generateGuideJsonLd({
+    slug: 'openai',
+    title: 'OpenAI 연동 가이드',
+    description: 'GPT-4o, DALL-E, Whisper 등 OpenAI API를 Next.js 프로젝트에 안전하게 연동하는 방법.',
+  });
+
+  return (
+    <>
+      <JsonLdScript data={jsonLd} />
+      <OpenAIGuide />
+    </>
+  );
 }

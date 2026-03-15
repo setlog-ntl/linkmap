@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: ['/', '/services', '/pricing', '/guides', '/guides/'],
+        allow: ['/', '/services', '/pricing', '/guides', '/guides/', '/faq', '/glossary'],
         disallow: [
           '/dashboard',
           '/project/',
@@ -14,6 +14,19 @@ export default function robots(): MetadataRoute.Robots {
           '/auth/',
           '/admin/',
         ],
+      },
+      {
+        userAgent: [
+          'GPTBot',
+          'ChatGPT-User',
+          'Google-Extended',
+          'PerplexityBot',
+          'ClaudeBot',
+          'Applebot-Extended',
+          'Yeti',
+        ],
+        allow: ['/', '/services', '/pricing', '/guides/', '/faq', '/glossary', '/llms.txt'],
+        disallow: ['/dashboard', '/project/', '/settings/', '/api/', '/auth/', '/admin/'],
       },
     ],
     sitemap: 'https://www.linkmap.biz/sitemap.xml',

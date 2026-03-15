@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { DeployGuide } from '@/components/guides/deploy-guide';
+import { JsonLdScript } from '@/components/seo/json-ld-script';
+import { generateGuideJsonLd } from '@/lib/seo/json-ld';
 
 export const metadata: Metadata = {
   title: '도메인·배포·서버란? — 바이브 코더 가이드 | Linkmap',
@@ -9,5 +11,16 @@ export const metadata: Metadata = {
 };
 
 export default function DeployGuidePage() {
-  return <DeployGuide />;
+  const jsonLd = generateGuideJsonLd({
+    slug: 'deploy',
+    title: '도메인·배포·서버란? — 바이브 코더 가이드',
+    description: '내 컴퓨터에서 전 세계로 — 도메인·DNS·서버·CDN·배포 파이프라인 개념을 초보자 눈높이로 설명합니다.',
+  });
+
+  return (
+    <>
+      <JsonLdScript data={jsonLd} />
+      <DeployGuide />
+    </>
+  );
 }

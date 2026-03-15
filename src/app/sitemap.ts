@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { GUIDE_LIST } from '@/data/ui/guide-meta';
+import { SERVICE_SLUGS } from '@/data/seed/service-slugs';
 
 const BASE_URL = 'https://www.linkmap.biz';
 
@@ -8,7 +9,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: BASE_URL, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },
     { url: `${BASE_URL}/pricing`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${BASE_URL}/services`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${BASE_URL}/services/compare`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/services/cost-simulator`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE_URL}/guides`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/faq`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/glossary`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${BASE_URL}/login`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
     { url: `${BASE_URL}/signup`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
     { url: `${BASE_URL}/privacy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
@@ -22,5 +27,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...guidePages];
+  const servicePages: MetadataRoute.Sitemap = SERVICE_SLUGS.map((slug) => ({
+    url: `${BASE_URL}/services/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }));
+
+  return [...staticPages, ...guidePages, ...servicePages];
 }

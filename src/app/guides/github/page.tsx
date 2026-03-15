@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { GitHubSetupGuide } from '@/components/guides/github-setup-guide';
+import { JsonLdScript } from '@/components/seo/json-ld-script';
+import { generateGuideJsonLd } from '@/lib/seo/json-ld';
 
 export const metadata: Metadata = {
   title: 'GitHub 빠른 설정 가이드 | Linkmap',
@@ -9,5 +11,16 @@ export const metadata: Metadata = {
 };
 
 export default function GitHubGuidePage() {
-  return <GitHubSetupGuide />;
+  const jsonLd = generateGuideJsonLd({
+    slug: 'github',
+    title: 'GitHub 빠른 설정 가이드',
+    description: '바이브 코딩을 시작하기 위한 GitHub 설정 가이드. 가입부터 첫 저장소 생성까지 5단계로 안내합니다.',
+  });
+
+  return (
+    <>
+      <JsonLdScript data={jsonLd} />
+      <GitHubSetupGuide />
+    </>
+  );
 }
