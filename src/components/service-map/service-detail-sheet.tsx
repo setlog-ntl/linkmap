@@ -465,6 +465,48 @@ export function ServiceDetailSheet({
                 </p>
               )}
 
+              {/* 최신 상태 요약 */}
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-blue-500" />
+                  <span className="text-sm font-medium">연결 상태</span>
+                  {recentChecks.length > 0 ? (
+                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <span className={cn(
+                        'h-2 w-2 rounded-full',
+                        recentChecks[0].status === 'healthy' ? 'bg-green-500' :
+                        recentChecks[0].status === 'degraded' ? 'bg-yellow-500' :
+                        recentChecks[0].status === 'unhealthy' ? 'bg-red-500' : 'bg-muted-foreground'
+                      )} />
+                      {recentChecks[0].status === 'healthy' ? '정상' :
+                       recentChecks[0].status === 'degraded' ? '경고' :
+                       recentChecks[0].status === 'unhealthy' ? '오류' : '알 수 없음'}
+                      {recentChecks[0].checked_at && (
+                        <span className="text-[10px]">
+                          ({new Date(recentChecks[0].checked_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })})
+                        </span>
+                      )}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">미검증</span>
+                  )}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRunCheck}
+                  disabled={runHealthCheck.isPending}
+                  className="h-7 text-xs"
+                >
+                  {runHealthCheck.isPending ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    '점검'
+                  )}
+                </Button>
+              </div>
+
               {dependencies.length > 0 && (
                 <>
                   <Separator />

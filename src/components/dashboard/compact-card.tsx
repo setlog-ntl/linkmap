@@ -1,10 +1,12 @@
 'use client';
 
 import { memo } from 'react';
-import { ExternalLink, Copy, FileText, Settings, ChevronDown } from 'lucide-react';
+import { ExternalLink, Copy, FileText, Settings, ChevronDown, Activity, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useDashboardStore } from '@/stores/dashboard-store';
+import { useRunHealthCheck } from '@/lib/queries/health-checks';
 import type { ServiceCardData } from '@/types';
 
 interface CompactCardProps {
@@ -40,6 +42,7 @@ export const CompactCard = memo(function CompactCard({ card, projectId }: Compac
   const expandedCardId = useDashboardStore((s) => s.expandedCardId);
   const toggleCard = useDashboardStore((s) => s.toggleCard);
   const isExpanded = expandedCardId === card.projectServiceId;
+  const runHealthCheck = useRunHealthCheck();
 
   return (
     <div
@@ -186,6 +189,34 @@ export const CompactCard = memo(function CompactCard({ card, projectId }: Compac
                     설정
                   </a>
                 )}
+                <button
+                  type="button"
+                  className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  disabled={runHealthCheck.isPending && runHealthCheck.variables?.project_service_id === card.projectServiceId}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    runHealthCheck.mutate(
+                      { project_service_id: card.projectServiceId },
+                      {
+                        onSuccess: (data) => {
+                          const label = data.status === 'healthy' ? '정상' : data.status === 'degraded' ? '경고' : '오류';
+                          toast.success(`${card.name}: ${label}`);
+                        },
+                        onError: () => {
+                          toast.error(`${card.name}: 점검 실패`);
+                        },
+                      },
+                    );
+                  }}
+                  aria-label={`${card.name} 상태 점검`}
+                >
+                  {runHealthCheck.isPending && runHealthCheck.variables?.project_service_id === card.projectServiceId ? (
+                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Activity className="h-3 w-3" aria-hidden="true" />
+                  )}
+                  점검
+                </button>
               </div>
             </div>
           </motion.div>

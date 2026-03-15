@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { useProjectServices, useAddProjectService, useRemoveProjectService } from '@/lib/queries/services';
+import { useState, useCallback } from 'react';
+import { useProjectServices, useAddProjectService, useRemoveProjectService, useUpdateProjectServiceAccount } from '@/lib/queries/services';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Accordion,
   AccordionContent,
@@ -15,13 +16,15 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AddServiceDialog } from '@/components/service/add-service-dialog';
 import { ServiceChecklist } from '@/components/service/service-checklist';
 import { SetupWizard } from '@/components/service/setup-wizard';
-import { Trash2, ExternalLink, Wand2, List as ListIcon } from 'lucide-react';
+import { Trash2, ExternalLink, Wand2, List as ListIcon, User, Check, X, Activity, Loader2 } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { allCategoryLabels } from '@/lib/constants/service-filters';
+import { useRunHealthCheck } from '@/lib/queries/health-checks';
+import { toast } from 'sonner';
 import type { ServiceCategory, ProjectService, Service } from '@/types';
 
 const statusLabels: Record<string, string> = {
@@ -42,11 +45,76 @@ interface ServicesContentProps {
   projectId: string;
 }
 
+function AccountIdentifierField({ projectServiceId, projectId, currentValue }: {
+  projectServiceId: string;
+  projectId: string;
+  currentValue: string | null;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [value, setValue] = useState(currentValue || '');
+  const updateAccount = useUpdateProjectServiceAccount(projectId);
+
+  const handleSave = useCallback(() => {
+    const trimmed = value.trim();
+    updateAccount.mutate({
+      projectServiceId,
+      accountIdentifier: trimmed || null,
+    });
+    setIsEditing(false);
+  }, [value, projectServiceId, updateAccount]);
+
+  const handleCancel = useCallback(() => {
+    setValue(currentValue || '');
+    setIsEditing(false);
+  }, [currentValue]);
+
+  if (!isEditing) {
+    return (
+      <button
+        type="button"
+        onClick={() => setIsEditing(true)}
+        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors group"
+      >
+        <User className="h-3 w-3" />
+        {currentValue ? (
+          <span className="font-mono">{currentValue}</span>
+        ) : (
+          <span className="italic group-hover:underline">계정 아이디 입력</span>
+        )}
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <User className="h-3 w-3 text-muted-foreground shrink-0" />
+      <Input
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="계정 아이디 또는 이메일"
+        className="h-7 text-xs font-mono max-w-[240px]"
+        autoFocus
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') handleSave();
+          if (e.key === 'Escape') handleCancel();
+        }}
+      />
+      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleSave}>
+        <Check className="h-3 w-3" />
+      </Button>
+      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCancel}>
+        <X className="h-3 w-3" />
+      </Button>
+    </div>
+  );
+}
+
 export function ServicesContent({ projectId }: ServicesContentProps) {
   const { locale } = useLocaleStore();
   const { data: services = [], isLoading } = useProjectServices(projectId);
   const addService = useAddProjectService(projectId);
   const removeService = useRemoveProjectService(projectId);
+  const runHealthCheck = useRunHealthCheck();
   const [wizardTarget, setWizardTarget] = useState<(ProjectService & { service: Service }) | null>(null);
 
   const handleAddService = async (serviceId: string) => {
@@ -110,9 +178,15 @@ export function ServicesContent({ projectId }: ServicesContentProps) {
                         {allCategoryLabels[ps.service?.category as ServiceCategory]}
                       </Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {ps.service?.description_ko || ps.service?.description}
-                    </p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span className="truncate">{ps.service?.description_ko || ps.service?.description}</span>
+                      {ps.account_identifier && (
+                        <span className="flex items-center gap-1 shrink-0 font-mono text-[11px] bg-muted px-1.5 py-0.5 rounded">
+                          <User className="h-3 w-3" />
+                          {ps.account_identifier}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <Badge variant={statusVariants[ps.status]} className="ml-2 shrink-0">
                     {statusLabels[ps.status]}
@@ -121,6 +195,13 @@ export function ServicesContent({ projectId }: ServicesContentProps) {
               </AccordionTrigger>
               <AccordionContent className="pb-4">
                 <div className="space-y-4 pt-2">
+                  <div className="pb-2 border-b">
+                    <AccountIdentifierField
+                      projectServiceId={ps.id}
+                      projectId={projectId}
+                      currentValue={ps.account_identifier}
+                    />
+                  </div>
                   <div className="flex gap-2 flex-wrap">
                     {ps.service && (
                       <Button
@@ -132,6 +213,32 @@ export function ServicesContent({ projectId }: ServicesContentProps) {
                         빠른 설정
                       </Button>
                     )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={runHealthCheck.isPending && runHealthCheck.variables?.project_service_id === ps.id}
+                      onClick={() => {
+                        runHealthCheck.mutate(
+                          { project_service_id: ps.id },
+                          {
+                            onSuccess: (data) => {
+                              const label = data.status === 'healthy' ? '정상' : data.status === 'degraded' ? '경고' : '오류';
+                              toast.success(`${ps.service?.name}: 상태 ${label}`);
+                            },
+                            onError: () => {
+                              toast.error(`${ps.service?.name}: 점검 실패`);
+                            },
+                          },
+                        );
+                      }}
+                    >
+                      {runHealthCheck.isPending && runHealthCheck.variables?.project_service_id === ps.id ? (
+                        <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Activity className="mr-1.5 h-3.5 w-3.5" />
+                      )}
+                      상태 점검
+                    </Button>
                     {ps.service?.website_url && (
                       <Button variant="outline" size="sm" asChild>
                         <a href={ps.service.website_url} target="_blank" rel="noopener noreferrer">

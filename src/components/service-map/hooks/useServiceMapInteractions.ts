@@ -150,8 +150,21 @@ export function useServiceMapInteractions(params: UseServiceMapInteractionsParam
   }, [setConnectingFrom]);
 
   const handleContextRunHealthCheck = useCallback((nodeId: string) => {
-    runHealthCheck.mutate({ project_service_id: nodeId });
-  }, [runHealthCheck]);
+    const svc = services.find((s) => s.id === nodeId);
+    const svcName = svc?.service?.name || '서비스';
+    runHealthCheck.mutate(
+      { project_service_id: nodeId },
+      {
+        onSuccess: (data) => {
+          const label = data.status === 'healthy' ? '정상' : data.status === 'degraded' ? '경고' : '오류';
+          toast.success(`${svcName}: 상태 ${label}`);
+        },
+        onError: () => {
+          toast.error(`${svcName}: 점검 실패`);
+        },
+      },
+    );
+  }, [runHealthCheck, services]);
 
   const handleContextRemoveService = useCallback((nodeId: string) => {
     removeService.mutate(nodeId);

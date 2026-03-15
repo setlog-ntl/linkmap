@@ -99,12 +99,13 @@ function DonutChart({ dist }: { dist: ReturnType<typeof computeHealthDistributio
 export function HealthRingCard({ projectId, allCards, initialHealthChecks }: HealthRingCardProps) {
   const { data: healthChecks = {} } = useLatestHealthChecks(projectId, initialHealthChecks);
   const runHealthCheck = useRunHealthCheck();
-  const [isRunningAll, setIsRunningAll] = useState(false);
+  const [runProgress, setRunProgress] = useState<{ running: boolean; current: number; total: number }>({ running: false, current: 0, total: 0 });
 
   const dist = computeHealthDistribution(allCards, healthChecks);
 
   const handleRunAll = async () => {
-    setIsRunningAll(true);
+    const total = allCards.length;
+    setRunProgress({ running: true, current: 0, total });
     let successCount = 0;
     let failCount = 0;
 
@@ -115,9 +116,10 @@ export function HealthRingCard({ projectId, allCards, initialHealthChecks }: Hea
       } catch {
         failCount++;
       }
+      setRunProgress((prev) => ({ ...prev, current: prev.current + 1 }));
     }
 
-    setIsRunningAll(false);
+    setRunProgress({ running: false, current: 0, total: 0 });
     if (failCount === 0) {
       toast.success(`${successCount}개 서비스 검증 완료`);
     } else {
@@ -172,10 +174,10 @@ export function HealthRingCard({ projectId, allCards, initialHealthChecks }: Hea
         size="sm"
         className="w-full h-8 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
         onClick={handleRunAll}
-        disabled={isRunningAll || allCards.length === 0}
+        disabled={runProgress.running || allCards.length === 0}
       >
-        <RefreshCw className={`h-3 w-3 ${isRunningAll ? 'animate-spin' : ''}`} />
-        {isRunningAll ? '검증 중...' : '전체 검증'}
+        <RefreshCw className={`h-3 w-3 ${runProgress.running ? 'animate-spin' : ''}`} />
+        {runProgress.running ? `검증 중 (${runProgress.current}/${runProgress.total})` : '전체 검증'}
       </Button>
     </div>
   );
