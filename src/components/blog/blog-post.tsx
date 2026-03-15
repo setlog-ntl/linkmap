@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useMemo, type ReactNode, type ComponentPropsWithoutRef } from 'react';
+import { useState, useEffect, useMemo, useCallback, type ReactNode, type ComponentPropsWithoutRef } from 'react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
-import { ArrowLeft, ArrowRight, Calendar, Clock, Tag, ExternalLink, ChevronRight, List } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar, Clock, Tag, ExternalLink, ChevronRight, List, Link2, Check, Share2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { BLOG_CATEGORIES, getPublishedPosts, type BlogPost } from '@/data/blog/posts';
@@ -240,6 +240,72 @@ function ReadingProgress() {
 }
 
 // ---------------------------------------------------------------------------
+// Share / Copy Link
+// ---------------------------------------------------------------------------
+function ShareButton({ slug }: { slug: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const copyLink = useCallback(async () => {
+    const url = `https://www.linkmap.biz/blog/${slug}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback
+      const textarea = document.createElement('textarea');
+      textarea.value = url;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }, [slug]);
+
+  const shareNative = useCallback(async () => {
+    const url = `https://www.linkmap.biz/blog/${slug}`;
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ url });
+      } catch {
+        // user cancelled
+      }
+    }
+  }, [slug]);
+
+  const hasNativeShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        onClick={copyLink}
+        className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-all ${
+          copied
+            ? 'border-brand-green bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400'
+            : 'border-border hover:border-brand-blue/50 hover:text-brand-blue'
+        }`}
+      >
+        {copied ? <Check className="h-3 w-3" /> : <Link2 className="h-3 w-3" />}
+        {copied ? '복사됨!' : '링크 복사'}
+      </button>
+      {hasNativeShare && (
+        <button
+          onClick={shareNative}
+          className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium hover:border-brand-blue/50 hover:text-brand-blue transition-all"
+        >
+          <Share2 className="h-3 w-3" />
+          공유
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // CTA Card
 // ---------------------------------------------------------------------------
 function CtaCard() {
@@ -339,19 +405,22 @@ export function BlogPostView({ post }: BlogPostViewProps) {
 
           <p className="text-lg text-muted-foreground leading-relaxed">{post.description}</p>
 
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              {new Date(post.publishedAt).toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              {post.readingTime}
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                {new Date(post.publishedAt).toLocaleDateString('ko-KR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </span>
+              <span className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                {post.readingTime}
+              </span>
+            </div>
+            <ShareButton slug={post.slug} />
           </div>
 
           {post.tags.length > 0 && (

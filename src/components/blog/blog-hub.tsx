@@ -1,7 +1,8 @@
 'use client';
 
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Clock, Calendar, Tag } from 'lucide-react';
+import { ArrowRight, Clock, Calendar, Tag, Link2, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   BLOG_CATEGORIES,
@@ -10,6 +11,44 @@ import {
   type BlogCategory,
   type BlogPost,
 } from '@/data/blog/posts';
+
+function CopyLinkButton({ slug }: { slug: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = `https://www.linkmap.biz/blog/${slug}`;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      const textarea = document.createElement('textarea');
+      textarea.value = url;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }, [slug]);
+
+  return (
+    <button
+      onClick={handleCopy}
+      className={`flex h-7 w-7 items-center justify-center rounded-md border transition-all ${
+        copied
+          ? 'border-brand-green bg-green-50 text-green-600 dark:bg-green-950/30'
+          : 'border-transparent opacity-0 group-hover:opacity-100 hover:border-brand-blue/50 hover:text-brand-blue'
+      }`}
+      title="링크 복사"
+    >
+      {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+    </button>
+  );
+}
 
 function PostCard({ post }: { post: BlogPost }) {
   const cat = BLOG_CATEGORIES[post.category];
@@ -20,7 +59,7 @@ function PostCard({ post }: { post: BlogPost }) {
       href={`/blog/${post.slug}`}
       className="group relative flex flex-col gap-3 rounded-lg border bg-card p-5 shadow-sm transition-all hover:border-brand-blue/50 hover:shadow-md"
     >
-      {/* Category + Tags */}
+      {/* Category + Tags + Copy */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
@@ -30,11 +69,14 @@ function PostCard({ post }: { post: BlogPost }) {
             {cat.label}
           </span>
         </div>
-        {post.tags.length > 0 && (
-          <Badge variant="secondary" className="text-xs">
-            {post.tags[0]}
-          </Badge>
-        )}
+        <div className="flex items-center gap-1.5">
+          {post.tags.length > 0 && (
+            <Badge variant="secondary" className="text-xs">
+              {post.tags[0]}
+            </Badge>
+          )}
+          <CopyLinkButton slug={post.slug} />
+        </div>
       </div>
 
       {/* Title + Description */}
