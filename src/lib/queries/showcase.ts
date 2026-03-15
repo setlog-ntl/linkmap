@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './keys';
-import type { ShowcaseCategory } from '@/types/core';
+import type { ShowcaseCategory, ShowcaseComment } from '@/types/core';
 
 export interface ShowcaseItem {
   id: string;
@@ -15,6 +15,8 @@ export interface ShowcaseItem {
   showcase_tags: string[];
   showcase_category: ShowcaseCategory | null;
   showcase_image_url: string | null;
+  like_count: number;
+  comment_count: number;
   source?: 'deploy' | 'project';
   project_icon_type?: string | null;
   project_icon_value?: string | null;
@@ -235,6 +237,125 @@ export function useUnregisterShowcase() {
       queryClient.invalidateQueries({ queryKey: queryKeys.showcase.mine });
       queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
     },
+  });
+}
+
+// ---------- Likes ----------
+
+export interface LikeStatus {
+  liked: boolean;
+  like_count: number;
+}
+
+export function useShowcaseLikeStatus(showcaseId: string) {
+  return useQuery({
+    queryKey: queryKeys.showcase.likes(showcaseId),
+    queryFn: async (): Promise<LikeStatus> => {
+      const res = await fetch(`/api/showcase/${showcaseId}/likes`);
+      if (!res.ok) return { liked: false, like_count: 0 };
+      return res.json();
+    },
+    enabled: !!showcaseId,
+  });
+}
+
+export function useToggleShowcaseLike() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ showcaseId, source }: { showcaseId: string; source: 'deploy' | 'project' }): Promise<LikeStatus> => {
+      const res = await fetch(`/api/showcase/${showcaseId}/likes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '추천 처리 실패');
+      }
+      return res.json();
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.likes(variables.showcaseId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.detail(variables.showcaseId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.list });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.leaderboard });
+    },
+  });
+}
+
+// ---------- Comments ----------
+
+export function useShowcaseComments(showcaseId: string) {
+  return useQuery({
+    queryKey: queryKeys.showcase.comments(showcaseId),
+    queryFn: async (): Promise<ShowcaseComment[]> => {
+      const res = await fetch(`/api/showcase/${showcaseId}/comments`);
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.comments;
+    },
+    enabled: !!showcaseId,
+  });
+}
+
+export function useCreateShowcaseComment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ showcaseId, source, content }: { showcaseId: string; source: 'deploy' | 'project'; content: string }): Promise<ShowcaseComment> => {
+      const res = await fetch(`/api/showcase/${showcaseId}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source, content }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '댓글 작성 실패');
+      }
+      return res.json();
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.comments(variables.showcaseId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.detail(variables.showcaseId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.list });
+    },
+  });
+}
+
+export function useDeleteShowcaseComment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ showcaseId, commentId }: { showcaseId: string; commentId: string }): Promise<void> => {
+      const res = await fetch(`/api/showcase/${showcaseId}/comments/${commentId}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '댓글 삭제 실패');
+      }
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.comments(variables.showcaseId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.detail(variables.showcaseId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.list });
+    },
+  });
+}
+
+// ---------- Leaderboard ----------
+
+export function useShowcaseLeaderboard() {
+  return useQuery({
+    queryKey: queryKeys.showcase.leaderboard,
+    queryFn: async (): Promise<ShowcaseItem[]> => {
+      const res = await fetch('/api/showcase/leaderboard');
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '리더보드 조회 실패');
+      }
+      const data = await res.json();
+      return data.showcases;
+    },
+    staleTime: 30_000,
   });
 }
 

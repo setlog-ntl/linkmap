@@ -168,9 +168,33 @@ export interface HomepageDeploy {
   showcase_tags: string[];
   showcase_category: ShowcaseCategory | null;
   showcase_image_url: string | null;
+  like_count: number;
+  comment_count: number;
   created_at: string;
   updated_at: string;
   deployed_at: string | null;
+}
+
+export interface ShowcaseLike {
+  id: string;
+  showcase_id: string;
+  showcase_source: 'deploy' | 'project';
+  user_id: string;
+  created_at: string;
+}
+
+export interface ShowcaseComment {
+  id: string;
+  showcase_id: string;
+  showcase_source: 'deploy' | 'project';
+  user_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  profiles?: {
+    name: string | null;
+    avatar_url: string | null;
+  } | null;
 }
 
 export type ShowcaseCategory =

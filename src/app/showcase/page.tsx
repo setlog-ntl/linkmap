@@ -3,8 +3,9 @@
 import { useState, useMemo } from 'react';
 import { useShowcaseList } from '@/lib/queries/showcase';
 import { ShowcaseCard } from '@/components/showcase/showcase-card';
+import { ShowcaseLeaderboard } from '@/components/showcase/showcase-leaderboard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Trophy, Sparkles } from 'lucide-react';
+import { Trophy, Sparkles, LayoutGrid, Crown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { SHOWCASE_CATEGORIES, type ShowcaseCategory } from '@/types/core';
 import { cn } from '@/lib/utils';
@@ -14,6 +15,7 @@ export default function ShowcasePage() {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ShowcaseCategory | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'gallery' | 'leaderboard'>('gallery');
 
   // 모든 태그를 수집하여 빈도순 정렬
   const allTags = useMemo(() => {
@@ -71,6 +73,42 @@ export default function ShowcasePage() {
         </p>
       </div>
 
+      {/* View Mode Tabs */}
+      <div className="flex justify-center gap-2 mb-6">
+        <button
+          type="button"
+          onClick={() => setViewMode('gallery')}
+          className={cn(
+            'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+            viewMode === 'gallery'
+              ? 'bg-brand-blue text-white'
+              : 'bg-muted text-muted-foreground hover:bg-muted/80'
+          )}
+        >
+          <LayoutGrid className="h-4 w-4" />
+          갤러리
+        </button>
+        <button
+          type="button"
+          onClick={() => setViewMode('leaderboard')}
+          className={cn(
+            'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+            viewMode === 'leaderboard'
+              ? 'bg-brand-blue text-white'
+              : 'bg-muted text-muted-foreground hover:bg-muted/80'
+          )}
+        >
+          <Crown className="h-4 w-4" />
+          리더보드
+        </button>
+      </div>
+
+      {viewMode === 'leaderboard' ? (
+        <div className="max-w-2xl mx-auto">
+          <ShowcaseLeaderboard />
+        </div>
+      ) : (
+      <>
       {/* Search */}
       <div className="max-w-md mx-auto mb-6">
         <Input
@@ -166,6 +204,8 @@ export default function ShowcasePage() {
               : '내 사이트 관리에서 쇼케이스에 등록해보세요!'}
           </p>
         </div>
+      )}
+      </>
       )}
     </div>
   );

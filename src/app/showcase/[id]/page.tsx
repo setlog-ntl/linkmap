@@ -8,6 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ShowcaseLikeButton } from '@/components/showcase/showcase-like-button';
+import { ShowcaseShareButton } from '@/components/showcase/showcase-share-button';
+import { ShowcaseComments } from '@/components/showcase/showcase-comments';
 import {
   ArrowLeft,
   ExternalLink,
@@ -18,10 +21,13 @@ import {
   AlertTriangle,
   FolderKanban,
   Rocket,
+  Heart,
+  MessageSquare,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
+import { createClient as createBrowserClient } from '@/lib/supabase/client';
 
 export default function ShowcaseDetailPage({
   params,
@@ -33,6 +39,14 @@ export default function ShowcaseDetailPage({
   const { locale } = useLocaleStore();
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeFailed, setIframeFailed] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>();
+
+  useEffect(() => {
+    const supabase = createBrowserClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setCurrentUserId(user?.id);
+    });
+  }, []);
 
   // iframe 로드 실패 감지: 타임아웃 기반
   useEffect(() => {
@@ -254,15 +268,26 @@ export default function ShowcaseDetailPage({
             </div>
           )}
 
-          {/* Visit button */}
-          {liveUrl && (
-            <Button asChild className="mt-2">
-              <a href={liveUrl} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                사이트 방문하기
-              </a>
-            </Button>
-          )}
+          {/* Action buttons */}
+          <div className="flex items-center gap-2 mt-2">
+            {liveUrl && (
+              <Button asChild>
+                <a href={liveUrl} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  사이트 방문하기
+                </a>
+              </Button>
+            )}
+            <ShowcaseLikeButton
+              showcaseId={id}
+              source={item.source || 'deploy'}
+              initialCount={item.like_count ?? 0}
+            />
+            <ShowcaseShareButton
+              showcaseId={id}
+              title={item.site_name}
+            />
+          </div>
         </div>
 
         {/* Sidebar */}
@@ -298,8 +323,33 @@ export default function ShowcaseDetailPage({
                 </span>
               </div>
             )}
+
+            {/* 추천수 / 댓글수 */}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">추천</span>
+              <span className="flex items-center gap-1.5">
+                <Heart className="h-3.5 w-3.5 text-red-400" />
+                {item.like_count ?? 0}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">댓글</span>
+              <span className="flex items-center gap-1.5">
+                <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+                {item.comment_count ?? 0}
+              </span>
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* 댓글 섹션 */}
+      <div className="mt-10 pt-8 border-t max-w-3xl">
+        <ShowcaseComments
+          showcaseId={id}
+          source={item.source || 'deploy'}
+          currentUserId={currentUserId}
+        />
       </div>
     </div>
   );

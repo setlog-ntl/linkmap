@@ -3,7 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Globe, FolderKanban, Rocket } from 'lucide-react';
+import { ExternalLink, Globe, FolderKanban, Rocket, Heart, MessageSquare } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { SHOWCASE_CATEGORIES } from '@/types/core';
 import Link from 'next/link';
@@ -191,10 +191,17 @@ export function ShowcaseCard({ item }: ShowcaseCardProps) {
             </Avatar>
             <span className="text-xs text-muted-foreground">{authorName}</span>
           </div>
-          <div className="flex items-center gap-2">
-            {deployDate && (
-              <span className="text-[10px] text-muted-foreground">{deployDate}</span>
-            )}
+          <div className="flex items-center gap-3">
+            {/* 추천수 */}
+            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+              <Heart className="h-3 w-3 text-red-400" />
+              {item.like_count ?? 0}
+            </span>
+            {/* 댓글수 */}
+            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+              <MessageSquare className="h-3 w-3" />
+              {item.comment_count ?? 0}
+            </span>
             {liveUrl && (
               <a
                 href={liveUrl}
