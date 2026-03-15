@@ -72,7 +72,7 @@ export const BLOG_POSTS: BlogPost[] = [
     tags: ['바이브 코딩', 'AI 코딩', 'Cursor', 'Claude', '노코드'],
     publishedAt: '2025-04-07',
     readingTime: '8분',
-    relatedGuides: ['env', 'github', 'supabase', 'vercel', 'deploy'],
+    relatedGuides: ['env', 'github', 'supabase', 'vercel'],
     content: `> **KEY:** 바이브 코딩(Vibe Coding)은 AI에게 자연어로 코드를 생성시키는 새로운 개발 방식입니다. 코딩 경험 없이도 실제 서비스를 만들 수 있지만, **서비스 연결과 환경변수 설정**이라는 새로운 과제가 생깁니다.
 
 ## 바이브 코딩이란?
@@ -90,10 +90,10 @@ export const BLOG_POSTS: BlogPost[] = [
 | 출력물 | 플랫폼 종속 앱 | **실제 코드 (GitHub 저장소)** |
 | 소유권 | 플랫폼 의존 | **코드 완전 소유** |
 | 확장성 | 플랫폼 한계 | 코드로 가능한 모든 것 |
-| 배포 | 플랫폼 내 | [Vercel](/guides/vercel), [Cloudflare](/guides/cloudflare) 등 [자유 선택](/guides/deploy) |
+| 배포 | 플랫폼 내 | Vercel, Cloudflare 등 자유 선택 |
 | 비용 구조 | 월 구독료 | 인프라 비용만 (대부분 무료 티어) |
 
-> **TIP:** 바이브 코딩의 결과물은 **진짜 코드**입니다. Next.js, React, Python 등 [실제 프레임워크](/guides/frontend)로 작성되어 [GitHub](/guides/github)에 저장되고, 원하는 곳에 [배포](/guides/deploy)됩니다.
+> **TIP:** 바이브 코딩의 결과물은 **진짜 코드**입니다. Next.js, React, Python 등 실제 프레임워크로 작성되어 GitHub에 저장되고, 원하는 곳에 배포됩니다.
 
 ## 바이브 코딩의 실전 워크플로
 
@@ -112,7 +112,7 @@ Supabase로 인증하고, Vercel에 배포할 거야."
 
 ### 3단계: 서비스 연결 — 여기서 막힌다
 
-> **WARNING:** AI가 코드를 만들어줬지만, 이런 질문이 남습니다: [Supabase](/services/supabase) 프로젝트는 어떻게 만들지? API 키는 어디서 발급받지? \`.env\` 파일에 뭘 넣어야 하지? [GitHub Secrets](/services/github)는 어떻게 설정하지?
+> **WARNING:** AI가 코드를 만들어줬지만, 이런 질문이 남습니다: Supabase 프로젝트는 어떻게 만들지? API 키는 어디서 발급받지? \`.env\` 파일에 뭘 넣어야 하지? GitHub Secrets는 어떻게 설정하지?
 
 **이것이 바로 [Linkmap](https://www.linkmap.biz)이 해결하는 문제입니다.**
 
@@ -133,8 +133,8 @@ Supabase로 인증하고, Vercel에 배포할 거야."
 
 AI가 코드를 잘 만들어줄수록, 남는 과제는 **코드 밖의 설정**입니다:
 
-- **[환경변수](/guides/env) 관리** — [Supabase](/services/supabase) URL, [OpenAI](/services/openai) API 키, [Stripe](/services/stripe) 시크릿 키 등 수십 개
-- **서비스 연결** — [인증](/guides/auth), [DB](/guides/backend), 결제, 이메일, 모니터링 등 평균 5~10개 외부 서비스
+- **[환경변수](/guides/env) 관리** — Supabase URL, OpenAI API 키, Stripe 시크릿 키 등 수십 개
+- **서비스 연결** — 인증, DB, 결제, 이메일, 모니터링 등 평균 5~10개 외부 서비스
 - **보안** — API 키 유출 방지, 환경별 분리, 팀 공유
 
 > **INFO:** 평균적인 바이브 코딩 프로젝트는 **7개의 외부 서비스**를 연결합니다. 각 서비스마다 2~5개의 환경변수가 필요하므로, 총 15~35개의 환경변수를 관리해야 합니다. [Linkmap 서비스 카탈로그](https://www.linkmap.biz/services)에서 128개 서비스의 환경변수 정보를 확인하세요.
@@ -143,13 +143,13 @@ AI가 코드를 잘 만들어줄수록, 남는 과제는 **코드 밖의 설정*
 
 [Linkmap](https://www.linkmap.biz)은 바이브 코더를 위한 인프라 두뇌입니다:
 
-| 기능 | 설명 | 바로가기 |
-|------|------|---------|
-| **서비스맵 시각화** | 프로젝트에 연결된 모든 서비스를 지도처럼 봅니다 | [서비스맵 만들기](/blog/service-map-tutorial) |
-| **128개 서비스 카탈로그** | 각 서비스의 환경변수, 발급 방법, 가격을 한곳에서 확인 | [서비스 카탈로그](https://www.linkmap.biz/services) |
-| **AES-256-GCM 암호화** | API 키를 군사 수준으로 안전하게 저장 | [환경변수 가이드](/guides/env) |
-| **GitHub Secrets 자동 배포** | 환경변수를 GitHub에 자동으로 동기화 | [자동화 가이드](/blog/github-secrets-automation) |
-| **원클릭 배포** | 템플릿으로 프로젝트를 즉시 시작 | [원클릭 배포](https://www.linkmap.biz/my-sites) |
+| 기능 | 설명 |
+|------|------|
+| **서비스맵 시각화** | 프로젝트에 연결된 모든 서비스를 지도처럼 봅니다 |
+| **128개 서비스 카탈로그** | 각 서비스의 환경변수, 발급 방법, 가격을 한곳에서 확인 |
+| **AES-256-GCM 암호화** | API 키를 군사 수준으로 안전하게 저장 |
+| **GitHub Secrets 자동 배포** | 환경변수를 GitHub에 자동으로 동기화 |
+| **원클릭 배포** | 템플릿으로 프로젝트를 즉시 시작 |
 
 ---
 
@@ -157,19 +157,19 @@ AI가 코드를 잘 만들어줄수록, 남는 과제는 **코드 밖의 설정*
 
 바이브 코딩을 시작한다면, 이 순서를 추천합니다:
 
-| 순서 | 할 일 | 도구 | Linkmap 가이드 |
-|------|------|------|---------------|
-| 1 | AI로 코드 생성 | Cursor, Claude | — |
-| 2 | GitHub 저장소 연결 | [GitHub](/services/github) | [GitHub 가이드](/guides/github) |
-| 3 | 서비스 연결 + 환경변수 | [Linkmap](https://www.linkmap.biz) | [환경변수 가이드](/guides/env) |
-| 4 | DB + 인증 설정 | [Supabase](/services/supabase) | [Supabase 가이드](/guides/supabase) |
-| 5 | 배포 | [Vercel](/services/vercel) | [Vercel 가이드](/guides/vercel) |
+| 순서 | 할 일 | 도구 |
+|------|------|------|
+| 1 | AI로 코드 생성 | Cursor, Claude |
+| 2 | GitHub 저장소 연결 | GitHub |
+| 3 | 서비스 연결 + 환경변수 | [Linkmap](https://www.linkmap.biz) |
+| 4 | DB + 인증 설정 | Supabase |
+| 5 | 배포 | Vercel |
 
 > **TRY:** 코드는 AI가, 연결은 [Linkmap](https://www.linkmap.biz)이. [무료로 시작하기](https://www.linkmap.biz/signup) — 프로젝트 3개, 환경변수 50개까지 무료입니다.
 
 ---
 
-*환경변수가 처음이라면 [환경변수 완전 정복 가이드](/guides/env)를, 인증이 궁금하면 [인증 가이드](/guides/auth)를, 배포 개념이 필요하면 [도메인·배포·서버 가이드](/guides/deploy)를 참고하세요. GitHub 설정은 [GitHub 시작하기 가이드](/guides/github), 바이브 코딩 실전기는 [바이브 코딩으로 SaaS 만들기](/blog/vibe-coding-can-you-build-saas)에서 확인하세요.*
+*환경변수가 처음이라면 [환경변수 완전 정복 가이드](/guides/env)를, 바이브 코딩 실전기는 [바이브 코딩으로 SaaS 만들기](/blog/vibe-coding-can-you-build-saas)에서 확인하세요.*
 `,
   },
   // ======================================================================
@@ -183,18 +183,18 @@ AI가 코드를 잘 만들어줄수록, 남는 과제는 **코드 밖의 설정*
     tags: ['환경변수', '.env', 'API 키', '보안', '시크릿 관리'],
     publishedAt: '2025-04-14',
     readingTime: '7분',
-    relatedGuides: ['env', 'github', 'auth', 'deploy', 'cloudflare', 'vercel'],
+    relatedGuides: ['env', 'github', 'deploy'],
     content: `> **KEY:** \`.env\` 파일은 편리하지만 **암호화, 접근 제어, 감사 로그, 동기화가 전혀 없습니다.** GitHub에 따르면 매년 수백만 건의 시크릿이 공개 저장소에 노출됩니다.
 
 ## .env 파일, 왜 문제인가
 
-거의 모든 개발자가 \`.env\` 파일을 사용합니다. 간편하고, 프레임워크가 기본 지원하니까요. 하지만 \`.env\` 파일에는 심각한 보안 위험이 숨어 있습니다. ([환경변수가 처음이라면 환경변수 완전 정복 가이드](/guides/env)를 먼저 읽어보세요.)
+거의 모든 개발자가 \`.env\` 파일을 사용합니다. 간편하고, 프레임워크가 기본 지원하니까요. 하지만 \`.env\` 파일에는 심각한 보안 위험이 숨어 있습니다. 환경변수가 처음이라면 [환경변수 완전 정복 가이드](/guides/env)를 먼저 읽어보세요.
 
 ## 실제 발생하는 3가지 위험
 
 ### 1. Git에 실수로 커밋
 
-\`.gitignore\`에 \`.env\`를 추가하는 것을 잊으면, API 키가 [GitHub](/services/github)에 공개됩니다.
+\`.gitignore\`에 \`.env\`를 추가하는 것을 잊으면, API 키가 GitHub에 공개됩니다.
 
 \`\`\`bash
 # 이런 실수가 매일 일어납니다
@@ -243,42 +243,42 @@ API 키 유출
 | 암호화 | 평문 텍스트 | **AES-256-GCM** |
 | 접근 제어 | 파일 접근 = 전체 접근 | 역할 기반 제어 |
 | 감사 로그 | 누가 봤는지 모름 | 모든 접근 기록 |
-| 자동 동기화 | 수동 복사 | [GitHub Secrets 자동 배포](/blog/github-secrets-automation) |
+| 자동 동기화 | 수동 복사 | GitHub Secrets 자동 배포 |
 | 유효성 검증 | 오타도 모름 | 자동 점검 |
 | 팀 공유 | 카톡/슬랙 전송 | 초대 링크 |
-| 서비스 시각화 | 없음 | [서비스맵](/blog/service-map-tutorial) |
+| 서비스 시각화 | 없음 | 서비스맵 |
 
 ---
 
 ## 안전한 환경변수 관리 5가지 원칙
 
 ### 1. 암호화 저장
-[환경변수](/guides/env)는 반드시 암호화해서 저장해야 합니다. [Linkmap](https://www.linkmap.biz)은 **AES-256-GCM**으로 모든 시크릿을 암호화합니다.
+환경변수는 반드시 암호화해서 저장해야 합니다. [Linkmap](https://www.linkmap.biz)은 **AES-256-GCM**으로 모든 시크릿을 암호화합니다.
 
 ### 2. 접근 제어
-누가 어떤 키에 접근할 수 있는지 제어합니다. [인증 체계](/guides/auth)를 통해 개발자에게는 개발 키만, 운영팀에게는 프로덕션 키만.
+누가 어떤 키에 접근할 수 있는지 제어합니다. 개발자에게는 개발 키만, 운영팀에게는 프로덕션 키만.
 
 ### 3. 감사 로그
 모든 접근과 변경을 기록합니다. 문제 발생 시 "누가, 언제, 어떤 키를" 추적할 수 있어야 합니다.
 
 ### 4. 자동 동기화
-로컬에서 키를 변경하면 [배포](/guides/deploy) 환경([GitHub Secrets](/blog/github-secrets-automation), [Vercel](/guides/vercel) 등)에 자동으로 반영되어야 합니다.
+로컬에서 키를 변경하면 배포 환경(GitHub Secrets, Vercel 등)에 자동으로 반영되어야 합니다.
 
 ### 5. 유효성 자동 점검
 누락된 변수, 형식 오류, 만료된 키를 자동으로 감지합니다.
 
-> **TIP:** 이 5가지를 모두 만족하는 도구를 쓰면 \`.env\` 파일 관련 사고를 **99% 예방**할 수 있습니다. [Linkmap 서비스 카탈로그](https://www.linkmap.biz/services)에서 128개 서비스의 환경변수 가이드를 확인하세요. 환경변수 개념이 생소하다면 [환경변수 완전 정복 가이드](/guides/env)를 추천합니다.
+> **TIP:** 이 5가지를 모두 만족하는 도구를 쓰면 \`.env\` 파일 관련 사고를 **99% 예방**할 수 있습니다.
 
 ## .env 파일 대신 무엇을 쓸까
 
 환경변수 관리 도구 중 **서비스 간 연결을 시각화하는 유일한 플랫폼이 [Linkmap](https://www.linkmap.biz)** 입니다. Doppler, Infisical, Vault가 키 하나하나를 관리한다면, Linkmap은 모든 서비스의 관계를 지도처럼 보여줍니다.
 
-| 도구 | 핵심 강점 | 적합한 경우 | 서비스 페이지 |
-|------|---------|-----------|-------------|
-| **[Linkmap](https://www.linkmap.biz)** | 시각화 + 암호화 + 한글 가이드 | 바이브 코더, 인디 개발자 | [서비스 카탈로그](https://www.linkmap.biz/services) |
-| [Doppler](/services/doppler) | 엔터프라이즈 워크플로 | 대기업 DevOps 팀 | [Doppler 상세](/services/doppler) |
-| [Infisical](/services/infisical) | 오픈소스 + 셀프호스팅 | 셀프호스팅 필요 시 | [Infisical 상세](/services/infisical) |
-| [Vault](/services/hashicorp-vault) | 동적 시크릿 + PKI | 대규모 인프라 운영 | [Vault 상세](/services/hashicorp-vault) |
+| 도구 | 핵심 강점 | 적합한 경우 |
+|------|---------|-----------|
+| **[Linkmap](https://www.linkmap.biz)** | 시각화 + 암호화 + 한글 가이드 | 바이브 코더, 인디 개발자 |
+| Doppler | 엔터프라이즈 워크플로 | 대기업 DevOps 팀 |
+| Infisical | 오픈소스 + 셀프호스팅 | 셀프호스팅 필요 시 |
+| Vault | 동적 시크릿 + PKI | 대규모 인프라 운영 |
 
 ---
 
@@ -287,14 +287,14 @@ API 키 유출
 - [x] \`.gitignore\`에 \`.env*\` 패턴 포함 확인
 - [ ] git 히스토리에 \`.env\` 커밋 기록 확인: \`git log --all -p -- .env\`
 - [ ] 팀 채팅방에서 API 키 평문 공유 중단
-- [ ] 프로덕션 키는 배포 플랫폼([Vercel](/services/vercel), [Cloudflare](/services/cloudflare))에서 관리
+- [ ] 프로덕션 키는 배포 플랫폼(Vercel, Cloudflare)에서 관리
 - [ ] [Linkmap](https://www.linkmap.biz/signup)으로 환경변수 관리 도구 도입
 
 > **TRY:** 환경변수 관리가 고민이라면 [Linkmap 무료 플랜](https://www.linkmap.biz/signup)으로 시작하세요. 프로젝트 3개, 환경변수 50개까지 무료입니다.
 
 ---
 
-*환경변수 기초가 필요하다면 [환경변수 완전 정복 가이드](/guides/env)를 참고하세요. 안전 관리 실천법은 [.env 안전 관리 5가지 방법](/blog/dotenv-safe-management-tips)에서 더 자세히 다룹니다.*
+*환경변수 기초는 [환경변수 완전 정복 가이드](/guides/env), 안전 관리 실천법은 [.env 안전 관리 5가지 방법](/blog/dotenv-safe-management-tips)에서 더 자세히 다룹니다.*
 `,
   },
   // ======================================================================
@@ -308,7 +308,7 @@ API 키 유출
     tags: ['바이브 코딩', 'SaaS', '사이드 프로젝트', 'AI 코딩', '경험담'],
     publishedAt: '2025-04-21',
     readingTime: '10분',
-    relatedGuides: ['env', 'supabase', 'vercel', 'github', 'cloudflare', 'openai', 'auth', 'backend'],
+    relatedGuides: ['env', 'supabase', 'vercel', 'github'],
     content: `> **KEY:** 바이브 코딩으로 SaaS를 만들 수 있습니다. [Linkmap](https://www.linkmap.biz) 자체가 그 증거입니다 — 70+ DB 마이그레이션, 45+ API 라우트, 128개 서비스 페이지. 다만 **"AI한테 시켜서 뚝딱"은 아닙니다.**
 
 ## 결론부터: 가능합니다, 조건부로
@@ -327,7 +327,7 @@ Linkmap (linkmap.biz)의 현재 규모 — 바이브 코딩으로 구축:
   └── 6개 원클릭 배포 템플릿
 \`\`\`
 
-> **INFO:** [Linkmap 서비스 카탈로그](https://www.linkmap.biz/services)에서 128개 서비스의 환경변수 가이드를 확인할 수 있고, [원클릭 배포](https://www.linkmap.biz/my-sites)로 6가지 템플릿을 즉시 시작할 수 있습니다. 기술 스택 설명: [Cloudflare 배포 가이드](/guides/cloudflare), [Supabase 시작하기](/guides/supabase), [GitHub 연동 가이드](/guides/github).
+> **INFO:** [서비스 카탈로그](https://www.linkmap.biz/services)에서 128개 서비스의 환경변수 가이드를 확인하고, [원클릭 배포](https://www.linkmap.biz/my-sites)로 템플릿을 즉시 시작할 수 있습니다.
 
 ## AI가 잘하는 것 vs 못하는 것
 
@@ -335,10 +335,10 @@ Linkmap (linkmap.biz)의 현재 규모 — 바이브 코딩으로 구축:
 |--|---------|---------------|
 | **코드** | 보일러플레이트, CRUD, 패턴 재현 | 아키텍처 의사결정 |
 | **디버깅** | 타입 에러, import 누락 | 비즈니스 로직 버그 |
-| **보안** | 기본 패턴 적용 | **보안 검증** ([API 키 노출 위험](/blog/why-dotenv-is-dangerous), XSS) |
-| **설정** | 코드 내 설정 | **서비스 연결** ([API 키 발급](/guides/env), [환경변수](/guides/env)) |
+| **보안** | 기본 패턴 적용 | 보안 검증 (API 키 노출, XSS) |
+| **설정** | 코드 내 설정 | **서비스 연결** (API 키 발급, 환경변수) |
 
-> **WARNING:** AI가 [Supabase](/services/supabase) 코드를 생성해줘도, 실제 프로젝트 생성([Supabase 가이드](/guides/supabase) 참고), API 키 발급([환경변수 가이드](/guides/env) 참고), [GitHub 설정](/guides/github)은 직접 해야 합니다. **이것이 바이브 코딩의 가장 큰 병목입니다.** [Linkmap](https://www.linkmap.biz)이 이 병목을 해결합니다.
+> **WARNING:** AI가 Supabase 코드를 생성해줘도, 실제 프로젝트 생성, API 키 발급, GitHub 설정은 직접 해야 합니다. **이것이 바이브 코딩의 가장 큰 병목입니다.** [Linkmap](https://www.linkmap.biz)이 이 병목을 해결합니다.
 
 ---
 
@@ -354,7 +354,7 @@ Linkmap (linkmap.biz)의 현재 규모 — 바이브 코딩으로 구축:
 
 ### 2. 서비스맵부터 그리기
 
-> **TIP:** 코드 생성 **전에** 먼저 [Linkmap 서비스맵](https://www.linkmap.biz)으로 필요한 서비스를 정리하세요. 어떤 서비스가 필요한지, 각 서비스의 환경변수가 무엇인지 미리 파악하면 AI에게 정확한 지시를 내릴 수 있습니다. [서비스맵 만들기 튜토리얼](/blog/service-map-tutorial)을 참고하세요.
+> **TIP:** 코드 생성 **전에** 먼저 [Linkmap 서비스맵](https://www.linkmap.biz)으로 필요한 서비스를 정리하세요. 어떤 서비스가 필요한지, 각 서비스의 환경변수가 무엇인지 미리 파악하면 AI에게 정확한 지시를 내릴 수 있습니다.
 
 ### 3. 기존 코드를 컨텍스트로 제공
 
@@ -370,24 +370,24 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
 
 ## 바이브 코딩 추천 스택
 
-| 용도 | 추천 | 왜? | Linkmap 연동 |
-|------|------|-----|-------------|
-| AI 에디터 | Cursor | AI 코드 생성 통합 | — |
-| LLM | Claude | 추론 품질, 긴 코드 생성 | — |
-| 프레임워크 | Next.js | AI가 가장 잘 아는 프레임워크 | [원클릭 배포](https://www.linkmap.biz/my-sites) |
-| DB + 인증 | [Supabase](/services/supabase) | AI 코드 호환성 최고 | [Supabase 가이드](/guides/supabase) |
-| 배포 | [Vercel](/services/vercel) | 원클릭 배포, GitHub 연동 | [Vercel 가이드](/guides/vercel) |
-| AI 기능 | [OpenAI](/services/openai) | GPT API | [OpenAI 연동 가이드](/guides/openai) |
-| 결제 | [Stripe](/services/stripe) | 글로벌 결제 | [Stripe 상세](/services/stripe) |
-| **서비스 관리** | **[Linkmap](https://www.linkmap.biz)** | 연결 시각화 + 환경변수 암호화 | [무료 시작](https://www.linkmap.biz/signup) |
+| 용도 | 추천 | 왜? |
+|------|------|-----|
+| AI 에디터 | Cursor | AI 코드 생성 통합 |
+| LLM | Claude | 추론 품질, 긴 코드 생성 |
+| 프레임워크 | Next.js | AI가 가장 잘 아는 프레임워크 |
+| DB + 인증 | Supabase | AI 코드 호환성 최고 |
+| 배포 | Vercel | 원클릭 배포, GitHub 연동 |
+| AI 기능 | OpenAI | GPT API |
+| 결제 | Stripe | 글로벌 결제 |
+| **서비스 관리** | **[Linkmap](https://www.linkmap.biz)** | 연결 시각화 + 환경변수 암호화 |
 
 ---
 
-> **TRY:** 바이브 코딩을 시작한다면 이 순서를 추천합니다: (1) Cursor로 코드 생성 → (2) [GitHub 저장소 연결](/guides/github) → (3) [Linkmap에서 서비스 연결](https://www.linkmap.biz/signup) → (4) [Vercel에 배포](/guides/vercel). 코드는 AI가, 연결은 [Linkmap](https://www.linkmap.biz)이.
+> **TRY:** 바이브 코딩을 시작한다면: (1) Cursor로 코드 생성 → (2) GitHub 저장소 연결 → (3) [Linkmap에서 서비스 연결](https://www.linkmap.biz/signup) → (4) Vercel에 배포. 코드는 AI가, 연결은 [Linkmap](https://www.linkmap.biz)이.
 
 ---
 
-*[Supabase 설정](/guides/supabase), [Vercel 배포](/guides/vercel), [Cloudflare 배포](/guides/cloudflare), [OpenAI 연동](/guides/openai) — 각 서비스 가이드를 참고하세요. 인증이 궁금하면 [인증 가이드](/guides/auth), API 개념은 [백엔드 가이드](/guides/backend)를 추천합니다. 바이브 코딩의 기본 개념은 [바이브 코딩이란 무엇인가](/blog/what-is-vibe-coding)에서 확인하세요.*
+*환경변수 관리가 처음이라면 [환경변수 가이드](/guides/env)를, 바이브 코딩의 기본 개념은 [바이브 코딩이란 무엇인가](/blog/what-is-vibe-coding)를 참고하세요.*
 `,
   },
   // ======================================================================
@@ -401,7 +401,7 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
     tags: ['서비스맵', 'Linkmap', '튜토리얼', '시각화', '프로젝트 관리'],
     publishedAt: '2025-05-05',
     readingTime: '5분',
-    relatedGuides: ['env', 'supabase', 'vercel', 'github', 'cloudflare', 'openai', 'auth', 'deploy'],
+    relatedGuides: ['env', 'github', 'deploy'],
     content: `> **KEY:** 바이브 코딩 프로젝트는 평균 7개의 외부 서비스를 연결합니다. [Linkmap 서비스맵](https://www.linkmap.biz)은 이 연결을 **지도처럼 시각화**해서 "어떤 서비스가, 어떤 환경변수로, 어떻게 연결되어 있는지" 한눈에 보여줍니다.
 
 ## 서비스맵이 왜 필요한가
@@ -423,7 +423,7 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
   → 전체 구조가 머릿속에만 있음
 \`\`\`
 
-> **INFO:** 이 서비스들이 어떻게 연결되어 있는지, 어떤 환경변수가 필요한지, 비용은 얼마인지 — **한눈에 보이지 않습니다.** [Linkmap 서비스맵](https://www.linkmap.biz)은 이 문제를 해결합니다. [128개 서비스 카탈로그](https://www.linkmap.biz/services)에서 각 서비스의 상세 정보도 확인 가능합니다.
+> **INFO:** 이 서비스들이 어떻게 연결되어 있는지, 어떤 환경변수가 필요한지, 비용은 얼마인지 — **한눈에 보이지 않습니다.** [Linkmap](https://www.linkmap.biz)은 이 문제를 해결합니다.
 
 ## 3분 만에 서비스맵 만들기
 
@@ -439,7 +439,7 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
 2. [서비스 카탈로그](https://www.linkmap.biz/services)에서 사용 중인 서비스 선택
 3. 각 서비스의 환경변수 입력 (AES-256-GCM으로 자동 암호화)
 
-> **TIP:** Linkmap이 각 서비스에 필요한 환경변수를 **자동으로 안내**합니다. 예를 들어 [Supabase](/services/supabase)를 선택하면 \`SUPABASE_URL\`, \`SUPABASE_ANON_KEY\`, \`SUPABASE_SERVICE_ROLE_KEY\` 등 필요한 변수 목록이 바로 표시됩니다. [OpenAI](/services/openai), [Stripe](/services/stripe), [Vercel](/services/vercel) 등 128개 서비스 모두 동일합니다.
+> **TIP:** Linkmap이 각 서비스에 필요한 환경변수를 **자동으로 안내**합니다. 예를 들어 Supabase를 선택하면 \`SUPABASE_URL\`, \`SUPABASE_ANON_KEY\`, \`SUPABASE_SERVICE_ROLE_KEY\` 등 필요한 변수 목록이 바로 표시됩니다. 128개 서비스 모두 동일합니다.
 
 ### Step 3. 서비스맵 확인 (1분)
 
@@ -451,26 +451,26 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
 
 ## 서비스맵에서 할 수 있는 것
 
-| 기능 | 설명 | 관련 기능 |
-|------|------|---------|
-| **연결 상태 확인** | 각 서비스의 API 키가 유효한지, 환경변수가 누락되지 않았는지 | [환경변수 자동 점검](https://www.linkmap.biz) |
-| **환경변수 암호화 저장** | AES-256-GCM으로 모든 시크릿을 안전하게 보호 | [환경변수 가이드](/guides/env) |
-| **GitHub Secrets 동기화** | 환경변수를 [GitHub 저장소에 자동 배포](/blog/github-secrets-automation) | [GitHub 가이드](/guides/github) |
-| **비용 추적** | 각 서비스의 예상 비용을 한눈에 파악 | [서비스 카탈로그](https://www.linkmap.biz/services) |
-| **팀 공유** | 팀원 초대 후 서비스맵 공동 관리 | [프로 플랜](https://www.linkmap.biz/pricing) |
+| 기능 | 설명 |
+|------|------|
+| **연결 상태 확인** | 각 서비스의 API 키가 유효한지, 환경변수가 누락되지 않았는지 |
+| **환경변수 암호화 저장** | AES-256-GCM으로 모든 시크릿을 안전하게 보호 |
+| **GitHub Secrets 동기화** | 환경변수를 GitHub 저장소에 자동 배포 |
+| **비용 추적** | 각 서비스의 예상 비용을 한눈에 파악 |
+| **팀 공유** | 팀원 초대 후 서비스맵 공동 관리 |
 
-## Linkmap 서비스 카탈로그 주요 서비스
+## 서비스 카탈로그 주요 서비스
 
-[Linkmap 서비스 카탈로그](https://www.linkmap.biz/services)에서는 128개 서비스의 상세 정보를 제공합니다:
+[서비스 카탈로그](https://www.linkmap.biz/services)에서는 128개 서비스의 상세 정보를 제공합니다:
 
-| 카테고리 | 주요 서비스 | Linkmap 상세 |
-|---------|-----------|-------------|
-| DB + 인증 | [Supabase](/services/supabase), [Firebase](/services/firebase) | [Supabase 가이드](/guides/supabase), [인증 가이드](/guides/auth) |
-| 배포 | [Vercel](/services/vercel), [Cloudflare](/services/cloudflare), [Netlify](/services/netlify) | [Vercel 가이드](/guides/vercel), [Cloudflare 가이드](/guides/cloudflare), [배포 개념](/guides/deploy) |
-| AI | [OpenAI](/services/openai), [Anthropic](/services/anthropic) | [OpenAI 연동 가이드](/guides/openai) |
-| 결제 | [Stripe](/services/stripe), [Toss Payments](/services/toss-payments) | [환경변수 가이드](/guides/env) (시크릿 키 관리) |
-| 이메일 | [Resend](/services/resend), [SendGrid](/services/sendgrid) | [환경변수 가이드](/guides/env) (SMTP 설정) |
-| 모니터링 | [PostHog](/services/posthog), [Sentry](/services/sentry) | [환경변수 가이드](/guides/env) (DSN/키) |
+| 카테고리 | 주요 서비스 |
+|---------|-----------|
+| DB + 인증 | Supabase, Firebase |
+| 배포 | Vercel, Cloudflare, Netlify |
+| AI | OpenAI, Anthropic |
+| 결제 | Stripe, Toss Payments |
+| 이메일 | Resend, SendGrid |
+| 모니터링 | PostHog, Sentry |
 
 ## 이런 분에게 추천합니다
 
@@ -479,11 +479,11 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
 - [.env 파일 관리가 혼란스러운](/blog/why-dotenv-is-dangerous) 분
 - 팀원에게 프로젝트 아키텍처를 설명해야 하는 분
 
-> **TRY:** [Linkmap 무료 플랜](https://www.linkmap.biz/signup)으로 시작하세요. 프로젝트 3개, 환경변수 50개까지 무료입니다. Pro 플랜에서는 팀원을 초대하여 서비스맵을 **공유**할 수 있습니다.
+> **TRY:** [Linkmap 무료 플랜](https://www.linkmap.biz/signup)으로 시작하세요. 프로젝트 3개, 환경변수 50개까지 무료입니다.
 
 ---
 
-*환경변수 개념이 처음이라면 [환경변수 완전 정복 가이드](/guides/env)를, 인증 설정은 [인증 가이드](/guides/auth)를, 배포 개념은 [도메인·배포·서버 가이드](/guides/deploy)를 참고하세요. GitHub Secrets 자동화가 궁금하다면 [GitHub Secrets 자동화](/blog/github-secrets-automation)를 참고하세요.*
+*환경변수 개념이 처음이라면 [환경변수 완전 정복 가이드](/guides/env)를, GitHub Secrets 자동화가 궁금하다면 [GitHub Secrets 자동화](/blog/github-secrets-automation)를 참고하세요.*
 `,
   },
   // ======================================================================
@@ -497,7 +497,7 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
     tags: ['환경변수', '.env', '보안', 'gitignore', 'GitHub Secrets'],
     publishedAt: '2025-05-12',
     readingTime: '6분',
-    relatedGuides: ['env', 'github', 'deploy', 'cloudflare', 'vercel', 'supabase', 'openai', 'frontend'],
+    relatedGuides: ['env', 'github', 'deploy'],
     content: `> **KEY:** 5가지 실천법 요약 — (1) .gitignore 완벽 설정, (2) 커밋 히스토리 점검, (3) 환경별 분리, (4) NEXT_PUBLIC_ 접두사 주의, (5) [Linkmap](https://www.linkmap.biz) 같은 전용 관리 도구 사용. 지금 바로 적용하세요.
 
 ## .env 파일, 제대로 관리하고 있나요?
@@ -519,7 +519,7 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
 !.env.example
 \`\`\`
 
-> **TIP:** \`.env.example\`은 커밋해도 됩니다 — 실제 값 대신 **형식만** 기록합니다. [Linkmap 서비스 카탈로그](https://www.linkmap.biz/services)에서 각 서비스에 필요한 환경변수 이름을 확인할 수 있습니다:
+> **TIP:** \`.env.example\`은 커밋해도 됩니다 — 실제 값 대신 **형식만** 기록합니다:
 
 \`\`\`
 # .env.example (커밋 OK — 값 없이 형식만)
@@ -538,17 +538,17 @@ git log --all --full-history -- .env
 git log --all --full-history -- ".env*"
 \`\`\`
 
-> **WARNING:** 결과가 나온다면 해당 키는 **이미 노출된 것**입니다. 즉시 새 키로 교체하세요. 각 서비스의 키 재발급 방법은 [Linkmap 서비스 카탈로그](https://www.linkmap.biz/services)에서 확인하세요. git 히스토리 정리보다 **키 교체가 우선**입니다.
+> **WARNING:** 결과가 나온다면 해당 키는 **이미 노출된 것**입니다. 즉시 새 키로 교체하세요. git 히스토리 정리보다 **키 교체가 우선**입니다.
 
 ## 3. 환경별 분리
 
 개발, 스테이징, 프로덕션 환경에 같은 키를 쓰면 안 됩니다:
 
-| 환경 | 키 관리 위치 | 추천 배포 플랫폼 |
-|------|-----------|--------------|
+| 환경 | 키 관리 위치 | 추천 |
+|------|-----------|------|
 | 로컬 개발 | \`.env.local\` (로컬만) | — |
-| 스테이징 | 배포 플랫폼 설정 | [Vercel](/services/vercel) Preview |
-| 프로덕션 | 배포 플랫폼 설정 | [Vercel](/services/vercel), [Cloudflare](/services/cloudflare) |
+| 스테이징 | 배포 플랫폼 설정 | Vercel Preview |
+| 프로덕션 | 배포 플랫폼 설정 | Vercel, Cloudflare |
 
 > **INFO:** 프로덕션 키는 \`.env\` 파일이 아니라 배포 플랫폼의 환경변수 설정에서 관리하세요. [Linkmap의 GitHub Secrets 자동 동기화](/blog/github-secrets-automation)를 사용하면 환경변수가 CI/CD에 자동 반영됩니다.
 
@@ -556,7 +556,7 @@ git log --all --full-history -- ".env*"
 
 ## 4. NEXT_PUBLIC_ 접두사 주의
 
-Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 [환경변수](/guides/env)는 **[브라우저](/guides/frontend)에 노출**됩니다 (CSR/SSR 차이는 [프론트엔드 가이드](/guides/frontend) 참고):
+Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 환경변수는 **브라우저에 노출**됩니다:
 
 \`\`\`
 공개 가능 (브라우저에 노출됨):
@@ -569,7 +569,7 @@ Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 [환경변수](/guides/env)는
   STRIPE_SECRET_KEY=sk_live_...
 \`\`\`
 
-> **WARNING:** **절대로** \`SUPABASE_SERVICE_ROLE_KEY\`([Supabase 가이드](/guides/supabase) 참고), \`OPENAI_API_KEY\`([OpenAI 가이드](/guides/openai) 참고), \`STRIPE_SECRET_KEY\`에 \`NEXT_PUBLIC_\` 접두사를 붙이면 안 됩니다. 브라우저 개발자 도구에서 **누구나** 볼 수 있게 됩니다. 각 서비스의 공개/비공개 키 구분은 [Linkmap 서비스 상세 페이지](https://www.linkmap.biz/services)에서 확인하세요.
+> **WARNING:** **절대로** \`SUPABASE_SERVICE_ROLE_KEY\`, \`OPENAI_API_KEY\`, \`STRIPE_SECRET_KEY\`에 \`NEXT_PUBLIC_\` 접두사를 붙이면 안 됩니다. 브라우저 개발자 도구에서 **누구나** 볼 수 있게 됩니다. 환경변수의 공개/비공개 구분이 헷갈린다면 [환경변수 완전 정복 가이드](/guides/env)를 참고하세요.
 
 ## 5. 환경변수 관리 도구 사용
 
@@ -578,12 +578,11 @@ Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 [환경변수](/guides/env)는
 | 기능 | .env 파일 | [Linkmap](https://www.linkmap.biz) |
 |------|----------|---------|
 | 암호화 | 평문 | **AES-256-GCM** |
-| 자동 동기화 | 수동 복사 | [GitHub Secrets 자동 배포](/blog/github-secrets-automation) |
+| 자동 동기화 | 수동 복사 | GitHub Secrets 자동 배포 |
 | 감사 로그 | 없음 | 모든 접근 기록 |
 | 누락 점검 | 없음 | 자동 감지 |
 | 팀 공유 | 카톡/슬랙 | 초대 링크 + 역할 제어 |
-| 시각화 | 없음 | [서비스맵](/blog/service-map-tutorial) |
-| 서비스 가이드 | 없음 | [128개 서비스 카탈로그](https://www.linkmap.biz/services) |
+| 시각화 | 없음 | 서비스맵 |
 
 ---
 
@@ -591,15 +590,15 @@ Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 [환경변수](/guides/env)는
 
 - [x] \`.gitignore\`에 \`.env*\` 패턴 포함
 - [ ] git 히스토리에 \`.env\` 커밋 기록 없음
-- [ ] 프로덕션 키는 배포 플랫폼([Vercel](/services/vercel), [Cloudflare](/services/cloudflare))에서 관리
+- [ ] 프로덕션 키는 배포 플랫폼(Vercel, Cloudflare)에서 관리
 - [ ] \`NEXT_PUBLIC_\`에 시크릿 키 미포함
 - [ ] [Linkmap](https://www.linkmap.biz/signup)으로 환경변수 관리 도구 도입
 
-> **TRY:** 환경변수 관리를 시작하고 싶다면 [Linkmap 무료 플랜](https://www.linkmap.biz/signup)으로 시작하세요. 프로젝트 3개, 환경변수 50개까지 무료입니다. [서비스 카탈로그](https://www.linkmap.biz/services)에서 128개 서비스의 환경변수 가이드를 확인하세요.
+> **TRY:** [Linkmap 무료 플랜](https://www.linkmap.biz/signup)으로 시작하세요. 프로젝트 3개, 환경변수 50개까지 무료입니다.
 
 ---
 
-*환경변수 기초는 [환경변수 완전 정복 가이드](/guides/env), .env 위험성은 [.env 파일은 왜 위험한가](/blog/why-dotenv-is-dangerous), 배포 설정은 [배포 가이드](/guides/deploy), 프론트엔드 개념은 [프론트엔드 가이드](/guides/frontend)를 참고하세요. [Supabase](/guides/supabase)와 [OpenAI](/guides/openai) 설정이 필요하면 각 서비스 가이드를 확인하세요.*
+*환경변수 기초는 [환경변수 완전 정복 가이드](/guides/env), .env 위험성은 [.env 파일은 왜 위험한가](/blog/why-dotenv-is-dangerous)를 참고하세요.*
 `,
   },
   // ======================================================================
@@ -613,12 +612,12 @@ Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 [환경변수](/guides/env)는
     tags: ['GitHub Secrets', '환경변수', '자동화', 'CI/CD', 'GitHub Actions'],
     publishedAt: '2025-05-19',
     readingTime: '6분',
-    relatedGuides: ['github', 'env', 'deploy', 'supabase', 'openai', 'vercel', 'cloudflare'],
+    relatedGuides: ['github', 'env', 'deploy'],
     content: `> **KEY:** GitHub Secrets를 수동으로 관리하면 동기화 누락, 변경 추적 불가, 확인 불가 문제가 생깁니다. [Linkmap](https://www.linkmap.biz)은 환경변수를 GitHub 저장소 시크릿에 **1클릭으로 자동 동기화**합니다.
 
 ## GitHub Secrets, 수동 관리의 한계
 
-[GitHub Actions](https://github.com/features/actions)로 CI/CD를 구성하면([배포 파이프라인 개념은 배포 가이드](/guides/deploy) 참고), [환경변수](/guides/env)를 [GitHub](/guides/github) Secrets에 등록해야 합니다.
+GitHub Actions로 CI/CD를 구성하면, 환경변수를 GitHub Secrets에 등록해야 합니다.
 
 \`\`\`
 수동 관리 흐름:
@@ -635,7 +634,7 @@ Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 [환경변수](/guides/env)는
   "어? 배포가 실패했는데... 시크릿 업데이트를 깜빡했다"
 \`\`\`
 
-> **WARNING:** 프로젝트에 환경변수가 10개만 되어도, 수동 관리는 실수의 온상이 됩니다. 등록된 시크릿의 값은 **다시 확인할 수도 없습니다** (마스킹). [왜 .env 수동 관리가 위험한지](/blog/why-dotenv-is-dangerous) 확인하세요.
+> **WARNING:** 프로젝트에 환경변수가 10개만 되어도, 수동 관리는 실수의 온상이 됩니다. 등록된 시크릿의 값은 **다시 확인할 수도 없습니다** (마스킹).
 
 ---
 
@@ -661,14 +660,14 @@ Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 [환경변수](/guides/env)는
 
 ### 설정 방법 (1회, 2분)
 
-| 단계 | 할 일 | 참고 |
-|------|------|------|
-| 1 | [Linkmap](https://www.linkmap.biz)에서 프로젝트 생성 | [서비스맵 튜토리얼](/blog/service-map-tutorial) |
-| 2 | 프로젝트 설정에서 [GitHub 저장소 연결](/guides/github) | GitHub OAuth |
-| 3 | 동기화할 환경변수 선택 | [서비스 카탈로그](https://www.linkmap.biz/services) 참조 |
-| 4 | **끝!** 이후 자동 동기화 | — |
+| 단계 | 할 일 |
+|------|------|
+| 1 | [Linkmap](https://www.linkmap.biz)에서 프로젝트 생성 |
+| 2 | 프로젝트 설정에서 GitHub 저장소 연결 (OAuth) |
+| 3 | 동기화할 환경변수 선택 |
+| 4 | **끝!** 이후 자동 동기화 |
 
-> **TIP:** 이후 [Linkmap](https://www.linkmap.biz)에서 환경변수를 변경할 때마다 GitHub Secrets에 **자동 반영**됩니다. 수동 업데이트가 필요 없습니다.
+> **TIP:** 이후 Linkmap에서 환경변수를 변경할 때마다 GitHub Secrets에 **자동 반영**됩니다. 수동 업데이트가 필요 없습니다.
 
 ## 수동 vs 자동 비교
 
@@ -677,10 +676,9 @@ Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 [환경변수](/guides/env)는
 | 등록 시간 | 변수당 30초 | **전체 1클릭** |
 | 동기화 | 수동 확인 | 자동 |
 | 변경 추적 | 없음 | 감사 로그 |
-| 누락 방지 | 기억에 의존 | [자동 점검](/blog/dotenv-safe-management-tips) |
+| 누락 방지 | 기억에 의존 | 자동 점검 |
 | 다중 저장소 | 각각 설정 | 한곳에서 관리 |
 | 값 확인 | 불가능 (마스킹) | Linkmap에서 확인 가능 |
-| 서비스 시각화 | 없음 | [서비스맵](/blog/service-map-tutorial) |
 
 ---
 
@@ -688,16 +686,16 @@ Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 [환경변수](/guides/env)는
 
 ### 시나리오 1: 새 서비스 추가
 
-[OpenAI](/services/openai) API를 프로젝트에 추가할 때 ([OpenAI 연동 가이드](/guides/openai)도 참고):
+OpenAI API를 프로젝트에 추가할 때:
 
-1. [Linkmap 서비스 카탈로그](https://www.linkmap.biz/services)에서 [OpenAI](/services/openai) 선택
+1. [서비스 카탈로그](https://www.linkmap.biz/services)에서 OpenAI 선택
 2. API 키 입력 (자동 AES-256 암호화)
 3. GitHub 동기화 클릭 → \`OPENAI_API_KEY\` 시크릿 자동 등록
 4. GitHub Actions에서 바로 사용 가능
 
 ### 시나리오 2: 키 로테이션
 
-[Supabase](/services/supabase) 키를 변경할 때 ([Supabase 시작하기 가이드](/guides/supabase)에서 키 발급 방법 확인):
+Supabase 키를 변경할 때:
 
 1. [Linkmap](https://www.linkmap.biz)에서 새 키로 업데이트
 2. GitHub 동기화 → 기존 시크릿 **자동 갱신**
@@ -708,10 +706,10 @@ Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 [환경변수](/guides/env)는
 새 팀원이 프로젝트에 참여할 때:
 
 1. 팀원을 [Linkmap](https://www.linkmap.biz) 프로젝트에 초대
-2. 팀원은 [서비스맵](/blog/service-map-tutorial)에서 전체 아키텍처 파악
+2. 팀원은 서비스맵에서 전체 아키텍처 파악
 3. GitHub 권한 설정 후 동기화 → 별도의 시크릿 공유 불필요
 
-> **INFO:** 더 이상 카톡이나 슬랙으로 API 키를 보낼 필요가 없습니다. [왜 이런 방식이 위험한지](/blog/why-dotenv-is-dangerous) 확인해보세요.
+> **INFO:** 더 이상 카톡이나 슬랙으로 API 키를 보낼 필요가 없습니다.
 
 ## GitHub Actions에서 사용
 
@@ -729,15 +727,15 @@ jobs:
           OPENAI_API_KEY: \${{ secrets.OPENAI_API_KEY }}
 \`\`\`
 
-> **TIP:** [Linkmap](https://www.linkmap.biz)이 시크릿을 자동 등록하므로, 워크플로에서 \`secrets.XXX\`로 바로 참조할 수 있습니다. [서비스 카탈로그](https://www.linkmap.biz/services)에서 각 서비스의 환경변수 이름을 확인하세요.
+> **TIP:** Linkmap이 시크릿을 자동 등록하므로, 워크플로에서 \`secrets.XXX\`로 바로 참조할 수 있습니다.
 
 ---
 
-> **TRY:** GitHub Secrets 자동화를 시작하고 싶다면 [Linkmap 무료 플랜](https://www.linkmap.biz/signup)으로 시작하세요. [GitHub 시작하기 가이드](/guides/github)에서 초기 설정 방법을 확인할 수 있습니다.
+> **TRY:** [Linkmap 무료 플랜](https://www.linkmap.biz/signup)으로 시작하세요. 환경변수 관리 기초는 [환경변수 완전 정복 가이드](/guides/env)를 참고하세요.
 
 ---
 
-*GitHub 설정은 [GitHub 시작하기 가이드](/guides/github), 환경변수 기본은 [환경변수 완전 정복 가이드](/guides/env), 배포 파이프라인은 [배포 가이드](/guides/deploy)를 참고하세요. 연동 서비스별 가이드: [Supabase](/guides/supabase), [Vercel](/guides/vercel), [Cloudflare](/guides/cloudflare), [OpenAI](/guides/openai).*
+*GitHub 설정은 [GitHub 시작하기 가이드](/guides/github), 배포 파이프라인은 [배포 가이드](/guides/deploy)를 참고하세요.*
 `,
   },
 ];
