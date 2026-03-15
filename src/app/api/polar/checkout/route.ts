@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, apiError, validationError } from '@/lib/api/errors';
 import { polarCheckoutRequestSchema } from '@/lib/validations/polar';
 import { logAudit } from '@/lib/audit';
+import { getRuntimeEnv } from '@/lib/env';
 
 export async function POST(request: NextRequest) {
   // Step 1: 인증
@@ -12,7 +13,7 @@ export async function POST(request: NextRequest) {
   if (!user) return unauthorizedError();
 
   // Step 2: 환경변수 확인
-  const accessToken = process.env.POLAR_ACCESS_TOKEN;
+  const accessToken = getRuntimeEnv('POLAR_ACCESS_TOKEN');
   if (!accessToken) return apiError('결제 시스템이 설정되지 않았습니다', 503);
 
   // Step 3: 요청 검증

@@ -2,6 +2,7 @@ import { Webhooks } from '@polar-sh/nextjs';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { logAudit } from '@/lib/audit';
 import { sendEmail } from '@/lib/email/sender';
+import { getRuntimeEnv } from '@/lib/env';
 
 /** metadata 또는 externalId에서 user_id 추출 */
 function resolveUserId(
@@ -14,7 +15,7 @@ function resolveUserId(
 }
 
 export const POST = Webhooks({
-  webhookSecret: process.env.POLAR_WEBHOOK_SECRET!,
+  webhookSecret: getRuntimeEnv('POLAR_WEBHOOK_SECRET') ?? '',
 
   onSubscriptionActive: async (payload) => {
     const sub = payload.data;
