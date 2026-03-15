@@ -31,9 +31,9 @@ export const metadata: Metadata = {
     "서비스 맵",
   ],
   openGraph: {
-    title: "Linkmap - 3분 만에 배포하세요",
+    title: "Linkmap - 서비스 연결을 한눈에, 안전하게 관리하는 플랫폼",
     description:
-      "초보자부터 개발자까지. Google 계정 하나면 GitHub 가입부터 홈페이지 배포까지 자동으로.",
+      "API 키 · 환경변수 · 서비스 연결 시각화 · 원클릭 배포까지. 복잡한 프로젝트 초기 설정을 체계적으로 관리하세요.",
     url: "https://www.linkmap.biz",
     siteName: "Linkmap",
     locale: "ko_KR",
@@ -41,9 +41,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Linkmap - 3분 만에 배포하세요",
+    title: "Linkmap - 서비스 연결을 한눈에, 안전하게 관리하는 플랫폼",
     description:
-      "초보자부터 개발자까지. Google 계정 하나면 GitHub 가입부터 홈페이지 배포까지 자동으로.",
+      "API 키 · 환경변수 · 서비스 연결 시각화 · 원클릭 배포까지. 복잡한 프로젝트 초기 설정을 체계적으로 관리하세요.",
   },
 };
 
