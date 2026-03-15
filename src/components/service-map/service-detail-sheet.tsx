@@ -24,6 +24,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { ExternalLink, BookOpen, GitFork, Activity, Loader2, X, KeyRound, Lightbulb, Copy, Check, UserPlus } from 'lucide-react';
+import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { queryKeys } from '@/lib/queries/keys';
@@ -148,7 +149,18 @@ export function ServiceDetailSheet({
   );
 
   const handleRunCheck = () => {
-    runHealthCheck.mutate({ project_service_id: service.id });
+    runHealthCheck.mutate(
+      { project_service_id: service.id },
+      {
+        onSuccess: (data) => {
+          const label = data.status === 'healthy' ? '정상' : data.status === 'degraded' ? '경고' : '오류';
+          toast.success(`${svc?.name}: 상태 ${label}`);
+        },
+        onError: (error) => {
+          toast.error(`${svc?.name}: ${error.message || '점검 실패'}`);
+        },
+      },
+    );
   };
 
   return (
