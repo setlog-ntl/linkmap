@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { updateProjectSchema } from '@/lib/validations/project';
-import { unauthorizedError, notFoundError, validationError, serverError } from '@/lib/api/errors';
+import { apiError, unauthorizedError, notFoundError, validationError, serverError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -101,16 +101,75 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
 
-  const { data: existing } = await supabase
+  // 1) 본인 소유 프로젝트 확인
+  const { data: ownProject } = await supabase
     .from('projects')
-    .select('id, name')
+    .select('id, name, user_id, team_id')
     .eq('id', id)
     .eq('user_id', user.id)
     .single();
 
-  if (!existing) return notFoundError('프로젝트');
+  // 2) 본인 소유 아닌 경우 → 팀 프로젝트 권한 확인
+  if (!ownProject) {
+    // RLS를 통해 조회 가능한 프로젝트인지 (팀 멤버로서 볼 수 있는 프로젝트)
+    const { data: teamProject } = await supabase
+      .from('projects')
+      .select('id, name, user_id, team_id')
+      .eq('id', id)
+      .single();
 
-  // 연결된 homepage_deploys 먼저 삭제 (원클릭배포 + 쇼케이스 동기화)
+    if (!teamProject) return notFoundError('프로젝트');
+
+    // 팀 프로젝트이면 팀 관리자/소유자 권한 확인
+    if (teamProject.team_id) {
+      const { data: membership } = await supabase
+        .from('team_members')
+        .select('role')
+        .eq('team_id', teamProject.team_id)
+        .eq('user_id', user.id)
+        .single();
+
+      const { data: team } = await supabase
+        .from('teams')
+        .select('owner_id')
+        .eq('id', teamProject.team_id)
+        .single();
+
+      const isTeamOwner = team?.owner_id === user.id;
+      const isTeamAdmin = membership?.role === 'admin';
+
+      if (!isTeamOwner && !isTeamAdmin) {
+        return apiError('이 프로젝트를 삭제할 권한이 없습니다', 403);
+      }
+
+      // 팀 관리자/소유자 → 삭제 진행 (프로젝트 소유자의 deploys도 정리)
+      await supabase
+        .from('homepage_deploys')
+        .delete()
+        .eq('project_id', id)
+        .eq('user_id', teamProject.user_id);
+
+      const { error } = await supabase
+        .from('projects')
+        .update({ deleted_at: new Date().toISOString(), is_showcase: false })
+        .eq('id', id);
+      if (error) return serverError(error.message);
+
+      await logAudit(user.id, {
+        action: 'project.delete',
+        resourceType: 'project',
+        resourceId: id,
+        details: { name: teamProject.name, team_id: teamProject.team_id },
+      });
+
+      return NextResponse.json({ success: true });
+    }
+
+    // 팀 프로젝트가 아닌데 본인 소유도 아님
+    return apiError('이 프로젝트를 삭제할 권한이 없습니다', 403);
+  }
+
+  // 3) 본인 소유 프로젝트 삭제
   await supabase
     .from('homepage_deploys')
     .delete()
@@ -128,7 +187,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     action: 'project.delete',
     resourceType: 'project',
     resourceId: id,
-    details: { name: existing.name },
+    details: { name: ownProject.name },
   });
 
   return NextResponse.json({ success: true });
