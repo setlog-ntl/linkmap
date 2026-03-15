@@ -10,9 +10,14 @@ vi.mock('@/lib/supabase/server', () => ({
 vi.mock('@/lib/audit', () => ({
   logAudit: vi.fn(),
 }));
+vi.mock('@/lib/api/team-auth', () => ({
+  requireTeamRole: vi.fn(),
+  isTeamAuthError: vi.fn((result: unknown) => result instanceof Response),
+}));
 
 import { GET } from '../[id]/members/route';
 import { createClient } from '@/lib/supabase/server';
+import { requireTeamRole } from '@/lib/api/team-auth';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -21,67 +26,35 @@ function createRequest(url: string) {
   return new NextRequest(new URL(url, 'http://localhost:3000'));
 }
 
-/**
- * Build a mock Supabase client for the teams/members tests.
- *
- * The members route calls `from()` up to 3 times on different tables:
- *  1. `team_members` (membership check)
- *  2. `teams` (owner fallback -- only when membership check returns null)
- *  3. `team_members` (fetch full member list)
- *
- * We track per-table call indices so each successive call can return a
- * different result.
- */
 function createMockSupabase(overrides: {
   user?: { id: string; email: string } | null;
-  fromResults?: Record<
-    string,
-    | { data: unknown; error: unknown }
-    | Array<{ data: unknown; error: unknown }>
-  >;
+  membersResult?: { data: unknown; error: unknown };
 } = {}) {
   const mockUser =
     overrides.user !== undefined
       ? overrides.user
       : { id: 'user-1', email: 'test@example.com' };
 
-  const callCounts: Record<string, number> = {};
+  const membersResult = overrides.membersResult ?? { data: [], error: null };
 
   return {
     auth: {
       getUser: vi.fn().mockResolvedValue({ data: { user: mockUser } }),
     },
-    from: vi.fn((table: string) => {
-      callCounts[table] = (callCounts[table] ?? 0) + 1;
-      const callIndex = callCounts[table] - 1;
-
-      const raw = overrides.fromResults?.[table];
-      let result: { data: unknown; error: unknown };
-      if (Array.isArray(raw)) {
-        result = raw[callIndex] ?? raw[raw.length - 1];
-      } else if (raw) {
-        result = raw;
-      } else {
-        result = { data: null, error: null };
-      }
-
+    from: vi.fn(() => {
       const chain: Record<string, unknown> = {};
-      const methods = ['select', 'eq', 'insert', 'delete', 'limit'];
+      const methods = ['select', 'eq', 'insert', 'delete', 'limit', 'order'];
       for (const m of methods) {
         chain[m] = vi.fn().mockReturnValue(chain);
       }
-      // Terminal methods resolve to the result
-      chain.single = vi.fn().mockResolvedValue(result);
-      chain.order = vi.fn().mockResolvedValue(result);
-      // Make the chain itself thenable so `await supabase.from(...).select().eq()` works
+      chain.single = vi.fn().mockResolvedValue(membersResult);
       chain.then = (resolve: (v: unknown) => void, reject: (e: unknown) => void) =>
-        Promise.resolve(result).then(resolve, reject);
+        Promise.resolve(membersResult).then(resolve, reject);
       return chain;
     }),
   };
 }
 
-/** Simulate Next.js 16 route params (async Promise) */
 function createParams(id: string): { params: Promise<{ id: string }> } {
   return { params: Promise.resolve({ id }) };
 }
@@ -107,41 +80,33 @@ describe('GET /api/teams/[id]/members', () => {
     expect(body.error).toContain('인증');
   });
 
-  it('returns 403 for non-team members who are also not team owner', async () => {
-    const mock = createMockSupabase({
-      fromResults: {
-        // 1st call: team_members membership check => not found
-        // 2nd call: teams owner check => not owner
-        // (we use arrays to separate calls)
-        team_members: [
-          { data: null, error: null }, // membership check
-        ],
-        teams: { data: null, error: null }, // owner check fails (no team or not owner)
-      },
-    });
+  it('returns 403 for non-team members', async () => {
+    const mock = createMockSupabase();
     vi.mocked(createClient).mockResolvedValue(mock as never);
+    // requireTeamRole returns a 403 Response
+    const errorResponse = new Response(JSON.stringify({ error: '팀 멤버가 아닙니다' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' },
+    });
+    vi.mocked(requireTeamRole).mockResolvedValue(errorResponse);
 
     const res = await GET(createRequest(`/api/teams/${teamId}/members`), createParams(teamId));
 
     expect(res.status).toBe(403);
-    const body = await res.json();
-    expect(body.error).toContain('접근 권한');
   });
 
-  it('returns 403 when team exists but user is not the owner', async () => {
-    const mock = createMockSupabase({
-      fromResults: {
-        team_members: [
-          { data: null, error: null }, // not a member
-        ],
-        teams: { data: { owner_id: 'someone-else' }, error: null }, // exists but different owner
-      },
-    });
+  it('returns 404 when team does not exist', async () => {
+    const mock = createMockSupabase();
     vi.mocked(createClient).mockResolvedValue(mock as never);
+    const errorResponse = new Response(JSON.stringify({ error: '팀을 찾을 수 없습니다' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' },
+    });
+    vi.mocked(requireTeamRole).mockResolvedValue(errorResponse);
 
     const res = await GET(createRequest(`/api/teams/${teamId}/members`), createParams(teamId));
 
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(404);
   });
 
   it('returns members with safe fields (no raw_user_meta_data exposed)', async () => {
@@ -176,16 +141,10 @@ describe('GET /api/teams/[id]/members', () => {
     ];
 
     const mock = createMockSupabase({
-      fromResults: {
-        // 1st call: membership check => found (user is a member)
-        // 2nd call: fetch member list (terminal is implicit via .eq returning result)
-        team_members: [
-          { data: { id: 'tm-self' }, error: null }, // membership check passes
-          { data: rawMembers, error: null },         // member list
-        ],
-      },
+      membersResult: { data: rawMembers, error: null },
     });
     vi.mocked(createClient).mockResolvedValue(mock as never);
+    vi.mocked(requireTeamRole).mockResolvedValue({ role: 'admin' });
 
     const res = await GET(createRequest(`/api/teams/${teamId}/members`), createParams(teamId));
 
@@ -193,7 +152,6 @@ describe('GET /api/teams/[id]/members', () => {
     const body = await res.json();
     expect(body.members).toHaveLength(2);
 
-    // Verify safe fields are present
     const member1 = body.members[0];
     expect(member1.user.email).toBe('admin@example.com');
     expect(member1.user.avatar_url).toBe('https://avatars.example.com/u1.png');
@@ -222,14 +180,10 @@ describe('GET /api/teams/[id]/members', () => {
     ];
 
     const mock = createMockSupabase({
-      fromResults: {
-        team_members: [
-          { data: { id: 'tm-self' }, error: null },
-          { data: rawMembers, error: null },
-        ],
-      },
+      membersResult: { data: rawMembers, error: null },
     });
     vi.mocked(createClient).mockResolvedValue(mock as never);
+    vi.mocked(requireTeamRole).mockResolvedValue({ role: 'viewer' });
 
     const res = await GET(createRequest(`/api/teams/${teamId}/members`), createParams(teamId));
     const body = await res.json();
@@ -254,14 +208,10 @@ describe('GET /api/teams/[id]/members', () => {
     ];
 
     const mock = createMockSupabase({
-      fromResults: {
-        team_members: [
-          { data: { id: 'tm-self' }, error: null },
-          { data: rawMembers, error: null },
-        ],
-      },
+      membersResult: { data: rawMembers, error: null },
     });
     vi.mocked(createClient).mockResolvedValue(mock as never);
+    vi.mocked(requireTeamRole).mockResolvedValue({ role: 'viewer' });
 
     const res = await GET(createRequest(`/api/teams/${teamId}/members`), createParams(teamId));
     const body = await res.json();
@@ -271,7 +221,7 @@ describe('GET /api/teams/[id]/members', () => {
     expect(member.user.full_name).toBeNull();
   });
 
-  it('allows team owner to view members even without explicit team_members row', async () => {
+  it('allows team owner to view members via requireTeamRole', async () => {
     const rawMembers = [
       {
         id: 'tm-1',
@@ -286,18 +236,11 @@ describe('GET /api/teams/[id]/members', () => {
     ];
 
     const mock = createMockSupabase({
-      fromResults: {
-        // 1st team_members call: membership check => NOT found
-        // teams call: owner check => owner matches user-1
-        // 2nd team_members call: fetch member list
-        team_members: [
-          { data: null, error: null },          // not a member
-          { data: rawMembers, error: null },    // member list
-        ],
-        teams: { data: { owner_id: 'user-1' }, error: null }, // current user is owner
-      },
+      membersResult: { data: rawMembers, error: null },
     });
     vi.mocked(createClient).mockResolvedValue(mock as never);
+    // Owner is treated as admin by requireTeamRole
+    vi.mocked(requireTeamRole).mockResolvedValue({ role: 'admin' });
 
     const res = await GET(createRequest(`/api/teams/${teamId}/members`), createParams(teamId));
 
