@@ -117,9 +117,24 @@ export function BlogHub() {
   const categoriesWithPosts = categories.filter(
     (cat) => posts.some((p) => p.category === cat)
   );
+  const [activeCategory, setActiveCategory] = useState<BlogCategory | 'all'>('all');
+
+  const filteredPosts = activeCategory === 'all'
+    ? posts
+    : posts.filter((p) => p.category === activeCategory);
+
+  // 카테고리별로 그룹핑
+  const groupedPosts = categoriesWithPosts
+    .filter((cat) => activeCategory === 'all' || cat === activeCategory)
+    .map((cat) => ({
+      key: cat,
+      ...BLOG_CATEGORIES[cat],
+      posts: filteredPosts.filter((p) => p.category === cat),
+    }))
+    .filter((g) => g.posts.length > 0);
 
   return (
-    <div className="py-12 md:py-16 space-y-12">
+    <div className="py-12 md:py-16 space-y-10">
       {/* Hero */}
       <div className="text-center space-y-3">
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight">블로그</h1>
@@ -128,29 +143,46 @@ export function BlogHub() {
         </p>
       </div>
 
-      {/* Category Filter Tags */}
+      {/* Category Filter Tabs */}
       {categoriesWithPosts.length > 1 && (
         <div className="flex flex-wrap justify-center gap-2">
+          <button
+            onClick={() => setActiveCategory('all')}
+            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+              activeCategory === 'all'
+                ? 'border-brand-blue bg-brand-blue/10 text-brand-blue font-medium'
+                : 'text-muted-foreground hover:border-brand-blue/30 hover:text-foreground'
+            }`}
+          >
+            전체
+            <span className="text-xs opacity-60">({posts.length})</span>
+          </button>
           {categoriesWithPosts.map((catKey) => {
             const cat = BLOG_CATEGORIES[catKey];
+            const CatIcon = cat.icon;
+            const count = posts.filter((p) => p.category === catKey).length;
+            const isActive = activeCategory === catKey;
             return (
-              <span
+              <button
                 key={catKey}
-                className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm text-muted-foreground"
+                onClick={() => setActiveCategory(catKey)}
+                className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                  isActive
+                    ? 'border-brand-blue bg-brand-blue/10 text-brand-blue font-medium'
+                    : 'text-muted-foreground hover:border-brand-blue/30 hover:text-foreground'
+                }`}
               >
-                <Tag className="h-3 w-3" />
+                <CatIcon className="h-3 w-3" />
                 {cat.label}
-                <span className="text-xs opacity-60">
-                  ({posts.filter((p) => p.category === catKey).length})
-                </span>
-              </span>
+                <span className="text-xs opacity-60">({count})</span>
+              </button>
             );
           })}
         </div>
       )}
 
-      {/* Posts Grid or Empty State */}
-      {posts.length === 0 ? (
+      {/* Posts by Category Sections */}
+      {filteredPosts.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-muted-foreground text-lg">아직 발행된 글이 없습니다.</p>
           <p className="text-sm text-muted-foreground mt-2">
@@ -158,10 +190,31 @@ export function BlogHub() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {posts.map((post) => (
-            <PostCard key={post.slug} post={post} />
-          ))}
+        <div className="space-y-10">
+          {groupedPosts.map((group) => {
+            const GroupIcon = group.icon;
+            return (
+              <section key={group.key}>
+                {/* Category Section Header */}
+                {activeCategory === 'all' && (
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-md bg-brand-blue/10">
+                      <GroupIcon className="h-3.5 w-3.5 text-brand-blue" />
+                    </div>
+                    <h2 className="text-lg font-semibold">{group.label}</h2>
+                    <span className="text-xs text-muted-foreground">
+                      {group.description}
+                    </span>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {group.posts.map((post) => (
+                    <PostCard key={post.slug} post={post} />
+                  ))}
+                </div>
+              </section>
+            );
+          })}
         </div>
       )}
 
