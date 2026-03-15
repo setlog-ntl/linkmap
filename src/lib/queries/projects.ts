@@ -12,9 +12,13 @@ export function useProjects() {
     queryKey: queryKeys.projects.all,
     staleTime: staleTime.project,
     queryFn: async (): Promise<ProjectWithServices[]> => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
       const { data, error } = await supabase
         .from('projects')
         .select(`*, project_services!project_services_project_id_fkey (*, service:services (*)), project_github_repos (id)`)
+        .eq('user_id', user.id)
         .is('deleted_at', null)
         .order('updated_at', { ascending: false });
 
@@ -29,10 +33,14 @@ export function useProject(id: string) {
     queryKey: queryKeys.projects.detail(id),
     staleTime: staleTime.project,
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('인증이 필요합니다');
+
       const { data, error } = await supabase
         .from('projects')
         .select('*')
         .eq('id', id)
+        .eq('user_id', user.id)
         .single();
 
       if (error) throw error;
