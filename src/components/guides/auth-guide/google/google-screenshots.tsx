@@ -22,13 +22,17 @@ export const googleSteps: StepData[] = [
         illustration: googleIllustrations[1],
         annotations: [
           { type: 'click', x: 15, y: 2, number: 1, label: '프로젝트명 클릭 → 선택/생성' },
+          { type: 'highlight', x: 14, y: 24, width: 26, height: 4 },
         ],
         masks: [
-          { x: 12, y: 1, width: 8, height: 3, label: '프로젝트명' },
-          { x: 14, y: 26, width: 17, height: 2, label: '프로젝트 번호' },
-          { x: 32, y: 26, width: 22, height: 2, label: '프로젝트 ID' },
+          // 상단 바 프로젝트명
+          { x: 12, y: 0, width: 9, height: 4, label: '프로젝트명' },
+          // 프로젝트 번호
+          { x: 17, y: 26, width: 12, height: 2.5, label: '번호' },
+          // 프로젝트 ID
+          { x: 35, y: 26, width: 17, height: 2.5, label: 'ID' },
         ],
-        caption: '상단 바에서 프로젝트명 클릭 → 프로젝트 선택·생성. 프로젝트 번호와 ID가 표시됩니다.',
+        caption: '상단 바 프로젝트명 클릭 → 프로젝트 선택·생성. "작업 중인 프로젝트" 아래에 번호와 ID가 표시됩니다.',
       },
     ],
   },
@@ -36,22 +40,22 @@ export const googleSteps: StepData[] = [
     step: 2,
     title: 'Google 인증 플랫폼 진입',
     where: 'Google Cloud Console > Google 인증 플랫폼 > 개요',
-    what: '좌측 "브랜딩" 메뉴에서 앱 이름, 지원 이메일을 설정하고, "데이터 액세스"에서 email, profile, openid 스코프를 추가합니다.',
+    what: '좌측 "브랜딩" 메뉴에서 앱 이름·지원 이메일 설정, "데이터 액세스"에서 email, profile, openid 스코프를 추가합니다.',
     why: '사용자가 로그인할 때 보게 되는 동의 화면의 내용을 정합니다.',
-    tip: '좌측 메뉴에서 개요/브랜딩/대상/클라이언트/데이터 액세스/인증 센터/설정 항목을 확인할 수 있습니다.',
+    tip: '좌측 메뉴: 개요/브랜딩/대상/클라이언트/데이터 액세스/인증 센터/설정',
     screenshots: [
       {
         src: `${IMG_BASE}/02-consent-menu.png`,
-        alt: 'Google 인증 플랫폼 — OAuth 개요 + 좌측 메뉴',
+        alt: 'Google 인증 플랫폼 — OAuth 개요 + 좌측 7개 메뉴',
         illustration: googleIllustrations[2],
         annotations: [
-          { type: 'click', x: 4, y: 14, number: 1, label: '브랜딩' },
-          { type: 'click', x: 5, y: 25, number: 2, label: '데이터 액세스' },
+          { type: 'click', x: 5, y: 14, number: 1, label: '브랜딩 (동의 화면)' },
+          { type: 'click', x: 6, y: 25, number: 2, label: '데이터 액세스 (스코프)' },
         ],
         masks: [
-          { x: 12, y: 1, width: 8, height: 3, label: '프로젝트명' },
+          { x: 12, y: 0, width: 9, height: 4, label: '프로젝트명' },
         ],
-        caption: '좌측 메뉴: ① "브랜딩"에서 앱 이름·지원 이메일, ② "데이터 액세스"에서 스코프 추가',
+        caption: '좌측 메뉴: ① "브랜딩" = 앱 이름·이메일 설정, ② "데이터 액세스" = 스코프 추가',
       },
     ],
   },
@@ -59,24 +63,23 @@ export const googleSteps: StepData[] = [
     step: 3,
     title: 'OAuth 클라이언트 만들기',
     where: 'Google 인증 플랫폼 > 클라이언트',
-    what: '좌측 메뉴 "클라이언트" → 상단 "+ 클라이언트 만들기" 클릭 → 웹 애플리케이션 선택',
+    what: '좌측 "클라이언트" → 상단 "+ 클라이언트 만들기" → 웹 애플리케이션 선택',
     why: 'Client ID와 Client Secret을 발급받기 위한 핵심 단계입니다.',
-    tip: '기존 클라이언트가 있다면 이름을 클릭하여 상세 페이지로 이동할 수 있습니다.',
+    tip: '기존 클라이언트 이름을 클릭하면 상세 페이지로 이동합니다.',
     screenshots: [
       {
         src: `${IMG_BASE}/03-credentials-menu.png`,
-        alt: '클라이언트 목록 페이지 — 클라이언트 만들기 버튼',
+        alt: '클라이언트 목록 — 만들기 버튼 + 기존 클라이언트 테이블',
         illustration: googleIllustrations[3],
         annotations: [
-          { type: 'click', x: 4, y: 24, number: 1, label: '클라이언트 메뉴' },
-          { type: 'click', x: 33, y: 11, number: 2, label: '+ 클라이언트 만들기' },
-          { type: 'highlight', x: 17, y: 25, width: 80, height: 4 },
+          { type: 'click', x: 5, y: 24, number: 1, label: '클라이언트 메뉴' },
+          { type: 'click', x: 34, y: 11, number: 2, label: '+ 클라이언트 만들기' },
         ],
         masks: [
-          { x: 12, y: 1, width: 9, height: 3, label: '프로젝트명' },
-          { x: 67, y: 26, width: 14, height: 3, label: 'Client ID' },
+          { x: 12, y: 0, width: 9, height: 4, label: '프로젝트명' },
+          { x: 66, y: 26, width: 16, height: 3.5, label: 'Client ID' },
         ],
-        caption: '좌측 "클라이언트" 메뉴 → "+ 클라이언트 만들기" 클릭. 기존 클라이언트는 테이블에 표시됩니다.',
+        caption: '① 좌측 "클라이언트" → ② "+ 클라이언트 만들기" 클릭',
       },
     ],
   },
@@ -84,28 +87,33 @@ export const googleSteps: StepData[] = [
     step: 4,
     title: '리디렉션 URI + Client ID/Secret 확인',
     where: '클라이언트 상세 페이지',
-    what: '왼쪽: "승인된 리디렉션 URI"에 Supabase 콜백 URL 추가. 오른쪽: Client ID와 보안 비밀번호 확인.',
-    why: 'Supabase에 등록할 Client ID와 Secret을 이 화면에서 확인하고, 콜백 URL도 여기서 등록합니다.',
-    tip: '리디렉션 URI는 https://<ref>.supabase.co/auth/v1/callback 형식입니다. Secret은 ****로 표시되며, 분실 시 "Add secret"으로 재생성합니다.',
+    what: '왼쪽 하단: "승인된 리디렉션 URI"에 Supabase 콜백 URL 추가. 오른쪽 상단: Client ID, 하단: 보안 비밀번호 확인.',
+    why: 'Supabase에 등록할 Client ID와 Secret, 콜백 URL을 모두 이 화면에서 관리합니다.',
+    tip: 'URI는 https://<ref>.supabase.co/auth/v1/callback. Secret은 ****로 표시되며 분실 시 "Add secret"으로 재생성.',
     screenshots: [
       {
         src: `${IMG_BASE}/03-redirect-uri.png`,
-        alt: '클라이언트 상세 — 리디렉션 URI(왼쪽) + Client ID/Secret(오른쪽)',
+        alt: '클라이언트 상세 — 왼쪽: 리디렉션 URI / 오른쪽: Client ID·Secret',
         illustration: googleIllustrations[4],
         annotations: [
-          { type: 'highlight', x: 18, y: 72, width: 35, height: 18 },
-          { type: 'highlight', x: 60, y: 16, width: 38, height: 18 },
-          { type: 'highlight', x: 60, y: 80, width: 38, height: 8 },
+          { type: 'highlight', x: 19, y: 63, width: 37, height: 30 },
+          { type: 'highlight', x: 60, y: 15, width: 39, height: 25 },
+          { type: 'highlight', x: 60, y: 55, width: 39, height: 40 },
         ],
         masks: [
-          { x: 20, y: 5, width: 55, height: 3, label: '브레드크럼 Client ID' },
-          { x: 63, y: 19, width: 35, height: 6, label: 'Client ID 전체' },
-          { x: 20, y: 73, width: 33, height: 3, label: 'Redirect URI 1' },
-          { x: 20, y: 78, width: 33, height: 3, label: 'Redirect URI 2' },
-          { x: 20, y: 83, width: 33, height: 3, label: 'Redirect URI 3' },
-          { x: 20, y: 88, width: 33, height: 3, label: 'Redirect URI 4' },
+          // 브레드크럼의 Client ID (상단)
+          { x: 19, y: 6, width: 55, height: 2.5, label: 'Client ID (브레드크럼)' },
+          // 오른쪽 Additional info의 Client ID 값
+          { x: 76, y: 23, width: 22, height: 6, label: 'Client ID' },
+          // 왼쪽 Redirect URI 4개
+          { x: 21, y: 74, width: 30, height: 3, label: 'URI ••••' },
+          { x: 21, y: 79, width: 30, height: 3, label: 'URI ••••' },
+          { x: 21, y: 85, width: 30, height: 3, label: 'URI ••••' },
+          { x: 21, y: 90, width: 30, height: 3, label: 'URI ••••' },
+          // Secret 값
+          { x: 77, y: 82, width: 12, height: 2.5, label: 'Secret' },
         ],
-        caption: '왼쪽: "승인된 리디렉션 URI"에 Supabase 콜백 URL. 오른쪽: Client ID + "클라이언트 보안 비밀번호" 확인',
+        caption: '왼쪽 노란 영역: "승인된 리디렉션 URI" 입력. 오른쪽 상단: Client ID 확인. 오른쪽 하단: 보안 비밀번호 확인.',
       },
     ],
   },
@@ -115,28 +123,29 @@ export const googleSteps: StepData[] = [
     where: 'Supabase Dashboard > Authentication > Sign In / Providers',
     what: 'Providers 목록에서 Google 클릭 → 토글 ON → Client ID, Secret 붙여넣기',
     why: 'Supabase가 구글 로그인을 대행할 수 있도록 연결합니다.',
-    tip: '좌측 Configuration > "Sign In / Providers" 메뉴 선택 후, 목록을 스크롤하여 Google 항목을 찾아 클릭하세요.',
+    tip: '좌측 Configuration > "Sign In / Providers" 선택 후 스크롤하여 Google을 찾으세요.',
     screenshots: [
       {
         src: `${SUPABASE_IMG}/providers-list.png`,
-        alt: 'Supabase Auth — Providers 목록',
+        alt: 'Supabase Auth — Sign In / Providers 메뉴 + 설정 영역',
         illustration: googleIllustrations[5],
         annotations: [
           { type: 'click', x: 12, y: 44, number: 1, label: 'Sign In / Providers' },
+          { type: 'highlight', x: 23, y: 80, width: 75, height: 12 },
         ],
-        caption: '좌측 "Sign In / Providers" 선택 → 스크롤하여 Google 항목 클릭',
+        caption: '① 좌측 "Sign In / Providers" → 아래 Auth Providers 목록 스크롤 → Google 클릭',
       },
       {
         src: `${SUPABASE_IMG}/google-settings.png`,
         alt: 'Google Provider 설정 다이얼로그',
         annotations: [
-          { type: 'input', x: 52, y: 33, width: 42, height: 6, label: 'Client IDs' },
-          { type: 'input', x: 52, y: 57, width: 42, height: 6, label: 'Client Secret' },
+          { type: 'highlight', x: 50, y: 12, width: 48, height: 90 },
         ],
         masks: [
-          { x: 52, y: 34, width: 42, height: 5, label: 'GCP Client ID' },
+          // Client IDs 입력값 (다이얼로그 내부)
+          { x: 51, y: 37, width: 46, height: 5, label: 'Client ID ••••' },
         ],
-        caption: 'Google 다이얼로그: Client IDs에 GCP Client ID, Client Secret에 GCP Secret → Save',
+        caption: 'Google 다이얼로그: Enable ON → "Client IDs" + "Client Secret" 입력 → Save',
       },
     ],
   },
@@ -146,22 +155,24 @@ export const googleSteps: StepData[] = [
     where: 'Supabase Dashboard > Authentication > URL Configuration',
     what: 'Site URL에 서비스 도메인 입력 + Redirect URLs에 /auth/callback 경로 추가',
     why: '로그인 성공 후 앱으로 안전하게 돌아오기 위한 주소를 등록합니다.',
-    tip: '좌측 "URL Configuration" 메뉴. 로컬 개발 시 http://localhost:3000/auth/callback도 추가하세요.',
+    tip: '좌측 "URL Configuration" 메뉴. 로컬 개발 시 localhost 콜백도 추가하세요.',
     screenshots: [
       {
         src: `${SUPABASE_IMG}/url-config.png`,
-        alt: 'URL Configuration — Site URL + Redirect URLs',
+        alt: 'URL Configuration — Site URL + Redirect URLs 전체',
         illustration: googleIllustrations[6],
         annotations: [
-          { type: 'click', x: 12, y: 59, number: 1, label: 'URL Configuration 메뉴' },
-          { type: 'highlight', x: 65, y: 32, width: 30, height: 4 },
-          { type: 'highlight', x: 24, y: 68, width: 55, height: 10 },
+          { type: 'click', x: 12, y: 59, number: 1, label: 'URL Configuration' },
         ],
         masks: [
-          { x: 28, y: 69, width: 45, height: 3, label: 'Redirect URL 1' },
-          { x: 28, y: 75, width: 35, height: 3, label: 'Redirect URL 2' },
+          // Site URL 값
+          { x: 65, y: 34, width: 25, height: 3.5, label: 'Site URL ••••' },
+          // Redirect URL 1
+          { x: 28, y: 69, width: 45, height: 3.5, label: 'Redirect URL ••••' },
+          // Redirect URL 2
+          { x: 28, y: 76, width: 35, height: 3.5, label: 'Redirect URL ••••' },
         ],
-        caption: 'Site URL(서비스 도메인) + Redirect URLs에 콜백 URL 추가. "Add URL" 버튼으로 추가합니다.',
+        caption: '① 좌측 "URL Configuration" → Site URL(서비스 도메인) 입력 + "Add URL"로 Redirect URL 추가',
       },
     ],
   },
