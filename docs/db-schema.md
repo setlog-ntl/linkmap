@@ -219,6 +219,7 @@
 | service_id | UUID FK | NO | → services(id) |
 | status | TEXT | NO | 'not_started' |
 | notes | TEXT | YES | NULL |
+| account_identifier | TEXT | YES | NULL | 사용 계정 아이디, M082 |
 | cost_tier_id | UUID FK | YES | NULL | → service_cost_tiers(id), M060 |
 | custom_cost_monthly | NUMERIC(10,2) | YES | NULL | 커스텀 월 비용, M060 |
 | custom_cost_yearly | NUMERIC(10,2) | YES | NULL | 커스텀 연 비용, M060 |

@@ -228,11 +228,14 @@ export function useUpdateProjectServiceAccount(projectId: string) {
       accountIdentifier: string | null;
     }) => {
       const supabase = createClient();
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('project_services')
         .update({ account_identifier: accountIdentifier })
-        .eq('id', projectServiceId);
+        .eq('id', projectServiceId)
+        .select('id')
+        .single();
       if (error) throw error;
+      if (!data) throw new Error('업데이트 권한이 없거나 대상을 찾을 수 없습니다');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.services.byProject(projectId) });
