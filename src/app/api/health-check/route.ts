@@ -18,21 +18,25 @@ export async function POST(request: NextRequest) {
 
   const { project_service_id, environment } = parsed.data;
 
-  // Verify ownership: project_service → project → user
+  // Verify ownership: project_service → project → user (JOIN 분리로 PGRST201 방지)
   const { data: projectService, error: psError } = await supabase
     .from('project_services')
-    .select('*, service:services(*), project:projects!inner(user_id, name)')
+    .select('*, service:services(*)')
     .eq('id', project_service_id)
     .single();
 
   if (psError || !projectService) {
-    return apiError(
-      `서비스를 찾을 수 없습니다 (${psError?.code || 'NOT_FOUND'})`,
-      404,
-    );
+    return notFoundError('서비스');
   }
 
-  if (projectService.project.user_id !== user.id) {
+  // 소유권 확인: project_id로 프로젝트 조회
+  const { data: project } = await supabase
+    .from('projects')
+    .select('user_id, name')
+    .eq('id', projectService.project_id)
+    .single();
+
+  if (!project || project.user_id !== user.id) {
     return notFoundError('서비스');
   }
 
@@ -125,7 +129,7 @@ export async function POST(request: NextRequest) {
         to: profile.email,
         serviceName: service.name ?? service.slug,
         serviceSlug: service.slug,
-        projectName: (projectService.project as { name?: string }).name ?? project_service_id,
+        projectName: project.name ?? project_service_id,
         environment,
         status: result.status,
         message: result.message ?? '서비스 상태 이상이 감지되었습니다.',
@@ -172,14 +176,24 @@ export async function GET(request: NextRequest) {
     return apiError('project_service_id가 필요합니다', 400);
   }
 
-  // Verify ownership
+  // Verify ownership (JOIN 분리로 PGRST201 방지)
   const { data: projectService } = await supabase
     .from('project_services')
-    .select('*, project:projects!inner(user_id)')
+    .select('*')
     .eq('id', projectServiceId)
     .single();
 
-  if (!projectService || projectService.project.user_id !== user.id) {
+  if (!projectService) {
+    return notFoundError('서비스');
+  }
+
+  const { data: ownerProject } = await supabase
+    .from('projects')
+    .select('user_id')
+    .eq('id', projectService.project_id)
+    .single();
+
+  if (!ownerProject || ownerProject.user_id !== user.id) {
     return notFoundError('서비스');
   }
 
