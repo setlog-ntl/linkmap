@@ -117,98 +117,316 @@ const S = {
 export const serviceGuides: ServiceGuideSeed[] = [
   {
     service_id: S.supabase,
-    quick_start: 'Supabase 프로젝트를 생성하고 Next.js 앱과 연결하여 인증, 데이터베이스, 스토리지를 즉시 사용할 수 있습니다.',
-    quick_start_en: 'Create a Supabase project and connect it to your Next.js app to instantly use authentication, database, and storage.',
+    quick_start: 'Supabase 프로젝트를 생성하고 Next.js 앱에 @supabase/ssr 패키지로 연결하세요. Browser·Server·Admin 세 가지 클라이언트를 상황에 맞게 사용하면 인증, 데이터베이스, 스토리지를 즉시 활용할 수 있습니다.',
+    quick_start_en: 'Create a Supabase project and connect it to your Next.js app using @supabase/ssr. Use Browser, Server, and Admin clients appropriately to leverage auth, database, and storage.',
     setup_steps: [
       {
         step: 1,
-        title: 'Install Supabase client',
-        title_ko: 'Supabase 클라이언트 설치',
-        description: 'Install the Supabase JavaScript client library',
-        description_ko: 'Supabase JS 클라이언트 라이브러리 설치',
-        code_snippet: 'npm install @supabase/supabase-js'
+        title: 'Install Supabase packages',
+        title_ko: 'Supabase 패키지 설치',
+        description: 'Install both supabase-js and the SSR helper for Next.js App Router support',
+        description_ko: 'Next.js App Router SSR 지원을 위해 supabase-js와 SSR 헬퍼를 함께 설치',
+        code_snippet: 'npm install @supabase/supabase-js @supabase/ssr'
       },
       {
         step: 2,
-        title: 'Initialize client',
-        title_ko: '클라이언트 초기화',
-        description: 'Create a Supabase client with your project URL and anon key',
-        description_ko: '프로젝트 URL과 anon key로 클라이언트 생성',
-        code_snippet: `import { createClient } from '@supabase/supabase-js'
-const supabase = createClient(URL, ANON_KEY)`
+        title: 'Set environment variables',
+        title_ko: '환경변수 설정',
+        description: 'Add your Supabase project URL and API keys to .env.local',
+        description_ko: 'Supabase 프로젝트 URL과 API 키를 .env.local에 추가',
+        code_snippet: `NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIs...`
       },
       {
         step: 3,
-        title: 'Use auth & database',
-        title_ko: '인증 및 DB 사용',
-        description: 'Start using authentication and database queries',
-        description_ko: '인증 및 데이터베이스 쿼리 시작',
-        code_snippet: `const { data } = await supabase.from('table').select()`
+        title: 'Create browser client (client components)',
+        title_ko: '브라우저 클라이언트 생성 (클라이언트 컴포넌트용)',
+        description: 'Use createBrowserClient from @supabase/ssr in client components',
+        description_ko: '클라이언트 컴포넌트에서는 @supabase/ssr의 createBrowserClient 사용',
+        code_snippet: `// src/lib/supabase/client.ts
+import { createBrowserClient } from '@supabase/ssr'
+
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}`
+      },
+      {
+        step: 4,
+        title: 'Create server client (server components & API routes)',
+        title_ko: '서버 클라이언트 생성 (서버 컴포넌트·API 라우트용)',
+        description: 'Use createServerClient from @supabase/ssr in server components and API routes — reads session from cookies',
+        description_ko: '서버 컴포넌트·API 라우트에서는 createServerClient 사용 — 쿠키에서 세션 읽기',
+        code_snippet: `// src/lib/supabase/server.ts
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+export async function createClient() {
+  const cookieStore = await cookies()
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll() },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch { /* Server Component에서 set은 무시 가능 */ }
+        },
+      },
+    }
+  )
+}`
+      },
+      {
+        step: 5,
+        title: 'Enable RLS and create policies',
+        title_ko: 'RLS 활성화 및 정책 생성',
+        description: 'Always enable Row Level Security on every table and define access policies',
+        description_ko: '모든 테이블에 RLS를 활성화하고 접근 정책을 반드시 정의',
+        code_snippet: `-- 테이블 RLS 활성화
+ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
+
+-- 본인 데이터만 조회 허용
+CREATE POLICY "본인 데이터 조회" ON posts
+  FOR SELECT USING (auth.uid() = user_id);
+
+-- 본인 데이터만 삽입 허용
+CREATE POLICY "본인 데이터 삽입" ON posts
+  FOR INSERT WITH CHECK (auth.uid() = user_id);`
       }
     ],
     code_examples: {
-      typescript: `import { createClient } from '@supabase/supabase-js'
+      typescript: `// === 클라이언트 컴포넌트 ===
+'use client'
+import { createBrowserClient } from '@supabase/ssr'
 
-const supabase = createClient(
+const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-// Auth
+// OAuth 로그인
 await supabase.auth.signInWithOAuth({ provider: 'google' })
 
-// Database
-const { data } = await supabase.from('users').select('*')`
+// 현재 사용자 조회 (클라이언트)
+const { data: { user } } = await supabase.auth.getUser()
+
+// 데이터 조회
+const { data, error } = await supabase
+  .from('posts')
+  .select('*')
+  .eq('published', true)
+
+// === 서버 컴포넌트 / API 라우트 ===
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+const cookieStore = await cookies()
+const supabase = createServerClient(URL, ANON_KEY, {
+  cookies: {
+    getAll() { return cookieStore.getAll() },
+    setAll(c) { c.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) },
+  },
+})
+
+// 서버에서 인증된 사용자 확인 (getUser() 필수 — getSession() 신뢰 불가)
+const { data: { user } } = await supabase.auth.getUser()
+if (!user) throw new Error('Unauthorized')`,
+      rls_policy: `-- 모든 테이블에 RLS 필수
+ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
+
+-- 본인 행만 조회
+CREATE POLICY "select_own" ON posts FOR SELECT USING (auth.uid() = user_id);
+
+-- 본인 행만 수정
+CREATE POLICY "update_own" ON posts FOR UPDATE USING (auth.uid() = user_id);
+
+-- 공개 읽기 (서비스 카탈로그 등)
+CREATE POLICY "public_read" ON services FOR SELECT USING (true);`,
     },
     common_pitfalls: [
       {
         title: 'RLS not enabled',
         title_ko: 'RLS 미설정',
-        problem: 'Tables are accessible without authentication',
-        solution: 'Enable Row Level Security and create policies',
-        code: `ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users view own" ON users FOR SELECT USING (auth.uid() = id);`
+        problem: 'Tables are publicly accessible — any authenticated user can read/write all rows',
+        solution: 'Enable RLS on every table immediately after creation and add restrictive policies. Default should be deny-all.',
+        code: `-- 생성 즉시 RLS 활성화
+ALTER TABLE my_table ENABLE ROW LEVEL SECURITY;
+
+-- 정책 없으면 아무도 접근 불가 (deny-all이 기본값)
+-- 필요한 접근만 명시적으로 허용
+CREATE POLICY "본인 데이터만" ON my_table
+  FOR ALL USING (auth.uid() = user_id);`
       },
       {
-        title: 'Server/Client confusion',
-        title_ko: '서버/클라이언트 혼용',
-        problem: 'Using wrong client in server components',
-        solution: 'Use createServerClient for server, createBrowserClient for client'
+        title: 'service_role key exposed to client',
+        title_ko: 'service_role 키 클라이언트 노출',
+        problem: 'SUPABASE_SERVICE_ROLE_KEY has NEXT_PUBLIC_ prefix or is used in client components — bypasses all RLS',
+        solution: 'service_role key must never have NEXT_PUBLIC_ prefix. Use it only in server-side code (API routes, Edge Functions).',
+        code: `// 절대 금지 — 클라이언트 번들에 노출됨
+const NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY = '...' // 위험!
+
+// 올바른 방법 — 서버 전용
+// .env.local: SUPABASE_SERVICE_ROLE_KEY=...
+// API route에서만 사용
+import { createClient } from '@supabase/supabase-js'
+const admin = createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY!)`
+      },
+      {
+        title: 'getSession() instead of getUser() on server',
+        title_ko: '서버에서 getSession() 사용',
+        problem: 'getSession() on the server trusts the client-side JWT without server verification — security risk',
+        solution: 'Always use getUser() on the server. It validates the JWT with the Supabase Auth server.',
+        code: `// 위험 — JWT를 서버에서 검증하지 않음
+const { data: { session } } = await supabase.auth.getSession()
+
+// 올바른 방법 — 서버에서 JWT 검증 수행
+const { data: { user } } = await supabase.auth.getUser()
+if (!user) return new Response('Unauthorized', { status: 401 })`
+      },
+      {
+        title: 'Missing middleware for session refresh',
+        title_ko: '미들웨어 세션 갱신 누락',
+        problem: 'Without middleware, the session token is not refreshed and users get logged out unexpectedly',
+        solution: 'Add updateSession() call in middleware.ts to keep sessions alive across requests',
+        code: `// middleware.ts
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
+
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({ request })
+  const supabase = createServerClient(url, anonKey, {
+    cookies: {
+      getAll() { return request.cookies.getAll() },
+      setAll(c) {
+        response = NextResponse.next({ request })
+        c.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options ?? {})
+        )
+      },
+    },
+  })
+  // 세션 갱신 — 반드시 호출
+  await supabase.auth.getUser()
+  return response
+}
+
+export const config = {
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+}`
       }
     ],
     integration_tips: [
       {
         with_service_slug: 'vercel',
-        tip: 'Use Vercel integration to auto-sync environment variables',
-        tip_ko: 'Vercel 통합으로 환경변수 자동 동기화',
-      }
+        tip: 'Use the official Vercel-Supabase integration (marketplace.vercel.com) to auto-sync NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY across all preview and production environments.',
+        tip_ko: 'Vercel 마켓플레이스의 공식 Vercel-Supabase 통합을 사용하면 NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY가 Preview·Production 환경 모두에 자동 동기화됩니다.',
+      },
+      {
+        with_service_slug: 'stripe',
+        tip: 'Use Supabase Edge Functions to handle Stripe webhooks. Store the webhook secret in Supabase Vault or as an Edge Function secret. Update subscription status in the database via service_role client.',
+        tip_ko: 'Stripe 웹훅을 Supabase Edge Functions로 처리하세요. 웹훅 시크릿은 Supabase Vault 또는 Edge Function 시크릿으로 관리하고, service_role 클라이언트로 DB 구독 상태를 업데이트합니다.',
+        code: `// supabase/functions/stripe-webhook/index.ts
+import Stripe from 'npm:stripe'
+import { createClient } from 'jsr:@supabase/supabase-js@2'
+
+Deno.serve(async (req) => {
+  const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!)
+  const signature = req.headers.get('stripe-signature')!
+  const body = await req.text()
+
+  const event = stripe.webhooks.constructEvent(
+    body, signature, Deno.env.get('STRIPE_WEBHOOK_SECRET')!
+  )
+
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  )
+
+  if (event.type === 'customer.subscription.updated') {
+    const sub = event.data.object
+    await supabase.from('subscriptions')
+      .upsert({ stripe_subscription_id: sub.id, status: sub.status })
+  }
+
+  return Response.json({ received: true })
+})`
+      },
+      {
+        with_service_slug: 'resend',
+        tip: 'Use Supabase Edge Functions to send transactional emails via Resend. Trigger on database webhooks (pg_net extension) when a new user signs up or a specific event occurs.',
+        tip_ko: 'Resend를 사용한 트랜잭션 이메일을 Supabase Edge Functions에서 발송하세요. pg_net 확장으로 DB 이벤트 발생 시 자동으로 Edge Function을 트리거할 수 있습니다.',
+        code: `// supabase/functions/send-welcome/index.ts
+import { Resend } from 'npm:resend'
+
+Deno.serve(async (req) => {
+  const { record } = await req.json() // DB webhook payload
+  const resend = new Resend(Deno.env.get('RESEND_API_KEY')!)
+
+  await resend.emails.send({
+    from: 'noreply@example.com',
+    to: record.email,
+    subject: '가입을 환영합니다',
+    html: '<p>안녕하세요!</p>',
+  })
+
+  return Response.json({ ok: true })
+})`
+      },
+      {
+        with_service_slug: 'cloudflare',
+        tip: 'When deploying Next.js on Cloudflare Workers with @opennextjs/cloudflare, use @supabase/supabase-js directly (not @supabase/ssr). The Workers runtime has no Node.js crypto — pass fetch explicitly if needed.',
+        tip_ko: '@opennextjs/cloudflare로 Cloudflare Workers에 배포할 때는 @supabase/ssr 대신 @supabase/supabase-js를 직접 사용합니다. Workers 런타임에는 Node.js crypto가 없으므로 필요 시 fetch를 명시적으로 전달합니다.',
+        code: `// Cloudflare Workers 환경에서 Supabase 클라이언트 초기화
+import { createClient } from '@supabase/supabase-js'
+
+// wrangler.toml 또는 .dev.vars 에 환경변수 설정
+const supabase = createClient(
+  env.NEXT_PUBLIC_SUPABASE_URL,
+  env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  { global: { fetch: fetch.bind(globalThis) } }
+)`
+      },
     ],
     pros: [
-      { text: 'All-in-one backend (Auth, DB, Storage, Realtime)', text_ko: '올인원 백엔드 (인증, DB, 스토리지, 실시간)' },
-      { text: 'PostgreSQL with automatic REST APIs', text_ko: 'PostgreSQL + 자동 REST API 생성' },
-      { text: 'Generous free tier', text_ko: '넉넉한 무료 플랜' }
+      { text: 'All-in-one backend: Auth, PostgreSQL, Storage, Realtime, Edge Functions', text_ko: '올인원 백엔드: 인증·PostgreSQL·스토리지·실시간·엣지 함수 통합 제공' },
+      { text: 'Automatic REST & GraphQL APIs from your database schema', text_ko: 'DB 스키마에서 REST·GraphQL API 자동 생성' },
+      { text: 'Row Level Security for granular access control without custom middleware', text_ko: '별도 미들웨어 없이 행 단위 접근 제어(RLS) 가능' },
+      { text: 'Generous free tier: 2 projects, 500MB DB, 50K MAU, 1GB Storage', text_ko: '넉넉한 무료 플랜: 프로젝트 2개, DB 500MB, MAU 5만, 스토리지 1GB' },
+      { text: 'pgvector support for AI/embedding workloads', text_ko: 'AI·임베딩 워크로드를 위한 pgvector 지원' }
     ],
     cons: [
-      { text: 'Learning curve for RLS policies', text_ko: 'RLS 정책 학습 곡선' },
-      { text: 'Cold starts on free tier', text_ko: '무료 플랜 콜드 스타트' }
+      { text: 'RLS policy syntax has a steep learning curve for newcomers', text_ko: 'RLS 정책 문법이 초보자에게 낯설고 학습 곡선이 있음' },
+      { text: 'Free tier projects pause after 1 week of inactivity (cold start ~2s)', text_ko: '무료 플랜은 1주일 비활성 시 일시 중지 — 재시작 콜드 스타트 약 2초' },
+      { text: 'Limited to PostgreSQL — NoSQL or graph workloads need separate solutions', text_ko: 'PostgreSQL 전용 — NoSQL·그래프 워크로드는 별도 솔루션 필요' },
+      { text: 'Edge Functions use Deno, not Node.js — some npm packages incompatible', text_ko: 'Edge Functions는 Deno 기반 — 일부 npm 패키지 호환 불가' }
     ],
     api_key_url: 'https://supabase.com/dashboard/project/_/settings/api',
-    api_key_url_label: 'Supabase Dashboard',
+    api_key_url_label: 'Supabase Project API Settings',
     signup: {
       url: 'https://supabase.com',
       steps: [
         'supabase.com 접속 후 [Start your project] 클릭',
         'GitHub 계정으로 간편 가입 (권장) 또는 이메일 가입',
-        'New project 버튼 → 프로젝트 이름·DB 비밀번호·리전 설정',
-        '프로젝트 생성 완료 후 Project Settings → API에서 키 복사',
+        'New project 버튼 → 프로젝트 이름·DB 비밀번호·리전 선택 (한국: ap-northeast-2 권장)',
+        '프로젝트 생성 완료(~2분) 후 Project Settings → API에서 URL·키 복사',
+        '.env.local에 NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY 저장',
       ],
-      free_tier: '무료 플랜: 프로젝트 2개, DB 500MB, 인증 50,000 MAU, 스토리지 1GB',
+      free_tier: '무료 플랜: 프로젝트 2개, DB 500MB, 인증 50,000 MAU, 스토리지 1GB, Edge Functions 50만 호출/월',
     },
     features: [
       {
         id: 'database',
         name: '데이터베이스 (PostgreSQL)',
-        description: '완전 관리형 PostgreSQL입니다. SQL 쿼리는 물론 JavaScript SDK로도 데이터를 읽고 쓸 수 있습니다. RLS(Row Level Security)로 행 단위 접근 제어가 가능합니다.',
+        description: '완전 관리형 PostgreSQL 15+입니다. JavaScript SDK로 타입 안전 쿼리를 작성하거나 SQL Editor에서 직접 쿼리를 실행할 수 있습니다. RLS(Row Level Security)로 행 단위 접근 제어가 가능하며, pgvector 확장으로 벡터 검색도 지원합니다.',
         tag: 'free',
         api_key: {
           env_var: 'NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY',
@@ -216,52 +434,75 @@ CREATE POLICY "Users view own" ON users FOR SELECT USING (auth.uid() = id);`
           url_label: 'Supabase Project API Settings',
           issue_steps: [
             { step: 1, title: '대시보드 접속', description: 'supabase.com/dashboard에서 해당 프로젝트를 선택합니다.' },
-            { step: 2, title: 'Project Settings → API 클릭', description: '좌측 하단 Settings 아이콘 → API 메뉴를 엽니다.' },
+            { step: 2, title: 'Project Settings → API 클릭', description: '좌측 하단 Settings 아이콘(톱니바퀴) → API 메뉴를 엽니다.' },
             { step: 3, title: 'Project URL 복사', description: 'Project URL 항목의 값을 복사합니다. (https://xxxx.supabase.co 형태)' },
-            { step: 4, title: 'anon public 키 복사', description: 'Project API Keys에서 anon / public 키를 복사합니다. 이 키는 공개해도 안전합니다(RLS 적용 시).' },
-            { step: 5, title: '.env에 저장', description: 'NEXT_PUBLIC_SUPABASE_URL=... 와 NEXT_PUBLIC_SUPABASE_ANON_KEY=... 를 .env.local에 붙여넣습니다.' },
+            { step: 4, title: 'anon public 키 복사', description: 'Project API Keys에서 anon / public 키를 복사합니다. RLS가 설정된 경우 이 키는 클라이언트에 노출해도 안전합니다.' },
+            { step: 5, title: '.env.local에 저장', description: 'NEXT_PUBLIC_SUPABASE_URL과 NEXT_PUBLIC_SUPABASE_ANON_KEY를 .env.local에 붙여넣습니다.' },
           ],
         },
-        code_example: `import { createClient } from '@supabase/supabase-js'
+        code_example: `import { createBrowserClient } from '@supabase/ssr'
 
-const supabase = createClient(
+const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-// 데이터 조회
+// 데이터 조회 (RLS 정책 자동 적용)
 const { data, error } = await supabase
   .from('posts')
-  .select('*')
-  .eq('published', true)`,
+  .select('id, title, created_at')
+  .eq('published', true)
+  .order('created_at', { ascending: false })
+
+// 데이터 삽입
+const { data: newPost, error: insertError } = await supabase
+  .from('posts')
+  .insert({ title: '새 글', user_id: user.id })
+  .select()
+  .single()`,
       },
       {
         id: 'auth',
         name: '인증 (Auth)',
-        description: '이메일/비밀번호, Google·GitHub·Kakao 등 소셜 로그인, 매직 링크를 지원합니다. 데이터베이스와 동일한 API 키를 사용합니다.',
+        description: '이메일/비밀번호, 매직 링크, Google·GitHub·Kakao·Apple 등 소셜 OAuth, 전화번호 OTP를 지원합니다. Next.js App Router에서는 @supabase/ssr 패키지로 서버·클라이언트 세션을 쿠키 기반으로 안전하게 관리합니다.',
         tag: 'free',
         api_key: {
           env_var: 'NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY',
           url: 'https://supabase.com/dashboard/project/_/settings/api',
           url_label: 'Supabase Project API Settings',
           issue_steps: [
-            { step: 1, title: '데이터베이스와 동일한 키 사용', description: '인증도 NEXT_PUBLIC_SUPABASE_URL과 NEXT_PUBLIC_SUPABASE_ANON_KEY를 그대로 사용합니다. 별도 발급이 필요하지 않습니다.' },
-            { step: 2, title: '소셜 로그인 설정 (선택)', description: 'Authentication → Providers에서 사용할 OAuth 제공자(Google, GitHub 등)를 활성화하고 Client ID/Secret을 입력합니다.' },
+            { step: 1, title: '데이터베이스와 동일한 키 사용', description: '인증도 NEXT_PUBLIC_SUPABASE_URL과 NEXT_PUBLIC_SUPABASE_ANON_KEY를 그대로 사용합니다. 별도 발급이 필요 없습니다.' },
+            { step: 2, title: 'Site URL 설정', description: 'Authentication → URL Configuration에서 Site URL(예: http://localhost:3000)을 설정합니다. OAuth 콜백이 이 URL로 리다이렉트됩니다.' },
+            { step: 3, title: 'Redirect URLs 추가', description: 'http://localhost:3000/** 와 프로덕션 도메인/**을 Redirect URLs에 추가합니다. 이 설정 누락 시 OAuth 콜백에서 404가 발생합니다.' },
+            { step: 4, title: '소셜 로그인 설정 (선택)', description: 'Authentication → Providers에서 사용할 OAuth 제공자(Google, GitHub 등)를 활성화하고 Client ID/Secret을 입력합니다.' },
           ],
         },
         code_example: `// 이메일 회원가입
-await supabase.auth.signUp({ email, password })
+const { data, error } = await supabase.auth.signUp({
+  email: 'user@example.com',
+  password: 'password',
+})
 
-// Google 로그인
-await supabase.auth.signInWithOAuth({ provider: 'google' })
+// 이메일 로그인
+await supabase.auth.signInWithPassword({ email, password })
 
-// 현재 사용자 조회
-const { data: { user } } = await supabase.auth.getUser()`,
+// Google OAuth 로그인
+await supabase.auth.signInWithOAuth({
+  provider: 'google',
+  options: { redirectTo: \`\${location.origin}/auth/callback\` },
+})
+
+// 서버 컴포넌트에서 사용자 확인 (getUser() 필수)
+const { data: { user } } = await supabase.auth.getUser()
+if (!user) redirect('/login')
+
+// 로그아웃
+await supabase.auth.signOut()`,
       },
       {
         id: 'storage',
         name: '스토리지 (Storage)',
-        description: '이미지·파일을 버킷 단위로 관리합니다. RLS 정책으로 파일 접근 권한을 제어하고 CDN을 통해 빠르게 제공합니다.',
+        description: '이미지·파일을 버킷 단위로 관리합니다. S3 호환 API를 제공하며, RLS 정책으로 파일 접근 권한을 세밀하게 제어합니다. 내장 CDN으로 전 세계에서 빠르게 파일을 제공하고, 이미지 변환(리사이징·포맷 변환)도 지원합니다.',
         tag: 'free',
         api_key: {
           env_var: 'NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY',
@@ -269,24 +510,39 @@ const { data: { user } } = await supabase.auth.getUser()`,
           url_label: 'Supabase Storage Buckets',
           issue_steps: [
             { step: 1, title: '데이터베이스와 동일한 키 사용', description: '스토리지도 동일한 클라이언트 키를 사용합니다.' },
-            { step: 2, title: '버킷 생성', description: '대시보드 → Storage → New bucket에서 버킷 이름과 공개/비공개 여부를 설정합니다.' },
-            { step: 3, title: 'RLS 정책 설정', description: '비공개 버킷은 Policies 탭에서 업로드·다운로드 정책을 추가해야 사용자가 접근할 수 있습니다.' },
+            { step: 2, title: '버킷 생성', description: '대시보드 → Storage → New bucket에서 버킷 이름과 공개(Public)/비공개(Private) 여부를 설정합니다.' },
+            { step: 3, title: '비공개 버킷 RLS 정책 설정', description: 'Storage → Policies 탭에서 버킷별 업로드·다운로드 정책을 추가합니다. 정책 없으면 아무도 파일에 접근할 수 없습니다.' },
           ],
         },
         code_example: `// 파일 업로드
 const { data, error } = await supabase.storage
   .from('avatars')
-  .upload(\`\${userId}/avatar.png\`, file)
+  .upload(\`\${userId}/avatar.png\`, file, {
+    cacheControl: '3600',
+    upsert: true,  // 덮어쓰기 허용
+  })
 
-// 공개 URL 조회
+// 공개 URL 조회 (Public 버킷)
 const { data: { publicUrl } } = supabase.storage
   .from('avatars')
-  .getPublicUrl(\`\${userId}/avatar.png\`)`,
+  .getPublicUrl(\`\${userId}/avatar.png\`)
+
+// 이미지 변환 (리사이징)
+const { data: { publicUrl: resizedUrl } } = supabase.storage
+  .from('avatars')
+  .getPublicUrl(\`\${userId}/avatar.png\`, {
+    transform: { width: 200, height: 200, resize: 'cover' },
+  })
+
+// 서명된 URL (비공개 버킷 — 1시간 유효)
+const { data: { signedUrl } } = await supabase.storage
+  .from('private-docs')
+  .createSignedUrl(\`\${userId}/doc.pdf\`, 3600)`,
       },
       {
         id: 'edge-functions',
         name: 'Edge Functions',
-        description: 'Deno 기반 서버리스 함수입니다. 서버 전용 로직(결제 처리, 외부 API 호출 등)을 안전하게 실행합니다. 서버 측에서는 service_role 키를 사용합니다.',
+        description: 'Deno 기반 서버리스 함수입니다. 서버 전용 로직(결제 웹훅, 외부 API 연동, 이메일 발송 등)을 안전하게 실행합니다. DB 트리거와 연동하거나 HTTP 엔드포인트로 직접 호출할 수 있습니다. service_role 키를 사용해 RLS를 우회한 관리자 작업도 가능합니다.',
         tag: 'free',
         api_key: {
           env_var: 'SUPABASE_SERVICE_ROLE_KEY',
@@ -295,25 +551,38 @@ const { data: { publicUrl } } = supabase.storage
           issue_steps: [
             { step: 1, title: 'API Settings 접속', description: 'Project Settings → API를 엽니다.' },
             { step: 2, title: 'service_role 키 복사', description: 'Project API Keys에서 service_role 키를 복사합니다. 이 키는 RLS를 우회하므로 절대 클라이언트에 노출하지 마세요.' },
-            { step: 3, title: '.env에 저장', description: 'SUPABASE_SERVICE_ROLE_KEY=... 를 .env.local에 붙여넣습니다. NEXT_PUBLIC_ 접두사를 붙이면 절대 안 됩니다.' },
+            { step: 3, title: 'Edge Function 시크릿 설정', description: '대시보드 → Edge Functions → 해당 함수 → Secrets에서 환경변수를 설정합니다. 또는 supabase secrets set 명령을 사용합니다.' },
           ],
         },
-        code_example: `// supabase/functions/hello/index.ts
+        code_example: `// supabase/functions/webhook-handler/index.ts
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 
 Deno.serve(async (req) => {
+  // Supabase 자동 주입 환경변수 사용
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!  // RLS 우회
   )
-  const { data } = await supabase.from('posts').select()
-  return Response.json(data)
-})`,
+
+  const payload = await req.json()
+
+  // RLS 없이 관리자 권한으로 DB 접근
+  const { error } = await supabase
+    .from('orders')
+    .update({ status: 'paid' })
+    .eq('id', payload.orderId)
+
+  return Response.json({ success: !error })
+})
+
+// 로컬 테스트
+// supabase functions serve webhook-handler --env-file .env.local
+// curl -X POST http://localhost:54321/functions/v1/webhook-handler`,
       },
       {
         id: 'realtime',
         name: '실시간 (Realtime)',
-        description: 'DB 변경사항을 WebSocket으로 실시간 수신합니다. 채팅·알림·대시보드 라이브 업데이트 등에 활용됩니다. 클라이언트 키로 바로 사용 가능합니다.',
+        description: 'DB 변경사항(INSERT/UPDATE/DELETE), Broadcast 메시지, Presence 상태를 WebSocket으로 실시간 수신합니다. 채팅·알림·대시보드 라이브 업데이트 등에 활용됩니다. 구독 전 대시보드에서 해당 테이블의 Realtime을 활성화해야 합니다.',
         tag: 'free',
         api_key: {
           env_var: 'NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY',
@@ -321,20 +590,37 @@ Deno.serve(async (req) => {
           url_label: 'Supabase Project API Settings',
           issue_steps: [
             { step: 1, title: '데이터베이스와 동일한 키 사용', description: 'Realtime도 동일한 클라이언트 키를 사용합니다.' },
-            { step: 2, title: '테이블 Realtime 활성화', description: '대시보드 → Database → Replication에서 구독할 테이블의 Realtime을 활성화합니다.' },
+            { step: 2, title: '테이블 Realtime 활성화', description: '대시보드 → Database → Replication(또는 Table Editor → 테이블 선택 → Realtime 토글)에서 구독할 테이블을 활성화합니다.' },
           ],
         },
-        code_example: `// 테이블 변경 실시간 구독
+        code_example: `// 테이블 변경 실시간 구독 (INSERT/UPDATE/DELETE)
 const channel = supabase
   .channel('posts-changes')
   .on(
     'postgres_changes',
-    { event: 'INSERT', schema: 'public', table: 'posts' },
-    (payload) => console.log('New post:', payload.new)
+    { event: '*', schema: 'public', table: 'posts' },
+    (payload) => {
+      if (payload.eventType === 'INSERT') setPosts(prev => [...prev, payload.new])
+      if (payload.eventType === 'DELETE') setPosts(prev => prev.filter(p => p.id !== payload.old.id))
+    }
   )
   .subscribe()
 
-// 구독 해제
+// Broadcast — 실시간 메시지 브로드캐스트
+const chatChannel = supabase.channel('room:123')
+chatChannel
+  .on('broadcast', { event: 'chat' }, ({ payload }) => {
+    setMessages(prev => [...prev, payload])
+  })
+  .subscribe()
+
+await chatChannel.send({
+  type: 'broadcast',
+  event: 'chat',
+  payload: { message: '안녕하세요', userId: user.id },
+})
+
+// 구독 해제 (컴포넌트 언마운트 시)
 await supabase.removeChannel(channel)`,
       },
     ],
