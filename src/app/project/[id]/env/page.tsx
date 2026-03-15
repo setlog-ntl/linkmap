@@ -53,7 +53,9 @@ import { parseEnvLine } from '@/lib/utils/parse-env';
 import { useLinkedRepos } from '@/lib/queries/github';
 import { EnvStatsHeader } from '@/components/env/env-stats-header';
 import { EnvFilterBar } from '@/components/env/env-filter-bar';
+import type { EnvViewMode } from '@/components/env/env-filter-bar';
 import { EnvDataTable } from '@/components/env/env-data-table';
+import type { EnvServiceGroup } from '@/components/env/env-data-table';
 import { EnvDoctorPanel } from '@/components/ai/env-doctor-panel';
 import { SmartKeyAnalyzerDialog } from '@/components/env/smart-key-analyzer';
 import type { Environment, EnvironmentVariable } from '@/types';
@@ -98,6 +100,7 @@ export default function ProjectEnvPage() {
   const [editServiceId, setEditServiceId] = useState<string | null>(null);
   const [editEnvironment, setEditEnvironment] = useState<Environment>('development');
   const [analyzerOpen, setAnalyzerOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<EnvViewMode>('all');
 
   const envKeyServiceMap = useMemo(
     () => buildEnvKeyServiceMap(catalogServices),
@@ -135,6 +138,64 @@ export default function ProjectEnvPage() {
     }
     return vars;
   }, [envVars, activeEnv, search]);
+
+  // 서비스 slug 맵 (아이콘 표시용)
+  const serviceSlugMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const ps of projectServices) {
+      if (ps.service) {
+        map.set(ps.service_id, ps.service.slug);
+      }
+    }
+    return map;
+  }, [projectServices]);
+
+  const serviceGroups = useMemo((): EnvServiceGroup[] | undefined => {
+    if (viewMode !== 'by-service') return undefined;
+
+    const groupMap = new Map<string, EnvironmentVariable[]>();
+    const unlinked: EnvironmentVariable[] = [];
+
+    for (const v of filteredVars) {
+      if (v.service_id) {
+        const existing = groupMap.get(v.service_id);
+        if (existing) existing.push(v);
+        else groupMap.set(v.service_id, [v]);
+      } else {
+        unlinked.push(v);
+      }
+    }
+
+    const groups: EnvServiceGroup[] = [];
+
+    // 서비스별 그룹 (이름순 정렬)
+    const entries = Array.from(groupMap.entries());
+    entries.sort((a, b) => {
+      const nameA = serviceNameMap.get(a[0]) || '';
+      const nameB = serviceNameMap.get(b[0]) || '';
+      return nameA.localeCompare(nameB);
+    });
+
+    for (const [serviceId, vars] of entries) {
+      groups.push({
+        serviceId,
+        serviceName: serviceNameMap.get(serviceId) || '알 수 없는 서비스',
+        serviceSlug: serviceSlugMap.get(serviceId),
+        envVars: vars,
+      });
+    }
+
+    // 미연결 그룹은 마지막
+    if (unlinked.length > 0) {
+      groups.push({
+        serviceId: null,
+        serviceName: '미연결 변수',
+        envVars: unlinked,
+      });
+    }
+
+    return groups;
+  }, [viewMode, filteredVars, serviceNameMap, serviceSlugMap]);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -333,6 +394,8 @@ export default function ProjectEnvPage() {
         onImportClick={() => setImportOpen(true)}
         onAnalyzeClick={() => setAnalyzerOpen(true)}
         envCounts={envCounts}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
       />
 
       {/* Data Table */}
@@ -347,6 +410,7 @@ export default function ProjectEnvPage() {
         onDelete={handleDelete}
         onCopy={handleCopy}
         onCopyValue={handleCopyValue}
+        serviceGroups={serviceGroups}
       />
 
       {/* Smart Key Analyzer */}

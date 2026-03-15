@@ -16,10 +16,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Search, Plus, Download, Upload, Sparkles } from 'lucide-react';
+import { Search, Plus, Download, Upload, Sparkles, List, Layers } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 import type { Environment } from '@/types';
+
+export type EnvViewMode = 'all' | 'by-service';
 
 const envOptions: { value: Environment; label: string }[] = [
   { value: 'development', label: '개발' },
@@ -37,6 +40,8 @@ interface EnvFilterBarProps {
   onImportClick?: () => void;
   onAnalyzeClick?: () => void;
   envCounts: Record<Environment, number>;
+  viewMode?: EnvViewMode;
+  onViewModeChange?: (mode: EnvViewMode) => void;
 }
 
 export function EnvFilterBar({
@@ -49,6 +54,8 @@ export function EnvFilterBar({
   onImportClick,
   onAnalyzeClick,
   envCounts,
+  viewMode = 'all',
+  onViewModeChange,
 }: EnvFilterBarProps) {
   const { locale } = useLocaleStore();
   const [inputValue, setInputValue] = useState(search);
@@ -87,6 +94,37 @@ export function EnvFilterBar({
           className="pl-9"
         />
       </div>
+
+      {onViewModeChange && (
+        <div className="flex rounded-md border bg-muted/50 p-0.5">
+          <button
+            type="button"
+            onClick={() => onViewModeChange('all')}
+            className={cn(
+              'flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 text-xs font-medium transition-colors',
+              viewMode === 'all'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <List className="h-3.5 w-3.5" />
+            전체
+          </button>
+          <button
+            type="button"
+            onClick={() => onViewModeChange('by-service')}
+            className={cn(
+              'flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 text-xs font-medium transition-colors',
+              viewMode === 'by-service'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <Layers className="h-3.5 w-3.5" />
+            서비스별
+          </button>
+        </div>
+      )}
 
       <TooltipProvider>
         <div className="flex gap-2">
