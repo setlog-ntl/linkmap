@@ -268,6 +268,8 @@ AI 코드를 완전히 거부할 필요는 없습니다. 검증 파이프라인�
 | 환경변수 클라이언트 노출 | 다수 | 높음 |
 | RLS 미설정 (Supabase) | 10.3%+ | 심각 |
 
+![바이브 코딩 앱 취약점 5가지](/blog/diagrams/vulnerability-patterns-chart.png)
+
 > **WARNING:** 바이브 코딩으로 만든 앱을 "AI가 다 알아서 해줬으니 안전하다"고 가정하는 것이 가장 위험합니다. AI는 보안 감사를 수행하지 않습니다.
 
 ## 체크리스트 Part 1: 인증 & 인가
@@ -527,6 +529,8 @@ AI 에이전트가 코드를 잘 만들어줄수록, 시크릿 관리는 더 엄
 
 ## Unit 42 추적: 2.3억 타겟 클라우드 갈취 캠페인의 전모
 
+![Unit 42 클라우드 갈취 캠페인 규모](/blog/diagrams/env-leak-campaign-scale.png)
+
 Palo Alto Networks의 위협 인텔리전스팀 [Unit 42](https://unit42.paloaltonetworks.com)는 조직적인 .env 파일 탈취 캠페인을 추적했습니다. 이 캠페인의 규모는 전례 없는 수준이었습니다.
 
 공격자들은 자동화 도구를 이용해 **2억 3,000만 개의 고유 IP**와 **11만 개 이상의 도메인**을 스캔했습니다. 수집한 .env 파일에서 추출한 정보는 다음과 같습니다:
@@ -560,6 +564,8 @@ Palo Alto Networks의 위협 인텔리전스팀 [Unit 42](https://unit42.paloalt
 ---
 
 ## .env를 넘어서: 시크릿 관리의 3가지 진화 단계
+
+![시크릿 관리의 3단계 진화](/blog/diagrams/secret-management-evolution.png)
 
 보안 성숙도에 따라 시크릿 관리는 세 단계로 발전합니다.
 
@@ -819,6 +825,8 @@ AI가 생성한 코드를 그대로 커밋하기 전, 반드시 API 키 패턴(s
 
 ## 어떤 도구를 선택해야 할까
 
+![환경변수 관리 도구 선택 가이드](/blog/diagrams/tool-selection-flowchart.png)
+
 ### Doppler가 적합한 경우
 
 - DevOps 팀이 있는 **중대형 기업**
@@ -883,6 +891,8 @@ AI가 생성한 코드를 그대로 커밋하기 전, 반드시 API 키 패턴(s
 > **INFO:** 마이크로서비스 환경에서 서비스 간 빈번한 네트워크 통신은 지연, 장애 전파, 부하 증가로 이어지며 이를 추적하지 못하면 장애 원인 파악에 수 시간이 걸릴 수 있습니다.
 
 ## 장애 전파: "어디서 터진 거야?"
+
+![마이크로서비스 장애 전파 캐스케이드](/blog/diagrams/cascade-failure-propagation.png)
 
 MSA 환경에서 장애의 가장 나쁜 특성은 **조용히 퍼진다**는 것입니다. 결제 서비스 하나가 타임아웃을 일으키면 주문 서비스가 응답 대기 상태에 빠지고, 이어서 API 게이트웨이가 막히며, 결국 사용자에게는 전혀 무관해 보이는 메인 페이지에서 에러가 납니다.
 
@@ -1011,6 +1021,8 @@ GitHub의 시크릿 스캐닝 리포트에 따르면 공개 리포지터리에�
 ---
 
 ## 유출 즉시 조치 체크리스트 — 5단계
+
+![API 키 유출 5단계 긴급 대응 타임라인](/blog/diagrams/incident-response-timeline.png)
 
 유출이 의심되는 순간 이 순서대로 움직이세요.
 
@@ -1178,6 +1190,8 @@ trufflehog git https://github.com/your-org/your-repo
 
 ## 바이브 코딩의 실전 워크플로
 
+![바이브 코딩 워크플로 3단계](/blog/diagrams/vibe-coding-workflow.png)
+
 바이브 코딩은 3단계로 진행됩니다. 하지만 마지막 단계에서 대부분 막힙니다.
 
 ### 1단계: AI에게 설명
@@ -1320,6 +1334,8 @@ API 키 유출
 
 ## .env 파일의 근본적 한계
 
+![.env 파일 vs 전용 관리 도구 비교](/blog/diagrams/env-vs-linkmap-comparison.png)
+
 | 기능 | .env 파일 | [Linkmap](https://www.linkmap.biz) |
 |------|----------|-------------|
 | 암호화 | 평문 텍스트 | **AES-256-GCM** |
@@ -1421,6 +1437,8 @@ Linkmap (linkmap.biz)의 현재 규모 — 바이브 코딩으로 구축:
 | **보안** | 기본 패턴 적용 | 보안 검증 (API 키 노출, XSS) |
 | **설정** | 코드 내 설정 | **서비스 연결** (API 키 발급, 환경변수) |
 
+![바이브 코딩 AI 능력 매트릭스](/blog/diagrams/ai-capability-matrix.png)
+
 > **WARNING:** AI가 Supabase 코드를 생성해줘도, 실제 프로젝트 생성, API 키 발급, GitHub 설정은 직접 해야 합니다. **이것이 바이브 코딩의 가장 큰 병목입니다.** [Linkmap](https://www.linkmap.biz)이 이 병목을 해결합니다.
 
 ---
@@ -1489,6 +1507,8 @@ AI 결과물이 마음에 들면 바로 커밋. [Linkmap의 GitHub Secrets 자�
     content: `> **KEY:** 바이브 코딩 프로젝트는 평균 7개의 외부 서비스를 연결합니다. [Linkmap 서비스맵](https://www.linkmap.biz)은 이 연결을 **지도처럼 시각화**해서 "어떤 서비스가, 어떤 환경변수로, 어떻게 연결되어 있는지" 한눈에 보여줍니다.
 
 ## 서비스맵이 왜 필요한가
+
+![서비스맵으로 외부 서비스 연결 시각화](/blog/diagrams/service-map-example.png)
 
 [바이브 코딩으로 프로젝트를 만들면](/blog/what-is-vibe-coding), 보통 5~10개의 외부 서비스를 연결합니다:
 
@@ -1641,6 +1661,8 @@ git log --all --full-history -- ".env*"
 
 ## 4. NEXT_PUBLIC_ 접두사 주의
 
+![NEXT_PUBLIC_ 보안 레벨](/blog/diagrams/next-public-security-levels.png)
+
 Next.js에서 \`NEXT_PUBLIC_\`으로 시작하는 환경변수는 **브라우저에 노출**됩니다:
 
 \`\`\`
@@ -1725,6 +1747,8 @@ GitHub Actions로 CI/CD를 구성하면, 환경변수를 GitHub Secrets에 등�
 ---
 
 ## Linkmap의 GitHub Secrets 자동 배포
+
+![GitHub Secrets 수동 vs 자동 비교](/blog/diagrams/manual-vs-auto-secrets.png)
 
 [Linkmap](https://www.linkmap.biz)은 프로젝트의 환경변수를 GitHub 저장소 시크릿에 **자동으로 동기화**합니다.
 
