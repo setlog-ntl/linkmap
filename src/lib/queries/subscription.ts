@@ -17,6 +17,8 @@ export function useSubscription() {
         .eq('user_id', user.id)
         .single();
       if (error?.code === 'PGRST116') return null; // 레코드 없음 → free 플랜
+      // 406: 테이블 미존재 또는 스키마 불일치 → free 플랜으로 폴백
+      if (error?.code === 'PGRST204' || error?.message?.includes('406')) return null;
       if (error) throw error;
       return data as Subscription;
     },
