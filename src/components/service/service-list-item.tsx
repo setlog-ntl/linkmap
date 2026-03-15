@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ExternalLink, ArrowRight, KeyRound, Plus, FolderKanban, Check, Loader2 } from 'lucide-react';
+import { ExternalLink, ArrowRight, KeyRound, Plus, FolderKanban, Check, Loader2, Search, Star } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { DifficultyBadge, GithubStarsBadge, FreeTierBadge } from './service-badges';
 import { allCategoryLabels } from '@/lib/constants/service-filters';
@@ -23,8 +24,6 @@ interface ServiceListItemProps {
 }
 
 export function ServiceListItem({ service, isUsed = false, hasGuide = false, apiKeyInfo }: ServiceListItemProps) {
-  const [popoverOpen, setPopoverOpen] = useState(false);
-
   return (
     <Card className="hover:shadow-md transition-all duration-200 group">
       <div className="flex items-center gap-4 p-4">
@@ -64,25 +63,8 @@ export function ServiceListItem({ service, isUsed = false, hasGuide = false, api
         </div>
 
         {/* Actions */}
-        <div className="hidden sm:flex items-center gap-1 shrink-0">
-          {/* 프로젝트에 추가 */}
-          <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 gap-1 text-xs text-muted-foreground hover:text-brand-blue"
-                onClick={(e) => e.stopPropagation()}
-                title="내 프로젝트에 추가"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                <span className="hidden xl:inline">추가</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="end" className="w-64 p-2" onClick={(e) => e.stopPropagation()}>
-              <AddToProjectList serviceId={service.id} serviceName={service.name} onDone={() => setPopoverOpen(false)} />
-            </PopoverContent>
-          </Popover>
+        <div className="hidden sm:flex items-center gap-1.5 shrink-0">
+          <AddToProjectButton serviceId={service.id} serviceName={service.name} />
 
           {hasGuide && (
             <Button variant="ghost" size="icon" className="h-8 w-8" asChild title="빠른 설정">
@@ -111,18 +93,16 @@ export function ServiceListItem({ service, isUsed = false, hasGuide = false, api
   );
 }
 
-/* ── 프로젝트에 추가 버튼 (외부에서도 사용 가능) ── */
+/* ── 내 프로젝트에 추가 버튼 (외부에서도 사용 가능) ── */
 export function AddToProjectButton({
   serviceId,
   serviceName,
-  variant = 'ghost',
-  size = 'sm',
+  variant = 'outline',
   className = '',
 }: {
   serviceId: string;
   serviceName: string;
   variant?: 'ghost' | 'outline' | 'default';
-  size?: 'sm' | 'icon';
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -131,16 +111,15 @@ export function AddToProjectButton({
       <PopoverTrigger asChild>
         <Button
           variant={variant}
-          size={size}
-          className={`gap-1 text-xs text-muted-foreground hover:text-brand-blue ${className}`}
+          size="sm"
+          className={`h-8 gap-1.5 text-xs font-medium border-brand-blue/30 text-brand-blue hover:bg-brand-blue/10 hover:text-brand-blue ${className}`}
           onClick={(e) => e.stopPropagation()}
-          title="내 프로젝트에 추가"
         >
           <Plus className="h-3.5 w-3.5" />
-          <span>추가</span>
+          내 프로젝트에 추가
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-64 p-2" onClick={(e) => e.stopPropagation()}>
+      <PopoverContent align="end" className="w-72 p-0" onClick={(e) => e.stopPropagation()}>
         <AddToProjectList serviceId={serviceId} serviceName={serviceName} onDone={() => setOpen(false)} />
       </PopoverContent>
     </Popover>
@@ -148,6 +127,8 @@ export function AddToProjectButton({
 }
 
 /* ── 프로젝트 선택 리스트 (Popover 내부) ── */
+const MAX_VISIBLE = 5;
+
 function AddToProjectList({
   serviceId,
   serviceName,
@@ -159,10 +140,33 @@ function AddToProjectList({
 }) {
   const { data: projects, isLoading } = useProjects();
   const [addingTo, setAddingTo] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+
+  // 즐겨찾기 상단, 나머지 이름순 정렬
+  const sortedProjects = useMemo(() => {
+    if (!projects) return [];
+    return [...projects].sort((a, b) => {
+      if (a.is_favorited && !b.is_favorited) return -1;
+      if (!a.is_favorited && b.is_favorited) return 1;
+      return a.name.localeCompare(b.name);
+    });
+  }, [projects]);
+
+  // 검색 필터
+  const filtered = useMemo(() => {
+    if (!search.trim()) return sortedProjects;
+    const q = search.toLowerCase();
+    return sortedProjects.filter((p) => p.name.toLowerCase().includes(q));
+  }, [sortedProjects, search]);
+
+  // 검색 안 했을 때 일부만 표시
+  const showSearch = sortedProjects.length > MAX_VISIBLE;
+  const displayed = search.trim() ? filtered : filtered.slice(0, MAX_VISIBLE);
+  const hasMore = !search.trim() && filtered.length > MAX_VISIBLE;
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-4">
+      <div className="flex items-center justify-center py-6">
         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
       </div>
     );
@@ -170,8 +174,9 @@ function AddToProjectList({
 
   if (!projects || projects.length === 0) {
     return (
-      <div className="py-3 px-2 text-center">
-        <p className="text-xs text-muted-foreground mb-2">프로젝트가 없습니다</p>
+      <div className="py-6 px-4 text-center">
+        <FolderKanban className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+        <p className="text-sm text-muted-foreground mb-3">프로젝트가 없습니다</p>
         <Button variant="outline" size="sm" className="text-xs" asChild>
           <Link href="/dashboard">프로젝트 만들기</Link>
         </Button>
@@ -180,24 +185,56 @@ function AddToProjectList({
   }
 
   return (
-    <div className="space-y-0.5">
-      <p className="text-xs font-medium text-muted-foreground px-2 py-1">프로젝트에 추가</p>
-      {projects.map((project) => {
-        const alreadyAdded = project.project_services?.some((ps) => ps.service_id === serviceId) ?? false;
-        return (
-          <AddToProjectItem
-            key={project.id}
-            projectId={project.id}
-            projectName={project.name}
-            serviceId={serviceId}
-            serviceName={serviceName}
-            alreadyAdded={alreadyAdded}
-            isAdding={addingTo === project.id}
-            onAddStart={() => setAddingTo(project.id)}
-            onAddEnd={() => { setAddingTo(null); onDone(); }}
-          />
-        );
-      })}
+    <div>
+      {/* 헤더 */}
+      <div className="px-3 pt-3 pb-2">
+        <p className="text-sm font-semibold">내 프로젝트에 추가</p>
+        <p className="text-xs text-muted-foreground mt-0.5">추가할 프로젝트를 선택하세요</p>
+      </div>
+
+      {/* 검색 */}
+      {showSearch && (
+        <div className="px-3 pb-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder="프로젝트 검색..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-8 pl-8 text-xs"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* 프로젝트 목록 */}
+      <div className="px-1.5 pb-1.5 max-h-[240px] overflow-y-auto">
+        {displayed.length === 0 && (
+          <p className="text-xs text-muted-foreground text-center py-3">검색 결과가 없습니다</p>
+        )}
+        {displayed.map((project) => {
+          const alreadyAdded = project.project_services?.some((ps) => ps.service_id === serviceId) ?? false;
+          return (
+            <AddToProjectItem
+              key={project.id}
+              projectId={project.id}
+              projectName={project.name}
+              isFavorited={project.is_favorited}
+              serviceId={serviceId}
+              serviceName={serviceName}
+              alreadyAdded={alreadyAdded}
+              isAdding={addingTo === project.id}
+              onAddStart={() => setAddingTo(project.id)}
+              onAddEnd={() => { setAddingTo(null); onDone(); }}
+            />
+          );
+        })}
+        {hasMore && (
+          <p className="text-[11px] text-muted-foreground text-center py-1.5">
+            외 {filtered.length - MAX_VISIBLE}개 — 검색으로 찾기
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -205,6 +242,7 @@ function AddToProjectList({
 function AddToProjectItem({
   projectId,
   projectName,
+  isFavorited,
   serviceId,
   serviceName,
   alreadyAdded,
@@ -214,6 +252,7 @@ function AddToProjectItem({
 }: {
   projectId: string;
   projectName: string;
+  isFavorited: boolean;
   serviceId: string;
   serviceName: string;
   alreadyAdded: boolean;
@@ -242,12 +281,24 @@ function AddToProjectItem({
     <button
       onClick={handleAdd}
       disabled={alreadyAdded || isAdding}
-      className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm hover:bg-accent disabled:opacity-50 disabled:cursor-default transition-colors"
+      className="w-full flex items-center gap-2 px-2.5 py-2 rounded-md text-sm hover:bg-accent disabled:cursor-default transition-colors group/item"
     >
-      <FolderKanban className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+      {isFavorited ? (
+        <Star className="h-3.5 w-3.5 shrink-0 text-yellow-500 fill-yellow-500" />
+      ) : (
+        <FolderKanban className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+      )}
       <span className="flex-1 text-left truncate">{projectName}</span>
-      {alreadyAdded && <Check className="h-3.5 w-3.5 text-green-500 shrink-0" />}
-      {isAdding && <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />}
+      {alreadyAdded ? (
+        <span className="flex items-center gap-1 text-[11px] text-green-600 shrink-0">
+          <Check className="h-3.5 w-3.5" />
+          추가됨
+        </span>
+      ) : isAdding ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0 text-muted-foreground" />
+      ) : (
+        <Plus className="h-3.5 w-3.5 shrink-0 text-muted-foreground opacity-0 group-hover/item:opacity-100 transition-opacity" />
+      )}
     </button>
   );
 }

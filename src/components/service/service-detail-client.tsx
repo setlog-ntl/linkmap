@@ -14,10 +14,11 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, ExternalLink, Globe, BookOpen, Clock, Copy, Check, KeyRound, UserPlus } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Globe, BookOpen, Clock, Copy, Check, KeyRound, UserPlus, Plus } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { allCategoryLabels, domainLabels, domainIcons } from '@/lib/constants/service-filters';
 import { DifficultyBadge, GithubStarsBadge, FreeTierBadge, VendorLockInBadge } from './service-badges';
+import { AddToProjectButton } from './service-list-item';
 import type {
   Service, ServiceGuide, ServiceCostTier, ServiceDependency,
   ServiceCategory, ServiceDomain, DependencyType,
@@ -122,16 +123,21 @@ export function ServiceDetailClient({ service, guide, costTiers, dependencies }:
           <ServiceIcon serviceId={service.slug} size={32} />
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold">{service.name}</h1>
-          <div className="flex flex-wrap items-center gap-2 mt-2">
-            <Badge variant="secondary">
-              {allCategoryLabels[service.category as ServiceCategory] || service.category}
-            </Badge>
-            {service.domain && (
-              <Badge variant="outline">
-                {domainIcons[service.domain as ServiceDomain]} {domainLabels[service.domain as ServiceDomain]}
-              </Badge>
-            )}
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold">{service.name}</h1>
+              <div className="flex flex-wrap items-center gap-2 mt-2">
+                <Badge variant="secondary">
+                  {allCategoryLabels[service.category as ServiceCategory] || service.category}
+                </Badge>
+                {service.domain && (
+                  <Badge variant="outline">
+                    {domainIcons[service.domain as ServiceDomain]} {domainLabels[service.domain as ServiceDomain]}
+                  </Badge>
+                )}
+              </div>
+            </div>
+            <AddToProjectButton serviceId={service.id} serviceName={service.name} className="h-9 text-sm shrink-0" />
           </div>
           <p className="text-muted-foreground mt-3">
             {service.description_ko || service.description}
