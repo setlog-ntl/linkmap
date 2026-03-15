@@ -81,17 +81,12 @@ export const kakaoSteps: StepData[] = [
     screenshots: [
       {
         src: `${IMG_BASE}/04-email-required.png`,
-        alt: '동의항목 페이지 상단',
+        alt: '동의항목 전체 — 닉네임, 이메일, 프로필 사진 등',
         illustration: kakaoIllustrations[4],
-        caption: '동의항목 설정 페이지',
-      },
-      {
-        src: `${IMG_BASE}/04-biz-app-switch.png`,
-        alt: '동의항목 테이블 — 닉네임, 이메일 설정',
         annotations: [
-          { type: 'highlight', x: 5, y: 50, width: 90, height: 12 },
+          { type: 'highlight', x: 5, y: 30, width: 90, height: 8 },
         ],
-        caption: '카카오계정(이메일) 항목을 필수 동의로 설정',
+        caption: '동의항목 페이지 — 카카오계정(이메일)을 "필수 동의"로 설정 (비즈 앱 전환 필요)',
       },
     ],
   },
