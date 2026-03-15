@@ -71,7 +71,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold mt-8 mb-3">7. 문의</h2>
             <p className="text-muted-foreground">
-              이용약관 관련 문의는 <a href="mailto:support@linkmap.dev" className="text-primary hover:underline">support@linkmap.dev</a>로 연락해주세요.
+              이용약관 관련 문의는 <a href="mailto:cdhrich2@gmail.com" className="text-primary hover:underline">cdhrich2@gmail.com</a>으로 연락해주세요.
             </p>
           </section>
         </div>

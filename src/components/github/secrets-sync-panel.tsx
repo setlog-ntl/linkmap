@@ -176,6 +176,9 @@ export function SecretsSyncPanel({ projectId }: SecretsSyncPanelProps) {
                     {new Date(repo.last_synced_at).toLocaleString('ko-KR')}
                   </span>
                 )}
+                {repo.last_sync_status && (
+                  <SyncStatusBadge status={repo.last_sync_status} error={repo.last_sync_error} />
+                )}
               </div>
             </div>
             <div onClick={(e) => e.stopPropagation()}>
@@ -319,6 +322,27 @@ export function SecretsSyncPanel({ projectId }: SecretsSyncPanelProps) {
         </>
       )}
     </div>
+  );
+}
+
+function SyncStatusBadge({ status, error }: { status: 'success' | 'partial' | 'failed'; error: string | null }) {
+  const config = {
+    success: { label: '성공', variant: 'secondary' as const, icon: Check, className: 'text-green-600' },
+    partial: { label: '부분 실패', variant: 'outline' as const, icon: AlertTriangle, className: 'text-yellow-600' },
+    failed: { label: '실패', variant: 'destructive' as const, icon: X, className: 'text-destructive' },
+  };
+  const c = config[status];
+  const Icon = c.icon;
+
+  return (
+    <Badge
+      variant={c.variant}
+      className={`text-[10px] gap-1 ${c.className}`}
+      title={error || undefined}
+    >
+      <Icon className="h-2.5 w-2.5" />
+      {c.label}
+    </Badge>
   );
 }
 

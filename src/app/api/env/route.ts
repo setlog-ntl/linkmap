@@ -158,8 +158,10 @@ export async function DELETE(request: NextRequest) {
     details: { key_name: envVarDel.key_name },
   });
 
-  // Trigger auto-sync (non-blocking)
-  triggerAutoSync(envVarDel.project_id, envVarDel.environment, user.id).catch(() => {});
+  // Trigger auto-sync with deleted key info (non-blocking)
+  triggerAutoSync(envVarDel.project_id, envVarDel.environment, user.id, {
+    deletedKeys: [envVarDel.key_name],
+  }).catch(() => {});
 
   return NextResponse.json({ success: true });
 }

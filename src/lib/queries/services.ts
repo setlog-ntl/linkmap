@@ -218,3 +218,24 @@ export function useRemoveProjectService(projectId: string) {
     },
   });
 }
+
+export function useUpdateProjectServiceAccount(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ projectServiceId, accountIdentifier }: {
+      projectServiceId: string;
+      accountIdentifier: string | null;
+    }) => {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from('project_services')
+        .update({ account_identifier: accountIdentifier })
+        .eq('id', projectServiceId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.services.byProject(projectId) });
+    },
+  });
+}

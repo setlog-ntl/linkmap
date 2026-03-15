@@ -25,6 +25,8 @@ export interface LinkedRepo {
   sync_branch?: string;
   sync_directory?: string | null;
   last_synced_at: string | null;
+  last_sync_status: 'success' | 'partial' | 'failed' | null;
+  last_sync_error: string | null;
   created_at: string;
   updated_at: string;
   service_account?: LinkedRepoServiceAccount | null;

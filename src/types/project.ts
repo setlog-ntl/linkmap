@@ -34,6 +34,7 @@ export interface ProjectService {
   service_id: string;
   status: ServiceStatus;
   notes: string | null;
+  account_identifier: string | null;
   cost_tier_id: string | null;
   custom_cost_monthly: number | null;
   custom_cost_yearly: number | null;

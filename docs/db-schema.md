@@ -460,6 +460,8 @@
 | sync_directory | TEXT | YES | NULL | M032 |
 | webhook_secret_encrypted | TEXT | YES | NULL | M032 |
 | last_synced_at | TIMESTAMPTZ | YES | NULL |
+| last_sync_status | TEXT | YES | NULL | M073 CHECK(success/partial/failed) |
+| last_sync_error | TEXT | YES | NULL | M073 |
 | created_at | TIMESTAMPTZ | NO | now() |
 | updated_at | TIMESTAMPTZ | NO | now() |
 
