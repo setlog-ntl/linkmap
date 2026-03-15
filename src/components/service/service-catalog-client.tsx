@@ -29,7 +29,7 @@ import {
 import { CategoryProcessDiagram } from './category-process-diagram';
 import { easyCategoryProcessFlows } from '@/lib/constants/easy-categories';
 import { EasyCategoryCard } from './easy-category-card';
-import { ServiceListItem } from './service-list-item';
+import { ServiceListItem, AddToProjectButton } from './service-list-item';
 import { DifficultyBadge, GithubStarsBadge, FreeTierBadge, CostEstimateBadge } from './service-badges';
 import type { Service, ServiceCategory, ServiceDomain, ServiceDomainRecord, FreeTierQuality, EasyCategory } from '@/types';
 
@@ -590,41 +590,40 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
                               </div>
                             </CardContent>
                           </Link>
-                          {(service.website_url || service.docs_url || guideServiceIds.includes(service.id) || guideApiKeyMap[service.id]) && (
-                            <div className="px-6 pb-4 pt-2 flex gap-2 border-t border-border/50 mt-auto">
-                              {guideServiceIds.includes(service.id) && (
-                                <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
-                                  <Link href={`/services/${service.slug}?tab=quickstart`}>
-                                    <KeyRound className="mr-1 h-3 w-3" />
-                                    빠른 설정
-                                  </Link>
-                                </Button>
-                              )}
-                              {guideApiKeyMap[service.id] && (
-                                <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
-                                  <a href={guideApiKeyMap[service.id].url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                                    <KeyRound className="mr-1 h-3 w-3" />
-                                    {guideApiKeyMap[service.id].label || '키 설정'}
-                                  </a>
-                                </Button>
-                              )}
-                              {service.website_url && (
-                                <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
-                                  <a href={service.website_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                                    <ExternalLink className="mr-1 h-3 w-3" />
-                                    웹사이트
-                                  </a>
-                                </Button>
-                              )}
-                              {service.docs_url && (
-                                <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
-                                  <a href={service.docs_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                                    문서
-                                  </a>
-                                </Button>
-                              )}
-                            </div>
-                          )}
+                          <div className="px-6 pb-4 pt-2 flex gap-2 border-t border-border/50 mt-auto">
+                            <AddToProjectButton serviceId={service.id} serviceName={service.name} className="h-7" />
+                            {guideServiceIds.includes(service.id) && (
+                              <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
+                                <Link href={`/services/${service.slug}?tab=quickstart`}>
+                                  <KeyRound className="mr-1 h-3 w-3" />
+                                  빠른 설정
+                                </Link>
+                              </Button>
+                            )}
+                            {guideApiKeyMap[service.id] && (
+                              <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
+                                <a href={guideApiKeyMap[service.id].url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                                  <KeyRound className="mr-1 h-3 w-3" />
+                                  {guideApiKeyMap[service.id].label || '키 설정'}
+                                </a>
+                              </Button>
+                            )}
+                            {service.website_url && (
+                              <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
+                                <a href={service.website_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                                  <ExternalLink className="mr-1 h-3 w-3" />
+                                  웹사이트
+                                </a>
+                              </Button>
+                            )}
+                            {service.docs_url && (
+                              <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
+                                <a href={service.docs_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                                  문서
+                                </a>
+                              </Button>
+                            )}
+                          </div>
                         </Card>
                       </motion.div>
                     ))}
@@ -935,41 +934,40 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
                         </div>
                       </CardContent>
                     </Link>
-                    {(service.website_url || service.docs_url || guideServiceIds.includes(service.id) || guideApiKeyMap[service.id]) && (
-                      <div className="px-6 pb-4 pt-2 flex gap-2 border-t border-border/50 mt-auto">
-                        {guideServiceIds.includes(service.id) && (
-                          <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
-                            <Link href={`/services/${service.slug}?tab=quickstart`}>
-                              <KeyRound className="mr-1 h-3 w-3" />
-                              빠른 설정
-                            </Link>
-                          </Button>
-                        )}
-                        {guideApiKeyMap[service.id] && (
-                          <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
-                            <a href={guideApiKeyMap[service.id].url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                              <KeyRound className="mr-1 h-3 w-3" />
-                              {guideApiKeyMap[service.id].label || '키 설정'}
-                            </a>
-                          </Button>
-                        )}
-                        {service.website_url && (
-                          <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
-                            <a href={service.website_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                              <ExternalLink className="mr-1 h-3 w-3" />
-                              웹사이트
-                            </a>
-                          </Button>
-                        )}
-                        {service.docs_url && (
-                          <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
-                            <a href={service.docs_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                              문서
-                            </a>
-                          </Button>
-                        )}
-                      </div>
-                    )}
+                    <div className="px-6 pb-4 pt-2 flex gap-2 border-t border-border/50 mt-auto">
+                      <AddToProjectButton serviceId={service.id} serviceName={service.name} className="h-7" />
+                      {guideServiceIds.includes(service.id) && (
+                        <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
+                          <Link href={`/services/${service.slug}?tab=quickstart`}>
+                            <KeyRound className="mr-1 h-3 w-3" />
+                            빠른 설정
+                          </Link>
+                        </Button>
+                      )}
+                      {guideApiKeyMap[service.id] && (
+                        <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
+                          <a href={guideApiKeyMap[service.id].url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                            <KeyRound className="mr-1 h-3 w-3" />
+                            {guideApiKeyMap[service.id].label || '키 설정'}
+                          </a>
+                        </Button>
+                      )}
+                      {service.website_url && (
+                        <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
+                          <a href={service.website_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                            <ExternalLink className="mr-1 h-3 w-3" />
+                            웹사이트
+                          </a>
+                        </Button>
+                      )}
+                      {service.docs_url && (
+                        <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
+                          <a href={service.docs_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                            문서
+                          </a>
+                        </Button>
+                      )}
+                    </div>
                   </Card>
                 </motion.div>
               ))}
