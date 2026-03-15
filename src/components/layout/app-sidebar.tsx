@@ -8,13 +8,13 @@ import {
   Rocket, Search, Map as MapIcon,
   List, Link2, Key, Settings, BookOpen, ChevronDown, ChevronRight,
   LogOut, Bot, User, GitBranch, Wrench, FolderKanban, Plus, LayoutDashboard,
-  Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight, Trash2, DollarSign, Users, BarChart3, Lightbulb, Trophy, Bug, Check, X,
+  Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight, Trash2, DollarSign, Users, BarChart3, Lightbulb, Trophy, Bug, Check, X, GripVertical,
 } from 'lucide-react';
 import { GUIDE_CATEGORIES, getGuidesByCategory, type GuideCategory } from '@/data/ui/guide-meta';
 import { createClient } from '@/lib/supabase/client';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
-import { useProjects, useToggleFavoriteProject, useUpdateProject } from '@/lib/queries/projects';
+import { useProjects, useToggleFavoriteProject, useUpdateProject, useReorderProjects } from '@/lib/queries/projects';
 import { useMyDeployments, useRenameDeploy, type HomepageDeploy } from '@/lib/queries/oneclick';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -46,7 +46,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { Profile } from '@/types';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import type { Profile, ProjectWithServices } from '@/types';
 
 const MAX_VISIBLE_PROJECTS = 15;
 const MAX_VISIBLE_SITES = 10;
@@ -160,7 +176,13 @@ export function AppSidebar({ profile }: AppSidebarProps) {
   const { data: deployments, isLoading: isDeploymentsLoading } = useMyDeployments();
   const { mutate: toggleFavorite } = useToggleFavoriteProject();
   const { mutate: updateProject } = useUpdateProject();
+  const { mutate: reorderProjects } = useReorderProjects();
   const { mutate: renameDeploy } = useRenameDeploy();
+
+  const sidebarDndSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   // Extract active project ID from URL
   const activeProjectId = pathname.match(/^\/project\/([^/]+)/)?.[1] ?? null;
@@ -275,7 +297,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
   const hasReadySite = deployments?.some((d) => d.deploy_status === 'ready') ?? false;
   const oneclickColorClass = !isDeploymentsLoading && hasReadySite ? 'text-green-500' : 'text-yellow-500';
 
-  const renderProjectItem = (project: NonNullable<typeof projects>[number]) => {
+  const renderProjectItem = (project: NonNullable<typeof projects>[number], dragHandleProps?: Record<string, unknown>) => {
     const isExpanded = expandedProjects.has(project.id);
     const isActiveProject = activeProjectId === project.id;
     const subNav = getProjectSubNav(project.id);
@@ -293,6 +315,15 @@ export function AppSidebar({ profile }: AppSidebarProps) {
       >
         <SidebarMenuSubItem>
           <div className="flex items-center group/project-row">
+            {dragHandleProps && (
+              <button
+                className="flex h-6 w-4 shrink-0 items-center justify-center cursor-grab active:cursor-grabbing touch-none text-muted-foreground/30 hover:text-muted-foreground/70 transition-opacity opacity-0 group-hover/project-row:opacity-100"
+                {...dragHandleProps}
+                aria-label="드래그하여 순서 변경"
+              >
+                <GripVertical className="h-3 w-3" />
+              </button>
+            )}
             <CollapsibleTrigger asChild>
               <button
                 className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm hover:bg-sidebar-accent"
@@ -375,6 +406,21 @@ export function AppSidebar({ profile }: AppSidebarProps) {
         </SidebarMenuSubItem>
       </Collapsible>
     );
+  };
+
+  const handleSidebarDragEnd = (projectList: ProjectWithServices[]) => (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = projectList.findIndex((p) => p.id === active.id);
+    const newIndex = projectList.findIndex((p) => p.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = [...projectList];
+    const [moved] = reordered.splice(oldIndex, 1);
+    reordered.splice(newIndex, 0, moved);
+
+    reorderProjects(reordered.map((p) => p.id));
   };
 
   return (
@@ -613,7 +659,15 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                               </span>
                             </SidebarMenuSubItem>
                           )}
-                          {sidebarManualProjects.map((project) => renderProjectItem(project))}
+                          <DndContext sensors={sidebarDndSensors} collisionDetection={closestCenter} onDragEnd={handleSidebarDragEnd(sidebarManualProjects)}>
+                            <SortableContext items={sidebarManualProjects.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+                              {sidebarManualProjects.map((project) => (
+                                <SortableSidebarProjectItem key={project.id} id={project.id}>
+                                  {(dragHandleProps) => renderProjectItem(project, dragHandleProps)}
+                                </SortableSidebarProjectItem>
+                              ))}
+                            </SortableContext>
+                          </DndContext>
                         </>
                       )}
 
@@ -626,7 +680,15 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                               원클릭 배포
                             </span>
                           </SidebarMenuSubItem>
-                          {sidebarDeployedProjects.map((project) => renderProjectItem(project))}
+                          <DndContext sensors={sidebarDndSensors} collisionDetection={closestCenter} onDragEnd={handleSidebarDragEnd(sidebarDeployedProjects)}>
+                            <SortableContext items={sidebarDeployedProjects.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+                              {sidebarDeployedProjects.map((project) => (
+                                <SortableSidebarProjectItem key={project.id} id={project.id}>
+                                  {(dragHandleProps) => renderProjectItem(project, dragHandleProps)}
+                                </SortableSidebarProjectItem>
+                              ))}
+                            </SortableContext>
+                          </DndContext>
                         </>
                       )}
 
@@ -850,5 +912,35 @@ export function AppSidebar({ profile }: AppSidebarProps) {
         )}
       </SidebarFooter>
     </Sidebar>
+  );
+}
+
+function SortableSidebarProjectItem({
+  id,
+  children,
+}: {
+  id: string;
+  children: (dragHandleProps: Record<string, unknown>) => React.ReactNode;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+    opacity: isDragging ? 0.7 : undefined,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      {children({ ...attributes, ...listeners })}
+    </div>
   );
 }
