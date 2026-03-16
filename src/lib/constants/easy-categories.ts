@@ -8,6 +8,7 @@ export const easyCategoryLabels: Record<EasyCategory, string> = {
   notifications: '알림/메시지',
   ai_tools: 'AI 도구',
   dev_tools: '개발 도구',
+  sns: 'SNS',
   analytics_other: '분석/기타',
 };
 
@@ -19,6 +20,7 @@ export const easyCategoryEmojis: Record<EasyCategory, string> = {
   notifications: '📧',
   ai_tools: '🤖',
   dev_tools: '🛠️',
+  sns: '📱',
   analytics_other: '📊',
 };
 
@@ -30,6 +32,7 @@ export const easyCategoryDescriptions: Record<EasyCategory, string> = {
   notifications: '이메일, 문자, 푸시 알림, 채팅',
   ai_tools: 'AI 모델 연동, 챗봇, 이미지 생성',
   dev_tools: '코드 관리, 테스트, 배포 자동화',
+  sns: 'Instagram, YouTube, X 등 SNS 연동',
   analytics_other: '방문자 분석, 검색, CMS, 기타',
 };
 
@@ -41,7 +44,8 @@ export const easyCategoryToServiceCategories: Record<EasyCategory, ServiceCatego
   notifications: ['email', 'sms', 'push', 'chat'],
   ai_tools: ['ai'],
   dev_tools: ['cicd', 'testing', 'code_quality', 'monitoring', 'logging', 'feature_flags', 'automation'],
-  analytics_other: ['analytics', 'search', 'cms', 'media', 'queue', 'scheduling', 'advertising', 'sns', 'other'],
+  sns: ['sns'],
+  analytics_other: ['analytics', 'search', 'cms', 'media', 'queue', 'scheduling', 'advertising', 'other'],
 };
 
 export const serviceCategoryToEasy: Record<ServiceCategory, EasyCategory> = {
@@ -67,6 +71,7 @@ export const serviceCategoryToEasy: Record<ServiceCategory, EasyCategory> = {
   logging: 'dev_tools',
   feature_flags: 'dev_tools',
   automation: 'dev_tools',
+  sns: 'sns',
   analytics: 'analytics_other',
   search: 'analytics_other',
   cms: 'analytics_other',
@@ -76,7 +81,6 @@ export const serviceCategoryToEasy: Record<ServiceCategory, EasyCategory> = {
   other: 'analytics_other',
   domain: 'deploy_hosting',
   advertising: 'analytics_other',
-  sns: 'analytics_other',
 };
 
 export interface ProcessStep {
@@ -134,6 +138,13 @@ export const easyCategoryProcessFlows: Record<EasyCategory, ProcessStep[]> = {
     { emoji: '♻️', label: 'CI/CD 파이프라인' },
     { emoji: '📊', label: '모니터링' },
   ],
+  sns: [
+    { emoji: '📝', label: '콘텐츠 작성' },
+    { emoji: '📡', label: 'SNS API 호출' },
+    { emoji: '📤', label: '게시물 발행' },
+    { emoji: '📊', label: '인사이트 수집' },
+    { emoji: '💬', label: '댓글/DM 관리' },
+  ],
   analytics_other: [
     { emoji: '👤', label: '사용자 행동' },
     { emoji: '📊', label: '데이터 수집' },
@@ -151,5 +162,6 @@ export const EASY_CATEGORY_ORDER: EasyCategory[] = [
   'notifications',
   'ai_tools',
   'dev_tools',
+  'sns',
   'analytics_other',
 ];

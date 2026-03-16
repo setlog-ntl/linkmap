@@ -65,6 +65,7 @@ export type EasyCategory =
   | 'notifications'
   | 'ai_tools'
   | 'dev_tools'
+  | 'sns'
   | 'analytics_other';
 
 export type SubscriptionPlan = 'free' | 'pro' | 'team';
