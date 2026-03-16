@@ -154,4 +154,9 @@ export const subcategories: SubcategorySeed[] = [
   { id: 'native_ads', category: 'advertising', name: 'Native Ads', name_ko: '네이티브 광고', description: 'Native and content recommendation ads', description_ko: '네이티브 및 콘텐츠 추천 광고' },
   { id: 'header_bidding', category: 'advertising', name: 'Header Bidding', name_ko: '헤더 비딩', description: 'Programmatic header bidding and ad serving', description_ko: '프로그래매틱 헤더 비딩 및 광고 서버' },
   { id: 'retargeting', category: 'advertising', name: 'Retargeting', name_ko: '리타겟팅', description: 'Retargeting and performance advertising', description_ko: '리타겟팅 및 퍼포먼스 광고' },
+
+  // --- sns ---
+  { id: 'social-media', category: 'sns', name: 'Social Media', name_ko: '소셜 미디어', description: 'Social media platform APIs', description_ko: '소셜 미디어 플랫폼 API' },
+  { id: 'video-platform', category: 'sns', name: 'Video Platform', name_ko: '영상 플랫폼', description: 'Video sharing platform APIs', description_ko: '영상 공유 플랫폼 API' },
+  { id: 'professional-sns', category: 'sns', name: 'Professional SNS', name_ko: '비즈니스 SNS', description: 'Professional networking platform APIs', description_ko: '비즈니스 네트워킹 플랫폼 API' },
 ];

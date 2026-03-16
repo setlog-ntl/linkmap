@@ -41,7 +41,7 @@ export const easyCategoryToServiceCategories: Record<EasyCategory, ServiceCatego
   notifications: ['email', 'sms', 'push', 'chat'],
   ai_tools: ['ai'],
   dev_tools: ['cicd', 'testing', 'code_quality', 'monitoring', 'logging', 'feature_flags', 'automation'],
-  analytics_other: ['analytics', 'search', 'cms', 'media', 'queue', 'scheduling', 'advertising', 'other'],
+  analytics_other: ['analytics', 'search', 'cms', 'media', 'queue', 'scheduling', 'advertising', 'sns', 'other'],
 };
 
 export const serviceCategoryToEasy: Record<ServiceCategory, EasyCategory> = {
@@ -76,6 +76,7 @@ export const serviceCategoryToEasy: Record<ServiceCategory, EasyCategory> = {
   other: 'analytics_other',
   domain: 'deploy_hosting',
   advertising: 'analytics_other',
+  sns: 'analytics_other',
 };
 
 export interface ProcessStep {

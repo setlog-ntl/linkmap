@@ -113,6 +113,13 @@ export const SERVICE_IDS_V2 = {
   fireworks_ai: '10000000-0000-4000-a000-000000000125',
   modal: '10000000-0000-4000-a000-000000000126',
   wandb: '10000000-0000-4000-a000-000000000127',
+  // SNS platform services
+  instagram_api: '10000000-0000-4000-a000-000000000128',
+  youtube_api: '10000000-0000-4000-a000-000000000129',
+  x_api: '10000000-0000-4000-a000-000000000130',
+  tiktok_api: '10000000-0000-4000-a000-000000000131',
+  linkedin_api: '10000000-0000-4000-a000-000000000132',
+  threads_api: '10000000-0000-4000-a000-000000000133',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -4163,6 +4170,404 @@ export const servicesV2: ServiceSeedV2[] = [
       starter: '$0',
       growth: '$60',
       enterprise: '$315+/시트',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // SNS Platform Services
+  // -----------------------------------------------------------------------
+
+  // -----------------------------------------------------------------------
+  // Instagram API (Meta Graph API)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.instagram_api,
+    name: 'Instagram API',
+    slug: 'instagram-api',
+    category: 'sns',
+    description:
+      'Instagram Graph API를 통해 비즈니스/크리에이터 계정의 게시물 발행, 댓글 관리, 인사이트 조회, 해시태그 검색 등을 자동화할 수 있습니다.',
+    description_ko:
+      'Instagram Graph API를 통해 비즈니스/크리에이터 계정의 게시물 발행, 댓글 관리, 인사이트 조회, 해시태그 검색 등을 자동화할 수 있습니다.',
+    icon_url: null,
+    website_url: 'https://developers.facebook.com/docs/instagram-api',
+    docs_url: 'https://developers.facebook.com/docs/instagram-platform',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '무료 (앱 리뷰 및 권한 승인 필요, 비즈니스/크리에이터 계정 필수)',
+      plans: [
+        { name: 'Standard', price: '$0/월 (API 사용 자체 무료)' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'INSTAGRAM_APP_ID',
+        public: false,
+        description: 'Meta App ID for Instagram API',
+        description_ko: 'Instagram API용 Meta 앱 ID',
+      },
+      {
+        name: 'INSTAGRAM_APP_SECRET',
+        public: false,
+        description: 'Meta App Secret for Instagram API',
+        description_ko: 'Instagram API용 Meta 앱 시크릿',
+      },
+      {
+        name: 'INSTAGRAM_ACCESS_TOKEN',
+        public: false,
+        description: 'Long-lived user access token for Instagram Graph API',
+        description_ko: 'Instagram Graph API용 장기 사용자 액세스 토큰',
+      },
+    ],
+    domain: 'business',
+    subcategory: 'social-media',
+    popularity_score: 95,
+    difficulty_level: 'intermediate',
+    tags: ['sns', 'social-media', 'instagram', 'meta', 'graph-api', 'reels', 'stories', 'marketing', 'influencer'],
+    alternatives: ['threads-api', 'tiktok-api', 'x-api'],
+    compatibility: {
+      framework: ['next', 'express', 'fastify', 'django', 'flask', 'rails'],
+      language: ['javascript', 'typescript', 'python', 'php', 'ruby'],
+    },
+    official_sdks: {
+      javascript: 'https://github.com/fbsamples/instagram-node',
+      python: 'https://github.com/facebook/facebook-python-business-sdk',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'high',
+    setup_time_minutes: 30,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$0',
+      enterprise: '$0 (API 무료, 광고 API 별도)',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // YouTube Data API v3
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.youtube_api,
+    name: 'YouTube Data API',
+    slug: 'youtube-api',
+    category: 'sns',
+    description:
+      'YouTube Data API v3를 통해 채널·영상·재생목록 관리, 검색, 댓글, 라이브 스트리밍, 분석 등을 프로그래밍 방식으로 제어할 수 있습니다.',
+    description_ko:
+      'YouTube Data API v3를 통해 채널·영상·재생목록 관리, 검색, 댓글, 라이브 스트리밍, 분석 등을 프로그래밍 방식으로 제어할 수 있습니다.',
+    icon_url: null,
+    website_url: 'https://developers.google.com/youtube/v3',
+    docs_url: 'https://developers.google.com/youtube/v3/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '일일 10,000 유닛 무료 (검색=100유닛, 읽기=1유닛, 업로드=1,600유닛)',
+      plans: [
+        { name: 'Free', price: '$0/월 (10,000유닛/일)' },
+        { name: 'Extended', price: '감사 후 할당량 확장 가능' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'YOUTUBE_API_KEY',
+        public: false,
+        description: 'Google Cloud API key for YouTube Data API',
+        description_ko: 'YouTube Data API용 Google Cloud API 키',
+      },
+      {
+        name: 'YOUTUBE_CLIENT_ID',
+        public: false,
+        description: 'OAuth 2.0 Client ID for YouTube API',
+        description_ko: 'YouTube API용 OAuth 2.0 클라이언트 ID',
+        optional: true,
+      },
+      {
+        name: 'YOUTUBE_CLIENT_SECRET',
+        public: false,
+        description: 'OAuth 2.0 Client Secret for YouTube API',
+        description_ko: 'YouTube API용 OAuth 2.0 클라이언트 시크릿',
+        optional: true,
+      },
+    ],
+    domain: 'business',
+    subcategory: 'video-platform',
+    popularity_score: 93,
+    difficulty_level: 'intermediate',
+    tags: ['sns', 'video', 'youtube', 'google', 'streaming', 'live', 'analytics', 'creator', 'playlist'],
+    alternatives: ['tiktok-api'],
+    compatibility: {
+      framework: ['next', 'express', 'fastify', 'django', 'flask', 'rails', 'spring'],
+      language: ['javascript', 'typescript', 'python', 'java', 'go', 'php', 'ruby', 'dotnet'],
+    },
+    official_sdks: {
+      javascript: 'https://github.com/googleapis/google-api-nodejs-client',
+      python: 'https://github.com/googleapis/google-api-python-client',
+      java: 'https://github.com/googleapis/google-api-java-client',
+      go: 'https://github.com/googleapis/google-api-go-client',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'high',
+    setup_time_minutes: 20,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$0',
+      enterprise: '$0 (할당량 확장 시 감사 필요)',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // X (Twitter) API v2
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.x_api,
+    name: 'X API',
+    slug: 'x-api',
+    category: 'sns',
+    description:
+      'X(구 Twitter) API v2를 통해 트윗 작성·읽기, 타임라인, 검색, 스페이스, DM, 분석 등을 자동화할 수 있습니다.',
+    description_ko:
+      'X(구 Twitter) API v2를 통해 트윗 작성·읽기, 타임라인, 검색, 스페이스, DM, 분석 등을 자동화할 수 있습니다.',
+    icon_url: null,
+    website_url: 'https://developer.x.com',
+    docs_url: 'https://developer.x.com/en/docs/x-api',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Free: 쓰기 전용 (1,500트윗/월), 읽기 불가',
+      plans: [
+        { name: 'Free', price: '$0/월 (쓰기 전용)' },
+        { name: 'Basic', price: '$200/월 (15K 읽기 + 50K 쓰기)' },
+        { name: 'Pro', price: '$5,000/월' },
+        { name: 'Enterprise', price: '$42,000+/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'X_API_KEY',
+        public: false,
+        description: 'X API Key (Consumer Key)',
+        description_ko: 'X API 키 (Consumer Key)',
+      },
+      {
+        name: 'X_API_SECRET',
+        public: false,
+        description: 'X API Secret (Consumer Secret)',
+        description_ko: 'X API 시크릿 (Consumer Secret)',
+      },
+      {
+        name: 'X_ACCESS_TOKEN',
+        public: false,
+        description: 'X OAuth 2.0 Access Token',
+        description_ko: 'X OAuth 2.0 액세스 토큰',
+      },
+      {
+        name: 'X_BEARER_TOKEN',
+        public: false,
+        description: 'X Bearer Token for app-only authentication',
+        description_ko: 'X 앱 전용 인증 Bearer 토큰',
+        optional: true,
+      },
+    ],
+    domain: 'business',
+    subcategory: 'social-media',
+    popularity_score: 88,
+    difficulty_level: 'intermediate',
+    tags: ['sns', 'social-media', 'twitter', 'x', 'tweet', 'realtime', 'marketing', 'analytics', 'spaces'],
+    alternatives: ['threads-api', 'instagram-api'],
+    compatibility: {
+      framework: ['next', 'express', 'fastify', 'django', 'flask', 'rails'],
+      language: ['javascript', 'typescript', 'python', 'java', 'ruby', 'go'],
+    },
+    official_sdks: {
+      python: 'https://github.com/xdevplatform/twitter-python-sdk',
+      javascript: 'https://github.com/xdevplatform/twitter-api-typescript-sdk',
+    },
+    free_tier_quality: 'limited',
+    vendor_lock_in_risk: 'high',
+    setup_time_minutes: 15,
+    monthly_cost_estimate: {
+      starter: '$0 (쓰기만)',
+      growth: '$200',
+      enterprise: '$5,000+',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // TikTok API
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.tiktok_api,
+    name: 'TikTok API',
+    slug: 'tiktok-api',
+    category: 'sns',
+    description:
+      'TikTok for Developers API를 통해 로그인 연동, 비디오 게시, 콘텐츠 분석, 댓글 관리 등을 자동화할 수 있습니다.',
+    description_ko:
+      'TikTok for Developers API를 통해 로그인 연동, 비디오 게시, 콘텐츠 분석, 댓글 관리 등을 자동화할 수 있습니다.',
+    icon_url: null,
+    website_url: 'https://developers.tiktok.com',
+    docs_url: 'https://developers.tiktok.com/doc/overview',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '무료 (앱 승인 필요, 동영상 게시 20개/일)',
+      plans: [
+        { name: 'Standard', price: '$0/월 (승인 후 사용)' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'TIKTOK_CLIENT_KEY',
+        public: false,
+        description: 'TikTok App Client Key',
+        description_ko: 'TikTok 앱 클라이언트 키',
+      },
+      {
+        name: 'TIKTOK_CLIENT_SECRET',
+        public: false,
+        description: 'TikTok App Client Secret',
+        description_ko: 'TikTok 앱 클라이언트 시크릿',
+      },
+    ],
+    domain: 'business',
+    subcategory: 'social-media',
+    popularity_score: 90,
+    difficulty_level: 'intermediate',
+    tags: ['sns', 'social-media', 'tiktok', 'short-video', 'creator', 'marketing', 'viral', 'duet', 'stitch'],
+    alternatives: ['youtube-api', 'instagram-api'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python', 'java'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'high',
+    setup_time_minutes: 25,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$0',
+      enterprise: '$0 (API 무료)',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // LinkedIn API
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.linkedin_api,
+    name: 'LinkedIn API',
+    slug: 'linkedin-api',
+    category: 'sns',
+    description:
+      'LinkedIn API를 통해 프로필 조회, 게시물 작성, 회사 페이지 관리, 채용 공고, 분석 등을 프로그래밍 방식으로 연동할 수 있습니다.',
+    description_ko:
+      'LinkedIn API를 통해 프로필 조회, 게시물 작성, 회사 페이지 관리, 채용 공고, 분석 등을 프로그래밍 방식으로 연동할 수 있습니다.',
+    icon_url: null,
+    website_url: 'https://developer.linkedin.com',
+    docs_url: 'https://learn.microsoft.com/en-us/linkedin/',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '기본 프로필 API 무료, Marketing/Sales API는 파트너십 필요',
+      plans: [
+        { name: 'Community', price: '$0/월 (기본 API)' },
+        { name: 'Marketing', price: '파트너십 모델 (문의)' },
+        { name: 'Sales Navigator', price: '$99+/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'LINKEDIN_CLIENT_ID',
+        public: false,
+        description: 'LinkedIn App Client ID',
+        description_ko: 'LinkedIn 앱 클라이언트 ID',
+      },
+      {
+        name: 'LINKEDIN_CLIENT_SECRET',
+        public: false,
+        description: 'LinkedIn App Client Secret',
+        description_ko: 'LinkedIn 앱 클라이언트 시크릿',
+      },
+    ],
+    domain: 'business',
+    subcategory: 'professional-sns',
+    popularity_score: 82,
+    difficulty_level: 'intermediate',
+    tags: ['sns', 'professional', 'linkedin', 'b2b', 'recruiting', 'networking', 'career', 'marketing', 'microsoft'],
+    alternatives: ['x-api'],
+    compatibility: {
+      framework: ['next', 'express', 'django', 'flask', 'spring'],
+      language: ['javascript', 'typescript', 'python', 'java', 'dotnet'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'limited',
+    vendor_lock_in_risk: 'high',
+    setup_time_minutes: 30,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$0 (기본)',
+      enterprise: '문의 (Marketing/Sales API)',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Threads API (Meta)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.threads_api,
+    name: 'Threads API',
+    slug: 'threads-api',
+    category: 'sns',
+    description:
+      'Meta Threads API를 통해 텍스트 게시물 작성, 미디어 업로드, 폴, 인사이트 조회 등을 자동화할 수 있습니다. Instagram 계정 기반으로 동작합니다.',
+    description_ko:
+      'Meta Threads API를 통해 텍스트 게시물 작성, 미디어 업로드, 폴, 인사이트 조회 등을 자동화할 수 있습니다. Instagram 계정 기반으로 동작합니다.',
+    icon_url: null,
+    website_url: 'https://developers.facebook.com/docs/threads',
+    docs_url: 'https://developers.facebook.com/docs/threads/overview',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '완전 무료 (Meta Graph API 기반)',
+      plans: [
+        { name: 'Standard', price: '$0/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'THREADS_APP_ID',
+        public: false,
+        description: 'Meta App ID for Threads API',
+        description_ko: 'Threads API용 Meta 앱 ID',
+      },
+      {
+        name: 'THREADS_APP_SECRET',
+        public: false,
+        description: 'Meta App Secret for Threads API',
+        description_ko: 'Threads API용 Meta 앱 시크릿',
+      },
+      {
+        name: 'THREADS_ACCESS_TOKEN',
+        public: false,
+        description: 'Long-lived access token for Threads API',
+        description_ko: 'Threads API용 장기 액세스 토큰',
+      },
+    ],
+    domain: 'business',
+    subcategory: 'social-media',
+    popularity_score: 78,
+    difficulty_level: 'beginner',
+    tags: ['sns', 'social-media', 'threads', 'meta', 'text', 'microblog', 'instagram', 'poll'],
+    alternatives: ['x-api', 'instagram-api'],
+    compatibility: {
+      framework: ['next', 'express', 'fastify', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python', 'php'],
+    },
+    official_sdks: {
+      python: 'https://github.com/facebook/facebook-python-business-sdk',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'high',
+    setup_time_minutes: 20,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$0',
+      enterprise: '$0',
     },
   },
 ];

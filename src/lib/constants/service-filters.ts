@@ -54,6 +54,7 @@ export const allCategoryLabels: Record<ServiceCategory, string> = {
   automation: '자동화',
   domain: '도메인',
   advertising: '광고',
+  sns: 'SNS',
 };
 
 export const allCategoryEmojis: Record<ServiceCategory, string> = {
@@ -88,6 +89,7 @@ export const allCategoryEmojis: Record<ServiceCategory, string> = {
   automation: '🤖',
   domain: '🌐',
   advertising: '📢',
+  sns: '📱',
 };
 
 export const domainCategoryMap: Record<ServiceDomain, ServiceCategory[]> = {
@@ -95,7 +97,7 @@ export const domainCategoryMap: Record<ServiceDomain, ServiceCategory[]> = {
   backend: ['database', 'auth', 'social_login', 'queue', 'search', 'cms'],
   devtools: ['cicd', 'testing', 'code_quality', 'logging'],
   communication: ['email', 'sms', 'push', 'chat'],
-  business: ['payment', 'ecommerce', 'analytics', 'scheduling', 'advertising'],
+  business: ['payment', 'ecommerce', 'analytics', 'scheduling', 'advertising', 'sns'],
   ai_ml: ['ai'],
   observability: ['monitoring', 'logging', 'feature_flags'],
   integration: ['automation', 'other'],

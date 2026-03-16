@@ -39,7 +39,7 @@ const CAT_VG: Record<string, string> = {
   database: 'core', auth: 'core', social_login: 'core', cache: 'core', search: 'core',
   deploy: 'runtime', serverless: 'runtime', cdn: 'runtime', domain: 'runtime',
   email: 'growth', sms: 'growth', push: 'growth', payment: 'growth', analytics: 'growth',
-  ecommerce: 'growth', chat: 'growth', cms: 'growth', advertising: 'growth',
+  ecommerce: 'growth', chat: 'growth', cms: 'growth', advertising: 'growth', sns: 'growth',
   ai: 'intelligence',
   storage: 'infra', monitoring: 'infra', logging: 'infra', cicd: 'infra', testing: 'infra',
   code_quality: 'infra', media: 'infra', queue: 'infra', feature_flags: 'infra',
@@ -268,6 +268,13 @@ export const CATEGORY_STYLES: Record<ServiceCategory, CategoryStyle> = {
     accentGradient: 'from-orange-400 to-amber-600',
     hexColor: '#f97316',
     ...vg('advertising'),
+  },
+  sns: {
+    nodeClasses: 'bg-pink-50 border-pink-200 dark:bg-pink-950/50 dark:border-pink-800',
+    gridBorderClasses: 'border-pink-300 dark:border-pink-700',
+    accentGradient: 'from-pink-400 to-rose-600',
+    hexColor: '#ec4899',
+    ...vg('sns'),
   },
 };
 

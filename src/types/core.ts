@@ -29,7 +29,8 @@ export type ServiceCategory =
   | 'code_quality'
   | 'automation'
   | 'domain'
-  | 'advertising';
+  | 'advertising'
+  | 'sns';
 
 export type ServiceDomain =
   | 'infrastructure'

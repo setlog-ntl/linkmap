@@ -5,7 +5,7 @@ const CATEGORY_TO_GROUP: Record<ServiceCategory, ViewGroup> = {
   deploy: 'runtime', serverless: 'runtime', cdn: 'runtime',
   email: 'growth', sms: 'growth', push: 'growth', payment: 'growth', analytics: 'growth', ecommerce: 'growth', chat: 'growth', cms: 'growth',
   ai: 'intelligence',
-  storage: 'infra', monitoring: 'infra', logging: 'infra', cicd: 'infra', testing: 'infra', code_quality: 'infra', media: 'infra', queue: 'infra', feature_flags: 'infra', scheduling: 'infra', automation: 'infra', other: 'infra', domain: 'runtime', advertising: 'growth',
+  storage: 'infra', monitoring: 'infra', logging: 'infra', cicd: 'infra', testing: 'infra', code_quality: 'infra', media: 'infra', queue: 'infra', feature_flags: 'infra', scheduling: 'infra', automation: 'infra', other: 'infra', domain: 'runtime', advertising: 'growth', sns: 'growth',
 };
 
 export interface ViewGroupMeta {
