@@ -4,17 +4,17 @@ import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { generateGuideJsonLd } from '@/lib/seo/json-ld';
 
 export const metadata: Metadata = {
-  title: '도메인·배포·서버란? — 바이브 코더 가이드 | Linkmap',
+  title: '배포 완전 정복 — 바이브 코더 가이드 | Linkmap',
   description:
-    '내 컴퓨터에서 전 세계로 — 도메인·DNS·서버·CDN·배포 파이프라인 개념을 초보자 눈높이로 설명합니다.',
-  keywords: ['도메인', 'DNS', '배포', '서버', 'CDN', '호스팅', 'Vercel', 'Cloudflare', '초보자'],
+    '코드를 작성하고 세상에 공개하기까지의 모든 과정. 수동 배포 vs 자동 배포, 배포 파이프라인, 플랫폼 비교를 초보자 눈높이로 설명합니다.',
+  keywords: ['배포', 'Deploy', 'CI/CD', 'Vercel', 'Cloudflare', 'Railway', 'Netlify', '자동 배포', '초보자'],
 };
 
 export default function DeployGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'deploy',
-    title: '도메인·배포·서버란? — 바이브 코더 가이드',
-    description: '내 컴퓨터에서 전 세계로 — 도메인·DNS·서버·CDN·배포 파이프라인 개념을 초보자 눈높이로 설명합니다.',
+    title: '배포 완전 정복 — 바이브 코더 가이드',
+    description: '코드를 작성하고 세상에 공개하기까지의 모든 과정. 배포 파이프라인과 플랫폼 비교를 초보자 눈높이로 설명합니다.',
   });
 
   return (

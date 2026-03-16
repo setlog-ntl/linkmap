@@ -1,18 +1,18 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { HeroSection } from './deploy-guide/hero-section';
-import { DeployBasicsSection } from './deploy-guide/deploy-basics-section';
-import { DeployFlowSection } from './deploy-guide/deploy-flow-section';
-import { PlatformsSection } from './deploy-guide/platforms-section';
+import { HeroSection } from './server-guide/hero-section';
+import { WhatIsServerSection } from './server-guide/what-is-server-section';
+import { ServerVsLocalSection } from './server-guide/server-vs-local-section';
+import { HostingOverviewSection } from './server-guide/hosting-overview-section';
 
 const sections = [
-  { id: 'deploy-basics', label: '배포란?' },
-  { id: 'deploy-flow', label: '배포 파이프라인' },
-  { id: 'platforms', label: '배포 플랫폼' },
+  { id: 'what-is-server', label: '서버란?' },
+  { id: 'server-vs-local', label: '내 PC vs 서버' },
+  { id: 'hosting-overview', label: '호스팅 유형' },
 ] as const;
 
-export function DeployGuide() {
+export function ServerGuide() {
   const [activeSection, setActiveSection] = useState<string>('');
   const observerRef = useRef<IntersectionObserver | null>(null);
 
@@ -66,9 +66,9 @@ export function DeployGuide() {
         </div>
       </nav>
 
-      <DeployBasicsSection />
-      <DeployFlowSection />
-      <PlatformsSection />
+      <WhatIsServerSection />
+      <ServerVsLocalSection />
+      <HostingOverviewSection />
     </div>
   );
 }

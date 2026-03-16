@@ -3,6 +3,13 @@
 import { Badge } from '@/components/ui/badge';
 import { ScrollReveal } from '@/components/landing/scroll-reveal';
 
+const flowSteps = [
+  { emoji: '✍️', label: '코드 작성', sub: 'VS Code' },
+  { emoji: '📦', label: 'git push', sub: 'GitHub' },
+  { emoji: '🔨', label: '자동 빌드', sub: 'CI/CD' },
+  { emoji: '🎉', label: '서비스 오픈', sub: 'my-app.com' },
+];
+
 export function HeroSection() {
   return (
     <section className="py-12 md:py-20">
@@ -12,51 +19,43 @@ export function HeroSection() {
             초보자용 · 읽기 약 10분
           </Badge>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
-            도메인 · 배포 · 서버란?
+            배포 완전 정복
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            내 컴퓨터에서 만든 코드를 전 세계가 접속하도록 만드는 방법
+            코드를 작성하고 세상에 공개하기까지의 모든 과정
             <br className="hidden sm:block" />
-            도메인 · DNS · 서버 · CDN · 배포의 모든 것
+            수동 배포부터 자동 파이프라인, 플랫폼 선택까지
           </p>
         </div>
       </ScrollReveal>
 
-      {/* 배포 전/후 도식 */}
+      {/* 배포 흐름 도식: 코드작성 → git push → 자동빌드 → 서비스오픈 */}
       <ScrollReveal delay={0.15}>
         <div className="max-w-2xl mx-auto mt-10">
           <div className="rounded-xl border bg-card shadow-sm p-6">
-            <div className="flex items-center justify-between gap-4">
-              {/* 내 컴퓨터 */}
-              <div className="flex flex-col items-center text-center gap-2 flex-1">
-                <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center text-3xl">
-                  💻
+            <div className="flex items-center justify-between gap-2">
+              {flowSteps.map((step, i) => (
+                <div key={step.label} className="flex items-center">
+                  <div className="flex flex-col items-center text-center gap-1.5 flex-1 min-w-[70px]">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-muted flex items-center justify-center text-2xl sm:text-3xl">
+                      {step.emoji}
+                    </div>
+                    <div className="text-xs sm:text-sm font-semibold">{step.label}</div>
+                    <div className="text-[10px] text-muted-foreground">{step.sub}</div>
+                  </div>
+                  {i < flowSteps.length - 1 && (
+                    <div className="shrink-0 mx-1">
+                      <svg className="w-8 h-5 sm:w-12 sm:h-5 text-primary" viewBox="0 0 48 20" fill="none">
+                        <path d="M0 10h40m0 0-8-5m8 5-8 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
-                <div className="text-sm font-semibold">내 컴퓨터</div>
-                <div className="text-[11px] text-muted-foreground">localhost:3000</div>
-                <div className="text-[10px] text-red-500 bg-red-50 dark:bg-red-950/30 px-2 py-0.5 rounded">
-                  나만 접속 가능
-                </div>
-              </div>
-
-              {/* 배포 화살표 */}
-              <div className="flex flex-col items-center gap-1 shrink-0">
-                <svg className="w-12 h-5 text-primary" viewBox="0 0 48 20" fill="none">
-                  <path d="M0 10h40m0 0-8-5m8 5-8 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <span className="text-[10px] font-medium text-primary">배포 (Deploy)</span>
-              </div>
-
-              {/* 서버 */}
-              <div className="flex flex-col items-center text-center gap-2 flex-1">
-                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-3xl">
-                  🌐
-                </div>
-                <div className="text-sm font-semibold">서버 + 도메인</div>
-                <div className="text-[11px] text-muted-foreground">my-app.com</div>
-                <div className="text-[10px] text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 px-2 py-0.5 rounded">
-                  전 세계 접속 가능
-                </div>
+              ))}
+            </div>
+            <div className="text-center mt-5">
+              <div className="text-[10px] text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 px-3 py-1 rounded-full inline-block">
+                git push 한 번으로 전 세계에 공개!
               </div>
             </div>
           </div>

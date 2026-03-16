@@ -1,4 +1,4 @@
-import { BookOpen, Wrench, Key, Shield, Monitor, Server, Globe, Github, Cloud, Bot, Database, Triangle, Chrome, MessageCircle, FileText, FolderOpen, Rocket, RefreshCw, Atom, ServerCog, CloudCog, GitBranch, Terminal, Package, KeyRound, Zap, Link2, LayoutDashboard } from 'lucide-react';
+import { BookOpen, Wrench, Key, Shield, Monitor, Server, Globe, Github, Cloud, Bot, Database, Triangle, Chrome, MessageCircle, FileText, FolderOpen, Rocket, RefreshCw, Atom, CloudCog, GitBranch, Terminal, Package, KeyRound, Zap, Link2, ServerCog, ShoppingCart, Network } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export type GuideCategory = 'concept' | 'service';
@@ -25,7 +25,9 @@ export const GUIDE_LIST: GuideMeta[] = [
   { slug: 'auth', title: '인증 가이드', description: '앱 로그인·서비스 연동 개념 + 구글·카카오 로그인 설정법', category: 'concept', icon: Shield, badge: '초보자용', readingTime: '15분', href: '/guides/auth' },
   { slug: 'frontend', title: '프론트엔드 가이드', description: '브라우저 렌더링, 컴포넌트, CSR·SSR·SSG', category: 'concept', icon: Monitor, readingTime: '12분', href: '/guides/frontend' },
   { slug: 'backend', title: '백엔드 가이드', description: 'API, 데이터베이스, BaaS의 기초', category: 'concept', icon: Server, readingTime: '10분', href: '/guides/backend' },
-  { slug: 'deploy', title: '도메인·배포·서버', description: '도메인, DNS, 호스팅, 배포 파이프라인', category: 'concept', icon: Globe, readingTime: '15분', href: '/guides/deploy' },
+  { slug: 'domain', title: '도메인 완전 정복', description: '도메인 구매, URL 구조, DNS 레코드 설정까지', category: 'concept', icon: Globe, badge: '초보자용', readingTime: '8분', href: '/guides/domain' },
+  { slug: 'server', title: '서버·호스팅 이해하기', description: '서버 개념, 호스팅 유형 비교, CDN과 엣지 서버', category: 'concept', icon: ServerCog, badge: '초보자용', readingTime: '10분', href: '/guides/server' },
+  { slug: 'deploy', title: '배포 완전 정복', description: '수동 vs 자동 배포, 파이프라인, 플랫폼 비교', category: 'concept', icon: Rocket, badge: '초보자용', readingTime: '10분', href: '/guides/deploy' },
   // 서비스 가이드
   { slug: 'github', title: 'GitHub 시작하기', description: '가입부터 첫 저장소까지 5단계 완성', category: 'service', icon: Github, badge: '단계별', readingTime: '30분', href: '/guides/github' },
   { slug: 'cloudflare', title: 'Cloudflare 연결', description: '계정 생성부터 자동 배포까지 7단계', category: 'service', icon: Cloud, badge: '단계별', readingTime: '40분', href: '/guides/cloudflare' },
@@ -68,9 +70,20 @@ export const SUB_GUIDE_LIST: SubGuideMeta[] = [
   { slug: 'database', parentSlug: 'backend', title: '데이터베이스 기초', description: 'RDB, NoSQL, 스키마 개념', icon: Database, readingTime: '4분', href: '/guides/backend/database' },
   { slug: 'baas', parentSlug: 'backend', title: 'BaaS 활용하기', description: 'Supabase/Firebase로 백엔드 없이 개발', icon: CloudCog, readingTime: '3분', href: '/guides/backend/baas' },
 
+  // ── 도메인 (domain) ──
+  { slug: 'overview', parentSlug: 'domain', title: '개요 — 도메인이란?', description: '인터넷 주소의 개념, IP vs 도메인, URL 구조', icon: FileText, readingTime: '3분', href: '/guides/domain' },
+  { slug: 'how-to-buy', parentSlug: 'domain', title: '도메인 구매 방법', description: '이름 짓기, 등록 업체 선택, 구매 후 체크리스트', icon: ShoppingCart, readingTime: '5분', href: '/guides/domain/how-to-buy' },
+  { slug: 'dns-records', parentSlug: 'domain', title: 'DNS 레코드 설정', description: 'A, CNAME, TXT 레코드와 Vercel·Cloudflare 연결 실전', icon: Network, readingTime: '6분', href: '/guides/domain/dns-records' },
+
+  // ── 서버·호스팅 (server) ──
+  { slug: 'overview', parentSlug: 'server', title: '개요 — 서버란?', description: '서버의 개념, 내 PC와 차이, 호스팅 유형 소개', icon: FileText, readingTime: '3분', href: '/guides/server' },
+  { slug: 'hosting-types', parentSlug: 'server', title: '호스팅 유형 비교', description: '정적·동적·서버리스·VPS 비교와 플랫폼 추천', icon: ServerCog, readingTime: '5분', href: '/guides/server/hosting-types' },
+  { slug: 'cdn', parentSlug: 'server', title: 'CDN과 엣지 서버', description: 'CDN 동작 원리, 엣지 컴퓨팅, 제공자 비교', icon: Globe, readingTime: '5분', href: '/guides/server/cdn' },
+
   // ── 배포 (deploy) ──
-  { slug: 'overview', parentSlug: 'deploy', title: '개요 — 도메인과 DNS', description: '도메인 구매, DNS 레코드 설정 방법', icon: FileText, readingTime: '5분', href: '/guides/deploy' },
-  { slug: 'hosting', parentSlug: 'deploy', title: '서버와 호스팅', description: '정적/동적 호스팅, CDN 개념', icon: ServerCog, readingTime: '5분', href: '/guides/deploy/hosting' },
+  { slug: 'overview', parentSlug: 'deploy', title: '개요 — 배포란?', description: '수동 vs 자동 배포, 배포 환경 3가지', icon: FileText, readingTime: '3분', href: '/guides/deploy' },
+  { slug: 'vercel-deploy', parentSlug: 'deploy', title: 'Vercel 배포 가이드', description: '가입부터 첫 배포, Preview URL, 커스텀 도메인까지', icon: Triangle, readingTime: '7분', href: '/guides/deploy/vercel-deploy' },
+  { slug: 'github-actions', parentSlug: 'deploy', title: 'GitHub Actions 가이드', description: 'CI/CD 핵심 개념, YAML 문법, 실전 워크플로우', icon: GitBranch, readingTime: '8분', href: '/guides/deploy/github-actions' },
   { slug: 'cicd', parentSlug: 'deploy', title: 'CI/CD 배포 파이프라인', description: 'GitHub Actions로 자동 배포 구축', icon: RefreshCw, readingTime: '5분', href: '/guides/deploy/cicd' },
 
   // ── GitHub (github) ──

@@ -1,18 +1,18 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { HeroSection } from './deploy-guide/hero-section';
-import { DeployBasicsSection } from './deploy-guide/deploy-basics-section';
-import { DeployFlowSection } from './deploy-guide/deploy-flow-section';
-import { PlatformsSection } from './deploy-guide/platforms-section';
+import { HeroSection } from './domain-guide/hero-section';
+import { DomainBasicsSection } from './domain-guide/domain-basics-section';
+import { UrlAnatomySection } from './domain-guide/url-anatomy-section';
+import { RegistrarsSection } from './domain-guide/registrars-section';
 
 const sections = [
-  { id: 'deploy-basics', label: '배포란?' },
-  { id: 'deploy-flow', label: '배포 파이프라인' },
-  { id: 'platforms', label: '배포 플랫폼' },
+  { id: 'domain-basics', label: '도메인 기초' },
+  { id: 'url-anatomy', label: 'URL 해부' },
+  { id: 'registrars', label: '구매처 비교' },
 ] as const;
 
-export function DeployGuide() {
+export function DomainGuide() {
   const [activeSection, setActiveSection] = useState<string>('');
   const observerRef = useRef<IntersectionObserver | null>(null);
 
@@ -66,9 +66,9 @@ export function DeployGuide() {
         </div>
       </nav>
 
-      <DeployBasicsSection />
-      <DeployFlowSection />
-      <PlatformsSection />
+      <DomainBasicsSection />
+      <UrlAnatomySection />
+      <RegistrarsSection />
     </div>
   );
 }
