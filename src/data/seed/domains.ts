@@ -83,4 +83,13 @@ export const domains: DomainSeed[] = [
     icon_name: 'Plug',
     order_index: 8,
   },
+  {
+    id: 'sns',
+    name: 'SNS',
+    name_ko: 'SNS',
+    description: 'Social network service platform APIs for content publishing, analytics, and engagement',
+    description_ko: '소셜 네트워크 플랫폼 API — 콘텐츠 발행, 분석, 인게이지먼트',
+    icon_name: 'Share2',
+    order_index: 9,
+  },
 ];

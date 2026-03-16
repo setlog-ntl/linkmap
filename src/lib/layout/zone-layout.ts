@@ -34,6 +34,7 @@ const DOMAIN_TO_ZONE: Record<ServiceDomain, ZoneKey> = {
   ai_ml: 'backend',
   observability: 'devtools',
   integration: 'backend',
+  sns: 'frontend',
 };
 
 const GRID_COLS = 3;

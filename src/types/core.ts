@@ -40,7 +40,8 @@ export type ServiceDomain =
   | 'business'
   | 'ai_ml'
   | 'observability'
-  | 'integration';
+  | 'integration'
+  | 'sns';
 
 export type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced';
 export type FreeTierQuality = 'excellent' | 'good' | 'limited' | 'none';

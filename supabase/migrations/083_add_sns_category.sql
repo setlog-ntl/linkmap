@@ -14,6 +14,14 @@ ALTER TABLE public.services ADD CONSTRAINT services_category_check
     'serverless', 'code_quality', 'automation', 'domain', 'advertising', 'sns'
   ));
 
+-- sns 도메인 추가
+INSERT INTO public.service_domains (id, name, name_ko, description, description_ko, icon_name, order_index)
+VALUES ('sns', 'SNS', 'SNS',
+  'Social network service platform APIs for content publishing, analytics, and engagement',
+  '소셜 네트워크 플랫폼 API — 콘텐츠 발행, 분석, 인게이지먼트',
+  'Share2', 9)
+ON CONFLICT (id) DO NOTHING;
+
 -- sns 서브카테고리 추가
 INSERT INTO public.service_subcategories (id, category, name, name_ko, description, description_ko)
 VALUES

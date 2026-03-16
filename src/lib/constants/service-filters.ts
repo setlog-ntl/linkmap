@@ -9,6 +9,7 @@ export const domainLabels: Record<ServiceDomain, string> = {
   ai_ml: 'AI/ML',
   observability: '옵저버빌리티',
   integration: '통합',
+  sns: 'SNS',
 };
 
 export const domainIcons: Record<ServiceDomain, string> = {
@@ -20,6 +21,7 @@ export const domainIcons: Record<ServiceDomain, string> = {
   ai_ml: '🧠',
   observability: '🔍',
   integration: '🔗',
+  sns: '📱',
 };
 
 export const allCategoryLabels: Record<ServiceCategory, string> = {
@@ -97,7 +99,8 @@ export const domainCategoryMap: Record<ServiceDomain, ServiceCategory[]> = {
   backend: ['database', 'auth', 'social_login', 'queue', 'search', 'cms'],
   devtools: ['cicd', 'testing', 'code_quality', 'logging'],
   communication: ['email', 'sms', 'push', 'chat'],
-  business: ['payment', 'ecommerce', 'analytics', 'scheduling', 'advertising', 'sns'],
+  business: ['payment', 'ecommerce', 'analytics', 'scheduling', 'advertising'],
+  sns: ['sns'],
   ai_ml: ['ai'],
   observability: ['monitoring', 'logging', 'feature_flags'],
   integration: ['automation', 'other'],
