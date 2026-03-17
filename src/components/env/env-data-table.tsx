@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,7 +10,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Eye, EyeOff, Pencil, Trash2, Copy, MoreHorizontal, Key as KeyIcon, ChevronDown } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Eye, EyeOff, Pencil, Trash2, Copy, Check, MoreHorizontal, Key as KeyIcon, ChevronDown, AlertTriangle } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -51,6 +58,15 @@ export function EnvDataTable({
   onCopyValue,
   serviceGroups,
 }: EnvDataTableProps) {
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopyValue = useCallback(async (envVar: EnvironmentVariable) => {
+    if (!onCopyValue) return;
+    onCopyValue(envVar);
+    setCopiedId(envVar.id);
+    setTimeout(() => setCopiedId(null), 1500);
+  }, [onCopyValue]);
+
   const maskValue = (value: string) => {
     return '\u2022'.repeat(Math.min(value.length || 20, 30));
   };
@@ -61,6 +77,10 @@ export function EnvDataTable({
   };
 
   const { locale } = useLocaleStore();
+
+  /** NEXT_PUBLIC_ + is_secret 조합 경고 판별 */
+  const isPublicSecretConflict = (envVar: EnvironmentVariable) =>
+    envVar.key_name.startsWith('NEXT_PUBLIC_') && envVar.is_secret;
 
   if (envVars.length === 0) {
     return (
@@ -82,30 +102,65 @@ export function EnvDataTable({
       className={cn(
         'flex flex-col gap-2 p-3 sm:p-4 sm:items-center hover:bg-muted/30 transition-colors',
         showServiceColumn
-          ? 'sm:grid sm:grid-cols-[1fr_200px_140px_100px_80px] sm:gap-4'
-          : 'sm:grid sm:grid-cols-[1fr_200px_100px_80px] sm:gap-4'
+          ? 'sm:grid sm:grid-cols-[1fr_200px_140px_100px_120px] sm:gap-4'
+          : 'sm:grid sm:grid-cols-[1fr_200px_100px_120px] sm:gap-4'
       )}
     >
-      {/* Key name */}
+      {/* Key name + badge */}
       <div className="flex items-center gap-2 min-w-0">
         <code className="text-sm font-mono font-medium truncate">
           {envVar.key_name}
         </code>
-        <Badge
-          variant={envVar.is_secret ? 'destructive' : 'secondary'}
-          className="text-[10px] shrink-0"
-        >
-          {envVar.is_secret ? '비밀' : '공개'}
-        </Badge>
+        {isPublicSecretConflict(envVar) ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge
+                  variant="destructive"
+                  className="text-[10px] shrink-0 gap-1"
+                >
+                  <AlertTriangle className="h-3 w-3" />
+                  공개 노출 위험
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[280px]">
+                <p className="text-xs">
+                  NEXT_PUBLIC_ 접두사가 붙은 변수는 클라이언트 번들에 포함됩니다. 민감한 값이라면 접두사를 제거하세요.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
+          <Badge
+            variant={envVar.is_secret ? 'destructive' : 'secondary'}
+            className="text-[10px] shrink-0"
+          >
+            {envVar.is_secret ? '비밀' : '공개'}
+          </Badge>
+        )}
       </div>
 
-      {/* Value */}
+      {/* Value + copy button */}
       <div className="flex items-center gap-1 min-w-0">
         <code className="text-xs text-muted-foreground font-mono truncate">
           {showValues[envVar.id] && decryptedValues[envVar.id] !== undefined
             ? decryptedValues[envVar.id]
             : maskValue(envVar.encrypted_value)}
         </code>
+        {onCopyValue && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 shrink-0"
+            onClick={() => handleCopyValue(envVar)}
+          >
+            {copiedId === envVar.id ? (
+              <Check className="h-3.5 w-3.5 text-green-500" />
+            ) : (
+              <Copy className="h-3.5 w-3.5" />
+            )}
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="icon"
@@ -139,8 +194,16 @@ export function EnvDataTable({
         {formatDate(envVar.updated_at)}
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center justify-end">
+      {/* Actions: edit icon + dropdown */}
+      <div className="flex items-center justify-end gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => onEdit(envVar)}
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -195,7 +258,7 @@ export function EnvDataTable({
     <Card>
       <CardContent className="p-0">
         {/* Header row - hidden on mobile */}
-        <div className="hidden sm:grid sm:grid-cols-[1fr_200px_140px_100px_80px] gap-4 px-4 py-2 border-b bg-muted/50 text-xs font-medium text-muted-foreground">
+        <div className="hidden sm:grid sm:grid-cols-[1fr_200px_140px_100px_120px] gap-4 px-4 py-2 border-b bg-muted/50 text-xs font-medium text-muted-foreground">
           <div>키 이름</div>
           <div>값</div>
           <div>서비스</div>
@@ -212,7 +275,6 @@ export function EnvDataTable({
 }
 
 // ── 서비스 그룹 카드 (접기/펼치기) ──
-import { useState } from 'react';
 
 function ServiceGroupCard({
   group,
@@ -253,7 +315,7 @@ function ServiceGroupCard({
         {!isCollapsed && (
           <>
             {/* Header row for grouped mode (no service column) */}
-            <div className="hidden sm:grid sm:grid-cols-[1fr_200px_100px_80px] gap-4 px-4 py-2 border-b bg-muted/30 text-xs font-medium text-muted-foreground">
+            <div className="hidden sm:grid sm:grid-cols-[1fr_200px_100px_120px] gap-4 px-4 py-2 border-b bg-muted/30 text-xs font-medium text-muted-foreground">
               <div>키 이름</div>
               <div>값</div>
               <div>수정일</div>

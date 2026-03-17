@@ -36,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { GitBranch, Loader2 } from 'lucide-react';
+import { AlertTriangle, GitBranch, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   buildEnvKeyServiceMap,
@@ -581,6 +581,14 @@ export default function ProjectEnvPage() {
                 민감한 값 (Secret)
               </Label>
             </div>
+            {newKey.startsWith('NEXT_PUBLIC_') && newIsSecret && (
+              <div className="flex items-start gap-2 rounded-md border border-destructive/50 bg-destructive/5 p-3">
+                <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                <p className="text-xs text-destructive">
+                  NEXT_PUBLIC_ 접두사가 붙은 변수는 클라이언트 번들에 포함되어 브라우저에서 노출됩니다. 민감한 값이라면 접두사를 제거하거나, &quot;민감한 값&quot; 체크를 해제하세요.
+                </p>
+              </div>
+            )}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>
                 취소

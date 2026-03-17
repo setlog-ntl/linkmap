@@ -20,7 +20,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Upload, Loader2 } from 'lucide-react';
-import { parseEnvContent } from '@/lib/utils/parse-env';
+import { parseEnvContent, detectEnvFormat } from '@/lib/utils/parse-env';
+import type { EnvFormat } from '@/lib/utils/parse-env';
 import { useCatalogServices } from '@/lib/queries/services';
 import { buildEnvKeyServiceMap, matchEnvKeyToService } from '@/lib/utils/env-service-matcher';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -62,6 +63,17 @@ export function EnvImportDialog({ open, onOpenChange, onImport, projectServices,
   );
 
   const parsed = useMemo(() => parseEnvContent(content), [content]);
+
+  const detectedFormat = useMemo((): EnvFormat | null => {
+    if (!content.trim()) return null;
+    return detectEnvFormat(content);
+  }, [content]);
+
+  const formatLabels: Record<EnvFormat, string> = {
+    'dotenv': '.env',
+    'json': 'Vercel JSON',
+    'docker-compose': 'Docker Compose',
+  };
 
   const parsedWithService = useMemo(() => {
     // Build a set of project service IDs for filtering
@@ -128,13 +140,22 @@ export function EnvImportDialog({ open, onOpenChange, onImport, projectServices,
             </Select>
           </div>
 
-          <Textarea
-            placeholder={t(locale, 'envVar.importDialog.placeholder')}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={8}
-            className="font-mono text-sm"
-          />
+          <div className="space-y-2">
+            <Textarea
+              placeholder={`# .env 형식\nAPI_KEY=sk_live_...\n\n# Vercel JSON 형식\n{"API_KEY": "sk_live_..."}\n\n# Docker Compose 형식\nenvironment:\n  - API_KEY=sk_live_...`}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={8}
+              className="font-mono text-sm"
+            />
+            {detectedFormat && parsed.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-[10px]">
+                  {formatLabels[detectedFormat]} 감지됨
+                </Badge>
+              </div>
+            )}
+          </div>
 
           {parsedWithService.length > 0 && (
             <div className="border rounded-lg p-3 max-h-[200px] overflow-y-auto">
