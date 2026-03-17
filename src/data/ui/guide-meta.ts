@@ -1,4 +1,4 @@
-import { BookOpen, Wrench, Key, Shield, Monitor, Server, Globe, Github, Cloud, Bot, Database, Triangle, Chrome, MessageCircle, FileText, FolderOpen, Rocket, RefreshCw, Atom, CloudCog, GitBranch, Terminal, Package, KeyRound, Zap, Link2, ServerCog, ShoppingCart, Network } from 'lucide-react';
+import { BookOpen, Wrench, Key, Shield, Monitor, Server, Globe, Github, Cloud, Bot, Database, Triangle, Chrome, MessageCircle, FileText, FolderOpen, Rocket, RefreshCw, Atom, CloudCog, GitBranch, Terminal, Package, KeyRound, Zap, Link2, ServerCog, ShoppingCart, Network, ShieldCheck, Palette, Mail, CreditCard, Activity, Workflow, Plug, Cpu, Code, Smartphone, AlertTriangle, Lock, Globe2, Layers, BookMarked, Search, ToggleRight, Bell, Send, Radio, Webhook, Timer, Share2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export type GuideCategory = 'concept' | 'service';
@@ -28,6 +28,19 @@ export const GUIDE_LIST: GuideMeta[] = [
   { slug: 'domain', title: '도메인 완전 정복', description: '도메인 구매, URL 구조, DNS 레코드 설정까지', category: 'concept', icon: Globe, badge: '초보자용', readingTime: '8분', href: '/guides/domain' },
   { slug: 'server', title: '서버·호스팅 이해하기', description: '서버 개념, 호스팅 유형 비교, CDN과 엣지 서버', category: 'concept', icon: ServerCog, badge: '초보자용', readingTime: '10분', href: '/guides/server' },
   { slug: 'deploy', title: '배포 완전 정복', description: '수동 vs 자동 배포, 파이프라인, 플랫폼 비교', category: 'concept', icon: Rocket, badge: '초보자용', readingTime: '10분', href: '/guides/deploy' },
+  // P0 신규
+  { slug: 'ai-tools', title: 'AI 도구 활용 가이드', description: '바이브코딩 개념부터 Cursor·Claude Code, AI API 연동까지', category: 'concept', icon: Bot, badge: '바이브코딩 필수', readingTime: '15분', href: '/guides/ai-tools' },
+  { slug: 'security', title: '보안 기초 가이드', description: '시크릿 관리, 웹 취약점, HTTPS·CORS 에러 해결', category: 'concept', icon: ShieldCheck, badge: '필수', readingTime: '12분', href: '/guides/security' },
+  { slug: 'version-control', title: '버전 관리 심화', description: 'Git 브랜치 전략, PR과 코드 리뷰, 충돌 해결', category: 'concept', icon: GitBranch, badge: '초보자용', readingTime: '12분', href: '/guides/version-control' },
+  // P1 신규
+  { slug: 'package-manager', title: '패키지 매니저 가이드', description: 'npm/yarn/pnpm 비교, package.json, 에러 해결', category: 'concept', icon: Package, badge: '초보자용', readingTime: '10분', href: '/guides/package-manager' },
+  { slug: 'api-basics', title: 'API 연동 기초', description: 'HTTP 요청, 에러 핸들링, API 인증 방식', category: 'concept', icon: Plug, badge: '초보자용', readingTime: '12분', href: '/guides/api-basics' },
+  { slug: 'design-ui', title: '디자인/UI 가이드', description: '웹 디자인 기초, Tailwind CSS, 컴포넌트 라이브러리, 반응형', category: 'concept', icon: Palette, badge: '초보자용', readingTime: '10분', href: '/guides/design-ui' },
+  // P2 신규
+  { slug: 'communication', title: '커뮤니케이션 가이드', description: '이메일·SMS·푸시·실시간 알림 서비스 연동', category: 'concept', icon: Mail, readingTime: '10분', href: '/guides/communication' },
+  { slug: 'payment', title: '결제 연동 가이드', description: 'Stripe·토스페이먼츠 연동, 결제 웹훅 처리', category: 'concept', icon: CreditCard, readingTime: '12분', href: '/guides/payment' },
+  { slug: 'monitoring', title: '모니터링 가이드', description: '에러 추적, 웹 분석, 피처 플래그 활용', category: 'concept', icon: Activity, readingTime: '10분', href: '/guides/monitoring' },
+  { slug: 'automation', title: '자동화/통합 가이드', description: '웹훅, 스케줄링, SNS API 연동', category: 'concept', icon: Workflow, readingTime: '10분', href: '/guides/automation' },
   // 서비스 가이드
   { slug: 'github', title: 'GitHub 시작하기', description: '가입부터 첫 저장소까지 5단계 완성', category: 'service', icon: Github, badge: '단계별', readingTime: '30분', href: '/guides/github' },
   { slug: 'cloudflare', title: 'Cloudflare 연결', description: '계정 생성부터 자동 배포까지 7단계', category: 'service', icon: Cloud, badge: '단계별', readingTime: '40분', href: '/guides/cloudflare' },
@@ -86,6 +99,66 @@ export const SUB_GUIDE_LIST: SubGuideMeta[] = [
   { slug: 'github-actions', parentSlug: 'deploy', title: 'GitHub Actions 가이드', description: 'CI/CD 핵심 개념, YAML 문법, 실전 워크플로우', icon: GitBranch, readingTime: '8분', href: '/guides/deploy/github-actions' },
   { slug: 'cicd', parentSlug: 'deploy', title: 'CI/CD 배포 파이프라인', description: 'GitHub Actions로 자동 배포 구축', icon: RefreshCw, readingTime: '5분', href: '/guides/deploy/cicd' },
 
+  // ── AI 도구 (ai-tools) ──
+  { slug: 'overview', parentSlug: 'ai-tools', title: '개요 — 바이브코딩이란?', description: 'AI와 대화하며 코딩하는 새로운 개발 방식', icon: FileText, readingTime: '4분', href: '/guides/ai-tools' },
+  { slug: 'prompt-engineering', parentSlug: 'ai-tools', title: '프롬프트 엔지니어링', description: '좋은 지시 구조, 컨텍스트 관리, 규격 문서 작성', icon: Code, readingTime: '5분', href: '/guides/ai-tools/prompt-engineering' },
+  { slug: 'cursor-claude', parentSlug: 'ai-tools', title: 'Cursor / Claude Code 활용법', description: '설치, 설정, 실전 워크플로우', icon: Terminal, readingTime: '4분', href: '/guides/ai-tools/cursor-claude' },
+  { slug: 'ai-api', parentSlug: 'ai-tools', title: 'AI API 연동 기초', description: 'OpenAI/Anthropic API, 토큰, 비용 관리, 스트리밍', icon: Cpu, readingTime: '4분', href: '/guides/ai-tools/ai-api' },
+
+  // ── 보안 (security) ──
+  { slug: 'overview', parentSlug: 'security', title: '개요 — 웹 보안이 중요한 이유', description: 'AI 코드의 보안 취약점과 왜 신경 써야 하는지', icon: FileText, readingTime: '3분', href: '/guides/security' },
+  { slug: 'secrets-management', parentSlug: 'security', title: '시크릿 관리', description: '.env 보호, 키 로테이션, 환경 분리', icon: KeyRound, readingTime: '4분', href: '/guides/security/secrets-management' },
+  { slug: 'web-vulnerabilities', parentSlug: 'security', title: '웹 취약점 기초', description: 'XSS, CSRF, SQL Injection, 입력 검증', icon: AlertTriangle, readingTime: '4분', href: '/guides/security/web-vulnerabilities' },
+  { slug: 'https-cors', parentSlug: 'security', title: 'HTTPS와 CORS', description: 'SSL 인증서, 동일 출처 정책, CORS 에러 해결', icon: Lock, readingTime: '3분', href: '/guides/security/https-cors' },
+
+  // ── 버전 관리 (version-control) ──
+  { slug: 'overview', parentSlug: 'version-control', title: '개요 — Git 브랜치란?', description: '분기의 개념, 왜 필요한가', icon: FileText, readingTime: '3분', href: '/guides/version-control' },
+  { slug: 'branching', parentSlug: 'version-control', title: '브랜치 전략', description: 'main/feature/hotfix, AI 코드는 별도 브랜치에서', icon: GitBranch, readingTime: '4분', href: '/guides/version-control/branching' },
+  { slug: 'pull-request', parentSlug: 'version-control', title: 'PR과 코드 리뷰', description: '생성, 리뷰, 머지, Preview 배포', icon: Globe2, readingTime: '3분', href: '/guides/version-control/pull-request' },
+  { slug: 'conflict', parentSlug: 'version-control', title: '충돌 해결', description: 'conflict markers, merge vs rebase, 실전 시나리오', icon: RefreshCw, readingTime: '3분', href: '/guides/version-control/conflict' },
+
+  // ── 패키지 매니저 (package-manager) ──
+  { slug: 'overview', parentSlug: 'package-manager', title: '개요 — 패키지 매니저란?', description: 'npm/yarn/pnpm 비교, 왜 필요한가', icon: FileText, readingTime: '3분', href: '/guides/package-manager' },
+  { slug: 'npm-basics', parentSlug: 'package-manager', title: 'npm 기본 명령어', description: 'install, update, run, scripts', icon: Terminal, readingTime: '3분', href: '/guides/package-manager/npm-basics' },
+  { slug: 'package-json', parentSlug: 'package-manager', title: 'package.json 이해하기', description: 'dependencies vs devDependencies, semver ^/~', icon: FileText, readingTime: '3분', href: '/guides/package-manager/package-json' },
+  { slug: 'troubleshooting', parentSlug: 'package-manager', title: 'npm 에러 해결', description: '버전 충돌, audit 경고, node_modules 재설치', icon: AlertTriangle, readingTime: '3분', href: '/guides/package-manager/troubleshooting' },
+
+  // ── API 연동 기초 (api-basics) ──
+  { slug: 'overview', parentSlug: 'api-basics', title: '개요 — API란 무엇인가?', description: '레스토랑 비유, REST vs GraphQL', icon: FileText, readingTime: '3분', href: '/guides/api-basics' },
+  { slug: 'fetch-axios', parentSlug: 'api-basics', title: 'HTTP 요청 보내기', description: 'fetch, GET/POST, 헤더, 바디, JSON', icon: Zap, readingTime: '4분', href: '/guides/api-basics/fetch-axios' },
+  { slug: 'error-handling', parentSlug: 'api-basics', title: '에러 핸들링', description: '상태 코드 401/403/404/500, try/catch, 재시도', icon: AlertTriangle, readingTime: '3분', href: '/guides/api-basics/error-handling' },
+  { slug: 'api-auth', parentSlug: 'api-basics', title: 'API 인증 방식', description: 'API Key, Bearer Token, OAuth 소개', icon: Shield, readingTime: '3분', href: '/guides/api-basics/api-auth' },
+
+  // ── 디자인/UI (design-ui) ──
+  { slug: 'overview', parentSlug: 'design-ui', title: '개요 — 웹 디자인 기초', description: '색상, 타이포그래피, 여백', icon: FileText, readingTime: '3분', href: '/guides/design-ui' },
+  { slug: 'tailwind', parentSlug: 'design-ui', title: 'Tailwind CSS 시작하기', description: '유틸리티 클래스, 반응형 접두사', icon: Palette, readingTime: '3분', href: '/guides/design-ui/tailwind' },
+  { slug: 'components', parentSlug: 'design-ui', title: '컴포넌트 라이브러리', description: 'shadcn/ui, Radix UI 활용', icon: Layers, readingTime: '3분', href: '/guides/design-ui/components' },
+  { slug: 'responsive', parentSlug: 'design-ui', title: '반응형 디자인', description: '모바일 퍼스트, 브레이크포인트, flex/grid', icon: Smartphone, readingTime: '3분', href: '/guides/design-ui/responsive' },
+
+  // ── 커뮤니케이션 (communication) ──
+  { slug: 'overview', parentSlug: 'communication', title: '개요 — 알림 서비스의 종류', description: '이메일/SMS/푸시/실시간', icon: FileText, readingTime: '3분', href: '/guides/communication' },
+  { slug: 'email', parentSlug: 'communication', title: '이메일 발송 기초', description: 'Resend, SendGrid, 트랜잭셔널 vs 마케팅', icon: Send, readingTime: '3분', href: '/guides/communication/email' },
+  { slug: 'push', parentSlug: 'communication', title: '푸시 알림', description: 'FCM, OneSignal, 웹 푸시', icon: Bell, readingTime: '3분', href: '/guides/communication/push' },
+  { slug: 'realtime', parentSlug: 'communication', title: '실시간 메시징', description: 'WebSocket, Supabase Realtime, Pusher', icon: Radio, readingTime: '3분', href: '/guides/communication/realtime' },
+
+  // ── 결제 (payment) ──
+  { slug: 'overview', parentSlug: 'payment', title: '개요 — 온라인 결제의 구조', description: 'PG사 역할, 결제 흐름 도식', icon: FileText, readingTime: '3분', href: '/guides/payment' },
+  { slug: 'stripe', parentSlug: 'payment', title: 'Stripe 결제', description: 'Checkout, Payment Intent, 테스트 모드', icon: CreditCard, readingTime: '4분', href: '/guides/payment/stripe' },
+  { slug: 'toss', parentSlug: 'payment', title: '토스페이먼츠', description: '한국 PG 특성, 빌링키, 가상계좌', icon: CreditCard, readingTime: '4분', href: '/guides/payment/toss' },
+  { slug: 'webhook', parentSlug: 'payment', title: '결제 웹훅 처리', description: '이벤트 검증, 멱등성, 재시도', icon: Webhook, readingTime: '3분', href: '/guides/payment/webhook' },
+
+  // ── 모니터링 (monitoring) ──
+  { slug: 'overview', parentSlug: 'monitoring', title: '개요 — 왜 모니터링이 필요한가', description: '배포 후 블랙박스 문제', icon: FileText, readingTime: '3분', href: '/guides/monitoring' },
+  { slug: 'error-tracking', parentSlug: 'monitoring', title: '에러 추적', description: 'Sentry, LogRocket, 세션 리플레이', icon: Search, readingTime: '3분', href: '/guides/monitoring/error-tracking' },
+  { slug: 'analytics', parentSlug: 'monitoring', title: '웹 분석', description: 'Google Analytics, Vercel Analytics, Plausible', icon: Activity, readingTime: '3분', href: '/guides/monitoring/analytics' },
+  { slug: 'feature-flags', parentSlug: 'monitoring', title: '피처 플래그', description: '점진적 롤아웃, A/B 테스트, LaunchDarkly', icon: ToggleRight, readingTime: '3분', href: '/guides/monitoring/feature-flags' },
+
+  // ── 자동화 (automation) ──
+  { slug: 'overview', parentSlug: 'automation', title: '개요 — 자동화란?', description: '수동 작업을 없애는 이유', icon: FileText, readingTime: '3분', href: '/guides/automation' },
+  { slug: 'webhook', parentSlug: 'automation', title: '웹훅 이해하기', description: '이벤트 기반, 시그니처 검증, 디버깅', icon: Webhook, readingTime: '3분', href: '/guides/automation/webhook' },
+  { slug: 'scheduling', parentSlug: 'automation', title: '스케줄링과 큐', description: 'cron, BullMQ, Inngest, Trigger.dev', icon: Timer, readingTime: '3분', href: '/guides/automation/scheduling' },
+  { slug: 'sns-api', parentSlug: 'automation', title: 'SNS API 연동', description: '카카오/인스타그램/유튜브 API 소개', icon: Share2, readingTime: '3분', href: '/guides/automation/sns-api' },
+
   // ── GitHub (github) ──
   { slug: 'overview', parentSlug: 'github', title: '개요 — GitHub이란?', description: 'Git과 GitHub의 차이, 핵심 개념', icon: FileText, readingTime: '5분', href: '/guides/github' },
   { slug: 'git-setup', parentSlug: 'github', title: 'Git 설치 + 가입', description: '환경 세팅과 기본 설정', icon: Terminal, readingTime: '10분', href: '/guides/github/git-setup' },
@@ -136,3 +209,41 @@ export const SERVICE_GUIDE_HREF: Record<string, string> = {
   'kakao-login': '/guides/auth/kakao',
   'google-oauth': '/guides/auth/google',
 };
+
+// ── 러닝패스 ──
+
+export interface LearningPath {
+  id: string;
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  guideSlugs: string[];
+  badge?: string;
+}
+
+export const LEARNING_PATHS: LearningPath[] = [
+  {
+    id: 'vibe-coding-intro',
+    title: '바이브코딩 입문',
+    description: '코딩 경험 0 → AI로 첫 웹앱 배포까지',
+    icon: Bot,
+    badge: '첫 프로젝트',
+    guideSlugs: ['ai-tools', 'env', 'frontend', 'design-ui', 'backend', 'deploy'],
+  },
+  {
+    id: 'dev-tools',
+    title: '실전 도구',
+    description: '앱을 만든 후 "제대로" 관리하는 법',
+    icon: Wrench,
+    badge: '개발 생산성',
+    guideSlugs: ['version-control', 'package-manager', 'security', 'api-basics', 'domain', 'server'],
+  },
+  {
+    id: 'scale-up',
+    title: '서비스 확장',
+    description: '프로젝트를 실제 서비스로 확장',
+    icon: Rocket,
+    badge: '수익화/운영',
+    guideSlugs: ['auth', 'communication', 'payment', 'monitoring', 'automation'],
+  },
+];

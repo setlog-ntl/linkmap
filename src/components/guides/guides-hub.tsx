@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Clock, ChevronDown } from 'lucide-react';
-import { GUIDE_CATEGORIES, GUIDE_LIST, getSubGuides, type GuideCategory } from '@/data/ui/guide-meta';
+import { ArrowRight, Clock, ChevronDown, BookOpen } from 'lucide-react';
+import { GUIDE_CATEGORIES, GUIDE_LIST, LEARNING_PATHS, getSubGuides, type GuideCategory } from '@/data/ui/guide-meta';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
@@ -32,6 +32,65 @@ export function GuidesHub() {
           바이브 코딩에 필요한 개념과 서비스 설정을 쉽게 따라할 수 있도록 정리했습니다
         </p>
       </div>
+
+      {/* Learning Paths */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <BookOpen className="h-5 w-5 text-brand-blue" />
+          <h2 className="text-xl font-semibold">러닝패스</h2>
+        </div>
+        <p className="text-sm text-muted-foreground">목표에 맞는 학습 순서를 따라가 보세요</p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {LEARNING_PATHS.map((path) => {
+            const PathIcon = path.icon;
+            const pathGuides = path.guideSlugs
+              .map(slug => GUIDE_LIST.find(g => g.slug === slug))
+              .filter(Boolean);
+
+            return (
+              <div
+                key={path.id}
+                className="rounded-lg border bg-card shadow-sm p-5 space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                    <PathIcon className="h-5 w-5 text-brand-blue" />
+                  </div>
+                  {path.badge && (
+                    <Badge variant="secondary" className="text-xs">
+                      {path.badge}
+                    </Badge>
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-semibold">{path.title}</h3>
+                  <p className="text-sm text-muted-foreground mt-1">{path.description}</p>
+                </div>
+                <div className="space-y-1.5 pt-1">
+                  {pathGuides.map((guide, i) => {
+                    if (!guide) return null;
+                    const GuideIcon = guide.icon;
+                    return (
+                      <Link
+                        key={guide.slug}
+                        href={guide.href}
+                        className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/50 transition-colors text-sm"
+                      >
+                        <span className="w-5 h-5 rounded-full bg-brand-blue/10 text-brand-blue text-[10px] flex items-center justify-center shrink-0 font-bold">
+                          {i + 1}
+                        </span>
+                        <GuideIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <span className="truncate">{guide.title}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       {/* Category Sections */}
       {categoryOrder.map((catKey) => {
