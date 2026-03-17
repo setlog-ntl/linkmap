@@ -20,27 +20,29 @@ export const GUIDE_CATEGORIES: Record<GuideCategory, { label: string; icon: Luci
 };
 
 export const GUIDE_LIST: GuideMeta[] = [
-  // 기본 개념
-  { slug: 'env', title: '환경변수 완전 정복', description: 'API 키와 환경변수(.env)의 개념부터 배포까지', category: 'concept', icon: Key, badge: '초보자용', readingTime: '10분', href: '/guides/env' },
-  { slug: 'auth', title: '인증 가이드', description: '앱 로그인·서비스 연동 개념 + 구글·카카오 로그인 설정법', category: 'concept', icon: Shield, badge: '초보자용', readingTime: '15분', href: '/guides/auth' },
-  { slug: 'frontend', title: '프론트엔드 가이드', description: '브라우저 렌더링, 컴포넌트, CSR·SSR·SSG', category: 'concept', icon: Monitor, readingTime: '12분', href: '/guides/frontend' },
-  { slug: 'backend', title: '백엔드 가이드', description: 'API, 데이터베이스, BaaS의 기초', category: 'concept', icon: Server, readingTime: '10분', href: '/guides/backend' },
-  { slug: 'domain', title: '도메인 완전 정복', description: '도메인 구매, URL 구조, DNS 레코드 설정까지', category: 'concept', icon: Globe, badge: '초보자용', readingTime: '8분', href: '/guides/domain' },
-  { slug: 'server', title: '서버·호스팅 이해하기', description: '서버 개념, 호스팅 유형 비교, CDN과 엣지 서버', category: 'concept', icon: ServerCog, badge: '초보자용', readingTime: '10분', href: '/guides/server' },
-  { slug: 'deploy', title: '배포 완전 정복', description: '수동 vs 자동 배포, 파이프라인, 플랫폼 비교', category: 'concept', icon: Rocket, badge: '초보자용', readingTime: '10분', href: '/guides/deploy' },
-  // P0 신규
-  { slug: 'ai-tools', title: 'AI 도구 활용 가이드', description: '바이브코딩 개념부터 Cursor·Claude Code, AI API 연동까지', category: 'concept', icon: Bot, badge: '바이브코딩 필수', readingTime: '15분', href: '/guides/ai-tools' },
-  { slug: 'security', title: '보안 기초 가이드', description: '시크릿 관리, 웹 취약점, HTTPS·CORS 에러 해결', category: 'concept', icon: ShieldCheck, badge: '필수', readingTime: '12분', href: '/guides/security' },
-  { slug: 'version-control', title: '버전 관리 심화', description: 'Git 브랜치 전략, PR과 코드 리뷰, 충돌 해결', category: 'concept', icon: GitBranch, badge: '초보자용', readingTime: '12분', href: '/guides/version-control' },
-  // P1 신규
-  { slug: 'package-manager', title: '패키지 매니저 가이드', description: 'npm/yarn/pnpm 비교, package.json, 에러 해결', category: 'concept', icon: Package, badge: '초보자용', readingTime: '10분', href: '/guides/package-manager' },
-  { slug: 'api-basics', title: 'API 연동 기초', description: 'HTTP 요청, 에러 핸들링, API 인증 방식', category: 'concept', icon: Plug, badge: '초보자용', readingTime: '12분', href: '/guides/api-basics' },
-  { slug: 'design-ui', title: '디자인/UI 가이드', description: '웹 디자인 기초, Tailwind CSS, 컴포넌트 라이브러리, 반응형', category: 'concept', icon: Palette, badge: '초보자용', readingTime: '10분', href: '/guides/design-ui' },
-  // P2 신규
-  { slug: 'communication', title: '커뮤니케이션 가이드', description: '이메일·SMS·푸시·실시간 알림 서비스 연동', category: 'concept', icon: Mail, readingTime: '10분', href: '/guides/communication' },
-  { slug: 'payment', title: '결제 연동 가이드', description: 'Stripe·토스페이먼츠 연동, 결제 웹훅 처리', category: 'concept', icon: CreditCard, readingTime: '12분', href: '/guides/payment' },
-  { slug: 'monitoring', title: '모니터링 가이드', description: '에러 추적, 웹 분석, 피처 플래그 활용', category: 'concept', icon: Activity, readingTime: '10분', href: '/guides/monitoring' },
-  { slug: 'automation', title: '자동화/통합 가이드', description: '웹훅, 스케줄링, SNS API 연동', category: 'concept', icon: Workflow, readingTime: '10분', href: '/guides/automation' },
+  // ── 기본 개념 (바이브코딩 학습 순서대로 정렬) ──
+  // 1~4: 시작 단계 — AI 도구 선택, 화면 만들기, 패키지 설치, 코드 관리
+  { slug: 'ai-tools', title: 'AI 도구 활용', description: 'AI 도구로 코드를 생성하는 법', category: 'concept', icon: Bot, badge: '바이브코딩 필수', readingTime: '15분', href: '/guides/ai-tools' },
+  { slug: 'frontend', title: '프론트엔드 기초', description: '화면을 만드는 기본 원리', category: 'concept', icon: Monitor, badge: '입문', readingTime: '12분', href: '/guides/frontend' },
+  { slug: 'package-manager', title: '패키지 매니저', description: 'npm과 의존성 관리 기초', category: 'concept', icon: Package, badge: '입문', readingTime: '10분', href: '/guides/package-manager' },
+  { slug: 'version-control', title: '버전 관리', description: 'Git으로 코드 변경 관리하기', category: 'concept', icon: GitBranch, badge: '입문', readingTime: '12분', href: '/guides/version-control' },
+  // 5~8: 개발 단계 — 환경변수, API, 백엔드, 인증
+  { slug: 'env', title: '환경변수 관리', description: '환경변수와 비밀 키 관리법', category: 'concept', icon: Key, badge: '필수', readingTime: '10분', href: '/guides/env' },
+  { slug: 'api-basics', title: 'API 연동 기초', description: 'API 요청과 응답 이해하기', category: 'concept', icon: Plug, badge: '입문', readingTime: '12분', href: '/guides/api-basics' },
+  { slug: 'backend', title: '백엔드 기초', description: '서버 로직과 데이터 처리', category: 'concept', icon: Server, readingTime: '10분', href: '/guides/backend' },
+  { slug: 'auth', title: '인증 구현', description: '로그인과 사용자 인증 구현', category: 'concept', icon: Shield, readingTime: '15분', href: '/guides/auth' },
+  // 9~10: 완성 단계 — 디자인, 보안
+  { slug: 'design-ui', title: '디자인/UI', description: '보기 좋은 UI 만드는 원칙', category: 'concept', icon: Palette, badge: '입문', readingTime: '10분', href: '/guides/design-ui' },
+  { slug: 'security', title: '보안 기초', description: '웹 앱 보안 기초 점검 항목', category: 'concept', icon: ShieldCheck, badge: '필수', readingTime: '12분', href: '/guides/security' },
+  // 11~13: 배포 단계 — 도메인, 서버, 배포
+  { slug: 'domain', title: '도메인 연결', description: '도메인 구매와 연결 방법', category: 'concept', icon: Globe, readingTime: '8분', href: '/guides/domain' },
+  { slug: 'server', title: '서버·호스팅', description: '호스팅 서비스 선택과 설정', category: 'concept', icon: ServerCog, readingTime: '10분', href: '/guides/server' },
+  { slug: 'deploy', title: '배포하기', description: '앱을 인터넷에 배포하기', category: 'concept', icon: Rocket, readingTime: '10분', href: '/guides/deploy' },
+  // 14~17: 확장 단계 — 알림, 결제, 모니터링, 자동화
+  { slug: 'communication', title: '알림 연동', description: '이메일·알림 연동 방법', category: 'concept', icon: Mail, readingTime: '10분', href: '/guides/communication' },
+  { slug: 'payment', title: '결제 연동', description: '결제 시스템 연동 기초', category: 'concept', icon: CreditCard, readingTime: '12분', href: '/guides/payment' },
+  { slug: 'monitoring', title: '모니터링', description: '에러 추적과 성능 모니터링', category: 'concept', icon: Activity, readingTime: '10분', href: '/guides/monitoring' },
+  { slug: 'automation', title: '자동화', description: '반복 작업을 자동화하는 법', category: 'concept', icon: Workflow, readingTime: '10분', href: '/guides/automation' },
   // 서비스 가이드
   { slug: 'github', title: 'GitHub 시작하기', description: '가입부터 첫 저장소까지 5단계 완성', category: 'service', icon: Github, badge: '단계별', readingTime: '30분', href: '/guides/github' },
   { slug: 'cloudflare', title: 'Cloudflare 연결', description: '계정 생성부터 자동 배포까지 7단계', category: 'service', icon: Cloud, badge: '단계별', readingTime: '40분', href: '/guides/cloudflare' },
