@@ -17,7 +17,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Menu, Globe, Search, BookOpen, PenLine, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench, ArrowRight, Rocket, BarChart3, Trophy } from 'lucide-react';
-import { GUIDE_CATEGORIES, getGuidesByCategory, getSubGuides } from '@/data/ui/guide-meta';
+import { GUIDE_CATEGORIES, LEARNING_STAGES, GUIDE_LIST, getGuidesByCategory, getSubGuides } from '@/data/ui/guide-meta';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useUIStore } from '@/stores/ui-store';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -108,7 +108,7 @@ export function Header({ profile }: HeaderProps) {
         블로그
       </Link>
 
-      {/* Guides dropdown — 2레벨 트리 */}
+      {/* Guides dropdown — 학습 단계별 그룹 */}
       <DropdownMenu>
         <DropdownMenuTrigger className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 outline-none">
           <BookOpen className="h-3.5 w-3.5" />
@@ -116,61 +116,72 @@ export function Header({ profile }: HeaderProps) {
           <ChevronDown className="h-3 w-3" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-72 max-h-[70vh] overflow-y-auto">
-          {(['concept', 'service'] as const).map((catKey, idx) => {
-            const cat = GUIDE_CATEGORIES[catKey];
-            const CatIcon = cat.icon;
-            const guides = getGuidesByCategory(catKey);
-            return (
-              <div key={catKey}>
-                {idx > 0 && <DropdownMenuSeparator />}
-                <DropdownMenuLabel className="flex items-center gap-1.5 text-xs">
-                  <CatIcon className="h-3.5 w-3.5" />
-                  {cat.label}
-                </DropdownMenuLabel>
-                {guides.map((guide) => {
-                  const subGuides = getSubGuides(guide.slug);
-                  const GuideIcon = guide.icon;
-                  if (subGuides.length === 0) {
-                    return (
-                      <DropdownMenuItem key={guide.slug} asChild>
-                        <Link href={guide.href} onClick={() => setSidebarOpen(false)}>
-                          <GuideIcon className="h-3.5 w-3.5 mr-2 opacity-60" />
-                          {guide.title}
-                        </Link>
-                      </DropdownMenuItem>
-                    );
-                  }
-                  return (
-                    <Collapsible key={guide.slug}>
-                      <CollapsibleTrigger className="flex items-center gap-2 w-full px-2 py-1.5 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground cursor-pointer">
-                        <GuideIcon className="h-3.5 w-3.5 opacity-60 shrink-0" />
-                        <span className="flex-1 text-left">{guide.title}</span>
-                        <ChevronDown className="h-3 w-3 opacity-50 transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="ml-4 border-l border-border/50 pl-2 py-0.5">
-                          {subGuides.map((sub) => (
-                            <DropdownMenuItem key={sub.slug} asChild className="text-xs h-7">
-                              <Link href={sub.href} onClick={() => setSidebarOpen(false)}>
-                                {sub.title}
-                              </Link>
-                            </DropdownMenuItem>
-                          ))}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  );
-                })}
-              </div>
-            );
-          })}
-          <DropdownMenuSeparator />
+          {/* 전체 보기 — 최상단 */}
           <DropdownMenuItem asChild>
-            <Link href="/guides" onClick={() => setSidebarOpen(false)} className="flex items-center justify-between">
-              전체 보기
-              <ArrowRight className="h-3.5 w-3.5" />
+            <Link href="/guides" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2 font-medium">
+              <BookOpen className="h-3.5 w-3.5" />
+              가이드 전체 보기
+              <ArrowRight className="h-3.5 w-3.5 ml-auto" />
             </Link>
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
+
+          {/* 기본 개념 — 학습 단계별 */}
+          <DropdownMenuLabel className="flex items-center gap-1.5 text-xs">
+            <BookOpen className="h-3.5 w-3.5" />
+            {GUIDE_CATEGORIES.concept.label}
+          </DropdownMenuLabel>
+          {LEARNING_STAGES.map((stage) => {
+            const StageIcon = stage.icon;
+            const stageGuides = stage.slugs
+              .map(slug => GUIDE_LIST.find(g => g.slug === slug))
+              .filter(Boolean);
+            if (stageGuides.length === 0) return null;
+            return (
+              <Collapsible key={stage.id}>
+                <CollapsibleTrigger className="flex items-center gap-2 w-full px-2 py-1.5 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground cursor-pointer">
+                  <StageIcon className="h-3.5 w-3.5 opacity-60 shrink-0" />
+                  <span className="flex-1 text-left font-medium">{stage.label}</span>
+                  <span className="text-[10px] text-muted-foreground mr-1">{stageGuides.length}</span>
+                  <ChevronDown className="h-3 w-3 opacity-50 transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="ml-4 border-l border-border/50 pl-2 py-0.5">
+                    {stageGuides.map((guide) => {
+                      if (!guide) return null;
+                      const GuideIcon = guide.icon;
+                      return (
+                        <DropdownMenuItem key={guide.slug} asChild className="text-xs h-7">
+                          <Link href={guide.href} onClick={() => setSidebarOpen(false)}>
+                            <GuideIcon className="h-3 w-3 mr-1.5 opacity-60" />
+                            {guide.title}
+                          </Link>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            );
+          })}
+
+          {/* 서비스 가이드 */}
+          <DropdownMenuSeparator />
+          <DropdownMenuLabel className="flex items-center gap-1.5 text-xs">
+            <Wrench className="h-3.5 w-3.5" />
+            {GUIDE_CATEGORIES.service.label}
+          </DropdownMenuLabel>
+          {getGuidesByCategory('service').map((guide) => {
+            const GuideIcon = guide.icon;
+            return (
+              <DropdownMenuItem key={guide.slug} asChild>
+                <Link href={guide.href} onClick={() => setSidebarOpen(false)}>
+                  <GuideIcon className="h-3.5 w-3.5 mr-2 opacity-60" />
+                  {guide.title}
+                </Link>
+              </DropdownMenuItem>
+            );
+          })}
         </DropdownMenuContent>
       </DropdownMenu>
     </>
@@ -391,65 +402,77 @@ export function Header({ profile }: HeaderProps) {
                 </Link>
 
                 <div className="border-t my-2" />
-                {(['concept', 'service'] as const).map((catKey) => {
-                  const cat = GUIDE_CATEGORIES[catKey];
-                  const guides = getGuidesByCategory(catKey);
-                  return (
-                    <div key={catKey}>
-                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold px-2.5 mb-1 mt-2">
-                        {cat.label}
-                      </p>
-                      {guides.map((guide) => {
-                        const subGuides = getSubGuides(guide.slug);
-                        const GuideIcon = guide.icon;
-                        if (subGuides.length === 0) {
-                          return (
-                            <Link
-                              key={guide.slug}
-                              href={guide.href}
-                              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2"
-                              onClick={() => setSidebarOpen(false)}
-                            >
-                              <GuideIcon className="h-3.5 w-3.5 opacity-60" />
-                              {guide.title}
-                            </Link>
-                          );
-                        }
-                        return (
-                          <Collapsible key={guide.slug}>
-                            <CollapsibleTrigger className="w-full text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2 cursor-pointer">
-                              <GuideIcon className="h-3.5 w-3.5 opacity-60 shrink-0" />
-                              <span className="flex-1 text-left">{guide.title}</span>
-                              <ChevronDown className="h-3 w-3 opacity-50 transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                              <div className="ml-7 border-l border-border/50 pl-2 py-0.5">
-                                {subGuides.map((sub) => (
-                                  <Link
-                                    key={sub.slug}
-                                    href={sub.href}
-                                    className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 block"
-                                    onClick={() => setSidebarOpen(false)}
-                                  >
-                                    {sub.title}
-                                  </Link>
-                                ))}
-                              </div>
-                            </CollapsibleContent>
-                          </Collapsible>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
+
+                {/* 가이드 — 전체 보기 최상단 */}
                 <Link
                   href="/guides"
-                  className="text-sm font-medium text-brand-blue hover:text-brand-blue/80 transition-colors px-2.5 py-1.5 flex items-center gap-1 mt-1"
+                  className="text-sm font-medium text-foreground hover:text-brand-blue transition-colors px-2.5 py-1.5 flex items-center gap-2"
                   onClick={() => setSidebarOpen(false)}
                 >
-                  전체 보기
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  <BookOpen className="h-4 w-4" />
+                  가이드 전체 보기
+                  <ArrowRight className="h-3.5 w-3.5 ml-auto" />
                 </Link>
+
+                {/* 기본 개념 — 학습 단계별 */}
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold px-2.5 mb-1 mt-2">
+                  {GUIDE_CATEGORIES.concept.label}
+                </p>
+                {LEARNING_STAGES.map((stage) => {
+                  const StageIcon = stage.icon;
+                  const stageGuides = stage.slugs
+                    .map(slug => GUIDE_LIST.find(g => g.slug === slug))
+                    .filter(Boolean);
+                  if (stageGuides.length === 0) return null;
+                  return (
+                    <Collapsible key={stage.id}>
+                      <CollapsibleTrigger className="w-full text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2 cursor-pointer">
+                        <StageIcon className="h-3.5 w-3.5 opacity-60 shrink-0" />
+                        <span className="flex-1 text-left">{stage.label}</span>
+                        <span className="text-[10px] text-muted-foreground mr-1">{stageGuides.length}</span>
+                        <ChevronDown className="h-3 w-3 opacity-50 transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="ml-7 border-l border-border/50 pl-2 py-0.5">
+                          {stageGuides.map((guide) => {
+                            if (!guide) return null;
+                            const GuideIcon = guide.icon;
+                            return (
+                              <Link
+                                key={guide.slug}
+                                href={guide.href}
+                                className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 flex items-center gap-1.5"
+                                onClick={() => setSidebarOpen(false)}
+                              >
+                                <GuideIcon className="h-3 w-3 opacity-60" />
+                                {guide.title}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  );
+                })}
+
+                {/* 서비스 가이드 */}
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold px-2.5 mb-1 mt-2">
+                  {GUIDE_CATEGORIES.service.label}
+                </p>
+                {getGuidesByCategory('service').map((guide) => {
+                  const GuideIcon = guide.icon;
+                  return (
+                    <Link
+                      key={guide.slug}
+                      href={guide.href}
+                      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2"
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      <GuideIcon className="h-3.5 w-3.5 opacity-60" />
+                      {guide.title}
+                    </Link>
+                  );
+                })}
 
                 <div className="border-t my-2" />
                 {!profile ? (
