@@ -2,8 +2,15 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Clock, ChevronDown, BookOpen, LayoutGrid } from 'lucide-react';
-import { GUIDE_CATEGORIES, GUIDE_LIST, LEARNING_PATHS, getSubGuides, type GuideCategory } from '@/data/ui/guide-meta';
+import { ArrowRight, Clock, ChevronDown, BookOpen } from 'lucide-react';
+import {
+  GUIDE_CATEGORIES,
+  GUIDE_LIST,
+  LEARNING_PATHS,
+  LEARNING_STAGES,
+  getSubGuides,
+  type GuideCategory,
+} from '@/data/ui/guide-meta';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
@@ -18,12 +25,22 @@ const tabs: { key: TabKey; label: string }[] = [
 export function GuidesHub() {
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<TabKey>('all');
+  const [collapsedStages, setCollapsedStages] = useState<Set<string>>(new Set());
 
   function toggleCard(slug: string) {
     setExpandedCards(prev => {
       const next = new Set(prev);
       if (next.has(slug)) next.delete(slug);
       else next.add(slug);
+      return next;
+    });
+  }
+
+  function toggleStage(stageId: string) {
+    setCollapsedStages(prev => {
+      const next = new Set(prev);
+      if (next.has(stageId)) next.delete(stageId);
+      else next.add(stageId);
       return next;
     });
   }
@@ -130,31 +147,45 @@ export function GuidesHub() {
 
       {/* Guide Cards */}
       {activeTab === 'all' ? (
-        // 전체보기: 카테고리 섹션별로 표시
-        (['concept', 'service'] as GuideCategory[]).map((catKey) => {
-          const cat = GUIDE_CATEGORIES[catKey];
-          const CatIcon = cat.icon;
-          const guides = GUIDE_LIST.filter(g => g.category === catKey);
+        <>
+          {/* 기본 개념 — 학습 단계별 그룹 */}
+          <ConceptStageSection
+            collapsedStages={collapsedStages}
+            onToggleStage={toggleStage}
+            expandedCards={expandedCards}
+            onToggleCard={toggleCard}
+          />
 
-          return (
-            <section key={catKey} className="space-y-4">
-              <div className="flex items-center gap-2">
-                <CatIcon className="h-5 w-5 text-brand-blue" />
-                <h2 className="text-xl font-semibold">{cat.label}</h2>
-                <span className="text-xs text-muted-foreground">({guides.length})</span>
-              </div>
-              <p className="text-sm text-muted-foreground">{cat.description}</p>
-
-              <GuideCardGrid
-                guides={guides}
-                expandedCards={expandedCards}
-                onToggle={toggleCard}
-              />
-            </section>
-          );
-        })
+          {/* 서비스 가이드 */}
+          {(() => {
+            const cat = GUIDE_CATEGORIES.service;
+            const CatIcon = cat.icon;
+            const guides = GUIDE_LIST.filter(g => g.category === 'service');
+            return (
+              <section className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <CatIcon className="h-5 w-5 text-brand-blue" />
+                  <h2 className="text-xl font-semibold">{cat.label}</h2>
+                  <span className="text-xs text-muted-foreground">({guides.length})</span>
+                </div>
+                <p className="text-sm text-muted-foreground">{cat.description}</p>
+                <GuideCardGrid
+                  guides={guides}
+                  expandedCards={expandedCards}
+                  onToggle={toggleCard}
+                />
+              </section>
+            );
+          })()}
+        </>
+      ) : activeTab === 'concept' ? (
+        <ConceptStageSection
+          collapsedStages={collapsedStages}
+          onToggleStage={toggleStage}
+          expandedCards={expandedCards}
+          onToggleCard={toggleCard}
+        />
       ) : (
-        // 개별 탭: 바로 카드 그리드
         <section className="space-y-4">
           <GuideCardGrid
             guides={filteredGuides}
@@ -167,7 +198,176 @@ export function GuidesHub() {
   );
 }
 
-// ── 카드 그리드 컴포넌트 (중복 제거) ──
+// ── 기본 개념: 학습 단계별 그룹 ──
+
+const STAGE_COLORS: Record<string, { dot: string; bg: string; text: string }> = {
+  start: { dot: 'bg-blue-500', bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400' },
+  develop: { dot: 'bg-amber-500', bg: 'bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400' },
+  polish: { dot: 'bg-violet-500', bg: 'bg-violet-500/10', text: 'text-violet-600 dark:text-violet-400' },
+  deploy: { dot: 'bg-green-500', bg: 'bg-green-500/10', text: 'text-green-600 dark:text-green-400' },
+  scale: { dot: 'bg-rose-500', bg: 'bg-rose-500/10', text: 'text-rose-600 dark:text-rose-400' },
+};
+
+function ConceptStageSection({
+  collapsedStages,
+  onToggleStage,
+  expandedCards,
+  onToggleCard,
+}: {
+  collapsedStages: Set<string>;
+  onToggleStage: (id: string) => void;
+  expandedCards: Set<string>;
+  onToggleCard: (slug: string) => void;
+}) {
+  const cat = GUIDE_CATEGORIES.concept;
+  const CatIcon = cat.icon;
+
+  return (
+    <section className="space-y-6">
+      <div className="flex items-center gap-2">
+        <CatIcon className="h-5 w-5 text-brand-blue" />
+        <h2 className="text-xl font-semibold">{cat.label}</h2>
+        <span className="text-xs text-muted-foreground">
+          ({GUIDE_LIST.filter(g => g.category === 'concept').length})
+        </span>
+      </div>
+      <p className="text-sm text-muted-foreground">{cat.description}</p>
+
+      {/* 단계별 진행 타임라인 */}
+      <div className="space-y-3">
+        {LEARNING_STAGES.map((stage, stageIdx) => {
+          const StageIcon = stage.icon;
+          const colors = STAGE_COLORS[stage.id] ?? STAGE_COLORS.start;
+          const isCollapsed = collapsedStages.has(stage.id);
+          const stageGuides = stage.slugs
+            .map(slug => GUIDE_LIST.find(g => g.slug === slug))
+            .filter(Boolean);
+
+          return (
+            <div key={stage.id} className="rounded-lg border bg-card shadow-sm overflow-hidden">
+              {/* 단계 헤더 */}
+              <button
+                onClick={() => onToggleStage(stage.id)}
+                className="flex items-center gap-3 w-full px-4 py-3 hover:bg-muted/30 transition-colors cursor-pointer"
+              >
+                {/* 단계 번호 */}
+                <div className={cn('flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white shrink-0', colors.dot)}>
+                  {stageIdx + 1}
+                </div>
+                <StageIcon className={cn('h-4 w-4 shrink-0', colors.text)} />
+                <div className="flex-1 text-left min-w-0">
+                  <span className="font-semibold text-sm">{stage.label}</span>
+                  <span className="text-xs text-muted-foreground ml-2 hidden sm:inline">{stage.description}</span>
+                </div>
+                <span className="text-xs text-muted-foreground shrink-0">{stageGuides.length}개</span>
+                <ChevronDown className={cn(
+                  'h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200',
+                  !isCollapsed && 'rotate-180'
+                )} />
+              </button>
+
+              {/* 단계 내 가이드 리스트 */}
+              <div className={cn(
+                'overflow-hidden transition-all duration-300',
+                isCollapsed ? 'max-h-0' : 'max-h-[1000px]'
+              )}>
+                <div className="border-t divide-y">
+                  {stageGuides.map((guide) => {
+                    if (!guide) return null;
+                    const Icon = guide.icon;
+                    const subGuides = getSubGuides(guide.slug);
+                    const hasChildren = subGuides.length > 0;
+                    const isExpanded = expandedCards.has(guide.slug);
+
+                    return (
+                      <div key={guide.slug}>
+                        <div className="flex items-center group">
+                          <Link
+                            href={guide.href}
+                            className="flex-1 flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors min-w-0"
+                          >
+                            <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg shrink-0', colors.bg)}>
+                              <Icon className={cn('h-4 w-4', colors.text)} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-sm group-hover:text-brand-blue transition-colors truncate">
+                                  {guide.title}
+                                </span>
+                                {guide.badge && (
+                                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
+                                    {guide.badge}
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                {guide.description}
+                              </p>
+                            </div>
+                            {guide.readingTime && (
+                              <span className="flex items-center gap-1 text-[11px] text-muted-foreground shrink-0 hidden sm:flex">
+                                <Clock className="h-3 w-3" />
+                                {guide.readingTime}
+                              </span>
+                            )}
+                            {!hasChildren && (
+                              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-brand-blue shrink-0 ml-2" />
+                            )}
+                          </Link>
+                          {hasChildren && (
+                            <button
+                              onClick={() => onToggleCard(guide.slug)}
+                              className="flex items-center gap-1 px-3 py-3 text-[11px] font-medium text-brand-blue hover:bg-muted/50 transition-colors cursor-pointer shrink-0 border-l"
+                            >
+                              <span className="hidden sm:inline">하위</span> {subGuides.length}개
+                              <ChevronDown className={cn(
+                                'h-3 w-3 transition-transform duration-200',
+                                isExpanded && 'rotate-180'
+                              )} />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* 서브가이드 확장 */}
+                        {hasChildren && (
+                          <div className={cn(
+                            'overflow-hidden transition-all duration-300',
+                            isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                          )}>
+                            <div className="bg-muted/20 px-4 py-1.5 ml-4 mr-4 mb-2 rounded-lg">
+                              {subGuides.map((sub) => {
+                                const SubIcon = sub.icon;
+                                return (
+                                  <Link
+                                    key={sub.slug}
+                                    href={sub.href}
+                                    className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-muted/50 transition-colors"
+                                  >
+                                    <div className="flex h-5 w-5 items-center justify-center rounded bg-muted/70 shrink-0">
+                                      <SubIcon className="h-3 w-3 text-muted-foreground" />
+                                    </div>
+                                    <span className="text-xs font-medium truncate flex-1">{sub.title}</span>
+                                    <ArrowRight className="h-2.5 w-2.5 text-muted-foreground shrink-0" />
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+// ── 카드 그리드 컴포넌트 (서비스 가이드용) ──
 
 function GuideCardGrid({
   guides,

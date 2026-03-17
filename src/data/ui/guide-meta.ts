@@ -212,6 +212,24 @@ export const SERVICE_GUIDE_HREF: Record<string, string> = {
   'google-oauth': '/guides/auth/google',
 };
 
+// ── 학습 단계 ──
+
+export interface LearningStage {
+  id: string;
+  label: string;
+  description: string;
+  icon: LucideIcon;
+  slugs: string[];
+}
+
+export const LEARNING_STAGES: LearningStage[] = [
+  { id: 'start', label: '시작', description: 'AI 도구와 개발 환경 세팅', icon: Bot, slugs: ['ai-tools', 'frontend', 'package-manager', 'version-control'] },
+  { id: 'develop', label: '개발', description: '핵심 기능 구현에 필요한 개념', icon: Code, slugs: ['env', 'api-basics', 'backend', 'auth'] },
+  { id: 'polish', label: '완성', description: '디자인과 보안 마무리', icon: Palette, slugs: ['design-ui', 'security'] },
+  { id: 'deploy', label: '배포', description: '도메인 연결, 서버, 배포 자동화', icon: Rocket, slugs: ['domain', 'server', 'deploy'] },
+  { id: 'scale', label: '확장', description: '알림, 결제, 모니터링, 자동화', icon: Workflow, slugs: ['communication', 'payment', 'monitoring', 'automation'] },
+];
+
 // ── 러닝패스 ──
 
 export interface LearningPath {
