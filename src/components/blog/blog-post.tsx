@@ -310,16 +310,29 @@ function ShareButton({ slug }: { slug: string }) {
 // CTA Card
 // ---------------------------------------------------------------------------
 function CtaCard() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    import('@/lib/supabase/client').then(({ createClient }) => {
+      const supabase = createClient();
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        setIsLoggedIn(!!user);
+      });
+    });
+  }, []);
+
   return (
     <div className="not-prose my-10 rounded-xl border-2 border-brand-blue/20 bg-gradient-to-br from-blue-50 to-green-50 dark:from-blue-950/20 dark:to-green-950/20 p-6 md:p-8 text-center">
       <h3 className="text-lg font-bold mb-2">서비스 연결, 시각적으로 관리하세요</h3>
       <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
         90+ 서비스 카탈로그, AES-256 암호화, GitHub Secrets 자동 배포.
-        <br />무료로 시작하세요.
+        <br />{isLoggedIn ? '내 프로젝트에서 바로 시작하세요.' : '무료로 시작하세요.'}
       </p>
       <div className="flex items-center justify-center gap-3">
         <Button asChild size="sm">
-          <Link href="/signup">무료로 시작하기</Link>
+          <Link href={isLoggedIn ? '/projects' : '/signup'}>
+            {isLoggedIn ? '내 프로젝트로 이동' : '무료로 시작하기'}
+          </Link>
         </Button>
         <Button asChild variant="outline" size="sm">
           <Link href="/services">서비스 카탈로그</Link>
