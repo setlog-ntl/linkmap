@@ -21,12 +21,10 @@ export const devShowcaseModuleSchema: TemplateModuleSchema = {
           labelEn: 'Design Preset',
           defaultValue: 'github-dark',
           options: [
-            { value: 'github-dark', label: 'GitHub Dark (기본)' },
-            { value: 'vscode', label: 'VS Code Dark' },
-            { value: 'dracula', label: 'Dracula' },
-            { value: 'terminal', label: '터미널 (Terminal)' },
-            { value: 'warm-earth', label: '웜 어스 (Warm Earth)' },
-            { value: 'midnight', label: '미드나잇 (Midnight)' },
+            { value: 'terminal', label: '미니멀' },
+            { value: 'github-dark', label: '기본' },
+            { value: 'midnight', label: '다크' },
+            { value: 'warm-earth', label: '컬러풀' },
           ],
         },
         {

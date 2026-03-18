@@ -22,13 +22,10 @@ export const personalBrandModuleSchema: TemplateModuleSchema = {
           labelEn: 'Design Preset',
           defaultValue: 'creator',
           options: [
-            { value: 'minimal', label: '미니멀 (Minimal)' },
-            { value: 'creator', label: '크리에이터 (Creator)' },
-            { value: 'storyteller', label: '풀 프로필 (Storyteller)' },
-            { value: 'editorial', label: '에디토리얼 (Editorial)' },
-            { value: 'magazine', label: '매거진 (Magazine)' },
-            { value: 'warm-earth', label: '웜 어스 (Warm Earth)' },
-            { value: 'midnight', label: '미드나잇 (Midnight)' },
+            { value: 'minimal', label: '미니멀' },
+            { value: 'creator', label: '기본' },
+            { value: 'midnight', label: '다크' },
+            { value: 'warm-earth', label: '컬러풀' },
           ],
         },
         {
