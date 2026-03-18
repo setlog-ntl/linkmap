@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linkmap — 환경변수 관리 개선 프리뷰</title>
+<style>
+  :root {
+    --bg: #09090b;
+    --bg-card: #18181b;
+    --bg-muted: #27272a;
+    --bg-hover: #3f3f46;
+    --border: #3f3f46;
+    --text: #fafafa;
+    --text-muted: #a1a1aa;
+    --text-dim: #71717a;
+    --brand-blue: #3b82f6;
+    --brand-green: #10b981;
+    --destructive: #ef4444;
+    --amber: #f59e0b;
+    --emerald: #10b981;
+    --purple: #a855f7;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,.4);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    padding: 24px;
+    min-height: 100vh;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  .page-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 32px;
+  }
+  .page-header h1 { font-size: 24px; font-weight: 700; }
+  .page-header .badge {
+    background: var(--brand-blue); color: #fff; font-size: 10px;
+    padding: 2px 8px; border-radius: 99px; font-weight: 600;
+  }
+
+  .section { margin-bottom: 40px; }
+  .section-title {
+    font-size: 16px; font-weight: 600; color: var(--text-muted);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .num {
+    background: var(--brand-blue); color: #fff; width: 24px; height: 24px;
+    border-radius: 50%; display: inline-flex; align-items: center;
+    justify-content: center; font-size: 12px; font-weight: 700;
+  }
+
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+
+  /* Filter Bar */
+  .filter-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .select-mock {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 12px; color: var(--text); font-size: 13px; min-width: 160px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .select-mock .arrow { color: var(--text-dim); font-size: 10px; }
+  .search-box { flex: 1; position: relative; min-width: 200px; }
+  .search-box input {
+    width: 100%; background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 12px 8px 36px; color: var(--text);
+    font-size: 13px; outline: none;
+  }
+  .search-box input::placeholder { color: var(--text-dim); }
+  .search-box .icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-size: 14px; }
+  .view-toggle { display: flex; background: var(--bg-muted); border-radius: 6px; padding: 2px; }
+  .view-toggle button {
+    background: none; border: none; color: var(--text-dim); font-size: 12px;
+    padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 500;
+  }
+  .view-toggle button.active { background: var(--bg-card); color: var(--text); box-shadow: var(--shadow); }
+  .btn-group { display: flex; gap: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px;
+    border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;
+    border: 1px solid var(--border); background: var(--bg-card); color: var(--text);
+    transition: all .15s; white-space: nowrap;
+  }
+  .btn:hover { background: var(--bg-muted); }
+  .btn-icon { padding: 8px; width: 36px; height: 36px; justify-content: center; }
+  .btn-new { background: var(--brand-blue); border-color: var(--brand-blue); color: #fff; font-weight: 600; }
+  .btn-new:hover { background: #2563eb; }
+
+  .new-badge {
+    background: var(--emerald); color: #fff; font-size: 9px; padding: 1px 6px;
+    border-radius: 99px; font-weight: 700; letter-spacing: .3px; animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
+
+  /* Dialog */
+  .dialog {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+    width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,.5);
+  }
+  .dialog-header { padding: 20px 24px 0; }
+  .dialog-header h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .dialog-header p { font-size: 13px; color: var(--text-dim); }
+  .dialog-body { padding: 16px 24px; }
+  .dialog-footer {
+    padding: 16px 24px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .dialog-footer .right { display: flex; gap: 8px; }
+
+  .env-info-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .env-badge {
+    background: var(--bg-muted); border: 1px solid var(--border); padding: 3px 10px;
+    border-radius: 6px; font-size: 12px; color: var(--text);
+  }
+  .count-badge {
+    background: var(--bg-muted); padding: 3px 10px; border-radius: 6px;
+    font-size: 11px; color: var(--text-muted);
+  }
+  .diff-badges { display: flex; gap: 6px; margin-left: auto; }
+  .diff-badge-add {
+    background: rgba(16,185,129,.1); color: #34d399; border: 1px solid rgba(16,185,129,.2);
+    font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 600;
+  }
+  .diff-badge-change {
+    background: rgba(245,158,11,.1); color: #fbbf24; border: 1px solid rgba(245,158,11,.2);
+    font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 600;
+  }
+  .diff-badge-remove {
+    background: rgba(239,68,68,.1); color: #f87171; border: 1px solid rgba(239,68,68,.2);
+    font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 600;
+  }
+
+  .tabs {
+    display: flex; background: var(--bg-muted); border-radius: 6px; padding: 2px;
+    margin-bottom: 12px; width: fit-content;
+  }
+  .tab {
+    padding: 6px 20px; font-size: 13px; font-weight: 500; border-radius: 4px;
+    border: none; background: none; color: var(--text-dim); cursor: pointer; transition: all .15s;
+  }
+  .tab.active { background: var(--bg-card); color: var(--text); box-shadow: var(--shadow); }
+
+  .editor-textarea {
+    width: 100%; min-height: 260px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px; font-family: 'Geist Mono', 'Fira Code', monospace;
+    font-size: 13px; line-height: 1.7; color: #a5d6a7; resize: vertical; outline: none;
+  }
+  .editor-textarea:focus { border-color: var(--brand-blue); }
+  .editor-textarea.json-mode { color: #90caf9; }
+
+  .btn-copy-env {
+    background: none; border: none; color: var(--brand-blue); font-size: 13px;
+    cursor: pointer; display: flex; align-items: center; gap: 6px;
+    padding: 6px 8px; border-radius: 6px;
+  }
+  .btn-copy-env:hover { background: rgba(59,130,246,.1); }
+  .btn-update {
+    background: var(--brand-blue); border: none; color: #fff; padding: 8px 20px;
+    border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .btn-update:hover { background: #2563eb; }
+  .btn-cancel {
+    background: none; border: 1px solid var(--border); color: var(--text);
+    padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer;
+  }
+
+  .warning-box {
+    display: flex; gap: 8px; align-items: flex-start;
+    background: rgba(239,68,68,.05); border: 1px solid rgba(239,68,68,.2);
+    border-radius: 8px; padding: 10px 14px; margin-top: 12px;
+  }
+  .warning-box .icon { color: var(--destructive); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .warning-box p { font-size: 12px; color: var(--destructive); }
+
+  /* Copy Dialog */
+  .copy-toggle {
+    display: flex; background: var(--bg-muted); border-radius: 8px; padding: 3px;
+    margin-bottom: 16px;
+  }
+  .copy-toggle button {
+    flex: 1; padding: 8px 16px; border: none; background: none;
+    color: var(--text-dim); font-size: 13px; font-weight: 500;
+    border-radius: 6px; cursor: pointer; transition: all .15s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .copy-toggle button.active {
+    background: var(--bg-card); color: var(--text); box-shadow: var(--shadow);
+  }
+  .source-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+    font-size: 13px;
+  }
+  .source-row .label { color: var(--text-dim); }
+  .source-badge {
+    background: var(--bg-muted); border: 1px solid var(--border);
+    padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 500;
+  }
+  .source-count {
+    background: var(--bg-muted); padding: 3px 8px; border-radius: 6px;
+    font-size: 11px; color: var(--text-muted);
+  }
+
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; display: block; }
+  .form-select {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--text);
+    appearance: none; outline: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+  }
+  .form-select:focus { border-color: var(--brand-blue); }
+
+  .stats-card {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; margin-bottom: 14px;
+  }
+  .stats-row {
+    display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px;
+  }
+  .stats-row .label { color: var(--text-dim); }
+  .stats-row .value { font-weight: 500; }
+  .stats-row.highlight .label { color: var(--emerald); }
+  .stats-row.highlight .value { color: var(--emerald); font-weight: 600; }
+
+  .checkbox-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+  }
+  .checkbox-row input[type="checkbox"] { accent-color: var(--brand-blue); width: 16px; height: 16px; }
+  .checkbox-row label { font-size: 13px; color: var(--text); }
+
+  .divider { height: 1px; background: var(--border); margin: 32px 0; }
+
+  .note {
+    background: rgba(59,130,246,.08); border: 1px solid rgba(59,130,246,.15);
+    border-radius: 8px; padding: 12px 16px; font-size: 12px; color: var(--text-muted); margin-top: 8px;
+  }
+
+  .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  .feature-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px;
+  }
+  .feature-card h4 {
+    font-size: 14px; font-weight: 600; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .feature-card p { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+  .feature-icon { font-size: 16px; }
+
+  /* Table */
+  .table-header {
+    display: grid; grid-template-columns: 1fr 200px 140px 100px 120px;
+    gap: 16px; padding: 8px 16px; background: var(--bg-muted);
+    font-size: 12px; font-weight: 500; color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+  }
+  .table-row {
+    display: grid; grid-template-columns: 1fr 200px 140px 100px 120px;
+    gap: 16px; padding: 12px 16px; align-items: center;
+    border-bottom: 1px solid rgba(63,63,70,.3); transition: background .15s;
+  }
+  .table-row:hover { background: rgba(63,63,70,.15); }
+  .table-row:last-child { border-bottom: none; }
+  .key-cell { display: flex; align-items: center; gap: 8px; }
+  .key-name { font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 500; }
+  .badge-secret {
+    background: rgba(239,68,68,.1); color: #f87171; border: 1px solid rgba(239,68,68,.2);
+    font-size: 10px; padding: 1px 6px; border-radius: 4px; font-weight: 500;
+  }
+  .badge-public {
+    background: rgba(161,161,170,.1); color: var(--text-muted); border: 1px solid rgba(161,161,170,.2);
+    font-size: 10px; padding: 1px 6px; border-radius: 4px; font-weight: 500;
+  }
+  .value-cell { display: flex; align-items: center; gap: 4px; }
+  .masked { font-family: monospace; font-size: 12px; color: var(--text-dim); letter-spacing: 1px; }
+  .icon-btn {
+    background: none; border: none; color: var(--text-dim); cursor: pointer;
+    padding: 4px; border-radius: 4px; display: flex; align-items: center;
+  }
+  .icon-btn:hover { background: var(--bg-muted); color: var(--text); }
+  .service-badge {
+    background: rgba(59,130,246,.1); color: #60a5fa; border: 1px solid rgba(59,130,246,.2);
+    font-size: 10px; padding: 2px 8px; border-radius: 4px;
+  }
+  .date-cell { font-size: 12px; color: var(--text-dim); }
+  .actions-cell { display: flex; gap: 4px; justify-content: flex-end; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1>환경변수 관리 개선 프리뷰</h1>
+    <span class="badge">v2 업데이트</span>
+  </div>
+
+  <!-- ====== 1. Filter Bar ====== -->
+  <div class="section">
+    <div class="section-title">
+      <span class="num">1</span>
+      필터바 — 일괄 편집 + 변수 복사 버튼 추가
+    </div>
+
+    <div class="card" style="padding: 16px;">
+      <div class="filter-bar">
+        <div class="select-mock">개발 (12) <span class="arrow">▾</span></div>
+        <div class="search-box">
+          <span class="icon">🔍</span>
+          <input type="text" placeholder="변수 검색..." readonly>
+        </div>
+        <div class="view-toggle">
+          <button class="active">📋 전체</button>
+          <button>📦 서비스별</button>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-icon" title="변수 복사" style="position:relative;">
+            ↗
+            <span class="new-badge" style="position:absolute;top:-6px;right:-6px;">NEW</span>
+          </button>
+          <button class="btn btn-icon" title="AI 키 분석">✨</button>
+          <button class="btn btn-icon" title=".env 가져오기">📤</button>
+          <button class="btn btn-icon" title=".env 다운로드">📥</button>
+          <button class="btn" title="일괄 편집" style="position:relative;">
+            { } <span style="margin-left:4px;">일괄 편집</span>
+            <span class="new-badge" style="margin-left:6px;">NEW</span>
+          </button>
+          <button class="btn btn-new">+ 변수 추가</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      💡 <strong>일괄 편집</strong> 버튼(텍스트 직접 편집)과 <strong>변수 복사(↗)</strong> 버튼(같은/다른 프로젝트로 복사)이 추가되었습니다.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ====== 2. 일괄 편집 ====== -->
+  <div class="section">
+    <div class="section-title">
+      <span class="num">2</span>
+      일괄 편집 — ENV / JSON 형식 직접 편집
+    </div>
+
+    <div class="dialog" style="max-width: 680px;">
+      <div class="dialog-header">
+        <h2>일괄 편집</h2>
+        <p>환경변수를 직접 편집하세요. 추가, 수정, 삭제가 한 번에 반영됩니다.</p>
+      </div>
+      <div class="dialog-body">
+        <div class="env-info-row">
+          <span class="env-badge">개발</span>
+          <span class="count-badge">12개 변수</span>
+          <div class="diff-badges">
+            <span class="diff-badge-add">+2 추가</span>
+            <span class="diff-badge-change">~1 수정</span>
+            <span class="diff-badge-remove">-1 삭제</span>
+          </div>
+        </div>
+        <div class="tabs">
+          <button class="tab active">ENV</button>
+          <button class="tab">JSON</button>
+        </div>
+        <textarea class="editor-textarea" readonly>SUPABASE_URL="https://abc.supabase.co"
+SUPABASE_ANON_KEY="eyJhbGciOi..."
+DATABASE_URL="postgresql://user:pass@host:5432/db"
+NEXT_PUBLIC_APP_URL="https://linkmap.site"
+STRIPE_SECRET_KEY="sk_live_..."
+ENCRYPTION_KEY="a1b2c3d4e5f6..."
+GITHUB_CLIENT_ID="Iv1.abc123"
+GITHUB_CLIENT_SECRET="ghs_xyz789..."
+NEW_API_KEY="new_value_here"
+ANOTHER_NEW="another_value"</textarea>
+        <div class="warning-box">
+          <span class="icon">⚠️</span>
+          <p>1개의 변수가 삭제됩니다. 삭제된 변수는 복구할 수 있습니다.</p>
+        </div>
+      </div>
+      <div class="dialog-footer">
+        <button class="btn-copy-env">📋 ENV 복사</button>
+        <div class="right">
+          <button class="btn-cancel">취소</button>
+          <button class="btn-update">변수 업데이트</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:16px;">
+      💡 <strong>ENV / JSON 탭 전환</strong>으로 원하는 형식으로 편집. .env 파일 통째로 붙여넣기 가능.
+      <strong>실시간 diff 표시</strong>로 추가/수정/삭제 항목을 한눈에 확인. Copy 버튼으로 클립보드 복사.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ====== 2-1. 일괄 편집 JSON ====== -->
+  <div class="section">
+    <div class="section-title">
+      <span class="num">2-1</span>
+      일괄 편집 — JSON 형식
+    </div>
+    <div class="dialog" style="max-width: 680px;">
+      <div class="dialog-header">
+        <h2>일괄 편집</h2>
+        <p>환경변수를 직접 편집하세요. 추가, 수정, 삭제가 한 번에 반영됩니다.</p>
+      </div>
+      <div class="dialog-body">
+        <div class="env-info-row">
+          <span class="env-badge">프로덕션</span>
+          <span class="count-badge">8개 변수</span>
+        </div>
+        <div class="tabs">
+          <button class="tab">ENV</button>
+          <button class="tab active">JSON</button>
+        </div>
+        <textarea class="editor-textarea json-mode" readonly>{
+  "SUPABASE_URL": "https://abc.supabase.co",
+  "SUPABASE_ANON_KEY": "eyJhbGciOi...",
+  "DATABASE_URL": "postgresql://user:pass@host:5432/db",
+  "NEXT_PUBLIC_APP_URL": "https://linkmap.site",
+  "STRIPE_SECRET_KEY": "sk_live_...",
+  "ENCRYPTION_KEY": "a1b2c3d4e5f6...",
+  "GITHUB_CLIENT_ID": "Iv1.abc123",
+  "GITHUB_CLIENT_SECRET": "ghs_xyz789..."
+}</textarea>
+      </div>
+      <div class="dialog-footer">
+        <button class="btn-copy-env">📋 JSON 복사</button>
+        <div class="right">
+          <button class="btn-cancel">취소</button>
+          <button class="btn-update" style="opacity:.5;cursor:not-allowed;">변수 업데이트</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ====== 3. Copy Dialog — 같은 프로젝트 ====== -->
+  <div class="section">
+    <div class="section-title">
+      <span class="num">3</span>
+      환경변수 복사 — 같은 프로젝트 내 환경 간 복사
+    </div>
+
+    <div class="dialog" style="max-width: 520px;">
+      <div class="dialog-header">
+        <h2>환경변수 복사</h2>
+        <p>현재 환경의 변수를 같은 프로젝트의 다른 환경 또는 다른 프로젝트로 복사합니다.</p>
+      </div>
+      <div class="dialog-body">
+        <!-- Toggle -->
+        <div class="copy-toggle">
+          <button class="active">같은 프로젝트</button>
+          <button>📂 다른 프로젝트</button>
+        </div>
+
+        <!-- Source -->
+        <div class="source-row">
+          <span class="label">소스:</span>
+          <span class="source-badge">My SaaS · 개발</span>
+          <span class="source-count">12개</span>
+        </div>
+
+        <!-- Target Env -->
+        <div class="form-group">
+          <label class="form-label">대상 환경 →</label>
+          <select class="form-select">
+            <option>프로덕션</option>
+            <option>스테이징</option>
+          </select>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-card">
+          <div class="stats-row">
+            <span class="label">소스 변수</span>
+            <span class="value">12개</span>
+          </div>
+          <div class="stats-row">
+            <span class="label">대상에 이미 존재</span>
+            <span class="value">8개</span>
+          </div>
+          <div class="stats-row highlight">
+            <span class="label">새로 추가될 변수</span>
+            <span class="value">4개</span>
+          </div>
+        </div>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="ow1">
+          <label for="ow1">기존 변수 덮어쓰기 (8개 충돌)</label>
+        </div>
+      </div>
+      <div class="dialog-footer">
+        <div></div>
+        <div class="right">
+          <button class="btn-cancel">취소</button>
+          <button class="btn-update">4개 변수 복사</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ====== 4. Copy Dialog — 다른 프로젝트 ====== -->
+  <div class="section">
+    <div class="section-title">
+      <span class="num">4</span>
+      환경변수 복사 — 다른 프로젝트로 복사
+    </div>
+
+    <div class="dialog" style="max-width: 520px;">
+      <div class="dialog-header">
+        <h2>환경변수 복사</h2>
+        <p>현재 환경의 변수를 같은 프로젝트의 다른 환경 또는 다른 프로젝트로 복사합니다.</p>
+      </div>
+      <div class="dialog-body">
+        <!-- Toggle -->
+        <div class="copy-toggle">
+          <button>같은 프로젝트</button>
+          <button class="active">📂 다른 프로젝트</button>
+        </div>
+
+        <!-- Source -->
+        <div class="source-row">
+          <span class="label">소스:</span>
+          <span class="source-badge">My SaaS · 개발</span>
+          <span class="source-count">12개</span>
+        </div>
+
+        <!-- Target Project -->
+        <div class="form-group">
+          <label class="form-label">대상 프로젝트</label>
+          <select class="form-select">
+            <option>Landing Page</option>
+            <option>Admin Dashboard</option>
+            <option>Mobile API</option>
+          </select>
+        </div>
+
+        <!-- Target Env -->
+        <div class="form-group">
+          <label class="form-label">대상 환경 →</label>
+          <select class="form-select">
+            <option>개발</option>
+            <option>스테이징</option>
+            <option>프로덕션</option>
+          </select>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-card">
+          <div class="stats-row">
+            <span class="label">소스 변수</span>
+            <span class="value">12개</span>
+          </div>
+          <div class="stats-row">
+            <span class="label">대상에 이미 존재</span>
+            <span class="value">3개</span>
+          </div>
+          <div class="stats-row highlight">
+            <span class="label">새로 추가될 변수</span>
+            <span class="value">9개</span>
+          </div>
+        </div>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="ow2" checked>
+          <label for="ow2">기존 변수 덮어쓰기 (3개 충돌)</label>
+        </div>
+
+        <div class="warning-box" style="margin-top:0;">
+          <span class="icon">⚠️</span>
+          <p>대상의 기존 값이 소스 값으로 교체됩니다. 다른 프로젝트의 변수가 변경됩니다.</p>
+        </div>
+      </div>
+      <div class="dialog-footer">
+        <div></div>
+        <div class="right">
+          <button class="btn-cancel">취소</button>
+          <button class="btn-update">복사 및 덮어쓰기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:16px;">
+      💡 <strong>같은 프로젝트</strong> 탭에서는 개발→스테이징→프로덕션 간 환경 변수를 동기화하고,
+      <strong>다른 프로젝트</strong> 탭에서는 공통 환경변수(Supabase, Stripe 등)를 다른 프로젝트로 한 번에 복사할 수 있습니다.
+      충돌 감지 + 덮어쓰기 옵션으로 안전하게 관리됩니다.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ====== 5. Table ====== -->
+  <div class="section">
+    <div class="section-title">
+      <span class="num">5</span>
+      데이터 테이블 (기존 유지)
+    </div>
+    <div class="card">
+      <div class="table-header">
+        <div>키 이름</div><div>값</div><div>서비스</div><div>수정일</div><div></div>
+      </div>
+      <div class="table-row">
+        <div class="key-cell"><span class="key-name">SUPABASE_URL</span><span class="badge-secret">비밀</span></div>
+        <div class="value-cell"><span class="masked">••••••••••••</span><button class="icon-btn">📋</button><button class="icon-btn">👁</button></div>
+        <div><span class="service-badge">Supabase</span></div>
+        <div class="date-cell">3월 15일</div>
+        <div class="actions-cell"><button class="icon-btn">✏️</button><button class="icon-btn">⋯</button></div>
+      </div>
+      <div class="table-row">
+        <div class="key-cell"><span class="key-name">STRIPE_SECRET_KEY</span><span class="badge-secret">비밀</span></div>
+        <div class="value-cell"><span class="masked">••••••••••••</span><button class="icon-btn">📋</button><button class="icon-btn">👁</button></div>
+        <div><span class="service-badge">Stripe</span></div>
+        <div class="date-cell">3월 14일</div>
+        <div class="actions-cell"><button class="icon-btn">✏️</button><button class="icon-btn">⋯</button></div>
+      </div>
+      <div class="table-row">
+        <div class="key-cell"><span class="key-name">NEXT_PUBLIC_APP_URL</span><span class="badge-public">공개</span></div>
+        <div class="value-cell"><span class="masked">••••••••••••</span><button class="icon-btn">📋</button><button class="icon-btn">👁</button></div>
+        <div><span style="font-size:12px;color:var(--text-dim);">-</span></div>
+        <div class="date-cell">3월 12일</div>
+        <div class="actions-cell"><button class="icon-btn">✏️</button><button class="icon-btn">⋯</button></div>
+      </div>
+      <div class="table-row">
+        <div class="key-cell"><span class="key-name">GITHUB_CLIENT_SECRET</span><span class="badge-secret">비밀</span></div>
+        <div class="value-cell"><span class="masked">••••••••••••</span><button class="icon-btn">📋</button><button class="icon-btn">👁</button></div>
+        <div><span class="service-badge">GitHub</span></div>
+        <div class="date-cell">3월 10일</div>
+        <div class="actions-cell"><button class="icon-btn">✏️</button><button class="icon-btn">⋯</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ====== Summary ====== -->
+  <div class="section">
+    <div class="section-title">
+      <span class="num">✓</span>
+      구현 요약
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h4><span class="feature-icon">{ }</span> 일괄 편집</h4>
+        <p>
+          ENV / JSON 탭 전환으로 텍스트 직접 편집.<br>
+          .env 파일 통째로 붙여넣기 가능.<br>
+          실시간 diff 표시 (+추가 ~수정 -삭제).<br>
+          ENV 복사 / JSON 복사 클립보드 복사.
+        </p>
+      </div>
+      <div class="feature-card">
+        <h4><span class="feature-icon">↗</span> 환경변수 복사</h4>
+        <p>
+          <strong>같은 프로젝트:</strong> 개발→스테이징→프로덕션 동기화.<br>
+          <strong>다른 프로젝트:</strong> 공통 변수를 다른 프로젝트로 복사.<br>
+          충돌 감지 + 덮어쓰기 옵션.<br>
+          프로덕션 / 크로스 프로젝트 경고.
+        </p>
+      </div>
+      <div class="feature-card">
+        <h4><span class="feature-icon">🔄</span> API 엔드포인트</h4>
+        <p>
+          <code style="background:var(--bg);padding:1px 4px;border-radius:3px;font-size:11px;">/api/env/raw</code> GET + PUT<br>
+          GET: 전체 복호화 변수 조회.<br>
+          PUT: diff 기반 일괄 업데이트.<br>
+          감사 로그 자동 기록.
+        </p>
+      </div>
+      <div class="feature-card">
+        <h4><span class="feature-icon">📊</span> 변경 파일</h4>
+        <p>
+          <code style="font-size:11px;">api/env/raw/route.ts</code> — 신규<br>
+          <code style="font-size:11px;">env-raw-editor-dialog.tsx</code> — 신규<br>
+          <code style="font-size:11px;">env-copy-env-dialog.tsx</code> — 재작성<br>
+          <code style="font-size:11px;">env-filter-bar.tsx</code> — 수정<br>
+          <code style="font-size:11px;">env/page.tsx</code> — 수정<br>
+          <code style="font-size:11px;">audit.ts</code> — 수정
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

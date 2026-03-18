@@ -16,7 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Search, Plus, Download, Upload, Sparkles, List, Layers } from 'lucide-react';
+import { Search, Plus, Download, Upload, Sparkles, List, Layers, Braces, Share2 } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
@@ -39,6 +39,8 @@ interface EnvFilterBarProps {
   onExportClick?: () => void;
   onImportClick?: () => void;
   onAnalyzeClick?: () => void;
+  onRawEditorClick?: () => void;
+  onCopyEnvClick?: () => void;
   envCounts: Record<Environment, number>;
   viewMode?: EnvViewMode;
   onViewModeChange?: (mode: EnvViewMode) => void;
@@ -53,6 +55,8 @@ export function EnvFilterBar({
   onExportClick,
   onImportClick,
   onAnalyzeClick,
+  onRawEditorClick,
+  onCopyEnvClick,
   envCounts,
   viewMode = 'all',
   onViewModeChange,
@@ -128,6 +132,16 @@ export function EnvFilterBar({
 
       <TooltipProvider>
         <div className="flex gap-2">
+          {onCopyEnvClick && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" onClick={onCopyEnvClick} aria-label="환경 간 복사">
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>환경 간 변수 복사</TooltipContent>
+            </Tooltip>
+          )}
           {onAnalyzeClick && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -156,6 +170,17 @@ export function EnvFilterBar({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>.env 파일 다운로드</TooltipContent>
+            </Tooltip>
+          )}
+          {onRawEditorClick && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" onClick={onRawEditorClick} className="gap-1.5">
+                  <Braces className="h-4 w-4" />
+                  <span className="hidden sm:inline">일괄 편집</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>텍스트로 일괄 편집</TooltipContent>
             </Tooltip>
           )}
           <Button onClick={onAddClick}>

@@ -6,6 +6,7 @@ import { queryKeys } from '@/lib/queries/keys';
 import { useParams, useRouter } from 'next/navigation';
 import { useEnvVars, useAddEnvVar, useDeleteEnvVar, useDecryptEnvVar, useUpdateEnvVar, useSyncEnvServices } from '@/lib/queries/env-vars';
 import { useProjectServices, useCatalogServices } from '@/lib/queries/services';
+import { useProject } from '@/lib/queries/projects';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -58,6 +59,8 @@ import { EnvDataTable } from '@/components/env/env-data-table';
 import type { EnvServiceGroup } from '@/components/env/env-data-table';
 import { EnvDoctorPanel } from '@/components/ai/env-doctor-panel';
 import { SmartKeyAnalyzerDialog } from '@/components/env/smart-key-analyzer';
+import { EnvRawEditorDialog } from '@/components/env/env-raw-editor-dialog';
+import { EnvCopyEnvDialog } from '@/components/env/env-copy-env-dialog';
 import type { Environment, EnvironmentVariable } from '@/types';
 
 export default function ProjectEnvPage() {
@@ -66,6 +69,7 @@ export default function ProjectEnvPage() {
   const projectId = params.id as string;
   const queryClient = useQueryClient();
   const { data: envVars = [], isLoading } = useEnvVars(projectId);
+  const { data: project } = useProject(projectId);
   const { data: projectServices = [] } = useProjectServices(projectId);
   const { data: catalogServices = [] } = useCatalogServices();
   const addEnvVar = useAddEnvVar(projectId);
@@ -100,6 +104,8 @@ export default function ProjectEnvPage() {
   const [editServiceId, setEditServiceId] = useState<string | null>(null);
   const [editEnvironment, setEditEnvironment] = useState<Environment>('development');
   const [analyzerOpen, setAnalyzerOpen] = useState(false);
+  const [rawEditorOpen, setRawEditorOpen] = useState(false);
+  const [copyEnvOpen, setCopyEnvOpen] = useState(false);
   const [viewMode, setViewMode] = useState<EnvViewMode>('all');
 
   const envKeyServiceMap = useMemo(
@@ -393,6 +399,8 @@ export default function ProjectEnvPage() {
         onExportClick={handleDownload}
         onImportClick={() => setImportOpen(true)}
         onAnalyzeClick={() => setAnalyzerOpen(true)}
+        onRawEditorClick={() => setRawEditorOpen(true)}
+        onCopyEnvClick={() => setCopyEnvOpen(true)}
         envCounts={envCounts}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
@@ -418,6 +426,34 @@ export default function ProjectEnvPage() {
         projectId={projectId}
         open={analyzerOpen}
         onOpenChange={setAnalyzerOpen}
+      />
+
+      {/* 일괄 편집 */}
+      <EnvRawEditorDialog
+        open={rawEditorOpen}
+        onOpenChange={setRawEditorOpen}
+        projectId={projectId}
+        environment={activeEnv}
+        onUpdated={() => {
+          queryClient.invalidateQueries({ queryKey: queryKeys.envVars.byProject(projectId) });
+          queryClient.invalidateQueries({ queryKey: queryKeys.envVars.conflicts(projectId) });
+          queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all(projectId) });
+        }}
+      />
+
+      {/* Copy to Environment / Project */}
+      <EnvCopyEnvDialog
+        open={copyEnvOpen}
+        onOpenChange={setCopyEnvOpen}
+        projectId={projectId}
+        projectName={project?.name}
+        sourceEnv={activeEnv}
+        envVars={envVars}
+        onCopied={() => {
+          queryClient.invalidateQueries({ queryKey: queryKeys.envVars.byProject(projectId) });
+          queryClient.invalidateQueries({ queryKey: queryKeys.envVars.conflicts(projectId) });
+          queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all(projectId) });
+        }}
       />
 
       {/* Import Dialog (externally controlled) */}

@@ -118,7 +118,9 @@ export type AuditAction =
   | 'credential.create'
   | 'credential.update'
   | 'credential.delete'
-  | 'credential.decrypt';
+  | 'credential.decrypt'
+  | 'env_var.raw_read'
+  | 'env_var.raw_update';
 
 interface AuditLogEntry {
   action: AuditAction;
