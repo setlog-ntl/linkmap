@@ -12,11 +12,11 @@
     "binding": "ASSETS"
   },
 
-  // KV namespace for incremental cache (OpenNext 기본 캐시)
-  // 필요 시 Cloudflare 대시보드에서 KV 생성 후 id 입력
-  // "kv_namespaces": [
-  //   { "binding": "NEXT_CACHE_KV", "id": "<KV_NAMESPACE_ID>" }
-  // ],
+  // KV namespace for incremental cache (OpenNext ISR 캐시)
+  // Cloudflare 대시보드 > Workers & Pages > KV에서 네임스페이스 생성 후 id 입력
+  "kv_namespaces": [
+    { "binding": "NEXT_CACHE_KV", "id": "531c47e4eab342088dca24e74d2cc67c" }
+  ],
 
   // 환경변수는 GitHub Secrets + CI 빌드 시 주입
   // NEXT_PUBLIC_* 는 빌드 시 env로 전달 (deploy-cloudflare.yml 참고)

@@ -7,13 +7,13 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder assets
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+    // 인증 보호가 필요한 경로만 매칭 (공개 페이지 제외 → CPU 시간 절약)
+    '/dashboard/:path*',
+    '/project/:path*',
+    '/settings/:path*',
+    '/admin/:path*',
+    '/my-sites/:path*',
+    '/login',
+    '/signup',
   ],
 };
