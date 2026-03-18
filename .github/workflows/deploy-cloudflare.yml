@@ -1,7 +1,9 @@
 # Git 배포 적용: main 푸시 시 Cloudflare Workers로 자동 배포
 # 필수 GitHub Secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID,
 #   NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY,
-#   NEXT_PUBLIC_POLAR_PRODUCT_PRO, POLAR_ACCESS_TOKEN, POLAR_WEBHOOK_SECRET
+#   NEXT_PUBLIC_POLAR_PRODUCT_PRO, NEXT_PUBLIC_POLAR_PRODUCT_PRO_YEARLY,
+#   NEXT_PUBLIC_POLAR_PRODUCT_TEAM, NEXT_PUBLIC_POLAR_PRODUCT_TEAM_YEARLY,
+#   POLAR_ACCESS_TOKEN, POLAR_WEBHOOK_SECRET
 # 서버 시크릿(POLAR_ACCESS_TOKEN 등)은 Cloudflare 대시보드 > Workers > Settings > Variables에도 설정 필요
 # 설정: Repository → Settings → Secrets and variables → Actions
 name: Deploy to Cloudflare Workers
