@@ -271,9 +271,21 @@ export function ModuleEditorStep({
           {modules.map((mod) => {
             const isEnabled = configState.enabled.includes(mod.id);
             const isExpanded = expandedModules.has(mod.id);
-            const editableFields = mod.fields.filter(
-              (f) => f.key !== 'designPreset' && f.key !== 'bgStyle' && f.type !== 'array'
-            );
+            const editableFields = mod.fields
+              .filter(
+                (f) => f.key !== 'designPreset' && f.key !== 'bgStyle' && f.type !== 'array'
+              )
+              // 영문 필드를 뒤로, 이미지/색상/핵심 필드를 앞으로
+              .sort((a, b) => {
+                const priority = (f: ModuleFieldDef) => {
+                  if (f.key.endsWith('En')) return 10;
+                  if (f.type === 'url') return 1; // 이미지 URL 우선
+                  if (f.type === 'color') return 2;
+                  if (f.validation?.required) return 0;
+                  return 5;
+                };
+                return priority(a) - priority(b);
+              });
 
             return (
               <div
@@ -314,7 +326,7 @@ export function ModuleEditorStep({
                 {/* Inline field editor */}
                 {isEnabled && isExpanded && editableFields.length > 0 && (
                   <div className="px-3 pb-3 space-y-2 border-t pt-2">
-                    {editableFields.slice(0, 4).map((field) => (
+                    {editableFields.slice(0, 6).map((field) => (
                       <SimpleFieldEditor
                         key={field.key}
                         field={field}
@@ -322,9 +334,9 @@ export function ModuleEditorStep({
                         onChange={(v) => updateField(mod.id, field.key, v)}
                       />
                     ))}
-                    {editableFields.length > 4 && (
+                    {editableFields.length > 6 && (
                       <p className="text-[10px] text-muted-foreground">
-                        +{editableFields.length - 4}개 필드 (배포 후 편집 가능)
+                        +{editableFields.length - 6}개 필드 (배포 후 편집 가능)
                       </p>
                     )}
                   </div>
