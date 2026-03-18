@@ -213,13 +213,13 @@ export function EnvRawEditorDialog({
           )}
         </div>
 
-        <Tabs value={format} onValueChange={handleFormatChange} className="flex-1 flex flex-col min-h-0">
+        <Tabs value={format} onValueChange={handleFormatChange} className="min-h-0">
           <TabsList className="shrink-0">
             <TabsTrigger value="env">ENV</TabsTrigger>
             <TabsTrigger value="json">JSON</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="env" className="flex-1 min-h-0 mt-2">
+          <TabsContent value="env" className="mt-2">
             {loading ? (
               <div className="flex items-center justify-center h-64">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -229,13 +229,13 @@ export function EnvRawEditorDialog({
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder={`# 한 줄에 하나의 변수를 입력하세요\nAPI_KEY="sk_live_..."\nDATABASE_URL="postgresql://..."\nNEXT_PUBLIC_APP_URL="https://..."`}
-                className="font-mono text-sm h-full min-h-[300px] resize-none"
+                className="font-mono text-sm min-h-[200px] max-h-[calc(85dvh-320px)] resize-none overflow-y-auto"
                 spellCheck={false}
               />
             )}
           </TabsContent>
 
-          <TabsContent value="json" className="flex-1 min-h-0 mt-2">
+          <TabsContent value="json" className="mt-2">
             {loading ? (
               <div className="flex items-center justify-center h-64">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -245,7 +245,7 @@ export function EnvRawEditorDialog({
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder={`{\n  "API_KEY": "sk_live_...",\n  "DATABASE_URL": "postgresql://..."\n}`}
-                className="font-mono text-sm h-full min-h-[300px] resize-none"
+                className="font-mono text-sm min-h-[200px] max-h-[calc(85dvh-320px)] resize-none overflow-y-auto"
                 spellCheck={false}
               />
             )}
