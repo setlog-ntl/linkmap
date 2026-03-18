@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>가이드 허브 프리뷰 — Before / After</title>
+<style>
+  :root {
+    --bg: #0a0a0a; --card-bg: #111; --card-border: #222; --muted-bg: #1a1a1a;
+    --text: #fafafa; --text-muted: #888; --brand-blue: #3b82f6;
+    --blue-bg: rgba(59,130,246,0.1); --amber-bg: rgba(245,158,11,0.1);
+    --violet-bg: rgba(139,92,246,0.1); --green-bg: rgba(34,197,94,0.1);
+    --rose-bg: rgba(244,63,94,0.1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard Variable', -apple-system, sans-serif; background: var(--bg); color: var(--text); }
+  .layout { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; }
+  @media (max-width: 1200px) { .layout { grid-template-columns: 1fr; } }
+  .panel { padding: 40px 32px; overflow-y: auto; max-height: 100vh; }
+  .panel-before { border-right: 2px solid #333; }
+  .panel-label { position: sticky; top: 0; z-index: 10; background: var(--bg); padding: 8px 0 16px; margin-bottom: 16px; }
+  .panel-label span { display: inline-block; padding: 4px 16px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+  .label-before { background: #333; color: #aaa; }
+  .label-after { background: var(--brand-blue); color: #fff; }
+
+  h2.section-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .section-desc { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px; }
+
+  /* Before: 기존 카드 그리드 */
+  .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px; }
+  .card-old { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 16px; }
+  .card-old .icon-wrap { width: 36px; height: 36px; background: var(--muted-bg); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; font-size: 16px; }
+  .card-old h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+  .card-old p { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; }
+  .card-old .meta { font-size: 0.65rem; color: var(--text-muted); margin-top: 8px; }
+
+  /* After: 단계별 리스트 */
+  .stage-group { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+  .stage-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; transition: background 0.15s; }
+  .stage-header:hover { background: var(--muted-bg); }
+  .stage-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .stage-label { font-size: 0.85rem; font-weight: 600; }
+  .stage-desc { font-size: 0.7rem; color: var(--text-muted); margin-left: 4px; }
+  .stage-count { font-size: 0.7rem; color: var(--text-muted); margin-left: auto; }
+
+  .stage-items { border-top: 1px solid var(--card-border); }
+  .guide-row { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-bottom: 1px solid var(--card-border); transition: background 0.15s; }
+  .guide-row:last-child { border-bottom: none; }
+  .guide-row:hover { background: var(--muted-bg); }
+  .guide-icon { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+  .guide-info { flex: 1; min-width: 0; }
+  .guide-title { font-size: 0.8rem; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+  .guide-title .badge { font-size: 0.6rem; padding: 1px 5px; border-radius: 3px; background: var(--muted-bg); color: var(--text-muted); }
+  .guide-desc-text { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .guide-time { font-size: 0.65rem; color: var(--text-muted); flex-shrink: 0; }
+
+  .num-blue { background: #3b82f6; }
+  .num-amber { background: #f59e0b; }
+  .num-violet { background: #8b5cf6; }
+  .num-green { background: #22c55e; }
+  .num-rose { background: #f43f5e; }
+
+  .comparison-note { margin-top: 24px; padding: 16px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; }
+  .comparison-note strong { color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- BEFORE -->
+  <div class="panel panel-before">
+    <div class="panel-label"><span class="label-before">Before — 기존</span></div>
+
+    <h2 class="section-title">기본 개념 <span style="font-size:0.7rem;color:var(--text-muted)">(17)</span></h2>
+    <p class="section-desc">개발에 꼭 필요한 핵심 개념을 쉽게 설명합니다</p>
+
+    <div class="card-grid">
+      <div class="card-old"><div class="icon-wrap">🤖</div><h4>AI 도구 활용</h4><p>AI 도구로 코드를 생성하는 법</p><div class="meta">15분</div></div>
+      <div class="card-old"><div class="icon-wrap">🖥️</div><h4>프론트엔드 기초</h4><p>화면을 만드는 기본 원리</p><div class="meta">12분</div></div>
+      <div class="card-old"><div class="icon-wrap">📦</div><h4>패키지 매니저</h4><p>npm과 의존성 관리 기초</p><div class="meta">10분</div></div>
+      <div class="card-old"><div class="icon-wrap">🔀</div><h4>버전 관리</h4><p>Git으로 코드 변경 관리하기</p><div class="meta">12분</div></div>
+      <div class="card-old"><div class="icon-wrap">🔑</div><h4>환경변수 관리</h4><p>환경변수와 비밀 키 관리법</p><div class="meta">10분</div></div>
+      <div class="card-old"><div class="icon-wrap">🔌</div><h4>API 연동 기초</h4><p>API 요청과 응답 이해하기</p><div class="meta">12분</div></div>
+      <div class="card-old"><div class="icon-wrap">🖧</div><h4>백엔드 기초</h4><p>서버 로직과 데이터 처리</p><div class="meta">10분</div></div>
+      <div class="card-old"><div class="icon-wrap">🛡️</div><h4>인증 구현</h4><p>로그인과 사용자 인증 구현</p><div class="meta">15분</div></div>
+      <div class="card-old"><div class="icon-wrap">🎨</div><h4>디자인/UI</h4><p>보기 좋은 UI 만드는 원칙</p><div class="meta">10분</div></div>
+      <div class="card-old"><div class="icon-wrap">🔒</div><h4>보안 기초</h4><p>웹 앱 보안 기초 점검 항목</p><div class="meta">12분</div></div>
+      <div class="card-old"><div class="icon-wrap">🌐</div><h4>도메인 연결</h4><p>도메인 구매와 연결 방법</p><div class="meta">8분</div></div>
+      <div class="card-old"><div class="icon-wrap">⚙️</div><h4>서버·호스팅</h4><p>호스팅 서비스 선택과 설정</p><div class="meta">10분</div></div>
+      <div class="card-old"><div class="icon-wrap">🚀</div><h4>배포하기</h4><p>앱을 인터넷에 배포하기</p><div class="meta">10분</div></div>
+      <div class="card-old"><div class="icon-wrap">📧</div><h4>알림 연동</h4><p>이메일·알림 연동 방법</p><div class="meta">10분</div></div>
+      <div class="card-old"><div class="icon-wrap">💳</div><h4>결제 연동</h4><p>결제 시스템 연동 기초</p><div class="meta">12분</div></div>
+      <div class="card-old"><div class="icon-wrap">📊</div><h4>모니터링</h4><p>에러 추적과 성능 모니터링</p><div class="meta">10분</div></div>
+      <div class="card-old"><div class="icon-wrap">⚡</div><h4>자동화</h4><p>반복 작업을 자동화하는 법</p><div class="meta">10분</div></div>
+    </div>
+
+    <div class="comparison-note">
+      <strong>문제점:</strong><br>
+      • 17개 카드가 3열×6행으로 나열 → 스크롤이 길고 압도적<br>
+      • 학습 단계(시작→개발→완성→배포→확장) 구분이 없음<br>
+      • 어디서부터 시작해야 할지 가이드가 부족
+    </div>
+  </div>
+
+  <!-- AFTER -->
+  <div class="panel">
+    <div class="panel-label"><span class="label-after">After — 개선</span></div>
+
+    <h2 class="section-title">기본 개념 <span style="font-size:0.7rem;color:var(--text-muted)">(17)</span></h2>
+    <p class="section-desc">개발에 꼭 필요한 핵심 개념을 쉽게 설명합니다</p>
+
+    <!-- Stage 1: 시작 -->
+    <div class="stage-group">
+      <div class="stage-header">
+        <div class="stage-num num-blue">1</div>
+        <span class="stage-label">시작</span>
+        <span class="stage-desc">AI 도구와 개발 환경 세팅</span>
+        <span class="stage-count">4개</span>
+      </div>
+      <div class="stage-items">
+        <div class="guide-row">
+          <div class="guide-icon" style="background:var(--blue-bg)">🤖</div>
+          <div class="guide-info">
+            <div class="guide-title">AI 도구 활용 <span class="badge">바이브코딩 필수</span></div>
+            <div class="guide-desc-text">AI 도구로 코드를 생성하는 법</div>
+          </div>
+          <span class="guide-time">15분</span>
+        </div>
+        <div class="guide-row">
+          <div class="guide-icon" style="background:var(--blue-bg)">🖥️</div>
+          <div class="guide-info">
+            <div class="guide-title">프론트엔드 기초 <span class="badge">입문</span></div>
+            <div class="guide-desc-text">화면을 만드는 기본 원리</div>
+          </div>
+          <span class="guide-time">12분</span>
+        </div>
+        <div class="guide-row">
+          <div class="guide-icon" style="background:var(--blue-bg)">📦</div>
+          <div class="guide-info">
+            <div class="guide-title">패키지 매니저 <span class="badge">입문</span></div>
+            <div class="guide-desc-text">npm과 의존성 관리 기초</div>
+          </div>
+          <span class="guide-time">10분</span>
+        </div>
+        <div class="guide-row">
+          <div class="guide-icon" style="background:var(--blue-bg)">🔀</div>
+          <div class="guide-info">
+            <div class="guide-title">버전 관리 <span class="badge">입문</span></div>
+            <div class="guide-desc-text">Git으로 코드 변경 관리하기</div>
+          </div>
+          <span class="guide-time">12분</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 2: 개발 -->
+    <div class="stage-group">
+      <div class="stage-header">
+        <div class="stage-num num-amber">2</div>
+        <span class="stage-label">개발</span>
+        <span class="stage-desc">핵심 기능 구현에 필요한 개념</span>
+        <span class="stage-count">4개</span>
+      </div>
+      <div class="stage-items">
+        <div class="guide-row">
+          <div class="guide-icon" style="background:var(--amber-bg)">🔑</div>
+          <div class="guide-info">
+            <div class="guide-title">환경변수 관리 <span class="badge">필수</span></div>
+            <div class="guide-desc-text">환경변수와 비밀 키 관리법</div>
+          </div>
+          <span class="guide-time">10분</span>
+        </div>
+        <div class="guide-row">
+          <div class="guide-icon" style="background:var(--amber-bg)">🔌</div>
+          <div class="guide-info">
+            <div class="guide-title">API 연동 기초 <span class="badge">입문</span></div>
+            <div class="guide-desc-text">API 요청과 응답 이해하기</div>
+          </div>
+          <span class="guide-time">12분</span>
+        </div>
+        <div class="guide-row">
+          <div class="guide-icon" style="background:var(--amber-bg)">🖧</div>
+          <div class="guide-info">
+            <div class="guide-title">백엔드 기초</div>
+            <div class="guide-desc-text">서버 로직과 데이터 처리</div>
+          </div>
+          <span class="guide-time">10분</span>
+        </div>
+        <div class="guide-row">
+          <div class="guide-icon" style="background:var(--amber-bg)">🛡️</div>
+          <div class="guide-info">
+            <div class="guide-title">인증 구현</div>
+            <div class="guide-desc-text">로그인과 사용자 인증 구현</div>
+          </div>
+          <span class="guide-time">15분</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 3: 완성 -->
+    <div class="stage-group">
+      <div class="stage-header">
+        <div class="stage-num num-violet">3</div>
+        <span class="stage-label">완성</span>
+        <span class="stage-desc">디자인과 보안 마무리</span>
+        <span class="stage-count">2개</span>
+      </div>
+      <div class="stage-items">
+        <div class="guide-row">
+          <div class="guide-icon" style="background:var(--violet-bg)">🎨</div>
+          <div class="guide-info">
+            <div class="guide-title">디자인/UI <span class="badge">입문</span></div>
+            <div class="guide-desc-text">보기 좋은 UI 만드는 원칙</div>
+          </div>
+          <span class="guide-time">10분</span>
+        </div>
+        <div class="guide-row">
+          <div class="guide-icon" style="background:var(--violet-bg)">🔒</div>
+          <div class="guide-info">
+            <div class="guide-title">보안 기초 <span class="badge">필수</span></div>
+            <div class="guide-desc-text">웹 앱 보안 기초 점검 항목</div>
+          </div>
+          <span class="guide-time">12분</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 4: 배포 -->
+    <div class="stage-group">
+      <div class="stage-header">
+        <div class="stage-num num-green">4</div>
+        <span class="stage-label">배포</span>
+        <span class="stage-desc">도메인 연결, 서버, 배포 자동화</span>
+        <span class="stage-count">3개</span>
+      </div>
+      <div class="stage-items">
+        <div class="guide-row">
+          <div class="guide-icon" style="background:var(--green-bg)">🌐</div>
+          <div class="guide-info"><div class="guide-title">도메인 연결</div><div class="guide-desc-text">도메인 구매와 연결 방법</div></div>
+          <span class="guide-time">8분</span>
+        </div>
+        <div class="guide-row">
+          <div class="guide-icon" style="background:var(--green-bg)">⚙️</div>
+          <div class="guide-info"><div class="guide-title">서버·호스팅</div><div class="guide-desc-text">호스팅 서비스 선택과 설정</div></div>
+          <span class="guide-time">10분</span>
+        </div>
+        <div class="guide-row">
+          <div class="guide-icon" style="background:var(--green-bg)">🚀</div>
+          <div class="guide-info"><div class="guide-title">배포하기</div><div class="guide-desc-text">앱을 인터넷에 배포하기</div></div>
+          <span class="guide-time">10분</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 5: 확장 -->
+    <div class="stage-group">
+      <div class="stage-header">
+        <div class="stage-num num-rose">5</div>
+        <span class="stage-label">확장</span>
+        <span class="stage-desc">알림, 결제, 모니터링, 자동화</span>
+        <span class="stage-count">4개</span>
+      </div>
+      <div class="stage-items">
+        <div class="guide-row">
+          <div class="guide-icon" style="background:var(--rose-bg)">📧</div>
+          <div class="guide-info"><div class="guide-title">알림 연동</div><div class="guide-desc-text">이메일·알림 연동 방법</div></div>
+          <span class="guide-time">10분</span>
+        </div>
+        <div class="guide-row">
+          <div class="guide-icon" style="background:var(--rose-bg)">💳</div>
+          <div class="guide-info"><div class="guide-title">결제 연동</div><div class="guide-desc-text">결제 시스템 연동 기초</div></div>
+          <span class="guide-time">12분</span>
+        </div>
+        <div class="guide-row">
+          <div class="guide-icon" style="background:var(--rose-bg)">📊</div>
+          <div class="guide-info"><div class="guide-title">모니터링</div><div class="guide-desc-text">에러 추적과 성능 모니터링</div></div>
+          <span class="guide-time">10분</span>
+        </div>
+        <div class="guide-row">
+          <div class="guide-icon" style="background:var(--rose-bg)">⚡</div>
+          <div class="guide-info"><div class="guide-title">자동화</div><div class="guide-desc-text">반복 작업을 자동화하는 법</div></div>
+          <span class="guide-time">10분</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="comparison-note">
+      <strong>개선 포인트:</strong><br>
+      • 17개 → 5단계 그룹으로 정리 (시작/개발/완성/배포/확장)<br>
+      • 단계별 색상 구분 + 번호로 학습 순서 명확<br>
+      • 컴팩트 리스트로 세로 공간 60% 절약<br>
+      • 각 단계를 접고 펼 수 있어 필요한 것만 집중<br>
+      • 하위 가이드 버튼은 오른쪽 끝에 분리되어 깔끔
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

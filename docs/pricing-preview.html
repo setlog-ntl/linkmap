@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linkmap 가격 페이지 프리뷰</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --card-bg: #111;
+    --card-border: #222;
+    --text: #fafafa;
+    --text-muted: #888;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.12);
+    --green-text: #4ade80;
+    --ring: rgba(59,130,246,0.2);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg); color: var(--text);
+    min-height: 100vh; padding: 60px 20px;
+  }
+  .container { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 2.5rem; font-weight: 700; text-align: center; margin-bottom: 12px; }
+  .subtitle { text-align: center; color: var(--text-muted); font-size: 1.15rem; margin-bottom: 0; }
+
+  /* 토글 */
+  .toggle-wrap {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; margin-top: 32px; margin-bottom: 48px;
+  }
+  .toggle-label { font-size: 0.875rem; font-weight: 500; color: var(--text-muted); transition: color .2s; }
+  .toggle-label.active { color: var(--text); }
+  .toggle-track {
+    position: relative; width: 44px; height: 24px; border-radius: 12px;
+    background: #333; cursor: pointer; transition: background .2s;
+  }
+  .toggle-track.on { background: var(--primary); }
+  .toggle-thumb {
+    position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
+    border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.4);
+    transition: transform .2s;
+  }
+  .toggle-track.on .toggle-thumb { transform: translateX(20px); }
+  .discount-badge {
+    font-size: 0.75rem; font-weight: 600; padding: 3px 10px; border-radius: 9999px;
+    background: var(--green-bg); color: var(--green-text);
+    display: none;
+  }
+  .discount-badge.show { display: inline-block; }
+
+  /* 카드 그리드 */
+  .grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 28px; }
+  @media (max-width: 768px) { .grid { grid-template-columns: 1fr; max-width: 380px; margin: 0 auto; } }
+  .card {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 12px; padding: 0; position: relative; transition: all .2s;
+  }
+  .card.highlight { border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring), 0 4px 20px rgba(0,0,0,.3); }
+  .card.dim { opacity: 0.55; }
+  .card-header { text-align: center; padding: 28px 24px 12px; }
+  .card-title { font-size: 1.1rem; font-weight: 600; }
+  .price-wrap { margin-top: 16px; }
+  .price { font-size: 2.5rem; font-weight: 700; }
+  .price-suffix { color: var(--text-muted); font-size: 0.95rem; }
+  .price-detail { margin-top: 6px; font-size: 0.8rem; color: var(--text-muted); }
+  .price-detail .strike { text-decoration: line-through; }
+  .card-body { padding: 8px 24px 28px; }
+  .features { list-style: none; margin-bottom: 20px; }
+  .features li {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.875rem; padding: 6px 0; color: var(--text);
+  }
+  .features li svg { width: 16px; height: 16px; color: var(--green); flex-shrink: 0; }
+  .btn {
+    width: 100%; padding: 10px 0; border-radius: 8px; font-size: 0.9rem;
+    font-weight: 500; cursor: pointer; transition: all .15s; border: none;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--card-border); }
+  .btn-outline:hover { background: #1a1a1a; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* 뱃지 */
+  .top-badge {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    font-size: 0.75rem; font-weight: 600; padding: 3px 14px; border-radius: 9999px;
+    white-space: nowrap;
+  }
+  .badge-recommend { background: var(--primary); color: #fff; }
+  .badge-coming { background: #333; color: #aaa; }
+
+  /* 섹션 라벨 */
+  .section-label {
+    text-align: center; margin-top: 48px; padding: 20px;
+    font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--card-border);
+  }
+  .section-label strong { color: var(--text); }
+
+  /* 연간 절약 표시 */
+  .save-tag {
+    display: none; margin-top: 8px; font-size: 0.75rem; font-weight: 600;
+    color: var(--green-text); background: var(--green-bg);
+    padding: 2px 8px; border-radius: 4px;
+  }
+  .save-tag.show { display: inline-block; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>심플한 가격</h1>
+  <p class="subtitle">개인 프로젝트부터 팀 협업까지, 필요에 맞는 플랜을 선택하세요.</p>
+
+  <!-- 토글 -->
+  <div class="toggle-wrap">
+    <span class="toggle-label active" id="lbl-monthly">월간</span>
+    <div class="toggle-track" id="toggle" onclick="togglePeriod()">
+      <div class="toggle-thumb"></div>
+    </div>
+    <span class="toggle-label" id="lbl-yearly">연간</span>
+    <span class="discount-badge" id="discount-badge">2개월 무료</span>
+  </div>
+
+  <!-- 카드 -->
+  <div class="grid">
+
+    <!-- Free -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">무료</div>
+        <div class="price-wrap">
+          <span class="price">$0</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <ul class="features">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>프로젝트 3개</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>프로젝트당 환경변수 20개</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>프로젝트당 서비스 10개</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>기본 암호화</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>커뮤니티 지원</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>비용 AI 리포트 월 3회</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>AI 어시스턴트 / AI 진단 월 5회</li>
+        </ul>
+        <button class="btn btn-outline" disabled>현재 플랜</button>
+      </div>
+    </div>
+
+    <!-- Pro -->
+    <div class="card highlight">
+      <span class="top-badge badge-recommend">추천</span>
+      <div class="card-header">
+        <div class="card-title">프로</div>
+        <div class="price-wrap">
+          <span class="price" id="pro-price">$9.9</span>
+          <span class="price-suffix">/mo</span>
+          <div class="price-detail" id="pro-detail" style="display:none">
+            <span class="strike">$9.9/mo</span>
+            <span style="margin-left:8px">$99/yr</span>
+          </div>
+          <span class="save-tag" id="pro-save">연 $19.8 절약</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <ul class="features">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>프로젝트 20개</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>프로젝트당 환경변수 100개</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>프로젝트당 서비스 50개</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>AI 기능 (채팅, 비용 리포트, 환경변수 진단)</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>GitHub Secrets 동기화</li>
+        </ul>
+        <button class="btn btn-primary">업그레이드</button>
+      </div>
+    </div>
+
+    <!-- Team -->
+    <div class="card dim">
+      <span class="top-badge badge-coming">준비 중</span>
+      <div class="card-header">
+        <div class="card-title">팀</div>
+        <div class="price-wrap">
+          <span class="price" id="team-price">$29</span>
+          <span class="price-suffix">/mo</span>
+          <div class="price-detail" id="team-detail" style="display:none">
+            <span class="strike">$29/mo</span>
+            <span style="margin-left:8px">$290/yr</span>
+          </div>
+          <span class="save-tag" id="team-save">연 $58 절약</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <ul class="features">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>프로젝트 100개</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>프로젝트당 환경변수 500개</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>프로젝트당 서비스 100개</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>팀 멤버 25명</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>RBAC 권한 관리</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>SSO / SAML</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>전담 지원</li>
+        </ul>
+        <button class="btn btn-outline" disabled>준비 중</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-label">
+    <strong>확인 포인트</strong><br><br>
+    • Pro 월간: <strong>$9.9/mo</strong> (월 $9.9 × 12 = $118.8/yr)<br>
+    • Pro 연간: <strong>$99/yr</strong> (월 $8.25 환산, 2개월 무료 = <strong>17% 할인</strong>)<br>
+    • 절약 금액: <strong>$19.8/yr</strong><br><br>
+    • Team 월간: <strong>$29/mo</strong> (월 $29 × 12 = $348/yr)<br>
+    • Team 연간: <strong>$290/yr</strong> (월 $24.17 환산, 2개월 무료 = <strong>17% 할인</strong>)<br>
+    • 절약 금액: <strong>$58/yr</strong>
+  </div>
+</div>
+
+<script>
+let yearly = false;
+function togglePeriod() {
+  yearly = !yearly;
+  const track = document.getElementById('toggle');
+  const lblM = document.getElementById('lbl-monthly');
+  const lblY = document.getElementById('lbl-yearly');
+  const badge = document.getElementById('discount-badge');
+
+  track.classList.toggle('on', yearly);
+  lblM.classList.toggle('active', !yearly);
+  lblY.classList.toggle('active', yearly);
+  badge.classList.toggle('show', yearly);
+
+  // Pro
+  document.getElementById('pro-price').textContent = yearly ? '$8.25' : '$9.9';
+  document.getElementById('pro-detail').style.display = yearly ? 'block' : 'none';
+  document.getElementById('pro-save').classList.toggle('show', yearly);
+
+  // Team
+  document.getElementById('team-price').textContent = yearly ? '$24.17' : '$29';
+  document.getElementById('team-detail').style.display = yearly ? 'block' : 'none';
+  document.getElementById('team-save').classList.toggle('show', yearly);
+}
+</script>
+</body>
+</html>

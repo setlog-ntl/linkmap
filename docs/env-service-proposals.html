@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linkmap 환경변수 관리 신규 서비스 기획서</title>
+<style>
+  :root {
+    --brand-blue: #2563eb;
+    --brand-blue-deep: #1e40af;
+    --brand-blue-light: #eff6ff;
+    --brand-green: #34d399;
+    --brand-green-deep: #059669;
+    --brand-green-light: #ecfdf5;
+    --circuit-950: #0f1d2f;
+    --circuit-900: #162436;
+    --circuit-800: #1e3048;
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1a2332;
+    --text-muted: #64748b;
+    --shadow-sm: 0 1px 3px oklch(0.20 0.03 250 / 0.08);
+    --shadow-md: 0 4px 12px oklch(0.20 0.03 250 / 0.10);
+    --shadow-lg: 0 8px 30px oklch(0.20 0.03 250 / 0.12);
+    --radius: 12px;
+    --purple: #7c3aed;
+    --orange: #f59e0b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, var(--circuit-950) 0%, var(--circuit-800) 50%, var(--brand-blue-deep) 100%);
+    color: #fff;
+    padding: 60px 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 50%, oklch(0.70 0.12 255 / 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 30%, oklch(0.75 0.17 160 / 0.06) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: oklch(0.70 0.12 255 / 0.2);
+    border: 1px solid oklch(0.70 0.12 255 / 0.3);
+    padding: 4px 16px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+  .hero p {
+    font-size: 16px;
+    opacity: 0.8;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  /* ── Container ── */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+  /* ── Section ── */
+  .section { padding: 48px 0; }
+  .section-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .section-subtitle {
+    color: var(--text-muted);
+    font-size: 15px;
+    margin-bottom: 32px;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  /* ── Executive Summary Grid ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+  }
+  .summary-card {
+    position: relative;
+    overflow: hidden;
+  }
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+  }
+  .summary-card.blue::before { background: linear-gradient(90deg, var(--brand-blue), var(--brand-green)); }
+  .summary-card.green::before { background: linear-gradient(90deg, var(--brand-green-deep), var(--brand-green)); }
+  .summary-card.purple::before { background: linear-gradient(90deg, var(--purple), #a78bfa); }
+
+  .card-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+  .card-icon.blue { background: var(--brand-blue-light); color: var(--brand-blue); }
+  .card-icon.green { background: var(--brand-green-light); color: var(--brand-green-deep); }
+  .card-icon.purple { background: #f3f0ff; color: var(--purple); }
+
+  .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .card-eng {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    font-family: 'Geist Mono', monospace;
+  }
+  .card-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  .tag-p0 { background: #fef2f2; color: #dc2626; }
+  .tag-p1 { background: #fff7ed; color: #ea580c; }
+  .tag-difficulty { background: #f0f9ff; color: var(--brand-blue); }
+  .tag-days { background: var(--brand-green-light); color: var(--brand-green-deep); }
+
+  /* ── Architecture Diagram ── */
+  .arch-box {
+    background: var(--circuit-950);
+    border-radius: var(--radius);
+    padding: 32px;
+    color: #e2e8f0;
+    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .arch-highlight { color: var(--brand-green); font-weight: 600; }
+  .arch-blue { color: #60a5fa; }
+  .arch-muted { color: #64748b; }
+  .arch-yellow { color: #fbbf24; }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 32px;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+    white-space: nowrap;
+    font-family: inherit;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: var(--brand-blue);
+    border-bottom-color: var(--brand-blue);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* ── Accordion ── */
+  .accordion { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; }
+  .accordion-header {
+    width: 100%;
+    padding: 16px 20px;
+    background: var(--card);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    font-family: inherit;
+    transition: background 0.2s;
+  }
+  .accordion-header:hover { background: #f8fafc; }
+  .accordion-arrow {
+    transition: transform 0.2s;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .accordion.open .accordion-arrow { transform: rotate(180deg); }
+  .accordion-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+  .accordion.open .accordion-body { max-height: 2000px; }
+  .accordion-content { padding: 0 20px 20px; font-size: 14px; color: var(--text-muted); }
+
+  /* ── Table ── */
+  .benchmark-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .benchmark-table th {
+    background: var(--circuit-950);
+    color: #e2e8f0;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .benchmark-table th:first-child { border-radius: var(--radius) 0 0 0; }
+  .benchmark-table th:last-child { border-radius: 0 var(--radius) 0 0; }
+  .benchmark-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .benchmark-table tr:hover td { background: #f8fafc; }
+  .check { color: var(--brand-green-deep); font-weight: 700; }
+  .cross { color: #dc2626; }
+  .partial { color: var(--orange); font-weight: 600; }
+  .star { color: var(--brand-blue); font-weight: 700; }
+
+  /* ── Synergy Matrix ── */
+  .synergy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .synergy-card {
+    border-left: 3px solid;
+    padding-left: 16px;
+  }
+  .synergy-card.s1 { border-color: var(--brand-blue); }
+  .synergy-card.s2 { border-color: var(--brand-green-deep); }
+  .synergy-card.s3 { border-color: var(--purple); }
+
+  /* ── Roadmap ── */
+  .roadmap {
+    position: relative;
+    padding-left: 24px;
+  }
+  .roadmap::before {
+    content: '';
+    position: absolute;
+    left: 7px; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--brand-blue), var(--brand-green), var(--purple));
+  }
+  .roadmap-item {
+    position: relative;
+    margin-bottom: 28px;
+  }
+  .roadmap-dot {
+    position: absolute;
+    left: -21px; top: 4px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: var(--shadow-sm);
+  }
+  .roadmap-dot.blue { background: var(--brand-blue); }
+  .roadmap-dot.green { background: var(--brand-green-deep); }
+  .roadmap-dot.purple { background: var(--purple); }
+
+  .roadmap-phase {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .roadmap-title { font-weight: 600; margin-bottom: 4px; }
+  .roadmap-desc { font-size: 14px; color: var(--text-muted); }
+
+  /* ── Security Architecture ── */
+  .security-layers {
+    display: grid;
+    gap: 12px;
+  }
+  .security-layer {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .layer-num {
+    min-width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #fff;
+  }
+  .layer-num.l1 { background: var(--brand-blue); }
+  .layer-num.l2 { background: var(--brand-green-deep); }
+  .layer-num.l3 { background: var(--purple); }
+  .layer-num.l4 { background: var(--orange); }
+  .layer-num.l5 { background: #dc2626; }
+  .layer-title { font-weight: 600; font-size: 14px; }
+  .layer-desc { font-size: 13px; color: var(--text-muted); }
+
+  /* ── Scenario ── */
+  .scenario {
+    background: #f8fafc;
+    border-left: 3px solid var(--brand-blue);
+    padding: 16px 20px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 16px 0;
+  }
+  .scenario-title { font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+  .scenario p { font-size: 14px; color: var(--text-muted); }
+
+  /* ── Feature List ── */
+  .feature-list { list-style: none; padding: 0; }
+  .feature-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .feature-list li::before {
+    content: '→';
+    color: var(--brand-blue);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* ── Tech Spec ── */
+  .tech-spec {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 8px 16px;
+    font-size: 14px;
+  }
+  .tech-label { font-weight: 600; color: var(--text); }
+  .tech-value { color: var(--text-muted); }
+
+  /* ── Subsection ── */
+  .subsection { margin-bottom: 28px; }
+  .subsection-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    background: var(--circuit-950);
+    color: #94a3b8;
+    text-align: center;
+    padding: 32px 24px;
+    font-size: 13px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    .synergy-grid { grid-template-columns: 1fr; }
+    .tech-spec { grid-template-columns: 1fr; }
+    .benchmark-table { font-size: 12px; }
+    .benchmark-table th, .benchmark-table td { padding: 8px; }
+    .hero { padding: 40px 16px 32px; }
+  }
+
+  /* ── Score bar ── */
+  .score-bar-wrapper { margin: 12px 0; }
+  .score-bar-label { font-size: 13px; font-weight: 600; margin-bottom: 4px; display: flex; justify-content: space-between; }
+  .score-bar-track { height: 8px; background: #e2e8f0; border-radius: 100px; overflow: hidden; }
+  .score-bar-fill { height: 100%; border-radius: 100px; transition: width 0.6s ease; }
+
+  /* ── DB Schema ── */
+  .schema-block {
+    background: var(--circuit-950);
+    color: #e2e8f0;
+    border-radius: var(--radius);
+    padding: 20px;
+    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin: 16px 0;
+  }
+  .sql-keyword { color: #60a5fa; }
+  .sql-type { color: var(--brand-green); }
+  .sql-comment { color: #64748b; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════ HERO ════════════════ -->
+<header class="hero">
+  <div class="container">
+    <div class="hero-badge">ENV MANAGEMENT · SERVICE PROPOSAL</div>
+    <h1>환경변수 관리 신규 서비스 3종 기획서</h1>
+    <p>AES-256-GCM 암호화 기반 Linkmap 환경변수 시스템의 전략적 확장 — EnvTimeline · KeyRotator · EnvShield</p>
+  </div>
+</header>
+
+<main class="container">
+
+<!-- ════════════════ 1. EXECUTIVE SUMMARY ════════════════ -->
+<section class="section">
+  <h2 class="section-title">1. Executive Summary</h2>
+  <p class="section-subtitle">3가지 신규 서비스의 핵심 가치와 우선순위 개요</p>
+
+  <div class="summary-grid">
+    <!-- EnvTimeline -->
+    <div class="card summary-card blue">
+      <div class="card-icon blue">⏱</div>
+      <div class="card-title">EnvTimeline</div>
+      <div class="card-eng">환경변수 타임라인 &amp; 스냅샷</div>
+      <div class="card-desc">변경 이력을 암호화 스냅샷으로 보존하고, 시점 복원과 환경 간 디프 뷰를 제공합니다. "누가, 언제, 왜 바꿨는지" 즉시 확인.</div>
+      <div>
+        <span class="tag tag-p0">P0</span>
+        <span class="tag tag-difficulty">난이도 중</span>
+        <span class="tag tag-days">3-4일</span>
+      </div>
+    </div>
+    <!-- KeyRotator -->
+    <div class="card summary-card green">
+      <div class="card-icon green">🔄</div>
+      <div class="card-title">KeyRotator</div>
+      <div class="card-eng">자동 키 로테이션 &amp; 만료 관리</div>
+      <div class="card-desc">API 키 만료일을 추적하고 D-7/3/1 사전 알림, OAuth 자동 갱신, 로테이션 워크플로를 제공합니다.</div>
+      <div>
+        <span class="tag tag-p0">P0</span>
+        <span class="tag tag-difficulty">난이도 중상</span>
+        <span class="tag tag-days">5-6일</span>
+      </div>
+    </div>
+    <!-- EnvShield -->
+    <div class="card summary-card purple">
+      <div class="card-icon purple">🛡</div>
+      <div class="card-title">EnvShield</div>
+      <div class="card-eng">접근 제어 &amp; 보안 인텔리전스</div>
+      <div class="card-desc">환경변수별 접근 등급을 부여하고, 비정상 접근 패턴을 탐지하며 보안 점수(0~100)를 산출합니다.</div>
+      <div>
+        <span class="tag tag-p1">P1</span>
+        <span class="tag tag-difficulty">난이도 상</span>
+        <span class="tag tag-days">7-10일</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ 2. 현재 시스템 분석 ════════════════ -->
+<section class="section">
+  <h2 class="section-title">2. 현재 시스템 분석</h2>
+  <p class="section-subtitle">Linkmap 환경변수 관리 아키텍처 현황과 개선 여지</p>
+
+  <div class="arch-box"><span class="arch-muted">┌──────────────────────────────────────────────────────────────────┐</span>
+<span class="arch-muted">│</span>  <span class="arch-blue">Linkmap Env Management — Current Architecture</span>                  <span class="arch-muted">│</span>
+<span class="arch-muted">├──────────────────────────────────────────────────────────────────┤</span>
+<span class="arch-muted">│</span>                                                                  <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>  <span class="arch-highlight">[Browser Client]</span>                                               <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>       │  React Flow 서비스맵 + 환경변수 패널                      <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>       ▼                                                          <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>  <span class="arch-blue">[Next.js API Routes]</span>  ← Zod safeParse + 소유권 검증            <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>       │  /api/env/    — CRUD, sync, bulk                          <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>       │  /api/health-check/ — 서비스 연결 상태                     <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>       ▼                                                          <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>  <span class="arch-yellow">[Encryption Layer]</span>  AES-256-GCM (64 hex chars key)              <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>       │  encrypt() / decrypt() — src/lib/crypto/                  <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>       ▼                                                          <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>  <span class="arch-highlight">[Supabase DB]</span>  env_vars table + RLS                              <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>       │  78개 서비스 자동 감지 │ GitHub Auto-Sync                  <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>       │  충돌 감지 + 감사 로그 (audit_log)                         <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>       ▼                                                          <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>  <span class="arch-blue">[Service Map Visualization]</span>  React Flow 연동                    <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>                                                                  <span class="arch-muted">│</span>
+<span class="arch-muted">├───────── Pain Points ────────────────────────────────────────────┤</span>
+<span class="arch-muted">│</span>  <span style="color:#f87171">✗</span> 값 변경 히스토리 미보존  → <span class="arch-highlight">EnvTimeline로 해결</span>                 <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>  <span style="color:#f87171">✗</span> 키 만료·로테이션 없음   → <span class="arch-highlight">KeyRotator로 해결</span>                 <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>  <span style="color:#f87171">✗</span> 세분화 접근 제어 부재   → <span class="arch-highlight">EnvShield로 해결</span>                  <span class="arch-muted">│</span>
+<span class="arch-muted">└──────────────────────────────────────────────────────────────────┘</span></div>
+
+  <div style="margin-top: 24px;">
+    <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 12px;">현재 강점</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+      <div class="card" style="padding: 16px;">
+        <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">🔐 AES-256-GCM 암호화</div>
+        <div style="font-size: 13px; color: var(--text-muted);">모든 env_vars.encrypted_value에 적용. IV 자동 생성, 서버사이드 전용 복호화</div>
+      </div>
+      <div class="card" style="padding: 16px;">
+        <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">🔍 78개 서비스 자동 감지</div>
+        <div style="font-size: 13px; color: var(--text-muted);">키 이름 패턴 매칭으로 서비스 식별. 서비스맵에 자동 노드 생성</div>
+      </div>
+      <div class="card" style="padding: 16px;">
+        <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">🔗 GitHub Auto-Sync</div>
+        <div style="font-size: 13px; color: var(--text-muted);">.env 파일 감지, 리포지토리별 환경변수 동기화, 충돌 해결 UI</div>
+      </div>
+      <div class="card" style="padding: 16px;">
+        <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">🗺 서비스맵 시각화 연동</div>
+        <div style="font-size: 13px; color: var(--text-muted);">React Flow 기반 시각적 서비스 연결 그래프. Linkmap 고유 해자</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ 3. 서비스별 상세 기획 ════════════════ -->
+<section class="section">
+  <h2 class="section-title">3. 서비스별 상세 기획</h2>
+  <p class="section-subtitle">탭을 클릭하여 각 서비스의 상세 기획을 확인하세요</p>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="timeline" role="tab">⏱ EnvTimeline</button>
+    <button class="tab" data-tab="rotator" role="tab">🔄 KeyRotator</button>
+    <button class="tab" data-tab="shield" role="tab">🛡 EnvShield</button>
+  </div>
+
+  <!-- ── EnvTimeline ── -->
+  <div class="tab-content active" id="tab-timeline">
+    <div class="subsection">
+      <h3 class="subsection-title">📋 문제 정의</h3>
+      <div class="card">
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 12px;">현재 Linkmap의 환경변수 시스템은 <strong>현재 값만 저장</strong>합니다. 변경 이력이 보존되지 않아 다음 문제가 발생합니다:</p>
+        <ul class="feature-list">
+          <li>"어제까지 잘 되던 API가 왜 안 되지?" → 어떤 값이 바뀌었는지 확인 불가</li>
+          <li>Production 장애 시 이전 정상 상태로 즉시 복원 불가</li>
+          <li>staging vs production 환경 간 어떤 키가 다른지 비교 불가</li>
+          <li>팀원이 실수로 값을 덮어써도 원본 복구 불가</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">⚡ 핵심 기능</h3>
+      <div class="accordion open">
+        <button class="accordion-header" onclick="toggleAccordion(this)">
+          변경 이력 암호화 스냅샷 <span class="accordion-arrow">▼</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-content">
+            <ul class="feature-list">
+              <li>모든 env_var 변경 시 이전 값을 암호화된 스냅샷으로 자동 보존</li>
+              <li>변경자 ID, 변경 시각, 변경 사유(optional) 기록</li>
+              <li>스냅샷 값도 AES-256-GCM으로 암호화 — 평문 저장 없음</li>
+              <li>보존 기간: Free 30일 / Pro 90일 / Enterprise 무제한</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="accordion">
+        <button class="accordion-header" onclick="toggleAccordion(this)">
+          시점 복원 (Point-in-Time Restore) <span class="accordion-arrow">▼</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-content">
+            <ul class="feature-list">
+              <li>특정 시점의 환경변수 전체 상태를 한 번에 복원</li>
+              <li>개별 키 단위 또는 전체 스냅샷 단위 선택 복원</li>
+              <li>복원 전 영향 범위 미리보기 (어떤 서비스가 영향받는지 서비스맵 하이라이트)</li>
+              <li>복원 작업도 감사 로그에 기록</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="accordion">
+        <button class="accordion-header" onclick="toggleAccordion(this)">
+          환경 간 디프 뷰 <span class="accordion-arrow">▼</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-content">
+            <ul class="feature-list">
+              <li>development / staging / production 환경 간 차이 시각적 비교</li>
+              <li>키 존재 여부, 값 일치 여부, 마지막 변경 시각 비교</li>
+              <li>"staging에만 있는 키", "prod에서 변경된 키" 등 필터링</li>
+              <li>디프 결과에서 바로 값 동기화 (원클릭 복사)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">🎬 사용 시나리오</h3>
+      <div class="scenario">
+        <div class="scenario-title">시나리오: Production 장애 시 즉시 복원</div>
+        <p>개발자 A가 프로덕션의 STRIPE_SECRET_KEY를 실수로 테스트 키로 변경함 → 결제 실패 발생 → EnvTimeline에서 30분 전 스냅샷 확인 → 이전 값 원클릭 복원 → 서비스맵에서 Stripe 노드 정상 상태 확인 → 장애 복구 완료 (MTTR: 2분)</p>
+      </div>
+      <div class="scenario" style="border-left-color: var(--brand-green-deep);">
+        <div class="scenario-title">시나리오: 환경 간 동기화 검증</div>
+        <p>배포 전 staging↔production 디프 뷰 실행 → 3개 키 불일치 발견 (DATABASE_URL, REDIS_URL, API_VERSION) → DATABASE_URL은 의도적 차이(확인), API_VERSION은 동기화 누락 → 원클릭 동기화 후 배포 진행</p>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">🗄 기술 설계</h3>
+      <div class="schema-block"><span class="sql-comment">-- env_snapshots 테이블</span>
+<span class="sql-keyword">CREATE TABLE</span> env_snapshots (
+  id            <span class="sql-type">uuid</span> <span class="sql-keyword">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  env_var_id    <span class="sql-type">uuid</span> <span class="sql-keyword">REFERENCES</span> env_vars(id) <span class="sql-keyword">ON DELETE CASCADE</span>,
+  project_id    <span class="sql-type">uuid</span> <span class="sql-keyword">REFERENCES</span> projects(id) <span class="sql-keyword">ON DELETE CASCADE</span>,
+  encrypted_value <span class="sql-type">text</span> <span class="sql-keyword">NOT NULL</span>,    <span class="sql-comment">-- AES-256-GCM 암호화된 이전 값</span>
+  changed_by    <span class="sql-type">uuid</span> <span class="sql-keyword">REFERENCES</span> auth.users(id),
+  change_reason <span class="sql-type">text</span>,
+  environment   <span class="sql-type">text</span> <span class="sql-keyword">CHECK</span> (environment <span class="sql-keyword">IN</span> ('development','staging','production')),
+  created_at    <span class="sql-type">timestamptz</span> <span class="sql-keyword">DEFAULT</span> now()
+);
+
+<span class="sql-comment">-- RLS 정책</span>
+<span class="sql-keyword">ALTER TABLE</span> env_snapshots <span class="sql-keyword">ENABLE ROW LEVEL SECURITY</span>;
+<span class="sql-keyword">CREATE POLICY</span> "owner_access" <span class="sql-keyword">ON</span> env_snapshots
+  <span class="sql-keyword">USING</span> (project_id <span class="sql-keyword">IN</span> (
+    <span class="sql-keyword">SELECT</span> id <span class="sql-keyword">FROM</span> projects <span class="sql-keyword">WHERE</span> user_id = auth.uid()
+  ));
+
+<span class="sql-comment">-- 인덱스</span>
+<span class="sql-keyword">CREATE INDEX</span> idx_snapshots_env_var <span class="sql-keyword">ON</span> env_snapshots(env_var_id, created_at <span class="sql-keyword">DESC</span>);
+<span class="sql-keyword">CREATE INDEX</span> idx_snapshots_project <span class="sql-keyword">ON</span> env_snapshots(project_id, created_at <span class="sql-keyword">DESC</span>);</div>
+
+      <div class="tech-spec" style="margin-top: 16px;">
+        <div class="tech-label">API 엔드포인트</div>
+        <div class="tech-value">/api/env/snapshots — GET (목록), POST (수동 스냅샷)</div>
+        <div class="tech-label">복원 API</div>
+        <div class="tech-value">/api/env/restore — POST (시점 복원, 감사 로그 기록)</div>
+        <div class="tech-label">디프 API</div>
+        <div class="tech-value">/api/env/diff — GET ?from=staging&to=production</div>
+        <div class="tech-label">보존 정책</div>
+        <div class="tech-value">pg_cron 기반 TTL 정리 (구독 플랜별 차등)</div>
+        <div class="tech-label">암호화</div>
+        <div class="tech-value">기존 AES-256-GCM 모듈 재사용 (src/lib/crypto/)</div>
+        <div class="tech-label">프론트엔드</div>
+        <div class="tech-value">타임라인 UI (세로 스크롤) + 디프 뷰 (좌우 분할)</div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">🔒 보안 고려사항</h3>
+      <ul class="feature-list">
+        <li>스냅샷 값은 반드시 AES-256-GCM으로 암호화하여 저장 — 평문 스냅샷 금지</li>
+        <li>복원 시 감사 로그 필수 기록 (logAudit: env.restore 이벤트)</li>
+        <li>RLS로 프로젝트 소유자만 스냅샷 접근 가능</li>
+        <li>TTL 정리 시에도 암호화 상태 그대로 삭제 — 복호화 후 삭제하지 않음</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── KeyRotator ── -->
+  <div class="tab-content" id="tab-rotator">
+    <div class="subsection">
+      <h3 class="subsection-title">📋 문제 정의</h3>
+      <div class="card">
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 12px;">현재 Linkmap에는 <strong>키 만료일 추적이 전혀 없습니다</strong>. 실제 발생하는 문제:</p>
+        <ul class="feature-list">
+          <li>API 키가 만료되어 서비스 장애 → 만료 시점을 몰라 사전 대응 불가</li>
+          <li>OAuth 토큰 갱신을 수동으로 해야 함 → 갱신 누락 시 서비스 중단</li>
+          <li>보안 감사에서 "키 로테이션 정책 없음" 지적 → 컴플라이언스 미충족</li>
+          <li>90일 이상 미갱신 키가 얼마나 있는지 파악 불가</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">⚡ 핵심 기능</h3>
+      <div class="accordion open">
+        <button class="accordion-header" onclick="toggleAccordion(this)">
+          만료일 추적 & 사전 알림 <span class="accordion-arrow">▼</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-content">
+            <ul class="feature-list">
+              <li>각 env_var에 expires_at 필드 추가 — 수동 설정 또는 서비스별 자동 감지</li>
+              <li>D-7, D-3, D-1 사전 알림 (대시보드 배너 + 이메일)</li>
+              <li>만료 임박 키를 서비스맵에서 경고 아이콘으로 시각화</li>
+              <li>만료된 키는 자동으로 서비스 노드에 "위험" 상태 표시</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="accordion">
+        <button class="accordion-header" onclick="toggleAccordion(this)">
+          OAuth 자동 갱신 <span class="accordion-arrow">▼</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-content">
+            <ul class="feature-list">
+              <li>OAuth 2.0 refresh_token 기반 자동 갱신 워크플로</li>
+              <li>지원 서비스: Google, GitHub, Stripe, Slack 등 주요 OAuth 제공자</li>
+              <li>갱신 실패 시 즉시 알림 + 수동 갱신 가이드 표시</li>
+              <li>갱신 이력 EnvTimeline과 연동 (자동 스냅샷 생성)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="accordion">
+        <button class="accordion-header" onclick="toggleAccordion(this)">
+          로테이션 워크플로 <span class="accordion-arrow">▼</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-content">
+            <ul class="feature-list">
+              <li>로테이션 정책 설정: 30/60/90일 주기 또는 커스텀</li>
+              <li>로테이션 체크리스트: 새 키 생성 → 테스트 → 이전 키 비활성화</li>
+              <li>서비스별 로테이션 가이드 (예: Stripe 키 교체 절차)</li>
+              <li>로테이션 완료 후 자동 Health Check 실행</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">🎬 사용 시나리오</h3>
+      <div class="scenario" style="border-left-color: var(--brand-green-deep);">
+        <div class="scenario-title">시나리오: API 키 만료 사전 예방</div>
+        <p>KeyRotator가 Sendgrid API 키 만료 D-7 알림 발송 → 개발자가 대시보드에서 경고 확인 → "키 로테이션 시작" 클릭 → Sendgrid 콘솔에서 새 키 생성 → Linkmap에 붙여넣기 → Health Check 자동 실행 → 이메일 발송 테스트 성공 → 이전 키 자동 비활성화</p>
+      </div>
+      <div class="scenario" style="border-left-color: var(--orange);">
+        <div class="scenario-title">시나리오: OAuth 토큰 자동 갱신</div>
+        <p>Google OAuth access_token 만료 1시간 전 → KeyRotator가 refresh_token으로 자동 갱신 시도 → 새 access_token 획득 → EnvTimeline에 갱신 스냅샷 자동 기록 → 서비스맵 Google 노드 정상 유지 → 개발자 개입 없이 무중단 운영</p>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">🗄 기술 설계</h3>
+      <div class="schema-block"><span class="sql-comment">-- env_vars 테이블 확장</span>
+<span class="sql-keyword">ALTER TABLE</span> env_vars <span class="sql-keyword">ADD COLUMN</span> expires_at <span class="sql-type">timestamptz</span>;
+<span class="sql-keyword">ALTER TABLE</span> env_vars <span class="sql-keyword">ADD COLUMN</span> rotation_policy <span class="sql-type">jsonb</span>;
+<span class="sql-comment">-- rotation_policy: { "interval_days": 90, "auto_renew": true, "notify_days": [7,3,1] }</span>
+
+<span class="sql-comment">-- key_rotation_log 테이블</span>
+<span class="sql-keyword">CREATE TABLE</span> key_rotation_log (
+  id            <span class="sql-type">uuid</span> <span class="sql-keyword">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  env_var_id    <span class="sql-type">uuid</span> <span class="sql-keyword">REFERENCES</span> env_vars(id) <span class="sql-keyword">ON DELETE CASCADE</span>,
+  project_id    <span class="sql-type">uuid</span> <span class="sql-keyword">REFERENCES</span> projects(id) <span class="sql-keyword">ON DELETE CASCADE</span>,
+  rotation_type <span class="sql-type">text</span> <span class="sql-keyword">CHECK</span> (rotation_type <span class="sql-keyword">IN</span> ('manual','auto','scheduled')),
+  status        <span class="sql-type">text</span> <span class="sql-keyword">CHECK</span> (status <span class="sql-keyword">IN</span> ('pending','in_progress','completed','failed')),
+  initiated_by  <span class="sql-type">uuid</span> <span class="sql-keyword">REFERENCES</span> auth.users(id),
+  completed_at  <span class="sql-type">timestamptz</span>,
+  created_at    <span class="sql-type">timestamptz</span> <span class="sql-keyword">DEFAULT</span> now()
+);
+
+<span class="sql-keyword">ALTER TABLE</span> key_rotation_log <span class="sql-keyword">ENABLE ROW LEVEL SECURITY</span>;
+
+<span class="sql-comment">-- 만료 임박 키 조회 인덱스</span>
+<span class="sql-keyword">CREATE INDEX</span> idx_env_vars_expires <span class="sql-keyword">ON</span> env_vars(expires_at)
+  <span class="sql-keyword">WHERE</span> expires_at <span class="sql-keyword">IS NOT NULL</span>;</div>
+
+      <div class="tech-spec" style="margin-top: 16px;">
+        <div class="tech-label">API 엔드포인트</div>
+        <div class="tech-value">/api/env/rotation — GET (상태), POST (로테이션 시작), PUT (정책 설정)</div>
+        <div class="tech-label">알림 시스템</div>
+        <div class="tech-value">pg_cron 매시간 만료 체크 → Edge Function 알림 발송</div>
+        <div class="tech-label">OAuth 갱신</div>
+        <div class="tech-value">/api/env/refresh — POST (서비스별 refresh_token 로직)</div>
+        <div class="tech-label">Health Check</div>
+        <div class="tech-value">기존 /api/health-check/ 재사용 (로테이션 후 자동 트리거)</div>
+        <div class="tech-label">서비스맵 연동</div>
+        <div class="tech-value">노드에 만료 상태 오버레이 (⚠️ D-7, 🔴 만료)</div>
+        <div class="tech-label">프론트엔드</div>
+        <div class="tech-value">만료 대시보드 + 로테이션 위저드 (스텝 UI)</div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">🔒 보안 고려사항</h3>
+      <ul class="feature-list">
+        <li>refresh_token은 별도 암호화 저장 — env_var와 동일한 AES-256-GCM 적용</li>
+        <li>자동 갱신 시에도 감사 로그 기록 (initiator: "system/auto-rotate")</li>
+        <li>로테이션 중 이전 키와 새 키가 동시 유효한 "그레이스 피리어드" 지원</li>
+        <li>갱신 실패 시 이전 키 유지 — 자동으로 키를 삭제하지 않음</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── EnvShield ── -->
+  <div class="tab-content" id="tab-shield">
+    <div class="subsection">
+      <h3 class="subsection-title">📋 문제 정의</h3>
+      <div class="card">
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 12px;">현재 접근 제어는 <strong>프로젝트 소유자 단위의 all-or-nothing</strong>입니다. 팀 환경에서의 문제:</p>
+        <ul class="feature-list">
+          <li>주니어 개발자도 프로덕션 DB 비밀번호에 동일한 접근 권한</li>
+          <li>어떤 팀원이 언제 어떤 환경변수를 조회했는지 추적 불가</li>
+          <li>.env 파일에 노출된 키가 있는지 자동 감지 불가</li>
+          <li>보안 감사 대응 시 "접근 제어 정책"을 증명할 수 없음</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">⚡ 핵심 기능</h3>
+      <div class="accordion open">
+        <button class="accordion-header" onclick="toggleAccordion(this)">
+          환경변수별 접근 등급 <span class="accordion-arrow">▼</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-content">
+            <ul class="feature-list">
+              <li>4단계 접근 등급: Public / Internal / Confidential / Restricted</li>
+              <li>등급별 복호화 권한 차등: Restricted는 Owner만, Confidential은 Admin+</li>
+              <li>자동 등급 추천: 키 이름 패턴 기반 (예: *_SECRET_* → Restricted)</li>
+              <li>서비스맵에서 등급별 색상 코딩 시각화</li>
+            </ul>
+            <div style="margin-top: 12px;">
+              <table class="benchmark-table" style="font-size: 13px;">
+                <tr><th>등급</th><th>복호화</th><th>수정</th><th>삭제</th><th>예시</th></tr>
+                <tr><td><strong>Public</strong></td><td>전체</td><td>Member+</td><td>Admin+</td><td>NEXT_PUBLIC_*</td></tr>
+                <tr><td><strong>Internal</strong></td><td>Member+</td><td>Admin+</td><td>Admin+</td><td>API_BASE_URL</td></tr>
+                <tr><td><strong>Confidential</strong></td><td>Admin+</td><td>Admin+</td><td>Owner</td><td>DATABASE_URL</td></tr>
+                <tr><td><strong>Restricted</strong></td><td>Owner</td><td>Owner</td><td>Owner</td><td>*_SECRET_KEY</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="accordion">
+        <button class="accordion-header" onclick="toggleAccordion(this)">
+          비정상 접근 탐지 <span class="accordion-arrow">▼</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-content">
+            <ul class="feature-list">
+              <li>이상 패턴 감지: 심야 시간 대량 조회, 새 IP에서 Restricted 접근</li>
+              <li>접근 빈도 기준선 학습 → 이탈 시 알림</li>
+              <li>실시간 접근 로그 대시보드 (who, what, when, where)</li>
+              <li>의심 접근 시 자동 일시 잠금 + Owner 승인 요청</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="accordion">
+        <button class="accordion-header" onclick="toggleAccordion(this)">
+          보안 점수 (0~100) <span class="accordion-arrow">▼</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-content">
+            <p style="margin-bottom: 12px;">프로젝트의 환경변수 보안 상태를 종합 점수로 산출합니다:</p>
+            <div class="score-bar-wrapper">
+              <div class="score-bar-label"><span>암호화 적용률</span><span>30점</span></div>
+              <div class="score-bar-track"><div class="score-bar-fill" style="width:100%; background: var(--brand-green-deep);"></div></div>
+            </div>
+            <div class="score-bar-wrapper">
+              <div class="score-bar-label"><span>접근 등급 설정률</span><span>25점</span></div>
+              <div class="score-bar-track"><div class="score-bar-fill" style="width:80%; background: var(--brand-blue);"></div></div>
+            </div>
+            <div class="score-bar-wrapper">
+              <div class="score-bar-label"><span>키 로테이션 준수율</span><span>20점</span></div>
+              <div class="score-bar-track"><div class="score-bar-fill" style="width:60%; background: var(--orange);"></div></div>
+            </div>
+            <div class="score-bar-wrapper">
+              <div class="score-bar-label"><span>만료 키 없음</span><span>15점</span></div>
+              <div class="score-bar-track"><div class="score-bar-fill" style="width:40%; background: var(--purple);"></div></div>
+            </div>
+            <div class="score-bar-wrapper">
+              <div class="score-bar-label"><span>이상 접근 0건</span><span>10점</span></div>
+              <div class="score-bar-track"><div class="score-bar-fill" style="width:90%; background: var(--brand-green);"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">🎬 사용 시나리오</h3>
+      <div class="scenario" style="border-left-color: var(--purple);">
+        <div class="scenario-title">시나리오: 보안 감사 대응</div>
+        <p>외부 보안 감사관이 "환경변수 접근 통제 정책을 증명하라" 요청 → EnvShield 대시보드에서 접근 등급 현황, 접근 로그, 보안 점수(87/100) 즉시 제출 → Restricted 등급 키의 접근 이력 + 이상 탐지 0건 리포트 → 감사 통과</p>
+      </div>
+      <div class="scenario" style="border-left-color: #dc2626;">
+        <div class="scenario-title">시나리오: 비정상 접근 자동 차단</div>
+        <p>새로운 IP에서 새벽 3시 Restricted 등급 키 20개 연속 조회 시도 → EnvShield 이상 패턴 탐지 → 해당 세션 자동 일시 잠금 → Owner에게 즉시 알림 (Slack + 이메일) → Owner가 확인 후 "차단 유지" 결정 → 접근 차단 + 감사 로그 기록</p>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">🗄 기술 설계</h3>
+      <div class="schema-block"><span class="sql-comment">-- env_vars 테이블 확장</span>
+<span class="sql-keyword">ALTER TABLE</span> env_vars <span class="sql-keyword">ADD COLUMN</span> access_level <span class="sql-type">text</span>
+  <span class="sql-keyword">CHECK</span> (access_level <span class="sql-keyword">IN</span> ('public','internal','confidential','restricted'))
+  <span class="sql-keyword">DEFAULT</span> 'internal';
+
+<span class="sql-comment">-- env_access_log 테이블</span>
+<span class="sql-keyword">CREATE TABLE</span> env_access_log (
+  id          <span class="sql-type">uuid</span> <span class="sql-keyword">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  env_var_id  <span class="sql-type">uuid</span> <span class="sql-keyword">REFERENCES</span> env_vars(id) <span class="sql-keyword">ON DELETE CASCADE</span>,
+  project_id  <span class="sql-type">uuid</span> <span class="sql-keyword">REFERENCES</span> projects(id) <span class="sql-keyword">ON DELETE CASCADE</span>,
+  user_id     <span class="sql-type">uuid</span> <span class="sql-keyword">REFERENCES</span> auth.users(id),
+  action      <span class="sql-type">text</span> <span class="sql-keyword">CHECK</span> (action <span class="sql-keyword">IN</span> ('view','decrypt','modify','delete')),
+  ip_address  <span class="sql-type">inet</span>,
+  user_agent  <span class="sql-type">text</span>,
+  flagged     <span class="sql-type">boolean</span> <span class="sql-keyword">DEFAULT</span> false,
+  created_at  <span class="sql-type">timestamptz</span> <span class="sql-keyword">DEFAULT</span> now()
+);
+
+<span class="sql-keyword">ALTER TABLE</span> env_access_log <span class="sql-keyword">ENABLE ROW LEVEL SECURITY</span>;
+
+<span class="sql-comment">-- 보안 점수 캐시</span>
+<span class="sql-keyword">CREATE TABLE</span> env_security_scores (
+  project_id  <span class="sql-type">uuid</span> <span class="sql-keyword">PRIMARY KEY REFERENCES</span> projects(id),
+  score       <span class="sql-type">integer</span> <span class="sql-keyword">CHECK</span> (score <span class="sql-keyword">BETWEEN</span> 0 <span class="sql-keyword">AND</span> 100),
+  breakdown   <span class="sql-type">jsonb</span>,  <span class="sql-comment">-- { encryption: 30, access_level: 20, ... }</span>
+  calculated_at <span class="sql-type">timestamptz</span> <span class="sql-keyword">DEFAULT</span> now()
+);
+
+<span class="sql-comment">-- 이상 탐지용 인덱스</span>
+<span class="sql-keyword">CREATE INDEX</span> idx_access_log_user_time
+  <span class="sql-keyword">ON</span> env_access_log(user_id, created_at <span class="sql-keyword">DESC</span>);
+<span class="sql-keyword">CREATE INDEX</span> idx_access_log_flagged
+  <span class="sql-keyword">ON</span> env_access_log(flagged) <span class="sql-keyword">WHERE</span> flagged = true;</div>
+
+      <div class="tech-spec" style="margin-top: 16px;">
+        <div class="tech-label">API 엔드포인트</div>
+        <div class="tech-value">/api/env/shield — GET (보안 점수), PUT (접근 등급 설정)</div>
+        <div class="tech-label">접근 로그 API</div>
+        <div class="tech-value">/api/env/access-log — GET (필터링: user, action, flagged)</div>
+        <div class="tech-label">이상 탐지</div>
+        <div class="tech-value">Edge Function: 1시간 윈도우 접근 패턴 분석 (pg_cron 트리거)</div>
+        <div class="tech-label">보안 점수</div>
+        <div class="tech-value">매 6시간 재계산 (env_security_scores 캐시)</div>
+        <div class="tech-label">서비스맵 연동</div>
+        <div class="tech-value">접근 등급별 노드 색상 + 이상 탐지 경고 오버레이</div>
+        <div class="tech-label">프론트엔드</div>
+        <div class="tech-value">보안 대시보드 + 접근 로그 테이블 + 점수 게이지</div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">🔒 보안 고려사항</h3>
+      <ul class="feature-list">
+        <li>접근 로그는 사용자가 삭제할 수 없음 — 감사 증적 보전</li>
+        <li>ip_address, user_agent 수집 시 개인정보처리방침 업데이트 필요</li>
+        <li>자동 잠금은 "일시 잠금"만 — 영구 차단은 Owner 수동 결정</li>
+        <li>보안 점수 로직은 서버사이드 전용 — 클라이언트에 점수 공식 노출 금지</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ 4. 경쟁 벤치마크 비교표 ════════════════ -->
+<section class="section">
+  <h2 class="section-title">4. 경쟁 벤치마크 비교</h2>
+  <p class="section-subtitle">Doppler, Infisical, HashiCorp Vault 대비 Linkmap의 포지셔닝</p>
+
+  <div style="overflow-x: auto;">
+    <table class="benchmark-table">
+      <thead>
+        <tr>
+          <th>기능</th>
+          <th>Linkmap<br><small>(현재+계획)</small></th>
+          <th>Doppler</th>
+          <th>Infisical</th>
+          <th>HashiCorp Vault</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>암호화 저장</strong></td>
+          <td class="check">✓ AES-256-GCM</td>
+          <td class="check">✓</td>
+          <td class="check">✓</td>
+          <td class="check">✓</td>
+        </tr>
+        <tr>
+          <td><strong>변경 이력 (Timeline)</strong></td>
+          <td class="star">★ 암호화 스냅샷</td>
+          <td class="check">✓ 기본</td>
+          <td class="check">✓ 버전관리</td>
+          <td class="check">✓ 감사 로그</td>
+        </tr>
+        <tr>
+          <td><strong>시점 복원</strong></td>
+          <td class="star">★ 서비스맵 연동</td>
+          <td class="check">✓</td>
+          <td class="partial">△ 수동</td>
+          <td class="cross">✗</td>
+        </tr>
+        <tr>
+          <td><strong>환경 간 디프</strong></td>
+          <td class="star">★ 시각적 디프뷰</td>
+          <td class="check">✓</td>
+          <td class="check">✓</td>
+          <td class="cross">✗</td>
+        </tr>
+        <tr>
+          <td><strong>키 만료 추적</strong></td>
+          <td class="star">★ 자동 감지+알림</td>
+          <td class="cross">✗</td>
+          <td class="partial">△ 수동</td>
+          <td class="check">✓ TTL</td>
+        </tr>
+        <tr>
+          <td><strong>자동 로테이션</strong></td>
+          <td class="star">★ OAuth 갱신 포함</td>
+          <td class="partial">△ 일부</td>
+          <td class="partial">△ 일부</td>
+          <td class="check">✓</td>
+        </tr>
+        <tr>
+          <td><strong>세분화 접근 제어</strong></td>
+          <td class="star">★ 4등급 + AI 추천</td>
+          <td class="check">✓ RBAC</td>
+          <td class="check">✓ RBAC</td>
+          <td class="check">✓ 정책 기반</td>
+        </tr>
+        <tr>
+          <td><strong>이상 접근 탐지</strong></td>
+          <td class="star">★ 자동 탐지+잠금</td>
+          <td class="cross">✗</td>
+          <td class="partial">△ 로그만</td>
+          <td class="partial">△ Sentinel</td>
+        </tr>
+        <tr>
+          <td><strong>보안 점수</strong></td>
+          <td class="star">★ 0~100 종합</td>
+          <td class="cross">✗</td>
+          <td class="cross">✗</td>
+          <td class="cross">✗</td>
+        </tr>
+        <tr style="background: var(--brand-blue-light);">
+          <td><strong>서비스맵 시각화 연동</strong></td>
+          <td class="star">★ 고유 해자</td>
+          <td class="cross">✗</td>
+          <td class="cross">✗</td>
+          <td class="cross">✗</td>
+        </tr>
+        <tr style="background: var(--brand-blue-light);">
+          <td><strong>78개 서비스 자동 감지</strong></td>
+          <td class="star">★ 고유 해자</td>
+          <td class="partial">△ 통합 제한적</td>
+          <td class="cross">✗</td>
+          <td class="cross">✗</td>
+        </tr>
+        <tr>
+          <td><strong>GitHub Sync</strong></td>
+          <td class="check">✓</td>
+          <td class="check">✓</td>
+          <td class="check">✓</td>
+          <td class="cross">✗</td>
+        </tr>
+        <tr>
+          <td><strong>셀프호스팅</strong></td>
+          <td class="cross">✗ (SaaS)</td>
+          <td class="cross">✗</td>
+          <td class="check">✓</td>
+          <td class="check">✓</td>
+        </tr>
+        <tr>
+          <td><strong>가격 (팀)</strong></td>
+          <td><strong>$15/mo</strong></td>
+          <td>$18/mo/user</td>
+          <td>$12/mo/user</td>
+          <td>$1.58/hr</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top: 20px; padding: 16px 20px; background: var(--brand-blue-light); border-radius: var(--radius); font-size: 14px;">
+    <strong style="color: var(--brand-blue);">★ Linkmap 차별점:</strong> 환경변수 관리 + 서비스맵 시각화의 결합은 경쟁사에 없는 고유 가치. 78개 서비스 자동 감지와 시각적 의존성 그래프 위에 보안 정보를 오버레이하는 것은 Linkmap만의 해자입니다.
+  </div>
+</section>
+
+<!-- ════════════════ 5. 시너지 매트릭스 & 로드맵 ════════════════ -->
+<section class="section">
+  <h2 class="section-title">5. 시너지 매트릭스 & 구현 로드맵</h2>
+  <p class="section-subtitle">3개 서비스 간 연동 시너지와 단계별 구현 계획</p>
+
+  <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">서비스 간 시너지</h3>
+  <div class="synergy-grid">
+    <div class="card synergy-card s1">
+      <div style="font-weight: 700; margin-bottom: 8px; color: var(--brand-blue);">Timeline × Rotator</div>
+      <p style="font-size: 14px; color: var(--text-muted);">키 로테이션 시 자동으로 이전 값 스냅샷 생성. 로테이션 실패 시 Timeline에서 즉시 이전 키로 롤백 가능. 로테이션 이력이 Timeline에 통합 표시.</p>
+    </div>
+    <div class="card synergy-card s2">
+      <div style="font-weight: 700; margin-bottom: 8px; color: var(--brand-green-deep);">Rotator × Shield</div>
+      <p style="font-size: 14px; color: var(--text-muted);">Restricted 등급 키의 로테이션 주기 강제. 보안 점수에 "로테이션 준수율" 반영. 미갱신 Restricted 키 자동 경고.</p>
+    </div>
+    <div class="card synergy-card s3">
+      <div style="font-weight: 700; margin-bottom: 8px; color: var(--purple);">Shield × Timeline</div>
+      <p style="font-size: 14px; color: var(--text-muted);">접근 등급에 따른 스냅샷 조회 권한 차등. 이상 접근 탐지 시 해당 시점 스냅샷 자동 보존. 접근 로그 + 변경 이력 통합 감사 뷰.</p>
+    </div>
+  </div>
+
+  <h3 style="font-size: 16px; font-weight: 700; margin: 32px 0 16px;">구현 로드맵</h3>
+  <div class="roadmap">
+    <div class="roadmap-item">
+      <div class="roadmap-dot blue"></div>
+      <div class="roadmap-phase" style="color: var(--brand-blue);">Phase 1 — Week 1~2</div>
+      <div class="roadmap-title">EnvTimeline 핵심 구현</div>
+      <div class="roadmap-desc">env_snapshots 테이블 + 변경 트리거 + 스냅샷 API + 타임라인 UI. 기존 env_vars CRUD에 스냅샷 생성 로직 삽입. 서비스맵 복원 하이라이트.</div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot green"></div>
+      <div class="roadmap-phase" style="color: var(--brand-green-deep);">Phase 2 — Week 2~4</div>
+      <div class="roadmap-title">KeyRotator 핵심 구현</div>
+      <div class="roadmap-desc">expires_at 필드 + 만료 체크 cron + 알림 시스템 + 로테이션 위저드 UI. OAuth 갱신 로직 (Google, GitHub 우선). Timeline 연동.</div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot purple"></div>
+      <div class="roadmap-phase" style="color: var(--purple);">Phase 3 — Week 4~6</div>
+      <div class="roadmap-title">EnvShield 핵심 구현</div>
+      <div class="roadmap-desc">access_level 필드 + 접근 로그 테이블 + 보안 점수 계산 + 이상 탐지 로직. 자동 등급 추천 + 서비스맵 등급 오버레이.</div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot blue"></div>
+      <div class="roadmap-phase" style="color: var(--brand-blue);">Phase 4 — Week 6~7</div>
+      <div class="roadmap-title">통합 & 고도화</div>
+      <div class="roadmap-desc">3개 서비스 간 시너지 연동 구현. 통합 보안 대시보드. 구독 플랜별 기능 차등. E2E 테스트. 문서화.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ 6. 보안 아키텍처 통합도 ════════════════ -->
+<section class="section">
+  <h2 class="section-title">6. 보안 아키텍처 통합도</h2>
+  <p class="section-subtitle">5계층 보안 아키텍처 — 신규 3개 서비스가 어떻게 기존 보안 체계에 통합되는지</p>
+
+  <div class="security-layers">
+    <div class="security-layer">
+      <div class="layer-num l1">L1</div>
+      <div>
+        <div class="layer-title">전송 계층 — Cloudflare + HTTPS</div>
+        <div class="layer-desc">Cloudflare Workers 배포. 모든 통신 TLS 1.3. DDoS 보호 및 Rate Limiting (Cloudflare Rules).</div>
+      </div>
+    </div>
+    <div class="security-layer">
+      <div class="layer-num l2">L2</div>
+      <div>
+        <div class="layer-title">인증 계층 — Supabase Auth + OAuth</div>
+        <div class="layer-desc">Google/GitHub OAuth. JWT 검증. 모든 API에서 getUser() 필수. <strong style="color: var(--brand-green-deep);">+ KeyRotator: OAuth 토큰 자동 갱신</strong></div>
+      </div>
+    </div>
+    <div class="security-layer">
+      <div class="layer-num l3">L3</div>
+      <div>
+        <div class="layer-title">인가 계층 — RLS + 소유권 검증</div>
+        <div class="layer-desc">Supabase RLS 정책. API에서 user_id 이중 검증. <strong style="color: var(--purple);">+ EnvShield: 4단계 접근 등급 (Public→Restricted)</strong></div>
+      </div>
+    </div>
+    <div class="security-layer">
+      <div class="layer-num l4">L4</div>
+      <div>
+        <div class="layer-title">데이터 계층 — AES-256-GCM 암호화</div>
+        <div class="layer-desc">env_vars.encrypted_value 암호화. 서버사이드 전용 복호화. <strong style="color: var(--brand-blue);">+ EnvTimeline: 스냅샷도 동일 암호화 적용</strong></div>
+      </div>
+    </div>
+    <div class="security-layer">
+      <div class="layer-num l5">L5</div>
+      <div>
+        <div class="layer-title">감사 계층 — Audit Log + 모니터링</div>
+        <div class="layer-desc">logAudit() 필수. <strong style="color: var(--purple);">+ EnvShield: 접근 로그 + 이상 탐지 + 보안 점수.</strong> <strong style="color: var(--brand-blue);">+ EnvTimeline: 복원 감사 기록.</strong> <strong style="color: var(--brand-green-deep);">+ KeyRotator: 로테이션 감사 기록.</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 24px;">
+    <div class="arch-box"><span class="arch-muted">┌─────────────────────────────────────────────────────────────┐</span>
+<span class="arch-muted">│</span>  <span class="arch-blue">통합 보안 아키텍처 (현재 + 신규 3서비스)</span>                    <span class="arch-muted">│</span>
+<span class="arch-muted">├─────────────────────────────────────────────────────────────┤</span>
+<span class="arch-muted">│</span>                                                             <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>  <span class="arch-highlight">[서비스맵 시각화]</span> ←── 보안 상태 오버레이                    <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>       │   접근 등급 색상 │ 만료 경고 │ 변경 이력                <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>       ▼                                                     <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>  ┌──────────┐  ┌──────────┐  ┌──────────┐                    <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>  │<span class="arch-blue">EnvTimeline</span>│←→│<span class="arch-highlight">KeyRotator</span>│←→│<span class="arch-yellow">EnvShield </span>│                    <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>  │ 스냅샷    │  │ 로테이션  │  │ 접근제어  │                    <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>  │ 복원      │  │ 만료관리  │  │ 이상탐지  │                    <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>  │ 디프뷰    │  │ 자동갱신  │  │ 보안점수  │                    <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>  └─────┬────┘  └─────┬────┘  └─────┬────┘                    <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>        └──────────────┼──────────────┘                        <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>                       ▼                                      <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>          ┌────────────────────────┐                           <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>          │  <span class="arch-yellow">AES-256-GCM 암호화 계층</span>  │                           <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>          │  src/lib/crypto/        │                           <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>          └───────────┬────────────┘                           <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>                       ▼                                      <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>          ┌────────────────────────┐                           <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>          │  <span class="arch-highlight">Supabase DB + RLS</span>       │                           <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>          │  env_vars + snapshots   │                           <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>          │  + rotation_log         │                           <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>          │  + access_log + scores  │                           <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>          └────────────────────────┘                           <span class="arch-muted">│</span>
+<span class="arch-muted">│</span>                                                             <span class="arch-muted">│</span>
+<span class="arch-muted">└─────────────────────────────────────────────────────────────┘</span></div>
+  </div>
+</section>
+
+</main>
+
+<!-- ════════════════ FOOTER ════════════════ -->
+<footer class="footer">
+  <p>Linkmap — 환경변수 관리 신규 서비스 기획서 v1.0</p>
+  <p style="margin-top: 4px; opacity: 0.6;">2026-03-18 · Circuit Blue-Green v2 Design System</p>
+</footer>
+
+<script>
+// ── Tab switching ──
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const target = tab.dataset.tab;
+    // Deactivate all
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    // Activate target
+    tab.classList.add('active');
+    document.getElementById('tab-' + target).classList.add('active');
+  });
+});
+
+// ── Accordion toggle ──
+function toggleAccordion(header) {
+  const accordion = header.parentElement;
+  accordion.classList.toggle('open');
+}
+</script>
+</body>
+</html>
