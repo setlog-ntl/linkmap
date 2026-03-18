@@ -112,9 +112,11 @@ export function TemplatePreview({ templateSlug, configState, designPreset }: Tem
   const heroVals = vals.hero ?? vals.profile ?? {};
   const displayName = str(heroVals.name, '내 사이트');
   const displayTagline = str(
-    heroVals.tagline ?? heroVals.bio ?? heroVals.description,
+    heroVals.tagline ?? heroVals.bio ?? heroVals.description ?? heroVals.title,
     '한줄 소개를 입력하세요'
   );
+  // small-biz: 전화번호 / digital-namecard: 회사명
+  const displaySub = str(heroVals.phone as string) || str(heroVals.company as string);
   const heroImageUrl = heroVals.heroImageUrl as string | undefined;
   const avatarUrl = heroVals.avatarUrl as string | undefined;
 
@@ -131,7 +133,7 @@ export function TemplatePreview({ templateSlug, configState, designPreset }: Tem
 
           {/* Screen */}
           <div
-            className="min-h-[340px] overflow-hidden"
+            className="min-h-[340px] overflow-hidden transition-colors duration-300"
             style={{
               background: styles.bg,
               backgroundColor: bgIsGradient ? undefined : styles.bg,
@@ -154,34 +156,42 @@ export function TemplatePreview({ templateSlug, configState, designPreset }: Tem
                 </div>
               )}
 
-              <div className="relative px-4 py-5 text-center" style={{ borderBottom: `2px solid ${styles.accent}20` }}>
+              <div className="relative px-4 py-5 text-center transition-all duration-200" style={{ borderBottom: `2px solid ${styles.accent}20` }}>
                 {/* Avatar */}
                 {(templateSlug === 'link-card' || templateSlug === 'digital-namecard' || templateSlug === 'freelancer-page') && (
                   isValidImageUrl(avatarUrl) ? (
-                    <div className="w-12 h-12 rounded-full mx-auto mb-2 overflow-hidden border-2" style={{ borderColor: `${styles.accent}40` }}>
+                    <div className="w-12 h-12 rounded-full mx-auto mb-2 overflow-hidden border-2 transition-all duration-200" style={{ borderColor: `${styles.accent}40` }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={avatarUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
                     </div>
                   ) : (
                     <div
-                      className="w-12 h-12 rounded-full mx-auto mb-2"
+                      className="w-12 h-12 rounded-full mx-auto mb-2 transition-colors duration-200"
                       style={{ backgroundColor: `${styles.accent}25`, border: `2px solid ${styles.accent}40` }}
                     />
                   )
                 )}
 
                 <p
-                  className="text-sm font-bold truncate"
+                  className="text-sm font-bold truncate transition-colors duration-200"
                   style={{ color: isValidImageUrl(heroImageUrl) ? '#fff' : styles.text }}
                 >
                   {truncate(displayName, 20)}
                 </p>
                 <p
-                  className="text-[9px] mt-0.5 truncate"
+                  className="text-[9px] mt-0.5 truncate transition-colors duration-200"
                   style={{ color: isValidImageUrl(heroImageUrl) ? 'rgba(255,255,255,0.8)' : styles.muted }}
                 >
                   {truncate(displayTagline, 40)}
                 </p>
+                {displaySub && (
+                  <p
+                    className="text-[8px] mt-0.5 truncate transition-colors duration-200"
+                    style={{ color: isValidImageUrl(heroImageUrl) ? 'rgba(255,255,255,0.6)' : `${styles.muted}aa` }}
+                  >
+                    {truncate(displaySub, 25)}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -231,21 +241,28 @@ function ModulePreviewBlock({
   const id = mod.id;
 
   return (
-    <div className="rounded-md p-2" style={{ backgroundColor: styles.card }}>
-      <p className="text-[8px] font-semibold mb-1" style={{ color: styles.accent }}>
+    <div className="rounded-md p-2 transition-colors duration-200" style={{ backgroundColor: styles.card }}>
+      <p className="text-[8px] font-semibold mb-1 transition-colors duration-200" style={{ color: styles.accent }}>
         {mod.name}
       </p>
 
       {/* ── About / Story ── */}
       {(id === 'about') && (
         <div>
-          {str(values.story as string) ? (
-            <p className="text-[8px] leading-[1.4]" style={{ color: styles.muted }}>
-              {truncate(str(values.story as string), 80)}
-            </p>
-          ) : (
-            <TextPlaceholder lines={3} styles={styles} />
-          )}
+          {(() => {
+            // story (text) 또는 stories (array) 둘 다 지원
+            const storyText = str(values.story as string);
+            const storiesArr = arrItems(values.stories);
+            const firstStory = storiesArr.length > 0 ? str(storiesArr[0].text as string) : '';
+            const displayText = storyText || firstStory;
+            return displayText ? (
+              <p className="text-[8px] leading-[1.4]" style={{ color: styles.muted }}>
+                {truncate(displayText, 80)}
+              </p>
+            ) : (
+              <TextPlaceholder lines={3} styles={styles} />
+            );
+          })()}
           {/* Skills */}
           {arrItems(values.skills).length > 0 && (
             <div className="mt-1 space-y-0.5">
