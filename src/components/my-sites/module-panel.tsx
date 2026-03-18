@@ -242,7 +242,6 @@ interface ModulePanelProps {
   isDeploying: boolean;
   locale: Locale;
   deployId?: string;
-  onImagePreview?: (path: string, dataUrl: string) => void;
 }
 
 export function ModulePanel({
@@ -255,7 +254,6 @@ export function ModulePanel({
   isDeploying,
   locale,
   deployId,
-  onImagePreview,
 }: ModulePanelProps) {
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(
     schema.modules[0]?.id ?? null
@@ -321,25 +319,13 @@ export function ModulePanel({
     (preset: ModulePreset) => {
       const next = { ...state };
       if (preset.state.enabled) next.enabled = preset.state.enabled;
-      if (preset.state.order) {
-        // 프리셋 order에 없지만 스키마에 있는 disabled 모듈도 order 뒤에 유지
-        const allIds = schema.modules.map((m) => m.id);
-        const presetOrder = preset.state.order;
-        const remaining = allIds.filter((id) => !presetOrder.includes(id));
-        next.order = [...presetOrder, ...remaining];
-      }
+      if (preset.state.order) next.order = preset.state.order;
       if (preset.state.values) {
-        // 딥 머지: 모듈별로 기존 값 보존 + 프리셋 값만 오버라이드
-        const merged = { ...state.values };
-        for (const [moduleId, presetModuleValues] of Object.entries(preset.state.values)) {
-          merged[moduleId] = { ...merged[moduleId], ...(presetModuleValues as Record<string, unknown>) };
-        }
-        next.values = merged;
+        next.values = { ...state.values, ...preset.state.values };
       }
-      // 비활성 모듈의 기존 값도 보존 (values는 건드리지 않음)
       onStateChange(next);
     },
-    [state, onStateChange, schema.modules]
+    [state, onStateChange]
   );
 
   const handleToggleModule = useCallback(
@@ -543,7 +529,6 @@ export function ModulePanel({
               }
               locale={locale}
               deployId={deployId}
-              onImagePreview={onImagePreview}
             />
           </div>
         ) : selectedModule ? (

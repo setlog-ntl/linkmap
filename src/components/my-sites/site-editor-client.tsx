@@ -69,7 +69,6 @@ import {
   parseConfigToState,
   parsePageToEnabledModules,
 } from '@/lib/oneclick/code-generator';
-import { generatePreviewHtml } from '@/lib/oneclick/preview';
 
 interface SiteEditorClientProps {
   deployId: string;
@@ -272,10 +271,6 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     [templateSlug]
   );
   const [moduleState, setModuleState] = useState<ModuleConfigState | null>(null);
-  // 모듈 실시간 미리보기 HTML
-  const [modulePreviewHtml, setModulePreviewHtml] = useState<string | null>(null);
-  // 업로드 이미지 로컬 캐시 (path → base64 dataUrl)
-  const previewImageMapRef = useRef<Record<string, string>>({});
   const [moduleInitialized, setModuleInitialized] = useState(false);
   const [dialogState, dispatchDialog] = useReducer(deployDialogReducer, initialDeployDialogState);
   const isApplyingModules = dialogState.overallStatus === 'running' && dialogState.mode === 'apply-only';
@@ -289,10 +284,6 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const deployStartedAtRef = useRef<number>(0);
   const seenBuildingRef = useRef(false);
   const queryClient = useQueryClient();
-
-  const handleImagePreview = useCallback((path: string, dataUrl: string) => {
-    previewImageMapRef.current[path] = dataUrl;
-  }, []);
 
   const { data: deployStatusData } = useDeployStatus(deployId, awaitingDeploy);
 
@@ -438,24 +429,6 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     }
     // config.ts를 아직 못 가져왔으면 대기
   }, [moduleSchema, moduleInitialized, fileCache, configFileForInit, pageFileForInit, configInitError, templateSlug]);
-
-  // ── 모듈 상태 변경 → 실시간 프리뷰 HTML 갱신 (디바운스 300ms) ──
-  useEffect(() => {
-    if (!moduleState || !templateSlug) {
-      setModulePreviewHtml(null);
-      return;
-    }
-    const timer = setTimeout(() => {
-      const html = generatePreviewHtml(
-        moduleState,
-        templateSlug,
-        liveUrl || '',
-        previewImageMapRef.current
-      );
-      setModulePreviewHtml(html);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [moduleState, templateSlug, liveUrl]);
 
   // 미리보기 HTML 조합
   const previewHtml = useMemo(() => {
@@ -809,18 +782,6 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           key={`live-${livePreviewKey}`}
           src={`${liveUrl}?_t=${livePreviewKey}`}
           title="사이트 미리보기"
-          className="h-full w-full bg-white border-0"
-          sandbox="allow-scripts allow-same-origin"
-        />
-      );
-    }
-    // 모듈 모드 실시간 프리뷰 (커밋 없이 즉시 반영)
-    if (rightPanel === 'modules' && modulePreviewHtml) {
-      return (
-        <iframe
-          ref={previewRef}
-          srcDoc={modulePreviewHtml}
-          title="모듈 미리보기"
           className="h-full w-full bg-white border-0"
           sandbox="allow-scripts allow-same-origin"
         />
@@ -1269,7 +1230,6 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                 isDeploying={isDeployingModules || isDeploying}
                 locale={locale}
                 deployId={deployId}
-                onImagePreview={handleImagePreview}
               />
             </div>
           ) : (
@@ -1312,10 +1272,6 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                   </Badge>
                 ) : isLivePreviewable ? (
                   <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                    LIVE
-                  </Badge>
-                ) : rightPanel === 'modules' && modulePreviewHtml ? (
-                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-green-600 text-white">
                     LIVE
                   </Badge>
                 ) : rightPanel === 'modules' ? (
@@ -1446,7 +1402,6 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                 isDeploying={isDeployingModules || isDeploying}
                 locale={locale}
                 deployId={deployId}
-                onImagePreview={handleImagePreview}
               />
             </div>
           )}
