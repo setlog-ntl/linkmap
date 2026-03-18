@@ -24,9 +24,10 @@ interface ModuleFormProps {
   onChange: (key: string, value: unknown) => void;
   locale: string;
   deployId?: string;
+  onImagePreview?: (path: string, dataUrl: string) => void;
 }
 
-export function ModuleForm({ fields, values, onChange, locale, deployId }: ModuleFormProps) {
+export function ModuleForm({ fields, values, onChange, locale, deployId, onImagePreview }: ModuleFormProps) {
   // 그래디언트 색상 쌍 감지 (gradientFrom + gradientTo)
   const gradientFrom = values['gradientFrom'] as string | undefined;
   const gradientTo = values['gradientTo'] as string | undefined;
@@ -52,6 +53,7 @@ export function ModuleForm({ fields, values, onChange, locale, deployId }: Modul
           onChange={(val) => onChange(field.key, val)}
           locale={locale}
           deployId={deployId}
+          onImagePreview={onImagePreview}
         />
       ))}
     </div>
@@ -68,9 +70,10 @@ interface FieldRendererProps {
   onChange: (value: unknown) => void;
   locale: string;
   deployId?: string;
+  onImagePreview?: (path: string, dataUrl: string) => void;
 }
 
-function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRendererProps) {
+function FieldRenderer({ field, value, onChange, locale, deployId, onImagePreview }: FieldRendererProps) {
   const label = locale === 'en' && field.labelEn ? field.labelEn : field.label;
 
   switch (field.type) {
@@ -106,6 +109,7 @@ function FieldRenderer({ field, value, onChange, locale, deployId }: FieldRender
           placeholder={field.placeholder}
           deployId={deployId}
           locale={locale}
+          onImagePreview={onImagePreview}
         />
       );
 
@@ -400,6 +404,7 @@ interface ImageUrlFieldProps {
   placeholder?: string;
   deployId?: string;
   locale: string;
+  onImagePreview?: (path: string, dataUrl: string) => void;
 }
 
 /** /public/images/... → /images/... 경로 보정 */
@@ -410,7 +415,7 @@ function fixPublicPath(path: string): string {
   return path;
 }
 
-function ImageUrlField({ label, value, onChange, placeholder, deployId, locale }: ImageUrlFieldProps) {
+function ImageUrlField({ label, value, onChange, placeholder, deployId, locale, onImagePreview }: ImageUrlFieldProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -427,6 +432,7 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale }
       setUploading(true);
       // resizeImage()는 항상 WebP로 변환하므로 mimeType/filename을 WebP로 고정
       const base64 = await resizeImage(file);
+      const previewDataUrl = `data:image/webp;base64,${base64}`;
 
       const res = await fetch(`/api/oneclick/deployments/${deployId}/upload`, {
         method: 'POST',
@@ -444,7 +450,9 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale }
       }
 
       const { path } = await res.json();
-      onChange(fixPublicPath(path));
+      const fixedPath = fixPublicPath(path);
+      onChange(fixedPath);
+      onImagePreview?.(fixedPath, previewDataUrl);
       toast.success(t(locale as Locale, 'moduleForm.imageUploaded'));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Upload failed');
@@ -452,7 +460,7 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale }
       setUploading(false);
       if (fileRef.current) fileRef.current.value = '';
     }
-  }, [deployId, locale, onChange]);
+  }, [deployId, locale, onChange, onImagePreview]);
 
   const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
