@@ -4,9 +4,8 @@ import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
-import { ChevronDown, Globe, GitBranch, Rocket, Pencil } from 'lucide-react';
+import { ChevronDown, Globe, GitBranch, Rocket } from 'lucide-react';
 import { TemplatePickerStep } from './template-picker-step';
-import { ModuleEditorStep } from './module-editor-step';
 import { DeployStep } from './deploy-step';
 import { DeploySuccess } from './deploy-success';
 import { AuthModal } from './auth-modal';
@@ -16,7 +15,6 @@ import { useGitHubConnections } from '@/lib/queries/github-connections';
 import { useDeployMachine } from '@/hooks/use-deploy-machine';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
-import type { ModuleConfigState } from '@/lib/module-schema';
 
 interface OneclickWizardClientProps {
   isAuthenticated: boolean;
@@ -55,13 +53,6 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
   const { data: accounts = [] } = useGitHubConnections();
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
 
-  // ── 편집 단계 상태 (로컬) ──
-  const [editingTemplate, setEditingTemplate] = useState<{
-    templateId: string;
-    siteName: string;
-    accountId?: string;
-  } | null>(null);
-
   // Auto-select first account when accounts load (or match preflight account)
   useEffect(() => {
     if (selectedAccountId || accounts.length === 0) return;
@@ -72,41 +63,26 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
     }
   }, [accounts, githubAccount, selectedAccountId]);
 
-  // Step 1 → 편집 단계로 전환
-  const onProceedToEdit = useCallback((data: { templateId: string; siteName: string; accountId?: string }) => {
-    setEditingTemplate(data);
-  }, []);
-
-  // 편집 단계에서 배포 실행
-  const onDeployFromEditor = useCallback((_configState: ModuleConfigState) => {
-    if (!editingTemplate) return;
-    // TODO: configState를 서버로 전달 (현재는 기본값 배포)
-    handleDeploy(editingTemplate.templateId, editingTemplate.siteName, editingTemplate.accountId);
-    setEditingTemplate(null);
-  }, [editingTemplate, handleDeploy]);
-
-  // 편집 단계에서 이전으로
-  const onBackFromEditor = useCallback(() => {
-    setEditingTemplate(null);
-  }, []);
+  // Step 1 → deploy
+  const onDeployClick = useCallback((data: { templateId: string; siteName: string; accountId?: string }) => {
+    handleDeploy(data.templateId, data.siteName, data.accountId);
+  }, [handleDeploy]);
 
   // Determine what to show
-  const isEditing = editingTemplate !== null && state.phase === 'selecting';
-  const isStep1 = state.phase === 'selecting' && !isEditing;
+  const isStep1 = state.phase === 'selecting';
   const isStep2 = ['deploying', 'polling', 'error'].includes(state.phase);
   const isStep3 = state.phase === 'success';
   const showAuthModal = state.phase === 'authenticating';
   const showGitHubModal = state.phase === 'connecting_github';
 
-  // Step labels (4-step flow)
+  // Step labels (i18n)
   const stepLabels = [
     t(locale, 'wizard.step1'),
-    '편집',
     t(locale, 'wizard.step2'),
     t(locale, 'wizard.step3'),
   ];
 
-  const currentStepIndex = isStep3 ? 3 : isStep2 ? 2 : isEditing ? 1 : 0;
+  const currentStepIndex = isStep3 ? 2 : isStep2 ? 1 : 0;
 
   // Get projectId from state for deploy success
   const projectId =
@@ -120,16 +96,6 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
     state.phase === 'polling' || state.phase === 'success' ? state.template :
     null;
   const activeTemplate = templateId ? templates.find((tmpl) => tmpl.id === templateId) ?? null : null;
-  const editingTemplateObj = editingTemplate
-    ? templates.find((tmpl) => tmpl.id === editingTemplate.templateId) ?? null
-    : null;
-
-  // Reset editing when deploy machine resets
-  useEffect(() => {
-    if (state.phase !== 'selecting') {
-      setEditingTemplate(null);
-    }
-  }, [state.phase]);
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6 sm:space-y-8">
@@ -162,7 +128,7 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
                 내 컴퓨터에서만 보이던 웹사이트를 인터넷에 공개해서,
                 누구나 주소(URL)로 접속할 수 있게 만드는 과정이에요.
               </p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                 <div className="flex items-start gap-2">
                   <Rocket className="h-4 w-4 mt-0.5 text-brand-blue shrink-0" />
                   <div>
@@ -171,23 +137,16 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
-                  <Pencil className="h-4 w-4 mt-0.5 text-brand-blue shrink-0" />
-                  <div>
-                    <p className="font-medium text-foreground text-xs">2. 편집</p>
-                    <p className="text-xs">내 정보를 입력해요</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
                   <GitBranch className="h-4 w-4 mt-0.5 text-brand-blue shrink-0" />
                   <div>
-                    <p className="font-medium text-foreground text-xs">3. GitHub 연결</p>
+                    <p className="font-medium text-foreground text-xs">2. GitHub 연결</p>
                     <p className="text-xs">코드 저장소가 자동 생성돼요</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <Globe className="h-4 w-4 mt-0.5 text-brand-blue shrink-0" />
                   <div>
-                    <p className="font-medium text-foreground text-xs">4. 자동 배포</p>
+                    <p className="font-medium text-foreground text-xs">3. 자동 배포</p>
                     <p className="text-xs">몇 분이면 내 사이트 완성!</p>
                   </div>
                 </div>
@@ -200,12 +159,12 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
         </Collapsible>
       )}
 
-      {/* 4-Step Indicator */}
+      {/* 3-Step Indicator */}
       <div className="flex items-center justify-center gap-1 sm:gap-2">
         {stepLabels.map((label, idx) => (
           <div key={idx} className="flex items-center">
             <div
-              className={`flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full text-xs font-medium transition-colors ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors ${
                 idx === currentStepIndex
                   ? 'bg-primary text-primary-foreground'
                   : idx < currentStepIndex
@@ -213,13 +172,13 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
                     : 'bg-muted text-muted-foreground'
               }`}
             >
-              <span className="w-4 h-4 rounded-full bg-background/20 flex items-center justify-center text-[10px] font-bold shrink-0">
+              <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-background/20 flex items-center justify-center text-xs font-bold shrink-0">
                 {idx + 1}
               </span>
               <span className="hidden sm:inline">{label}</span>
             </div>
             {idx < stepLabels.length - 1 && (
-              <div className={`w-3 sm:w-6 h-0.5 mx-0.5 ${idx < currentStepIndex ? 'bg-primary' : 'bg-muted'}`} />
+              <div className={`w-4 sm:w-8 h-0.5 mx-0.5 sm:mx-1 ${idx < currentStepIndex ? 'bg-primary' : 'bg-muted'}`} />
             )}
           </div>
         ))}
@@ -231,7 +190,7 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
           templates={templates}
           isLoading={templatesLoading}
           isDeploying={deployMutation.isPending}
-          onNext={onProceedToEdit}
+          onNext={onDeployClick}
           githubUsername={isGitHubConnected ? githubAccount?.provider_account_id : undefined}
           isGitHubLoading={githubLoading}
           isAuthenticated={isAuthenticated}
@@ -244,17 +203,7 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
         />
       )}
 
-      {/* Step 2: Module Editor */}
-      {isEditing && editingTemplateObj && (
-        <ModuleEditorStep
-          template={editingTemplateObj}
-          isDeploying={deployMutation.isPending}
-          onDeploy={onDeployFromEditor}
-          onBack={onBackFromEditor}
-        />
-      )}
-
-      {/* Step 3: Deploy progress / error */}
+      {/* Step 2: Deploy progress / error */}
       {isStep2 && (
         <DeployStep
           status={deployStatus ?? null}
@@ -268,7 +217,7 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
         />
       )}
 
-      {/* Step 4: Success */}
+      {/* Step 3: Success */}
       {isStep3 && deployStatus && (
         <DeploySuccess status={deployStatus} projectId={projectId} template={activeTemplate} />
       )}

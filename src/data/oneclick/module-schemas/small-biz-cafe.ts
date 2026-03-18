@@ -60,10 +60,11 @@ export const smallBizCafeModuleSchema: TemplateModuleSchema = {
           labelEn: 'Design Preset',
           defaultValue: 'default',
           options: [
-            { value: 'modern-minimal', label: '미니멀' },
-            { value: 'default', label: '기본' },
-            { value: 'midnight', label: '다크' },
-            { value: 'warm-earth', label: '컬러풀' },
+            { value: 'default', label: '기본 (Default)' },
+            { value: 'warm-serif', label: '따뜻한 세리프 (Warm Serif)' },
+            { value: 'modern-minimal', label: '모던 미니멀 (Modern Minimal)' },
+            { value: 'warm-earth', label: '웜 어스 (Warm Earth)' },
+            { value: 'midnight', label: '미드나잇 (Midnight)' },
           ],
         },
         {

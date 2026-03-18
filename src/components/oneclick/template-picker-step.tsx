@@ -425,7 +425,7 @@ export function TemplatePickerStep({
             ) : (
               <>
                 <Rocket className="h-4 w-4" />
-                <span>다음</span>
+                <span>원클릭 배포</span>
               </>
             )}
           </Button>

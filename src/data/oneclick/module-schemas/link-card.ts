@@ -185,10 +185,13 @@ export const linkCardModuleSchema: TemplateModuleSchema = {
           labelEn: 'Background Style',
           defaultValue: 'light',
           options: [
-            { value: 'light', label: '미니멀' },
-            { value: 'gradient', label: '기본' },
-            { value: 'dark', label: '다크' },
-            { value: 'aurora', label: '컬러풀' },
+            { value: 'light', label: '밝은 배경 (기본)' },
+            { value: 'gradient', label: '그래디언트' },
+            { value: 'solid', label: '단색 (메인 컬러)' },
+            { value: 'mesh', label: '메쉬' },
+            { value: 'aurora', label: '오로라 (2025 트렌드)' },
+            { value: 'glass', label: '유리 효과' },
+            { value: 'dark', label: '다크 모드' },
           ],
         },
         {
@@ -200,8 +203,10 @@ export const linkCardModuleSchema: TemplateModuleSchema = {
           options: [
             { value: 'rounded', label: '둥근 모서리' },
             { value: 'pill', label: '알약형' },
+            { value: 'square', label: '직각' },
             { value: 'glass', label: '유리 카드' },
-            { value: 'outline', label: '아웃라인' },
+            { value: 'neon', label: '네온 테두리' },
+            { value: 'outline', label: '아웃라인 (두꺼운 테두리)' },
           ],
         },
         {

@@ -74,10 +74,11 @@ export const freelancerPageModuleSchema: TemplateModuleSchema = {
           labelEn: 'Design Preset',
           defaultValue: 'default',
           options: [
-            { value: 'creative-minimal', label: '미니멀' },
-            { value: 'default', label: '기본' },
-            { value: 'midnight', label: '다크' },
-            { value: 'warm-earth', label: '컬러풀' },
+            { value: 'default', label: '기본 (Default)' },
+            { value: 'agency', label: '에이전시 (Agency)' },
+            { value: 'creative-minimal', label: '크리에이티브 미니멀' },
+            { value: 'warm-earth', label: '웜 어스 (Warm Earth)' },
+            { value: 'midnight', label: '미드나잇 (Midnight)' },
           ],
         },
         {
