@@ -18,6 +18,8 @@ import {
   Paintbrush,
   Layers,
   Eye,
+  ImagePlus,
+  X,
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { getModuleSchema } from '@/data/oneclick/module-schemas';
@@ -271,6 +273,10 @@ export function ModuleEditorStep({
           {modules.map((mod) => {
             const isEnabled = configState.enabled.includes(mod.id);
             const isExpanded = expandedModules.has(mod.id);
+            // 이미지 배열 필드 (갤러리, 포트폴리오 등)
+            const imageArrayFields = mod.fields.filter(
+              (f) => f.type === 'array' && isImageArrayField(f)
+            );
             const editableFields = mod.fields
               .filter(
                 (f) => f.key !== 'designPreset' && f.key !== 'bgStyle' && f.type !== 'array'
@@ -286,6 +292,7 @@ export function ModuleEditorStep({
                 };
                 return priority(a) - priority(b);
               });
+            const hasEditableContent = editableFields.length > 0 || imageArrayFields.length > 0;
 
             return (
               <div
@@ -309,7 +316,7 @@ export function ModuleEditorStep({
                       </Badge>
                     )}
                   </div>
-                  {isEnabled && editableFields.length > 0 && (
+                  {isEnabled && hasEditableContent && (
                     <button
                       onClick={() => toggleExpand(mod.id)}
                       className="p-1 rounded hover:bg-muted transition-colors"
@@ -324,7 +331,7 @@ export function ModuleEditorStep({
                 </div>
 
                 {/* Inline field editor */}
-                {isEnabled && isExpanded && editableFields.length > 0 && (
+                {isEnabled && isExpanded && hasEditableContent && (
                   <div className="px-3 pb-3 space-y-2 border-t pt-2">
                     {editableFields.slice(0, 6).map((field) => (
                       <SimpleFieldEditor
@@ -339,6 +346,15 @@ export function ModuleEditorStep({
                         +{editableFields.length - 6}개 필드 (배포 후 편집 가능)
                       </p>
                     )}
+                    {/* 이미지 배열 에디터 */}
+                    {imageArrayFields.map((field) => (
+                      <ImageArrayEditor
+                        key={field.key}
+                        field={field}
+                        value={configState.values[mod.id]?.[field.key]}
+                        onChange={(v) => updateField(mod.id, field.key, v)}
+                      />
+                    ))}
                   </div>
                 )}
               </div>
@@ -424,18 +440,34 @@ function SimpleFieldEditor({
           />
         </div>
       );
-    case 'url':
+    case 'url': {
+      const urlStr = String(displayValue ?? '');
+      const isImage = isLikelyImageUrl(urlStr);
       return (
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">{field.label}</Label>
           <Input
-            value={String(displayValue ?? '')}
+            value={urlStr}
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder ?? 'https://...'}
             className="h-8 text-sm"
           />
+          {/* 이미지 URL이면 썸네일 프리뷰 */}
+          {isImage && urlStr.length > 10 && (
+            <div className="w-full h-16 rounded border overflow-hidden bg-muted/30">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={urlStr}
+                alt="미리보기"
+                className="w-full h-full object-cover"
+                loading="lazy"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+            </div>
+          )}
         </div>
       );
+    }
     case 'boolean':
       return (
         <div className="flex items-center gap-2">
@@ -471,6 +503,136 @@ function SimpleFieldEditor({
     default:
       return null;
   }
+}
+
+// ── Image Helpers ──
+
+/** URL이 이미지일 가능성이 있는지 판단 */
+function isLikelyImageUrl(url: string): boolean {
+  if (!url || url.length < 10) return false;
+  if (!url.startsWith('http://') && !url.startsWith('https://')) return false;
+  // unsplash, 이미지 확장자, 또는 이미지 키워드가 있으면 이미지로 간주
+  const lower = url.toLowerCase();
+  return /\.(jpg|jpeg|png|gif|webp|svg|avif)(\?|$)/i.test(lower)
+    || lower.includes('unsplash.com')
+    || lower.includes('images.')
+    || lower.includes('/photo')
+    || lower.includes('img')
+    || lower.includes('avatar');
+}
+
+/** 배열 필드가 이미지 배열인지 (gallery images, portfolio items with imageUrl 등) */
+function isImageArrayField(field: ModuleFieldDef): boolean {
+  if (!field.itemSchema) return false;
+  // itemSchema에 'url' 타입 필드가 있거나 key가 images/gallery인 경우
+  return field.key === 'images'
+    || field.itemSchema.some((s) => s.key === 'url' && s.type === 'url')
+    || field.itemSchema.some((s) => s.key === 'imageUrl' && s.type === 'url');
+}
+
+/** 이미지 배열 필드용 에디터 */
+function ImageArrayEditor({
+  field,
+  value,
+  onChange,
+}: {
+  field: ModuleFieldDef;
+  value: unknown;
+  onChange: (v: unknown) => void;
+}) {
+  const items = Array.isArray(value) ? value as Array<Record<string, unknown>> : [];
+  const maxItems = field.maxItems ?? 12;
+
+  // 이미지 URL 키를 찾는다 (url 또는 imageUrl)
+  const urlKey = field.itemSchema?.find((s) => s.type === 'url')?.key ?? 'url';
+
+  const updateItem = (index: number, url: string) => {
+    const next = [...items];
+    next[index] = { ...next[index], [urlKey]: url };
+    onChange(next);
+  };
+
+  const removeItem = (index: number) => {
+    onChange(items.filter((_, i) => i !== index));
+  };
+
+  const addItem = () => {
+    if (items.length >= maxItems) return;
+    onChange([...items, { [urlKey]: '' }]);
+  };
+
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs text-muted-foreground flex items-center gap-1">
+        <ImagePlus className="h-3 w-3" />
+        {field.label} ({items.length}/{maxItems})
+      </Label>
+
+      {/* 이미지 썸네일 그리드 */}
+      {items.length > 0 && (
+        <div className="grid grid-cols-4 gap-1.5">
+          {items.map((item, i) => {
+            const url = String(item[urlKey] ?? '');
+            const hasUrl = url.startsWith('http');
+            return (
+              <div key={i} className="relative group">
+                <div className="w-full aspect-square rounded border overflow-hidden bg-muted/30">
+                  {hasUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={url}
+                      alt=""
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                      <ImagePlus className="h-3 w-3" />
+                    </div>
+                  )}
+                </div>
+                {/* 삭제 버튼 */}
+                <button
+                  onClick={() => removeItem(i)}
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="h-2.5 w-2.5" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* URL 입력 (선택된 이미지 또는 새 이미지) */}
+      {items.map((item, i) => {
+        const url = String(item[urlKey] ?? '');
+        return (
+          <Input
+            key={i}
+            value={url}
+            onChange={(e) => updateItem(i, e.target.value)}
+            placeholder={`이미지 ${i + 1} URL`}
+            className="h-7 text-xs"
+          />
+        );
+      })}
+
+      {/* 추가 버튼 */}
+      {items.length < maxItems && (
+        <button
+          onClick={addItem}
+          className="w-full h-7 rounded border border-dashed border-muted-foreground/30 text-xs text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors flex items-center justify-center gap-1"
+        >
+          <ImagePlus className="h-3 w-3" />
+          이미지 추가
+        </button>
+      )}
+    </div>
+  );
 }
 
 // ── Helpers ──
