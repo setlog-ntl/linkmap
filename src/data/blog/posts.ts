@@ -70,7 +70,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description: '트레바리 독서 모임에서 현직 개발자를 만나 몇 달 고민이 한 문장으로 풀렸습니다. 바이브 코딩의 진짜 병목은 코딩이 아니라 도구를 아는 것, 서비스를 연결하는 것, 그리고 커뮤니티였습니다.',
     category: 'vibe-coding',
     tags: ['바이브 코딩', '1인 개발', '커뮤니티', 'Claude Code', 'Linkmap 개발기'],
-    publishedAt: '2026-03-20',
+    publishedAt: '2026-03-18',
     readingTime: '8분',
     relatedGuides: ['env', 'deploy', 'github'],
     content: `> **KEY:** 바이브 코딩의 진짜 병목은 코드를 짜는 능력이 아닙니다. 어떤 도구가 존재하는지 알고, 서비스를 올바르게 연결하고, 막혔을 때 물어볼 사람이 있는가가 결정적입니다.
@@ -171,7 +171,7 @@ Supabase(DB+Auth)를 쓰기로 함
     description: 'Supabase 데이터 흐름 설계 실패, AI가 만든 RLS 보안 허점, 기능 20개 이상에서 AI가 기존 코드를 무시하는 컨텍스트 한계. ERP 경험으로 돌파한 방법을 공유합니다.',
     category: 'vibe-coding',
     tags: ['바이브 코딩', 'AI 협업', 'PRD', '프롬프트 엔지니어링', '데이터 설계'],
-    publishedAt: '2026-03-19',
+    publishedAt: '2026-03-18',
     readingTime: '9분',
     relatedGuides: ['supabase', 'env', 'backend'],
     content: `> **KEY:** AI는 코드를 짜주지만 데이터 흐름을 설계하지 않습니다. AI에게 구현을 시키기 전에 테이블 간 관계와 데이터 흐름도를 직접 그려야 합니다. 그렇지 않으면 기능이 늘어날수록 코드가 아니라 설계 빚이 쌓입니다.
