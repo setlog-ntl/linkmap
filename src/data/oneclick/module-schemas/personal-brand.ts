@@ -18,8 +18,8 @@ export const personalBrandModuleSchema: TemplateModuleSchema = {
         {
           key: 'designPreset',
           type: 'select',
-          label: '디자인 프리셋',
-          labelEn: 'Design Preset',
+          label: '디자인 테마',
+          labelEn: 'Design Theme',
           defaultValue: 'creator',
           options: [
             { value: 'minimal', label: '미니멀 (Minimal)' },

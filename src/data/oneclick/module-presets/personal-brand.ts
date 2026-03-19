@@ -7,51 +7,32 @@ export interface ModulePreset {
   description: string;
   descriptionEn: string;
   state: Partial<ModuleConfigState>;
+  /** 대표 색상 (UI 색상 스와치 표시용) */
+  colors?: [string, string];
 }
 
 export const personalBrandPresets: ModulePreset[] = [
   {
-    id: 'minimal',
-    name: '미니멀',
-    nameEn: 'Minimal',
-    description: 'Hero + 연락처만 — 깔끔한 명함 스타일',
-    descriptionEn: 'Hero + Contact only — clean card style',
-    state: {
-      enabled: ['hero', 'contact'],
-      order: ['hero', 'contact'],
-    },
-  },
-  {
     id: 'creator',
-    name: '크리에이터',
-    nameEn: 'Creator',
-    description: '소개 + 하이라이트 + 갤러리 포함 포트폴리오',
-    descriptionEn: 'Portfolio with bio, highlights, and gallery',
+    name: '선셋 오렌지',
+    nameEn: 'Sunset Orange',
+    description: '따뜻한 주황+노랑 그래디언트 — 에너지 넘치는 스타일',
+    descriptionEn: 'Warm orange-yellow gradient — energetic style',
+    colors: ['#ee5b2b', '#f59e0b'],
     state: {
-      enabled: ['hero', 'about', 'highlights', 'gallery', 'contact'],
-      order: ['hero', 'about', 'highlights', 'gallery', 'contact'],
-    },
-  },
-  {
-    id: 'full',
-    name: '풀 프로필',
-    nameEn: 'Full Profile',
-    description: '모든 모듈 활성화 — 완전한 프로필 페이지',
-    descriptionEn: 'All modules enabled — complete profile',
-    state: {
-      enabled: ['hero', 'about', 'values', 'highlights', 'gallery', 'contact'],
-      order: ['hero', 'about', 'values', 'highlights', 'gallery', 'contact'],
+      values: {
+        hero: { designPreset: 'creator' },
+      },
     },
   },
   {
     id: 'magazine',
-    name: '매거진',
-    nameEn: 'Magazine',
-    description: 'serif 폰트 + 2단 레이아웃 — 에디토리얼 감성',
-    descriptionEn: 'Serif font + editorial layout — magazine aesthetic',
+    name: '볼드 레드',
+    nameEn: 'Bold Red',
+    description: '강렬한 레드+오렌지 — 매거진 감성',
+    descriptionEn: 'Bold red-orange — magazine aesthetic',
+    colors: ['#d4163c', '#ff6b35'],
     state: {
-      enabled: ['hero', 'about', 'highlights', 'gallery', 'contact'],
-      order: ['hero', 'about', 'highlights', 'gallery', 'contact'],
       values: {
         hero: { designPreset: 'magazine' },
       },
@@ -59,13 +40,12 @@ export const personalBrandPresets: ModulePreset[] = [
   },
   {
     id: 'warm-earth',
-    name: '웜 어스',
-    nameEn: 'Warm Earth',
-    description: '따뜻한 어스톤 + 세리프 폰트 — 자연스러운 감성',
-    descriptionEn: 'Warm earth tones + serif font — natural aesthetic',
+    name: '내추럴 어스',
+    nameEn: 'Natural Earth',
+    description: '따뜻한 브라운 톤 + 크림 배경 — 자연스러운 감성',
+    descriptionEn: 'Warm brown tones + cream background — natural feel',
+    colors: ['#92400e', '#b45309'],
     state: {
-      enabled: ['hero', 'about', 'values', 'highlights', 'contact'],
-      order: ['hero', 'about', 'values', 'highlights', 'contact'],
       values: {
         hero: { designPreset: 'warm-earth' },
       },
@@ -75,11 +55,10 @@ export const personalBrandPresets: ModulePreset[] = [
     id: 'midnight',
     name: '미드나잇',
     nameEn: 'Midnight',
-    description: '진한 다크 + 인디고 악센트 — 모던 나이트 모드',
-    descriptionEn: 'Deep dark + indigo accent — modern night mode',
+    description: '다크 배경 + 인디고 악센트 — 모던 나이트 모드',
+    descriptionEn: 'Dark background + indigo accent — modern night mode',
+    colors: ['#818cf8', '#c084fc'],
     state: {
-      enabled: ['hero', 'about', 'values', 'highlights', 'gallery', 'contact'],
-      order: ['hero', 'about', 'values', 'highlights', 'gallery', 'contact'],
       values: {
         hero: { designPreset: 'midnight' },
       },
@@ -87,13 +66,12 @@ export const personalBrandPresets: ModulePreset[] = [
   },
   {
     id: 'editorial',
-    name: '에디토리얼',
-    nameEn: 'Editorial',
-    description: '2열 매거진 레이아웃 — 전문 포트폴리오 감성',
-    descriptionEn: 'Two-column magazine layout — professional portfolio aesthetic',
+    name: '모노 클래식',
+    nameEn: 'Mono Classic',
+    description: '모노톤 블랙 — 전문적이고 클래식한 스타일',
+    descriptionEn: 'Monochrome black — professional classic style',
+    colors: ['#1c1c1e', '#3a3a3c'],
     state: {
-      enabled: ['hero', 'about', 'values', 'highlights', 'gallery', 'contact'],
-      order: ['hero', 'about', 'values', 'highlights', 'gallery', 'contact'],
       values: {
         hero: { designPreset: 'editorial' },
       },

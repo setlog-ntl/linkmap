@@ -319,11 +319,14 @@ export function ModulePanel({
 
   const handleApplyPreset = useCallback(
     (preset: ModulePreset) => {
+      // 색상테마: 디자인 값만 변경, 섹션 구성(enabled/order)은 유지
       const next = { ...state };
-      if (preset.state.enabled) next.enabled = preset.state.enabled;
-      if (preset.state.order) next.order = preset.state.order;
       if (preset.state.values) {
-        next.values = { ...state.values, ...preset.state.values };
+        const merged = { ...state.values };
+        for (const [modId, fields] of Object.entries(preset.state.values)) {
+          merged[modId] = { ...merged[modId], ...fields };
+        }
+        next.values = merged;
       }
       onStateChange(next);
     },
@@ -413,25 +416,44 @@ export function ModulePanel({
 
       {/* 스크롤 가능 영역 */}
       <div className="flex-1 overflow-y-auto">
-        {/* 프리셋 */}
+        {/* 색상테마 */}
         {presets.length > 0 && (
           <div className="px-4 pb-2">
-            <span className="text-[11px] font-medium text-muted-foreground mb-1.5 block">프리셋</span>
-            <div className="flex gap-1 flex-wrap">
-              {presets.map((preset) => (
-                <button
-                  key={preset.id}
-                  className="text-[10px] px-2.5 py-1 rounded-full border hover:bg-primary/10 hover:border-primary hover:shadow-sm transition-all duration-200 font-medium"
-                  onClick={() => handleApplyPreset(preset)}
-                  title={
-                    locale === 'en'
-                      ? preset.descriptionEn
-                      : preset.description
-                  }
-                >
-                  {locale === 'en' ? preset.nameEn : preset.name}
-                </button>
-              ))}
+            <span className="text-[11px] font-medium text-muted-foreground mb-1.5 block">색상테마</span>
+            <div className="flex gap-1.5 flex-wrap">
+              {presets.map((preset) => {
+                const currentDesign = (state.values.hero?.designPreset as string) || 'creator';
+                const isActive = currentDesign === preset.id;
+                return (
+                  <button
+                    key={preset.id}
+                    className={`flex items-center gap-1.5 text-[10px] px-2.5 py-1.5 rounded-full border transition-all duration-200 font-medium ${
+                      isActive
+                        ? 'border-primary bg-primary/10 shadow-sm ring-1 ring-primary/20'
+                        : 'hover:bg-primary/10 hover:border-primary hover:shadow-sm'
+                    }`}
+                    onClick={() => handleApplyPreset(preset)}
+                    title={
+                      locale === 'en'
+                        ? preset.descriptionEn
+                        : preset.description
+                    }
+                  >
+                    {preset.colors && (
+                      <span className="flex -space-x-0.5">
+                        {preset.colors.map((c, i) => (
+                          <span
+                            key={i}
+                            className="inline-block w-3 h-3 rounded-full border border-background"
+                            style={{ backgroundColor: c }}
+                          />
+                        ))}
+                      </span>
+                    )}
+                    {locale === 'en' ? preset.nameEn : preset.name}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
