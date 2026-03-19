@@ -115,17 +115,17 @@ function renderHeroSection(
     : '';
 
   return `
-    <section class="fp-hero" style="background:linear-gradient(135deg, ${esc(gradientFrom)}, ${esc(gradientTo)})">
-      <div class="fp-hero-inner">
-        <div class="fp-hero-text">
-          <p class="fp-hero-title-label">${esc(title)}${titleEn ? ` <span style="opacity:.7;font-size:12px;">${esc(titleEn)}</span>` : ''}</p>
-          <h1 class="fp-hero-name">${esc(name)}</h1>
-          ${nameEn ? `<p style="font-size:18px;opacity:.8;margin:0 0 4px;">${esc(nameEn)}</p>` : ''}
-          <p class="fp-hero-tagline">${esc(tagline)}</p>
-          ${taglineEn ? `<p style="font-size:14px;opacity:.7;margin:0 0 16px;">${esc(taglineEn)}</p>` : ''}
-          ${wordBadges ? `<div class="fp-keywords">${wordBadges}</div>` : ''}
-        </div>
+    <section class="fp-hero">
+      <div class="fp-hero-glow" style="background:radial-gradient(circle, ${esc(gradientFrom)}26 0%, transparent 70%)"></div>
+      <div class="fp-hero-center">
         ${avatarHtml}
+        <p class="fp-hero-name-label">${esc(name)}</p>
+        <h1 class="fp-hero-title" style="background:linear-gradient(to right, ${esc(gradientFrom)}, ${esc(gradientTo)});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">${esc(title || name)}</h1>
+        ${nameEn ? `<p style="font-size:14px;color:var(--text-secondary);margin:0 0 8px;">${esc(nameEn)}</p>` : ''}
+        <p class="fp-hero-tagline">${esc(tagline)}</p>
+        ${taglineEn ? `<p style="font-size:14px;color:var(--text-secondary);margin:0 0 16px;">${esc(taglineEn)}</p>` : ''}
+        ${wordBadges ? `<div class="fp-keywords">${wordBadges}</div>` : ''}
+        <a href="#contact" class="fp-hero-cta" style="background:linear-gradient(to right, ${esc(gradientFrom)}, ${esc(gradientTo)})">프로젝트 문의</a>
       </div>
     </section>`;
 }
@@ -285,58 +285,86 @@ function buildFreelancerCSS(gradientFrom: string, gradientTo: string): string {
 
     body { background: #fafafa; }
 
-    /* Hero */
+    /* Hero — 배포 템플릿과 동일한 밝은 배경 + 라디얼 글로우 + 중앙 정렬 */
     .fp-hero {
-      padding: 64px 24px;
-      color: #fff;
-    }
-    .fp-hero-inner {
-      max-width: 960px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
+      position: relative;
+      min-height: 480px;
+      display: flex;
+      flex-direction: column;
       align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      overflow: hidden;
     }
-    @media (max-width: 640px) {
-      .fp-hero-inner { grid-template-columns: 1fr; text-align: center; }
+    .fp-hero-glow {
+      position: absolute;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      pointer-events: none;
     }
-    .fp-hero-title-label {
+    .fp-hero-center {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 720px;
+    }
+    .fp-hero-name-label {
       font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      letter-spacing: 2px;
-      opacity: .8;
-      margin: 0 0 8px;
+      color: var(--text-secondary, #9ca3af);
+      margin: 0 0 16px;
     }
-    .fp-hero-name {
-      font-size: 42px;
+    .fp-hero-title {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
       font-weight: 800;
-      margin: 0 0 12px;
-      line-height: 1.15;
+      line-height: 1.1;
+      margin: 0 0 16px;
     }
     .fp-hero-tagline {
-      font-size: 17px;
-      opacity: .9;
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--text-secondary, #6b7280);
       margin: 0 0 20px;
-      line-height: 1.6;
+      line-height: 1.7;
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
     }
-    .fp-keywords { display: flex; flex-wrap: wrap; gap: 8px; }
-    @media (max-width: 640px) { .fp-keywords { justify-content: center; } }
+    .fp-keywords { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 24px; }
     .fp-keyword {
       display: inline-block;
-      padding: 4px 14px;
-      background: rgba(255,255,255,.18);
+      padding: 6px 16px;
+      background: var(--fp-to, #06b6d4);
+      color: #fff;
       border-radius: 999px;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
     }
-    .fp-hero-image { display: flex; justify-content: center; }
+    .fp-hero-image { display: flex; justify-content: center; margin-bottom: 24px; }
     .fp-hero-image img {
-      width: 280px; height: 280px;
-      border-radius: 20px;
+      width: 112px; height: 112px;
+      border-radius: 16px;
       object-fit: cover;
-      box-shadow: 0 8px 32px rgba(0,0,0,.2);
+      box-shadow: 0 4px 16px rgba(0,0,0,.12);
     }
+    .fp-hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 40px;
+      color: #fff;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+    .fp-hero-cta:hover { opacity: 0.9; }
 
     /* Sections */
     .fp-section {

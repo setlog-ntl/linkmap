@@ -56,13 +56,22 @@ export function renderSmallBizHeroSection(
 
   return `
   <section class="sb-hero">
-    <div class="sb-hero-overlay"></div>
+    <div class="sb-hero-bg"></div>
+    <div class="sb-hero-circle sb-hero-circle-1"></div>
+    <div class="sb-hero-circle sb-hero-circle-2"></div>
+    <div class="sb-hero-circle sb-hero-circle-3"></div>
+    <div class="sb-hero-noise"></div>
     <div class="sb-hero-content">
+      <p class="sb-hero-category">소상공인<span class="sb-hero-category-dot"></span>${esc(name)}</p>
       <h1 class="sb-hero-name" style="color:${esc(primaryColor)}">${esc(name)}</h1>
       ${nameEn ? `<p class="sb-hero-name-en">${esc(nameEn)}</p>` : ''}
-      <p class="sb-hero-desc">${esc(description)}</p>
+      <div class="sb-hero-divider"><span class="sb-hero-divider-line"></span><span style="font-size:0.625rem;">&#10022;</span><span class="sb-hero-divider-line"></span></div>
+      ${description ? `<p class="sb-hero-slogan">&ldquo;${esc(description)}&rdquo;</p>` : ''}
       ${descriptionEn ? `<p class="sb-hero-desc-en">${esc(descriptionEn)}</p>` : ''}
-      ${phone ? `<a class="sb-hero-phone" href="tel:${esc(phone)}">&#9742; ${esc(phone)}</a>` : ''}
+      <div class="sb-hero-actions">
+        <a href="#menu" class="sb-btn sb-btn-primary" style="background:${esc(primaryColor)}">메뉴 보기</a>
+        ${phone ? `<a class="sb-btn sb-btn-outline" href="tel:${esc(phone)}">&#9742; 전화하기</a>` : ''}
+      </div>
     </div>
   </section>`;
 }
@@ -239,66 +248,141 @@ export function buildSmallBizCSS(primaryColor: string): string {
   return `
 /* ── Small Biz Template ── */
 
-/* Hero */
+/* Hero — 배포 템플릿과 동일한 다크 그래디언트 + 장식 */
 .sb-hero {
   position: relative;
-  min-height: 360px;
+  min-height: 480px;
   display: flex;
-  align-items: flex-end;
-  background: var(--bg-alt, #f5f5f5);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
+  padding: 5rem 2rem 4rem;
 }
-.sb-hero-overlay {
+.sb-hero-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.45));
+  background: linear-gradient(160deg, #1a1a1a 0%, #2a2520 35%, #3a302a 70%, #4a3f35 100%);
+}
+.sb-hero-circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.15;
   pointer-events: none;
+}
+.sb-hero-circle-1 {
+  width: 600px; height: 600px;
+  top: -200px; right: -150px;
+  background: radial-gradient(circle, #fde68a, transparent 70%);
+}
+.sb-hero-circle-2 {
+  width: 400px; height: 400px;
+  bottom: -100px; left: -80px;
+  background: radial-gradient(circle, #fef3c7, transparent 70%);
+  opacity: 0.12;
+}
+.sb-hero-circle-3 {
+  width: 200px; height: 200px;
+  top: 30%; left: 10%;
+  background: radial-gradient(circle, #fffbeb, transparent 70%);
+  opacity: 0.08;
+}
+.sb-hero-noise {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.3;
 }
 .sb-hero-content {
   position: relative;
   z-index: 1;
-  padding: 3rem var(--section-padding-x, 1.5rem);
-  max-width: 1080px;
-  margin: 0 auto;
-  width: 100%;
+  text-align: center;
+  max-width: 680px;
+  color: #fff;
+}
+.sb-hero-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 1.5rem;
+}
+.sb-hero-category-dot {
+  display: inline-block;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.6);
+  margin: 0 0.25rem;
 }
 .sb-hero-name {
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  font-weight: 800;
-  margin: 0 0 4px;
-  line-height: 1.2;
+  font-size: clamp(2.5rem, 7vw, 4.5rem);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.5rem;
 }
 .sb-hero-name-en {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  margin: 0 0 12px;
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
   font-weight: 400;
+  letter-spacing: 0.25em;
+  color: rgba(255,255,255,0.65);
+  margin: 0 0 2rem;
 }
-.sb-hero-desc {
-  font-size: 1.125rem;
-  color: var(--text-primary);
-  margin: 0 0 4px;
-  font-weight: 500;
+.sb-hero-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  color: rgba(255,255,255,0.5);
+}
+.sb-hero-divider-line {
+  width: 48px;
+  height: 1px;
+  background: rgba(255,255,255,0.4);
+}
+.sb-hero-slogan {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  font-style: italic;
+  color: rgba(255,255,255,0.9);
+  font-weight: 400;
+  margin: 0 0 1rem;
 }
 .sb-hero-desc-en {
   font-size: 0.9rem;
-  color: var(--text-secondary);
-  margin: 0 0 16px;
+  color: rgba(255,255,255,0.65);
+  margin: 0 0 2.5rem;
 }
-.sb-hero-phone {
+.sb-hero-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.sb-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 24px;
-  background: ${primaryColor};
-  color: #fff;
+  padding: 12px 28px;
   border-radius: 50px;
   font-size: 0.95rem;
   font-weight: 600;
   text-decoration: none;
-  transition: opacity .2s;
+  transition: opacity .2s, transform .2s;
+  cursor: pointer;
+  border: none;
 }
-.sb-hero-phone:hover { opacity: 0.85; }
+.sb-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+.sb-btn-primary { color: #fff; }
+.sb-btn-outline {
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.4);
+}
 
 /* Section titles */
 .sb-section-title {

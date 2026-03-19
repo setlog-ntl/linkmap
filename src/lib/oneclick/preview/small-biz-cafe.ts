@@ -51,14 +51,20 @@ function renderCafeHeroSection(
 
   return `
   <section class="cafe-hero">
-    <div class="cafe-hero-bg"></div>
+    <div class="cafe-hero-bg-img"></div>
+    <div class="cafe-hero-overlay"></div>
+    <div class="cafe-hero-gradient"></div>
     <div class="cafe-hero-content">
-      <div class="cafe-hero-icon">&#9749;</div>
+      <div class="cafe-hero-badge"><span class="cafe-hero-badge-dot" style="background:${esc(primaryColor)}"></span>${esc(description || name)}</div>
       <h1 class="cafe-hero-name">${esc(name)}</h1>
       ${nameEn ? `<p class="cafe-hero-name-en">${esc(nameEn)}</p>` : ''}
-      <p class="cafe-hero-desc">${esc(description)}</p>
+      <div class="cafe-hero-divider"><span class="cafe-hero-divider-line"></span><span>&#9749;</span><span class="cafe-hero-divider-line"></span></div>
+      ${description ? `<p class="cafe-hero-slogan">&ldquo;${esc(description)}&rdquo;</p>` : ''}
       ${descriptionEn ? `<p class="cafe-hero-desc-en">${esc(descriptionEn)}</p>` : ''}
-      ${phone ? `<a class="cafe-hero-phone" href="tel:${esc(phone)}" style="background:${esc(primaryColor)}">&#9742; ${esc(phone)}</a>` : ''}
+      <div class="cafe-hero-actions">
+        <a href="#menu" class="cafe-btn cafe-btn-primary" style="background:${esc(primaryColor)}">메뉴 보기</a>
+        ${phone ? `<a class="cafe-btn cafe-btn-outline" href="tel:${esc(phone)}">&#9742; 전화하기</a>` : ''}
+      </div>
     </div>
   </section>`;
 }
@@ -129,72 +135,125 @@ function buildCafeCSS(primaryColor: string): string {
   return `
 /* ── Cafe Template Overrides ── */
 
-/* Hero — 카페 특화 중앙 정렬 */
+/* Hero — 배포 템플릿과 동일한 배경 이미지 + 오버레이 */
 .cafe-hero {
   position: relative;
-  min-height: 400px;
+  min-height: 480px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
   overflow: hidden;
+  padding: 6rem 2rem 5rem;
 }
-.cafe-hero-bg {
+.cafe-hero-bg-img {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, ${primaryColor}08 0%, ${primaryColor}15 100%);
+  background: url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1600&q=80&auto=format&fit=crop') center center / cover no-repeat;
+}
+.cafe-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(28, 20, 16, 0.45);
+}
+.cafe-hero-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(28,20,16,0.10) 0%, rgba(28,20,16,0.30) 50%, rgba(28,20,16,0.65) 100%);
 }
 .cafe-hero-content {
   position: relative;
   z-index: 1;
-  padding: 4rem var(--section-padding-x, 1.5rem);
-  max-width: 640px;
+  text-align: center;
+  max-width: 680px;
+  color: #fff;
 }
-.cafe-hero-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  display: block;
-  opacity: 0.8;
+.cafe-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.80);
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.22);
+  padding: 6px 16px;
+  border-radius: 999px;
+  margin-bottom: 1.75rem;
+}
+.cafe-hero-badge-dot {
+  display: inline-block;
+  width: 5px; height: 5px;
+  border-radius: 50%;
 }
 .cafe-hero-name {
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 800;
-  color: var(--text-primary);
-  margin: 0 0 4px;
-  line-height: 1.2;
+  font-size: clamp(2.8rem, 8vw, 5rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.4rem;
+  text-shadow: 0 2px 24px rgba(0,0,0,0.35);
 }
 .cafe-hero-name-en {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  margin: 0 0 16px;
+  font-size: clamp(0.9rem, 2vw, 1.25rem);
   font-weight: 400;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.3em;
+  color: rgba(255,255,255,0.60);
+  margin: 0 0 2rem;
 }
-.cafe-hero-desc {
-  font-size: 1.15rem;
-  color: var(--text-primary);
-  margin: 0 0 4px;
-  font-weight: 500;
-  line-height: 1.6;
+.cafe-hero-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+  color: rgba(255,255,255,0.5);
+}
+.cafe-hero-divider-line {
+  width: 52px; height: 1px;
+  background: rgba(255,255,255,0.35);
+}
+.cafe-hero-slogan {
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  font-style: italic;
+  color: rgba(255,255,255,0.88);
+  font-weight: 400;
+  margin: 0 0 1rem;
 }
 .cafe-hero-desc-en {
   font-size: 0.9rem;
-  color: var(--text-secondary);
-  margin: 0 0 24px;
+  color: rgba(255,255,255,0.60);
+  margin: 0 0 2.5rem;
 }
-.cafe-hero-phone {
+.cafe-hero-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.cafe-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 28px;
-  color: #fff;
+  padding: 12px 28px;
   border-radius: 50px;
   font-size: 0.95rem;
   font-weight: 600;
   text-decoration: none;
-  transition: opacity .2s;
+  transition: opacity .2s, transform .2s;
+  cursor: pointer;
+  border: none;
 }
-.cafe-hero-phone:hover { opacity: 0.85; }
+.cafe-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+.cafe-btn-primary { color: #fff; }
+.cafe-btn-outline {
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.4);
+}
 
 /* About */
 .cafe-about-stories { margin-bottom: 1.5rem; }
