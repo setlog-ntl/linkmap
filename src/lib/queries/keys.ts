@@ -69,6 +69,7 @@ export const queryKeys = {
     deployments: ['oneclick', 'deployments'] as const,
     files: (deployId: string) => ['oneclick', 'files', deployId] as const,
     fileContent: (deployId: string, path: string) => ['oneclick', 'files', deployId, path] as const,
+    draft: (deployId: string) => ['oneclick', 'draft', deployId] as const,
   },
   showcase: {
     list: ['showcase'] as const,

@@ -415,3 +415,42 @@ export function useDeployStatus(deployId: string | null, enabled: boolean = true
     },
   });
 }
+
+// ---------- Draft (초안 자동저장) ----------
+
+export function useSaveDraft() {
+  return useMutation({
+    mutationFn: async ({ deployId, state }: { deployId: string; state: Record<string, unknown> }) => {
+      const res = await fetch(`/api/oneclick/deployments/${deployId}/draft`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          moduleDraft: {
+            state,
+            savedAt: new Date().toISOString(),
+          },
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || '초안 저장 실패');
+      }
+      return res.json();
+    },
+  });
+}
+
+export function useDeleteDraft() {
+  return useMutation({
+    mutationFn: async (deployId: string) => {
+      const res = await fetch(`/api/oneclick/deployments/${deployId}/draft`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || '초안 삭제 실패');
+      }
+      return res.json();
+    },
+  });
+}

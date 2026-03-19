@@ -40,7 +40,7 @@ export function SplitButton({
           <Rocket className="h-3.5 w-3.5" />
         )}
         <span className="text-xs">
-          {isApplying ? '적용 중...' : isDeploying ? '배포 중...' : '저장 및 배포'}
+          {isApplying ? '저장 중...' : isDeploying ? '배포 중...' : '저장 + 배포'}
         </span>
       </Button>
       <DropdownMenu>
@@ -56,7 +56,7 @@ export function SplitButton({
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem onClick={onSaveOnly} disabled={disabled}>
             <Save className="h-3.5 w-3.5 mr-2" />
-            <span className="text-xs">저장만 (배포 없이)</span>
+            <span className="text-xs">GitHub에 저장</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

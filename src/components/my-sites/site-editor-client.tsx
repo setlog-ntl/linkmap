@@ -49,6 +49,8 @@ import {
   useBatchApplyFiles,
   useMyDeployments,
   useDeployStatus,
+  useSaveDraft,
+  useDeleteDraft,
 } from '@/lib/queries/oneclick';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queries/keys';
@@ -69,6 +71,7 @@ import {
   parseConfigToState,
   parsePageToEnabledModules,
 } from '@/lib/oneclick/code-generator';
+import { generatePreviewHtml } from '@/lib/oneclick/preview';
 
 interface SiteEditorClientProps {
   deployId: string;
@@ -272,9 +275,18 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   );
   const [moduleState, setModuleState] = useState<ModuleConfigState | null>(null);
   const [moduleInitialized, setModuleInitialized] = useState(false);
+  const [imageMap, setImageMap] = useState<Record<string, string>>({});
+  const handleImagePreview = useCallback((path: string, dataUrl: string) => {
+    setImageMap((prev) => ({ ...prev, [path]: dataUrl }));
+  }, []);
   const [dialogState, dispatchDialog] = useReducer(deployDialogReducer, initialDeployDialogState);
   const isApplyingModules = dialogState.overallStatus === 'running' && dialogState.mode === 'apply-only';
   const isDeployingModules = dialogState.overallStatus === 'running' && dialogState.mode === 'apply-and-deploy';
+  const saveDraft = useSaveDraft();
+  const deleteDraft = useDeleteDraft();
+  const [showDraftRestore, setShowDraftRestore] = useState(false);
+  const pendingDraftRef = useRef<ModuleConfigState | null>(null);
+  const moduleStateInitialRef = useRef<ModuleConfigState | null>(null);
 
   // ── 배포 대기 상태 (useDeployStatus 연동) ──
   type DeployOrigin = 'direct' | 'module-deploy' | null;
@@ -430,6 +442,40 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     // config.ts를 아직 못 가져왔으면 대기
   }, [moduleSchema, moduleInitialized, fileCache, configFileForInit, pageFileForInit, configInitError, templateSlug]);
 
+  // ── 초안 복원 체크 ──
+  useEffect(() => {
+    if (!moduleInitialized || !deployId) return;
+    // initial state 저장 (dirty 비교용)
+    if (moduleState) {
+      moduleStateInitialRef.current = moduleState;
+    }
+    // 서버에서 초안 확인
+    fetch(`/api/oneclick/deployments/${deployId}/draft`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data?.moduleDraft?.state) {
+          pendingDraftRef.current = data.moduleDraft.state as ModuleConfigState;
+          setShowDraftRestore(true);
+        }
+      })
+      .catch(() => { /* 초안 없음 */ });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [moduleInitialized, deployId]);
+
+  // ── 모듈 상태 디바운스 자동 저장 (3초) ──
+  useEffect(() => {
+    if (!moduleState || !moduleInitialized || !deployId) return;
+    // 초기 상태와 동일하면 저장 스킵
+    if (moduleStateInitialRef.current && JSON.stringify(moduleState) === JSON.stringify(moduleStateInitialRef.current)) return;
+
+    const timer = setTimeout(() => {
+      saveDraft.mutate({ deployId, state: moduleState as unknown as Record<string, unknown> });
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [moduleState, moduleInitialized, deployId]);
+
   // 미리보기 HTML 조합
   const previewHtml = useMemo(() => {
     const htmlPath = isHtmlFile(selectedPath)
@@ -463,6 +509,12 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     }
     return injected + '\n' + htmlContent;
   }, [editorContent, selectedPath, files, fileCache, liveUrl]);
+
+  // 모듈 실시간 프리뷰 HTML
+  const modulePreviewHtml = useMemo(() => {
+    if (!moduleState || !templateSlug) return null;
+    return generatePreviewHtml(moduleState, templateSlug, liveUrl || '', imageMap);
+  }, [moduleState, templateSlug, liveUrl, imageMap]);
 
   // iframe 미리보기 반영
   useEffect(() => {
@@ -775,6 +827,17 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   // 미리보기 렌더링 (데스크탑/모바일 공용)
   // 부모가 block(h-full) 또는 명시적 높이 컨테이너이므로 h-full 사용 (flex-1은 flex 부모 필요)
   const renderPreview = () => {
+    // 모듈 편집 중: 실시간 HTML 미리보기
+    if (rightPanel === 'modules' && modulePreviewHtml) {
+      return (
+        <iframe
+          srcDoc={modulePreviewHtml}
+          title="실시간 미리보기"
+          className="h-full w-full bg-white border-0"
+          sandbox="allow-scripts"
+        />
+      );
+    }
     if (showLiveAfterDeploy && liveUrl) {
       return (
         <iframe
@@ -1230,6 +1293,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                 isDeploying={isDeployingModules || isDeploying}
                 locale={locale}
                 deployId={deployId}
+                onImagePreview={handleImagePreview}
               />
             </div>
           ) : (
@@ -1274,10 +1338,10 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                   <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
                     LIVE
                   </Badge>
-                ) : rightPanel === 'modules' ? (
-                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-1 text-muted-foreground">
+                ) : rightPanel === 'modules' && modulePreviewHtml ? (
+                  <Badge variant="default" className="text-[10px] px-1.5 py-0 gap-1 bg-green-600 text-white">
                     <Eye className="h-2.5 w-2.5" />
-                    적용 후 미리보기 갱신
+                    실시간
                   </Badge>
                 ) : null}
                 {/* 반응형 뷰포트 토글 */}
@@ -1402,6 +1466,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                 isDeploying={isDeployingModules || isDeploying}
                 locale={locale}
                 deployId={deployId}
+                onImagePreview={handleImagePreview}
               />
             </div>
           )}
@@ -1459,6 +1524,38 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
             <AlertDialogCancel>{t(locale, 'common.cancel')}</AlertDialogCancel>
             <AlertDialogAction variant="destructive" onClick={confirmTabSwitch}>
               {t(locale, 'editor.leave')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* ===== 초안 복원 다이얼로그 ===== */}
+      <AlertDialog open={showDraftRestore} onOpenChange={(open) => { if (!open) setShowDraftRestore(false); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>이전 편집 초안이 있습니다</AlertDialogTitle>
+            <AlertDialogDescription>
+              저장하지 않은 편집 내용이 남아있습니다. 복원하시겠습니까?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setShowDraftRestore(false);
+              pendingDraftRef.current = null;
+              deleteDraft.mutate(deployId);
+            }}>
+              삭제
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              if (pendingDraftRef.current) {
+                setModuleState(pendingDraftRef.current);
+                setRightPanel('modules');
+              }
+              setShowDraftRestore(false);
+              pendingDraftRef.current = null;
+              deleteDraft.mutate(deployId);
+            }}>
+              복원
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

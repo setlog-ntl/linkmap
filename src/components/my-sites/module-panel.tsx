@@ -242,6 +242,7 @@ interface ModulePanelProps {
   isDeploying: boolean;
   locale: Locale;
   deployId?: string;
+  onImagePreview?: (path: string, dataUrl: string) => void;
 }
 
 export function ModulePanel({
@@ -254,6 +255,7 @@ export function ModulePanel({
   isDeploying,
   locale,
   deployId,
+  onImagePreview,
 }: ModulePanelProps) {
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(
     schema.modules[0]?.id ?? null
@@ -529,6 +531,7 @@ export function ModulePanel({
               }
               locale={locale}
               deployId={deployId}
+              onImagePreview={onImagePreview}
             />
           </div>
         ) : selectedModule ? (
