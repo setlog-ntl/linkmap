@@ -7,8 +7,7 @@ import remarkGfm from 'remark-gfm';
 import { ArrowLeft, ArrowRight, Calendar, Clock, Tag, ExternalLink, ChevronRight, List, Link2, Check, Share2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BLOG_CATEGORIES, getPublishedPosts, type BlogPost } from '@/data/blog/posts';
-import { GUIDE_LIST } from '@/data/ui/guide-meta';
+import { BLOG_CATEGORIES, type BlogPost } from '@/data/blog/posts';
 
 // ---------------------------------------------------------------------------
 // Callout parser — blockquote 첫 줄 접두사로 유형 판별
@@ -345,11 +344,9 @@ function CtaCard() {
 // ---------------------------------------------------------------------------
 // Post Navigation (prev/next)
 // ---------------------------------------------------------------------------
-function PostNavigation({ currentSlug }: { currentSlug: string }) {
-  const posts = getPublishedPosts();
-  const idx = posts.findIndex((p) => p.slug === currentSlug);
-  const prev = idx < posts.length - 1 ? posts[idx + 1] : null;
-  const next = idx > 0 ? posts[idx - 1] : null;
+interface NavPost { slug: string; title: string }
+
+function PostNavigation({ prev, next }: { prev: NavPost | null; next: NavPost | null }) {
 
   if (!prev && !next) return null;
 
@@ -374,17 +371,23 @@ function PostNavigation({ currentSlug }: { currentSlug: string }) {
 // ---------------------------------------------------------------------------
 // Main Component
 // ---------------------------------------------------------------------------
-interface BlogPostViewProps {
-  post: BlogPost;
+export interface RelatedGuideInfo {
+  slug: string;
+  title: string;
+  href: string;
+  readingTime?: string;
 }
 
-export function BlogPostView({ post }: BlogPostViewProps) {
+interface BlogPostViewProps {
+  post: BlogPost;
+  prevPost?: NavPost | null;
+  nextPost?: NavPost | null;
+  relatedGuideInfos?: RelatedGuideInfo[];
+}
+
+export function BlogPostView({ post, prevPost = null, nextPost = null, relatedGuideInfos = [] }: BlogPostViewProps) {
   const cat = BLOG_CATEGORIES[post.category];
   const CatIcon = cat.icon;
-
-  const relatedGuides = (post.relatedGuides ?? [])
-    .map((slug) => GUIDE_LIST.find((g) => g.slug === slug))
-    .filter(Boolean);
 
   // Split content at "---" to insert CTA in middle
   const contentParts = post.content.split(/\n---\n/);
@@ -468,27 +471,23 @@ export function BlogPostView({ post }: BlogPostViewProps) {
         )}
 
         {/* Related Guides */}
-        {relatedGuides.length > 0 && (
+        {relatedGuideInfos.length > 0 && (
           <div className="mt-12 rounded-lg border bg-muted/30 p-6">
             <h3 className="font-semibold mb-3">관련 가이드</h3>
             <div className="space-y-2">
-              {relatedGuides.map((guide) => {
-                if (!guide) return null;
-                const GIcon = guide.icon;
-                return (
-                  <Link
-                    key={guide.slug}
-                    href={guide.href}
-                    className="flex items-center gap-3 rounded-md p-2 hover:bg-muted transition-colors"
-                  >
-                    <GIcon className="h-4 w-4 text-brand-blue" />
-                    <span className="text-sm font-medium">{guide.title}</span>
-                    {guide.readingTime && (
-                      <span className="text-xs text-muted-foreground ml-auto">{guide.readingTime}</span>
-                    )}
-                  </Link>
-                );
-              })}
+              {relatedGuideInfos.map((guide) => (
+                <Link
+                  key={guide.slug}
+                  href={guide.href}
+                  className="flex items-center gap-3 rounded-md p-2 hover:bg-muted transition-colors"
+                >
+                  <ChevronRight className="h-4 w-4 text-brand-blue" />
+                  <span className="text-sm font-medium">{guide.title}</span>
+                  {guide.readingTime && (
+                    <span className="text-xs text-muted-foreground ml-auto">{guide.readingTime}</span>
+                  )}
+                </Link>
+              ))}
             </div>
           </div>
         )}
@@ -504,7 +503,7 @@ export function BlogPostView({ post }: BlogPostViewProps) {
         )}
 
         {/* Post Navigation */}
-        <PostNavigation currentSlug={post.slug} />
+        <PostNavigation prev={prevPost} next={nextPost} />
 
         {/* Back to list */}
         <div className="mt-10 pt-8 border-t">

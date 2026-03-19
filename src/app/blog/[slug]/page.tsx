@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getBlogPostBySlug, BLOG_POSTS } from '@/data/blog/posts';
+import { getBlogPostBySlug, getPublishedPosts, BLOG_POSTS } from '@/data/blog/posts';
+import { GUIDE_LIST } from '@/data/ui/guide-meta';
 import { generateBlogJsonLd } from '@/lib/seo/json-ld';
 import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { BlogPostView } from '@/components/blog/blog-post';
+import type { RelatedGuideInfo } from '@/components/blog/blog-post';
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
@@ -45,6 +47,19 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const post = getBlogPostBySlug(slug);
   if (!post) notFound();
 
+  // prev/next 계산 (서버에서만 — 클라이언트 번들에 전체 BLOG_POSTS 포함 방지)
+  const posts = getPublishedPosts();
+  const idx = posts.findIndex((p) => p.slug === slug);
+  const prevPost = idx < posts.length - 1 ? { slug: posts[idx + 1].slug, title: posts[idx + 1].title } : null;
+  const nextPost = idx > 0 ? { slug: posts[idx - 1].slug, title: posts[idx - 1].title } : null;
+
+  // relatedGuides 서버 측 해석 (GUIDE_LIST icon 컴포넌트 제외, 직렬화 가능 데이터만)
+  const relatedGuideInfos: RelatedGuideInfo[] = (post.relatedGuides ?? []).reduce<RelatedGuideInfo[]>((acc, gSlug) => {
+    const g = GUIDE_LIST.find((gl) => gl.slug === gSlug);
+    if (g) acc.push({ slug: g.slug, title: g.title, href: g.href, readingTime: g.readingTime });
+    return acc;
+  }, []);
+
   const jsonLd = generateBlogJsonLd({
     slug: post.slug,
     title: post.title,
@@ -58,7 +73,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   return (
     <>
       <JsonLdScript data={jsonLd} />
-      <BlogPostView post={post} />
+      <BlogPostView
+        post={post}
+        prevPost={prevPost}
+        nextPost={nextPost}
+        relatedGuideInfos={relatedGuideInfos}
+      />
     </>
   );
 }
