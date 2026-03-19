@@ -29,6 +29,14 @@
 - 디자인: Circuit Blue-Green v2, `brand-blue/green` 토큰, `bg-card shadow-sm` (글래스모피즘 금지, 헤더만 예외)
 - 폰트: Pretendard Variable (CDN) + Geist Mono
 
+## Content Objectivity (블로그/비교 콘텐츠 객관성)
+- 비교분석 콘텐츠는 편향 없이 객관적 데이터 기반으로 작성
+- 자사 서비스(Linkmap)도 장단점을 공정하게 기술 — 자사 우대 금지
+- 특정 LLM/AI 도구 편향 금지 — GPT, Claude, Gemini 등 모든 주요 모델을 동등하게 다룸
+- 가격·기능·성능 데이터는 공식 소스 기준, `lastUpdated` 일자 표기 필수
+- verdict(결론)는 "상황별 추천" 형태로 작성 (단일 추천 금지)
+- 비교 데이터: `src/data/blog/service-comparisons.ts` — 신규 도구 출시 시 업데이트 필수
+
 ## Patterns
 - Supabase 클라이언트 3종: Server(API) / Browser(클라) / Admin(감사 로그 전용)
 - RLS + API 레벨 `user_id` 이중 방어

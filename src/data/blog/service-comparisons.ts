@@ -313,14 +313,14 @@ export const ENV_MANAGEMENT_COMPARISON: ServiceComparison = {
 };
 
 // ---------------------------------------------------------------------------
-// 2. AI 코딩 도구: Claude Code vs Cursor vs GitHub Copilot vs Windsurf
+// 2. AI 코딩 도구: ChatGPT vs Claude Code vs Cursor vs Gemini vs GitHub Copilot vs Windsurf
 // ---------------------------------------------------------------------------
 
 export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
   id: 'ai-coding-tools',
   title: 'AI 코딩 도구 비교',
   description:
-    'Claude Code, Cursor, GitHub Copilot, Windsurf의 기능, 가격, 보안을 비교합니다.',
+    'ChatGPT, Claude Code, Cursor, Gemini Code Assist, GitHub Copilot, Windsurf 등 주요 AI 코딩 도구 6종의 기능, 가격, 보안을 객관적으로 비교합니다.',
   lastUpdated: '2026-03-19',
   services: [
     {
@@ -360,6 +360,53 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
           'CVE-2025-55284 (패치됨) -- .env 자동 로드 이력',
           '무료 플랜 없음 (Pro $20/월부터)',
           '바이브코더에게 어려울 수 있음',
+        ],
+      },
+    },
+    {
+      name: 'ChatGPT',
+      url: 'https://chatgpt.com',
+      tagline: 'OpenAI의 대화형 AI — Canvas 코드 편집 + Code Interpreter',
+      pricing: [
+        {
+          name: 'Free',
+          price: '$0',
+          period: '월',
+          highlights: ['GPT-4o 제한 접근', 'GPT-4o mini 무제한', '기본 코드 생성'],
+        },
+        {
+          name: 'Plus',
+          price: '$20',
+          period: '월',
+          highlights: ['GPT-4o 확장', 'Canvas 코드 편집', 'Code Interpreter'],
+        },
+        {
+          name: 'Pro',
+          price: '$200',
+          period: '월',
+          highlights: ['o3 접근', '무제한 사용', '최고 성능 모델'],
+        },
+        {
+          name: 'Team',
+          price: '$25/사용자',
+          period: '월',
+          highlights: ['팀 공유 워크스페이스', '관리 콘솔', '데이터 미학습 보장'],
+        },
+      ],
+      prosCons: {
+        pros: [
+          '가장 큰 사용자 기반 — 전 세계 2억+ MAU',
+          'Canvas 모드로 코드 직접 편집·실행 가능',
+          'Code Interpreter로 데이터 분석·시각화',
+          '무료 플랜에서 GPT-4o 접근 가능',
+          'GPTs/플러그인 생태계',
+        ],
+        cons: [
+          'IDE 통합 없음 — 웹/앱 기반 대화만 지원',
+          '프로젝트 파일 시스템 직접 접근 불가',
+          '코드베이스 전체 컨텍스트 파악 어려움',
+          '자동 커밋·테스트 등 에이전트 자동화 없음',
+          'Canvas 코드 편집은 단일 파일 수준',
         ],
       },
     },
@@ -466,6 +513,47 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
       },
     },
     {
+      name: 'Gemini Code Assist',
+      url: 'https://cloud.google.com/gemini/docs/codeassist/overview',
+      tagline: 'Google의 AI 코딩 어시스턴트 — IDE 플러그인 + Gemini 2.5',
+      pricing: [
+        {
+          name: 'Free (개인)',
+          price: '$0',
+          period: '월',
+          highlights: ['개인 개발자 무료', 'Gemini 2.5 Flash', 'IDE 플러그인'],
+        },
+        {
+          name: 'Standard',
+          price: '$19/사용자',
+          period: '월',
+          highlights: ['Gemini 2.5 Pro', '코드 커스터마이징', 'Google Cloud 통합'],
+        },
+        {
+          name: 'Enterprise',
+          price: '$45/사용자',
+          period: '월',
+          highlights: ['전체 코드베이스 인덱싱', 'Gemini 2.5 Pro 확장', '보안 정책'],
+        },
+      ],
+      prosCons: {
+        pros: [
+          'Gemini 2.5 Pro — 100만 토큰 컨텍스트 창',
+          'VS Code, JetBrains, Android Studio 플러그인 지원',
+          '개인 개발자 무료',
+          'Google Cloud 서비스 깊은 통합',
+          '코드 변환, 테스트 생성, 문서화 자동화',
+        ],
+        cons: [
+          'Google Cloud 생태계 외 통합 제한적',
+          '에이전트 모드 자율성이 Claude Code·Cursor 대비 발전 중',
+          'IDE 플러그인 안정성 개선 중',
+          '커뮤니티 규모가 Copilot·Cursor 대비 성장 중',
+          'Android Studio 외 모바일 개발 지원 제한',
+        ],
+      },
+    },
+    {
       name: 'Windsurf',
       url: 'https://windsurf.com',
       tagline: '엔터프라이즈 보안 특화 AI IDE',
@@ -516,8 +604,10 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       feature: '형태',
       values: {
+        ChatGPT: '웹 챗봇 + Canvas',
         'Claude Code': 'CLI 에이전트',
         Cursor: 'IDE (VS Code 포크)',
+        'Gemini Code Assist': 'IDE 플러그인',
         'GitHub Copilot': 'IDE 플러그인',
         Windsurf: 'IDE',
       },
@@ -525,8 +615,10 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       feature: '무료 플랜',
       values: {
+        ChatGPT: 'GPT-4o 제한 + 4o mini',
         'Claude Code': '없음',
         Cursor: '제한적 (Hobby)',
+        'Gemini Code Assist': '개인 무료',
         'GitHub Copilot': '2,000 완성 + 50 요청/월',
         Windsurf: '25 크레딧/월',
       },
@@ -534,8 +626,10 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       feature: '유료 시작가',
       values: {
+        ChatGPT: '$20/월 (Plus)',
         'Claude Code': '$20/월',
         Cursor: '$20/월',
+        'Gemini Code Assist': '$19/사용자/월',
         'GitHub Copilot': '$10/월',
         Windsurf: '$15/월',
       },
@@ -543,8 +637,10 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       feature: 'SWE-bench 순위',
       values: {
+        ChatGPT: '--',
         'Claude Code': '1위',
         Cursor: '--',
+        'Gemini Code Assist': '--',
         'GitHub Copilot': '--',
         Windsurf: '--',
       },
@@ -552,8 +648,10 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       feature: '"가장 사랑받는" 비율',
       values: {
+        ChatGPT: '--',
         'Claude Code': '46%',
         Cursor: '19%',
+        'Gemini Code Assist': '--',
         'GitHub Copilot': '9%',
         Windsurf: '--',
       },
@@ -562,8 +660,10 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       feature: '컨텍스트 창',
       values: {
+        ChatGPT: '128K (GPT-4o)',
         'Claude Code': '최대 200K (Max: 1M)',
         Cursor: '프로젝트 전체',
+        'Gemini Code Assist': '최대 100만 토큰',
         'GitHub Copilot': '리포지토리',
         Windsurf: '프로젝트 전체',
       },
@@ -571,8 +671,10 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       feature: '에이전트 모드',
       values: {
+        ChatGPT: '제한적 (Canvas)',
         'Claude Code': '기본 (자율 수행)',
         Cursor: '지원',
+        'Gemini Code Assist': '지원 (발전 중)',
         'GitHub Copilot': '지원',
         Windsurf: '지원 (Cascade)',
       },
@@ -580,8 +682,10 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       feature: '멀티모델 선택',
       values: {
+        ChatGPT: 'OpenAI 전용',
         'Claude Code': 'Claude 전용',
         Cursor: '지원',
+        'Gemini Code Assist': 'Gemini 전용',
         'GitHub Copilot': 'Pro+ 이상',
         Windsurf: '지원',
       },
@@ -589,8 +693,10 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       feature: '.env 보안',
       values: {
+        ChatGPT: '파일 접근 없음 (웹 기반)',
         'Claude Code': '자동 로드 (deny 설정 필요)',
         Cursor: '자동 포함 (.cursorignore 필요)',
+        'Gemini Code Assist': 'IDE 기본 동일',
         'GitHub Copilot': '열린 파일/리포 한정',
         Windsurf: 'IDE 기본 동일',
       },
@@ -598,8 +704,10 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       feature: 'CVE 이력',
       values: {
+        ChatGPT: '해당 없음',
         'Claude Code': 'CVE-2025-55284 (패치됨)',
         Cursor: 'CVE-2025-54135 (패치됨)',
+        'Gemini Code Assist': '해당 없음',
         'GitHub Copilot': '해당 없음',
         Windsurf: '해당 없음',
       },
@@ -607,8 +715,10 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       feature: 'SOC 2 준수',
       values: {
+        ChatGPT: 'Enterprise',
         'Claude Code': '해당 없음',
         Cursor: '해당 없음',
+        'Gemini Code Assist': 'Enterprise',
         'GitHub Copilot': 'Enterprise',
         Windsurf: 'Enterprise',
       },
@@ -618,8 +728,10 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       label: '바이브코더 (코딩 경험 0)',
       fits: {
+        ChatGPT: 'best',
         'Claude Code': 'limited',
         Cursor: 'good',
+        'Gemini Code Assist': 'good',
         'GitHub Copilot': 'good',
         Windsurf: 'good',
       },
@@ -627,8 +739,10 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       label: '개발자 (코딩 경험 있음)',
       fits: {
+        ChatGPT: 'limited',
         'Claude Code': 'best',
         Cursor: 'best',
+        'Gemini Code Assist': 'good',
         'GitHub Copilot': 'good',
         Windsurf: 'good',
       },
@@ -636,8 +750,10 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       label: '대규모 코드베이스 작업',
       fits: {
+        ChatGPT: 'none',
         'Claude Code': 'best',
         Cursor: 'good',
+        'Gemini Code Assist': 'good',
         'GitHub Copilot': 'limited',
         Windsurf: 'good',
       },
@@ -645,8 +761,10 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       label: '보안 중시 기업',
       fits: {
+        ChatGPT: 'good',
         'Claude Code': 'limited',
         Cursor: 'good',
+        'Gemini Code Assist': 'best',
         'GitHub Copilot': 'best',
         Windsurf: 'best',
       },
@@ -654,8 +772,10 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       label: '비용 민감 (무료 우선)',
       fits: {
+        ChatGPT: 'good',
         'Claude Code': 'none',
         Cursor: 'limited',
+        'Gemini Code Assist': 'best',
         'GitHub Copilot': 'best',
         Windsurf: 'good',
       },
@@ -670,7 +790,7 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       slug: 'vibe-coding-tools-comparison-2026',
       title: '2026 바이브코딩 도구 완벽 비교 -- 목적별 추천 가이드',
-      relevance: '풀스택 빌더 포함 6개 도구 비교',
+      relevance: '풀스택 빌더 포함 도구 비교',
     },
     {
       slug: 'ai-agent-reads-your-env',
@@ -694,7 +814,7 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     },
   ],
   verdict:
-    '코드 이해/수정 능력 최고는 Claude Code, VS Code 사용자 전환 최적은 Cursor, 무료+넓은 에디터 지원은 GitHub Copilot, 엔터프라이즈 보안은 Windsurf. 대부분의 개발자는 2-3개를 조합해 사용합니다.',
+    '대화형 코드 생성과 입문은 ChatGPT, 대규모 코드베이스 이해·수정은 Claude Code, VS Code 사용자 전환은 Cursor, Google Cloud 생태계와 무료 IDE 플러그인은 Gemini Code Assist, 넓은 에디터 지원과 무료 플랜은 GitHub Copilot, 엔터프라이즈 보안은 Windsurf. 대부분의 개발자는 2-3개를 조합해 사용합니다.',
 };
 
 // ---------------------------------------------------------------------------
@@ -1310,6 +1430,26 @@ export const VIBE_CODING_TOOLS: VibeTool[] = [
     paidFrom: '$15/월',
     bestFor: '보안 중시 기업, 학생',
     linkmapIntegration: 'catalog',
+  },
+  {
+    name: 'ChatGPT',
+    url: 'https://chatgpt.com',
+    category: 'ai-code-editor',
+    tagline: 'OpenAI 대화형 AI — Canvas 코드 편집',
+    freeTier: 'GPT-4o 제한 + 4o mini',
+    paidFrom: '$20/월 (Plus)',
+    bestFor: '입문자, 대화형 코드 생성',
+    linkmapIntegration: 'none',
+  },
+  {
+    name: 'Gemini Code Assist',
+    url: 'https://cloud.google.com/gemini/docs/codeassist/overview',
+    category: 'ai-code-editor',
+    tagline: 'Google AI 코딩 어시스턴트 — Gemini 2.5',
+    freeTier: '개인 무료',
+    paidFrom: '$19/사용자/월',
+    bestFor: 'Google Cloud 사용자, 무료 IDE 플러그인',
+    linkmapIntegration: 'none',
   },
   // --- 풀스택 앱 빌더 ---
   {
