@@ -2,36 +2,26 @@ import type { ModulePreset } from './personal-brand';
 
 export const smallBizCafePresets: ModulePreset[] = [
   {
-    id: 'minimal',
-    name: '심플',
-    nameEn: 'Simple',
-    description: '가게 정보 + 위치만 — 간단한 소개 페이지',
-    descriptionEn: 'Store info + Location only — simple intro page',
+    id: 'default',
+    name: '카페 기본',
+    nameEn: 'Cafe Default',
+    description: '따뜻한 브라운 톤 — 카페 기본 스타일',
+    descriptionEn: 'Warm brown tone — default cafe style',
+    colors: ['#8b6914', '#d4a853'],
     state: {
-      enabled: ['hero', 'location'],
-      order: ['hero', 'location'],
+      values: {
+        hero: { designPreset: 'default' },
+      },
     },
   },
   {
-    id: 'cafe-full',
-    name: '카페 풀 구성',
-    nameEn: 'Cafe Full',
-    description: '모든 모듈 활성화 — 완전한 카페 홍보 페이지',
-    descriptionEn: 'All modules enabled — complete cafe page',
+    id: 'modern-minimal',
+    name: '모던 미니멀',
+    nameEn: 'Modern Minimal',
+    description: '깔끔한 모노톤 — 세련된 카페 느낌',
+    descriptionEn: 'Clean monochrome — sophisticated cafe feel',
+    colors: ['#18181b', '#52525b'],
     state: {
-      enabled: ['hero', 'about', 'menu', 'hours', 'location', 'gallery', 'sns'],
-      order: ['hero', 'about', 'menu', 'hours', 'location', 'gallery', 'sns'],
-    },
-  },
-  {
-    id: 'modern-cafe',
-    name: '모던 카페',
-    nameEn: 'Modern Cafe',
-    description: '라이트톤 + Pretendard — 깔끔한 카페 느낌',
-    descriptionEn: 'Light tone + Pretendard — clean cafe style',
-    state: {
-      enabled: ['hero', 'about', 'menu', 'hours', 'location', 'sns'],
-      order: ['hero', 'about', 'menu', 'hours', 'location', 'sns'],
       values: {
         hero: { primaryColor: '#18181b', fontFamily: 'Pretendard', designPreset: 'modern-minimal' },
       },
@@ -43,9 +33,8 @@ export const smallBizCafePresets: ModulePreset[] = [
     nameEn: 'Vintage Cafe',
     description: '세리프 폰트 + 따뜻한 톤 — 감성 카페 무드',
     descriptionEn: 'Serif font + warm tones — vintage cafe mood',
+    colors: ['#92400e', '#b45309'],
     state: {
-      enabled: ['hero', 'about', 'menu', 'hours', 'location', 'gallery', 'sns'],
-      order: ['hero', 'about', 'menu', 'hours', 'location', 'gallery', 'sns'],
       values: {
         hero: { fontFamily: 'Nanum Myeongjo', designPreset: 'warm-serif' },
       },
@@ -53,13 +42,12 @@ export const smallBizCafePresets: ModulePreset[] = [
   },
   {
     id: 'warm-earth',
-    name: '웜 어스',
-    nameEn: 'Warm Earth',
+    name: '내추럴 어스',
+    nameEn: 'Natural Earth',
     description: '따뜻한 어스톤 — 로스터리 카페에 딱 맞는 감성',
     descriptionEn: 'Warm earth tones — perfect for roastery cafes',
+    colors: ['#92400e', '#fef3c7'],
     state: {
-      enabled: ['hero', 'about', 'menu', 'hours', 'location', 'gallery', 'sns'],
-      order: ['hero', 'about', 'menu', 'hours', 'location', 'gallery', 'sns'],
       values: {
         hero: { designPreset: 'warm-earth' },
       },
@@ -71,9 +59,8 @@ export const smallBizCafePresets: ModulePreset[] = [
     nameEn: 'Midnight',
     description: '다크 + 인디고 악센트 — 야간 무드 카페',
     descriptionEn: 'Dark + indigo accent — night mood cafe',
+    colors: ['#818cf8', '#c084fc'],
     state: {
-      enabled: ['hero', 'about', 'menu', 'hours', 'location', 'gallery', 'sns'],
-      order: ['hero', 'about', 'menu', 'hours', 'location', 'gallery', 'sns'],
       values: {
         hero: { designPreset: 'midnight' },
       },

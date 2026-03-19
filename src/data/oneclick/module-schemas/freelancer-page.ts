@@ -70,8 +70,8 @@ export const freelancerPageModuleSchema: TemplateModuleSchema = {
         {
           key: 'designPreset',
           type: 'select',
-          label: '디자인 프리셋',
-          labelEn: 'Design Preset',
+          label: '디자인 테마',
+          labelEn: 'Design Theme',
           defaultValue: 'default',
           options: [
             { value: 'default', label: '기본 (Default)' },

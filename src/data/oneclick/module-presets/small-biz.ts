@@ -2,74 +2,28 @@ import type { ModulePreset } from './personal-brand';
 
 export const smallBizPresets: ModulePreset[] = [
   {
-    id: 'minimal',
-    name: '심플',
-    nameEn: 'Simple',
-    description: '가게 정보 + 위치만 — 간단한 소개 페이지',
-    descriptionEn: 'Store info + Location only — simple intro page',
+    id: 'default',
+    name: '기본 골드',
+    nameEn: 'Default Gold',
+    description: '따뜻한 골드 톤 — 요리주점/레스토랑 기본 스타일',
+    descriptionEn: 'Warm gold tone — default izakaya/restaurant style',
+    colors: ['#c8a97e', '#d4a853'],
     state: {
-      enabled: ['hero', 'location'],
-      order: ['hero', 'location'],
-    },
-  },
-  {
-    id: 'izakaya',
-    name: '요리주점',
-    nameEn: 'Izakaya',
-    description: '메뉴 + 영업시간 + SNS — 요리주점/바에 최적화',
-    descriptionEn: 'Menu + Hours + SNS — optimized for izakaya/bars',
-    state: {
-      enabled: ['hero', 'menu', 'hours', 'location', 'sns'],
-      order: ['hero', 'menu', 'hours', 'location', 'sns'],
-    },
-  },
-  {
-    id: 'restaurant',
-    name: '레스토랑',
-    nameEn: 'Restaurant',
-    description: '메뉴 + 영업시간 + 갤러리 + SNS — 레스토랑 홍보 페이지',
-    descriptionEn: 'Menu + Hours + Gallery + SNS — restaurant promotion page',
-    state: {
-      enabled: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
-      order: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
-    },
-  },
-  {
-    id: 'full',
-    name: '풀 구성',
-    nameEn: 'Full',
-    description: '모든 모듈 활성화 — 완전한 가게 홍보 페이지',
-    descriptionEn: 'All modules enabled — complete store promotion page',
-    state: {
-      enabled: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
-      order: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
+      values: {
+        hero: { designPreset: 'default' },
+      },
     },
   },
   {
     id: 'dark-gold',
     name: '다크 골드',
     nameEn: 'Dark Gold',
-    description: '다크 배경 + 골드 악센트 — 프리미엄 요리주점 무드',
-    descriptionEn: 'Dark background + gold accent — premium izakaya mood',
+    description: '다크 배경 + 골드 악센트 — 프리미엄 무드',
+    descriptionEn: 'Dark background + gold accent — premium mood',
+    colors: ['#c8a97e', '#1a1a1a'],
     state: {
-      enabled: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
-      order: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
       values: {
         hero: { primaryColor: '#c8a97e', fontFamily: 'Nanum Myeongjo', designPreset: 'default' },
-      },
-    },
-  },
-  {
-    id: 'midnight',
-    name: '미드나잇',
-    nameEn: 'Midnight',
-    description: '진한 다크 + 인디고 악센트 — 세련된 바/레스토랑 무드',
-    descriptionEn: 'Deep dark + indigo accent — sophisticated bar/restaurant mood',
-    state: {
-      enabled: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
-      order: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
-      values: {
-        hero: { designPreset: 'midnight' },
       },
     },
   },
@@ -77,13 +31,38 @@ export const smallBizPresets: ModulePreset[] = [
     id: 'warm-serif',
     name: '따뜻한 세리프',
     nameEn: 'Warm Serif',
-    description: '세리프 폰트 + 따뜻한 톤 — 고급 일식 레스토랑 감성',
-    descriptionEn: 'Serif font + warm tones — premium Japanese dining aesthetic',
+    description: '세리프 폰트 + 따뜻한 톤 — 고급 레스토랑 감성',
+    descriptionEn: 'Serif font + warm tones — premium dining aesthetic',
+    colors: ['#92400e', '#b45309'],
     state: {
-      enabled: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
-      order: ['hero', 'menu', 'hours', 'location', 'gallery', 'sns'],
       values: {
         hero: { fontFamily: 'Nanum Myeongjo', designPreset: 'warm-serif' },
+      },
+    },
+  },
+  {
+    id: 'warm-earth',
+    name: '내추럴 어스',
+    nameEn: 'Natural Earth',
+    description: '따뜻한 어스톤 배경 — 자연스러운 감성',
+    descriptionEn: 'Warm earth tone background — natural feel',
+    colors: ['#92400e', '#fef3c7'],
+    state: {
+      values: {
+        hero: { designPreset: 'warm-earth' },
+      },
+    },
+  },
+  {
+    id: 'midnight',
+    name: '미드나잇',
+    nameEn: 'Midnight',
+    description: '다크 + 인디고 악센트 — 세련된 바/레스토랑 무드',
+    descriptionEn: 'Dark + indigo accent — sophisticated bar/restaurant mood',
+    colors: ['#818cf8', '#c084fc'],
+    state: {
+      values: {
+        hero: { designPreset: 'midnight' },
       },
     },
   },

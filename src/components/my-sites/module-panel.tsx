@@ -422,8 +422,19 @@ export function ModulePanel({
             <span className="text-[11px] font-medium text-muted-foreground mb-1.5 block">색상테마</span>
             <div className="flex gap-1.5 flex-wrap">
               {presets.map((preset) => {
-                const currentDesign = (state.values.hero?.designPreset as string) || 'creator';
-                const isActive = currentDesign === preset.id;
+                // 프리셋의 values가 현재 state와 일치하는지 비교
+                const isActive = (() => {
+                  const pv = preset.state.values;
+                  if (!pv) return false;
+                  for (const [modId, fields] of Object.entries(pv)) {
+                    const cur = state.values[modId];
+                    if (!cur) return false;
+                    for (const [k, v] of Object.entries(fields as Record<string, unknown>)) {
+                      if (cur[k] !== v) return false;
+                    }
+                  }
+                  return true;
+                })();
                 return (
                   <button
                     key={preset.id}

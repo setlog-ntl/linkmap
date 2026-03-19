@@ -17,8 +17,8 @@ export const devShowcaseModuleSchema: TemplateModuleSchema = {
         {
           key: 'designPreset',
           type: 'select',
-          label: '디자인 프리셋',
-          labelEn: 'Design Preset',
+          label: '디자인 테마',
+          labelEn: 'Design Theme',
           defaultValue: 'github-dark',
           options: [
             { value: 'github-dark', label: 'GitHub Dark (기본)' },
