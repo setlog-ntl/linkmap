@@ -52,7 +52,7 @@ export const SERVICE_BRANDS: Record<string, ServiceBrand> = {
   // --- 신규 서비스 (SERVICE_IDS에만 존재, services.ts에 추가 예정) ---
   'github-actions': { slug: 'githubactions',     color: '#2088FF', darkColor: '#58A6FF', emoji: '⚡' },
   twilio:           { slug: 'twilio',             color: '#F22F46', darkColor: '#F22F46', emoji: '📞' },
-  onesignal:        { slug: 'onesignal',          color: '#E54B4D', darkColor: '#E54B4D', emoji: '🔔' }, // TODO: Simple Icons 미등록, 로컬 SVG 필요
+  onesignal:        { color: '#E54B4D', darkColor: '#E54B4D', emoji: '🔔' },
   algolia:          { slug: 'algolia',            color: '#003DFF', darkColor: '#003DFF', emoji: '🔎' },
   sanity:           { slug: 'sanity',             color: '#0D0E12', darkColor: '#ffffff', emoji: '📝' },
   ga4:              { slug: 'googleanalytics',    color: '#E37400', darkColor: '#F59E0B', emoji: '📈' },
@@ -64,21 +64,21 @@ export const SERVICE_BRANDS: Record<string, ServiceBrand> = {
   contentful:       { slug: 'contentful',         color: '#2478CC', darkColor: '#5BA3E6', emoji: '📄' },
   meilisearch:      { slug: 'meilisearch',        color: '#FF5CAA', darkColor: '#FF5CAA', emoji: '🔍' },
   pusher:           { slug: 'pusher',             color: '#300D4F', darkColor: '#9B6FDB', emoji: '📡' },
-  'trigger-dev':    { slug: 'triggerdotdev',      color: '#1EE8B7', darkColor: '#1EE8B7', emoji: '⏱️' }, // TODO: Simple Icons 미등록, 로컬 SVG 필요
-  launchdarkly:     { slug: 'launchdarkly',       color: '#405BFF', darkColor: '#5B73FF', emoji: '🏁' }, // TODO: Simple Icons 미등록, 로컬 SVG 필요
-  groq:             { slug: 'groq',               color: '#F55036', darkColor: '#F55036', emoji: '⚡' }, // TODO: Simple Icons 미등록, 로컬 SVG 필요
+  'trigger-dev':    { color: '#1EE8B7', darkColor: '#1EE8B7', emoji: '⏱️' },
+  launchdarkly:     { color: '#405BFF', darkColor: '#5B73FF', emoji: '🏁' },
+  groq:             { color: '#F55036', darkColor: '#F55036', emoji: '⚡' },
   render:           { slug: 'render',             color: '#000000', darkColor: '#ffffff', emoji: '🖥️' },
-  logrocket:        { slug: 'logrocket',          color: '#764ABC', darkColor: '#9B7FDB', emoji: '🚀' }, // TODO: Simple Icons 미등록, 로컬 SVG 필요
+  logrocket:        { color: '#764ABC', darkColor: '#9B7FDB', emoji: '🚀' },
   playwright:       { slug: 'playwright',         color: '#2EAD33', darkColor: '#45D04C', emoji: '🎭' },
   'slack-api':      { slug: 'slack',              color: '#4A154B', darkColor: '#E01E5A', emoji: '💬' },
   'discord-api':    { slug: 'discord',            color: '#5865F2', darkColor: '#5865F2', emoji: '🎮' },
   mapbox:           { slug: 'mapbox',             color: '#000000', darkColor: '#4264FB', emoji: '🗺️' },
   elevenlabs:       { slug: 'elevenlabs',         color: '#000000', darkColor: '#ffffff', emoji: '🎙️' },
-  inngest:          { slug: 'inngest',            color: '#4636F5', darkColor: '#6B5FFF', emoji: '🔄' }, // TODO: Simple Icons 미등록, 로컬 SVG 필요
+  inngest:          { color: '#4636F5', darkColor: '#6B5FFF', emoji: '🔄' },
   strapi:           { slug: 'strapi',             color: '#4945FF', darkColor: '#6B69FF', emoji: '🧩' },
   plausible:        { slug: 'plausibleanalytics', color: '#5850EC', darkColor: '#7C75F0', emoji: '📊' },
   cypress:          { slug: 'cypress',            color: '#69D3A7', darkColor: '#69D3A7', emoji: '🧪' },
-  bullmq:           { slug: 'bull',               color: '#E4405F', darkColor: '#E4405F', emoji: '🐂' }, // TODO: Simple Icons 미등록, 로컬 SVG 필요
+  bullmq:           { color: '#E4405F', darkColor: '#E4405F', emoji: '🐂' },
   'shopify-api':    { slug: 'shopify',            color: '#7AB55C', darkColor: '#95BF47', emoji: '🛍️' },
 
   // --- Flow preset 별칭 (flow-presets.ts에서 사용) ---
