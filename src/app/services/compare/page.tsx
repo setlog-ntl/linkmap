@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { CompareClient } from '@/components/service/compare-client';
+import { generateItemListJsonLd } from '@/lib/seo/json-ld';
 import type { Profile, ServiceComparison, Service } from '@/types';
 
 export const metadata: Metadata = {
@@ -29,8 +30,26 @@ export default async function ComparePage() {
     supabase.from('services').select('id, name, slug').order('name'),
   ]);
 
+  const comparisonList = (comparisons as ServiceComparison[]) || [];
+
+  const jsonLd = comparisonList.length > 0
+    ? generateItemListJsonLd(
+        comparisonList.map((c) => ({
+          name: c.title_ko || c.services.join(' vs '),
+          url: `https://www.linkmap.biz/services/compare?category=${c.category}`,
+          description: `${c.services.join(' vs ')} 비교 — 가격, 무료 플랜, 난이도, 기능별 차이`,
+        }))
+      )
+    : null;
+
   return (
     <div className="min-h-screen flex flex-col">
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
       <Header profile={profile} />
       <main className="flex-1 container py-8">
         <div className="mb-8">
@@ -40,7 +59,7 @@ export default async function ComparePage() {
           </p>
         </div>
         <CompareClient
-          comparisons={(comparisons as ServiceComparison[]) || []}
+          comparisons={comparisonList}
           services={(services as Pick<Service, 'id' | 'name' | 'slug'>[]) || []}
         />
       </main>

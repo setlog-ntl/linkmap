@@ -71,6 +71,7 @@
   .grid { display: grid; gap: 16px; }
   .grid-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
   .grid-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .grid-5 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
   .card {
     background: var(--card);
     border-radius: var(--radius);
@@ -85,6 +86,11 @@
     margin-bottom: 12px;
     text-transform: uppercase;
     letter-spacing: 0.02em;
+  }
+  .card h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 6px;
   }
   .stat-value { font-size: 32px; font-weight: 700; }
   .stat-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
@@ -250,7 +256,7 @@
     .header h1 { font-size: 18px; }
     .tab { padding: 12px 16px; font-size: 13px; }
     .container { padding: 16px 12px; }
-    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .grid-4, .grid-5 { grid-template-columns: repeat(2, 1fr); }
   }
 </style>
 </head>
@@ -276,13 +282,14 @@
   <button class="tab" data-tab="community">커뮤니티</button>
   <button class="tab" data-tab="backlinks">백링크</button>
   <button class="tab" data-tab="kpi">KPI</button>
+  <button class="tab" data-tab="monitoring">모니터링</button>
 </div>
 
 <div class="container">
 
   <!-- ====== 전체 현황 ====== -->
   <div class="tab-content active" id="tab-overview">
-    <div class="grid grid-4 mb-24">
+    <div class="grid grid-5 mb-24">
       <div class="card">
         <h3>AI 인용 수</h3>
         <div class="stat-value stat-blue" id="stat-ai">0</div>
@@ -301,7 +308,12 @@
       <div class="card">
         <h3>디렉토리 등록</h3>
         <div class="stat-value stat-green" id="stat-dirs">0</div>
-        <div class="stat-label">목표: 12+</div>
+        <div class="stat-label">목표: 16+</div>
+      </div>
+      <div class="card">
+        <h3>기술 GEO 완성도</h3>
+        <div class="stat-value stat-blue" id="stat-geo">0%</div>
+        <div class="stat-label">모니터링 체크 기반</div>
       </div>
     </div>
 
@@ -324,6 +336,13 @@
         <li>&#10003; 링크 복사/공유 기능 + linkmap.biz 서비스 링크 전면 반영</li>
         <li>&#10003; 가이드 10개 맥락별 교차 링크 전면 적용 (env, auth, frontend, backend, deploy, github, cloudflare, openai, supabase, vercel)</li>
         <li>&#10003; relatedGuides 배열 확장 → 블로그 하단 관련 가이드 섹션 강화</li>
+        <li>&#10003; JSON-LD 10개 스키마 타입 구현 완료</li>
+        <li>&#10003; FAQ 119개 항목 + FAQPage 스키마</li>
+        <li>&#10003; 용어집 /glossary + DefinedTermSet 스키마</li>
+        <li>&#10003; 가이드 55+ (Article + FAQPage JSON-LD)</li>
+        <li>&#10003; OG/Twitter 메타데이터 전역 설정</li>
+        <li>&#10003; AI 봇 6종 robots.ts 허용 설정</li>
+        <li>&#10003; sitemap.ts 동적 생성 (서비스 128개 포함)</li>
       </ul>
     </div>
     <div class="grid grid-2 mb-24">
@@ -372,22 +391,55 @@
     <div class="section-title">로드맵 타임라인</div>
     <div class="card">
       <div class="timeline">
-        <div class="timeline-item"><div class="timeline-dot done"></div><div class="timeline-month">3월</div><div class="timeline-desc">블로그 인프라 구축 완료, 시각 강화(콜아웃/TOC/CTA/공유), Phase 1 글 6편 + linkmap.biz 서비스 링크 + 가이드 10개 교차 링크 전면 적용</div></div>
-        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">4월</div><div class="timeline-desc">검색엔진 등록, 디렉토리 등록, 첫 블로그</div></div>
-        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">5월</div><div class="timeline-desc">SNS 시작, 튜토리얼 영상, 블로그 5편 완성</div></div>
-        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">6월</div><div class="timeline-desc">비교 글 시리즈 시작, YouTube, 영문 콘텐츠</div></div>
-        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">7월</div><div class="timeline-desc">Product Hunt 런칭, 비교 글 5편 완성</div></div>
-        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">8월</div><div class="timeline-desc">GeekNews, Awesome list PR, Reddit 참여</div></div>
-        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">9월</div><div class="timeline-desc">컨퍼런스, 파트너십, 6개월 회고</div></div>
-        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">10월</div><div class="timeline-desc">Show HN, G2 등록, 영문 블로그</div></div>
-        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">11월</div><div class="timeline-desc">Capterra, 영문 가이드, 총정리 글</div></div>
-        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">12월</div><div class="timeline-desc">연말 회고, 2026 로드맵, KPI 최종 점검</div></div>
+        <div class="timeline-item"><div class="timeline-dot done"></div><div class="timeline-month">2026년 3월</div><div class="timeline-desc">블로그 인프라 구축 완료, 시각 강화(콜아웃/TOC/CTA/공유), Phase 1 글 6편 + linkmap.biz 서비스 링크 + 가이드 10개 교차 링크 전면 적용</div></div>
+        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">2026년 4월</div><div class="timeline-desc">검색엔진 등록, 디렉토리 등록, 첫 블로그</div></div>
+        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">2026년 5월</div><div class="timeline-desc">SNS 시작, 튜토리얼 영상, 블로그 5편 완성</div></div>
+        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">2026년 6월</div><div class="timeline-desc">비교 글 시리즈 시작, YouTube, 영문 콘텐츠</div></div>
+        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">2026년 7월</div><div class="timeline-desc">Product Hunt 런칭, 비교 글 5편 완성</div></div>
+        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">2026년 8월</div><div class="timeline-desc">GeekNews, Awesome list PR, Reddit 참여</div></div>
+        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">2026년 9월</div><div class="timeline-desc">컨퍼런스, 파트너십, 6개월 회고</div></div>
+        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">2026년 10월</div><div class="timeline-desc">Show HN, G2 등록, 영문 블로그</div></div>
+        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">2026년 11월</div><div class="timeline-desc">Capterra, 영문 가이드, 총정리 글</div></div>
+        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-month">2026년 12월</div><div class="timeline-desc">연말 회고, 2027 로드맵, KPI 최종 점검</div></div>
       </div>
     </div>
   </div>
 
   <!-- ====== 콘텐츠 탭 ====== -->
   <div class="tab-content" id="tab-content">
+
+    <div class="section-title">GEO 콘텐츠 작성 원칙</div>
+    <div class="grid grid-2 mb-24">
+      <div class="card">
+        <h4>Answer-First</h4>
+        <p style="font-size:13px;color:var(--text-muted)">첫 40~60단어에 핵심 답변을 배치합니다. AI가 스니펫으로 인용할 수 있도록 질문에 대한 직접적인 답을 글 서두에 명확히 제시합니다.</p>
+      </div>
+      <div class="card">
+        <h4>비교 테이블 필수</h4>
+        <p style="font-size:13px;color:var(--text-muted)">비교 콘텐츠에는 반드시 구조화된 테이블을 포함합니다. 비교 테이블이 있는 콘텐츠는 AI 인용율이 2.5배 향상됩니다.</p>
+      </div>
+      <div class="card">
+        <h4>FAQ 3~5개 + FAQPage 스키마</h4>
+        <p style="font-size:13px;color:var(--text-muted)">모든 콘텐츠에 관련 FAQ 3~5개를 포함하고, FAQPage JSON-LD 스키마를 적용하여 AI 검색엔진의 구조화된 데이터 활용을 극대화합니다.</p>
+      </div>
+      <div class="card">
+        <h4>JSON-LD 트리플 스택</h4>
+        <p style="font-size:13px;color:var(--text-muted)">Article + ItemList + FAQPage 세 가지 JSON-LD 스키마를 동시에 적용하여 검색엔진과 AI가 콘텐츠 구조를 정확히 이해할 수 있게 합니다.</p>
+      </div>
+      <div class="card">
+        <h4>최종 수정일 표시</h4>
+        <p style="font-size:13px;color:var(--text-muted)">30~90일 주기로 콘텐츠를 업데이트하고 최종 수정일을 명시합니다. AI는 최신 정보를 우선 인용하므로 freshness 신호가 중요합니다.</p>
+      </div>
+      <div class="card">
+        <h4>Quotable Snippet</h4>
+        <p style="font-size:13px;color:var(--text-muted)">AI가 그대로 인용할 수 있는 명확하고 간결한 문장(1~2문장)을 의도적으로 포함합니다. 정의, 비교 결론, 핵심 수치 등이 대상입니다.</p>
+      </div>
+      <div class="card">
+        <h4>구체적 숫자/통계 포함</h4>
+        <p style="font-size:13px;color:var(--text-muted)">데이터 기반 신뢰도를 확보합니다. "많은" 대신 "128개", "빠른" 대신 "2.3초" 등 구체적 숫자와 출처를 포함하여 AI 인용 가능성을 높입니다.</p>
+      </div>
+    </div>
+
     <div class="section-title">Phase 1 콘텐츠 (4~5월)</div>
     <div class="card mb-24">
       <ul class="checklist" id="cl-content-p1">
@@ -401,6 +453,9 @@
         <li><input type="checkbox" id="c-p1-8"><label for="c-p1-8"><span class="tag tag-video">VIDEO</span> 3분 만에 서비스맵 만들기 (YouTube)</label></li>
         <li><input type="checkbox" id="c-p1-9"><label for="c-p1-9"><span class="tag tag-sns">SNS</span> 바이브 코딩 소개 스레드 (Twitter/X)</label></li>
         <li><input type="checkbox" id="c-p1-10"><label for="c-p1-10"><span class="tag tag-sns">SNS</span> .env 보안 팁 카드 뉴스</label></li>
+        <li><input type="checkbox" id="c-p1-11"><label for="c-p1-11"><span class="tag tag-site">SITE</span> Bing Webmaster Tools 등록 + sitemap 제출</label></li>
+        <li><input type="checkbox" id="c-p1-12"><label for="c-p1-12"><span class="tag tag-site">SITE</span> IndexNow API 연동 구현</label></li>
+        <li><input type="checkbox" id="c-p1-13"><label for="c-p1-13"><span class="tag tag-site">SITE</span> /services/compare ItemList JSON-LD 추가</label></li>
       </ul>
     </div>
 
@@ -575,6 +630,10 @@
         <li><input type="checkbox" id="d-10"><label for="d-10">Capterra</label></li>
         <li><input type="checkbox" id="d-11"><label for="d-11">awesome-developer-tools</label></li>
         <li><input type="checkbox" id="d-12"><label for="d-12">awesome-selfhosted</label></li>
+        <li><input type="checkbox" id="d-13"><label for="d-13">Crunchbase</label></li>
+        <li><input type="checkbox" id="d-14"><label for="d-14">TrustRadius</label></li>
+        <li><input type="checkbox" id="d-15"><label for="d-15">LinkedIn Company Page 최적화</label></li>
+        <li><input type="checkbox" id="d-16"><label for="d-16">GitHub README 최적화</label></li>
       </ul>
     </div>
 
@@ -677,19 +736,53 @@
       <div style="font-size:12px;color:var(--text-muted);margin-top:8px">전략: 영문 콘텐츠 + HN + G2/Capterra</div>
     </div>
 
-    <div class="section-title">AI 검색 테스트 로그</div>
+    <div class="card">
+      <p style="font-size:13px;color:var(--text-muted)">상세 AI 검색 테스트 로그는 <strong>모니터링</strong> 탭에서 확인하세요.</p>
+    </div>
+  </div>
+
+  <!-- ====== 모니터링 탭 ====== -->
+  <div class="tab-content" id="tab-monitoring">
+    <div class="section-title">AI 봇 크롤링 추적</div>
+    <div class="card mb-24">
+      <ul class="checklist" id="cl-monitoring">
+        <li><input type="checkbox" id="mon-1"><label for="mon-1">middleware.ts AI 봇 UA 감지 구현</label></li>
+        <li><input type="checkbox" id="mon-2"><label for="mon-2">ai_bot_logs 테이블 + RLS 정책 생성</label></li>
+        <li><input type="checkbox" id="mon-3"><label for="mon-3">GA4 AI 봇 트래픽 필터 설정</label></li>
+        <li><input type="checkbox" id="mon-4"><label for="mon-4">Cloudflare Analytics AI 봇 카운트 확인</label></li>
+        <li><input type="checkbox" id="mon-5"><label for="mon-5">주간 크롤링 리포트 자동화</label></li>
+      </ul>
+    </div>
+
+    <div class="section-title">AI 플랫폼별 최적화 현황</div>
+    <div class="card mb-24">
+      <table class="kpi-table">
+        <thead>
+          <tr><th>AI 플랫폼</th><th>검색 소스</th><th>최적화 상태</th><th>우선 작업</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>ChatGPT</td><td>Bing</td><td>미등록</td><td>Bing Webmaster 등록</td></tr>
+          <tr><td>Perplexity</td><td>Reddit + 웹 크롤링</td><td>미진행</td><td>Reddit 참여 시작</td></tr>
+          <tr><td>Claude</td><td>Brave Search</td><td>미진행</td><td>Brave 색인 확인</td></tr>
+          <tr><td>Grok</td><td>X/Twitter</td><td>미진행</td><td>Twitter/X 활동 시작</td></tr>
+          <tr><td>Gemini</td><td>Google</td><td>GSC 등록 예정</td><td>sitemap 제출</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-title">AI 검색 프롬프트 테스트 로그</div>
     <div class="card">
       <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">주 1회 아래 검색어로 AI LLM 테스트 → 스크린샷 저장</p>
       <table class="kpi-table">
         <thead>
-          <tr><th>검색어</th><th>ChatGPT</th><th>Gemini</th><th>Perplexity</th></tr>
+          <tr><th>검색어</th><th>ChatGPT</th><th>Gemini</th><th>Perplexity</th><th>Claude</th></tr>
         </thead>
         <tbody>
-          <tr><td>"환경변수 관리 도구 추천"</td><td>-</td><td>-</td><td>-</td></tr>
-          <tr><td>"바이브 코딩 플랫폼"</td><td>-</td><td>-</td><td>-</td></tr>
-          <tr><td>"Doppler alternative"</td><td>-</td><td>-</td><td>-</td></tr>
-          <tr><td>"API key management tool"</td><td>-</td><td>-</td><td>-</td></tr>
-          <tr><td>"env management visualization"</td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td>"환경변수 관리 도구 추천"</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td>"바이브 코딩 플랫폼"</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td>"Doppler alternative"</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td>"API key management tool"</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td>"env management visualization"</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
         </tbody>
       </table>
     </div>
@@ -762,24 +855,34 @@
   function updateStats() {
     // Phase progress
     const phases = [
-      { prefix: 'c-p1-', pctId: 'p1-pct', barId: 'p1-bar', extra: ['d-1','d-2','d-3','d-4','d-5','d-6','d-7','cm-1','cm-2','cm-3'] },
+      { prefix: 'c-p1-', pctId: 'p1-pct', barId: 'p1-bar', extra: ['c-p1-11','c-p1-12','c-p1-13','d-1','d-2','d-3','d-4','d-5','d-6','d-7','cm-1','cm-2','cm-3'] },
       { prefix: 'c-p2-', pctId: 'p2-pct', barId: 'p2-bar', extra: ['cm-10','cm-11','cm-12','cm-13'] },
       { prefix: 'c-p3-', pctId: 'p3-pct', barId: 'p3-bar', extra: ['cm-4','cm-5','cm-18','cm-19'] },
-      { prefix: 'c-p4-', pctId: 'p4-pct', barId: 'p4-bar', extra: ['cm-14','cm-15','cm-20','cm-21','cm-22','d-8','d-9','d-10'] },
+      { prefix: 'c-p4-', pctId: 'p4-pct', barId: 'p4-bar', extra: ['d-13','d-14','d-15','d-16','cm-14','cm-15','cm-20','cm-21','cm-22','d-8','d-9','d-10'] },
     ];
 
-    phases.forEach(p => {
+    const phaseResults = {};
+
+    phases.forEach((p, idx) => {
       const main = countChecked(p.prefix);
       let extraChecked = 0, extraTotal = p.extra.length;
+      // Exclude items that are already counted by prefix to avoid double counting
+      const prefixIds = new Set();
+      document.querySelectorAll(`input[id^="${p.prefix}"]`).forEach(cb => prefixIds.add(cb.id));
+      let uniqueExtraTotal = 0;
+      let uniqueExtraChecked = 0;
       p.extra.forEach(id => {
+        if (prefixIds.has(id)) return; // already counted
+        uniqueExtraTotal++;
         const el = document.getElementById(id);
-        if (el && el.checked) extraChecked++;
+        if (el && el.checked) uniqueExtraChecked++;
       });
-      const total = main.total + extraTotal;
-      const checked = main.checked + extraChecked;
+      const total = main.total + uniqueExtraTotal;
+      const checked = main.checked + uniqueExtraChecked;
       const pct = total > 0 ? Math.round((checked / total) * 100) : 0;
       document.getElementById(p.pctId).textContent = pct + '%';
       document.getElementById(p.barId).style.width = pct + '%';
+      phaseResults['p' + (idx + 1)] = { checked, total, pct };
     });
 
     // Content count
@@ -810,6 +913,11 @@
     ['cm-18','cm-19'].forEach(id => { if (document.getElementById(id)?.checked) awesomeChecked++; });
     const awesomeBar = document.getElementById('bl-awesome-bar');
     if (awesomeBar) awesomeBar.style.width = (awesomeChecked / 2 * 100) + '%';
+
+    // Monitoring / GEO completion
+    const mon = countChecked('mon-');
+    const geoPct = mon.total > 0 ? Math.round((mon.checked / mon.total) * 100) : 0;
+    document.getElementById('stat-geo').textContent = geoPct + '%';
   }
 
   // Reset all
@@ -827,6 +935,40 @@
     document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
       data.checkboxes[cb.id] = cb.checked;
     });
+
+    // Stats summary
+    let contentCount = 0;
+    ['c-p1-','c-p2-','c-p3-','c-p4-'].forEach(prefix => {
+      document.querySelectorAll(`input[id^="${prefix}"]`).forEach(cb => {
+        if (cb.checked) {
+          const label = cb.nextElementSibling;
+          if (label && (label.textContent.includes('BLOG') || label.textContent.includes('VIDEO'))) {
+            contentCount++;
+          }
+        }
+      });
+    });
+    const dirs = countChecked('d-');
+    const mon = countChecked('mon-');
+    const geoPct = mon.total > 0 ? Math.round((mon.checked / mon.total) * 100) : 0;
+
+    const p1 = countChecked('c-p1-');
+    const p2 = countChecked('c-p2-');
+    const p3 = countChecked('c-p3-');
+    const p4 = countChecked('c-p4-');
+
+    data.stats = {
+      contentCount: contentCount,
+      dirCount: dirs.checked,
+      geoCompletionPct: geoPct,
+      phases: {
+        p1: { checked: p1.checked, total: p1.total },
+        p2: { checked: p2.checked, total: p2.total },
+        p3: { checked: p3.checked, total: p3.total },
+        p4: { checked: p4.checked, total: p4.total }
+      }
+    };
+
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

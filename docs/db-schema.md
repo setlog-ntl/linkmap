@@ -1,7 +1,7 @@
 # Linkmap Database Schema Reference
 
-> **Last Updated**: 2026-03-07
-> **Migrations**: 001 ~ 072 (72 files)
+> **Last Updated**: 2026-03-19
+> **Migrations**: 001 ~ 084 (84 files)
 > **Engine**: Supabase (PostgreSQL 15+)
 
 이 문서는 바이브코딩 시 DB 구조를 빠르게 참조하기 위한 스키마 레퍼런스입니다.
@@ -640,6 +640,23 @@
 **RLS**: 본인 조회, service_role INSERT
 **TS Type**: `AuditLog` (`src/types/core.ts`)
 
+### ai_bot_logs
+
+| Column | Type | Nullable | Default |
+|--------|------|----------|---------|
+| id | UUID PK | NO | gen_random_uuid() |
+| bot_name | TEXT | NO | - |
+| path | TEXT | NO | - |
+| user_agent | TEXT | YES | NULL |
+| ip_address | TEXT | YES | NULL |
+| created_at | TIMESTAMPTZ | NO | now() |
+
+**Indexes**: `idx_ai_bot_logs_bot_name`, `idx_ai_bot_logs_created_at`
+**RLS**: service_role만 INSERT/SELECT (일반 사용자 접근 불가)
+**Migration**: 084
+
+---
+
 ### health_checks
 
 | Column | Type | Nullable | Default |
@@ -747,7 +764,7 @@ CREATE TYPE team_role AS ENUM ('admin', 'editor', 'viewer');
 | **admin 전용** | ai_providers, ai_guardrails, ai_usage_logs | profiles.is_admin = true |
 | **인증된 읽기** | services, service_domains, plan_quotas, ai_personas(active) | authenticated role |
 | **공개 읽기** | homepage_templates (active) | anon + authenticated |
-| **service_role** | audit_logs INSERT, health_checks INSERT, subscriptions CRUD | service_role only |
+| **service_role** | audit_logs INSERT, health_checks INSERT, subscriptions CRUD, ai_bot_logs INSERT/SELECT | service_role only |
 
 ### RLS 주의사항
 - **모든 테이블에 RLS 활성화됨** — `ALTER TABLE ... ENABLE ROW LEVEL SECURITY`
