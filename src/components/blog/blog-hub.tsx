@@ -8,8 +8,8 @@ import {
   BLOG_CATEGORIES,
   getBlogCategoryOrder,
   type BlogCategory,
-  type BlogPostMeta,
-} from '@/data/blog/posts';
+} from '@/data/blog/blog-categories';
+import type { BlogPostMeta } from '@/data/blog/posts';
 
 /** ISO date → "2026년 3월 18일" (환경 무관 결정적 포맷) */
 function formatDateKR(iso: string): string {

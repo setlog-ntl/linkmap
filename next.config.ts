@@ -3,6 +3,18 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   poweredByHeader: false,
 
+  // Barrel export 최적화 — lucide-react(296파일), recharts 등의 전체 라이브러리 번들링 방지
+  // Workers CPU 시간 절약 (cold start 시 파싱 비용 대폭 감소)
+  experimental: {
+    optimizePackageImports: [
+      'lucide-react',
+      'recharts',
+      '@xyflow/react',
+      'react-markdown',
+      'date-fns',
+    ],
+  },
+
   // Cloudflare Workers 배포 시 NEXT_PUBLIC_* 환경변수가 클라이언트 번들에 인라인되도록 보장
   env: {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,

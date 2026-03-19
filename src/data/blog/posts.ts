@@ -1,11 +1,14 @@
-import type { LucideIcon } from 'lucide-react';
-import { Sparkles, Shield, GitBranch, LayoutDashboard, Scale } from 'lucide-react';
+// ---------------------------------------------------------------------------
+// Categories & types — blog-categories.ts에서 re-export (역호환)
+// ---------------------------------------------------------------------------
+export { BLOG_CATEGORIES, getBlogCategoryOrder } from './blog-categories';
+export type { BlogCategory } from './blog-categories';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-export type BlogCategory = 'vibe-coding' | 'env-management' | 'comparison' | 'tutorial' | 'insight';
+import type { BlogCategory } from './blog-categories';
 
 export interface BlogPost {
   slug: string;
@@ -25,36 +28,6 @@ export interface BlogPost {
   /** OG 이미지 경로 (없으면 기본 사용) */
   ogImage?: string;
 }
-
-export const BLOG_CATEGORIES: Record<BlogCategory, { label: string; icon: LucideIcon; description: string }> = {
-  'vibe-coding': {
-    label: '바이브 코딩',
-    icon: Sparkles,
-    description: 'AI 시대의 새로운 개발 방식',
-  },
-  'env-management': {
-    label: '환경변수 관리',
-    icon: Shield,
-    description: 'API 키와 시크릿을 안전하게',
-  },
-  comparison: {
-    label: '비교 분석',
-    icon: Scale,
-    description: '도구와 서비스 객관적 비교',
-  },
-  tutorial: {
-    label: '튜토리얼',
-    icon: GitBranch,
-    description: '단계별 실전 가이드',
-  },
-  insight: {
-    label: '인사이트',
-    icon: LayoutDashboard,
-    description: '개발 생태계 관찰과 의견',
-  },
-};
-
-const categoryOrder: BlogCategory[] = ['vibe-coding', 'env-management', 'comparison', 'tutorial', 'insight'];
 
 // ---------------------------------------------------------------------------
 // Posts (newest first)
@@ -3580,10 +3553,6 @@ export type BlogPostMeta = Omit<BlogPost, 'content'>;
 /** 클라이언트 번들에 content(225KB)를 포함시키지 않기 위한 경량 목록 */
 export function getPublishedPostsMeta(): BlogPostMeta[] {
   return getPublishedPosts().map(({ content: _, ...meta }) => meta);
-}
-
-export function getBlogCategoryOrder(): BlogCategory[] {
-  return categoryOrder;
 }
 
 export function getAllTags(): string[] {

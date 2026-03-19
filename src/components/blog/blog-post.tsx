@@ -7,7 +7,8 @@ import remarkGfm from 'remark-gfm';
 import { ArrowLeft, ArrowRight, Calendar, Clock, Tag, ExternalLink, ChevronRight, List, Link2, Check, Share2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BLOG_CATEGORIES, type BlogPost } from '@/data/blog/posts';
+import { BLOG_CATEGORIES } from '@/data/blog/blog-categories';
+import type { BlogPost } from '@/data/blog/posts';
 
 /** ISO date → "2026년 3월 18일" (환경 무관 결정적 포맷) */
 function formatDateKR(iso: string): string {
