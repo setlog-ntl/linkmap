@@ -399,7 +399,7 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
                 연결된 서비스가 없습니다
               </p>
               <p className="text-xs text-muted-foreground/70 mt-1">
-                "연결 추가" 버튼으로 서비스 간 연결을 만들어보세요
+                &quot;연결 추가&quot; 버튼으로 서비스 간 연결을 만들어보세요
               </p>
             </CardContent>
           </Card>
