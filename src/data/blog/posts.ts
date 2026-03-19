@@ -1818,28 +1818,28 @@ AI가 예제로 만들어준 코드에 API 키가 직접 들어있는 경우가 
   {
     slug: 'ai-coding-tools-security-comparison',
     title: '2026 AI 코딩 도구 비교 — 보안과 환경변수 관점에서',
-    description: 'Claude Code, Cursor, Windsurf, GitHub Copilot을 보안 관점에서 비교합니다. .env 파일 처리 방식, 생성 코드 보안 품질, 도구 자체 CVE를 분석하고 공통 대응 전략을 제안합니다.',
+    description: 'ChatGPT, Claude Code, Cursor, Gemini Code Assist, Windsurf, GitHub Copilot 6종을 보안 관점에서 비교합니다. .env 파일 처리 방식, 생성 코드 보안 품질, 도구 자체 CVE를 분석하고 공통 대응 전략을 제안합니다.',
     category: 'comparison',
-    tags: ['Claude Code', 'Cursor', 'Windsurf', '도구 비교', 'AI 코딩', '보안'],
+    tags: ['ChatGPT', 'Claude Code', 'Cursor', 'Gemini', 'Windsurf', '도구 비교', 'AI 코딩', '보안'],
     publishedAt: '2026-02-05',
     readingTime: '8분',
     relatedGuides: ['env', 'github', 'auth', 'deploy'],
     ogImage: '/blog/og/ai-coding-tools-security-comparison.png',
     content: `> **KEY:** 어떤 AI 코딩 도구를 쓰든, 도구 자체의 보안 취약점과 .env 파일 처리 방식은 개발자가 직접 관리해야 합니다. 도구 선택보다 환경변수를 도구로부터 분리하는 구조가 먼저입니다.
 
-## 2026 AI 코딩 도구 4대장 한눈에 비교
+## 2026 AI 코딩 도구 6종 한눈에 비교
 
-AI 코딩 도구 시장은 2025년 이후 빠르게 재편됐습니다. Pragmatic Engineer 서베이(906명 응답)에 따르면 Claude Code는 출시 10개월 만에 "가장 사랑받는 도구" 1위(46%)를 차지했으며, Cursor(19%), GitHub Copilot(9%)과 큰 격차를 보입니다.
+AI 코딩 도구 시장은 2025년 이후 빠르게 재편됐습니다. OpenAI의 ChatGPT, Anthropic의 Claude Code, Google의 Gemini Code Assist, 그리고 Cursor, Windsurf, GitHub Copilot이 각자의 강점으로 경쟁하고 있습니다. Pragmatic Engineer 서베이(906명 응답)에 따르면 Claude Code가 "가장 사랑받는 도구" 1위(46%)를 차지했지만, 도구마다 형태와 접근 방식이 다르므로 단순 비교보다는 보안 관점에서의 차이가 중요합니다.
 
-| 항목 | Claude Code | Cursor | Windsurf | GitHub Copilot |
-|------|------------|--------|----------|----------------|
-| 형태 | CLI 에이전트 | IDE (VS Code 포크) | IDE | IDE 플러그인 |
-| 기본 모델 | Claude (Anthropic) | 멀티모델 선택 | 멀티모델 선택 | GPT / Claude |
-| 가격 (기준) | \$100/월 (Max) | \$20/월 (Pro) | \$15/월 (Pro) | \$10/월 (Individual) |
-| SWE-bench 순위 | **1위** | — | — | — |
-| "가장 사랑받는" 비율 | **46%** | 19% | — | 9% |
-| 컨텍스트 창 | 최대 200K | 프로젝트 전체 | 프로젝트 전체 | 리포지토리 |
-| 에이전트 모드 | 기본 | 지원 | 지원 | 지원 |
+| 항목 | ChatGPT | Claude Code | Cursor | Gemini Code Assist | Windsurf | GitHub Copilot |
+|------|---------|------------|--------|-------------------|----------|----------------|
+| 형태 | 웹 챗봇 + Canvas | CLI 에이전트 | IDE (VS Code 포크) | IDE 플러그인 | IDE | IDE 플러그인 |
+| 기본 모델 | GPT-4o (OpenAI) | Claude (Anthropic) | 멀티모델 선택 | Gemini 2.5 (Google) | 멀티모델 선택 | GPT / Claude |
+| 가격 (기준) | \$20/월 (Plus) | \$100/월 (Max) | \$20/월 (Pro) | \$19/사용자 (Standard) | \$15/월 (Pro) | \$10/월 (Individual) |
+| SWE-bench 순위 | — | **1위** | — | — | — | — |
+| "가장 사랑받는" 비율 | — | **46%** | 19% | — | — | 9% |
+| 컨텍스트 창 | 128K (GPT-4o) | 최대 200K (Max: 1M) | 프로젝트 전체 | 최대 100만 토큰 | 프로젝트 전체 | 리포지토리 |
+| 에이전트 모드 | 제한적 (Canvas) | 기본 (자율 수행) | 지원 | 지원 (발전 중) | 지원 (Cascade) | 지원 |
 
 이 비교 글의 초점은 기능이 아니라 **보안**입니다. 각 도구가 여러분의 시크릿을 어떻게 다루는지, 그리고 도구 자체에 어떤 취약점이 있었는지를 살펴봅니다.
 
@@ -1847,11 +1847,15 @@ AI 코딩 도구 시장은 2025년 이후 빠르게 재편됐습니다. Pragmati
 
 ## 보안 관점: 각 도구의 .env 파일 처리 방식
 
-AI 코딩 도구들은 모두 동일한 방식으로 작동합니다. 프로젝트 디렉토리의 파일을 읽어 컨텍스트를 구성하고, 이를 LLM에 전달합니다. 이 과정에서 **프로젝트 안에 있는 .env 파일도 함께 읽힐 수 있습니다.**
+AI 코딩 도구들은 프로젝트 디렉토리의 파일을 읽어 컨텍스트를 구성하고, 이를 LLM에 전달합니다. 이 과정에서 **프로젝트 안에 있는 .env 파일도 함께 읽힐 수 있습니다.** 도구의 형태(웹, CLI, IDE)에 따라 .env 접근 범위가 달라집니다.
+
+**ChatGPT (OpenAI)**는 웹 브라우저 기반으로 작동하므로 로컬 파일 시스템에 직접 접근하지 않습니다. .env 파일이 자동으로 읽힐 위험은 없지만, 사용자가 직접 코드나 환경변수 값을 대화에 붙여넣는 경우 해당 정보가 OpenAI 서버로 전송됩니다. Canvas 모드에서도 로컬 파일 접근은 없습니다.
 
 **Claude Code**는 [Knostic의 보고서](https://www.knostic.ai/blog/claude-loads-secrets-without-permission)에 따르면 프로젝트 디렉토리의 .env 파일을 사용자 확인 없이 자동으로 로드하는 동작이 발견됐습니다. \`~/.claude/settings.json\`에 deny 규칙을 추가해 제외 설정이 가능합니다.
 
 **Cursor** 역시 프로젝트 디렉토리 전체를 읽어 컨텍스트를 구성합니다. [API Stronghold의 분석](https://www.apistronghold.com/blog/cursor-reads-your-env-file)에 따르면 Cursor가 .env 파일을 읽어 에이전트 컨텍스트에 포함하는 사례가 확인됐습니다. \`.cursorignore\` 파일로 제외 설정이 가능합니다.
+
+**Gemini Code Assist (Google)**는 VS Code, JetBrains 등의 IDE 플러그인으로 작동합니다. 컨텍스트 수집 범위는 IDE에서 열린 파일과 프로젝트 구조에 기반하며, .env 파일 처리 방식은 다른 IDE 기반 도구들과 기본적으로 동일합니다. Google Cloud 엔터프라이즈 플랜에서는 데이터 처리 정책을 별도로 설정할 수 있습니다.
 
 **Windsurf**는 엔터프라이즈 보안에 주력하며 SOC 2 준수, SSO, 데이터 레지던시 옵션을 제공합니다. 다만 일반 .env 파일 처리 방식은 다른 IDE 기반 도구들과 기본적으로 동일합니다.
 
@@ -1882,13 +1886,13 @@ AI 코딩 도구들은 모두 동일한 방식으로 작동합니다. 프로젝�
 
 **CVE-2025-54135 — Cursor (패치됨):** [Tenable 분석](https://www.tenable.com/blog/faq-cve-2025-54135-cve-2025-54136-vulnerabilities-in-cursor-curxecute-mcpoison)에서 발견. CVSS 8.6(High). MCP 서버 처리 방식의 결함으로 프롬프트 인젝션을 통해 임의 명령 실행이 가능했습니다. 2025년 7월 패치됨.
 
-두 CVE 모두 현재는 패치된 상태이지만, AI 코딩 도구는 개발 환경에 깊이 통합된 에이전트이며, 도구에 대한 공격은 개발자의 전체 시크릿과 코드베이스를 위협합니다.
+두 CVE 모두 현재는 패치된 상태입니다. ChatGPT, Gemini Code Assist, Windsurf, GitHub Copilot에서는 유사한 CVE가 공개 보고되지 않았으나, 이는 취약점이 없다는 의미가 아닙니다. AI 코딩 도구는 개발 환경에 깊이 통합된 에이전트이며, 도구에 대한 공격은 개발자의 전체 시크릿과 코드베이스를 위협합니다.
 
 > **TIP:** AI 코딩 도구는 항상 최신 버전으로 유지하세요. Claude Code는 \`claude --version\`으로 버전 확인이 가능하며, Cursor는 자동 업데이트를 켜두는 것이 좋습니다.
 
 ## 어떤 도구를 쓰든 환경변수는 별도로 관리해야 한다
 
-이 비교에서 가장 중요한 결론입니다. Claude Code든 Cursor든 Windsurf든, **환경변수를 도구의 컨텍스트에서 분리하는 것이 공통 대응 전략**입니다.
+이 비교에서 가장 중요한 결론입니다. ChatGPT든 Claude Code든 Cursor든 Gemini든 Windsurf든, **환경변수를 도구의 컨텍스트에서 분리하는 것이 공통 대응 전략**입니다.
 
 ![환경변수 분리 아키텍처 — AI 도구 컨텍스트 밖으로](/blog/diagrams/env-separation-architecture.png)
 
