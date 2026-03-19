@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // ISR: 1시간 캐시
 
 import { createAdminClient } from '@/lib/supabase/admin';
 import { Header } from '@/components/layout/header';
