@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export const runtime = 'edge';
-
 const AI_BOTS: Array<{ pattern: RegExp; name: string }> = [
   { pattern: /GPTBot/i, name: 'GPTBot' },
   { pattern: /ChatGPT-User/i, name: 'ChatGPT-User' },
