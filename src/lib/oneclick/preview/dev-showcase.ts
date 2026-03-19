@@ -156,17 +156,22 @@ function buildExperienceSection(state: ModuleConfigState): string {
     .map((item) => {
       const v = item as Record<string, string>;
       const title = esc(v.title || '');
+      const titleEn = esc(v.titleEn || '');
       const company = esc(v.company || '');
+      const companyEn = esc(v.companyEn || '');
       const period = esc(v.period || '');
+      const periodEn = esc(v.periodEn || '');
       const description = esc(v.description || '');
+      const descriptionEn = esc(v.descriptionEn || '');
       return `
       <div class="timeline-item">
         <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.25rem;">
-          <h3 style="font-size:1.1rem;font-weight:600;margin:0;">${title}</h3>
-          <span style="font-size:.85rem;color:var(--text-secondary);white-space:nowrap;">${period}</span>
+          <h3 style="font-size:1.1rem;font-weight:600;margin:0;">${title}${titleEn ? ` <span style="font-size:.85rem;color:var(--text-secondary);font-weight:400;">${titleEn}</span>` : ''}</h3>
+          <span style="font-size:.85rem;color:var(--text-secondary);white-space:nowrap;">${period}${periodEn ? ` (${periodEn})` : ''}</span>
         </div>
-        <p style="font-size:.95rem;color:var(--brand-primary);font-weight:500;margin:0 0 0.5rem;">${company}</p>
+        <p style="font-size:.95rem;color:var(--brand-primary);font-weight:500;margin:0 0 0.5rem;">${company}${companyEn ? ` <span style="font-size:.85rem;color:var(--text-secondary);font-weight:400;">${companyEn}</span>` : ''}</p>
         ${description ? `<p style="font-size:.9rem;color:var(--text-secondary);margin:0;line-height:1.6;">${description}</p>` : ''}
+        ${descriptionEn ? `<p style="font-size:.85rem;color:var(--text-secondary);margin:0;line-height:1.5;opacity:.7;">${descriptionEn}</p>` : ''}
       </div>`;
     })
     .join('');

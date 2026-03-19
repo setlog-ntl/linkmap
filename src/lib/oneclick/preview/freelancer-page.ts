@@ -89,8 +89,11 @@ function renderHeroSection(
   gradientTo: string,
 ): string {
   const name = getVal(state, 'hero', 'name', '');
+  const nameEn = getVal(state, 'hero', 'nameEn', '');
   const title = getVal(state, 'hero', 'title', '');
+  const titleEn = getVal(state, 'hero', 'titleEn', '');
   const tagline = getVal(state, 'hero', 'tagline', '');
+  const taglineEn = getVal(state, 'hero', 'taglineEn', '');
   const avatarUrl = getVal(state, 'hero', 'avatarUrl', '');
   const rotatingWords = getVal(state, 'hero', 'rotatingWords', '');
 
@@ -115,9 +118,11 @@ function renderHeroSection(
     <section class="fp-hero" style="background:linear-gradient(135deg, ${esc(gradientFrom)}, ${esc(gradientTo)})">
       <div class="fp-hero-inner">
         <div class="fp-hero-text">
-          <p class="fp-hero-title-label">${esc(title)}</p>
+          <p class="fp-hero-title-label">${esc(title)}${titleEn ? ` <span style="opacity:.7;font-size:12px;">${esc(titleEn)}</span>` : ''}</p>
           <h1 class="fp-hero-name">${esc(name)}</h1>
+          ${nameEn ? `<p style="font-size:18px;opacity:.8;margin:0 0 4px;">${esc(nameEn)}</p>` : ''}
           <p class="fp-hero-tagline">${esc(tagline)}</p>
+          ${taglineEn ? `<p style="font-size:14px;opacity:.7;margin:0 0 16px;">${esc(taglineEn)}</p>` : ''}
           ${wordBadges ? `<div class="fp-keywords">${wordBadges}</div>` : ''}
         </div>
         ${avatarHtml}
@@ -134,9 +139,10 @@ function renderServicesSection(state: ModuleConfigState, gradientFrom: string): 
       (item) => `
       <div class="fp-service-card">
         <div class="fp-service-icon" style="color:${esc(gradientFrom)}">${getServiceIcon(item.icon)}</div>
-        <h3 class="fp-service-title">${esc(item.title)}</h3>
+        <h3 class="fp-service-title">${esc(item.title)}${item.titleEn ? ` <span style="font-size:13px;color:#999;font-weight:400;">${esc(item.titleEn)}</span>` : ''}</h3>
         <p class="fp-service-desc">${esc(item.desc)}</p>
-        ${item.price ? `<p class="fp-service-price" style="color:${esc(gradientFrom)}">${esc(item.price)}</p>` : ''}
+        ${item.descEn ? `<p class="fp-service-desc" style="font-size:12px;color:#888;">${esc(item.descEn)}</p>` : ''}
+        ${item.price ? `<p class="fp-service-price" style="color:${esc(gradientFrom)}">${esc(item.price)}${item.priceEn ? ` <span style="font-size:12px;color:#999;">${esc(item.priceEn)}</span>` : ''}</p>` : ''}
       </div>`,
     )
     .join('');
@@ -173,9 +179,10 @@ function renderPortfolioSection(
       <div class="fp-portfolio-card">
         ${imgSrc ? `<div class="fp-portfolio-img"><img src="${esc(imgSrc)}" alt="${esc(item.title)}" /></div>` : ''}
         <div class="fp-portfolio-body">
-          <span class="fp-portfolio-cat">${esc(item.category)}</span>
-          <h3 class="fp-portfolio-title">${esc(item.title)}</h3>
+          <span class="fp-portfolio-cat">${esc(item.category)}${item.categoryEn ? ` / ${esc(item.categoryEn)}` : ''}</span>
+          <h3 class="fp-portfolio-title">${esc(item.title)}${item.titleEn ? ` <span style="font-size:13px;color:#999;font-weight:400;">${esc(item.titleEn)}</span>` : ''}</h3>
           ${item.desc ? `<p class="fp-portfolio-desc">${esc(item.desc)}</p>` : ''}
+          ${item.descEn ? `<p class="fp-portfolio-desc" style="font-size:12px;color:#999;">${esc(item.descEn)}</p>` : ''}
           ${tagsHtml ? `<div class="fp-tags">${tagsHtml}</div>` : ''}
         </div>
       </div>`;
@@ -204,9 +211,10 @@ function renderTestimonialsSection(state: ModuleConfigState, gradientFrom: strin
       <div class="fp-testimonial-card">
         <div class="fp-testimonial-stars">${stars}</div>
         <p class="fp-testimonial-content">&ldquo;${esc(item.content)}&rdquo;</p>
+        ${item.contentEn ? `<p class="fp-testimonial-content" style="font-size:12px;color:#888;">&ldquo;${esc(item.contentEn)}&rdquo;</p>` : ''}
         <div class="fp-testimonial-author">
-          <strong>${esc(item.author)}</strong>
-          ${item.role || item.company ? `<span class="fp-testimonial-role">${esc(item.role)}${item.company ? `, ${esc(item.company)}` : ''}</span>` : ''}
+          <strong>${esc(item.author)}${item.authorEn ? ` <span style="font-size:12px;color:#999;font-weight:400;">${esc(item.authorEn)}</span>` : ''}</strong>
+          ${item.role || item.company ? `<span class="fp-testimonial-role">${esc(item.role)}${item.roleEn ? ` (${esc(item.roleEn)})` : ''}${item.company ? `, ${esc(item.company)}` : ''}${item.companyEn ? ` (${esc(item.companyEn)})` : ''}</span>` : ''}
         </div>
       </div>`;
     })
@@ -229,8 +237,9 @@ function renderProcessSection(state: ModuleConfigState, gradientFrom: string): s
       <div class="fp-process-step">
         <div class="fp-process-number" style="background:${esc(gradientFrom)}">${esc(item.number)}</div>
         <div class="fp-process-body">
-          <h3 class="fp-process-title">${esc(item.title)}</h3>
+          <h3 class="fp-process-title">${esc(item.title)}${item.titleEn ? ` <span style="font-size:13px;color:#999;font-weight:400;">${esc(item.titleEn)}</span>` : ''}</h3>
           <p class="fp-process-desc">${esc(item.desc)}</p>
+          ${item.descEn ? `<p class="fp-process-desc" style="font-size:12px;color:#888;">${esc(item.descEn)}</p>` : ''}
         </div>
       </div>`,
     )

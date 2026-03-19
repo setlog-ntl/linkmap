@@ -70,6 +70,8 @@ export function renderSmallBizHeroSection(
 export function renderSmallBizMenuSection(
   state: ModuleConfigState,
   primaryColor: string,
+  liveUrl: string = '',
+  imageMap: Record<string, string> = {},
 ): string {
   const items = getArr(state, 'menu', 'items') as unknown as MenuItem[];
   if (items.length === 0) return '';
@@ -95,8 +97,10 @@ export function renderSmallBizMenuSection(
       if (item.isPopular) badges.push('<span class="sb-badge sb-badge--popular">인기</span>');
       if (item.isNew) badges.push('<span class="sb-badge sb-badge--new">NEW</span>');
 
+      const menuImgSrc = item.imageUrl ? resolveImageSrc(item.imageUrl, liveUrl, imageMap) : '';
       html += `
       <div class="sb-menu-item">
+        ${menuImgSrc ? `<img class="sb-menu-item-img" src="${esc(menuImgSrc)}" alt="${esc(item.name)}" />` : ''}
         <div class="sb-menu-item-left">
           ${item.emoji ? `<span class="sb-menu-emoji">${esc(item.emoji)}</span>` : ''}
           <div class="sb-menu-item-info">
@@ -106,6 +110,7 @@ export function renderSmallBizMenuSection(
             </div>
             ${item.nameEn ? `<span class="sb-menu-item-name-en">${esc(item.nameEn)}</span>` : ''}
             ${item.desc ? `<p class="sb-menu-item-desc">${esc(item.desc)}</p>` : ''}
+            ${item.descEn ? `<p class="sb-menu-item-desc" style="font-size:11px;color:#aaa;">${esc(item.descEn)}</p>` : ''}
           </div>
         </div>
         <span class="sb-menu-item-price" style="color:${esc(primaryColor)}">${esc(item.price)}</span>
@@ -134,8 +139,8 @@ export function renderSmallBizHoursSection(
     const holidayClass = item.isHoliday ? ' sb-hours-row--holiday' : '';
     html += `
     <div class="sb-hours-row${holidayClass}">
-      <span class="sb-hours-day">${esc(item.day)}</span>
-      <span class="sb-hours-time">${esc(item.hours)}</span>
+      <span class="sb-hours-day">${esc(item.day)}${item.dayEn ? ` <span style="font-size:11px;color:#aaa;">${esc(item.dayEn)}</span>` : ''}</span>
+      <span class="sb-hours-time">${esc(item.hours)}${item.hoursEn ? ` <span style="font-size:11px;color:#aaa;">${esc(item.hoursEn)}</span>` : ''}</span>
     </div>`;
   }
 
@@ -342,6 +347,7 @@ export function buildSmallBizCSS(primaryColor: string): string {
 .sb-menu-item-name { font-size: 1rem; font-weight: 600; color: var(--text-primary); }
 .sb-menu-item-name-en { font-size: 0.8rem; color: var(--text-secondary); display: block; margin-top: 1px; }
 .sb-menu-item-desc { font-size: 0.85rem; color: var(--text-secondary); margin: 4px 0 0; line-height: 1.5; }
+.sb-menu-item-img { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
 .sb-menu-item-price {
   font-size: 1rem;
   font-weight: 700;
@@ -496,7 +502,7 @@ export function generateSmallBizPreview(
 
   const sectionRenderers: Record<string, () => string> = {
     hero: () => renderSmallBizHeroSection(state, liveUrl, imageMap, primaryColor),
-    menu: () => renderSmallBizMenuSection(state, primaryColor),
+    menu: () => renderSmallBizMenuSection(state, primaryColor, liveUrl, imageMap),
     hours: () => renderSmallBizHoursSection(state, primaryColor),
     location: () => renderSmallBizLocationSection(state, primaryColor),
     gallery: () => renderSmallBizGallerySection(state, liveUrl, imageMap, primaryColor),

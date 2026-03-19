@@ -110,12 +110,15 @@ function buildValuesSection(state: ModuleConfigState): string {
       const v = item as Record<string, string>;
       const emoji = esc(v.emoji || '');
       const title = esc(v.title || '');
+      const titleEn = esc(v.titleEn || '');
       const desc = esc(v.desc || '');
+      const descEn = esc(v.descEn || '');
       return `
       <div class="value-card">
         <div class="value-icon">${emoji}</div>
-        <h3 style="font-size:1.15rem;font-weight:600;margin:0 0 0.5rem;">${title}</h3>
+        <h3 style="font-size:1.15rem;font-weight:600;margin:0 0 0.5rem;">${title}${titleEn ? ` <span style="font-size:.85rem;color:var(--text-secondary);font-weight:400;">${titleEn}</span>` : ''}</h3>
         <p style="font-size:.9rem;color:var(--text-secondary);margin:0;line-height:1.6;">${desc}</p>
+        ${descEn ? `<p style="font-size:.8rem;color:var(--text-secondary);margin:0.25rem 0 0;line-height:1.5;opacity:.7;">${descEn}</p>` : ''}
       </div>`;
     })
     .join('');
@@ -141,11 +144,13 @@ function buildHighlightsSection(state: ModuleConfigState): string {
     .map((item) => {
       const v = item as Record<string, string>;
       const value = esc(v.value || '');
+      const valueEn = esc(v.valueEn || '');
       const label = esc(v.label || '');
+      const labelEn = esc(v.labelEn || '');
       return `
       <div class="highlight-item">
-        <div class="highlight-number">${value}</div>
-        <div class="highlight-label">${label}</div>
+        <div class="highlight-number">${value}${valueEn ? ` <span style="font-size:.6em;opacity:.6;">${valueEn}</span>` : ''}</div>
+        <div class="highlight-label">${label}${labelEn ? ` <span style="font-size:.85em;opacity:.7;">${labelEn}</span>` : ''}</div>
       </div>`;
     })
     .join('');

@@ -116,9 +116,11 @@ function renderCafeAboutSection(
 function renderCafeMenuSection(
   state: ModuleConfigState,
   primaryColor: string,
+  liveUrl: string = '',
+  imageMap: Record<string, string> = {},
 ): string {
   // 카페 메뉴는 small-biz 메뉴와 필드 구조 동일, 공유 렌더러 재사용
-  return renderSmallBizMenuSection(state, primaryColor);
+  return renderSmallBizMenuSection(state, primaryColor, liveUrl, imageMap);
 }
 
 // ── Cafe CSS ─────────────────────────────────────
@@ -289,7 +291,7 @@ export function generateSmallBizCafePreview(
   const sectionRenderers: Record<string, () => string> = {
     hero: () => renderCafeHeroSection(state, primaryColor),
     about: () => renderCafeAboutSection(state, primaryColor),
-    menu: () => renderCafeMenuSection(state, primaryColor),
+    menu: () => renderCafeMenuSection(state, primaryColor, liveUrl, imageMap),
     hours: () => renderSmallBizHoursSection(state, primaryColor),
     location: () => renderSmallBizLocationSection(state, primaryColor),
     gallery: () => renderSmallBizGallerySection(state, liveUrl, imageMap, primaryColor),

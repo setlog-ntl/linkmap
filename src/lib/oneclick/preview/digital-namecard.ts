@@ -56,6 +56,7 @@ function renderContactSection(state: ModuleConfigState): string {
   const email = getVal(state, 'contact', 'email', '');
   const phone = getVal(state, 'contact', 'phone', '');
   const address = getVal(state, 'contact', 'address', '');
+  const addressEn = getVal(state, 'contact', 'addressEn', '');
   const website = getVal(state, 'contact', 'website', '');
 
   const rows: string[] = [];
@@ -77,7 +78,7 @@ function renderContactSection(state: ModuleConfigState): string {
     rows.push(`
       <div class="nc-contact-row">
         <span class="nc-contact-icon">&#128205;</span>
-        <span>${esc(address)}</span>
+        <span>${esc(address)}${addressEn ? ` <span class="nc-en">${esc(addressEn)}</span>` : ''}</span>
       </div>`);
   }
   if (website) {

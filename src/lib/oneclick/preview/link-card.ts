@@ -36,7 +36,9 @@ function renderProfileSection(
   isDark: boolean,
 ): string {
   const name = getVal(state, 'profile', 'name', '');
+  const nameEn = getVal(state, 'profile', 'nameEn', '');
   const bio = getVal(state, 'profile', 'bio', '');
+  const bioEn = getVal(state, 'profile', 'bioEn', '');
   const avatarUrl = getVal(state, 'profile', 'avatarUrl', '');
 
   const avatarSrc = resolveImageSrc(avatarUrl, liveUrl, imageMap);
@@ -48,7 +50,9 @@ function renderProfileSection(
     <section class="lc-profile">
       ${avatarHtml}
       <h1 class="lc-name${isDark ? ' lc-text-light' : ''}">${esc(name)}</h1>
+      ${nameEn ? `<p style="font-size:13px;color:${isDark ? '#9ca3af' : '#999'};margin:0 0 6px;">${esc(nameEn)}</p>` : ''}
       ${bio ? `<p class="lc-bio${isDark ? ' lc-text-light-muted' : ''}">${esc(bio)}</p>` : ''}
+      ${bioEn ? `<p class="lc-bio${isDark ? ' lc-text-light-muted' : ''}" style="font-size:12px;margin-top:2px;">${esc(bioEn)}</p>` : ''}
     </section>`;
 }
 
