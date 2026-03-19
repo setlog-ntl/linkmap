@@ -3574,6 +3574,14 @@ export function getPublishedPosts(): BlogPost[] {
     .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 }
 
+/** content를 제외한 경량 메타데이터 타입 (목록 표시용) */
+export type BlogPostMeta = Omit<BlogPost, 'content'>;
+
+/** 클라이언트 번들에 content(225KB)를 포함시키지 않기 위한 경량 목록 */
+export function getPublishedPostsMeta(): BlogPostMeta[] {
+  return getPublishedPosts().map(({ content: _, ...meta }) => meta);
+}
+
 export function getBlogCategoryOrder(): BlogCategory[] {
   return categoryOrder;
 }

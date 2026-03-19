@@ -6,10 +6,9 @@ import { ArrowRight, Clock, Calendar, Tag, Link2, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   BLOG_CATEGORIES,
-  getPublishedPosts,
   getBlogCategoryOrder,
   type BlogCategory,
-  type BlogPost,
+  type BlogPostMeta,
 } from '@/data/blog/posts';
 
 function CopyLinkButton({ slug }: { slug: string }) {
@@ -50,7 +49,7 @@ function CopyLinkButton({ slug }: { slug: string }) {
   );
 }
 
-function PostCard({ post }: { post: BlogPost }) {
+function PostCard({ post }: { post: BlogPostMeta }) {
   const cat = BLOG_CATEGORIES[post.category];
   const CatIcon = cat.icon;
 
@@ -111,8 +110,7 @@ function PostCard({ post }: { post: BlogPost }) {
   );
 }
 
-export function BlogHub() {
-  const posts = getPublishedPosts();
+export function BlogHub({ posts }: { posts: BlogPostMeta[] }) {
   const categories = getBlogCategoryOrder();
   const categoriesWithPosts = categories.filter(
     (cat) => posts.some((p) => p.category === cat)

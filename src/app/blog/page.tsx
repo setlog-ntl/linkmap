@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { getPublishedPostsMeta } from '@/data/blog/posts';
 import { BlogHub } from '@/components/blog/blog-hub';
 
 export const metadata: Metadata = {
@@ -18,5 +19,6 @@ export const metadata: Metadata = {
 };
 
 export default function BlogPage() {
-  return <BlogHub />;
+  const posts = getPublishedPostsMeta();
+  return <BlogHub posts={posts} />;
 }
