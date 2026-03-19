@@ -175,8 +175,7 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
     img.src = url;
   }, [data.projectName]);
 
-  // Keyboard shortcuts (including Ctrl+Z/Y for undo/redo)
-  const { undo, redo, canUndo, canRedo } = useServiceMapStore();
+  // Keyboard shortcuts
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       const target = e.target as HTMLElement;
@@ -184,18 +183,6 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
         if (e.key === 'Escape') {
           (target as HTMLElement).blur();
         }
-        return;
-      }
-
-      // Undo/Redo
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
-        e.preventDefault();
-        if (canUndo()) undo();
-        return;
-      }
-      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
-        e.preventDefault();
-        if (canRedo()) redo();
         return;
       }
 
@@ -237,7 +224,7 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusedNodeId, setFocusedNodeId, fitView, nodes, data, projectId, openSheet, isReadOnly, undo, redo, canUndo, canRedo]);
+  }, [focusedNodeId, setFocusedNodeId, fitView, nodes, data, projectId, openSheet, isReadOnly]);
 
   // Find focused service info for panel
   const focusedService = focusedNodeId
@@ -369,11 +356,10 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
             maskColor={isDark ? 'rgba(15, 29, 47, 0.85)' : undefined}
             style={isDark ? { backgroundColor: 'var(--card)' } : undefined}
           />
-          {/* PCB dot grid background */}
           {isDark ? (
-            <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="oklch(0.35 0.08 160)" style={{ opacity: 0.25 }} />
+            <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="oklch(0.35 0.02 250)" style={{ opacity: 0.25 }} />
           ) : (
-            <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="var(--border)" style={{ opacity: 0.45 }} />
+            <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="var(--border)" style={{ opacity: 0.5 }} />
           )}
 
           {/* SVG defs for arrow markers + glow filters */}

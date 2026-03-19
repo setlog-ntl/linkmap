@@ -231,11 +231,11 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
               maskColor={isDark ? 'rgba(15, 29, 47, 0.85)' : undefined}
               style={isDark ? { backgroundColor: 'var(--card)' } : undefined}
             />
-            {/* PCB dot grid background (matching map-view) */}
+            {/* PCB 스타일 도트 그리드 배경 (의존성 뷰 전용) */}
             {isDark ? (
-              <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="oklch(0.35 0.08 160)" style={{ opacity: 0.25 }} />
+              <Background variant={BackgroundVariant.Dots} gap={24} size={1.2} color="#34d39940" style={{ opacity: 0.5 }} />
             ) : (
-              <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="var(--border)" style={{ opacity: 0.45 }} />
+              <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#3b6cf030" style={{ opacity: 0.7 }} />
             )}
           </ReactFlow>
           {!isReadOnly && <EditSaveBar onSave={handleSaveChanges} saving={saving} />}

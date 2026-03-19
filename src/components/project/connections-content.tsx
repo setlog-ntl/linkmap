@@ -1,7 +1,11 @@
 'use client';
 
-import { useState, Fragment } from 'react';
-import { Cable, Wand2, Trash2, Plus, RefreshCw, Clock } from 'lucide-react';
+import { useState, Fragment, useMemo } from 'react';
+import {
+  Cable, Wand2, Trash2, Plus, RefreshCw, Clock, ArrowRight,
+  ChevronDown, ChevronUp, Filter, Zap, Shield, Database,
+  Globe, AlertTriangle, CheckCircle2, XCircle, Pause,
+} from 'lucide-react';
 import { ImpactAnalysisPanel } from '@/components/project/impact-analysis-panel';
 import { ConnectionHistoryRow } from '@/components/project/connection-history-row';
 import { toast } from 'sonner';
@@ -9,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 import {
   useProjectConnections,
   useCreateConnection,
@@ -22,6 +27,42 @@ import { useProjectServices } from '@/lib/queries/services';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import type { UserConnectionType, ConnectionStatus, ConnectionEnvironment } from '@/types';
+
+/* ─── 연결 타입 설정 ─── */
+const CONNECTION_TYPE_CONFIG: Record<UserConnectionType, {
+  label: string;
+  color: string;
+  bgColor: string;
+  icon: typeof Database;
+  desc: string;
+}> = {
+  uses:          { label: '사용',       color: '#3b82f6', bgColor: 'bg-blue-50 dark:bg-blue-900/20',    icon: Database,       desc: '서비스 사용' },
+  api_call:      { label: 'API 호출',   color: '#8b5cf6', bgColor: 'bg-violet-50 dark:bg-violet-900/20', icon: Zap,            desc: 'API 호출' },
+  data_transfer: { label: '데이터 전달', color: '#f97316', bgColor: 'bg-orange-50 dark:bg-orange-900/20', icon: ArrowRight,     desc: '데이터 전송' },
+  integrates:    { label: '연동',       color: '#22c55e', bgColor: 'bg-green-50 dark:bg-green-900/20',   icon: Cable,          desc: '양방향 통합' },
+  auth_provider: { label: '인증 제공',   color: '#ec4899', bgColor: 'bg-pink-50 dark:bg-pink-900/20',    icon: Shield,         desc: '인증 제공' },
+  webhook:       { label: '웹훅',       color: '#14b8a6', bgColor: 'bg-teal-50 dark:bg-teal-900/20',    icon: Globe,          desc: '웹훅 이벤트' },
+  sdk:           { label: 'SDK',        color: '#6366f1', bgColor: 'bg-indigo-50 dark:bg-indigo-900/20', icon: Database,       desc: 'SDK 연동' },
+};
+
+const STATUS_CONFIG: Record<ConnectionStatus, {
+  label: string;
+  color: string;
+  icon: typeof CheckCircle2;
+  badge: string;
+}> = {
+  active:   { label: '활성',   color: '#22c55e', icon: CheckCircle2, badge: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+  inactive: { label: '비활성', color: '#64748b', icon: Pause,        badge: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' },
+  error:    { label: '오류',   color: '#ef4444', icon: XCircle,      badge: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+  pending:  { label: '대기',   color: '#f59e0b', icon: AlertTriangle, badge: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
+};
+
+const ENVIRONMENTS: { value: ConnectionEnvironment | 'all'; label: string; icon: string }[] = [
+  { value: 'all',         label: '전체',       icon: '🌐' },
+  { value: 'development', label: '개발',       icon: '🔧' },
+  { value: 'staging',     label: '스테이징',    icon: '🧪' },
+  { value: 'production',  label: '프로덕션',    icon: '🚀' },
+];
 
 const TYPE_KEYS: Record<UserConnectionType, string> = {
   uses: 'connections.typeUses',
@@ -39,20 +80,6 @@ const STATUS_KEYS: Record<ConnectionStatus, string> = {
   error: 'connections.statusError',
   pending: 'connections.statusPending',
 };
-
-const STATUS_BADGE: Record<ConnectionStatus, string> = {
-  active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  inactive: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
-  error: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-};
-
-const ENVIRONMENTS: { value: ConnectionEnvironment | 'all'; label: string }[] = [
-  { value: 'all', label: '전체' },
-  { value: 'development', label: '개발' },
-  { value: 'staging', label: '스테이징' },
-  { value: 'production', label: '프로덕션' },
-];
 
 function formatVerifiedAt(iso: string | null): string {
   if (!iso) return '';
@@ -90,14 +117,28 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
   const autoConnectMutation = useAutoConnect(projectId);
   const verifyMutation = useVerifyConnection(projectId);
 
-  const serviceMap = new Map<string, string>();
-  if (services) {
-    for (const ps of services) {
-      if (ps.service) {
-        serviceMap.set(ps.service.id, ps.service.name);
+  const serviceMap = useMemo(() => {
+    const map = new Map<string, string>();
+    if (services) {
+      for (const ps of services) {
+        if (ps.service) map.set(ps.service.id, ps.service.name);
       }
     }
-  }
+    return map;
+  }, [services]);
+
+  // Status summary counts
+  const statusCounts = useMemo(() => {
+    const counts = { active: 0, inactive: 0, error: 0, pending: 0, total: 0 };
+    if (connections) {
+      counts.total = connections.length;
+      for (const c of connections) {
+        const s = c.connection_status as ConnectionStatus;
+        if (s in counts) counts[s]++;
+      }
+    }
+    return counts;
+  }, [connections]);
 
   const handleAutoConnect = () => {
     if (!suggestions || suggestions.length === 0) return;
@@ -120,7 +161,16 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
         connection_type: newType,
         environment: newEnv,
       },
-      { onSuccess: () => setShowCreate(false) }
+      {
+        onSuccess: () => {
+          setShowCreate(false);
+          setNewSource('');
+          setNewTarget('');
+          setNewType('uses');
+          setNewEnv('all');
+          toast.success('연결이 생성되었습니다');
+        },
+      }
     );
   };
 
@@ -137,14 +187,15 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* ─── 헤더 + 상태 요약 카드 ─── */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Cable className="h-5 w-5" />
-            {t(locale, 'connections.title')}
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <Cable className="h-5 w-5 text-brand-blue" />
+            연결 관리
           </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            {t(locale, 'connections.subtitle')}
+          <p className="text-sm text-muted-foreground mt-0.5">
+            서비스 간 연결 상태를 관리하고 모니터링합니다
           </p>
         </div>
         <div className="flex gap-2">
@@ -154,44 +205,80 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
               size="sm"
               onClick={handleAutoConnect}
               disabled={autoConnectMutation.isPending}
+              className="gap-1.5"
             >
-              <Wand2 className="mr-1.5 h-4 w-4" />
-              {t(locale, 'connections.autoConnect')} ({suggestions.length}{t(locale, 'connections.suggestions')})
+              <Wand2 className="h-4 w-4 text-violet-500" />
+              자동 연결 ({suggestions.length}건)
             </Button>
           )}
-          <Button size="sm" onClick={() => setShowCreate(!showCreate)}>
-            <Plus className="mr-1.5 h-4 w-4" />
-            {t(locale, 'connections.addConnection')}
+          <Button size="sm" onClick={() => setShowCreate(!showCreate)} className="gap-1.5">
+            <Plus className="h-4 w-4" />
+            연결 추가
           </Button>
         </div>
       </div>
 
-      {/* 환경 필터 탭 */}
-      <div className="flex gap-1 border-b">
-        {ENVIRONMENTS.map((env) => (
-          <button
-            key={env.value}
-            onClick={() => setEnvFilter(env.value)}
-            className={`px-3 py-1.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
-              envFilter === env.value
-                ? 'border-brand-blue text-brand-blue'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {env.label}
-          </button>
-        ))}
+      {/* ─── 상태 요약 카드 4개 ─── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {(Object.entries(STATUS_CONFIG) as [ConnectionStatus, typeof STATUS_CONFIG[ConnectionStatus]][]).map(([key, cfg]) => {
+          const Icon = cfg.icon;
+          const count = statusCounts[key];
+          return (
+            <div
+              key={key}
+              className="rounded-xl border bg-card p-3.5 flex items-center gap-3 transition-colors hover:bg-accent/30"
+            >
+              <div
+                className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: `${cfg.color}15` }}
+              >
+                <Icon className="h-4.5 w-4.5" style={{ color: cfg.color }} />
+              </div>
+              <div>
+                <div className="text-xl font-bold leading-tight">{count}</div>
+                <div className="text-[11px] text-muted-foreground">{cfg.label}</div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
+      {/* ─── 환경 필터 ─── */}
+      <div className="flex items-center gap-2">
+        <Filter className="h-4 w-4 text-muted-foreground" />
+        <div className="flex gap-1.5">
+          {ENVIRONMENTS.map((env) => (
+            <button
+              key={env.value}
+              onClick={() => setEnvFilter(env.value)}
+              className={cn(
+                'px-3 py-1.5 rounded-lg text-sm font-medium transition-all border',
+                envFilter === env.value
+                  ? 'border-brand-blue bg-brand-blue/5 text-brand-blue shadow-sm'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/50'
+              )}
+            >
+              <span className="mr-1">{env.icon}</span>
+              {env.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ─── 연결 추가 폼 ─── */}
       {showCreate && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-wrap items-end gap-3">
-              <div className="flex-1 min-w-[160px]">
-                <label className="text-xs text-muted-foreground mb-1 block">{t(locale, 'connections.sourceService')}</label>
+        <Card className="border-brand-blue/30 shadow-sm">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Plus className="h-4 w-4 text-brand-blue" />
+              <span className="text-sm font-semibold">새 연결 추가</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">소스 서비스</label>
                 <Select value={newSource} onValueChange={setNewSource}>
                   <SelectTrigger className="h-9 text-sm">
-                    <SelectValue placeholder={t(locale, 'connections.select')} />
+                    <SelectValue placeholder="선택..." />
                   </SelectTrigger>
                   <SelectContent>
                     {[...serviceMap.entries()].map(([id, name]) => (
@@ -200,11 +287,11 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex-1 min-w-[160px]">
-                <label className="text-xs text-muted-foreground mb-1 block">{t(locale, 'connections.targetService')}</label>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">타겟 서비스</label>
                 <Select value={newTarget} onValueChange={setNewTarget}>
                   <SelectTrigger className="h-9 text-sm">
-                    <SelectValue placeholder={t(locale, 'connections.select')} />
+                    <SelectValue placeholder="선택..." />
                   </SelectTrigger>
                   <SelectContent>
                     {[...serviceMap.entries()].map(([id, name]) => (
@@ -213,188 +300,256 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="min-w-[140px]">
-                <label className="text-xs text-muted-foreground mb-1 block">{t(locale, 'connections.type')}</label>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">연결 타입</label>
                 <Select value={newType} onValueChange={(v) => setNewType(v as UserConnectionType)}>
                   <SelectTrigger className="h-9 text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {(Object.entries(TYPE_KEYS) as [UserConnectionType, string][]).map(([k, key]) => (
-                      <SelectItem key={k} value={k} className="text-sm">{t(locale, key)}</SelectItem>
+                    {(Object.entries(CONNECTION_TYPE_CONFIG) as [UserConnectionType, typeof CONNECTION_TYPE_CONFIG[UserConnectionType]][]).map(([k, cfg]) => (
+                      <SelectItem key={k} value={k} className="text-sm">
+                        <span className="inline-block w-2 h-2 rounded-full mr-1.5" style={{ backgroundColor: cfg.color }} />
+                        {cfg.label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="min-w-[120px]">
-                <label className="text-xs text-muted-foreground mb-1 block">환경</label>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">환경</label>
                 <Select value={newEnv} onValueChange={(v) => setNewEnv(v as ConnectionEnvironment)}>
                   <SelectTrigger className="h-9 text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {ENVIRONMENTS.map((env) => (
-                      <SelectItem key={env.value} value={env.value} className="text-sm">{env.label}</SelectItem>
+                      <SelectItem key={env.value} value={env.value} className="text-sm">{env.icon} {env.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={handleCreate} disabled={createMutation.isPending || !newSource || !newTarget}>
-                {t(locale, 'connections.create')}
-              </Button>
+              <div className="flex items-end">
+                <Button onClick={handleCreate} disabled={createMutation.isPending || !newSource || !newTarget} className="w-full h-9">
+                  연결 생성
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
       )}
 
+      {/* ─── 자동 연결 제안 ─── */}
       {suggestions && suggestions.length > 0 && (
-        <Card>
+        <Card className="border-violet-200 dark:border-violet-800/40">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm flex items-center gap-2">
-              <Wand2 className="h-4 w-4 text-purple-500" />
-              {t(locale, 'connections.autoConnectSuggestions')}
+              <Wand2 className="h-4 w-4 text-violet-500" />
+              자동 연결 제안
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 font-medium">
+                {suggestions.length}건
+              </span>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0">
-            <div className="space-y-2">
-              {suggestions.map((s, i) => (
-                <div key={i} className="flex items-center justify-between text-sm py-1.5 px-2 rounded-md bg-muted/50">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{serviceMap.get(s.source_service_id) ?? '?'}</span>
-                    <span className="text-muted-foreground">→</span>
-                    <span className="font-medium">{serviceMap.get(s.target_service_id) ?? '?'}</span>
-                    <span className="text-xs text-muted-foreground">({t(locale, TYPE_KEYS[s.connection_type] ?? '')})</span>
+            <div className="space-y-1.5">
+              {suggestions.map((s, i) => {
+                const typeConfig = CONNECTION_TYPE_CONFIG[s.connection_type] || CONNECTION_TYPE_CONFIG.uses;
+                return (
+                  <div key={i} className="flex items-center justify-between text-sm py-2 px-3 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{serviceMap.get(s.source_service_id) ?? '?'}</span>
+                      <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="font-medium">{serviceMap.get(s.target_service_id) ?? '?'}</span>
+                      <span
+                        className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                        style={{ backgroundColor: `${typeConfig.color}15`, color: typeConfig.color }}
+                      >
+                        {typeConfig.label}
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground max-w-[200px] truncate">{s.reason}</span>
                   </div>
-                  <span className="text-xs text-muted-foreground">{s.reason}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
       )}
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm">
-            {t(locale, 'connections.connectionList')} ({connections?.length ?? 0}{t(locale, 'connections.count')})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="p-4 space-y-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex items-center gap-4 px-4 py-2.5">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-20" />
-                  <Skeleton className="h-5 w-12 rounded-full" />
-                  <Skeleton className="h-4 w-32 flex-1" />
-                  <Skeleton className="h-7 w-14 rounded" />
-                </div>
-              ))}
-            </div>
-          ) : !connections || connections.length === 0 ? (
-            <div className="p-8 text-center text-sm text-muted-foreground">
-              {t(locale, 'connections.empty')}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">{t(locale, 'connections.source')}</th>
-                    <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">{t(locale, 'connections.target')}</th>
-                    <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">{t(locale, 'connections.type')}</th>
-                    <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">{t(locale, 'connections.status')}</th>
-                    <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">{t(locale, 'connections.description')}</th>
-                    <th className="px-4 py-2.5 text-right font-medium text-muted-foreground">{t(locale, 'connections.actions')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {connections.map((conn) => (
-                    <Fragment key={conn.id}>
-                      <tr className="border-b hover:bg-muted/30 transition-colors">
-                        <td className="px-4 py-2.5 font-medium">
-                          {serviceMap.get(conn.source_service_id) ?? conn.source_service_id.slice(0, 8)}
-                        </td>
-                        <td className="px-4 py-2.5 font-medium">
-                          {serviceMap.get(conn.target_service_id) ?? conn.target_service_id.slice(0, 8)}
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <Select
-                            value={conn.connection_type}
-                            onValueChange={(v) => updateMutation.mutate({ id: conn.id, connection_type: v as UserConnectionType })}
-                          >
-                            <SelectTrigger className="h-7 w-[120px] text-xs border-none bg-transparent p-0">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {(Object.entries(TYPE_KEYS) as [UserConnectionType, string][]).map(([k, key]) => (
-                                <SelectItem key={k} value={k} className="text-xs">{t(locale, key)}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <div className="flex flex-col gap-0.5">
-                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_BADGE[conn.connection_status] ?? STATUS_BADGE.active}`}>
-                              {t(locale, STATUS_KEYS[conn.connection_status] ?? 'connections.statusActive')}
+      {/* ─── 연결 목록 (카드 기반) ─── */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-muted-foreground">
+            연결 목록 ({statusCounts.total}건)
+          </h3>
+        </div>
+
+        {isLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-20 w-full rounded-xl" />
+            ))}
+          </div>
+        ) : !connections || connections.length === 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="py-12 text-center">
+              <Cable className="h-10 w-10 mx-auto text-muted-foreground/30 mb-3" />
+              <p className="text-sm text-muted-foreground">
+                연결된 서비스가 없습니다
+              </p>
+              <p className="text-xs text-muted-foreground/70 mt-1">
+                "연결 추가" 버튼으로 서비스 간 연결을 만들어보세요
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-2">
+            {connections.map((conn) => {
+              const typeConfig = CONNECTION_TYPE_CONFIG[conn.connection_type] || CONNECTION_TYPE_CONFIG.uses;
+              const statusConfig = STATUS_CONFIG[conn.connection_status] || STATUS_CONFIG.active;
+              const StatusIcon = statusConfig.icon;
+              const isExpanded = expandedHistoryId === conn.id;
+
+              return (
+                <Fragment key={conn.id}>
+                  <Card className={cn(
+                    'transition-all hover:shadow-sm',
+                    conn.connection_status === 'error' && 'border-red-200 dark:border-red-900/40',
+                  )}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-4">
+                        {/* 연결 타입 아이콘 */}
+                        <div
+                          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                          style={{ backgroundColor: `${typeConfig.color}12` }}
+                        >
+                          <typeConfig.icon className="h-5 w-5" style={{ color: typeConfig.color }} />
+                        </div>
+
+                        {/* 소스 → 타겟 */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="font-semibold text-sm truncate max-w-[140px]">
+                              {serviceMap.get(conn.source_service_id) ?? conn.source_service_id.slice(0, 8)}
                             </span>
-                            {conn.last_verified_at && (
-                              <span className="text-[10px] text-muted-foreground pl-0.5">
-                                {formatVerifiedAt(conn.last_verified_at)}
-                              </span>
+                            <svg width="20" height="10" viewBox="0 0 20 10" className="flex-shrink-0" style={{ color: typeConfig.color }}>
+                              <line x1="0" y1="5" x2="15" y2="5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                              <polygon points="14,2 20,5 14,8" fill="currentColor" />
+                            </svg>
+                            <span className="font-semibold text-sm truncate max-w-[140px]">
+                              {serviceMap.get(conn.target_service_id) ?? conn.target_service_id.slice(0, 8)}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            {/* 타입 뱃지 */}
+                            <span
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium"
+                              style={{ backgroundColor: `${typeConfig.color}10`, color: typeConfig.color }}
+                            >
+                              {typeConfig.label}
+                            </span>
+                            {conn.description && (
+                              <>
+                                <span className="opacity-30">|</span>
+                                <span className="truncate max-w-[200px]">{conn.description}</span>
+                              </>
                             )}
                           </div>
-                        </td>
-                        <td className="px-4 py-2.5 text-muted-foreground text-xs max-w-[200px] truncate">
-                          {conn.description ?? conn.label ?? '-'}
-                        </td>
-                        <td className="px-4 py-2.5 text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className={`h-7 w-7 p-0 hover:text-brand-blue ${expandedHistoryId === conn.id ? 'text-brand-blue' : 'text-muted-foreground'}`}
-                              title="변경 이력 보기"
-                              onClick={() => setExpandedHistoryId(expandedHistoryId === conn.id ? null : conn.id)}
-                            >
-                              <Clock className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 w-7 p-0 text-muted-foreground hover:text-brand-blue"
-                              title="헬스체크 기반 상태 검증"
-                              disabled={verifyMutation.isPending && verifyMutation.variables === conn.id}
-                              onClick={() => handleVerify(conn.id)}
-                            >
-                              <RefreshCw className={`h-3.5 w-3.5 ${verifyMutation.isPending && verifyMutation.variables === conn.id ? 'animate-spin' : ''}`} />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-                              onClick={() => deleteMutation.mutate(conn.id)}
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                      {expandedHistoryId === conn.id && (
-                        <ConnectionHistoryRow connectionId={conn.id} colSpan={6} />
-                      )}
-                    </Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                        </div>
 
-      {/* 영향 분석 패널 */}
+                        {/* 상태 뱃지 */}
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <span className={cn(
+                            'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium',
+                            statusConfig.badge,
+                          )}>
+                            <StatusIcon className="h-3 w-3" />
+                            {statusConfig.label}
+                          </span>
+                          {conn.last_verified_at && (
+                            <span className="text-[10px] text-muted-foreground">
+                              {formatVerifiedAt(conn.last_verified_at)}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* 타입 변경 셀렉트 */}
+                        <Select
+                          value={conn.connection_type}
+                          onValueChange={(v) => updateMutation.mutate({ id: conn.id, connection_type: v as UserConnectionType })}
+                        >
+                          <SelectTrigger className="h-8 w-[110px] text-xs border-dashed flex-shrink-0">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {(Object.entries(CONNECTION_TYPE_CONFIG) as [UserConnectionType, typeof CONNECTION_TYPE_CONFIG[UserConnectionType]][]).map(([k, cfg]) => (
+                              <SelectItem key={k} value={k} className="text-xs">
+                                <span className="inline-block w-2 h-2 rounded-full mr-1.5" style={{ backgroundColor: cfg.color }} />
+                                {cfg.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        {/* 액션 버튼 */}
+                        <div className="flex items-center gap-0.5 flex-shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={cn(
+                              'h-8 w-8 p-0',
+                              isExpanded ? 'text-brand-blue' : 'text-muted-foreground hover:text-brand-blue',
+                            )}
+                            title="변경 이력"
+                            onClick={() => setExpandedHistoryId(isExpanded ? null : conn.id)}
+                          >
+                            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 text-muted-foreground hover:text-brand-blue"
+                            title="상태 검증"
+                            disabled={verifyMutation.isPending && verifyMutation.variables === conn.id}
+                            onClick={() => handleVerify(conn.id)}
+                          >
+                            <RefreshCw className={cn('h-4 w-4', verifyMutation.isPending && verifyMutation.variables === conn.id && 'animate-spin')} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                            title="삭제"
+                            onClick={() => {
+                              if (window.confirm('이 연결을 삭제하시겠습니까?')) {
+                                deleteMutation.mutate(conn.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+
+                    {/* 이력 확장 영역 */}
+                    {isExpanded && (
+                      <div className="border-t bg-muted/20">
+                        <table className="w-full"><tbody>
+                          <ConnectionHistoryRow connectionId={conn.id} colSpan={1} />
+                        </tbody></table>
+                      </div>
+                    )}
+                  </Card>
+                </Fragment>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ─── 영향 분석 패널 ─── */}
       {services && services.length > 0 && (
         <ImpactAnalysisPanel
           projectId={projectId}
