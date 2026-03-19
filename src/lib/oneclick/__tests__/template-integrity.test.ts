@@ -121,13 +121,13 @@ describe('템플릿 무결성 검증', () => {
         }
 
         for (const preset of presets) {
-          for (const id of preset.state.enabled) {
+          for (const id of preset.state.enabled ?? []) {
             expect(
               moduleIds.has(id),
               `프리셋 "${preset.id}"의 enabled에 스키마에 없는 모듈 "${id}"가 포함됨`
             ).toBe(true);
           }
-          for (const id of preset.state.order) {
+          for (const id of preset.state.order ?? []) {
             expect(
               moduleIds.has(id),
               `프리셋 "${preset.id}"의 order에 스키마에 없는 모듈 "${id}"가 포함됨`
