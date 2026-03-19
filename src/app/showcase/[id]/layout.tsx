@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import type { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // ISR: 1시간 캐시
 
 const CATEGORY_LABELS: Record<string, string> = {
   portfolio: '포트폴리오',

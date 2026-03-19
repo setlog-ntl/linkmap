@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // ISR: 1시간마다 재생성
 
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -8,7 +8,7 @@ import { Footer } from '@/components/layout/footer';
 import { ServiceDetailClient } from '@/components/service/service-detail-client';
 import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { generateServiceJsonLd } from '@/lib/seo/json-ld';
-import type { Profile, Service, ServiceGuide, ServiceCostTier, ServiceDependency } from '@/types';
+import type { Service, ServiceGuide, ServiceCostTier, ServiceDependency } from '@/types';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -45,13 +45,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ServiceDetailPage({ params }: Props) {
   const { slug } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  let profile: Profile | null = null;
-  if (user) {
-    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-    profile = data;
-  }
 
   // Fetch service by slug
   const { data: service } = await supabase
@@ -62,7 +55,7 @@ export default async function ServiceDetailPage({ params }: Props) {
 
   if (!service) notFound();
 
-  // Parallel fetch related data
+  // Parallel fetch related data (auth 제거 — 공개 카탈로그)
   const [
     { data: guide },
     { data: costTiers },
@@ -98,7 +91,7 @@ export default async function ServiceDetailPage({ params }: Props) {
   return (
     <div className="min-h-screen flex flex-col">
       <JsonLdScript data={serviceJsonLd} />
-      <Header profile={profile} />
+      <Header profile={null} />
       <main className="flex-1 container py-8">
         <ServiceDetailClient
           service={typedService}

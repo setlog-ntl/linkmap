@@ -1,7 +1,6 @@
 export const dynamic = 'force-dynamic';
 
 import { createAdminClient } from '@/lib/supabase/admin';
-import { createClient } from '@/lib/supabase/server';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { DemoProjectGrid } from '@/components/demo/demo-project-grid';
@@ -153,22 +152,14 @@ async function fetchDemoProjects(): Promise<ProjectWithServices[]> {
 }
 
 export default async function DemoPage() {
-  let isLoggedIn = false;
-  try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    isLoggedIn = !!user;
-  } catch {
-    // 미인증 상태 → 데모 계속 표시
-  }
-
+  // 공개 데모 페이지 — auth 확인 불필요 (Workers CPU 절약)
   const demoProjects = await fetchDemoProjects();
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Header profile={null} />
       <main className="flex-1">
-        <DemoProjectGrid projects={demoProjects} isLoggedIn={isLoggedIn} />
+        <DemoProjectGrid projects={demoProjects} isLoggedIn={false} />
       </main>
       <Footer />
     </div>

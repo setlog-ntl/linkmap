@@ -4,10 +4,6 @@ import { Footer } from '@/components/layout/footer';
 import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { generateFaqJsonLd } from '@/lib/seo/json-ld';
 import { FAQ_DATA, FAQ_CATEGORIES } from '@/data/seo/faq-data';
-import { createClient } from '@/lib/supabase/server';
-import type { Profile } from '@/types';
-
-export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '자주 묻는 질문 (FAQ) — 바이브 코딩, 환경변수, 배포 | Linkmap',
@@ -24,15 +20,7 @@ export const metadata: Metadata = {
   ],
 };
 
-export default async function FaqPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  let profile: Profile | null = null;
-  if (user) {
-    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-    profile = data;
-  }
-
+export default function FaqPage() {
   const faqJsonLd = generateFaqJsonLd(
     FAQ_DATA.map((f) => ({ question: f.question, answer: f.answer }))
   );
@@ -42,7 +30,7 @@ export default async function FaqPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <JsonLdScript data={faqJsonLd} />
-      <Header profile={profile} />
+      <Header profile={null} />
       <main className="flex-1 container py-12 max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold mb-2">자주 묻는 질문</h1>
         <p className="text-muted-foreground mb-10">
@@ -60,7 +48,7 @@ export default async function FaqPage() {
                   <details key={i} className="group rounded-lg border bg-card p-4">
                     <summary className="cursor-pointer font-medium list-none flex items-center justify-between">
                       {faq.question}
-                      <span className="ml-2 text-muted-foreground group-open:rotate-180 transition-transform">▾</span>
+                      <span className="ml-2 text-muted-foreground group-open:rotate-180 transition-transform">&#9662;</span>
                     </summary>
                     <p className="mt-3 text-muted-foreground leading-relaxed">
                       {faq.answer}

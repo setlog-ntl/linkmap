@@ -4,10 +4,6 @@ import { Footer } from '@/components/layout/footer';
 import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { generateGlossaryJsonLd } from '@/lib/seo/json-ld';
 import { GLOSSARY_DATA, GLOSSARY_CATEGORIES } from '@/data/seo/glossary-data';
-import { createClient } from '@/lib/supabase/server';
-import type { Profile } from '@/types';
-
-export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '바이브 코딩 용어집 — 환경변수, API, OAuth, BaaS 40+ 용어 | Linkmap',
@@ -25,15 +21,7 @@ export const metadata: Metadata = {
   ],
 };
 
-export default async function GlossaryPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  let profile: Profile | null = null;
-  if (user) {
-    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-    profile = data;
-  }
-
+export default function GlossaryPage() {
   const glossaryJsonLd = generateGlossaryJsonLd(
     GLOSSARY_DATA.map((t) => ({ term: t.term, definition: t.definition }))
   );
@@ -43,7 +31,7 @@ export default async function GlossaryPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <JsonLdScript data={glossaryJsonLd} />
-      <Header profile={profile} />
+      <Header profile={null} />
       <main className="flex-1 container py-12 max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-2">바이브 코딩 용어집</h1>
         <p className="text-muted-foreground mb-10">

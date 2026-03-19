@@ -1,6 +1,3 @@
-export const dynamic = 'force-dynamic';
-
-import { createClient } from '@/lib/supabase/server';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { HeroSection } from '@/components/landing/hero-section';
@@ -12,28 +9,14 @@ import { ServicesGrid } from '@/components/landing/services-grid';
 import { PricingSection, FinalCtaSection } from '@/components/landing/cta-section';
 import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { generateWebAppJsonLd } from '@/lib/seo/json-ld';
-import type { Profile } from '@/types';
 
-export default async function LandingPage() {
-  let profile: Profile | null = null;
-
-  try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      profile = data ?? null;
-    }
-  } catch {
-    profile = null;
-  }
-
+export default function LandingPage() {
   const webAppJsonLd = generateWebAppJsonLd();
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <JsonLdScript data={webAppJsonLd} />
-      <Header profile={profile} />
+      <Header profile={null} />
 
       {/* Section 1: Hero */}
       <HeroSection />

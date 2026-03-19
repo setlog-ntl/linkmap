@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
-
-export const dynamic = 'force-dynamic';
+import { Header } from '@/components/layout/header';
+import { Footer } from '@/components/layout/footer';
+import { PricingContent } from './pricing-content';
+import { JsonLdScript } from '@/components/seo/json-ld-script';
+import { generatePricingJsonLd } from '@/lib/seo/json-ld';
 
 export const metadata: Metadata = {
   title: '요금제 | Linkmap',
@@ -8,29 +11,13 @@ export const metadata: Metadata = {
   keywords: ['Linkmap 요금제', '가격', 'Pro 플랜', '무료', 'API 키 관리'],
 };
 
-import { createClient } from '@/lib/supabase/server';
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
-import { PricingContent } from './pricing-content';
-import { JsonLdScript } from '@/components/seo/json-ld-script';
-import { generatePricingJsonLd } from '@/lib/seo/json-ld';
-import type { Profile } from '@/types';
-
-export default async function PricingPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  let profile: Profile | null = null;
-  if (user) {
-    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-    profile = data;
-  }
-
+export default function PricingPage() {
   const pricingJsonLd = generatePricingJsonLd();
 
   return (
     <div className="min-h-screen flex flex-col">
       <JsonLdScript data={pricingJsonLd} />
-      <Header profile={profile} />
+      <Header profile={null} />
       <main className="flex-1 container py-16">
         <PricingContent />
       </main>

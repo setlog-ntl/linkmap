@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // ISR: 1시간마다 재생성
 
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
@@ -6,7 +6,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { CompareClient } from '@/components/service/compare-client';
 import { generateItemListJsonLd } from '@/lib/seo/json-ld';
-import type { Profile, ServiceComparison, Service } from '@/types';
+import type { ServiceComparison, Service } from '@/types';
 
 export const metadata: Metadata = {
   title: '서비스 비교 — Supabase vs Firebase, Vercel vs Netlify | Linkmap',
@@ -17,13 +17,6 @@ export const metadata: Metadata = {
 
 export default async function ComparePage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  let profile: Profile | null = null;
-  if (user) {
-    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-    profile = data;
-  }
 
   const [{ data: comparisons }, { data: services }] = await Promise.all([
     supabase.from('service_comparisons').select('*').order('category'),
@@ -50,7 +43,7 @@ export default async function ComparePage() {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
-      <Header profile={profile} />
+      <Header profile={null} />
       <main className="flex-1 container py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">서비스 비교</h1>

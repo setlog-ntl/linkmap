@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // ISR: 1시간 캐시
 
 export const metadata: Metadata = {
   title: '비용 시뮬레이터 | Linkmap',
@@ -12,21 +12,14 @@ import { createClient } from '@/lib/supabase/server';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { CostSimulatorClient } from '@/components/service/cost-simulator-client';
-import type { Profile, Service, ServiceCostTier } from '@/types';
+import type { Service, ServiceCostTier } from '@/types';
 
 export default async function CostSimulatorPage() {
-  let profile: Profile | null = null;
   let services: Service[] = [];
   let costTiers: ServiceCostTier[] = [];
 
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      profile = profileData ?? null;
-    }
-
     const [servicesRes, tiersRes] = await Promise.all([
       supabase
         .from('services')
@@ -47,7 +40,7 @@ export default async function CostSimulatorPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header profile={profile} />
+      <Header profile={null} />
       <main className="flex-1 container py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">비용 시뮬레이터</h1>
