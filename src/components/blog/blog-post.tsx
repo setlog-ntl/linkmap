@@ -9,6 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { BLOG_CATEGORIES, type BlogPost } from '@/data/blog/posts';
 
+/** ISO date → "2026년 3월 18일" (환경 무관 결정적 포맷) */
+function formatDateKR(iso: string): string {
+  const [y, m, d] = iso.split('-');
+  return `${y}년 ${Number(m)}월 ${Number(d)}일`;
+}
+
 // ---------------------------------------------------------------------------
 // Callout parser — blockquote 첫 줄 접두사로 유형 판별
 // ---------------------------------------------------------------------------
@@ -426,11 +432,7 @@ export function BlogPostView({ post, prevPost = null, nextPost = null, relatedGu
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
-                {new Date(post.publishedAt).toLocaleDateString('ko-KR', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
+                {formatDateKR(post.publishedAt)}
               </span>
               <span className="flex items-center gap-1">
                 <Clock className="h-4 w-4" />

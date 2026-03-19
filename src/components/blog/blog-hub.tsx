@@ -11,6 +11,12 @@ import {
   type BlogPostMeta,
 } from '@/data/blog/posts';
 
+/** ISO date → "2026년 3월 18일" (환경 무관 결정적 포맷) */
+function formatDateKR(iso: string): string {
+  const [y, m, d] = iso.split('-');
+  return `${y}년 ${Number(m)}월 ${Number(d)}일`;
+}
+
 function CopyLinkButton({ slug }: { slug: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -93,11 +99,7 @@ function PostCard({ post }: { post: BlogPostMeta }) {
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1">
             <Calendar className="h-3 w-3" />
-            {new Date(post.publishedAt).toLocaleDateString('ko-KR', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-            })}
+            {formatDateKR(post.publishedAt)}
           </span>
           <span className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
