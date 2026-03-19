@@ -335,6 +335,50 @@
   animation: hub-glow 4s ease-in-out infinite;
 }
 
+/* PCB: IC pin handle fade-in */
+@keyframes pcb-pin-show {
+  from { opacity: 0; transform: scaleX(0.3); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+.animate-pcb-pin {
+  animation: pcb-pin-show 0.15s ease-out both;
+}
+
+/* PCB: data packet flow (rectangular) */
+@keyframes pcb-packet-flow {
+  0% { offset-distance: 0%; opacity: 0; }
+  5% { opacity: 0.9; }
+  90% { opacity: 0.9; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+/* PCB: via hole pulse */
+@keyframes pcb-via-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+.animate-pcb-via {
+  animation: pcb-via-pulse 2s ease-in-out infinite;
+}
+
+/* PCB: connection creation flash */
+@keyframes pcb-trace-create {
+  0% { stroke-dashoffset: 100%; opacity: 0.3; }
+  100% { stroke-dashoffset: 0%; opacity: 1; }
+}
+.animate-pcb-trace-create {
+  animation: pcb-trace-create 0.4s ease-out both;
+}
+
+/* PCB: LED status blink */
+@keyframes pcb-led-blink {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.3; }
+}
+.animate-pcb-led {
+  animation: pcb-led-blink 2s ease-in-out infinite;
+}
+
 /* Dashboard: glass panel */
 .glass-panel {
   background: oklch(0.18 0.025 250 / 0.6);

@@ -8,6 +8,15 @@ interface ContextMenuState {
   nodeId: string | null;
 }
 
+/** Undo/Redo history entry for connection operations */
+interface HistoryEntry {
+  type: 'connection_create' | 'connection_delete' | 'connection_type_change';
+  data: Record<string, unknown>;
+  timestamp: number;
+}
+
+const MAX_HISTORY = 50;
+
 interface ServiceMapState {
   viewLevel: ViewLevel;
   catalogSidebarOpen: boolean;
@@ -19,6 +28,13 @@ interface ServiceMapState {
   editMode: boolean;
   pendingOverrides: Record<string, ZoneKey>;
   pendingMainServiceId: string | null | undefined;
+
+  // Multi-select support
+  selectedNodeIds: Set<string>;
+
+  // Undo/Redo history
+  undoStack: HistoryEntry[];
+  redoStack: HistoryEntry[];
 
   setViewLevel: (level: ViewLevel) => void;
   setCatalogSidebarOpen: (open: boolean) => void;
@@ -33,6 +49,18 @@ interface ServiceMapState {
   setPendingMainServiceId: (id: string | null) => void;
   clearPendingChanges: () => void;
   pendingChangeCount: () => number;
+
+  // Multi-select
+  toggleNodeSelection: (nodeId: string) => void;
+  clearSelection: () => void;
+  isNodeSelected: (nodeId: string) => boolean;
+
+  // Undo/Redo
+  pushHistory: (entry: Omit<HistoryEntry, 'timestamp'>) => void;
+  undo: () => HistoryEntry | undefined;
+  redo: () => HistoryEntry | undefined;
+  canUndo: () => boolean;
+  canRedo: () => boolean;
 }
 
 export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
@@ -46,6 +74,10 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
   editMode: false,
   pendingOverrides: {},
   pendingMainServiceId: undefined,
+
+  selectedNodeIds: new Set(),
+  undoStack: [],
+  redoStack: [],
 
   setViewLevel: (level) => set({ viewLevel: level }),
   setCatalogSidebarOpen: (open) => set({ catalogSidebarOpen: open }),
@@ -74,4 +106,45 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
     if (s.pendingMainServiceId !== undefined) count += 1;
     return count;
   },
+
+  // Multi-select
+  toggleNodeSelection: (nodeId) => set((s) => {
+    const next = new Set(s.selectedNodeIds);
+    if (next.has(nodeId)) {
+      next.delete(nodeId);
+    } else {
+      next.add(nodeId);
+    }
+    return { selectedNodeIds: next };
+  }),
+  clearSelection: () => set({ selectedNodeIds: new Set() }),
+  isNodeSelected: (nodeId) => get().selectedNodeIds.has(nodeId),
+
+  // Undo/Redo
+  pushHistory: (entry) => set((s) => ({
+    undoStack: [...s.undoStack.slice(-(MAX_HISTORY - 1)), { ...entry, timestamp: Date.now() }],
+    redoStack: [], // Clear redo on new action
+  })),
+  undo: () => {
+    const s = get();
+    if (s.undoStack.length === 0) return undefined;
+    const entry = s.undoStack[s.undoStack.length - 1];
+    set({
+      undoStack: s.undoStack.slice(0, -1),
+      redoStack: [...s.redoStack, entry],
+    });
+    return entry;
+  },
+  redo: () => {
+    const s = get();
+    if (s.redoStack.length === 0) return undefined;
+    const entry = s.redoStack[s.redoStack.length - 1];
+    set({
+      redoStack: s.redoStack.slice(0, -1),
+      undoStack: [...s.undoStack, entry],
+    });
+    return entry;
+  },
+  canUndo: () => get().undoStack.length > 0,
+  canRedo: () => get().redoStack.length > 0,
 }));

@@ -5,6 +5,7 @@ import type { Node } from '@xyflow/react';
 import { toast } from 'sonner';
 import { getCategoryStyle } from '@/lib/constants/category-styles';
 import { useServiceDetailStore } from '@/stores/service-detail-store';
+import { useServiceMapStore } from '@/stores/service-map-store';
 import type { useCreateConnection, useDeleteConnection } from '@/lib/queries/connections';
 import type { useRunHealthCheck } from '@/lib/queries/health-checks';
 import type { useRemoveProjectService } from '@/lib/queries/services';
@@ -65,14 +66,18 @@ export function useServiceMapInteractions(params: UseServiceMapInteractionsParam
   } = params;
 
   const openSheet = useServiceDetailStore((s) => s.openSheet);
+  const pushHistory = useServiceMapStore((s) => s.pushHistory);
 
   const handleDeleteUserConnection = useCallback((edgeId: string) => {
     const connectionId = edgeId.replace('uc-', '');
     deleteConnectionRef.current.mutate(connectionId, {
-      onSuccess: () => { toast.success('연결이 삭제되었습니다'); },
+      onSuccess: () => {
+        toast.success('연결이 삭제되었습니다');
+        pushHistory({ type: 'connection_delete', data: { edgeId, connectionId } });
+      },
       onError: (error) => { toast.error(error.message || '연결 삭제에 실패했습니다'); },
     });
-  }, [deleteConnectionRef]);
+  }, [deleteConnectionRef, pushHistory]);
 
   const createConnection = useCallback(
     (sourceServiceId: string, targetServiceId: string, connectionType: UserConnectionType) => {
@@ -84,12 +89,18 @@ export function useServiceMapInteractions(params: UseServiceMapInteractionsParam
           connection_type: connectionType,
         },
         {
-          onSuccess: () => { toast.success('연결이 생성되었습니다'); },
+          onSuccess: () => {
+            toast.success('연결이 생성되었습니다');
+            pushHistory({
+              type: 'connection_create',
+              data: { sourceServiceId, targetServiceId, connectionType },
+            });
+          },
           onError: (error) => { toast.error(error.message || '연결 생성에 실패했습니다'); },
         },
       );
     },
-    [projectId, createConnectionRef]
+    [projectId, createConnectionRef, pushHistory]
   );
 
   const buildFullData = useCallback((svc: ProjectService & { service: Service }) => {

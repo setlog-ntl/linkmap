@@ -32,6 +32,20 @@ const CATEGORY_LABELS: Partial<Record<ServiceCategory, string>> = {
   advertising: '광고', other: '기타',
 };
 
+/** IC pin handle configuration — position, type, and pin visual offset */
+const IC_PIN_HANDLES = [
+  // Source pins (output, right/bottom)
+  { id: 'source-top',    type: 'source' as const, position: Position.Top,    pinX: NODE_W / 2, pinY: -5, dir: 'v' },
+  { id: 'source-bottom', type: 'source' as const, position: Position.Bottom, pinX: NODE_W / 2, pinY: NODE_H + 5, dir: 'v' },
+  { id: 'source-left',   type: 'source' as const, position: Position.Left,   pinX: -5, pinY: NODE_H / 2, dir: 'h' },
+  { id: 'source-right',  type: 'source' as const, position: Position.Right,  pinX: NODE_W + 5, pinY: NODE_H / 2, dir: 'h' },
+  // Target pins (input, left/top)
+  { id: 'top',    type: 'target' as const, position: Position.Top,    pinX: NODE_W / 2, pinY: -5, dir: 'v' },
+  { id: 'bottom', type: 'target' as const, position: Position.Bottom, pinX: NODE_W / 2, pinY: NODE_H + 5, dir: 'v' },
+  { id: 'left',   type: 'target' as const, position: Position.Left,   pinX: -5, pinY: NODE_H / 2, dir: 'h' },
+  { id: 'right',  type: 'target' as const, position: Position.Right,  pinX: NODE_W + 5, pinY: NODE_H / 2, dir: 'h' },
+];
+
 interface ServiceNodeData {
   label: string;
   category: ServiceCategory;
@@ -174,24 +188,41 @@ function ServiceNode({ data }: NodeProps) {
             opacity="0.25"
           />
         )}
+
+        {/* IC Pin visuals — copper-colored pins that appear on hover */}
+        {hovered && (
+          <>
+            {/* Left pins */}
+            <rect x="-8" y={NODE_H / 2 - 4} width="9" height="5" rx="1"
+              fill="#b87333" opacity="0.75" className="animate-pcb-pin" />
+            <rect x="-8" y={NODE_H / 2 + 4} width="9" height="3" rx="1"
+              fill="#b87333" opacity="0.5" className="animate-pcb-pin" />
+            {/* Right pins */}
+            <rect x={NODE_W - 1} y={NODE_H / 2 - 4} width="9" height="5" rx="1"
+              fill="#b87333" opacity="0.75" className="animate-pcb-pin" />
+            <rect x={NODE_W - 1} y={NODE_H / 2 + 4} width="9" height="3" rx="1"
+              fill="#b87333" opacity="0.5" className="animate-pcb-pin" />
+            {/* Top pin */}
+            <rect x={NODE_W / 2 - 3} y="-6" width="6" height="7" rx="1"
+              fill="#b87333" opacity="0.7" className="animate-pcb-pin" />
+            {/* Bottom pin */}
+            <rect x={NODE_W / 2 - 3} y={NODE_H - 1} width="6" height="7" rx="1"
+              fill="#b87333" opacity="0.7" className="animate-pcb-pin" />
+          </>
+        )}
       </svg>
 
-      {/* Status dot — top right */}
+      {/* LED status indicator — top right (PCB style) */}
       <div
-        className="absolute top-2.5 right-2.5 w-[6px] h-[6px] rounded-full"
-        style={{ backgroundColor: status.hex, opacity: d.status === 'not_started' ? 0.4 : 1 }}
+        className={`absolute top-2.5 right-2.5 w-[6px] h-[6px] rounded-full ${
+          d.status === 'in_progress' || d.status === 'error' ? 'animate-pcb-led' : ''
+        }`}
+        style={{
+          backgroundColor: status.hex,
+          opacity: d.status === 'not_started' ? 0.4 : 1,
+          boxShadow: d.status !== 'not_started' ? `0 0 4px ${status.hex}` : undefined,
+        }}
       />
-
-      {/* Subtle status indicator ring for in_progress / error */}
-      {(d.status === 'in_progress' || d.status === 'error') && (
-        <div
-          className="absolute top-2.5 right-2.5 w-[6px] h-[6px] rounded-full animate-ping"
-          style={{
-            backgroundColor: status.hex,
-            opacity: 0.3,
-          }}
-        />
-      )}
 
       {/* Content — horizontal layout: icon left, text right */}
       <div className="absolute inset-0 flex items-center gap-2.5 z-10 pointer-events-none px-4">
@@ -217,15 +248,20 @@ function ServiceNode({ data }: NodeProps) {
         </div>
       </div>
 
-      {/* Handles — transparent, all 4 directions for both source and target */}
-      <Handle type="target" position={Position.Top} id="top" className="!bg-transparent !border-0 !w-3 !h-3" />
-      <Handle type="target" position={Position.Bottom} id="bottom" className="!bg-transparent !border-0 !w-3 !h-3" />
-      <Handle type="target" position={Position.Left} id="left" className="!bg-transparent !border-0 !w-3 !h-3" />
-      <Handle type="target" position={Position.Right} id="right" className="!bg-transparent !border-0 !w-3 !h-3" />
-      <Handle type="source" position={Position.Top} id="source-top" className="!bg-transparent !border-0 !w-3 !h-3" />
-      <Handle type="source" position={Position.Bottom} id="source-bottom" className="!bg-transparent !border-0 !w-3 !h-3" />
-      <Handle type="source" position={Position.Left} id="source-left" className="!bg-transparent !border-0 !w-3 !h-3" />
-      <Handle type="source" position={Position.Right} id="source-right" className="!bg-transparent !border-0 !w-3 !h-3" />
+      {/* Handles — IC pin style: slightly visible on hover via SVG above, functional handles here */}
+      {IC_PIN_HANDLES.map((h) => (
+        <Handle
+          key={h.id}
+          type={h.type}
+          position={h.position}
+          id={h.id}
+          className="!border-0 !w-3 !h-3 !rounded-sm transition-colors duration-150"
+          style={{
+            background: hovered ? `${brandColor}40` : 'transparent',
+            cursor: hovered ? 'crosshair' : 'default',
+          }}
+        />
+      ))}
     </div>
   );
 

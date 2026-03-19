@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Linkmap 연결 관리 UX 재설계 기획</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Pretendard Variable"', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: { blue: '#3b6cf0', green: '#34d399', 'blue-light': '#e8eefa', 'green-light': '#e6faf0' },
+            circuit: { 950: '#0f1d2f', 900: '#162436', 800: '#1e3048', 700: '#2a4060' },
+            pcb: { copper: '#b87333', gold: '#ffd700', solder: '#c0c0c0', trace: '#34d399', glow: '#5eead4' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { font-family: 'Pretendard Variable', system-ui, sans-serif; }
+    .gradient-text { background: linear-gradient(135deg, #3b6cf0, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .pcb-grid { background-image: radial-gradient(circle, rgba(52,211,153,0.15) 1px, transparent 1px); background-size: 20px 20px; }
+    .dark .pcb-grid { background-image: radial-gradient(circle, rgba(52,211,153,0.25) 1px, transparent 1px); }
+    .glow { filter: drop-shadow(0 0 6px rgba(52,211,153,0.5)); }
+    .dark .glow { filter: drop-shadow(0 0 10px rgba(52,211,153,0.7)); }
+    .card-hover { transition: all 0.2s ease; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .dark .card-hover:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
+    @keyframes packet-flow { 0% { offset-distance: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { offset-distance: 100%; opacity: 0; } }
+    @keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 4px rgba(52,211,153,0.4)); } 50% { filter: drop-shadow(0 0 12px rgba(52,211,153,0.8)); } }
+    @keyframes led-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+    .toc-link { border-left: 2px solid transparent; transition: all 0.15s; }
+    .toc-link:hover, .toc-link.active { border-left-color: #3b6cf0; color: #3b6cf0; background: rgba(59,108,240,0.05); }
+    .dark .toc-link:hover, .dark .toc-link.active { border-left-color: #34d399; color: #34d399; background: rgba(52,211,153,0.05); }
+    .section-anchor { scroll-margin-top: 5rem; }
+    .comparison-arrow { position: relative; }
+    .comparison-arrow::after { content: '→'; position: absolute; right: -1.5rem; top: 50%; transform: translateY(-50%); font-size: 1.5rem; color: #34d399; }
+    @media (max-width: 768px) { .comparison-arrow::after { display: none; } }
+  </style>
+</head>
+<body class="bg-white dark:bg-circuit-950 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+  <!-- Top Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-circuit-950/90 backdrop-blur-lg border-b border-gray-200 dark:border-circuit-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" class="glow">
+          <rect x="2" y="2" width="24" height="24" rx="4" stroke="#34d399" stroke-width="2" fill="none"/>
+          <circle cx="8" cy="8" r="2" fill="#3b6cf0"/>
+          <circle cx="20" cy="8" r="2" fill="#3b6cf0"/>
+          <circle cx="14" cy="20" r="2" fill="#34d399"/>
+          <line x1="8" y1="10" x2="14" y2="18" stroke="#34d399" stroke-width="1.5"/>
+          <line x1="20" y1="10" x2="14" y2="18" stroke="#3b6cf0" stroke-width="1.5"/>
+        </svg>
+        <span class="font-bold text-lg">연결 관리 UX 재설계</span>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-brand-green/10 text-brand-green border border-brand-green/20">기획 v1.0</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">2026-03-19</span>
+        <button id="themeToggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-circuit-800 transition-colors" aria-label="테마 토글">
+          <svg id="sunIcon" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          <svg id="moonIcon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Layout -->
+  <div class="flex pt-14">
+    <!-- Sidebar TOC (Desktop) -->
+    <aside class="hidden lg:block fixed left-0 top-14 bottom-0 w-60 border-r border-gray-200 dark:border-circuit-800 overflow-y-auto p-4 bg-white/50 dark:bg-circuit-950/50">
+      <nav class="space-y-1 text-sm">
+        <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3 px-3">목차</p>
+        <a href="#executive-summary" class="toc-link block px-3 py-1.5 rounded-r text-gray-600 dark:text-gray-400">Executive Summary</a>
+        <a href="#current-analysis" class="toc-link block px-3 py-1.5 rounded-r text-gray-600 dark:text-gray-400">현재 상태 분석</a>
+        <a href="#benchmarking" class="toc-link block px-3 py-1.5 rounded-r text-gray-600 dark:text-gray-400">벤치마킹: Excalidraw</a>
+        <a href="#personas" class="toc-link block px-3 py-1.5 rounded-r text-gray-600 dark:text-gray-400">페르소나별 여정</a>
+        <a href="#ux-improvement" class="toc-link block px-3 py-1.5 rounded-r text-gray-600 dark:text-gray-400">UX 개선안</a>
+        <a href="#pcb-metaphor" class="toc-link block px-3 py-1.5 rounded-r text-gray-600 dark:text-gray-400">PCB 메타포</a>
+        <a href="#lod-system" class="toc-link block px-3 py-1.5 rounded-r text-gray-600 dark:text-gray-400">LOD 시스템</a>
+        <a href="#roadmap" class="toc-link block px-3 py-1.5 rounded-r text-gray-600 dark:text-gray-400">구현 로드맵</a>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <main class="flex-1 lg:ml-60 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+      <!-- ============================================================ -->
+      <!-- Section 1: Executive Summary -->
+      <!-- ============================================================ -->
+      <section id="executive-summary" class="section-anchor mb-20">
+        <div class="text-center mb-12">
+          <h1 class="text-4xl sm:text-5xl font-extrabold mb-4">
+            <span class="gradient-text">연결 관리 UX 재설계</span>
+          </h1>
+          <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Excalidraw의 직관성 + PCB 회로 기판의 시각적 아이덴티티로<br/>
+            바이브코더도 즉시 사용할 수 있는 연결 경험을 만듭니다.
+          </p>
+        </div>
+
+        <!-- Key Metrics Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+          <div class="card-hover bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-6 text-center">
+            <div class="text-3xl font-bold text-brand-blue mb-1">5→2</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">연결 생성 단계 축소</div>
+            <div class="text-xs text-brand-green mt-1">60% 감소</div>
+          </div>
+          <div class="card-hover bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-6 text-center">
+            <div class="text-3xl font-bold text-brand-green mb-1">0초</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">학습 곡선 (드래그 연결)</div>
+            <div class="text-xs text-brand-green mt-1">직관적 인터랙션</div>
+          </div>
+          <div class="card-hover bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-6 text-center">
+            <div class="text-3xl font-bold gradient-text mb-1">PCB</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">차별화된 비주얼 메타포</div>
+            <div class="text-xs text-brand-green mt-1">시장 유일</div>
+          </div>
+        </div>
+
+        <!-- Why This Redesign -->
+        <div class="bg-gradient-to-r from-brand-blue/5 to-brand-green/5 dark:from-brand-blue/10 dark:to-brand-green/10 rounded-xl p-6 border border-gray-200 dark:border-circuit-800">
+          <h3 class="font-bold text-lg mb-3">왜 지금 재설계가 필요한가?</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div class="space-y-2">
+              <div class="flex items-start gap-2">
+                <span class="text-red-500 mt-0.5">&#x2717;</span>
+                <span><strong>발견성 부재</strong> — 연결 핸들이 투명하여 존재 자체를 모름</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-red-500 mt-0.5">&#x2717;</span>
+                <span><strong>고정된 진입점</strong> — 우클릭 컨텍스트 메뉴는 데스크톱 파워유저 패턴</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-red-500 mt-0.5">&#x2717;</span>
+                <span><strong>모달 중단</strong> — 타입 선택 다이얼로그가 흐름을 끊음</span>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-start gap-2">
+                <span class="text-green-500 mt-0.5">&#x2713;</span>
+                <span><strong>드래그 연결</strong> — 핸들에서 드래그하면 즉시 연결 (Excalidraw 방식)</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-green-500 mt-0.5">&#x2713;</span>
+                <span><strong>인라인 팝오버</strong> — 컨텍스트를 유지한 채 타입 선택</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-green-500 mt-0.5">&#x2713;</span>
+                <span><strong>PCB 비주얼</strong> — 정보 시각화와 브랜드 차별화 동시 달성</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 2: 현재 상태 분석 -->
+      <!-- ============================================================ -->
+      <section id="current-analysis" class="section-anchor mb-20">
+        <h2 class="text-3xl font-bold mb-8 flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500 text-sm font-mono">01</span>
+          현재 상태 분석
+        </h2>
+
+        <!-- Current Flow Diagram -->
+        <div class="bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-6 mb-8">
+          <h3 class="font-semibold mb-4 text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wider">현재 연결 생성 흐름 (5단계)</h3>
+          <svg viewBox="0 0 900 140" class="w-full" xmlns="http://www.w3.org/2000/svg">
+            <!-- Step boxes -->
+            <g>
+              <!-- Step 1 -->
+              <rect x="10" y="30" width="140" height="60" rx="8" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 2"/>
+              <text x="80" y="55" text-anchor="middle" class="fill-current" font-size="11" font-weight="600">1. 노드 우클릭</text>
+              <text x="80" y="72" text-anchor="middle" fill="#9ca3af" font-size="9">컨텍스트 메뉴 열기</text>
+              <!-- Arrow -->
+              <line x1="150" y1="60" x2="180" y2="60" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+
+              <!-- Step 2 -->
+              <rect x="180" y="30" width="140" height="60" rx="8" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 2"/>
+              <text x="250" y="55" text-anchor="middle" class="fill-current" font-size="11" font-weight="600">2. "연결 시작" 클릭</text>
+              <text x="250" y="72" text-anchor="middle" fill="#9ca3af" font-size="9">메뉴 항목 선택</text>
+              <line x1="320" y1="60" x2="350" y2="60" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+
+              <!-- Step 3 -->
+              <rect x="350" y="30" width="140" height="60" rx="8" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 2"/>
+              <text x="420" y="55" text-anchor="middle" class="fill-current" font-size="11" font-weight="600">3. 대상 노드 클릭</text>
+              <text x="420" y="72" text-anchor="middle" fill="#9ca3af" font-size="9">연결 대상 지정</text>
+              <line x1="490" y1="60" x2="520" y2="60" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+
+              <!-- Step 4 -->
+              <rect x="520" y="30" width="160" height="60" rx="8" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 2"/>
+              <text x="600" y="55" text-anchor="middle" class="fill-current" font-size="11" font-weight="600">4. 타입 선택 모달</text>
+              <text x="600" y="72" text-anchor="middle" fill="#9ca3af" font-size="9">다이얼로그 팝업 대기</text>
+              <line x1="680" y1="60" x2="710" y2="60" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+
+              <!-- Step 5 -->
+              <rect x="710" y="30" width="140" height="60" rx="8" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 2"/>
+              <text x="780" y="55" text-anchor="middle" class="fill-current" font-size="11" font-weight="600">5. 확인 클릭</text>
+              <text x="780" y="72" text-anchor="middle" fill="#9ca3af" font-size="9">연결 완료</text>
+            </g>
+
+            <!-- Pain points -->
+            <text x="80" y="115" text-anchor="middle" fill="#ef4444" font-size="9">발견 불가</text>
+            <text x="420" y="115" text-anchor="middle" fill="#ef4444" font-size="9">모드 전환 혼란</text>
+            <text x="600" y="115" text-anchor="middle" fill="#ef4444" font-size="9">흐름 단절</text>
+
+            <defs>
+              <marker id="arrowGray" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="6" markerHeight="6" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#9ca3af"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+
+        <!-- Problem Analysis Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-red-50 dark:bg-red-900/10 rounded-xl p-5 border border-red-200 dark:border-red-900/30">
+            <h4 class="font-semibold text-red-600 dark:text-red-400 mb-2 text-sm">발견성 (Discoverability)</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-400">연결 핸들이 완전히 투명하여 호버 전까지 존재를 알 수 없음. 우클릭 메뉴 진입점은 초보자가 발견하기 어려운 패턴.</p>
+          </div>
+          <div class="bg-red-50 dark:bg-red-900/10 rounded-xl p-5 border border-red-200 dark:border-red-900/30">
+            <h4 class="font-semibold text-red-600 dark:text-red-400 mb-2 text-sm">인지 부하 (Cognitive Load)</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-400">5단계 프로세스 중 "연결 시작 모드"라는 별도 상태가 생기며, 사용자는 현재 무엇을 해야 하는지 혼란을 겪음.</p>
+          </div>
+          <div class="bg-red-50 dark:bg-red-900/10 rounded-xl p-5 border border-red-200 dark:border-red-900/30">
+            <h4 class="font-semibold text-red-600 dark:text-red-400 mb-2 text-sm">흐름 단절 (Flow Interruption)</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-400">타입 선택 모달이 전체 화면을 가리며 캔버스 컨텍스트를 잃음. 연결 위치와 타입 선택이 공간적으로 분리됨.</p>
+          </div>
+          <div class="bg-red-50 dark:bg-red-900/10 rounded-xl p-5 border border-red-200 dark:border-red-900/30">
+            <h4 class="font-semibold text-red-600 dark:text-red-400 mb-2 text-sm">실수 복구 (Error Recovery)</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Undo/Redo 부재로 잘못된 연결 생성 시 수동 삭제 필요. 다중 선택 불가로 일괄 작업 불가.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 3: 벤치마킹 - Excalidraw -->
+      <!-- ============================================================ -->
+      <section id="benchmarking" class="section-anchor mb-20">
+        <h2 class="text-3xl font-bold mb-8 flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-brand-blue/10 flex items-center justify-center text-brand-blue text-sm font-mono">02</span>
+          벤치마킹: Excalidraw
+        </h2>
+
+        <p class="text-gray-600 dark:text-gray-400 mb-8">Excalidraw에서 차용할 5가지 핵심 인터랙션 패턴과 Linkmap에의 적용 방안.</p>
+
+        <div class="space-y-4">
+          <!-- Pattern 1 -->
+          <div class="card-hover bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-6">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-lg bg-brand-blue/10 flex items-center justify-center flex-shrink-0">
+                <span class="text-brand-blue font-bold">1</span>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-semibold mb-1">핸들 호버 가시화 (Handle Affordance)</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Excalidraw: 요소 호버 시 4방향에 연결 포인트 fade-in. 드래그 가능함을 즉각 인지.</p>
+                <div class="bg-gray-50 dark:bg-circuit-800 rounded-lg p-4">
+                  <p class="text-sm font-medium text-brand-green mb-1">Linkmap 적용</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">IC 칩 핀 형태의 핸들로 변환. 호버 시 핀이 외부로 확장되며 "드래그하여 연결" 툴팁 표시. 핀 색상으로 입/출력 방향 구분.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pattern 2 -->
+          <div class="card-hover bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-6">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-lg bg-brand-blue/10 flex items-center justify-center flex-shrink-0">
+                <span class="text-brand-blue font-bold">2</span>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-semibold mb-1">드래그 투 커넥트 (Drag-to-Connect)</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Excalidraw: 핸들에서 드래그 시작 → 대상 요소 위에서 릴리스 → 즉시 연결 생성. 중간 단계 없음.</p>
+                <div class="bg-gray-50 dark:bg-circuit-800 rounded-lg p-4">
+                  <p class="text-sm font-medium text-brand-green mb-1">Linkmap 적용</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">핀에서 드래그 시작 시 PCB 트레이스 프리뷰 라인 표시. 유효 타겟 노드 하이라이트. 드롭 시 인라인 팝오버로 타입 선택 (기본값 자동 추론).</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pattern 3 -->
+          <div class="card-hover bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-6">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-lg bg-brand-blue/10 flex items-center justify-center flex-shrink-0">
+                <span class="text-brand-blue font-bold">3</span>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-semibold mb-1">스마트 스냅 & 정렬 (Smart Snap)</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Excalidraw: 드래그 중 가까운 요소에 자동 스냅. 정렬 가이드라인 표시.</p>
+                <div class="bg-gray-50 dark:bg-circuit-800 rounded-lg p-4">
+                  <p class="text-sm font-medium text-brand-green mb-1">Linkmap 적용</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">연결선이 대상 핀에 자기(magnet) 스냅. PCB 직각 경로(orthogonal routing) 자동 생성. 기존 트레이스와 겹치지 않도록 자동 우회.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pattern 4 -->
+          <div class="card-hover bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-6">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-lg bg-brand-blue/10 flex items-center justify-center flex-shrink-0">
+                <span class="text-brand-blue font-bold">4</span>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-semibold mb-1">인라인 편집 (Inline Editing)</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Excalidraw: 요소 더블클릭 시 모달 없이 즉석 텍스트 편집. 컨텍스트 유지.</p>
+                <div class="bg-gray-50 dark:bg-circuit-800 rounded-lg p-4">
+                  <p class="text-sm font-medium text-brand-green mb-1">Linkmap 적용</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">엣지 더블클릭 → 라벨/타입/메모 인라인 편집. 노드 더블클릭 → 이름/설명 즉석 편집. ESC로 취소, Enter로 확인.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pattern 5 -->
+          <div class="card-hover bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-6">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-lg bg-brand-blue/10 flex items-center justify-center flex-shrink-0">
+                <span class="text-brand-blue font-bold">5</span>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-semibold mb-1">Undo/Redo 히스토리 (Command History)</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Excalidraw: Ctrl+Z/Y로 모든 액션 되돌리기. 실수 비용 제로.</p>
+                <div class="bg-gray-50 dark:bg-circuit-800 rounded-lg p-4">
+                  <p class="text-sm font-medium text-brand-green mb-1">Linkmap 적용</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">연결 생성/삭제/타입 변경/위치 이동을 모두 히스토리 스택에 기록. Ctrl+Z/Y + 툴바 버튼 양쪽 지원. 히스토리 50개 유지.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 4: 페르소나별 사용자 여정 -->
+      <!-- ============================================================ -->
+      <section id="personas" class="section-anchor mb-20">
+        <h2 class="text-3xl font-bold mb-8 flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500 text-sm font-mono">03</span>
+          5개 페르소나별 사용자 여정
+        </h2>
+
+        <!-- Persona Cards -->
+        <div class="space-y-6">
+          <!-- 민지 -->
+          <div class="bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 overflow-hidden">
+            <div class="bg-gradient-to-r from-pink-500/10 to-purple-500/10 dark:from-pink-500/5 dark:to-purple-500/5 px-6 py-4 border-b border-gray-200 dark:border-circuit-800">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center text-lg">&#x1F469;&#x200D;&#x1F3A8;</div>
+                <div>
+                  <h3 class="font-bold">민지 — 바이브코더</h3>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">코딩 경험 0 | AI로 첫 사이드 프로젝트 빌딩 중</p>
+                </div>
+                <span class="ml-auto text-xs px-2 py-1 rounded-full bg-pink-500/10 text-pink-600 dark:text-pink-400">타겟 1순위</span>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <p class="font-medium text-red-500 mb-1">Pain Point</p>
+                  <p class="text-gray-600 dark:text-gray-400">"API 키? 환경변수? 연결 타입? 무슨 말인지 모르겠어요." 연결 타입 선택 모달에서 이탈.</p>
+                </div>
+                <div>
+                  <p class="font-medium text-brand-green mb-1">해결책</p>
+                  <p class="text-gray-600 dark:text-gray-400"><strong>스마트 기본값</strong> — 서비스 조합에 따라 연결 타입 자동 추론. Supabase+Next.js → "Database Client" 자동 선택.</p>
+                </div>
+                <div>
+                  <p class="font-medium text-brand-blue mb-1">개선 후 여정</p>
+                  <p class="text-gray-600 dark:text-gray-400">핀에서 드래그 → 대상 노드 드롭 → "이 연결이 맞나요?" 팝오버 → 확인 클릭 → 완료 (2단계)</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 현우 -->
+          <div class="bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 dark:from-blue-500/5 dark:to-cyan-500/5 px-6 py-4 border-b border-gray-200 dark:border-circuit-800">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-lg">&#x1F468;&#x200D;&#x1F4BB;</div>
+                <div>
+                  <h3 class="font-bold">현우 — 주니어 개발자</h3>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">경력 1년 | 첫 풀스택 프로젝트 세팅 중</p>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <p class="font-medium text-red-500 mb-1">Pain Point</p>
+                  <p class="text-gray-600 dark:text-gray-400">package.json에 이미 있는 서비스를 일일이 수동 추가해야 함. 연결도 하나씩 만들어야 해서 시간 낭비.</p>
+                </div>
+                <div>
+                  <p class="font-medium text-brand-green mb-1">해결책</p>
+                  <p class="text-gray-600 dark:text-gray-400"><strong>GitHub 연동 자동 감지</strong> — 리포 연결 시 의존성 분석 → 서비스+연결 자동 생성 제안.</p>
+                </div>
+                <div>
+                  <p class="font-medium text-brand-blue mb-1">개선 후 여정</p>
+                  <p class="text-gray-600 dark:text-gray-400">GitHub 연결 → "8개 서비스 발견" 알림 → 한 번에 추가 → 연결 자동 생성 → 미세 조정만</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 수진 -->
+          <div class="bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 overflow-hidden">
+            <div class="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/5 dark:to-teal-500/5 px-6 py-4 border-b border-gray-200 dark:border-circuit-800">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-lg">&#x1F469;&#x200D;&#x1F52C;</div>
+                <div>
+                  <h3 class="font-bold">수진 — 시니어 엔지니어</h3>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">경력 8년 | 30+ 마이크로서비스 운영 중</p>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <p class="font-medium text-red-500 mb-1">Pain Point</p>
+                  <p class="text-gray-600 dark:text-gray-400">30개 서비스 × N개 연결 = 스파게티. 줌아웃하면 라벨 안 보이고, 줌인하면 전체 그림 안 보임.</p>
+                </div>
+                <div>
+                  <p class="font-medium text-brand-green mb-1">해결책</p>
+                  <p class="text-gray-600 dark:text-gray-400"><strong>엣지 번들링 + LOD</strong> — 같은 방향 연결선 묶기. 줌 레벨별 디테일 자동 조절. 그룹 접기/펼치기.</p>
+                </div>
+                <div>
+                  <p class="font-medium text-brand-blue mb-1">개선 후 여정</p>
+                  <p class="text-gray-600 dark:text-gray-400">줌아웃 → 트래픽 히트맵 오버뷰 → 이상 구간 클릭 → 줌인 → 상세 연결 확인 → 인라인 편집</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 재혁 -->
+          <div class="bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 overflow-hidden">
+            <div class="bg-gradient-to-r from-amber-500/10 to-orange-500/10 dark:from-amber-500/5 dark:to-orange-500/5 px-6 py-4 border-b border-gray-200 dark:border-circuit-800">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-lg">&#x1F4CB;</div>
+                <div>
+                  <h3 class="font-bold">재혁 — PM / 기술 기획자</h3>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">아키텍처 문서화 담당 | 이해관계자 커뮤니케이션</p>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <p class="font-medium text-red-500 mb-1">Pain Point</p>
+                  <p class="text-gray-600 dark:text-gray-400">서비스맵을 스크린샷으로 공유하면 해상도 깨짐. 인쇄용 PDF 내보내기 없음. 비개발 이해관계자에게 설명 어려움.</p>
+                </div>
+                <div>
+                  <p class="font-medium text-brand-green mb-1">해결책</p>
+                  <p class="text-gray-600 dark:text-gray-400"><strong>SVG/PDF 내보내기</strong> — 벡터 기반 고품질 내보내기. 자동 범례 포함. 인쇄 최적화 레이아웃.</p>
+                </div>
+                <div>
+                  <p class="font-medium text-brand-blue mb-1">개선 후 여정</p>
+                  <p class="text-gray-600 dark:text-gray-400">서비스맵 완성 → 내보내기 → SVG 선택 → 범례+타이틀 자동 포함 → Confluence/Notion 임베드</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 소영 -->
+          <div class="bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 overflow-hidden">
+            <div class="bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 dark:from-violet-500/5 dark:to-fuchsia-500/5 px-6 py-4 border-b border-gray-200 dark:border-circuit-800">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center text-lg">&#x1F680;</div>
+                <div>
+                  <h3 class="font-bold">소영 — 스타트업 창업자 / CTO</h3>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">비용 최적화 | 기술 스택 의사결정</p>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <p class="font-medium text-red-500 mb-1">Pain Point</p>
+                  <p class="text-gray-600 dark:text-gray-400">"이 서비스를 저걸로 바꾸면 비용이 얼마나 줄지?" 비교가 안 됨. 연결 영향도도 파악 불가.</p>
+                </div>
+                <div>
+                  <p class="font-medium text-brand-green mb-1">해결책</p>
+                  <p class="text-gray-600 dark:text-gray-400"><strong>교체 시뮬레이션</strong> — 서비스 교체 시 영향받는 연결 하이라이트 + 비용 비교 팝오버.</p>
+                </div>
+                <div>
+                  <p class="font-medium text-brand-blue mb-1">개선 후 여정</p>
+                  <p class="text-gray-600 dark:text-gray-400">서비스 우클릭 → "교체 시뮬레이션" → 대체 서비스 선택 → 영향 연결 빨간색 표시 → 비용 차이 확인</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 5: UX 개선안 - 드래그 연결 -->
+      <!-- ============================================================ -->
+      <section id="ux-improvement" class="section-anchor mb-20">
+        <h2 class="text-3xl font-bold mb-8 flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-brand-green/10 flex items-center justify-center text-brand-green text-sm font-mono">04</span>
+          UX 개선안: 드래그 연결
+        </h2>
+
+        <!-- Before / After Comparison -->
+        <div class="mb-10">
+          <h3 class="font-semibold mb-4">Before → After 비교</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm border-collapse">
+              <thead>
+                <tr class="border-b border-gray-200 dark:border-circuit-800">
+                  <th class="text-left py-3 px-4 font-semibold text-gray-500 dark:text-gray-400">항목</th>
+                  <th class="text-left py-3 px-4 font-semibold text-red-500">현재</th>
+                  <th class="text-left py-3 px-4 font-semibold text-brand-green">개선 후</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 dark:divide-circuit-800">
+                <tr>
+                  <td class="py-3 px-4 font-medium">핸들 가시성</td>
+                  <td class="py-3 px-4 text-gray-500">투명 (발견 불가)</td>
+                  <td class="py-3 px-4 text-gray-600 dark:text-gray-300">호버 시 IC 핀 핸들 fade-in + 툴팁</td>
+                </tr>
+                <tr>
+                  <td class="py-3 px-4 font-medium">연결 시작</td>
+                  <td class="py-3 px-4 text-gray-500">우클릭 → 메뉴 → "연결 시작"</td>
+                  <td class="py-3 px-4 text-gray-600 dark:text-gray-300">핸들에서 드래그 시작 (1 액션)</td>
+                </tr>
+                <tr>
+                  <td class="py-3 px-4 font-medium">타입 선택</td>
+                  <td class="py-3 px-4 text-gray-500">모달 다이얼로그 (전체 차단)</td>
+                  <td class="py-3 px-4 text-gray-600 dark:text-gray-300">인라인 팝오버 (컨텍스트 유지)</td>
+                </tr>
+                <tr>
+                  <td class="py-3 px-4 font-medium">실수 복구</td>
+                  <td class="py-3 px-4 text-gray-500">수동 삭제만 가능</td>
+                  <td class="py-3 px-4 text-gray-600 dark:text-gray-300">Ctrl+Z/Y 히스토리 스택</td>
+                </tr>
+                <tr>
+                  <td class="py-3 px-4 font-medium">다중 선택</td>
+                  <td class="py-3 px-4 text-gray-500">불가</td>
+                  <td class="py-3 px-4 text-gray-600 dark:text-gray-300">Shift+클릭 / 영역 선택</td>
+                </tr>
+                <tr>
+                  <td class="py-3 px-4 font-medium">엣지 편집</td>
+                  <td class="py-3 px-4 text-gray-500">별도 패널 열기</td>
+                  <td class="py-3 px-4 text-gray-600 dark:text-gray-300">더블클릭 인라인 편집</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- New Flow Diagram -->
+        <div class="bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-6 mb-8">
+          <h3 class="font-semibold mb-4 text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wider">개선된 연결 생성 흐름 (2단계)</h3>
+          <svg viewBox="0 0 700 160" class="w-full" xmlns="http://www.w3.org/2000/svg">
+            <!-- Step 1 -->
+            <rect x="50" y="30" width="240" height="80" rx="12" fill="none" stroke="#34d399" stroke-width="2"/>
+            <text x="170" y="58" text-anchor="middle" class="fill-current" font-size="13" font-weight="700">1. 핸들 드래그 → 대상 드롭</text>
+            <text x="170" y="78" text-anchor="middle" fill="#9ca3af" font-size="10">핀에서 시작 → PCB 트레이스 프리뷰</text>
+            <text x="170" y="93" text-anchor="middle" fill="#9ca3af" font-size="10">유효 타겟 하이라이트 → 드롭</text>
+
+            <!-- Arrow -->
+            <line x1="290" y1="70" x2="370" y2="70" stroke="#34d399" stroke-width="2" marker-end="url(#arrowGreen)"/>
+            <text x="330" y="60" text-anchor="middle" fill="#34d399" font-size="9" font-weight="600">자동 추론</text>
+
+            <!-- Step 2 -->
+            <rect x="370" y="30" width="240" height="80" rx="12" fill="none" stroke="#34d399" stroke-width="2"/>
+            <text x="490" y="58" text-anchor="middle" class="fill-current" font-size="13" font-weight="700">2. 팝오버에서 확인</text>
+            <text x="490" y="78" text-anchor="middle" fill="#9ca3af" font-size="10">타입 자동 추론 → 원클릭 확인</text>
+            <text x="490" y="93" text-anchor="middle" fill="#9ca3af" font-size="10">또는 타입 변경 후 확인</text>
+
+            <!-- Result -->
+            <text x="350" y="145" text-anchor="middle" fill="#34d399" font-size="11" font-weight="600">5단계 → 2단계 (60% 단축)</text>
+
+            <defs>
+              <marker id="arrowGreen" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="8" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#34d399"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+
+        <!-- Interaction Scenario Steps -->
+        <h3 class="font-semibold mb-4">인터랙션 시나리오 (상세)</h3>
+        <div class="space-y-3">
+          <div class="flex gap-4 items-start bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-5">
+            <div class="w-8 h-8 rounded-full bg-brand-green/10 flex items-center justify-center flex-shrink-0 text-brand-green font-bold text-sm">1</div>
+            <div>
+              <h4 class="font-medium mb-1">호버 → 핸들 가시화</h4>
+              <p class="text-sm text-gray-500 dark:text-gray-400">서비스 노드에 마우스를 올리면 상하좌우에 IC 핀 형태의 연결 핸들이 0.15s fade-in. 핀 색상: 출력(green), 입력(blue). 커서가 grab으로 변경.</p>
+            </div>
+          </div>
+          <div class="flex gap-4 items-start bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-5">
+            <div class="w-8 h-8 rounded-full bg-brand-green/10 flex items-center justify-center flex-shrink-0 text-brand-green font-bold text-sm">2</div>
+            <div>
+              <h4 class="font-medium mb-1">드래그 시작 → 트레이스 프리뷰</h4>
+              <p class="text-sm text-gray-500 dark:text-gray-400">핀에서 마우스 다운+드래그 시 직각 경로의 PCB 트레이스 프리뷰 라인 표시. 점선 + 네온 글로우. 유효하지 않은 영역에서는 빨간색으로 변경.</p>
+            </div>
+          </div>
+          <div class="flex gap-4 items-start bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-5">
+            <div class="w-8 h-8 rounded-full bg-brand-green/10 flex items-center justify-center flex-shrink-0 text-brand-green font-bold text-sm">3</div>
+            <div>
+              <h4 class="font-medium mb-1">타겟 스냅 → 하이라이트</h4>
+              <p class="text-sm text-gray-500 dark:text-gray-400">드래그 커서가 유효 타겟 노드 반경 40px 이내 진입 시 자기 스냅. 타겟 노드에 글로우 링 + 입력 핀 확대. 연결 가능 여부 즉시 피드백.</p>
+            </div>
+          </div>
+          <div class="flex gap-4 items-start bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-5">
+            <div class="w-8 h-8 rounded-full bg-brand-green/10 flex items-center justify-center flex-shrink-0 text-brand-green font-bold text-sm">4</div>
+            <div>
+              <h4 class="font-medium mb-1">드롭 → 인라인 팝오버</h4>
+              <p class="text-sm text-gray-500 dark:text-gray-400">타겟 위에서 마우스 업 시 드롭 지점 근처에 인라인 팝오버 표시. 서비스 조합 기반 타입 자동 추론 + 신뢰도 표시. 원클릭 확인 또는 타입 변경.</p>
+            </div>
+          </div>
+          <div class="flex gap-4 items-start bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-5">
+            <div class="w-8 h-8 rounded-full bg-brand-green/10 flex items-center justify-center flex-shrink-0 text-brand-green font-bold text-sm">5</div>
+            <div>
+              <h4 class="font-medium mb-1">확인 → 연결 생성 + 애니메이션</h4>
+              <p class="text-sm text-gray-500 dark:text-gray-400">팝오버 확인 시 트레이스가 점선에서 실선으로 전환. 생성 완료 효과: 트레이스를 따라 데이터 패킷(rect) 1회 흐름. 히스토리 스택에 push. sonner 토스트 "연결 생성됨".</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 6: PCB 메타포 비주얼 차별화 -->
+      <!-- ============================================================ -->
+      <section id="pcb-metaphor" class="section-anchor mb-20">
+        <h2 class="text-3xl font-bold mb-8 flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-pcb-copper/20 flex items-center justify-center text-pcb-copper text-sm font-mono">05</span>
+          비주얼 차별화: PCB 메타포
+        </h2>
+
+        <p class="text-gray-600 dark:text-gray-400 mb-8">
+          "살아있는 회로 기판" 메타포로 기능적 정보 시각화와 브랜드 차별화를 동시에 달성합니다.
+        </p>
+
+        <!-- PCB Visual Demo -->
+        <div class="bg-circuit-950 rounded-xl border border-circuit-800 p-8 mb-8 pcb-grid overflow-hidden">
+          <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-6">PCB 메타포 인터랙티브 프리뷰 (다크 모드)</h3>
+
+          <svg viewBox="0 0 800 400" class="w-full" xmlns="http://www.w3.org/2000/svg">
+            <!-- Background grid dots -->
+            <defs>
+              <pattern id="pcbDots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="10" cy="10" r="0.8" fill="rgba(52,211,153,0.2)"/>
+              </pattern>
+              <filter id="glow-green">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <filter id="glow-blue">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <filter id="glow-copper">
+                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <rect width="800" height="400" fill="url(#pcbDots)"/>
+
+            <!-- Copper Layer Zone -->
+            <rect x="30" y="20" width="740" height="360" rx="8" fill="none" stroke="#b87333" stroke-width="1" stroke-dasharray="6 3" opacity="0.3"/>
+            <text x="50" y="16" fill="#b87333" font-size="9" opacity="0.5" font-family="monospace">ZONE: Frontend Layer</text>
+
+            <!-- IC Chip Node 1: Next.js -->
+            <g transform="translate(100, 100)">
+              <!-- Chip body -->
+              <rect x="0" y="0" width="140" height="80" rx="4" fill="#1e3048" stroke="#34d399" stroke-width="1.5" filter="url(#glow-green)"/>
+              <!-- IC notch -->
+              <circle cx="70" cy="0" r="6" fill="#1e3048" stroke="#34d399" stroke-width="1"/>
+              <!-- Pins left -->
+              <rect x="-12" y="15" width="12" height="6" rx="1" fill="#b87333" filter="url(#glow-copper)"/>
+              <rect x="-12" y="35" width="12" height="6" rx="1" fill="#b87333" filter="url(#glow-copper)"/>
+              <rect x="-12" y="55" width="12" height="6" rx="1" fill="#b87333" filter="url(#glow-copper)"/>
+              <!-- Pins right -->
+              <rect x="140" y="15" width="12" height="6" rx="1" fill="#b87333" filter="url(#glow-copper)"/>
+              <rect x="140" y="35" width="12" height="6" rx="1" fill="#b87333" filter="url(#glow-copper)"/>
+              <rect x="140" y="55" width="12" height="6" rx="1" fill="#b87333" filter="url(#glow-copper)"/>
+              <!-- Label -->
+              <text x="70" y="35" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700" font-family="monospace">Next.js</text>
+              <text x="70" y="52" text-anchor="middle" fill="#94a3b8" font-size="9">App Router</text>
+              <!-- LED indicator -->
+              <circle cx="120" cy="15" r="4" fill="#34d399" opacity="0.9">
+                <animate attributeName="opacity" values="0.9;0.4;0.9" dur="2s" repeatCount="indefinite"/>
+              </circle>
+              <!-- Silk screen label -->
+              <text x="70" y="72" text-anchor="middle" fill="#64748b" font-size="7" font-family="monospace">U1 — FRAMEWORK</text>
+            </g>
+
+            <!-- IC Chip Node 2: Supabase -->
+            <g transform="translate(500, 80)">
+              <rect x="0" y="0" width="160" height="90" rx="4" fill="#1e3048" stroke="#3b6cf0" stroke-width="1.5" filter="url(#glow-blue)"/>
+              <circle cx="80" cy="0" r="6" fill="#1e3048" stroke="#3b6cf0" stroke-width="1"/>
+              <!-- Pins left -->
+              <rect x="-12" y="15" width="12" height="6" rx="1" fill="#b87333" filter="url(#glow-copper)"/>
+              <rect x="-12" y="35" width="12" height="6" rx="1" fill="#b87333" filter="url(#glow-copper)"/>
+              <rect x="-12" y="55" width="12" height="6" rx="1" fill="#b87333" filter="url(#glow-copper)"/>
+              <rect x="-12" y="75" width="12" height="6" rx="1" fill="#b87333" filter="url(#glow-copper)"/>
+              <!-- Pins right -->
+              <rect x="160" y="15" width="12" height="6" rx="1" fill="#b87333" filter="url(#glow-copper)"/>
+              <rect x="160" y="35" width="12" height="6" rx="1" fill="#b87333" filter="url(#glow-copper)"/>
+              <rect x="160" y="55" width="12" height="6" rx="1" fill="#b87333" filter="url(#glow-copper)"/>
+              <text x="80" y="40" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700" font-family="monospace">Supabase</text>
+              <text x="80" y="57" text-anchor="middle" fill="#94a3b8" font-size="9">Auth + DB + Storage</text>
+              <circle cx="140" cy="15" r="4" fill="#34d399" opacity="0.9">
+                <animate attributeName="opacity" values="0.9;0.4;0.9" dur="2.3s" repeatCount="indefinite"/>
+              </circle>
+              <text x="80" y="82" text-anchor="middle" fill="#64748b" font-size="7" font-family="monospace">U2 — BACKEND</text>
+            </g>
+
+            <!-- IC Chip Node 3: Vercel -->
+            <g transform="translate(100, 260)">
+              <rect x="0" y="0" width="140" height="70" rx="4" fill="#1e3048" stroke="#a78bfa" stroke-width="1.5"/>
+              <circle cx="70" cy="0" r="6" fill="#1e3048" stroke="#a78bfa" stroke-width="1"/>
+              <rect x="-12" y="15" width="12" height="6" rx="1" fill="#b87333"/>
+              <rect x="-12" y="35" width="12" height="6" rx="1" fill="#b87333"/>
+              <rect x="140" y="15" width="12" height="6" rx="1" fill="#b87333"/>
+              <rect x="140" y="35" width="12" height="6" rx="1" fill="#b87333"/>
+              <text x="70" y="32" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700" font-family="monospace">Vercel</text>
+              <text x="70" y="47" text-anchor="middle" fill="#94a3b8" font-size="9">Deploy</text>
+              <circle cx="120" cy="12" r="4" fill="#34d399" opacity="0.9">
+                <animate attributeName="opacity" values="0.9;0.4;0.9" dur="1.8s" repeatCount="indefinite"/>
+              </circle>
+              <text x="70" y="62" text-anchor="middle" fill="#64748b" font-size="7" font-family="monospace">U3 — HOSTING</text>
+            </g>
+
+            <!-- IC Chip Node 4: Stripe -->
+            <g transform="translate(500, 250)">
+              <rect x="0" y="0" width="140" height="70" rx="4" fill="#1e3048" stroke="#f59e0b" stroke-width="1.5"/>
+              <circle cx="70" cy="0" r="6" fill="#1e3048" stroke="#f59e0b" stroke-width="1"/>
+              <rect x="-12" y="15" width="12" height="6" rx="1" fill="#b87333"/>
+              <rect x="-12" y="35" width="12" height="6" rx="1" fill="#b87333"/>
+              <rect x="140" y="15" width="12" height="6" rx="1" fill="#b87333"/>
+              <text x="70" y="32" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700" font-family="monospace">Stripe</text>
+              <text x="70" y="47" text-anchor="middle" fill="#94a3b8" font-size="9">Payment</text>
+              <circle cx="120" cy="12" r="4" fill="#f59e0b" opacity="0.9">
+                <animate attributeName="opacity" values="0.9;0.4;0.9" dur="3s" repeatCount="indefinite"/>
+              </circle>
+              <text x="70" y="62" text-anchor="middle" fill="#64748b" font-size="7" font-family="monospace">U4 — PAYMENT</text>
+            </g>
+
+            <!-- PCB Trace: Next.js → Supabase (orthogonal, green) -->
+            <g>
+              <path d="M252 138 L320 138 L320 118 L488 118" fill="none" stroke="#34d399" stroke-width="2.5" filter="url(#glow-green)" stroke-linecap="round" stroke-linejoin="round"/>
+              <!-- Via hole at bend -->
+              <circle cx="320" cy="138" r="5" fill="#0f1d2f" stroke="#34d399" stroke-width="1.5"/>
+              <circle cx="320" cy="138" r="2" fill="#34d399"/>
+              <!-- Data packet animation -->
+              <rect width="10" height="4" rx="1" fill="#5eead4" opacity="0.9">
+                <animateMotion dur="2s" repeatCount="indefinite" path="M252,138 L320,138 L320,118 L488,118"/>
+              </rect>
+              <!-- Connection label -->
+              <rect x="355" y="104" width="80" height="18" rx="3" fill="#162436" stroke="#34d399" stroke-width="0.5"/>
+              <text x="395" y="116" text-anchor="middle" fill="#34d399" font-size="8" font-family="monospace">DB_CLIENT</text>
+            </g>
+
+            <!-- PCB Trace: Next.js → Vercel (orthogonal, purple) -->
+            <g>
+              <path d="M170 180 L170 220 L170 275" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="170" cy="220" r="5" fill="#0f1d2f" stroke="#a78bfa" stroke-width="1.5"/>
+              <circle cx="170" cy="220" r="2" fill="#a78bfa"/>
+              <rect width="8" height="4" rx="1" fill="#c4b5fd" opacity="0.8">
+                <animateMotion dur="1.5s" repeatCount="indefinite" path="M170,180 L170,220 L170,260"/>
+              </rect>
+              <rect x="178" y="215" width="56" height="18" rx="3" fill="#162436" stroke="#a78bfa" stroke-width="0.5"/>
+              <text x="206" y="227" text-anchor="middle" fill="#a78bfa" font-size="8" font-family="monospace">DEPLOY</text>
+            </g>
+
+            <!-- PCB Trace: Supabase → Stripe (orthogonal, amber) -->
+            <g>
+              <path d="M580 170 L580 210 L570 210 L570 250" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="580" cy="210" r="5" fill="#0f1d2f" stroke="#f59e0b" stroke-width="1.5"/>
+              <circle cx="580" cy="210" r="2" fill="#f59e0b"/>
+              <rect width="8" height="4" rx="1" fill="#fbbf24" opacity="0.8">
+                <animateMotion dur="2.5s" repeatCount="indefinite" path="M580,170 L580,210 L570,210 L570,250"/>
+              </rect>
+              <rect x="588" y="202" width="68" height="18" rx="3" fill="#162436" stroke="#f59e0b" stroke-width="0.5"/>
+              <text x="622" y="214" text-anchor="middle" fill="#f59e0b" font-size="8" font-family="monospace">WEBHOOK</text>
+            </g>
+
+            <!-- Legend -->
+            <g transform="translate(30, 370)">
+              <circle cx="8" cy="4" r="3" fill="#34d399"/>
+              <text x="16" y="7" fill="#64748b" font-size="8">정상</text>
+              <circle cx="68" cy="4" r="3" fill="#f59e0b"/>
+              <text x="76" y="7" fill="#64748b" font-size="8">경고</text>
+              <circle cx="128" cy="4" r="3" fill="#ef4444"/>
+              <text x="136" y="7" fill="#64748b" font-size="8">오류</text>
+              <circle cx="200" cy="4" r="5" fill="#0f1d2f" stroke="#64748b" stroke-width="1"/>
+              <circle cx="200" cy="4" r="2" fill="#64748b"/>
+              <text x="210" y="7" fill="#64748b" font-size="8">Via Hole</text>
+              <rect x="275" y="0" width="10" height="6" rx="1" fill="#5eead4" opacity="0.8"/>
+              <text x="290" y="7" fill="#64748b" font-size="8">Data Packet</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- 6 Design Elements Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- IC Chip Node -->
+          <div class="card-hover bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-5">
+            <div class="w-8 h-8 rounded bg-pcb-copper/10 flex items-center justify-center mb-3">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <rect x="4" y="4" width="12" height="12" rx="1" stroke="#b87333" stroke-width="1.5"/>
+                <rect x="1" y="7" width="3" height="2" rx="0.5" fill="#b87333"/>
+                <rect x="1" y="11" width="3" height="2" rx="0.5" fill="#b87333"/>
+                <rect x="16" y="7" width="3" height="2" rx="0.5" fill="#b87333"/>
+                <rect x="16" y="11" width="3" height="2" rx="0.5" fill="#b87333"/>
+              </svg>
+            </div>
+            <h4 class="font-semibold mb-1 text-sm">IC 칩 노드</h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400">카테고리별 핀 수/형태 차등. 서비스 크기에 비례. LED 상태 인디케이터 (green/amber/red). 실크스크린 라벨.</p>
+          </div>
+
+          <!-- PCB Trace Edge -->
+          <div class="card-hover bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-5">
+            <div class="w-8 h-8 rounded bg-brand-green/10 flex items-center justify-center mb-3">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M2 10 L8 10 L8 4 L18 4" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="8" cy="10" r="2" fill="none" stroke="#34d399" stroke-width="1"/>
+              </svg>
+            </div>
+            <h4 class="font-semibold mb-1 text-sm">PCB 트레이스 엣지</h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400">직각 경로(orthogonal routing). 교차점에 Via Hole 마커. 데이터 패킷(rect) 파티클 애니메이션. 타입별 색상.</p>
+          </div>
+
+          <!-- Circuit Board Canvas -->
+          <div class="card-hover bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-5">
+            <div class="w-8 h-8 rounded bg-circuit-800/30 dark:bg-circuit-800/50 flex items-center justify-center mb-3 pcb-grid">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="4" cy="4" r="1" fill="#34d399" opacity="0.4"/>
+                <circle cx="12" cy="4" r="1" fill="#34d399" opacity="0.4"/>
+                <circle cx="4" cy="12" r="1" fill="#34d399" opacity="0.4"/>
+                <circle cx="12" cy="12" r="1" fill="#34d399" opacity="0.4"/>
+                <circle cx="8" cy="8" r="1" fill="#34d399" opacity="0.4"/>
+              </svg>
+            </div>
+            <h4 class="font-semibold mb-1 text-sm">회로 기판 캔버스</h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400">다크: PCB 도트 그리드 + Via Hole 배경. 라이트: Blueprint 스타일 격자. 줌에 따라 그리드 밀도 변화.</p>
+          </div>
+
+          <!-- Copper Layer Zone -->
+          <div class="card-hover bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-5">
+            <div class="w-8 h-8 rounded bg-pcb-copper/10 flex items-center justify-center mb-3">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <rect x="2" y="2" width="16" height="16" rx="2" stroke="#b87333" stroke-width="1" stroke-dasharray="4 2"/>
+                <line x1="5" y1="5" x2="7" y2="7" stroke="#b87333" stroke-width="0.5" opacity="0.5"/>
+                <line x1="9" y1="5" x2="11" y2="7" stroke="#b87333" stroke-width="0.5" opacity="0.5"/>
+                <line x1="13" y1="5" x2="15" y2="7" stroke="#b87333" stroke-width="0.5" opacity="0.5"/>
+              </svg>
+            </div>
+            <h4 class="font-semibold mb-1 text-sm">Copper Layer 존</h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400">서비스 그룹을 해칭 패턴 영역으로 시각화. 실크스크린 스타일 라벨 (monospace). 접기/펼치기 지원.</p>
+          </div>
+
+          <!-- Neon Glow -->
+          <div class="card-hover bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-5">
+            <div class="w-8 h-8 rounded bg-pcb-glow/10 flex items-center justify-center mb-3">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <circle cx="10" cy="10" r="4" fill="none" stroke="#5eead4" stroke-width="1.5" filter="url(#glow-green)"/>
+                <circle cx="10" cy="10" r="2" fill="#5eead4"/>
+              </svg>
+            </div>
+            <h4 class="font-semibold mb-1 text-sm">네온 글로우</h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400">다크모드 전용 엣지/노드 글로우 강화. 활성 연결은 밝은 글로우, 비활성은 감쇠. 호버 시 글로우 증폭.</p>
+          </div>
+
+          <!-- Data Packets -->
+          <div class="card-hover bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-5">
+            <div class="w-8 h-8 rounded bg-brand-green/10 flex items-center justify-center mb-3">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <rect x="3" y="8" width="6" height="4" rx="1" fill="#34d399" opacity="0.8"/>
+                <rect x="11" y="8" width="6" height="4" rx="1" fill="#34d399" opacity="0.4"/>
+                <path d="M9 10 L11 10" stroke="#34d399" stroke-width="1" stroke-dasharray="1 1"/>
+              </svg>
+            </div>
+            <h4 class="font-semibold mb-1 text-sm">데이터 패킷 파티클</h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400">트레이스 위를 이동하는 작은 직사각형 파티클. 연결 활성 상태를 직관적으로 표현. 속도로 트래픽 양 시각화.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 7: LOD 시스템 -->
+      <!-- ============================================================ -->
+      <section id="lod-system" class="section-anchor mb-20">
+        <h2 class="text-3xl font-bold mb-8 flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500 text-sm font-mono">06</span>
+          정보 밀도 관리: LOD 시스템
+        </h2>
+
+        <p class="text-gray-600 dark:text-gray-400 mb-8">
+          줌 레벨에 따라 표시되는 디테일을 자동 조절하여, 30+ 서비스 규모에서도 가독성을 유지합니다.
+        </p>
+
+        <!-- LOD Levels -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <!-- Overview -->
+          <div class="bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 overflow-hidden">
+            <div class="bg-indigo-500/5 dark:bg-indigo-500/10 px-5 py-3 border-b border-gray-200 dark:border-circuit-800">
+              <div class="flex items-center justify-between">
+                <h3 class="font-semibold text-sm">Overview</h3>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500 font-mono">&lt; 0.5x</span>
+              </div>
+            </div>
+            <div class="p-5">
+              <svg viewBox="0 0 200 140" class="w-full mb-3" xmlns="http://www.w3.org/2000/svg">
+                <rect width="200" height="140" fill="#0f1d2f" rx="4"/>
+                <!-- Simplified nodes as colored dots -->
+                <circle cx="50" cy="40" r="8" fill="#34d399" opacity="0.6"/>
+                <circle cx="120" cy="35" r="10" fill="#3b6cf0" opacity="0.6"/>
+                <circle cx="50" cy="100" r="7" fill="#a78bfa" opacity="0.6"/>
+                <circle cx="150" cy="90" r="6" fill="#f59e0b" opacity="0.6"/>
+                <circle cx="90" cy="70" r="5" fill="#ef4444" opacity="0.6"/>
+                <!-- Bundled edges as thick lines -->
+                <line x1="58" y1="40" x2="110" y2="37" stroke="#34d399" stroke-width="3" opacity="0.4"/>
+                <line x1="50" y1="48" x2="50" y2="92" stroke="#a78bfa" stroke-width="2" opacity="0.4"/>
+                <line x1="128" y1="43" x2="145" y2="84" stroke="#f59e0b" stroke-width="2" opacity="0.4"/>
+                <!-- Heat overlay -->
+                <circle cx="90" cy="55" r="30" fill="#ef4444" opacity="0.05"/>
+              </svg>
+              <ul class="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                <li>&#x2022; 노드 → 색상 원형 (아이콘/라벨 숨김)</li>
+                <li>&#x2022; 엣지 → 번들링된 두꺼운 선</li>
+                <li>&#x2022; 존(Zone) 라벨만 표시</li>
+                <li>&#x2022; 트래픽 히트맵 오버레이</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Standard -->
+          <div class="bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 overflow-hidden">
+            <div class="bg-brand-green/5 dark:bg-brand-green/10 px-5 py-3 border-b border-gray-200 dark:border-circuit-800">
+              <div class="flex items-center justify-between">
+                <h3 class="font-semibold text-sm">Standard</h3>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-brand-green/10 text-brand-green font-mono">0.5–1.2x</span>
+              </div>
+            </div>
+            <div class="p-5">
+              <svg viewBox="0 0 200 140" class="w-full mb-3" xmlns="http://www.w3.org/2000/svg">
+                <rect width="200" height="140" fill="#0f1d2f" rx="4"/>
+                <!-- IC chip nodes -->
+                <rect x="20" y="20" width="60" height="35" rx="3" fill="#1e3048" stroke="#34d399" stroke-width="1"/>
+                <text x="50" y="38" text-anchor="middle" fill="#e2e8f0" font-size="7" font-weight="600">Next.js</text>
+                <text x="50" y="48" text-anchor="middle" fill="#94a3b8" font-size="5">Framework</text>
+                <circle cx="68" cy="27" r="2.5" fill="#34d399"/>
+
+                <rect x="120" y="15" width="65" height="40" rx="3" fill="#1e3048" stroke="#3b6cf0" stroke-width="1"/>
+                <text x="152" y="35" text-anchor="middle" fill="#e2e8f0" font-size="7" font-weight="600">Supabase</text>
+                <text x="152" y="45" text-anchor="middle" fill="#94a3b8" font-size="5">Backend</text>
+                <circle cx="173" cy="22" r="2.5" fill="#34d399"/>
+
+                <rect x="30" y="85" width="55" height="35" rx="3" fill="#1e3048" stroke="#a78bfa" stroke-width="1"/>
+                <text x="57" y="103" text-anchor="middle" fill="#e2e8f0" font-size="7" font-weight="600">Vercel</text>
+                <circle cx="73" cy="92" r="2.5" fill="#34d399"/>
+
+                <!-- Traces with labels -->
+                <path d="M80 37 L100 37 L100 35 L120 35" fill="none" stroke="#34d399" stroke-width="1.5"/>
+                <line x1="50" y1="55" x2="50" y2="85" stroke="#a78bfa" stroke-width="1.2"/>
+              </svg>
+              <ul class="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                <li>&#x2022; 노드 → IC 칩 + 이름 + LED</li>
+                <li>&#x2022; 엣지 → PCB 트레이스 + 라벨</li>
+                <li>&#x2022; 핀 → 호버 시 표시</li>
+                <li>&#x2022; 패킷 파티클 애니메이션</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Detail -->
+          <div class="bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 overflow-hidden">
+            <div class="bg-amber-500/5 dark:bg-amber-500/10 px-5 py-3 border-b border-gray-200 dark:border-circuit-800">
+              <div class="flex items-center justify-between">
+                <h3 class="font-semibold text-sm">Detail</h3>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 font-mono">&gt; 1.2x</span>
+              </div>
+            </div>
+            <div class="p-5">
+              <svg viewBox="0 0 200 160" class="w-full mb-3" xmlns="http://www.w3.org/2000/svg">
+                <rect width="200" height="160" fill="#0f1d2f" rx="4"/>
+                <!-- Detailed IC chip -->
+                <rect x="30" y="15" width="140" height="70" rx="4" fill="#1e3048" stroke="#34d399" stroke-width="1.5"/>
+                <circle cx="100" cy="15" r="5" fill="#1e3048" stroke="#34d399" stroke-width="1"/>
+                <!-- All pins visible -->
+                <rect x="18" y="25" width="12" height="5" rx="1" fill="#b87333"/>
+                <rect x="18" y="38" width="12" height="5" rx="1" fill="#b87333"/>
+                <rect x="18" y="51" width="12" height="5" rx="1" fill="#b87333"/>
+                <rect x="18" y="64" width="12" height="5" rx="1" fill="#b87333"/>
+                <rect x="170" y="25" width="12" height="5" rx="1" fill="#b87333"/>
+                <rect x="170" y="38" width="12" height="5" rx="1" fill="#b87333"/>
+                <rect x="170" y="51" width="12" height="5" rx="1" fill="#b87333"/>
+                <text x="100" y="38" text-anchor="middle" fill="#e2e8f0" font-size="10" font-weight="700">Next.js</text>
+                <text x="100" y="50" text-anchor="middle" fill="#94a3b8" font-size="7">App Router v16</text>
+                <text x="100" y="62" text-anchor="middle" fill="#64748b" font-size="5" font-family="monospace">PORT: 3000 | ENV: 12 vars</text>
+                <circle cx="155" cy="24" r="3" fill="#34d399"/>
+                <text x="100" y="78" text-anchor="middle" fill="#64748b" font-size="6" font-family="monospace">U1 — FRAMEWORK</text>
+
+                <!-- Pin labels -->
+                <text x="16" y="29" text-anchor="end" fill="#64748b" font-size="5" font-family="monospace">API</text>
+                <text x="16" y="42" text-anchor="end" fill="#64748b" font-size="5" font-family="monospace">AUTH</text>
+                <text x="16" y="55" text-anchor="end" fill="#64748b" font-size="5" font-family="monospace">DB</text>
+                <text x="16" y="68" text-anchor="end" fill="#64748b" font-size="5" font-family="monospace">STRG</text>
+
+                <!-- Env var preview -->
+                <rect x="30" y="95" width="140" height="50" rx="3" fill="#162436" stroke="#2a4060" stroke-width="0.5"/>
+                <text x="38" y="108" fill="#94a3b8" font-size="6" font-family="monospace">NEXT_PUBLIC_SUPA_URL</text>
+                <text x="38" y="118" fill="#94a3b8" font-size="6" font-family="monospace">NEXT_PUBLIC_SUPA_KEY</text>
+                <text x="38" y="128" fill="#94a3b8" font-size="6" font-family="monospace">STRIPE_SECRET_KEY</text>
+                <text x="38" y="138" fill="#64748b" font-size="5">+ 9 more...</text>
+              </svg>
+              <ul class="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                <li>&#x2022; 핀 라벨 상시 표시 (API/AUTH/DB...)</li>
+                <li>&#x2022; 환경변수 프리뷰 패널</li>
+                <li>&#x2022; 실크스크린 + 상세 메타데이터</li>
+                <li>&#x2022; 연결 메모/설명 인라인 표시</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- LOD Transition Rules -->
+        <div class="bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-6">
+          <h3 class="font-semibold mb-4 text-sm">LOD 전환 규칙</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm border-collapse">
+              <thead>
+                <tr class="border-b border-gray-200 dark:border-circuit-800">
+                  <th class="text-left py-2 px-3 font-semibold text-gray-500 dark:text-gray-400 text-xs">요소</th>
+                  <th class="text-left py-2 px-3 font-semibold text-indigo-500 text-xs">Overview (&lt;0.5x)</th>
+                  <th class="text-left py-2 px-3 font-semibold text-brand-green text-xs">Standard (0.5–1.2x)</th>
+                  <th class="text-left py-2 px-3 font-semibold text-amber-500 text-xs">Detail (&gt;1.2x)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 dark:divide-circuit-800 text-xs">
+                <tr><td class="py-2 px-3 font-medium">노드 형태</td><td class="py-2 px-3">색상 원형</td><td class="py-2 px-3">IC 칩 (이름+LED)</td><td class="py-2 px-3">IC 칩 (핀 라벨+메타)</td></tr>
+                <tr><td class="py-2 px-3 font-medium">엣지 형태</td><td class="py-2 px-3">번들 두꺼운 선</td><td class="py-2 px-3">PCB 트레이스+라벨</td><td class="py-2 px-3">트레이스+Via+패킷</td></tr>
+                <tr><td class="py-2 px-3 font-medium">핸들/핀</td><td class="py-2 px-3">숨김</td><td class="py-2 px-3">호버 시 표시</td><td class="py-2 px-3">항상 표시</td></tr>
+                <tr><td class="py-2 px-3 font-medium">존 라벨</td><td class="py-2 px-3">이름만</td><td class="py-2 px-3">이름+해칭</td><td class="py-2 px-3">이름+해칭+통계</td></tr>
+                <tr><td class="py-2 px-3 font-medium">환경변수</td><td class="py-2 px-3">숨김</td><td class="py-2 px-3">숨김</td><td class="py-2 px-3">프리뷰 패널</td></tr>
+                <tr><td class="py-2 px-3 font-medium">그리드</td><td class="py-2 px-3">숨김</td><td class="py-2 px-3">20px 도트</td><td class="py-2 px-3">10px 도트+서브그리드</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 8: 구현 로드맵 -->
+      <!-- ============================================================ -->
+      <section id="roadmap" class="section-anchor mb-20">
+        <h2 class="text-3xl font-bold mb-8 flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-brand-blue/10 flex items-center justify-center text-brand-blue text-sm font-mono">07</span>
+          구현 로드맵
+        </h2>
+
+        <!-- Phase Timeline -->
+        <div class="space-y-6">
+          <!-- Phase 1 -->
+          <div class="bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 overflow-hidden">
+            <div class="bg-brand-green/5 dark:bg-brand-green/10 px-6 py-4 border-b border-gray-200 dark:border-circuit-800 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green font-bold text-sm">P1</span>
+                <div>
+                  <h3 class="font-bold">Phase 1 — 드래그 연결 기본</h3>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">핵심 인터랙션 구현</p>
+                </div>
+              </div>
+              <span class="text-xs px-3 py-1 rounded-full bg-brand-green/10 text-brand-green font-medium">우선순위: 최고</span>
+            </div>
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 class="text-sm font-semibold mb-2">구현 항목</h4>
+                  <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1.5">
+                    <li class="flex items-start gap-2"><span class="text-brand-green mt-0.5">&#9679;</span> 핸들 호버 가시화 (IC 핀 스타일)</li>
+                    <li class="flex items-start gap-2"><span class="text-brand-green mt-0.5">&#9679;</span> 드래그 투 커넥트 + 프리뷰 라인</li>
+                    <li class="flex items-start gap-2"><span class="text-brand-green mt-0.5">&#9679;</span> 인라인 팝오버 타입 선택</li>
+                    <li class="flex items-start gap-2"><span class="text-brand-green mt-0.5">&#9679;</span> 스마트 타입 추론 (서비스 조합 기반)</li>
+                    <li class="flex items-start gap-2"><span class="text-brand-green mt-0.5">&#9679;</span> 연결 생성 애니메이션</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 class="text-sm font-semibold mb-2">수정 대상 파일</h4>
+                  <ul class="text-xs text-gray-500 dark:text-gray-400 space-y-1 font-mono">
+                    <li>src/components/service-map/service-node.tsx</li>
+                    <li>src/components/service-map/connection-edge.tsx</li>
+                    <li>src/components/service-map/connection-type-dialog.tsx</li>
+                    <li>src/stores/service-map-store.ts</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phase 2 -->
+          <div class="bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 overflow-hidden">
+            <div class="bg-brand-blue/5 dark:bg-brand-blue/10 px-6 py-4 border-b border-gray-200 dark:border-circuit-800 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue font-bold text-sm">P2</span>
+                <div>
+                  <h3 class="font-bold">Phase 2 — PCB 비주얼 + LOD</h3>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">시각적 차별화 구현</p>
+                </div>
+              </div>
+              <span class="text-xs px-3 py-1 rounded-full bg-brand-blue/10 text-brand-blue font-medium">우선순위: 높음</span>
+            </div>
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 class="text-sm font-semibold mb-2">구현 항목</h4>
+                  <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1.5">
+                    <li class="flex items-start gap-2"><span class="text-brand-blue mt-0.5">&#9679;</span> PCB 트레이스 직각 경로 엣지</li>
+                    <li class="flex items-start gap-2"><span class="text-brand-blue mt-0.5">&#9679;</span> Via Hole 마커 + 패킷 파티클</li>
+                    <li class="flex items-start gap-2"><span class="text-brand-blue mt-0.5">&#9679;</span> PCB 그리드 캔버스 배경</li>
+                    <li class="flex items-start gap-2"><span class="text-brand-blue mt-0.5">&#9679;</span> LED 상태 인디케이터</li>
+                    <li class="flex items-start gap-2"><span class="text-brand-blue mt-0.5">&#9679;</span> LOD 시스템 (3단계 줌 레벨)</li>
+                    <li class="flex items-start gap-2"><span class="text-brand-blue mt-0.5">&#9679;</span> 네온 글로우 (다크모드)</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 class="text-sm font-semibold mb-2">기술 고려사항</h4>
+                  <ul class="text-xs text-gray-500 dark:text-gray-400 space-y-1.5">
+                    <li>&#x2022; React Flow onViewportChange로 줌 레벨 감지</li>
+                    <li>&#x2022; SVG 필터(feGaussianBlur) 성능 → will-change 최적화</li>
+                    <li>&#x2022; 패킷 파티클 → requestAnimationFrame 기반</li>
+                    <li>&#x2022; LOD 전환 → useMemo + 줌 threshold 디바운스</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phase 3 -->
+          <div class="bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 overflow-hidden">
+            <div class="bg-purple-500/5 dark:bg-purple-500/10 px-6 py-4 border-b border-gray-200 dark:border-circuit-800 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500 font-bold text-sm">P3</span>
+                <div>
+                  <h3 class="font-bold">Phase 3 — 편집 고도화</h3>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">파워유저 기능</p>
+                </div>
+              </div>
+              <span class="text-xs px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 font-medium">우선순위: 보통</span>
+            </div>
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 class="text-sm font-semibold mb-2">구현 항목</h4>
+                  <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1.5">
+                    <li class="flex items-start gap-2"><span class="text-purple-500 mt-0.5">&#9679;</span> Undo/Redo 히스토리 스택</li>
+                    <li class="flex items-start gap-2"><span class="text-purple-500 mt-0.5">&#9679;</span> Shift+클릭 다중 선택</li>
+                    <li class="flex items-start gap-2"><span class="text-purple-500 mt-0.5">&#9679;</span> 더블클릭 인라인 편집</li>
+                    <li class="flex items-start gap-2"><span class="text-purple-500 mt-0.5">&#9679;</span> 엣지 번들링 (동방향 그룹핑)</li>
+                    <li class="flex items-start gap-2"><span class="text-purple-500 mt-0.5">&#9679;</span> 키보드 단축키 통합</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 class="text-sm font-semibold mb-2">구현 항목 (계속)</h4>
+                  <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1.5">
+                    <li class="flex items-start gap-2"><span class="text-purple-500 mt-0.5">&#9679;</span> Copper Layer 존 그룹핑</li>
+                    <li class="flex items-start gap-2"><span class="text-purple-500 mt-0.5">&#9679;</span> SVG/PDF 내보내기</li>
+                    <li class="flex items-start gap-2"><span class="text-purple-500 mt-0.5">&#9679;</span> 서비스 교체 시뮬레이션</li>
+                    <li class="flex items-start gap-2"><span class="text-purple-500 mt-0.5">&#9679;</span> GitHub 자동 감지 연동</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Priority Matrix -->
+        <div class="mt-8 bg-white dark:bg-circuit-900 rounded-xl border border-gray-200 dark:border-circuit-800 p-6">
+          <h3 class="font-semibold mb-4 text-sm">영향도-난이도 매트릭스</h3>
+          <svg viewBox="0 0 600 350" class="w-full" xmlns="http://www.w3.org/2000/svg">
+            <!-- Axes -->
+            <line x1="80" y1="300" x2="580" y2="300" stroke="currentColor" stroke-width="1" opacity="0.2"/>
+            <line x1="80" y1="300" x2="80" y2="30" stroke="currentColor" stroke-width="1" opacity="0.2"/>
+            <text x="330" y="330" text-anchor="middle" fill="currentColor" font-size="11" opacity="0.5">구현 난이도 →</text>
+            <text x="30" y="170" text-anchor="middle" fill="currentColor" font-size="11" opacity="0.5" transform="rotate(-90, 30, 170)">사용자 영향도 →</text>
+
+            <!-- Quadrant labels -->
+            <text x="200" y="60" text-anchor="middle" fill="#34d399" font-size="10" opacity="0.6" font-weight="600">Quick Win</text>
+            <text x="460" y="60" text-anchor="middle" fill="#3b6cf0" font-size="10" opacity="0.6" font-weight="600">Strategic</text>
+            <text x="200" y="280" text-anchor="middle" fill="#9ca3af" font-size="10" opacity="0.6">Low Priority</text>
+            <text x="460" y="280" text-anchor="middle" fill="#f59e0b" font-size="10" opacity="0.6">Evaluate</text>
+
+            <!-- Quadrant lines -->
+            <line x1="330" y1="30" x2="330" y2="300" stroke="currentColor" stroke-width="0.5" stroke-dasharray="4 4" opacity="0.1"/>
+            <line x1="80" y1="165" x2="580" y2="165" stroke="currentColor" stroke-width="0.5" stroke-dasharray="4 4" opacity="0.1"/>
+
+            <!-- Items -->
+            <!-- Quick Wins (high impact, low effort) -->
+            <circle cx="160" cy="70" r="20" fill="#34d399" opacity="0.15"/>
+            <text x="160" y="73" text-anchor="middle" fill="#34d399" font-size="8" font-weight="600">핸들 가시화</text>
+
+            <circle cx="250" cy="90" r="22" fill="#34d399" opacity="0.15"/>
+            <text x="250" y="93" text-anchor="middle" fill="#34d399" font-size="8" font-weight="600">드래그 연결</text>
+
+            <circle cx="190" cy="130" r="18" fill="#34d399" opacity="0.15"/>
+            <text x="190" y="133" text-anchor="middle" fill="#34d399" font-size="8" font-weight="600">인라인 팝오버</text>
+
+            <!-- Strategic (high impact, high effort) -->
+            <circle cx="400" cy="80" r="22" fill="#3b6cf0" opacity="0.15"/>
+            <text x="400" y="83" text-anchor="middle" fill="#3b6cf0" font-size="8" font-weight="600">LOD 시스템</text>
+
+            <circle cx="500" cy="100" r="20" fill="#3b6cf0" opacity="0.15"/>
+            <text x="500" y="96" text-anchor="middle" fill="#3b6cf0" font-size="7" font-weight="600">PCB 트레이스</text>
+            <text x="500" y="108" text-anchor="middle" fill="#3b6cf0" font-size="7" font-weight="600">+ 패킷</text>
+
+            <circle cx="440" cy="140" r="18" fill="#3b6cf0" opacity="0.15"/>
+            <text x="440" y="143" text-anchor="middle" fill="#3b6cf0" font-size="8" font-weight="600">번들링</text>
+
+            <!-- Evaluate (low impact, high effort) -->
+            <circle cx="420" cy="220" r="16" fill="#f59e0b" opacity="0.15"/>
+            <text x="420" y="223" text-anchor="middle" fill="#f59e0b" font-size="7" font-weight="600">교체 시뮬레이션</text>
+
+            <circle cx="520" cy="240" r="15" fill="#f59e0b" opacity="0.15"/>
+            <text x="520" y="243" text-anchor="middle" fill="#f59e0b" font-size="7" font-weight="600">SVG 내보내기</text>
+
+            <!-- Low Priority -->
+            <circle cx="180" cy="230" r="14" fill="#9ca3af" opacity="0.1"/>
+            <text x="180" y="233" text-anchor="middle" fill="#9ca3af" font-size="7" font-weight="600">Undo/Redo</text>
+
+            <circle cx="250" cy="250" r="14" fill="#9ca3af" opacity="0.1"/>
+            <text x="250" y="253" text-anchor="middle" fill="#9ca3af" font-size="7" font-weight="600">다중 선택</text>
+          </svg>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="border-t border-gray-200 dark:border-circuit-800 pt-8 pb-16 text-center">
+        <div class="flex items-center justify-center gap-2 mb-2">
+          <svg width="20" height="20" viewBox="0 0 28 28" fill="none" class="glow">
+            <rect x="2" y="2" width="24" height="24" rx="4" stroke="#34d399" stroke-width="2" fill="none"/>
+            <circle cx="8" cy="8" r="2" fill="#3b6cf0"/>
+            <circle cx="20" cy="8" r="2" fill="#3b6cf0"/>
+            <circle cx="14" cy="20" r="2" fill="#34d399"/>
+            <line x1="8" y1="10" x2="14" y2="18" stroke="#34d399" stroke-width="1.5"/>
+            <line x1="20" y1="10" x2="14" y2="18" stroke="#3b6cf0" stroke-width="1.5"/>
+          </svg>
+          <span class="font-bold gradient-text">Linkmap</span>
+        </div>
+        <p class="text-sm text-gray-400 dark:text-gray-500">연결 관리 UX 재설계 기획 v1.0 — 2026-03-19</p>
+        <p class="text-xs text-gray-400 dark:text-gray-600 mt-2">Circuit Blue-Green v2 Design System</p>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- Theme Toggle Script -->
+  <script>
+    const toggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+
+    // Check system preference or saved preference
+    if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      html.classList.add('dark');
+    }
+
+    toggle.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+    });
+
+    // Active TOC highlight on scroll
+    const sections = document.querySelectorAll('.section-anchor');
+    const tocLinks = document.querySelectorAll('.toc-link');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          tocLinks.forEach(link => link.classList.remove('active'));
+          const activeLink = document.querySelector(`.toc-link[href="#${entry.target.id}"]`);
+          if (activeLink) activeLink.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-20% 0px -60% 0px' });
+
+    sections.forEach(section => observer.observe(section));
+  </script>
+</body>
+</html>

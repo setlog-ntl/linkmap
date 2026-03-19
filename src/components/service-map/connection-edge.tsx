@@ -59,15 +59,20 @@ function ConnectionEdge({
     targetY,
     sourcePosition,
     targetPosition,
-    borderRadius: 12,
+    borderRadius: 8,
   });
 
   const showLabel = hovered || editMode;
-  const showParticle = s.weight >= 2 && s.dash === '0';
+  const showPacket = s.weight >= 2 && s.dash === '0';
 
   // Marching ants on hover: override dash to animated pattern
   const isStaticDashed = s.dash !== '0';
   const strokeDasharray = hovered && !isStaticDashed ? '5 5' : (isStaticDashed ? s.dash : undefined);
+
+  // Calculate midpoint for via hole marker
+  const midX = (sourceX + targetX) / 2;
+  const midY = (sourceY + targetY) / 2;
+  const hasCorner = Math.abs(sourceX - targetX) > 30 && Math.abs(sourceY - targetY) > 30;
 
   return (
     <>
@@ -81,6 +86,19 @@ function ConnectionEdge({
         onMouseLeave={() => setHovered(false)}
         className="react-flow__edge-interaction"
       />
+
+      {/* PCB trace glow underlay (hover) */}
+      {hovered && (
+        <path
+          d={edgePath}
+          fill="none"
+          stroke={s.color}
+          strokeWidth={s.weight + 4}
+          opacity={0.1}
+          style={{ filter: `blur(4px)` }}
+        />
+      )}
+
       <BaseEdge
         id={id}
         path={edgePath}
@@ -89,21 +107,49 @@ function ConnectionEdge({
           stroke: s.color,
           strokeWidth: hovered ? s.weight + 1 : s.weight,
           strokeDasharray,
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round',
           transition: 'stroke-width 0.2s ease',
         }}
         className={hovered && !isStaticDashed ? 'animate-edge-march' : ''}
       />
-      {/* Flow particle — animate a dot along the edge path for active connections */}
-      {showParticle && (
-        <circle
-          r={3}
+
+      {/* Via hole marker at bend point (PCB style) */}
+      {hasCorner && (
+        <g className="animate-pcb-via">
+          <circle cx={midX} cy={midY} r={4} fill="var(--background)" stroke={s.color} strokeWidth={1.2} opacity={0.6} />
+          <circle cx={midX} cy={midY} r={1.5} fill={s.color} opacity={0.5} />
+        </g>
+      )}
+
+      {/* Data packet — rectangular PCB packet instead of circular */}
+      {showPacket && (
+        <rect
+          width={8}
+          height={4}
+          rx={1}
           fill={s.color}
           className="flow-particle"
-          style={{ filter: `drop-shadow(0 0 4px ${s.color})` }}
+          style={{ filter: `drop-shadow(0 0 3px ${s.color})`, opacity: 0.85 }}
         >
-          <animateMotion dur="2.5s" repeatCount="indefinite" path={edgePath} />
-        </circle>
+          <animateMotion dur="2.5s" repeatCount="indefinite" path={edgePath} rotate="auto" />
+        </rect>
       )}
+
+      {/* Second staggered packet for heavy connections */}
+      {showPacket && s.weight >= 3 && (
+        <rect
+          width={6}
+          height={3}
+          rx={1}
+          fill={s.color}
+          className="flow-particle"
+          style={{ opacity: 0.5 }}
+        >
+          <animateMotion dur="2.5s" repeatCount="indefinite" path={edgePath} rotate="auto" begin="1.2s" />
+        </rect>
+      )}
+
       {showLabel && (
         <EdgeLabelRenderer>
           <div
@@ -117,7 +163,7 @@ function ConnectionEdge({
           >
             <div className="flex items-center gap-1">
               <span
-                className="rounded-full border px-1.5 py-0.5 text-[10px] font-medium shadow-sm"
+                className="rounded-full border px-1.5 py-0.5 text-[10px] font-medium shadow-sm font-mono"
                 style={{
                   backgroundColor: 'var(--background)',
                   color: s.color,

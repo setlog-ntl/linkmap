@@ -120,12 +120,37 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     setTimeout(() => { instance.fitView({ padding: 0.2 }); initialFitDone.current = true; }, 100);
   }, []);
 
+  // Undo/Redo keyboard shortcuts
+  const { undo, redo, canUndo, canRedo } = useServiceMapStore();
+  useEffect(() => {
+    if (isReadOnly) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        if (canUndo()) undo();
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        if (canRedo()) redo();
+        return;
+      }
+      // ESC to cancel connecting mode
+      if (e.key === 'Escape' && connectingFrom) {
+        setConnectingFrom(null);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isReadOnly, undo, redo, canUndo, canRedo, connectingFrom, setConnectingFrom]);
+
   const handleNativeConnect = useCallback((connection: Connection) => {
     if (!connection.source || !connection.target || connection.source === connection.target) return;
-    const sourceSvc = data.services.find((s) => s.id === connection.source);
-    const targetSvc = data.services.find((s) => s.id === connection.target);
-    if (sourceSvc && targetSvc) interactions.createConnection(sourceSvc.service_id, targetSvc.service_id, 'uses');
-  }, [data.services, interactions]);
+    // Show connection type dialog instead of auto-creating as 'uses'
+    onShowConnectionDialog(connection.source, connection.target);
+  }, [onShowConnectionDialog]);
 
   const handleConnectionConfirm = useCallback((type: UserConnectionType) => {
     if (!connectionDialog) return;
@@ -134,8 +159,12 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     if (sourceSvc && targetSvc) interactions.createConnection(sourceSvc.service_id, targetSvc.service_id, type);
   }, [connectionDialog, data.services, interactions]);
 
-  const dialogSourceLabel = connectionDialog ? data.services.find((s) => s.id === connectionDialog.sourceId)?.service?.name : undefined;
-  const dialogTargetLabel = connectionDialog ? data.services.find((s) => s.id === connectionDialog.targetId)?.service?.name : undefined;
+  const dialogSourceSvc = connectionDialog ? data.services.find((s) => s.id === connectionDialog.sourceId) : undefined;
+  const dialogTargetSvc = connectionDialog ? data.services.find((s) => s.id === connectionDialog.targetId) : undefined;
+  const dialogSourceLabel = dialogSourceSvc?.service?.name;
+  const dialogTargetLabel = dialogTargetSvc?.service?.name;
+  const dialogSourceCategory = dialogSourceSvc?.service?.category;
+  const dialogTargetCategory = dialogTargetSvc?.service?.category;
 
   const getCurrentZone = useCallback((nodeId: string): ZoneKey | null => {
     const domain = nodesResult.getDomain(nodeId);
@@ -202,10 +231,11 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
               maskColor={isDark ? 'rgba(15, 29, 47, 0.85)' : undefined}
               style={isDark ? { backgroundColor: 'var(--card)' } : undefined}
             />
+            {/* PCB dot grid background (matching map-view) */}
             {isDark ? (
-              <Background variant={BackgroundVariant.Lines} gap={40} color="oklch(0.35 0.02 250)" style={{ opacity: 0.3 }} />
+              <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="oklch(0.35 0.08 160)" style={{ opacity: 0.25 }} />
             ) : (
-              <Background variant={BackgroundVariant.Cross} gap={32} color="var(--border)" style={{ opacity: 0.5 }} />
+              <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="var(--border)" style={{ opacity: 0.45 }} />
             )}
           </ReactFlow>
           {!isReadOnly && <EditSaveBar onSave={handleSaveChanges} saving={saving} />}
@@ -226,7 +256,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
           health={Object.entries(data.healthChecks).map(([psId, hc]) => ({ service_name: psId, status: (hc as { status?: string })?.status || 'unknown' }))}
         />
       )}
-      <ConnectionTypeDialog open={connectionDialog !== null} onOpenChange={(open) => { if (!open) setConnectionDialog(null); }} onConfirm={handleConnectionConfirm} sourceLabel={dialogSourceLabel} targetLabel={dialogTargetLabel} />
+      <ConnectionTypeDialog open={connectionDialog !== null} onOpenChange={(open) => { if (!open) setConnectionDialog(null); }} onConfirm={handleConnectionConfirm} sourceLabel={dialogSourceLabel} targetLabel={dialogTargetLabel} sourceCategory={dialogSourceCategory} targetCategory={dialogTargetCategory} />
     </div>
   );
 }
