@@ -1,6 +1,6 @@
 // JSON-LD structured data generators for GEO (Generative Engine Optimization)
 
-import { GUIDE_LIST } from '@/data/ui/guide-meta';
+import { GUIDE_DATA } from '@/data/ui/guide-data';
 
 const SITE_URL = 'https://www.linkmap.biz';
 const SITE_NAME = 'Linkmap';
@@ -77,7 +77,7 @@ interface GuideJsonLdInput {
 }
 
 export function generateGuideJsonLd(input: GuideJsonLdInput) {
-  const guideMeta = GUIDE_LIST.find((g) => g.slug === input.slug);
+  const guideMeta = GUIDE_DATA.find((g) => g.slug === input.slug);
   const url = `${SITE_URL}/guides/${input.slug}`;
 
   const graph: Record<string, unknown>[] = [

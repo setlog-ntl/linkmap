@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getBlogPostBySlug, getPublishedPosts, BLOG_POSTS } from '@/data/blog/posts';
-import { GUIDE_LIST } from '@/data/ui/guide-meta';
+import { GUIDE_DATA } from '@/data/ui/guide-data';
 import { generateBlogJsonLd } from '@/lib/seo/json-ld';
 import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { BlogPostView } from '@/components/blog/blog-post';
@@ -53,9 +53,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const prevPost = idx < posts.length - 1 ? { slug: posts[idx + 1].slug, title: posts[idx + 1].title } : null;
   const nextPost = idx > 0 ? { slug: posts[idx - 1].slug, title: posts[idx - 1].title } : null;
 
-  // relatedGuides 서버 측 해석 (GUIDE_LIST icon 컴포넌트 제외, 직렬화 가능 데이터만)
+  // relatedGuides 서버 측 해석 (GUIDE_DATA icon 컴포넌트 제외, 직렬화 가능 데이터만)
   const relatedGuideInfos: RelatedGuideInfo[] = (post.relatedGuides ?? []).reduce<RelatedGuideInfo[]>((acc, gSlug) => {
-    const g = GUIDE_LIST.find((gl) => gl.slug === gSlug);
+    const g = GUIDE_DATA.find((gl) => gl.slug === gSlug);
     if (g) acc.push({ slug: g.slug, title: g.title, href: g.href, readingTime: g.readingTime });
     return acc;
   }, []);

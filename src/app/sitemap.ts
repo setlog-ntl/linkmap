@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { GUIDE_LIST } from '@/data/ui/guide-meta';
+import { GUIDE_DATA } from '@/data/ui/guide-data';
 import { SERVICE_SLUGS } from '@/data/seed/service-slugs';
 import { BLOG_POSTS } from '@/data/blog/posts';
 
@@ -22,7 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/terms`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
   ];
 
-  const guidePages: MetadataRoute.Sitemap = GUIDE_LIST.map((guide) => ({
+  const guidePages: MetadataRoute.Sitemap = GUIDE_DATA.map((guide) => ({
     url: `${BASE_URL}${guide.href}`,
     lastModified: new Date(),
     changeFrequency: 'monthly' as const,

@@ -1,10 +1,10 @@
-import { GUIDE_LIST } from '@/data/ui/guide-meta';
+import { GUIDE_DATA } from '@/data/ui/guide-data';
 import { getPublishedPosts } from '@/data/blog/posts';
 
 const SITE_URL = 'https://www.linkmap.biz';
 
 export function GET() {
-  const guideLines = GUIDE_LIST.map(
+  const guideLines = GUIDE_DATA.map(
     (g) => `- ${g.title}: ${g.description} → ${SITE_URL}${g.href}`
   ).join('\n');
 
