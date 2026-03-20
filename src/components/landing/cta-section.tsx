@@ -130,7 +130,7 @@ export function PricingSection() {
                   }`}
                   asChild
                 >
-                  <Link href={signupHref}>{plan.cta}</Link>
+                  <Link href={signupHref} prefetch={false}>{plan.cta}</Link>
                 </Button>
               </div>
             </ScrollReveal>
@@ -163,7 +163,7 @@ export function FinalCtaSection() {
           <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-5 sm:mb-6 text-white leading-tight">{t(locale, 'landing.finalCtaTitle')}</h2>
           <p className="text-base sm:text-lg text-white/60 mb-8 sm:mb-10 max-w-xl mx-auto leading-relaxed">{t(locale, 'landing.finalCtaDesc')}</p>
           <Button className="bg-brand-green text-black hover:bg-brand-green/90 px-7 py-3 sm:px-10 sm:py-4 h-auto rounded-xl text-base font-bold transition-all duration-200 hover:shadow-[0_4px_24px_rgba(16,185,129,0.3)] active:scale-[0.98]" asChild>
-            <Link href={signupHref}>
+            <Link href={signupHref} prefetch={false}>
               {t(locale, 'landing.ctaStart')}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>

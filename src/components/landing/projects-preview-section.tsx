@@ -143,7 +143,7 @@ export function ProjectsPreviewSection({
                 size="sm"
                 asChild
               >
-                <Link href="/signup">
+                <Link href="/signup" prefetch={false}>
                   무료로 시작하기
                   <ArrowRight className="ml-1.5 h-4 w-4" />
                 </Link>
@@ -170,18 +170,18 @@ export function ProjectsPreviewSection({
                   className="bg-brand-green text-black hover:bg-brand-green/90 px-8 py-3 h-auto rounded-xl text-sm font-bold"
                   asChild
                 >
-                  <Link href="/signup">
+                  <Link href="/signup" prefetch={false}>
                     내 프로젝트 만들기
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
                 <Button variant="outline" className="rounded-xl" asChild>
-                  <Link href="/login">로그인</Link>
+                  <Link href="/login" prefetch={false}>로그인</Link>
                 </Button>
               </div>
             ) : isLoggedIn ? (
               <Button variant="outline" className="rounded-xl" asChild>
-                <Link href="/dashboard">
+                <Link href="/dashboard" prefetch={false}>
                   대시보드로 이동
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>

@@ -180,7 +180,7 @@ export function HowItWorks() {
             }
             asChild
           >
-            <Link href={ctaHref}>
+            <Link href={ctaHref} prefetch={false}>
               {persona === 'beginner' && (
                 <Rocket className="mr-2 h-5 w-5" />
               )}

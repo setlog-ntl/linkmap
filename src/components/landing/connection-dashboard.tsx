@@ -143,7 +143,7 @@ export function ConnectionDashboard() {
           </span>
         </div>
         <Button size="sm" variant="outline" asChild>
-          <Link href="/signup">{t(locale, 'landing.viewAllConnections')}</Link>
+          <Link href="/signup" prefetch={false}>{t(locale, 'landing.viewAllConnections')}</Link>
         </Button>
       </div>
     </div>

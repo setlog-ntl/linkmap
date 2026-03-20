@@ -13,7 +13,7 @@ export function Footer() {
       <div className="container py-8 md:py-12">
         <div className="grid grid-cols-2 md:grid-cols-7 gap-8">
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="flex items-center gap-1 font-bold text-lg mb-3">
+            <Link href="/" prefetch={false} className="flex items-center gap-1 font-bold text-lg mb-3">
               <span className="text-brand-green">Link</span>
               <span className="text-white">map</span>
             </Link>
@@ -24,9 +24,9 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-sm mb-3 text-white">{t(locale, 'landing.footerProduct')}</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/services" className="hover:text-white transition-colors">{t(locale, 'nav.serviceCatalog')}</Link></li>
-              <li><Link href="/#features" className="hover:text-white transition-colors">{t(locale, 'landing.featuresTitle')}</Link></li>
-              <li><Link href="/#pricing" className="hover:text-white transition-colors">{t(locale, 'landing.pricingTitle')}</Link></li>
+              <li><Link href="/services" prefetch={false} className="hover:text-white transition-colors">{t(locale, 'nav.serviceCatalog')}</Link></li>
+              <li><Link href="/#features" prefetch={false} className="hover:text-white transition-colors">{t(locale, 'landing.featuresTitle')}</Link></li>
+              <li><Link href="/#pricing" prefetch={false} className="hover:text-white transition-colors">{t(locale, 'landing.pricingTitle')}</Link></li>
             </ul>
           </div>
           {/* 기본 개념 — 학습 단계별 요약 */}
@@ -53,7 +53,7 @@ export function Footer() {
                 );
               })}
               <div>
-                <Link href="/guides" className="hover:text-white transition-colors text-xs font-medium">
+                <Link href="/guides" prefetch={false} className="hover:text-white transition-colors text-xs font-medium">
                   전체 보기 →
                 </Link>
               </div>
@@ -76,16 +76,16 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-sm mb-3 text-white">콘텐츠</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/blog" className="hover:text-white transition-colors">블로그</Link></li>
-              <li><Link href="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
-              <li><Link href="/glossary" className="hover:text-white transition-colors">용어집</Link></li>
+              <li><Link href="/blog" prefetch={false} className="hover:text-white transition-colors">블로그</Link></li>
+              <li><Link href="/faq" prefetch={false} className="hover:text-white transition-colors">FAQ</Link></li>
+              <li><Link href="/glossary" prefetch={false} className="hover:text-white transition-colors">용어집</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold text-sm mb-3 text-white">{t(locale, 'landing.footerLegal')}</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link></li>
-              <li><Link href="/terms" className="hover:text-white transition-colors">Terms</Link></li>
+              <li><Link href="/privacy" prefetch={false} className="hover:text-white transition-colors">Privacy</Link></li>
+              <li><Link href="/terms" prefetch={false} className="hover:text-white transition-colors">Terms</Link></li>
             </ul>
           </div>
           <div>

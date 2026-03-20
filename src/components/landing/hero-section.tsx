@@ -79,7 +79,7 @@ export function HeroSection() {
               className="w-full sm:w-auto bg-brand-green text-black hover:bg-brand-green/90 px-8 py-3.5 h-auto rounded-xl text-base font-bold transition-all duration-200 hover:shadow-[0_4px_24px_rgba(16,185,129,0.25)] active:scale-[0.98]"
               asChild
             >
-              <Link href="/sites">
+              <Link href="/sites" prefetch={false}>
                 <Rocket className="mr-2 h-4 w-4" />
                 {t(locale, 'landing.ctaOneclickHero')}
               </Link>
@@ -90,7 +90,7 @@ export function HeroSection() {
                 className="w-full sm:w-auto bg-card border-border text-foreground hover:border-brand-green/40 hover:bg-muted px-8 py-3.5 h-auto rounded-xl text-base font-bold transition-all duration-200 shadow-sm"
                 asChild
               >
-                <Link href="/dashboard">
+                <Link href="/dashboard" prefetch={false}>
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   {t(locale, 'common.dashboard')}
                 </Link>
@@ -101,7 +101,7 @@ export function HeroSection() {
                 className="w-full sm:w-auto bg-card border-border text-foreground hover:border-brand-green/40 hover:bg-muted px-8 py-3.5 h-auto rounded-xl text-base font-bold transition-all duration-200 shadow-sm"
                 asChild
               >
-                <Link href="/signup">
+                <Link href="/signup" prefetch={false}>
                   {t(locale, 'landing.ctaStart')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>

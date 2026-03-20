@@ -50,6 +50,7 @@ export function Header({ profile }: HeaderProps) {
     <>
       <Link
         href="/sites/new"
+        prefetch={false}
         className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
         onClick={() => setSidebarOpen(false)}
       >
@@ -59,6 +60,7 @@ export function Header({ profile }: HeaderProps) {
       {!profile && (
         <Link
           href="/demo"
+          prefetch={false}
           className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           onClick={() => setSidebarOpen(false)}
         >
@@ -68,6 +70,7 @@ export function Header({ profile }: HeaderProps) {
       {profile && (
         <Link
           href="/dashboard"
+          prefetch={false}
           className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           onClick={() => setSidebarOpen(false)}
         >
@@ -76,6 +79,7 @@ export function Header({ profile }: HeaderProps) {
       )}
       <Link
         href="/pricing"
+        prefetch={false}
         className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         onClick={() => setSidebarOpen(false)}
       >
@@ -83,6 +87,7 @@ export function Header({ profile }: HeaderProps) {
       </Link>
       <Link
         href="/services"
+        prefetch={false}
         className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         onClick={() => setSidebarOpen(false)}
       >
@@ -90,6 +95,7 @@ export function Header({ profile }: HeaderProps) {
       </Link>
       <Link
         href="/feedback"
+        prefetch={false}
         className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         onClick={() => setSidebarOpen(false)}
       >
@@ -97,6 +103,7 @@ export function Header({ profile }: HeaderProps) {
       </Link>
       <Link
         href="/showcase"
+        prefetch={false}
         className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
         onClick={() => setSidebarOpen(false)}
       >
@@ -106,6 +113,7 @@ export function Header({ profile }: HeaderProps) {
 
       <Link
         href="/blog"
+        prefetch={false}
         className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
         onClick={() => setSidebarOpen(false)}
       >
@@ -123,7 +131,7 @@ export function Header({ profile }: HeaderProps) {
         <DropdownMenuContent align="start" className="w-72 max-h-[70vh] overflow-y-auto">
           {/* 전체 보기 — 최상단 */}
           <DropdownMenuItem asChild>
-            <Link href="/guides" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2 font-medium">
+            <Link href="/guides" prefetch={false} onClick={() => setSidebarOpen(false)} className="flex items-center gap-2 font-medium">
               <BookOpen className="h-3.5 w-3.5" />
               가이드 전체 보기
               <ArrowRight className="h-3.5 w-3.5 ml-auto" />
@@ -189,7 +197,7 @@ export function Header({ profile }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl">
+        <Link href="/" prefetch={false} className="flex items-center gap-2 font-bold text-xl">
           <LinkmapLogo size={32} />
           <div className="flex items-center">
             <span className="text-[#38bdf8]">Link</span>
@@ -266,26 +274,26 @@ export function Header({ profile }: HeaderProps) {
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/settings/account">
+                      <Link href="/settings/account" prefetch={false}>
                         <User className="mr-2 h-4 w-4" />
                         {t(locale, 'nav.settingsAccount')}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/settings/github">
+                      <Link href="/settings/github" prefetch={false}>
                         <GitBranch className="mr-2 h-4 w-4" />
                         {t(locale, 'nav.settingsGithub')}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/settings/developer">
+                      <Link href="/settings/developer" prefetch={false}>
                         <Wrench className="mr-2 h-4 w-4" />
                         {t(locale, 'nav.settingsDeveloper')}
                       </Link>
                     </DropdownMenuItem>
                     {profile.is_admin && (
                       <DropdownMenuItem asChild>
-                        <Link href="/admin/ai-config">
+                        <Link href="/admin/ai-config" prefetch={false}>
                           <Bot className="mr-2 h-4 w-4" />
                           {t(locale, 'nav.adminAi')}
                         </Link>
@@ -293,7 +301,7 @@ export function Header({ profile }: HeaderProps) {
                     )}
                     {profile.is_admin && (
                       <DropdownMenuItem asChild>
-                        <Link href="/admin/usage-stats">
+                        <Link href="/admin/usage-stats" prefetch={false}>
                           <BarChart3 className="mr-2 h-4 w-4" />
                           기능 통계
                         </Link>
@@ -309,10 +317,10 @@ export function Header({ profile }: HeaderProps) {
             ) : (
               <>
                 <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
-                  <Link href="/login">{t(locale, 'common.login')}</Link>
+                  <Link href="/login" prefetch={false}>{t(locale, 'common.login')}</Link>
                 </Button>
                 <Button size="sm" asChild>
-                  <Link href="/signup">{t(locale, 'common.signup')}</Link>
+                  <Link href="/signup" prefetch={false}>{t(locale, 'common.signup')}</Link>
                 </Button>
               </>
             )}
@@ -329,6 +337,7 @@ export function Header({ profile }: HeaderProps) {
               <nav className="flex flex-col gap-2 mt-8">
                 <Link
                   href="/sites/new"
+                  prefetch={false}
                   className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2"
                   onClick={() => setSidebarOpen(false)}
                 >
@@ -338,6 +347,7 @@ export function Header({ profile }: HeaderProps) {
                 {!profile && (
                   <Link
                     href="/demo"
+                    prefetch={false}
                     className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5"
                     onClick={() => setSidebarOpen(false)}
                   >
@@ -361,6 +371,7 @@ export function Header({ profile }: HeaderProps) {
                     <div className="border-t my-1" />
                     <Link
                       href="/dashboard"
+                      prefetch={false}
                       className="text-sm font-medium text-foreground px-2.5 py-1.5"
                       onClick={() => setSidebarOpen(false)}
                     >
@@ -370,6 +381,7 @@ export function Header({ profile }: HeaderProps) {
                 )}
                 <Link
                   href="/pricing"
+                  prefetch={false}
                   className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5"
                   onClick={() => setSidebarOpen(false)}
                 >
@@ -377,6 +389,7 @@ export function Header({ profile }: HeaderProps) {
                 </Link>
                 <Link
                   href="/services"
+                  prefetch={false}
                   className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5"
                   onClick={() => setSidebarOpen(false)}
                 >
@@ -384,6 +397,7 @@ export function Header({ profile }: HeaderProps) {
                 </Link>
                 <Link
                   href="/showcase"
+                  prefetch={false}
                   className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2"
                   onClick={() => setSidebarOpen(false)}
                 >
@@ -393,6 +407,7 @@ export function Header({ profile }: HeaderProps) {
 
                 <Link
                   href="/blog"
+                  prefetch={false}
                   className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2"
                   onClick={() => setSidebarOpen(false)}
                 >
@@ -405,6 +420,7 @@ export function Header({ profile }: HeaderProps) {
                 {/* 가이드 — 전체 보기 최상단 */}
                 <Link
                   href="/guides"
+                  prefetch={false}
                   className="text-sm font-medium text-foreground hover:text-brand-blue transition-colors px-2.5 py-1.5 flex items-center gap-2"
                   onClick={() => setSidebarOpen(false)}
                 >
@@ -439,6 +455,7 @@ export function Header({ profile }: HeaderProps) {
                               <Link
                                 key={guide.slug}
                                 href={guide.href}
+                                prefetch={false}
                                 className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 flex items-center gap-1.5"
                                 onClick={() => setSidebarOpen(false)}
                               >
@@ -460,6 +477,7 @@ export function Header({ profile }: HeaderProps) {
                   <Link
                     key={guide.slug}
                     href={guide.href}
+                    prefetch={false}
                     className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2"
                     onClick={() => setSidebarOpen(false)}
                   >
@@ -470,10 +488,10 @@ export function Header({ profile }: HeaderProps) {
                 <div className="border-t my-2" />
                 {!profile ? (
                   <>
-                    <Link href="/login" className="text-sm font-medium px-2.5 py-1.5" onClick={() => setSidebarOpen(false)}>
+                    <Link href="/login" prefetch={false} className="text-sm font-medium px-2.5 py-1.5" onClick={() => setSidebarOpen(false)}>
                       {t(locale, 'common.login')}
                     </Link>
-                    <Link href="/signup" className="text-sm font-medium px-2.5 py-1.5" onClick={() => setSidebarOpen(false)}>
+                    <Link href="/signup" prefetch={false} className="text-sm font-medium px-2.5 py-1.5" onClick={() => setSidebarOpen(false)}>
                       {t(locale, 'common.signup')}
                     </Link>
                   </>
@@ -481,6 +499,7 @@ export function Header({ profile }: HeaderProps) {
                   <>
                     <Link
                       href="/settings"
+                      prefetch={false}
                       className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2"
                       onClick={() => setSidebarOpen(false)}
                     >
