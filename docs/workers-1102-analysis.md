@@ -107,33 +107,27 @@ next/og → satori (2.9MB)
 
 ---
 
-## Cloudflare Cache Rules 권장 설정
+## Cloudflare Cache Rules — Workers 아키텍처 비적용
 
-Workers 진입 자체를 차단하여 cold start CPU를 0으로 만드는 것이 최선의 전략이다.
+> **검증 결과 (03-20):** linkmap.biz는 `@opennextjs/cloudflare` Workers Route로 서빙되므로,
+> 요청이 CDN 캐시 레이어를 **우회**하여 Worker로 직접 전달된다.
+> Cache Rules를 설정해도 **Worker 진입을 차단하지 못한다.**
 
-### Dashboard 설정 (Settings → Caching → Cache Rules)
+### Dashboard 설정 (적용했으나 비적용 확인됨)
 
-| 경로 패턴 | Edge TTL | Browser TTL | 비고 |
-|-----------|----------|-------------|------|
-| `/blog/*` | 3600s (1시간) | 600s | 블로그 콘텐츠 |
-| `/guides/*` | 3600s | 600s | 가이드 콘텐츠 |
-| `/services/*` | 3600s | 600s | 서비스 카탈로그 |
-| `/faq` | 3600s | 600s | FAQ |
-| `/glossary` | 3600s | 600s | 용어집 |
-| `/pricing` | 3600s | 600s | 가격 페이지 |
+| 경로 패턴 | Edge TTL | Browser TTL | 실제 효과 |
+|-----------|----------|-------------|-----------|
+| `/blog/*` | 3600s (1시간) | 600s | ⚠ Workers에서 비적용 |
+| `/guides/*` | 3600s | 600s | ⚠ Workers에서 비적용 |
+| `/services/*` | 3600s | 600s | ⚠ Workers에서 비적용 |
+| `/faq` | 3600s | 600s | ⚠ Workers에서 비적용 |
+| `/glossary` | 3600s | 600s | ⚠ Workers에서 비적용 |
+| `/pricing` | 3600s | 600s | ⚠ Workers에서 비적용 |
 
-**효과:**
-- Edge 캐시 히트 → Worker 코드 실행 안 함 → CPU 0ms
-- cold start 완전 차단 (해당 경로)
-- Free Plan CPU 제한 (10ms) 걱정 없음
-
-### 설정 방법
-
-1. Cloudflare Dashboard → 도메인 선택
-2. Caching → Cache Rules → Create Rule
-3. Expression: `(http.request.uri.path matches "^/blog/")`
-4. Edge TTL: Override → 3600 seconds
-5. Browser TTL: Override → 600 seconds
+**Workers 아키텍처의 캐시 레이어:**
+- 실제 캐시는 **OpenNext ISR** (`x-nextjs-cache` 헤더) + **KV namespace**가 담당
+- `cf-cache-status` 헤더가 응답에 없음 = Edge CDN 캐시 미사용 확인
+- Cache Rules는 삭제해도 무방 (해가 되지는 않음)
 
 ---
 
@@ -179,10 +173,10 @@ Workers 진입 자체를 차단하여 cold start CPU를 0으로 만드는 것이
 
 ### 장기 개선 방향
 
-1. **Cloudflare Cache Rules 적용** — 정적 페이지 Worker 진입 차단
+1. **KV 캐시 워밍업 스크립트** — 배포 후 주요 공개 페이지 10개 자동 요청 (ISR 캐시 미스 방지)
 2. **Paid Plan 검토** — CPU 제한 10ms → 50ms (Bundled) 또는 30s (Unbound)
-3. **Edge-side Includes** — 동적 부분만 Worker 처리
-4. **번들 크기 모니터링 자동화** — CI에서 서버 번들 크기 경고
+3. **번들 크기 모니터링 자동화** — CI에서 서버 번들 크기 경고
+4. **블로그 content 분리** — `BLOG_POSTS` content를 개별 파일로 분리하여 서버 번들 추가 경량화
 
 ---
 

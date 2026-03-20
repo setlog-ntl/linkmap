@@ -734,8 +734,8 @@
     <!-- Cache Rules -->
     <div class="phase">
       <div class="phase-header">
-        <div class="phase-title">Cloudflare Cache Rules — Dashboard 설정 권장</div>
-        <span class="phase-badge badge-recommend">권장</span>
+        <div class="phase-title">Cloudflare Cache Rules — Workers 아키텍처 비적용</div>
+        <span class="phase-badge" style="background:rgba(251,191,36,0.15);color:var(--yellow);border:1px solid rgba(251,191,36,0.3);">비적용</span>
       </div>
       <div style="overflow-x: auto;">
         <table class="cache-table">
@@ -752,43 +752,44 @@
               <td class="cache-path">/blog/*</td>
               <td>3600s (1시간)</td>
               <td>600s</td>
-              <td class="cache-effect">Worker 진입 차단</td>
+              <td style="color:var(--yellow);">Workers에서 비적용</td>
             </tr>
             <tr>
               <td class="cache-path">/guides/*</td>
               <td>3600s</td>
               <td>600s</td>
-              <td class="cache-effect">Worker 진입 차단</td>
+              <td style="color:var(--yellow);">Workers에서 비적용</td>
             </tr>
             <tr>
               <td class="cache-path">/services/*</td>
               <td>3600s</td>
               <td>600s</td>
-              <td class="cache-effect">Worker 진입 차단</td>
+              <td style="color:var(--yellow);">Workers에서 비적용</td>
             </tr>
             <tr>
               <td class="cache-path">/faq</td>
               <td>3600s</td>
               <td>600s</td>
-              <td class="cache-effect">Worker 진입 차단</td>
+              <td style="color:var(--yellow);">Workers에서 비적용</td>
             </tr>
             <tr>
               <td class="cache-path">/glossary</td>
               <td>3600s</td>
               <td>600s</td>
-              <td class="cache-effect">Worker 진입 차단</td>
+              <td style="color:var(--yellow);">Workers에서 비적용</td>
             </tr>
             <tr>
               <td class="cache-path">/pricing</td>
               <td>3600s</td>
               <td>600s</td>
-              <td class="cache-effect">Worker 진입 차단</td>
+              <td style="color:var(--yellow);">Workers에서 비적용</td>
             </tr>
           </tbody>
         </table>
       </div>
-      <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary);">
-        Edge 캐시 히트 시 Worker 코드 실행 없음 → CPU 0ms → cold start 완전 차단
+      <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--yellow);">
+        ⚠ 검증 결과: Workers Route로 서빙되는 사이트는 CDN 캐시 레이어를 우회하므로 Cache Rules가 Worker 진입을 차단하지 못합니다.
+        실제 캐시는 OpenNext ISR (x-nextjs-cache) + KV가 담당합니다.
       </p>
     </div>
   </div>
