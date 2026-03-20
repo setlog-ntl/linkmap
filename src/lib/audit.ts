@@ -120,7 +120,8 @@ export type AuditAction =
   | 'credential.delete'
   | 'credential.decrypt'
   | 'env_var.raw_read'
-  | 'env_var.raw_update';
+  | 'env_var.raw_update'
+  | 'project.share_toggle';
 
 interface AuditLogEntry {
   action: AuditAction;

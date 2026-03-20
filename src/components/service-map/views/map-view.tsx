@@ -20,6 +20,7 @@ import { useTheme } from 'next-themes';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Maximize2, Download, X } from 'lucide-react';
+import { ShareMapButton } from '@/components/service-map/share-map-button';
 import ServiceNode from '@/components/service-map/service-node';
 import ProjectNode from '@/components/service-map/project-node';
 import RadialEdge from '@/components/service-map/radial-edge';
@@ -264,6 +265,7 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full" onClick={() => { setFocusedNodeId(null); fitView({ padding: 0.3 }); }} title={t(locale, 'serviceMap.actions.fitView')}>
           <Maximize2 className="h-4 w-4" />
         </Button>
+        {!isReadOnly && <ShareMapButton projectId={projectId} />}
         <Button variant="ghost" size="sm" className="h-8 text-muted-foreground hover:text-foreground rounded-full" onClick={handleExportPng}>
           <Download className="mr-1.5 h-4 w-4" />
           PNG

@@ -14,6 +14,9 @@ export interface Project {
   icon_type: 'brand' | 'emoji' | 'custom' | null;
   icon_value: string | null;
   link_url: string | null;
+  share_token: string | null;
+  is_map_shared: boolean;
+  shared_at: string | null;
   is_favorited: boolean;
   is_showcase: boolean;
   showcase_description: string | null;

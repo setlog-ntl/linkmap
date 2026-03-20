@@ -21,6 +21,13 @@ import type {
 
 const EMPTY_CONNECTIONS: UserConnection[] = [];
 
+export type ServiceMapMode = 'normal' | 'demo' | 'shared';
+
+export interface ServiceMapOptions {
+  mode?: ServiceMapMode;
+  shareToken?: string;
+}
+
 export interface ServiceMapData {
   // Project
   projectName: string;
@@ -57,8 +64,8 @@ export interface ServiceMapData {
   layerOverrides: Record<string, string>; // service_id → dashboard_layer
 }
 
-// 데모 API 응답 타입
-interface DemoApiResponse {
+// 데모/공유 API 응답 타입
+interface RemoteApiResponse {
   project?: { name?: string; main_service_id?: string | null };
   services?: (ProjectService & { service: Service })[];
   dependencies?: ServiceDependency[];
@@ -67,15 +74,23 @@ interface DemoApiResponse {
   layerOverrides?: { service_id: string; dashboard_layer: string | null }[];
 }
 
-export function useServiceMapData(projectId: string, isDemo = false): ServiceMapData {
+export function useServiceMapData(projectId: string, options?: ServiceMapOptions | boolean): ServiceMapData {
+  // 하위 호환: isDemo boolean 지원
+  const opts: ServiceMapOptions = typeof options === 'boolean'
+    ? { mode: options ? 'demo' : 'normal' }
+    : options ?? {};
+  const mode = opts.mode ?? 'normal';
+  const shareToken = opts.shareToken;
+  const isRemote = mode === 'demo' || mode === 'shared';
+
   const supabaseRef = useRef(createClient());
 
   // Project name + main_service_id
   const [projectName, setProjectName] = useState('내 앱');
   const [mainServiceId, setMainServiceId] = useState<string | null>(null);
 
-  // 데모 모드 전용 상태
-  const [demoData, setDemoData] = useState<{
+  // 리모트(데모/공유) 모드 전용 상태
+  const [remoteData, setRemoteData] = useState<{
     services: (ProjectService & { service: Service })[];
     dependencies: ServiceDependency[];
     connections: UserConnection[];
@@ -88,13 +103,17 @@ export function useServiceMapData(projectId: string, isDemo = false): ServiceMap
     envVars: [],
     layerOverrides: {},
   });
-  const [demoLoading, setDemoLoading] = useState(isDemo);
+  const [remoteLoading, setRemoteLoading] = useState(isRemote);
 
   useEffect(() => {
-    if (isDemo) {
-      setDemoLoading(true);
-      fetch(`/api/demo/project/${projectId}`)
-        .then((r) => r.ok ? r.json() as Promise<DemoApiResponse> : null)
+    if (isRemote) {
+      const apiUrl = mode === 'shared'
+        ? `/api/shared/map/${shareToken}`
+        : `/api/demo/project/${projectId}`;
+
+      setRemoteLoading(true);
+      fetch(apiUrl)
+        .then((r) => r.ok ? r.json() as Promise<RemoteApiResponse> : null)
         .then((json) => {
           if (!json) return;
           if (json.project) {
@@ -105,7 +124,7 @@ export function useServiceMapData(projectId: string, isDemo = false): ServiceMap
           for (const o of json.layerOverrides ?? []) {
             if (o.dashboard_layer) overridesMap[o.service_id] = o.dashboard_layer;
           }
-          setDemoData({
+          setRemoteData({
             services: json.services ?? [],
             dependencies: json.dependencies ?? [],
             connections: json.userConnections ?? [],
@@ -114,7 +133,7 @@ export function useServiceMapData(projectId: string, isDemo = false): ServiceMap
           });
         })
         .catch(() => {})
-        .finally(() => setDemoLoading(false));
+        .finally(() => setRemoteLoading(false));
       return;
     }
 
@@ -131,10 +150,10 @@ export function useServiceMapData(projectId: string, isDemo = false): ServiceMap
       }
     };
     fetchProject();
-  }, [projectId, isDemo]);
+  }, [projectId, isRemote, mode, shareToken]);
 
-  // TanStack Query hooks — 데모 모드에서는 빈 projectId로 비활성화 (enabled: !!projectId)
-  const queryProjectId = isDemo ? '' : projectId;
+  // TanStack Query hooks — 리모트 모드에서는 빈 projectId로 비활성화 (enabled: !!projectId)
+  const queryProjectId = isRemote ? '' : projectId;
   const { data: services = [], isLoading: servicesLoading } = useProjectServices(queryProjectId);
   const { data: catalogServices = [], isLoading: catalogLoading } = useCatalogServices();
   const { data: healthChecks = {} } = useLatestHealthChecks(queryProjectId);
@@ -158,13 +177,13 @@ export function useServiceMapData(projectId: string, isDemo = false): ServiceMap
   // Layer overrides (memoized to prevent infinite re-render)
   const { data: layerOverridesRaw = [] } = useLayerOverrides(queryProjectId);
   const layerOverrides = useMemo(() => {
-    if (isDemo) return demoData.layerOverrides;
+    if (isRemote) return remoteData.layerOverrides;
     const map: Record<string, string> = {};
     for (const o of layerOverridesRaw) {
       if (o.dashboard_layer) map[o.service_id] = o.dashboard_layer;
     }
     return map;
-  }, [isDemo, demoData.layerOverrides, layerOverridesRaw]);
+  }, [isRemote, remoteData.layerOverrides, layerOverridesRaw]);
 
   // Stable refs for mutations
   const createConnectionRef = useRef(createConnectionMutation);
@@ -175,19 +194,19 @@ export function useServiceMapData(projectId: string, isDemo = false): ServiceMap
   return {
     projectName,
     mainServiceId,
-    services: isDemo ? demoData.services : services,
-    servicesLoading: isDemo ? demoLoading : servicesLoading,
+    services: isRemote ? remoteData.services : services,
+    servicesLoading: isRemote ? remoteLoading : servicesLoading,
     catalogServices,
     catalogLoading,
     removeService,
     healthChecks,
     runHealthCheck,
-    dependencies: isDemo ? demoData.dependencies : dependencies,
-    depsLoading: isDemo ? demoLoading : depsLoading,
+    dependencies: isRemote ? remoteData.dependencies : dependencies,
+    depsLoading: isRemote ? remoteLoading : depsLoading,
     serviceAccounts,
-    envVars: isDemo ? demoData.envVars : envVars,
-    userConnections: isDemo ? demoData.connections : userConnections,
-    connectionsLoading: isDemo ? demoLoading : connectionsLoading,
+    envVars: isRemote ? remoteData.envVars : envVars,
+    userConnections: isRemote ? remoteData.connections : userConnections,
+    connectionsLoading: isRemote ? remoteLoading : connectionsLoading,
     createConnectionRef,
     deleteConnectionRef,
     layerOverrides,

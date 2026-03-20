@@ -132,4 +132,7 @@ export const queryKeys = {
     featureQna: (slug: string) => ['ai-config', 'feature-qna', slug] as const,
     featurePresets: ['ai-config', 'feature-presets'] as const,
   },
+  share: {
+    status: (projectId: string) => ['share', 'status', projectId] as const,
+  },
 } as const;

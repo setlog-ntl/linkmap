@@ -69,13 +69,16 @@
 | showcase_tags | TEXT[] | YES | '{}' | M074 |
 | showcase_category | TEXT | YES | NULL | M074. CHECK: portfolio,business,blog,landing,community,ecommerce,other |
 | showcase_image_url | TEXT | YES | NULL | M076 |
+| share_token | TEXT UNIQUE | YES | NULL | 공유 링크 토큰 (nanoid 12), M085 |
+| is_map_shared | BOOLEAN | NO | false | 서비스맵 공유 활성화 여부, M085 |
+| shared_at | TIMESTAMPTZ | YES | NULL | 공유 활성화 시각, M085 |
 | monthly_budget | NUMERIC(10,2) | YES | NULL | 월간 예산, M060 |
 | budget_currency | TEXT | NO | 'USD' | 'USD'\|'KRW', M060 |
 | created_at | TIMESTAMPTZ | NO | now() | |
 | updated_at | TIMESTAMPTZ | NO | now() | |
 
-**Indexes**: `idx_projects_user_id`, `idx_projects_team`, `idx_projects_user_favorited`
-**RLS**: 소유자 CRUD + 팀 멤버 조회
+**Indexes**: `idx_projects_user_id`, `idx_projects_team`, `idx_projects_user_favorited`, `idx_projects_share_token` (partial, WHERE share_token IS NOT NULL)
+**RLS**: 소유자 CRUD + 팀 멤버 조회 + shared_map_public_read (is_map_shared=true)
 **TS Type**: `Project` (`src/types/project.ts`)
 
 ---
