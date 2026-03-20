@@ -5,6 +5,8 @@ import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { generateGlossaryJsonLd } from '@/lib/seo/json-ld';
 import { GLOSSARY_DATA, GLOSSARY_CATEGORIES } from '@/data/seo/glossary-data';
 
+export const revalidate = false;
+
 export const metadata: Metadata = {
   title: '바이브 코딩 용어집 — 환경변수, API, OAuth, BaaS 40+ 용어 | Linkmap',
   description:

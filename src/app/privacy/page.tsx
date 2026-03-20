@@ -1,6 +1,8 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 
+export const revalidate = false;
+
 export const metadata = {
   title: '개인정보처리방침 - Linkmap',
 };

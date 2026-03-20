@@ -1,6 +1,8 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 
+export const revalidate = false;
+
 export const metadata = {
   title: '이용약관 - Linkmap',
 };

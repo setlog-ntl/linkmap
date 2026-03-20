@@ -5,6 +5,8 @@ import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { generateFaqJsonLd } from '@/lib/seo/json-ld';
 import { FAQ_DATA, FAQ_CATEGORIES } from '@/data/seo/faq-data';
 
+export const revalidate = false;
+
 export const metadata: Metadata = {
   title: '자주 묻는 질문 (FAQ) — 바이브 코딩, 환경변수, 배포 | Linkmap',
   description:

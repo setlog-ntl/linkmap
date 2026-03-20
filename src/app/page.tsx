@@ -10,6 +10,8 @@ import { PricingSection, FinalCtaSection } from '@/components/landing/cta-sectio
 import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { generateWebAppJsonLd } from '@/lib/seo/json-ld';
 
+export const revalidate = false;
+
 export default function LandingPage() {
   const webAppJsonLd = generateWebAppJsonLd();
 

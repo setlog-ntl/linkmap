@@ -5,6 +5,8 @@ import { PricingContent } from './pricing-content';
 import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { generatePricingJsonLd } from '@/lib/seo/json-ld';
 
+export const revalidate = false;
+
 export const metadata: Metadata = {
   title: '요금제 | Linkmap',
   description: 'Linkmap Free와 Pro 요금제를 비교하세요. 무료로 시작하고, Pro로 프로젝트와 환경변수 제한을 확장하세요.',
