@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['shadcn/ui', 'Radix UI', '컴포넌트', 'React', 'UI 라이브러리', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function ComponentsPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'design-ui/components',

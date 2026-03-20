@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Supabase', 'PostgreSQL', 'BaaS', 'Auth', 'RLS', 'Next.js', '연동', '가이드', 'Linkmap'],
 };
 
+export const revalidate = false;
+
 export default function SupabaseGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'supabase',

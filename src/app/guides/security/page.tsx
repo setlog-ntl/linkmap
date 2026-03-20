@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['웹 보안', '시크릿 관리', 'XSS', 'CSRF', 'CORS', 'HTTPS', '환경변수 보안', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function SecurityGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'security',

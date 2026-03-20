@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['바이브코딩', 'AI 코딩', 'Cursor', 'Claude Code', 'ChatGPT', '프롬프트 엔지니어링', 'AI API'],
 };
 
+export const revalidate = false;
+
 export default function AiToolsGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'ai-tools',

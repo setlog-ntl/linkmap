@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Git 설치', 'GitHub 가입', 'SSH 키', 'git config', '초보자', '개발 환경 설정'],
 };
 
+export const revalidate = false;
+
 export default function GitSetupPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'github/git-setup',

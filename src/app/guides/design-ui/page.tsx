@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['웹 디자인', 'Tailwind CSS', 'shadcn/ui', '반응형', 'UI', 'CSS', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function DesignUiGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'design-ui',

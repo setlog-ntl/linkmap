@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['에러 추적', 'Sentry', 'LogRocket', '에러 모니터링', '세션 리플레이', '알림 설정'],
 };
 
+export const revalidate = false;
+
 export default function ErrorTrackingPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'monitoring/error-tracking',

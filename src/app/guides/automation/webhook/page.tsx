@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['웹훅', 'Webhook', 'Push', 'Pull', '시그니처 검증', 'RequestBin', '이벤트 기반', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function WebhookPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'automation/webhook',

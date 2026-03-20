@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['데이터베이스', 'SQL', 'NoSQL', 'CRUD', '스키마', 'PostgreSQL', 'Supabase', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function DatabasePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'backend/database',

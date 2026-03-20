@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['npm 에러', 'ERESOLVE', 'peer dependency', 'npm audit', 'node_modules', '트러블슈팅'],
 };
 
+export const revalidate = false;
+
 export default function TroubleshootingPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'package-manager/troubleshooting',

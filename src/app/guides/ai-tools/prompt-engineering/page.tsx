@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['프롬프트 엔지니어링', 'AI 프롬프트', '프롬프트 작성법', 'CLAUDE.md', '규격 문서', '바이브코딩'],
 };
 
+export const revalidate = false;
+
 export default function PromptEngineeringPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'ai-tools/prompt-engineering',

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Supabase RLS', 'Row Level Security', '테이블 생성', '정책', 'Supabase 클라이언트', 'PostgreSQL'],
 };
 
+export const revalidate = false;
+
 export default function SupabaseDatabaseRlsPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'supabase/database-rls',

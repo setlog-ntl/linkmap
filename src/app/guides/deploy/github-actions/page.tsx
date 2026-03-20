@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['GitHub Actions', 'CI/CD', '자동 배포', 'YAML', 'Workflow', '린트', '빌드', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function GithubActionsPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'deploy/github-actions',

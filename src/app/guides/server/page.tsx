@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['서버', '호스팅', 'VPS', '서버리스', 'localhost', '배포', '초보자', '바이브코딩'],
 };
 
+export const revalidate = false;
+
 export default function ServerGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'server',

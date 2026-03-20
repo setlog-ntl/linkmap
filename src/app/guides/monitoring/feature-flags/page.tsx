@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['피처 플래그', 'Feature Flags', 'A/B 테스트', '점진적 롤아웃', 'LaunchDarkly', 'Vercel'],
 };
 
+export const revalidate = false;
+
 export default function FeatureFlagsPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'monitoring/feature-flags',

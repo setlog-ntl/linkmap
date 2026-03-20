@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['모니터링', 'Sentry', 'Google Analytics', '에러 추적', '피처 플래그', 'A/B 테스트', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function MonitoringGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'monitoring',

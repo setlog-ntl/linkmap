@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Git 충돌', 'conflict', 'merge', 'rebase', '충돌 해결', 'conflict markers'],
 };
 
+export const revalidate = false;
+
 export default function ConflictPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'version-control/conflict',

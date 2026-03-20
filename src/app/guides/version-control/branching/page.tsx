@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['브랜치 전략', 'Git Flow', 'GitHub Flow', 'Trunk Based', '브랜치 네이밍'],
 };
 
+export const revalidate = false;
+
 export default function BranchingPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'version-control/branching',

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['반응형', '모바일 퍼스트', 'Flexbox', 'Grid', '레이아웃', 'CSS', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function ResponsivePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'design-ui/responsive',

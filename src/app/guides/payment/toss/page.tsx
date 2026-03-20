@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['토스페이먼츠', '결제 위젯', '빌링키', '정기결제', '가상계좌', '한국 PG'],
 };
 
+export const revalidate = false;
+
 export default function TossPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'payment/toss',

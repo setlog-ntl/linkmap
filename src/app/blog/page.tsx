@@ -18,6 +18,8 @@ export const metadata: Metadata = {
   ],
 };
 
+export const revalidate = 86400;
+
 export default function BlogPage() {
   const posts = getPublishedPostsMeta();
   return <BlogHub posts={posts} />;

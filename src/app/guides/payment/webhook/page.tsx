@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['웹훅', 'Webhook', '시그니처 검증', '멱등성', '재시도', '결제 이벤트'],
 };
 
+export const revalidate = false;
+
 export default function WebhookPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'payment/webhook',

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['OpenAI', 'GPT-4o', 'ChatGPT', 'AI API', 'Next.js', '연동', '가이드', 'Linkmap'],
 };
 
+export const revalidate = false;
+
 export default function OpenAIGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'openai',

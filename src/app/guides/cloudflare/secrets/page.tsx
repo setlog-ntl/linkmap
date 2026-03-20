@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Cloudflare Workers', 'wrangler secret', 'KV Storage', '환경변수', '시크릿 관리', '보안'],
 };
 
+export const revalidate = false;
+
 export default function CloudflareSecretsPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'cloudflare/secrets',

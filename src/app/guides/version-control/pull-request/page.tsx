@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Pull Request', 'PR', '코드 리뷰', '머지', 'Preview 배포', 'GitHub'],
 };
 
+export const revalidate = false;
+
 export default function PullRequestPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'version-control/pull-request',

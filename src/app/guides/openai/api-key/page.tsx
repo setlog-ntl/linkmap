@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['OpenAI API 키', 'API 키 발급', 'OPENAI_API_KEY', '환경변수', '요금 한도', 'platform.openai.com'],
 };
 
+export const revalidate = false;
+
 export default function OpenAIApiKeyPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'openai/api-key',

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['카카오 로그인', '카카오 OAuth', 'Supabase OIDC', '소셜 로그인', '설정 가이드', '카카오 개발자'],
 };
 
+export const revalidate = false;
+
 export default function KakaoGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'auth/kakao',

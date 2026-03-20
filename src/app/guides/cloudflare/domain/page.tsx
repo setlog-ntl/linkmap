@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Cloudflare', '도메인 연결', '네임서버', 'SSL', 'DNS', 'HTTPS', 'DDoS 보호'],
 };
 
+export const revalidate = false;
+
 export default function CloudflareDomainPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'cloudflare/domain',

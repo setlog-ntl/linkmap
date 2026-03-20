@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Supabase', '프로젝트 생성', 'SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SERVICE_ROLE_KEY', '환경변수'],
 };
 
+export const revalidate = false;
+
 export default function SupabaseProjectSetupPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'supabase/project-setup',

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['프론트엔드', 'HTML', 'CSS', 'JavaScript', 'React', '컴포넌트', 'CSR', 'SSR', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function FrontendGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'frontend',

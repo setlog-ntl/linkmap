@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['결제', 'Stripe', '토스페이먼츠', 'PG사', '웹훅', 'Payment Intent', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function PaymentGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'payment',

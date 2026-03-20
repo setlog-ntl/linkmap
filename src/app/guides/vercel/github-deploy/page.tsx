@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Vercel 배포', 'GitHub 연동', '자동 배포', '프리뷰 배포', 'CI/CD', 'Next.js 배포', 'Vercel'],
 };
 
+export const revalidate = false;
+
 export default function VercelGithubDeployPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'vercel/github-deploy',

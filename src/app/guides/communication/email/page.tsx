@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['이메일', 'Resend', 'SendGrid', '트랜잭셔널 이메일', '마케팅 이메일', 'SMTP', 'API'],
 };
 
+export const revalidate = false;
+
 export default function EmailPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'communication/email',

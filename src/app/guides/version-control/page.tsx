@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Git', '브랜치', 'Pull Request', '코드 리뷰', '충돌 해결', 'merge', 'rebase', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function VersionControlGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'version-control',

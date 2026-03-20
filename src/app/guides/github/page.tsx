@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['GitHub', '깃허브', '가이드', '바이브 코딩', '초보자', 'Git 설치', '저장소 만들기'],
 };
 
+export const revalidate = false;
+
 export default function GitHubGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'github',

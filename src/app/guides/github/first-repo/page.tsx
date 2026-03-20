@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['git init', '첫 커밋', 'git push', 'GitHub 저장소', '.gitignore', 'git add', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function FirstRepoPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'github/first-repo',

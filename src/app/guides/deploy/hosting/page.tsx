@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['서버', '호스팅', 'CDN', '서버리스', 'Vercel', 'Cloudflare', 'Railway', '정적 호스팅', '배포'],
 };
 
+export const revalidate = false;
+
 export default function HostingPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'deploy/hosting',

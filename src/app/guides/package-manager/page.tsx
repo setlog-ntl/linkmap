@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['npm', 'yarn', 'pnpm', 'package.json', '패키지 매니저', 'node_modules', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function PackageManagerGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'package-manager',

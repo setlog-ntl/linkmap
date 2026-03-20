@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['.env', '.env.local', '.env.example', '환경변수 파일', 'gitignore', 'Next.js', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function DotenvFilesPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'env/dotenv-files',

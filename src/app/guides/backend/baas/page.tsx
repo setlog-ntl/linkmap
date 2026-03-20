@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['BaaS', 'Supabase', 'Firebase', '백엔드', '인증', '데이터베이스', '바이브 코딩', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function BaasPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'backend/baas',

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Cloudflare', 'Workers', '배포', '가이드', 'wrangler', '환경변수', '시크릿', 'Linkmap'],
 };
 
+export const revalidate = false;
+
 export default function CloudflareGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'cloudflare',

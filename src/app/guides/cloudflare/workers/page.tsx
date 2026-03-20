@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Cloudflare Workers', 'Wrangler', 'Next.js 배포', 'wrangler.toml', 'opennextjs', '서버리스'],
 };
 
+export const revalidate = false;
+
 export default function CloudflareWorkersPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'cloudflare/workers',

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Cursor', 'Claude Code', 'AI 코드 에디터', 'AI 코딩 도구', '바이브코딩', 'Windsurf'],
 };
 
+export const revalidate = false;
+
 export default function CursorClaudePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'ai-tools/cursor-claude',

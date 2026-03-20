@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['OpenAI Next.js', 'API Route', '스트리밍', 'Vercel AI SDK', 'useChat', 'streamText', 'gpt-4o'],
 };
 
+export const revalidate = false;
+
 export default function NextjsIntegrationPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'openai/nextjs-integration',

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['CI/CD', 'GitHub Actions', '자동 배포', 'Vercel', '배포 파이프라인', '지속적 통합', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function CicdPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'deploy/cicd',

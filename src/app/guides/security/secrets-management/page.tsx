@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['시크릿 관리', '.env', 'API 키', '환경변수', '키 로테이션', '보안'],
 };
 
+export const revalidate = false;
+
 export default function SecretsManagementPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'security/secrets-management',

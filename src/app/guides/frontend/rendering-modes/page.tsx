@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['CSR', 'SSR', 'SSG', '렌더링', 'Next.js', 'App Router', '서버 컴포넌트', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function RenderingModesPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'frontend/rendering-modes',

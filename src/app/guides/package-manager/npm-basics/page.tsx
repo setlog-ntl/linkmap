@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['npm install', 'npm run', 'npx', 'npm scripts', '패키지 설치', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function NpmBasicsPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'package-manager/npm-basics',

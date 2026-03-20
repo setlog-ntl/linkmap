@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['package.json', 'dependencies', 'devDependencies', 'semver', 'lock 파일', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function PackageJsonPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'package-manager/package-json',

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['React', 'Next.js', 'App Router', '컴포넌트', 'Props', 'State', 'useEffect', '서버 컴포넌트', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function ReactNextjsPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'frontend/react-nextjs',

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['HTTPS', 'SSL', 'TLS', 'CORS', '동일 출처 정책', 'CORS 에러', '보안'],
 };
 
+export const revalidate = false;
+
 export default function HttpsCorsPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'security/https-cors',

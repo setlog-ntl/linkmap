@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['에러 핸들링', 'HTTP 상태 코드', 'try catch', '재시도', '지수 백오프', 'API 에러'],
 };
 
+export const revalidate = false;
+
 export default function ErrorHandlingPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'api-basics/error-handling',

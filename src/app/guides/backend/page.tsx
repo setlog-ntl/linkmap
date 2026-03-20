@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['백엔드', 'API', '데이터베이스', 'REST', 'Supabase', 'Firebase', 'BaaS', '서버', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function BackendGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'backend',

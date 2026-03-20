@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['푸시 알림', 'FCM', 'OneSignal', 'Web Push', '서비스 워커', 'Service Worker', '모바일 푸시'],
 };
 
+export const revalidate = false;
+
 export default function PushPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'communication/push',

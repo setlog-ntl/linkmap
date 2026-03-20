@@ -21,6 +21,8 @@ export const metadata: Metadata = {
   ],
 };
 
+export const revalidate = false;
+
 export default function CdnPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'server/cdn',

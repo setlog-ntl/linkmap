@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['웹 분석', 'Google Analytics', 'GA4', 'Plausible', 'Vercel Analytics', '이벤트 트래킹', '페이지뷰'],
 };
 
+export const revalidate = false;
+
 export default function AnalyticsPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'monitoring/analytics',

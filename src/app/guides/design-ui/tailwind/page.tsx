@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Tailwind CSS', '유틸리티 클래스', '반응형', '다크 모드', 'CSS', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function TailwindPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'design-ui/tailwind',

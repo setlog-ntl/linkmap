@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['API', 'REST', 'GraphQL', 'fetch', 'HTTP', '에러 핸들링', '인증', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function ApiBasicsGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'api-basics',

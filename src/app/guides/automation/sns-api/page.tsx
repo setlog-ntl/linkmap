@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['카카오 API', '인스타그램 API', 'YouTube API', 'OAuth', 'SNS 연동', 'REST API', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function SnsApiPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'automation/sns-api',

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['구글 로그인', 'Google OAuth', 'Supabase', '소셜 로그인', '설정 가이드', 'Google Cloud Console'],
 };
 
+export const revalidate = false;
+
 export default function GoogleGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'auth/google',

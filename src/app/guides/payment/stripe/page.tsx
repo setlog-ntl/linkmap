@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Stripe', 'Payment Intent', 'Checkout', '테스트 카드', 'Next.js', '결제 연동'],
 };
 
+export const revalidate = false;
+
 export default function StripePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'payment/stripe',

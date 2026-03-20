@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Supabase Auth', 'Google 로그인', 'Kakao 로그인', 'OAuth', '미들웨어', '소셜 로그인', 'Next.js'],
 };
 
+export const revalidate = false;
+
 export default function SupabaseAuthSetupPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'supabase/auth-setup',

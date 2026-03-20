@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['자동화', '웹훅', 'Webhook', 'cron', '스케줄링', 'SNS API', '카카오 API', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function AutomationGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'automation',

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['배포', 'Deploy', 'CI/CD', 'Vercel', 'Cloudflare', 'Railway', 'Netlify', '자동 배포', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function DeployGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'deploy',

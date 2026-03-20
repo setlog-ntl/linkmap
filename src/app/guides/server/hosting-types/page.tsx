@@ -22,6 +22,8 @@ export const metadata: Metadata = {
   ],
 };
 
+export const revalidate = false;
+
 export default function HostingTypesPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'server/hosting-types',

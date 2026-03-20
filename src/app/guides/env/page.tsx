@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['환경변수', '.env', 'API Key', 'NEXT_PUBLIC', '배포', '가이드', '초보자', 'Linkmap'],
 };
 
+export const revalidate = false;
+
 export default function EnvGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'env',

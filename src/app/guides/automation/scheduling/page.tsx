@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['cron', '스케줄링', 'Vercel Cron', 'Inngest', 'Trigger.dev', 'Queue', '큐', '자동화', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function SchedulingPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'automation/scheduling',

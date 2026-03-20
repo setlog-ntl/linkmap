@@ -11,6 +11,8 @@ interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
 }
 
+export const revalidate = false;
+
 export async function generateStaticParams() {
   return getPublishedPostSlugs();
 }

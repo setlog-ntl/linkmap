@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Vercel 도메인', 'DNS 설정', 'A 레코드', 'CNAME', 'SSL 인증서', 'www 리다이렉트', '커스텀 도메인'],
 };
 
+export const revalidate = false;
+
 export default function VercelCustomDomainPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'vercel/custom-domain',

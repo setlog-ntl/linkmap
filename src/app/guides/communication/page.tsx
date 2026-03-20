@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['이메일', 'SMS', '푸시 알림', 'WebSocket', 'Resend', 'SendGrid', 'FCM', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function CommunicationGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'communication',

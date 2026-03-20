@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['API Key', 'Bearer Token', 'OAuth', 'API 인증', 'Authorization', '보안', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function ApiAuthPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'api-basics/api-auth',

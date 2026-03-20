@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['Vercel', '배포', 'CI/CD', '프리뷰', '환경변수', 'Next.js', '가이드', 'Linkmap'],
 };
 
+export const revalidate = false;
+
 export default function VercelGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'vercel',

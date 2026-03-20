@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['DNS', 'DNS 레코드', 'A 레코드', 'CNAME', 'TXT', 'MX', 'TTL', 'Vercel 도메인', 'Cloudflare DNS', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function DnsRecordsPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'domain/dns-records',

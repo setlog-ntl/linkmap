@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['인증', 'OAuth', 'API Key', '로그인', '서비스 연동', '가이드', '초보자', 'Linkmap', '구글 로그인', '카카오 로그인'],
 };
 
+export const revalidate = false;
+
 export default function AuthGuidePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'auth',

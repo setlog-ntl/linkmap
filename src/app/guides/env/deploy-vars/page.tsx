@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['배포 환경변수', 'Vercel 환경변수', 'Cloudflare', 'NEXT_PUBLIC', '환경변수 설정', '배포'],
 };
 
+export const revalidate = false;
+
 export default function DeployVarsPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'env/deploy-vars',

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['WebSocket', 'Supabase Realtime', 'Pusher', '실시간', 'SSE', '채팅', '라이브 업데이트'],
 };
 
+export const revalidate = false;
+
 export default function RealtimePage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'communication/realtime',

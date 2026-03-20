@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['XSS', 'CSRF', 'SQL Injection', '웹 취약점', '입력 검증', 'Zod', '보안'],
 };
 
+export const revalidate = false;
+
 export default function WebVulnerabilitiesPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'security/web-vulnerabilities',

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['OpenAI API', 'Anthropic API', 'AI API', '토큰 비용', '스트리밍', 'GPT API', 'Claude API'],
 };
 
+export const revalidate = false;
+
 export default function AiApiPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'ai-tools/ai-api',

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['도메인 구매', '도메인 이름', '도메인 가격', '가비아', 'Namecheap', 'Cloudflare', '네임서버', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function HowToBuyPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'domain/how-to-buy',

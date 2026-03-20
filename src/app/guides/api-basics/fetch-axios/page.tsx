@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   keywords: ['fetch', 'axios', 'HTTP', 'GET', 'POST', 'JSON', 'API 요청', '초보자'],
 };
 
+export const revalidate = false;
+
 export default function FetchAxiosPage() {
   const jsonLd = generateGuideJsonLd({
     slug: 'api-basics/fetch-axios',
