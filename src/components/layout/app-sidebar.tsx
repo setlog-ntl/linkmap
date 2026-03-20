@@ -342,7 +342,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
               isActive={isActiveProject && pathname === `/project/${project.id}`}
               className="flex-1 min-w-0"
             >
-              <Link href={`/project/${project.id}`}>
+              <Link href={`/project/${project.id}`} prefetch={false}>
                 <InlineEditableName
                   name={project.name}
                   onSave={(newName) => updateProject({ id: project.id, name: newName })}
@@ -377,7 +377,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                     asChild
                     isActive={isActive(item.href, item.exact)}
                   >
-                    <Link href={item.href}>
+                    <Link href={item.href} prefetch={false}>
                       <item.icon className="h-3.5 w-3.5" />
                       <span>{t(locale, item.labelKey)}</span>
                     </Link>
@@ -398,7 +398,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                   )}
                   <SidebarMenuSubItem>
                     <SidebarMenuSubButton asChild isActive={activeDeployId === latestDeploy.id}>
-                      <Link href={`/sites/${latestDeploy.id}/edit`}>
+                      <Link href={`/sites/${latestDeploy.id}/edit`} prefetch={false}>
                         <Pencil className="h-3.5 w-3.5" />
                         <span>사이트 편집</span>
                       </Link>
@@ -432,7 +432,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
     <Sidebar collapsible="icon" className="border-r">
       {/* Logo */}
       <SidebarHeader className="px-3 py-3">
-        <Link href="/" className="flex items-center gap-2 font-bold text-lg px-1">
+        <Link href="/" prefetch={false} className="flex items-center gap-2 font-bold text-lg px-1">
           <LinkmapLogo size={32} className="shrink-0" />
           {!isCollapsed && (
             <span className="flex items-center">
@@ -464,7 +464,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                       {/* 전체 보기 / 사이트 추가 — 최상단 */}
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton asChild>
-                          <Link href="/sites/manage" className="flex items-center justify-between w-full group/site-action">
+                          <Link href="/sites/manage" prefetch={false} className="flex items-center justify-between w-full group/site-action">
                             <span className="flex items-center gap-1">
                               <LayoutGrid className="h-3.5 w-3.5" />
                               <span>전체 보기</span>
@@ -490,7 +490,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                       {!isDeploymentsLoading && visibleSites.length === 0 && (
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton asChild>
-                            <Link href="/sites/new" className="text-muted-foreground text-xs">
+                            <Link href="/sites/new" prefetch={false} className="text-muted-foreground text-xs">
                               <span>배포된 사이트 없음</span>
                             </Link>
                           </SidebarMenuSubButton>
@@ -539,7 +539,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                                     isActive={activeDeployId === deploy.id}
                                     className="flex-1 min-w-0"
                                   >
-                                    <Link href={`/sites/${deploy.id}/edit`}>
+                                    <Link href={`/sites/${deploy.id}/edit`} prefetch={false}>
                                       <StatusIcon className={`h-3.5 w-3.5 ${statusClass}`} />
                                       <InlineEditableName
                                         name={deploy.site_name}
@@ -563,7 +563,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                                     {deploy.project_id && (
                                       <SidebarMenuSubItem>
                                         <SidebarMenuSubButton asChild isActive={activeProjectId === deploy.project_id}>
-                                          <Link href={`/project/${deploy.project_id}`}>
+                                          <Link href={`/project/${deploy.project_id}`} prefetch={false}>
                                             <FolderKanban className="h-3.5 w-3.5" />
                                             <span>프로젝트 관리</span>
                                           </Link>
@@ -583,7 +583,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                               asChild
                               isActive={activeDeployId === deploy.id}
                             >
-                              <Link href={`/sites/${deploy.id}/edit`}>
+                              <Link href={`/sites/${deploy.id}/edit`} prefetch={false}>
                                 <StatusIcon className={`h-3.5 w-3.5 ${statusClass}`} />
                                 <InlineEditableName
                                   name={deploy.site_name}
@@ -622,7 +622,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                       {/* 전체 보기 / 새 프로젝트 — 최상단 */}
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton asChild>
-                          <Link href="/dashboard" className="flex items-center justify-between w-full group/proj-action">
+                          <Link href="/dashboard" prefetch={false} className="flex items-center justify-between w-full group/proj-action">
                             <span className="flex items-center gap-1">
                               <LayoutGrid className="h-3.5 w-3.5" />
                               <span>전체 보기</span>
@@ -648,7 +648,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                       {!isProjectsLoading && visibleProjects.length === 0 && (
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton asChild>
-                            <Link href="/dashboard" className="text-muted-foreground text-xs">
+                            <Link href="/dashboard" prefetch={false} className="text-muted-foreground text-xs">
                               <span>{t(locale, 'dashboard.noProjects')}</span>
                             </Link>
                           </SidebarMenuSubButton>
@@ -721,7 +721,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                       isActive={isActive(item.href)}
                       tooltip={label}
                     >
-                      <Link href={item.href}>
+                      <Link href={item.href} prefetch={false}>
                         <item.icon className="h-4 w-4" />
                         <span>{label}</span>
                       </Link>
@@ -801,7 +801,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                       </Collapsible>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton asChild isActive={pathname === '/guides'}>
-                          <Link href="/guides" className="text-muted-foreground">
+                          <Link href="/guides" prefetch={false} className="text-muted-foreground">
                             <ArrowRight className="h-3.5 w-3.5" />
                             <span>전체 보기</span>
                           </Link>
@@ -827,7 +827,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                     isActive={isActive(item.href)}
                     tooltip={item.label}
                   >
-                    <Link href={item.href}>
+                    <Link href={item.href} prefetch={false}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.label}</span>
                     </Link>
@@ -859,7 +859,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                           {adminNav.map((item) => (
                             <SidebarMenuSubItem key={item.href}>
                               <SidebarMenuSubButton asChild isActive={isActive(item.href)}>
-                                <Link href={item.href}>
+                                <Link href={item.href} prefetch={false}>
                                   <item.icon className="h-3.5 w-3.5" />
                                   <span>{item.label}</span>
                                 </Link>
@@ -919,19 +919,19 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/settings/account">
+                    <Link href="/settings/account" prefetch={false}>
                       <User className="mr-2 h-4 w-4" />
                       {t(locale, 'nav.settingsAccount')}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/settings/github">
+                    <Link href="/settings/github" prefetch={false}>
                       <GitBranch className="mr-2 h-4 w-4" />
                       {t(locale, 'nav.settingsGithub')}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/settings/developer">
+                    <Link href="/settings/developer" prefetch={false}>
                       <Wrench className="mr-2 h-4 w-4" />
                       {t(locale, 'nav.settingsDeveloper')}
                     </Link>

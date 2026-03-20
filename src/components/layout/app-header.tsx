@@ -111,26 +111,26 @@ export function AppHeader({ projectName, profile }: AppHeaderProps) {
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/settings/account">
+                <Link href="/settings/account" prefetch={false}>
                   <User className="mr-2 h-4 w-4" />
                   {t(locale, 'nav.settingsAccount')}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/settings/github">
+                <Link href="/settings/github" prefetch={false}>
                   <GitBranch className="mr-2 h-4 w-4" />
                   {t(locale, 'nav.settingsGithub')}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/settings/developer">
+                <Link href="/settings/developer" prefetch={false}>
                   <Wrench className="mr-2 h-4 w-4" />
                   {t(locale, 'nav.settingsDeveloper')}
                 </Link>
               </DropdownMenuItem>
               {profile.is_admin && (
                 <DropdownMenuItem asChild>
-                  <Link href="/admin/ai-config">
+                  <Link href="/admin/ai-config" prefetch={false}>
                     <Bot className="mr-2 h-4 w-4" />
                     {t(locale, 'nav.adminAi')}
                   </Link>
@@ -138,7 +138,7 @@ export function AppHeader({ projectName, profile }: AppHeaderProps) {
               )}
               {profile.is_admin && (
                 <DropdownMenuItem asChild>
-                  <Link href="/admin/users">
+                  <Link href="/admin/users" prefetch={false}>
                     <Users className="mr-2 h-4 w-4" />
                     사용자 관리
                   </Link>
