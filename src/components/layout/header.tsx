@@ -16,8 +16,13 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { Menu, Globe, Search, BookOpen, PenLine, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench, ArrowRight, Rocket, BarChart3, Trophy } from 'lucide-react';
-import { GUIDE_CATEGORIES, LEARNING_STAGES, GUIDE_LIST, getGuidesByCategory, getSubGuides } from '@/data/ui/guide-meta';
+import { Menu, Globe, Search, BookOpen, PenLine, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench, ArrowRight, Rocket, BarChart3, Trophy, Code, Palette, Workflow } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { GUIDE_CATEGORIES_DATA, LEARNING_STAGES_DATA, GUIDE_DATA, getGuideDataByCategory } from '@/data/ui/guide-data';
+
+const STAGE_ICON_MAP: Record<string, LucideIcon> = {
+  start: Bot, develop: Code, polish: Palette, deploy: Rocket, scale: Workflow,
+};
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useUIStore } from '@/stores/ui-store';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -129,12 +134,12 @@ export function Header({ profile }: HeaderProps) {
           {/* 기본 개념 — 학습 단계별 */}
           <DropdownMenuLabel className="flex items-center gap-1.5 text-xs">
             <BookOpen className="h-3.5 w-3.5" />
-            {GUIDE_CATEGORIES.concept.label}
+            {GUIDE_CATEGORIES_DATA.concept.label}
           </DropdownMenuLabel>
-          {LEARNING_STAGES.map((stage) => {
-            const StageIcon = stage.icon;
+          {LEARNING_STAGES_DATA.map((stage) => {
+            const StageIcon = STAGE_ICON_MAP[stage.id] ?? BookOpen;
             const stageGuides = stage.slugs
-              .map(slug => GUIDE_LIST.find(g => g.slug === slug))
+              .map(slug => GUIDE_DATA.find(g => g.slug === slug))
               .filter(Boolean);
             if (stageGuides.length === 0) return null;
             return (
@@ -149,11 +154,9 @@ export function Header({ profile }: HeaderProps) {
                   <div className="ml-4 border-l border-border/50 pl-2 py-0.5">
                     {stageGuides.map((guide) => {
                       if (!guide) return null;
-                      const GuideIcon = guide.icon;
                       return (
                         <DropdownMenuItem key={guide.slug} asChild className="text-xs h-7">
                           <Link href={guide.href} onClick={() => setSidebarOpen(false)}>
-                            <GuideIcon className="h-3 w-3 mr-1.5 opacity-60" />
                             {guide.title}
                           </Link>
                         </DropdownMenuItem>
@@ -169,19 +172,15 @@ export function Header({ profile }: HeaderProps) {
           <DropdownMenuSeparator />
           <DropdownMenuLabel className="flex items-center gap-1.5 text-xs">
             <Wrench className="h-3.5 w-3.5" />
-            {GUIDE_CATEGORIES.service.label}
+            {GUIDE_CATEGORIES_DATA.service.label}
           </DropdownMenuLabel>
-          {getGuidesByCategory('service').map((guide) => {
-            const GuideIcon = guide.icon;
-            return (
-              <DropdownMenuItem key={guide.slug} asChild>
-                <Link href={guide.href} onClick={() => setSidebarOpen(false)}>
-                  <GuideIcon className="h-3.5 w-3.5 mr-2 opacity-60" />
-                  {guide.title}
-                </Link>
-              </DropdownMenuItem>
-            );
-          })}
+          {getGuideDataByCategory('service').map((guide) => (
+            <DropdownMenuItem key={guide.slug} asChild>
+              <Link href={guide.href} onClick={() => setSidebarOpen(false)}>
+                {guide.title}
+              </Link>
+            </DropdownMenuItem>
+          ))}
         </DropdownMenuContent>
       </DropdownMenu>
     </>
@@ -416,12 +415,12 @@ export function Header({ profile }: HeaderProps) {
 
                 {/* 기본 개념 — 학습 단계별 */}
                 <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold px-2.5 mb-1 mt-2">
-                  {GUIDE_CATEGORIES.concept.label}
+                  {GUIDE_CATEGORIES_DATA.concept.label}
                 </p>
-                {LEARNING_STAGES.map((stage) => {
-                  const StageIcon = stage.icon;
+                {LEARNING_STAGES_DATA.map((stage) => {
+                  const StageIcon = STAGE_ICON_MAP[stage.id] ?? BookOpen;
                   const stageGuides = stage.slugs
-                    .map(slug => GUIDE_LIST.find(g => g.slug === slug))
+                    .map(slug => GUIDE_DATA.find(g => g.slug === slug))
                     .filter(Boolean);
                   if (stageGuides.length === 0) return null;
                   return (
@@ -436,7 +435,6 @@ export function Header({ profile }: HeaderProps) {
                         <div className="ml-7 border-l border-border/50 pl-2 py-0.5">
                           {stageGuides.map((guide) => {
                             if (!guide) return null;
-                            const GuideIcon = guide.icon;
                             return (
                               <Link
                                 key={guide.slug}
@@ -444,7 +442,6 @@ export function Header({ profile }: HeaderProps) {
                                 className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 flex items-center gap-1.5"
                                 onClick={() => setSidebarOpen(false)}
                               >
-                                <GuideIcon className="h-3 w-3 opacity-60" />
                                 {guide.title}
                               </Link>
                             );
@@ -457,22 +454,18 @@ export function Header({ profile }: HeaderProps) {
 
                 {/* 서비스 가이드 */}
                 <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold px-2.5 mb-1 mt-2">
-                  {GUIDE_CATEGORIES.service.label}
+                  {GUIDE_CATEGORIES_DATA.service.label}
                 </p>
-                {getGuidesByCategory('service').map((guide) => {
-                  const GuideIcon = guide.icon;
-                  return (
-                    <Link
-                      key={guide.slug}
-                      href={guide.href}
-                      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2"
-                      onClick={() => setSidebarOpen(false)}
-                    >
-                      <GuideIcon className="h-3.5 w-3.5 opacity-60" />
-                      {guide.title}
-                    </Link>
-                  );
-                })}
+                {getGuideDataByCategory('service').map((guide) => (
+                  <Link
+                    key={guide.slug}
+                    href={guide.href}
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2"
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    {guide.title}
+                  </Link>
+                ))}
 
                 <div className="border-t my-2" />
                 {!profile ? (

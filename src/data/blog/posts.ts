@@ -3555,6 +3555,16 @@ export function getPublishedPostsMeta(): BlogPostMeta[] {
   return getPublishedPosts().map(({ content: _, ...meta }) => meta);
 }
 
+/** sitemap용 경량 엔트리 (slug + 날짜만) */
+export function getBlogSitemapEntries(): { slug: string; updatedAt?: string; publishedAt: string }[] {
+  return BLOG_POSTS.map(({ slug, updatedAt, publishedAt }) => ({ slug, updatedAt, publishedAt }));
+}
+
+/** generateStaticParams용 slug 목록 */
+export function getPublishedPostSlugs(): { slug: string }[] {
+  return BLOG_POSTS.map(({ slug }) => ({ slug }));
+}
+
 export function getAllTags(): string[] {
   const tagSet = new Set<string>();
   for (const post of BLOG_POSTS) {

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { GUIDE_DATA } from '@/data/ui/guide-data';
 import { SERVICE_SLUGS } from '@/data/seed/service-slugs';
-import { BLOG_POSTS } from '@/data/blog/posts';
+import { getBlogSitemapEntries } from '@/data/blog/posts';
 
 const BASE_URL = 'https://www.linkmap.biz';
 
@@ -29,9 +29,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  const blogPages: MetadataRoute.Sitemap = BLOG_POSTS.map((post) => ({
-    url: `${BASE_URL}/blog/${post.slug}`,
-    lastModified: new Date(post.updatedAt ?? post.publishedAt),
+  const blogPages: MetadataRoute.Sitemap = getBlogSitemapEntries().map((entry) => ({
+    url: `${BASE_URL}/blog/${entry.slug}`,
+    lastModified: new Date(entry.updatedAt ?? entry.publishedAt),
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }));

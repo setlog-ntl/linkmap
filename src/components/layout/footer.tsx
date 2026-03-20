@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
-import { GUIDE_CATEGORIES, LEARNING_STAGES, GUIDE_LIST, getGuidesByCategory } from '@/data/ui/guide-meta';
+import { GUIDE_CATEGORIES_DATA, LEARNING_STAGES_DATA, GUIDE_DATA, getGuideDataByCategory } from '@/data/ui/guide-data';
 
 export function Footer() {
   const { locale } = useLocaleStore();
@@ -31,12 +31,11 @@ export function Footer() {
           </div>
           {/* 기본 개념 — 학습 단계별 요약 */}
           <div className="col-span-2 md:col-span-2">
-            <h4 className="font-semibold text-sm mb-3 text-white">{GUIDE_CATEGORIES.concept.label}</h4>
+            <h4 className="font-semibold text-sm mb-3 text-white">{GUIDE_CATEGORIES_DATA.concept.label}</h4>
             <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-              {LEARNING_STAGES.map((stage) => {
-                const StageIcon = stage.icon;
+              {LEARNING_STAGES_DATA.map((stage) => {
                 const stageGuides = stage.slugs
-                  .map(slug => GUIDE_LIST.find(g => g.slug === slug))
+                  .map(slug => GUIDE_DATA.find(g => g.slug === slug))
                   .filter(Boolean);
                 return (
                   <div key={stage.id}>
@@ -62,9 +61,9 @@ export function Footer() {
           </div>
           {/* 서비스 가이드 */}
           <div>
-            <h4 className="font-semibold text-sm mb-3 text-white">{GUIDE_CATEGORIES.service.label}</h4>
+            <h4 className="font-semibold text-sm mb-3 text-white">{GUIDE_CATEGORIES_DATA.service.label}</h4>
             <ul className="space-y-2 text-sm">
-              {getGuidesByCategory('service').map((guide) => (
+              {getGuideDataByCategory('service').map((guide) => (
                 <li key={guide.slug}>
                   <Link href={guide.href} className="hover:text-white transition-colors">
                     {guide.title}

@@ -140,10 +140,43 @@ export const SUB_GUIDE_DATA: SubGuideData[] = [
   { slug: 'custom-domain', parentSlug: 'vercel', title: '커스텀 도메인 연결', description: '도메인 추가, DNS 설정, SSL', readingTime: '5분', href: '/guides/vercel/custom-domain' },
 ];
 
+// ── 카테고리 (아이콘 없는 순수 데이터) ──
+
+export interface GuideCategoryData {
+  label: string;
+  description: string;
+}
+
+export const GUIDE_CATEGORIES_DATA: Record<GuideCategory, GuideCategoryData> = {
+  concept: { label: '기본 개념', description: '개발에 꼭 필요한 핵심 개념을 쉽게 설명합니다' },
+  service: { label: '서비스 가이드', description: '자주 쓰는 서비스를 단계별로 설정합니다' },
+};
+
+// ── 학습 단계 (아이콘 없는 순수 데이터) ──
+
+export interface LearningStageData {
+  id: string;
+  label: string;
+  description: string;
+  slugs: string[];
+}
+
+export const LEARNING_STAGES_DATA: LearningStageData[] = [
+  { id: 'start', label: '시작', description: 'AI 도구와 개발 환경 세팅', slugs: ['ai-tools', 'frontend', 'package-manager', 'version-control'] },
+  { id: 'develop', label: '개발', description: '핵심 기능 구현에 필요한 개념', slugs: ['env', 'api-basics', 'backend', 'auth'] },
+  { id: 'polish', label: '완성', description: '디자인과 보안 마무리', slugs: ['design-ui', 'security'] },
+  { id: 'deploy', label: '배포', description: '도메인 연결, 서버, 배포 자동화', slugs: ['domain', 'server', 'deploy'] },
+  { id: 'scale', label: '확장', description: '알림, 결제, 모니터링, 자동화', slugs: ['communication', 'payment', 'monitoring', 'automation'] },
+];
+
 // ── 유틸리티 함수 ──
 
 export function getGuideDataBySlug(slug: string): GuideData | undefined {
   return GUIDE_DATA.find(g => g.slug === slug);
+}
+
+export function getGuideDataByCategory(category: GuideCategory): GuideData[] {
+  return GUIDE_DATA.filter(g => g.category === category);
 }
 
 export function getSubGuideData(parentSlug: string): SubGuideData[] {

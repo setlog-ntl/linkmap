@@ -9,8 +9,15 @@ import {
   List, Link2, Key, Settings, BookOpen, ChevronDown, ChevronRight,
   LogOut, Bot, User, GitBranch, Wrench, FolderKanban, Plus, LayoutDashboard, LayoutGrid,
   Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight, Trash2, DollarSign, Users, BarChart3, Lightbulb, Trophy, Bug, Check, X, GripVertical,
+  Code, Palette, Workflow,
 } from 'lucide-react';
-import { GUIDE_CATEGORIES, LEARNING_STAGES, getGuidesByCategory } from '@/data/ui/guide-meta';
+import { GUIDE_CATEGORIES_DATA, LEARNING_STAGES_DATA, getGuideDataByCategory } from '@/data/ui/guide-data';
+import type { LucideIcon } from 'lucide-react';
+
+const STAGE_ICON_MAP: Record<string, LucideIcon> = {
+  start: Bot, develop: Code, polish: Palette, deploy: Rocket, scale: Workflow,
+};
+
 import { createClient } from '@/lib/supabase/client';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
@@ -734,12 +741,12 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       {/* 기본 개념: 학습 단계별 그룹 */}
-                      {LEARNING_STAGES.map((stage) => {
+                      {LEARNING_STAGES_DATA.map((stage) => {
                         const stageGuides = stage.slugs
-                          .map(slug => getGuidesByCategory('concept').find(g => g.slug === slug))
+                          .map(slug => getGuideDataByCategory('concept').find(g => g.slug === slug))
                           .filter(Boolean);
                         if (stageGuides.length === 0) return null;
-                        const StageIcon = stage.icon;
+                        const StageIcon = STAGE_ICON_MAP[stage.id] ?? BookOpen;
                         return (
                           <Collapsible key={stage.id} defaultOpen={stageGuides.some(g => g && isActive(g.href))} className="group/stage">
                             <SidebarMenuSubItem>
@@ -768,18 +775,18 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                         );
                       })}
                       {/* 서비스 가이드 */}
-                      <Collapsible defaultOpen={getGuidesByCategory('service').some(g => isActive(g.href))} className="group/stage">
+                      <Collapsible defaultOpen={getGuideDataByCategory('service').some(g => isActive(g.href))} className="group/stage">
                         <SidebarMenuSubItem>
                           <CollapsibleTrigger asChild>
                             <SidebarMenuSubButton className="cursor-pointer">
                               <Wrench className="h-3.5 w-3.5" />
-                              <span>{GUIDE_CATEGORIES.service.label}</span>
+                              <span>{GUIDE_CATEGORIES_DATA.service.label}</span>
                               <ChevronDown className="ml-auto h-3 w-3 transition-transform group-data-[state=open]/stage:rotate-180" />
                             </SidebarMenuSubButton>
                           </CollapsibleTrigger>
                           <CollapsibleContent>
                             <SidebarMenuSub>
-                              {getGuidesByCategory('service').map((guide) => (
+                              {getGuideDataByCategory('service').map((guide) => (
                                 <SidebarMenuSubItem key={guide.href}>
                                   <SidebarMenuSubButton asChild isActive={isActive(guide.href)}>
                                     <Link href={guide.href}>

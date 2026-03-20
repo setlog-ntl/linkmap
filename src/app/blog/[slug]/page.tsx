@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getBlogPostBySlug, getPublishedPosts, BLOG_POSTS } from '@/data/blog/posts';
+import { getBlogPostBySlug, getPublishedPosts, getPublishedPostSlugs } from '@/data/blog/posts';
 import { GUIDE_DATA } from '@/data/ui/guide-data';
 import { generateBlogJsonLd } from '@/lib/seo/json-ld';
 import { JsonLdScript } from '@/components/seo/json-ld-script';
@@ -12,7 +12,7 @@ interface BlogPostPageProps {
 }
 
 export async function generateStaticParams() {
-  return BLOG_POSTS.map((post) => ({ slug: post.slug }));
+  return getPublishedPostSlugs();
 }
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {

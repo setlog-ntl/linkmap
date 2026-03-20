@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workers 1102 분석 대시보드 — Linkmap</title>
+<style>
+  :root {
+    --brand-blue: #38bdf8;
+    --brand-green: #4ade80;
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-card: #1e293b;
+    --bg-card-hover: #334155;
+    --border: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --red: #f87171;
+    --orange: #fb923c;
+    --yellow: #fbbf24;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2.5rem 2rem;
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(74, 222, 128, 0.08));
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+  }
+
+  .header .status-resolved {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.375rem 1rem;
+    background: rgba(74, 222, 128, 0.15);
+    color: var(--brand-green);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  /* Summary Cards */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .summary-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+
+  .summary-card .label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.375rem;
+  }
+
+  .summary-card .value {
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+
+  .summary-card .sub {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+  }
+
+  .value-red { color: var(--red); }
+  .value-green { color: var(--brand-green); }
+  .value-blue { color: var(--brand-blue); }
+  .value-orange { color: var(--orange); }
+
+  /* Section */
+  .section {
+    margin-bottom: 2.5rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-title .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .dot-red { background: var(--red); }
+  .dot-blue { background: var(--brand-blue); }
+  .dot-green { background: var(--brand-green); }
+  .dot-orange { background: var(--orange); }
+
+  /* Timeline */
+  .timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    transition: border-color 0.2s;
+  }
+
+  .timeline-item:hover {
+    border-color: var(--brand-blue);
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -2rem;
+    top: 1.25rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--bg-primary);
+  }
+
+  .timeline-item.error::before { background: var(--red); }
+  .timeline-item.warning::before { background: var(--orange); }
+  .timeline-item.success::before { background: var(--brand-green); }
+  .timeline-item.info::before { background: var(--brand-blue); }
+
+  .timeline-time {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-family: 'Geist Mono', monospace;
+    margin-bottom: 0.25rem;
+  }
+
+  .timeline-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .timeline-desc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+
+  /* CPU Chart */
+  .chart-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+  }
+
+  .bar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .bar-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    min-width: 120px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 28px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--bg-primary);
+    transition: width 0.6s ease;
+  }
+
+  .bar-limit {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--red);
+    z-index: 2;
+  }
+
+  .bar-limit-label {
+    position: absolute;
+    top: -18px;
+    font-size: 0.65rem;
+    color: var(--red);
+    white-space: nowrap;
+    transform: translateX(-50%);
+  }
+
+  /* Optimization Phases */
+  .phase {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .phase-title {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .phase-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: 600;
+  }
+
+  .badge-done {
+    background: rgba(74, 222, 128, 0.15);
+    color: var(--brand-green);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+  }
+
+  .badge-recommend {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--brand-blue);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+  }
+
+  .opt-list {
+    list-style: none;
+  }
+
+  .opt-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.9rem;
+  }
+
+  .opt-list li:last-child {
+    border-bottom: none;
+  }
+
+  .opt-check {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    margin-top: 2px;
+  }
+
+  .check-done {
+    background: rgba(74, 222, 128, 0.2);
+    color: var(--brand-green);
+    border: 1px solid rgba(74, 222, 128, 0.4);
+  }
+
+  .check-pending {
+    background: rgba(56, 189, 248, 0.2);
+    color: var(--brand-blue);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+  }
+
+  .opt-text {
+    flex: 1;
+  }
+
+  .opt-text strong {
+    color: var(--text-primary);
+  }
+
+  .opt-text span {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.125rem;
+  }
+
+  /* Cache Rules Checklist */
+  .cache-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+
+  .cache-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    background: rgba(255,255,255,0.03);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cache-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text-primary);
+  }
+
+  .cache-table tr:hover td {
+    background: rgba(255,255,255,0.02);
+  }
+
+  .cache-path {
+    font-family: 'Geist Mono', monospace;
+    color: var(--brand-blue);
+    font-size: 0.85rem;
+  }
+
+  .cache-effect {
+    color: var(--brand-green);
+    font-weight: 500;
+  }
+
+  /* Files Table */
+  .files-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .files-table th {
+    text-align: left;
+    padding: 0.625rem 0.75rem;
+    background: rgba(255,255,255,0.03);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .files-table td {
+    padding: 0.625rem 0.75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .files-table .file-path {
+    font-family: 'Geist Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--brand-blue);
+    word-break: break-all;
+  }
+
+  /* Footer */
+  .report-footer {
+    text-align: center;
+    padding: 2rem 0;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .container { padding: 1rem; }
+    .header h1 { font-size: 1.5rem; }
+    .summary-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+    .summary-card .value { font-size: 1.25rem; }
+    .bar-label { min-width: 80px; font-size: 0.7rem; }
+    .timeline { padding-left: 1.5rem; }
+    .cache-table, .files-table { font-size: 0.75rem; }
+    .cache-table th, .cache-table td,
+    .files-table th, .files-table td { padding: 0.5rem; }
+  }
+
+  @media (max-width: 480px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    .phase-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header class="header">
+    <h1>Cloudflare Workers Error 1102 분석</h1>
+    <p>linkmap.biz | 2026-03-19 ~ 2026-03-20</p>
+    <div class="status-resolved">RESOLVED</div>
+  </header>
+
+  <!-- Summary Cards -->
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="label">에러 유형</div>
+      <div class="value value-red">1102</div>
+      <div class="sub">Worker exceeded resource limits</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">exceededResources</div>
+      <div class="value value-red">7건</div>
+      <div class="sub">03-19 06:04 UTC 기준</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">해결 후</div>
+      <div class="value value-green">0건</div>
+      <div class="sub">15:50 UTC 배포 이후</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Cold Start CPU</div>
+      <div class="value value-orange">718ms</div>
+      <div class="sub">최대값 (제한: 10ms)</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">적용 커밋</div>
+      <div class="value value-blue">9+</div>
+      <div class="sub">Phase 0~2 최적화</div>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="section">
+    <h2 class="section-title"><span class="dot dot-red"></span>에러 타임라인</h2>
+    <div class="timeline">
+      <div class="timeline-item error">
+        <div class="timeline-time">03-19 06:04 UTC</div>
+        <div class="timeline-title">exceededResources 7건 발생</div>
+        <div class="timeline-desc">cpuTimeP50=10ms 하드킬. ISR 캐시 미스 시 서버 번들 파싱 + full SSR로 CPU 제한 초과.</div>
+      </div>
+      <div class="timeline-item info">
+        <div class="timeline-time">03-19 06:10 ~ 15:00 UTC</div>
+        <div class="timeline-title">Phase 0 긴급 최적화 적용 (9개 커밋)</div>
+        <div class="timeline-desc">force-dynamic 제거, 블로그 번들 478KB 경량화, optimizePackageImports, guide-data 분리, next/og(satori 2.9MB) 제거.</div>
+      </div>
+      <div class="timeline-item success">
+        <div class="timeline-time">03-19 15:50 UTC</div>
+        <div class="timeline-title">최종 배포 — exceededResources 0건 달성</div>
+        <div class="timeline-desc">서버 번들 경량화 + ISR 전환으로 Error 1102 완전 해결.</div>
+      </div>
+      <div class="timeline-item warning">
+        <div class="timeline-time">03-19 22:04 UTC</div>
+        <div class="timeline-title">clientDisconnected 2건</div>
+        <div class="timeline-desc">Ray ID: 9defc68b9e0addc0. Cold start 시 느린 응답으로 사용자가 먼저 연결 종료. 에러 아닌 사용자 이탈.</div>
+      </div>
+      <div class="timeline-item info">
+        <div class="timeline-time">03-20</div>
+        <div class="timeline-title">Phase 1 + Phase 2 추가 최적화</div>
+        <div class="timeline-desc">서버 번들 lucide 아이콘 완전 제거, 블로그 데이터 경량 접근, ISR revalidate 86400초 연장.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CPU Time Chart -->
+  <div class="section">
+    <h2 class="section-title"><span class="dot dot-orange"></span>Cold Start CPU 시간 분포</h2>
+
+    <div class="chart-container">
+      <div class="chart-title">페이지별 Cold Start CPU 소모 (Free Plan 제한: 10ms)</div>
+      <div class="bar-chart">
+        <div class="bar-row">
+          <div class="bar-label">블로그 상세</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: 95.8%; background: linear-gradient(90deg, var(--red), #dc2626);">718ms</div>
+            <div class="bar-limit" style="left: 1.33%;"><span class="bar-limit-label">10ms 제한</span></div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">서비스 카탈로그</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: 66.7%; background: linear-gradient(90deg, var(--orange), var(--red));">500ms</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">가이드 목록</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: 46.7%; background: linear-gradient(90deg, var(--yellow), var(--orange));">350ms</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">대시보드</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: 30%; background: linear-gradient(90deg, var(--brand-blue), var(--yellow));">225ms</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">ISR 캐시 히트</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: 1.33%; background: var(--brand-green);">~2ms</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <div class="chart-title">최적화 전후 서버 번들 크기 비교</div>
+      <div class="bar-chart">
+        <div class="bar-row">
+          <div class="bar-label">최적화 전</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: 100%; background: linear-gradient(90deg, var(--red), #dc2626);">satori 2.9MB + lucide 52 + blog 478KB</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Phase 0 후</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: 25%; background: linear-gradient(90deg, var(--yellow), var(--orange));">lucide 잔여 + blog 경량</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Phase 1 후</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: 10%; background: linear-gradient(90deg, var(--brand-green), var(--brand-blue));">최소 서버 번들</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Optimization Phases -->
+  <div class="section">
+    <h2 class="section-title"><span class="dot dot-green"></span>적용된 최적화</h2>
+
+    <!-- Phase 0 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-title">Phase 0 — 긴급 대응 (03-19~20, 9개 커밋)</div>
+        <span class="phase-badge badge-done">완료</span>
+      </div>
+      <ul class="opt-list">
+        <li>
+          <div class="opt-check check-done">&#10003;</div>
+          <div class="opt-text">
+            <strong>블로그/가이드/쇼케이스 force-dynamic 제거</strong>
+            <span>f21a7c87 — 매 요청 SSR → ISR 캐싱 전환</span>
+          </div>
+        </li>
+        <li>
+          <div class="opt-check check-done">&#10003;</div>
+          <div class="opt-text">
+            <strong>공개 페이지 force-dynamic 전면 제거</strong>
+            <span>ee2f3434 — cold start 빈도 대폭 감소</span>
+          </div>
+        </li>
+        <li>
+          <div class="opt-check check-done">&#10003;</div>
+          <div class="opt-text">
+            <strong>/demo ISR 전환</strong>
+            <span>56d0ae71 — Demo 페이지 캐싱 활성화</span>
+          </div>
+        </li>
+        <li>
+          <div class="opt-check check-done">&#10003;</div>
+          <div class="opt-text">
+            <strong>블로그 상세 클라이언트 번들 253KB 제거</strong>
+            <span>c8a368f0 — 불필요한 클라이언트 코드 제거</span>
+          </div>
+        </li>
+        <li>
+          <div class="opt-check check-done">&#10003;</div>
+          <div class="opt-text">
+            <strong>블로그 목록 클라이언트 번들 225KB 경량화</strong>
+            <span>43c24ae7 — 블로그 총 478KB 절감</span>
+          </div>
+        </li>
+        <li>
+          <div class="opt-check check-done">&#10003;</div>
+          <div class="opt-text">
+            <strong>optimizePackageImports + BLOG_CATEGORIES 분리</strong>
+            <span>4b23d778 — 트리쉐이킹 개선</span>
+          </div>
+        </li>
+        <li>
+          <div class="opt-check check-done">&#10003;</div>
+          <div class="opt-text">
+            <strong>guide-meta.ts 서버 번들에서 48개 lucide 아이콘 제거</strong>
+            <span>d60b5f71 — 서버 번들 크기 절감</span>
+          </div>
+        </li>
+        <li>
+          <div class="opt-check check-done">&#10003;</div>
+          <div class="opt-text">
+            <strong>next/og (satori 2.9MB) 제거 + Polar SDK 동적 import</strong>
+            <span>8ed5a172 — 근본 해결. 서버 번들에서 가장 큰 단일 모듈 제거</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Phase 1 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-title">Phase 1 — 서버 번들 완전 정리 (03-20)</div>
+        <span class="phase-badge badge-done">완료</span>
+      </div>
+      <ul class="opt-list">
+        <li>
+          <div class="opt-check check-done">&#10003;</div>
+          <div class="opt-text">
+            <strong>Header/Footer/Sidebar → guide-data.ts 전환</strong>
+            <span>52개 lucide 아이콘 서버 번들 완전 제거. 아이콘을 string으로 참조, 렌더링은 클라이언트 전용.</span>
+          </div>
+        </li>
+        <li>
+          <div class="opt-check check-done">&#10003;</div>
+          <div class="opt-text">
+            <strong>sitemap.ts → getBlogSitemapEntries()</strong>
+            <span>3,500줄 BLOG_POSTS 전체 대신 slug/lastModified만 반환하는 경량 함수 사용</span>
+          </div>
+        </li>
+        <li>
+          <div class="opt-check check-done">&#10003;</div>
+          <div class="opt-text">
+            <strong>blog/[slug]/page.tsx → getPublishedPostSlugs()</strong>
+            <span>generateStaticParams에서 전체 블로그 데이터 로드 방지</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-title">Phase 2 — ISR 캐시 수명 연장 (03-20)</div>
+        <span class="phase-badge badge-done">완료</span>
+      </div>
+      <ul class="opt-list">
+        <li>
+          <div class="opt-check check-done">&#10003;</div>
+          <div class="opt-text">
+            <strong>ISR revalidate 3600 → 86400 (24시간)</strong>
+            <span>services, compare, cost-simulator 페이지. 자주 변경되지 않는 정적 콘텐츠의 cold start 빈도 추가 감소.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Cache Rules -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-title">Cloudflare Cache Rules — Dashboard 설정 권장</div>
+        <span class="phase-badge badge-recommend">권장</span>
+      </div>
+      <div style="overflow-x: auto;">
+        <table class="cache-table">
+          <thead>
+            <tr>
+              <th>경로 패턴</th>
+              <th>Edge TTL</th>
+              <th>Browser TTL</th>
+              <th>효과</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="cache-path">/blog/*</td>
+              <td>3600s (1시간)</td>
+              <td>600s</td>
+              <td class="cache-effect">Worker 진입 차단</td>
+            </tr>
+            <tr>
+              <td class="cache-path">/guides/*</td>
+              <td>3600s</td>
+              <td>600s</td>
+              <td class="cache-effect">Worker 진입 차단</td>
+            </tr>
+            <tr>
+              <td class="cache-path">/services/*</td>
+              <td>3600s</td>
+              <td>600s</td>
+              <td class="cache-effect">Worker 진입 차단</td>
+            </tr>
+            <tr>
+              <td class="cache-path">/faq</td>
+              <td>3600s</td>
+              <td>600s</td>
+              <td class="cache-effect">Worker 진입 차단</td>
+            </tr>
+            <tr>
+              <td class="cache-path">/glossary</td>
+              <td>3600s</td>
+              <td>600s</td>
+              <td class="cache-effect">Worker 진입 차단</td>
+            </tr>
+            <tr>
+              <td class="cache-path">/pricing</td>
+              <td>3600s</td>
+              <td>600s</td>
+              <td class="cache-effect">Worker 진입 차단</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary);">
+        Edge 캐시 히트 시 Worker 코드 실행 없음 → CPU 0ms → cold start 완전 차단
+      </p>
+    </div>
+  </div>
+
+  <!-- Changed Files -->
+  <div class="section">
+    <h2 class="section-title"><span class="dot dot-blue"></span>변경 파일 목록</h2>
+    <div class="chart-container" style="overflow-x: auto;">
+      <table class="files-table">
+        <thead>
+          <tr>
+            <th>Phase</th>
+            <th>파일</th>
+            <th>작업 내용</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1-1</td>
+            <td class="file-path">src/data/ui/guide-data.ts</td>
+            <td>GUIDE_CATEGORIES_DATA, LEARNING_STAGES_DATA 추가</td>
+          </tr>
+          <tr>
+            <td>1-1</td>
+            <td class="file-path">src/components/layout/header.tsx</td>
+            <td>guide-meta → guide-data import, STAGE_ICON_MAP</td>
+          </tr>
+          <tr>
+            <td>1-1</td>
+            <td class="file-path">src/components/layout/footer.tsx</td>
+            <td>guide-meta → guide-data import 변경</td>
+          </tr>
+          <tr>
+            <td>1-1</td>
+            <td class="file-path">src/components/layout/app-sidebar.tsx</td>
+            <td>guide-meta → guide-data import, STAGE_ICON_MAP</td>
+          </tr>
+          <tr>
+            <td>1-2</td>
+            <td class="file-path">src/app/sitemap.ts</td>
+            <td>BLOG_POSTS → getBlogSitemapEntries()</td>
+          </tr>
+          <tr>
+            <td>1-2/3</td>
+            <td class="file-path">src/data/blog/posts.ts</td>
+            <td>getBlogSitemapEntries(), getPublishedPostSlugs() 추가</td>
+          </tr>
+          <tr>
+            <td>1-3</td>
+            <td class="file-path">src/app/blog/[slug]/page.tsx</td>
+            <td>BLOG_POSTS → getPublishedPostSlugs()</td>
+          </tr>
+          <tr>
+            <td>2-1</td>
+            <td class="file-path">src/app/services/*/page.tsx</td>
+            <td>revalidate 3600 → 86400</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer class="report-footer">
+    Linkmap Workers 1102 분석 보고서 | 2026-03-20 | Cloudflare GraphQL Analytics API + Next.js Bundle Analyzer
+  </footer>
+
+</div>
+
+</body>
+</html>

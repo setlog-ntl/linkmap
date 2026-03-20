@@ -1,4 +1,4 @@
-export const revalidate = 3600; // ISR: 1시간마다 재생성
+export const revalidate = 86400; // ISR: 24시간마다 재생성 (서비스 카탈로그 변경 빈도 낮음)
 
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
