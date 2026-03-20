@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queries/keys';
 import { useParams, useRouter } from 'next/navigation';
 import { useEnvVars, useAddEnvVar, useDeleteEnvVar, useDecryptEnvVar, useUpdateEnvVar, useSyncEnvServices } from '@/lib/queries/env-vars';
-import { useProjectServices, useCatalogServices } from '@/lib/queries/services';
+import { useProjectServices, useCatalogServices, useAddProjectService } from '@/lib/queries/services';
 import { useProject } from '@/lib/queries/projects';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -77,6 +77,7 @@ export default function ProjectEnvPage() {
   const decryptEnvVar = useDecryptEnvVar();
   const updateEnvVar = useUpdateEnvVar(projectId);
   const syncEnvServices = useSyncEnvServices(projectId);
+  const addProjectService = useAddProjectService(projectId);
 
   const { locale } = useLocaleStore();
   const { data: linkedRepos = [] } = useLinkedRepos(projectId);
@@ -125,6 +126,11 @@ export default function ProjectEnvPage() {
     }
     return map;
   }, [projectServices]);
+
+  const projectServiceIds = useMemo(
+    () => new Set(projectServices.map((ps) => ps.service_id)),
+    [projectServices]
+  );
 
   const envCounts = useMemo(() => ({
     development: envVars.filter((v) => v.environment === 'development').length,
@@ -206,6 +212,14 @@ export default function ProjectEnvPage() {
     e.preventDefault();
     if (!newKey.trim()) return;
     try {
+      // 감지된 서비스가 프로젝트에 없으면 자동 추가
+      if (newServiceId && !projectServiceIds.has(newServiceId)) {
+        try {
+          await addProjectService.mutateAsync(newServiceId);
+        } catch {
+          // 이미 존재하는 경우 무시 (race condition 방어)
+        }
+      }
       await addEnvVar.mutateAsync({
         key_name: newKey.trim(),
         value: newValue,
@@ -419,10 +433,14 @@ export default function ProjectEnvPage() {
         onOpenChange={setRawEditorOpen}
         projectId={projectId}
         environment={activeEnv}
-        onUpdated={() => {
-          queryClient.invalidateQueries({ queryKey: queryKeys.envVars.byProject(projectId) });
-          queryClient.invalidateQueries({ queryKey: queryKeys.envVars.conflicts(projectId) });
-          queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all(projectId) });
+        onUpdated={async () => {
+          await Promise.all([
+            queryClient.invalidateQueries({ queryKey: queryKeys.envVars.byProject(projectId) }),
+            queryClient.invalidateQueries({ queryKey: queryKeys.envVars.conflicts(projectId) }),
+            queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all(projectId) }),
+          ]);
+          // 일괄 편집 후 서비스 자동 감지 & 추가
+          syncEnvServices.mutate();
         }}
       />
 
@@ -448,6 +466,17 @@ export default function ProjectEnvPage() {
         projectServices={projectServices}
         initialContent={importInitialContent}
         onImport={async (vars: ImportVariable[]) => {
+          // 매칭된 서비스 중 프로젝트에 없는 것 자동 추가
+          const newServiceIds = [...new Set(
+            vars.map((v) => v.service_id).filter((id): id is string => !!id && !projectServiceIds.has(id))
+          )];
+          for (const sid of newServiceIds) {
+            try {
+              await addProjectService.mutateAsync(sid);
+            } catch {
+              // 이미 존재하는 경우 무시
+            }
+          }
           const res = await fetch('/api/env/bulk', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
