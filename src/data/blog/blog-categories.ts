@@ -1,12 +1,12 @@
 import type { LucideIcon } from 'lucide-react';
-import { Sparkles, Shield, GitBranch, LayoutDashboard, Scale } from 'lucide-react';
+import { Sparkles, Shield, GitBranch, LayoutDashboard, Scale, Rocket } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
 // Blog category types & constants — 클라이언트 번들용 경량 모듈
 // posts.ts(3,595줄)와 분리하여 tree-shaking 보장
 // ---------------------------------------------------------------------------
 
-export type BlogCategory = 'vibe-coding' | 'env-management' | 'comparison' | 'tutorial' | 'insight';
+export type BlogCategory = 'vibe-coding' | 'env-management' | 'comparison' | 'tutorial' | 'insight' | 'deploy-ops';
 
 export const BLOG_CATEGORIES: Record<BlogCategory, { label: string; icon: LucideIcon; description: string }> = {
   'vibe-coding': {
@@ -34,9 +34,14 @@ export const BLOG_CATEGORIES: Record<BlogCategory, { label: string; icon: Lucide
     icon: LayoutDashboard,
     description: '개발 생태계 관찰과 의견',
   },
+  'deploy-ops': {
+    label: '배포관리',
+    icon: Rocket,
+    description: '배포 환경 설정과 운영 노하우',
+  },
 };
 
-const categoryOrder: BlogCategory[] = ['vibe-coding', 'env-management', 'comparison', 'tutorial', 'insight'];
+const categoryOrder: BlogCategory[] = ['vibe-coding', 'env-management', 'comparison', 'tutorial', 'insight', 'deploy-ops'];
 
 export function getBlogCategoryOrder(): BlogCategory[] {
   return categoryOrder;

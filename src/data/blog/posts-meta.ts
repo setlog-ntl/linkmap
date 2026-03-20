@@ -28,10 +28,10 @@ export const BLOG_POSTS_META: BlogPostMeta[] = [
   // ======================================================================
   {
     slug: 'cloudflare-workers-nextjs-prefetch-503-fix',
-    title: 'Cloudflare Workers에서 Next.js Link prefetch가 503을 유발한다 — 실제 해결 과정',
-    description: 'Next.js Link 컴포넌트의 자동 prefetch가 Cloudflare Workers Free Plan에서 503을 유발한 원인과 5단계 해결 과정. Playwright 테스트로 RSC 동시 요청 52건을 발견하고 prefetch={false}로 완전 해결한 실제 경험.',
-    category: 'vibe-coding',
-    tags: ['바이브 코딩', 'Cloudflare Workers', 'Next.js', 'prefetch', '503 에러', '성능 최적화'],
+    title: '내 사이트가 간헐적으로 안 열린다? — Next.js 배포 후 503 에러 해결기',
+    description: '배포 후 "가끔 사이트가 안 열린다"는 문제의 원인은 Next.js가 자동으로 보내는 숨겨진 요청 52건이었습니다. 코드 한 줄로 해결한 과정을 초보자도 이해할 수 있게 설명합니다.',
+    category: 'deploy-ops',
+    tags: ['배포 에러 해결', '503 에러', 'Next.js 배포', 'Cloudflare Workers', '사이트 안 열림'],
     publishedAt: '2026-03-20',
     readingTime: '8분',
     relatedGuides: ['deploy', 'cloudflare', 'env'],
