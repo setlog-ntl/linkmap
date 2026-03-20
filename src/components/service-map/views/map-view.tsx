@@ -84,10 +84,14 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
 
+  // 프로젝트 아이콘: emoji → iconEmoji, brand/custom → iconUrl 없음(서비스맵 자체 아이콘)
+  const projectIconEmoji = data.projectMeta?.iconType === 'emoji' ? data.projectMeta.iconValue : null;
+
   const { nodes: layoutNodes, edges: layoutEdges } = useRadialMapNodes({
     services: data.services,
     userConnections: data.userConnections,
     projectName: data.projectName,
+    projectIconEmoji,
     searchQuery,
     focusedNodeId,
     filterStatuses: filterStatuses.length > 0 ? filterStatuses : undefined,

@@ -21,6 +21,7 @@ interface RadialLayoutInput {
   getStatus: (nodeId: string) => string;
   projectName: string;
   projectIconUrl?: string | null;
+  projectIconEmoji?: string | null;
 }
 
 export interface RadialLayoutResult { nodes: Node[]; }
@@ -97,7 +98,7 @@ function sortByStatusZone(nodes: Node[], getStatus: (id: string) => string): Nod
 }
 
 export function computeRadialLayout(input: RadialLayoutInput): RadialLayoutResult {
-  const { serviceNodes, getStatus, projectName, projectIconUrl } = input;
+  const { serviceNodes, getStatus, projectName, projectIconUrl, projectIconEmoji } = input;
   const resultNodes: Node[] = [];
   const totalNodes = serviceNodes.length;
   const { inner: INNER_RADIUS, outer: OUTER_RADIUS } = getRadii(totalNodes);
@@ -105,7 +106,7 @@ export function computeRadialLayout(input: RadialLayoutInput): RadialLayoutResul
   resultNodes.push({
     id: PROJECT_NODE_ID, type: 'project',
     position: { x: CENTER_X - HUB_WIDTH / 2, y: CENTER_Y - HUB_HEIGHT / 2 },
-    data: { label: projectName, iconUrl: projectIconUrl ?? null },
+    data: { label: projectName, iconUrl: projectIconUrl ?? null, iconEmoji: projectIconEmoji ?? null },
   });
 
   if (totalNodes === 0) return { nodes: resultNodes };

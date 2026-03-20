@@ -9,13 +9,14 @@ interface UseRadialMapNodesInput {
   userConnections: UserConnection[];
   projectName: string;
   projectIconUrl?: string | null;
+  projectIconEmoji?: string | null;
   searchQuery?: string;
   focusedNodeId?: string | null;
   filterStatuses?: string[];
 }
 
 export function useRadialMapNodes(input: UseRadialMapNodesInput) {
-  const { services, userConnections, projectName, projectIconUrl, searchQuery, focusedNodeId, filterStatuses } = input;
+  const { services, userConnections, projectName, projectIconUrl, projectIconEmoji, searchQuery, focusedNodeId, filterStatuses } = input;
 
   return useMemo(() => {
     if (services.length === 0) return { nodes: [] as Node[], edges: [] as Edge[] };
@@ -115,6 +116,7 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
       getStatus,
       projectName,
       projectIconUrl,
+      projectIconEmoji,
     });
 
     // Inject hub node stats

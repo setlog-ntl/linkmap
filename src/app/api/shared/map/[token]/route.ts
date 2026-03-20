@@ -14,7 +14,7 @@ export async function GET(
     // 공유 활성화된 프로젝트만 조회
     const { data: project } = await admin
       .from('projects')
-      .select('id, name, main_service_id, icon_type, icon_value, is_showcase, showcase_description, showcase_category')
+      .select('id, name, description, main_service_id, icon_type, icon_value, link_url, is_showcase, showcase_description, showcase_category')
       .eq('share_token', token)
       .eq('is_map_shared', true)
       .is('deleted_at', null)
@@ -49,9 +49,11 @@ export async function GET(
       project: {
         id: project.id,
         name: project.name,
+        description: project.description,
         main_service_id: project.main_service_id,
         icon_type: project.icon_type,
         icon_value: project.icon_value,
+        link_url: project.link_url,
         is_showcase: project.is_showcase,
         showcase_description: project.showcase_description,
         showcase_category: project.showcase_category,

@@ -81,6 +81,7 @@ const SEGMENT_COLORS = {
 interface ProjectNodeData {
   label: string;
   iconUrl: string | null;
+  iconEmoji: string | null;
   connectedCount?: number;
   inProgressCount?: number;
   errorCount?: number;
@@ -91,7 +92,7 @@ interface ProjectNodeData {
 
 function ProjectNodeComponent({ data }: NodeProps) {
   const d = data as ProjectNodeData;
-  const { label, iconUrl } = d;
+  const { label, iconUrl, iconEmoji } = d;
   const connectedCount = (d.connectedCount as number) ?? 0;
   const inProgressCount = (d.inProgressCount as number) ?? 0;
   const errorCount = (d.errorCount as number) ?? 0;
@@ -245,7 +246,11 @@ function ProjectNodeComponent({ data }: NodeProps) {
 
       {/* Content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-        {iconUrl ? (
+        {iconEmoji ? (
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-2xl mb-1.5">
+            {iconEmoji}
+          </div>
+        ) : iconUrl ? (
           <img src={iconUrl} alt="" className="w-10 h-10 rounded-xl object-contain mb-1.5" />
         ) : (
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary font-bold text-base mb-1.5">

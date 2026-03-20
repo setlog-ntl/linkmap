@@ -31,8 +31,10 @@ export interface ServiceMapOptions {
 
 export interface ProjectMeta {
   id: string | null;
+  description: string | null;
   iconType: string | null;
   iconValue: string | null;
+  linkUrl: string | null;
   isShowcase: boolean;
   showcaseDescription: string | null;
   showcaseCategory: ShowcaseCategory | null;
@@ -80,9 +82,11 @@ interface RemoteApiResponse {
   project?: {
     id?: string;
     name?: string;
+    description?: string | null;
     main_service_id?: string | null;
     icon_type?: string | null;
     icon_value?: string | null;
+    link_url?: string | null;
     is_showcase?: boolean;
     showcase_description?: string | null;
     showcase_category?: ShowcaseCategory | null;
@@ -96,8 +100,10 @@ interface RemoteApiResponse {
 
 const EMPTY_META: ProjectMeta = {
   id: null,
+  description: null,
   iconType: null,
   iconValue: null,
+  linkUrl: null,
   isShowcase: false,
   showcaseDescription: null,
   showcaseCategory: null,
@@ -151,8 +157,10 @@ export function useServiceMapData(projectId: string, options?: ServiceMapOptions
             setMainServiceId(json.project.main_service_id ?? null);
             setProjectMeta({
               id: json.project.id ?? null,
+              description: json.project.description ?? null,
               iconType: json.project.icon_type ?? null,
               iconValue: json.project.icon_value ?? null,
+              linkUrl: json.project.link_url ?? null,
               isShowcase: json.project.is_showcase ?? false,
               showcaseDescription: json.project.showcase_description ?? null,
               showcaseCategory: json.project.showcase_category ?? null,
