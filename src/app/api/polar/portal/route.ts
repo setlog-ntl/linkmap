@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Polar } from '@polar-sh/sdk';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, apiError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
@@ -27,6 +26,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Step 4: Polar Customer Portal 세션 생성
+  const { Polar } = await import('@polar-sh/sdk');
   const polar = new Polar({ accessToken });
   const origin = request.headers.get('origin') || 'https://www.linkmap.biz';
 

@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
       '@xyflow/react',
       'react-markdown',
       'date-fns',
+      'framer-motion',
     ],
   },
 

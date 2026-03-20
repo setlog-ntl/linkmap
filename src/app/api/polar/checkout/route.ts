@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Polar } from '@polar-sh/sdk';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, apiError, validationError } from '@/lib/api/errors';
 import { polarCheckoutRequestSchema } from '@/lib/validations/polar';
@@ -23,6 +22,7 @@ export async function POST(request: NextRequest) {
   const { productId } = parsed.data;
 
   // Step 4: Polar checkout 세션 생성
+  const { Polar } = await import('@polar-sh/sdk');
   const polar = new Polar({ accessToken });
   const origin = request.headers.get('origin') || 'https://www.linkmap.biz';
   const successUrl = process.env.POLAR_SUCCESS_URL || `${origin}/dashboard?upgraded=true`;
