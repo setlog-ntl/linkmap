@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Check, Loader2, AlertTriangle } from 'lucide-react';
+import { Copy, Check, Loader2, AlertTriangle, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { parseEnvContent } from '@/lib/utils/parse-env';
 import type { Environment } from '@/types';
@@ -142,6 +142,20 @@ export function EnvRawEditorDialog({
     setTimeout(() => setCopied(false), 1500);
   };
 
+  const handleDownload = () => {
+    if (parsedVars.length === 0) return;
+    const ext = format === 'env' ? '.env' : '.json';
+    const mimeType = format === 'env' ? 'text/plain' : 'application/json';
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${environment}${ext}`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`${environment}${ext} 파일이 다운로드되었습니다`);
+  };
+
   const handleSave = async () => {
     if (diff.total === 0) {
       toast.info('변경사항이 없습니다');
@@ -262,16 +276,28 @@ export function EnvRawEditorDialog({
         )}
 
         <DialogFooter className="shrink-0 flex-row justify-between sm:justify-between">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCopy}
-            disabled={loading || parsedVars.length === 0}
-            className="gap-1.5"
-          >
-            {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-            {format === 'env' ? 'ENV' : 'JSON'} 복사
-          </Button>
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleCopy}
+              disabled={loading || parsedVars.length === 0}
+              className="gap-1.5"
+            >
+              {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+              {format === 'env' ? 'ENV' : 'JSON'} 복사
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDownload}
+              disabled={loading || parsedVars.length === 0}
+              className="gap-1.5"
+            >
+              <Download className="h-4 w-4" />
+              다운로드
+            </Button>
+          </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               취소

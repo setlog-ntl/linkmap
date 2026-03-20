@@ -16,7 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Search, Plus, Download, Upload, Sparkles, List, Layers, Braces, Share2 } from 'lucide-react';
+import { Search, Plus, List, Layers, Braces, Share2 } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
@@ -36,9 +36,6 @@ interface EnvFilterBarProps {
   search: string;
   onSearchChange: (value: string) => void;
   onAddClick: () => void;
-  onExportClick?: () => void;
-  onImportClick?: () => void;
-  onAnalyzeClick?: () => void;
   onRawEditorClick?: () => void;
   onCopyEnvClick?: () => void;
   envCounts: Record<Environment, number>;
@@ -52,9 +49,6 @@ export function EnvFilterBar({
   search,
   onSearchChange,
   onAddClick,
-  onExportClick,
-  onImportClick,
-  onAnalyzeClick,
   onRawEditorClick,
   onCopyEnvClick,
   envCounts,
@@ -140,36 +134,6 @@ export function EnvFilterBar({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>환경 간 변수 복사</TooltipContent>
-            </Tooltip>
-          )}
-          {onAnalyzeClick && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="icon" onClick={onAnalyzeClick} aria-label="AI 키 분석">
-                  <Sparkles className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>AI 키 분석</TooltipContent>
-            </Tooltip>
-          )}
-          {onImportClick && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="icon" onClick={onImportClick} aria-label={t(locale, 'envVar.import')}>
-                  <Upload className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>.env 파일 가져오기</TooltipContent>
-            </Tooltip>
-          )}
-          {onExportClick && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="icon" onClick={onExportClick} aria-label={t(locale, 'envVar.download')}>
-                  <Download className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>.env 파일 다운로드</TooltipContent>
             </Tooltip>
           )}
           {onRawEditorClick && (

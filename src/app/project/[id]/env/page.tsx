@@ -58,7 +58,6 @@ import type { EnvViewMode } from '@/components/env/env-filter-bar';
 import { EnvDataTable } from '@/components/env/env-data-table';
 import type { EnvServiceGroup } from '@/components/env/env-data-table';
 import { EnvDoctorPanel } from '@/components/ai/env-doctor-panel';
-import { SmartKeyAnalyzerDialog } from '@/components/env/smart-key-analyzer';
 import { EnvRawEditorDialog } from '@/components/env/env-raw-editor-dialog';
 import { EnvCopyEnvDialog } from '@/components/env/env-copy-env-dialog';
 import type { Environment, EnvironmentVariable } from '@/types';
@@ -103,7 +102,6 @@ export default function ProjectEnvPage() {
   const [manualServiceSelect, setManualServiceSelect] = useState(false);
   const [editServiceId, setEditServiceId] = useState<string | null>(null);
   const [editEnvironment, setEditEnvironment] = useState<Environment>('development');
-  const [analyzerOpen, setAnalyzerOpen] = useState(false);
   const [rawEditorOpen, setRawEditorOpen] = useState(false);
   const [copyEnvOpen, setCopyEnvOpen] = useState(false);
   const [viewMode, setViewMode] = useState<EnvViewMode>('all');
@@ -245,10 +243,6 @@ export default function ProjectEnvPage() {
     if (!pendingDeleteId) return;
     await deleteEnvVar.mutateAsync(pendingDeleteId);
     setPendingDeleteId(null);
-  };
-
-  const handleDownload = () => {
-    window.open(`/api/env/download?project_id=${projectId}&environment=${activeEnv}`, '_blank');
   };
 
   const toggleShowValue = useCallback(async (id: string) => {
@@ -396,9 +390,6 @@ export default function ProjectEnvPage() {
         search={search}
         onSearchChange={setSearch}
         onAddClick={() => setAddOpen(true)}
-        onExportClick={handleDownload}
-        onImportClick={() => setImportOpen(true)}
-        onAnalyzeClick={() => setAnalyzerOpen(true)}
         onRawEditorClick={() => setRawEditorOpen(true)}
         onCopyEnvClick={() => setCopyEnvOpen(true)}
         envCounts={envCounts}
@@ -419,13 +410,6 @@ export default function ProjectEnvPage() {
         onCopy={handleCopy}
         onCopyValue={handleCopyValue}
         serviceGroups={serviceGroups}
-      />
-
-      {/* Smart Key Analyzer */}
-      <SmartKeyAnalyzerDialog
-        projectId={projectId}
-        open={analyzerOpen}
-        onOpenChange={setAnalyzerOpen}
       />
 
       {/* 일괄 편집 */}
@@ -485,6 +469,9 @@ export default function ProjectEnvPage() {
             <DialogTitle>환경변수 추가</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleAdd} className="space-y-4">
+            <p className="text-xs text-muted-foreground">
+              KEY=VALUE 형식을 그대로 붙여넣으면 자동으로 분리됩니다. 여러 줄을 붙여넣으면 일괄 가져오기로 전환됩니다.
+            </p>
             <div className="space-y-2">
               <Label htmlFor="env-key">변수 이름</Label>
               <Input
