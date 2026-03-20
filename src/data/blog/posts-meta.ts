@@ -23,6 +23,19 @@ export interface BlogPostMeta {
 // ---------------------------------------------------------------------------
 
 export const BLOG_POSTS_META: BlogPostMeta[] = [
+  // ======================================================================
+  // 새 포스트 — Cloudflare Workers + Next.js prefetch 503 해결기
+  // ======================================================================
+  {
+    slug: 'cloudflare-workers-nextjs-prefetch-503-fix',
+    title: 'Cloudflare Workers에서 Next.js Link prefetch가 503을 유발한다 — 실제 해결 과정',
+    description: 'Next.js Link 컴포넌트의 자동 prefetch가 Cloudflare Workers Free Plan에서 503을 유발한 원인과 5단계 해결 과정. Playwright 테스트로 RSC 동시 요청 52건을 발견하고 prefetch={false}로 완전 해결한 실제 경험.',
+    category: 'vibe-coding',
+    tags: ['바이브 코딩', 'Cloudflare Workers', 'Next.js', 'prefetch', '503 에러', '성능 최적화'],
+    publishedAt: '2026-03-20',
+    readingTime: '8분',
+    relatedGuides: ['deploy', 'cloudflare', 'env'],
+  },
   {
     slug: 'linkmap-dev-story-3-community-and-next',
     title: 'ERP 담당자의 Linkmap 개발기 ③ — 혼자 만들되, 혼자 고민하지 마세요',

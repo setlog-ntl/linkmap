@@ -2,6 +2,7 @@
 // Each content file exports: export const content = `...`;
 
 import { content as c0 } from './content/ai-agent-reads-your-env';
+import { content as cWorkersPrefetch } from './content/cloudflare-workers-nextjs-prefetch-503-fix';
 import { content as c1 } from './content/ai-code-security-reality';
 import { content as c2 } from './content/ai-coding-tools-security-comparison';
 import { content as c3 } from './content/api-key-leak-incident-response';
@@ -37,6 +38,7 @@ import { content as c32 } from './content/what-is-vibe-coding';
 import { content as c33 } from './content/why-dotenv-is-dangerous';
 
 export const CONTENT_MAP: Record<string, string> = {
+  'cloudflare-workers-nextjs-prefetch-503-fix': cWorkersPrefetch,
   'ai-agent-reads-your-env': c0,
   'ai-code-security-reality': c1,
   'ai-coding-tools-security-comparison': c2,
