@@ -126,29 +126,30 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
     setEdges((eds) => applyEdgeChanges(changes, eds));
   }, []);
 
+  const closeSheet = useServiceDetailStore((s) => s.closeSheet);
+  const isSheetOpen = useServiceDetailStore((s) => s.isOpen);
+
   const handleNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     if (node.type === 'project') {
       if (focusedNodeId) setFocusedNodeId(null);
+      closeSheet();
       return;
     }
     setFocusedNodeId(node.id);
     if (isReadOnly) return;
-  }, [focusedNodeId, setFocusedNodeId, isReadOnly]);
-
-  const handleNodeDoubleClick = useCallback((_: React.MouseEvent, node: Node) => {
-    if (isReadOnly) return;
-    if (node.type === 'project') return;
+    // 싱글 클릭으로 바로 상세 시트 열기
     const svc = data.services.find((s) => s.id === node.id);
     if (!svc) return;
     const serviceNames: Record<string, string> = {};
     for (const s of data.services) serviceNames[s.service_id] = s.service?.name || 'Unknown';
     const deps = data.dependencies.filter((d) => d.service_id === svc.service_id);
     openSheet({ service: svc, dependencies: deps, serviceNames, projectId, envVars: data.envVars });
-  }, [data, projectId, openSheet, isReadOnly]);
+  }, [focusedNodeId, setFocusedNodeId, isReadOnly, data, projectId, openSheet, closeSheet]);
 
   const handlePaneClick = useCallback(() => {
     if (focusedNodeId) setFocusedNodeId(null);
-  }, [focusedNodeId, setFocusedNodeId]);
+    if (isSheetOpen) closeSheet();
+  }, [focusedNodeId, setFocusedNodeId, isSheetOpen, closeSheet]);
 
   const handleExportPng = useCallback(() => {
     const svgEl = document.querySelector('.react-flow__viewport');
@@ -188,6 +189,7 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
 
       switch (e.key) {
         case 'Escape':
+          if (isSheetOpen) closeSheet();
           if (focusedNodeId) setFocusedNodeId(null);
           break;
         case 'f':
@@ -224,12 +226,7 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusedNodeId, setFocusedNodeId, fitView, nodes, data, projectId, openSheet, isReadOnly]);
-
-  // Find focused service info for panel
-  const focusedService = focusedNodeId
-    ? data.services.find((s) => s.id === focusedNodeId)
-    : null;
+  }, [focusedNodeId, setFocusedNodeId, fitView, nodes, data, projectId, openSheet, isReadOnly, isSheetOpen, closeSheet]);
 
   // MiniMap node color: status-based
   const miniMapNodeColor = useCallback((node: Node) => {
@@ -296,27 +293,6 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
         })}
       </div>
 
-      {/* Focus info panel */}
-      {focusedService && (
-        <div className="absolute top-4 right-4 z-10 w-64 bg-background/92 backdrop-blur-md border rounded-2xl p-4 shadow-lg animate-node-enter">
-          <button
-            className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
-            onClick={() => setFocusedNodeId(null)}
-          >
-            <X className="h-4 w-4" />
-          </button>
-          <div className="flex items-center gap-3 mb-3">
-            <div className="text-lg">{focusedService.service?.icon_url ? '🔗' : '⚙️'}</div>
-            <div>
-              <div className="text-sm font-bold">{focusedService.service?.name}</div>
-              <div className="text-[10px] text-muted-foreground">{focusedService.service?.category}</div>
-            </div>
-          </div>
-          <div className="text-xs text-muted-foreground">
-            더블클릭하여 상세 정보 보기
-          </div>
-        </div>
-      )}
 
       {/* Canvas */}
       <div className="absolute inset-0 z-0 bg-background/50 service-map-canvas" style={{ width: '100%', height: '100%' }}>
@@ -340,7 +316,6 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onNodeClick={handleNodeClick}
-          onNodeDoubleClick={handleNodeDoubleClick}
           onPaneClick={handlePaneClick}
           onInit={handleInit}
           nodeTypes={nodeTypes}

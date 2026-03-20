@@ -11,6 +11,7 @@ import { ViewLevelSwitcher } from '@/components/service-map/view-level-switcher'
 import { MapView } from '@/components/service-map/views/map-view';
 import { DependencyView } from '@/components/service-map/views/dependency-view';
 import { useServiceMapStore } from '@/stores/service-map-store';
+import { useServiceDetailStore } from '@/stores/service-detail-store';
 import { useServiceMapData } from '@/components/service-map/hooks/useServiceMapData';
 
 interface ServiceMapInnerProps {
@@ -21,6 +22,7 @@ function ServiceMapInner({ isReadOnly = false }: ServiceMapInnerProps) {
   const params = useParams();
   const projectId = params.id as string;
   const { viewLevel } = useServiceMapStore();
+  const isSheetOpen = useServiceDetailStore((s) => s.isOpen);
 
   // OAuth success redirect handling (로그인 상태에서만)
   useEffect(() => {
@@ -69,7 +71,10 @@ function ServiceMapInner({ isReadOnly = false }: ServiceMapInnerProps) {
   return (
     <TooltipProvider>
       <div className="flex flex-col w-full h-full relative">
-        <div className="absolute top-4 right-4 z-10 flex items-center justify-between gap-4">
+        <div
+          className="absolute top-4 z-10 flex items-center justify-between gap-4 transition-all duration-300"
+          style={{ right: isSheetOpen ? 'calc(380px + 1.5rem)' : '1rem' }}
+        >
           <ViewLevelSwitcher />
         </div>
 
