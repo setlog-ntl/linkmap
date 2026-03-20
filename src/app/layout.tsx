@@ -18,23 +18,27 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.linkmap.biz"),
   alternates: { canonical: "./" },
-  title: "Linkmap - 서비스 연결을 한눈에, 안전하게 관리하는 플랫폼",
+  title: "Linkmap - 바이브 코딩 플랫폼 | 서비스 시각화부터 원클릭 배포까지",
   description:
-    "서비스 연결, API 키 관리, 환경변수 설정까지. 복잡한 프로젝트 초기 설정을 체계적으로 관리하세요.",
+    "Google 계정 하나면 3분 만에 내 홈페이지 배포. 서비스 맵으로 연결 구조를 시각화하고, 환경변수를 안전하게 관리하세요. 초보자부터 개발자까지, 무료로 시작할 수 있습니다.",
   keywords: [
     "바이브 코딩",
     "vibe coding",
-    "API 관리",
-    "환경변수",
-    "서비스 연결",
-    "프로젝트 설정",
+    "바이브코딩 플랫폼",
     "원클릭 배포",
+    "홈페이지 만들기",
     "서비스 맵",
+    "서비스 시각화",
+    "API 관리",
+    "환경변수 관리",
+    "프로젝트 설정",
+    "개발자 도구",
+    "무료 홈페이지",
   ],
   openGraph: {
-    title: "Linkmap - 서비스 연결을 한눈에, 안전하게 관리하는 플랫폼",
+    title: "Linkmap - 한 플랫폼에서 서비스를 시각화하세요",
     description:
-      "API 키 · 환경변수 · 서비스 연결 시각화 · 원클릭 배포까지. 복잡한 프로젝트 초기 설정을 체계적으로 관리하세요.",
+      "3분 만에 내 홈페이지 배포 + 서비스 맵으로 연결 구조 시각화. Google 계정만 있으면 무료로 시작. AES-256 암호화로 환경변수를 안전하게 관리합니다.",
     url: "https://www.linkmap.biz",
     siteName: "Linkmap",
     locale: "ko_KR",
@@ -42,9 +46,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Linkmap - 서비스 연결을 한눈에, 안전하게 관리하는 플랫폼",
+    title: "Linkmap - 바이브 코딩 플랫폼 | 서비스 시각화부터 원클릭 배포까지",
     description:
-      "API 키 · 환경변수 · 서비스 연결 시각화 · 원클릭 배포까지. 복잡한 프로젝트 초기 설정을 체계적으로 관리하세요.",
+      "3분 만에 내 홈페이지 배포 + 서비스 맵으로 연결 구조 시각화. 초보자부터 개발자까지, 무료로 시작할 수 있습니다.",
   },
 };
 
