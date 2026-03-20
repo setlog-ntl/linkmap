@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -467,11 +468,11 @@ export default function ProjectEnvPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>환경변수 추가</DialogTitle>
+            <DialogDescription>
+              KEY=VALUE 형식을 그대로 붙여넣으면 자동으로 분리됩니다. 여러 줄을 붙여넣으면 일괄 가져오기로 전환됩니다.
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAdd} className="space-y-4">
-            <p className="text-xs text-muted-foreground">
-              KEY=VALUE 형식을 그대로 붙여넣으면 자동으로 분리됩니다. 여러 줄을 붙여넣으면 일괄 가져오기로 전환됩니다.
-            </p>
             <div className="space-y-2">
               <Label htmlFor="env-key">변수 이름</Label>
               <Input
@@ -653,6 +654,7 @@ export default function ProjectEnvPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>환경변수 수정</DialogTitle>
+            <DialogDescription>변수의 이름, 값, 환경, 서비스를 수정할 수 있습니다.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEdit} className="space-y-4">
             <div className="space-y-2">
