@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Layers, ExternalLink, Globe, ArrowRight } from 'lucide-react';
+import { useState } from 'react';
+import { ExternalLink, Globe, ArrowRight, ChevronUp, ChevronDown } from 'lucide-react';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { MapView } from '@/components/service-map/views/map-view';
@@ -12,6 +13,7 @@ import { ViewLevelSwitcher } from '@/components/service-map/view-level-switcher'
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import { useServiceMapData } from '@/components/service-map/hooks/useServiceMapData';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { SHOWCASE_CATEGORIES } from '@/types/core';
 
 const STATUS_DOT: Record<string, string> = {
@@ -34,6 +36,8 @@ interface SharedMapClientProps {
 
 function SharedMapInner({ shareToken }: SharedMapClientProps) {
   const { viewLevel } = useServiceMapStore();
+  const isMobile = useIsMobile();
+  const [panelExpanded, setPanelExpanded] = useState(false);
 
   const data = useServiceMapData('', { mode: 'shared', shareToken });
 
@@ -64,8 +68,8 @@ function SharedMapInner({ shareToken }: SharedMapClientProps) {
   return (
     <TooltipProvider>
       <div className="flex flex-col w-full h-full relative">
-        {/* 프로젝트 정보 패널 */}
-        <div className="absolute top-4 left-4 z-10 w-72">
+        {/* 프로젝트 정보 패널 — 데스크톱 */}
+        <div className="absolute top-4 left-4 z-10 w-72 hidden md:block">
           <div className="bg-background/85 backdrop-blur-md rounded-xl border shadow-sm overflow-hidden">
             {/* 헤더: 프로젝트명 + 아이콘 */}
             <div className="p-3 border-b space-y-1.5">
@@ -156,7 +160,116 @@ function SharedMapInner({ shareToken }: SharedMapClientProps) {
           </div>
         </div>
 
-        <div className="absolute top-16 right-4 z-10">
+        {/* 프로젝트 정보 — 모바일 하단 콜랩서블 카드 */}
+        <div className="absolute bottom-0 left-0 right-0 z-10 md:hidden">
+          <div className="bg-background/90 backdrop-blur-md border-t shadow-sm">
+            {/* 축소 헤더 — 항상 표시 */}
+            <button
+              onClick={() => setPanelExpanded(!panelExpanded)}
+              className="w-full flex items-center gap-2 px-3 py-2.5 min-h-[48px]"
+            >
+              {projectMeta.iconType === 'emoji' && projectMeta.iconValue && (
+                <span className="text-lg shrink-0">{projectMeta.iconValue}</span>
+              )}
+              <span className="text-sm font-bold truncate">{data.projectName}</span>
+
+              {/* 서비스 아이콘 미리보기 (겹침, 최대 5개) */}
+              <div className="flex -space-x-1 shrink-0">
+                {data.services.slice(0, 5).map((ps) => (
+                  <div key={ps.id} className="w-5 h-5 rounded-full bg-muted border border-background flex items-center justify-center overflow-hidden">
+                    <ServiceIcon
+                      serviceId={ps.service?.slug ?? ''}
+                      iconEmoji={ps.service?.icon_emoji}
+                      size={12}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <Badge variant="secondary" className="text-[10px] shrink-0">
+                {data.services.length}개
+              </Badge>
+
+              <span className="ml-auto shrink-0 text-muted-foreground">
+                {panelExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+              </span>
+            </button>
+
+            {/* 펼침 컨텐츠 */}
+            {panelExpanded && (
+              <div className="max-h-[55vh] overflow-y-auto border-t px-3 py-2 space-y-2">
+                {/* 설명 */}
+                {projectMeta.description && (
+                  <p className="text-xs text-muted-foreground">{projectMeta.description}</p>
+                )}
+
+                {/* 링크 */}
+                {projectMeta.linkUrl && (
+                  <a
+                    href={projectMeta.linkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[11px] text-brand-blue hover:underline"
+                  >
+                    <Globe className="h-3 w-3" />
+                    {projectMeta.linkUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                  </a>
+                )}
+
+                {/* 서비스 리스트 */}
+                <div className="space-y-0.5">
+                  <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                    등록된 서비스
+                  </div>
+                  {data.services.map((ps) => (
+                    <div
+                      key={ps.id}
+                      className="flex items-center gap-2 rounded-md px-2 py-2.5 hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="relative shrink-0">
+                        <ServiceIcon
+                          serviceId={ps.service?.slug ?? ''}
+                          iconEmoji={ps.service?.icon_emoji}
+                          size={16}
+                        />
+                        <span className={`absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border border-background ${STATUS_DOT[ps.status] ?? STATUS_DOT.not_started}`} />
+                      </div>
+                      <span className="text-xs truncate flex-1">{ps.service?.name ?? 'Unknown'}</span>
+                      <span className="text-[10px] text-muted-foreground shrink-0">
+                        {STATUS_LABEL[ps.status] ?? ps.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 상태 요약 */}
+                <div className="flex flex-wrap gap-2 text-[10px] text-muted-foreground pt-1 border-t">
+                  {Object.entries(statusCounts).map(([status, count]) => (
+                    <span key={status} className="flex items-center gap-1">
+                      <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[status] ?? STATUS_DOT.not_started}`} />
+                      {STATUS_LABEL[status] ?? status} {count}
+                    </span>
+                  ))}
+                </div>
+
+                {/* 쇼케이스 링크 */}
+                {projectMeta.isShowcase && projectMeta.id && (
+                  <Link
+                    href={`/showcase/${projectMeta.id}`}
+                    prefetch={false}
+                    className="flex items-center gap-1.5 text-xs text-brand-blue hover:underline"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    {showcaseCategoryLabel ? `${showcaseCategoryLabel} 쇼케이스 보기` : '쇼케이스 보기'}
+                    <ArrowRight className="h-3 w-3 ml-auto" />
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="absolute top-4 right-4 md:top-16 z-10">
           <ViewLevelSwitcher />
         </div>
 

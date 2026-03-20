@@ -29,6 +29,7 @@ import { useLocaleStore } from '@/stores/locale-store';
 import { useServiceDetailStore } from '@/stores/service-detail-store';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import { t } from '@/lib/i18n';
+import { useIsMobile } from '@/hooks/use-mobile';
 import type { ServiceMapData } from '@/components/service-map/hooks/useServiceMapData';
 
 const nodeTypes = {
@@ -81,6 +82,7 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
   const setFocusedNodeId = useServiceMapStore((s) => s.setFocusedNodeId);
   const filterStatuses = useServiceMapStore((s) => s.filterStatuses);
   const toggleFilterStatus = useServiceMapStore((s) => s.toggleFilterStatus);
+  const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -244,7 +246,7 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
     <div className="flex-1 w-full relative min-h-0">
       {/* Toolbar */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-background/80 backdrop-blur-md rounded-full border shadow-sm p-1">
-        <div className="relative flex-1 w-[200px]">
+        <div className="relative flex-1 w-[140px] sm:w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             ref={searchRef}
@@ -271,13 +273,13 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
         </Button>
         {!isReadOnly && <ShareMapButton projectId={projectId} />}
         <Button variant="ghost" size="sm" className="h-8 text-muted-foreground hover:text-foreground rounded-full" onClick={handleExportPng}>
-          <Download className="mr-1.5 h-4 w-4" />
-          PNG
+          <Download className="h-4 w-4" />
+          <span className="hidden sm:inline ml-1.5">PNG</span>
         </Button>
       </div>
 
       {/* Status filter chips — simplified (4 statuses only, no ViewGroup) */}
-      <div className="absolute top-16 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5">
+      <div className="absolute top-14 sm:top-16 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 sm:gap-1.5 flex-wrap justify-center max-w-[calc(100vw-2rem)]">
         {STATUS_FILTER_OPTIONS.map((opt) => {
           const isActive = filterStatuses.includes(opt.key);
           return (
@@ -329,14 +331,16 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
           proOptions={{ hideAttribution: true }}
         >
           <Controls />
-          <MiniMap
-            nodeStrokeWidth={3}
-            zoomable
-            pannable
-            nodeColor={miniMapNodeColor}
-            maskColor={isDark ? 'rgba(15, 29, 47, 0.85)' : undefined}
-            style={isDark ? { backgroundColor: 'var(--card)' } : undefined}
-          />
+          {!isMobile && (
+            <MiniMap
+              nodeStrokeWidth={3}
+              zoomable
+              pannable
+              nodeColor={miniMapNodeColor}
+              maskColor={isDark ? 'rgba(15, 29, 47, 0.85)' : undefined}
+              style={isDark ? { backgroundColor: 'var(--card)' } : undefined}
+            />
+          )}
           {isDark ? (
             <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="oklch(0.35 0.02 250)" style={{ opacity: 0.25 }} />
           ) : (
