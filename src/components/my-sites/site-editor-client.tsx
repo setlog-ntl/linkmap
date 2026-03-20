@@ -1035,7 +1035,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         {/* 좌측: 뒤로가기 + 사이트 정보 */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <Button variant="ghost" size="sm" className="shrink-0 gap-1.5 text-muted-foreground hover:text-foreground" asChild>
-            <Link href="/my-sites">
+            <Link href="/my-sites" prefetch={false}>
               <ArrowLeft className="h-4 w-4" />
               <span className="hidden sm:inline text-xs">{t(locale, 'editor.backToSites')}</span>
             </Link>
