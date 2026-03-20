@@ -337,12 +337,12 @@ function CtaCard() {
       </p>
       <div className="flex items-center justify-center gap-3">
         <Button asChild size="sm">
-          <Link href={isLoggedIn ? '/projects' : '/signup'}>
+          <Link href={isLoggedIn ? '/dashboard' : '/signup'} prefetch={false}>
             {isLoggedIn ? '내 프로젝트로 이동' : '무료로 시작하기'}
           </Link>
         </Button>
         <Button asChild variant="outline" size="sm">
-          <Link href="/services">서비스 카탈로그</Link>
+          <Link href="/services" prefetch={false}>서비스 카탈로그</Link>
         </Button>
       </div>
     </div>
