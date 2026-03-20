@@ -68,6 +68,7 @@ const S: Record<string, string> = {
   gabia: '10000000-0000-4000-a000-000000000054',
   hosting_kr: '10000000-0000-4000-a000-000000000055',
   dotname: '10000000-0000-4000-a000-000000000056',
+  polar: '10000000-0000-4000-a000-000000000134',
   // AI Phase 5
   grok: '10000000-0000-4000-a000-000000000103',
   mistral: '10000000-0000-4000-a000-000000000104',
@@ -361,6 +362,21 @@ export const costTiers: CostTierSeed[] = [
     ['Priority support', '우선 지원', true],
     ['Custom terms', '맞춤 조건', true],
   ], { fee: 'Custom', products: 'Unlimited', subscriptions: 'Unlimited' }, '대기업', 1),
+
+  // Polar (2 tiers)
+  t(S.polar, 'standard', '표준', '$0', '$0', [
+    ['4% + 40¢ per transaction', '거래당 4% + 40¢', true],
+    ['Digital products & subscriptions', '디지털 상품 및 구독', true],
+    ['Global tax compliance (VAT/GST)', '글로벌 세금 준수 (VAT/GST)', true],
+    ['License keys & file downloads', '라이선스 키 및 파일 다운로드', true],
+    ['GitHub / Discord access grants', 'GitHub / Discord 접근 권한 부여', true],
+  ], { fee: '4% + 40¢', products: 'Unlimited', subscriptions: 'Unlimited' }, '인디 개발자·오픈소스 프로젝트', 0),
+
+  t(S.polar, 'volume', '볼륨', 'Contact', 'Contact', [
+    ['Custom transaction fees', '맞춤 거래 수수료', true],
+    ['Dedicated support', '전담 지원', true],
+    ['Custom terms', '맞춤 조건', true],
+  ], { fee: 'Custom', products: 'Unlimited', subscriptions: 'Unlimited' }, '대규모 비즈니스', 1),
 
   // UploadThing (2 tiers)
   t(S.uploadthing, 'free', '무료', '$0', '$0', [

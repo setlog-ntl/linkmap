@@ -72,6 +72,8 @@ const S = {
   gabia: '10000000-0000-4000-a000-000000000054',
   hosting_kr: '10000000-0000-4000-a000-000000000055',
   dotname: '10000000-0000-4000-a000-000000000056',
+  lemonsqueezy: '10000000-0000-4000-a000-000000000017',
+  polar: '10000000-0000-4000-a000-000000000134',
 } as const;
 
 export const comparisons: ComparisonSeed[] = [
@@ -390,6 +392,63 @@ export const comparisons: ComparisonSeed[] = [
     recommendation: {
       real_time: { need: '실시간 대화형 AI가 필요할 때', choose: 'Deepgram', because: '초저지연 + 초 단위 과금' },
       accuracy: { need: '최고 정확도가 필요할 때', choose: 'AssemblyAI', because: '업계 최고 정확도 + 의료 도메인 특화' },
+    },
+  },
+
+  // --- 14. Payment Platform Comparison ---
+  {
+    category: 'payment',
+    title: 'Payment Platform Comparison',
+    title_ko: '결제 플랫폼 비교',
+    services: [S.stripe, S.lemonsqueezy, S.polar],
+    comparison_data: {
+      criteria: [
+        {
+          name: 'Transaction Fee',
+          name_ko: '거래 수수료',
+          values: { stripe: '2.9% + 30¢', 'lemon-squeezy': '5% + 50¢', polar: '4% + 40¢' },
+        },
+        {
+          name: 'Merchant of Record',
+          name_ko: '판매 대행(MoR)',
+          values: { stripe: '아니오 (직접 세금 처리)', 'lemon-squeezy': '예 (글로벌 세금 자동)', polar: '예 (글로벌 세금 자동)' },
+        },
+        {
+          name: 'Digital Products',
+          name_ko: '디지털 상품',
+          values: { stripe: '직접 구현 필요', 'lemon-squeezy': '기본 지원', polar: '라이선스키·파일·GitHub 접근 등 네이티브 지원' },
+        },
+        {
+          name: 'Open Source',
+          name_ko: '오픈소스',
+          values: { stripe: '아니오', 'lemon-squeezy': '아니오', polar: '예 (Apache 2.0)' },
+        },
+        {
+          name: 'Free Tier',
+          name_ko: '무료 티어',
+          values: { stripe: '플랫폼 무료, 수수료만', 'lemon-squeezy': '플랫폼 무료, 수수료만', polar: '플랫폼 무료, 수수료만' },
+        },
+        {
+          name: 'Setup Complexity',
+          name_ko: '설정 복잡도',
+          values: { stripe: '복잡 (웹훅·세금 직접 설정)', 'lemon-squeezy': '쉬움', polar: '쉬움' },
+        },
+        {
+          name: 'Ecosystem',
+          name_ko: '생태계',
+          values: { stripe: '매우 풍부 (96점)', 'lemon-squeezy': '중간 (70점)', polar: '성장 중 (62점)' },
+        },
+        {
+          name: 'DX Score',
+          name_ko: 'DX 점수',
+          values: { stripe: '8.5', 'lemon-squeezy': '7.5', polar: '7.5' },
+        },
+      ],
+    },
+    recommendation: {
+      enterprise: { need: '기업급 결제 인프라가 필요할 때', choose: 'Stripe', because: '가장 풍부한 생태계, 낮은 수수료, 완전한 제어권' },
+      indie: { need: '인디 개발자 또는 오픈소스 프로젝트 수익화 시', choose: 'Polar', because: '오픈소스, MoR 자동화, GitHub 접근 권한 부여 등 개발자 특화 기능' },
+      digital_products: { need: '디지털 상품·SaaS 구독을 빠르게 시작할 때', choose: 'Lemon Squeezy', because: 'MoR + 세금 자동화 + 쉬운 설정' },
     },
   },
 ];

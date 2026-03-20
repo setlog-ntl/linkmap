@@ -120,6 +120,7 @@ export const SERVICE_IDS_V2 = {
   tiktok_api: '10000000-0000-4000-a000-000000000131',
   linkedin_api: '10000000-0000-4000-a000-000000000132',
   threads_api: '10000000-0000-4000-a000-000000000133',
+  polar: '10000000-0000-4000-a000-000000000134',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -4568,6 +4569,65 @@ export const servicesV2: ServiceSeedV2[] = [
       starter: '$0',
       growth: '$0',
       enterprise: '$0',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Polar
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.polar,
+    name: 'Polar',
+    slug: 'polar',
+    category: 'payment',
+    description:
+      '오픈소스 프로젝트와 인디 개발자를 위한 결제·수익화 플랫폼입니다. 디지털 상품 판매, 구독, 후원을 단일 API로 처리하며 글로벌 세금(VAT/GST) 준수를 자동화합니다.',
+    description_ko:
+      '오픈소스 프로젝트와 인디 개발자를 위한 결제·수익화 플랫폼입니다. 디지털 상품 판매, 구독, 후원을 단일 API로 처리하며 글로벌 세금(VAT/GST) 준수를 자동화합니다.',
+    icon_url: null,
+    website_url: 'https://polar.sh',
+    docs_url: 'https://docs.polar.sh',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '플랫폼 무료, 거래 수수료: 4% + 40¢',
+      plans: [{ name: 'Standard', price: '거래당 4% + 40¢ (월정액 없음)' }],
+    },
+    required_env_vars: [
+      {
+        name: 'POLAR_ACCESS_TOKEN',
+        public: false,
+        description: 'Polar API access token',
+        description_ko: 'Polar API 액세스 토큰',
+      },
+      {
+        name: 'POLAR_WEBHOOK_SECRET',
+        public: false,
+        optional: true,
+        description: 'Polar webhook signing secret (required when using webhooks)',
+        description_ko: 'Polar 웹훅 서명 시크릿 (웹훅 사용 시 필요)',
+      },
+    ],
+    domain: 'business',
+    subcategory: 'payment_gateway',
+    popularity_score: 62,
+    difficulty_level: 'beginner',
+    tags: ['payment', 'subscription', 'digital-products', 'merchant-of-record', 'open-source', 'indie', 'saas', 'tax'],
+    alternatives: ['stripe', 'lemon-squeezy'],
+    compatibility: {
+      framework: ['next', 'nuxt', 'remix', 'sveltekit', 'astro', 'express', 'fastify', 'laravel'],
+      language: ['javascript', 'typescript', 'python', 'go', 'php'],
+    },
+    official_sdks: {
+      npm: 'https://www.npmjs.com/package/@polar-sh/sdk',
+      python: 'https://pypi.org/project/polar-sdk/',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 15,
+    monthly_cost_estimate: {
+      starter: '4%+40¢/tx',
+      growth: '4%+40¢/tx',
+      enterprise: 'Custom',
     },
   },
 ];

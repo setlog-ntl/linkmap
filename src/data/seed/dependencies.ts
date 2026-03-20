@@ -96,6 +96,7 @@ const S = {
   dify: '10000000-0000-4000-a000-000000000123',
   together_ai: '10000000-0000-4000-a000-000000000124',
   fireworks_ai: '10000000-0000-4000-a000-000000000125',
+  polar: '10000000-0000-4000-a000-000000000134',
 } as const;
 
 export const dependencies: DependencySeed[] = [
@@ -257,4 +258,12 @@ export const dependencies: DependencySeed[] = [
   { service_id: S.langchain, depends_on_service_id: S.openai, dependency_type: 'recommended', description: 'OpenAI is the most common LLM used with LangChain', description_ko: 'OpenAI는 LangChain과 가장 많이 사용되는 LLM입니다' },
   { service_id: S.crewai, depends_on_service_id: S.openai, dependency_type: 'recommended', description: 'OpenAI is commonly used as the LLM backend for CrewAI', description_ko: 'OpenAI는 CrewAI의 LLM 백엔드로 자주 사용됩니다' },
   { service_id: S.dify, depends_on_service_id: S.openai, dependency_type: 'recommended', description: 'OpenAI is the default LLM provider for Dify', description_ko: 'OpenAI는 Dify의 기본 LLM 제공자입니다' },
+
+  // --- Payment: Polar Alternatives ---
+  { service_id: S.polar, depends_on_service_id: S.stripe, dependency_type: 'alternative', description: 'Stripe is a full-featured alternative payment platform', description_ko: 'Stripe는 완전한 기능의 대안 결제 플랫폼입니다' },
+  { service_id: S.polar, depends_on_service_id: S.lemonsqueezy, dependency_type: 'alternative', description: 'Lemon Squeezy is an alternative MoR platform for digital products', description_ko: 'Lemon Squeezy는 디지털 상품을 위한 대안 MoR 플랫폼입니다' },
+  { service_id: S.stripe, depends_on_service_id: S.polar, dependency_type: 'alternative', description: 'Polar is an open-source MoR alternative focused on indie developers', description_ko: 'Polar는 인디 개발자에게 특화된 오픈소스 MoR 대안입니다' },
+  { service_id: S.lemonsqueezy, depends_on_service_id: S.polar, dependency_type: 'alternative', description: 'Polar is an open-source alternative for monetizing digital products', description_ko: 'Polar는 디지털 상품 수익화를 위한 오픈소스 대안입니다' },
+  { service_id: S.polar, depends_on_service_id: S.supabase, dependency_type: 'recommended', description: 'Use Supabase to store Polar customer and subscription data', description_ko: 'Supabase를 사용하여 Polar 고객 및 구독 데이터를 저장합니다' },
+  { service_id: S.polar, depends_on_service_id: S.resend, dependency_type: 'recommended', description: 'Use Resend to send payment receipts and order confirmations', description_ko: 'Resend를 사용하여 결제 영수증 및 주문 확인 이메일을 전송합니다' },
 ];

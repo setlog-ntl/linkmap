@@ -477,7 +477,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 96,
     difficulty_level: 'intermediate',
     tags: ['payment', 'subscription', 'billing', 'invoicing', 'marketplace'],
-    alternatives: ['lemonsqueezy'],
+    alternatives: ['lemonsqueezy', 'polar'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'ruby-on-rails'],
       language: ['typescript', 'javascript', 'python', 'ruby', 'go', 'java', 'php'],
@@ -1211,7 +1211,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 70,
     difficulty_level: 'beginner',
     tags: ['payment', 'subscription', 'digital-products', 'merchant-of-record', 'tax'],
-    alternatives: ['stripe'],
+    alternatives: ['stripe', 'polar'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue'],
       language: ['typescript', 'javascript', 'python', 'ruby', 'php'],
