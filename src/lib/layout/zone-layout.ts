@@ -38,13 +38,13 @@ const DOMAIN_TO_ZONE: Record<ServiceDomain, ZoneKey> = {
 };
 
 const GRID_COLS = 3;
-const ZONE_GAP = 32;
-const ZONE_PADDING = 24;
+const ZONE_GAP = 64;
+const ZONE_PADDING = 40;
 const ZONE_HEADER_HEIGHT = 44;
 const NODE_WIDTH = 180;
 const NODE_HEIGHT = 72;
-const NODE_GAP_X = 16;
-const NODE_GAP_Y = 12;
+const NODE_GAP_X = 40;
+const NODE_GAP_Y = 32;
 const INNER_COLS = 3;
 const MIN_ZONE_WIDTH = INNER_COLS * NODE_WIDTH + (INNER_COLS - 1) * NODE_GAP_X + 2 * ZONE_PADDING;
 const MIN_ZONE_HEIGHT = ZONE_HEADER_HEIGHT + NODE_HEIGHT + 2 * ZONE_PADDING;
@@ -105,10 +105,14 @@ export function computeZoneLayout(
     const size = zoneSizes[i];
     const zoneNodeId = `zone-${zone.key}`;
 
+    // Zone as background hint — not a container
     resultNodes.push({
       id: zoneNodeId,
       type: 'zone',
       position: { x: xOffset, y: 0 },
+      selectable: false,
+      draggable: false,
+      zIndex: -1,
       data: {
         domain: zone.key,
         label: ZONE_LABELS[zone.key],
@@ -119,23 +123,22 @@ export function computeZoneLayout(
         width: size.w,
         height: maxHeight,
         backgroundColor: ZONE_COLORS[zone.key],
+        pointerEvents: 'none' as const,
       },
     });
 
-    // Place service nodes inside zone
+    // Place service nodes with absolute coordinates (no parentId)
     zone.serviceNodeIds.forEach((nodeId, idx) => {
       const original = nodeMap.get(nodeId);
       if (!original) return;
       const localRow = Math.floor(idx / INNER_COLS);
       const localCol = idx % INNER_COLS;
-      const localX = ZONE_PADDING + localCol * (NODE_WIDTH + NODE_GAP_X);
-      const localY = ZONE_HEADER_HEIGHT + ZONE_PADDING + localRow * (NODE_HEIGHT + NODE_GAP_Y);
+      const absX = xOffset + ZONE_PADDING + localCol * (NODE_WIDTH + NODE_GAP_X);
+      const absY = ZONE_HEADER_HEIGHT + ZONE_PADDING + localRow * (NODE_HEIGHT + NODE_GAP_Y);
 
       resultNodes.push({
         ...original,
-        position: { x: localX, y: localY },
-        parentId: zoneNodeId,
-        extent: 'parent' as const,
+        position: { x: absX, y: absY },
       });
     });
 

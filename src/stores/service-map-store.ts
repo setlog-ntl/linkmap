@@ -8,6 +8,11 @@ interface ContextMenuState {
   nodeId: string | null;
 }
 
+export interface HoveredEdgeNodes {
+  source: string;
+  target: string;
+}
+
 /** Undo/Redo history entry for connection operations */
 interface HistoryEntry {
   type: 'connection_create' | 'connection_delete' | 'connection_type_change';
@@ -29,6 +34,11 @@ interface ServiceMapState {
   pendingOverrides: Record<string, ZoneKey>;
   pendingMainServiceId: string | null | undefined;
 
+  // Hover state for edge↔node cross-highlighting
+  hoveredEdgeId: string | null;
+  hoveredEdgeNodes: HoveredEdgeNodes | null;
+  hoveredNodeId: string | null;
+
   // Multi-select support
   selectedNodeIds: Set<string>;
 
@@ -49,6 +59,10 @@ interface ServiceMapState {
   setPendingMainServiceId: (id: string | null) => void;
   clearPendingChanges: () => void;
   pendingChangeCount: () => number;
+
+  // Hover cross-highlighting
+  setHoveredEdge: (id: string | null, nodes?: HoveredEdgeNodes) => void;
+  setHoveredNodeId: (id: string | null) => void;
 
   // Multi-select
   toggleNodeSelection: (nodeId: string) => void;
@@ -74,6 +88,10 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
   editMode: false,
   pendingOverrides: {},
   pendingMainServiceId: undefined,
+
+  hoveredEdgeId: null,
+  hoveredEdgeNodes: null,
+  hoveredNodeId: null,
 
   selectedNodeIds: new Set(),
   undoStack: [],
@@ -106,6 +124,13 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
     if (s.pendingMainServiceId !== undefined) count += 1;
     return count;
   },
+
+  // Hover cross-highlighting
+  setHoveredEdge: (id, nodes) => set({
+    hoveredEdgeId: id,
+    hoveredEdgeNodes: id && nodes ? nodes : null,
+  }),
+  setHoveredNodeId: (id) => set({ hoveredNodeId: id }),
 
   // Multi-select
   toggleNodeSelection: (nodeId) => set((s) => {

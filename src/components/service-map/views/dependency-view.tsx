@@ -30,7 +30,9 @@ import { EditSaveBar } from '@/components/service-map/edit-save-bar';
 import { MapLegend } from '@/components/service-map/map-legend';
 import { MapNarratorPanel } from '@/components/ai/map-narrator-panel';
 import { useServiceMapStore } from '@/stores/service-map-store';
+import { EdgeEditPopover } from '@/components/service-map/edge-edit-popover';
 import { useUpsertLayerOverride } from '@/lib/queries/layer-overrides';
+import { useUpdateConnection } from '@/lib/queries/connections';
 import { useUpdateProject } from '@/lib/queries/projects';
 import { domainToZone, type ZoneKey } from '@/lib/layout/zone-layout';
 import { useServiceMapNodes } from '@/components/service-map/hooks/useServiceMapNodes';
@@ -38,6 +40,7 @@ import { useServiceMapLayout } from '@/components/service-map/hooks/useServiceMa
 import { useServiceMapInteractions } from '@/components/service-map/hooks/useServiceMapInteractions';
 import type { ServiceMapData } from '@/components/service-map/hooks/useServiceMapData';
 import type { UserConnectionType, ServiceDomain } from '@/types';
+import type { Edge as ReactFlowEdge } from '@xyflow/react';
 
 const nodeTypes = { service: ServiceNode, zone: ZoneNode };
 const edgeTypes = { connection: ConnectionEdge };
@@ -54,6 +57,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     connectingFrom, setConnectingFrom,
     editMode, pendingOverrides, pendingMainServiceId,
     setPendingMainServiceId, clearPendingChanges, setEditMode,
+    setHoveredNodeId,
   } = useServiceMapStore();
 
   const { resolvedTheme } = useTheme();
@@ -64,9 +68,17 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
   const [showLegend, setShowLegend] = useState(false);
   const [saving, setSaving] = useState(false);
   const [connectionDialog, setConnectionDialog] = useState<{ sourceId: string; targetId: string } | null>(null);
+  const [edgePopover, setEdgePopover] = useState<{
+    edgeId: string;
+    connectionId: string;
+    currentType: UserConnectionType;
+    x: number;
+    y: number;
+  } | null>(null);
 
   const upsertLayerOverride = useUpsertLayerOverride(projectId);
   const updateProject = useUpdateProject();
+  const updateConnection = useUpdateConnection(projectId);
   const effectiveMainServiceId = pendingMainServiceId !== undefined ? pendingMainServiceId : data.mainServiceId;
 
   const deleteConnectionRef = data.deleteConnectionRef;
@@ -117,7 +129,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
   useEffect(() => { setNodes(layoutedNodes); setEdges(layoutedEdges); }, [layoutedNodes, layoutedEdges]);
 
   const handleInit = useCallback((instance: ReactFlowInstance) => {
-    setTimeout(() => { instance.fitView({ padding: 0.2 }); initialFitDone.current = true; }, 100);
+    setTimeout(() => { instance.fitView({ padding: 0.4 }); initialFitDone.current = true; }, 100);
   }, []);
 
   // Undo/Redo keyboard shortcuts
@@ -148,9 +160,33 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
 
   const handleNativeConnect = useCallback((connection: Connection) => {
     if (!connection.source || !connection.target || connection.source === connection.target) return;
-    // Show connection type dialog instead of auto-creating as 'uses'
     onShowConnectionDialog(connection.source, connection.target);
   }, [onShowConnectionDialog]);
+
+  const handleNodeMouseEnter = useCallback((_: React.MouseEvent, node: Node) => {
+    if (node.type === 'zone') return;
+    setHoveredNodeId(node.id);
+  }, [setHoveredNodeId]);
+
+  const handleNodeMouseLeave = useCallback(() => {
+    setHoveredNodeId(null);
+  }, [setHoveredNodeId]);
+
+  const handleEdgeClick = useCallback((_: React.MouseEvent, edge: ReactFlowEdge) => {
+    if (isReadOnly) return;
+    // Only user connections (uc- prefix) are editable
+    if (!edge.id.startsWith('uc-')) return;
+    const connectionId = edge.id.replace('uc-', '');
+    const edgeData = edge.data as Record<string, unknown> | undefined;
+    const currentType = (edgeData?.connectionType as UserConnectionType) || 'uses';
+    // Find the edge label position from the current layouted edges
+    const matchedEdge = edges.find((e) => e.id === edge.id);
+    // Use mouse event coordinates for popover position
+    const rect = (_.target as HTMLElement).closest('.service-map-canvas')?.getBoundingClientRect();
+    const x = _.clientX - (rect?.left ?? 0);
+    const y = _.clientY - (rect?.top ?? 0);
+    setEdgePopover({ edgeId: edge.id, connectionId, currentType, x, y });
+  }, [isReadOnly, edges]);
 
   const handleConnectionConfirm = useCallback((type: UserConnectionType) => {
     if (!connectionDialog) return;
@@ -218,6 +254,9 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
             onPaneClick={isReadOnly ? undefined : interactions.handlePaneClick}
             onNodeContextMenu={isReadOnly ? undefined : interactions.handleNodeContextMenu}
             onPaneContextMenu={isReadOnly ? undefined : interactions.handlePaneContextMenu}
+            onNodeMouseEnter={handleNodeMouseEnter}
+            onNodeMouseLeave={handleNodeMouseLeave}
+            onEdgeClick={handleEdgeClick}
             nodeTypes={nodeTypes} edgeTypes={edgeTypes} onInit={handleInit}
             nodesDraggable={!isReadOnly}
             nodesConnectable={!isReadOnly}
@@ -233,13 +272,33 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
             />
             {/* PCB 스타일 도트 그리드 배경 (의존성 뷰 전용) */}
             {isDark ? (
-              <Background variant={BackgroundVariant.Dots} gap={24} size={1.2} color="#34d39940" style={{ opacity: 0.5 }} />
+              <Background variant={BackgroundVariant.Dots} gap={32} size={0.8} color="#34d39940" style={{ opacity: 0.3 }} />
             ) : (
-              <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#3b6cf030" style={{ opacity: 0.7 }} />
+              <Background variant={BackgroundVariant.Dots} gap={32} size={0.8} color="#3b6cf030" style={{ opacity: 0.7 }} />
             )}
           </ReactFlow>
           {!isReadOnly && <EditSaveBar onSave={handleSaveChanges} saving={saving} />}
           {showLegend && <MapLegend onClose={() => setShowLegend(false)} />}
+          {edgePopover && (
+            <EdgeEditPopover
+              edgeId={edgePopover.edgeId}
+              connectionId={edgePopover.connectionId}
+              currentType={edgePopover.currentType}
+              position={{ x: edgePopover.x, y: edgePopover.y }}
+              onChangeType={(type) => {
+                updateConnection.mutate(
+                  { id: edgePopover.connectionId, connection_type: type },
+                  { onSuccess: () => toast.success('연결 타입이 변경되었습니다') },
+                );
+                setEdgePopover(null);
+              }}
+              onDelete={() => {
+                handleDeleteUserConnection(edgePopover.edgeId);
+                setEdgePopover(null);
+              }}
+              onClose={() => setEdgePopover(null)}
+            />
+          )}
         </div>
         <NodeContextMenu
           onViewDetail={interactions.handleContextViewDetail} onStartConnect={interactions.handleContextStartConnect}

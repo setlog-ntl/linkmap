@@ -4,6 +4,7 @@ import { memo, useState } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { NodeTooltip } from '@/components/service-map/node-tooltip';
+import { useServiceMapStore } from '@/stores/service-map-store';
 import type { ServiceCategory } from '@/types';
 import { getServiceBrand } from '@/lib/constants/service-brands';
 
@@ -47,9 +48,13 @@ interface ServiceNodeData {
   [key: string]: unknown;
 }
 
-function ServiceNode({ data }: NodeProps) {
+function ServiceNode({ id, data }: NodeProps) {
   const d = data as unknown as ServiceNodeData;
   const [hovered, setHovered] = useState(false);
+  const hoveredEdgeNodes = useServiceMapStore((s) => s.hoveredEdgeNodes);
+  const isEdgeHighlighted = hoveredEdgeNodes
+    ? hoveredEdgeNodes.source === id || hoveredEdgeNodes.target === id
+    : false;
   const category = d.category as ServiceCategory;
   const status = STATUS_CONFIG[d.status] || STATUS_CONFIG.not_started;
 
@@ -217,15 +222,27 @@ function ServiceNode({ data }: NodeProps) {
         </div>
       </div>
 
-      {/* Handles — transparent, all 4 directions for both source and target */}
-      <Handle type="target" position={Position.Top} id="top" className="!bg-transparent !border-0 !w-3 !h-3" />
-      <Handle type="target" position={Position.Bottom} id="bottom" className="!bg-transparent !border-0 !w-3 !h-3" />
-      <Handle type="target" position={Position.Left} id="left" className="!bg-transparent !border-0 !w-3 !h-3" />
-      <Handle type="target" position={Position.Right} id="right" className="!bg-transparent !border-0 !w-3 !h-3" />
-      <Handle type="source" position={Position.Top} id="source-top" className="!bg-transparent !border-0 !w-3 !h-3" />
-      <Handle type="source" position={Position.Bottom} id="source-bottom" className="!bg-transparent !border-0 !w-3 !h-3" />
-      <Handle type="source" position={Position.Left} id="source-left" className="!bg-transparent !border-0 !w-3 !h-3" />
-      <Handle type="source" position={Position.Right} id="source-right" className="!bg-transparent !border-0 !w-3 !h-3" />
+      {/* Edge hover ring glow */}
+      {isEdgeHighlighted && (
+        <div
+          className="absolute inset-[-3px] rounded-[17px] pointer-events-none"
+          style={{
+            boxShadow: `0 0 12px 2px ${brandColor}50`,
+            border: `1.5px solid ${brandColor}60`,
+            transition: 'all 0.2s ease',
+          }}
+        />
+      )}
+
+      {/* Handles — visible on hover, transparent otherwise */}
+      <Handle type="target" position={Position.Top} id="top" className={`!w-2.5 !h-2.5 !rounded-full transition-all duration-200 ${hovered ? '!bg-primary/60 !border-primary/30 !border' : '!bg-transparent !border-0'}`} />
+      <Handle type="target" position={Position.Bottom} id="bottom" className={`!w-2.5 !h-2.5 !rounded-full transition-all duration-200 ${hovered ? '!bg-primary/60 !border-primary/30 !border' : '!bg-transparent !border-0'}`} />
+      <Handle type="target" position={Position.Left} id="left" className={`!w-2.5 !h-2.5 !rounded-full transition-all duration-200 ${hovered ? '!bg-primary/60 !border-primary/30 !border' : '!bg-transparent !border-0'}`} />
+      <Handle type="target" position={Position.Right} id="right" className={`!w-2.5 !h-2.5 !rounded-full transition-all duration-200 ${hovered ? '!bg-primary/60 !border-primary/30 !border' : '!bg-transparent !border-0'}`} />
+      <Handle type="source" position={Position.Top} id="source-top" className={`!w-2.5 !h-2.5 !rounded-full transition-all duration-200 ${hovered ? '!bg-primary/60 !border-primary/30 !border' : '!bg-transparent !border-0'}`} />
+      <Handle type="source" position={Position.Bottom} id="source-bottom" className={`!w-2.5 !h-2.5 !rounded-full transition-all duration-200 ${hovered ? '!bg-primary/60 !border-primary/30 !border' : '!bg-transparent !border-0'}`} />
+      <Handle type="source" position={Position.Left} id="source-left" className={`!w-2.5 !h-2.5 !rounded-full transition-all duration-200 ${hovered ? '!bg-primary/60 !border-primary/30 !border' : '!bg-transparent !border-0'}`} />
+      <Handle type="source" position={Position.Right} id="source-right" className={`!w-2.5 !h-2.5 !rounded-full transition-all duration-200 ${hovered ? '!bg-primary/60 !border-primary/30 !border' : '!bg-transparent !border-0'}`} />
     </div>
   );
 

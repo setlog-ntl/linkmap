@@ -4,22 +4,21 @@ import { memo, useState } from 'react';
 import {
   BaseEdge,
   EdgeLabelRenderer,
-  getSmoothStepPath,
-  MarkerType,
+  getBezierPath,
   type EdgeProps,
 } from '@xyflow/react';
 import { X } from 'lucide-react';
-import { useServiceMapStore } from '@/stores/service-map-store';
+import { useServiceMapStore, type HoveredEdgeNodes } from '@/stores/service-map-store';
 import type { DependencyType, UserConnectionType } from '@/types';
 
 /** All connection styles - dependencies + user connections
  *  weight: 1=lightweight, 2=normal, 3=critical */
 const styles: Record<string, { color: string; dash: string; label: string; weight: number }> = {
   // Dependency types
-  required:    { color: 'var(--destructive)', dash: '0',   label: '필수',   weight: 3 },
+  required:    { color: 'var(--destructive)', dash: '0',   label: '필수',   weight: 3.5 },
   recommended: { color: 'var(--primary)',     dash: '0',   label: '권장',   weight: 2 },
-  optional:    { color: 'var(--muted-foreground)', dash: '6 3', label: '선택', weight: 1 },
-  alternative: { color: 'var(--chart-4)',     dash: '6 3', label: '대체',   weight: 1 },
+  optional:    { color: 'var(--muted-foreground)', dash: '6 3', label: '선택', weight: 1.5 },
+  alternative: { color: 'var(--chart-4)',     dash: '6 3', label: '대체',   weight: 1.5 },
   // User connection types
   uses:          { color: '#3b82f6', dash: '0',   label: '사용',       weight: 2 },
   integrates:    { color: '#22c55e', dash: '0',   label: '연동',       weight: 3 },
@@ -38,6 +37,8 @@ interface ConnectionEdgeData {
 
 function ConnectionEdge({
   id,
+  source,
+  target,
   sourceX,
   sourceY,
   targetX,
@@ -48,74 +49,109 @@ function ConnectionEdge({
 }: EdgeProps) {
   const [hovered, setHovered] = useState(false);
   const editMode = useServiceMapStore((s) => s.editMode);
+  const setHoveredEdge = useServiceMapStore((s) => s.setHoveredEdge);
+  const hoveredNodeId = useServiceMapStore((s) => s.hoveredNodeId);
   const edgeData = data as unknown as ConnectionEdgeData;
   const connType = edgeData?.connectionType || 'uses';
   const s = styles[connType] || styles.uses;
 
-  const [edgePath, labelX, labelY] = getSmoothStepPath({
+  const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
     targetX,
     targetY,
     sourcePosition,
     targetPosition,
-    borderRadius: 8,
+    curvature: 0.25,
   });
 
-  const showLabel = hovered || editMode;
+  // Dim edges not connected to hovered node
+  const isRelatedToHoveredNode = hoveredNodeId
+    ? source === hoveredNodeId || target === hoveredNodeId
+    : true;
+
+  const showLabel = true;
+  const labelOpacity = hovered ? 1.0 : 0.75;
   const showPacket = s.weight >= 2 && s.dash === '0';
 
   // Marching ants on hover: override dash to animated pattern
   const isStaticDashed = s.dash !== '0';
   const strokeDasharray = hovered && !isStaticDashed ? '5 5' : (isStaticDashed ? s.dash : undefined);
 
-  // Calculate midpoint for via hole marker
+  // Via hole for long edges only (200px+)
+  const edgeLength = Math.sqrt((targetX - sourceX) ** 2 + (targetY - sourceY) ** 2);
   const midX = (sourceX + targetX) / 2;
   const midY = (sourceY + targetY) / 2;
-  const hasCorner = Math.abs(sourceX - targetX) > 30 && Math.abs(sourceY - targetY) > 30;
+  const showViaHole = edgeLength > 200;
+
+  const handleMouseEnter = () => {
+    setHovered(true);
+    setHoveredEdge(id, { source: source ?? '', target: target ?? '' });
+  };
+  const handleMouseLeave = () => {
+    setHovered(false);
+    setHoveredEdge(null);
+  };
+
+  // Unique marker ID per connection type for colored arrows
+  const markerId = `arrow-${connType}-${id}`;
 
   return (
     <>
+      {/* Custom colored arrow marker */}
+      <defs>
+        <marker
+          id={markerId}
+          markerWidth="14"
+          markerHeight="14"
+          refX="12"
+          refY="7"
+          orient="auto"
+          markerUnits="userSpaceOnUse"
+        >
+          <path d="M2 2 L12 7 L2 12 Z" fill={s.color} />
+        </marker>
+      </defs>
+
       {/* Invisible wider path for hover detection */}
       <path
         d={edgePath}
         fill="none"
         strokeWidth={20}
         stroke="transparent"
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         className="react-flow__edge-interaction"
       />
 
-      {/* PCB trace glow underlay (hover) */}
-      {hovered && (
-        <path
-          d={edgePath}
-          fill="none"
-          stroke={s.color}
-          strokeWidth={s.weight + 4}
-          opacity={0.1}
-          style={{ filter: `blur(4px)` }}
-        />
-      )}
+      {/* Subtle glow underlay — always visible, stronger on hover */}
+      <path
+        d={edgePath}
+        fill="none"
+        stroke={s.color}
+        strokeWidth={s.weight + (hovered ? 4 : 2)}
+        opacity={hovered ? 0.1 : 0.04}
+        style={{ filter: `blur(${hovered ? 4 : 2}px)`, transition: 'opacity 0.2s ease' }}
+      />
 
       <BaseEdge
         id={id}
         path={edgePath}
-        markerEnd={MarkerType.ArrowClosed}
+        markerEnd={`url(#${markerId})`}
         style={{
           stroke: s.color,
           strokeWidth: hovered ? s.weight + 1 : s.weight,
           strokeDasharray,
           strokeLinecap: 'round',
           strokeLinejoin: 'round',
-          transition: 'stroke-width 0.2s ease',
+          opacity: isRelatedToHoveredNode ? 1 : 0.3,
+          transition: 'stroke-width 0.2s ease, opacity 0.2s ease',
         }}
         className={hovered && !isStaticDashed ? 'animate-edge-march' : ''}
       />
 
-      {/* Via hole marker at bend point (PCB style) */}
-      {hasCorner && (
+      {/* Via hole marker for long edges (PCB style) */}
+      {showViaHole && (
         <g className="animate-pcb-via">
           <circle cx={midX} cy={midY} r={4} fill="var(--background)" stroke={s.color} strokeWidth={1.2} opacity={0.6} />
           <circle cx={midX} cy={midY} r={1.5} fill={s.color} opacity={0.5} />
@@ -157,13 +193,15 @@ function ConnectionEdge({
             style={{
               position: 'absolute',
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+              opacity: labelOpacity,
+              transition: 'opacity 0.2s ease',
             }}
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
           >
             <div className="flex items-center gap-1">
               <span
-                className="rounded-full border px-1.5 py-0.5 text-[10px] font-medium shadow-sm font-mono"
+                className="rounded-full border px-1.5 py-0.5 text-[11px] font-medium shadow-sm font-mono"
                 style={{
                   backgroundColor: 'var(--background)',
                   color: s.color,
