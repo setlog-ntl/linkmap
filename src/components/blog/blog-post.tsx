@@ -76,6 +76,7 @@ function CustomLink({ href, children, ...props }: ComponentPropsWithoutRef<'a'>)
     return (
       <Link
         href={href}
+        prefetch={false}
         className={`inline-flex items-center gap-1 font-medium transition-colors ${
           isGuide ? 'text-green-600 dark:text-green-400 hover:text-green-700' :
           isService ? 'text-purple-600 dark:text-purple-400 hover:text-purple-700' :
@@ -360,13 +361,13 @@ function PostNavigation({ prev, next }: { prev: NavPost | null; next: NavPost | 
   return (
     <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
       {prev ? (
-        <Link href={`/blog/${prev.slug}`} className="group rounded-lg border p-4 hover:border-brand-blue/50 transition-colors">
+        <Link href={`/blog/${prev.slug}`} prefetch={false} className="group rounded-lg border p-4 hover:border-brand-blue/50 transition-colors">
           <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1"><ArrowLeft className="h-3 w-3" /> 이전 글</div>
           <div className="text-sm font-medium group-hover:text-brand-blue transition-colors line-clamp-2">{prev.title}</div>
         </Link>
       ) : <div />}
       {next ? (
-        <Link href={`/blog/${next.slug}`} className="group rounded-lg border p-4 hover:border-brand-blue/50 transition-colors text-right">
+        <Link href={`/blog/${next.slug}`} prefetch={false} className="group rounded-lg border p-4 hover:border-brand-blue/50 transition-colors text-right">
           <div className="text-xs text-muted-foreground mb-1 flex items-center justify-end gap-1">다음 글 <ArrowRight className="h-3 w-3" /></div>
           <div className="text-sm font-medium group-hover:text-brand-blue transition-colors line-clamp-2">{next.title}</div>
         </Link>
@@ -408,6 +409,7 @@ export function BlogPostView({ post, prevPost = null, nextPost = null, relatedGu
         {/* Back link */}
         <Link
           href="/blog"
+          prefetch={false}
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-brand-blue transition-colors mb-8"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -482,6 +484,7 @@ export function BlogPostView({ post, prevPost = null, nextPost = null, relatedGu
                 <Link
                   key={guide.slug}
                   href={guide.href}
+                  prefetch={false}
                   className="flex items-center gap-3 rounded-md p-2 hover:bg-muted transition-colors"
                 >
                   <ChevronRight className="h-4 w-4 text-brand-blue" />
@@ -512,6 +515,7 @@ export function BlogPostView({ post, prevPost = null, nextPost = null, relatedGu
         <div className="mt-10 pt-8 border-t">
           <Link
             href="/blog"
+            prefetch={false}
             className="inline-flex items-center gap-1 text-sm font-medium text-brand-blue hover:underline"
           >
             <ArrowLeft className="h-4 w-4" />

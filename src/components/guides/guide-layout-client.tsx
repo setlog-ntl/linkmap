@@ -28,13 +28,13 @@ export function GuideLayoutClient({ parentSlug, children }: GuideLayoutClientPro
     <div>
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1 text-sm text-muted-foreground py-4">
-        <Link href="/guides" className="hover:text-foreground transition-colors">
+        <Link href="/guides" prefetch={false} className="hover:text-foreground transition-colors">
           가이드
         </Link>
         <ChevronRight className="w-3.5 h-3.5" />
         {isSubPage ? (
           <>
-            <Link href={parent.href} className="hover:text-foreground transition-colors">
+            <Link href={parent.href} prefetch={false} className="hover:text-foreground transition-colors">
               {parent.title}
             </Link>
             <ChevronRight className="w-3.5 h-3.5" />

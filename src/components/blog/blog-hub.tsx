@@ -62,6 +62,7 @@ function PostCard({ post }: { post: BlogPostMeta }) {
   return (
     <Link
       href={`/blog/${post.slug}`}
+      prefetch={false}
       className="group relative flex flex-col gap-3 rounded-lg border bg-card p-5 shadow-sm transition-all hover:border-brand-blue/50 hover:shadow-md"
     >
       {/* Category + Tags + Copy */}
@@ -225,6 +226,7 @@ export function BlogHub({ posts }: { posts: BlogPostMeta[] }) {
         </p>
         <Link
           href="/guides"
+          prefetch={false}
           className="inline-flex items-center gap-1 text-sm font-medium text-brand-blue hover:underline"
         >
           서비스 가이드 보기 <ArrowRight className="h-4 w-4" />

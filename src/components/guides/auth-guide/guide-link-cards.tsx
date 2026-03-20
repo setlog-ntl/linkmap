@@ -67,7 +67,7 @@ export function GuideLinkCards() {
             const Icon = guide.icon;
             const styles = colorStyles[guide.color];
             return (
-              <Link key={guide.href} href={guide.href}>
+              <Link key={guide.href} href={guide.href} prefetch={false}>
                 <Card
                   className={`h-full transition-all duration-200 ${styles.border} hover:shadow-md group`}
                 >
