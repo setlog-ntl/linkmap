@@ -18,6 +18,7 @@ import type {
   HealthCheck,
   UserConnection,
 } from '@/types';
+import type { ShowcaseCategory } from '@/types/core';
 
 const EMPTY_CONNECTIONS: UserConnection[] = [];
 
@@ -28,10 +29,20 @@ export interface ServiceMapOptions {
   shareToken?: string;
 }
 
+export interface ProjectMeta {
+  id: string | null;
+  iconType: string | null;
+  iconValue: string | null;
+  isShowcase: boolean;
+  showcaseDescription: string | null;
+  showcaseCategory: ShowcaseCategory | null;
+}
+
 export interface ServiceMapData {
   // Project
   projectName: string;
   mainServiceId: string | null;
+  projectMeta: ProjectMeta;
 
   // Services
   services: (ProjectService & { service: Service })[];
@@ -66,13 +77,31 @@ export interface ServiceMapData {
 
 // 데모/공유 API 응답 타입
 interface RemoteApiResponse {
-  project?: { name?: string; main_service_id?: string | null };
+  project?: {
+    id?: string;
+    name?: string;
+    main_service_id?: string | null;
+    icon_type?: string | null;
+    icon_value?: string | null;
+    is_showcase?: boolean;
+    showcase_description?: string | null;
+    showcase_category?: ShowcaseCategory | null;
+  };
   services?: (ProjectService & { service: Service })[];
   dependencies?: ServiceDependency[];
   userConnections?: UserConnection[];
   envVars?: EnvironmentVariable[];
   layerOverrides?: { service_id: string; dashboard_layer: string | null }[];
 }
+
+const EMPTY_META: ProjectMeta = {
+  id: null,
+  iconType: null,
+  iconValue: null,
+  isShowcase: false,
+  showcaseDescription: null,
+  showcaseCategory: null,
+};
 
 export function useServiceMapData(projectId: string, options?: ServiceMapOptions | boolean): ServiceMapData {
   // 하위 호환: isDemo boolean 지원
@@ -85,9 +114,10 @@ export function useServiceMapData(projectId: string, options?: ServiceMapOptions
 
   const supabaseRef = useRef(createClient());
 
-  // Project name + main_service_id
+  // Project name + main_service_id + meta
   const [projectName, setProjectName] = useState('내 앱');
   const [mainServiceId, setMainServiceId] = useState<string | null>(null);
+  const [projectMeta, setProjectMeta] = useState<ProjectMeta>(EMPTY_META);
 
   // 리모트(데모/공유) 모드 전용 상태
   const [remoteData, setRemoteData] = useState<{
@@ -119,6 +149,14 @@ export function useServiceMapData(projectId: string, options?: ServiceMapOptions
           if (json.project) {
             setProjectName(json.project.name ?? '내 앱');
             setMainServiceId(json.project.main_service_id ?? null);
+            setProjectMeta({
+              id: json.project.id ?? null,
+              iconType: json.project.icon_type ?? null,
+              iconValue: json.project.icon_value ?? null,
+              isShowcase: json.project.is_showcase ?? false,
+              showcaseDescription: json.project.showcase_description ?? null,
+              showcaseCategory: json.project.showcase_category ?? null,
+            });
           }
           const overridesMap: Record<string, string> = {};
           for (const o of json.layerOverrides ?? []) {
@@ -194,6 +232,7 @@ export function useServiceMapData(projectId: string, options?: ServiceMapOptions
   return {
     projectName,
     mainServiceId,
+    projectMeta,
     services: isRemote ? remoteData.services : services,
     servicesLoading: isRemote ? remoteLoading : servicesLoading,
     catalogServices,
