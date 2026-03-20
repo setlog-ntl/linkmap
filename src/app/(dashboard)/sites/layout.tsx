@@ -16,6 +16,13 @@ export default function SitesLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const { locale } = useLocaleStore();
 
+  // 에디터 페이지는 전체 화면 사용 (container 제약 제거)
+  const isEditorPage = /\/sites\/[^/]+\/edit/.test(pathname);
+
+  if (isEditorPage) {
+    return <>{children}</>;
+  }
+
   return (
     <div className="container py-4 sm:py-8 max-w-5xl px-4 sm:px-6">
       <div className="mb-5 sm:mb-6">

@@ -229,10 +229,10 @@ type RightPanel = 'preview' | 'modules' | null;
 type MobileTab = 'code' | 'preview' | 'modules';
 type PreviewViewport = 'mobile' | 'tablet' | 'desktop';
 
-const VIEWPORT_SIZES: Record<PreviewViewport, { width: string; label: string }> = {
-  mobile: { width: '375px', label: '375px' },
-  tablet: { width: '768px', label: '768px' },
-  desktop: { width: '100%', label: 'Full' },
+const VIEWPORT_SIZES: Record<PreviewViewport, { width: string; height: string; label: string }> = {
+  mobile: { width: '390px', height: '844px', label: '390px' },
+  tablet: { width: '820px', height: '1180px', label: '820px' },
+  desktop: { width: '100%', height: '100%', label: 'Full' },
 };
 
 export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
@@ -1031,7 +1031,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)]">
       {/* ===== 툴바 ===== */}
-      <div className="border-b px-3 sm:px-4 h-14 flex items-center justify-between bg-background/95 backdrop-blur-sm gap-3">
+      <div className="border-b px-4 sm:px-5 h-12 flex items-center justify-between bg-background/95 backdrop-blur-sm gap-3 shrink-0">
         {/* 좌측: 뒤로가기 + 사이트 정보 */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <Button variant="ghost" size="sm" className="shrink-0 gap-1.5 text-muted-foreground hover:text-foreground" asChild>
@@ -1239,11 +1239,11 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         )}
 
         {/* 데스크탑 파일 사이드바 (접기/펼치기) */}
-        <div className={`hidden md:flex md:flex-col border-r bg-muted/20 flex-shrink-0 transition-[width] duration-200 ${showFileSidebar ? 'w-48' : 'w-10'}`}>
-          <div className="px-2 py-2.5 border-b flex items-center justify-between gap-1">
+        <div className={`hidden md:flex md:flex-col border-r bg-muted/20 flex-shrink-0 transition-[width] duration-200 ${showFileSidebar ? 'w-56 lg:w-60' : 'w-10'}`}>
+          <div className="px-2.5 py-2 border-b flex items-center justify-between gap-1 h-9">
             {showFileSidebar ? (
               <>
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider pl-1">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider pl-1">
                   {t(locale, 'editor.files')}
                 </span>
                 <div className="flex items-center gap-1">
@@ -1282,7 +1282,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         <div className="hidden md:flex flex-1 overflow-hidden">
           {/* 좌측: 모듈 패널 (모듈 모드) OR 코드 에디터 */}
           {rightPanel === 'modules' && moduleSchema && moduleState ? (
-            <div className="w-[380px] flex-shrink-0 flex flex-col overflow-hidden border-r bg-background">
+            <div className="w-[420px] flex-shrink-0 flex flex-col overflow-hidden border-r bg-background">
               <ModulePanel
                 schema={moduleSchema}
                 state={moduleState}
@@ -1297,10 +1297,10 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
               />
             </div>
           ) : (
-          <div className={`flex flex-col overflow-hidden ${rightPanel ? 'w-2/5 min-w-[320px] border-r' : 'w-full'}`}>
-            <div className="border-b px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground flex-shrink-0 h-9">
-              <Code className="h-3.5 w-3.5" />
-              <span className="truncate font-medium">{selectedFileName || ''}</span>
+          <div className={`flex flex-col overflow-hidden ${rightPanel ? 'w-1/2 min-w-[400px] border-r' : 'w-full'}`}>
+            <div className="border-b px-3.5 py-1.5 flex items-center gap-2 bg-muted/30 text-xs text-muted-foreground flex-shrink-0 h-9">
+              <Code className="h-3.5 w-3.5 text-muted-foreground/70" />
+              <span className="truncate font-semibold text-foreground/80">{selectedFileName || ''}</span>
               {(() => {
                 const langBadge = getLanguageBadge(selectedPath);
                 if (!langBadge) return null;
@@ -1322,9 +1322,9 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
           {rightPanel && (
             <div className="flex-1 flex flex-col overflow-hidden relative">
               {/* 미리보기 헤더 */}
-              <div className="border-b px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground flex-shrink-0 h-9">
-                <Eye className="h-3.5 w-3.5" />
-                <span className="font-medium">{t(locale, 'editor.preview')}</span>
+              <div className="border-b px-3.5 py-1.5 flex items-center gap-2 bg-muted/30 text-xs text-muted-foreground flex-shrink-0 h-9">
+                <Eye className="h-3.5 w-3.5 text-muted-foreground/70" />
+                <span className="font-semibold text-foreground/80">{t(locale, 'editor.preview')}</span>
                 {awaitingDeploy ? (
                   <Badge variant="secondary" className="text-[10px] px-1.5 py-0 gap-1 bg-amber-500/20 text-amber-500">
                     <Github className="h-2.5 w-2.5 animate-github-wiggle" />
@@ -1396,16 +1396,17 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                 )}
               </div>
               {/* 미리보기 본문 */}
-              <div className={`flex-1 overflow-auto relative ${previewViewport !== 'desktop' ? 'bg-muted/20 flex justify-center items-start py-6' : ''}`}>
+              <div className={`flex-1 overflow-auto relative ${previewViewport !== 'desktop' ? 'bg-muted/30 flex justify-center items-start p-4' : ''}`}>
                 {renderBuildOverlay()}
                 <div
                   className={previewViewport !== 'desktop'
-                    ? 'bg-white shadow-xl rounded-xl overflow-hidden border-2 border-border/50'
+                    ? 'bg-white shadow-2xl rounded-lg overflow-hidden ring-1 ring-border/40'
                     : 'h-full'
                   }
                   style={previewViewport !== 'desktop' ? {
                     width: VIEWPORT_SIZES[previewViewport].width,
-                    height: previewViewport === 'mobile' ? '667px' : '1024px',
+                    height: VIEWPORT_SIZES[previewViewport].height,
+                    maxHeight: 'calc(100vh - 10rem)',
                   } : undefined}
                 >
                   {renderPreview()}
@@ -1474,9 +1475,9 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       </div>
 
       {/* ===== 상태 바 ===== */}
-      <div className="border-t px-3 sm:px-4 h-8 flex items-center justify-between text-xs text-muted-foreground bg-muted/30 gap-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <span className="font-mono text-[11px] truncate">{selectedFileName}</span>
+      <div className="border-t px-4 sm:px-5 h-7 flex items-center justify-between text-[11px] text-muted-foreground bg-muted/20 gap-4 shrink-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="font-mono truncate">{selectedFileName}</span>
           {(() => {
             const langBadge = getLanguageBadge(selectedPath);
             if (!langBadge) return null;
@@ -1486,25 +1487,28 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
               </span>
             );
           })()}
+          {lineCount > 0 && (
+            <span className="text-muted-foreground/40 font-mono">{lineCount}L</span>
+          )}
         </div>
         {awaitingDeploy ? (
-          <span className="hidden sm:flex items-center gap-1.5 text-[11px] text-amber-500">
+          <span className="hidden sm:flex items-center gap-1.5 text-amber-500">
             <Github className="h-3 w-3 animate-github-wiggle" />
             {buildStatusLabel || '배포 진행 중...'}
           </span>
         ) : (
-          <span className="text-muted-foreground/50 hidden sm:inline text-[11px]">
+          <span className="text-muted-foreground/40 hidden sm:inline">
             {t(locale, 'editor.statusBarHint')}
           </span>
         )}
         <div className="flex items-center gap-2 shrink-0">
           {lastSavedAt ? (
-            <span className="text-[11px]">
+            <span>
               {t(locale, 'editor.lastSavedAt')}
               {formatRelativeTime(lastSavedAt, locale)}
             </span>
           ) : (
-            <span className="text-[11px] text-muted-foreground/40">
+            <span className="text-muted-foreground/40">
               {t(locale, 'editor.notSavedYet')}
             </span>
           )}
