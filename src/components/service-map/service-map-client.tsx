@@ -72,7 +72,7 @@ function ServiceMapInner({ isReadOnly = false }: ServiceMapInnerProps) {
     <TooltipProvider>
       <div className="flex flex-col w-full h-full relative">
         <div
-          className="absolute top-4 z-10 flex items-center justify-between gap-4 transition-all duration-300"
+          className="absolute top-16 z-10 flex items-center gap-4 transition-all duration-300"
           style={{ right: isSheetOpen ? 'calc(380px + 1.5rem)' : '1rem' }}
         >
           <ViewLevelSwitcher />
