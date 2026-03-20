@@ -127,6 +127,7 @@ export function GuidesHub() {
                         <Link
                           key={guide.slug}
                           href={guide.href}
+                          prefetch={false}
                           className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/50 transition-colors text-sm"
                         >
                           <span className="w-5 h-5 rounded-full bg-brand-blue/10 text-brand-blue text-[10px] flex items-center justify-center shrink-0 font-bold">
@@ -284,6 +285,7 @@ function ConceptStageSection({
                         <div className="flex items-center group">
                           <Link
                             href={guide.href}
+                            prefetch={false}
                             className="flex-1 flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors min-w-0"
                           >
                             <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg shrink-0', colors.bg)}>
@@ -341,6 +343,7 @@ function ConceptStageSection({
                                   <Link
                                     key={sub.slug}
                                     href={sub.href}
+                                    prefetch={false}
                                     className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-muted/50 transition-colors"
                                   >
                                     <div className="flex h-5 w-5 items-center justify-center rounded bg-muted/70 shrink-0">
@@ -397,6 +400,7 @@ function GuideCardGrid({
             {/* Card Main */}
             <Link
               href={guide.href}
+              prefetch={false}
               className="flex flex-col gap-3 p-5"
             >
               <div className="flex items-center justify-between">
@@ -456,6 +460,7 @@ function GuideCardGrid({
                         <Link
                           key={sub.slug}
                           href={sub.href}
+                          prefetch={false}
                           className="flex items-center gap-2.5 px-3 py-2 rounded-md hover:bg-muted/50 transition-colors"
                         >
                           <div className="flex h-6 w-6 items-center justify-center rounded bg-muted/70 shrink-0">

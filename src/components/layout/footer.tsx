@@ -43,7 +43,7 @@ export function Footer() {
                     <ul className="space-y-1">
                       {stageGuides.map((guide) => guide && (
                         <li key={guide.slug}>
-                          <Link href={guide.href} className="hover:text-white transition-colors text-xs">
+                          <Link href={guide.href} prefetch={false} className="hover:text-white transition-colors text-xs">
                             {guide.title}
                           </Link>
                         </li>
@@ -65,7 +65,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               {getGuideDataByCategory('service').map((guide) => (
                 <li key={guide.slug}>
-                  <Link href={guide.href} className="hover:text-white transition-colors">
+                  <Link href={guide.href} prefetch={false} className="hover:text-white transition-colors">
                     {guide.title}
                   </Link>
                 </li>

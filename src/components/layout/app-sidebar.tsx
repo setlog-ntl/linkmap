@@ -762,7 +762,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                                   {stageGuides.map((guide) => guide && (
                                     <SidebarMenuSubItem key={guide.href}>
                                       <SidebarMenuSubButton asChild isActive={isActive(guide.href)}>
-                                        <Link href={guide.href}>
+                                        <Link href={guide.href} prefetch={false}>
                                           <span>{guide.title}</span>
                                         </Link>
                                       </SidebarMenuSubButton>
@@ -789,7 +789,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                               {getGuideDataByCategory('service').map((guide) => (
                                 <SidebarMenuSubItem key={guide.href}>
                                   <SidebarMenuSubButton asChild isActive={isActive(guide.href)}>
-                                    <Link href={guide.href}>
+                                    <Link href={guide.href} prefetch={false}>
                                       <span>{guide.title}</span>
                                     </Link>
                                   </SidebarMenuSubButton>

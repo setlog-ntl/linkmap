@@ -156,7 +156,7 @@ export function Header({ profile }: HeaderProps) {
                       if (!guide) return null;
                       return (
                         <DropdownMenuItem key={guide.slug} asChild className="text-xs h-7">
-                          <Link href={guide.href} onClick={() => setSidebarOpen(false)}>
+                          <Link href={guide.href} prefetch={false} onClick={() => setSidebarOpen(false)}>
                             {guide.title}
                           </Link>
                         </DropdownMenuItem>
@@ -176,7 +176,7 @@ export function Header({ profile }: HeaderProps) {
           </DropdownMenuLabel>
           {getGuideDataByCategory('service').map((guide) => (
             <DropdownMenuItem key={guide.slug} asChild>
-              <Link href={guide.href} onClick={() => setSidebarOpen(false)}>
+              <Link href={guide.href} prefetch={false} onClick={() => setSidebarOpen(false)}>
                 {guide.title}
               </Link>
             </DropdownMenuItem>
