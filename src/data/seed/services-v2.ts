@@ -125,6 +125,8 @@ export const SERVICE_IDS_V2 = {
   gwanggo: '10000000-0000-4000-a000-000000000135',
   // Platform self-reference
   linkmap: '10000000-0000-4000-a000-000000000136',
+  // Analytics
+  clarity: '10000000-0000-4000-a000-000000000137',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -4725,6 +4727,59 @@ export const servicesV2: ServiceSeedV2[] = [
       starter: '₩0',
       growth: '₩9,900',
       enterprise: '₩29,900',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Microsoft Clarity — 무료 히트맵·세션 녹화 분석 도구
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.clarity,
+    name: 'Microsoft Clarity',
+    slug: 'clarity',
+    category: 'analytics',
+    description:
+      'Free behavioral analytics tool by Microsoft. Provides heatmaps, session recordings, and scroll-depth insights to understand how users interact with your website. No traffic limits, GDPR-ready, integrates with Google Analytics.',
+    description_ko:
+      'Microsoft의 무료 행동 분석 도구입니다. 히트맵, 세션 녹화, 스크롤 깊이 분석으로 사용자가 웹사이트에서 어떻게 행동하는지 파악할 수 있습니다. 트래픽 제한 없이 무료이며, GDPR 준수, Google Analytics와 연동됩니다.',
+    icon_url: null,
+    website_url: 'https://clarity.microsoft.com',
+    docs_url: 'https://learn.microsoft.com/en-us/clarity/',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '완전 무료 — 트래픽 제한 없음',
+      plans: [
+        { name: 'Free', price: '$0 (완전 무료)' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'NEXT_PUBLIC_CLARITY_ID',
+        public: true,
+        description: 'Microsoft Clarity project ID',
+        description_ko: 'Microsoft Clarity 프로젝트 ID',
+      },
+    ],
+    domain: 'business',
+    subcategory: 'behavior-analytics',
+    popularity_score: 75,
+    difficulty_level: 'beginner',
+    tags: ['analytics', 'heatmap', 'session-recording', 'microsoft', 'free', 'ux', 'behavior', 'scroll-depth'],
+    alternatives: ['ga4', 'posthog', 'mixpanel', 'plausible'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'svelte', 'angular'],
+      language: ['javascript', 'typescript'],
+    },
+    official_sdks: {
+      npm: 'https://www.npmjs.com/package/clarity-js',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$0',
+      enterprise: '$0',
     },
   },
 ];
