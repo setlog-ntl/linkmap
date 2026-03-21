@@ -25,7 +25,11 @@ export interface UseServiceMapLayoutReturn {
   neighborSet: Set<string> | null;
 }
 
-/** Compute optimal sourceHandle/targetHandle based on relative node positions */
+/**
+ * Compute optimal sourceHandle/targetHandle based on relative node positions.
+ * Source exits toward target, target receives from the source direction.
+ * Example: target is RIGHT of source → source exits RIGHT, target receives from LEFT.
+ */
 function computeEdgeHandles(
   srcNode: Node,
   tgtNode: Node,
@@ -43,14 +47,17 @@ function computeEdgeHandles(
   const dx = tgtCx - srcCx;
   const dy = tgtCy - srcCy;
 
+  // Dominant axis determines direction. Target handle is OPPOSITE to source handle.
   if (Math.abs(dx) >= Math.abs(dy)) {
+    // Horizontal dominant
     return dx > 0
-      ? { sourceHandle: 'source-right', targetHandle: 'right' }
-      : { sourceHandle: 'source-left', targetHandle: 'left' };
+      ? { sourceHandle: 'source-right', targetHandle: 'left' }   // → target is RIGHT, enter from LEFT
+      : { sourceHandle: 'source-left', targetHandle: 'right' };  // ← target is LEFT, enter from RIGHT
   }
+  // Vertical dominant
   return dy > 0
-    ? { sourceHandle: 'source-bottom', targetHandle: 'bottom' }
-    : { sourceHandle: 'source-top', targetHandle: 'top' };
+    ? { sourceHandle: 'source-bottom', targetHandle: 'top' }     // ↓ target is BELOW, enter from TOP
+    : { sourceHandle: 'source-top', targetHandle: 'bottom' };    // ↑ target is ABOVE, enter from BOTTOM
 }
 
 export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServiceMapLayoutReturn {

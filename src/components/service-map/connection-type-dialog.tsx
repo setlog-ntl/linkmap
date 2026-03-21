@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -104,6 +105,7 @@ export function ConnectionTypeDialog({
         <div className="px-5 pt-5 pb-3">
           <DialogHeader>
             <DialogTitle className="text-base">연결 타입 선택</DialogTitle>
+            <DialogDescription className="sr-only">두 서비스 간 연결 유형을 선택합니다</DialogDescription>
             {sourceLabel && targetLabel && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                 <span className="font-medium text-foreground truncate max-w-[120px]">{sourceLabel}</span>
