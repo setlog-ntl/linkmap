@@ -4663,7 +4663,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'ai_creative',
     popularity_score: 60,
     difficulty_level: 'beginner',
-    tags: ['ai', 'advertising', 'image-generation', 'video-generation', 'marketing', 'creative', 'ecommerce', 'korean'],
+    tags: ['ai', 'advertising', 'image-generation', 'video-generation', 'marketing', 'creative', 'ecommerce', 'korean', '조코딩'],
     alternatives: ['midjourney', 'leonardo-ai', 'runway-ml'],
     compatibility: {
       framework: [],
