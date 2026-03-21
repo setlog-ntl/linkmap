@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ChevronDown, ChevronRight, Pencil, BarChart2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -128,7 +128,16 @@ export function CostServiceList({ projectId, services, budgetCurrency, usdToKrw 
     );
   };
 
-  if (services.length === 0) {
+  // 비용 높은순 정렬 (실사용량 > 월비용 > 미설정)
+  const sortedServices = useMemo(() => {
+    return [...services].sort((a, b) => {
+      const costA = a.actualCostMonthly ?? a.monthlyCost;
+      const costB = b.actualCostMonthly ?? b.monthlyCost;
+      return costB - costA;
+    });
+  }, [services]);
+
+  if (sortedServices.length === 0) {
     return (
       <Card>
         <CardContent className="py-8 text-center text-sm text-muted-foreground">
@@ -144,7 +153,7 @@ export function CostServiceList({ projectId, services, budgetCurrency, usdToKrw 
         <CardTitle className="text-sm font-semibold">서비스별 비용</CardTitle>
       </CardHeader>
       <CardContent className="pt-0 divide-y">
-        {services.map((entry) => {
+        {sortedServices.map((entry) => {
           const isExpanded = expandedId === entry.projectServiceId;
           const isOpenAI = entry.serviceSlug === 'openai';
           const hasCost =
