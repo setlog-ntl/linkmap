@@ -127,6 +127,8 @@ export const SERVICE_IDS_V2 = {
   linkmap: '10000000-0000-4000-a000-000000000136',
   // Analytics
   clarity: '10000000-0000-4000-a000-000000000137',
+  // AI IDE / Agentic Development
+  google_antigravity: '10000000-0000-4000-a000-000000000138',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -4780,6 +4782,52 @@ export const servicesV2: ServiceSeedV2[] = [
       starter: '$0',
       growth: '$0',
       enterprise: '$0',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Google Antigravity — AI 에이전트 기반 개발 플랫폼 (IDE)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.google_antigravity,
+    name: 'Google Antigravity',
+    slug: 'google-antigravity',
+    category: 'ai',
+    description:
+      'AI-powered agentic development platform by Google. Built on a modified VS Code fork, it enables developers to delegate complex coding tasks to autonomous AI agents powered by Gemini models. Agents can plan, execute, and verify tasks across editor, terminal, and browser.',
+    description_ko:
+      'Google의 AI 에이전트 기반 개발 플랫폼입니다. VS Code 포크에 기반하여 Gemini 모델로 구동되는 자율 AI 에이전트에게 복잡한 코딩 작업을 위임할 수 있습니다. 에이전트가 에디터, 터미널, 브라우저에서 작업을 계획·실행·검증합니다.',
+    icon_url: null,
+    website_url: 'https://antigravity.google',
+    docs_url: 'https://developers.googleblog.com/build-with-google-antigravity-our-new-agentic-development-platform/',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '개인 개발자 무료 퍼블릭 프리뷰 (AI 크레딧 시스템)',
+      plans: [
+        { name: 'Free', price: '$0 (프리뷰)' },
+        { name: 'Pro', price: '크레딧 기반' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [],
+    domain: 'ai_ml',
+    subcategory: 'ai_agent',
+    popularity_score: 82,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'ide', 'agentic', 'google', 'gemini', 'vibe-coding', 'code-generation', 'autonomous', '바이브코딩'],
+    alternatives: ['cursor', 'github-copilot', 'windsurf'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'svelte', 'angular', 'express', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python', 'go', 'rust', 'java'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '크레딧 기반',
+      enterprise: '문의',
     },
   },
 ];

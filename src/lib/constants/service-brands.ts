@@ -172,6 +172,9 @@ export const SERVICE_BRANDS: Record<string, ServiceBrand> = {
   // --- 분석 ---
   clarity:                { slug: 'microsoftclarity', color: '#4B53BC', darkColor: '#7B83EB', emoji: '🔍' },
 
+  // --- AI IDE ---
+  'google-antigravity':   { slug: 'google',           color: '#4285F4', darkColor: '#8AB4F8', emoji: '🚀' },
+
   // --- slug 매핑 별칭 (seed slug ↔ brand key 불일치 보정) ---
   flyio:                  { slug: 'flydotio',           color: '#24175B', darkColor: '#ffffff', emoji: '🪁' },
 
