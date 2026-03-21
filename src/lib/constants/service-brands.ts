@@ -167,6 +167,7 @@ export const SERVICE_BRANDS: Record<string, ServiceBrand> = {
 
   // --- 광고/미디어 ---
   gwanggo:                { localPath: '/icons/gwanggo.svg', color: '#8B6FFF', darkColor: '#8B6FFF', emoji: '📢', multiColor: true },
+  linkmap:                { localPath: '/img/linkmap-logo-dark.svg', color: '#38bdf8', darkColor: '#38bdf8', emoji: '🗺️', multiColor: true },
 
   // --- slug 매핑 별칭 (seed slug ↔ brand key 불일치 보정) ---
   flyio:                  { slug: 'flydotio',           color: '#24175B', darkColor: '#ffffff', emoji: '🪁' },

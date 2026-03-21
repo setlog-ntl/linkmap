@@ -123,6 +123,8 @@ export const SERVICE_IDS_V2 = {
   polar: '10000000-0000-4000-a000-000000000134',
   // AI creative ad generation
   gwanggo: '10000000-0000-4000-a000-000000000135',
+  // Platform self-reference
+  linkmap: '10000000-0000-4000-a000-000000000136',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -4677,6 +4679,52 @@ export const servicesV2: ServiceSeedV2[] = [
       starter: '크레딧 구매',
       growth: '크레딧 구매',
       enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Linkmap — 서비스 시각화 + 원클릭 배포 플랫폼 (자사 서비스)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.linkmap,
+    name: 'Linkmap',
+    slug: 'linkmap',
+    category: 'deploy',
+    description:
+      'Service visualization and one-click deployment platform. Visualize your service architecture with interactive maps, manage environment variables securely with AES-256 encryption, and deploy websites in 3 minutes with one click.',
+    description_ko:
+      '서비스 시각화 및 원클릭 배포 플랫폼입니다. 인터랙티브 서비스 맵으로 아키텍처를 시각화하고, AES-256 암호화로 환경변수를 안전하게 관리하며, 3분 만에 원클릭으로 웹사이트를 배포할 수 있습니다.',
+    icon_url: null,
+    website_url: 'https://www.linkmap.biz',
+    docs_url: 'https://www.linkmap.biz/guides',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '무료로 시작 — 프로젝트 3개, 원클릭 배포 3개',
+      plans: [
+        { name: 'Free', price: '₩0' },
+        { name: 'Pro', price: '₩9,900/월' },
+        { name: 'Team', price: '₩29,900/월' },
+      ],
+    },
+    required_env_vars: [],
+    domain: 'devtools',
+    subcategory: 'platform',
+    popularity_score: 70,
+    difficulty_level: 'beginner',
+    tags: ['서비스맵', '원클릭배포', '환경변수', '시각화', 'devtools', 'deploy', 'platform', 'korean', '바이브코딩'],
+    alternatives: ['vercel', 'netlify', 'railway'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'svelte'],
+      language: ['javascript', 'typescript'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 3,
+    monthly_cost_estimate: {
+      starter: '₩0',
+      growth: '₩9,900',
+      enterprise: '₩29,900',
     },
   },
 ];

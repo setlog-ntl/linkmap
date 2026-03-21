@@ -4,6 +4,7 @@ import { createProjectSchema } from '@/lib/validations/project';
 import { unauthorizedError, validationError, serverError, quotaExceededError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 import { checkProjectQuota } from '@/lib/quota';
+import { SERVICE_IDS_V2 } from '@/data/seed/services-v2';
 
 export async function GET() {
   const supabase = await createClient();
@@ -42,6 +43,16 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) return serverError(error.message);
+
+  // 기본 서비스 자동 추가: Linkmap
+  await supabase
+    .from('project_services')
+    .insert({
+      project_id: data.id,
+      service_id: SERVICE_IDS_V2.linkmap,
+      status: 'connected',
+    })
+    .single();
 
   await logAudit(user.id, {
     action: 'project.create',
