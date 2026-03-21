@@ -28,6 +28,7 @@ export interface UseServiceMapNodesParams {
   mainServiceId: string | null;
   layerOverrides: Record<string, string>;
   pendingOverrides: Record<string, ZoneKey>;
+  filterStatuses?: string[];
 }
 
 export interface UseServiceMapNodesReturn {
@@ -55,6 +56,7 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
     mainServiceId,
     layerOverrides,
     pendingOverrides,
+    filterStatuses,
   } = params;
 
   const serviceNames = useMemo(() => {
@@ -135,7 +137,9 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
     return filteredServices.map((ps) => {
       const category = (ps.service?.category as ServiceCategory) || 'other';
       const domain = nodeDomainMap.get(ps.id) || (ps.service?.domain as ServiceDomain | undefined);
-      const isMatch = searchQuery === '' || ps.service?.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const nameMatch = searchQuery === '' || ps.service?.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const statusMatch = !filterStatuses || filterStatuses.length === 0 || filterStatuses.includes(ps.status);
+      const isMatch = nameMatch && statusMatch;
       const iconSlug = ps.service?.slug;
       const isMainService = mainServiceId === ps.id;
 
@@ -154,7 +158,7 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
         },
       };
     });
-  }, [filteredServices, searchQuery, mainServiceId, nodeDomainMap]);
+  }, [filteredServices, searchQuery, mainServiceId, nodeDomainMap, filterStatuses]);
 
   // Build edges
   const rawEdges = useMemo<Edge[]>(() => {

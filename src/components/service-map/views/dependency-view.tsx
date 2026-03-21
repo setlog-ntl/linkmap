@@ -50,6 +50,21 @@ import type { Edge as ReactFlowEdge } from '@xyflow/react';
 const nodeTypes = { service: ServiceNode, zone: ZoneNode };
 const edgeTypes = { connection: ConnectionEdge };
 
+/** Status-based colors for MiniMap (consistent with map-view) */
+const STATUS_MINIMAP_COLORS: Record<string, string> = {
+  connected: '#4ade80',
+  in_progress: '#facc15',
+  error: '#fb923c',
+  not_started: '#475569',
+};
+
+const STATUS_FILTER_OPTIONS = [
+  { key: 'connected', label: '연결됨', color: '#4ade80' },
+  { key: 'in_progress', label: '진행 중', color: '#facc15' },
+  { key: 'error', label: '오류', color: '#fb923c' },
+  { key: 'not_started', label: '시작 전', color: '#64748b' },
+] as const;
+
 interface DependencyViewProps {
   data: ServiceMapData;
   projectId: string;
@@ -67,6 +82,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     setZonePositionOverride, getActiveZones, setPendingOverride,
     pendingNodePositions, setPendingNodePosition,
     zoneConnections, addZoneConnection, removeZoneConnection,
+    filterStatuses, toggleFilterStatus,
   } = useServiceMapStore();
 
   const { resolvedTheme } = useTheme();
@@ -111,6 +127,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     searchQuery, handleDeleteUserConnection,
     mainServiceId: effectiveMainServiceId,
     layerOverrides: data.layerOverrides, pendingOverrides,
+    filterStatuses: filterStatuses.length > 0 ? filterStatuses : undefined,
   });
 
   const onShowConnectionDialog = useCallback((sourceId: string, targetId: string) => {
@@ -416,6 +433,42 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
           <CatalogSidebar projectId={projectId} catalogServices={data.catalogServices} projectServices={data.services} isLoading={data.catalogLoading} />
         )}
         <div className="flex-1 relative service-map-canvas" style={{ width: '100%', height: '100%' }}>
+          {/* Ambient glow (dark mode only — consistent with map-view) */}
+          {isDark && (
+            <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
+              <defs>
+                <radialGradient id="dep-ambient-glow" cx="50%" cy="48%" r="40%">
+                  <stop offset="0%" stopColor="#00d4ff" stopOpacity="0.04" />
+                  <stop offset="100%" stopColor="#00d4ff" stopOpacity="0" />
+                </radialGradient>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#dep-ambient-glow)" />
+            </svg>
+          )}
+
+          {/* Status filter chips (consistent with map-view) */}
+          <div className="absolute top-2 left-4 z-10 flex items-center gap-1 flex-wrap">
+            {STATUS_FILTER_OPTIONS.map((opt) => {
+              const isActive = filterStatuses.includes(opt.key);
+              return (
+                <button
+                  key={opt.key}
+                  onClick={() => toggleFilterStatus(opt.key)}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium border transition-all"
+                  style={{
+                    borderColor: isActive ? opt.color : 'var(--border)',
+                    background: isActive ? `${opt.color}18` : 'var(--background)',
+                    color: isActive ? opt.color : 'var(--muted-foreground)',
+                    opacity: isActive ? 1 : 0.7,
+                  }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: opt.color }} />
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+
           {!isReadOnly && connectingFrom && (
             <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-primary text-primary-foreground text-xs px-4 py-2 rounded-full shadow-lg">
               <span className="relative flex h-2 w-2">
@@ -452,17 +505,20 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
             <Controls />
             <MiniMap
               nodeStrokeWidth={3}
-              nodeColor={interactions.getNodeColor}
+              nodeColor={(node: Node) => {
+                if (node.type === 'zone') return 'var(--muted)';
+                const st = (node.data as Record<string, unknown>)?.status as string | undefined;
+                return STATUS_MINIMAP_COLORS[st ?? 'not_started'] ?? '#475569';
+              }}
               zoomable
               pannable
               maskColor={isDark ? 'rgba(15, 29, 47, 0.85)' : undefined}
               style={isDark ? { backgroundColor: 'var(--card)' } : undefined}
             />
-            {/* PCB 스타일 도트 그리드 배경 (의존성 뷰 전용) */}
             {isDark ? (
-              <Background variant={BackgroundVariant.Dots} gap={32} size={0.8} color="#34d39940" style={{ opacity: 0.3 }} />
+              <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="oklch(0.35 0.02 250)" style={{ opacity: 0.25 }} />
             ) : (
-              <Background variant={BackgroundVariant.Dots} gap={32} size={0.8} color="#3b6cf030" style={{ opacity: 0.7 }} />
+              <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="var(--border)" style={{ opacity: 0.5 }} />
             )}
           </ReactFlow>
           {!isReadOnly && <EditSaveBar onSave={handleSaveChanges} saving={saving} />}
