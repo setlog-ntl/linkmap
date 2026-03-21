@@ -24,6 +24,7 @@ export async function GET() {
       deploy_error_message,
       retry_count,
       is_showcase,
+      display_order,
       created_at,
       deployed_at,
       template_id,
@@ -38,6 +39,7 @@ export async function GET() {
       )
     `)
     .eq('user_id', user.id)
+    .order('display_order', { ascending: true })
     .order('created_at', { ascending: false });
 
   if (error) {

@@ -23,7 +23,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { useProjects, useToggleFavoriteProject, useUpdateProject, useReorderProjects } from '@/lib/queries/projects';
-import { useMyDeployments, useRenameDeploy, type HomepageDeploy } from '@/lib/queries/oneclick';
+import { useMyDeployments, useRenameDeploy, useReorderDeployments, type HomepageDeploy } from '@/lib/queries/oneclick';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Sidebar,
@@ -198,6 +198,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
   const updateProjectMutation = useUpdateProject();
   const { mutate: reorderProjects } = useReorderProjects();
   const renameDeployMutation = useRenameDeploy();
+  const { mutate: reorderDeployments } = useReorderDeployments();
 
   const updateProject = (args: Parameters<typeof updateProjectMutation.mutate>[0]) => {
     updateProjectMutation.mutate(args, {
@@ -440,6 +441,22 @@ export function AppSidebar({ profile }: AppSidebarProps) {
     );
   };
 
+  const handleDeployDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const list = visibleSites;
+    const oldIndex = list.findIndex((d) => d.id === active.id);
+    const newIndex = list.findIndex((d) => d.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = [...list];
+    const [moved] = reordered.splice(oldIndex, 1);
+    reordered.splice(newIndex, 0, moved);
+
+    reorderDeployments(reordered.map((d) => d.id));
+  };
+
   const handleSidebarDragEnd = (projectList: ProjectWithServices[]) => (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -524,103 +541,132 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                         </SidebarMenuSubItem>
                       )}
 
-                      {/* Site list */}
-                      {visibleSites.map((deploy) => {
-                        const isReady = deploy.deploy_status === 'ready';
-                        const isBuilding = ['building', 'creating', 'pending'].includes(deploy.deploy_status);
-                        const isError = deploy.deploy_status === 'error';
-                        const siteUrl = deploy.pages_url || deploy.deployment_url;
-                        const hasSubMenu = (isReady && siteUrl) || deploy.project_id;
+                      {/* Site list — DnD 순서 변경 가능 */}
+                      <DndContext sensors={sidebarDndSensors} collisionDetection={closestCenter} onDragEnd={handleDeployDragEnd}>
+                        <SortableContext items={visibleSites.map((d) => d.id)} strategy={verticalListSortingStrategy}>
+                          {visibleSites.map((deploy) => {
+                            const isReady = deploy.deploy_status === 'ready';
+                            const isBuilding = ['building', 'creating', 'pending'].includes(deploy.deploy_status);
+                            const isError = deploy.deploy_status === 'error';
+                            const siteUrl = deploy.pages_url || deploy.deployment_url;
+                            const hasSubMenu = (isReady && siteUrl) || deploy.project_id;
 
-                        const StatusIcon = isReady
-                          ? Globe
-                          : isBuilding
-                            ? Loader2
-                            : isError
-                              ? AlertTriangle
-                              : Globe;
+                            const StatusIcon = isReady
+                              ? Globe
+                              : isBuilding
+                                ? Loader2
+                                : isError
+                                  ? AlertTriangle
+                                  : Globe;
 
-                        const statusClass = isReady
-                          ? 'text-green-500'
-                          : isBuilding
-                            ? 'animate-spin text-yellow-500'
-                            : isError
-                              ? 'text-red-500'
-                              : '';
+                            const statusClass = isReady
+                              ? 'text-green-500'
+                              : isBuilding
+                                ? 'animate-spin text-yellow-500'
+                                : isError
+                                  ? 'text-red-500'
+                                  : '';
 
-                        if (hasSubMenu) {
-                          return (
-                            <Collapsible key={deploy.id} className="group/site">
-                              <SidebarMenuSubItem>
-                                <div className="flex items-center">
-                                  <CollapsibleTrigger asChild>
-                                    <button
-                                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm hover:bg-sidebar-accent"
-                                      aria-label={`Toggle ${deploy.site_name}`}
-                                    >
-                                      <ChevronRight className="h-3 w-3 transition-transform group-data-[state=open]/site:rotate-90" />
-                                    </button>
-                                  </CollapsibleTrigger>
-                                  <SidebarMenuSubButton
-                                    asChild
-                                    isActive={activeDeployId === deploy.id}
-                                    className="flex-1 min-w-0"
-                                  >
-                                    <Link href={`/sites/${deploy.id}/edit`} prefetch={false}>
-                                      <StatusIcon className={`h-3.5 w-3.5 ${statusClass}`} />
-                                      <InlineEditableName
-                                        name={deploy.site_name}
-                                        onSave={(newName) => renameDeploy({ id: deploy.id, site_name: newName })}
-                                      />
-                                    </Link>
-                                  </SidebarMenuSubButton>
-                                </div>
-                                <CollapsibleContent>
-                                  <SidebarMenuSub>
-                                    {isReady && siteUrl && (
+                            if (hasSubMenu) {
+                              return (
+                                <SortableSidebarDeployItem key={deploy.id} id={deploy.id}>
+                                  {(dragHandleProps) => (
+                                    <Collapsible className="group/site">
                                       <SidebarMenuSubItem>
-                                        <SidebarMenuSubButton asChild>
-                                          <a href={siteUrl} target="_blank" rel="noopener noreferrer">
-                                            <ExternalLink className="h-3.5 w-3.5" />
-                                            <span>사이트 열기</span>
-                                          </a>
-                                        </SidebarMenuSubButton>
+                                        <div className="flex items-center group/deploy-row">
+                                          <button
+                                            className="flex h-6 w-4 shrink-0 items-center justify-center cursor-grab active:cursor-grabbing touch-none text-muted-foreground/30 hover:text-muted-foreground/70 transition-opacity opacity-0 group-hover/deploy-row:opacity-100"
+                                            {...dragHandleProps}
+                                            aria-label="드래그하여 순서 변경"
+                                          >
+                                            <GripVertical className="h-3 w-3" />
+                                          </button>
+                                          <CollapsibleTrigger asChild>
+                                            <button
+                                              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm hover:bg-sidebar-accent"
+                                              aria-label={`Toggle ${deploy.site_name}`}
+                                            >
+                                              <ChevronRight className="h-3 w-3 transition-transform group-data-[state=open]/site:rotate-90" />
+                                            </button>
+                                          </CollapsibleTrigger>
+                                          <SidebarMenuSubButton
+                                            asChild
+                                            isActive={activeDeployId === deploy.id}
+                                            className="flex-1 min-w-0"
+                                          >
+                                            <Link href={`/sites/${deploy.id}/edit`} prefetch={false}>
+                                              <StatusIcon className={`h-3.5 w-3.5 ${statusClass}`} />
+                                              <InlineEditableName
+                                                name={deploy.site_name}
+                                                onSave={(newName) => renameDeploy({ id: deploy.id, site_name: newName })}
+                                              />
+                                            </Link>
+                                          </SidebarMenuSubButton>
+                                        </div>
+                                        <CollapsibleContent>
+                                          <SidebarMenuSub>
+                                            {isReady && siteUrl && (
+                                              <SidebarMenuSubItem>
+                                                <SidebarMenuSubButton asChild>
+                                                  <a href={siteUrl} target="_blank" rel="noopener noreferrer">
+                                                    <ExternalLink className="h-3.5 w-3.5" />
+                                                    <span>사이트 열기</span>
+                                                  </a>
+                                                </SidebarMenuSubButton>
+                                              </SidebarMenuSubItem>
+                                            )}
+                                            {deploy.project_id && (
+                                              <SidebarMenuSubItem>
+                                                <SidebarMenuSubButton asChild isActive={activeProjectId === deploy.project_id}>
+                                                  <Link href={`/project/${deploy.project_id}`} prefetch={false}>
+                                                    <FolderKanban className="h-3.5 w-3.5" />
+                                                    <span>프로젝트 관리</span>
+                                                  </Link>
+                                                </SidebarMenuSubButton>
+                                              </SidebarMenuSubItem>
+                                            )}
+                                          </SidebarMenuSub>
+                                        </CollapsibleContent>
                                       </SidebarMenuSubItem>
-                                    )}
-                                    {deploy.project_id && (
-                                      <SidebarMenuSubItem>
-                                        <SidebarMenuSubButton asChild isActive={activeProjectId === deploy.project_id}>
-                                          <Link href={`/project/${deploy.project_id}`} prefetch={false}>
-                                            <FolderKanban className="h-3.5 w-3.5" />
-                                            <span>프로젝트 관리</span>
-                                          </Link>
-                                        </SidebarMenuSubButton>
-                                      </SidebarMenuSubItem>
-                                    )}
-                                  </SidebarMenuSub>
-                                </CollapsibleContent>
-                              </SidebarMenuSubItem>
-                            </Collapsible>
-                          );
-                        }
+                                    </Collapsible>
+                                  )}
+                                </SortableSidebarDeployItem>
+                              );
+                            }
 
-                        return (
-                          <SidebarMenuSubItem key={deploy.id}>
-                            <SidebarMenuSubButton
-                              asChild
-                              isActive={activeDeployId === deploy.id}
-                            >
-                              <Link href={`/sites/${deploy.id}/edit`} prefetch={false}>
-                                <StatusIcon className={`h-3.5 w-3.5 ${statusClass}`} />
-                                <InlineEditableName
-                                  name={deploy.site_name}
-                                  onSave={(newName) => renameDeploy({ id: deploy.id, site_name: newName })}
-                                />
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        );
-                      })}
+                            return (
+                              <SortableSidebarDeployItem key={deploy.id} id={deploy.id}>
+                                {(dragHandleProps) => (
+                                  <SidebarMenuSubItem>
+                                    <div className="flex items-center group/deploy-row">
+                                      <button
+                                        className="flex h-6 w-4 shrink-0 items-center justify-center cursor-grab active:cursor-grabbing touch-none text-muted-foreground/30 hover:text-muted-foreground/70 transition-opacity opacity-0 group-hover/deploy-row:opacity-100"
+                                        {...dragHandleProps}
+                                        aria-label="드래그하여 순서 변경"
+                                      >
+                                        <GripVertical className="h-3 w-3" />
+                                      </button>
+                                      <SidebarMenuSubButton
+                                        asChild
+                                        isActive={activeDeployId === deploy.id}
+                                        className="flex-1 min-w-0"
+                                      >
+                                        <Link href={`/sites/${deploy.id}/edit`} prefetch={false}>
+                                          <StatusIcon className={`h-3.5 w-3.5 ${statusClass}`} />
+                                          <InlineEditableName
+                                            name={deploy.site_name}
+                                            onSave={(newName) => renameDeploy({ id: deploy.id, site_name: newName })}
+                                          />
+                                        </Link>
+                                      </SidebarMenuSubButton>
+                                    </div>
+                                  </SidebarMenuSubItem>
+                                )}
+                              </SortableSidebarDeployItem>
+                            );
+                          })}
+                        </SortableContext>
+                      </DndContext>
 
                     </SidebarMenuSub>
                   </CollapsibleContent>
@@ -975,6 +1021,36 @@ export function AppSidebar({ profile }: AppSidebarProps) {
         )}
       </SidebarFooter>
     </Sidebar>
+  );
+}
+
+function SortableSidebarDeployItem({
+  id,
+  children,
+}: {
+  id: string;
+  children: (dragHandleProps: Record<string, unknown>) => React.ReactNode;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+    opacity: isDragging ? 0.7 : undefined,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      {children({ ...attributes, ...listeners })}
+    </div>
   );
 }
 

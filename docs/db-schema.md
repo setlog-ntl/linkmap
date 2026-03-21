@@ -531,6 +531,7 @@
 | showcase_tags | TEXT[] | YES | '{}' | M073 |
 | showcase_category | TEXT | YES | NULL | M073. CHECK: portfolio,business,blog,landing,community,ecommerce,other |
 | showcase_image_url | TEXT | YES | NULL | M076 |
+| display_order | INTEGER | NO | 0 | M086 |
 | created_at | TIMESTAMPTZ | NO | now() |
 | updated_at | TIMESTAMPTZ | NO | now() |
 | deployed_at | TIMESTAMPTZ | YES | NULL |

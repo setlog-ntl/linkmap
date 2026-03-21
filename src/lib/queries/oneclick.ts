@@ -115,6 +115,7 @@ export interface HomepageDeploy {
   forked_repo_full_name: string | null;
   deploy_error_message: string | null;
   retry_count?: number;
+  display_order: number;
   is_showcase?: boolean;
   showcase_description?: string | null;
   showcase_tags?: string[];
@@ -198,6 +199,47 @@ export function useRenameDeploy() {
       queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
       // 배포명 변경 시 사이드바 프로젝트 섹션의 배포 표시에도 반영
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+    },
+  });
+}
+
+export function useReorderDeployments() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (orderedIds: string[]) => {
+      const res = await fetch('/api/oneclick/deployments/reorder', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderedIds }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || '배포 순서 변경 실패');
+      }
+      return res.json();
+    },
+    onMutate: async (orderedIds) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.oneclick.deployments });
+      const previous = queryClient.getQueryData<HomepageDeploy[]>(queryKeys.oneclick.deployments);
+      if (previous) {
+        const orderMap = new Map(orderedIds.map((id, i) => [id, i]));
+        const reordered = [...previous].sort((a, b) => {
+          const oa = orderMap.get(a.id) ?? 9999;
+          const ob = orderMap.get(b.id) ?? 9999;
+          return oa - ob;
+        });
+        queryClient.setQueryData<HomepageDeploy[]>(queryKeys.oneclick.deployments, reordered);
+      }
+      return { previous };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous) {
+        queryClient.setQueryData(queryKeys.oneclick.deployments, ctx.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
     },
   });
 }
