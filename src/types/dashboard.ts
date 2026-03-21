@@ -2,7 +2,7 @@ import type { ServiceCategory, ServiceStatus, ViewGroup, HealthCheckStatus } fro
 import type { Project } from './project';
 import type { UserConnection } from './connection';
 
-export type DashboardLayer = 'frontend' | 'backend' | 'devtools';
+export type DashboardLayer = 'frontend' | 'backend' | 'devtools' | 'etc';
 
 export type DashboardSubcategory =
   | 'deploy'

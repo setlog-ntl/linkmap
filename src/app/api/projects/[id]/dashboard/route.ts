@@ -4,12 +4,27 @@ import { unauthorizedError, notFoundError, serverError } from '@/lib/api/errors'
 import type { DashboardLayer, DashboardResponse, ServiceCardData, LayerData, DashboardMetrics } from '@/types';
 import type { UserConnection } from '@/types';
 
-const LAYER_ORDER: DashboardLayer[] = ['frontend', 'backend', 'devtools'];
+const LAYER_ORDER: DashboardLayer[] = ['frontend', 'backend', 'devtools', 'etc'];
 
 const LAYER_LABELS: Record<DashboardLayer, string> = {
   frontend: 'Frontend',
   backend: 'Backend',
   devtools: 'DevTools',
+  etc: 'ETC',
+};
+
+/** Map service domain to dashboard layer — domains not in frontend/backend/devtools go to etc */
+const DOMAIN_TO_LAYER: Record<string, DashboardLayer> = {
+  infrastructure: 'frontend',
+  sns: 'frontend',
+  backend: 'backend',
+  devtools: 'devtools',
+  observability: 'devtools',
+  // These domains go to ETC
+  communication: 'etc',
+  business: 'etc',
+  ai_ml: 'etc',
+  integration: 'etc',
 };
 
 export async function GET(
@@ -31,7 +46,7 @@ export async function GET(
         .single(),
       supabase
         .from('project_services')
-        .select('id, status, service:services(id, name, slug, category, website_url, dashboard_layer, dashboard_subcategory, required_env_vars)')
+        .select('id, status, service:services(id, name, slug, category, website_url, dashboard_layer, dashboard_subcategory, domain, required_env_vars)')
         .eq('project_id', id)
         .order('created_at'),
       supabase
@@ -104,7 +119,7 @@ export async function GET(
         slug: svc.slug,
         category: svc.category as ServiceCardData['category'],
         status: ps.status as ServiceCardData['status'],
-        dashboardLayer: (ovr?.dashboard_layer ?? svc.dashboard_layer ?? 'backend') as DashboardLayer,
+        dashboardLayer: (ovr?.dashboard_layer ?? svc.dashboard_layer ?? DOMAIN_TO_LAYER[(svc as Record<string, unknown>).domain as string] ?? 'backend') as DashboardLayer,
         dashboardSubcategory: ovr?.dashboard_subcategory ?? svc.dashboard_subcategory ?? svc.category,
         envTotal,
         envFilled: Math.min(envFilled, envTotal),
@@ -120,7 +135,7 @@ export async function GET(
     for (const card of cards) {
       const arr = layerMap.get(card.dashboardLayer);
       if (arr) arr.push(card);
-      else layerMap.get('backend')!.push(card);
+      else layerMap.get('etc')!.push(card);
     }
 
     const layers: LayerData[] = LAYER_ORDER.map((layer) => ({

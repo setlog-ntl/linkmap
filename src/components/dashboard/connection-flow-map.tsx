@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
-import { Monitor, Server, Wrench, ChevronRight, Plus } from 'lucide-react';
+import { Monitor, Server, Wrench, Box, ChevronRight, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { groupConnectionsByLayer } from './utils/dashboard-transforms';
@@ -40,6 +40,12 @@ const LAYER_CFG = {
     label: 'DevTools',
     textCls: 'text-orange-600 dark:text-orange-400',
     badgeCls: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+  },
+  etc: {
+    icon: Box,
+    label: 'ETC',
+    textCls: 'text-slate-500 dark:text-slate-400',
+    badgeCls: 'bg-slate-500/10 text-slate-500 dark:text-slate-400',
   },
 } as const;
 
@@ -160,6 +166,9 @@ export function ConnectionFlowMap({
   const fe = layers.find((l) => l.layer === 'frontend')?.services ?? [];
   const be = layers.find((l) => l.layer === 'backend')?.services ?? [];
   const dt = layers.find((l) => l.layer === 'devtools')?.services ?? [];
+  // ETC: services in layers that are not frontend/backend/devtools
+  const knownLayers = new Set(['frontend', 'backend', 'devtools']);
+  const etc = layers.filter((l) => !knownLayers.has(l.layer)).flatMap((l) => l.services);
 
   return (
     <div className="rounded-2xl border bg-card overflow-hidden">
@@ -208,12 +217,13 @@ export function ConnectionFlowMap({
           <LayerSection services={be} layerKey="backend" onServiceClick={onServiceClick} />
         </div>
 
-        {/* DevTools below hub (desktop) */}
-        {dt.length > 0 && (
-          <div className="hidden md:flex flex-col items-center mt-1">
+        {/* DevTools + ETC below hub (desktop) */}
+        {(dt.length > 0 || etc.length > 0) && (
+          <div className="hidden md:flex flex-col items-center mt-1 gap-3">
             <FlowArrow direction="down" />
-            <div className="w-full max-w-xs">
-              <LayerSection services={dt} layerKey="devtools" onServiceClick={onServiceClick} />
+            <div className={`w-full ${etc.length > 0 && dt.length > 0 ? 'max-w-lg grid grid-cols-2 gap-4' : 'max-w-xs'}`}>
+              {dt.length > 0 && <LayerSection services={dt} layerKey="devtools" onServiceClick={onServiceClick} />}
+              {etc.length > 0 && <LayerSection services={etc} layerKey="etc" onServiceClick={onServiceClick} />}
             </div>
           </div>
         )}
@@ -227,6 +237,12 @@ export function ConnectionFlowMap({
           {be.length > 0 && <LayerSection services={be} layerKey="backend" onServiceClick={onServiceClick} />}
           {be.length > 0 && dt.length > 0 && <FlowArrow direction="down" />}
           {dt.length > 0 && <LayerSection services={dt} layerKey="devtools" onServiceClick={onServiceClick} />}
+          {etc.length > 0 && (
+            <>
+              <FlowArrow direction="down" />
+              <LayerSection services={etc} layerKey="etc" onServiceClick={onServiceClick} />
+            </>
+          )}
         </div>
       </div>
 

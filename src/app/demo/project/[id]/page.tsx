@@ -82,11 +82,12 @@ function buildDemoConnections(projectId: string, cards: ServiceCardData[]): User
   return connections;
 }
 
-const LAYER_ORDER: DashboardLayer[] = ['frontend', 'backend', 'devtools'];
+const LAYER_ORDER: DashboardLayer[] = ['frontend', 'backend', 'devtools', 'etc'];
 const LAYER_LABELS: Record<DashboardLayer, string> = {
   frontend: 'Frontend',
   backend: 'Backend',
   devtools: 'DevTools',
+  etc: 'ETC',
 };
 
 export default async function DemoProjectPage({
