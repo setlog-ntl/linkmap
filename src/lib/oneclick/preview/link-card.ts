@@ -29,53 +29,113 @@ type BgStyle = 'light' | 'dark' | 'gradient' | 'solid' | 'mesh' | 'aurora' | 'gl
 type CardStyle = 'rounded' | 'pill' | 'square' | 'glass' | 'neon' | 'outline';
 type FontFamily = 'system' | 'serif' | 'mono' | 'display';
 
-// ── Section Renderers ────────────────────────────
+// ── Theme — 실제 배포 themes.ts와 동일 ──────────
+
+interface ThemePreset {
+  backgroundFrom: string;
+  backgroundTo: string;
+  primary: string;
+  text: string;
+  textMuted: string;
+  cardBg: string;
+  cardBorder: string;
+}
+
+/** primaryColor 기반으로 실제 배포 테마와 동일한 ThemePreset 생성 */
+function buildThemeFromPrimary(primaryColor: string, bgStyle: BgStyle): ThemePreset {
+  const isDark = ['dark', 'aurora', 'neon', 'ocean', 'sunset', 'forest', 'monochrome'].includes(bgStyle);
+  const isLight = ['light', 'minimal', 'candy'].includes(bgStyle);
+
+  if (isDark) {
+    return {
+      backgroundFrom: '#0f172a',
+      backgroundTo: '#1e1b4b',
+      primary: primaryColor,
+      text: '#f5f3ff',
+      textMuted: 'rgba(245,243,255,0.7)',
+      cardBg: `${primaryColor}14`,
+      cardBorder: `${primaryColor}33`,
+    };
+  }
+  if (isLight || bgStyle === 'glass') {
+    return {
+      backgroundFrom: '#ffffff',
+      backgroundTo: '#f3f4f6',
+      primary: primaryColor,
+      text: '#111827',
+      textMuted: '#6b7280',
+      cardBg: 'rgba(0,0,0,0.04)',
+      cardBorder: 'rgba(0,0,0,0.08)',
+    };
+  }
+  // gradient, solid, mesh, pastel
+  return {
+    backgroundFrom: primaryColor,
+    backgroundTo: shiftHue(primaryColor, 40),
+    primary: primaryColor,
+    text: '#ffffff',
+    textMuted: 'rgba(255,255,255,0.85)',
+    cardBg: 'rgba(255,255,255,0.15)',
+    cardBorder: 'rgba(255,255,255,0.28)',
+  };
+}
+
+// ── Section Renderers — 실제 배포 컴포넌트 기준 ──
 
 function renderProfileSection(
   state: ModuleConfigState,
+  theme: ThemePreset,
   liveUrl: string,
   imageMap: Record<string, string>,
-  isDark: boolean,
 ): string {
   const name = getVal(state, 'profile', 'name', '');
-  const nameEn = getVal(state, 'profile', 'nameEn', '');
   const bio = getVal(state, 'profile', 'bio', '');
-  const bioEn = getVal(state, 'profile', 'bioEn', '');
   const avatarUrl = getVal(state, 'profile', 'avatarUrl', '');
-
   const avatarSrc = resolveImageSrc(avatarUrl, liveUrl, imageMap);
+
+  const initials = name.split(' ').map((w: string) => w[0] || '').join('').slice(0, 2).toUpperCase();
+
   const avatarHtml = avatarSrc
-    ? `<img class="lc-avatar" src="${esc(avatarSrc)}" alt="${esc(name)}" />`
-    : `<div class="lc-avatar lc-avatar--placeholder">${esc(name.charAt(0) || '?')}</div>`;
+    ? `<img class="lc-avatar" src="${esc(avatarSrc)}" alt="${esc(name)}"
+           style="box-shadow: 0 0 30px ${theme.primary}66; border-color: ${theme.primary}33;" />`
+    : `<div class="lc-avatar lc-avatar--placeholder"
+           style="background-color: ${theme.primary}; box-shadow: 0 0 30px ${theme.primary}66;">${esc(initials || '?')}</div>`;
 
   return `
     <section class="lc-profile">
       ${avatarHtml}
-      <h1 class="lc-name${isDark ? ' lc-text-light' : ''}">${esc(name)}</h1>
-      ${nameEn ? `<p style="font-size:13px;color:${isDark ? '#9ca3af' : '#999'};margin:0 0 6px;">${esc(nameEn)}</p>` : ''}
-      ${bio ? `<p class="lc-bio${isDark ? ' lc-text-light-muted' : ''}">${esc(bio)}</p>` : ''}
-      ${bioEn ? `<p class="lc-bio${isDark ? ' lc-text-light-muted' : ''}" style="font-size:12px;margin-top:2px;">${esc(bioEn)}</p>` : ''}
+      <h1 class="lc-name" style="color:${theme.text}">${esc(name)}</h1>
+      ${bio ? `<p class="lc-bio" style="color:${theme.textMuted}">${esc(bio)}</p>` : ''}
     </section>`;
 }
 
 function renderLinksSection(
   state: ModuleConfigState,
-  primaryColor: string,
+  theme: ThemePreset,
   cardStyle: CardStyle,
-  isDark: boolean,
 ): string {
   const items = getArr(state, 'links', 'items') as LinkItem[];
   if (items.length === 0) return '';
 
+  const radius = cardStyle === 'pill' ? '9999px' : cardStyle === 'square' || cardStyle === 'outline' ? '0' : '12px';
+
   const buttons = items
     .map((item) => {
       const emojiHtml = item.emoji ? `<span class="lc-link-emoji">${esc(item.emoji)}</span>` : '';
+      const extraStyle = cardStyle === 'neon'
+        ? `box-shadow: 0 0 8px ${theme.primary}66, 0 0 20px ${theme.primary}33; border-color: ${theme.primary};`
+        : cardStyle === 'outline'
+          ? `border: 2px solid ${theme.primary}; background: transparent;`
+          : '';
       return `
-      <a class="lc-link-btn lc-card--${esc(cardStyle)}${isDark ? ' lc-link-btn--dark' : ''}"
+      <a class="lc-link-btn"
          href="${esc(item.url)}" target="_blank" rel="noopener noreferrer"
-         style="--btn-color:${esc(primaryColor)}">
+         style="background:${theme.cardBg}; border: 1px solid ${theme.cardBorder}; color:${theme.text}; border-radius:${radius}; ${extraStyle}"
+         onmouseenter="this.style.borderColor='${theme.primary}66'"
+         onmouseleave="this.style.borderColor='${theme.cardBorder}'">
         ${emojiHtml}
         <span class="lc-link-title">${esc(item.title)}</span>
+        <svg class="lc-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       </a>`;
     })
     .join('');
@@ -85,22 +145,20 @@ function renderLinksSection(
 
 function renderSocialsSection(
   state: ModuleConfigState,
-  primaryColor: string,
-  isDark: boolean,
+  theme: ThemePreset,
 ): string {
   const items = getArr(state, 'socials', 'items') as SocialItem[];
   if (items.length === 0) return '';
 
   const icons = items
     .map((item) => {
-      const iconColor = isDark ? '#d1d5db' : (SOCIAL_ICON_MAP[item.platform]?.color ?? '#555');
-      const svg = getSocialIconSvg(item.platform, 18, iconColor);
+      const svg = getSocialIconSvg(item.platform, 20, theme.text);
       const fallback = svg || esc(item.platform);
       return `
-      <a class="lc-social-icon${isDark ? ' lc-social-icon--dark' : ''}${svg ? ' lc-social-icon--svg' : ''}"
+      <a class="lc-social-icon"
          href="${esc(item.url)}" target="_blank" rel="noopener noreferrer"
          title="${esc(item.platform)}"
-         style="--icon-color:${esc(SOCIAL_ICON_MAP[item.platform]?.color ?? primaryColor)}">
+         style="color:${theme.text}">
         ${fallback}
       </a>`;
     })
@@ -109,74 +167,38 @@ function renderSocialsSection(
   return `<section class="lc-socials">${icons}</section>`;
 }
 
-// ── CSS ──────────────────────────────────────────
+// ── Background — 실제 배포 getBackground()와 동일 ──
 
-function buildBgCSS(bgStyle: BgStyle, primaryColor: string): string {
+function buildBgStyle(theme: ThemePreset, bgStyle: BgStyle): string {
   switch (bgStyle) {
-    case 'dark':
-      return 'background:#111827; color:#f9fafb;';
-    case 'gradient':
-      return `background:linear-gradient(135deg, ${primaryColor}, ${shiftHue(primaryColor, 40)}); color:#fff;`;
-    case 'solid':
-      return `background:${primaryColor}; color:#fff;`;
-    case 'mesh':
-      return `background:#f0f2f5;
-        background-image:
-          radial-gradient(at 20% 30%, ${primaryColor}33 0, transparent 50%),
-          radial-gradient(at 80% 70%, ${shiftHue(primaryColor, 60)}33 0, transparent 50%);`;
-    case 'aurora':
-      return `background:linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, ${primaryColor}88 70%, #0f172a 100%);
-        color:#f9fafb;`;
-    case 'glass':
-      return `background:rgba(255,255,255,.6); backdrop-filter:blur(20px);`;
     case 'light':
+      return `background: linear-gradient(180deg, ${theme.backgroundFrom}, ${theme.backgroundTo});`;
+    case 'dark':
+      return 'background: linear-gradient(135deg, #0f172a, #1e1b4b);';
+    case 'solid':
+      return `background: ${theme.primary};`;
+    case 'mesh':
+      return `background: radial-gradient(at 40% 20%, ${theme.backgroundFrom} 0px, transparent 50%), radial-gradient(at 80% 0%, ${theme.primary} 0px, transparent 50%), radial-gradient(at 0% 50%, ${theme.backgroundTo} 0px, transparent 50%), radial-gradient(at 80% 50%, ${theme.primary}44 0px, transparent 50%), radial-gradient(at 0% 100%, ${theme.backgroundFrom} 0px, transparent 50%), ${theme.backgroundTo};`;
+    case 'aurora':
+      return `background: radial-gradient(ellipse at top left, ${theme.backgroundFrom}cc 0%, transparent 60%), radial-gradient(ellipse at top right, ${theme.primary}99 0%, transparent 60%), radial-gradient(ellipse at bottom center, ${theme.backgroundTo}bb 0%, transparent 65%), #090d18;`;
+    case 'glass':
+      return `background: linear-gradient(135deg, ${theme.backgroundFrom}ee, ${theme.backgroundTo}ee);`;
+    case 'gradient':
     default:
-      return 'background:#f8fafc;';
+      return `background: linear-gradient(135deg, ${theme.backgroundFrom}, ${theme.primary}, ${theme.backgroundTo}); background-size: 200% 200%;`;
   }
 }
 
-/** 간이 hue shift (hex -> hsl 변환 없이 채널 회전) */
+/** 간이 hue shift */
 function shiftHue(hex: string, deg: number): string {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
-  // 간단한 RGB 채널 회전
   const shift = Math.round((deg / 360) * 255);
   const nr = (r + shift) % 256;
   const ng = (g + shift * 2) % 256;
   const nb = (b + shift) % 256;
   return `#${nr.toString(16).padStart(2, '0')}${ng.toString(16).padStart(2, '0')}${nb.toString(16).padStart(2, '0')}`;
-}
-
-function getCardStyleCSS(cardStyle: CardStyle, primaryColor: string): string {
-  const base = `
-    .lc-card--rounded { border-radius: 12px; }
-    .lc-card--pill { border-radius: 999px; }
-    .lc-card--square { border-radius: 0; }
-  `;
-  const glass = `
-    .lc-card--glass {
-      border-radius: 12px;
-      background: rgba(255,255,255,.15);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,.2);
-    }
-  `;
-  const neon = `
-    .lc-card--neon {
-      border-radius: 12px;
-      box-shadow: 0 0 8px ${primaryColor}66, 0 0 20px ${primaryColor}33;
-      border: 1.5px solid ${primaryColor};
-    }
-  `;
-  const outline = `
-    .lc-card--outline {
-      border-radius: 12px;
-      border: 2.5px solid ${primaryColor};
-      background: transparent;
-    }
-  `;
-  return `${base}\n${glass}\n${neon}\n${outline}`;
 }
 
 function getFontFamilyValue(fontFamily: FontFamily): string {
@@ -189,138 +211,117 @@ function getFontFamilyValue(fontFamily: FontFamily): string {
       return "'Gmarket Sans', 'Impact', sans-serif";
     case 'system':
     default:
-      return "'Pretendard Variable', 'Pretendard', -apple-system, sans-serif";
+      return "'Pretendard Variable', 'Inter', ui-sans-serif, system-ui, sans-serif";
   }
 }
 
+// ── CSS — 실제 배포 페이지와 동일한 값 ──────────
+
 function buildLinkCardCSS(
-  primaryColor: string,
+  theme: ThemePreset,
   bgStyle: BgStyle,
-  cardStyle: CardStyle,
-  fontFamily: FontFamily,
 ): string {
-  const isDark = bgStyle === 'dark' || bgStyle === 'aurora';
+  const isAnimated = bgStyle === 'gradient' || bgStyle === 'aurora';
 
   return `
-    :root { --lc-primary: ${primaryColor}; }
+    :root { --lc-primary: ${theme.primary}; }
+
+    @keyframes gradient-shift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
 
     body {
-      ${buildBgCSS(bgStyle, primaryColor)}
+      ${buildBgStyle(theme, bgStyle)}
       display: flex;
       justify-content: center;
+      align-items: center;
       min-height: 100vh;
-      padding: 40px 16px;
+      padding: 16px;
+      ${isAnimated ? 'animation: gradient-shift 15s ease infinite;' : ''}
     }
 
     .lc-container {
-      max-width: 480px;
+      max-width: 448px;
       width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      padding: 48px 0;
     }
 
-    /* Profile */
-    .lc-profile { text-align: center; margin-bottom: 28px; }
+    /* Profile — 실제: w-24 h-24, text-2xl, ring-2 */
+    .lc-profile { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }
     .lc-avatar {
-      width: 88px; height: 88px;
+      width: 96px; height: 96px;
       border-radius: 50%;
       object-fit: cover;
-      margin: 0 auto 14px;
       display: block;
-      border: 3px solid var(--lc-primary);
+      border: 2px solid ${theme.primary}33;
+      transition: transform 0.2s;
     }
+    .lc-avatar:hover { transform: scale(1.05); }
     .lc-avatar--placeholder {
-      background: var(--lc-primary);
       color: #fff;
-      font-size: 32px;
+      font-size: 24px;
       font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .lc-name { font-size: 22px; font-weight: 700; margin: 0 0 6px; color: #111; }
-    .lc-bio { font-size: 14px; color: #666; margin: 0; line-height: 1.5; }
-    .lc-text-light { color: #f9fafb; }
-    .lc-text-light-muted { color: #d1d5db; }
+    .lc-name { font-size: 24px; font-weight: 700; margin: 0; }
+    .lc-bio { font-size: 16px; margin: 0; max-width: 320px; text-wrap: balance; line-height: 1.5; }
 
-    /* Links */
-    .lc-links { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+    /* Links — 실제: gap-3, px-5 py-3.5, border 1px, hover:scale-[1.02] */
+    .lc-links { display: flex; flex-direction: column; gap: 12px; width: 100%; }
     .lc-link-btn {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
+      gap: 12px;
       width: 100%;
       padding: 14px 20px;
-      background: #fff;
-      color: #333;
-      font-size: 15px;
-      font-weight: 600;
+      font-size: 14px;
+      font-weight: 500;
       text-decoration: none;
-      border: 1.5px solid #e5e7eb;
-      transition: transform .15s, box-shadow .15s, border-color .15s;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      transition: transform 0.2s, border-color 0.2s;
     }
     .lc-link-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,.1);
-      border-color: var(--btn-color);
+      transform: scale(1.02);
     }
-    .lc-link-btn--dark {
-      background: rgba(255,255,255,.08);
-      color: #f9fafb;
-      border-color: rgba(255,255,255,.15);
+    .lc-link-btn:active {
+      transform: scale(0.98);
     }
-    .lc-link-btn--dark:hover {
-      background: rgba(255,255,255,.15);
-      border-color: var(--btn-color);
-    }
-    .lc-link-emoji { font-size: 18px; }
-    .lc-link-title { flex: 1; text-align: center; }
+    .lc-link-emoji { font-size: 18px; flex-shrink: 0; }
+    .lc-link-title { flex: 1; }
+    .lc-link-arrow { flex-shrink: 0; }
 
-    /* Socials */
+    /* Socials — 실제: gap-4, 아이콘만 w-5 h-5, opacity-70 → hover:opacity-100 */
     .lc-socials {
       display: flex;
-      justify-content: center;
+      align-items: center;
       gap: 16px;
-      flex-wrap: wrap;
-      padding-top: 8px;
     }
     .lc-social-icon {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      background: #fff;
-      color: #555;
-      font-size: 11px;
-      font-weight: 600;
       text-decoration: none;
-      text-transform: capitalize;
-      border: 1.5px solid #e5e7eb;
-      transition: border-color .2s, transform .2s, box-shadow .2s;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .lc-social-icon--svg {
-      font-size: 0;
+      opacity: 0.7;
+      transition: opacity 0.2s;
     }
     .lc-social-icon:hover {
-      border-color: var(--icon-color);
-      color: var(--icon-color);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,.1);
-    }
-    .lc-social-icon--dark {
-      background: rgba(255,255,255,.08);
-      color: #d1d5db;
-      border-color: rgba(255,255,255,.15);
-    }
-    .lc-social-icon--dark:hover {
-      border-color: var(--icon-color);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,.3);
+      opacity: 1;
     }
 
-    ${getCardStyleCSS(cardStyle, primaryColor)}
+    /* Footer */
+    .lc-footer {
+      font-size: 12px;
+      opacity: 0.5;
+      margin-top: 8px;
+    }
   `;
 }
 
@@ -335,15 +336,15 @@ export function generateLinkCardPreview(
   const bgStyle = getVal(state, 'theme', 'bgStyle', 'light') as BgStyle;
   const cardStyle = getVal(state, 'theme', 'cardStyle', 'rounded') as CardStyle;
   const fontFamily = getVal(state, 'theme', 'fontFamily', 'system') as FontFamily;
-  const isDark = bgStyle === 'dark' || bgStyle === 'aurora';
 
+  const theme = buildThemeFromPrimary(primaryColor, bgStyle);
   const activeModules = getActiveModules(state);
 
   const sectionRenderers: Record<string, () => string> = {
-    profile: () => renderProfileSection(state, liveUrl, imageMap, isDark),
-    links: () => renderLinksSection(state, primaryColor, cardStyle, isDark),
-    socials: () => renderSocialsSection(state, primaryColor, isDark),
-    theme: () => '', // theme 모듈은 시각 섹션이 아님
+    profile: () => renderProfileSection(state, theme, liveUrl, imageMap),
+    links: () => renderLinksSection(state, theme, cardStyle),
+    socials: () => renderSocialsSection(state, theme),
+    theme: () => '',
   };
 
   const sections = activeModules
@@ -354,9 +355,10 @@ export function generateLinkCardPreview(
     .filter(Boolean)
     .join('');
 
-  const bodyContent = `<div class="lc-container">${sections}</div>`;
+  const footer = `<div class="lc-footer" style="color:${theme.textMuted}">Powered by Linkmap</div>`;
+  const bodyContent = `<div class="lc-container">${sections}${footer}</div>`;
   const baseCss = buildBaseCSS('default');
-  const templateCss = buildLinkCardCSS(primaryColor, bgStyle, cardStyle, fontFamily);
+  const templateCss = buildLinkCardCSS(theme, bgStyle);
   const fullCss = `${baseCss}\n${templateCss}`;
   const fontFamilyValue = getFontFamilyValue(fontFamily);
 
