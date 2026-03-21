@@ -95,22 +95,25 @@ function ZoneNode({ id, data, selected }: NodeProps) {
   const bgClass = isCustom ? '' : (bgColors[zoneKey] || '');
 
   return (
-    <div className={`w-full h-full rounded-[18px] border transition-colors ${bgClass} ${
-      editMode && selected ? 'border-primary ring-2 ring-primary/20' : editMode ? 'border-primary/40 border-dashed' : borderClass
-    }`}>
+    <div
+      className={`w-full h-full rounded-[18px] border transition-colors nodrag ${bgClass} ${
+        editMode && selected ? 'border-primary ring-2 ring-primary/20' : editMode ? 'border-primary/40 border-dashed' : borderClass
+      }`}
+    >
       {/* Resize handle — edit mode only */}
       {editMode && (
         <NodeResizer
           minWidth={300}
           minHeight={160}
-          isVisible={editMode}
+          isVisible={selected}
           lineClassName="!border-primary/30"
-          handleClassName="!w-2.5 !h-2.5 !rounded-sm !bg-primary/60 !border-primary"
+          handleClassName="!w-3 !h-3 !rounded-sm !bg-primary/60 !border-primary"
+          handleStyle={{ zIndex: 20 }}
         />
       )}
 
-      {/* Zone label chip */}
-      <div className="absolute -top-3 left-4 z-10">
+      {/* Zone label chip — pointer-events auto for interaction */}
+      <div className="absolute -top-3 left-4 z-10" style={{ pointerEvents: 'auto' }}>
         <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] border text-[10px] font-semibold tracking-wide shadow-sm backdrop-blur-sm ${chipClass}`}>
           <Icon className="h-3.5 w-3.5 opacity-75" />
           {isRenaming ? (
@@ -142,9 +145,9 @@ function ZoneNode({ id, data, selected }: NodeProps) {
         </div>
       </div>
 
-      {/* Edit mode controls — top right */}
+      {/* Edit mode controls — top right, pointer-events auto for interaction */}
       {editMode && (
-        <div className="absolute -top-3 right-4 z-10 flex items-center gap-1">
+        <div className="absolute -top-3 right-4 z-10 flex items-center gap-1" style={{ pointerEvents: 'auto' }}>
           {/* Color picker */}
           <div className="relative" ref={colorRef}>
             <button

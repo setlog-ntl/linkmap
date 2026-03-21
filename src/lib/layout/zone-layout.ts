@@ -140,10 +140,17 @@ export function computeZoneLayout(
     const pos = posOverrides[zoneNodeId] ?? autoPositions[i];
     const isCustom = !DEFAULT_ZONES.some((d) => d.key === zg.config.key);
 
+    // Edit mode: boost zone background visibility for clear boundaries
+    const editBgColor = editMode
+      ? zg.config.color.replace(/[\d.]+\)$/, '0.08)')  // 4% → 8%
+      : zg.config.color;
+
     resultNodes.push({
       id: zoneNodeId,
       type: 'zone',
       position: pos,
+      // Edit mode: selectable for NodeResizer, draggable for repositioning
+      // Service nodes have zIndex: 10 so they receive events first
       selectable: editMode,
       draggable: editMode,
       zIndex: -1,
@@ -155,11 +162,14 @@ export function computeZoneLayout(
         color: zg.config.color,
         subtitle: zg.config.subtitle,
         isCustom,
+        editMode,
       },
       style: {
         width: size.w,
         height: size.h,
-        backgroundColor: zg.config.color,
+        backgroundColor: editBgColor,
+        // View mode: pointerEvents none so zones don't block service nodes
+        // Edit mode: RF wrapper needs events for drag/resize (service nodes at zIndex 10 get priority)
         ...(editMode ? {} : { pointerEvents: 'none' as const }),
       },
     });
@@ -176,6 +186,7 @@ export function computeZoneLayout(
       resultNodes.push({
         ...original,
         position: { x: absX, y: absY },
+        zIndex: 10,  // Service nodes always above zone backgrounds (-1)
       });
     });
   }
