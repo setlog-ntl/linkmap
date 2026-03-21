@@ -340,15 +340,23 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         return;
       }
 
-      setLivePreviewKey((k) => k + 1);
-      setShowLiveAfterDeploy(true);
       setDeployState('deployed');
-      // 모듈 배포 완료 시 우측 패널을 미리보기로 자동 전환
+      // 모듈 배포 완료: CDN 캐시(최대 10분) 후 반영되므로 모듈 프리뷰 유지
+      // 라이브 URL은 캐시로 인해 이전 버전을 보여줄 수 있음
       if (deployOrigin === 'module-deploy') {
-        setRightPanel('preview');
+        // 모듈 프리뷰가 최신이므로 그대로 유지 (라이브 전환 안 함)
+        setShowLiveAfterDeploy(false);
+      } else {
+        // 직접 배포: 라이브 URL 표시 (캐시 무효화 파라미터 포함)
+        setLivePreviewKey((k) => k + 1);
+        setShowLiveAfterDeploy(true);
       }
       toast.success(t(locale, 'editor.deployed'), {
-        description: '실제 사이트 반영까지 1~3분 정도 걸릴 수 있어요',
+        description: '실제 사이트에 반영 완료 (CDN 캐시로 최대 10분 후 표시)',
+        action: liveUrl ? {
+          label: '사이트 확인',
+          onClick: () => window.open(`${liveUrl}?_t=${Date.now()}`, '_blank'),
+        } : undefined,
       });
       setTimeout(() => setDeployState('idle'), 3000);
       cleanup();
@@ -859,8 +867,30 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     }
   })();
 
-  // 빌드 진행 배너 (미리보기 하단에 표시 — 미리보기 콘텐츠는 가리지 않음)
+  // 빌드 진행/완료 배너 (미리보기 하단에 표시)
   const renderBuildOverlay = () => {
+    if (deployState === 'deployed' && !showLiveAfterDeploy) {
+      // 모듈 배포 완료: 실시간 프리뷰 유지 + 안내 배너
+      return (
+        <div className="absolute bottom-0 left-0 right-0 z-10 bg-green-500/10 border-t border-green-500/30 px-4 py-2.5">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+            <p className="text-xs text-green-700 dark:text-green-400 flex-1">
+              배포 완료 · 실제 사이트에 반영 중 (CDN 캐시로 최대 10분 소요)
+            </p>
+            {liveUrl && (
+              <button
+                onClick={() => window.open(`${liveUrl}?_t=${Date.now()}`, '_blank')}
+                className="text-xs font-medium text-green-600 dark:text-green-400 hover:underline shrink-0"
+              >
+                사이트 확인 →
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     if (!awaitingDeploy) return null;
     return (
       <div className="absolute bottom-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm border-t px-4 py-3">
