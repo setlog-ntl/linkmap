@@ -16,12 +16,14 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   let profile: Profile | null = null;
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (!user || authError) {
+    redirect('/signup');
+  }
+
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      redirect('/signup');
-    }
     const { data } = await supabase
       .from('profiles')
       .select('*')
@@ -29,6 +31,7 @@ export default async function DashboardLayout({
       .single();
     profile = data ?? null;
   } catch {
+    // 프로필 조회 실패는 비치명적 — null로 진행
     profile = null;
   }
 
