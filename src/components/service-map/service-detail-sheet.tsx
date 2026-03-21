@@ -311,7 +311,7 @@ export function ServiceDetailSheet({
                             asChild
                             className="flex-1 justify-center gap-2 text-primary border-primary/30 hover:bg-primary/5"
                           >
-                            <Link href={guideHref}>
+                            <Link prefetch={false} href={guideHref}>
                               <BookOpen className="h-3.5 w-3.5" />
                               상세 가이드
                               <ExternalLink className="h-3 w-3" />
@@ -378,7 +378,7 @@ export function ServiceDetailSheet({
                 {/* 0-1. 상세 가이드 페이지 링크 */}
                 {svc?.slug && SERVICE_GUIDE_HREF[svc.slug] && (
                   <Button variant="outline" size="sm" asChild className="w-full justify-start gap-2 text-primary border-primary/30 hover:bg-primary/5">
-                    <Link href={SERVICE_GUIDE_HREF[svc.slug]}>
+                    <Link prefetch={false} href={SERVICE_GUIDE_HREF[svc.slug]}>
                       <BookOpen className="h-3.5 w-3.5" />
                       스크린샷 포함 상세 가이드 보기
                       <ExternalLink className="ml-auto h-3 w-3" />

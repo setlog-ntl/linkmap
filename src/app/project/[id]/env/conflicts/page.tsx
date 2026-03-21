@@ -81,7 +81,7 @@ export default function EnvConflictsPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/project/${projectId}/env`}>
+            <Link prefetch={false} href={`/project/${projectId}/env`}>
               <ArrowLeft className="mr-1.5 h-4 w-4" />
               환경변수
             </Link>

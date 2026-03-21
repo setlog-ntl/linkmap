@@ -25,7 +25,7 @@ export default function ProjectError({
       </p>
       <div className="flex gap-3">
         <Button asChild variant="outline">
-          <Link href="/dashboard">대시보드로</Link>
+          <Link prefetch={false} href="/dashboard">대시보드로</Link>
         </Button>
         <Button onClick={() => reset()}>다시 시도</Button>
       </div>

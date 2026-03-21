@@ -108,13 +108,13 @@ export function MyProjectCard({ project, metrics, allCards }: MyProjectCardProps
         {/* CTA buttons */}
         <div className="flex w-full gap-2 mt-auto">
           <Button variant="default" size="sm" className="flex-1" asChild>
-            <Link href={`/project/${project.id}/integrations`}>
+            <Link prefetch={false} href={`/project/${project.id}/integrations`}>
               <Plus className="mr-1 h-3.5 w-3.5" />
               {t(locale, 'myProjectCard.addService')}
             </Link>
           </Button>
           <Button variant="outline" size="sm" className="flex-1" asChild>
-            <Link href={`/project/${project.id}/service-map`}>
+            <Link prefetch={false} href={`/project/${project.id}/service-map`}>
               <MapIcon className="mr-1 h-3.5 w-3.5" />
               {t(locale, 'myProjectCard.viewMap')}
             </Link>

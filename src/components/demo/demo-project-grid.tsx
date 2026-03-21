@@ -46,7 +46,7 @@ export function DemoProjectGrid({ projects, isLoggedIn }: DemoProjectGridProps) 
             className="bg-brand-green text-black hover:bg-brand-green/90 rounded-xl font-bold"
             asChild
           >
-            <Link href="/signup">
+            <Link prefetch={false} href="/signup">
               무료로 시작하기
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
@@ -71,7 +71,7 @@ export function DemoProjectGrid({ projects, isLoggedIn }: DemoProjectGridProps) 
         </div>
         {isLoggedIn ? (
           <Button size="sm" className="bg-brand-blue text-white hover:bg-brand-blue/90 rounded-xl shrink-0" asChild>
-            <Link href="/dashboard">
+            <Link prefetch={false} href="/dashboard">
               내 대시보드로 이동
               <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
             </Link>
@@ -79,10 +79,10 @@ export function DemoProjectGrid({ projects, isLoggedIn }: DemoProjectGridProps) 
         ) : (
           <div className="flex gap-2 shrink-0">
             <Button variant="outline" size="sm" className="rounded-xl" asChild>
-              <Link href="/login">로그인</Link>
+              <Link prefetch={false} href="/login">로그인</Link>
             </Button>
             <Button size="sm" className="bg-brand-blue text-white hover:bg-brand-blue/90 rounded-xl" asChild>
-              <Link href="/signup">
+              <Link prefetch={false} href="/signup">
                 회원가입
                 <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </Link>

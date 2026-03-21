@@ -155,7 +155,7 @@ export function KakaoLoginSection() {
             로그인할 수 있습니다.
           </p>
           <Button asChild variant="outline" size="sm">
-            <Link href="/guides/auth/kakao" className="gap-1.5">
+            <Link prefetch={false} href="/guides/auth/kakao" className="gap-1.5">
               스크린샷 포함 상세 가이드 보기
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>

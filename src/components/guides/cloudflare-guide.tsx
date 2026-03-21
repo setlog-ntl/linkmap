@@ -481,13 +481,13 @@ export function CloudflareGuide() {
                 <p className="text-muted-foreground mb-6">{t(locale, 'cloudflareGuide.congratsDesc')}</p>
                 <div className="flex flex-wrap justify-center gap-3">
                   <Button asChild>
-                    <Link href="/">
+                    <Link prefetch={false} href="/">
                       {t(locale, 'cloudflareGuide.ctaLinkmap')}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
                   <Button variant="outline" asChild>
-                    <Link href="/guides/github">{t(locale, 'cloudflareGuide.ctaOtherGuide')}</Link>
+                    <Link prefetch={false} href="/guides/github">{t(locale, 'cloudflareGuide.ctaOtherGuide')}</Link>
                   </Button>
                 </div>
               </CardContent>

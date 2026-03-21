@@ -14,10 +14,10 @@ export default function NotFound() {
         </p>
         <div className="flex gap-3 justify-center">
           <Button asChild variant="outline">
-            <Link href="/">홈으로</Link>
+            <Link prefetch={false} href="/">홈으로</Link>
           </Button>
           <Button asChild>
-            <Link href="/dashboard">대시보드</Link>
+            <Link prefetch={false} href="/dashboard">대시보드</Link>
           </Button>
         </div>
       </div>

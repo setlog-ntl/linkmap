@@ -224,13 +224,13 @@ function ErrorCard({
 
           <div className="flex flex-wrap gap-3 justify-center pt-1">
             <Button size="sm" asChild>
-              <Link href="/pricing">
+              <Link prefetch={false} href="/pricing">
                 <Crown className="mr-2 h-4 w-4" />
                 Pro 플랜 보기
               </Link>
             </Button>
             <Button variant="outline" size="sm" asChild>
-              <Link href="/sites">
+              <Link prefetch={false} href="/sites">
                 <LayoutDashboard className="mr-2 h-4 w-4" />
                 내 사이트 관리
               </Link>
@@ -294,7 +294,7 @@ function ErrorCard({
             </Button>
           )}
           <Button variant="outline" size="sm" asChild>
-            <Link href="/sites">
+            <Link prefetch={false} href="/sites">
               <LayoutDashboard className="mr-2 h-4 w-4" />
               {t(locale, 'deployStep.manageSites')}
             </Link>

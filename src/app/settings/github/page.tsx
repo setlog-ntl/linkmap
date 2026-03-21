@@ -160,7 +160,7 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
           <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase pt-0.5">Projects</span>
           <div className="flex flex-col gap-1.5">
             {connection.linked_projects.map((proj) => (
-              <Link key={proj.project_id} href={`/project/${proj.project_id}`}
+              <Link key={proj.project_id} prefetch={false} href={`/project/${proj.project_id}`}
                 className="inline-flex items-center gap-1.5 text-[13px] text-foreground/80 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
                 <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
                 <span>{proj.project_name}</span>

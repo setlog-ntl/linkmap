@@ -140,7 +140,7 @@ export function ShowcaseCard({ item }: ShowcaseCardProps) {
       <CardContent className="p-4 space-y-2.5">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <Link href={`/showcase/${item.id}`} className="hover:underline">
+            <Link prefetch={false} href={`/showcase/${item.id}`} className="hover:underline">
               <h3 className="font-semibold truncate">{item.site_name}</h3>
             </Link>
             {templateName && (

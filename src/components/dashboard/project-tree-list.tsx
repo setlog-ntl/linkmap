@@ -315,7 +315,7 @@ function ProjectTreeItem({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link href={`/project/${project.id}`}>
+                <Link prefetch={false} href={`/project/${project.id}`}>
                   <FolderOpen className="mr-2 h-4 w-4" />
                   {t(locale, 'dashboard.openProject')}
                 </Link>

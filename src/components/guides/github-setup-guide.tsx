@@ -448,13 +448,13 @@ export function GitHubSetupGuide() {
                 </p>
                 <div className="flex flex-wrap justify-center gap-3">
                   <Button asChild>
-                    <Link href="/signup">
+                    <Link prefetch={false} href="/signup">
                       Linkmap으로 프로젝트 관리 시작하기
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
                   <Button variant="outline" asChild>
-                    <Link href="/services">서비스 카탈로그 둘러보기</Link>
+                    <Link prefetch={false} href="/services">서비스 카탈로그 둘러보기</Link>
                   </Button>
                 </div>
               </CardContent>

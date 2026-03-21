@@ -137,7 +137,7 @@ export default function MyShowcasePage() {
           </p>
         </div>
         <Button variant="outline" asChild>
-          <Link href="/showcase">
+          <Link prefetch={false} href="/showcase">
             <Globe className="mr-2 h-4 w-4" />
             갤러리 보기
           </Link>
@@ -268,10 +268,10 @@ export default function MyShowcasePage() {
           </p>
           <div className="flex justify-center gap-3">
             <Button variant="outline" asChild>
-              <Link href="/sites/manage">내 사이트 관리</Link>
+              <Link prefetch={false} href="/sites/manage">내 사이트 관리</Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link href="/dashboard">프로젝트 목록</Link>
+              <Link prefetch={false} href="/dashboard">프로젝트 목록</Link>
             </Button>
           </div>
         </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LinkmapLogo } from '@/components/icons/linkmap-logo';
@@ -34,14 +35,39 @@ interface HeaderProps {
   profile: Profile | null;
 }
 
-export function Header({ profile }: HeaderProps) {
+export function Header({ profile: profileProp }: HeaderProps) {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
+  const [clientProfile, setClientProfile] = useState<Profile | null>(null);
+
+  // 서버에서 profile이 전달되지 않은 공개 페이지에서 클라이언트 인증 상태 확인
+  useEffect(() => {
+    if (profileProp) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user || cancelled) return;
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        if (!cancelled && data) setClientProfile(data as Profile);
+      } catch {
+        // 인증 확인 실패는 무시
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [profileProp, supabase]);
+
+  const profile = profileProp ?? clientProfile;
   const { sidebarOpen, setSidebarOpen, setCommandOpen } = useUIStore();
   const { locale, setLocale } = useLocaleStore();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    setClientProfile(null);
     router.push('/');
     router.refresh();
   };

@@ -166,7 +166,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
 
           <p className="text-sm text-muted-foreground text-center">
             {t(locale, 'authModal.noAccount')}{' '}
-            <Link href="/signup?redirect=/oneclick" className="text-primary hover:underline font-medium">
+            <Link prefetch={false} href="/signup?redirect=/oneclick" className="text-primary hover:underline font-medium">
               {t(locale, 'authModal.signUp')}
             </Link>
           </p>

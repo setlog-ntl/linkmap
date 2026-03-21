@@ -93,13 +93,13 @@ export function FaqSection() {
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">
-              <Link href="/signup">
+              <Link prefetch={false} href="/signup">
                 지금 시작하기
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button variant="outline" asChild size="lg">
-              <Link href="/services">서비스 카탈로그 둘러보기</Link>
+              <Link prefetch={false} href="/services">서비스 카탈로그 둘러보기</Link>
             </Button>
           </div>
         </div>

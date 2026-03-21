@@ -7,6 +7,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    // 홈 (세션 갱신 — 로그인 상태 유지)
+    '/',
     // 인증 보호 경로
     '/dashboard/:path*',
     '/project/:path*',
@@ -22,5 +24,7 @@ export const config = {
     '/showcase/:path*',
     '/blog/:path*',
     '/services/:path*',
+    '/feedback',
+    '/demo',
   ],
 };

@@ -47,7 +47,7 @@ export default function ResetPasswordPage() {
           </CardHeader>
           <CardFooter className="justify-center">
             <Button variant="ghost" asChild>
-              <Link href="/login">
+              <Link href="/login" prefetch={false}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 로그인으로 돌아가기
               </Link>
@@ -90,7 +90,7 @@ export default function ResetPasswordPage() {
         </CardContent>
         <CardFooter className="justify-center">
           <Button variant="ghost" asChild>
-            <Link href="/login">
+            <Link prefetch={false} href="/login">
               <ArrowLeft className="mr-2 h-4 w-4" />
               로그인으로 돌아가기
             </Link>

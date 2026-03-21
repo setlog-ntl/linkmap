@@ -172,7 +172,7 @@ export function CostPageContent({ projectId, isDemo = false, reportHref }: CostP
                 className="gap-1.5 h-8 text-xs border-brand-blue/30 text-brand-blue hover:bg-brand-blue/5"
                 asChild
               >
-                <Link href={reportLink}>
+                <Link prefetch={false} href={reportLink}>
                   <FileText className="h-3.5 w-3.5" />
                   AI 리포트 보기
                 </Link>
@@ -185,7 +185,7 @@ export function CostPageContent({ projectId, isDemo = false, reportHref }: CostP
                   disabled={costSummary.services.length === 0}
                   asChild
                 >
-                  <Link href={reportLink}>
+                  <Link prefetch={false} href={reportLink}>
                     <Sparkles className="h-3.5 w-3.5" />
                     재생성
                   </Link>
@@ -215,7 +215,7 @@ export function CostPageContent({ projectId, isDemo = false, reportHref }: CostP
               disabled={costSummary.services.length === 0}
               asChild
             >
-              <Link href={reportLink}>
+              <Link prefetch={false} href={reportLink}>
                 <Sparkles className="h-3.5 w-3.5" />
                 AI 리포트
               </Link>

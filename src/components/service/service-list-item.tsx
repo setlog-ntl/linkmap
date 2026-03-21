@@ -33,7 +33,7 @@ export function ServiceListItem({ service, isUsed = false, hasGuide = false, api
         </div>
 
         {/* Name + Description */}
-        <Link href={`/services/${service.slug}`} className="flex-1 min-w-0">
+        <Link prefetch={false} href={`/services/${service.slug}`} className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="font-medium text-sm group-hover:text-primary transition-colors truncate">
               {service.name}
@@ -68,7 +68,7 @@ export function ServiceListItem({ service, isUsed = false, hasGuide = false, api
 
           {hasGuide && (
             <Button variant="ghost" size="icon" className="h-8 w-8" asChild title="빠른 설정">
-              <Link href={`/services/${service.slug}?tab=quickstart`} onClick={(e) => e.stopPropagation()}>
+              <Link prefetch={false} href={`/services/${service.slug}?tab=quickstart`} onClick={(e) => e.stopPropagation()}>
                 <KeyRound className="h-3.5 w-3.5" />
               </Link>
             </Button>
@@ -178,7 +178,7 @@ function AddToProjectList({
         <FolderKanban className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
         <p className="text-sm text-muted-foreground mb-3">프로젝트가 없습니다</p>
         <Button variant="outline" size="sm" className="text-xs" asChild>
-          <Link href="/dashboard">프로젝트 만들기</Link>
+          <Link prefetch={false} href="/dashboard">프로젝트 만들기</Link>
         </Button>
       </div>
     );

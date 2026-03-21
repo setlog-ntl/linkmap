@@ -58,7 +58,7 @@ export function FeedbackDetail({ id, isLoggedIn, isAdmin, currentUserId }: Feedb
     return (
       <div className="text-center py-12 text-muted-foreground">
         요청을 찾을 수 없습니다.{' '}
-        <Link href="/feedback" className="text-brand-blue hover:underline">
+        <Link prefetch={false} href="/feedback" className="text-brand-blue hover:underline">
           목록으로 돌아가기
         </Link>
       </div>

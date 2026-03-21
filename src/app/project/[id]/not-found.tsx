@@ -12,7 +12,7 @@ export default function ProjectNotFound() {
           요청하신 프로젝트가 존재하지 않거나 접근 권한이 없습니다.
         </p>
         <Button asChild>
-          <Link href="/dashboard">대시보드로 돌아가기</Link>
+          <Link prefetch={false} href="/dashboard">대시보드로 돌아가기</Link>
         </Button>
       </div>
     </div>

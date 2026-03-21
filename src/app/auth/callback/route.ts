@@ -6,7 +6,11 @@ export async function GET(request: Request) {
   const code = searchParams.get('code');
   const error_param = searchParams.get('error');
   const error_description = searchParams.get('error_description');
-  const next = searchParams.get('next') ?? '/dashboard';
+  const rawNext = searchParams.get('next') ?? '/dashboard';
+  // Open redirect 방지: 반드시 /로 시작하고 프로토콜 포함 금지
+  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') && !rawNext.includes('://')
+    ? rawNext
+    : '/dashboard';
 
   // OAuth provider returned an error
   if (error_param) {

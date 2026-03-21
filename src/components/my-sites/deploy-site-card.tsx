@@ -373,7 +373,7 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
           )}
           {deploy.deploy_status === 'ready' && (
             <Button size="sm" variant="outline" asChild>
-              <Link href={`/my-sites/${deploy.id}/edit`}>
+              <Link prefetch={false} href={`/my-sites/${deploy.id}/edit`}>
                 <Pencil className="mr-1 h-3 w-3" />
                 {t(locale, 'mySites.editSite')}
               </Link>
@@ -381,7 +381,7 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
           )}
           {deploy.project_id && (
             <Button size="sm" variant="outline" asChild>
-              <Link href={`/project/${deploy.project_id}`}>
+              <Link prefetch={false} href={`/project/${deploy.project_id}`}>
                 <LayoutDashboard className="mr-1 h-3 w-3" />
                 {t(locale, 'deploySiteCard.manage')}
               </Link>

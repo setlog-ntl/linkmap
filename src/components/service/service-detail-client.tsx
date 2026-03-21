@@ -111,7 +111,7 @@ export function ServiceDetailClient({ service, guide, costTiers, dependencies }:
     <div className="space-y-6">
       {/* Back navigation */}
       <Button variant="ghost" size="sm" asChild>
-        <Link href="/services">
+        <Link prefetch={false} href="/services">
           <ArrowLeft className="mr-1.5 h-4 w-4" />
           카탈로그로 돌아가기
         </Link>

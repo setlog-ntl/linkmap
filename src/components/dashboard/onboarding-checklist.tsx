@@ -123,7 +123,7 @@ export function OnboardingChecklist({ projectId, metrics }: OnboardingChecklistP
                 {step.done ? (
                   <p className="text-sm text-muted-foreground line-through">{t(locale, step.labelKey)}</p>
                 ) : (
-                  <Link href={step.href} className="text-sm font-medium hover:underline">
+                  <Link prefetch={false} href={step.href} className="text-sm font-medium hover:underline">
                     {t(locale, step.labelKey)}
                   </Link>
                 )}

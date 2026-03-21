@@ -20,7 +20,7 @@ export default async function DashboardLayout({
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (!user || authError) {
-    redirect('/signup');
+    redirect('/login');
   }
 
   try {

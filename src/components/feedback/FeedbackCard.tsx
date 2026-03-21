@@ -75,7 +75,7 @@ export function FeedbackCard({ item, isLoggedIn }: FeedbackCardProps) {
           </span>
         </div>
 
-        <Link href={`/feedback/${item.id}`} className="group">
+        <Link prefetch={false} href={`/feedback/${item.id}`} className="group">
           <h3 className="font-semibold text-sm leading-snug group-hover:text-brand-blue transition-colors line-clamp-2">
             {item.title}
           </h3>

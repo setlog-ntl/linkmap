@@ -158,7 +158,7 @@ export function AuthGateStep() {
 
             <p className="text-sm text-muted-foreground">
               {t(locale, 'authGate.noAccount')}{' '}
-              <Link href="/signup?redirect=/oneclick" className="text-primary hover:underline font-medium">
+              <Link prefetch={false} href="/signup?redirect=/oneclick" className="text-primary hover:underline font-medium">
                 {t(locale, 'authGate.signUp')}
               </Link>
             </p>

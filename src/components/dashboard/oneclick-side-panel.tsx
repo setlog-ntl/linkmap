@@ -164,7 +164,7 @@ export function OneclickSidePanel({ deployments }: OneclickSidePanelProps) {
       {/* Footer CTA */}
       <div className="px-3 pb-3 pt-1 border-t border-border/40 mt-1">
         <Button asChild size="sm" className="w-full h-8 text-xs gap-1.5">
-          <Link href="/sites/new">
+          <Link prefetch={false} href="/sites/new">
             <Rocket className="h-3.5 w-3.5" />
             새 사이트 배포
           </Link>

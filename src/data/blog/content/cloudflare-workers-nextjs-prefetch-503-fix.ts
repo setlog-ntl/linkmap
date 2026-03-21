@@ -109,8 +109,8 @@ Next.js에서 페이지 이동에 쓰는 \`<Link>\` 컴포넌트는 **화면에 
 
 \`\`\`tsx
 // Before — Next.js가 자동으로 이 페이지 데이터를 미리 가져옴
-<Link href="/pricing">가격</Link>
-<Link href="/blog">블로그</Link>
+<Link prefetch={false} href="/pricing">가격</Link>
+<Link prefetch={false} href="/blog">블로그</Link>
 
 // After — 사용자가 클릭할 때만 데이터를 가져옴
 <Link href="/pricing" prefetch={false}>가격</Link>

@@ -550,7 +550,7 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
                         transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3) }}
                       >
                         <Card className="h-full flex flex-col hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 group">
-                          <Link href={`/services/${service.slug}`} className="flex-1">
+                          <Link prefetch={false} href={`/services/${service.slug}`} className="flex-1">
                             <CardHeader className="pb-3">
                               <div className="flex items-start justify-between">
                                 <div className="flex items-center gap-3">
@@ -594,7 +594,7 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
                             <AddToProjectButton serviceId={service.id} serviceName={service.name} className="h-7" />
                             {guideServiceIds.includes(service.id) && (
                               <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
-                                <Link href={`/services/${service.slug}?tab=quickstart`}>
+                                <Link prefetch={false} href={`/services/${service.slug}?tab=quickstart`}>
                                   <KeyRound className="mr-1 h-3 w-3" />
                                   빠른 설정
                                 </Link>
@@ -677,7 +677,7 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
                   </p>
                 </div>
                 <Button asChild className="shrink-0">
-                  <Link href="/pricing">
+                  <Link prefetch={false} href="/pricing">
                     요금제 보기
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
@@ -894,7 +894,7 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
                   transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3) }}
                 >
                   <Card className="h-full flex flex-col hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 group">
-                    <Link href={`/services/${service.slug}`} className="flex-1">
+                    <Link prefetch={false} href={`/services/${service.slug}`} className="flex-1">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3">
@@ -938,7 +938,7 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
                       <AddToProjectButton serviceId={service.id} serviceName={service.name} className="h-7" />
                       {guideServiceIds.includes(service.id) && (
                         <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
-                          <Link href={`/services/${service.slug}?tab=quickstart`}>
+                          <Link prefetch={false} href={`/services/${service.slug}?tab=quickstart`}>
                             <KeyRound className="mr-1 h-3 w-3" />
                             빠른 설정
                           </Link>

@@ -134,7 +134,7 @@ export default function SignupPage() {
             </Button>
             {error && <p className="text-sm text-destructive">{error}</p>}
             <Button variant="ghost" asChild>
-              <Link href="/login">로그인 페이지로 돌아가기</Link>
+              <Link href="/login" prefetch={false}>로그인 페이지로 돌아가기</Link>
             </Button>
           </CardFooter>
         </Card>
@@ -146,7 +146,7 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <Link href="/" className="inline-flex items-center justify-center gap-1 font-bold text-2xl mb-2">
+          <Link href="/" prefetch={false} className="inline-flex items-center justify-center gap-1 font-bold text-2xl mb-2">
             <span className="text-primary">Link</span>
             <span>map</span>
           </Link>
@@ -240,7 +240,7 @@ export default function SignupPage() {
         <CardFooter className="justify-center">
           <p className="text-sm text-muted-foreground">
             이미 계정이 있으신가요?{' '}
-            <Link href={redirect !== '/dashboard' ? `/login?redirect=${encodeURIComponent(redirect)}` : '/login'} className="text-primary hover:underline font-medium">
+            <Link href={redirect !== '/dashboard' ? `/login?redirect=${encodeURIComponent(redirect)}` : '/login'} prefetch={false} className="text-primary hover:underline font-medium">
               로그인
             </Link>
           </p>

@@ -80,7 +80,7 @@ export default function ShowcaseDetailPage({
           삭제되었거나 비공개 처리된 쇼케이스입니다.
         </p>
         <Button variant="outline" asChild>
-          <Link href="/showcase">
+          <Link prefetch={false} href="/showcase">
             <ArrowLeft className="mr-2 h-4 w-4" />
             갤러리로 돌아가기
           </Link>
@@ -259,7 +259,7 @@ export default function ShowcaseDetailPage({
             <div className="flex items-center gap-2 flex-wrap">
               <Tag className="h-4 w-4 text-muted-foreground" />
               {item.showcase_tags.map((tag) => (
-                <Link key={tag} href={`/showcase?tag=${encodeURIComponent(tag)}`}>
+                <Link key={tag} prefetch={false} href={`/showcase?tag=${encodeURIComponent(tag)}`}>
                   <Badge variant="secondary" className="hover:bg-secondary/80">
                     {tag}
                   </Badge>

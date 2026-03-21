@@ -15,10 +15,10 @@ export function DemoBanner() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <Button variant="ghost" size="sm" className="h-7 text-xs px-2" asChild>
-            <Link href="/login">로그인</Link>
+            <Link prefetch={false} href="/login">로그인</Link>
           </Button>
           <Button size="sm" className="h-7 text-xs px-2 bg-brand-blue text-white hover:bg-brand-blue/90" asChild>
-            <Link href="/signup">
+            <Link prefetch={false} href="/signup">
               무료 시작
               <ArrowRight className="ml-1 h-3 w-3" />
             </Link>

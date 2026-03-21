@@ -329,13 +329,13 @@ export function ProjectHeroCard({ project, metrics, allCards, onServiceClick }: 
           {/* CTA buttons */}
           <div className="flex flex-wrap gap-2 pt-1">
             <Button size="sm" className="h-8 text-xs" asChild>
-              <Link href={`/project/${project.id}/integrations`}>
+              <Link prefetch={false} href={`/project/${project.id}/integrations`}>
                 <Plus className="mr-1 h-3.5 w-3.5" />
                 서비스 추가
               </Link>
             </Button>
             <Button variant="outline" size="sm" className="h-8 text-xs" asChild>
-              <Link href={`/project/${project.id}/service-map`}>
+              <Link prefetch={false} href={`/project/${project.id}/service-map`}>
                 <MapIcon className="mr-1 h-3.5 w-3.5" />
                 맵 보기
               </Link>

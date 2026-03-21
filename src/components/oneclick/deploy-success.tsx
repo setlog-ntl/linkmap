@@ -236,7 +236,7 @@ export function DeploySuccess({ status, projectId, template }: DeploySuccessProp
 
       <div className="text-center">
         <Button variant="link" asChild className="text-muted-foreground">
-          <Link href="/my-sites">
+          <Link prefetch={false} href="/my-sites">
             {t(locale, 'deployProgress.manageSites')}
           </Link>
         </Button>
@@ -280,7 +280,7 @@ function ActionCard({
     );
   }
 
-  return <Link href={href}>{inner}</Link>;
+  return <Link prefetch={false} href={href}>{inner}</Link>;
 }
 
 function ShareSection({ url, locale }: { url: string; locale: Locale }) {

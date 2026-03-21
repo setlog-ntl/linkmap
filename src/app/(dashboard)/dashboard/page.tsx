@@ -299,13 +299,13 @@ export default function DashboardPage() {
           {/* Helpful Links */}
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" size="sm" asChild>
-              <Link href="/services" className="gap-1.5">
+              <Link prefetch={false} href="/services" className="gap-1.5">
                 <Puzzle className="h-4 w-4" />
                 서비스 카탈로그
               </Link>
             </Button>
             <Button variant="outline" size="sm" asChild>
-              <Link href="/guides" className="gap-1.5">
+              <Link prefetch={false} href="/guides" className="gap-1.5">
                 <BookOpen className="h-4 w-4" />
                 가이드 보기
               </Link>

@@ -83,13 +83,13 @@ export function DashboardLayout({ data }: DashboardLayoutProps) {
             </div>
             <div className="flex gap-3">
               <Button asChild>
-                <Link href={`/project/${project.id}/integrations`}>
+                <Link prefetch={false} href={`/project/${project.id}/integrations`}>
                   <Plus className="mr-1.5 h-4 w-4" />
                   서비스 추가하기
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/services">
+                <Link prefetch={false} href="/services">
                   <LayoutTemplate className="mr-1.5 h-4 w-4" />
                   카탈로그 보기
                 </Link>

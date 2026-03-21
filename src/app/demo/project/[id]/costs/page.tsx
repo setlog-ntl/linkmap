@@ -73,7 +73,7 @@ export default async function DemoCostsPage({
             className="gap-1.5 h-9 text-xs border-brand-blue/30 text-brand-blue hover:bg-brand-blue/5 shrink-0"
             asChild
           >
-            <Link href={`/demo/project/${id}/costs/report`}>
+            <Link prefetch={false} href={`/demo/project/${id}/costs/report`}>
               <FileText className="h-3.5 w-3.5" />
               AI 리포트 보기
             </Link>

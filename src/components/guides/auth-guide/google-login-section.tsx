@@ -136,7 +136,7 @@ export function GoogleLoginSection() {
             등록하면, 클릭 한 번으로 구글 로그인을 사용할 수 있습니다.
           </p>
           <Button asChild variant="outline" size="sm">
-            <Link href="/guides/auth/google" className="gap-1.5">
+            <Link prefetch={false} href="/guides/auth/google" className="gap-1.5">
               스크린샷 포함 상세 가이드 보기
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>

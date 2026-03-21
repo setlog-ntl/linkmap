@@ -20,13 +20,13 @@ export function AuthGuideLayoutClient({ children }: { children: React.ReactNode 
     <div>
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1 text-sm text-muted-foreground py-4">
-        <Link href="/guides" className="hover:text-foreground transition-colors">
+        <Link prefetch={false} href="/guides" className="hover:text-foreground transition-colors">
           가이드
         </Link>
         <ChevronRight className="w-3.5 h-3.5" />
         {isSubPage ? (
           <>
-            <Link href="/guides/auth" className="hover:text-foreground transition-colors">
+            <Link prefetch={false} href="/guides/auth" className="hover:text-foreground transition-colors">
               인증 가이드
             </Link>
             <ChevronRight className="w-3.5 h-3.5" />

@@ -240,7 +240,7 @@ export function ProjectCard({ project, onDelete, onToggleFavorite, deploy, baseP
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link href={`${basePath}/${project.id}`}>
+                <Link prefetch={false} href={`${basePath}/${project.id}`}>
                   <FolderOpen className="mr-2 h-4 w-4" />
                   프로젝트 열기
                 </Link>

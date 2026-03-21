@@ -53,7 +53,7 @@ export function MySitesClient() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/oneclick">
+          <Link prefetch={false} href="/oneclick">
             <Rocket className="mr-2 h-4 w-4" />
             {t(locale, 'nav.oneclick')}
           </Link>
@@ -142,7 +142,7 @@ export function MySitesClient() {
             {t(locale, 'mySites.emptyDesc')}
           </p>
           <Button asChild>
-            <Link href="/oneclick">
+            <Link prefetch={false} href="/oneclick">
               <Rocket className="mr-2 h-4 w-4" />
               {t(locale, 'mySites.createFirst')}
             </Link>
