@@ -20,8 +20,10 @@ export interface DeployStatusResult {
 }
 
 export interface ResolveDeployOptions {
-  /** ISO timestamp of when the deploy was created (for timeout calculation) */
+  /** ISO timestamp of when the deploy was created */
   createdAt?: string;
+  /** ISO timestamp of when the deploy record was last updated (deploy_status 변경 시점 — 타임아웃 기준) */
+  updatedAt?: string;
   /** Current retry count from DB (0 = no retries yet) */
   retryCount?: number;
 }
@@ -64,9 +66,11 @@ export async function resolveDeployStatus(
   const [owner, repo] = repoFullName.split('/');
   const retryCount = options?.retryCount ?? 0;
 
-  // Timeout check: if deploy has been building for > 10 minutes, mark as error
-  if (options?.createdAt) {
-    const elapsed = Date.now() - new Date(options.createdAt).getTime();
+  // Timeout check: 마지막 배포 시작(updated_at) 기준으로 10분 초과 시 에러
+  // updated_at은 batch-update 커밋 시 deploy_status='building'으로 업데이트될 때 자동 갱신
+  const timeoutBase = options?.updatedAt ?? options?.createdAt;
+  if (timeoutBase) {
+    const elapsed = Date.now() - new Date(timeoutBase).getTime();
     if (elapsed > DEPLOY_TIMEOUT_MS && currentDeployStatus !== 'ready') {
       return {
         deployStatus: 'error',

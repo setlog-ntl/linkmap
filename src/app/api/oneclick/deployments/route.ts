@@ -83,6 +83,7 @@ async function refreshDeployStatus(
       deploy.pages_url as string | null,
       {
         createdAt: deploy.created_at as string,
+        updatedAt: deploy.updated_at as string,
         retryCount: (deploy.retry_count as number) ?? 0,
       }
     );

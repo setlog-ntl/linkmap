@@ -76,6 +76,7 @@ export async function GET(request: NextRequest) {
             deploy.pages_url,
             {
               createdAt: deploy.created_at,
+              updatedAt: deploy.updated_at,
               retryCount: deploy.retry_count ?? 0,
             }
           );
