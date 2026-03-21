@@ -121,6 +121,8 @@ export const SERVICE_IDS_V2 = {
   linkedin_api: '10000000-0000-4000-a000-000000000132',
   threads_api: '10000000-0000-4000-a000-000000000133',
   polar: '10000000-0000-4000-a000-000000000134',
+  // AI creative ad generation
+  gwanggo: '10000000-0000-4000-a000-000000000135',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -3131,7 +3133,7 @@ export const servicesV2: ServiceSeedV2[] = [
     popularity_score: 90,
     difficulty_level: 'beginner',
     tags: ['ai', 'image-generation', 'art', 'creative', 'design', 'visual'],
-    alternatives: ['stability-ai', 'leonardo-ai', 'ideogram'],
+    alternatives: ['stability-ai', 'leonardo-ai', 'ideogram', 'gwanggo'],
     compatibility: {
       framework: [],
       language: [],
@@ -3185,7 +3187,7 @@ export const servicesV2: ServiceSeedV2[] = [
     popularity_score: 78,
     difficulty_level: 'beginner',
     tags: ['ai', 'video-generation', 'gen-4', 'creative', 'editing', 'lip-sync'],
-    alternatives: ['sora', 'pika', 'leonardo-ai'],
+    alternatives: ['sora', 'pika', 'leonardo-ai', 'gwanggo'],
     compatibility: {
       framework: ['next', 'express', 'django', 'flask'],
       language: ['javascript', 'typescript', 'python'],
@@ -3296,7 +3298,7 @@ export const servicesV2: ServiceSeedV2[] = [
     popularity_score: 72,
     difficulty_level: 'beginner',
     tags: ['ai', 'image-generation', 'game-art', 'flux', 'creative', 'assets'],
-    alternatives: ['midjourney', 'stability-ai', 'ideogram'],
+    alternatives: ['midjourney', 'stability-ai', 'ideogram', 'gwanggo'],
     compatibility: {
       framework: ['next', 'express', 'django', 'flask'],
       language: ['javascript', 'typescript', 'python'],
@@ -4628,6 +4630,53 @@ export const servicesV2: ServiceSeedV2[] = [
       starter: '4%+40¢/tx',
       growth: '4%+40¢/tx',
       enterprise: 'Custom',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // gwanggo — AI 광고 이미지·영상 자동 생성 플랫폼
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.gwanggo,
+    name: 'gwanggo',
+    slug: 'gwanggo',
+    category: 'media',
+    description:
+      'AI-powered advertising content generation platform for Korean marketers. Automatically creates product ad images and videos using Seedream, FLUX, and Grok Imagine models. Upload a product photo and select a style to generate professional ad creatives in minutes.',
+    description_ko:
+      'AI 기반 광고 콘텐츠 자동 생성 플랫폼입니다. Seedream, FLUX, Grok Imagine 등 다양한 AI 모델로 제품 광고 이미지와 영상을 자동 제작합니다. 제품 사진을 업로드하고 스타일을 선택하면 전문 광고 소재를 몇 분 안에 완성할 수 있습니다.',
+    icon_url: null,
+    website_url: 'https://gwanggo.jocoding.io',
+    docs_url: 'https://gwanggo.jocoding.io',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '회원가입 시 20크레딧 무료 제공',
+      plans: [
+        { name: 'Free', price: '20크레딧 (회원가입)' },
+        { name: 'Starter', price: '크레딧 구매' },
+        { name: 'Pro', price: '크레딧 구매' },
+        { name: 'Business', price: '크레딧 구매' },
+      ],
+    },
+    required_env_vars: [],
+    domain: 'ai_ml',
+    subcategory: 'ai_creative',
+    popularity_score: 60,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'advertising', 'image-generation', 'video-generation', 'marketing', 'creative', 'ecommerce', 'korean'],
+    alternatives: ['midjourney', 'leonardo-ai', 'runway-ml'],
+    compatibility: {
+      framework: [],
+      language: [],
+    },
+    official_sdks: {},
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '크레딧 구매',
+      growth: '크레딧 구매',
+      enterprise: '문의',
     },
   },
 ];
