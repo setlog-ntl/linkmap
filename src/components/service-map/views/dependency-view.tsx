@@ -28,7 +28,6 @@ import { NodeContextMenu } from '@/components/service-map/node-context-menu';
 import { ConnectionTypeDialog } from '@/components/service-map/connection-type-dialog';
 import { EditSaveBar } from '@/components/service-map/edit-save-bar';
 import { MapLegend } from '@/components/service-map/map-legend';
-import { AlignmentGuides } from '@/components/service-map/alignment-guides';
 import { MapNarratorPanel } from '@/components/ai/map-narrator-panel';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import { EdgeEditPopover } from '@/components/service-map/edge-edit-popover';
@@ -84,7 +83,6 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
     pendingNodePositions, setPendingNodePosition,
     zoneConnections, addZoneConnection, removeZoneConnection,
     filterStatuses, toggleFilterStatus,
-    snapToGrid,
   } = useServiceMapStore();
 
   const { resolvedTheme } = useTheme();
@@ -105,8 +103,6 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
 
   // Selected node for floating toolbar
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  // Alignment guides during drag
-  const [alignGuides, setAlignGuides] = useState<{ h: number[]; v: number[] }>({ h: [], v: [] });
   const rfInstance = useRef<ReactFlowInstance | null>(null);
 
   const queryClient = useQueryClient();
@@ -357,50 +353,15 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
         }
       }
 
-      // Service node dragging → highlight target zone + save position + alignment guides
+      // Service node dragging → highlight target zone + save position
       if (change.type === 'position' && !change.id.startsWith('zone-') && change.position) {
         const cx = change.position.x + 80;
         const cy = change.position.y + 36;
         if (change.dragging) {
           setDragTargetZoneKey(findZoneAtPoint(cx, cy));
-
-          // Compute alignment guides (snap indicator lines)
-          if (snapToGrid) {
-            const ALIGN_THRESHOLD = 8;
-            const dragX = change.position.x;
-            const dragY = change.position.y;
-            const dragCx = dragX + 80;  // NODE_WIDTH/2
-            const dragCy = dragY + 36;  // NODE_HEIGHT/2
-            const hGuides: number[] = [];
-            const vGuides: number[] = [];
-
-            for (const node of nodesRef.current) {
-              if (node.id === change.id || node.type === 'zone') continue;
-              const nx = node.position.x;
-              const ny = node.position.y;
-              const nCx = nx + 80;
-              const nCy = ny + 36;
-
-              // Top alignment
-              if (Math.abs(dragY - ny) < ALIGN_THRESHOLD) hGuides.push(ny);
-              // Center Y alignment
-              if (Math.abs(dragCy - nCy) < ALIGN_THRESHOLD) hGuides.push(nCy);
-              // Bottom alignment
-              if (Math.abs((dragY + 72) - (ny + 72)) < ALIGN_THRESHOLD) hGuides.push(ny + 72);
-              // Left alignment
-              if (Math.abs(dragX - nx) < ALIGN_THRESHOLD) vGuides.push(nx);
-              // Center X alignment
-              if (Math.abs(dragCx - nCx) < ALIGN_THRESHOLD) vGuides.push(nCx);
-              // Right alignment
-              if (Math.abs((dragX + 160) - (nx + 160)) < ALIGN_THRESHOLD) vGuides.push(nx + 160);
-            }
-
-            setAlignGuides({ h: [...new Set(hGuides)], v: [...new Set(vGuides)] });
-          }
         } else {
-          // Drop complete: save position + detect zone change + clear guides
+          // Drop complete: save position + detect zone change
           setPendingNodePosition(change.id, change.position);
-          setAlignGuides({ h: [], v: [] });
           const targetZone = findZoneAtPoint(cx, cy);
           setDragTargetZoneKey(null);
           if (targetZone) {
@@ -414,7 +375,7 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
         }
       }
     }
-  }, [editMode, setZonePositionOverride, setDragTargetZoneKey, findZoneAtPoint, nodesResult, activeZones, setPendingOverride, setPendingNodePosition, mergedNodePositions, snapToGrid]);
+  }, [editMode, setZonePositionOverride, setDragTargetZoneKey, findZoneAtPoint, nodesResult, activeZones, setPendingOverride, setPendingNodePosition, mergedNodePositions]);
   const onEdgesChange = useCallback((changes: EdgeChange<Edge>[]) => { setEdges((eds) => applyEdgeChanges(changes, eds)); }, []);
 
   useEffect(() => { setNodes(layoutedNodes); setEdges([...layoutedEdges, ...zoneEdges]); }, [layoutedNodes, layoutedEdges, zoneEdges]);
@@ -650,8 +611,6 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
           <ReactFlow
             style={{ width: '100%', height: '100%' }}
             nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
-            snapToGrid={editMode && snapToGrid}
-            snapGrid={[20, 20]}
             onConnect={isReadOnly ? undefined : handleNativeConnect}
             onNodeClick={isReadOnly ? undefined : (e, node) => {
               interactions.handleNodeClick(e, node);
@@ -684,16 +643,10 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
               maskColor={isDark ? 'rgba(15, 29, 47, 0.85)' : undefined}
               style={isDark ? { backgroundColor: 'var(--card)' } : undefined}
             />
-            {editMode && snapToGrid ? (
-              <Background variant={BackgroundVariant.Lines} gap={20} color={isDark ? 'oklch(0.30 0.02 250)' : 'var(--border)'} style={{ opacity: isDark ? 0.3 : 0.25 }} />
-            ) : isDark ? (
+            {isDark ? (
               <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="oklch(0.35 0.02 250)" style={{ opacity: 0.25 }} />
             ) : (
               <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="var(--border)" style={{ opacity: 0.5 }} />
-            )}
-            {/* Alignment guides during drag */}
-            {editMode && snapToGrid && (alignGuides.h.length > 0 || alignGuides.v.length > 0) && (
-              <AlignmentGuides horizontalGuides={alignGuides.h} verticalGuides={alignGuides.v} />
             )}
           </ReactFlow>
           {!isReadOnly && <EditSaveBar onSave={handleSaveChanges} saving={saving} />}
@@ -773,5 +726,3 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
     </div>
   );
 });
-
-export default DependencyView;
