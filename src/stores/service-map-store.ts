@@ -13,6 +13,15 @@ export interface HoveredEdgeNodes {
   target: string;
 }
 
+/** Zone-level connection (visual edge between zone nodes) */
+export interface ZoneConnection {
+  id: string;
+  source: string;   // zone-{key} or service node id
+  target: string;   // zone-{key} or service node id
+  connectionType: string;
+  label?: string;
+}
+
 /** Undo/Redo history entry for connection operations */
 interface HistoryEntry {
   type: 'connection_create' | 'connection_delete' | 'connection_type_change';
@@ -48,6 +57,9 @@ interface ServiceMapState {
   // Drag-to-zone: zone highlighted as drop target during service node drag
   dragTargetZoneKey: string | null;
 
+  // Zone-level connections (visual edges between zones/zone↔node)
+  zoneConnections: ZoneConnection[];
+
   // Multi-select support
   selectedNodeIds: Set<string>;
 
@@ -79,6 +91,10 @@ interface ServiceMapState {
   setZoneSizeOverride: (zoneId: string, size: { width: number; height: number }) => void;
   resetZoneLayout: () => void;
   getActiveZones: () => ZoneConfig[];
+
+  // Zone connections
+  addZoneConnection: (conn: ZoneConnection) => void;
+  removeZoneConnection: (id: string) => void;
 
   // Hover cross-highlighting
   setHoveredEdge: (id: string | null, nodes?: HoveredEdgeNodes) => void;
@@ -120,6 +136,7 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
   hoveredEdgeNodes: null,
   hoveredNodeId: null,
   dragTargetZoneKey: null,
+  zoneConnections: [],
 
   selectedNodeIds: new Set(),
   undoStack: [],
@@ -192,6 +209,14 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
     const s = get();
     return s.zoneConfigs.length > 0 ? s.zoneConfigs : DEFAULT_ZONES;
   },
+
+  // Zone connections
+  addZoneConnection: (conn) => set((s) => ({
+    zoneConnections: [...s.zoneConnections, conn],
+  })),
+  removeZoneConnection: (id) => set((s) => ({
+    zoneConnections: s.zoneConnections.filter((c) => c.id !== id),
+  })),
 
   // Hover cross-highlighting
   setHoveredEdge: (id, nodes) => set({

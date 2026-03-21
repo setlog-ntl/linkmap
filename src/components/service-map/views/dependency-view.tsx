@@ -33,6 +33,7 @@ import { MapNarratorPanel } from '@/components/ai/map-narrator-panel';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import { EdgeEditPopover } from '@/components/service-map/edge-edit-popover';
 import { NodeEditToolbar } from '@/components/service-map/node-edit-toolbar';
+import { ZoneEditToolbar } from '@/components/service-map/zone-edit-toolbar';
 import { useUpsertLayerOverride } from '@/lib/queries/layer-overrides';
 import { useUpdateConnection } from '@/lib/queries/connections';
 import { useUpdateProject } from '@/lib/queries/projects';
@@ -62,6 +63,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     setHoveredNodeId, setDragTargetZoneKey,
     zoneConfigs, layoutPreset, zonePositionOverrides, zoneSizeOverrides,
     setZonePositionOverride, getActiveZones, setPendingOverride,
+    zoneConnections, addZoneConnection, removeZoneConnection,
   } = useServiceMapStore();
 
   const { resolvedTheme } = useTheme();
@@ -130,8 +132,25 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     zonePositionOverrides, zoneSizeOverrides,
   });
 
+  // Build zone-level visual edges
+  const zoneEdges = useMemo<Edge[]>(() => {
+    return zoneConnections.map((zc) => ({
+      id: `zc-${zc.id}`,
+      source: zc.source,
+      target: zc.target,
+      type: 'connection',
+      zIndex: 5,
+      data: {
+        connectionType: zc.connectionType,
+        onDelete: (edgeId: string) => removeZoneConnection(edgeId.replace('zc-', '')),
+      },
+    }));
+  }, [zoneConnections, removeZoneConnection]);
+
+  const allEdges = useMemo(() => [...layoutedEdges, ...zoneEdges], [layoutedEdges, zoneEdges]);
+
   const [nodes, setNodes] = useState<Node[]>(layoutedNodes);
-  const [edges, setEdges] = useState<Edge[]>(layoutedEdges);
+  const [edges, setEdges] = useState<Edge[]>(allEdges);
   const initialFitDone = useRef(false);
   const nodesRef = useRef(nodes);
   nodesRef.current = nodes;
@@ -184,7 +203,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
   }, [editMode, setZonePositionOverride, setDragTargetZoneKey, findZoneAtPoint, nodesResult, activeZones, setPendingOverride]);
   const onEdgesChange = useCallback((changes: EdgeChange<Edge>[]) => { setEdges((eds) => applyEdgeChanges(changes, eds)); }, []);
 
-  useEffect(() => { setNodes(layoutedNodes); setEdges(layoutedEdges); }, [layoutedNodes, layoutedEdges]);
+  useEffect(() => { setNodes(layoutedNodes); setEdges([...layoutedEdges, ...zoneEdges]); }, [layoutedNodes, layoutedEdges, zoneEdges]);
 
   const handleInit = useCallback((instance: ReactFlowInstance) => {
     rfInstance.current = instance;
@@ -266,7 +285,15 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
       const targetSvc = data.services.find((s) => s.id === targetId);
       if (sourceSvc && targetSvc) interactions.createConnection(sourceSvc.service_id, targetSvc.service_id, type);
     } else {
-      // Zone involved — expand to service-level connections
+      // Zone involved: create visual zone edge + underlying service connections
+      addZoneConnection({
+        id: `${Date.now()}`,
+        source: sourceId,
+        target: targetId,
+        connectionType: type,
+      });
+
+      // Also create underlying service-to-service connections
       const sourceServices = isSourceZone
         ? getServicesInZone(sourceId.replace('zone-', ''))
         : [data.services.find((s) => s.id === sourceId)].filter(Boolean);
@@ -283,9 +310,12 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
           }
         }
       }
-      if (count > 0) toast.success(`${count}개 연결이 생성되었습니다`);
+      const zoneName = isSourceZone
+        ? activeZones.find((z) => z.key === sourceId.replace('zone-', ''))?.label
+        : activeZones.find((z) => z.key === targetId.replace('zone-', ''))?.label;
+      toast.success(`Zone "${zoneName}" 연결 생성 (${count}개 서비스 연결 포함)`);
     }
-  }, [connectionDialog, data.services, interactions, getServicesInZone]);
+  }, [connectionDialog, data.services, interactions, getServicesInZone, addZoneConnection, activeZones]);
 
   // Dialog labels — handle zone IDs
   const resolveDialogInfo = useCallback((id: string) => {
@@ -355,7 +385,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
             onConnect={isReadOnly ? undefined : handleNativeConnect}
             onNodeClick={isReadOnly ? undefined : (e, node) => {
               interactions.handleNodeClick(e, node);
-              if (editMode && node.type === 'service') setSelectedNodeId(node.id);
+              if (editMode && (node.type === 'service' || node.type === 'zone')) setSelectedNodeId(node.id);
               else setSelectedNodeId(null);
             }}
             onPaneClick={isReadOnly ? undefined : () => {
@@ -388,16 +418,29 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
             )}
           </ReactFlow>
           {!isReadOnly && <EditSaveBar onSave={handleSaveChanges} saving={saving} />}
-          {/* Floating edit toolbar above selected node */}
+          {/* Floating edit toolbar above selected node/zone */}
           {editMode && selectedNodeId && (() => {
             const selectedNode = nodes.find((n) => n.id === selectedNodeId);
             if (!selectedNode || !rfInstance.current) return null;
-            // Convert node position (flow coords) to screen coords
             const screenPos = rfInstance.current.flowToScreenPosition(selectedNode.position);
             const canvasRect = document.querySelector('.service-map-canvas')?.getBoundingClientRect();
             if (!canvasRect) return null;
             const relX = screenPos.x - canvasRect.left;
             const relY = screenPos.y - canvasRect.top;
+            const nodeW = (selectedNode.style?.width as number) || 160;
+
+            if (selectedNode.type === 'zone') {
+              const zoneData = selectedNode.data as Record<string, unknown>;
+              return (
+                <ZoneEditToolbar
+                  zoneId={selectedNode.id}
+                  zoneLabel={(zoneData.label as string) || 'ZONE'}
+                  position={{ x: relX + nodeW / 2, y: relY }}
+                  onStartConnect={(nid) => { interactions.handleContextStartConnect(nid); setSelectedNodeId(null); }}
+                />
+              );
+            }
+
             const currentZone = getCurrentZone(selectedNodeId);
             return (
               <NodeEditToolbar
