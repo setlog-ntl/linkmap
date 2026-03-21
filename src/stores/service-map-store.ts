@@ -45,6 +45,9 @@ interface ServiceMapState {
   hoveredEdgeNodes: HoveredEdgeNodes | null;
   hoveredNodeId: string | null;
 
+  // Drag-to-zone: zone highlighted as drop target during service node drag
+  dragTargetZoneKey: string | null;
+
   // Multi-select support
   selectedNodeIds: Set<string>;
 
@@ -80,6 +83,7 @@ interface ServiceMapState {
   // Hover cross-highlighting
   setHoveredEdge: (id: string | null, nodes?: HoveredEdgeNodes) => void;
   setHoveredNodeId: (id: string | null) => void;
+  setDragTargetZoneKey: (key: string | null) => void;
 
   // Multi-select
   toggleNodeSelection: (nodeId: string) => void;
@@ -115,6 +119,7 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
   hoveredEdgeId: null,
   hoveredEdgeNodes: null,
   hoveredNodeId: null,
+  dragTargetZoneKey: null,
 
   selectedNodeIds: new Set(),
   undoStack: [],
@@ -194,6 +199,7 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
     hoveredEdgeNodes: id && nodes ? nodes : null,
   }),
   setHoveredNodeId: (id) => set({ hoveredNodeId: id }),
+  setDragTargetZoneKey: (key) => set({ dragTargetZoneKey: key }),
 
   // Multi-select
   toggleNodeSelection: (nodeId) => set((s) => {

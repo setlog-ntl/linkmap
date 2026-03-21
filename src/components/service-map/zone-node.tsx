@@ -31,9 +31,12 @@ function ZoneNode({ id, data, selected }: NodeProps) {
   const removeZone = useServiceMapStore((s) => s.removeZone);
   const setZoneSizeOverride = useServiceMapStore((s) => s.setZoneSizeOverride);
 
+  const dragTargetZoneKey = useServiceMapStore((s) => s.dragTargetZoneKey);
+
   const Icon = ZONE_ICONS[d.domain] || Box;
   const isCustom = d.isCustom === true;
   const isDefault = DEFAULT_ZONES.some((z) => z.key === d.domain);
+  const isDragTarget = editMode && dragTargetZoneKey === d.domain;
 
   // Inline rename
   const [isRenaming, setIsRenaming] = useState(false);
@@ -101,9 +104,16 @@ function ZoneNode({ id, data, selected }: NodeProps) {
 
   return (
     <div
-      className={`w-full h-full rounded-[18px] border transition-colors nodrag ${bgClass} ${
-        editMode && selected ? 'border-primary ring-2 ring-primary/20' : editMode ? 'border-primary/40 border-dashed' : borderClass
+      className={`w-full h-full rounded-[18px] border transition-all duration-200 nodrag ${bgClass} ${
+        isDragTarget
+          ? 'border-primary border-2 ring-4 ring-primary/20 scale-[1.01]'
+          : editMode && selected
+            ? 'border-primary ring-2 ring-primary/20'
+            : editMode
+              ? 'border-primary/40 border-dashed'
+              : borderClass
       }`}
+      style={isDragTarget ? { backgroundColor: d.color?.replace(/[\d.]+\)$/, '0.12)') } : undefined}
     >
       {/* Resize handle — edit mode only, onResizeEnd saves to store */}
       {editMode && (

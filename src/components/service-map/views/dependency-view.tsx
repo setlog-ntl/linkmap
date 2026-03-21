@@ -57,9 +57,9 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     connectingFrom, setConnectingFrom,
     editMode, pendingOverrides, pendingMainServiceId,
     setPendingMainServiceId, clearPendingChanges, setEditMode,
-    setHoveredNodeId,
+    setHoveredNodeId, setDragTargetZoneKey,
     zoneConfigs, layoutPreset, zonePositionOverrides, zoneSizeOverrides,
-    setZonePositionOverride, getActiveZones,
+    setZonePositionOverride, getActiveZones, setPendingOverride,
   } = useServiceMapStore();
 
   const { resolvedTheme } = useTheme();
@@ -127,21 +127,55 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
   const [nodes, setNodes] = useState<Node[]>(layoutedNodes);
   const [edges, setEdges] = useState<Edge[]>(layoutedEdges);
   const initialFitDone = useRef(false);
+  const nodesRef = useRef(nodes);
+  nodesRef.current = nodes;
+
+  // Find which zone contains a given point (for drag-to-zone)
+  const findZoneAtPoint = useCallback((x: number, y: number): string | null => {
+    const zoneNodes = nodesRef.current.filter((n) => n.id.startsWith('zone-'));
+    for (const zone of zoneNodes) {
+      const zw = (zone.style?.width as number) || 0;
+      const zh = (zone.style?.height as number) || 0;
+      if (x >= zone.position.x && x <= zone.position.x + zw &&
+          y >= zone.position.y && y <= zone.position.y + zh) {
+        return zone.id.replace('zone-', '');
+      }
+    }
+    return null;
+  }, []);
 
   const onNodesChange = useCallback((changes: NodeChange<Node>[]) => {
     setNodes((nds) => applyNodeChanges(changes, nds));
-    // Capture zone drag end for persistence (position only)
-    // NOTE: dimensions changes are NOT captured here — they cause infinite loops
-    // (NodeResizer → dimensions change → store update → layout recompute → NodeResizer → ...)
-    // Zone resize is handled by NodeResizer's onResizeEnd in zone-node.tsx
-    if (editMode) {
-      for (const change of changes) {
-        if (change.type === 'position' && change.dragging === false && change.id.startsWith('zone-') && change.position) {
-          setZonePositionOverride(change.id, change.position);
+    if (!editMode) return;
+
+    for (const change of changes) {
+      // Zone drag end → save position override
+      if (change.type === 'position' && change.dragging === false && change.id.startsWith('zone-') && change.position) {
+        setZonePositionOverride(change.id, change.position);
+      }
+
+      // Service node dragging → highlight target zone
+      if (change.type === 'position' && !change.id.startsWith('zone-') && change.position) {
+        const cx = change.position.x + 80;  // NODE_WIDTH / 2
+        const cy = change.position.y + 36;  // NODE_HEIGHT / 2
+        if (change.dragging) {
+          setDragTargetZoneKey(findZoneAtPoint(cx, cy));
+        } else {
+          // Drop: assign to zone if different
+          const targetZone = findZoneAtPoint(cx, cy);
+          setDragTargetZoneKey(null);
+          if (targetZone) {
+            const currentDomain = nodesResult.getDomain(change.id);
+            const currentZone = currentDomain ? domainToZone(currentDomain as ServiceDomain, activeZones) : null;
+            if (targetZone !== currentZone) {
+              setPendingOverride(change.id, targetZone);
+              toast.success(`Zone "${targetZone.toUpperCase()}"(으)로 이동됨`);
+            }
+          }
         }
       }
     }
-  }, [editMode, setZonePositionOverride]);
+  }, [editMode, setZonePositionOverride, setDragTargetZoneKey, findZoneAtPoint, nodesResult, activeZones, setPendingOverride]);
   const onEdgesChange = useCallback((changes: EdgeChange<Edge>[]) => { setEdges((eds) => applyEdgeChanges(changes, eds)); }, []);
 
   useEffect(() => { setNodes(layoutedNodes); setEdges(layoutedEdges); }, [layoutedNodes, layoutedEdges]);

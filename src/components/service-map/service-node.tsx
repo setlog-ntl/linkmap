@@ -48,9 +48,16 @@ interface ServiceNodeData {
   [key: string]: unknown;
 }
 
+const ZONE_BADGE_COLORS: Record<string, { bg: string; text: string }> = {
+  frontend: { bg: '#3b82f618', text: '#3b82f6' },
+  backend: { bg: '#8b5cf618', text: '#8b5cf6' },
+  devtools: { bg: '#eab30818', text: '#eab308' },
+};
+
 function ServiceNode({ id, data }: NodeProps) {
   const d = data as unknown as ServiceNodeData;
   const [hovered, setHovered] = useState(false);
+  const editMode = useServiceMapStore((s) => s.editMode);
   const hoveredEdgeNodes = useServiceMapStore((s) => s.hoveredEdgeNodes);
   const isEdgeHighlighted = hoveredEdgeNodes
     ? hoveredEdgeNodes.source === id || hoveredEdgeNodes.target === id
@@ -186,6 +193,19 @@ function ServiceNode({ id, data }: NodeProps) {
         className="absolute top-2.5 right-2.5 w-[6px] h-[6px] rounded-full"
         style={{ backgroundColor: status.hex, opacity: d.status === 'not_started' ? 0.4 : 1 }}
       />
+
+      {/* Zone badge — edit mode only, shows zone membership */}
+      {editMode && d.domain && (
+        <div
+          className="absolute -top-1.5 -left-1.5 px-1 py-0 rounded text-[7px] font-bold tracking-wider uppercase pointer-events-none z-20"
+          style={{
+            backgroundColor: ZONE_BADGE_COLORS[d.domain as string]?.bg || '#94a3b818',
+            color: ZONE_BADGE_COLORS[d.domain as string]?.text || '#94a3b8',
+          }}
+        >
+          {(d.domain as string).slice(0, 3)}
+        </div>
+      )}
 
       {/* Subtle status indicator ring for in_progress / error */}
       {(d.status === 'in_progress' || d.status === 'error') && (
