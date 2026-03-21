@@ -631,14 +631,20 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       // Step 1: 코드 생성
       const generatedFiles = generateFiles(moduleState, fileCache, templateSlug ?? undefined);
 
+      // 실제 변경된 파일만 필터링 (동일 내용 제외)
+      const changedFiles = generatedFiles.filter(
+        (gf) => fileCache[gf.path] !== gf.content
+      );
+
       let totalAdded = 0;
       let totalRemoved = 0;
-      for (const gf of generatedFiles) {
+      for (const gf of changedFiles) {
         const stats = computeDiffStats(fileCache[gf.path], gf.content);
         totalAdded += stats.added;
         totalRemoved += stats.removed;
       }
 
+      // 로컬 캐시 + 에디터 즉시 반영 (커밋 여부와 무관)
       for (const gf of generatedFiles) {
         setFileCache((prev) => ({ ...prev, [gf.path]: gf.content }));
         if (gf.path === selectedPath) {
@@ -648,23 +654,28 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
 
       dispatchDialog({ type: 'ADVANCE_STEP', stepId: 'generate' });
 
-      // Step 2: GitHub 커밋
-      const filesToSave = generatedFiles.map((gf) => ({
-        path: gf.path,
-        content: gf.content,
-      }));
+      // Step 2: GitHub 커밋 (변경된 파일이 있을 때만)
+      if (changedFiles.length > 0) {
+        const filesToSave = changedFiles.map((gf) => ({
+          path: gf.path,
+          content: gf.content,
+        }));
 
-      try {
-        await batchApply.mutateAsync({
-          deployId,
-          files: filesToSave,
-        });
-      } catch (err) {
-        if (err instanceof Error && (err.message.includes('409') || err.message.includes('conflict'))) {
-          queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.files(deployId) });
-          throw new Error('파일 충돌이 발생했습니다. 잠시 후 다시 시도해주세요.');
+        try {
+          await batchApply.mutateAsync({
+            deployId,
+            files: filesToSave,
+          });
+        } catch (err) {
+          if (err instanceof Error && (err.message.includes('409') || err.message.includes('conflict'))) {
+            queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.files(deployId) });
+            throw new Error('파일 충돌이 발생했습니다. 잠시 후 다시 시도해주세요.');
+          }
+          throw err;
         }
-        throw err;
+      } else if (!options?.deploy) {
+        // 변경 없고 배포도 아님 → 알림
+        toast.info('변경된 내용이 없습니다');
       }
 
       setHasUnsavedChanges(false);
@@ -672,14 +683,27 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
 
       dispatchDialog({
         type: 'COMPLETE',
-        diffStats: { fileCount: generatedFiles.length, added: totalAdded, removed: totalRemoved },
+        diffStats: { fileCount: changedFiles.length, added: totalAdded, removed: totalRemoved },
       });
 
       // 저장 완료 → 미리보기는 항상 즉시 반영 (modulePreviewHtml이 moduleState 기반)
       setShowLiveAfterDeploy(false);
 
       if (options?.deploy) {
-        // 배포 시작: 빌드 추적 (미리보기는 실시간 프리뷰 유지, 오버레이로 배포 상태 표시)
+        // 변경 파일이 없어도 배포 트리거 (이전 저장 코드로 재빌드)
+        if (changedFiles.length === 0) {
+          // 이미 커밋된 코드로 GitHub Pages 재빌드 트리거
+          try {
+            await fetch(`/api/oneclick/deployments/${deployId}/redeploy`, { method: 'POST' });
+          } catch {
+            // 재배포 API 실패 시 fallback: 빈 커밋으로라도 Actions 트리거
+            await batchApply.mutateAsync({
+              deployId,
+              files: generatedFiles.map((gf) => ({ path: gf.path, content: gf.content })),
+            });
+          }
+        }
+        // 배포 추적 시작
         queryClient.removeQueries({ queryKey: queryKeys.oneclick.status(deployId) });
         deployStartedAtRef.current = Date.now();
         seenBuildingRef.current = false;

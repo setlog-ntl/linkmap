@@ -24,9 +24,9 @@ export async function POST(
 
   if (!deploy) return notFoundError('배포');
 
-  // Only allow redeploy from error state
-  if (deploy.deploy_status !== 'error') {
-    return apiError('오류 상태의 배포만 재배포할 수 있습니다', 400);
+  // 빌드 중인 상태에서는 재배포 방지 (중복 트리거 방지)
+  if (['building', 'creating', 'pending'].includes(deploy.deploy_status)) {
+    return apiError('이미 배포가 진행 중입니다', 400);
   }
 
   if (!deploy.forked_repo_full_name) {
@@ -84,7 +84,7 @@ export async function POST(
     return apiError('워크플로우 재실행에 실패했습니다. GitHub 레포지토리를 확인해주세요.', 500);
   }
 
-  // Update DB: reset to building, reset retry_count
+  // Update DB: reset to building + updated_at 갱신 (타임아웃 기준 시각)
   await supabase
     .from('homepage_deploys')
     .update({
@@ -92,6 +92,7 @@ export async function POST(
       pages_status: 'building',
       deploy_error_message: null,
       retry_count: 0,
+      updated_at: new Date().toISOString(),
     })
     .eq('id', id);
 
