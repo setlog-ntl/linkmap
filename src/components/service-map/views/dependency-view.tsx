@@ -132,20 +132,54 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     zonePositionOverrides, zoneSizeOverrides,
   });
 
-  // Build zone-level visual edges
+  // Compute optimal handle pair based on relative node positions
+  const computeHandles = useCallback((srcId: string, tgtId: string) => {
+    const srcNode = nodesRef.current.find((n) => n.id === srcId);
+    const tgtNode = nodesRef.current.find((n) => n.id === tgtId);
+    if (!srcNode || !tgtNode) return { sourceHandle: 'zs-right', targetHandle: 'zt-left' };
+
+    const srcCx = srcNode.position.x + ((srcNode.style?.width as number) || 160) / 2;
+    const srcCy = srcNode.position.y + ((srcNode.style?.height as number) || 72) / 2;
+    const tgtCx = tgtNode.position.x + ((tgtNode.style?.width as number) || 160) / 2;
+    const tgtCy = tgtNode.position.y + ((tgtNode.style?.height as number) || 72) / 2;
+
+    const dx = tgtCx - srcCx;
+    const dy = tgtCy - srcCy;
+    const isZoneSrc = srcId.startsWith('zone-');
+    const isZoneTgt = tgtId.startsWith('zone-');
+    const sp = isZoneSrc ? 'zs' : 'source';
+    const tp = isZoneTgt ? 'zt' : '';
+
+    // Pick direction based on dominant axis
+    if (Math.abs(dx) >= Math.abs(dy)) {
+      return dx > 0
+        ? { sourceHandle: `${sp}-right`, targetHandle: tp ? `${tp}-left` : 'left' }
+        : { sourceHandle: `${sp}-left`, targetHandle: tp ? `${tp}-right` : 'right' };
+    }
+    return dy > 0
+      ? { sourceHandle: `${sp}-bottom`, targetHandle: tp ? `${tp}-top` : 'top' }
+      : { sourceHandle: `${sp}-top`, targetHandle: tp ? `${tp}-bottom` : 'bottom' };
+  }, []);
+
+  // Build zone-level visual edges with optimized handle directions
   const zoneEdges = useMemo<Edge[]>(() => {
-    return zoneConnections.map((zc) => ({
-      id: `zc-${zc.id}`,
-      source: zc.source,
-      target: zc.target,
-      type: 'connection',
-      zIndex: 5,
-      data: {
-        connectionType: zc.connectionType,
-        onDelete: (edgeId: string) => removeZoneConnection(edgeId.replace('zc-', '')),
-      },
-    }));
-  }, [zoneConnections, removeZoneConnection]);
+    return zoneConnections.map((zc) => {
+      const handles = computeHandles(zc.source, zc.target);
+      return {
+        id: `zc-${zc.id}`,
+        source: zc.source,
+        target: zc.target,
+        sourceHandle: handles.sourceHandle,
+        targetHandle: handles.targetHandle,
+        type: 'connection',
+        zIndex: 5,
+        data: {
+          connectionType: zc.connectionType,
+          onDelete: (edgeId: string) => removeZoneConnection(edgeId.replace('zc-', '')),
+        },
+      };
+    });
+  }, [zoneConnections, removeZoneConnection, computeHandles]);
 
   const allEdges = useMemo(() => [...layoutedEdges, ...zoneEdges], [layoutedEdges, zoneEdges]);
 
@@ -264,15 +298,6 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     setEdgePopover({ edgeId: edge.id, connectionId, currentType, x, y });
   }, [isReadOnly, edges]);
 
-  // Resolve zone ID → all services in that zone
-  const getServicesInZone = useCallback((zoneKey: string) => {
-    return data.services.filter((s) => {
-      const domain = nodesResult.getDomain(s.id);
-      const zone = domain ? domainToZone(domain as ServiceDomain, activeZones) : null;
-      return zone === zoneKey;
-    });
-  }, [data.services, nodesResult, activeZones]);
-
   const handleConnectionConfirm = useCallback((type: UserConnectionType) => {
     if (!connectionDialog) return;
     const { sourceId, targetId } = connectionDialog;
@@ -285,37 +310,22 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
       const targetSvc = data.services.find((s) => s.id === targetId);
       if (sourceSvc && targetSvc) interactions.createConnection(sourceSvc.service_id, targetSvc.service_id, type);
     } else {
-      // Zone involved: create visual zone edge + underlying service connections
+      // Zone involved: create zone-level visual edge ONLY (no service expansion)
       addZoneConnection({
         id: `${Date.now()}`,
         source: sourceId,
         target: targetId,
         connectionType: type,
       });
-
-      // Also create underlying service-to-service connections
-      const sourceServices = isSourceZone
-        ? getServicesInZone(sourceId.replace('zone-', ''))
-        : [data.services.find((s) => s.id === sourceId)].filter(Boolean);
-      const targetServices = isTargetZone
-        ? getServicesInZone(targetId.replace('zone-', ''))
-        : [data.services.find((s) => s.id === targetId)].filter(Boolean);
-
-      let count = 0;
-      for (const src of sourceServices) {
-        for (const tgt of targetServices) {
-          if (src && tgt && src.service_id !== tgt.service_id) {
-            interactions.createConnection(src.service_id, tgt.service_id, type);
-            count++;
-          }
-        }
-      }
-      const zoneName = isSourceZone
-        ? activeZones.find((z) => z.key === sourceId.replace('zone-', ''))?.label
-        : activeZones.find((z) => z.key === targetId.replace('zone-', ''))?.label;
-      toast.success(`Zone "${zoneName}" 연결 생성 (${count}개 서비스 연결 포함)`);
+      const srcLabel = isSourceZone
+        ? activeZones.find((z) => z.key === sourceId.replace('zone-', ''))?.label || sourceId
+        : '서비스';
+      const tgtLabel = isTargetZone
+        ? activeZones.find((z) => z.key === targetId.replace('zone-', ''))?.label || targetId
+        : '서비스';
+      toast.success(`${srcLabel} → ${tgtLabel} Zone 연결 생성`);
     }
-  }, [connectionDialog, data.services, interactions, getServicesInZone, addZoneConnection, activeZones]);
+  }, [connectionDialog, data.services, interactions, addZoneConnection, activeZones]);
 
   // Dialog labels — handle zone IDs
   const resolveDialogInfo = useCallback((id: string) => {
