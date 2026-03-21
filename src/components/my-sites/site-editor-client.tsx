@@ -564,6 +564,26 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     }
   }, [pendingTabPath]);
 
+  // ── 코드(fileCache) → 모듈 상태 재동기화 ──
+  // 코드 에디터에서 직접 config.ts를 수정했거나, 모듈 뷰로 전환할 때 호출
+  const syncModuleStateFromCode = useCallback(() => {
+    if (!moduleSchema || !templateSlug) return;
+    const configContent = fileCache['src/lib/config.ts'];
+    const pageContent = fileCache['src/app/page.tsx'];
+    if (!configContent) return;
+
+    const parsed = parseConfigToState(configContent, moduleSchema);
+    if (pageContent) {
+      const { enabled, order } = parsePageToEnabledModules(pageContent, templateSlug);
+      if (enabled.length > 0) {
+        parsed.enabled = enabled;
+        parsed.order = order;
+      }
+    }
+    setModuleState(parsed);
+    moduleStateInitialRef.current = parsed;
+  }, [moduleSchema, templateSlug, fileCache]);
+
   // 저장
   const handleSave = useCallback(async () => {
     if (!selectedPath || !fileDetail) return;
@@ -581,11 +601,17 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       setHasUnsavedChanges(false);
       setLastSavedAt(new Date());
       fileDetail.sha = result.sha;
+      // config.ts 또는 page.tsx 직접 편집 시 모듈 상태 재동기화
+      if (selectedPath === 'src/lib/config.ts' || selectedPath === 'src/app/page.tsx') {
+        setFileCache((prev) => ({ ...prev, [selectedPath]: editorContent }));
+        // 다음 틱에서 동기화 (fileCache 업데이트 반영 후)
+        setTimeout(() => syncModuleStateFromCode(), 0);
+      }
       toast.success(t(locale, 'editor.saved'));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t(locale, 'editor.saveFailed'));
     }
-  }, [selectedPath, fileDetail, editorContent, deployId, updateFile, locale, contentLoading]);
+  }, [selectedPath, fileDetail, editorContent, deployId, updateFile, locale, contentLoading, syncModuleStateFromCode]);
 
   // 배포
   const handleDeploy = useCallback(async () => {
@@ -678,6 +704,10 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
 
       setHasUnsavedChanges(false);
       setLastSavedAt(new Date());
+      // 모듈 저장 후 dirty 비교 기준 갱신 (불필요한 초안 자동저장 방지)
+      if (moduleState) {
+        moduleStateInitialRef.current = moduleState;
+      }
 
       dispatchDialog({
         type: 'COMPLETE',
@@ -1118,7 +1148,11 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
             </button>
             {moduleSchema && (
               <button
-                onClick={() => setRightPanel(rightPanel === 'modules' ? 'preview' : 'modules')}
+                onClick={() => {
+                  const next = rightPanel === 'modules' ? 'preview' : 'modules';
+                  if (next === 'modules') syncModuleStateFromCode();
+                  setRightPanel(next);
+                }}
                 className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
                   rightPanel === 'modules'
                     ? 'bg-primary text-primary-foreground shadow-sm'
@@ -1223,7 +1257,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         </button>
         {moduleSchema && (
           <button
-            onClick={() => setMobileTab('modules')}
+            onClick={() => { syncModuleStateFromCode(); setMobileTab('modules'); }}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors ${
               mobileTab === 'modules'
                 ? 'text-foreground border-b-2 border-primary bg-background'
