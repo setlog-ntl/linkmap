@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import {
   ReactFlow,
   Controls,
@@ -15,6 +15,7 @@ import {
   type ReactFlowInstance,
   type Connection,
   BackgroundVariant,
+  useReactFlow,
 } from '@xyflow/react';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
@@ -31,6 +32,7 @@ import { MapLegend } from '@/components/service-map/map-legend';
 import { MapNarratorPanel } from '@/components/ai/map-narrator-panel';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import { EdgeEditPopover } from '@/components/service-map/edge-edit-popover';
+import { NodeEditToolbar } from '@/components/service-map/node-edit-toolbar';
 import { useUpsertLayerOverride } from '@/lib/queries/layer-overrides';
 import { useUpdateConnection } from '@/lib/queries/connections';
 import { useUpdateProject } from '@/lib/queries/projects';
@@ -77,6 +79,10 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     x: number;
     y: number;
   } | null>(null);
+
+  // Selected node for floating toolbar
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const rfInstance = useRef<ReactFlowInstance | null>(null);
 
   const upsertLayerOverride = useUpsertLayerOverride(projectId);
   const updateProject = useUpdateProject();
@@ -181,6 +187,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
   useEffect(() => { setNodes(layoutedNodes); setEdges(layoutedEdges); }, [layoutedNodes, layoutedEdges]);
 
   const handleInit = useCallback((instance: ReactFlowInstance) => {
+    rfInstance.current = instance;
     setTimeout(() => { instance.fitView({ padding: 0.4 }); initialFitDone.current = true; }, 100);
   }, []);
 
@@ -300,8 +307,15 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
             style={{ width: '100%', height: '100%' }}
             nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
             onConnect={isReadOnly ? undefined : handleNativeConnect}
-            onNodeClick={isReadOnly ? undefined : interactions.handleNodeClick}
-            onPaneClick={isReadOnly ? undefined : interactions.handlePaneClick}
+            onNodeClick={isReadOnly ? undefined : (e, node) => {
+              interactions.handleNodeClick(e, node);
+              if (editMode && node.type === 'service') setSelectedNodeId(node.id);
+              else setSelectedNodeId(null);
+            }}
+            onPaneClick={isReadOnly ? undefined : () => {
+              interactions.handlePaneClick();
+              setSelectedNodeId(null);
+            }}
             onNodeContextMenu={isReadOnly ? undefined : interactions.handleNodeContextMenu}
             onPaneContextMenu={isReadOnly ? undefined : interactions.handlePaneContextMenu}
             onNodeMouseEnter={handleNodeMouseEnter}
@@ -328,6 +342,28 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
             )}
           </ReactFlow>
           {!isReadOnly && <EditSaveBar onSave={handleSaveChanges} saving={saving} />}
+          {/* Floating edit toolbar above selected node */}
+          {editMode && selectedNodeId && (() => {
+            const selectedNode = nodes.find((n) => n.id === selectedNodeId);
+            if (!selectedNode || !rfInstance.current) return null;
+            // Convert node position (flow coords) to screen coords
+            const screenPos = rfInstance.current.flowToScreenPosition(selectedNode.position);
+            const canvasRect = document.querySelector('.service-map-canvas')?.getBoundingClientRect();
+            if (!canvasRect) return null;
+            const relX = screenPos.x - canvasRect.left;
+            const relY = screenPos.y - canvasRect.top;
+            const currentZone = getCurrentZone(selectedNodeId);
+            return (
+              <NodeEditToolbar
+                nodeId={selectedNodeId}
+                currentZoneKey={currentZone}
+                position={{ x: relX + 80, y: relY }}
+                onStartConnect={(nid) => { interactions.handleContextStartConnect(nid); setSelectedNodeId(null); }}
+                onViewDetail={(nid) => { interactions.handleContextViewDetail(nid); setSelectedNodeId(null); }}
+                onRemoveService={(nid) => { interactions.handleContextRemoveService(nid); setSelectedNodeId(null); }}
+              />
+            );
+          })()}
           {showLegend && <MapLegend onClose={() => setShowLegend(false)} />}
           {edgePopover && (
             <EdgeEditPopover

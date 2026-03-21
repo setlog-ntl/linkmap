@@ -49,11 +49,15 @@ const DOMAIN_TO_ZONE: Record<ServiceDomain, string> = {
   sns: 'frontend',
 };
 
-export function domainToZone(domain: ServiceDomain | null, zones?: ZoneConfig[]): string {
+export function domainToZone(domain: ServiceDomain | string | null, zones?: ZoneConfig[]): string {
   if (!domain) return 'backend';
-  const key = DOMAIN_TO_ZONE[domain] ?? 'backend';
-  if (zones && zones.length > 0 && !zones.some((z) => z.key === key)) {
-    return zones[0].key;
+  // If domain is already a valid zone key (e.g. from pendingOverrides/layerOverrides), return directly
+  const activeZones = zones ?? DEFAULT_ZONES;
+  if (activeZones.some((z) => z.key === domain)) return domain;
+  // Otherwise map ServiceDomain → ZoneKey
+  const key = DOMAIN_TO_ZONE[domain as ServiceDomain] ?? 'backend';
+  if (activeZones.length > 0 && !activeZones.some((z) => z.key === key)) {
+    return activeZones[0].key;
   }
   return key;
 }
