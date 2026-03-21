@@ -354,9 +354,15 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       cleanup();
     } else if (status === 'error' || status === 'timeout') {
       const msg = status === 'timeout'
-        ? '배포 시간이 초과되었습니다 (10분). 재배포를 시도해주세요.'
+        ? '배포 시간이 초과되었습니다. 재배포를 시도해주세요.'
         : deployStatusData.deploy_error || 'GitHub Actions 빌드 실패';
-      toast.error(msg);
+      toast.error(msg, {
+        duration: 10000,
+        action: {
+          label: '재배포',
+          onClick: () => handleRetryDeploy(),
+        },
+      });
       setDeployState('idle');
       cleanup();
     }
@@ -669,19 +675,17 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         diffStats: { fileCount: generatedFiles.length, added: totalAdded, removed: totalRemoved },
       });
 
+      // 저장 완료 → 미리보기는 항상 즉시 반영 (modulePreviewHtml이 moduleState 기반)
+      setShowLiveAfterDeploy(false);
+
       if (options?.deploy) {
-        // 빌드 추적은 미리보기 오버레이에서만 표시
+        // 배포 시작: 빌드 추적 (미리보기는 실시간 프리뷰 유지, 오버레이로 배포 상태 표시)
         queryClient.removeQueries({ queryKey: queryKeys.oneclick.status(deployId) });
         deployStartedAtRef.current = Date.now();
         seenBuildingRef.current = false;
         setDeployState('deploying');
         setDeployOrigin('module-deploy');
         setAwaitingDeploy(true);
-      } else {
-        // 저장만 모드: 모듈 실시간 프리뷰 유지 (배포 없이 커밋만 했으므로 라이브 URL은 이전 버전)
-        // modulePreviewHtml은 moduleState 변경 시 자동 재생성되므로 별도 갱신 불필요
-        // rightPanel을 'modules'로 유지하여 실시간 프리뷰 계속 표시
-        setShowLiveAfterDeploy(false);
       }
     } catch (err) {
       dispatchDialog({
@@ -796,29 +800,30 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     }
   })();
 
-  // 빌드 진행 오버레이 (미리보기 위에 표시)
+  // 빌드 진행 배너 (미리보기 하단에 표시 — 미리보기 콘텐츠는 가리지 않음)
   const renderBuildOverlay = () => {
     if (!awaitingDeploy) return null;
     return (
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/80 backdrop-blur-[2px]">
-        <span className="relative mb-3">
-          <Github className="h-7 w-7 text-primary animate-github-wiggle" />
-          <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-        </span>
-        <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
-          {buildStatusLabel || '배포 진행 중...'}
-          <span className="flex gap-[2px]">
-            <span className="h-[3px] w-[3px] rounded-full bg-current animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="h-[3px] w-[3px] rounded-full bg-current animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="h-[3px] w-[3px] rounded-full bg-current animate-bounce" style={{ animationDelay: '300ms' }} />
+      <div className="absolute bottom-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm border-t px-4 py-3">
+        <div className="flex items-center gap-3">
+          <span className="relative shrink-0">
+            <Github className="h-5 w-5 text-primary animate-github-wiggle" />
+            <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
           </span>
-        </p>
-        <p className="text-xs text-muted-foreground mt-1">
-          GitHub Actions로 빌드 중이며, 보통 1~3분 정도 걸려요
-        </p>
-        <p className="text-xs text-muted-foreground/60 mt-0.5">
-          완료되면 자동으로 최신 화면을 표시합니다
-        </p>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium text-foreground flex items-center gap-1.5">
+              {buildStatusLabel || '배포 진행 중...'}
+              <span className="flex gap-[2px]">
+                <span className="h-[3px] w-[3px] rounded-full bg-current animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="h-[3px] w-[3px] rounded-full bg-current animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="h-[3px] w-[3px] rounded-full bg-current animate-bounce" style={{ animationDelay: '300ms' }} />
+              </span>
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              미리보기는 저장된 내용을 표시 중 · 배포 완료 시 실제 사이트에 반영
+            </p>
+          </div>
+        </div>
       </div>
     );
   };
@@ -1327,20 +1332,20 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                 {awaitingDeploy ? (
                   <Badge variant="secondary" className="text-[10px] px-1.5 py-0 gap-1 bg-amber-500/20 text-amber-500">
                     <Github className="h-2.5 w-2.5 animate-github-wiggle" />
-                    {buildStatusLabel || '빌드 중...'}
+                    배포 중
                   </Badge>
                 ) : showLiveAfterDeploy ? (
                   <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-green-600">
                     {t(locale, 'editor.deployedBadge')}
                   </Badge>
+                ) : modulePreviewHtml ? (
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 gap-1">
+                    <Eye className="h-2.5 w-2.5" />
+                    실시간 미리보기
+                  </Badge>
                 ) : isLivePreviewable ? (
                   <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
                     LIVE
-                  </Badge>
-                ) : rightPanel === 'modules' && modulePreviewHtml ? (
-                  <Badge variant="default" className="text-[10px] px-1.5 py-0 gap-1 bg-green-600 text-white">
-                    <Eye className="h-2.5 w-2.5" />
-                    실시간
                   </Badge>
                 ) : null}
                 {/* 반응형 뷰포트 토글 */}
