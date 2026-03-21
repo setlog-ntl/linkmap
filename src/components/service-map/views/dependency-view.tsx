@@ -78,9 +78,8 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     editMode, pendingOverrides, pendingMainServiceId,
     setPendingMainServiceId, clearPendingChanges, setEditMode,
     setHoveredNodeId, setDragTargetZoneKey,
-    zoneConfigs, layoutPreset, zonePositionOverrides, zoneSizeOverrides,
+    layoutPreset, zonePositionOverrides, zoneSizeOverrides,
     setZonePositionOverride, getActiveZones, setPendingOverride,
-    setZoneConfigs, setLayoutPreset,
     pendingNodePositions, setPendingNodePosition,
     zoneConnections, addZoneConnection, removeZoneConnection,
     filterStatuses, toggleFilterStatus,
@@ -207,6 +206,9 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
   const nodesRef = useRef<Node[]>(layoutedNodes);
   const initialFitDone = useRef(false);
 
+  // Track zone position at drag start for delta calculation
+  const zoneDragStartRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+
   // Compute optimal handle pair based on relative node positions
   const computeHandles = useCallback((srcId: string, tgtId: string) => {
     const srcNode = nodesRef.current.find((n) => n.id === srcId);
@@ -236,7 +238,11 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
       : { sourceHandle: `${sp}-top`, targetHandle: tp ? `${tp}-bottom` : 'bottom' };
   }, []);
 
+  const [nodes, setNodes] = useState<Node[]>(layoutedNodes);
+  nodesRef.current = nodes;
+
   // Build zone-level visual edges with optimized handle directions
+  // Include `nodes` in deps so handles recalculate when zones are repositioned
   const zoneEdges = useMemo<Edge[]>(() => {
     return zoneConnections.map((zc) => {
       const handles = computeHandles(zc.source, zc.target);
@@ -254,13 +260,11 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
         },
       };
     });
-  }, [zoneConnections, removeZoneConnection, computeHandles]);
+  }, [zoneConnections, removeZoneConnection, computeHandles, nodes]);
 
   const allEdges = useMemo(() => [...layoutedEdges, ...zoneEdges], [layoutedEdges, zoneEdges]);
 
-  const [nodes, setNodes] = useState<Node[]>(layoutedNodes);
   const [edges, setEdges] = useState<Edge[]>(allEdges);
-  nodesRef.current = nodes;
 
   // Find which zone contains a given point (for drag-to-zone)
   const findZoneAtPoint = useCallback((x: number, y: number): string | null => {
@@ -277,13 +281,74 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
   }, []);
 
   const onNodesChange = useCallback((changes: NodeChange<Node>[]) => {
-    setNodes((nds) => applyNodeChanges(changes, nds));
+    setNodes((prevNodes) => {
+      let updated = applyNodeChanges(changes, prevNodes);
+
+      if (!editMode) return updated;
+
+      // Zone drag: move contained service nodes together
+      for (const change of changes) {
+        if (change.type !== 'position' || !change.id.startsWith('zone-') || !change.position) continue;
+
+        if (change.dragging) {
+          // Record start position on first drag event
+          if (!zoneDragStartRef.current.has(change.id)) {
+            const prevZone = prevNodes.find((n) => n.id === change.id);
+            if (prevZone) {
+              zoneDragStartRef.current.set(change.id, { ...prevZone.position });
+            }
+          }
+
+          // Move contained nodes by per-frame delta
+          const prevZone = prevNodes.find((n) => n.id === change.id);
+          if (prevZone) {
+            const dx = change.position.x - prevZone.position.x;
+            const dy = change.position.y - prevZone.position.y;
+            if (dx !== 0 || dy !== 0) {
+              const zoneKey = change.id.replace('zone-', '');
+              updated = updated.map((node) => {
+                if (node.id.startsWith('zone-')) return node;
+                const domain = nodesResult.getDomain(node.id);
+                const nodeZone = domain ? domainToZone(domain as ServiceDomain, activeZones) : null;
+                if (nodeZone !== zoneKey) return node;
+                return {
+                  ...node,
+                  position: { x: node.position.x + dx, y: node.position.y + dy },
+                };
+              });
+            }
+          }
+        }
+      }
+
+      return updated;
+    });
+
     if (!editMode) return;
 
     for (const change of changes) {
-      // Zone drag end → save position override
+      // Zone drag end → save position override + update contained node positions
       if (change.type === 'position' && change.dragging === false && change.id.startsWith('zone-') && change.position) {
         setZonePositionOverride(change.id, change.position);
+
+        // Update manually-positioned nodes by total delta
+        const startPos = zoneDragStartRef.current.get(change.id);
+        if (startPos) {
+          const totalDx = change.position.x - startPos.x;
+          const totalDy = change.position.y - startPos.y;
+          if (totalDx !== 0 || totalDy !== 0) {
+            const zoneKey = change.id.replace('zone-', '');
+            // Update pending positions for nodes that had custom positions
+            for (const [nodeId, pos] of Object.entries(mergedNodePositions)) {
+              const domain = nodesResult.getDomain(nodeId);
+              const nodeZone = domain ? domainToZone(domain as ServiceDomain, activeZones) : null;
+              if (nodeZone === zoneKey) {
+                setPendingNodePosition(nodeId, { x: pos.x + totalDx, y: pos.y + totalDy });
+              }
+            }
+          }
+          zoneDragStartRef.current.delete(change.id);
+        }
       }
 
       // Service node dragging → highlight target zone + save position
@@ -302,12 +367,13 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
             const currentZone = currentDomain ? domainToZone(currentDomain as ServiceDomain, activeZones) : null;
             if (targetZone !== currentZone) {
               setPendingOverride(change.id, targetZone);
+              toast.success(`${targetZone.toUpperCase()} Zone으로 이동`);
             }
           }
         }
       }
     }
-  }, [editMode, setZonePositionOverride, setDragTargetZoneKey, findZoneAtPoint, nodesResult, activeZones, setPendingOverride]);
+  }, [editMode, setZonePositionOverride, setDragTargetZoneKey, findZoneAtPoint, nodesResult, activeZones, setPendingOverride, setPendingNodePosition, mergedNodePositions]);
   const onEdgesChange = useCallback((changes: EdgeChange<Edge>[]) => { setEdges((eds) => applyEdgeChanges(changes, eds)); }, []);
 
   useEffect(() => { setNodes(layoutedNodes); setEdges([...layoutedEdges, ...zoneEdges]); }, [layoutedNodes, layoutedEdges, zoneEdges]);
@@ -334,14 +400,18 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
         if (canRedo()) redo();
         return;
       }
-      // ESC to cancel connecting mode
-      if (e.key === 'Escape' && connectingFrom) {
-        setConnectingFrom(null);
+      // ESC to cancel connecting mode or deselect node
+      if (e.key === 'Escape') {
+        if (connectingFrom) {
+          setConnectingFrom(null);
+        } else if (selectedNodeId) {
+          setSelectedNodeId(null);
+        }
       }
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isReadOnly, undo, redo, canUndo, canRedo, connectingFrom, setConnectingFrom]);
+  }, [isReadOnly, undo, redo, canUndo, canRedo, connectingFrom, setConnectingFrom, selectedNodeId]);
 
   const handleNativeConnect = useCallback((connection: Connection) => {
     if (!connection.source || !connection.target || connection.source === connection.target) return;

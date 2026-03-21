@@ -2,7 +2,7 @@
 
 import { memo, useState, useRef, useEffect, useCallback } from 'react';
 import { NodeResizer, Handle, Position, type NodeProps, type ResizeParams } from '@xyflow/react';
-import { Monitor, Server, Wrench, Box, Trash2, Shrink } from 'lucide-react';
+import { Monitor, Server, Wrench, Box, Trash2, Shrink, GripVertical, Move } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import { DEFAULT_ZONES, ZONE_COLOR_PALETTE, computeAutoFitSize } from '@/lib/layout/zone-layout';
@@ -110,11 +110,18 @@ function ZoneNode({ id, data, selected }: NodeProps) {
           : editMode && selected
             ? 'border-primary ring-2 ring-primary/20'
             : editMode
-              ? 'border-primary/40 border-dashed'
+              ? 'border-primary/40 border-dashed hover:border-primary/60'
               : borderClass
       }`}
       style={isDragTarget ? { backgroundColor: d.color?.replace(/[\d.]+\)$/, '0.12)') } : undefined}
     >
+      {/* Drag handle indicator — edit mode, appears at top center */}
+      {editMode && (
+        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 z-[5] flex items-center gap-0.5 text-muted-foreground/30 cursor-grab active:cursor-grabbing pointer-events-none">
+          <GripVertical className="h-3 w-3" />
+          <span className="text-[8px] font-medium">드래그하여 이동</span>
+        </div>
+      )}
       {/* Resize handle — edit mode only, onResizeEnd saves to store */}
       {editMode && (
         <NodeResizer
@@ -213,8 +220,11 @@ function ZoneNode({ id, data, selected }: NodeProps) {
       )}
 
       {d.count === 0 && (
-        <div className="px-4 pt-8 text-xs text-muted-foreground/60">
-          + 서비스를 이 Zone으로 이동하세요
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-1 text-muted-foreground/40">
+            <Move className="h-5 w-5" />
+            <span className="text-[11px]">서비스를 여기로 드래그하세요</span>
+          </div>
         </div>
       )}
 
@@ -222,29 +232,29 @@ function ZoneNode({ id, data, selected }: NodeProps) {
       {editMode && (
         <>
           <Handle type="target" position={Position.Top} id="zt-top"
-            className="!w-4 !h-1.5 !rounded-sm !bg-primary/40 !border-primary/30 !border"
-            style={{ pointerEvents: 'auto', top: -3 }} />
+            className="!w-5 !h-2 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all"
+            style={{ pointerEvents: 'auto', top: -4 }} />
           <Handle type="target" position={Position.Bottom} id="zt-bottom"
-            className="!w-4 !h-1.5 !rounded-sm !bg-primary/40 !border-primary/30 !border"
-            style={{ pointerEvents: 'auto', bottom: -3 }} />
+            className="!w-5 !h-2 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all"
+            style={{ pointerEvents: 'auto', bottom: -4 }} />
           <Handle type="target" position={Position.Left} id="zt-left"
-            className="!w-1.5 !h-4 !rounded-sm !bg-primary/40 !border-primary/30 !border"
-            style={{ pointerEvents: 'auto', left: -3 }} />
+            className="!w-2 !h-5 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all"
+            style={{ pointerEvents: 'auto', left: -4 }} />
           <Handle type="target" position={Position.Right} id="zt-right"
-            className="!w-1.5 !h-4 !rounded-sm !bg-primary/40 !border-primary/30 !border"
-            style={{ pointerEvents: 'auto', right: -3 }} />
+            className="!w-2 !h-5 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all"
+            style={{ pointerEvents: 'auto', right: -4 }} />
           <Handle type="source" position={Position.Top} id="zs-top"
-            className="!w-4 !h-1.5 !rounded-sm !bg-primary/40 !border-primary/30 !border"
-            style={{ pointerEvents: 'auto', top: -3 }} />
+            className="!w-5 !h-2 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all"
+            style={{ pointerEvents: 'auto', top: -4 }} />
           <Handle type="source" position={Position.Bottom} id="zs-bottom"
-            className="!w-4 !h-1.5 !rounded-sm !bg-primary/40 !border-primary/30 !border"
-            style={{ pointerEvents: 'auto', bottom: -3 }} />
+            className="!w-5 !h-2 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all"
+            style={{ pointerEvents: 'auto', bottom: -4 }} />
           <Handle type="source" position={Position.Left} id="zs-left"
-            className="!w-1.5 !h-4 !rounded-sm !bg-primary/40 !border-primary/30 !border"
-            style={{ pointerEvents: 'auto', left: -3 }} />
+            className="!w-2 !h-5 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all"
+            style={{ pointerEvents: 'auto', left: -4 }} />
           <Handle type="source" position={Position.Right} id="zs-right"
-            className="!w-1.5 !h-4 !rounded-sm !bg-primary/40 !border-primary/30 !border"
-            style={{ pointerEvents: 'auto', right: -3 }} />
+            className="!w-2 !h-5 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all"
+            style={{ pointerEvents: 'auto', right: -4 }} />
         </>
       )}
     </div>

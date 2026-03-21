@@ -3,7 +3,7 @@
 import { memo, useCallback } from 'react';
 import { Link2, Eye, Trash2 } from 'lucide-react';
 import { useServiceMapStore } from '@/stores/service-map-store';
-import { DEFAULT_ZONES, ZONE_COLOR_PALETTE } from '@/lib/layout/zone-layout';
+import { ZONE_COLOR_PALETTE } from '@/lib/layout/zone-layout';
 import type { ZoneConfig } from '@/lib/layout/zone-layout';
 
 const ZONE_HEX: Record<string, string> = {
@@ -45,55 +45,59 @@ function NodeEditToolbarInner({
 
   return (
     <div
-      className="absolute z-30 flex items-center gap-1 bg-card/95 backdrop-blur-sm border rounded-lg shadow-lg px-1.5 py-1 pointer-events-auto"
+      className="absolute z-30 flex items-center gap-1 bg-card/95 backdrop-blur-sm border rounded-xl shadow-lg px-2 py-1.5 pointer-events-auto"
       style={{
         left: position.x,
         top: position.y,
-        transform: 'translate(-50%, -100%) translateY(-12px)',
+        transform: 'translate(-50%, -100%) translateY(-14px)',
       }}
     >
       {/* Zone quick-switch buttons */}
-      {zones.map((z) => {
-        const hex = getZoneHex(z);
-        const isActive = currentZoneKey === z.key;
-        return (
-          <button
-            key={z.key}
-            className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider transition-all ${
-              isActive ? 'ring-1 ring-offset-1 scale-105' : 'opacity-60 hover:opacity-100'
-            }`}
-            style={{
-              backgroundColor: `${hex}20`,
-              color: hex,
-              boxShadow: isActive ? `0 0 0 2px ${hex}40` : undefined,
-            }}
-            onClick={() => handleZoneClick(z.key)}
-            title={`${z.label}(으)로 이동`}
-          >
-            {z.label.slice(0, 3)}
-          </button>
-        );
-      })}
+      <div className="flex items-center gap-0.5 bg-muted/50 rounded-lg p-0.5">
+        {zones.map((z) => {
+          const hex = getZoneHex(z);
+          const isActive = currentZoneKey === z.key;
+          return (
+            <button
+              key={z.key}
+              className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider transition-all ${
+                isActive
+                  ? 'shadow-sm scale-105'
+                  : 'opacity-50 hover:opacity-90'
+              }`}
+              style={{
+                backgroundColor: isActive ? `${hex}30` : `${hex}10`,
+                color: hex,
+                boxShadow: isActive ? `0 0 0 1.5px ${hex}50` : undefined,
+              }}
+              onClick={() => handleZoneClick(z.key)}
+              title={`${z.label}(으)로 이동`}
+            >
+              {z.label.slice(0, 3)}
+            </button>
+          );
+        })}
+      </div>
 
-      <div className="w-px h-4 bg-border mx-0.5" />
+      <div className="w-px h-5 bg-border mx-0.5" />
 
       {/* Quick actions */}
       <button
-        className="p-1 rounded hover:bg-accent transition-colors"
+        className="p-1.5 rounded-lg hover:bg-primary/10 transition-colors group"
         onClick={() => onStartConnect(nodeId)}
         title="연결 시작"
       >
-        <Link2 className="h-3.5 w-3.5 text-primary" />
+        <Link2 className="h-3.5 w-3.5 text-primary group-hover:scale-110 transition-transform" />
       </button>
       <button
-        className="p-1 rounded hover:bg-accent transition-colors"
+        className="p-1.5 rounded-lg hover:bg-accent transition-colors"
         onClick={() => onViewDetail(nodeId)}
         title="상세 보기"
       >
         <Eye className="h-3.5 w-3.5 text-muted-foreground" />
       </button>
       <button
-        className="p-1 rounded hover:bg-destructive/10 transition-colors"
+        className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
         onClick={() => onRemoveService(nodeId)}
         title="서비스 제거"
       >

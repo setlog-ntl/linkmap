@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useMemo } from 'react';
-import { Link2, Trash2, X } from 'lucide-react';
+import { Link2, X } from 'lucide-react';
 import { useServiceMapStore } from '@/stores/service-map-store';
 
 interface ZoneEditToolbarProps {
@@ -35,51 +35,60 @@ function ZoneEditToolbarInner({
     return id.slice(0, 8) + '...';
   };
 
-  const TYPE_LABELS: Record<string, string> = {
-    uses: '사용',
-    api_call: 'API 호출',
-    data_transfer: '데이터 전달',
-    integrates: '연동',
-    auth_provider: '인증 제공',
-    webhook: '웹훅',
-    sdk: 'SDK',
+  const TYPE_LABELS: Record<string, { label: string; color: string }> = {
+    uses:          { label: '사용',       color: '#3b82f6' },
+    api_call:      { label: 'API 호출',   color: '#8b5cf6' },
+    data_transfer: { label: '데이터 전달', color: '#f97316' },
+    integrates:    { label: '연동',       color: '#22c55e' },
+    auth_provider: { label: '인증 제공',   color: '#ec4899' },
+    webhook:       { label: '웹훅',       color: '#14b8a6' },
+    sdk:           { label: 'SDK',        color: '#6366f1' },
   };
 
   return (
     <div
-      className="absolute z-30 bg-card/95 backdrop-blur-sm border rounded-lg shadow-lg pointer-events-auto min-w-[200px]"
+      className="absolute z-30 bg-card/95 backdrop-blur-sm border rounded-xl shadow-lg pointer-events-auto min-w-[220px]"
       style={{
         left: position.x,
         top: position.y,
-        transform: 'translate(-50%, -100%) translateY(-12px)',
+        transform: 'translate(-50%, -100%) translateY(-14px)',
       }}
     >
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2 border-b">
         <span className="text-xs font-bold text-primary">{zoneLabel}</span>
-        <span className="text-[9px] text-muted-foreground">Zone 연결</span>
+        <span className="text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">Zone</span>
         <div className="flex-1" />
         <button
-          className="p-1 rounded hover:bg-accent transition-colors"
+          className="p-1.5 rounded-lg hover:bg-primary/10 transition-colors group"
           onClick={() => onStartConnect(zoneId)}
           title="연결 시작"
         >
-          <Link2 className="h-3.5 w-3.5 text-primary" />
+          <Link2 className="h-3.5 w-3.5 text-primary group-hover:scale-110 transition-transform" />
         </button>
       </div>
 
       {/* Connection list */}
       {relatedConnections.length > 0 ? (
-        <div className="px-2 py-1 max-h-[160px] overflow-auto">
+        <div className="px-2 py-1.5 max-h-[180px] overflow-auto space-y-0.5">
           {relatedConnections.map((conn) => {
             const isSource = conn.source === zoneId;
             const otherLabel = resolveLabel(isSource ? conn.target : conn.source);
+            const typeInfo = TYPE_LABELS[conn.connectionType] || { label: conn.connectionType, color: '#94a3b8' };
             return (
-              <div key={conn.id} className="flex items-center gap-1.5 py-1 text-[10px] group">
-                <span className="text-muted-foreground">{isSource ? '→' : '←'}</span>
+              <div key={conn.id} className="flex items-center gap-1.5 py-1 px-1 rounded-lg hover:bg-muted/50 text-[10px] group transition-colors">
+                <span
+                  className="text-[9px] font-bold w-3 text-center"
+                  style={{ color: typeInfo.color }}
+                >
+                  {isSource ? '\u2192' : '\u2190'}
+                </span>
                 <span className="font-medium truncate flex-1">{otherLabel}</span>
-                <span className="text-muted-foreground text-[9px]">
-                  {TYPE_LABELS[conn.connectionType] || conn.connectionType}
+                <span
+                  className="text-[9px] px-1 py-0.5 rounded-full"
+                  style={{ backgroundColor: `${typeInfo.color}15`, color: typeInfo.color }}
+                >
+                  {typeInfo.label}
                 </span>
                 <button
                   className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-destructive/10 transition-all"
@@ -93,8 +102,11 @@ function ZoneEditToolbarInner({
           })}
         </div>
       ) : (
-        <div className="px-3 py-2 text-[10px] text-muted-foreground">
-          연결 없음 — 핸들을 드래그하여 연결하세요
+        <div className="px-3 py-3 text-[10px] text-muted-foreground text-center">
+          <div className="flex flex-col items-center gap-1">
+            <Link2 className="h-4 w-4 opacity-30" />
+            <span>핸들을 드래그하여 연결하세요</span>
+          </div>
         </div>
       )}
     </div>

@@ -98,18 +98,30 @@ function ConnectionEdge({
 
   return (
     <>
-      {/* Custom colored arrow marker */}
+      {/* Custom colored arrow markers — end and start */}
       <defs>
         <marker
           id={markerId}
-          markerWidth="14"
-          markerHeight="14"
-          refX="12"
-          refY="7"
+          markerWidth="16"
+          markerHeight="16"
+          refX="13"
+          refY="8"
           orient="auto"
           markerUnits="userSpaceOnUse"
         >
-          <path d="M2 2 L12 7 L2 12 Z" fill={s.color} />
+          <path d="M3 3 L13 8 L3 13 Z" fill={s.color} opacity="0.9" />
+        </marker>
+        {/* Source direction indicator (small dot) */}
+        <marker
+          id={`${markerId}-start`}
+          markerWidth="8"
+          markerHeight="8"
+          refX="4"
+          refY="4"
+          orient="auto"
+          markerUnits="userSpaceOnUse"
+        >
+          <circle cx="4" cy="4" r="2.5" fill={s.color} opacity="0.5" />
         </marker>
       </defs>
 
@@ -138,6 +150,7 @@ function ConnectionEdge({
         id={id}
         path={edgePath}
         markerEnd={`url(#${markerId})`}
+        markerStart={`url(#${markerId}-start)`}
         style={{
           stroke: s.color,
           strokeWidth: hovered ? s.weight + 1 : s.weight,
