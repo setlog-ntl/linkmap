@@ -91,6 +91,9 @@ export const queryKeys = {
   layerOverrides: {
     byProject: (projectId: string) => ['layer-overrides', 'project', projectId] as const,
   },
+  zoneLayout: {
+    byProject: (projectId: string) => ['zone-layout', 'project', projectId] as const,
+  },
   costs: {
     byProject: (projectId: string) => ['costs', 'project', projectId] as const,
     openaiUsage: (projectServiceId: string) =>

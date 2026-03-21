@@ -34,6 +34,7 @@ import { EdgeEditPopover } from '@/components/service-map/edge-edit-popover';
 import { NodeEditToolbar } from '@/components/service-map/node-edit-toolbar';
 import { ZoneEditToolbar } from '@/components/service-map/zone-edit-toolbar';
 import { useUpsertLayerOverride } from '@/lib/queries/layer-overrides';
+import { useZoneLayout, useSaveZoneLayout } from '@/lib/queries/zone-layout';
 import { useUpdateConnection } from '@/lib/queries/connections';
 import { useUpdateProject } from '@/lib/queries/projects';
 import { useQueryClient } from '@tanstack/react-query';
@@ -79,6 +80,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     setHoveredNodeId, setDragTargetZoneKey,
     zoneConfigs, layoutPreset, zonePositionOverrides, zoneSizeOverrides,
     setZonePositionOverride, getActiveZones, setPendingOverride,
+    setZoneConfigs, setLayoutPreset,
     pendingNodePositions, setPendingNodePosition,
     zoneConnections, addZoneConnection, removeZoneConnection,
     filterStatuses, toggleFilterStatus,
@@ -106,9 +108,41 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
 
   const queryClient = useQueryClient();
   const upsertLayerOverride = useUpsertLayerOverride(projectId);
+  const saveZoneLayout = useSaveZoneLayout(projectId);
   const updateProject = useUpdateProject();
   const updateConnection = useUpdateConnection(projectId);
   const effectiveMainServiceId = pendingMainServiceId !== undefined ? pendingMainServiceId : data.mainServiceId;
+
+  // Zone layout 데이터 로드 및 스토어 복원
+  const { data: savedZoneLayout } = useZoneLayout(isReadOnly ? '' : projectId);
+  const zoneLayoutRestoredRef = useRef(false);
+  useEffect(() => {
+    if (!savedZoneLayout || zoneLayoutRestoredRef.current) return;
+    zoneLayoutRestoredRef.current = true;
+    const store = useServiceMapStore.getState();
+    if (savedZoneLayout.zoneConfigs && savedZoneLayout.zoneConfigs.length > 0) {
+      store.setZoneConfigs(savedZoneLayout.zoneConfigs);
+    }
+    if (savedZoneLayout.layoutPreset) {
+      store.setLayoutPreset(savedZoneLayout.layoutPreset);
+    }
+    if (savedZoneLayout.zonePositionOverrides) {
+      for (const [id, pos] of Object.entries(savedZoneLayout.zonePositionOverrides)) {
+        store.setZonePositionOverride(id, pos);
+      }
+    }
+    if (savedZoneLayout.zoneSizeOverrides) {
+      for (const [id, size] of Object.entries(savedZoneLayout.zoneSizeOverrides)) {
+        store.setZoneSizeOverride(id, size);
+      }
+    }
+    if (savedZoneLayout.zoneConnections && savedZoneLayout.zoneConnections.length > 0) {
+      // 기존 연결 초기화 후 복원
+      for (const conn of savedZoneLayout.zoneConnections) {
+        store.addZoneConnection(conn);
+      }
+    }
+  }, [savedZoneLayout]);
 
   const deleteConnectionRef = data.deleteConnectionRef;
   const handleDeleteUserConnection = useCallback((edgeId: string) => {
@@ -415,6 +449,27 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
         await updateProject.mutateAsync({ id: projectId, main_service_id: pendingMainServiceId });
       }
 
+      // Zone 레이아웃 데이터 저장 (zone 구성, 연결, 위치/크기, 프리셋)
+      const store = useServiceMapStore.getState();
+      const activeConfigs = store.zoneConfigs;
+      const hasZoneData = activeConfigs.length > 0
+        || store.zoneConnections.length > 0
+        || Object.keys(store.zonePositionOverrides).length > 0
+        || Object.keys(store.zoneSizeOverrides).length > 0
+        || store.layoutPreset !== 'horizontal';
+
+      if (hasZoneData) {
+        await saveZoneLayout.mutateAsync({
+          zoneConfigs: activeConfigs.length > 0 ? activeConfigs : undefined,
+          zoneConnections: store.zoneConnections.length > 0 ? store.zoneConnections : undefined,
+          zonePositionOverrides: Object.keys(store.zonePositionOverrides).length > 0
+            ? store.zonePositionOverrides : undefined,
+          zoneSizeOverrides: Object.keys(store.zoneSizeOverrides).length > 0
+            ? store.zoneSizeOverrides : undefined,
+          layoutPreset: store.layoutPreset !== 'horizontal' ? store.layoutPreset : undefined,
+        });
+      }
+
       await queryClient.refetchQueries({ queryKey: queryKeys.layerOverrides.byProject(projectId) });
       toast.success('변경사항이 저장되었습니다');
       clearPendingChanges();
@@ -424,7 +479,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     } finally {
       setSaving(false);
     }
-  }, [pendingOverrides, pendingNodePositions, pendingMainServiceId, data.services, projectId, upsertLayerOverride, updateProject, clearPendingChanges, setEditMode, queryClient]);
+  }, [pendingOverrides, pendingNodePositions, pendingMainServiceId, data.services, projectId, upsertLayerOverride, saveZoneLayout, updateProject, clearPendingChanges, setEditMode, queryClient]);
 
   return (
     <div className="flex-1 w-full relative min-h-0 border-none bg-background overflow-hidden flex flex-col">

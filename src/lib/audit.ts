@@ -121,7 +121,8 @@ export type AuditAction =
   | 'credential.decrypt'
   | 'env_var.raw_read'
   | 'env_var.raw_update'
-  | 'project.share_toggle';
+  | 'project.share_toggle'
+  | 'zone_layout.upsert';
 
 interface AuditLogEntry {
   action: AuditAction;
