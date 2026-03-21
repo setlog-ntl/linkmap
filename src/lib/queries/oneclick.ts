@@ -196,6 +196,8 @@ export function useRenameDeploy() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
+      // 배포명 변경 시 사이드바 프로젝트 섹션의 배포 표시에도 반영
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
     },
   });
 }

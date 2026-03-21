@@ -18,6 +18,7 @@ const STAGE_ICON_MAP: Record<string, LucideIcon> = {
   start: Bot, develop: Code, polish: Palette, deploy: Rocket, scale: Workflow,
 };
 
+import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
@@ -106,7 +107,6 @@ function InlineEditableName({
   useEffect(() => {
     if (isEditing) {
       setEditValue(name);
-      // Delay focus to ensure input is rendered
       requestAnimationFrame(() => inputRef.current?.select());
     }
   }, [isEditing, name]);
@@ -158,16 +158,29 @@ function InlineEditableName({
   }
 
   return (
-    <span
-      className={`truncate ${className ?? ''}`}
-      onDoubleClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsEditing(true);
-      }}
-      title="더블클릭하여 이름 수정"
-    >
-      {name}
+    <span className={`group/editable inline-flex items-center gap-1 min-w-0 ${className ?? ''}`}>
+      <span
+        className="truncate"
+        onDoubleClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsEditing(true);
+        }}
+        title="더블클릭하여 이름 수정"
+      >
+        {name}
+      </span>
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsEditing(true);
+        }}
+        className="shrink-0 opacity-0 group-hover/editable:opacity-100 transition-opacity"
+        title="이름 수정"
+      >
+        <Pencil className="h-2.5 w-2.5 text-muted-foreground hover:text-foreground" />
+      </button>
     </span>
   );
 }
@@ -182,9 +195,23 @@ export function AppSidebar({ profile }: AppSidebarProps) {
   const { data: projects, isLoading: isProjectsLoading } = useProjects();
   const { data: deployments, isLoading: isDeploymentsLoading } = useMyDeployments();
   const { mutate: toggleFavorite } = useToggleFavoriteProject();
-  const { mutate: updateProject } = useUpdateProject();
+  const updateProjectMutation = useUpdateProject();
   const { mutate: reorderProjects } = useReorderProjects();
-  const { mutate: renameDeploy } = useRenameDeploy();
+  const renameDeployMutation = useRenameDeploy();
+
+  const updateProject = (args: Parameters<typeof updateProjectMutation.mutate>[0]) => {
+    updateProjectMutation.mutate(args, {
+      onSuccess: () => toast.success('프로젝트 이름이 변경되었습니다'),
+      onError: (err) => toast.error(err instanceof Error ? err.message : '이름 변경 실패'),
+    });
+  };
+
+  const renameDeploy = (args: Parameters<typeof renameDeployMutation.mutate>[0]) => {
+    renameDeployMutation.mutate(args, {
+      onSuccess: () => toast.success('사이트 이름이 변경되었습니다'),
+      onError: (err) => toast.error(err instanceof Error ? err.message : '이름 변경 실패'),
+    });
+  };
 
   const sidebarDndSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),

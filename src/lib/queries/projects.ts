@@ -174,8 +174,12 @@ export function useUpdateProject() {
       }
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+      // 프로젝트명 변경 시 API가 연결된 homepage_deploys.site_name도 동기화하므로 배포 캐시도 갱신
+      if (variables.name) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
+      }
     },
   });
 }
