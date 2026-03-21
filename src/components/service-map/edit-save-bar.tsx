@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Save, X, Undo2, Redo2, Keyboard } from 'lucide-react';
+import { Save, X, Undo2, Redo2, Keyboard, Grid3x3 } from 'lucide-react';
 import { useServiceMapStore } from '@/stores/service-map-store';
 
 interface EditSaveBarProps {
@@ -15,6 +15,7 @@ export function EditSaveBar({ onSave, saving }: EditSaveBarProps) {
     editMode, setEditMode, clearPendingChanges, pendingChangeCount,
     canUndo, canRedo, undo, redo,
     pendingOverrides, pendingNodePositions, zoneConnections,
+    snapToGrid, toggleSnapToGrid,
   } = useServiceMapStore();
   const count = pendingChangeCount();
 
@@ -66,6 +67,19 @@ export function EditSaveBar({ onSave, saving }: EditSaveBarProps) {
 
         <div className="w-px h-4 bg-border" />
 
+        {/* Snap to grid toggle */}
+        <Button
+          variant={snapToGrid ? 'secondary' : 'ghost'}
+          size="icon"
+          className="h-6 w-6"
+          onClick={toggleSnapToGrid}
+          title={snapToGrid ? '그리드 스냅 끄기' : '그리드 스냅 켜기'}
+        >
+          <Grid3x3 className="h-3 w-3" />
+        </Button>
+
+        <div className="w-px h-4 bg-border" />
+
         <Button
           variant="ghost"
           size="sm"
@@ -109,6 +123,12 @@ export function EditSaveBar({ onSave, saving }: EditSaveBarProps) {
         <span>ESC 연결 취소</span>
         <span>&middot;</span>
         <span>노드 클릭: 편집</span>
+        {snapToGrid && (
+          <>
+            <span>&middot;</span>
+            <span className="text-primary">그리드 ON</span>
+          </>
+        )}
       </div>
     </div>
   );

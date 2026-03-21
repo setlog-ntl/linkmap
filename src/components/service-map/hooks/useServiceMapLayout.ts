@@ -2,9 +2,15 @@
 
 import { useMemo } from 'react';
 import type { Node, Edge } from '@xyflow/react';
-import { computeZoneLayout, type ZoneConfig, type LayoutPreset, NODE_WIDTH, NODE_HEIGHT } from '@/lib/layout/zone-layout';
+import { computeZoneLayout, domainToZone, type ZoneConfig, type LayoutPreset, NODE_WIDTH, NODE_HEIGHT } from '@/lib/layout/zone-layout';
 import { getNeighborhood, isNodeHighlighted, isEdgeHighlighted } from '@/lib/layout/graph-utils';
 import type { ServiceDomain } from '@/types';
+
+/** Zone center info for zone-aware edge routing */
+interface ZoneCenter {
+  cx: number;
+  cy: number;
+}
 
 export interface UseServiceMapLayoutParams {
   serviceNodes: Node[];
@@ -28,12 +34,15 @@ export interface UseServiceMapLayoutReturn {
 
 /**
  * Compute optimal sourceHandle/targetHandle based on relative node positions.
- * Source exits toward target, target receives from the source direction.
- * Example: target is RIGHT of source → source exits RIGHT, target receives from LEFT.
+ * Zone-aware: when nodes are in different zones, use zone center direction
+ * to determine the primary edge direction for more natural inter-zone routing.
  */
 function computeEdgeHandles(
   srcNode: Node,
   tgtNode: Node,
+  zoneCenters?: Map<string, ZoneCenter>,
+  srcZoneKey?: string,
+  tgtZoneKey?: string,
 ): { sourceHandle: string; targetHandle: string } {
   const sw = (srcNode.style?.width as number) || NODE_WIDTH;
   const sh = (srcNode.style?.height as number) || NODE_HEIGHT;
@@ -45,20 +54,33 @@ function computeEdgeHandles(
   const tgtCx = tgtNode.position.x + tw / 2;
   const tgtCy = tgtNode.position.y + th / 2;
 
-  const dx = tgtCx - srcCx;
-  const dy = tgtCy - srcCy;
+  let dx = tgtCx - srcCx;
+  let dy = tgtCy - srcCy;
+
+  // Zone-aware: for inter-zone edges, blend zone direction with node direction
+  // This prevents edges from routing vertically when zones are side-by-side
+  if (zoneCenters && srcZoneKey && tgtZoneKey && srcZoneKey !== tgtZoneKey) {
+    const srcZC = zoneCenters.get(srcZoneKey);
+    const tgtZC = zoneCenters.get(tgtZoneKey);
+    if (srcZC && tgtZC) {
+      const zdx = tgtZC.cx - srcZC.cx;
+      const zdy = tgtZC.cy - srcZC.cy;
+      // Blend: 60% zone direction + 40% node direction
+      // This respects zone layout while allowing node-level fine-tuning
+      dx = zdx * 0.6 + dx * 0.4;
+      dy = zdy * 0.6 + dy * 0.4;
+    }
+  }
 
   // Dominant axis determines direction. Target handle is OPPOSITE to source handle.
   if (Math.abs(dx) >= Math.abs(dy)) {
-    // Horizontal dominant
     return dx > 0
-      ? { sourceHandle: 'source-right', targetHandle: 'left' }   // → target is RIGHT, enter from LEFT
-      : { sourceHandle: 'source-left', targetHandle: 'right' };  // ← target is LEFT, enter from RIGHT
+      ? { sourceHandle: 'source-right', targetHandle: 'left' }
+      : { sourceHandle: 'source-left', targetHandle: 'right' };
   }
-  // Vertical dominant
   return dy > 0
-    ? { sourceHandle: 'source-bottom', targetHandle: 'top' }     // ↓ target is BELOW, enter from TOP
-    : { sourceHandle: 'source-top', targetHandle: 'bottom' };    // ↑ target is ABOVE, enter from BOTTOM
+    ? { sourceHandle: 'source-bottom', targetHandle: 'top' }
+    : { sourceHandle: 'source-top', targetHandle: 'bottom' };
 }
 
 export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServiceMapLayoutReturn {
@@ -100,6 +122,31 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
     return map;
   }, [zoneResult.nodes]);
 
+  // Build zone center map for zone-aware edge routing
+  const zoneCenters = useMemo(() => {
+    const map = new Map<string, ZoneCenter>();
+    for (const n of zoneResult.nodes) {
+      if (n.type !== 'zone') continue;
+      const w = (n.style?.width as number) || 0;
+      const h = (n.style?.height as number) || 0;
+      const key = n.id.replace('zone-', '');
+      map.set(key, { cx: n.position.x + w / 2, cy: n.position.y + h / 2 });
+    }
+    return map;
+  }, [zoneResult.nodes]);
+
+  // Build nodeId → zoneKey map for edge routing
+  const nodeZoneMap = useMemo(() => {
+    const map = new Map<string, string>();
+    const zones = zoneConfigs && zoneConfigs.length > 0 ? zoneConfigs : undefined;
+    for (const n of zoneResult.nodes) {
+      if (n.type === 'zone') continue;
+      const domain = getDomain(n.id);
+      if (domain) map.set(n.id, domainToZone(domain, zones));
+    }
+    return map;
+  }, [zoneResult.nodes, getDomain, zoneConfigs]);
+
   const layoutedNodes = useMemo<Node[]>(() => {
     if (!focusedNodeId) return zoneResult.nodes;
     return zoneResult.nodes.map((node) => {
@@ -112,16 +159,18 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
     });
   }, [zoneResult.nodes, focusedNodeId, neighborSet]);
 
-  // Apply handles + focus dimming to edges
+  // Apply handles + focus dimming to edges (zone-aware for inter-zone edges)
   const layoutedEdges = useMemo<Edge[]>(() => {
     return rawEdges.map((edge) => {
       const srcNode = nodeMap.get(edge.source);
       const tgtNode = nodeMap.get(edge.target);
 
-      // Compute optimal handles based on node positions
+      // Compute optimal handles — zone-aware for inter-zone edges
       let handles: { sourceHandle?: string; targetHandle?: string } = {};
       if (srcNode && tgtNode) {
-        handles = computeEdgeHandles(srcNode, tgtNode);
+        const srcZone = nodeZoneMap.get(edge.source);
+        const tgtZone = nodeZoneMap.get(edge.target);
+        handles = computeEdgeHandles(srcNode, tgtNode, zoneCenters, srcZone, tgtZone);
       }
 
       const focusDim = focusedNodeId
@@ -135,7 +184,7 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
         style: { ...edge.style, ...focusDim },
       };
     });
-  }, [rawEdges, nodeMap, focusedNodeId, neighborSet]);
+  }, [rawEdges, nodeMap, focusedNodeId, neighborSet, zoneCenters, nodeZoneMap]);
 
   return { layoutedNodes, layoutedEdges, neighborSet };
 }

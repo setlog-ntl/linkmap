@@ -61,6 +61,9 @@ interface ServiceMapState {
   // Zone-level connections (visual edges between zones/zone↔node)
   zoneConnections: ZoneConnection[];
 
+  // Snap-to-grid (edit mode alignment)
+  snapToGrid: boolean;
+
   // Multi-select support
   selectedNodeIds: Set<string>;
 
@@ -103,6 +106,10 @@ interface ServiceMapState {
   setHoveredNodeId: (id: string | null) => void;
   setDragTargetZoneKey: (key: string | null) => void;
 
+  // Snap-to-grid
+  setSnapToGrid: (snap: boolean) => void;
+  toggleSnapToGrid: () => void;
+
   // Multi-select
   toggleNodeSelection: (nodeId: string) => void;
   clearSelection: () => void;
@@ -140,6 +147,8 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
   hoveredNodeId: null,
   dragTargetZoneKey: null,
   zoneConnections: [],
+
+  snapToGrid: false,
 
   selectedNodeIds: new Set(),
   undoStack: [],
@@ -235,6 +244,10 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
   }),
   setHoveredNodeId: (id) => set({ hoveredNodeId: id }),
   setDragTargetZoneKey: (key) => set({ dragTargetZoneKey: key }),
+
+  // Snap-to-grid
+  setSnapToGrid: (snap) => set({ snapToGrid: snap }),
+  toggleSnapToGrid: () => set((s) => ({ snapToGrid: !s.snapToGrid })),
 
   // Multi-select
   toggleNodeSelection: (nodeId) => set((s) => {

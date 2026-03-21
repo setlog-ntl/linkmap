@@ -137,12 +137,12 @@ function ZoneNode({ id, data, selected }: NodeProps) {
 
       {/* Zone label chip — pointer-events auto for interaction */}
       <div className="absolute -top-3 left-4 z-10" style={{ pointerEvents: 'auto' }}>
-        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] border text-[10px] font-semibold tracking-wide shadow-sm backdrop-blur-sm ${chipClass}`}>
-          <Icon className="h-3.5 w-3.5 opacity-75" />
+        <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-[10px] border text-xs font-bold tracking-wide shadow-sm backdrop-blur-sm ${chipClass}`}>
+          <Icon className="h-4 w-4 opacity-80" />
           {isRenaming ? (
             <input
               ref={inputRef}
-              className="bg-transparent outline-none text-[10px] font-semibold w-[80px]"
+              className="bg-transparent outline-none text-xs font-bold w-[80px]"
               value={renameValue}
               onChange={(e) => setRenameValue(e.target.value)}
               onBlur={handleRenameSubmit}
@@ -160,9 +160,9 @@ function ZoneNode({ id, data, selected }: NodeProps) {
             </span>
           )}
           {d.subtitle && !isRenaming && (
-            <span className="text-[8.5px] font-medium opacity-55 tracking-normal">{d.subtitle}</span>
+            <span className="text-[10px] font-medium opacity-55 tracking-normal">{d.subtitle}</span>
           )}
-          <Badge variant="secondary" className="text-[9px] h-4 px-1.5 ml-0.5 rounded-[5px]">
+          <Badge variant="secondary" className="text-[10px] h-[18px] px-1.5 ml-0.5 rounded-[5px]">
             {d.count}
           </Badge>
         </div>
