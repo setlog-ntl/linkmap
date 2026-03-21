@@ -140,7 +140,6 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
       const nameMatch = searchQuery === '' || ps.service?.name.toLowerCase().includes(searchQuery.toLowerCase());
       const statusMatch = !filterStatuses || filterStatuses.length === 0 || filterStatuses.includes(ps.status);
       const isMatch = nameMatch && statusMatch;
-      const iconSlug = ps.service?.slug;
       const isMainService = mainServiceId === ps.id;
 
       return {
@@ -151,7 +150,7 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
           label: ps.service?.name || 'Unknown',
           category,
           status: ps.status,
-          iconSlug,
+          slug: ps.service?.slug,
           highlighted: isMatch,
           domain: domain || 'integration',
           isMainService,

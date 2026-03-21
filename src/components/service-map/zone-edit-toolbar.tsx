@@ -2,7 +2,7 @@
 
 import { memo, useMemo } from 'react';
 import { Link2, Trash2, X } from 'lucide-react';
-import { useServiceMapStore, type ZoneConnection } from '@/stores/service-map-store';
+import { useServiceMapStore } from '@/stores/service-map-store';
 
 interface ZoneEditToolbarProps {
   zoneId: string;            // e.g. "zone-frontend"
