@@ -104,10 +104,16 @@ export async function POST(
       commitMessage
     );
 
-    // 커밋 성공 → deploy_status를 'building'으로 리셋하여 새 빌드 추적 가능하게 함
+    // 커밋 성공 → deploy_status를 'building'으로 리셋 + updated_at 갱신
+    // updated_at은 타임아웃 기준 시각으로 사용됨 (deploy-status.ts)
     await supabase
       .from('homepage_deploys')
-      .update({ deploy_status: 'building', pages_status: 'building' })
+      .update({
+        deploy_status: 'building',
+        pages_status: 'building',
+        deploy_error_message: null,
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', id);
 
     await logAudit(user.id, {
