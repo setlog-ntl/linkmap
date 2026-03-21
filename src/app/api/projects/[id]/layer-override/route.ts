@@ -6,7 +6,7 @@ import { logAudit } from '@/lib/audit';
 
 const upsertSchema = z.object({
   service_id: z.string().uuid(),
-  dashboard_layer: z.enum(['frontend', 'backend', 'devtools']).optional(),
+  dashboard_layer: z.string().max(50).optional(),  // ZoneKey: default 3 + custom zones
   dashboard_subcategory: z.string().max(50).optional(),
 });
 

@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import type { Node, Edge } from '@xyflow/react';
-import { computeZoneLayout, type ZoneConfig, type LayoutPreset } from '@/lib/layout/zone-layout';
+import { computeZoneLayout, type ZoneConfig, type LayoutPreset, NODE_WIDTH, NODE_HEIGHT } from '@/lib/layout/zone-layout';
 import { getNeighborhood, isNodeHighlighted, isEdgeHighlighted } from '@/lib/layout/graph-utils';
 import type { ServiceDomain } from '@/types';
 
@@ -12,7 +12,6 @@ export interface UseServiceMapLayoutParams {
   focusedNodeId: string | null;
   getDomain: (nodeId: string) => ServiceDomain | null;
   mainServiceId?: string | null;
-  // Zone customization
   zoneConfigs?: ZoneConfig[];
   layoutPreset?: LayoutPreset;
   editMode?: boolean;
@@ -26,6 +25,34 @@ export interface UseServiceMapLayoutReturn {
   neighborSet: Set<string> | null;
 }
 
+/** Compute optimal sourceHandle/targetHandle based on relative node positions */
+function computeEdgeHandles(
+  srcNode: Node,
+  tgtNode: Node,
+): { sourceHandle: string; targetHandle: string } {
+  const sw = (srcNode.style?.width as number) || NODE_WIDTH;
+  const sh = (srcNode.style?.height as number) || NODE_HEIGHT;
+  const tw = (tgtNode.style?.width as number) || NODE_WIDTH;
+  const th = (tgtNode.style?.height as number) || NODE_HEIGHT;
+
+  const srcCx = srcNode.position.x + sw / 2;
+  const srcCy = srcNode.position.y + sh / 2;
+  const tgtCx = tgtNode.position.x + tw / 2;
+  const tgtCy = tgtNode.position.y + th / 2;
+
+  const dx = tgtCx - srcCx;
+  const dy = tgtCy - srcCy;
+
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    return dx > 0
+      ? { sourceHandle: 'source-right', targetHandle: 'right' }
+      : { sourceHandle: 'source-left', targetHandle: 'left' };
+  }
+  return dy > 0
+    ? { sourceHandle: 'source-bottom', targetHandle: 'bottom' }
+    : { sourceHandle: 'source-top', targetHandle: 'top' };
+}
+
 export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServiceMapLayoutReturn {
   const {
     serviceNodes, rawEdges, focusedNodeId, getDomain, mainServiceId,
@@ -37,7 +64,6 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
     return getNeighborhood(focusedNodeId, rawEdges);
   }, [focusedNodeId, rawEdges]);
 
-  // Sort: main service first in its zone
   const sortedServiceNodes = useMemo(() => {
     if (!mainServiceId) return serviceNodes;
     return [...serviceNodes].sort((a, b) => {
@@ -47,7 +73,6 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
     });
   }, [serviceNodes, mainServiceId]);
 
-  // Zone-based layout with customization
   const zoneResult = useMemo(() => {
     return computeZoneLayout(sortedServiceNodes, getDomain, {
       zones: zoneConfigs,
@@ -58,7 +83,13 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
     });
   }, [sortedServiceNodes, getDomain, zoneConfigs, layoutPreset, editMode, zonePositionOverrides, zoneSizeOverrides]);
 
-  // Apply focus mode opacity
+  // Build node lookup from layout result (includes positions)
+  const nodeMap = useMemo(() => {
+    const map = new Map<string, Node>();
+    for (const n of zoneResult.nodes) map.set(n.id, n);
+    return map;
+  }, [zoneResult.nodes]);
+
   const layoutedNodes = useMemo<Node[]>(() => {
     if (!focusedNodeId) return zoneResult.nodes;
     return zoneResult.nodes.map((node) => {
@@ -66,32 +97,35 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
       const highlighted = isNodeHighlighted(node.id, focusedNodeId, neighborSet);
       return {
         ...node,
-        data: {
-          ...node.data,
-          focusOpacity: highlighted ? 1 : 0.35,
-        },
+        data: { ...node.data, focusOpacity: highlighted ? 1 : 0.35 },
       };
     });
   }, [zoneResult.nodes, focusedNodeId, neighborSet]);
 
-  // Apply focus mode edge dimming
+  // Apply handles + focus dimming to edges
   const layoutedEdges = useMemo<Edge[]>(() => {
-    if (!focusedNodeId) return rawEdges;
     return rawEdges.map((edge) => {
-      const highlighted = isEdgeHighlighted(edge, focusedNodeId, neighborSet);
+      const srcNode = nodeMap.get(edge.source);
+      const tgtNode = nodeMap.get(edge.target);
+
+      // Compute optimal handles based on node positions
+      let handles: { sourceHandle?: string; targetHandle?: string } = {};
+      if (srcNode && tgtNode) {
+        handles = computeEdgeHandles(srcNode, tgtNode);
+      }
+
+      const focusDim = focusedNodeId
+        ? { opacity: isEdgeHighlighted(edge, focusedNodeId, neighborSet) ? 1 : 0.1 }
+        : {};
+
       return {
         ...edge,
-        style: {
-          ...edge.style,
-          opacity: highlighted ? 1 : 0.1,
-        },
+        sourceHandle: edge.sourceHandle || handles.sourceHandle,
+        targetHandle: edge.targetHandle || handles.targetHandle,
+        style: { ...edge.style, ...focusDim },
       };
     });
-  }, [rawEdges, focusedNodeId, neighborSet]);
+  }, [rawEdges, nodeMap, focusedNodeId, neighborSet]);
 
-  return {
-    layoutedNodes,
-    layoutedEdges,
-    neighborSet,
-  };
+  return { layoutedNodes, layoutedEdges, neighborSet };
 }
