@@ -87,6 +87,8 @@ export interface ZoneLayoutOptions {
   editMode?: boolean;
   positionOverrides?: Record<string, { x: number; y: number }>;
   sizeOverrides?: Record<string, { width: number; height: number }>;
+  /** Saved/pending service node position overrides (nodeId → {x,y}) */
+  nodePositionOverrides?: Record<string, { x: number; y: number }>;
 }
 
 // ── Main layout function ───────────────────────────────────────
@@ -101,6 +103,7 @@ export function computeZoneLayout(
   const editMode = options?.editMode ?? false;
   const posOverrides = options?.positionOverrides ?? {};
   const sizeOverrides = options?.sizeOverrides ?? {};
+  const nodePosOverrides = options?.nodePositionOverrides ?? {};
 
   // Group service nodes into zones
   const zoneGroups = zones.map((z) => ({ config: z, serviceNodeIds: [] as string[] }));
@@ -180,20 +183,22 @@ export function computeZoneLayout(
       },
     });
 
-    // Place service nodes with absolute coordinates
+    // Place service nodes — use position override if available, else compute
     zg.serviceNodeIds.forEach((nodeId, idx) => {
       const original = nodeMap.get(nodeId);
       if (!original) return;
+
+      const savedPos = nodePosOverrides[nodeId];
+      if (savedPos) {
+        resultNodes.push({ ...original, position: savedPos, zIndex: 10 });
+        return;
+      }
+
       const localRow = Math.floor(idx / INNER_COLS);
       const localCol = idx % INNER_COLS;
       const absX = pos.x + ZONE_PADDING + localCol * (NODE_WIDTH + NODE_GAP_X);
       const absY = pos.y + ZONE_HEADER_HEIGHT + ZONE_PADDING + localRow * (NODE_HEIGHT + NODE_GAP_Y);
-
-      resultNodes.push({
-        ...original,
-        position: { x: absX, y: absY },
-        zIndex: 10,  // Service nodes always above zone backgrounds (-1)
-      });
+      resultNodes.push({ ...original, position: { x: absX, y: absY }, zIndex: 10 });
     });
   }
 

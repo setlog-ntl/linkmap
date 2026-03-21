@@ -17,6 +17,7 @@ export interface UseServiceMapLayoutParams {
   editMode?: boolean;
   zonePositionOverrides?: Record<string, { x: number; y: number }>;
   zoneSizeOverrides?: Record<string, { width: number; height: number }>;
+  nodePositionOverrides?: Record<string, { x: number; y: number }>;
 }
 
 export interface UseServiceMapLayoutReturn {
@@ -64,6 +65,7 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
   const {
     serviceNodes, rawEdges, focusedNodeId, getDomain, mainServiceId,
     zoneConfigs, layoutPreset, editMode, zonePositionOverrides, zoneSizeOverrides,
+    nodePositionOverrides,
   } = params;
 
   const neighborSet = useMemo(() => {
@@ -87,8 +89,9 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
       editMode,
       positionOverrides: zonePositionOverrides,
       sizeOverrides: zoneSizeOverrides,
+      nodePositionOverrides,
     });
-  }, [sortedServiceNodes, getDomain, zoneConfigs, layoutPreset, editMode, zonePositionOverrides, zoneSizeOverrides]);
+  }, [sortedServiceNodes, getDomain, zoneConfigs, layoutPreset, editMode, zonePositionOverrides, zoneSizeOverrides, nodePositionOverrides]);
 
   // Build node lookup from layout result (includes positions)
   const nodeMap = useMemo(() => {

@@ -65,6 +65,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     setHoveredNodeId, setDragTargetZoneKey,
     zoneConfigs, layoutPreset, zonePositionOverrides, zoneSizeOverrides,
     setZonePositionOverride, getActiveZones, setPendingOverride,
+    pendingNodePositions, setPendingNodePosition,
     zoneConnections, addZoneConnection, removeZoneConnection,
   } = useServiceMapStore();
 
@@ -128,11 +129,28 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
   });
 
   const activeZones = getActiveZones();
+
+  // Merge saved positions (service_id keyed) + pending positions (nodeId keyed)
+  const mergedNodePositions = useMemo(() => {
+    const result: Record<string, { x: number; y: number }> = {};
+    // Saved from DB (service_id → pos) → convert to nodeId
+    for (const [serviceId, pos] of Object.entries(data.savedNodePositions)) {
+      const nodeId = nodesResult.serviceIdToNodeId.get(serviceId);
+      if (nodeId) result[nodeId] = pos;
+    }
+    // Pending overrides take priority (nodeId → pos)
+    for (const [nodeId, pos] of Object.entries(pendingNodePositions)) {
+      result[nodeId] = pos;
+    }
+    return result;
+  }, [data.savedNodePositions, pendingNodePositions, nodesResult.serviceIdToNodeId]);
+
   const { layoutedNodes, layoutedEdges } = useServiceMapLayout({
     serviceNodes: nodesResult.serviceNodes, rawEdges: nodesResult.rawEdges,
     focusedNodeId, getDomain: nodesResult.getDomain, mainServiceId: effectiveMainServiceId,
     zoneConfigs: activeZones, layoutPreset, editMode,
     zonePositionOverrides, zoneSizeOverrides,
+    nodePositionOverrides: mergedNodePositions,
   });
 
   // Compute optimal handle pair based on relative node positions
@@ -216,14 +234,15 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
         setZonePositionOverride(change.id, change.position);
       }
 
-      // Service node dragging → highlight target zone
+      // Service node dragging → highlight target zone + save position
       if (change.type === 'position' && !change.id.startsWith('zone-') && change.position) {
-        const cx = change.position.x + 80;  // NODE_WIDTH / 2
-        const cy = change.position.y + 36;  // NODE_HEIGHT / 2
+        const cx = change.position.x + 80;
+        const cy = change.position.y + 36;
         if (change.dragging) {
           setDragTargetZoneKey(findZoneAtPoint(cx, cy));
         } else {
-          // Drop: assign to zone if different
+          // Drop complete: save position + detect zone change
+          setPendingNodePosition(change.id, change.position);
           const targetZone = findZoneAtPoint(cx, cy);
           setDragTargetZoneKey(null);
           if (targetZone) {
@@ -231,7 +250,6 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
             const currentZone = currentDomain ? domainToZone(currentDomain as ServiceDomain, activeZones) : null;
             if (targetZone !== currentZone) {
               setPendingOverride(change.id, targetZone);
-              toast.success(`Zone "${targetZone.toUpperCase()}"(으)로 이동됨`);
             }
           }
         }
@@ -356,15 +374,29 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
   const handleSaveChanges = useCallback(async () => {
     setSaving(true);
     try {
-      for (const [nodeId, zone] of Object.entries(pendingOverrides)) {
+      // Collect all nodes that need saving (zone changes and/or position changes)
+      const allNodeIds = new Set([
+        ...Object.keys(pendingOverrides),
+        ...Object.keys(pendingNodePositions),
+      ]);
+
+      for (const nodeId of allNodeIds) {
         const svc = data.services.find((s) => s.id === nodeId);
-        if (svc) await upsertLayerOverride.mutateAsync({ service_id: svc.service_id, dashboard_layer: zone });
+        if (!svc) continue;
+        const zone = pendingOverrides[nodeId];
+        const pos = pendingNodePositions[nodeId];
+        await upsertLayerOverride.mutateAsync({
+          service_id: svc.service_id,
+          ...(zone ? { dashboard_layer: zone } : {}),
+          position_x: pos?.x ?? null,
+          position_y: pos?.y ?? null,
+        });
       }
+
       if (pendingMainServiceId !== undefined) {
         await updateProject.mutateAsync({ id: projectId, main_service_id: pendingMainServiceId });
       }
-      // Wait for layer overrides to refetch BEFORE clearing pending state
-      // This prevents the layout from reverting to stale data momentarily
+
       await queryClient.refetchQueries({ queryKey: queryKeys.layerOverrides.byProject(projectId) });
       toast.success('변경사항이 저장되었습니다');
       clearPendingChanges();
@@ -374,7 +406,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     } finally {
       setSaving(false);
     }
-  }, [pendingOverrides, pendingMainServiceId, data.services, projectId, upsertLayerOverride, updateProject, clearPendingChanges, setEditMode, queryClient]);
+  }, [pendingOverrides, pendingNodePositions, pendingMainServiceId, data.services, projectId, upsertLayerOverride, updateProject, clearPendingChanges, setEditMode, queryClient]);
 
   return (
     <div className="flex-1 w-full relative min-h-0 border-none bg-background overflow-hidden flex flex-col">

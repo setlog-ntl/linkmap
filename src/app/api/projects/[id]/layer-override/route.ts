@@ -6,8 +6,10 @@ import { logAudit } from '@/lib/audit';
 
 const upsertSchema = z.object({
   service_id: z.string().uuid(),
-  dashboard_layer: z.string().max(50).optional(),  // ZoneKey: default 3 + custom zones
+  dashboard_layer: z.string().max(50).optional(),
   dashboard_subcategory: z.string().max(50).optional(),
+  position_x: z.number().min(-10000).max(10000).nullable().optional(),
+  position_y: z.number().min(-10000).max(10000).nullable().optional(),
 });
 
 export async function GET(
@@ -51,7 +53,7 @@ export async function PUT(
 
   if (!project) return notFoundError('프로젝트');
 
-  const { service_id, dashboard_layer, dashboard_subcategory } = parsed.data;
+  const { service_id, dashboard_layer, dashboard_subcategory, position_x, position_y } = parsed.data;
 
   const { data, error } = await supabase
     .from('project_service_overrides')
@@ -61,6 +63,8 @@ export async function PUT(
         service_id,
         dashboard_layer,
         dashboard_subcategory,
+        position_x: position_x ?? null,
+        position_y: position_y ?? null,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'project_id,service_id' }

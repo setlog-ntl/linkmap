@@ -42,6 +42,7 @@ interface ServiceMapState {
   editMode: boolean;
   pendingOverrides: Record<string, ZoneKey>;
   pendingMainServiceId: string | null | undefined;
+  pendingNodePositions: Record<string, { x: number; y: number }>;
 
   // Zone customization
   zoneConfigs: ZoneConfig[];
@@ -78,6 +79,7 @@ interface ServiceMapState {
   setEditMode: (mode: boolean) => void;
   setPendingOverride: (nodeId: string, zone: ZoneKey) => void;
   setPendingMainServiceId: (id: string | null) => void;
+  setPendingNodePosition: (nodeId: string, pos: { x: number; y: number }) => void;
   clearPendingChanges: () => void;
   pendingChangeCount: () => number;
 
@@ -125,6 +127,7 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
   editMode: false,
   pendingOverrides: {},
   pendingMainServiceId: undefined,
+  pendingNodePositions: {},
 
   // Zone customization defaults
   zoneConfigs: [],  // empty = use DEFAULT_ZONES
@@ -156,16 +159,23 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
 
   setEditMode: (mode) => set({
     editMode: mode,
-    ...(mode ? {} : { pendingOverrides: {}, pendingMainServiceId: undefined }),
+    ...(mode ? {} : { pendingOverrides: {}, pendingMainServiceId: undefined, pendingNodePositions: {} }),
   }),
   setPendingOverride: (nodeId, zone) => set((s) => ({
     pendingOverrides: { ...s.pendingOverrides, [nodeId]: zone },
   })),
   setPendingMainServiceId: (id) => set({ pendingMainServiceId: id }),
-  clearPendingChanges: () => set({ pendingOverrides: {}, pendingMainServiceId: undefined }),
+  setPendingNodePosition: (nodeId, pos) => set((s) => ({
+    pendingNodePositions: { ...s.pendingNodePositions, [nodeId]: pos },
+  })),
+  clearPendingChanges: () => set({ pendingOverrides: {}, pendingMainServiceId: undefined, pendingNodePositions: {} }),
   pendingChangeCount: () => {
     const s = get();
-    let count = Object.keys(s.pendingOverrides).length;
+    const overrideIds = new Set(Object.keys(s.pendingOverrides));
+    const positionIds = new Set(Object.keys(s.pendingNodePositions));
+    // Merge unique node IDs (some nodes have both zone + position changes)
+    const uniqueIds = new Set([...overrideIds, ...positionIds]);
+    let count = uniqueIds.size;
     if (s.pendingMainServiceId !== undefined) count += 1;
     return count;
   },

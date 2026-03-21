@@ -75,6 +75,8 @@ export interface ServiceMapData {
 
   // Layer overrides
   layerOverrides: Record<string, string>; // service_id → dashboard_layer
+  // Saved node positions (service_id → {x, y})
+  savedNodePositions: Record<string, { x: number; y: number }>;
 }
 
 // 데모/공유 API 응답 타입
@@ -231,6 +233,18 @@ export function useServiceMapData(projectId: string, options?: ServiceMapOptions
     return map;
   }, [isRemote, remoteData.layerOverrides, layerOverridesRaw]);
 
+  // Saved node positions from DB
+  const savedNodePositions = useMemo(() => {
+    if (isRemote) return {};
+    const map: Record<string, { x: number; y: number }> = {};
+    for (const o of layerOverridesRaw) {
+      if (o.position_x != null && o.position_y != null) {
+        map[o.service_id] = { x: Number(o.position_x), y: Number(o.position_y) };
+      }
+    }
+    return map;
+  }, [isRemote, layerOverridesRaw]);
+
   // Stable refs for mutations
   const createConnectionRef = useRef(createConnectionMutation);
   createConnectionRef.current = createConnectionMutation;
@@ -257,5 +271,6 @@ export function useServiceMapData(projectId: string, options?: ServiceMapOptions
     createConnectionRef,
     deleteConnectionRef,
     layerOverrides,
+    savedNodePositions,
   };
 }

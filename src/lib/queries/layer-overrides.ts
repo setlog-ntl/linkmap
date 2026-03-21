@@ -5,12 +5,14 @@ import { queryKeys } from './keys';
 import { staleTime } from './stale-time';
 import type { ZoneKey } from '@/lib/layout/zone-layout';
 
-interface LayerOverride {
+export interface LayerOverride {
   id: string;
   project_id: string;
   service_id: string;
   dashboard_layer: ZoneKey | null;
   dashboard_subcategory: string | null;
+  position_x: number | null;
+  position_y: number | null;
   updated_at: string;
 }
 
@@ -27,10 +29,17 @@ export function useLayerOverrides(projectId: string) {
   });
 }
 
+interface UpsertInput {
+  service_id: string;
+  dashboard_layer?: ZoneKey;
+  position_x?: number | null;
+  position_y?: number | null;
+}
+
 export function useUpsertLayerOverride(projectId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (input: { service_id: string; dashboard_layer: ZoneKey }) => {
+    mutationFn: async (input: UpsertInput) => {
       const res = await fetch(`/api/projects/${projectId}/layer-override`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
