@@ -169,6 +169,10 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     nodePositionOverrides: mergedNodePositions,
   });
 
+  // Refs for node state (needed by computeHandles before useState)
+  const nodesRef = useRef<Node[]>(layoutedNodes);
+  const initialFitDone = useRef(false);
+
   // Compute optimal handle pair based on relative node positions
   const computeHandles = useCallback((srcId: string, tgtId: string) => {
     const srcNode = nodesRef.current.find((n) => n.id === srcId);
@@ -222,8 +226,6 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
 
   const [nodes, setNodes] = useState<Node[]>(layoutedNodes);
   const [edges, setEdges] = useState<Edge[]>(allEdges);
-  const initialFitDone = useRef(false);
-  const nodesRef = useRef(nodes);
   nodesRef.current = nodes;
 
   // Find which zone contains a given point (for drag-to-zone)
