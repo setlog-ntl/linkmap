@@ -543,12 +543,42 @@ export function ModulePanel({
                   return <Icon className="h-4 w-4 text-primary" />;
                 })()}
               </div>
-              <div className="min-w-0">
-                <h3 className="text-sm font-semibold leading-tight">
-                  {locale === 'en' && selectedModule.nameEn
-                    ? selectedModule.nameEn
-                    : selectedModule.name}
-                </h3>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <h3 className="text-sm font-semibold leading-tight flex-1 truncate">
+                    {locale === 'en' && selectedModule.nameEn
+                      ? selectedModule.nameEn
+                      : selectedModule.name}
+                  </h3>
+                  {/* 위치 이동 컨트롤 */}
+                  {(() => {
+                    const idx = enabledModules.indexOf(selectedModule.id);
+                    if (idx < 0) return null;
+                    return (
+                      <div className="flex items-center gap-0.5 shrink-0">
+                        <span className="text-[10px] text-muted-foreground tabular-nums mr-0.5">
+                          {idx + 1}/{enabledModules.length}
+                        </span>
+                        <button
+                          className="p-1 hover:bg-muted rounded-md disabled:opacity-30 transition-colors"
+                          onClick={() => handleMoveUp(selectedModule.id)}
+                          disabled={idx === 0}
+                          title="위로 이동"
+                        >
+                          <ChevronUp className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          className="p-1 hover:bg-muted rounded-md disabled:opacity-30 transition-colors"
+                          onClick={() => handleMoveDown(selectedModule.id)}
+                          disabled={idx === enabledModules.length - 1}
+                          title="아래로 이동"
+                        >
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    );
+                  })()}
+                </div>
                 <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
                   {locale === 'en' && selectedModule.descriptionEn
                     ? selectedModule.descriptionEn
