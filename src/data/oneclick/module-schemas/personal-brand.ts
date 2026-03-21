@@ -22,13 +22,14 @@ export const personalBrandModuleSchema: TemplateModuleSchema = {
           labelEn: 'Design Theme',
           defaultValue: 'creator',
           options: [
-            { value: 'minimal', label: '미니멀 (Minimal)' },
             { value: 'creator', label: '크리에이터 (Creator)' },
-            { value: 'storyteller', label: '풀 프로필 (Storyteller)' },
-            { value: 'editorial', label: '에디토리얼 (Editorial)' },
-            { value: 'magazine', label: '매거진 (Magazine)' },
             { value: 'warm-earth', label: '웜 어스 (Warm Earth)' },
+            { value: 'storyteller', label: '스토리텔러 (Storyteller)' },
+            { value: 'magazine', label: '매거진 (Magazine)' },
+            { value: 'editorial', label: '에디토리얼 (Editorial)' },
+            { value: 'minimal', label: '미니멀 (Minimal)' },
             { value: 'midnight', label: '미드나잇 (Midnight)' },
+            { value: 'terminal', label: '터미널 (Terminal)' },
           ],
         },
         {
