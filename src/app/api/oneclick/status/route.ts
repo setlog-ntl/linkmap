@@ -25,8 +25,9 @@ export async function GET(request: NextRequest) {
 
   const deployMethod = deploy.deploy_method || 'github_pages';
 
-  // GitHub Pages polling
-  if (deployMethod === 'github_pages' && deploy.deploy_status !== 'ready' && deploy.deploy_status !== 'error') {
+  // GitHub Pages polling — ready 외 모든 상태에서 실행
+  // error 상태도 재확인: 타임아웃 후 Actions가 뒤늦게 성공했을 수 있음
+  if (deployMethod === 'github_pages' && deploy.deploy_status !== 'ready') {
     try {
       // Resolve token — need full flow for error handling (token decryption failure → mark deploy as error)
       const { data: githubService } = await supabase

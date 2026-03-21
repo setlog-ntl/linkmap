@@ -409,12 +409,10 @@ export function useBatchApplyFiles() {
 
 // ---------- Status Polling (exponential backoff) ----------
 
-// 10-minute timeout (서버 deploy-status.ts의 DEPLOY_TIMEOUT_MS와 동일)
-const POLL_TIMEOUT_MS = 10 * 60 * 1000;
-
-// Backoff: 1s → 2s → 3s → 5s → 8s → 10s (capped)
+// Backoff: 2s → 3s → 5s → 8s → 10s (capped)
+// 타임아웃은 서버(deploy-status.ts)에서 단일 관리 — 클라이언트는 서버 응답에 의존
 function getBackoffInterval(pollCount: number): number {
-  const intervals = [1000, 2000, 3000, 5000, 8000, 10000];
+  const intervals = [2000, 3000, 5000, 8000, 10000];
   return intervals[Math.min(pollCount, intervals.length - 1)];
 }
 
@@ -434,23 +432,13 @@ export function useDeployStatus(deployId: string | null, enabled: boolean = true
     enabled: !!deployId && enabled,
     refetchInterval: (query) => {
       const data = query.state.data;
-      if (!data) return 1000; // Fast initial poll
+      if (!data) return 2000;
 
-      // Stop polling when deployment is in a terminal state
-      if (['ready', 'error', 'canceled', 'timeout'].includes(data.deploy_status)) {
+      // 터미널 상태 도달 시 폴링 중단 (서버가 타임아웃 판정하여 'error' 반환)
+      if (['ready', 'error', 'canceled'].includes(data.deploy_status)) {
         if (data.deploy_status === 'ready') {
           queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
         }
-        return false;
-      }
-
-      // Timeout: stop polling after POLL_TIMEOUT_MS (첫 데이터 수신 시점 기준)
-      const firstFetchAt = query.state.dataUpdatedAt - (query.state.dataUpdateCount * getBackoffInterval(Math.max(0, query.state.dataUpdateCount - 1)));
-      if (Date.now() - firstFetchAt > POLL_TIMEOUT_MS) {
-        queryClient.setQueryData<DeployStatus>(
-          queryKeys.oneclick.status(deployId || ''),
-          (prev) => prev ? { ...prev, deploy_status: 'timeout' } : prev
-        );
         return false;
       }
 

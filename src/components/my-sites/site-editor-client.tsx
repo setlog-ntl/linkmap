@@ -352,11 +352,9 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       });
       setTimeout(() => setDeployState('idle'), 3000);
       cleanup();
-    } else if (status === 'error' || status === 'timeout') {
-      const msg = status === 'timeout'
-        ? '배포 시간이 초과되었습니다. 재배포를 시도해주세요.'
-        : deployStatusData.deploy_error || 'GitHub Actions 빌드 실패';
-      toast.error(msg, {
+    } else if (status === 'error') {
+      const errorMsg = deployStatusData.deploy_error || 'GitHub Actions 빌드 실패';
+      toast.error(errorMsg, {
         duration: 10000,
         action: {
           label: '재배포',
@@ -729,14 +727,21 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     await applyModuleChanges({ deploy: true });
   }, [applyModuleChanges]);
 
-  // ── 배포 리트라이 (상태 초기화 포함) ──
-  const handleRetryDeploy = useCallback(() => {
-    setAwaitingDeploy(false);
-    setDeployOrigin(null);
-    pendingDiffStatsRef.current = null;
-    seenBuildingRef.current = false;
-    handleApplyModulesAndDeploy();
-  }, [handleApplyModulesAndDeploy]);
+  // ── 배포 리트라이 (redeploy API로 workflow_dispatch만 트리거) ──
+  const handleRetryDeploy = useCallback(async () => {
+    try {
+      setDeployState('deploying');
+      await fetch(`/api/oneclick/deployments/${deployId}/redeploy`, { method: 'POST' });
+      queryClient.removeQueries({ queryKey: queryKeys.oneclick.status(deployId) });
+      deployStartedAtRef.current = Date.now();
+      seenBuildingRef.current = false;
+      setDeployOrigin('module-deploy');
+      setAwaitingDeploy(true);
+    } catch {
+      toast.error('재배포에 실패했습니다');
+      setDeployState('idle');
+    }
+  }, [deployId, queryClient]);
 
   // ── 빌드 진행 서브 라벨 (module-deploy 다이얼로그용) ──
   const buildSubLabel = useMemo(() => {

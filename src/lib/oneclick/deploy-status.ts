@@ -28,8 +28,8 @@ export interface ResolveDeployOptions {
   retryCount?: number;
 }
 
-/** Deploy timeout: 10 minutes from creation */
-const DEPLOY_TIMEOUT_MS = 10 * 60 * 1000;
+/** Deploy timeout: 15 minutes from last deploy attempt (GitHub Actions 평균 3-5분, 최악 8분 + CDN 2분 + 여유 5분) */
+const DEPLOY_TIMEOUT_MS = 15 * 60 * 1000;
 
 /**
  * Check if a GitHub Pages URL is actually accessible (returns 2xx).
@@ -77,7 +77,7 @@ export async function resolveDeployStatus(
         pagesStatus: 'errored',
         pagesUrl: currentPagesUrl,
         deploymentUrl: null,
-        errorMessage: '배포 시간이 초과되었습니다 (10분). 재배포를 시도해주세요.',
+        errorMessage: '배포 시간이 초과되었습니다. 재배포를 시도해주세요.',
         changed: currentDeployStatus !== 'error',
       };
     }
