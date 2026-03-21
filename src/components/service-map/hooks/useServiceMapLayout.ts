@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import type { Node, Edge } from '@xyflow/react';
-import { computeZoneLayout } from '@/lib/layout/zone-layout';
+import { computeZoneLayout, type ZoneConfig, type LayoutPreset } from '@/lib/layout/zone-layout';
 import { getNeighborhood, isNodeHighlighted, isEdgeHighlighted } from '@/lib/layout/graph-utils';
 import type { ServiceDomain } from '@/types';
 
@@ -12,6 +12,12 @@ export interface UseServiceMapLayoutParams {
   focusedNodeId: string | null;
   getDomain: (nodeId: string) => ServiceDomain | null;
   mainServiceId?: string | null;
+  // Zone customization
+  zoneConfigs?: ZoneConfig[];
+  layoutPreset?: LayoutPreset;
+  editMode?: boolean;
+  zonePositionOverrides?: Record<string, { x: number; y: number }>;
+  zoneSizeOverrides?: Record<string, { width: number; height: number }>;
 }
 
 export interface UseServiceMapLayoutReturn {
@@ -21,7 +27,10 @@ export interface UseServiceMapLayoutReturn {
 }
 
 export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServiceMapLayoutReturn {
-  const { serviceNodes, rawEdges, focusedNodeId, getDomain, mainServiceId } = params;
+  const {
+    serviceNodes, rawEdges, focusedNodeId, getDomain, mainServiceId,
+    zoneConfigs, layoutPreset, editMode, zonePositionOverrides, zoneSizeOverrides,
+  } = params;
 
   const neighborSet = useMemo(() => {
     if (!focusedNodeId) return null;
@@ -38,10 +47,16 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
     });
   }, [serviceNodes, mainServiceId]);
 
-  // Zone-based layout
+  // Zone-based layout with customization
   const zoneResult = useMemo(() => {
-    return computeZoneLayout(sortedServiceNodes, getDomain);
-  }, [sortedServiceNodes, getDomain]);
+    return computeZoneLayout(sortedServiceNodes, getDomain, {
+      zones: zoneConfigs,
+      preset: layoutPreset,
+      editMode,
+      positionOverrides: zonePositionOverrides,
+      sizeOverrides: zoneSizeOverrides,
+    });
+  }, [sortedServiceNodes, getDomain, zoneConfigs, layoutPreset, editMode, zonePositionOverrides, zoneSizeOverrides]);
 
   // Apply focus mode opacity
   const layoutedNodes = useMemo<Node[]>(() => {

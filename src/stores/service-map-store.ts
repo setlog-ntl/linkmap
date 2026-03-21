@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ZoneKey } from '@/lib/layout/zone-layout';
+import { DEFAULT_ZONES, type ZoneConfig, type LayoutPreset, type ZoneKey } from '@/lib/layout/zone-layout';
 import type { ViewLevel } from '@/types';
 
 interface ContextMenuState {
@@ -34,6 +34,12 @@ interface ServiceMapState {
   pendingOverrides: Record<string, ZoneKey>;
   pendingMainServiceId: string | null | undefined;
 
+  // Zone customization
+  zoneConfigs: ZoneConfig[];
+  layoutPreset: LayoutPreset;
+  zonePositionOverrides: Record<string, { x: number; y: number }>;
+  zoneSizeOverrides: Record<string, { width: number; height: number }>;
+
   // Hover state for edge↔node cross-highlighting
   hoveredEdgeId: string | null;
   hoveredEdgeNodes: HoveredEdgeNodes | null;
@@ -59,6 +65,17 @@ interface ServiceMapState {
   setPendingMainServiceId: (id: string | null) => void;
   clearPendingChanges: () => void;
   pendingChangeCount: () => number;
+
+  // Zone customization
+  setZoneConfigs: (configs: ZoneConfig[]) => void;
+  addZone: (zone: ZoneConfig) => void;
+  removeZone: (key: string) => void;
+  updateZone: (key: string, updates: Partial<ZoneConfig>) => void;
+  setLayoutPreset: (preset: LayoutPreset) => void;
+  setZonePositionOverride: (zoneId: string, pos: { x: number; y: number }) => void;
+  setZoneSizeOverride: (zoneId: string, size: { width: number; height: number }) => void;
+  resetZoneLayout: () => void;
+  getActiveZones: () => ZoneConfig[];
 
   // Hover cross-highlighting
   setHoveredEdge: (id: string | null, nodes?: HoveredEdgeNodes) => void;
@@ -88,6 +105,12 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
   editMode: false,
   pendingOverrides: {},
   pendingMainServiceId: undefined,
+
+  // Zone customization defaults
+  zoneConfigs: [],  // empty = use DEFAULT_ZONES
+  layoutPreset: 'horizontal',
+  zonePositionOverrides: {},
+  zoneSizeOverrides: {},
 
   hoveredEdgeId: null,
   hoveredEdgeNodes: null,
@@ -125,6 +148,46 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
     return count;
   },
 
+  // Zone customization
+  setZoneConfigs: (configs) => set({ zoneConfigs: configs }),
+  addZone: (zone) => set((s) => {
+    const base = s.zoneConfigs.length > 0 ? s.zoneConfigs : [...DEFAULT_ZONES];
+    return { zoneConfigs: [...base, zone] };
+  }),
+  removeZone: (key) => set((s) => {
+    const base = s.zoneConfigs.length > 0 ? s.zoneConfigs : [...DEFAULT_ZONES];
+    const updated = base.filter((z) => z.key !== key);
+    // Clear position/size overrides for removed zone
+    const { [`zone-${key}`]: _p, ...posRest } = s.zonePositionOverrides;
+    const { [`zone-${key}`]: _s, ...sizeRest } = s.zoneSizeOverrides;
+    return { zoneConfigs: updated, zonePositionOverrides: posRest, zoneSizeOverrides: sizeRest };
+  }),
+  updateZone: (key, updates) => set((s) => {
+    const base = s.zoneConfigs.length > 0 ? s.zoneConfigs : [...DEFAULT_ZONES];
+    return {
+      zoneConfigs: base.map((z) => (z.key === key ? { ...z, ...updates } : z)),
+    };
+  }),
+  setLayoutPreset: (preset) => set({
+    layoutPreset: preset,
+    zonePositionOverrides: {},  // Reset positions when changing preset
+  }),
+  setZonePositionOverride: (zoneId, pos) => set((s) => ({
+    zonePositionOverrides: { ...s.zonePositionOverrides, [zoneId]: pos },
+  })),
+  setZoneSizeOverride: (zoneId, size) => set((s) => ({
+    zoneSizeOverrides: { ...s.zoneSizeOverrides, [zoneId]: size },
+  })),
+  resetZoneLayout: () => set({
+    zonePositionOverrides: {},
+    zoneSizeOverrides: {},
+    layoutPreset: 'horizontal',
+  }),
+  getActiveZones: () => {
+    const s = get();
+    return s.zoneConfigs.length > 0 ? s.zoneConfigs : DEFAULT_ZONES;
+  },
+
   // Hover cross-highlighting
   setHoveredEdge: (id, nodes) => set({
     hoveredEdgeId: id,
@@ -148,7 +211,7 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
   // Undo/Redo
   pushHistory: (entry) => set((s) => ({
     undoStack: [...s.undoStack.slice(-(MAX_HISTORY - 1)), { ...entry, timestamp: Date.now() }],
-    redoStack: [], // Clear redo on new action
+    redoStack: [],
   })),
   undo: () => {
     const s = get();

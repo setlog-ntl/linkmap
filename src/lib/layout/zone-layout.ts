@@ -1,31 +1,43 @@
 import type { Node } from '@xyflow/react';
 import type { ServiceDomain } from '@/types';
 
-/** Simplified 3-zone layout: FRONTEND / BACKEND / DEVTOOLS */
-export type ZoneKey = 'frontend' | 'backend' | 'devtools';
+// ── Zone Configuration ─────────────────────────────────────────
 
-const ZONE_ORDER: ZoneKey[] = ['frontend', 'backend', 'devtools'];
+export interface ZoneConfig {
+  key: string;
+  label: string;
+  emoji: string;
+  color: string;       // rgba background
+  subtitle?: string;
+}
 
-const ZONE_LABELS: Record<ZoneKey, string> = {
-  frontend: 'FRONTEND',
-  backend: 'BACKEND',
-  devtools: 'DEVTOOLS',
-};
+export type LayoutPreset = 'horizontal' | 'vertical' | 'grid';
 
-const ZONE_EMOJIS: Record<ZoneKey, string> = {
-  frontend: '🖥️',
-  backend: '⚙️',
-  devtools: '🛠️',
-};
+/** Backwards-compatible alias — now any string (custom zones supported) */
+export type ZoneKey = string;
 
-const ZONE_COLORS: Record<ZoneKey, string> = {
-  frontend: 'rgba(59, 130, 246, 0.04)',  // blue - subtle tint
-  backend: 'rgba(139, 92, 246, 0.04)',   // violet - subtle tint
-  devtools: 'rgba(234, 179, 8, 0.04)',   // yellow - subtle tint
-};
+/** 3 default zones */
+export const DEFAULT_ZONES: ZoneConfig[] = [
+  { key: 'frontend', label: 'FRONTEND', emoji: '🖥️', color: 'rgba(59, 130, 246, 0.04)', subtitle: 'UI & Client' },
+  { key: 'backend',  label: 'BACKEND',  emoji: '⚙️', color: 'rgba(139, 92, 246, 0.04)', subtitle: 'Server & API' },
+  { key: 'devtools', label: 'DEVTOOLS', emoji: '🛠️', color: 'rgba(234, 179, 8, 0.04)',  subtitle: 'Build & Test' },
+];
 
-/** Map 8 ServiceDomains → 3 zones */
-const DOMAIN_TO_ZONE: Record<ServiceDomain, ZoneKey> = {
+/** Color palette for custom zones */
+export const ZONE_COLOR_PALETTE: { name: string; color: string; hex: string }[] = [
+  { name: '블루',     color: 'rgba(59, 130, 246, 0.04)',  hex: '#3b82f6' },
+  { name: '바이올렛', color: 'rgba(139, 92, 246, 0.04)',  hex: '#8b5cf6' },
+  { name: '옐로',     color: 'rgba(234, 179, 8, 0.04)',   hex: '#eab308' },
+  { name: '그린',     color: 'rgba(34, 197, 94, 0.04)',   hex: '#22c55e' },
+  { name: '레드',     color: 'rgba(239, 68, 68, 0.04)',   hex: '#ef4444' },
+  { name: '오렌지',   color: 'rgba(249, 115, 22, 0.04)',  hex: '#f97316' },
+  { name: '핑크',     color: 'rgba(236, 72, 153, 0.04)',  hex: '#ec4899' },
+  { name: '시안',     color: 'rgba(6, 182, 212, 0.04)',   hex: '#06b6d4' },
+];
+
+// ── Domain → Zone mapping ──────────────────────────────────────
+
+const DOMAIN_TO_ZONE: Record<ServiceDomain, string> = {
   infrastructure: 'frontend',
   backend: 'backend',
   devtools: 'devtools',
@@ -37,7 +49,17 @@ const DOMAIN_TO_ZONE: Record<ServiceDomain, ZoneKey> = {
   sns: 'frontend',
 };
 
-const GRID_COLS = 3;
+export function domainToZone(domain: ServiceDomain | null, zones?: ZoneConfig[]): string {
+  if (!domain) return 'backend';
+  const key = DOMAIN_TO_ZONE[domain] ?? 'backend';
+  if (zones && zones.length > 0 && !zones.some((z) => z.key === key)) {
+    return zones[0].key;
+  }
+  return key;
+}
+
+// ── Layout Constants ───────────────────────────────────────────
+
 const ZONE_GAP = 64;
 const ZONE_PADDING = 40;
 const ZONE_HEADER_HEIGHT = 44;
@@ -49,42 +71,47 @@ const INNER_COLS = 3;
 const MIN_ZONE_WIDTH = INNER_COLS * NODE_WIDTH + (INNER_COLS - 1) * NODE_GAP_X + 2 * ZONE_PADDING;
 const MIN_ZONE_HEIGHT = ZONE_HEADER_HEIGHT + NODE_HEIGHT + 2 * ZONE_PADDING;
 
-interface ZoneInfo {
-  key: ZoneKey;
-  serviceNodeIds: string[];
-}
+// ── Layout Result ──────────────────────────────────────────────
 
 export interface ZoneLayoutResult {
   nodes: Node[];
 }
 
-export function domainToZone(domain: ServiceDomain | null): ZoneKey {
-  if (!domain) return 'backend';
-  return DOMAIN_TO_ZONE[domain] ?? 'backend';
+export interface ZoneLayoutOptions {
+  zones?: ZoneConfig[];
+  preset?: LayoutPreset;
+  editMode?: boolean;
+  positionOverrides?: Record<string, { x: number; y: number }>;
+  sizeOverrides?: Record<string, { width: number; height: number }>;
 }
 
-/**
- * 3-zone horizontal layout:
- * [FRONTEND] [BACKEND] [DEVTOOLS]
- */
+// ── Main layout function ───────────────────────────────────────
+
 export function computeZoneLayout(
   serviceNodes: Node[],
   getDomain: (nodeId: string) => ServiceDomain | null,
+  options?: ZoneLayoutOptions,
 ): ZoneLayoutResult {
-  // Group service nodes into 3 zones
-  const zones: ZoneInfo[] = ZONE_ORDER.map((key) => ({ key, serviceNodeIds: [] }));
-  const zoneIndex = new Map(ZONE_ORDER.map((k, i) => [k, i]));
+  const zones = options?.zones && options.zones.length > 0 ? options.zones : DEFAULT_ZONES;
+  const preset = options?.preset ?? 'horizontal';
+  const editMode = options?.editMode ?? false;
+  const posOverrides = options?.positionOverrides ?? {};
+  const sizeOverrides = options?.sizeOverrides ?? {};
+
+  // Group service nodes into zones
+  const zoneGroups = zones.map((z) => ({ config: z, serviceNodeIds: [] as string[] }));
+  const zoneKeyToIndex = new Map(zones.map((z, i) => [z.key, i]));
 
   for (const node of serviceNodes) {
     const domain = getDomain(node.id);
-    const zone = domainToZone(domain);
-    const idx = zoneIndex.get(zone) ?? 1;
-    zones[idx].serviceNodeIds.push(node.id);
+    const zoneKey = domainToZone(domain, zones);
+    const idx = zoneKeyToIndex.get(zoneKey) ?? 0;
+    zoneGroups[idx].serviceNodeIds.push(node.id);
   }
 
-  // Compute each zone's size
-  const zoneSizes = zones.map((z) => {
-    const count = z.serviceNodeIds.length;
+  // Compute auto-fit size per zone
+  const autoSizes = zoneGroups.map((zg) => {
+    const count = zg.serviceNodeIds.length;
     const rows = Math.max(1, Math.ceil(count / INNER_COLS));
     const cols = Math.min(count || 1, INNER_COLS);
     const w = Math.max(MIN_ZONE_WIDTH, cols * NODE_WIDTH + (cols - 1) * NODE_GAP_X + 2 * ZONE_PADDING);
@@ -92,60 +119,130 @@ export function computeZoneLayout(
     return { w, h };
   });
 
-  // All zones same height (max)
-  const maxHeight = Math.max(...zoneSizes.map((s) => s.h));
+  // Apply size overrides
+  const finalSizes = autoSizes.map((auto, i) => {
+    const zoneId = `zone-${zoneGroups[i].config.key}`;
+    const ov = sizeOverrides[zoneId];
+    return ov ? { w: ov.width, h: ov.height } : auto;
+  });
+
+  // Compute zone positions based on preset
+  const autoPositions = computePresetPositions(finalSizes, preset);
 
   // Build output
   const resultNodes: Node[] = [];
   const nodeMap = new Map(serviceNodes.map((n) => [n.id, n]));
-  let xOffset = 0;
 
-  for (let i = 0; i < zones.length; i++) {
-    const zone = zones[i];
-    const size = zoneSizes[i];
-    const zoneNodeId = `zone-${zone.key}`;
+  for (let i = 0; i < zoneGroups.length; i++) {
+    const zg = zoneGroups[i];
+    const size = finalSizes[i];
+    const zoneNodeId = `zone-${zg.config.key}`;
+    const pos = posOverrides[zoneNodeId] ?? autoPositions[i];
+    const isCustom = !DEFAULT_ZONES.some((d) => d.key === zg.config.key);
 
-    // Zone as background hint — not a container
     resultNodes.push({
       id: zoneNodeId,
       type: 'zone',
-      position: { x: xOffset, y: 0 },
-      selectable: false,
-      draggable: false,
+      position: pos,
+      selectable: editMode,
+      draggable: editMode,
       zIndex: -1,
       data: {
-        domain: zone.key,
-        label: ZONE_LABELS[zone.key],
-        emoji: ZONE_EMOJIS[zone.key],
-        count: zone.serviceNodeIds.length,
+        domain: zg.config.key,
+        label: zg.config.label,
+        emoji: zg.config.emoji,
+        count: zg.serviceNodeIds.length,
+        color: zg.config.color,
+        subtitle: zg.config.subtitle,
+        isCustom,
       },
       style: {
         width: size.w,
-        height: maxHeight,
-        backgroundColor: ZONE_COLORS[zone.key],
-        pointerEvents: 'none' as const,
+        height: size.h,
+        backgroundColor: zg.config.color,
+        ...(editMode ? {} : { pointerEvents: 'none' as const }),
       },
     });
 
-    // Place service nodes with absolute coordinates (no parentId)
-    zone.serviceNodeIds.forEach((nodeId, idx) => {
+    // Place service nodes with absolute coordinates
+    zg.serviceNodeIds.forEach((nodeId, idx) => {
       const original = nodeMap.get(nodeId);
       if (!original) return;
       const localRow = Math.floor(idx / INNER_COLS);
       const localCol = idx % INNER_COLS;
-      const absX = xOffset + ZONE_PADDING + localCol * (NODE_WIDTH + NODE_GAP_X);
-      const absY = ZONE_HEADER_HEIGHT + ZONE_PADDING + localRow * (NODE_HEIGHT + NODE_GAP_Y);
+      const absX = pos.x + ZONE_PADDING + localCol * (NODE_WIDTH + NODE_GAP_X);
+      const absY = pos.y + ZONE_HEADER_HEIGHT + ZONE_PADDING + localRow * (NODE_HEIGHT + NODE_GAP_Y);
 
       resultNodes.push({
         ...original,
         position: { x: absX, y: absY },
       });
     });
-
-    xOffset += size.w + ZONE_GAP;
   }
 
   return { nodes: resultNodes };
 }
 
-export { ZONE_ORDER, NODE_WIDTH, NODE_HEIGHT };
+// ── Preset position calculators ────────────────────────────────
+
+function computePresetPositions(
+  sizes: { w: number; h: number }[],
+  preset: LayoutPreset,
+): { x: number; y: number }[] {
+  switch (preset) {
+    case 'horizontal': {
+      const maxH = Math.max(...sizes.map((s) => s.h));
+      let x = 0;
+      return sizes.map((s) => {
+        const p = { x, y: (maxH - s.h) / 2 };
+        x += s.w + ZONE_GAP;
+        return p;
+      });
+    }
+    case 'vertical': {
+      const maxW = Math.max(...sizes.map((s) => s.w));
+      let y = 0;
+      return sizes.map((s) => {
+        const p = { x: (maxW - s.w) / 2, y };
+        y += s.h + ZONE_GAP;
+        return p;
+      });
+    }
+    case 'grid': {
+      const cols = Math.ceil(Math.sqrt(sizes.length));
+      let x = 0;
+      let y = 0;
+      let rowMaxH = 0;
+      let col = 0;
+      return sizes.map((s) => {
+        if (col >= cols) {
+          col = 0;
+          x = 0;
+          y += rowMaxH + ZONE_GAP;
+          rowMaxH = 0;
+        }
+        const p = { x, y };
+        x += s.w + ZONE_GAP;
+        rowMaxH = Math.max(rowMaxH, s.h);
+        col++;
+        return p;
+      });
+    }
+  }
+}
+
+// ── Auto-fit: compute optimal size for a zone's services ──────
+
+export function computeAutoFitSize(serviceCount: number): { width: number; height: number } {
+  const count = Math.max(0, serviceCount);
+  const rows = Math.max(1, Math.ceil(count / INNER_COLS));
+  const cols = Math.min(count || 1, INNER_COLS);
+  return {
+    width: Math.max(MIN_ZONE_WIDTH, cols * NODE_WIDTH + (cols - 1) * NODE_GAP_X + 2 * ZONE_PADDING),
+    height: Math.max(MIN_ZONE_HEIGHT, ZONE_HEADER_HEIGHT + rows * NODE_HEIGHT + (rows - 1) * NODE_GAP_Y + 2 * ZONE_PADDING),
+  };
+}
+
+// ── Exports ────────────────────────────────────────────────────
+
+export { NODE_WIDTH, NODE_HEIGHT, ZONE_PADDING, ZONE_HEADER_HEIGHT };

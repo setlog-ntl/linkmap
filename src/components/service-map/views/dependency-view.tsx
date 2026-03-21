@@ -58,6 +58,8 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     editMode, pendingOverrides, pendingMainServiceId,
     setPendingMainServiceId, clearPendingChanges, setEditMode,
     setHoveredNodeId,
+    zoneConfigs, layoutPreset, zonePositionOverrides, zoneSizeOverrides,
+    setZonePositionOverride, setZoneSizeOverride, getActiveZones,
   } = useServiceMapStore();
 
   const { resolvedTheme } = useTheme();
@@ -114,16 +116,32 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     onShowConnectionDialog,
   });
 
+  const activeZones = getActiveZones();
   const { layoutedNodes, layoutedEdges } = useServiceMapLayout({
     serviceNodes: nodesResult.serviceNodes, rawEdges: nodesResult.rawEdges,
     focusedNodeId, getDomain: nodesResult.getDomain, mainServiceId: effectiveMainServiceId,
+    zoneConfigs: activeZones, layoutPreset, editMode,
+    zonePositionOverrides, zoneSizeOverrides,
   });
 
   const [nodes, setNodes] = useState<Node[]>(layoutedNodes);
   const [edges, setEdges] = useState<Edge[]>(layoutedEdges);
   const initialFitDone = useRef(false);
 
-  const onNodesChange = useCallback((changes: NodeChange<Node>[]) => { setNodes((nds) => applyNodeChanges(changes, nds)); }, []);
+  const onNodesChange = useCallback((changes: NodeChange<Node>[]) => {
+    setNodes((nds) => applyNodeChanges(changes, nds));
+    // Capture zone drag/resize for persistence
+    if (editMode) {
+      for (const change of changes) {
+        if (change.type === 'position' && change.dragging === false && change.id.startsWith('zone-') && change.position) {
+          setZonePositionOverride(change.id, change.position);
+        }
+        if (change.type === 'dimensions' && change.id.startsWith('zone-') && change.dimensions) {
+          setZoneSizeOverride(change.id, { width: change.dimensions.width, height: change.dimensions.height });
+        }
+      }
+    }
+  }, [editMode, setZonePositionOverride, setZoneSizeOverride]);
   const onEdgesChange = useCallback((changes: EdgeChange<Edge>[]) => { setEdges((eds) => applyEdgeChanges(changes, eds)); }, []);
 
   useEffect(() => { setNodes(layoutedNodes); setEdges(layoutedEdges); }, [layoutedNodes, layoutedEdges]);
@@ -204,8 +222,8 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
 
   const getCurrentZone = useCallback((nodeId: string): ZoneKey | null => {
     const domain = nodesResult.getDomain(nodeId);
-    return domain ? domainToZone(domain as ServiceDomain) : null;
-  }, [nodesResult]);
+    return domain ? domainToZone(domain as ServiceDomain, activeZones) : null;
+  }, [nodesResult, activeZones]);
 
   const handleSaveChanges = useCallback(async () => {
     setSaving(true);

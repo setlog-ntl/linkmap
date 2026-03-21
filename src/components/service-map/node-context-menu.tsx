@@ -4,13 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Eye, Link2, Activity, Trash2, Plus, Maximize2, FolderOpen, Star, StarOff, Check, ChevronRight } from 'lucide-react';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import { useReactFlow } from '@xyflow/react';
-import type { ZoneKey } from '@/lib/layout/zone-layout';
-
-const ZONES: { key: ZoneKey; label: string }[] = [
-  { key: 'frontend', label: 'FRONTEND' },
-  { key: 'backend', label: 'BACKEND' },
-  { key: 'devtools', label: 'DEVTOOLS' },
-];
 
 interface NodeContextMenuProps {
   onViewDetail: (nodeId: string) => void;
@@ -20,7 +13,7 @@ interface NodeContextMenuProps {
   onSetMainService?: (nodeId: string) => void;
   onUnsetMainService?: () => void;
   mainServiceId?: string | null;
-  currentZone?: (nodeId: string) => ZoneKey | null;
+  currentZone?: (nodeId: string) => string | null;
 }
 
 export function NodeContextMenu({
@@ -33,7 +26,10 @@ export function NodeContextMenu({
   mainServiceId,
   currentZone,
 }: NodeContextMenuProps) {
-  const { contextMenu, setContextMenu, setCatalogSidebarOpen, editMode, setPendingOverride } = useServiceMapStore();
+  const {
+    contextMenu, setContextMenu, setCatalogSidebarOpen,
+    editMode, setPendingOverride, getActiveZones,
+  } = useServiceMapStore();
   const { fitView } = useReactFlow();
   const menuRef = useRef<HTMLDivElement>(null);
   const [showZoneSubmenu, setShowZoneSubmenu] = useState(false);
@@ -57,6 +53,7 @@ export function NodeContextMenu({
   const nodeId = contextMenu.nodeId;
   const isMainService = nodeId === mainServiceId;
   const nodeCurrentZone = nodeId && currentZone ? currentZone(nodeId) : null;
+  const zones = getActiveZones();
 
   const paneMenuItems = [
     { icon: Plus, label: '서비스 추가', action: () => setCatalogSidebarOpen(true) },
@@ -92,7 +89,6 @@ export function NodeContextMenu({
       style={{ left: contextMenu.x, top: contextMenu.y }}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* View detail */}
       <button
         className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
         onClick={() => { onViewDetail(nodeId!); setContextMenu(null); }}
@@ -100,7 +96,6 @@ export function NodeContextMenu({
         <Eye className="h-4 w-4" /> 상세 보기
       </button>
 
-      {/* Start connection */}
       <button
         className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
         onClick={() => { onStartConnect(nodeId!); setContextMenu(null); }}
@@ -113,7 +108,7 @@ export function NodeContextMenu({
         <>
           <div className="my-1 border-t border-border" />
 
-          {/* Zone move submenu */}
+          {/* Zone move submenu — dynamic zone list */}
           <div
             className="relative"
             onMouseEnter={() => setShowZoneSubmenu(true)}
@@ -125,8 +120,8 @@ export function NodeContextMenu({
               <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
             {showZoneSubmenu && (
-              <div className="absolute left-full top-0 ml-1 min-w-[140px] rounded-md border bg-popover p-1 shadow-md">
-                {ZONES.map((z) => (
+              <div className="absolute left-full top-0 ml-1 min-w-[160px] rounded-md border bg-popover p-1 shadow-md">
+                {zones.map((z) => (
                   <button
                     key={z.key}
                     className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
@@ -136,9 +131,9 @@ export function NodeContextMenu({
                       setShowZoneSubmenu(false);
                     }}
                   >
-                    {nodeCurrentZone === z.key && <Check className="h-3.5 w-3.5" />}
-                    {nodeCurrentZone !== z.key && <span className="w-3.5" />}
-                    {z.label}
+                    {nodeCurrentZone === z.key ? <Check className="h-3.5 w-3.5" /> : <span className="w-3.5" />}
+                    <span className="flex-1">{z.label}</span>
+                    {z.subtitle && <span className="text-[9px] text-muted-foreground">{z.subtitle}</span>}
                   </button>
                 ))}
               </div>
@@ -165,7 +160,6 @@ export function NodeContextMenu({
 
       <div className="my-1 border-t border-border" />
 
-      {/* Health check */}
       <button
         className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
         onClick={() => { onRunHealthCheck(nodeId!); setContextMenu(null); }}
@@ -173,7 +167,6 @@ export function NodeContextMenu({
         <Activity className="h-4 w-4" /> 헬스체크 실행
       </button>
 
-      {/* Remove service */}
       <button
         className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-destructive hover:bg-accent hover:text-destructive"
         onClick={() => { onRemoveService(nodeId!); setContextMenu(null); }}
