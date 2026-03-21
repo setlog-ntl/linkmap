@@ -242,7 +242,8 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
   nodesRef.current = nodes;
 
   // Build zone-level visual edges with optimized handle directions
-  // Include `nodes` in deps so handles recalculate when zones are repositioned
+  // Depend on zonePositionOverrides/zoneSizeOverrides so handles recalculate when zones reposition
+  // (NOT on `nodes` — that causes render loop: nodes→zoneEdges→useEffect→setNodes→nodes)
   const zoneEdges = useMemo<Edge[]>(() => {
     return zoneConnections.map((zc) => {
       const handles = computeHandles(zc.source, zc.target);
@@ -260,7 +261,8 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
         },
       };
     });
-  }, [zoneConnections, removeZoneConnection, computeHandles, nodes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [zoneConnections, removeZoneConnection, computeHandles, zonePositionOverrides, zoneSizeOverrides]);
 
   const allEdges = useMemo(() => [...layoutedEdges, ...zoneEdges], [layoutedEdges, zoneEdges]);
 
