@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useState, useRef, useEffect, useCallback } from 'react';
-import { NodeResizer, type NodeProps, type ResizeParams } from '@xyflow/react';
+import { NodeResizer, Handle, Position, type NodeProps, type ResizeParams } from '@xyflow/react';
 import { Monitor, Server, Wrench, Box, Trash2, Shrink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useServiceMapStore } from '@/stores/service-map-store';
@@ -216,6 +216,36 @@ function ZoneNode({ id, data, selected }: NodeProps) {
         <div className="px-4 pt-8 text-xs text-muted-foreground/60">
           + 서비스를 이 Zone으로 이동하세요
         </div>
+      )}
+
+      {/* Connection handles — edit mode only, for zone↔zone and zone↔node connections */}
+      {editMode && (
+        <>
+          <Handle type="target" position={Position.Top} id="zt-top"
+            className="!w-4 !h-1.5 !rounded-sm !bg-primary/40 !border-primary/30 !border"
+            style={{ pointerEvents: 'auto', top: -3 }} />
+          <Handle type="target" position={Position.Bottom} id="zt-bottom"
+            className="!w-4 !h-1.5 !rounded-sm !bg-primary/40 !border-primary/30 !border"
+            style={{ pointerEvents: 'auto', bottom: -3 }} />
+          <Handle type="target" position={Position.Left} id="zt-left"
+            className="!w-1.5 !h-4 !rounded-sm !bg-primary/40 !border-primary/30 !border"
+            style={{ pointerEvents: 'auto', left: -3 }} />
+          <Handle type="target" position={Position.Right} id="zt-right"
+            className="!w-1.5 !h-4 !rounded-sm !bg-primary/40 !border-primary/30 !border"
+            style={{ pointerEvents: 'auto', right: -3 }} />
+          <Handle type="source" position={Position.Top} id="zs-top"
+            className="!w-4 !h-1.5 !rounded-sm !bg-primary/40 !border-primary/30 !border"
+            style={{ pointerEvents: 'auto', top: -3 }} />
+          <Handle type="source" position={Position.Bottom} id="zs-bottom"
+            className="!w-4 !h-1.5 !rounded-sm !bg-primary/40 !border-primary/30 !border"
+            style={{ pointerEvents: 'auto', bottom: -3 }} />
+          <Handle type="source" position={Position.Left} id="zs-left"
+            className="!w-1.5 !h-4 !rounded-sm !bg-primary/40 !border-primary/30 !border"
+            style={{ pointerEvents: 'auto', left: -3 }} />
+          <Handle type="source" position={Position.Right} id="zs-right"
+            className="!w-1.5 !h-4 !rounded-sm !bg-primary/40 !border-primary/30 !border"
+            style={{ pointerEvents: 'auto', right: -3 }} />
+        </>
       )}
     </div>
   );

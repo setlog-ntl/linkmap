@@ -28,6 +28,7 @@ export interface UseServiceMapInteractionsParams {
   setConnectingFrom: (id: string | null) => void;
   connectingFrom: string | null;
   onShowConnectionDialog: (sourceId: string, targetId: string) => void;
+  editMode?: boolean;
 }
 
 export interface UseServiceMapInteractionsReturn {
@@ -63,6 +64,7 @@ export function useServiceMapInteractions(params: UseServiceMapInteractionsParam
     setConnectingFrom,
     connectingFrom,
     onShowConnectionDialog,
+    editMode,
   } = params;
 
   const openSheet = useServiceDetailStore((s) => s.openSheet);
@@ -112,9 +114,7 @@ export function useServiceMapInteractions(params: UseServiceMapInteractionsParam
 
   // Node click: focus + detail OR complete connection
   const handleNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
-    if (node.type === 'zone') return;
-
-    // If connecting: show dialog to pick type
+    // In connecting mode: allow zone and service as targets
     if (connectingFrom && connectingFrom !== node.id) {
       onShowConnectionDialog(connectingFrom, node.id);
       setConnectingFrom(null);
@@ -125,11 +125,20 @@ export function useServiceMapInteractions(params: UseServiceMapInteractionsParam
       return;
     }
 
-    // Normal click: toggle focus + open detail sheet
+    // Zone click: allow in edit mode for connecting
+    if (node.type === 'zone') return;
+
+    // Edit mode: toggle focus only (no detail sheet)
+    if (editMode) {
+      setFocusedNodeId(node.id);
+      return;
+    }
+
+    // View mode: toggle focus + open detail sheet
     setFocusedNodeId(node.id);
     const svc = services.find((s) => s.id === node.id);
     if (svc) openSheet(buildFullData(svc));
-  }, [services, setFocusedNodeId, openSheet, buildFullData, connectingFrom, setConnectingFrom, onShowConnectionDialog]);
+  }, [services, setFocusedNodeId, openSheet, buildFullData, connectingFrom, setConnectingFrom, onShowConnectionDialog, editMode]);
 
   const handlePaneClick = useCallback(() => {
     if (connectingFrom) {
@@ -140,10 +149,11 @@ export function useServiceMapInteractions(params: UseServiceMapInteractionsParam
   }, [focusedNodeId, setFocusedNodeId, connectingFrom, setConnectingFrom]);
 
   const handleNodeContextMenu = useCallback((event: React.MouseEvent, node: Node) => {
-    if (node.type === 'zone') return;
+    // Zone context menu: only in edit mode for connecting
+    if (node.type === 'zone' && !editMode) return;
     event.preventDefault();
     setContextMenu({ x: event.clientX, y: event.clientY, nodeId: node.id });
-  }, [setContextMenu]);
+  }, [setContextMenu, editMode]);
 
   const handlePaneContextMenu = useCallback((event: React.MouseEvent | MouseEvent) => {
     event.preventDefault();

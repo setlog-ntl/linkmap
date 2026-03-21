@@ -153,10 +153,12 @@ export function computeZoneLayout(
       id: zoneNodeId,
       type: 'zone',
       position: pos,
-      // Edit mode: selectable for NodeResizer, draggable for repositioning
+      // Edit mode: selectable for NodeResizer, draggable for repositioning,
+      // connectable for zone↔zone and zone↔node connections
       // Service nodes have zIndex: 10 so they receive events first
       selectable: editMode,
       draggable: editMode,
+      connectable: editMode,
       zIndex: -1,
       data: {
         domain: zg.config.key,

@@ -119,7 +119,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     runHealthCheck: data.runHealthCheck, removeService: data.removeService,
     setFocusedNodeId, setContextMenu, focusedNodeId,
     setConnectingFrom, connectingFrom,
-    onShowConnectionDialog,
+    onShowConnectionDialog, editMode,
   });
 
   const activeZones = getActiveZones();
@@ -245,19 +245,65 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     setEdgePopover({ edgeId: edge.id, connectionId, currentType, x, y });
   }, [isReadOnly, edges]);
 
+  // Resolve zone ID → all services in that zone
+  const getServicesInZone = useCallback((zoneKey: string) => {
+    return data.services.filter((s) => {
+      const domain = nodesResult.getDomain(s.id);
+      const zone = domain ? domainToZone(domain as ServiceDomain, activeZones) : null;
+      return zone === zoneKey;
+    });
+  }, [data.services, nodesResult, activeZones]);
+
   const handleConnectionConfirm = useCallback((type: UserConnectionType) => {
     if (!connectionDialog) return;
-    const sourceSvc = data.services.find((s) => s.id === connectionDialog.sourceId);
-    const targetSvc = data.services.find((s) => s.id === connectionDialog.targetId);
-    if (sourceSvc && targetSvc) interactions.createConnection(sourceSvc.service_id, targetSvc.service_id, type);
-  }, [connectionDialog, data.services, interactions]);
+    const { sourceId, targetId } = connectionDialog;
+    const isSourceZone = sourceId.startsWith('zone-');
+    const isTargetZone = targetId.startsWith('zone-');
 
-  const dialogSourceSvc = connectionDialog ? data.services.find((s) => s.id === connectionDialog.sourceId) : undefined;
-  const dialogTargetSvc = connectionDialog ? data.services.find((s) => s.id === connectionDialog.targetId) : undefined;
-  const dialogSourceLabel = dialogSourceSvc?.service?.name;
-  const dialogTargetLabel = dialogTargetSvc?.service?.name;
-  const dialogSourceCategory = dialogSourceSvc?.service?.category;
-  const dialogTargetCategory = dialogTargetSvc?.service?.category;
+    if (!isSourceZone && !isTargetZone) {
+      // Service-to-Service (existing)
+      const sourceSvc = data.services.find((s) => s.id === sourceId);
+      const targetSvc = data.services.find((s) => s.id === targetId);
+      if (sourceSvc && targetSvc) interactions.createConnection(sourceSvc.service_id, targetSvc.service_id, type);
+    } else {
+      // Zone involved — expand to service-level connections
+      const sourceServices = isSourceZone
+        ? getServicesInZone(sourceId.replace('zone-', ''))
+        : [data.services.find((s) => s.id === sourceId)].filter(Boolean);
+      const targetServices = isTargetZone
+        ? getServicesInZone(targetId.replace('zone-', ''))
+        : [data.services.find((s) => s.id === targetId)].filter(Boolean);
+
+      let count = 0;
+      for (const src of sourceServices) {
+        for (const tgt of targetServices) {
+          if (src && tgt && src.service_id !== tgt.service_id) {
+            interactions.createConnection(src.service_id, tgt.service_id, type);
+            count++;
+          }
+        }
+      }
+      if (count > 0) toast.success(`${count}개 연결이 생성되었습니다`);
+    }
+  }, [connectionDialog, data.services, interactions, getServicesInZone]);
+
+  // Dialog labels — handle zone IDs
+  const resolveDialogInfo = useCallback((id: string) => {
+    if (id.startsWith('zone-')) {
+      const zoneKey = id.replace('zone-', '');
+      const zone = activeZones.find((z) => z.key === zoneKey);
+      return { label: zone?.label || zoneKey.toUpperCase(), category: undefined };
+    }
+    const svc = data.services.find((s) => s.id === id);
+    return { label: svc?.service?.name, category: svc?.service?.category };
+  }, [data.services, activeZones]);
+
+  const dialogSource = connectionDialog ? resolveDialogInfo(connectionDialog.sourceId) : null;
+  const dialogTarget = connectionDialog ? resolveDialogInfo(connectionDialog.targetId) : null;
+  const dialogSourceLabel = dialogSource?.label;
+  const dialogTargetLabel = dialogTarget?.label;
+  const dialogSourceCategory = dialogSource?.category;
+  const dialogTargetCategory = dialogTarget?.category;
 
   const getCurrentZone = useCallback((nodeId: string): ZoneKey | null => {
     const domain = nodesResult.getDomain(nodeId);
