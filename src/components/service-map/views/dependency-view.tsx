@@ -37,6 +37,8 @@ import { ZoneEditToolbar } from '@/components/service-map/zone-edit-toolbar';
 import { useUpsertLayerOverride } from '@/lib/queries/layer-overrides';
 import { useUpdateConnection } from '@/lib/queries/connections';
 import { useUpdateProject } from '@/lib/queries/projects';
+import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/queries/keys';
 import { domainToZone, type ZoneKey } from '@/lib/layout/zone-layout';
 import { useServiceMapNodes } from '@/components/service-map/hooks/useServiceMapNodes';
 import { useServiceMapLayout } from '@/components/service-map/hooks/useServiceMapLayout';
@@ -86,6 +88,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const rfInstance = useRef<ReactFlowInstance | null>(null);
 
+  const queryClient = useQueryClient();
   const upsertLayerOverride = useUpsertLayerOverride(projectId);
   const updateProject = useUpdateProject();
   const updateConnection = useUpdateConnection(projectId);
@@ -360,6 +363,9 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
       if (pendingMainServiceId !== undefined) {
         await updateProject.mutateAsync({ id: projectId, main_service_id: pendingMainServiceId });
       }
+      // Wait for layer overrides to refetch BEFORE clearing pending state
+      // This prevents the layout from reverting to stale data momentarily
+      await queryClient.refetchQueries({ queryKey: queryKeys.layerOverrides.byProject(projectId) });
       toast.success('변경사항이 저장되었습니다');
       clearPendingChanges();
       setEditMode(false);
@@ -368,7 +374,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     } finally {
       setSaving(false);
     }
-  }, [pendingOverrides, pendingMainServiceId, data.services, projectId, upsertLayerOverride, updateProject, clearPendingChanges, setEditMode]);
+  }, [pendingOverrides, pendingMainServiceId, data.services, projectId, upsertLayerOverride, updateProject, clearPendingChanges, setEditMode, queryClient]);
 
   return (
     <div className="flex-1 w-full relative min-h-0 border-none bg-background overflow-hidden flex flex-col">

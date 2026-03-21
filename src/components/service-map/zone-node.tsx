@@ -104,7 +104,7 @@ function ZoneNode({ id, data, selected }: NodeProps) {
 
   return (
     <div
-      className={`w-full h-full rounded-[18px] border transition-all duration-200 nodrag ${bgClass} ${
+      className={`w-full h-full rounded-[18px] border transition-all duration-200 ${editMode ? '' : 'nodrag'} ${bgClass} ${
         isDragTarget
           ? 'border-primary border-2 ring-4 ring-primary/20 scale-[1.01]'
           : editMode && selected
