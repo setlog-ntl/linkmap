@@ -31,7 +31,7 @@ export async function PATCH(
   // Verify ownership
   const { data: deploy } = await supabase
     .from('homepage_deploys')
-    .select('id, site_name')
+    .select('id, site_name, project_id')
     .eq('id', id)
     .eq('user_id', user.id)
     .single();
@@ -48,11 +48,20 @@ export async function PATCH(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  // 연결된 프로젝트 이름도 동기화
+  if (deploy.project_id) {
+    await supabase
+      .from('projects')
+      .update({ name: site_name })
+      .eq('id', deploy.project_id)
+      .eq('user_id', user.id);
+  }
+
   await logAudit(user.id, {
     action: 'oneclick.deploy_rename',
     resourceType: 'homepage_deploy',
     resourceId: id,
-    details: { old_name: deploy.site_name, new_name: site_name },
+    details: { old_name: deploy.site_name, new_name: site_name, synced_project_id: deploy.project_id },
   });
 
   return NextResponse.json({ success: true, site_name });
