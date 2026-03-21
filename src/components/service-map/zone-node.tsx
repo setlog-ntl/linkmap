@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useState, useRef, useEffect, useCallback } from 'react';
-import { NodeResizer, type NodeProps } from '@xyflow/react';
+import { NodeResizer, type NodeProps, type ResizeParams } from '@xyflow/react';
 import { Monitor, Server, Wrench, Box, Trash2, Shrink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useServiceMapStore } from '@/stores/service-map-store';
@@ -72,6 +72,11 @@ function ZoneNode({ id, data, selected }: NodeProps) {
     setZoneSizeOverride(id, optimal);
   }, [id, d.count, setZoneSizeOverride]);
 
+  // Save size on resize end (NOT during resize — prevents infinite loop)
+  const handleResizeEnd = useCallback((_event: unknown, params: ResizeParams) => {
+    setZoneSizeOverride(id, { width: params.width, height: params.height });
+  }, [id, setZoneSizeOverride]);
+
   // Derive colors from zone key or custom color
   const zoneKey = d.domain;
   const borderColors: Record<string, string> = {
@@ -100,7 +105,7 @@ function ZoneNode({ id, data, selected }: NodeProps) {
         editMode && selected ? 'border-primary ring-2 ring-primary/20' : editMode ? 'border-primary/40 border-dashed' : borderClass
       }`}
     >
-      {/* Resize handle — edit mode only */}
+      {/* Resize handle — edit mode only, onResizeEnd saves to store */}
       {editMode && (
         <NodeResizer
           minWidth={300}
@@ -109,6 +114,7 @@ function ZoneNode({ id, data, selected }: NodeProps) {
           lineClassName="!border-primary/30"
           handleClassName="!w-3 !h-3 !rounded-sm !bg-primary/60 !border-primary"
           handleStyle={{ zIndex: 20 }}
+          onResizeEnd={handleResizeEnd}
         />
       )}
 

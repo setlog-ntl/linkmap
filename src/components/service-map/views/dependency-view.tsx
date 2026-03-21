@@ -59,7 +59,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     setPendingMainServiceId, clearPendingChanges, setEditMode,
     setHoveredNodeId,
     zoneConfigs, layoutPreset, zonePositionOverrides, zoneSizeOverrides,
-    setZonePositionOverride, setZoneSizeOverride, getActiveZones,
+    setZonePositionOverride, getActiveZones,
   } = useServiceMapStore();
 
   const { resolvedTheme } = useTheme();
@@ -130,18 +130,18 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
 
   const onNodesChange = useCallback((changes: NodeChange<Node>[]) => {
     setNodes((nds) => applyNodeChanges(changes, nds));
-    // Capture zone drag/resize for persistence
+    // Capture zone drag end for persistence (position only)
+    // NOTE: dimensions changes are NOT captured here — they cause infinite loops
+    // (NodeResizer → dimensions change → store update → layout recompute → NodeResizer → ...)
+    // Zone resize is handled by NodeResizer's onResizeEnd in zone-node.tsx
     if (editMode) {
       for (const change of changes) {
         if (change.type === 'position' && change.dragging === false && change.id.startsWith('zone-') && change.position) {
           setZonePositionOverride(change.id, change.position);
         }
-        if (change.type === 'dimensions' && change.id.startsWith('zone-') && change.dimensions) {
-          setZoneSizeOverride(change.id, { width: change.dimensions.width, height: change.dimensions.height });
-        }
       }
     }
-  }, [editMode, setZonePositionOverride, setZoneSizeOverride]);
+  }, [editMode, setZonePositionOverride]);
   const onEdgesChange = useCallback((changes: EdgeChange<Edge>[]) => { setEdges((eds) => applyEdgeChanges(changes, eds)); }, []);
 
   useEffect(() => { setNodes(layoutedNodes); setEdges(layoutedEdges); }, [layoutedNodes, layoutedEdges]);
@@ -197,8 +197,6 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
     const connectionId = edge.id.replace('uc-', '');
     const edgeData = edge.data as Record<string, unknown> | undefined;
     const currentType = (edgeData?.connectionType as UserConnectionType) || 'uses';
-    // Find the edge label position from the current layouted edges
-    const matchedEdge = edges.find((e) => e.id === edge.id);
     // Use mouse event coordinates for popover position
     const rect = (_.target as HTMLElement).closest('.service-map-canvas')?.getBoundingClientRect();
     const x = _.clientX - (rect?.left ?? 0);
