@@ -17,7 +17,7 @@ export function EditSaveBar({ onSave, saving }: EditSaveBarProps) {
   if (!editMode) return null;
 
   return (
-    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 rounded-full border bg-background/95 backdrop-blur-sm px-4 py-2 shadow-lg">
+    <div className="absolute top-16 right-4 z-40 flex items-center gap-3 rounded-full border bg-background/95 backdrop-blur-sm px-4 py-2 shadow-lg">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Pencil className="h-3.5 w-3.5" />
         <span>편집 모드</span>
