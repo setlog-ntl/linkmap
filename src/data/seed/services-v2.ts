@@ -129,6 +129,8 @@ export const SERVICE_IDS_V2 = {
   clarity: '10000000-0000-4000-a000-000000000137',
   // AI IDE / Agentic Development
   google_antigravity: '10000000-0000-4000-a000-000000000138',
+  // Workflow Automation
+  n8n: '10000000-0000-4000-a000-000000000139',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -4827,6 +4829,62 @@ export const servicesV2: ServiceSeedV2[] = [
     monthly_cost_estimate: {
       starter: '$0',
       growth: '크레딧 기반',
+      enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // n8n — 오픈소스 워크플로우 자동화 플랫폼
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.n8n,
+    name: 'n8n',
+    slug: 'n8n',
+    category: 'automation',
+    description:
+      'Open-source workflow automation platform with 400+ integrations. Build complex automations with a visual node-based editor, self-host for free, or use the managed cloud. Fair-code licensed, extensible with custom nodes and JavaScript/Python code.',
+    description_ko:
+      '400개 이상의 통합을 지원하는 오픈소스 워크플로우 자동화 플랫폼입니다. 비주얼 노드 에디터로 복잡한 자동화를 구축하고, 무료로 셀프호스팅하거나 관리형 클라우드를 사용할 수 있습니다. Fair-code 라이선스, 커스텀 노드와 JavaScript/Python 코드로 확장 가능합니다.',
+    icon_url: null,
+    website_url: 'https://n8n.io',
+    docs_url: 'https://docs.n8n.io',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '셀프호스팅 무료 (Community Edition), 클라우드는 14일 무료 체험',
+      plans: [
+        { name: 'Community (Self-hosted)', price: '$0' },
+        { name: 'Starter (Cloud)', price: '€20/월' },
+        { name: 'Pro (Cloud)', price: '€50/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'N8N_WEBHOOK_URL',
+        public: false,
+        description: 'n8n instance webhook base URL',
+        description_ko: 'n8n 인스턴스 웹훅 기본 URL',
+      },
+    ],
+    domain: 'integration',
+    subcategory: 'workflow_automation',
+    popularity_score: 85,
+    difficulty_level: 'beginner',
+    tags: ['automation', 'workflow', 'no-code', 'open-source', 'integration', 'webhook', 'api', 'self-hosted', 'ai-agent'],
+    alternatives: ['zapier', 'make', 'trigger-dev'],
+    compatibility: {
+      framework: ['next', 'react', 'express', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python'],
+    },
+    official_sdks: {
+      npm: 'https://www.npmjs.com/package/n8n',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 15,
+    monthly_cost_estimate: {
+      starter: '$0 (셀프호스팅)',
+      growth: '€50',
       enterprise: '문의',
     },
   },

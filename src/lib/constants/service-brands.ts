@@ -175,6 +175,9 @@ export const SERVICE_BRANDS: Record<string, ServiceBrand> = {
   // --- AI IDE ---
   'google-antigravity':   { slug: 'google',           color: '#4285F4', darkColor: '#8AB4F8', emoji: '🚀' },
 
+  // --- 자동화 ---
+  n8n:                    { slug: 'n8n',              color: '#EA4B71', darkColor: '#FF6D8E', emoji: '⚡' },
+
   // --- slug 매핑 별칭 (seed slug ↔ brand key 불일치 보정) ---
   flyio:                  { slug: 'flydotio',           color: '#24175B', darkColor: '#ffffff', emoji: '🪁' },
 
