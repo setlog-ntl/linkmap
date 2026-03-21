@@ -228,35 +228,32 @@ function ZoneNode({ id, data, selected }: NodeProps) {
         </div>
       )}
 
-      {/* Connection handles — edit mode only, for zone↔zone and zone↔node connections */}
-      {editMode && (
-        <>
-          <Handle type="target" position={Position.Top} id="zt-top"
-            className="!w-5 !h-2 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all"
-            style={{ pointerEvents: 'auto', top: -4 }} />
-          <Handle type="target" position={Position.Bottom} id="zt-bottom"
-            className="!w-5 !h-2 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all"
-            style={{ pointerEvents: 'auto', bottom: -4 }} />
-          <Handle type="target" position={Position.Left} id="zt-left"
-            className="!w-2 !h-5 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all"
-            style={{ pointerEvents: 'auto', left: -4 }} />
-          <Handle type="target" position={Position.Right} id="zt-right"
-            className="!w-2 !h-5 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all"
-            style={{ pointerEvents: 'auto', right: -4 }} />
-          <Handle type="source" position={Position.Top} id="zs-top"
-            className="!w-5 !h-2 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all"
-            style={{ pointerEvents: 'auto', top: -4 }} />
-          <Handle type="source" position={Position.Bottom} id="zs-bottom"
-            className="!w-5 !h-2 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all"
-            style={{ pointerEvents: 'auto', bottom: -4 }} />
-          <Handle type="source" position={Position.Left} id="zs-left"
-            className="!w-2 !h-5 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all"
-            style={{ pointerEvents: 'auto', left: -4 }} />
-          <Handle type="source" position={Position.Right} id="zs-right"
-            className="!w-2 !h-5 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all"
-            style={{ pointerEvents: 'auto', right: -4 }} />
-        </>
-      )}
+      {/* Connection handles — always rendered so saved zone edges render in view mode,
+          but only visually visible & interactive in edit mode */}
+      <Handle type="target" position={Position.Top} id="zt-top"
+        className={editMode ? '!w-5 !h-2 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all' : '!w-0 !h-0 !border-0 !bg-transparent !min-w-0 !min-h-0'}
+        style={{ pointerEvents: editMode ? 'auto' : 'none', top: -4 }} />
+      <Handle type="target" position={Position.Bottom} id="zt-bottom"
+        className={editMode ? '!w-5 !h-2 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all' : '!w-0 !h-0 !border-0 !bg-transparent !min-w-0 !min-h-0'}
+        style={{ pointerEvents: editMode ? 'auto' : 'none', bottom: -4 }} />
+      <Handle type="target" position={Position.Left} id="zt-left"
+        className={editMode ? '!w-2 !h-5 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all' : '!w-0 !h-0 !border-0 !bg-transparent !min-w-0 !min-h-0'}
+        style={{ pointerEvents: editMode ? 'auto' : 'none', left: -4 }} />
+      <Handle type="target" position={Position.Right} id="zt-right"
+        className={editMode ? '!w-2 !h-5 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all' : '!w-0 !h-0 !border-0 !bg-transparent !min-w-0 !min-h-0'}
+        style={{ pointerEvents: editMode ? 'auto' : 'none', right: -4 }} />
+      <Handle type="source" position={Position.Top} id="zs-top"
+        className={editMode ? '!w-5 !h-2 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all' : '!w-0 !h-0 !border-0 !bg-transparent !min-w-0 !min-h-0'}
+        style={{ pointerEvents: editMode ? 'auto' : 'none', top: -4 }} />
+      <Handle type="source" position={Position.Bottom} id="zs-bottom"
+        className={editMode ? '!w-5 !h-2 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all' : '!w-0 !h-0 !border-0 !bg-transparent !min-w-0 !min-h-0'}
+        style={{ pointerEvents: editMode ? 'auto' : 'none', bottom: -4 }} />
+      <Handle type="source" position={Position.Left} id="zs-left"
+        className={editMode ? '!w-2 !h-5 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all' : '!w-0 !h-0 !border-0 !bg-transparent !min-w-0 !min-h-0'}
+        style={{ pointerEvents: editMode ? 'auto' : 'none', left: -4 }} />
+      <Handle type="source" position={Position.Right} id="zs-right"
+        className={editMode ? '!w-2 !h-5 !rounded-full !bg-primary/30 !border-primary/40 !border hover:!bg-primary/60 hover:!scale-125 !transition-all' : '!w-0 !h-0 !border-0 !bg-transparent !min-w-0 !min-h-0'}
+        style={{ pointerEvents: editMode ? 'auto' : 'none', right: -4 }} />
     </div>
   );
 }

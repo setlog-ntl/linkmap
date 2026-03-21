@@ -170,7 +170,7 @@ export const SERVICE_BRANDS: Record<string, ServiceBrand> = {
   linkmap:                { localPath: '/img/linkmap-logo-dark.svg', color: '#38bdf8', darkColor: '#38bdf8', emoji: '🗺️', multiColor: true },
 
   // --- 분석 ---
-  clarity:                { slug: 'microsoftclarity', color: '#4B53BC', darkColor: '#7B83EB', emoji: '🔍' },
+  clarity:                { localPath: '/icons/microsoft-clarity.svg', color: '#4B53BC', darkColor: '#7B83EB', emoji: '🔍' },
 
   // --- AI IDE ---
   'google-antigravity':   { slug: 'google',           color: '#4285F4', darkColor: '#8AB4F8', emoji: '🚀' },
