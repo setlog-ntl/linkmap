@@ -409,8 +409,8 @@ export function useBatchApplyFiles() {
 
 // ---------- Status Polling (exponential backoff) ----------
 
-// 5-minute timeout (based on elapsed time, not poll count)
-const POLL_TIMEOUT_MS = 5 * 60 * 1000;
+// 10-minute timeout (서버 deploy-status.ts의 DEPLOY_TIMEOUT_MS와 동일)
+const POLL_TIMEOUT_MS = 10 * 60 * 1000;
 
 // Backoff: 1s → 2s → 3s → 5s → 8s → 10s (capped)
 function getBackoffInterval(pollCount: number): number {
@@ -444,9 +444,8 @@ export function useDeployStatus(deployId: string | null, enabled: boolean = true
         return false;
       }
 
-      // Timeout: stop polling after POLL_TIMEOUT_MS
-      const dataUpdatedAt = query.state.dataUpdatedAt;
-      const firstFetchAt = dataUpdatedAt - (query.state.dataUpdateCount * 3000); // approximate
+      // Timeout: stop polling after POLL_TIMEOUT_MS (첫 데이터 수신 시점 기준)
+      const firstFetchAt = query.state.dataUpdatedAt - (query.state.dataUpdateCount * getBackoffInterval(Math.max(0, query.state.dataUpdateCount - 1)));
       if (Date.now() - firstFetchAt > POLL_TIMEOUT_MS) {
         queryClient.setQueryData<DeployStatus>(
           queryKeys.oneclick.status(deployId || ''),

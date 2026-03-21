@@ -354,7 +354,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       cleanup();
     } else if (status === 'error' || status === 'timeout') {
       const msg = status === 'timeout'
-        ? '배포 시간이 초과되었습니다 (5분). GitHub Actions를 확인해주세요.'
+        ? '배포 시간이 초과되었습니다 (10분). 재배포를 시도해주세요.'
         : deployStatusData.deploy_error || 'GitHub Actions 빌드 실패';
       toast.error(msg);
       setDeployState('idle');
@@ -678,11 +678,10 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         setDeployOrigin('module-deploy');
         setAwaitingDeploy(true);
       } else {
-        // 미리보기 갱신
-        setLivePreviewKey((k) => k + 1);
-        if (liveUrl) {
-          setShowLiveAfterDeploy(true);
-        }
+        // 저장만 모드: 모듈 실시간 프리뷰 유지 (배포 없이 커밋만 했으므로 라이브 URL은 이전 버전)
+        // modulePreviewHtml은 moduleState 변경 시 자동 재생성되므로 별도 갱신 불필요
+        // rightPanel을 'modules'로 유지하여 실시간 프리뷰 계속 표시
+        setShowLiveAfterDeploy(false);
       }
     } catch (err) {
       dispatchDialog({
@@ -827,8 +826,8 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   // 미리보기 렌더링 (데스크탑/모바일 공용)
   // 부모가 block(h-full) 또는 명시적 높이 컨테이너이므로 h-full 사용 (flex-1은 flex 부모 필요)
   const renderPreview = () => {
-    // 모듈 편집 중: 실시간 HTML 미리보기
-    if (rightPanel === 'modules' && modulePreviewHtml) {
+    // 모듈 편집 중 또는 저장 후: 실시간 HTML 미리보기 (배포 전이므로 라이브 URL보다 우선)
+    if ((rightPanel === 'modules' || !showLiveAfterDeploy) && modulePreviewHtml) {
       return (
         <iframe
           srcDoc={modulePreviewHtml}
