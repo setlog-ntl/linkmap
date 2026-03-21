@@ -28,7 +28,7 @@ export async function GET(
       // account_identifier 제외 — 보안
       admin
         .from('project_services')
-        .select('id, project_id, service_id, status, notes, cost_tier_id, billing_cycle, created_at, updated_at, service:services(*)')
+        .select('id, project_id, service_id, status, notes, cost_tier_id, billing_cycle, created_at, updated_at, service:services(id, name, slug, category, icon_url, icon_emoji, domain)')
         .eq('project_id', projectId),
       admin
         .from('service_dependencies')

@@ -40,10 +40,12 @@ export function useAiChat({ projectId, featureSlug = 'overview_chat', context }:
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const accumulatedRef = useRef('');
+  const messagesRef = useRef<ChatMessage[]>(messages);
+  messagesRef.current = messages;
 
   const sendMessage = useCallback(async (content: string) => {
     const userMessage: ChatMessage = { role: 'user', content };
-    const updatedMessages = [...messages, userMessage];
+    const updatedMessages = [...messagesRef.current, userMessage];
 
     setMessages(updatedMessages);
     setError(null);
@@ -132,7 +134,7 @@ export function useAiChat({ projectId, featureSlug = 'overview_chat', context }:
       setIsStreaming(false);
       abortRef.current = null;
     }
-  }, [messages, projectId, featureSlug, context]);
+  }, [projectId, featureSlug, context]);
 
   const stop = useCallback(() => {
     abortRef.current?.abort();

@@ -1,4 +1,4 @@
-import type { HomepageTemplateContent, TemplateFile } from './homepage-template-content';
+import type { HomepageTemplateContent } from './homepage-template-content';
 import {
   sharedGitignore as gitignore,
   sharedDeployYml as deployYml,

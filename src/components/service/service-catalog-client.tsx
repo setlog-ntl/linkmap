@@ -24,7 +24,6 @@ import {
   easyCategoryToServiceCategories,
   easyCategoryLabels,
   easyCategoryEmojis,
-  serviceCategoryToEasy,
 } from '@/lib/constants/easy-categories';
 import { CategoryProcessDiagram } from './category-process-diagram';
 import { easyCategoryProcessFlows } from '@/lib/constants/easy-categories';

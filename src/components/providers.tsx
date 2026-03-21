@@ -24,7 +24,7 @@ function useAuthStateListener() {
     // 현재 세션 확인 (초기 상태 설정)
     supabase.auth.getSession().then(({ data: { session } }) => {
       wasSignedIn.current = !!session;
-    });
+    }).catch(() => {});
 
     const {
       data: { subscription },

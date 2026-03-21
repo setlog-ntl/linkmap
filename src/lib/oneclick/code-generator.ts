@@ -4,7 +4,7 @@
 // ──────────────────────────────────────────────
 
 import type { ModuleConfigState, TemplateModuleSchema } from '@/lib/module-schema';
-import { getGenerator, buildInitialState as _buildInitialState } from './generators';
+import { getGenerator } from './generators';
 
 // ─── 공개 API: 개별 config 생성 (하위 호환) ──
 

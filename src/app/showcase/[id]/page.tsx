@@ -47,7 +47,7 @@ export default function ShowcaseDetailPage({
     const supabase = createBrowserClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
       setCurrentUserId(user?.id);
-    });
+    }).catch(() => {});
   }, []);
 
   // 페이지 진입 시 조회수 기록

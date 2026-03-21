@@ -3,7 +3,6 @@ import {
   resolveImageSrc,
   getVal,
   getArr,
-  isEnabled,
   getActiveModules,
   buildBaseCSS,
   wrapInHtml,

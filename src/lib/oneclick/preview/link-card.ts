@@ -3,12 +3,10 @@ import {
   resolveImageSrc,
   getVal,
   getArr,
-  isEnabled,
   getActiveModules,
   buildBaseCSS,
   wrapInHtml,
   getSocialIconSvg,
-  SOCIAL_ICON_MAP,
 } from './base';
 import type { ModuleConfigState } from '@/lib/module-schema';
 

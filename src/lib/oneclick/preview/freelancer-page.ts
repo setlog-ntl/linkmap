@@ -3,7 +3,6 @@ import {
   resolveImageSrc,
   getVal,
   getArr,
-  isEnabled,
   getActiveModules,
   buildBaseCSS,
   wrapInHtml,
@@ -91,7 +90,6 @@ function renderHeroSection(
   const name = getVal(state, 'hero', 'name', '');
   const nameEn = getVal(state, 'hero', 'nameEn', '');
   const title = getVal(state, 'hero', 'title', '');
-  const titleEn = getVal(state, 'hero', 'titleEn', '');
   const tagline = getVal(state, 'hero', 'tagline', '');
   const taglineEn = getVal(state, 'hero', 'taglineEn', '');
   const avatarUrl = getVal(state, 'hero', 'avatarUrl', '');

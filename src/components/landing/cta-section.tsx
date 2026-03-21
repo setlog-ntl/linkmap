@@ -12,7 +12,7 @@ import { t } from '@/lib/i18n';
 function useSignupHref() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   useEffect(() => {
-    createClient().auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user));
+    createClient().auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user)).catch(() => {});
   }, []);
   return isLoggedIn ? '/dashboard' : '/signup';
 }

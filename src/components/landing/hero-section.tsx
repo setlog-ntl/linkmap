@@ -21,7 +21,7 @@ export function HeroSection() {
   const { locale } = useLocaleStore();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   useEffect(() => {
-    createClient().auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user));
+    createClient().auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user)).catch(() => {});
   }, []);
 
   return (

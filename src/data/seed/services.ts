@@ -3728,7 +3728,7 @@ export const services: ServiceSeed[] = [
 // ---------------------------------------------------------------------------
 
 let _checklistId = 0;
-function cid(serviceSlug: string): string {
+function cid(_serviceSlug: string): string {
   _checklistId += 1;
   const padded = String(_checklistId).padStart(4, '0');
   return `20000000-0000-4000-b000-00000000${padded}`;

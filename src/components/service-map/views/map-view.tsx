@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, memo } from 'react';
 import {
   ReactFlow,
   Controls,
@@ -72,7 +72,7 @@ interface MapViewProps {
   isReadOnly?: boolean;
 }
 
-function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
+const MapViewInner = memo(function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
   const { locale } = useLocaleStore();
   const { fitView } = useReactFlow();
   const { resolvedTheme } = useTheme();
@@ -377,8 +377,10 @@ function MapViewInner({ data, projectId, isReadOnly = false }: MapViewProps) {
       </div>
     </div>
   );
-}
+});
 
 export function MapView(props: MapViewProps) {
   return <MapViewInner {...props} isReadOnly={props.isReadOnly} />;
 }
+
+export default MapView;

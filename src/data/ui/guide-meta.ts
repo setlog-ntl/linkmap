@@ -1,4 +1,4 @@
-import { BookOpen, Wrench, Key, Shield, Monitor, Server, Globe, Github, Cloud, Bot, Database, Triangle, Chrome, MessageCircle, FileText, FolderOpen, Rocket, RefreshCw, Atom, CloudCog, GitBranch, Terminal, Package, KeyRound, Zap, Link2, ServerCog, ShoppingCart, Network, ShieldCheck, Palette, Mail, CreditCard, Activity, Workflow, Plug, Cpu, Code, Smartphone, AlertTriangle, Lock, Globe2, Layers, BookMarked, Search, ToggleRight, Bell, Send, Radio, Webhook, Timer, Share2 } from 'lucide-react';
+import { BookOpen, Wrench, Key, Shield, Monitor, Server, Globe, Github, Cloud, Bot, Database, Triangle, Chrome, MessageCircle, FileText, FolderOpen, Rocket, RefreshCw, Atom, CloudCog, GitBranch, Terminal, Package, KeyRound, Zap, Link2, ServerCog, ShoppingCart, Network, ShieldCheck, Palette, Mail, CreditCard, Activity, Workflow, Plug, Cpu, Code, Smartphone, AlertTriangle, Lock, Globe2, Layers, Search, ToggleRight, Bell, Send, Radio, Webhook, Timer, Share2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export type GuideCategory = 'concept' | 'service';

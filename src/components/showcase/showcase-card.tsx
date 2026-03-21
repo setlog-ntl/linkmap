@@ -39,13 +39,6 @@ export function ShowcaseCard({ item }: ShowcaseCardProps) {
     ? SHOWCASE_CATEGORIES.find((c) => c.value === item.showcase_category)?.label
     : null;
 
-  const deployDate = item.deployed_at
-    ? new Date(item.deployed_at).toLocaleDateString(
-        locale === 'ko' ? 'ko-KR' : 'en-US',
-        { year: 'numeric', month: 'short', day: 'numeric' }
-      )
-    : null;
-
   const isProject = item.source === 'project';
   const gradient = CATEGORY_GRADIENTS[item.showcase_category || 'other'] || CATEGORY_GRADIENTS.other;
   const previewImage = item.showcase_image_url || item.homepage_templates?.preview_image_url;

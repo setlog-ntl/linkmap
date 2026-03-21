@@ -8,7 +8,6 @@ import {
   esc,
   percentToLevel,
   levelToPercent,
-  buildSocialsArray,
   createExtractors,
   extractSiteBlock,
   parseArrayConstant,

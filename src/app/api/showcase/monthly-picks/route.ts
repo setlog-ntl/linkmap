@@ -66,23 +66,55 @@ async function enrichPicks(
   supabase: Awaited<ReturnType<typeof createClient>>,
   picks: PickRow[]
 ) {
+  // 1. Group picks by showcase_source
+  const deployIds = picks
+    .filter((p) => p.showcase_source === 'deploy')
+    .map((p) => p.showcase_id);
+  const projectIds = picks
+    .filter((p) => p.showcase_source !== 'deploy')
+    .map((p) => p.showcase_id);
+
+  // 2. Batch fetch deploy-source and project-source in parallel
+  const [deployResult, projectResult] = await Promise.all([
+    deployIds.length > 0
+      ? supabase
+          .from('homepage_deploys')
+          .select(`
+            id, site_name, pages_url, deployment_url, deploy_method, deployed_at,
+            created_at, user_id, showcase_description, showcase_tags, showcase_category,
+            showcase_image_url, like_count, comment_count, view_count,
+            profiles:user_id ( name, avatar_url )
+          `)
+          .in('id', deployIds)
+      : Promise.resolve({ data: [] as never[] }),
+    projectIds.length > 0
+      ? supabase
+          .from('projects')
+          .select(`
+            id, name, link_url, description, icon_type, icon_value,
+            showcase_description, showcase_tags, showcase_category, showcase_image_url,
+            like_count, comment_count, view_count,
+            created_at, user_id,
+            profiles:user_id ( name, avatar_url )
+          `)
+          .in('id', projectIds)
+      : Promise.resolve({ data: [] as never[] }),
+  ]);
+
+  // 3. Build lookup maps by id
+  const deployMap = new Map(
+    (deployResult.data ?? []).map((d) => [d.id, d])
+  );
+  const projectMap = new Map(
+    (projectResult.data ?? []).map((p) => [p.id, p])
+  );
+
+  // 4. Map results back to picks, preserving original order
   const enriched = [];
 
   for (const pick of picks) {
-    const table = pick.showcase_source === 'deploy' ? 'homepage_deploys' : 'projects';
-
     if (pick.showcase_source === 'deploy') {
-      const { data } = await supabase
-        .from('homepage_deploys')
-        .select(`
-          id, site_name, pages_url, deployment_url, deploy_method, deployed_at,
-          created_at, user_id, showcase_description, showcase_tags, showcase_category,
-          showcase_image_url, like_count, comment_count, view_count,
-          profiles:user_id ( name, avatar_url )
-        `)
-        .eq('id', pick.showcase_id)
-        .maybeSingle();
-
+      const data = deployMap.get(pick.showcase_id);
       if (data) {
         const prof = Array.isArray(data.profiles) ? data.profiles[0] ?? null : data.profiles ?? null;
         enriched.push({
@@ -97,18 +129,7 @@ async function enrichPicks(
         });
       }
     } else {
-      const { data } = await supabase
-        .from('projects')
-        .select(`
-          id, name, link_url, description, icon_type, icon_value,
-          showcase_description, showcase_tags, showcase_category, showcase_image_url,
-          like_count, comment_count, view_count,
-          created_at, user_id,
-          profiles:user_id ( name, avatar_url )
-        `)
-        .eq('id', pick.showcase_id)
-        .maybeSingle();
-
+      const data = projectMap.get(pick.showcase_id);
       if (data) {
         const prof = Array.isArray(data.profiles) ? data.profiles[0] ?? null : data.profiles ?? null;
         enriched.push({

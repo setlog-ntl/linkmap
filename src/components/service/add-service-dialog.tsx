@@ -47,7 +47,7 @@ interface AddServiceDialogProps {
   onAdd: (serviceId: string) => Promise<void>;
 }
 
-export function AddServiceDialog({ projectId, existingServiceIds, onAdd }: AddServiceDialogProps) {
+export function AddServiceDialog({ projectId: _projectId, existingServiceIds, onAdd }: AddServiceDialogProps) {
   const supabase = createClient();
   const [open, setOpen] = useState(false);
   const [services, setServices] = useState<Service[]>([]);

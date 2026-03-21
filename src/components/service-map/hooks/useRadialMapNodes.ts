@@ -204,5 +204,5 @@ export function useRadialMapNodes(input: UseRadialMapNodesInput) {
       });
 
     return { nodes: positionedNodes, edges: [...hubEdges, ...s2sEdges] };
-  }, [services, userConnections, projectName, projectIconUrl, searchQuery, focusedNodeId, filterStatuses]);
+  }, [services, userConnections, projectName, projectIconUrl, projectIconEmoji, searchQuery, focusedNodeId, filterStatuses]);
 }

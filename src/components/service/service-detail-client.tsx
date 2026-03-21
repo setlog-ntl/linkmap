@@ -14,7 +14,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, ExternalLink, Globe, BookOpen, Clock, Copy, Check, KeyRound, UserPlus, Plus } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Globe, BookOpen, Clock, Copy, Check, KeyRound, UserPlus } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { allCategoryLabels, domainLabels, domainIcons } from '@/lib/constants/service-filters';
 import { DifficultyBadge, GithubStarsBadge, FreeTierBadge, VendorLockInBadge } from './service-badges';
@@ -32,7 +32,7 @@ interface ServiceDetailClientProps {
   dependencies: (ServiceDependency & { depends_on_service: Service })[];
 }
 
-function CodeBlock({ code, language }: { code: string; language?: string }) {
+function CodeBlock({ code }: { code: string; language?: string }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
     navigator.clipboard.writeText(code);

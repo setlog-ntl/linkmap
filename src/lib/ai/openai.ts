@@ -170,8 +170,13 @@ export async function callOpenAIWithTools(
 
     if (choice.finish_reason === 'tool_calls' && assistantMessage.tool_calls?.length) {
       for (const toolCall of assistantMessage.tool_calls as ToolCallResult[]) {
-        const args = JSON.parse(toolCall.function.arguments);
-        const toolResult = await toolExecutor(toolCall.function.name, args);
+        let parsedArgs;
+        try {
+          parsedArgs = JSON.parse(toolCall.function.arguments);
+        } catch {
+          parsedArgs = {};
+        }
+        const toolResult = await toolExecutor(toolCall.function.name, parsedArgs);
         conversationMessages.push({
           role: 'tool',
           tool_call_id: toolCall.id,
