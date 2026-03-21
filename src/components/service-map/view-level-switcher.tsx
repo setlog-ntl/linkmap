@@ -1,24 +1,22 @@
 'use client';
 
-import { Map, GitBranch } from 'lucide-react';
+import { Map, GitBranch, LayoutGrid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useServiceMapStore } from '@/stores/service-map-store';
-import { useLocaleStore } from '@/stores/locale-store';
-import { t } from '@/lib/i18n';
 import type { ViewLevel } from '@/types';
 
-const LEVELS: { key: ViewLevel; icon: typeof Map; labelKey: string }[] = [
-  { key: 'map', icon: Map, labelKey: 'serviceMap.viewLevel.map' },
-  { key: 'dependency', icon: GitBranch, labelKey: 'serviceMap.viewLevel.dependency' },
+const LEVELS: { key: ViewLevel; icon: typeof Map; label: string }[] = [
+  { key: 'status', icon: LayoutGrid, label: '한눈에 보기' },
+  { key: 'map', icon: Map, label: '맵 보기' },
+  { key: 'dependency', icon: GitBranch, label: '의존성 보기' },
 ];
 
 export function ViewLevelSwitcher() {
   const { viewLevel, setViewLevel } = useServiceMapStore();
-  const { locale } = useLocaleStore();
 
   return (
     <div className="flex items-center rounded-lg border bg-muted/50 p-0.5">
-      {LEVELS.map(({ key, icon: Icon, labelKey }) => (
+      {LEVELS.map(({ key, icon: Icon, label }) => (
         <Button
           key={key}
           variant={viewLevel === key ? 'secondary' : 'ghost'}
@@ -27,7 +25,7 @@ export function ViewLevelSwitcher() {
           onClick={() => setViewLevel(key)}
         >
           <Icon className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">{t(locale, labelKey)}</span>
+          <span className="hidden sm:inline">{label}</span>
         </Button>
       ))}
     </div>

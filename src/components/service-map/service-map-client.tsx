@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { EmptyMapState } from '@/components/service-map/empty-map-state';
 import { ViewLevelSwitcher } from '@/components/service-map/view-level-switcher';
+import { StatusView } from '@/components/service-map/views/status-view';
 import { MapView } from '@/components/service-map/views/map-view';
 import { DependencyView } from '@/components/service-map/views/dependency-view';
 import { useServiceMapStore } from '@/stores/service-map-store';
@@ -78,6 +79,7 @@ function ServiceMapInner({ isReadOnly = false }: ServiceMapInnerProps) {
           <ViewLevelSwitcher />
         </div>
 
+        {viewLevel === 'status' && <StatusView data={data} projectId={projectId} />}
         {viewLevel === 'map' && <MapView data={data} projectId={projectId} isReadOnly={isReadOnly} />}
         {viewLevel === 'dependency' && <DependencyView data={data} projectId={projectId} isReadOnly={isReadOnly} />}
       </div>
