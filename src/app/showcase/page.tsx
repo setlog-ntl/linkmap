@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { useShowcaseList } from '@/lib/queries/showcase';
 import { ShowcaseCard } from '@/components/showcase/showcase-card';
 import { ShowcaseLeaderboard } from '@/components/showcase/showcase-leaderboard';
+import { MonthlyPicksSection } from '@/components/showcase/monthly-picks-section';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Trophy, Sparkles, LayoutGrid, Crown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -72,6 +73,9 @@ export default function ShowcasePage() {
           내 사이트도 쇼케이스에 등록할 수 있습니다!
         </p>
       </div>
+
+      {/* 이달의 페이지 섹션 */}
+      <MonthlyPicksSection />
 
       {/* View Mode Tabs */}
       <div className="flex justify-center gap-2 mb-6">

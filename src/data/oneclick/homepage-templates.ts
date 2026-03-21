@@ -37,7 +37,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     id: 'b2c3d4e5-0003-4000-9000-000000000003',
     slug: 'link-card',
     name: 'Link Card',
-    name_ko: '링크 카드',
+    name_ko: '링크카드',
     description:
       'Your personal link card — share your profile and all links on a single page you fully own. Animated backgrounds, custom themes, bilingual support, and analytics built in.',
     description_ko:

@@ -54,6 +54,7 @@ export function ShowcaseCard({ item }: ShowcaseCardProps) {
     <Card className="overflow-hidden group hover:shadow-md transition-shadow">
       {/* Preview Area */}
       <Link
+        prefetch={false}
         href={`/showcase/${item.id}`}
         className="block relative w-full border-b cursor-pointer"
         style={{ height: '200px' }}

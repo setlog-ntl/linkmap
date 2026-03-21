@@ -1,7 +1,7 @@
 # Linkmap Database Schema Reference
 
-> **Last Updated**: 2026-03-19
-> **Migrations**: 001 ~ 084 (84 files)
+> **Last Updated**: 2026-03-21
+> **Migrations**: 001 ~ 091 (91 files)
 > **Engine**: Supabase (PostgreSQL 15+)
 
 이 문서는 바이브코딩 시 DB 구조를 빠르게 참조하기 위한 스키마 레퍼런스입니다.
@@ -755,6 +755,78 @@ CREATE TYPE team_role AS ENUM ('admin', 'editor', 'viewer');
 | AiFeatureSlug (6 values) | `AiFeatureSlug` | ai.ts |
 | IconType (3 values) | `IconType` | core.ts |
 | SubscriptionPlan (3 values) | `SubscriptionPlan` | core.ts |
+
+---
+
+## 11-B. Showcase Leaderboard Tables (M091)
+
+### showcase_views — 조회 로그
+
+| Column | Type | Nullable | Default | Note |
+|--------|------|----------|---------|------|
+| id | UUID | NO | gen_random_uuid() | PK |
+| showcase_id | UUID | NO | | 쇼케이스 ID |
+| showcase_source | TEXT | NO | | CHECK: deploy, project |
+| viewer_id | UUID | YES | NULL | FK → auth.users |
+| viewer_ip_hash | TEXT | YES | NULL | SHA-256 해시 |
+| created_at | TIMESTAMPTZ | NO | now() | |
+
+**RLS**: 공개 읽기, 인증 또는 IP 기반 INSERT
+
+### showcase_monthly_picks — 이달의 페이지
+
+| Column | Type | Nullable | Default | Note |
+|--------|------|----------|---------|------|
+| id | UUID | NO | gen_random_uuid() | PK |
+| showcase_id | UUID | NO | | 쇼케이스 ID |
+| showcase_source | TEXT | NO | | CHECK: deploy, project |
+| year_month | TEXT | NO | | YYYY-MM 형식 |
+| pick_type | TEXT | NO | | CHECK: algorithm, curated |
+| rank | INTEGER | NO | | CHECK: 1-10 |
+| admin_note | TEXT | YES | NULL | |
+| picked_by | UUID | YES | NULL | FK → auth.users |
+| score_snapshot | NUMERIC | YES | NULL | 선정 시점 스코어 |
+| created_at | TIMESTAMPTZ | NO | now() | |
+
+**UNIQUE**: (showcase_id, year_month)
+**RLS**: 공개 읽기, 관리자 전용 INSERT/DELETE
+
+### showcase_admin_actions — 관리자 액션
+
+| Column | Type | Nullable | Default | Note |
+|--------|------|----------|---------|------|
+| id | UUID | NO | gen_random_uuid() | PK |
+| showcase_id | UUID | NO | | 쇼케이스 ID |
+| showcase_source | TEXT | NO | | CHECK: deploy, project |
+| action_type | TEXT | NO | | CHECK: boost, suppress, hide, unhide, feature, unfeature |
+| boost_score | NUMERIC | YES | 0 | |
+| reason | TEXT | YES | NULL | |
+| admin_id | UUID | NO | | FK → auth.users |
+| expires_at | TIMESTAMPTZ | YES | NULL | |
+| is_active | BOOLEAN | NO | true | |
+| created_at | TIMESTAMPTZ | NO | now() | |
+
+**RLS**: 관리자 전용 ALL
+
+### showcase_badges — 사용자 배지
+
+| Column | Type | Nullable | Default | Note |
+|--------|------|----------|---------|------|
+| id | UUID | NO | gen_random_uuid() | PK |
+| user_id | UUID | NO | | FK → auth.users |
+| badge_type | TEXT | NO | | CHECK: monthly_winner, monthly_runner_up, editors_choice, popular_creator, prolific_creator, community_star, first_showcase |
+| showcase_id | UUID | YES | NULL | |
+| year_month | TEXT | YES | NULL | |
+| metadata | JSONB | YES | '{}' | |
+| created_at | TIMESTAMPTZ | NO | now() | |
+
+**UNIQUE**: (user_id, badge_type, COALESCE(year_month, ''))
+**RLS**: 공개 읽기, 관리자 전용 INSERT
+
+### 추가 컬럼 (M091)
+
+- `homepage_deploys.view_count INTEGER NOT NULL DEFAULT 0`
+- `projects.view_count INTEGER NOT NULL DEFAULT 0`
 
 ---
 

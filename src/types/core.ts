@@ -209,6 +209,99 @@ export type ShowcaseCategory =
   | 'ecommerce'
   | 'other';
 
+export type ShowcaseBadgeType =
+  | 'monthly_winner'
+  | 'monthly_runner_up'
+  | 'editors_choice'
+  | 'popular_creator'
+  | 'prolific_creator'
+  | 'community_star'
+  | 'first_showcase';
+
+export type ShowcasePickType = 'algorithm' | 'curated';
+
+export type ShowcaseAdminActionType =
+  | 'boost'
+  | 'suppress'
+  | 'hide'
+  | 'unhide'
+  | 'feature'
+  | 'unfeature';
+
+export type LeaderboardPeriod = 'week' | 'month' | 'all';
+
+export interface MonthlyPick {
+  id: string;
+  showcase_id: string;
+  showcase_source: 'deploy' | 'project';
+  year_month: string;
+  pick_type: ShowcasePickType;
+  rank: number;
+  admin_note: string | null;
+  picked_by: string | null;
+  score_snapshot: number | null;
+  created_at: string;
+  showcase?: ShowcaseItemWithScore;
+}
+
+export interface ShowcaseBadge {
+  id: string;
+  user_id: string;
+  badge_type: ShowcaseBadgeType;
+  showcase_id: string | null;
+  year_month: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface AdminAction {
+  id: string;
+  showcase_id: string;
+  showcase_source: 'deploy' | 'project';
+  action_type: ShowcaseAdminActionType;
+  boost_score: number;
+  reason: string | null;
+  admin_id: string;
+  expires_at: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface ShowcaseItemWithScore {
+  id: string;
+  site_name: string;
+  pages_url: string | null;
+  deployment_url: string | null;
+  deploy_method: string | null;
+  deployed_at: string | null;
+  created_at: string;
+  user_id: string;
+  showcase_description: string | null;
+  showcase_tags: string[];
+  showcase_category: ShowcaseCategory | null;
+  showcase_image_url: string | null;
+  like_count: number;
+  comment_count: number;
+  view_count: number;
+  score: number;
+  source?: 'deploy' | 'project';
+  project_icon_type?: string | null;
+  project_icon_value?: string | null;
+  homepage_templates: {
+    id: string;
+    slug: string;
+    name: string;
+    name_ko: string;
+    framework: string;
+    preview_image_url: string | null;
+  } | null;
+  profiles: {
+    name: string | null;
+    avatar_url: string | null;
+  } | null;
+  badges?: ShowcaseBadge[];
+}
+
 export const SHOWCASE_CATEGORIES: { value: ShowcaseCategory; label: string }[] = [
   { value: 'portfolio', label: '포트폴리오' },
   { value: 'business', label: '비즈니스' },

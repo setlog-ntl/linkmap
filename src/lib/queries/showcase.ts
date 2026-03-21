@@ -1,6 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './keys';
-import type { ShowcaseCategory, ShowcaseComment } from '@/types/core';
+import type {
+  ShowcaseCategory,
+  ShowcaseComment,
+  ShowcaseItemWithScore,
+  MonthlyPick,
+  ShowcaseBadge,
+  AdminAction,
+  LeaderboardPeriod,
+} from '@/types/core';
 
 export interface ShowcaseItem {
   id: string;
@@ -17,6 +25,7 @@ export interface ShowcaseItem {
   showcase_image_url: string | null;
   like_count: number;
   comment_count: number;
+  view_count?: number;
   source?: 'deploy' | 'project';
   project_icon_type?: string | null;
   project_icon_value?: string | null;
@@ -278,7 +287,7 @@ export function useToggleShowcaseLike() {
       queryClient.invalidateQueries({ queryKey: queryKeys.showcase.likes(variables.showcaseId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.showcase.detail(variables.showcaseId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.showcase.list });
-      queryClient.invalidateQueries({ queryKey: queryKeys.showcase.leaderboard });
+      queryClient.invalidateQueries({ queryKey: ['showcase', 'leaderboard'] });
     },
   });
 }
@@ -343,11 +352,11 @@ export function useDeleteShowcaseComment() {
 
 // ---------- Leaderboard ----------
 
-export function useShowcaseLeaderboard() {
+export function useShowcaseLeaderboard(period: LeaderboardPeriod = 'month') {
   return useQuery({
-    queryKey: queryKeys.showcase.leaderboard,
-    queryFn: async (): Promise<ShowcaseItem[]> => {
-      const res = await fetch('/api/showcase/leaderboard');
+    queryKey: queryKeys.showcase.leaderboard(period),
+    queryFn: async (): Promise<ShowcaseItemWithScore[]> => {
+      const res = await fetch(`/api/showcase/leaderboard?period=${period}`);
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || '리더보드 조회 실패');
@@ -356,6 +365,122 @@ export function useShowcaseLeaderboard() {
       return data.showcases;
     },
     staleTime: 30_000,
+  });
+}
+
+// ---------- View Count ----------
+
+export function useRecordShowcaseView() {
+  return useMutation({
+    mutationFn: async (showcaseId: string): Promise<{ recorded: boolean }> => {
+      const res = await fetch(`/api/showcase/${showcaseId}/view`, {
+        method: 'POST',
+      });
+      if (!res.ok) return { recorded: false };
+      return res.json();
+    },
+  });
+}
+
+// ---------- Monthly Picks ----------
+
+export function useMonthlyPicks(month?: string) {
+  return useQuery({
+    queryKey: queryKeys.showcase.monthlyPicks(month),
+    queryFn: async (): Promise<MonthlyPick[]> => {
+      const params = month ? `?month=${month}` : '';
+      const res = await fetch(`/api/showcase/monthly-picks${params}`);
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.picks;
+    },
+    staleTime: 60_000,
+  });
+}
+
+export function useMonthlyArchive() {
+  return useQuery({
+    queryKey: queryKeys.showcase.monthlyArchive,
+    queryFn: async (): Promise<{ year_month: string; count: number }[]> => {
+      const res = await fetch('/api/showcase/monthly-picks/archive');
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.months;
+    },
+    staleTime: 300_000,
+  });
+}
+
+// ---------- Badges ----------
+
+export function useUserBadges(userId: string) {
+  return useQuery({
+    queryKey: queryKeys.showcase.badges(userId),
+    queryFn: async (): Promise<ShowcaseBadge[]> => {
+      const res = await fetch(`/api/showcase/badges?userId=${userId}`);
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.badges;
+    },
+    enabled: !!userId,
+  });
+}
+
+// ---------- Admin Actions ----------
+
+export function useAdminShowcaseAction() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: {
+      showcaseId: string;
+      source: 'deploy' | 'project';
+      actionType: string;
+      boostScore?: number;
+      reason?: string;
+      expiresAt?: string;
+    }): Promise<AdminAction> => {
+      const res = await fetch('/api/admin/showcase/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '관리자 액션 실패');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['showcase'] });
+    },
+  });
+}
+
+export function useAdminMonthlyPick() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: {
+      showcaseId: string;
+      source: 'deploy' | 'project';
+      yearMonth: string;
+      rank: number;
+      pickType?: 'algorithm' | 'curated';
+      adminNote?: string;
+    }): Promise<MonthlyPick> => {
+      const res = await fetch('/api/admin/showcase/monthly-pick', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '이달의 페이지 선정 실패');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['showcase'] });
+    },
   });
 }
 

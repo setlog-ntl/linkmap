@@ -1,7 +1,7 @@
 'use client';
 
 import { use } from 'react';
-import { useShowcaseDetail } from '@/lib/queries/showcase';
+import { useShowcaseDetail, useRecordShowcaseView } from '@/lib/queries/showcase';
 import { useLocaleStore } from '@/stores/locale-store';
 import { SHOWCASE_CATEGORIES } from '@/types/core';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,7 @@ import {
   Rocket,
   Heart,
   MessageSquare,
+  Eye,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
@@ -40,6 +41,7 @@ export default function ShowcaseDetailPage({
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeFailed, setIframeFailed] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
+  const recordView = useRecordShowcaseView();
 
   useEffect(() => {
     const supabase = createBrowserClient();
@@ -47,6 +49,14 @@ export default function ShowcaseDetailPage({
       setCurrentUserId(user?.id);
     });
   }, []);
+
+  // 페이지 진입 시 조회수 기록
+  useEffect(() => {
+    if (id) {
+      recordView.mutate(id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   // iframe 로드 실패 감지: 타임아웃 기반
   useEffect(() => {
@@ -110,6 +120,7 @@ export default function ShowcaseDetailPage({
     <div className="container py-8 max-w-5xl">
       {/* Back */}
       <Link
+        prefetch={false}
         href="/showcase"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
       >
@@ -324,7 +335,14 @@ export default function ShowcaseDetailPage({
               </div>
             )}
 
-            {/* 추천수 / 댓글수 */}
+            {/* 추천수 / 댓글수 / 조회수 */}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">조회</span>
+              <span className="flex items-center gap-1.5">
+                <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                {item.view_count ?? 0}
+              </span>
+            </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">추천</span>
               <span className="flex items-center gap-1.5">
