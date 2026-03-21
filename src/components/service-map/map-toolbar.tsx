@@ -7,6 +7,7 @@ import {
   Download, Maximize2, Search, Plus, Brain, Pencil, HelpCircle,
   LayoutGrid, ArrowRightLeft, ArrowDownUp, Grid3X3, RotateCcw,
 } from 'lucide-react';
+import { ShareMapButton } from '@/components/service-map/share-map-button';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import { ZONE_COLOR_PALETTE } from '@/lib/layout/zone-layout';
 import type { LayoutPreset } from '@/lib/layout/zone-layout';
@@ -17,6 +18,8 @@ interface MapToolbarProps {
   onExportPng: () => void;
   onAiAnalyze?: () => void;
   onToggleLegend?: () => void;
+  projectId?: string;
+  isReadOnly?: boolean;
 }
 
 const PRESET_OPTIONS: { key: LayoutPreset; label: string; icon: typeof ArrowRightLeft }[] = [
@@ -33,6 +36,8 @@ export function MapToolbar({
   onExportPng,
   onAiAnalyze,
   onToggleLegend,
+  projectId,
+  isReadOnly,
 }: MapToolbarProps) {
   const { fitView } = useReactFlow();
   const {
@@ -97,6 +102,8 @@ export function MapToolbar({
       <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full" onClick={onExportPng} title="PNG 다운로드">
         <Download className="h-4 w-4" />
       </Button>
+
+      {projectId && !isReadOnly && <ShareMapButton projectId={projectId} />}
 
       <div className="w-px h-5 bg-border/50" />
 

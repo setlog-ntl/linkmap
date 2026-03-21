@@ -427,7 +427,7 @@ export function DependencyView({ data, projectId, isReadOnly = false }: Dependen
 
   return (
     <div className="flex-1 w-full relative min-h-0 border-none bg-background overflow-hidden flex flex-col">
-      <MapToolbar searchQuery={searchQuery} onSearchChange={setSearchQuery} onExportPng={interactions.handleExportPng} onAiAnalyze={() => setShowAiPanel(!showAiPanel)} onToggleLegend={() => setShowLegend(!showLegend)} />
+      <MapToolbar searchQuery={searchQuery} onSearchChange={setSearchQuery} onExportPng={interactions.handleExportPng} onAiAnalyze={() => setShowAiPanel(!showAiPanel)} onToggleLegend={() => setShowLegend(!showLegend)} projectId={projectId} isReadOnly={isReadOnly} />
       <div className="flex-1 flex overflow-hidden">
         {!isReadOnly && (
           <CatalogSidebar projectId={projectId} catalogServices={data.catalogServices} projectServices={data.services} isLoading={data.catalogLoading} />
