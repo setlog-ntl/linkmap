@@ -7,6 +7,8 @@ import {
   getActiveModules,
   buildBaseCSS,
   wrapInHtml,
+  getSocialIconSvg,
+  SOCIAL_ICON_MAP,
 } from './base';
 import type { ModuleConfigState } from '@/lib/module-schema';
 
@@ -90,15 +92,18 @@ function renderSocialsSection(
   if (items.length === 0) return '';
 
   const icons = items
-    .map(
-      (item) => `
-      <a class="lc-social-icon${isDark ? ' lc-social-icon--dark' : ''}"
+    .map((item) => {
+      const iconColor = isDark ? '#d1d5db' : (SOCIAL_ICON_MAP[item.platform]?.color ?? '#555');
+      const svg = getSocialIconSvg(item.platform, 18, iconColor);
+      const fallback = svg || esc(item.platform);
+      return `
+      <a class="lc-social-icon${isDark ? ' lc-social-icon--dark' : ''}${svg ? ' lc-social-icon--svg' : ''}"
          href="${esc(item.url)}" target="_blank" rel="noopener noreferrer"
          title="${esc(item.platform)}"
-         style="--icon-color:${esc(primaryColor)}">
-        ${esc(item.platform)}
-      </a>`,
-    )
+         style="--icon-color:${esc(SOCIAL_ICON_MAP[item.platform]?.color ?? primaryColor)}">
+        ${fallback}
+      </a>`;
+    })
     .join('');
 
   return `<section class="lc-socials">${icons}</section>`;
@@ -291,13 +296,18 @@ function buildLinkCardCSS(
       text-decoration: none;
       text-transform: capitalize;
       border: 1.5px solid #e5e7eb;
-      transition: border-color .15s, color .15s;
+      transition: border-color .2s, transform .2s, box-shadow .2s;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    .lc-social-icon--svg {
+      font-size: 0;
     }
     .lc-social-icon:hover {
       border-color: var(--icon-color);
       color: var(--icon-color);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,.1);
     }
     .lc-social-icon--dark {
       background: rgba(255,255,255,.08);
@@ -305,8 +315,9 @@ function buildLinkCardCSS(
       border-color: rgba(255,255,255,.15);
     }
     .lc-social-icon--dark:hover {
-      color: var(--icon-color);
       border-color: var(--icon-color);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,.3);
     }
 
     ${getCardStyleCSS(cardStyle, primaryColor)}

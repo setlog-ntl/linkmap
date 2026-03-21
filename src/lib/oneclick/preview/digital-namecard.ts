@@ -7,6 +7,8 @@ import {
   getActiveModules,
   buildBaseCSS,
   wrapInHtml,
+  getSocialIconSvg,
+  SOCIAL_ICON_MAP,
 } from './base';
 import type { ModuleConfigState } from '@/lib/module-schema';
 
@@ -103,13 +105,16 @@ function renderSocialsSection(state: ModuleConfigState, accentColor: string): st
   if (items.length === 0) return '';
 
   const pills = items
-    .map(
-      (item) => `
+    .map((item) => {
+      const brandColor = SOCIAL_ICON_MAP[item.platform]?.color ?? accentColor;
+      const svg = getSocialIconSvg(item.platform, 14, brandColor);
+      return `
       <a class="nc-social-pill" href="${esc(item.url)}" target="_blank" rel="noopener noreferrer"
-         style="border-color:${esc(accentColor)}; color:${esc(accentColor)}">
+         style="border-color:${esc(brandColor)}; color:${esc(brandColor)}">
+        ${svg ? `<span class="nc-social-svg">${svg}</span>` : ''}
         ${esc(item.platform)}
-      </a>`,
-    )
+      </a>`;
+    })
     .join('');
 
   return `
@@ -185,7 +190,9 @@ function buildNamecardCSS(accentColor: string): string {
     .nc-socials { padding: 0 24px 24px; }
     .nc-social-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
     .nc-social-pill {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       padding: 6px 16px;
       border: 1.5px solid;
       border-radius: 999px;
@@ -193,11 +200,18 @@ function buildNamecardCSS(accentColor: string): string {
       font-weight: 500;
       text-decoration: none;
       text-transform: capitalize;
-      transition: background .15s, color .15s;
+      transition: background .15s, color .15s, transform .15s;
     }
     .nc-social-pill:hover {
       background: var(--brand-primary);
       color: #fff !important;
+      transform: translateY(-1px);
+    }
+    .nc-social-pill:hover svg { fill: #fff; }
+    .nc-social-svg {
+      display: inline-flex;
+      align-items: center;
+      line-height: 0;
     }
 
     /* Divider */
