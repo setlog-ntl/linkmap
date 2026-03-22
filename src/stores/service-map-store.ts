@@ -61,6 +61,9 @@ interface ServiceMapState {
   // Zone-level connections (visual edges between zones/zone↔node)
   zoneConnections: ZoneConnection[];
 
+  // Edge routing mode
+  edgeRouting: 'smooth' | 'orthogonal';
+
   // Snap-to-grid (edit mode alignment)
   snapToGrid: boolean;
 
@@ -106,6 +109,9 @@ interface ServiceMapState {
   setHoveredNodeId: (id: string | null) => void;
   setDragTargetZoneKey: (key: string | null) => void;
 
+  // Edge routing
+  setEdgeRouting: (mode: 'smooth' | 'orthogonal') => void;
+
   // Snap-to-grid
   setSnapToGrid: (snap: boolean) => void;
   toggleSnapToGrid: () => void;
@@ -148,6 +154,7 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
   dragTargetZoneKey: null,
   zoneConnections: [],
 
+  edgeRouting: 'smooth',
   snapToGrid: false,
 
   selectedNodeIds: new Set(),
@@ -244,6 +251,9 @@ export const useServiceMapStore = create<ServiceMapState>((set, get) => ({
   }),
   setHoveredNodeId: (id) => set({ hoveredNodeId: id }),
   setDragTargetZoneKey: (key) => set({ dragTargetZoneKey: key }),
+
+  // Edge routing
+  setEdgeRouting: (mode) => set({ edgeRouting: mode }),
 
   // Snap-to-grid
   setSnapToGrid: (snap) => set({ snapToGrid: snap }),

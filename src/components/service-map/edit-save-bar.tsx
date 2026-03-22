@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Save, X, Undo2, Redo2, Keyboard, LayoutGrid } from 'lucide-react';
+import { Save, X, Undo2, Redo2, Keyboard, LayoutGrid, Spline, CornerDownRight } from 'lucide-react';
 import { useServiceMapStore } from '@/stores/service-map-store';
 
 interface EditSaveBarProps {
@@ -16,6 +16,7 @@ export function EditSaveBar({ onSave, saving, onAutoArrange }: EditSaveBarProps)
     editMode, setEditMode, clearPendingChanges, pendingChangeCount,
     canUndo, canRedo, undo, redo,
     pendingOverrides, pendingNodePositions, zoneConnections,
+    edgeRouting, setEdgeRouting,
   } = useServiceMapStore();
   const count = pendingChangeCount();
 
@@ -80,6 +81,29 @@ export function EditSaveBar({ onSave, saving, onAutoArrange }: EditSaveBarProps)
             </Button>
           </>
         )}
+
+        {/* Edge routing mode */}
+        <div className="w-px h-4 bg-border" />
+        <div className="flex items-center gap-0.5 rounded-lg bg-muted/50 p-0.5">
+          <Button
+            variant={edgeRouting === 'smooth' ? 'secondary' : 'ghost'}
+            size="icon"
+            className="h-6 w-6"
+            onClick={() => setEdgeRouting('smooth')}
+            title="부드러운 곡선"
+          >
+            <Spline className="h-3 w-3" />
+          </Button>
+          <Button
+            variant={edgeRouting === 'orthogonal' ? 'secondary' : 'ghost'}
+            size="icon"
+            className="h-6 w-6"
+            onClick={() => setEdgeRouting('orthogonal')}
+            title="직각 라인"
+          >
+            <CornerDownRight className="h-3 w-3" />
+          </Button>
+        </div>
 
         <div className="w-px h-4 bg-border" />
 

@@ -5,6 +5,7 @@ import {
   BaseEdge,
   EdgeLabelRenderer,
   getBezierPath,
+  getSmoothStepPath,
   type EdgeProps,
 } from '@xyflow/react';
 import { X } from 'lucide-react';
@@ -107,7 +108,10 @@ function ConnectionEdge({
     else adjustedTargetY += offset;
   }
 
-  // Adaptive curvature
+  // Edge routing mode
+  const edgeRouting = useServiceMapStore((s) => s.edgeRouting);
+
+  // Adaptive curvature (used in smooth mode)
   const edgeLength = Math.sqrt(
     (adjustedTargetX - adjustedSourceX) ** 2 + (adjustedTargetY - adjustedSourceY) ** 2,
   );
@@ -129,7 +133,19 @@ function ConnectionEdge({
   let labelX: number;
   let labelY: number;
 
-  if (obstacleCy !== undefined) {
+  if (edgeRouting === 'orthogonal') {
+    // Orthogonal (right-angle) routing
+    [edgePath, labelX, labelY] = getSmoothStepPath({
+      sourceX: adjustedSourceX,
+      sourceY: adjustedSourceY,
+      targetX: adjustedTargetX,
+      targetY: adjustedTargetY,
+      sourcePosition,
+      targetPosition,
+      borderRadius: 8,
+      offset: 20,
+    });
+  } else if (obstacleCy !== undefined) {
     const sx = adjustedSourceX;
     const sy = adjustedSourceY;
     const tx = adjustedTargetX;

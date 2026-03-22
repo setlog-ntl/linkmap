@@ -16,13 +16,13 @@ import type { Node, Edge } from '@xyflow/react';
 // ── Constants ────────────────────────────────────────────────────────
 const NODE_W = 180;
 const NODE_H = 72;
-const GAP_X = 50;            // horizontal gap between columns
-const GAP_Y = 56;            // vertical gap between rows
-const PAD = 50;              // zone inner padding
+const GAP_X = 64;            // horizontal gap between columns (wider for breathing room)
+const GAP_Y = 64;            // vertical gap between rows
+const PAD = 56;              // zone inner padding (generous for spacious feel)
 const HEADER = 48;           // zone header height
-const BASE_GAP = 140;        // base gap between zones
-const EDGE_BONUS = 25;       // extra gap per cross-zone edge
-const MAX_GAP = 320;         // maximum zone-to-zone gap
+const BASE_GAP = 180;        // base gap between zones (wider for edge routing)
+const EDGE_BONUS = 30;       // extra gap per cross-zone edge
+const MAX_GAP = 380;         // maximum zone-to-zone gap
 const MIN_W = 2 * NODE_W + GAP_X + 2 * PAD;
 const MIN_H = HEADER + NODE_H + 2 * PAD;
 
