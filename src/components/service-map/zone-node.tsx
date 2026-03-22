@@ -136,13 +136,13 @@ function ZoneNode({ id, data, selected }: NodeProps) {
       )}
 
       {/* Zone label chip — pointer-events auto for interaction */}
-      <div className="absolute -top-3 left-4 z-10" style={{ pointerEvents: 'auto' }}>
-        <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-[10px] border text-xs font-bold tracking-wide shadow-sm backdrop-blur-sm ${chipClass}`}>
-          <Icon className="h-4 w-4 opacity-80" />
+      <div className="absolute -top-4 left-4 z-10" style={{ pointerEvents: 'auto' }}>
+        <div className={`inline-flex items-center gap-2.5 px-4 py-2 rounded-[12px] border text-sm font-bold tracking-wide shadow-sm backdrop-blur-sm ${chipClass}`}>
+          <Icon className="h-5 w-5 opacity-80" />
           {isRenaming ? (
             <input
               ref={inputRef}
-              className="bg-transparent outline-none text-xs font-bold w-[80px]"
+              className="bg-transparent outline-none text-sm font-bold w-[100px]"
               value={renameValue}
               onChange={(e) => setRenameValue(e.target.value)}
               onBlur={handleRenameSubmit}
@@ -153,16 +153,16 @@ function ZoneNode({ id, data, selected }: NodeProps) {
             />
           ) : (
             <span
-              className={editMode ? 'cursor-text hover:underline' : ''}
-              onDoubleClick={() => { if (editMode) { setRenameValue(d.label); setIsRenaming(true); } }}
+              className="cursor-text hover:underline decoration-1 underline-offset-2"
+              onClick={() => { setRenameValue(d.label); setIsRenaming(true); }}
             >
               {d.label}
             </span>
           )}
           {d.subtitle && !isRenaming && (
-            <span className="text-[10px] font-medium opacity-55 tracking-normal">{d.subtitle}</span>
+            <span className="text-xs font-medium opacity-55 tracking-normal">{d.subtitle}</span>
           )}
-          <Badge variant="secondary" className="text-[10px] h-[18px] px-1.5 ml-0.5 rounded-[5px]">
+          <Badge variant="secondary" className="text-[11px] h-5 px-2 ml-0.5 rounded-[6px]">
             {d.count}
           </Badge>
         </div>
@@ -170,7 +170,7 @@ function ZoneNode({ id, data, selected }: NodeProps) {
 
       {/* Edit mode controls — top right, pointer-events auto for interaction */}
       {editMode && (
-        <div className="absolute -top-3 right-4 z-10 flex items-center gap-1" style={{ pointerEvents: 'auto' }}>
+        <div className="absolute -top-4 right-4 z-10 flex items-center gap-1" style={{ pointerEvents: 'auto' }}>
           {/* Color picker */}
           <div className="relative" ref={colorRef}>
             <button
