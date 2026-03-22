@@ -6,12 +6,15 @@ export const metadata: Metadata = {
   title: '서비스 카탈로그 | Linkmap',
   description: '바이브 코딩에 필요한 인증, 데이터베이스, 배포, AI 등 서비스를 비교하고 프로젝트에 연결하세요.',
   keywords: ['서비스 카탈로그', 'API 서비스', 'Supabase', 'Stripe', 'Vercel', '바이브 코딩'],
+  alternates: { canonical: 'https://www.linkmap.biz/services' },
 };
 
 import { createClient } from '@/lib/supabase/server';
 import { ServiceCatalogClient } from '@/components/service/service-catalog-client';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
+import { JsonLdScript } from '@/components/seo/json-ld-script';
+import { generateItemListJsonLd } from '@/lib/seo/json-ld';
 import type { Service, ServiceDomainRecord } from '@/types';
 
 export default async function ServicesPage() {
@@ -40,8 +43,17 @@ export default async function ServicesPage() {
     // 카탈로그 조회 실패 시 빈 상태로 표시
   }
 
+  const itemListData = services.slice(0, 50).map((s) => ({
+    name: s.name,
+    url: `https://www.linkmap.biz/services/${s.slug}`,
+    description: s.description ?? undefined,
+  }));
+
   return (
     <div className="min-h-screen flex flex-col">
+      {itemListData.length > 0 && (
+        <JsonLdScript data={generateItemListJsonLd(itemListData)} />
+      )}
       <Header profile={null} />
       <main className="flex-1 container py-8">
         <div className="mb-8">

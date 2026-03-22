@@ -17,7 +17,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.linkmap.biz"),
-  alternates: { canonical: "./" },
+  alternates: {
+    canonical: "./",
+    types: { 'application/rss+xml': '/feed.xml' },
+  },
   title: "Linkmap - 바이브 코딩 플랫폼 | 시각화·원클릭 배포",
   description:
     "Google 계정 하나면 3분 만에 내 홈페이지 배포. 서비스 맵으로 연결 구조를 시각화하고 환경변수를 안전하게 관리하세요.",

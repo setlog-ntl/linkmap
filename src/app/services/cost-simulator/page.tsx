@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: '비용 시뮬레이터 | Linkmap',
   description: '서비스 조합별 월간 비용을 시뮬레이션하세요. 무료 스택 조합을 한눈에 확인할 수 있습니다.',
   keywords: ['비용 시뮬레이터', '스택 비용 계산기', 'SaaS 비용', '무료 스택'],
+  alternates: { canonical: 'https://www.linkmap.biz/services/cost-simulator' },
 };
 
 import { createClient } from '@/lib/supabase/server';

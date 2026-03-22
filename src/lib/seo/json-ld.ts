@@ -16,7 +16,11 @@ function organizationJsonLd() {
     name: SITE_NAME,
     url: SITE_URL,
     logo: LOGO_URL,
-    sameAs: ['https://github.com/linkmap-biz'],
+    sameAs: [
+      'https://github.com/linkmap-biz',
+      `${SITE_URL}/blog`,
+      `${SITE_URL}/services`,
+    ],
   };
 }
 
@@ -308,6 +312,34 @@ export function generateItemListJsonLd(
       url: item.url,
       ...(item.description && { description: item.description }),
     })),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Showcase — CollectionPage + BreadcrumbList
+// ---------------------------------------------------------------------------
+
+export function generateShowcaseJsonLd() {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        name: '쇼케이스 — 원클릭 배포 사이트 모음 | Linkmap',
+        description:
+          'Linkmap 원클릭 배포로 만들어진 실제 사이트를 구경하세요. 링크카드, 디지털 명함, 프리랜서 홍보 페이지 등 다양한 템플릿 예시.',
+        url: `${SITE_URL}/showcase`,
+        isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: SITE_URL },
+        inLanguage: 'ko',
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '홈', item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: '쇼케이스', item: `${SITE_URL}/showcase` },
+        ],
+      },
+    ],
   };
 }
 

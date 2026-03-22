@@ -13,6 +13,7 @@ export const metadata: Metadata = {
   description:
     '같은 카테고리의 서비스를 한눈에 비교하세요. 가격, 무료 플랜, 난이도, 기능별 차이를 확인할 수 있습니다.',
   keywords: ['서비스 비교', 'Supabase vs Firebase', 'Vercel vs Netlify', '무료 플랜 비교', 'BaaS 비교', 'Linkmap'],
+  alternates: { canonical: 'https://www.linkmap.biz/services/compare' },
 };
 
 export default async function ComparePage() {

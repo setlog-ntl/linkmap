@@ -21,6 +21,7 @@ export const metadata: Metadata = {
     'API란',
     'Linkmap',
   ],
+  alternates: { canonical: 'https://www.linkmap.biz/glossary' },
 };
 
 export default function GlossaryPage() {

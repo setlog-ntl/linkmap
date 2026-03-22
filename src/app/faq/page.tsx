@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: '자주 묻는 질문 (FAQ) — 바이브 코딩, 환경변수, 배포 | Linkmap',
   description:
     '바이브 코딩이란? 환경변수란? API 키를 안전하게 관리하는 방법은? 무료로 홈페이지 만드는 방법까지, Linkmap에 대한 모든 질문과 답변.',
+  alternates: { canonical: 'https://www.linkmap.biz/faq' },
   keywords: [
     '바이브 코딩이란',
     '환경변수란',
