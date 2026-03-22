@@ -26,7 +26,7 @@ const TYPE_LABELS: Record<UserConnectionType, string> = {
 const STATUS_LABELS: Record<ConnectionStatus, string> = {
   active: '활성',
   inactive: '비활성',
-  error: '오류',
+  error: '점검 필요',
   pending: '대기',
 };
 

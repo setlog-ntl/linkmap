@@ -48,7 +48,7 @@ function StatusBadge({ status }: { status: HomepageDeploy['deploy_status'] }) {
     return (
       <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 gap-1 border-red-500/30 text-red-600 dark:text-red-400">
         <AlertCircle className="h-2.5 w-2.5" />
-        오류
+        점검 필요
       </Badge>
     );
   }

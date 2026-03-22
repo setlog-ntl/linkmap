@@ -96,7 +96,7 @@ export function HealthSummaryStrip({ projectId, allCards }: HealthSummaryStripPr
               <div
                 key={card.projectServiceId}
                 className="flex items-center gap-1 rounded-md bg-muted/50 px-2 py-1"
-                title={check ? `${card.name}: ${status} (${check.response_time_ms ?? '-'}ms)` : `${card.name}: 미검증`}
+                title={check ? `${card.name}: ${status} (${check.response_time_ms ?? '-'}ms)` : `${card.name}: 대기 중`}
               >
                 <Icon className={`h-3 w-3 ${config.className}`} />
                 <span className="text-xs truncate max-w-[80px]">{card.name}</span>

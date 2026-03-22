@@ -51,7 +51,7 @@ export function ActionNeeded({ projectId, allCards, metrics }: ActionNeededProps
     if (unhealthyCount > 0) {
       items.push({
         severity: 'error',
-        message: `비정상 서비스 ${unhealthyCount}개`,
+        message: `점검 필요 서비스 ${unhealthyCount}개`,
         href: `/project/${projectId}/monitoring?tab=health`,
       });
     }
@@ -62,7 +62,7 @@ export function ActionNeeded({ projectId, allCards, metrics }: ActionNeededProps
   if (missingEnvCount > 0) {
     items.push({
       severity: 'warning',
-      message: `환경변수 미입력 ${missingEnvCount}개`,
+      message: `환경변수 설정 필요 ${missingEnvCount}개`,
       href: `/project/${projectId}/env`,
     });
   }

@@ -34,12 +34,12 @@ const STATUS_CONFIG: Record<SystemStatus, { label: string; dotClass: string; tex
     textClass: 'text-green-700 dark:text-green-400',
   },
   degraded: {
-    label: '일부 장애',
+    label: '일부 점검 필요',
     dotClass: 'bg-yellow-500',
     textClass: 'text-yellow-700 dark:text-yellow-400',
   },
   major_outage: {
-    label: '주요 장애',
+    label: '점검 필요',
     dotClass: 'bg-red-500',
     textClass: 'text-red-700 dark:text-red-400',
   },

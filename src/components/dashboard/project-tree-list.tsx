@@ -394,7 +394,7 @@ function DeployStatusIcon({ status }: { status: HomepageDeploy['deploy_status'] 
     building: { dotClass: 'bg-yellow-500 animate-pulse', label: '원클릭 배포 · 배포 중' },
     creating: { dotClass: 'bg-yellow-500 animate-pulse', label: '원클릭 배포 · 생성 중' },
     pending: { dotClass: 'bg-yellow-500 animate-pulse', label: '원클릭 배포 · 대기 중' },
-    error: { dotClass: 'bg-red-500', label: '원클릭 배포 · 오류' },
+    error: { dotClass: 'bg-red-500', label: '원클릭 배포 · 점검 필요' },
     canceled: { dotClass: 'bg-muted-foreground/40', label: '원클릭 배포' },
   } as const;
 

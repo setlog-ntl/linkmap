@@ -181,7 +181,7 @@ export function ConnectionFlowMap({
           {[
             { label: '연결됨', cls: 'bg-emerald-500' },
             { label: '대기중', cls: 'bg-amber-500' },
-            { label: '오류', cls: 'bg-red-500' },
+            { label: '점검 필요', cls: 'bg-red-500' },
             { label: '미연결', cls: 'bg-muted-foreground' },
           ].map((s) => (
             <span key={s.label} className="flex items-center gap-1.5">

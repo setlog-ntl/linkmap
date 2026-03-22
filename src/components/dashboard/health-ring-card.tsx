@@ -157,13 +157,13 @@ export function HealthRingCard({ projectId, allCards, initialHealthChecks }: Hea
           {dist.unhealthy > 0 && (
             <span className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
-              오류 <span className="font-mono font-semibold">{dist.unhealthy}</span>
+              점검 필요 <span className="font-mono font-semibold">{dist.unhealthy}</span>
             </span>
           )}
           {dist.unknown > 0 && (
             <span className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground" />
-              미검증 <span className="font-mono font-semibold">{dist.unknown}</span>
+              대기 중 <span className="font-mono font-semibold">{dist.unknown}</span>
             </span>
           )}
         </div>

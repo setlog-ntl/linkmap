@@ -30,7 +30,7 @@ const STATUS_BORDER: Record<string, string> = {
 
 const STATUS_LABEL: Record<string, string> = {
   connected: '연결됨',
-  error: '오류',
+  error: '점검 필요',
   in_progress: '진행 중',
   not_started: '미시작',
 };
@@ -199,7 +199,7 @@ export const CompactCard = memo(function CompactCard({ card, projectId }: Compac
                       { project_service_id: card.projectServiceId },
                       {
                         onSuccess: (data) => {
-                          const label = data.status === 'healthy' ? '정상' : data.status === 'degraded' ? '경고' : '오류';
+                          const label = data.status === 'healthy' ? '정상' : data.status === 'degraded' ? '경고' : '점검 필요';
                           toast.success(`${card.name}: ${label}`);
                         },
                         onError: () => {

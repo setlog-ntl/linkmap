@@ -577,7 +577,7 @@ export function ServiceDetailSheet({
                       )}
                     </span>
                   ) : (
-                    <span className="text-xs text-muted-foreground">미검증</span>
+                    <span className="text-xs text-muted-foreground">대기 중</span>
                   )}
                 </div>
                 <Button
