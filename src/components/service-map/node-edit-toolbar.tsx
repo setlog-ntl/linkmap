@@ -2,6 +2,7 @@
 
 import { memo, useCallback } from 'react';
 import { Link2, Eye, Trash2 } from 'lucide-react';
+import { IconTooltip } from '@/components/ui/icon-tooltip';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import { ZONE_COLOR_PALETTE } from '@/lib/layout/zone-layout';
 import type { ZoneConfig } from '@/lib/layout/zone-layout';
@@ -82,27 +83,30 @@ function NodeEditToolbarInner({
       <div className="w-px h-5 bg-border mx-0.5" />
 
       {/* Quick actions */}
-      <button
-        className="p-1.5 rounded-lg hover:bg-primary/10 transition-colors group"
-        onClick={() => onStartConnect(nodeId)}
-        title="연결 시작"
-      >
-        <Link2 className="h-3.5 w-3.5 text-primary group-hover:scale-110 transition-transform" />
-      </button>
-      <button
-        className="p-1.5 rounded-lg hover:bg-accent transition-colors"
-        onClick={() => onViewDetail(nodeId)}
-        title="상세 보기"
-      >
-        <Eye className="h-3.5 w-3.5 text-muted-foreground" />
-      </button>
-      <button
-        className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
-        onClick={() => onRemoveService(nodeId)}
-        title="서비스 제거"
-      >
-        <Trash2 className="h-3.5 w-3.5 text-destructive" />
-      </button>
+      <IconTooltip label="연결 시작">
+        <button
+          className="p-1.5 rounded-lg hover:bg-primary/10 transition-colors group"
+          onClick={() => onStartConnect(nodeId)}
+        >
+          <Link2 className="h-3.5 w-3.5 text-primary group-hover:scale-110 transition-transform" />
+        </button>
+      </IconTooltip>
+      <IconTooltip label="상세 보기">
+        <button
+          className="p-1.5 rounded-lg hover:bg-accent transition-colors"
+          onClick={() => onViewDetail(nodeId)}
+        >
+          <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+        </button>
+      </IconTooltip>
+      <IconTooltip label="서비스 제거">
+        <button
+          className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
+          onClick={() => onRemoveService(nodeId)}
+        >
+          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+        </button>
+      </IconTooltip>
     </div>
   );
 }

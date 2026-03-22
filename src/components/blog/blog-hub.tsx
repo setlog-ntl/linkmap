@@ -2,7 +2,8 @@
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Clock, Calendar, Tag, Link2, Check } from 'lucide-react';
+import { ArrowRight, Clock, Calendar, Link2, Check } from 'lucide-react';
+import { IconTooltip } from '@/components/ui/icon-tooltip';
 import { Badge } from '@/components/ui/badge';
 import {
   BLOG_CATEGORIES,
@@ -41,17 +42,18 @@ function CopyLinkButton({ slug }: { slug: string }) {
   }, [slug]);
 
   return (
-    <button
-      onClick={handleCopy}
-      className={`flex h-7 w-7 items-center justify-center rounded-md border transition-all ${
-        copied
-          ? 'border-brand-green bg-green-50 text-green-600 dark:bg-green-950/30'
-          : 'border-transparent opacity-0 group-hover:opacity-100 hover:border-brand-blue/50 hover:text-brand-blue'
-      }`}
-      title="링크 복사"
-    >
-      {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
-    </button>
+    <IconTooltip label="링크 복사">
+      <button
+        onClick={handleCopy}
+        className={`flex h-7 w-7 items-center justify-center rounded-md border transition-all ${
+          copied
+            ? 'border-brand-green bg-green-50 text-green-600 dark:bg-green-950/30'
+            : 'border-transparent opacity-0 group-hover:opacity-100 hover:border-brand-blue/50 hover:text-brand-blue'
+        }`}
+      >
+        {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+      </button>
+    </IconTooltip>
   );
 }
 

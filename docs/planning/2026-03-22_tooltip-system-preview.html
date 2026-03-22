@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linkmap Tooltip System - Preview</title>
+<style>
+  :root {
+    --bg: #0a0f1a;
+    --card: #111827;
+    --card-hover: #1a2332;
+    --border: #1e2d3d;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --brand-blue: #3b82f6;
+    --brand-green: #10b981;
+    --accent: #6366f1;
+    --red: #ef4444;
+    --amber: #f59e0b;
+    --tooltip-bg: #f8fafc;
+    --tooltip-text: #0f172a;
+    --tooltip-border: #e2e8f0;
+    --radius: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 0 24px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .page-header p { color: var(--muted); font-size: 14px; }
+  .page-header .badge {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: rgba(99,102,241,0.15);
+    color: #a5b4fc;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Layout ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  /* ── Section ── */
+  .section {
+    padding: 40px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .section:last-child { border-bottom: none; }
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .section-label.tier1 { background: rgba(59,130,246,0.15); color: #93c5fd; }
+  .section-label.tier2 { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+  .section-label.tier3 { background: rgba(168,85,247,0.15); color: #c4b5fd; }
+  .section-label.config { background: rgba(245,158,11,0.15); color: #fcd34d; }
+
+  .section h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .section .desc {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 24px;
+    max-width: 600px;
+  }
+
+  /* ── Demo Area ── */
+  .demo-area {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    position: relative;
+  }
+  .demo-label {
+    position: absolute;
+    top: -10px;
+    left: 16px;
+    padding: 2px 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Tooltip Core ── */
+  .tip-trigger {
+    position: relative;
+    display: inline-flex;
+    cursor: pointer;
+  }
+  .tip-trigger .tooltip {
+    position: absolute;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0.96);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    white-space: nowrap;
+  }
+  .tip-trigger:hover .tooltip,
+  .tip-trigger:focus-within .tooltip {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .tooltip.top {
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform-origin: bottom center;
+  }
+  .tip-trigger:hover .tooltip.top,
+  .tip-trigger:focus-within .tooltip.top {
+    transform: scale(1) translateX(-50%);
+  }
+  .tooltip.top { transform: scale(0.96) translateX(-50%); }
+
+  .tooltip.bottom {
+    top: calc(100% + 6px);
+    left: 50%;
+    transform-origin: top center;
+  }
+  .tip-trigger:hover .tooltip.bottom,
+  .tip-trigger:focus-within .tooltip.bottom {
+    transform: scale(1) translateX(-50%);
+  }
+  .tooltip.bottom { transform: scale(0.96) translateX(-50%); }
+
+  .tooltip.right {
+    left: calc(100% + 6px);
+    top: 50%;
+    transform-origin: left center;
+  }
+  .tip-trigger:hover .tooltip.right,
+  .tip-trigger:focus-within .tooltip.right {
+    transform: scale(1) translateY(-50%);
+  }
+  .tooltip.right { transform: scale(0.96) translateY(-50%); }
+
+  /* Tooltip Styles */
+  .tooltip-simple {
+    background: var(--tooltip-bg);
+    color: var(--tooltip-text);
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .tooltip-simple .kbd {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 5px;
+    background: #e2e8f0;
+    border: 1px solid #cbd5e1;
+    border-radius: 3px;
+    font-size: 10px;
+    font-family: 'Geist Mono', monospace;
+    color: #475569;
+    line-height: 1.4;
+  }
+
+  .tooltip-service {
+    background: var(--tooltip-bg);
+    color: var(--tooltip-text);
+    padding: 8px 12px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    white-space: nowrap;
+  }
+  .tooltip-service .svc-name {
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .tooltip-service .svc-cat {
+    font-size: 10px;
+    color: #64748b;
+    margin-top: 1px;
+  }
+  .tooltip-service .svc-desc {
+    font-size: 10px;
+    color: #94a3b8;
+    margin-top: 3px;
+    max-width: 200px;
+    white-space: normal;
+    line-height: 1.4;
+  }
+
+  .tooltip-rich {
+    background: var(--tooltip-bg);
+    color: var(--tooltip-text);
+    padding: 12px 14px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    min-width: 200px;
+    white-space: normal;
+  }
+  .tooltip-rich .rich-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .tooltip-rich .rich-header .name {
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .tooltip-rich .rich-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+    font-size: 11px;
+  }
+  .tooltip-rich .rich-row .label { color: #64748b; }
+  .tooltip-rich .rich-row .value { font-weight: 500; }
+  .tooltip-rich .progress-bar {
+    margin-top: 6px;
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .tooltip-rich .progress-bar .fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  /* Arrow */
+  .tooltip-arrow {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--tooltip-bg);
+    transform: rotate(45deg);
+  }
+  .tooltip.top .tooltip-arrow {
+    bottom: -4px;
+    left: 50%;
+    margin-left: -4px;
+  }
+  .tooltip.bottom .tooltip-arrow {
+    top: -4px;
+    left: 50%;
+    margin-left: -4px;
+  }
+
+  /* ── Icon Buttons ── */
+  .icon-btn {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .icon-btn:hover {
+    background: var(--card-hover);
+    color: var(--text);
+    border-color: rgba(255,255,255,0.1);
+  }
+  .icon-btn svg { width: 16px; height: 16px; }
+
+  /* ── Service Icons ── */
+  .svc-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all 0.15s ease;
+    cursor: pointer;
+  }
+  .svc-icon:hover { transform: scale(1.08); }
+
+  /* ── Service Node (Map) ── */
+  .map-node {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 160px;
+  }
+  .map-node:hover {
+    border-color: var(--brand-blue);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  }
+  .map-node .node-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .map-node .node-info { display: flex; flex-direction: column; }
+  .map-node .node-name { font-size: 13px; font-weight: 600; }
+  .map-node .node-cat { font-size: 10px; color: var(--muted); }
+
+  /* ── Status dots ── */
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .status-dot.green { background: #10b981; }
+  .status-dot.yellow { background: #f59e0b; }
+  .status-dot.red { background: #ef4444; }
+
+  /* ── Comparison Grid ── */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .compare-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .compare-card h3 {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .compare-card.before { border-color: rgba(239,68,68,0.3); }
+  .compare-card.after { border-color: rgba(16,185,129,0.3); }
+  .compare-card .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .compare-card.before .tag { background: rgba(239,68,68,0.15); color: #fca5a5; }
+  .compare-card.after .tag { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+
+  .icon-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  /* ── Timeline / Config ── */
+  .config-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .config-table th {
+    text-align: left;
+    padding: 10px 12px;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .config-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .config-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .mono { font-family: 'Geist Mono', monospace; font-size: 12px; }
+  .highlight { color: var(--brand-blue); }
+  .highlight-green { color: var(--brand-green); }
+
+  /* ── Delay Visualizer ── */
+  .delay-viz {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .delay-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .delay-row .label-box {
+    width: 140px;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .delay-track {
+    flex: 1;
+    height: 32px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+  .delay-bar {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    color: white;
+    transition: width 0.8s ease;
+  }
+  .delay-bar.d0 { width: 2%; background: var(--red); }
+  .delay-bar.d50 { width: 5%; background: #f97316; }
+  .delay-bar.d200 { width: 20%; background: var(--amber); }
+  .delay-bar.d300 { width: 30%; background: var(--brand-green); }
+  .delay-bar.d400 { width: 40%; background: var(--brand-blue); }
+  .delay-bar.d1200 { width: 100%; background: var(--accent); }
+
+  .delay-value {
+    width: 60px;
+    text-align: right;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Geist Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  /* ── Architecture Diagram ── */
+  .arch-diagram {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    margin-top: 16px;
+  }
+  .arch-box {
+    flex: 1;
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    text-align: center;
+  }
+  .arch-box h4 {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--brand-blue);
+  }
+  .arch-box p { font-size: 11px; color: var(--muted); line-height: 1.5; }
+  .arch-arrow {
+    display: flex;
+    align-items: center;
+    color: var(--muted);
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  /* ── Mobile Demo ── */
+  .mobile-frame {
+    width: 320px;
+    margin: 0 auto;
+    border: 2px solid var(--border);
+    border-radius: 24px;
+    padding: 12px;
+    background: var(--card);
+  }
+  .mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 4px;
+    margin-bottom: 12px;
+  }
+  .mobile-header .title { font-size: 14px; font-weight: 600; }
+  .mobile-btn-row {
+    display: flex;
+    gap: 6px;
+    padding: 8px 0;
+  }
+  .mobile-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 11px;
+  }
+  .mobile-btn svg { width: 14px; height: 14px; color: var(--muted); }
+  .long-press-hint {
+    text-align: center;
+    padding: 12px;
+    font-size: 11px;
+    color: var(--muted);
+    border: 1px dashed rgba(255,255,255,0.1);
+    border-radius: 8px;
+    margin-top: 8px;
+  }
+
+  /* ── Animated tooltip demo ── */
+  .live-demo-area {
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  /* ── Tier Overview Cards ── */
+  .tier-overview {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .tier-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+  .tier-card:hover {
+    border-color: rgba(255,255,255,0.1);
+    transform: translateY(-2px);
+  }
+  .tier-card .tier-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .tier-card:nth-child(1) .tier-num { background: rgba(59,130,246,0.15); color: #93c5fd; }
+  .tier-card:nth-child(2) .tier-num { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+  .tier-card:nth-child(3) .tier-num { background: rgba(168,85,247,0.15); color: #c4b5fd; }
+  .tier-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .tier-card p { font-size: 11px; color: var(--muted); }
+
+  /* ── Footer ── */
+  .page-footer {
+    text-align: center;
+    padding: 32px 0;
+    color: var(--muted);
+    font-size: 11px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  @media (max-width: 768px) {
+    .compare-grid { grid-template-columns: 1fr; }
+    .tier-overview { grid-template-columns: 1fr; }
+    .arch-diagram { flex-direction: column; }
+    .arch-arrow { transform: rotate(90deg); justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════ HEADER ════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="container">
+    <h1>Tooltip System Preview</h1>
+    <p>Linkmap 서비스 아이콘 & 기능 버튼 툴팁 적용 기획</p>
+    <div class="badge">2026-03-22 DESIGN SPEC</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ OVERVIEW ════════════════════════════════════════════ -->
+<div class="section">
+  <div class="container">
+    <h2>3-Tier 툴팁 계층 구조</h2>
+    <p class="desc">정보 밀도에 따라 3단계로 분류하여, 각 상황에 맞는 수준의 정보를 제공합니다.</p>
+
+    <div class="tier-overview">
+      <div class="tier-card">
+        <div class="tier-num">1</div>
+        <h3>Simple Label</h3>
+        <p>아이콘 버튼에 1줄 행동 동사<br>delay 400ms</p>
+      </div>
+      <div class="tier-card">
+        <div class="tier-num">2</div>
+        <h3>Service Label</h3>
+        <p>서비스 아이콘에 이름+카테고리<br>delay 300ms</p>
+      </div>
+      <div class="tier-card">
+        <div class="tier-num">3</div>
+        <h3>Rich Info</h3>
+        <p>서비스맵 노드에 상태/진행률<br>delay 300ms</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ TIER 1 ════════════════════════════════════════════ -->
+<div class="section">
+  <div class="container">
+    <div class="section-label tier1">TIER 1</div>
+    <h2>Simple Label - 아이콘 버튼 툴팁</h2>
+    <p class="desc">아이콘만 있는 버튼에 간결한 1줄 라벨을 제공합니다. 단축키도 함께 표시하여 파워유저 전환을 유도합니다.</p>
+
+    <div class="compare-grid">
+      <!-- Before -->
+      <div class="compare-card before">
+        <div class="tag">BEFORE - 현재</div>
+        <h3>설명 없는 아이콘 버튼</h3>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">아이콘만 보이고 기능을 알 수 없음</p>
+        <div class="icon-row">
+          <button class="icon-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </button>
+          <button class="icon-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <button class="icon-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="icon-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+          </button>
+          <button class="icon-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          </button>
+          <span style="font-size:11px;color:var(--red);margin-left:8px;">? 뭐하는 버튼이지?</span>
+        </div>
+      </div>
+
+      <!-- After -->
+      <div class="compare-card after">
+        <div class="tag">AFTER - 적용 후</div>
+        <h3>호버 시 라벨 + 단축키 표시</h3>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">각 버튼 위에 마우스를 올려보세요</p>
+        <div class="icon-row">
+          <div class="tip-trigger">
+            <button class="icon-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+            <div class="tooltip top tooltip-simple">
+              복사<span class="kbd">Ctrl+C</span>
+              <div class="tooltip-arrow"></div>
+            </div>
+          </div>
+
+          <div class="tip-trigger">
+            <button class="icon-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+            <div class="tooltip top tooltip-simple">
+              값 표시
+              <div class="tooltip-arrow"></div>
+            </div>
+          </div>
+
+          <div class="tip-trigger">
+            <button class="icon-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <div class="tooltip top tooltip-simple">
+              수정<span class="kbd">E</span>
+              <div class="tooltip-arrow"></div>
+            </div>
+          </div>
+
+          <div class="tip-trigger">
+            <button class="icon-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+            </button>
+            <div class="tooltip top tooltip-simple">
+              삭제<span class="kbd">Del</span>
+              <div class="tooltip-arrow"></div>
+            </div>
+          </div>
+
+          <div class="tip-trigger">
+            <button class="icon-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            </button>
+            <div class="tooltip top tooltip-simple">
+              설정
+              <div class="tooltip-arrow"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code -->
+    <div style="margin-top:24px;background:#0d1117;border:1px solid var(--border);border-radius:10px;padding:20px;font-family:'Geist Mono',monospace;font-size:12px;color:#c9d1d9;line-height:1.7;overflow-x:auto;">
+      <div style="color:var(--muted);margin-bottom:8px;">// 적용 코드 (IconTooltip 래퍼)</div>
+      <div><span style="color:#ff7b72;">import</span> { IconTooltip } <span style="color:#ff7b72;">from</span> <span style="color:#a5d6ff;">'@/components/ui/icon-tooltip'</span>;</div>
+      <br>
+      <div style="color:#8b949e;">// Before: 설명 없는 아이콘 버튼</div>
+      <div>&lt;<span style="color:#7ee787;">Button</span> <span style="color:#79c0ff;">variant</span>=<span style="color:#a5d6ff;">"ghost"</span> <span style="color:#79c0ff;">size</span>=<span style="color:#a5d6ff;">"icon"</span>&gt;&lt;<span style="color:#7ee787;">Copy</span> /&gt;&lt;/<span style="color:#7ee787;">Button</span>&gt;</div>
+      <br>
+      <div style="color:#8b949e;">// After: 1줄 래퍼로 툴팁 적용</div>
+      <div>&lt;<span style="color:#7ee787;">IconTooltip</span> <span style="color:#79c0ff;">label</span>=<span style="color:#a5d6ff;">"복사"</span> <span style="color:#79c0ff;">shortcut</span>=<span style="color:#a5d6ff;">"Ctrl+C"</span>&gt;</div>
+      <div>&nbsp;&nbsp;&lt;<span style="color:#7ee787;">Button</span> <span style="color:#79c0ff;">variant</span>=<span style="color:#a5d6ff;">"ghost"</span> <span style="color:#79c0ff;">size</span>=<span style="color:#a5d6ff;">"icon"</span>&gt;&lt;<span style="color:#7ee787;">Copy</span> /&gt;&lt;/<span style="color:#7ee787;">Button</span>&gt;</div>
+      <div>&lt;/<span style="color:#7ee787;">IconTooltip</span>&gt;</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ TIER 2 ════════════════════════════════════════════ -->
+<div class="section">
+  <div class="container">
+    <div class="section-label tier2">TIER 2</div>
+    <h2>Service Label - 서비스 아이콘 툴팁</h2>
+    <p class="desc">서비스 아이콘에 호버하면 서비스명, 카테고리, 한 줄 설명을 보여줍니다.</p>
+
+    <div class="demo-area">
+      <div class="demo-label">Dashboard Service Cards</div>
+      <div class="live-demo-area" style="gap:32px;">
+
+        <div class="tip-trigger">
+          <div class="svc-icon" style="background:rgba(63,207,142,0.12);">
+            <span style="font-size:20px;">&#x1F5C4;&#xFE0F;</span>
+          </div>
+          <div class="tooltip bottom tooltip-service">
+            <div class="svc-name">Supabase</div>
+            <div class="svc-cat">데이터베이스</div>
+            <div class="svc-desc">오픈소스 Firebase 대안 - DB, 인증, 실시간 API</div>
+            <div class="tooltip-arrow"></div>
+          </div>
+        </div>
+
+        <div class="tip-trigger">
+          <div class="svc-icon" style="background:rgba(0,0,0,0.12);">
+            <span style="font-size:18px;">&#x25B2;</span>
+          </div>
+          <div class="tooltip bottom tooltip-service">
+            <div class="svc-name">Vercel</div>
+            <div class="svc-cat">호스팅 / 배포</div>
+            <div class="svc-desc">Next.js 최적화 프론트엔드 배포 플랫폼</div>
+            <div class="tooltip-arrow"></div>
+          </div>
+        </div>
+
+        <div class="tip-trigger">
+          <div class="svc-icon" style="background:rgba(99,102,241,0.12);">
+            <span style="font-size:18px;">&#x1F4B3;</span>
+          </div>
+          <div class="tooltip bottom tooltip-service">
+            <div class="svc-name">Stripe</div>
+            <div class="svc-cat">결제</div>
+            <div class="svc-desc">온라인 결제 처리 및 구독 관리 플랫폼</div>
+            <div class="tooltip-arrow"></div>
+          </div>
+        </div>
+
+        <div class="tip-trigger">
+          <div class="svc-icon" style="background:rgba(234,88,12,0.12);">
+            <span style="font-size:18px;">&#x1F525;</span>
+          </div>
+          <div class="tooltip bottom tooltip-service">
+            <div class="svc-name">Firebase</div>
+            <div class="svc-cat">BaaS</div>
+            <div class="svc-desc">Google BaaS - Firestore, 인증, 호스팅</div>
+            <div class="tooltip-arrow"></div>
+          </div>
+        </div>
+
+        <div class="tip-trigger">
+          <div class="svc-icon" style="background:rgba(59,130,246,0.12);">
+            <span style="font-size:18px;">&#x2601;&#xFE0F;</span>
+          </div>
+          <div class="tooltip bottom tooltip-service">
+            <div class="svc-name">Cloudflare</div>
+            <div class="svc-cat">인프라 / CDN</div>
+            <div class="svc-desc">CDN, DNS, DDoS 방어, Workers 엣지 컴퓨팅</div>
+            <div class="tooltip-arrow"></div>
+          </div>
+        </div>
+
+        <div class="tip-trigger">
+          <div class="svc-icon" style="background:rgba(168,85,247,0.12);">
+            <span style="font-size:18px;">&#x1F512;</span>
+          </div>
+          <div class="tooltip bottom tooltip-service">
+            <div class="svc-name">Clerk</div>
+            <div class="svc-cat">인증</div>
+            <div class="svc-desc">사용자 인증 및 관리 서비스</div>
+            <div class="tooltip-arrow"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Code -->
+    <div style="margin-top:24px;background:#0d1117;border:1px solid var(--border);border-radius:10px;padding:20px;font-family:'Geist Mono',monospace;font-size:12px;color:#c9d1d9;line-height:1.7;overflow-x:auto;">
+      <div style="color:var(--muted);margin-bottom:8px;">// 적용 코드 (ServiceTooltip 래퍼)</div>
+      <div>&lt;<span style="color:#7ee787;">ServiceTooltip</span></div>
+      <div>&nbsp;&nbsp;<span style="color:#79c0ff;">serviceId</span>=<span style="color:#a5d6ff;">"supabase"</span></div>
+      <div>&nbsp;&nbsp;<span style="color:#79c0ff;">serviceName</span>=<span style="color:#a5d6ff;">"Supabase"</span></div>
+      <div>&nbsp;&nbsp;<span style="color:#79c0ff;">category</span>=<span style="color:#a5d6ff;">"데이터베이스"</span></div>
+      <div>&nbsp;&nbsp;<span style="color:#79c0ff;">description</span>=<span style="color:#a5d6ff;">"오픈소스 Firebase 대안"</span></div>
+      <div>&gt;</div>
+      <div>&nbsp;&nbsp;&lt;<span style="color:#7ee787;">ServiceIcon</span> <span style="color:#79c0ff;">serviceId</span>=<span style="color:#a5d6ff;">"supabase"</span> <span style="color:#79c0ff;">size</span>={<span style="color:#79c0ff;">24</span>} /&gt;</div>
+      <div>&lt;/<span style="color:#7ee787;">ServiceTooltip</span>&gt;</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ TIER 3 ════════════════════════════════════════════ -->
+<div class="section">
+  <div class="container">
+    <div class="section-label tier3">TIER 3</div>
+    <h2>Rich Info - 서비스맵 노드 툴팁</h2>
+    <p class="desc">서비스맵의 노드에 호버하면 상태, 카테고리, 환경변수 진행률 등 풍부한 정보를 보여줍니다.</p>
+
+    <div class="demo-area">
+      <div class="demo-label">Service Map Node</div>
+      <div class="live-demo-area" style="gap:48px;padding:20px 0;">
+
+        <!-- Supabase Node -->
+        <div class="tip-trigger">
+          <div class="map-node">
+            <div class="node-icon" style="background:rgba(63,207,142,0.12);">&#x1F5C4;&#xFE0F;</div>
+            <div class="node-info">
+              <div class="node-name">Supabase</div>
+              <div class="node-cat">데이터베이스</div>
+            </div>
+          </div>
+          <div class="tooltip bottom tooltip-rich" style="min-width:220px;">
+            <div class="rich-header">
+              <span class="name">Supabase</span>
+              <span style="color:#f59e0b;font-size:12px;">&#x1F451;</span>
+            </div>
+            <div style="font-size:10px;color:#64748b;margin:-4px 0 8px;">오픈소스 Firebase 대안 - DB, 인증, 실시간 API</div>
+            <div class="rich-row">
+              <span class="label">상태</span>
+              <span class="value" style="color:#10b981;display:flex;align-items:center;gap:4px;">
+                <span class="status-dot green"></span> 연결됨
+              </span>
+            </div>
+            <div class="rich-row">
+              <span class="label">카테고리</span>
+              <span class="value">데이터베이스</span>
+            </div>
+            <div class="rich-row">
+              <span class="label">도메인</span>
+              <span class="value">백엔드</span>
+            </div>
+            <div class="rich-row">
+              <span class="label">환경변수</span>
+              <span class="value" style="color:#10b981;">3/4 (75%)</span>
+            </div>
+            <div class="progress-bar">
+              <div class="fill" style="width:75%;background:#10b981;"></div>
+            </div>
+            <div class="tooltip-arrow"></div>
+          </div>
+        </div>
+
+        <!-- Stripe Node -->
+        <div class="tip-trigger">
+          <div class="map-node">
+            <div class="node-icon" style="background:rgba(99,102,241,0.12);">&#x1F4B3;</div>
+            <div class="node-info">
+              <div class="node-name">Stripe</div>
+              <div class="node-cat">결제</div>
+            </div>
+          </div>
+          <div class="tooltip bottom tooltip-rich" style="min-width:220px;">
+            <div class="rich-header">
+              <span class="name">Stripe</span>
+            </div>
+            <div style="font-size:10px;color:#64748b;margin:-4px 0 8px;">온라인 결제 처리 및 구독 관리</div>
+            <div class="rich-row">
+              <span class="label">상태</span>
+              <span class="value" style="color:#f59e0b;display:flex;align-items:center;gap:4px;">
+                <span class="status-dot yellow"></span> 진행중
+              </span>
+            </div>
+            <div class="rich-row">
+              <span class="label">카테고리</span>
+              <span class="value">결제</span>
+            </div>
+            <div class="rich-row">
+              <span class="label">도메인</span>
+              <span class="value">백엔드</span>
+            </div>
+            <div class="rich-row">
+              <span class="label">환경변수</span>
+              <span class="value" style="color:#f59e0b;">1/3 (33%)</span>
+            </div>
+            <div class="progress-bar">
+              <div class="fill" style="width:33%;background:#f59e0b;"></div>
+            </div>
+            <div class="tooltip-arrow"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ DELAY CONFIG ════════════════════════════════════════════ -->
+<div class="section">
+  <div class="container">
+    <div class="section-label config">CONFIG</div>
+    <h2>Delay 전략 - 업계 벤치마크 기반</h2>
+    <p class="desc">GitHub Primer 3단계 체계를 참고하여, Linkmap에 최적화된 지연 시간을 설정합니다.</p>
+
+    <div class="delay-viz">
+      <div class="delay-row">
+        <div class="label-box" style="color:var(--red);text-decoration:line-through;">현재 (전역)</div>
+        <div class="delay-track">
+          <div class="delay-bar d0">0ms</div>
+        </div>
+        <div class="delay-value" style="color:var(--red);">0ms</div>
+      </div>
+      <div class="delay-row">
+        <div class="label-box" style="color:#93c5fd;">Tier 1 (버튼)</div>
+        <div class="delay-track">
+          <div class="delay-bar d400">400ms</div>
+        </div>
+        <div class="delay-value" style="color:var(--brand-blue);">400ms</div>
+      </div>
+      <div class="delay-row">
+        <div class="label-box" style="color:#6ee7b7;">Tier 2 (서비스)</div>
+        <div class="delay-track">
+          <div class="delay-bar d300">300ms</div>
+        </div>
+        <div class="delay-value" style="color:var(--brand-green);">300ms</div>
+      </div>
+      <div class="delay-row">
+        <div class="label-box" style="color:#c4b5fd;">Tier 3 (노드)</div>
+        <div class="delay-track">
+          <div class="delay-bar d300">300ms</div>
+        </div>
+        <div class="delay-value" style="color:var(--accent);">300ms</div>
+      </div>
+      <div class="delay-row">
+        <div class="label-box" style="color:#fcd34d;">skipDelay (연속)</div>
+        <div class="delay-track">
+          <div class="delay-bar d200">200ms</div>
+        </div>
+        <div class="delay-value" style="color:var(--amber);">200ms</div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;">
+        <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--amber);">skipDelayDuration 동작 원리</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;">
+          1. 첫 번째 노드 호버 → <strong style="color:var(--text);">300ms 후</strong> 툴팁 표시<br>
+          2. 마우스를 다른 노드로 이동 → <strong style="color:var(--text);">즉시</strong> (200ms 이내) 표시<br>
+          3. 서비스맵에서 노드를 연속 탐색할 때 체감 속도 대폭 향상
+        </div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;">
+        <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--brand-blue);">sideOffset 변경</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;">
+          현재: <strong style="color:var(--red);">0px</strong> (트리거 요소에 밀착)<br>
+          변경: <strong style="color:var(--brand-green);">4px</strong> (트리거를 가리지 않는 간격)<br>
+          NNGroup 권장: 4~6px 간격으로 트리거 요소 가시성 확보
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ ARCHITECTURE ════════════════════════════════════════════ -->
+<div class="section">
+  <div class="container">
+    <h2>컴포넌트 아키텍처</h2>
+    <p class="desc">기존 ServiceIcon은 순수 렌더링 유지, 외부 래퍼 컴포넌트로 Tooltip을 결합하는 컴포지션 패턴입니다.</p>
+
+    <div class="arch-diagram">
+      <div class="arch-box">
+        <h4>IconTooltip</h4>
+        <p><strong>Tier 1 래퍼</strong><br>신규 생성<br><code style="font-size:10px;color:var(--muted);">ui/icon-tooltip.tsx</code></p>
+        <div style="margin-top:8px;padding:6px;background:rgba(59,130,246,0.08);border-radius:6px;font-size:10px;color:#93c5fd;">
+          label + shortcut?
+        </div>
+      </div>
+      <div class="arch-arrow">&#x2192;</div>
+      <div class="arch-box" style="border-color:rgba(255,255,255,0.15);">
+        <h4 style="color:var(--text);">Tooltip (shadcn)</h4>
+        <p><strong>기존 유지</strong><br>Radix UI 기반<br><code style="font-size:10px;color:var(--muted);">ui/tooltip.tsx</code></p>
+        <div style="margin-top:8px;padding:6px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:10px;color:var(--muted);">
+          sideOffset: 0 → 4
+        </div>
+      </div>
+      <div class="arch-arrow">&#x2190;</div>
+      <div class="arch-box">
+        <h4 style="color:var(--brand-green);">ServiceTooltip</h4>
+        <p><strong>Tier 2 래퍼</strong><br>신규 생성<br><code style="font-size:10px;color:var(--muted);">ui/service-tooltip.tsx</code></p>
+        <div style="margin-top:8px;padding:6px;background:rgba(16,185,129,0.08);border-radius:6px;font-size:10px;color:#6ee7b7;">
+          name + category + desc?
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-diagram" style="margin-top:12px;">
+      <div class="arch-box">
+        <h4 style="color:var(--muted);">ServiceIcon</h4>
+        <p><strong>변경 없음</strong><br>순수 아이콘 렌더링<br><code style="font-size:10px;color:var(--muted);">ui/service-icon.tsx</code></p>
+      </div>
+      <div class="arch-arrow">&#x2192;</div>
+      <div class="arch-box">
+        <h4 style="color:var(--amber);">SERVICE_DESCRIPTIONS</h4>
+        <p><strong>신규 상수</strong><br>slug별 한 줄 설명<br><code style="font-size:10px;color:var(--muted);">constants/service-descriptions.ts</code></p>
+      </div>
+      <div class="arch-arrow">&#x2192;</div>
+      <div class="arch-box">
+        <h4 style="color:var(--accent);">NodeTooltip</h4>
+        <p><strong>확장</strong><br>description prop 추가<br><code style="font-size:10px;color:var(--muted);">service-map/node-tooltip.tsx</code></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ MOBILE ════════════════════════════════════════════ -->
+<div class="section">
+  <div class="container">
+    <h2>모바일 대응 전략</h2>
+    <p class="desc">터치 디바이스에서는 호버가 불가능하므로, 텍스트 라벨 병행 + long-press 방식으로 대체합니다.</p>
+
+    <div style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap;">
+      <!-- Desktop -->
+      <div>
+        <div style="text-align:center;font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600;">Desktop - 호버 툴팁</div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;width:360px;">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div class="tip-trigger">
+              <button class="icon-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              </button>
+              <div class="tooltip top tooltip-simple">복사<div class="tooltip-arrow"></div></div>
+            </div>
+            <div class="tip-trigger">
+              <button class="icon-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+              <div class="tooltip top tooltip-simple">값 표시<div class="tooltip-arrow"></div></div>
+            </div>
+            <div class="tip-trigger">
+              <button class="icon-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <div class="tooltip top tooltip-simple">수정<div class="tooltip-arrow"></div></div>
+            </div>
+            <span style="font-size:10px;color:var(--muted);margin-left:auto;">hover로 확인</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile -->
+      <div>
+        <div style="text-align:center;font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600;">Mobile - 텍스트 라벨 병행</div>
+        <div class="mobile-frame">
+          <div class="mobile-header">
+            <div class="title">환경변수</div>
+            <div style="display:flex;gap:4px;">
+              <button class="icon-btn" style="width:28px;height:28px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></button>
+            </div>
+          </div>
+          <div class="mobile-btn-row">
+            <div class="mobile-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              복사
+            </div>
+            <div class="mobile-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              수정
+            </div>
+            <div class="mobile-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              표시
+            </div>
+          </div>
+          <div class="long-press-hint">
+            서비스 아이콘을 길게 누르면<br>상세 정보가 표시됩니다
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ AFFECTED FILES ════════════════════════════════════════════ -->
+<div class="section">
+  <div class="container">
+    <h2>영향 범위 요약</h2>
+    <p class="desc">수정 대상 파일과 신규 생성 파일 목록입니다.</p>
+
+    <table class="config-table">
+      <thead>
+        <tr>
+          <th>구분</th>
+          <th>파일</th>
+          <th>변경 내용</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span style="color:var(--amber);">설정</span></td>
+          <td class="mono">providers.tsx</td>
+          <td>delayDuration=400, skipDelayDuration=200</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--amber);">설정</span></td>
+          <td class="mono">ui/tooltip.tsx</td>
+          <td>sideOffset 기본값 0 → 4</td>
+        </tr>
+        <tr style="background:rgba(16,185,129,0.05);">
+          <td><span style="color:var(--brand-green);">신규</span></td>
+          <td class="mono highlight-green">ui/icon-tooltip.tsx</td>
+          <td>Tier 1 래퍼 컴포넌트</td>
+        </tr>
+        <tr style="background:rgba(16,185,129,0.05);">
+          <td><span style="color:var(--brand-green);">신규</span></td>
+          <td class="mono highlight-green">ui/service-tooltip.tsx</td>
+          <td>Tier 2 래퍼 컴포넌트</td>
+        </tr>
+        <tr style="background:rgba(16,185,129,0.05);">
+          <td><span style="color:var(--brand-green);">신규</span></td>
+          <td class="mono highlight-green">constants/service-descriptions.ts</td>
+          <td>서비스 한 줄 설명 상수</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--brand-blue);">수정</span></td>
+          <td class="mono">env/env-data-table.tsx</td>
+          <td>중복 Provider 제거 + IconTooltip 적용</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--brand-blue);">수정</span></td>
+          <td class="mono">service-map/node-tooltip.tsx</td>
+          <td>description prop 추가</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--brand-blue);">수정</span></td>
+          <td class="mono">service-map/map-toolbar.tsx</td>
+          <td>title → IconTooltip 전환</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--brand-blue);">수정</span></td>
+          <td class="mono">dashboard/service-item.tsx</td>
+          <td>ServiceTooltip 적용</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--brand-blue);">수정</span></td>
+          <td class="mono">layout/header.tsx</td>
+          <td>IconTooltip 적용</td>
+        </tr>
+        <tr>
+          <td style="color:var(--muted);">외 8개</td>
+          <td class="mono" style="color:var(--muted);">...</td>
+          <td style="color:var(--muted);">아이콘 버튼 / 서비스 아이콘 적용</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ BENCHMARK ════════════════════════════════════════════ -->
+<div class="section">
+  <div class="container">
+    <h2>벤치마킹 근거</h2>
+    <p class="desc">5개 서비스 분석 결과에서 Linkmap에 차용한 핵심 포인트입니다.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:16px;margin-bottom:6px;">&#x25B2;</div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:4px;">Vercel</div>
+        <div style="font-size:10px;color:var(--brand-blue);">skipDelay<br>연속 탐색</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:16px;margin-bottom:6px;">&#x1F4DD;</div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:4px;">Linear</div>
+        <div style="font-size:10px;color:var(--accent);">단축키 표시<br>학습 유도</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:16px;margin-bottom:6px;">&#x1F3A8;</div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:4px;">Figma</div>
+        <div style="font-size:10px;color:var(--amber);">밀집 아이콘<br>빠른 delay</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:16px;margin-bottom:6px;">&#x1F4D3;</div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:4px;">Notion</div>
+        <div style="font-size:10px;color:var(--brand-green);">Progressive<br>Disclosure</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:16px;margin-bottom:6px;">&#x1F419;</div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:4px;">GitHub</div>
+        <div style="font-size:10px;color:var(--red);">3단계 delay<br>Label/Desc 구분</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ FOOTER ════════════════════════════════════════════ -->
+<div class="page-footer">
+  <div class="container">
+    Linkmap Tooltip System Design Spec &mdash; 2026-03-22<br>
+    Benchmark: docs/benchmark/tooltip-ux-trends/report.md &nbsp;|&nbsp; Plan: plans/prancy-crafting-horizon.md
+  </div>
+</div>
+
+</body>
+</html>

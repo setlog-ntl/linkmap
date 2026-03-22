@@ -3,6 +3,7 @@
 import { useMemo, useCallback } from 'react';
 import { type Edge, type Node } from '@xyflow/react';
 import { domainToZone, type ZoneKey } from '@/lib/layout/zone-layout';
+import { getServiceDescription } from '@/lib/constants/service-descriptions';
 import type {
   ProjectService,
   Service,
@@ -151,6 +152,7 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
           category,
           status: ps.status,
           slug: ps.service?.slug,
+          description: ps.service?.description_ko || ps.service?.description || (ps.service?.slug ? getServiceDescription(ps.service.slug) : undefined),
           highlighted: isMatch,
           domain: domain || 'integration',
           isMainService,

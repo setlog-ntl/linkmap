@@ -22,6 +22,8 @@ import {
 } from '@/components/ui/tooltip';
 import { Plus, Search, Pencil, Trash2, ArrowRightLeft } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/service-icon';
+import { ServiceTooltip } from '@/components/ui/service-tooltip';
+import { getServiceDescription } from '@/lib/constants/service-descriptions';
 import { CreateCustomServiceDialog } from './create-custom-service-dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useDeleteCustomService, useCustomServiceMatches, useMigrateCustomService } from '@/lib/queries/services';
@@ -155,7 +157,13 @@ export function AddServiceDialog({ projectId: _projectId, existingServiceIds, on
           {service.is_custom && service.icon_emoji ? (
             <span className="text-lg">{service.icon_emoji}</span>
           ) : (
-            <ServiceIcon serviceId={service.slug} iconEmoji={service.icon_emoji} size={20} />
+            <ServiceTooltip
+              serviceName={service.name}
+              category={categoryLabels[service.category as ServiceCategory]}
+              description={getServiceDescription(service.slug)}
+            >
+              <ServiceIcon serviceId={service.slug} iconEmoji={service.icon_emoji} size={20} />
+            </ServiceTooltip>
           )}
         </div>
         <div className="min-w-0 flex-1">

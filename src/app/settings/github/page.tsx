@@ -12,7 +12,6 @@ import { EmptyState } from '@/components/ui/empty-state';
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
@@ -180,7 +179,6 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
             onConfirm={async () => { try { await disconnectMutation.mutateAsync(connection.id); toast.success(t(locale, 'account.disconnectSuccess')); } catch (err) { toast.error(err instanceof Error ? err.message : 'Failed'); } }}
           />
         )}
-        <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <span>
@@ -198,7 +196,6 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
             </TooltipTrigger>
             {hasLinkedRepos && <TooltipContent><p>{t(locale, 'account.deleteBlocked')}</p></TooltipContent>}
           </Tooltip>
-        </TooltipProvider>
       </div>
     </div>
   );

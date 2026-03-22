@@ -5,8 +5,11 @@ import Link from 'next/link';
 import { Monitor, Server, Wrench, Box, ChevronRight, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ServiceIcon } from '@/components/ui/service-icon';
+import { ServiceTooltip } from '@/components/ui/service-tooltip';
+import { getServiceDescription } from '@/lib/constants/service-descriptions';
+import { allCategoryLabels } from '@/lib/constants/service-filters';
 import { groupConnectionsByLayer } from './utils/dashboard-transforms';
-import type { ServiceCardData, UserConnection } from '@/types';
+import type { ServiceCardData, UserConnection, ServiceCategory } from '@/types';
 
 interface ConnectionFlowMapProps {
   allCards: ServiceCardData[];
@@ -59,7 +62,13 @@ function FlowPill({ svc, onClick }: { svc: ServiceCardData; onClick?: () => void
 
   return (
     <div className={`flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors hover:bg-accent/50 dark:hover:bg-white/[0.04] ${onClick ? 'cursor-pointer' : ''}`} onClick={onClick}>
-      <ServiceIcon serviceId={svc.slug} size={16} className="shrink-0 opacity-80" />
+      <ServiceTooltip
+        serviceName={svc.name}
+        category={allCategoryLabels[svc.category as ServiceCategory]}
+        description={getServiceDescription(svc.slug)}
+      >
+        <ServiceIcon serviceId={svc.slug} size={16} className="shrink-0 opacity-80" />
+      </ServiceTooltip>
       <span className="text-[13px] font-medium truncate flex-1">{svc.name}</span>
       {envPct !== null && (
         <div className="w-8 h-1 rounded-full bg-muted overflow-hidden shrink-0">

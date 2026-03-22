@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { Bot, Sparkles, Send, Square, RotateCcw, X, User, GripHorizontal, Maximize2, Minimize2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { IconTooltip } from '@/components/ui/icon-tooltip';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -243,32 +244,36 @@ export function AiChatPanel({ data }: AiChatPanelProps) {
           <span className="font-medium text-sm">{t(locale, 'ai.chat.title')}</span>
         </div>
         <div className="flex items-center gap-0.5">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            onClick={reset}
-            title={t(locale, 'ai.chat.clearChat')}
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            onClick={toggleMaximize}
-            title={isMaximized ? '복원' : '최대화'}
-          >
-            {isMaximized ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            onClick={close}
-          >
-            <X className="h-3.5 w-3.5" />
-          </Button>
+          <IconTooltip label={t(locale, 'ai.chat.clearChat')}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={reset}
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+            </Button>
+          </IconTooltip>
+          <IconTooltip label={isMaximized ? '복원' : '최대화'}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={toggleMaximize}
+            >
+              {isMaximized ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+            </Button>
+          </IconTooltip>
+          <IconTooltip label="닫기">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={close}
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </IconTooltip>
         </div>
       </div>
 
@@ -370,24 +375,27 @@ export function AiChatPanel({ data }: AiChatPanelProps) {
           className="text-sm"
         />
         {isStreaming ? (
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={stop}
-            className="shrink-0"
-            title={t(locale, 'ai.chat.stopStreaming')}
-          >
-            <Square className="h-3.5 w-3.5" />
-          </Button>
+          <IconTooltip label={t(locale, 'ai.chat.stopStreaming')}>
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={stop}
+              className="shrink-0"
+            >
+              <Square className="h-3.5 w-3.5" />
+            </Button>
+          </IconTooltip>
         ) : (
-          <Button
-            size="icon"
-            onClick={handleSend}
-            disabled={!input.trim()}
-            className="shrink-0 bg-violet-600 hover:bg-violet-700"
-          >
-            <Send className="h-3.5 w-3.5" />
-          </Button>
+          <IconTooltip label="전송">
+            <Button
+              size="icon"
+              onClick={handleSend}
+              disabled={!input.trim()}
+              className="shrink-0 bg-violet-600 hover:bg-violet-700"
+            >
+              <Send className="h-3.5 w-3.5" />
+            </Button>
+          </IconTooltip>
         )}
       </div>
 

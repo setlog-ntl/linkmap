@@ -13,9 +13,9 @@ import {
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { IconTooltip } from '@/components/ui/icon-tooltip';
 import { Eye, EyeOff, Pencil, Trash2, Copy, Check, MoreHorizontal, Key as KeyIcon, ChevronDown, AlertTriangle } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ServiceIcon } from '@/components/ui/service-icon';
@@ -112,7 +112,6 @@ export function EnvDataTable({
           {envVar.key_name}
         </code>
         {isPublicSecretConflict(envVar) ? (
-          <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Badge
@@ -129,7 +128,6 @@ export function EnvDataTable({
                 </p>
               </TooltipContent>
             </Tooltip>
-          </TooltipProvider>
         ) : (
           <Badge
             variant={envVar.is_secret ? 'destructive' : 'secondary'}
@@ -148,32 +146,36 @@ export function EnvDataTable({
             : maskValue(envVar.encrypted_value)}
         </code>
         {onCopyValue && (
+          <IconTooltip label="복사">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 shrink-0"
+              onClick={() => handleCopyValue(envVar)}
+            >
+              {copiedId === envVar.id ? (
+                <Check className="h-3.5 w-3.5 text-green-500" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )}
+            </Button>
+          </IconTooltip>
+        )}
+        <IconTooltip label={showValues[envVar.id] ? '값 숨기기' : '값 표시'}>
           <Button
             variant="ghost"
             size="icon"
             className="h-7 w-7 shrink-0"
-            onClick={() => handleCopyValue(envVar)}
+            onClick={() => onToggleShow(envVar.id)}
+            disabled={isDecrypting}
           >
-            {copiedId === envVar.id ? (
-              <Check className="h-3.5 w-3.5 text-green-500" />
+            {showValues[envVar.id] ? (
+              <EyeOff className="h-3.5 w-3.5" />
             ) : (
-              <Copy className="h-3.5 w-3.5" />
+              <Eye className="h-3.5 w-3.5" />
             )}
           </Button>
-        )}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 shrink-0"
-          onClick={() => onToggleShow(envVar.id)}
-          disabled={isDecrypting}
-        >
-          {showValues[envVar.id] ? (
-            <EyeOff className="h-3.5 w-3.5" />
-          ) : (
-            <Eye className="h-3.5 w-3.5" />
-          )}
-        </Button>
+        </IconTooltip>
       </div>
 
       {/* Service (only in flat mode) */}
@@ -196,19 +198,23 @@ export function EnvDataTable({
 
       {/* Actions: edit icon + dropdown */}
       <div className="flex items-center justify-end gap-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          onClick={() => onEdit(envVar)}
-        >
-          <Pencil className="h-3.5 w-3.5" />
-        </Button>
+        <IconTooltip label="수정">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => onEdit(envVar)}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+        </IconTooltip>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
+            <IconTooltip label="더보기">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </IconTooltip>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => onEdit(envVar)}>

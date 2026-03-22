@@ -7,6 +7,7 @@ import {
   Download, Maximize2, Search, Plus, Brain, Pencil, HelpCircle,
   LayoutGrid, ArrowRightLeft, ArrowDownUp, Grid3X3, RotateCcw,
 } from 'lucide-react';
+import { IconTooltip } from '@/components/ui/icon-tooltip';
 import { ShareMapButton } from '@/components/service-map/share-map-button';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import { ZONE_COLOR_PALETTE } from '@/lib/layout/zone-layout';
@@ -83,9 +84,11 @@ export function MapToolbar({
 
       <div className="w-px h-5 bg-border/50" />
 
-      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full" onClick={() => fitView({ padding: 0.3 })} title="전체 보기">
-        <Maximize2 className="h-4 w-4" />
-      </Button>
+      <IconTooltip label="전체 보기">
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full" onClick={() => fitView({ padding: 0.3 })}>
+          <Maximize2 className="h-4 w-4" />
+        </Button>
+      </IconTooltip>
 
       {onAiAnalyze && (
         <Button
@@ -99,9 +102,11 @@ export function MapToolbar({
         </Button>
       )}
 
-      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full" onClick={onExportPng} title="PNG 다운로드">
-        <Download className="h-4 w-4" />
-      </Button>
+      <IconTooltip label="PNG 다운로드">
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full" onClick={onExportPng}>
+          <Download className="h-4 w-4" />
+        </Button>
+      </IconTooltip>
 
       {projectId && !isReadOnly && <ShareMapButton projectId={projectId} />}
 
@@ -131,7 +136,6 @@ export function MapToolbar({
                 size="sm"
                 className="h-6 px-2 rounded-full text-[10px]"
                 onClick={() => setLayoutPreset(p.key)}
-                title={`${p.label} 배열`}
               >
                 <p.icon className="h-3 w-3 mr-1" />
                 {p.label}
@@ -151,22 +155,25 @@ export function MapToolbar({
           </Button>
 
           {/* Reset layout */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-muted-foreground hover:text-foreground rounded-full"
-            onClick={() => { resetZoneLayout(); setTimeout(() => fitView({ padding: 0.4 }), 100); }}
-            title="자동 정렬"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-          </Button>
+          <IconTooltip label="자동 정렬">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-muted-foreground hover:text-foreground rounded-full"
+              onClick={() => { resetZoneLayout(); setTimeout(() => fitView({ padding: 0.4 }), 100); }}
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+            </Button>
+          </IconTooltip>
         </>
       )}
 
       {onToggleLegend && (
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full" onClick={onToggleLegend} title="범례">
-          <HelpCircle className="h-4 w-4" />
-        </Button>
+        <IconTooltip label="범례">
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full" onClick={onToggleLegend}>
+            <HelpCircle className="h-4 w-4" />
+          </Button>
+        </IconTooltip>
       )}
     </div>
   );

@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ExternalLink, ArrowRight, KeyRound, Plus, FolderKanban, Check, Loader2, Search, Star } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/service-icon';
+import { ServiceTooltip } from '@/components/ui/service-tooltip';
+import { getServiceDescription } from '@/lib/constants/service-descriptions';
 import { DifficultyBadge, GithubStarsBadge, FreeTierBadge } from './service-badges';
 import { allCategoryLabels } from '@/lib/constants/service-filters';
 import { useAddProjectService } from '@/lib/queries/services';
@@ -29,7 +31,13 @@ export function ServiceListItem({ service, isUsed = false, hasGuide = false, api
       <div className="flex items-center gap-4 p-4">
         {/* Icon */}
         <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
-          <ServiceIcon serviceId={service.slug} size={24} />
+          <ServiceTooltip
+            serviceName={service.name}
+            category={allCategoryLabels[service.category as ServiceCategory]}
+            description={getServiceDescription(service.slug)}
+          >
+            <ServiceIcon serviceId={service.slug} size={24} />
+          </ServiceTooltip>
         </div>
 
         {/* Name + Description */}

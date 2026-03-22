@@ -2,9 +2,13 @@
 
 import { memo } from 'react';
 import { ExternalLink } from 'lucide-react';
+import { IconTooltip } from '@/components/ui/icon-tooltip';
 import { cn } from '@/lib/utils';
 import { ServiceIcon } from '@/components/ui/service-icon';
-import type { ServiceCardData } from '@/types';
+import { ServiceTooltip } from '@/components/ui/service-tooltip';
+import { getServiceDescription } from '@/lib/constants/service-descriptions';
+import { allCategoryLabels } from '@/lib/constants/service-filters';
+import type { ServiceCardData, ServiceCategory } from '@/types';
 
 interface ServiceItemProps {
   card: ServiceCardData;
@@ -28,7 +32,13 @@ export const ServiceItem = memo(function ServiceItem({ card }: ServiceItemProps)
       className="group flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors hover:bg-muted/50"
     >
       {/* Service brand icon */}
-      <ServiceIcon serviceId={card.slug} size={16} className="shrink-0" />
+      <ServiceTooltip
+        serviceName={card.name}
+        category={allCategoryLabels[card.category as ServiceCategory]}
+        description={getServiceDescription(card.slug)}
+      >
+        <ServiceIcon serviceId={card.slug} size={16} className="shrink-0" />
+      </ServiceTooltip>
 
       {/* Status dot */}
       <span className={cn('h-2 w-2 shrink-0 rounded-full', dotClass)} />
@@ -51,15 +61,17 @@ export const ServiceItem = memo(function ServiceItem({ card }: ServiceItemProps)
 
       {/* External link */}
       {card.websiteUrl && (
-        <a
-          href={card.websiteUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <ExternalLink className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-        </a>
+        <IconTooltip label="외부 링크">
+          <a
+            href={card.websiteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ExternalLink className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+          </a>
+        </IconTooltip>
       )}
     </div>
   );

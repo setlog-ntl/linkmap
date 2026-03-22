@@ -38,6 +38,7 @@ interface ServiceNodeData {
   category: ServiceCategory;
   status: string;
   slug?: string;
+  description?: string;
   highlighted?: boolean;
   focusOpacity?: number;
   domain?: string;
@@ -267,7 +268,7 @@ function ServiceNode({ id, data }: NodeProps) {
   );
 
   return (
-    <NodeTooltip label={d.label} status={d.status} domain={d.domain} category={d.category} isMainService={isMain}>
+    <NodeTooltip label={d.label} status={d.status} domain={d.domain} category={d.category} description={d.description} isMainService={isMain}>
       {nodeContent}
     </NodeTooltip>
   );

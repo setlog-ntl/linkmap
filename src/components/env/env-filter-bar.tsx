@@ -13,7 +13,6 @@ import {
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Search, Plus, List, Layers, Braces, Share2 } from 'lucide-react';
@@ -124,7 +123,6 @@ export function EnvFilterBar({
         </div>
       )}
 
-      <TooltipProvider>
         <div className="flex gap-2">
           {onCopyEnvClick && (
             <Tooltip>
@@ -152,7 +150,6 @@ export function EnvFilterBar({
             {t(locale, 'envVar.addVar')}
           </Button>
         </div>
-      </TooltipProvider>
     </div>
   );
 }

@@ -17,6 +17,7 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { IconTooltip } from '@/components/ui/icon-tooltip';
 import { Menu, Globe, Search, BookOpen, PenLine, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench, ArrowRight, Rocket, BarChart3, Trophy, Code, Palette, Workflow } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { GUIDE_CATEGORIES_DATA, LEARNING_STAGES_DATA, GUIDE_DATA, getGuideDataByCategory } from '@/data/ui/guide-data';
@@ -254,9 +255,11 @@ export function Header({ profile: profileProp }: HeaderProps) {
           {/* Language Toggle */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Globe className="h-4 w-4" />
-              </Button>
+              <IconTooltip label="언어 변경">
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Globe className="h-4 w-4" />
+                </Button>
+              </IconTooltip>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {(Object.keys(localeNames) as Locale[]).map((loc) => (
@@ -355,9 +358,11 @@ export function Header({ profile: profileProp }: HeaderProps) {
           {/* Mobile menu */}
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Menu className="h-5 w-5" />
-              </Button>
+              <IconTooltip label="메뉴">
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </IconTooltip>
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
               <nav className="flex flex-col gap-2 mt-8">

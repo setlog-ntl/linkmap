@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { IconTooltip } from '@/components/ui/icon-tooltip';
 import { Search, Globe, LogOut, Bot, User, GitBranch, Wrench, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -66,9 +67,11 @@ export function AppHeader({ projectName, profile }: AppHeaderProps) {
         {/* Language Toggle */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Globe className="h-4 w-4" />
-            </Button>
+            <IconTooltip label="언어 변경">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Globe className="h-4 w-4" />
+              </Button>
+            </IconTooltip>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {(Object.keys(localeNames) as Locale[]).map((loc) => (
