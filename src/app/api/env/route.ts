@@ -6,6 +6,7 @@ import { unauthorizedError, notFoundError, validationError, quotaExceededError }
 import { logAudit } from '@/lib/audit';
 import { triggerAutoSync } from '@/lib/github/auto-sync';
 import { checkEnvVarQuota } from '@/lib/quota';
+import { buildServiceMapsFromDB, resolveServiceId } from '@/lib/utils/env-service-matcher';
 import type { DbEnvVarWithProject } from '@/lib/supabase/types';
 
 export async function POST(request: NextRequest) {
@@ -34,11 +35,15 @@ export async function POST(request: NextRequest) {
 
   const encrypted_value = encrypt(value);
 
+  // service_id 미지정 시 key_name으로 자동 매칭
+  const { exactMap, prefixMap } = await buildServiceMapsFromDB(supabase);
+  const resolvedServiceId = resolveServiceId(key_name, service_id, exactMap, prefixMap);
+
   const { data, error } = await supabase
     .from('environment_variables')
     .insert({
       project_id,
-      service_id: service_id || null,
+      service_id: resolvedServiceId,
       key_name,
       encrypted_value,
       environment,
@@ -93,7 +98,14 @@ export async function PATCH(request: NextRequest) {
   if (environment !== undefined) updates.environment = environment;
   if (is_secret !== undefined) updates.is_secret = is_secret;
   if (description !== undefined) updates.description = description;
-  if (service_id !== undefined) updates.service_id = service_id;
+  if (service_id !== undefined) {
+    updates.service_id = service_id;
+  } else if (key_name !== undefined && !envVarTyped.service_id) {
+    // key_name이 변경되었고 기존 service_id가 없으면 자동 매칭 시도
+    const { exactMap, prefixMap } = await buildServiceMapsFromDB(supabase);
+    const resolved = resolveServiceId(key_name, null, exactMap, prefixMap);
+    if (resolved) updates.service_id = resolved;
+  }
 
   const { data, error } = await supabase
     .from('environment_variables')

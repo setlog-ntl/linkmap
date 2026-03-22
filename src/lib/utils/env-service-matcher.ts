@@ -1,4 +1,5 @@
 import type { Service } from '@/types';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * Builds an exact-match map from env var key names to service info.
@@ -104,4 +105,35 @@ export function matchEnvKeyToServiceFuzzy(
   }
 
   return null;
+}
+
+/**
+ * 카탈로그 서비스를 조회하여 매칭맵을 생성하는 헬퍼.
+ * 단일/벌크 생성·수정 API에서 공용으로 사용.
+ */
+export async function buildServiceMapsFromDB(supabase: SupabaseClient) {
+  const { data: catalogServices = [] } = await supabase
+    .from('services')
+    .select('id, name, slug, required_env_vars');
+
+  const exactMap = buildEnvKeyServiceMap(catalogServices as Service[]);
+  const prefixMap = buildEnvPrefixServiceMap(catalogServices as Service[]);
+  return { exactMap, prefixMap };
+}
+
+/**
+ * service_id가 명시되지 않은 경우 key_name으로 자동 매칭.
+ * 명시적 service_id가 있으면 그대로 반환 (사용자 선택 우선).
+ */
+export function resolveServiceId(
+  keyName: string,
+  explicitServiceId: string | null | undefined,
+  exactMap: Map<string, { serviceId: string; serviceName: string }>,
+  prefixMap: Map<string, { serviceId: string; serviceName: string }>
+): string | null {
+  // 사용자가 명시적으로 service_id를 지정했으면 그대로 사용
+  if (explicitServiceId) return explicitServiceId;
+
+  const match = matchEnvKeyToServiceFuzzy(keyName, exactMap, prefixMap);
+  return match?.serviceId ?? null;
 }

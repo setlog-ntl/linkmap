@@ -5,6 +5,7 @@ import { bulkEnvVarSchema } from '@/lib/validations/env-bulk';
 import { unauthorizedError, notFoundError, validationError, apiError, quotaExceededError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 import { checkEnvVarQuota } from '@/lib/quota';
+import { buildServiceMapsFromDB, resolveServiceId } from '@/lib/utils/env-service-matcher';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -39,10 +40,13 @@ export async function POST(request: NextRequest) {
     return quotaExceededError('환경변수', quota.current, quota.max);
   }
 
+  // 자동 서비스 매칭을 위해 카탈로그 맵 1회 조회
+  const { exactMap, prefixMap } = await buildServiceMapsFromDB(supabase);
+
   // Insert all variables
   const records = variables.map((v) => ({
     project_id,
-    service_id: v.service_id ?? null,
+    service_id: resolveServiceId(v.key_name, v.service_id, exactMap, prefixMap),
     key_name: v.key_name,
     encrypted_value: encrypt(v.value),
     environment: v.environment,
