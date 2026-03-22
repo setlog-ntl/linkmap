@@ -205,7 +205,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'postgres',
     popularity_score: 92,
     difficulty_level: 'beginner',
-    tags: ['postgres', 'realtime', 'auth', 'storage', 'open-source', 'baas'],
+    tags: ['postgres', 'realtime', 'auth', 'storage', 'open-source', 'baas', '수파베이스', '데이터베이스'],
     alternatives: ['firebase', 'neon', 'planetscale'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'svelte', 'flutter'],
@@ -289,7 +289,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'nosql',
     popularity_score: 90,
     difficulty_level: 'beginner',
-    tags: ['nosql', 'firestore', 'realtime', 'auth', 'google', 'baas', 'mobile'],
+    tags: ['nosql', 'firestore', 'realtime', 'auth', 'google', 'baas', 'mobile', '파이어베이스', '데이터베이스'],
     alternatives: ['supabase'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'flutter'],
@@ -354,7 +354,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'jamstack',
     popularity_score: 95,
     difficulty_level: 'beginner',
-    tags: ['nextjs', 'hosting', 'serverless', 'edge', 'preview-deploys', 'cdn'],
+    tags: ['nextjs', 'hosting', 'serverless', 'edge', 'preview-deploys', 'cdn', '버셀', '배포'],
     alternatives: ['netlify', 'railway', 'fly-io', 'render'],
     compatibility: {
       framework: ['nextjs', 'react', 'svelte', 'nuxt', 'astro'],
@@ -412,7 +412,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'jamstack',
     popularity_score: 82,
     difficulty_level: 'beginner',
-    tags: ['jamstack', 'static', 'hosting', 'serverless', 'forms', 'edge'],
+    tags: ['jamstack', 'static', 'hosting', 'serverless', 'forms', 'edge', '넷리파이', '배포'],
     alternatives: ['vercel', 'render'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'gatsby', 'hugo', 'astro'],
@@ -476,7 +476,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'payment_gateway',
     popularity_score: 96,
     difficulty_level: 'intermediate',
-    tags: ['payment', 'subscription', 'billing', 'invoicing', 'marketplace'],
+    tags: ['payment', 'subscription', 'billing', 'invoicing', 'marketplace', '스트라이프', '결제'],
     alternatives: ['lemonsqueezy', 'polar'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'ruby-on-rails'],
@@ -548,7 +548,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'auth_platform',
     popularity_score: 85,
     difficulty_level: 'beginner',
-    tags: ['auth', 'oauth', 'social-login', 'user-management', 'mfa', 'pre-built-ui'],
+    tags: ['auth', 'oauth', 'social-login', 'user-management', 'mfa', 'pre-built-ui', '클럭', '인증'],
     alternatives: ['nextauth', 'supabase'],
     compatibility: {
       framework: ['nextjs', 'react', 'remix', 'gatsby'],
@@ -630,7 +630,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'auth_platform',
     popularity_score: 80,
     difficulty_level: 'intermediate',
-    tags: ['auth', 'oauth', 'open-source', 'self-hosted', 'nextjs'],
+    tags: ['auth', 'oauth', 'open-source', 'self-hosted', 'nextjs', '넥스트오스', '인증'],
     alternatives: ['clerk', 'supabase'],
     compatibility: {
       framework: ['nextjs', 'sveltekit'],
@@ -682,7 +682,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'transactional_email',
     popularity_score: 78,
     difficulty_level: 'beginner',
-    tags: ['email', 'transactional', 'react-email', 'developer-friendly'],
+    tags: ['email', 'transactional', 'react-email', 'developer-friendly', '리센드', '이메일'],
     alternatives: ['sendgrid'],
     compatibility: {
       framework: ['nextjs', 'react', 'express'],
@@ -741,7 +741,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'transactional_email',
     popularity_score: 75,
     difficulty_level: 'intermediate',
-    tags: ['email', 'transactional', 'marketing', 'smtp', 'twilio'],
+    tags: ['email', 'transactional', 'marketing', 'smtp', 'twilio', '센드그리드', '이메일'],
     alternatives: ['resend'],
     compatibility: {
       framework: ['nextjs', 'react', 'express', 'django', 'rails'],
@@ -796,7 +796,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'llm',
     popularity_score: 98,
     difficulty_level: 'beginner',
-    tags: ['llm', 'gpt', 'chatgpt', 'dall-e', 'whisper', 'embeddings', 'ai'],
+    tags: ['llm', 'gpt', 'chatgpt', 'dall-e', 'whisper', 'embeddings', 'ai', '오픈에이아이'],
     alternatives: ['anthropic', 'groq'],
     compatibility: {
       framework: ['nextjs', 'react', 'express', 'fastapi'],
@@ -844,7 +844,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'llm',
     popularity_score: 88,
     difficulty_level: 'beginner',
-    tags: ['llm', 'claude', 'ai', 'safety', 'long-context'],
+    tags: ['llm', 'claude', 'ai', 'safety', 'long-context', '앤트로픽'],
     alternatives: ['openai', 'groq'],
     compatibility: {
       framework: ['nextjs', 'react', 'express', 'fastapi'],
@@ -909,7 +909,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'image_video',
     popularity_score: 80,
     difficulty_level: 'intermediate',
-    tags: ['image', 'video', 'media', 'cdn', 'optimization', 'transformation'],
+    tags: ['image', 'video', 'media', 'cdn', 'optimization', 'transformation', '클라우디너리', '이미지'],
     alternatives: ['uploadthing', 'aws-s3'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular'],
@@ -983,7 +983,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'error_tracking',
     popularity_score: 90,
     difficulty_level: 'beginner',
-    tags: ['error-tracking', 'monitoring', 'performance', 'debugging', 'open-source'],
+    tags: ['error-tracking', 'monitoring', 'performance', 'debugging', 'open-source', '센트리', '모니터링'],
     alternatives: [],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'svelte', 'django', 'rails', 'flask'],
@@ -1036,7 +1036,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'mysql',
     popularity_score: 78,
     difficulty_level: 'intermediate',
-    tags: ['mysql', 'vitess', 'branching', 'serverless', 'horizontal-scaling'],
+    tags: ['mysql', 'vitess', 'branching', 'serverless', 'horizontal-scaling', '플래닛스케일', '데이터베이스'],
     alternatives: ['neon', 'supabase'],
     compatibility: {
       framework: ['nextjs', 'react', 'express', 'django', 'rails'],
@@ -1096,7 +1096,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'postgres',
     popularity_score: 82,
     difficulty_level: 'beginner',
-    tags: ['postgres', 'serverless', 'branching', 'auto-scaling', 'open-source'],
+    tags: ['postgres', 'serverless', 'branching', 'auto-scaling', 'open-source', '니온', '데이터베이스'],
     alternatives: ['supabase', 'planetscale'],
     compatibility: {
       framework: ['nextjs', 'react', 'express', 'django', 'rails'],
@@ -1149,7 +1149,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'paas',
     popularity_score: 80,
     difficulty_level: 'beginner',
-    tags: ['hosting', 'docker', 'databases', 'paas', 'deploy', 'full-stack'],
+    tags: ['hosting', 'docker', 'databases', 'paas', 'deploy', 'full-stack', '레일웨이', '배포'],
     alternatives: ['vercel', 'render', 'fly-io'],
     compatibility: {
       framework: ['nextjs', 'react', 'express', 'django', 'rails', 'flask'],
@@ -1210,7 +1210,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'payment_gateway',
     popularity_score: 70,
     difficulty_level: 'beginner',
-    tags: ['payment', 'subscription', 'digital-products', 'merchant-of-record', 'tax'],
+    tags: ['payment', 'subscription', 'digital-products', 'merchant-of-record', 'tax', '레몬스퀴지', '결제'],
     alternatives: ['stripe', 'polar'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue'],
@@ -1268,7 +1268,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'file_upload',
     popularity_score: 72,
     difficulty_level: 'beginner',
-    tags: ['file-upload', 'storage', 'nextjs', 'react', 'typesafe'],
+    tags: ['file-upload', 'storage', 'nextjs', 'react', 'typesafe', '업로드씽', '파일업로드'],
     alternatives: ['cloudinary', 'aws-s3'],
     compatibility: {
       framework: ['nextjs', 'react', 'solid', 'svelte', 'vue', 'express'],
@@ -1325,7 +1325,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'product_analytics',
     popularity_score: 82,
     difficulty_level: 'beginner',
-    tags: ['analytics', 'session-replay', 'feature-flags', 'open-source', 'a-b-testing', 'product-analytics'],
+    tags: ['analytics', 'session-replay', 'feature-flags', 'open-source', 'a-b-testing', 'product-analytics', '포스트호그', '분석'],
     alternatives: ['ga4', 'mixpanel', 'plausible'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'svelte', 'django', 'rails', 'flask'],
@@ -1396,7 +1396,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'object_storage',
     popularity_score: 95,
     difficulty_level: 'intermediate',
-    tags: ['storage', 'object-storage', 'static-hosting', 'cdn', 'aws', 'enterprise'],
+    tags: ['storage', 'object-storage', 'static-hosting', 'cdn', 'aws', 'enterprise', '아마존', '스토리지'],
     alternatives: ['cloudinary', 'uploadthing'],
     compatibility: {
       framework: ['nextjs', 'react', 'express', 'django', 'rails', 'flask', 'spring'],
@@ -1462,7 +1462,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'version_control',
     popularity_score: 98,
     difficulty_level: 'beginner',
-    tags: ['git', 'ci/cd', 'version-control', 'actions', 'open-source', 'devtools'],
+    tags: ['git', 'ci/cd', 'version-control', 'actions', 'open-source', 'devtools', '깃허브', '깃허브 액션'],
     alternatives: ['gitlab', 'bitbucket'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'svelte', 'angular', 'express'],
@@ -1512,7 +1512,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'code_assistant',
     popularity_score: 88,
     difficulty_level: 'beginner',
-    tags: ['ai', 'coding-assistant', 'cli', 'agent', 'anthropic', 'claude'],
+    tags: ['ai', 'coding-assistant', 'cli', 'agent', 'anthropic', 'claude', '클로드 코드'],
     alternatives: ['github-copilot', 'cursor'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'svelte', 'express', 'django', 'rails'],
@@ -1562,7 +1562,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'multimodal_ai',
     popularity_score: 85,
     difficulty_level: 'beginner',
-    tags: ['ai', 'multimodal', 'google', 'llm', 'vision', 'gemini'],
+    tags: ['ai', 'multimodal', 'google', 'llm', 'vision', 'gemini', '제미나이'],
     alternatives: ['openai', 'anthropic'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'express', 'flask', 'django'],
@@ -1626,7 +1626,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 92,
     difficulty_level: 'beginner',
-    tags: ['social-login', 'kakao', 'kakaotalk', 'oauth', 'korea', '한국', '소셜로그인'],
+    tags: ['social-login', 'kakao', 'kakaotalk', 'oauth', 'korea', '한국', '소셜로그인', '카카오 로그인'],
     alternatives: ['naver-login', 'google-oauth', 'apple-login'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'flutter', 'react-native'],
@@ -1684,7 +1684,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 95,
     difficulty_level: 'beginner',
-    tags: ['social-login', 'google', 'oauth', 'openid-connect', 'gmail', '소셜로그인'],
+    tags: ['social-login', 'google', 'oauth', 'openid-connect', 'gmail', '소셜로그인', '구글 로그인'],
     alternatives: ['kakao-login', 'naver-login', 'apple-login'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'flutter', 'react-native'],
@@ -1742,7 +1742,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 88,
     difficulty_level: 'beginner',
-    tags: ['social-login', 'naver', 'oauth', 'korea', '한국', '소셜로그인', '네이버'],
+    tags: ['social-login', 'naver', 'oauth', 'korea', '한국', '소셜로그인', '네이버', '네이버 로그인'],
     alternatives: ['kakao-login', 'google-oauth', 'apple-login'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'flutter', 'react-native'],
@@ -1815,7 +1815,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 82,
     difficulty_level: 'intermediate',
-    tags: ['social-login', 'apple', 'oauth', 'ios', 'privacy', '소셜로그인'],
+    tags: ['social-login', 'apple', 'oauth', 'ios', 'privacy', '소셜로그인', '애플 로그인'],
     alternatives: ['google-oauth', 'kakao-login', 'naver-login'],
     compatibility: {
       framework: ['nextjs', 'react', 'flutter', 'react-native', 'swift-ui'],
@@ -1873,7 +1873,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 85,
     difficulty_level: 'beginner',
-    tags: ['social-login', 'github', 'oauth', 'developer', '소셜로그인', '개발자'],
+    tags: ['social-login', 'github', 'oauth', 'developer', '소셜로그인', '개발자', '깃허브 로그인'],
     alternatives: ['google-oauth', 'kakao-login'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'express', 'fastify'],
@@ -1950,7 +1950,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 88,
     difficulty_level: 'intermediate',
-    tags: ['auth', 'sso', 'mfa', 'oauth', 'identity'],
+    tags: ['auth', 'sso', 'mfa', 'oauth', 'identity', '오스제로', '인증'],
     alternatives: ['clerk', 'supabase-auth', 'firebase-auth'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'express'],
@@ -2010,7 +2010,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 78,
     difficulty_level: 'beginner',
-    tags: ['database', 'realtime', 'serverless', 'baas', 'reactive'],
+    tags: ['database', 'realtime', 'serverless', 'baas', 'reactive', '컨벡스', '데이터베이스'],
     alternatives: ['supabase', 'firebase', 'neon'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'svelte'],
@@ -2060,7 +2060,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 85,
     difficulty_level: 'intermediate',
-    tags: ['orm', 'typescript', 'sql', 'postgres', 'mysql', 'sqlite'],
+    tags: ['orm', 'typescript', 'sql', 'postgres', 'mysql', 'sqlite', '드리즐', 'ORM'],
     alternatives: ['prisma', 'typeorm', 'kysely'],
     compatibility: {
       framework: ['nextjs', 'react', 'express', 'fastify', 'hono'],
@@ -2120,7 +2120,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 90,
     difficulty_level: 'beginner',
-    tags: ['orm', 'typescript', 'postgres', 'mysql', 'sqlite', 'migrations'],
+    tags: ['orm', 'typescript', 'postgres', 'mysql', 'sqlite', 'migrations', '프리즈마', 'ORM'],
     alternatives: ['drizzle', 'typeorm', 'kysely'],
     compatibility: {
       framework: ['nextjs', 'react', 'express', 'fastify', 'nestjs'],
@@ -2174,7 +2174,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 76,
     difficulty_level: 'beginner',
-    tags: ['sqlite', 'edge', 'database', 'libsql', 'replication'],
+    tags: ['sqlite', 'edge', 'database', 'libsql', 'replication', '투르소', '데이터베이스'],
     alternatives: ['planetscale', 'neon', 'supabase'],
     compatibility: {
       framework: ['nextjs', 'react', 'svelte', 'astro', 'hono'],
@@ -2228,7 +2228,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 86,
     difficulty_level: 'intermediate',
-    tags: ['cache', 'redis', 'key-value', 'session', 'pub-sub'],
+    tags: ['cache', 'redis', 'key-value', 'session', 'pub-sub', '레디스', '캐시'],
     alternatives: ['upstash', 'vercel-kv', 'memcached'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'nestjs', 'django'],
@@ -2293,7 +2293,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 72,
     difficulty_level: 'beginner',
-    tags: ['cache', 'redis', 'key-value', 'serverless', 'vercel'],
+    tags: ['cache', 'redis', 'key-value', 'serverless', 'vercel', '버셀 KV', '캐시'],
     alternatives: ['upstash', 'redis-cloud', 'cloudflare-kv'],
     compatibility: {
       framework: ['nextjs', 'react', 'svelte'],
@@ -2353,7 +2353,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 82,
     difficulty_level: 'intermediate',
-    tags: ['vector-db', 'ai', 'embeddings', 'similarity-search', 'rag'],
+    tags: ['vector-db', 'ai', 'embeddings', 'similarity-search', 'rag', '파인콘', '벡터DB'],
     alternatives: ['weaviate', 'qdrant', 'chromadb'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'django', 'flask'],
@@ -2413,7 +2413,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 88,
     difficulty_level: 'advanced',
-    tags: ['llm', 'ai', 'rag', 'agents', 'orchestration', 'langsmith'],
+    tags: ['llm', 'ai', 'rag', 'agents', 'orchestration', 'langsmith', '랭체인'],
     alternatives: ['llamaindex', 'semantic-kernel', 'haystack'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'django', 'flask'],
@@ -2457,7 +2457,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 80,
     difficulty_level: 'beginner',
-    tags: ['ai', 'ml', 'model-hosting', 'inference', 'open-source'],
+    tags: ['ai', 'ml', 'model-hosting', 'inference', 'open-source', '레플리케이트'],
     alternatives: ['huggingface', 'aws-sagemaker', 'google-vertex-ai'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'django', 'flask'],
@@ -2511,7 +2511,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 90,
     difficulty_level: 'intermediate',
-    tags: ['ai', 'ml', 'models', 'inference', 'nlp', 'open-source'],
+    tags: ['ai', 'ml', 'models', 'inference', 'nlp', 'open-source', '허깅페이스'],
     alternatives: ['replicate', 'openai', 'anthropic'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'django', 'flask'],
@@ -2559,7 +2559,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 78,
     difficulty_level: 'beginner',
-    tags: ['ai', 'image-generation', 'stable-diffusion', 'sdxl', 'generative'],
+    tags: ['ai', 'image-generation', 'stable-diffusion', 'sdxl', 'generative', '스태빌리티', '이미지생성'],
     alternatives: ['dall-e', 'midjourney', 'replicate'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'django'],
@@ -2613,7 +2613,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 82,
     difficulty_level: 'beginner',
-    tags: ['automation', 'notion', 'api', 'cms', 'productivity'],
+    tags: ['automation', 'notion', 'api', 'cms', 'productivity', '노션', '자동화'],
     alternatives: ['airtable', 'coda', 'google-sheets-api'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'django'],
@@ -2667,7 +2667,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 80,
     difficulty_level: 'beginner',
-    tags: ['project-management', 'issue-tracker', 'graphql', 'devtools', 'automation'],
+    tags: ['project-management', 'issue-tracker', 'graphql', 'devtools', 'automation', '리니어', '프로젝트관리'],
     alternatives: ['jira', 'github-issues', 'shortcut'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify'],
@@ -2723,7 +2723,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 85,
     difficulty_level: 'intermediate',
-    tags: ['payment', 'korean', 'toss', 'pg', 'fintech', '결제'],
+    tags: ['payment', 'korean', 'toss', 'pg', 'fintech', '결제', '토스페이먼츠', '토스'],
     alternatives: ['iamport', 'nice-payments', 'kakaopay'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'express'],
@@ -2779,7 +2779,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 88,
     difficulty_level: 'intermediate',
-    tags: ['payment', 'global', 'checkout', 'subscriptions', 'payouts'],
+    tags: ['payment', 'global', 'checkout', 'subscriptions', 'payouts', '페이팔', '결제'],
     alternatives: ['stripe', 'toss-payments', 'adyen'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'express'],
@@ -2844,7 +2844,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 82,
     difficulty_level: 'intermediate',
-    tags: ['email', 'aws', 'transactional', 'marketing', 'smtp'],
+    tags: ['email', 'aws', 'transactional', 'marketing', 'smtp', '아마존', '이메일'],
     alternatives: ['sendgrid', 'resend', 'mailchimp'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'nestjs', 'django'],
@@ -2905,7 +2905,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 84,
     difficulty_level: 'beginner',
-    tags: ['email', 'marketing', 'automation', 'newsletter', 'crm'],
+    tags: ['email', 'marketing', 'automation', 'newsletter', 'crm', '메일침프', '이메일마케팅'],
     alternatives: ['sendgrid', 'resend', 'aws-ses', 'convertkit'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'django'],
@@ -2965,7 +2965,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 74,
     difficulty_level: 'beginner',
-    tags: ['image', 'cdn', 'optimization', 'video', 'media', 'storage'],
+    tags: ['image', 'cdn', 'optimization', 'video', 'media', 'storage', '이미지킷', '이미지'],
     alternatives: ['cloudinary', 'imgix', 'bunny-cdn'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'svelte'],
@@ -3030,7 +3030,7 @@ export const services: ServiceSeed[] = [
     domain: 'backend',
     popularity_score: 80,
     difficulty_level: 'intermediate',
-    tags: ['storage', 's3-compatible', 'cloudflare', 'object-storage', 'cdn'],
+    tags: ['storage', 's3-compatible', 'cloudflare', 'object-storage', 'cdn', '클라우드플레어', '스토리지'],
     alternatives: ['aws-s3', 'backblaze-b2', 'wasabi'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'hono', 'django'],
@@ -3090,7 +3090,7 @@ export const services: ServiceSeed[] = [
     domain: 'devtools',
     popularity_score: 88,
     difficulty_level: 'intermediate',
-    tags: ['monitoring', 'observability', 'metrics', 'logs', 'dashboards', 'open-source'],
+    tags: ['monitoring', 'observability', 'metrics', 'logs', 'dashboards', 'open-source', '그라파나', '모니터링'],
     alternatives: ['datadog', 'new-relic', 'prometheus'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'nestjs', 'django'],
@@ -3150,7 +3150,7 @@ export const services: ServiceSeed[] = [
     domain: 'devtools',
     popularity_score: 84,
     difficulty_level: 'intermediate',
-    tags: ['monitoring', 'apm', 'observability', 'rum', 'infrastructure'],
+    tags: ['monitoring', 'apm', 'observability', 'rum', 'infrastructure', '뉴렐릭', '모니터링'],
     alternatives: ['datadog', 'grafana', 'dynatrace'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'nestjs', 'django'],
@@ -3199,7 +3199,7 @@ export const services: ServiceSeed[] = [
     domain: 'devtools',
     popularity_score: 92,
     difficulty_level: 'beginner',
-    tags: ['ai', 'code-completion', 'github', 'ide', 'pair-programming'],
+    tags: ['ai', 'code-completion', 'github', 'ide', 'pair-programming', '깃허브 코파일럿'],
     alternatives: ['cursor', 'codeium', 'tabnine'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'svelte'],
@@ -3248,7 +3248,7 @@ export const services: ServiceSeed[] = [
     domain: 'devtools',
     popularity_score: 88,
     difficulty_level: 'beginner',
-    tags: ['ai', 'ide', 'code-editor', 'vscode', 'pair-programming'],
+    tags: ['ai', 'ide', 'code-editor', 'vscode', 'pair-programming', '커서'],
     alternatives: ['github-copilot', 'codeium', 'windsurf'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'svelte'],
@@ -3298,7 +3298,7 @@ export const services: ServiceSeed[] = [
     domain: 'devtools',
     popularity_score: 86,
     difficulty_level: 'beginner',
-    tags: ['testing', 'unit-test', 'vite', 'jest', 'coverage', 'open-source'],
+    tags: ['testing', 'unit-test', 'vite', 'jest', 'coverage', 'open-source', '바이테스트', '테스트'],
     alternatives: ['jest', 'mocha', 'ava'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'svelte', 'astro'],
@@ -3351,7 +3351,7 @@ export const services: ServiceSeed[] = [
     domain: 'devtools',
     popularity_score: 84,
     difficulty_level: 'beginner',
-    tags: ['testing', 'ui', 'components', 'documentation', 'visual-testing', 'open-source'],
+    tags: ['testing', 'ui', 'components', 'documentation', 'visual-testing', 'open-source', '스토리북'],
     alternatives: ['ladle', 'histoire', 'playroom'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'svelte', 'web-components'],
@@ -3412,7 +3412,7 @@ export const services: ServiceSeed[] = [
     domain: 'devtools',
     popularity_score: 94,
     difficulty_level: 'intermediate',
-    tags: ['container', 'devops', 'deploy', 'docker', 'cicd', 'infrastructure'],
+    tags: ['container', 'devops', 'deploy', 'docker', 'cicd', 'infrastructure', '도커', '컨테이너'],
     alternatives: ['podman', 'containerd', 'lxc'],
     compatibility: {
       framework: ['nextjs', 'react', 'express', 'fastify', 'django', 'rails'],
@@ -3469,7 +3469,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'domain_hosting',
     popularity_score: 88,
     difficulty_level: 'beginner',
-    tags: ['domain', 'dns', 'hosting', 'ssl', 'korea', 'registrar'],
+    tags: ['domain', 'dns', 'hosting', 'ssl', 'korea', 'registrar', '가비아', '도메인'],
     alternatives: ['whois', 'cafe24', 'inames', 'namecheap'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'wordpress'],
@@ -3526,7 +3526,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'domain_registrar',
     popularity_score: 78,
     difficulty_level: 'beginner',
-    tags: ['domain', 'dns', 'whois', 'ssl', 'korea', 'registrar'],
+    tags: ['domain', 'dns', 'whois', 'ssl', 'korea', 'registrar', '후이즈', '도메인'],
     alternatives: ['gabia', 'cafe24', 'inames', 'namecheap'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'wordpress'],
@@ -3589,7 +3589,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'domain_hosting',
     popularity_score: 83,
     difficulty_level: 'beginner',
-    tags: ['domain', 'hosting', 'ecommerce', 'korea', 'shopping-mall', 'cloud'],
+    tags: ['domain', 'hosting', 'ecommerce', 'korea', 'shopping-mall', 'cloud', '카페24', '도메인', '쇼핑몰'],
     alternatives: ['gabia', 'whois', 'inames', 'namecheap'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'wordpress', 'php'],
@@ -3646,7 +3646,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'domain_registrar',
     popularity_score: 68,
     difficulty_level: 'beginner',
-    tags: ['domain', 'dns', 'korea', 'registrar', 'affordable'],
+    tags: ['domain', 'dns', 'korea', 'registrar', 'affordable', '아이네임즈', '도메인'],
     alternatives: ['gabia', 'whois', 'cafe24', 'namecheap'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'wordpress'],
@@ -3709,7 +3709,7 @@ export const services: ServiceSeed[] = [
     subcategory: 'domain_registrar',
     popularity_score: 85,
     difficulty_level: 'beginner',
-    tags: ['domain', 'dns', 'ssl', 'hosting', 'whois-privacy', 'global', 'registrar'],
+    tags: ['domain', 'dns', 'ssl', 'hosting', 'whois-privacy', 'global', 'registrar', '네임칩', '도메인'],
     alternatives: ['gabia', 'whois', 'cafe24', 'inames'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'wordpress', 'php'],

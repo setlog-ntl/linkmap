@@ -7,6 +7,9 @@ import type {
   EnvVarTemplate,
 } from '@/types';
 
+// tags 규칙: 영문 기술 태그 + 한글 음역 + 한글 키워드
+// 예: tags: ['payment', 'subscription', '폴라', '결제', '구독']
+
 // ---------------------------------------------------------------------------
 // Seed-specific types: V2 extended service data
 // ---------------------------------------------------------------------------
@@ -177,7 +180,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'ci-cd',
     popularity_score: 95,
     difficulty_level: 'intermediate',
-    tags: ['ci', 'cd', 'automation', 'github', 'workflow', 'yaml', 'devops'],
+    tags: ['ci', 'cd', 'automation', 'github', 'workflow', 'yaml', 'devops', '깃허브 액션', 'CI/CD', '자동화'],
     alternatives: ['vercel', 'netlify', 'railway'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'angular', 'svelte', 'nuxt', 'express', 'django', 'rails'],
@@ -244,7 +247,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'sms-voice',
     popularity_score: 88,
     difficulty_level: 'intermediate',
-    tags: ['sms', 'voice', 'messaging', 'whatsapp', 'communication', 'api', 'verification'],
+    tags: ['sms', 'voice', 'messaging', 'whatsapp', 'communication', 'api', 'verification', '트윌리오', '문자', '인증'],
     alternatives: ['onesignal', 'pusher'],
     compatibility: {
       framework: ['next', 'express', 'django', 'rails', 'flask', 'spring'],
@@ -311,7 +314,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'push-notification',
     popularity_score: 75,
     difficulty_level: 'beginner',
-    tags: ['push', 'notification', 'mobile', 'web', 'engagement', 'messaging'],
+    tags: ['push', 'notification', 'mobile', 'web', 'engagement', 'messaging', '원시그널', '푸시알림'],
     alternatives: ['pusher', 'twilio'],
     compatibility: {
       framework: ['next', 'react', 'react-native', 'flutter', 'angular', 'vue'],
@@ -381,7 +384,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'search-discovery',
     popularity_score: 82,
     difficulty_level: 'intermediate',
-    tags: ['search', 'full-text', 'instant-search', 'autocomplete', 'analytics', 'ai', 'recommendation'],
+    tags: ['search', 'full-text', 'instant-search', 'autocomplete', 'analytics', 'ai', 'recommendation', '알골리아', '검색'],
     alternatives: ['meilisearch'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'angular', 'svelte', 'nuxt', 'gatsby'],
@@ -451,7 +454,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'headless-cms',
     popularity_score: 78,
     difficulty_level: 'intermediate',
-    tags: ['cms', 'headless', 'content', 'groq', 'studio', 'structured-content', 'real-time'],
+    tags: ['cms', 'headless', 'content', 'groq', 'studio', 'structured-content', 'real-time', '새니티', 'CMS'],
     alternatives: ['contentful', 'strapi'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'nuxt', 'gatsby', 'svelte', 'astro', 'remix'],
@@ -506,7 +509,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'web-analytics',
     popularity_score: 97,
     difficulty_level: 'beginner',
-    tags: ['analytics', 'web', 'app', 'google', 'tracking', 'event', 'conversion', 'report'],
+    tags: ['analytics', 'web', 'app', 'google', 'tracking', 'event', 'conversion', 'report', '구글 애널리틱스', '분석'],
     alternatives: ['posthog', 'mixpanel', 'plausible'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'angular', 'svelte', 'nuxt', 'gatsby', 'astro'],
@@ -568,7 +571,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'cache-store',
     popularity_score: 76,
     difficulty_level: 'beginner',
-    tags: ['redis', 'cache', 'serverless', 'edge', 'rate-limit', 'session', 'rest-api'],
+    tags: ['redis', 'cache', 'serverless', 'edge', 'rate-limit', 'session', 'rest-api', '업스태시', '레디스', '캐시'],
     alternatives: ['vercel', 'cloudflare'],
     compatibility: {
       framework: ['next', 'nuxt', 'remix', 'express', 'fastify', 'hono'],
@@ -631,7 +634,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'cdn-security',
     popularity_score: 93,
     difficulty_level: 'intermediate',
-    tags: ['cdn', 'dns', 'security', 'edge', 'workers', 'r2', 'ddos', 'waf', 'ssl'],
+    tags: ['cdn', 'dns', 'security', 'edge', 'workers', 'r2', 'ddos', 'waf', 'ssl', '클라우드플레어', 'CDN'],
     alternatives: ['vercel', 'flyio', 'render'],
     compatibility: {
       framework: ['next', 'nuxt', 'remix', 'astro', 'hono', 'express'],
@@ -687,7 +690,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'container-hosting',
     popularity_score: 72,
     difficulty_level: 'intermediate',
-    tags: ['deploy', 'container', 'docker', 'edge', 'global', 'postgres', 'redis', 'vm'],
+    tags: ['deploy', 'container', 'docker', 'edge', 'global', 'postgres', 'redis', 'vm', '플라이', '배포'],
     alternatives: ['render', 'railway', 'vercel'],
     compatibility: {
       framework: ['next', 'remix', 'express', 'fastify', 'django', 'rails', 'phoenix'],
@@ -754,7 +757,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'monitoring-apm',
     popularity_score: 90,
     difficulty_level: 'advanced',
-    tags: ['monitoring', 'apm', 'logging', 'metrics', 'dashboard', 'alerting', 'tracing', 'infrastructure'],
+    tags: ['monitoring', 'apm', 'logging', 'metrics', 'dashboard', 'alerting', 'tracing', 'infrastructure', '데이터독', '모니터링'],
     alternatives: ['sentry', 'logrocket', 'posthog'],
     compatibility: {
       framework: ['next', 'express', 'django', 'rails', 'spring', 'flask'],
@@ -812,7 +815,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'product-analytics',
     popularity_score: 80,
     difficulty_level: 'beginner',
-    tags: ['analytics', 'product', 'funnel', 'retention', 'cohort', 'ab-test', 'event-tracking'],
+    tags: ['analytics', 'product', 'funnel', 'retention', 'cohort', 'ab-test', 'event-tracking', '믹스패널', '분석'],
     alternatives: ['posthog', 'ga4', 'plausible'],
     compatibility: {
       framework: ['next', 'react', 'react-native', 'vue', 'angular', 'svelte', 'flutter'],
@@ -881,7 +884,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'headless-cms',
     popularity_score: 80,
     difficulty_level: 'intermediate',
-    tags: ['cms', 'headless', 'content', 'api-first', 'enterprise', 'graphql', 'rest'],
+    tags: ['cms', 'headless', 'content', 'api-first', 'enterprise', 'graphql', 'rest', '컨텐트풀', 'CMS'],
     alternatives: ['sanity', 'strapi'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'nuxt', 'gatsby', 'angular', 'svelte', 'astro'],
@@ -950,7 +953,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'search-engine',
     popularity_score: 68,
     difficulty_level: 'beginner',
-    tags: ['search', 'open-source', 'typo-tolerance', 'instant-search', 'self-hosted', 'full-text'],
+    tags: ['search', 'open-source', 'typo-tolerance', 'instant-search', 'self-hosted', 'full-text', '메일리서치', '검색'],
     alternatives: ['algolia'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'angular', 'svelte', 'nuxt', 'rails'],
@@ -1029,7 +1032,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'realtime-messaging',
     popularity_score: 70,
     difficulty_level: 'beginner',
-    tags: ['realtime', 'websocket', 'push', 'channels', 'messaging', 'presence', 'pub-sub'],
+    tags: ['realtime', 'websocket', 'push', 'channels', 'messaging', 'presence', 'pub-sub', '푸셔', '실시간'],
     alternatives: ['onesignal', 'twilio'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'angular', 'svelte', 'express', 'laravel', 'rails'],
@@ -1092,7 +1095,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'background-jobs',
     popularity_score: 62,
     difficulty_level: 'intermediate',
-    tags: ['background-jobs', 'scheduling', 'cron', 'queue', 'serverless', 'typescript', 'workflow', 'event-driven'],
+    tags: ['background-jobs', 'scheduling', 'cron', 'queue', 'serverless', 'typescript', 'workflow', 'event-driven', '트리거', '백그라운드'],
     alternatives: ['inngest', 'bullmq'],
     compatibility: {
       framework: ['next', 'remix', 'express', 'fastify', 'hono'],
@@ -1153,7 +1156,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'feature-management',
     popularity_score: 74,
     difficulty_level: 'intermediate',
-    tags: ['feature-flag', 'ab-test', 'progressive-delivery', 'targeting', 'experiment', 'rollout'],
+    tags: ['feature-flag', 'ab-test', 'progressive-delivery', 'targeting', 'experiment', 'rollout', '런치다클리', '피처플래그'],
     alternatives: ['posthog'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'angular', 'svelte', 'express', 'django', 'rails', 'spring'],
@@ -1212,7 +1215,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'llm-inference',
     popularity_score: 70,
     difficulty_level: 'beginner',
-    tags: ['ai', 'llm', 'inference', 'fast', 'open-source-model', 'llama', 'mixtral', 'lpu'],
+    tags: ['ai', 'llm', 'inference', 'fast', 'open-source-model', 'llama', 'mixtral', 'lpu', '그로크', 'AI', '추론'],
     alternatives: ['openai', 'anthropic'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'django', 'flask'],
@@ -1269,7 +1272,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'cloud-hosting',
     popularity_score: 73,
     difficulty_level: 'beginner',
-    tags: ['deploy', 'hosting', 'cloud', 'postgres', 'redis', 'static-site', 'docker', 'cron'],
+    tags: ['deploy', 'hosting', 'cloud', 'postgres', 'redis', 'static-site', 'docker', 'cron', '렌더', '배포'],
     alternatives: ['flyio', 'railway', 'vercel'],
     compatibility: {
       framework: ['next', 'express', 'django', 'rails', 'flask', 'fastify', 'spring'],
@@ -1323,7 +1326,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'session-replay',
     popularity_score: 65,
     difficulty_level: 'beginner',
-    tags: ['session-replay', 'error-tracking', 'frontend', 'performance', 'ux', 'logging', 'monitoring'],
+    tags: ['session-replay', 'error-tracking', 'frontend', 'performance', 'ux', 'logging', 'monitoring', '로그로켓', '모니터링'],
     alternatives: ['sentry', 'datadog', 'posthog'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'angular', 'svelte', 'remix'],
@@ -1375,7 +1378,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'e2e-testing',
     popularity_score: 85,
     difficulty_level: 'intermediate',
-    tags: ['testing', 'e2e', 'browser', 'automation', 'cross-browser', 'ci', 'microsoft', 'open-source'],
+    tags: ['testing', 'e2e', 'browser', 'automation', 'cross-browser', 'ci', 'microsoft', 'open-source', '플레이라이트', '테스트'],
     alternatives: ['cypress'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'angular', 'svelte', 'nuxt', 'remix', 'astro'],
@@ -1446,7 +1449,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'team-messaging',
     popularity_score: 88,
     difficulty_level: 'intermediate',
-    tags: ['chat', 'bot', 'messaging', 'slack', 'webhook', 'notification', 'automation', 'slash-command'],
+    tags: ['chat', 'bot', 'messaging', 'slack', 'webhook', 'notification', 'automation', 'slash-command', '슬랙', '메시지'],
     alternatives: ['discord-api'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'django', 'flask', 'rails'],
@@ -1517,7 +1520,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'community-platform',
     popularity_score: 84,
     difficulty_level: 'intermediate',
-    tags: ['chat', 'bot', 'community', 'discord', 'webhook', 'slash-command', 'voice', 'gaming'],
+    tags: ['chat', 'bot', 'community', 'discord', 'webhook', 'slash-command', 'voice', 'gaming', '디스코드', '메시지'],
     alternatives: ['slack-api'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'django', 'flask'],
@@ -1580,7 +1583,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'maps-location',
     popularity_score: 78,
     difficulty_level: 'intermediate',
-    tags: ['maps', 'geocoding', 'navigation', 'location', 'gis', 'directions', 'custom-map'],
+    tags: ['maps', 'geocoding', 'navigation', 'location', 'gis', 'directions', 'custom-map', '맵박스', '지도'],
     alternatives: [],
     compatibility: {
       framework: ['next', 'react', 'react-native', 'vue', 'angular', 'svelte', 'flutter'],
@@ -1640,7 +1643,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'voice-synthesis',
     popularity_score: 72,
     difficulty_level: 'beginner',
-    tags: ['ai', 'tts', 'voice', 'speech', 'clone', 'dubbing', 'text-to-speech', 'audio'],
+    tags: ['ai', 'tts', 'voice', 'speech', 'clone', 'dubbing', 'text-to-speech', 'audio', '일레븐랩스', '음성'],
     alternatives: ['openai'],
     compatibility: {
       framework: ['next', 'react', 'express', 'fastify', 'django', 'flask'],
@@ -1702,7 +1705,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'event-driven-functions',
     popularity_score: 60,
     difficulty_level: 'intermediate',
-    tags: ['background-jobs', 'event-driven', 'step-functions', 'scheduling', 'retry', 'workflow', 'serverless'],
+    tags: ['background-jobs', 'event-driven', 'step-functions', 'scheduling', 'retry', 'workflow', 'serverless', '인게스트', '백그라운드'],
     alternatives: ['trigger-dev', 'bullmq'],
     compatibility: {
       framework: ['next', 'remix', 'express', 'fastify', 'hono', 'nuxt', 'sveltekit'],
@@ -1766,7 +1769,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'headless-cms',
     popularity_score: 77,
     difficulty_level: 'intermediate',
-    tags: ['cms', 'headless', 'open-source', 'self-hosted', 'rest', 'graphql', 'admin-panel', 'content'],
+    tags: ['cms', 'headless', 'open-source', 'self-hosted', 'rest', 'graphql', 'admin-panel', 'content', '스트라피', 'CMS'],
     alternatives: ['sanity', 'contentful'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'nuxt', 'gatsby', 'angular', 'svelte', 'astro'],
@@ -1827,7 +1830,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'privacy-analytics',
     popularity_score: 58,
     difficulty_level: 'beginner',
-    tags: ['analytics', 'privacy', 'gdpr', 'cookie-free', 'open-source', 'lightweight', 'self-hosted'],
+    tags: ['analytics', 'privacy', 'gdpr', 'cookie-free', 'open-source', 'lightweight', 'self-hosted', '플로저블', '분석'],
     alternatives: ['ga4', 'posthog', 'mixpanel'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'nuxt', 'gatsby', 'astro', 'svelte', 'remix'],
@@ -1890,7 +1893,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'e2e-testing',
     popularity_score: 82,
     difficulty_level: 'beginner',
-    tags: ['testing', 'e2e', 'component', 'browser', 'automation', 'debug', 'ci', 'open-source'],
+    tags: ['testing', 'e2e', 'component', 'browser', 'automation', 'debug', 'ci', 'open-source', '사이프레스', '테스트'],
     alternatives: ['playwright'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'angular', 'svelte', 'nuxt'],
@@ -1944,7 +1947,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'job-queue',
     popularity_score: 65,
     difficulty_level: 'intermediate',
-    tags: ['queue', 'redis', 'job', 'background', 'worker', 'delayed', 'repeatable', 'priority', 'open-source'],
+    tags: ['queue', 'redis', 'job', 'background', 'worker', 'delayed', 'repeatable', 'priority', 'open-source', '불엠큐', '큐'],
     alternatives: ['trigger-dev', 'inngest'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'nestjs', 'hono'],
@@ -2018,7 +2021,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'ecommerce-platform',
     popularity_score: 90,
     difficulty_level: 'intermediate',
-    tags: ['ecommerce', 'shop', 'storefront', 'payment', 'cart', 'graphql', 'headless-commerce', 'shopify'],
+    tags: ['ecommerce', 'shop', 'storefront', 'payment', 'cart', 'graphql', 'headless-commerce', 'shopify', '쇼피파이', '이커머스'],
     alternatives: ['stripe', 'lemonsqueezy'],
     compatibility: {
       framework: ['next', 'react', 'remix', 'hydrogen', 'vue', 'nuxt', 'angular'],
@@ -2083,7 +2086,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'domain_registrar',
     popularity_score: 82,
     difficulty_level: 'beginner',
-    tags: ['domain', 'registrar', 'dns', 'whois', 'cheap', 'transfer', 'privacy', 'bulk-registration'],
+    tags: ['domain', 'registrar', 'dns', 'whois', 'cheap', 'transfer', 'privacy', 'bulk-registration', '네임칩', '도메인'],
     alternatives: ['godaddy', 'cloudflare-registrar', 'gabia'],
     compatibility: {
       framework: ['next', 'express', 'django', 'rails'],
@@ -2146,7 +2149,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'domain_registrar',
     popularity_score: 75,
     difficulty_level: 'intermediate',
-    tags: ['domain', 'registrar', 'dns', 'dnssec', 'cloudflare', 'transparent-pricing', 'api', 'cdn-integration'],
+    tags: ['domain', 'registrar', 'dns', 'dnssec', 'cloudflare', 'transparent-pricing', 'api', 'cdn-integration', '클라우드플레어', '도메인'],
     alternatives: ['namecheap', 'godaddy'],
     compatibility: {
       framework: ['next', 'express', 'django', 'rails', 'remix'],
@@ -2210,7 +2213,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'domain_registrar',
     popularity_score: 90,
     difficulty_level: 'beginner',
-    tags: ['domain', 'registrar', 'hosting', 'builder', 'email', 'ssl', 'popular', 'all-in-one'],
+    tags: ['domain', 'registrar', 'hosting', 'builder', 'email', 'ssl', 'popular', 'all-in-one', '고대디', '도메인'],
     alternatives: ['namecheap', 'cloudflare-registrar'],
     compatibility: {
       framework: ['next', 'express', 'django', 'rails', 'wordpress'],
@@ -2273,7 +2276,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'domain_registrar',
     popularity_score: 88,
     difficulty_level: 'beginner',
-    tags: ['domain', 'registrar', '.kr', 'korea', 'local', 'ai-recommendation', 'hosting', 'ssl'],
+    tags: ['domain', 'registrar', '.kr', 'korea', 'local', 'ai-recommendation', 'hosting', 'ssl', '가비아', '도메인'],
     alternatives: ['hosting-kr', 'dotname'],
     compatibility: {
       framework: ['next', 'express', 'django', 'rails'],
@@ -2336,7 +2339,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'domain_registrar',
     popularity_score: 78,
     difficulty_level: 'beginner',
-    tags: ['domain', 'registrar', '.kr', 'korea', 'hosting', 'email', 'dns', 'local'],
+    tags: ['domain', 'registrar', '.kr', 'korea', 'hosting', 'email', 'dns', 'local', '호스팅케이알', '도메인'],
     alternatives: ['gabia', 'dotname'],
     compatibility: {
       framework: ['next', 'express', 'django', 'rails'],
@@ -2398,7 +2401,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'domain_registrar',
     popularity_score: 72,
     difficulty_level: 'beginner',
-    tags: ['domain', 'registrar', '.kr', 'korea', 'free-hosting', 'dns', 'local', 'affordable'],
+    tags: ['domain', 'registrar', '.kr', 'korea', 'free-hosting', 'dns', 'local', 'affordable', '닷네임', '도메인'],
     alternatives: ['gabia', 'hosting-kr'],
     compatibility: {
       framework: ['next', 'express', 'django', 'rails'],
@@ -2457,7 +2460,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'display_ads',
     popularity_score: 90,
     difficulty_level: 'beginner',
-    tags: ['advertising', 'monetization', 'banner', 'native', 'cpc', 'cpm', 'google', 'display'],
+    tags: ['advertising', 'monetization', 'banner', 'native', 'cpc', 'cpm', 'google', 'display', '구글 애드센스', '광고', '수익화'],
     alternatives: ['kakao-adfit', 'google-ad-manager'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'nuxt', 'gatsby', 'astro', 'angular', 'svelte'],
@@ -2511,7 +2514,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'display_ads',
     popularity_score: 72,
     difficulty_level: 'beginner',
-    tags: ['advertising', 'monetization', 'banner', 'native', 'cpc', 'cpm', 'kakao', 'korea', 'display'],
+    tags: ['advertising', 'monetization', 'banner', 'native', 'cpc', 'cpm', 'kakao', 'korea', 'display', '카카오 애드핏', '광고', '수익화'],
     alternatives: ['google-adsense', 'google-ad-manager'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'nuxt', 'gatsby', 'angular'],
@@ -2572,7 +2575,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'retargeting',
     popularity_score: 68,
     difficulty_level: 'intermediate',
-    tags: ['advertising', 'retargeting', 'performance', 'cpm', 'header-bidding', 'ecommerce', 'programmatic', 'ai'],
+    tags: ['advertising', 'retargeting', 'performance', 'cpm', 'header-bidding', 'ecommerce', 'programmatic', 'ai', '크리테오', '리타겟팅', '광고'],
     alternatives: ['taboola', 'amazon-aps'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'nuxt', 'angular'],
@@ -2633,7 +2636,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'native_ads',
     popularity_score: 62,
     difficulty_level: 'beginner',
-    tags: ['advertising', 'native', 'content-recommendation', 'sponsored', 'cpc', 'widget', 'discovery', 'publisher'],
+    tags: ['advertising', 'native', 'content-recommendation', 'sponsored', 'cpc', 'widget', 'discovery', 'publisher', '타불라', '광고', '콘텐츠추천'],
     alternatives: ['criteo', 'amazon-aps'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'nuxt', 'angular', 'gatsby'],
@@ -2700,7 +2703,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'header_bidding',
     popularity_score: 58,
     difficulty_level: 'advanced',
-    tags: ['advertising', 'header-bidding', 'display', 'video', 'cpm', 'amazon', 'programmatic', 'dsp'],
+    tags: ['advertising', 'header-bidding', 'display', 'video', 'cpm', 'amazon', 'programmatic', 'dsp', '아마존', '헤더비딩', '광고'],
     alternatives: ['criteo', 'taboola', 'google-ad-manager'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'nuxt', 'angular'],
@@ -2761,7 +2764,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'header_bidding',
     popularity_score: 75,
     difficulty_level: 'advanced',
-    tags: ['advertising', 'ad-server', 'header-bidding', 'programmatic', 'cpm', 'google', 'dfp', 'ssp', 'video'],
+    tags: ['advertising', 'ad-server', 'header-bidding', 'programmatic', 'cpm', 'google', 'dfp', 'ssp', 'video', '구글 애드매니저', '광고서버'],
     alternatives: ['google-adsense', 'amazon-aps'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'nuxt', 'angular', 'gatsby'],
@@ -2821,7 +2824,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'llm',
     popularity_score: 75,
     difficulty_level: 'beginner',
-    tags: ['ai', 'llm', 'grok', 'xai', 'elon-musk', 'web-search', 'long-context'],
+    tags: ['ai', 'llm', 'grok', 'xai', 'elon-musk', 'web-search', 'long-context', '그록', 'AI'],
     alternatives: ['openai', 'anthropic', 'google-gemini'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'django', 'flask'],
@@ -2875,7 +2878,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'llm',
     popularity_score: 78,
     difficulty_level: 'beginner',
-    tags: ['ai', 'llm', 'mistral', 'open-source', 'european', 'nemo', 'mixtral'],
+    tags: ['ai', 'llm', 'mistral', 'open-source', 'european', 'nemo', 'mixtral', '미스트랄', 'AI'],
     alternatives: ['openai', 'anthropic', 'deepseek'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'django', 'flask'],
@@ -2931,7 +2934,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'llm',
     popularity_score: 72,
     difficulty_level: 'beginner',
-    tags: ['ai', 'llm', 'rag', 'enterprise', 'embeddings', 'reranking', 'fine-tuning'],
+    tags: ['ai', 'llm', 'rag', 'enterprise', 'embeddings', 'reranking', 'fine-tuning', '코히어', 'AI'],
     alternatives: ['openai', 'anthropic', 'mistral-ai'],
     compatibility: {
       framework: ['next', 'express', 'django', 'flask', 'fastify'],
@@ -2986,7 +2989,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'llm',
     popularity_score: 82,
     difficulty_level: 'beginner',
-    tags: ['ai', 'llm', 'deepseek', 'low-cost', 'reasoning', 'chinese', 'open-source'],
+    tags: ['ai', 'llm', 'deepseek', 'low-cost', 'reasoning', 'chinese', 'open-source', '딥시크', 'AI'],
     alternatives: ['openai', 'mistral-ai', 'groq'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'django', 'flask'],
@@ -3040,7 +3043,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'ai_search',
     popularity_score: 80,
     difficulty_level: 'beginner',
-    tags: ['ai', 'search', 'rag', 'web-search', 'citations', 'sonar', 'answer-engine'],
+    tags: ['ai', 'search', 'rag', 'web-search', 'citations', 'sonar', 'answer-engine', '퍼플렉시티', 'AI', '검색'],
     alternatives: ['openai', 'google-gemini', 'cohere'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'django', 'flask'],
@@ -3093,7 +3096,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'llm',
     popularity_score: 60,
     difficulty_level: 'beginner',
-    tags: ['ai', 'llm', 'jamba', 'ssm', 'hybrid', 'long-context', 'fast'],
+    tags: ['ai', 'llm', 'jamba', 'ssm', 'hybrid', 'long-context', 'fast', 'AI21', 'AI'],
     alternatives: ['openai', 'mistral-ai', 'cohere'],
     compatibility: {
       framework: ['next', 'express', 'django', 'flask'],
@@ -3142,7 +3145,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'image_generation',
     popularity_score: 90,
     difficulty_level: 'beginner',
-    tags: ['ai', 'image-generation', 'art', 'creative', 'design', 'visual'],
+    tags: ['ai', 'image-generation', 'art', 'creative', 'design', 'visual', '미드저니', 'AI', '이미지'],
     alternatives: ['stability-ai', 'leonardo-ai', 'ideogram', 'gwanggo'],
     compatibility: {
       framework: [],
@@ -3196,7 +3199,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'video_generation',
     popularity_score: 78,
     difficulty_level: 'beginner',
-    tags: ['ai', 'video-generation', 'gen-4', 'creative', 'editing', 'lip-sync'],
+    tags: ['ai', 'video-generation', 'gen-4', 'creative', 'editing', 'lip-sync', '런웨이', 'AI', '비디오'],
     alternatives: ['sora', 'pika', 'leonardo-ai', 'gwanggo'],
     compatibility: {
       framework: ['next', 'express', 'django', 'flask'],
@@ -3251,7 +3254,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'video_generation',
     popularity_score: 85,
     difficulty_level: 'beginner',
-    tags: ['ai', 'video-generation', 'text-to-video', 'openai', 'cinematic'],
+    tags: ['ai', 'video-generation', 'text-to-video', 'openai', 'cinematic', '소라', 'AI', '비디오'],
     alternatives: ['runway-ml', 'pika', 'leonardo-ai'],
     compatibility: {
       framework: ['next', 'express', 'django', 'flask'],
@@ -3307,7 +3310,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'image_generation',
     popularity_score: 72,
     difficulty_level: 'beginner',
-    tags: ['ai', 'image-generation', 'game-art', 'flux', 'creative', 'assets'],
+    tags: ['ai', 'image-generation', 'game-art', 'flux', 'creative', 'assets', '레오나르도', 'AI', '이미지'],
     alternatives: ['midjourney', 'stability-ai', 'ideogram', 'gwanggo'],
     compatibility: {
       framework: ['next', 'express', 'django', 'flask'],
@@ -3360,7 +3363,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'speech_to_text',
     popularity_score: 75,
     difficulty_level: 'beginner',
-    tags: ['ai', 'stt', 'speech', 'voice', 'transcription', 'real-time', 'low-latency'],
+    tags: ['ai', 'stt', 'speech', 'voice', 'transcription', 'real-time', 'low-latency', '딥그램', '음성인식'],
     alternatives: ['assemblyai', 'openai'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'django', 'flask'],
@@ -3416,7 +3419,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'speech_to_text',
     popularity_score: 73,
     difficulty_level: 'beginner',
-    tags: ['ai', 'stt', 'speech', 'transcription', 'medical', 'accuracy', 'slam-1'],
+    tags: ['ai', 'stt', 'speech', 'transcription', 'medical', 'accuracy', 'slam-1', '어셈블리AI', '음성인식'],
     alternatives: ['deepgram', 'openai'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'django', 'flask'],
@@ -3479,7 +3482,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'voice-synthesis',
     popularity_score: 65,
     difficulty_level: 'beginner',
-    tags: ['ai', 'tts', 'voice', 'speech', 'clone', 'text-to-speech', 'audio'],
+    tags: ['ai', 'tts', 'voice', 'speech', 'clone', 'text-to-speech', 'audio', '플레이에이치티', '음성합성'],
     alternatives: ['elevenlabs', 'openai'],
     compatibility: {
       framework: ['next', 'express', 'django', 'flask'],
@@ -3527,7 +3530,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'code_assistant',
     popularity_score: 75,
     difficulty_level: 'beginner',
-    tags: ['ai', 'coding-assistant', 'ide', 'agentic', 'codeium', 'autocomplete'],
+    tags: ['ai', 'coding-assistant', 'ide', 'agentic', 'codeium', 'autocomplete', '윈드서프', '코딩어시스턴트'],
     alternatives: ['cursor', 'github-copilot', 'claude-code'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'svelte', 'express', 'django'],
@@ -3573,7 +3576,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'code_assistant',
     popularity_score: 68,
     difficulty_level: 'beginner',
-    tags: ['ai', 'coding-assistant', 'privacy', 'on-premises', 'compliance', 'soc2'],
+    tags: ['ai', 'coding-assistant', 'privacy', 'on-premises', 'compliance', 'soc2', '탭나인', '코딩어시스턴트'],
     alternatives: ['github-copilot', 'cursor', 'windsurf'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'angular', 'express', 'django'],
@@ -3632,7 +3635,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'code_assistant',
     popularity_score: 70,
     difficulty_level: 'beginner',
-    tags: ['ai', 'coding-assistant', 'aws', 'amazon', 'code-transformation', 'agent'],
+    tags: ['ai', 'coding-assistant', 'aws', 'amazon', 'code-transformation', 'agent', '아마존 큐', '코딩어시스턴트'],
     alternatives: ['github-copilot', 'cursor', 'claude-code'],
     compatibility: {
       framework: ['next', 'express', 'django', 'flask', 'spring'],
@@ -3691,7 +3694,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'vector_db',
     popularity_score: 76,
     difficulty_level: 'intermediate',
-    tags: ['ai', 'vector-db', 'embeddings', 'hybrid-search', 'knowledge-graph', 'open-source'],
+    tags: ['ai', 'vector-db', 'embeddings', 'hybrid-search', 'knowledge-graph', 'open-source', '위비에이트', '벡터DB'],
     alternatives: ['pinecone', 'qdrant', 'chroma'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'django', 'flask'],
@@ -3753,7 +3756,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'vector_db',
     popularity_score: 74,
     difficulty_level: 'intermediate',
-    tags: ['ai', 'vector-db', 'rust', 'high-performance', 'distributed', 'open-source'],
+    tags: ['ai', 'vector-db', 'rust', 'high-performance', 'distributed', 'open-source', '큐드란트', '벡터DB'],
     alternatives: ['pinecone', 'weaviate', 'chroma'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'django', 'flask'],
@@ -3814,7 +3817,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'vector_db',
     popularity_score: 72,
     difficulty_level: 'beginner',
-    tags: ['ai', 'vector-db', 'lightweight', 'prototyping', 'embeddings', 'open-source'],
+    tags: ['ai', 'vector-db', 'lightweight', 'prototyping', 'embeddings', 'open-source', '크로마', '벡터DB'],
     alternatives: ['pinecone', 'weaviate', 'qdrant'],
     compatibility: {
       framework: ['next', 'express', 'django', 'flask'],
@@ -3870,7 +3873,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'ai_agent',
     popularity_score: 76,
     difficulty_level: 'intermediate',
-    tags: ['ai', 'agents', 'multi-agent', 'automation', 'orchestration', 'open-source'],
+    tags: ['ai', 'agents', 'multi-agent', 'automation', 'orchestration', 'open-source', '크루AI', '에이전트'],
     alternatives: ['langchain', 'dify', 'autogen'],
     compatibility: {
       framework: ['next', 'express', 'django', 'flask'],
@@ -3933,7 +3936,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'ai_agent',
     popularity_score: 78,
     difficulty_level: 'beginner',
-    tags: ['ai', 'no-code', 'low-code', 'rag', 'workflow', 'agents', 'llm-app', 'open-source'],
+    tags: ['ai', 'no-code', 'low-code', 'rag', 'workflow', 'agents', 'llm-app', 'open-source', '디파이', '노코드', 'AI'],
     alternatives: ['langchain', 'crewai', 'flowise'],
     compatibility: {
       framework: ['next', 'express', 'django', 'flask'],
@@ -3989,7 +3992,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'llm-inference',
     popularity_score: 74,
     difficulty_level: 'beginner',
-    tags: ['ai', 'llm', 'inference', 'open-source', 'fast', 'hosting'],
+    tags: ['ai', 'llm', 'inference', 'open-source', 'fast', 'hosting', '투게더', 'AI'],
     alternatives: ['groq', 'fireworks-ai', 'replicate'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'django', 'flask'],
@@ -4045,7 +4048,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'llm-inference',
     popularity_score: 70,
     difficulty_level: 'beginner',
-    tags: ['ai', 'llm', 'inference', 'fireattention', 'compliance', 'hipaa', 'multimodal'],
+    tags: ['ai', 'llm', 'inference', 'fireattention', 'compliance', 'hipaa', 'multimodal', '파이어웍스', 'AI'],
     alternatives: ['groq', 'together-ai', 'replicate'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'django', 'flask'],
@@ -4106,7 +4109,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'mlops',
     popularity_score: 72,
     difficulty_level: 'intermediate',
-    tags: ['ai', 'gpu', 'serverless', 'ml', 'training', 'inference', 'batch'],
+    tags: ['ai', 'gpu', 'serverless', 'ml', 'training', 'inference', 'batch', '모달', 'GPU', '서버리스'],
     alternatives: ['replicate', 'together-ai', 'anyscale'],
     compatibility: {
       framework: ['django', 'flask', 'fastapi'],
@@ -4167,7 +4170,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'mlops',
     popularity_score: 80,
     difficulty_level: 'intermediate',
-    tags: ['ai', 'mlops', 'experiment-tracking', 'model-eval', 'observability', 'dashboard'],
+    tags: ['ai', 'mlops', 'experiment-tracking', 'model-eval', 'observability', 'dashboard', '웨이츠앤바이어시스', 'MLOps'],
     alternatives: ['mlflow', 'neptune-ai', 'comet-ml'],
     compatibility: {
       framework: ['pytorch', 'tensorflow', 'jax', 'fastai'],
@@ -4236,7 +4239,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'social-media',
     popularity_score: 95,
     difficulty_level: 'intermediate',
-    tags: ['sns', 'social-media', 'instagram', 'meta', 'graph-api', 'reels', 'stories', 'marketing', 'influencer'],
+    tags: ['sns', 'social-media', 'instagram', 'meta', 'graph-api', 'reels', 'stories', 'marketing', 'influencer', '인스타그램', 'SNS'],
     alternatives: ['threads-api', 'tiktok-api', 'x-api'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'django', 'flask', 'rails'],
@@ -4305,7 +4308,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'video-platform',
     popularity_score: 93,
     difficulty_level: 'intermediate',
-    tags: ['sns', 'video', 'youtube', 'google', 'streaming', 'live', 'analytics', 'creator', 'playlist'],
+    tags: ['sns', 'video', 'youtube', 'google', 'streaming', 'live', 'analytics', 'creator', 'playlist', '유튜브', '동영상'],
     alternatives: ['tiktok-api'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'django', 'flask', 'rails', 'spring'],
@@ -4383,7 +4386,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'social-media',
     popularity_score: 88,
     difficulty_level: 'intermediate',
-    tags: ['sns', 'social-media', 'twitter', 'x', 'tweet', 'realtime', 'marketing', 'analytics', 'spaces'],
+    tags: ['sns', 'social-media', 'twitter', 'x', 'tweet', 'realtime', 'marketing', 'analytics', 'spaces', '트위터', '엑스', 'SNS'],
     alternatives: ['threads-api', 'instagram-api'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'django', 'flask', 'rails'],
@@ -4443,7 +4446,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'social-media',
     popularity_score: 90,
     difficulty_level: 'intermediate',
-    tags: ['sns', 'social-media', 'tiktok', 'short-video', 'creator', 'marketing', 'viral', 'duet', 'stitch'],
+    tags: ['sns', 'social-media', 'tiktok', 'short-video', 'creator', 'marketing', 'viral', 'duet', 'stitch', '틱톡', '숏폼'],
     alternatives: ['youtube-api', 'instagram-api'],
     compatibility: {
       framework: ['next', 'express', 'django', 'flask'],
@@ -4502,7 +4505,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'professional-sns',
     popularity_score: 82,
     difficulty_level: 'intermediate',
-    tags: ['sns', 'professional', 'linkedin', 'b2b', 'recruiting', 'networking', 'career', 'marketing', 'microsoft'],
+    tags: ['sns', 'professional', 'linkedin', 'b2b', 'recruiting', 'networking', 'career', 'marketing', 'microsoft', '링크드인', '채용'],
     alternatives: ['x-api'],
     compatibility: {
       framework: ['next', 'express', 'django', 'flask', 'spring'],
@@ -4565,7 +4568,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'social-media',
     popularity_score: 78,
     difficulty_level: 'beginner',
-    tags: ['sns', 'social-media', 'threads', 'meta', 'text', 'microblog', 'instagram', 'poll'],
+    tags: ['sns', 'social-media', 'threads', 'meta', 'text', 'microblog', 'instagram', 'poll', '쓰레드', 'SNS'],
     alternatives: ['x-api', 'instagram-api'],
     compatibility: {
       framework: ['next', 'express', 'fastify', 'django', 'flask'],
@@ -4637,7 +4640,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'payment_gateway',
     popularity_score: 62,
     difficulty_level: 'beginner',
-    tags: ['payment', 'subscription', 'digital-products', 'merchant-of-record', 'open-source', 'indie', 'saas', 'tax'],
+    tags: ['payment', 'subscription', 'digital-products', 'merchant-of-record', 'open-source', 'indie', 'saas', 'tax', '폴라', '결제', '구독'],
     alternatives: ['stripe', 'lemon-squeezy'],
     compatibility: {
       framework: ['next', 'nuxt', 'remix', 'sveltekit', 'astro', 'express', 'fastify', 'laravel'],
@@ -4687,7 +4690,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'ai_creative',
     popularity_score: 60,
     difficulty_level: 'beginner',
-    tags: ['ai', 'advertising', 'image-generation', 'video-generation', 'marketing', 'creative', 'ecommerce', 'korean', '조코딩'],
+    tags: ['ai', 'advertising', 'image-generation', 'video-generation', 'marketing', 'creative', 'ecommerce', 'korean', '조코딩', '광고', 'AI', '이미지'],
     alternatives: ['midjourney', 'leonardo-ai', 'runway-ml'],
     compatibility: {
       framework: [],
@@ -4733,7 +4736,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'platform',
     popularity_score: 70,
     difficulty_level: 'beginner',
-    tags: ['서비스맵', '원클릭배포', '환경변수', '시각화', 'devtools', 'deploy', 'platform', 'korean', '바이브코딩'],
+    tags: ['서비스맵', '원클릭배포', '환경변수', '시각화', 'devtools', 'deploy', 'platform', 'korean', '바이브코딩', '링크맵'],
     alternatives: ['vercel', 'netlify', 'railway'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'svelte'],
@@ -4784,7 +4787,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'behavior-analytics',
     popularity_score: 75,
     difficulty_level: 'beginner',
-    tags: ['analytics', 'heatmap', 'session-recording', 'microsoft', 'free', 'ux', 'behavior', 'scroll-depth'],
+    tags: ['analytics', 'heatmap', 'session-recording', 'microsoft', 'free', 'ux', 'behavior', 'scroll-depth', '마이크로소프트 클래리티', '히트맵', '분석'],
     alternatives: ['ga4', 'posthog', 'mixpanel', 'plausible'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'svelte', 'angular'],
@@ -4832,7 +4835,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'ai_agent',
     popularity_score: 82,
     difficulty_level: 'beginner',
-    tags: ['ai', 'ide', 'agentic', 'google', 'gemini', 'vibe-coding', 'code-generation', 'autonomous', '바이브코딩'],
+    tags: ['ai', 'ide', 'agentic', 'google', 'gemini', 'vibe-coding', 'code-generation', 'autonomous', '바이브코딩', '구글 안티그래비티', '코딩어시스턴트'],
     alternatives: ['cursor', 'github-copilot', 'windsurf'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'svelte', 'angular', 'express', 'django', 'flask'],
@@ -4886,7 +4889,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'workflow_automation',
     popularity_score: 85,
     difficulty_level: 'beginner',
-    tags: ['automation', 'workflow', 'no-code', 'open-source', 'integration', 'webhook', 'api', 'self-hosted', 'ai-agent'],
+    tags: ['automation', 'workflow', 'no-code', 'open-source', 'integration', 'webhook', 'api', 'self-hosted', 'ai-agent', '엔에이트엔', '자동화', '워크플로우'],
     alternatives: ['zapier', 'make', 'trigger-dev'],
     compatibility: {
       framework: ['next', 'react', 'express', 'django', 'flask'],
@@ -4937,7 +4940,7 @@ export const servicesV2: ServiceSeedV2[] = [
     subcategory: 'ai_creative',
     popularity_score: 70,
     difficulty_level: 'beginner',
-    tags: ['ai', 'ui-design', 'code-generation', 'prototyping', 'google-labs', 'vibe-design', 'frontend'],
+    tags: ['ai', 'ui-design', 'code-generation', 'prototyping', 'google-labs', 'vibe-design', 'frontend', '구글 스티치', '통합', 'AI'],
     alternatives: ['google-antigravity'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'angular', 'svelte'],

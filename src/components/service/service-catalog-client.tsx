@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Search, ExternalLink, ArrowRight, LayoutGrid, Settings2, X, List, Sparkles, KeyRound, Plus } from 'lucide-react';
+import { matchKorean } from '@/lib/utils/korean-search';
 import { CreateCustomServiceDialog } from '@/components/service/create-custom-service-dialog';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { domainLabels, domainIcons, allCategoryLabels, allCategoryEmojis, domainCategoryMap } from '@/lib/constants/service-filters';
@@ -151,9 +152,9 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
     if (q.length < 2) return [];
     return services
       .filter((s) => {
-        const tagMatch = s.tags?.some((tag) => tag.toLowerCase().includes(q));
-        const catLabel = (allCategoryLabels[s.category as ServiceCategory] || '').toLowerCase();
-        return tagMatch || catLabel.includes(q);
+        const tagMatch = s.tags?.some((tag) => matchKorean(q, tag));
+        const catLabel = allCategoryLabels[s.category as ServiceCategory] || '';
+        return tagMatch || matchKorean(q, catLabel);
       })
       .sort((a, b) => (b.popularity_score || 0) - (a.popularity_score || 0))
       .slice(0, 3);
@@ -176,14 +177,16 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
       // Free tier filter (both modes)
       if (freeTierFilter !== 'all' && s.free_tier_quality !== freeTierFilter) return false;
 
-      // Search (both modes)
+      // Search (both modes) — 한글 초성/음역 매칭 포함
       if (search) {
         const q = search.toLowerCase();
-        const tagMatch = s.tags?.some((t) => t.toLowerCase().includes(q));
+        const tagMatch = s.tags?.some((t) => matchKorean(q, t));
         return (
           s.name.toLowerCase().includes(q) ||
+          matchKorean(q, s.name) ||
           s.description?.toLowerCase().includes(q) ||
           s.description_ko?.toLowerCase().includes(q) ||
+          matchKorean(q, s.description_ko || '') ||
           s.slug.toLowerCase().includes(q) ||
           tagMatch
         );
