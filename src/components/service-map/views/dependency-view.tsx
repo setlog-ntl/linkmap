@@ -209,7 +209,9 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
   // Track zone position at drag start for delta calculation
   const zoneDragStartRef = useRef<Map<string, { x: number; y: number }>>(new Map());
 
-  // Compute optimal handle pair based on relative node positions
+  // Compute optimal handle pair for zone/service connections.
+  // Uses a horizontal bias (×1.15) so edges prefer left↔right routing,
+  // matching the natural reading direction of the layout.
   const computeHandles = useCallback((srcId: string, tgtId: string) => {
     const srcNode = nodesRef.current.find((n) => n.id === srcId);
     const tgtNode = nodesRef.current.find((n) => n.id === tgtId);
@@ -227,8 +229,9 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
     const sp = isZoneSrc ? 'zs' : 'source';
     const tp = isZoneTgt ? 'zt' : '';
 
-    // Pick direction based on dominant axis
-    if (Math.abs(dx) >= Math.abs(dy)) {
+    // Horizontal bias for more readable routing
+    const HORIZONTAL_BIAS = 1.15;
+    if (Math.abs(dx) * HORIZONTAL_BIAS >= Math.abs(dy)) {
       return dx > 0
         ? { sourceHandle: `${sp}-right`, targetHandle: tp ? `${tp}-left` : 'left' }
         : { sourceHandle: `${sp}-left`, targetHandle: tp ? `${tp}-right` : 'right' };

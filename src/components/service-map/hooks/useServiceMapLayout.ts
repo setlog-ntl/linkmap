@@ -33,9 +33,15 @@ export interface UseServiceMapLayoutReturn {
 }
 
 /**
- * Compute optimal sourceHandle/targetHandle based on relative node positions.
- * Zone-aware: when nodes are in different zones, use zone center direction
- * to determine the primary edge direction for more natural inter-zone routing.
+ * Pick the best handle pair for an edge between two nodes.
+ *
+ * For **intra-zone** edges we use pure node-center deltas.
+ * For **inter-zone** edges we blend node-direction with zone-direction.
+ *   – If the zone direction clearly dominates one axis (ratio > 1.8),
+ *     we follow the zone axis with a very high weight (90 %).
+ *   – Otherwise we use 70/30 zone/node blend.
+ * A small horizontal bias (×1.15) is applied so layouts read left-to-right
+ * naturally and edges only go vertical when the vertical gap is clearly larger.
  */
 function computeEdgeHandles(
   srcNode: Node,
@@ -57,23 +63,31 @@ function computeEdgeHandles(
   let dx = tgtCx - srcCx;
   let dy = tgtCy - srcCy;
 
-  // Zone-aware: for inter-zone edges, blend zone direction with node direction
-  // This prevents edges from routing vertically when zones are side-by-side
+  // Zone-aware blending for inter-zone edges
   if (zoneCenters && srcZoneKey && tgtZoneKey && srcZoneKey !== tgtZoneKey) {
     const srcZC = zoneCenters.get(srcZoneKey);
     const tgtZC = zoneCenters.get(tgtZoneKey);
     if (srcZC && tgtZC) {
       const zdx = tgtZC.cx - srcZC.cx;
       const zdy = tgtZC.cy - srcZC.cy;
-      // Blend: 60% zone direction + 40% node direction
-      // This respects zone layout while allowing node-level fine-tuning
-      dx = zdx * 0.6 + dx * 0.4;
-      dy = zdy * 0.6 + dy * 0.4;
+      const azx = Math.abs(zdx);
+      const azy = Math.abs(zdy);
+
+      // When one zone axis clearly dominates (e.g. zones side-by-side)
+      // use a very strong zone bias so edges don't exit from the wrong side.
+      const ratio = azx > 0 && azy > 0 ? Math.max(azx, azy) / Math.min(azx, azy) : 10;
+      const zoneWeight = ratio > 1.8 ? 0.9 : 0.7;
+      const nodeWeight = 1 - zoneWeight;
+
+      dx = zdx * zoneWeight + dx * nodeWeight;
+      dy = zdy * zoneWeight + dy * nodeWeight;
     }
   }
 
-  // Dominant axis determines direction. Target handle is OPPOSITE to source handle.
-  if (Math.abs(dx) >= Math.abs(dy)) {
+  // Slight horizontal bias — diagrams are typically wider than tall,
+  // so horizontal routing is more natural / readable.
+  const HORIZONTAL_BIAS = 1.15;
+  if (Math.abs(dx) * HORIZONTAL_BIAS >= Math.abs(dy)) {
     return dx > 0
       ? { sourceHandle: 'source-right', targetHandle: 'left' }
       : { sourceHandle: 'source-left', targetHandle: 'right' };

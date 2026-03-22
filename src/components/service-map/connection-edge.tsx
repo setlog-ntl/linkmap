@@ -80,6 +80,22 @@ function ConnectionEdge({
     adjustedTargetY += py * parallelOffset;
   }
 
+  // Adaptive curvature: lower for long edges (avoids wide sweeping arcs),
+  // higher for short edges or perpendicular handle pairs.
+  const edgeLength = Math.sqrt(
+    (adjustedTargetX - adjustedSourceX) ** 2 + (adjustedTargetY - adjustedSourceY) ** 2,
+  );
+  const isPerpendicularHandles =
+    (sourcePosition === 'left' || sourcePosition === 'right') !==
+    (targetPosition === 'left' || targetPosition === 'right');
+  const baseCurvature = isPerpendicularHandles ? 0.35 : 0.25;
+  // Scale down for long edges (>400px), scale up for short (<120px)
+  const curvature = edgeLength > 400
+    ? baseCurvature * 0.6
+    : edgeLength < 120
+      ? baseCurvature * 1.3
+      : baseCurvature;
+
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX: adjustedSourceX,
     sourceY: adjustedSourceY,
@@ -87,7 +103,7 @@ function ConnectionEdge({
     targetY: adjustedTargetY,
     sourcePosition,
     targetPosition,
-    curvature: 0.25,
+    curvature,
   });
 
   // Dim edges not connected to hovered node
@@ -104,7 +120,6 @@ function ConnectionEdge({
   const strokeDasharray = hovered && !isStaticDashed ? '5 5' : (isStaticDashed ? s.dash : undefined);
 
   // Via hole for long edges only (200px+)
-  const edgeLength = Math.sqrt((adjustedTargetX - adjustedSourceX) ** 2 + (adjustedTargetY - adjustedSourceY) ** 2);
   const midX = (adjustedSourceX + adjustedTargetX) / 2;
   const midY = (adjustedSourceY + adjustedTargetY) / 2;
   const showViaHole = edgeLength > 200;
