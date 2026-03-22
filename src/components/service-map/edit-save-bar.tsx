@@ -2,15 +2,16 @@
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Save, X, Undo2, Redo2, Keyboard } from 'lucide-react';
+import { Save, X, Undo2, Redo2, Keyboard, LayoutGrid } from 'lucide-react';
 import { useServiceMapStore } from '@/stores/service-map-store';
 
 interface EditSaveBarProps {
   onSave: () => void;
   saving?: boolean;
+  onAutoArrange?: () => void;
 }
 
-export function EditSaveBar({ onSave, saving }: EditSaveBarProps) {
+export function EditSaveBar({ onSave, saving, onAutoArrange }: EditSaveBarProps) {
   const {
     editMode, setEditMode, clearPendingChanges, pendingChangeCount,
     canUndo, canRedo, undo, redo,
@@ -63,6 +64,22 @@ export function EditSaveBar({ onSave, saving }: EditSaveBarProps) {
             <Redo2 className="h-3 w-3" />
           </Button>
         </div>
+
+        {onAutoArrange && (
+          <>
+            <div className="w-px h-4 bg-border" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={onAutoArrange}
+              title="연결 분석 기반 자동 정렬"
+            >
+              <LayoutGrid className="mr-1 h-3 w-3" />
+              자동 정렬
+            </Button>
+          </>
+        )}
 
         <div className="w-px h-4 bg-border" />
 

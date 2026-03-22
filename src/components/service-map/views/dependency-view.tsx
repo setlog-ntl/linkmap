@@ -40,6 +40,9 @@ import { useUpdateProject } from '@/lib/queries/projects';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queries/keys';
 import { domainToZone, type ZoneKey } from '@/lib/layout/zone-layout';
+import { computeSnapGuides, type GuideLine } from '@/lib/layout/snap-guides';
+import { autoArrange } from '@/lib/layout/auto-arrange';
+import { SnapGuideLines } from '@/components/service-map/snap-guide-lines';
 import { useServiceMapNodes } from '@/components/service-map/hooks/useServiceMapNodes';
 import { useServiceMapLayout } from '@/components/service-map/hooks/useServiceMapLayout';
 import { useServiceMapInteractions } from '@/components/service-map/hooks/useServiceMapInteractions';
@@ -103,6 +106,8 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
 
   // Selected node for floating toolbar
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  // Snap guide lines during drag
+  const [snapGuides, setSnapGuides] = useState<GuideLine[]>([]);
   const rfInstance = useRef<ReactFlowInstance | null>(null);
 
   const queryClient = useQueryClient();
@@ -290,6 +295,32 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
   }, []);
 
   const onNodesChange = useCallback((changes: NodeChange<Node>[]) => {
+    // Snap guides: detect alignment during drag
+    let hasActiveDrag = false;
+    for (const change of changes) {
+      if (change.type === 'position' && change.dragging && change.position) {
+        hasActiveDrag = true;
+        const draggedNode = nodesRef.current.find((n) => n.id === change.id);
+        if (draggedNode) {
+          const w = (draggedNode.style?.width as number) || (change.id.startsWith('zone-') ? 500 : 180);
+          const h = (draggedNode.style?.height as number) || (change.id.startsWith('zone-') ? 300 : 72);
+          const snap = computeSnapGuides(change.id, change.position.x, change.position.y, w, h, nodesRef.current);
+          setSnapGuides(snap.guides);
+          // Apply snapped position
+          if (snap.guides.length > 0) {
+            change.position = { x: snap.x, y: snap.y };
+          }
+        }
+        break;
+      }
+      if (change.type === 'position' && change.dragging === false) {
+        setSnapGuides([]);
+      }
+    }
+    if (!hasActiveDrag && changes.some((c) => c.type === 'position' && c.dragging === false)) {
+      setSnapGuides([]);
+    }
+
     setNodes((prevNodes) => {
       let updated = applyNodeChanges(changes, prevNodes);
 
@@ -502,6 +533,36 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
     return domain ? domainToZone(domain as ServiceDomain, activeZones) : null;
   }, [nodesResult, activeZones]);
 
+  // Auto-arrange: analyze connections and compute optimal layout
+  const handleAutoArrange = useCallback(() => {
+    const currentNodes = nodesRef.current;
+    const currentEdges = edges;
+    const getZoneKey = (nodeId: string): string | null => {
+      if (nodeId.startsWith('zone-')) return nodeId.replace('zone-', '');
+      const domain = nodesResult.getDomain(nodeId);
+      return domain ? domainToZone(domain as ServiceDomain, activeZones) : null;
+    };
+
+    const result = autoArrange(currentNodes, currentEdges, getZoneKey);
+
+    // Apply zone positions and sizes
+    for (const [zoneId, pos] of Object.entries(result.zonePositions)) {
+      setZonePositionOverride(zoneId, pos);
+    }
+    for (const [zoneId, size] of Object.entries(result.zoneSizes)) {
+      useServiceMapStore.getState().setZoneSizeOverride(zoneId, size);
+    }
+
+    // Apply node positions
+    for (const [nodeId, pos] of Object.entries(result.nodePositions)) {
+      setPendingNodePosition(nodeId, pos);
+    }
+
+    toast.success('자동 정렬이 적용되었습니다');
+    // Fit view after layout settles
+    setTimeout(() => rfInstance.current?.fitView({ padding: 0.3 }), 150);
+  }, [edges, nodesResult, activeZones, setZonePositionOverride, setPendingNodePosition]);
+
   const handleSaveChanges = useCallback(async () => {
     setSaving(true);
     try {
@@ -655,8 +716,9 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
             ) : (
               <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="var(--border)" style={{ opacity: 0.5 }} />
             )}
+            {editMode && snapGuides.length > 0 && <SnapGuideLines guides={snapGuides} />}
           </ReactFlow>
-          {!isReadOnly && <EditSaveBar onSave={handleSaveChanges} saving={saving} />}
+          {!isReadOnly && <EditSaveBar onSave={handleSaveChanges} saving={saving} onAutoArrange={handleAutoArrange} />}
           {/* Floating edit toolbar above selected node/zone */}
           {editMode && selectedNodeId && (() => {
             const selectedNode = nodes.find((n) => n.id === selectedNodeId);
