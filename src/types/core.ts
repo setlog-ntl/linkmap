@@ -55,7 +55,7 @@ export type HealthCheckStatus = 'healthy' | 'unhealthy' | 'degraded' | 'unknown'
 export type TeamRole = 'admin' | 'editor' | 'viewer';
 
 export type ViewGroup = 'core' | 'runtime' | 'growth' | 'intelligence' | 'infra';
-export type ViewLevel = 'status' | 'map' | 'dependency';
+export type ViewLevel = 'map' | 'dependency';
 
 export type EasyCategory =
   | 'login_signup'

@@ -1,12 +1,11 @@
 'use client';
 
-import { Map, GitBranch, LayoutGrid } from 'lucide-react';
+import { Map, GitBranch } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import type { ViewLevel } from '@/types';
 
 const LEVELS: { key: ViewLevel; icon: typeof Map; label: string }[] = [
-  { key: 'status', icon: LayoutGrid, label: '한눈에 보기' },
   { key: 'map', icon: Map, label: '맵 보기' },
   { key: 'dependency', icon: GitBranch, label: '의존성 보기' },
 ];
