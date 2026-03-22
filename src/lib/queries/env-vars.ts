@@ -234,6 +234,8 @@ export function useSyncEnvServices(projectId: string) {
       added_services: number;
       updated_statuses: number;
       auto_connections: number;
+      matched_details: { key_name: string; service_name: string; confidence: 'exact' | 'prefix' }[];
+      added_service_names: string[];
     }> => {
       const res = await fetch('/api/env/sync', {
         method: 'POST',

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Key, RefreshCw, CloudCog, Clock, AlertTriangle } from 'lucide-react';
+import { Key, Sparkles, CloudCog, Clock, AlertTriangle } from 'lucide-react';
 import type { EnvironmentVariable } from '@/types';
 
 interface EnvStatsHeaderProps {
@@ -78,10 +78,22 @@ export function EnvStatsHeader({ projectId, envVars, onSync, isSyncing }: EnvSta
           <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
             <CloudCog className="h-5 w-5 text-blue-500" />
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-2xl font-bold">{stats.syncedServices}</p>
             <p className="text-xs text-muted-foreground">연결된 서비스</p>
           </div>
+          {onSync && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs gap-1.5 shrink-0"
+              onClick={onSync}
+              disabled={isSyncing}
+            >
+              <Sparkles className={`h-3.5 w-3.5 ${isSyncing ? 'animate-pulse' : ''}`} />
+              {isSyncing ? '확인 중...' : '서비스 확인'}
+            </Button>
+          )}
         </CardContent>
       </Card>
 
@@ -96,18 +108,6 @@ export function EnvStatsHeader({ projectId, envVars, onSync, isSyncing }: EnvSta
             </p>
             <p className="text-xs text-muted-foreground">마지막 업데이트</p>
           </div>
-          {onSync && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 ml-auto shrink-0"
-              onClick={onSync}
-              disabled={isSyncing}
-              aria-label="서비스 동기화"
-            >
-              <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-            </Button>
-          )}
         </CardContent>
       </Card>
 

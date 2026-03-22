@@ -61,6 +61,8 @@ import type { EnvServiceGroup } from '@/components/env/env-data-table';
 import { EnvDoctorPanel } from '@/components/ai/env-doctor-panel';
 import { EnvRawEditorDialog } from '@/components/env/env-raw-editor-dialog';
 import { EnvCopyEnvDialog } from '@/components/env/env-copy-env-dialog';
+import { EnvSyncResultDialog } from '@/components/env/env-sync-result-dialog';
+import type { EnvSyncResult } from '@/components/env/env-sync-result-dialog';
 import type { Environment, EnvironmentVariable } from '@/types';
 
 export default function ProjectEnvPage() {
@@ -107,6 +109,8 @@ export default function ProjectEnvPage() {
   const [rawEditorOpen, setRawEditorOpen] = useState(false);
   const [copyEnvOpen, setCopyEnvOpen] = useState(false);
   const [viewMode, setViewMode] = useState<EnvViewMode>('all');
+  const [syncResultOpen, setSyncResultOpen] = useState(false);
+  const [syncResult, setSyncResult] = useState<EnvSyncResult | null>(null);
 
   const envKeyServiceMap = useMemo(
     () => buildEnvKeyServiceMap(catalogServices),
@@ -365,11 +369,8 @@ export default function ProjectEnvPage() {
         onSync={async () => {
           try {
             const result = await syncEnvServices.mutateAsync();
-            const parts: string[] = [];
-            if (result.updated_vars > 0) parts.push(`변수 ${result.updated_vars}개 서비스 매칭`);
-            if (result.added_services > 0) parts.push(`서비스 ${result.added_services}개 추가`);
-            if (result.auto_connections > 0) parts.push(`연결 ${result.auto_connections}개 생성`);
-            toast.success(parts.length > 0 ? parts.join(' · ') : '이미 최신 상태입니다');
+            setSyncResult(result);
+            setSyncResultOpen(true);
           } catch {
             toast.error(t(locale, 'envVar.syncFailed'));
           }
@@ -677,6 +678,13 @@ export default function ProjectEnvPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Sync Result Dialog */}
+      <EnvSyncResultDialog
+        open={syncResultOpen}
+        onOpenChange={setSyncResultOpen}
+        result={syncResult}
+      />
 
       {/* Edit Dialog */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>

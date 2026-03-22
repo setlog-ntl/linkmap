@@ -47,11 +47,13 @@ export async function POST(request: NextRequest) {
 
     // Auto-detect service_id for env vars that don't have one yet
     const toUpdate: { id: string; service_id: string }[] = [];
+    const matchedDetails: { key_name: string; service_name: string; confidence: 'exact' | 'prefix' }[] = [];
     for (const ev of allEnvVars || []) {
       if (ev.service_id) continue; // already assigned
       const match = matchEnvKeyToServiceFuzzy(ev.key_name, exactMap, prefixMap);
       if (match) {
         toUpdate.push({ id: ev.id, service_id: match.serviceId });
+        matchedDetails.push({ key_name: ev.key_name, service_name: match.serviceName, confidence: match.confidence });
       }
     }
 
@@ -104,7 +106,15 @@ export async function POST(request: NextRequest) {
     );
 
     let addedServices = 0;
+    const addedServiceNames: string[] = [];
     if (missingServiceIds.length > 0) {
+      // 추가할 서비스 이름 조회
+      const { data: serviceNames = [] } = await supabase
+        .from('services')
+        .select('id, name')
+        .in('id', missingServiceIds);
+      const svcNameMap = new Map((serviceNames || []).map((s) => [s.id, s.name]));
+
       const { data: inserted } = await supabase
         .from('project_services')
         .insert(
@@ -116,6 +126,10 @@ export async function POST(request: NextRequest) {
         )
         .select();
       addedServices = inserted?.length ?? 0;
+      for (const sid of missingServiceIds) {
+        const name = svcNameMap.get(sid);
+        if (name) addedServiceNames.push(name);
+      }
     }
 
     // Update existing service statuses based on required env vars completeness
@@ -224,6 +238,8 @@ export async function POST(request: NextRequest) {
       added_services: addedServices,
       updated_statuses: updatedStatuses,
       auto_connections: autoConnections,
+      matched_details: matchedDetails,
+      added_service_names: addedServiceNames,
     });
   } catch (error) {
     return serverError(error instanceof Error ? error.message : 'Unknown error');
