@@ -3,6 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,6 +49,9 @@ interface CredentialsTableProps {
   onToggleShow: (id: string) => void;
   onEdit: (cred: ServiceCredential) => void;
   onDelete: (id: string) => void;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (id: string) => void;
+  onToggleSelectAll?: () => void;
 }
 
 export function CredentialsTable({
@@ -59,8 +63,14 @@ export function CredentialsTable({
   onToggleShow,
   onEdit,
   onDelete,
+  selectedIds,
+  onToggleSelect,
+  onToggleSelectAll,
 }: CredentialsTableProps) {
   const maskValue = () => '\u2022'.repeat(12);
+  const selectable = !!selectedIds && !!onToggleSelect && !!onToggleSelectAll;
+  const allSelected = selectable && credentials.length > 0 && credentials.every((c) => selectedIds.has(c.id));
+  const someSelected = selectable && credentials.some((c) => selectedIds.has(c.id)) && !allSelected;
 
   const handleCopyUsername = (id: string) => {
     const data = decryptedData[id];
@@ -100,7 +110,16 @@ export function CredentialsTable({
     <Card>
       <CardContent className="p-0">
         {/* Header row - hidden on mobile */}
-        <div className="hidden sm:grid sm:grid-cols-[1fr_160px_120px_100px_80px_60px] gap-4 px-4 py-2 border-b bg-muted/50 text-xs font-medium text-muted-foreground">
+        <div className={`hidden sm:grid gap-4 px-4 py-2 border-b bg-muted/50 text-xs font-medium text-muted-foreground ${selectable ? 'sm:grid-cols-[36px_1fr_160px_120px_100px_80px_60px]' : 'sm:grid-cols-[1fr_160px_120px_100px_80px_60px]'}`}>
+          {selectable && (
+            <div className="flex items-center">
+              <Checkbox
+                checked={allSelected ? true : someSelected ? 'indeterminate' : false}
+                onCheckedChange={() => onToggleSelectAll()}
+                aria-label="전체 선택"
+              />
+            </div>
+          )}
           <div>라벨 / 아이디</div>
           <div>비밀번호</div>
           <div>용도</div>
@@ -113,12 +132,24 @@ export function CredentialsTable({
           {credentials.map((cred) => {
             const isShowing = showValues[cred.id];
             const data = decryptedData[cred.id];
+            const isSelected = selectable && selectedIds.has(cred.id);
 
             return (
               <div
                 key={cred.id}
-                className="flex flex-col sm:grid sm:grid-cols-[1fr_160px_120px_100px_80px_60px] gap-2 sm:gap-4 p-3 sm:p-4 sm:items-center hover:bg-muted/30 transition-colors"
+                className={`flex flex-col sm:grid gap-2 sm:gap-4 p-3 sm:p-4 sm:items-center hover:bg-muted/30 transition-colors ${isSelected ? 'bg-brand-blue/5 dark:bg-brand-blue/10' : ''} ${selectable ? 'sm:grid-cols-[36px_1fr_160px_120px_100px_80px_60px]' : 'sm:grid-cols-[1fr_160px_120px_100px_80px_60px]'}`}
               >
+                {/* Checkbox */}
+                {selectable && (
+                  <div className="flex items-center">
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => onToggleSelect(cred.id)}
+                      aria-label={`${cred.label} 선택`}
+                    />
+                  </div>
+                )}
+
                 {/* Label + Username */}
                 <div className="min-w-0 space-y-1">
                   <div className="flex items-center gap-2">

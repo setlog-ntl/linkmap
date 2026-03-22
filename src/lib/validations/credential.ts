@@ -30,5 +30,18 @@ export const updateCredentialSchema = z.object({
   notes: z.string().max(1000).nullable().optional(),
 });
 
+export const bulkUpdateCredentialSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1, '최소 1개 이상 선택 필요').max(50, '최대 50개까지 일괄 수정 가능'),
+  purpose: z.enum(credentialPurposes).optional(),
+  environment: z.enum(credentialEnvironments).optional(),
+  service_id: z.string().uuid().nullable().optional(),
+});
+
+export const bulkDeleteCredentialSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1, '최소 1개 이상 선택 필요').max(50, '최대 50개까지 일괄 삭제 가능'),
+});
+
 export type CreateCredentialInput = z.infer<typeof createCredentialSchema>;
 export type UpdateCredentialInput = z.infer<typeof updateCredentialSchema>;
+export type BulkUpdateCredentialInput = z.infer<typeof bulkUpdateCredentialSchema>;
+export type BulkDeleteCredentialInput = z.infer<typeof bulkDeleteCredentialSchema>;

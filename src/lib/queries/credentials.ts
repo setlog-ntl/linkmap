@@ -129,6 +129,63 @@ export function useDeleteCredential(projectId: string) {
   });
 }
 
+export function useBulkUpdateCredentials(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (vars: {
+      ids: string[];
+      purpose?: string;
+      environment?: string;
+      service_id?: string | null;
+    }) => {
+      const res = await fetch('/api/credentials/bulk', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(vars),
+      });
+      if (!res.ok) throw new Error('일괄 수정 실패');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.credentials.byProject(projectId) });
+    },
+  });
+}
+
+export function useBulkDeleteCredentials(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const res = await fetch('/api/credentials/bulk', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids }),
+      });
+      if (!res.ok) throw new Error('일괄 삭제 실패');
+      return res.json();
+    },
+    onMutate: async (ids) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.credentials.byProject(projectId) });
+      const previous = queryClient.getQueryData<ServiceCredential[]>(queryKeys.credentials.byProject(projectId));
+      queryClient.setQueryData<ServiceCredential[]>(
+        queryKeys.credentials.byProject(projectId),
+        (old) => (old || []).filter((v) => !ids.includes(v.id)),
+      );
+      return { previous };
+    },
+    onError: (_err, _ids, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(queryKeys.credentials.byProject(projectId), context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.credentials.byProject(projectId) });
+    },
+  });
+}
+
 export function useDecryptCredential() {
   return useMutation({
     mutationFn: async (params: { id: string; field?: 'username' | 'password' | 'both' }): Promise<{ username?: string; password?: string }> => {

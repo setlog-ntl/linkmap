@@ -8,6 +8,8 @@ import {
   useUpdateCredential,
   useDeleteCredential,
   useDecryptCredential,
+  useBulkUpdateCredentials,
+  useBulkDeleteCredentials,
 } from '@/lib/queries/credentials';
 import { useProjectServices, useCatalogServices } from '@/lib/queries/services';
 import { Button } from '@/components/ui/button';
@@ -40,7 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, UserCheck, Loader2, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { Plus, UserCheck, Loader2, ShieldCheck, Eye, EyeOff, CheckSquare, X, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { CredentialsTable } from '@/components/credentials/credentials-table';
 import type { ServiceCredential, CredentialPurpose } from '@/types';
@@ -71,6 +73,8 @@ export default function ProjectCredentialsPage() {
   const updateCredential = useUpdateCredential(projectId);
   const deleteCredential = useDeleteCredential(projectId);
   const decryptCredential = useDecryptCredential();
+  const bulkUpdateCredentials = useBulkUpdateCredentials(projectId);
+  const bulkDeleteCredentials = useBulkDeleteCredentials(projectId);
 
   // State
   const [addOpen, setAddOpen] = useState(false);
@@ -81,7 +85,16 @@ export default function ProjectCredentialsPage() {
   const [showValues, setShowValues] = useState<Record<string, boolean>>({});
   const [search, setSearch] = useState('');
   const [filterPurpose, setFilterPurpose] = useState<string>('__all__');
+  const [filterService, setFilterService] = useState<string>('__all__');
   const [showPassword, setShowPassword] = useState(false);
+
+  // Bulk edit state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkEditOpen, setBulkEditOpen] = useState(false);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkPurpose, setBulkPurpose] = useState<string>('__unchanged__');
+  const [bulkEnv, setBulkEnv] = useState<string>('__unchanged__');
+  const [bulkServiceId, setBulkServiceId] = useState<string>('__unchanged__');
 
   // Add form
   const [newLabel, setNewLabel] = useState('');
@@ -110,7 +123,6 @@ export default function ProjectCredentialsPage() {
         map.set(ps.service_id, ps.service.name);
       }
     }
-    // Also include catalog services for credentials linked to non-bound services
     for (const svc of catalogServices) {
       if (!map.has(svc.id)) {
         map.set(svc.id, svc.name);
@@ -118,6 +130,14 @@ export default function ProjectCredentialsPage() {
     }
     return map;
   }, [projectServices, catalogServices]);
+
+  // Unique services used in credentials (for filter dropdown)
+  const usedServices = useMemo(() => {
+    const serviceIds = new Set(credentials.filter((c) => c.service_id).map((c) => c.service_id!));
+    return Array.from(serviceIds)
+      .map((id) => ({ id, name: serviceNameMap.get(id) || id }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [credentials, serviceNameMap]);
 
   const filteredCredentials = useMemo(() => {
     let list = credentials;
@@ -133,8 +153,15 @@ export default function ProjectCredentialsPage() {
     if (filterPurpose !== '__all__') {
       list = list.filter((c) => c.purpose === filterPurpose);
     }
+    if (filterService !== '__all__') {
+      if (filterService === '__none__') {
+        list = list.filter((c) => !c.service_id);
+      } else {
+        list = list.filter((c) => c.service_id === filterService);
+      }
+    }
     return list;
-  }, [credentials, search, filterPurpose, serviceNameMap]);
+  }, [credentials, search, filterPurpose, filterService, serviceNameMap]);
 
   const toggleShowValue = useCallback(
     async (id: string) => {
@@ -157,6 +184,39 @@ export default function ProjectCredentialsPage() {
     },
     [showValues, decryptCredential]
   );
+
+  // Selection handlers
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleSelectAll = useCallback(() => {
+    setSelectedIds((prev) => {
+      const allFilteredIds = filteredCredentials.map((c) => c.id);
+      const allSelected = allFilteredIds.every((id) => prev.has(id));
+      if (allSelected) {
+        const next = new Set(prev);
+        allFilteredIds.forEach((id) => next.delete(id));
+        return next;
+      } else {
+        const next = new Set(prev);
+        allFilteredIds.forEach((id) => next.add(id));
+        return next;
+      }
+    });
+  }, [filteredCredentials]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
 
   const resetAddForm = () => {
     setNewLabel('');
@@ -229,7 +289,6 @@ export default function ProjectCredentialsPage() {
         website_url: editWebsiteUrl.trim() || null,
         notes: editNotes.trim() || null,
       });
-      // Clear cached decrypted data for this credential
       setDecryptedData((prev) => {
         const next = { ...prev };
         delete next[editTarget.id];
@@ -252,6 +311,55 @@ export default function ProjectCredentialsPage() {
       toast.success('계정 정보가 삭제되었습니다');
     } catch {
       toast.error('삭제에 실패했습니다');
+    }
+  };
+
+  // Bulk handlers
+  const openBulkEdit = () => {
+    setBulkPurpose('__unchanged__');
+    setBulkEnv('__unchanged__');
+    setBulkServiceId('__unchanged__');
+    setBulkEditOpen(true);
+  };
+
+  const handleBulkEdit = async () => {
+    const ids = Array.from(selectedIds);
+    const updates: Record<string, unknown> = {};
+    if (bulkPurpose !== '__unchanged__') updates.purpose = bulkPurpose;
+    if (bulkEnv !== '__unchanged__') updates.environment = bulkEnv;
+    if (bulkServiceId !== '__unchanged__') {
+      updates.service_id = bulkServiceId === '__none__' ? null : bulkServiceId;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      toast.error('변경할 항목을 선택하세요');
+      return;
+    }
+
+    try {
+      const result = await bulkUpdateCredentials.mutateAsync({ ids, ...updates } as {
+        ids: string[];
+        purpose?: string;
+        environment?: string;
+        service_id?: string | null;
+      });
+      setBulkEditOpen(false);
+      clearSelection();
+      toast.success(`${result.count}개 계정 정보가 수정되었습니다`);
+    } catch {
+      toast.error('일괄 수정에 실패했습니다');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = Array.from(selectedIds);
+    try {
+      const result = await bulkDeleteCredentials.mutateAsync(ids);
+      setBulkDeleteOpen(false);
+      clearSelection();
+      toast.success(`${result.count}개 계정 정보가 삭제되었습니다`);
+    } catch {
+      toast.error('일괄 삭제에 실패했습니다');
     }
   };
 
@@ -326,12 +434,46 @@ export default function ProjectCredentialsPage() {
             ))}
           </SelectContent>
         </Select>
+        <Select value={filterService} onValueChange={setFilterService}>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="서비스 필터" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">전체 서비스</SelectItem>
+            <SelectItem value="__none__">미연결</SelectItem>
+            {usedServices.map((svc) => (
+              <SelectItem key={svc.id} value={svc.id}>
+                {svc.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <div className="flex-1" />
         <Button onClick={() => setAddOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           계정 추가
         </Button>
       </div>
+
+      {/* Bulk Action Bar */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-brand-blue/10 dark:bg-brand-blue/20 rounded-lg border border-brand-blue/20">
+          <CheckSquare className="h-4 w-4 text-brand-blue" />
+          <span className="text-sm font-medium">{selectedIds.size}개 선택됨</span>
+          <div className="flex-1" />
+          <Button variant="outline" size="sm" onClick={openBulkEdit}>
+            <Pencil className="mr-2 h-3.5 w-3.5" />
+            일괄 수정
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setBulkDeleteOpen(true)} className="text-destructive border-destructive/30 hover:bg-destructive/10">
+            <Trash2 className="mr-2 h-3.5 w-3.5" />
+            일괄 삭제
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={clearSelection}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
 
       {/* Data Table */}
       <CredentialsTable
@@ -343,6 +485,9 @@ export default function ProjectCredentialsPage() {
         onToggleShow={toggleShowValue}
         onEdit={openEditDialog}
         onDelete={(id) => setPendingDeleteId(id)}
+        selectedIds={selectedIds}
+        onToggleSelect={toggleSelect}
+        onToggleSelectAll={toggleSelectAll}
       />
 
       {/* Add Dialog */}
@@ -596,6 +741,76 @@ export default function ProjectCredentialsPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Bulk Edit Dialog */}
+      <Dialog open={bulkEditOpen} onOpenChange={setBulkEditOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="h-5 w-5" />
+              {selectedIds.size}개 계정 일괄 수정
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              변경하지 않을 항목은 &quot;변경 없음&quot;으로 유지하세요.
+            </p>
+            <div className="space-y-2">
+              <Label>용도</Label>
+              <Select value={bulkPurpose} onValueChange={setBulkPurpose}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__unchanged__">변경 없음</SelectItem>
+                  {purposeOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>환경</Label>
+              <Select value={bulkEnv} onValueChange={setBulkEnv}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__unchanged__">변경 없음</SelectItem>
+                  {envOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>서비스</Label>
+              <Select value={bulkServiceId} onValueChange={setBulkServiceId}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__unchanged__">변경 없음</SelectItem>
+                  <SelectItem value="__none__">서비스 미연결</SelectItem>
+                  {catalogServices.map((svc) => (
+                    <SelectItem key={svc.id} value={svc.id}>{svc.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkEditOpen(false)}>
+              취소
+            </Button>
+            <Button
+              onClick={handleBulkEdit}
+              disabled={bulkUpdateCredentials.isPending || (bulkPurpose === '__unchanged__' && bulkEnv === '__unchanged__' && bulkServiceId === '__unchanged__')}
+            >
+              {bulkUpdateCredentials.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  수정 중...
+                </>
+              ) : '일괄 수정'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Confirm Dialog */}
       <AlertDialog open={!!pendingDeleteId} onOpenChange={(open) => { if (!open) setPendingDeleteId(null); }}>
         <AlertDialogContent>
@@ -617,6 +832,32 @@ export default function ProjectCredentialsPage() {
             >
               {deleteCredential.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete Confirm Dialog */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>일괄 삭제 확인</AlertDialogTitle>
+            <AlertDialogDescription>
+              선택한 {selectedIds.size}개의 계정 정보를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={(e) => {
+                e.preventDefault();
+                handleBulkDelete();
+              }}
+              disabled={bulkDeleteCredentials.isPending}
+            >
+              {bulkDeleteCredentials.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {selectedIds.size}개 삭제
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
