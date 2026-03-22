@@ -97,6 +97,115 @@ function computeEdgeHandles(
     : { sourceHandle: 'source-top', targetHandle: 'bottom' };
 }
 
+/** Helper: get node center */
+function nodeCenter(node: Node): { cx: number; cy: number } {
+  const w = (node.style?.width as number) || NODE_WIDTH;
+  const h = (node.style?.height as number) || NODE_HEIGHT;
+  return { cx: node.position.x + w / 2, cy: node.position.y + h / 2 };
+}
+
+/**
+ * Fan-out post-processing for congested handles.
+ *
+ * When a single node has 3+ edges sharing the same source or target handle,
+ * the outer edges are redistributed to perpendicular handles based on
+ * where their counterpart node actually is on the secondary axis.
+ *
+ * Example: GitHub (bottom) has 5 edges all using `source-top` to targets
+ * spread across BACKEND zone. After fan-out:
+ *   - leftmost targets  → `source-left`  (exits left, curves up)
+ *   - center targets    → `source-top`   (kept)
+ *   - rightmost targets → `source-right` (exits right, curves up)
+ */
+function fanOutCongestedHandles(edges: Edge[], nodeMap: Map<string, Node>): void {
+  fanOutOneSide(edges, nodeMap, 'source');
+  fanOutOneSide(edges, nodeMap, 'target');
+}
+
+function fanOutOneSide(
+  edges: Edge[],
+  nodeMap: Map<string, Node>,
+  side: 'source' | 'target',
+): void {
+  const handleProp: 'sourceHandle' | 'targetHandle' =
+    side === 'source' ? 'sourceHandle' : 'targetHandle';
+  const otherHandleProp: 'sourceHandle' | 'targetHandle' =
+    side === 'source' ? 'targetHandle' : 'sourceHandle';
+  const otherSide: 'source' | 'target' = side === 'source' ? 'target' : 'source';
+
+  // Group edges by (nodeId, handle)
+  const groups = new Map<string, number[]>();
+  for (let i = 0; i < edges.length; i++) {
+    const key = `${edges[i][side]}::${edges[i][handleProp] ?? ''}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(i);
+  }
+
+  for (const [key, indices] of groups) {
+    if (indices.length < 3) continue;
+
+    const sepIdx = key.indexOf('::');
+    const nodeId = key.slice(0, sepIdx);
+    const handle = key.slice(sepIdx + 2);
+    const node = nodeMap.get(nodeId);
+    if (!node || !handle) continue;
+
+    const { cx: ncx, cy: ncy } = nodeCenter(node);
+    const isVertical = handle.endsWith('top') || handle.endsWith('bottom');
+
+    // Sort edges by the secondary-axis offset of the OTHER node.
+    // For a vertical handle (top/bottom), the secondary axis is X.
+    // For a horizontal handle (left/right), the secondary axis is Y.
+    const sorted = indices.map((idx) => {
+      const otherNode = nodeMap.get(edges[idx][otherSide] ?? '');
+      if (!otherNode) return { idx, offset: 0 };
+      const { cx: ocx, cy: ocy } = nodeCenter(otherNode);
+      return { idx, offset: isVertical ? ocx - ncx : ocy - ncy };
+    });
+    sorted.sort((a, b) => a.offset - b.offset);
+
+    // How many to spread to each perpendicular side
+    const spreadCount = Math.max(1, Math.ceil((sorted.length - 1) / 3));
+
+    // Determine perpendicular handle names
+    const prefix = side === 'source' ? 'source-' : '';
+    const beforeHandle = isVertical ? `${prefix}left` : `${prefix}top`;
+    const afterHandle = isVertical ? `${prefix}right` : `${prefix}bottom`;
+
+    for (let i = 0; i < sorted.length; i++) {
+      const { idx } = sorted[i];
+      let newHandle: string | undefined;
+
+      if (i < spreadCount) {
+        newHandle = beforeHandle;
+      } else if (i >= sorted.length - spreadCount) {
+        newHandle = afterHandle;
+      }
+
+      if (newHandle && newHandle !== handle) {
+        edges[idx] = { ...edges[idx], [handleProp]: newHandle };
+
+        // Recompute the OTHER side's handle: it should face toward this node.
+        const otherNode = nodeMap.get(edges[idx][otherSide] ?? '');
+        if (otherNode) {
+          const { cx: ocx, cy: ocy } = nodeCenter(otherNode);
+          // Vector from other node → this node
+          const rdx = ncx - ocx;
+          const rdy = ncy - ocy;
+          const otherPrefix = side === 'source' ? '' : 'source-';
+          let recomputedHandle: string;
+          if (Math.abs(rdx) >= Math.abs(rdy)) {
+            recomputedHandle = rdx > 0 ? `${otherPrefix}right` : `${otherPrefix}left`;
+          } else {
+            recomputedHandle = rdy > 0 ? `${otherPrefix}bottom` : `${otherPrefix}top`;
+          }
+          edges[idx] = { ...edges[idx], [otherHandleProp]: recomputedHandle };
+        }
+      }
+    }
+  }
+}
+
 export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServiceMapLayoutReturn {
   const {
     serviceNodes, rawEdges, focusedNodeId, getDomain, mainServiceId,
@@ -175,11 +284,11 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
 
   // Apply handles + focus dimming to edges (zone-aware for inter-zone edges)
   const layoutedEdges = useMemo<Edge[]>(() => {
-    return rawEdges.map((edge) => {
+    // Pass 1: compute initial handles per edge
+    const result = rawEdges.map((edge) => {
       const srcNode = nodeMap.get(edge.source);
       const tgtNode = nodeMap.get(edge.target);
 
-      // Compute optimal handles — zone-aware for inter-zone edges
       let handles: { sourceHandle?: string; targetHandle?: string } = {};
       if (srcNode && tgtNode) {
         const srcZone = nodeZoneMap.get(edge.source);
@@ -198,6 +307,12 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
         style: { ...edge.style, ...focusDim },
       };
     });
+
+    // Pass 2: fan-out — redistribute congested handles so multi-edge
+    // nodes spread connections naturally instead of stacking on one handle
+    fanOutCongestedHandles(result, nodeMap);
+
+    return result;
   }, [rawEdges, nodeMap, focusedNodeId, neighborSet, zoneCenters, nodeZoneMap]);
 
   return { layoutedNodes, layoutedEdges, neighborSet };
