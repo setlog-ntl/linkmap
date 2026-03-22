@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
   // Get catalog services for name-based matching
   const { data: catalogServices = [] } = await supabase
     .from('services')
-    .select('id, name, required_env_vars');
+    .select('id, name, slug, required_env_vars');
 
   const exactMap = buildEnvKeyServiceMap(catalogServices as Service[]);
   const prefixMap = buildEnvPrefixServiceMap(catalogServices as Service[]);

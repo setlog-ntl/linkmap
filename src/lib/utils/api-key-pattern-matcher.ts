@@ -76,6 +76,7 @@ const SID = {
   convex: '10000000-0000-4000-a000-000000000060',
   turso: '10000000-0000-4000-a000-000000000063',
   shopify_api: '10000000-0000-4000-a000-000000000050',
+  polar: '10000000-0000-4000-a000-000000000134',
 } as const;
 
 /**
@@ -275,6 +276,9 @@ export const API_KEY_PATTERNS: ApiKeyPattern[] = [
   // === Firebase ===
   { serviceId: SID.firebase, serviceName: 'Firebase', regex: /^https:\/\/[a-z0-9-]+\.firebaseio\.com\b/, confidence: 'high' as const, suggestedKeyName: 'FIREBASE_DATABASE_URL' },
   { serviceId: SID.firebase, serviceName: 'Firebase', regex: /^[a-z0-9-]+\.firebaseapp\.com$/, confidence: 'high' as const, suggestedKeyName: 'FIREBASE_AUTH_DOMAIN' },
+
+  // === Polar ===
+  { serviceId: SID.polar, serviceName: 'Polar', prefix: 'polar_at_', confidence: 'high' as const, suggestedKeyName: 'POLAR_ACCESS_TOKEN' },
 ].sort((a, b) => {
   // 긴 접두사 우선
   const aLen = a.prefix?.length ?? 0;

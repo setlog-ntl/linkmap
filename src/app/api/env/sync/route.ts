@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     // Get all catalog services with required_env_vars for matching
     const { data: catalogServices = [] } = await supabase
       .from('services')
-      .select('id, name, required_env_vars');
+      .select('id, name, slug, required_env_vars');
 
     // Build matching maps
     const exactMap = buildEnvKeyServiceMap(catalogServices as Service[]);

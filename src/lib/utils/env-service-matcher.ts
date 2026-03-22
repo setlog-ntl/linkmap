@@ -43,7 +43,23 @@ export function buildEnvPrefixServiceMap(
   // 서비스 자체 이름/slug와 일치하는 prefix를 추적하여 우선권 부여
   const ownedPrefixes = new Set<string>();
 
-  // 1차: 서비스 slug/name과 일치하는 prefix만 먼저 등록 (발급처 우선)
+  // 0차: 서비스 slug/name 자체를 prefix로 등록 (required_env_vars 유무와 무관)
+  // → DB에 서비스가 있으면 slug/name만으로도 NEXT_PUBLIC_POLAR_* 등을 매칭 가능
+  for (const svc of services) {
+    const svcSlug = svc.slug?.toUpperCase();
+    const svcName = svc.name?.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const entry = { serviceId: svc.id, serviceName: svc.name };
+    if (svcSlug && svcSlug.length >= 2 && !map.has(svcSlug)) {
+      map.set(svcSlug, entry);
+      ownedPrefixes.add(svcSlug);
+    }
+    if (svcName && svcName.length >= 2 && svcName !== svcSlug && !map.has(svcName)) {
+      map.set(svcName, entry);
+      ownedPrefixes.add(svcName);
+    }
+  }
+
+  // 1차: 서비스 slug/name과 일치하는 env var prefix 등록 (발급처 우선)
   for (const svc of services) {
     if (!svc.required_env_vars?.length) continue;
     const svcSlug = svc.slug?.toUpperCase();
@@ -54,7 +70,7 @@ export function buildEnvPrefixServiceMap(
         .replace(/^(NEXT_PUBLIC_|REACT_APP_|VITE_|NUXT_PUBLIC_)/, '');
       const firstSegment = stripped.split('_')[0];
       if (!firstSegment || firstSegment.length < 2) continue;
-      // prefix가 서비스 자체 slug/name과 일치하면 즉시 등록
+      // prefix가 서비스 자체 slug/name과 일치하면 즉시 등록 (이미 0차에서 등록된 경우 덮어쓰기)
       if (firstSegment === svcSlug || firstSegment === svcName) {
         map.set(firstSegment, { serviceId: svc.id, serviceName: svc.name });
         ownedPrefixes.add(firstSegment);
