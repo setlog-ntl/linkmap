@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "./" },
   title: "Linkmap - 바이브 코딩 플랫폼 | 서비스 시각화부터 원클릭 배포까지",
   description:
-    "Google 계정 하나면 3분 만에 내 홈페이지 배포. 서비스 맵으로 연결 구조를 시각화하고, 환경변수를 안전하게 관리하세요. 초보자부터 개발자까지, 무료로 시작할 수 있습니다.",
+    "Google 계정 하나면 3분 만에 내 홈페이지 배포. 서비스 맵으로 연결 구조를 시각화하고 환경변수를 안전하게 관리하세요.",
   keywords: [
     "바이브 코딩",
     "vibe coding",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Linkmap - 한 플랫폼에서 서비스를 시각화하세요",
     description:
-      "3분 만에 내 홈페이지 배포 + 서비스 맵으로 연결 구조 시각화. Google 계정만 있으면 무료로 시작. AES-256 암호화로 환경변수를 안전하게 관리합니다.",
+      "3분 만에 내 홈페이지 배포 + 서비스 맵으로 연결 구조 시각화. Google 계정만 있으면 무료로 시작할 수 있습니다.",
     url: "https://www.linkmap.biz",
     siteName: "Linkmap",
     locale: "ko_KR",
