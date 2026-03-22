@@ -106,6 +106,7 @@ function RadialEdgeComponent({
       <BaseEdge
         id={id}
         path={edgePath}
+        interactionWidth={0}
         style={{
           stroke: `url(#${gradId})`,
           strokeWidth: edgeWidth,
