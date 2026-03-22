@@ -26,7 +26,6 @@ export default function robots(): MetadataRoute.Robots {
           'PerplexityBot',
           'ClaudeBot',
           'Applebot-Extended',
-          'Yeti',
         ],
         allow: ['/llms.txt'],
         disallow: [
