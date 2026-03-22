@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.linkmap.biz"),
   alternates: { canonical: "./" },
-  title: "Linkmap - 바이브 코딩 플랫폼 | 서비스 시각화부터 원클릭 배포까지",
+  title: "Linkmap - 바이브 코딩 플랫폼 | 시각화·원클릭 배포",
   description:
     "Google 계정 하나면 3분 만에 내 홈페이지 배포. 서비스 맵으로 연결 구조를 시각화하고 환경변수를 안전하게 관리하세요.",
   keywords: [
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Linkmap - 바이브 코딩 플랫폼 | 서비스 시각화부터 원클릭 배포까지",
+    title: "Linkmap - 바이브 코딩 플랫폼 | 시각화·원클릭 배포",
     description:
       "3분 만에 내 홈페이지 배포 + 서비스 맵으로 연결 구조 시각화. 초보자부터 개발자까지, 무료로 시작할 수 있습니다.",
   },
