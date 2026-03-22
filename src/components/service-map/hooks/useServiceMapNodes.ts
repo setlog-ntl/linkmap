@@ -159,7 +159,7 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
     });
   }, [filteredServices, searchQuery, mainServiceId, nodeDomainMap, filterStatuses]);
 
-  // Build edges
+  // Build edges with parallel detection and source/target names
   const rawEdges = useMemo<Edge[]>(() => {
     const edges: Edge[] = [];
 
@@ -173,7 +173,11 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
           source: sourceNodeId,
           target: targetNodeId,
           type: 'connection',
-          data: { connectionType: dep.dependency_type as DependencyType },
+          data: {
+            connectionType: dep.dependency_type as DependencyType,
+            sourceName: serviceNames[dep.service_id],
+            targetName: serviceNames[dep.depends_on_service_id],
+          },
         });
       }
     });
@@ -191,13 +195,35 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
           data: {
             connectionType: conn.connection_type,
             onDelete: handleDeleteUserConnection,
+            sourceName: serviceNames[conn.source_service_id],
+            targetName: serviceNames[conn.target_service_id],
           },
         });
       }
     });
 
+    // Detect parallel edges (A→B and B→A) and assign perpendicular offsets
+    const PARALLEL_GAP = 12;
+    const pairCount = new Map<string, number>();
+    const pairIndex = new Map<string, number>();
+    for (const edge of edges) {
+      const key = [edge.source, edge.target].sort().join('|');
+      pairCount.set(key, (pairCount.get(key) || 0) + 1);
+    }
+    for (const edge of edges) {
+      const key = [edge.source, edge.target].sort().join('|');
+      const count = pairCount.get(key) || 1;
+      if (count > 1) {
+        const idx = pairIndex.get(key) || 0;
+        pairIndex.set(key, idx + 1);
+        // Spread evenly: -gap, +gap for 2 edges; -gap, 0, +gap for 3, etc.
+        const offset = (idx - (count - 1) / 2) * PARALLEL_GAP;
+        (edge.data as Record<string, unknown>).parallelOffset = offset;
+      }
+    }
+
     return edges;
-  }, [relevantDependencies, userConnections, serviceIdToNodeId, handleDeleteUserConnection]);
+  }, [relevantDependencies, userConnections, serviceIdToNodeId, handleDeleteUserConnection, serviceNames]);
 
   return {
     serviceNodes,

@@ -8,30 +8,34 @@ import {
   type EdgeProps,
 } from '@xyflow/react';
 import { X } from 'lucide-react';
-import { useServiceMapStore, type HoveredEdgeNodes } from '@/stores/service-map-store';
+import { useServiceMapStore } from '@/stores/service-map-store';
 import type { DependencyType, UserConnectionType } from '@/types';
 
 /** All connection styles - dependencies + user connections
- *  weight: 1=lightweight, 2=normal, 3=critical */
-const styles: Record<string, { color: string; dash: string; label: string; weight: number }> = {
-  // Dependency types
-  required:    { color: 'var(--destructive)', dash: '0',   label: '필수',   weight: 3.5 },
-  recommended: { color: 'var(--primary)',     dash: '0',   label: '권장',   weight: 2 },
-  optional:    { color: 'var(--muted-foreground)', dash: '6 3', label: '선택', weight: 1.5 },
-  alternative: { color: 'var(--chart-4)',     dash: '6 3', label: '대체',   weight: 1.5 },
+ *  weight: 1=lightweight, 2=normal, 3=critical
+ *  bidirectional: true for types that represent two-way relationships */
+const styles: Record<string, { color: string; dash: string; label: string; weight: number; bidirectional?: boolean; icon: string }> = {
+  // Dependency types (always unidirectional)
+  required:    { color: 'var(--destructive)', dash: '0',   label: '필수',   weight: 3.5, icon: '→' },
+  recommended: { color: 'var(--primary)',     dash: '0',   label: '권장',   weight: 2, icon: '→' },
+  optional:    { color: 'var(--muted-foreground)', dash: '6 3', label: '선택', weight: 1.5, icon: '→' },
+  alternative: { color: 'var(--chart-4)',     dash: '6 3', label: '대체',   weight: 1.5, icon: '↔' },
   // User connection types
-  uses:          { color: '#3b82f6', dash: '0',   label: '사용',       weight: 2 },
-  integrates:    { color: '#22c55e', dash: '0',   label: '연동',       weight: 3 },
-  data_transfer: { color: '#f97316', dash: '6 3', label: '데이터 전달', weight: 2 },
-  api_call:      { color: '#8b5cf6', dash: '0',   label: 'API 호출',   weight: 3 },
-  auth_provider: { color: '#ec4899', dash: '4 2', label: '인증 제공',   weight: 2 },
-  webhook:       { color: '#14b8a6', dash: '6 2', label: '웹훅',       weight: 1 },
-  sdk:           { color: '#6366f1', dash: '0',   label: 'SDK',        weight: 1 },
+  uses:          { color: '#3b82f6', dash: '0',   label: '사용',       weight: 2, icon: '→' },
+  integrates:    { color: '#22c55e', dash: '0',   label: '연동',       weight: 3, bidirectional: true, icon: '⇄' },
+  data_transfer: { color: '#f97316', dash: '6 3', label: '데이터 전달', weight: 2, bidirectional: true, icon: '↔' },
+  api_call:      { color: '#8b5cf6', dash: '0',   label: 'API 호출',   weight: 3, icon: '→' },
+  auth_provider: { color: '#ec4899', dash: '4 2', label: '인증 제공',   weight: 2, icon: '←' },
+  webhook:       { color: '#14b8a6', dash: '6 2', label: '웹훅',       weight: 1, icon: '→' },
+  sdk:           { color: '#6366f1', dash: '0',   label: 'SDK',        weight: 1, icon: '→' },
 };
 
 interface ConnectionEdgeData {
   connectionType: DependencyType | UserConnectionType;
   onDelete?: (edgeId: string) => void;
+  sourceName?: string;
+  targetName?: string;
+  parallelOffset?: number;
   [key: string]: unknown;
 }
 
@@ -54,12 +58,33 @@ function ConnectionEdge({
   const edgeData = data as unknown as ConnectionEdgeData;
   const connType = edgeData?.connectionType || 'uses';
   const s = styles[connType] || styles.uses;
+  const isBidirectional = s.bidirectional === true;
+  const parallelOffset = (edgeData?.parallelOffset as number) || 0;
+
+  // Apply parallel offset perpendicular to the edge direction
+  let adjustedSourceX = sourceX;
+  let adjustedSourceY = sourceY;
+  let adjustedTargetX = targetX;
+  let adjustedTargetY = targetY;
+
+  if (parallelOffset !== 0) {
+    const dx = targetX - sourceX;
+    const dy = targetY - sourceY;
+    const len = Math.sqrt(dx * dx + dy * dy) || 1;
+    // Perpendicular unit vector
+    const px = -dy / len;
+    const py = dx / len;
+    adjustedSourceX += px * parallelOffset;
+    adjustedSourceY += py * parallelOffset;
+    adjustedTargetX += px * parallelOffset;
+    adjustedTargetY += py * parallelOffset;
+  }
 
   const [edgePath, labelX, labelY] = getBezierPath({
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
+    sourceX: adjustedSourceX,
+    sourceY: adjustedSourceY,
+    targetX: adjustedTargetX,
+    targetY: adjustedTargetY,
     sourcePosition,
     targetPosition,
     curvature: 0.25,
@@ -79,9 +104,9 @@ function ConnectionEdge({
   const strokeDasharray = hovered && !isStaticDashed ? '5 5' : (isStaticDashed ? s.dash : undefined);
 
   // Via hole for long edges only (200px+)
-  const edgeLength = Math.sqrt((targetX - sourceX) ** 2 + (targetY - sourceY) ** 2);
-  const midX = (sourceX + targetX) / 2;
-  const midY = (sourceY + targetY) / 2;
+  const edgeLength = Math.sqrt((adjustedTargetX - adjustedSourceX) ** 2 + (adjustedTargetY - adjustedSourceY) ** 2);
+  const midX = (adjustedSourceX + adjustedTargetX) / 2;
+  const midY = (adjustedSourceY + adjustedTargetY) / 2;
   const showViaHole = edgeLength > 200;
 
   const handleMouseEnter = () => {
@@ -96,33 +121,55 @@ function ConnectionEdge({
   // Unique marker ID per connection type for colored arrows
   const markerId = `arrow-${connType}-${id}`;
 
+  // Build direction label: icon + type
+  const sourceName = edgeData?.sourceName as string | undefined;
+  const targetName = edgeData?.targetName as string | undefined;
+  const dirLabel = hovered && sourceName && targetName
+    ? `${sourceName} ${s.icon} ${targetName}`
+    : `${s.icon} ${s.label}`;
+
   return (
     <>
       {/* Custom colored arrow markers — end and start */}
       <defs>
+        {/* Target arrow — larger, filled triangle */}
         <marker
           id={markerId}
-          markerWidth="16"
-          markerHeight="16"
-          refX="13"
-          refY="8"
+          markerWidth="20"
+          markerHeight="20"
+          refX="17"
+          refY="10"
           orient="auto"
           markerUnits="userSpaceOnUse"
         >
-          <path d="M3 3 L13 8 L3 13 Z" fill={s.color} opacity="0.9" />
+          <path d="M4 4 L17 10 L4 16 L7 10 Z" fill={s.color} opacity="0.95" />
         </marker>
-        {/* Source direction indicator (small dot) */}
-        <marker
-          id={`${markerId}-start`}
-          markerWidth="8"
-          markerHeight="8"
-          refX="4"
-          refY="4"
-          orient="auto"
-          markerUnits="userSpaceOnUse"
-        >
-          <circle cx="4" cy="4" r="2.5" fill={s.color} opacity="0.5" />
-        </marker>
+        {/* Source arrow — for bidirectional edges, reversed filled triangle */}
+        {isBidirectional ? (
+          <marker
+            id={`${markerId}-start`}
+            markerWidth="20"
+            markerHeight="20"
+            refX="3"
+            refY="10"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <path d="M16 4 L3 10 L16 16 L13 10 Z" fill={s.color} opacity="0.95" />
+          </marker>
+        ) : (
+          <marker
+            id={`${markerId}-start`}
+            markerWidth="10"
+            markerHeight="10"
+            refX="5"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <circle cx="5" cy="5" r="3" fill={s.color} opacity="0.6" />
+          </marker>
+        )}
       </defs>
 
       {/* Invisible wider path for hover detection */}
@@ -199,6 +246,20 @@ function ConnectionEdge({
         </rect>
       )}
 
+      {/* Reverse packet for bidirectional edges */}
+      {showPacket && isBidirectional && (
+        <rect
+          width={7}
+          height={3.5}
+          rx={1}
+          fill={s.color}
+          className="flow-particle"
+          style={{ filter: `drop-shadow(0 0 3px ${s.color})`, opacity: 0.7 }}
+        >
+          <animateMotion dur="2.5s" repeatCount="indefinite" path={edgePath} rotate="auto" keyPoints="1;0" keyTimes="0;1" begin="0.8s" />
+        </rect>
+      )}
+
       {showLabel && (
         <EdgeLabelRenderer>
           <div
@@ -207,21 +268,25 @@ function ConnectionEdge({
               position: 'absolute',
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
               opacity: labelOpacity,
-              transition: 'opacity 0.2s ease',
+              transition: 'opacity 0.2s ease, max-width 0.3s ease',
             }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
             <div className="flex items-center gap-1">
               <span
-                className="rounded-full border px-1.5 py-0.5 text-[11px] font-medium shadow-sm font-mono"
+                className="rounded-full border px-1.5 py-0.5 text-[11px] font-medium shadow-sm font-mono whitespace-nowrap"
                 style={{
                   backgroundColor: 'var(--background)',
                   color: s.color,
                   borderColor: s.color,
+                  maxWidth: hovered ? '240px' : '120px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  transition: 'max-width 0.3s ease',
                 }}
               >
-                {s.label}
+                {dirLabel}
               </span>
               {edgeData?.onDelete && (hovered || editMode) && (
                 <button
