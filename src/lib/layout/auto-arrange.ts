@@ -1,28 +1,30 @@
 /**
- * Auto-Arrange Algorithm v3
+ * Auto-Arrange Algorithm v4 — Connection-Aligned Layout
  *
- * Produces a clean layout where edges don't cross or overlap.
- *
- * Key design decisions:
- * - Zones with many external connections use **2 columns** (not 3)
- *   to give vertical space for edge routing
- * - Node gaps are wide (64px vertical) so Bezier curves don't overlap
- * - Nodes are placed on the side of their zone that faces
- *   the **specific nodes** they connect to (not just the zone center)
- * - Zone size automatically expands based on connection density
+ * Key improvements over v3:
+ * 1. Flow-based zone ordering (sources left, targets right)
+ * 2. Barycenter pre-pass (4 iterations L-R-L-R) for optimal node ordering
+ * 3. Cross-zone Y-alignment (connected nodes share matching Y positions)
+ * 4. Smart column assignment (nodes face their connections)
+ * 5. Unconnected nodes fill gaps naturally in balanced columns
+ * 6. Bottom-row zones X-centered under their connections
+ * 7. Adaptive zone sizing from actual node placement
+ * 8. No stagger offset — Y-alignment handles visual separation
  */
 import type { Node, Edge } from '@xyflow/react';
 
-const NODE_WIDTH = 180;
-const NODE_HEIGHT = 72;
-const NODE_GAP_X = 50;
-const NODE_GAP_Y = 64;        // wide vertical gap for line routing
-const STAGGER_OFFSET = Math.round(NODE_HEIGHT * 0.5); // 36px — odd columns shifted down
-const ZONE_PADDING = 50;      // generous padding inside zone
-const ZONE_HEADER = 48;
-const BASE_ZONE_GAP = 140;
-const EDGE_GAP_BONUS = 25;
-const MAX_ZONE_GAP = 320;
+// ── Constants ────────────────────────────────────────────────────────
+const NODE_W = 180;
+const NODE_H = 72;
+const GAP_X = 50;            // horizontal gap between columns
+const GAP_Y = 56;            // vertical gap between rows
+const PAD = 50;              // zone inner padding
+const HEADER = 48;           // zone header height
+const BASE_GAP = 140;        // base gap between zones
+const EDGE_BONUS = 25;       // extra gap per cross-zone edge
+const MAX_GAP = 320;         // maximum zone-to-zone gap
+const MIN_W = 2 * NODE_W + GAP_X + 2 * PAD;
+const MIN_H = HEADER + NODE_H + 2 * PAD;
 
 export interface ArrangeResult {
   zonePositions: Record<string, { x: number; y: number }>;
@@ -35,269 +37,523 @@ interface ZoneInfo {
   key: string;
   nodeIds: string[];
   connections: number;
-  externalNodeCount: number;  // how many nodes have external connections
+  externalNodeCount: number;
 }
 
+// ══════════════════════════════════════════════════════════════════════
+// Main
+// ══════════════════════════════════════════════════════════════════════
 export function autoArrange(
   nodes: Node[],
   edges: Edge[],
   getZoneKey: (nodeId: string) => string | null,
 ): ArrangeResult {
-  // ── 1. Collect zone info ──────────────────────────────────────
+  /* ── 1. Parse zones and service nodes ──────────────────────────── */
   const zoneMap = new Map<string, ZoneInfo>();
-  const serviceNodes: Node[] = [];
-
-  for (const node of nodes) {
-    if (node.type === 'zone') {
-      const key = node.id.replace('zone-', '');
-      zoneMap.set(key, { id: node.id, key, nodeIds: [], connections: 0, externalNodeCount: 0 });
-    } else {
-      serviceNodes.push(node);
+  for (const n of nodes) {
+    if (n.type === 'zone') {
+      const k = n.id.replace('zone-', '');
+      zoneMap.set(k, { id: n.id, key: k, nodeIds: [], connections: 0, externalNodeCount: 0 });
+    }
+  }
+  for (const n of nodes) {
+    if (n.type !== 'zone') {
+      const z = getZoneKey(n.id);
+      if (z && zoneMap.has(z)) zoneMap.get(z)!.nodeIds.push(n.id);
     }
   }
 
-  for (const node of serviceNodes) {
-    const zoneKey = getZoneKey(node.id);
-    if (zoneKey && zoneMap.has(zoneKey)) {
-      zoneMap.get(zoneKey)!.nodeIds.push(node.id);
-    }
+  /* ── 2. Build cross-zone adjacency ─────────────────────────────── */
+  const adj = new Map<string, { nid: string; zone: string }[]>();
+  const pairCount = new Map<string, number>();
+  const flowDir = new Map<string, number>();
+
+  for (const e of edges) {
+    const sz = getZoneKey(e.source ?? '');
+    const tz = getZoneKey(e.target ?? '');
+    if (!sz || !tz || sz === tz || !e.source || !e.target) continue;
+
+    pushAdj(adj, e.source, e.target, tz);
+    pushAdj(adj, e.target, e.source, sz);
+
+    const pk = [sz, tz].sort().join('::');
+    pairCount.set(pk, (pairCount.get(pk) || 0) + 1);
+    flowDir.set(`${sz}::${tz}`, (flowDir.get(`${sz}::${tz}`) || 0) + 1);
+
+    zoneMap.get(sz)!.connections++;
+    zoneMap.get(tz)!.connections++;
   }
 
-  // ── 2. Build connection graph ─────────────────────────────────
-  const zoneEdgePairs = new Map<string, number>();
-  const nodeExternalZones = new Map<string, Set<string>>();
-  // Track specific node-to-node connections across zones
-  const crossZoneEdges: { src: string; tgt: string; srcZone: string; tgtZone: string }[] = [];
+  for (const z of zoneMap.values())
+    z.externalNodeCount = z.nodeIds.filter(n => adj.has(n)).length;
 
-  for (const edge of edges) {
-    const srcZone = getZoneKey(edge.source ?? '');
-    const tgtZone = getZoneKey(edge.target ?? '');
-    if (srcZone && tgtZone && srcZone !== tgtZone) {
-      const pairKey = [srcZone, tgtZone].sort().join('::');
-      zoneEdgePairs.set(pairKey, (zoneEdgePairs.get(pairKey) || 0) + 1);
+  const zones = [...zoneMap.values()];
+  if (!zones.length) return { zonePositions: {}, zoneSizes: {}, nodePositions: {} };
 
-      const srcInfo = zoneMap.get(srcZone);
-      const tgtInfo = zoneMap.get(tgtZone);
-      if (srcInfo) srcInfo.connections++;
-      if (tgtInfo) tgtInfo.connections++;
-
-      if (edge.source) {
-        if (!nodeExternalZones.has(edge.source)) nodeExternalZones.set(edge.source, new Set());
-        nodeExternalZones.get(edge.source)!.add(tgtZone);
-      }
-      if (edge.target) {
-        if (!nodeExternalZones.has(edge.target)) nodeExternalZones.set(edge.target, new Set());
-        nodeExternalZones.get(edge.target)!.add(srcZone);
-      }
-
-      if (edge.source && edge.target) {
-        crossZoneEdges.push({ src: edge.source, tgt: edge.target, srcZone, tgtZone });
-      }
+  /* ── 3. Flow-based zone ordering ───────────────────────────────── */
+  // Flow score: positive = more outgoing (source-like → goes left)
+  const fScore = new Map<string, number>();
+  for (const z of zones) {
+    let s = 0;
+    for (const o of zones) {
+      if (o.key === z.key) continue;
+      s += (flowDir.get(`${z.key}::${o.key}`) || 0)
+        - (flowDir.get(`${o.key}::${z.key}`) || 0);
     }
+    fScore.set(z.key, s);
   }
 
-  // Count how many nodes in each zone have external connections
-  for (const zone of zoneMap.values()) {
+  const isBot = (k: string) => k === 'devtools';
+  const topZones = zones.filter(z => !isBot(z.key))
+    .sort((a, b) => (fScore.get(b.key) || 0) - (fScore.get(a.key) || 0)
+      || b.connections - a.connections);
+  const botZones = zones.filter(z => isBot(z.key));
+
+  const hIdx = new Map<string, number>();
+  topZones.forEach((z, i) => hIdx.set(z.key, i));
+
+  const allOrdered = [...topZones, ...botZones];
+
+  /* ── 4. Column count per zone ──────────────────────────────────── */
+  const colCnt = new Map<string, number>();
+  for (const z of zones) {
+    const n = z.nodeIds.length;
+    const hi = z.externalNodeCount >= 3 || z.connections >= 6;
+    colCnt.set(z.id, (n <= 4 || hi) ? Math.min(n || 1, 2) : Math.min(n || 1, 3));
+  }
+
+  /* ── 5. Column assignment per node ─────────────────────────────── */
+  const nodeCol = new Map<string, number>();
+
+  for (const zone of allOrdered) {
+    const cols = colCnt.get(zone.id) || 1;
+    const myI = hIdx.get(zone.key) ?? 0;
+
+    // Connected nodes: column based on connection direction
     for (const nid of zone.nodeIds) {
-      if (nodeExternalZones.has(nid)) zone.externalNodeCount++;
+      if (cols < 2 || !adj.has(nid)) {
+        nodeCol.set(nid, 0);
+        continue;
+      }
+
+      if (isBot(zone.key)) {
+        // Bottom zones: use X position of connections for column
+        nodeCol.set(nid, 0);
+      } else {
+        const nbs = adj.get(nid)!;
+        let leftN = 0, rightN = 0;
+        for (const nb of nbs) {
+          const oi = hIdx.get(nb.zone);
+          if (oi === undefined) continue;
+          if (oi < myI) leftN++;
+          else if (oi > myI) rightN++;
+        }
+        nodeCol.set(nid, rightN > leftN ? cols - 1 : 0);
+      }
+    }
+
+    // Balance: assign unconnected nodes to least-filled column
+    const buckets: number[] = Array(cols).fill(0);
+    for (const nid of zone.nodeIds) {
+      if (adj.has(nid)) buckets[nodeCol.get(nid) || 0]++;
+    }
+    for (const nid of zone.nodeIds) {
+      if (!adj.has(nid)) {
+        const minC = buckets.indexOf(Math.min(...buckets));
+        nodeCol.set(nid, minC);
+        buckets[minC]++;
+      }
     }
   }
 
-  // ── 3. Sort zones ─────────────────────────────────────────────
-  const sortedZones = [...zoneMap.values()].sort((a, b) => b.connections - a.connections);
-  if (sortedZones.length === 0) return { zonePositions: {}, zoneSizes: {}, nodePositions: {} };
+  /* ── 6. Barycenter pre-pass (4 iterations) ─────────────────────── */
+  // Computes optimal node ordering within each zone to minimize crossings
+  const slot = new Map<string, number>();
 
-  // ── 4. Compute zone sizes with dynamic column count ───────────
-  const zoneSizes: Record<string, { width: number; height: number }> = {};
-  const zoneCols: Record<string, number> = {};
+  // Initialize: connected nodes first (by connection count), unconnected last
+  for (const zone of allOrdered) {
+    const cols = colCnt.get(zone.id) || 1;
+    const colBuckets = makeBuckets(zone.nodeIds, cols, nodeCol);
 
-  for (const zone of sortedZones) {
-    const count = zone.nodeIds.length;
-    // Use 2 columns when zone has many external connections or ≤4 nodes
-    // This gives more vertical space for edge routing
-    const hasHighConnectivity = zone.externalNodeCount >= 3 || zone.connections >= 6;
-    const cols = (count <= 4 || hasHighConnectivity) ? Math.min(count || 1, 2) : Math.min(count || 1, 3);
-    zoneCols[zone.id] = cols;
+    for (const col of colBuckets) {
+      col.sort((a, b) => (adj.get(b)?.length || 0) - (adj.get(a)?.length || 0));
+    }
 
-    const rows = Math.max(1, Math.ceil(count / cols));
-    // Add extra padding for zones with many external connections
-    const extraPad = zone.externalNodeCount >= 3 ? 20 : 0;
-    const pad = ZONE_PADDING + extraPad;
-
-    const minCols = cols;
-    const stagger = cols > 1 ? STAGGER_OFFSET : 0;
-    zoneSizes[zone.id] = {
-      width: Math.max(
-        minCols * NODE_WIDTH + (minCols - 1) * NODE_GAP_X + 2 * pad,
-        2 * NODE_WIDTH + NODE_GAP_X + 2 * pad,  // minimum 2-col width
-      ),
-      height: Math.max(
-        ZONE_HEADER + NODE_HEIGHT + stagger + 2 * pad,
-        ZONE_HEADER + rows * NODE_HEIGHT + (rows - 1) * NODE_GAP_Y + stagger + 2 * pad,
-      ),
-    };
+    let s = 0;
+    const maxRows = Math.max(...colBuckets.map(c => c.length), 1);
+    for (let r = 0; r < maxRows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (r < colBuckets[c].length) slot.set(colBuckets[c][r], s++);
+      }
+    }
   }
 
-  // ── 5. Place zones ────────────────────────────────────────────
-  const zonePositions: Record<string, { x: number; y: number }> = {};
+  // Iterative barycenter refinement
+  for (let iter = 0; iter < 4; iter++) {
+    const order = iter % 2 === 0 ? allOrdered : [...allOrdered].reverse();
 
-  const gapBetween = (z1Key: string, z2Key: string): number => {
-    const pairKey = [z1Key, z2Key].sort().join('::');
-    const edgeCount = zoneEdgePairs.get(pairKey) || 0;
-    return Math.min(MAX_ZONE_GAP, BASE_ZONE_GAP + edgeCount * EDGE_GAP_BONUS);
+    for (const zone of order) {
+      const cols = colCnt.get(zone.id) || 1;
+      const colBuckets = makeBuckets(zone.nodeIds, cols, nodeCol);
+
+      // Compute barycenters from cross-zone neighbors
+      const bary = new Map<string, number>();
+      for (const nid of zone.nodeIds) {
+        const nbs = adj.get(nid) || [];
+        const vals: number[] = [];
+        for (const nb of nbs) {
+          if (nb.zone === zone.key) continue;
+          const s = slot.get(nb.nid);
+          if (s !== undefined) vals.push(s);
+        }
+        if (vals.length) bary.set(nid, avg(vals));
+      }
+
+      // Sort each column by barycenter (connected first, then unconnected by slot)
+      for (const col of colBuckets) {
+        col.sort((a, b) => {
+          const ba = bary.get(a), bb = bary.get(b);
+          if (ba !== undefined && bb !== undefined) return ba - bb;
+          if (ba !== undefined) return -1;
+          if (bb !== undefined) return 1;
+          return (adj.get(b)?.length || 0) - (adj.get(a)?.length || 0);
+        });
+      }
+
+      // Reassign slots
+      let s = 0;
+      const maxRows = Math.max(...colBuckets.map(c => c.length), 1);
+      for (let r = 0; r < maxRows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (r < colBuckets[c].length) slot.set(colBuckets[c][r], s++);
+        }
+      }
+    }
+  }
+
+  /* ── 7. Sequential placement with Y-alignment ──────────────────── */
+  const zPos: Record<string, { x: number; y: number }> = {};
+  const zSiz: Record<string, { width: number; height: number }> = {};
+  const nPos: Record<string, { x: number; y: number }> = {};
+
+  const gapOf = (a: string, b: string) => {
+    const pk = [a, b].sort().join('::');
+    return Math.min(MAX_GAP, BASE_GAP + (pairCount.get(pk) || 0) * EDGE_BONUS);
   };
 
-  if (sortedZones.length <= 2) {
-    let x = 0;
-    for (let i = 0; i < sortedZones.length; i++) {
-      const zone = sortedZones[i];
-      zonePositions[zone.id] = { x, y: 0 };
-      if (i < sortedZones.length - 1) {
-        x += zoneSizes[zone.id].width + gapBetween(zone.key, sortedZones[i + 1].key);
-      }
+  // ── Top row (left → right) ──
+  let topX = 0;
+  let topMaxH = 0;
+
+  for (let i = 0; i < topZones.length; i++) {
+    const zone = topZones[i];
+    const cols = colCnt.get(zone.id) || 1;
+
+    const { rel, w, h } = placeZone(zone, cols, adj, slot, nodeCol, nPos);
+
+    zPos[zone.id] = { x: topX, y: 0 };
+    zSiz[zone.id] = { width: w, height: h };
+    for (const [nid, r] of Object.entries(rel))
+      nPos[nid] = { x: topX + r.x, y: r.y };
+
+    topMaxH = Math.max(topMaxH, h);
+    topX += w + (i < topZones.length - 1 ? gapOf(zone.key, topZones[i + 1].key) : 0);
+  }
+
+  // ── Bottom row (centered under connections) ──
+  if (botZones.length) {
+    let vGap = BASE_GAP;
+    for (const t of topZones)
+      for (const b of botZones)
+        vGap = Math.max(vGap, gapOf(t.key, b.key));
+    const botY = topMaxH + vGap;
+
+    // Compute layouts
+    const botLayouts = botZones.map(zone => ({
+      zone,
+      ...placeZone(zone, colCnt.get(zone.id) || 1, adj, slot, nodeCol, nPos),
+    }));
+
+    const totalBotW = botLayouts.reduce((s, l) => s + l.w, 0)
+      + Math.max(0, botZones.length - 1) * BASE_GAP;
+
+    // Center: use average X of connected top-row nodes
+    let startX = (topX - totalBotW) / 2;
+    const connXs: number[] = [];
+    for (const bl of botLayouts)
+      for (const nid of bl.zone.nodeIds)
+        for (const nb of adj.get(nid) || [])
+          if (nPos[nb.nid]) connXs.push(nPos[nb.nid].x + NODE_W / 2);
+
+    if (connXs.length)
+      startX = avg(connXs) - totalBotW / 2;
+
+    let bx = startX;
+    for (let i = 0; i < botLayouts.length; i++) {
+      const { zone, rel, w, h } = botLayouts[i];
+      zPos[zone.id] = { x: bx, y: botY };
+      zSiz[zone.id] = { width: w, height: h };
+      for (const [nid, r] of Object.entries(rel))
+        nPos[nid] = { x: bx + r.x, y: botY + r.y };
+      bx += w + BASE_GAP;
     }
-  } else {
-    // 3+ zones: row1 = top, row2 = bottom
-    // Decide which zones go on row1:
-    // The two zones with most MUTUAL connections go side by side
-    let bestPair: [number, number] = [0, 1];
-    let bestPairScore = 0;
-    for (let i = 0; i < sortedZones.length; i++) {
-      for (let j = i + 1; j < sortedZones.length; j++) {
-        const pk = [sortedZones[i].key, sortedZones[j].key].sort().join('::');
-        const score = zoneEdgePairs.get(pk) || 0;
-        if (score > bestPairScore) {
-          bestPairScore = score;
-          bestPair = [i, j];
+  }
+
+  /* ── 8. Post-refinement: nudge same-row nodes for better alignment */
+  refineSameRowAlignment(topZones, adj, nPos, zPos, zSiz);
+
+  return { zonePositions: zPos, zoneSizes: zSiz, nodePositions: nPos };
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// Place nodes inside a single zone
+// ══════════════════════════════════════════════════════════════════════
+function placeZone(
+  zone: ZoneInfo,
+  cols: number,
+  adj: Map<string, { nid: string; zone: string }[]>,
+  slot: Map<string, number>,
+  nodeCol: Map<string, number>,
+  placed: Record<string, { x: number; y: number }>,
+): { rel: Record<string, { x: number; y: number }>; w: number; h: number } {
+  const N = zone.nodeIds.length;
+  if (!N) return { rel: {}, w: MIN_W, h: MIN_H };
+
+  // ── Compute target Y from already-placed neighbors ──
+  const tgtY = new Map<string, number>();
+  for (const nid of zone.nodeIds) {
+    const nbs = adj.get(nid) || [];
+    const ys: number[] = [];
+    for (const nb of nbs) {
+      if (nb.zone === zone.key) continue;
+      const p = placed[nb.nid];
+      if (p) ys.push(p.y);
+    }
+    if (ys.length) tgtY.set(nid, avg(ys));
+  }
+
+  // ── Group into columns ──
+  const colBuckets = makeBuckets(zone.nodeIds, cols, nodeCol);
+
+  // ── Sort: by targetY first (for alignment), slot as tiebreaker ──
+  for (const col of colBuckets) {
+    col.sort((a, b) => {
+      const ta = tgtY.get(a), tb = tgtY.get(b);
+      // Both have targets → sort by target Y (key for alignment)
+      if (ta !== undefined && tb !== undefined) return ta - tb;
+      // Connected nodes with targets go first
+      if (ta !== undefined) return -1;
+      if (tb !== undefined) return 1;
+      // Fallback: barycenter-optimized slot order
+      return (slot.get(a) ?? 999) - (slot.get(b) ?? 999);
+    });
+  }
+
+  // ── Place with Y-alignment ──
+  const rel: Record<string, { x: number; y: number }> = {};
+  let maxY = 0;
+
+  // Phase A: place connected nodes with targetY alignment
+  for (let c = 0; c < cols; c++) {
+    const x = PAD + c * (NODE_W + GAP_X);
+    let curY = HEADER + PAD;
+
+    for (const nid of colBuckets[c]) {
+      if (!adj.has(nid)) continue; // skip unconnected for now
+      const target = tgtY.get(nid);
+      const y = target !== undefined ? Math.max(curY, target) : curY;
+      rel[nid] = { x, y };
+      curY = y + NODE_H + GAP_Y;
+      maxY = Math.max(maxY, y + NODE_H);
+    }
+  }
+
+  // Phase B: place unconnected nodes — align with adjacent column rows
+  for (let c = 0; c < cols; c++) {
+    const x = PAD + c * (NODE_W + GAP_X);
+
+    // Get existing Y positions from this column (connected nodes)
+    const thisColYs = colBuckets[c]
+      .filter(nid => rel[nid])
+      .map(nid => rel[nid].y);
+
+    // Get Y positions from adjacent column for row alignment
+    const otherC = c === 0 ? Math.min(1, cols - 1) : 0;
+    const otherYs = otherC !== c
+      ? colBuckets[otherC].filter(nid => rel[nid]).map(nid => rel[nid].y)
+      : [];
+
+    // Start after last connected node in this column
+    let curY = thisColYs.length
+      ? Math.max(...thisColYs) + NODE_H + GAP_Y
+      : HEADER + PAD;
+
+    let otherIdx = 0;
+    for (const nid of colBuckets[c]) {
+      if (adj.has(nid)) continue; // already placed
+
+      // Try to align with an adjacent column row
+      while (otherIdx < otherYs.length && otherYs[otherIdx] < curY - GAP_Y) otherIdx++;
+      const alignTarget = otherIdx < otherYs.length ? otherYs[otherIdx] : undefined;
+
+      let y = curY;
+      if (alignTarget !== undefined && alignTarget >= curY && alignTarget - curY < NODE_H + GAP_Y * 2) {
+        // Snap to adjacent column row if close enough
+        y = alignTarget;
+        otherIdx++;
+      }
+
+      rel[nid] = { x, y };
+      curY = y + NODE_H + GAP_Y;
+      maxY = Math.max(maxY, y + NODE_H);
+    }
+  }
+
+  // ── Zone size ──
+  const w = Math.max(MIN_W, cols * NODE_W + Math.max(0, cols - 1) * GAP_X + 2 * PAD);
+  const h = Math.max(MIN_H, maxY + PAD);
+
+  return { rel, w, h };
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// Post-refinement: nudge first-zone nodes for better alignment
+// ══════════════════════════════════════════════════════════════════════
+function refineSameRowAlignment(
+  topZones: ZoneInfo[],
+  adj: Map<string, { nid: string; zone: string }[]>,
+  nPos: Record<string, { x: number; y: number }>,
+  zPos: Record<string, { x: number; y: number }>,
+  zSiz: Record<string, { width: number; height: number }>,
+): void {
+  if (topZones.length < 2) return;
+
+  // For the first (leftmost) zone: nodes had no left neighbors during placement
+  // Now that right neighbors are placed, adjust Y to improve alignment
+  const firstZone = topZones[0];
+  const firstZonePos = zPos[firstZone.id];
+  if (!firstZonePos) return;
+
+  // Collect nodes that need adjustment: those in the first zone with right neighbors
+  const adjustable: { nid: string; currentY: number; targetY: number }[] = [];
+
+  for (const nid of firstZone.nodeIds) {
+    const nbs = adj.get(nid) || [];
+    const rightYs: number[] = [];
+    for (const nb of nbs) {
+      if (nb.zone === firstZone.key) continue;
+      const p = nPos[nb.nid];
+      if (p) rightYs.push(p.y);
+    }
+    if (rightYs.length && nPos[nid]) {
+      adjustable.push({
+        nid,
+        currentY: nPos[nid].y,
+        targetY: avg(rightYs),
+      });
+    }
+  }
+
+  if (!adjustable.length) return;
+
+  // Sort by target Y to determine optimal order
+  adjustable.sort((a, b) => a.targetY - b.targetY);
+
+  // Check if reordering improves alignment
+  const currentOrder = adjustable.map(a => a.currentY);
+  const isAlreadyOrdered = currentOrder.every((y, i) => i === 0 || y >= currentOrder[i - 1]);
+
+  if (!isAlreadyOrdered) return; // Don't adjust if current order is already disrupted
+
+  // Compute new Y positions: try to match target Y while maintaining min gap
+  let curY = HEADER + PAD; // relative to zone top
+  const newPositions: { nid: string; y: number }[] = [];
+
+  for (const item of adjustable) {
+    const y = Math.max(curY, item.targetY);
+    newPositions.push({ nid: item.nid, y });
+    curY = y + NODE_H + GAP_Y;
+  }
+
+  // Check if new positions are better (lower total Y-distance to targets)
+  const oldDist = adjustable.reduce(
+    (sum, a) => sum + Math.abs(a.currentY - a.targetY), 0);
+  const newDist = newPositions.reduce(
+    (sum, np, i) => sum + Math.abs(np.y - adjustable[i].targetY), 0);
+
+  if (newDist >= oldDist) return; // No improvement
+
+  // Apply adjustments
+  for (const np of newPositions) {
+    nPos[np.nid] = { x: nPos[np.nid].x, y: np.y };
+  }
+
+  // Also adjust non-connected nodes in the first zone that follow
+  const adjustedIds = new Set(adjustable.map(a => a.nid));
+  const unadjusted = firstZone.nodeIds.filter(nid => !adjustedIds.has(nid) && nPos[nid]);
+
+  if (unadjusted.length && newPositions.length) {
+    const lastAdjustedY = Math.max(...newPositions.map(np => np.y));
+    let nextY = lastAdjustedY + NODE_H + GAP_Y;
+
+    // Re-sort unadjusted by their current column and Y
+    unadjusted.sort((a, b) => {
+      const pa = nPos[a], pb = nPos[b];
+      if (pa.x !== pb.x) return pa.x - pb.x;
+      return pa.y - pb.y;
+    });
+
+    // Group by column
+    const colGroups = new Map<number, string[]>();
+    for (const nid of unadjusted) {
+      const x = nPos[nid].x;
+      if (!colGroups.has(x)) colGroups.set(x, []);
+      colGroups.get(x)!.push(nid);
+    }
+
+    for (const [_x, nids] of colGroups) {
+      let cy = nextY;
+      for (const nid of nids) {
+        // Only push down if needed (don't pull up)
+        if (nPos[nid].y < cy) {
+          nPos[nid] = { x: nPos[nid].x, y: cy };
         }
-      }
-    }
-
-    // If no mutual connections, fall back to most-connected zones
-    const row1Indices = bestPairScore > 0 ? bestPair : [0, 1];
-    const row1 = row1Indices.map((i) => sortedZones[i]);
-    const row2 = sortedZones.filter((_, i) => !row1Indices.includes(i));
-
-    // Place row 1 — order: smaller node count first (less visual weight on left)
-    if (row1[0].nodeIds.length > row1[1].nodeIds.length) row1.reverse();
-    const row1Gap = gapBetween(row1[0].key, row1[1].key);
-    zonePositions[row1[0].id] = { x: 0, y: 0 };
-    zonePositions[row1[1].id] = { x: zoneSizes[row1[0].id].width + row1Gap, y: 0 };
-    const row1Height = Math.max(...row1.map((z) => zoneSizes[z.id].height));
-    const row1TotalWidth = zoneSizes[row1[0].id].width + row1Gap + zoneSizes[row1[1].id].width;
-
-    // Row 2 vertical gap
-    let maxVerticalGap = BASE_ZONE_GAP;
-    for (const r1 of row1) {
-      for (const r2 of row2) {
-        maxVerticalGap = Math.max(maxVerticalGap, gapBetween(r1.key, r2.key));
-      }
-    }
-    const row2Y = row1Height + maxVerticalGap;
-
-    if (row2.length === 1) {
-      const r2Zone = row2[0];
-      const r2Size = zoneSizes[r2Zone.id];
-      // Center under the entire row1 span
-      zonePositions[r2Zone.id] = {
-        x: (row1TotalWidth - r2Size.width) / 2,
-        y: row2Y,
-      };
-    } else {
-      const row2TotalWidth = row2.reduce((sum, z) => sum + zoneSizes[z.id].width, 0)
-        + Math.max(0, row2.length - 1) * BASE_ZONE_GAP;
-      let row2X = (row1TotalWidth - row2TotalWidth) / 2;
-      for (let i = 0; i < row2.length; i++) {
-        const zone = row2[i];
-        zonePositions[zone.id] = { x: row2X, y: row2Y };
-        if (i < row2.length - 1) {
-          row2X += zoneSizes[zone.id].width + gapBetween(zone.key, row2[i + 1].key);
-        }
+        cy = nPos[nid].y + NODE_H + GAP_Y;
       }
     }
   }
 
-  // ── 6. Place nodes — connection-target aware ──────────────────
-  const nodePositions: Record<string, { x: number; y: number }> = {};
-
-  for (const zone of sortedZones) {
-    const pos = zonePositions[zone.id];
-    if (!pos) continue;
-
-    const count = zone.nodeIds.length;
-    if (count === 0) continue;
-
-    const cols = zoneCols[zone.id] || Math.min(count, 3);
-    const extraPad = zone.externalNodeCount >= 3 ? 20 : 0;
-    const pad = ZONE_PADDING + extraPad;
-
-    // For each node, compute WHERE its connected nodes actually are.
-    // This uses the positions of the connected nodes' ZONES (since we don't
-    // know individual node positions yet — chicken-and-egg).
-    // xScore > 0 means "my connections are to the right" → place me on the right.
-    // yScore > 0 means "my connections are below" → place me at the bottom.
-    const nodeScores = new Map<string, { xScore: number; yScore: number; extCount: number }>();
-    const zoneCx = pos.x + zoneSizes[zone.id].width / 2;
-    const zoneCy = pos.y + zoneSizes[zone.id].height / 2;
-
-    for (const nid of zone.nodeIds) {
-      let xScore = 0;
-      let yScore = 0;
-      let extCount = 0;
-
-      // Check all cross-zone edges involving this node
-      for (const ce of crossZoneEdges) {
-        const isMe = ce.src === nid || ce.tgt === nid;
-        if (!isMe) continue;
-
-        const otherZoneKey = ce.src === nid ? ce.tgtZone : ce.srcZone;
-        const otherZoneInfo = zoneMap.get(otherZoneKey);
-        if (!otherZoneInfo) continue;
-
-        const otherPos = zonePositions[otherZoneInfo.id];
-        const otherSize = zoneSizes[otherZoneInfo.id];
-        if (!otherPos || !otherSize) continue;
-
-        // Direction vector from THIS zone center to OTHER zone center
-        xScore += (otherPos.x + otherSize.width / 2) - zoneCx;
-        yScore += (otherPos.y + otherSize.height / 2) - zoneCy;
-        extCount++;
-      }
-
-      nodeScores.set(nid, { xScore, yScore, extCount });
-    }
-
-    // Sort nodes for grid placement:
-    // 1. External nodes first, internal nodes last
-    // 2. Among external nodes, sort by X score (left-connecting → left column)
-    // 3. Within same column, sort by Y score
-    const sortedNodeIds = [...zone.nodeIds].sort((a, b) => {
-      const sa = nodeScores.get(a) || { xScore: 0, yScore: 0, extCount: 0 };
-      const sb = nodeScores.get(b) || { xScore: 0, yScore: 0, extCount: 0 };
-
-      // External nodes first
-      if (sa.extCount > 0 && sb.extCount === 0) return -1;
-      if (sa.extCount === 0 && sb.extCount > 0) return 1;
-
-      // Among external nodes: sort by X so left-connecting → col 0, right-connecting → col 1
-      const xDiff = sa.xScore - sb.xScore;
-      if (Math.abs(xDiff) > 20) return xDiff;
-
-      // Tie-break: by Y score
-      return sa.yScore - sb.yScore;
-    });
-
-    // Assign grid positions
-    sortedNodeIds.forEach((nodeId, idx) => {
-      const localRow = Math.floor(idx / cols);
-      const localCol = idx % cols;
-      const baseY = pos.y + ZONE_HEADER + pad + localRow * (NODE_HEIGHT + NODE_GAP_Y);
-      nodePositions[nodeId] = {
-        x: pos.x + pad + localCol * (NODE_WIDTH + NODE_GAP_X),
-        y: baseY + (localCol % 2 === 1 ? STAGGER_OFFSET : 0),
-      };
-    });
+  // Update zone height if nodes moved down
+  const allYs = firstZone.nodeIds
+    .filter(nid => nPos[nid])
+    .map(nid => nPos[nid].y + NODE_H);
+  if (allYs.length) {
+    const newH = Math.max(zSiz[firstZone.id].height, Math.max(...allYs) + PAD);
+    zSiz[firstZone.id] = { ...zSiz[firstZone.id], height: newH };
   }
+}
 
-  return { zonePositions, zoneSizes, nodePositions };
+// ══════════════════════════════════════════════════════════════════════
+// Utilities
+// ══════════════════════════════════════════════════════════════════════
+function pushAdj(
+  map: Map<string, { nid: string; zone: string }[]>,
+  from: string, to: string, toZone: string,
+): void {
+  if (!map.has(from)) map.set(from, []);
+  map.get(from)!.push({ nid: to, zone: toZone });
+}
+
+function avg(arr: number[]): number {
+  return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+
+function makeBuckets(
+  nodeIds: string[],
+  cols: number,
+  nodeCol: Map<string, number>,
+): string[][] {
+  const buckets: string[][] = Array.from({ length: cols }, () => []);
+  for (const nid of nodeIds) buckets[nodeCol.get(nid) || 0].push(nid);
+  return buckets;
 }
