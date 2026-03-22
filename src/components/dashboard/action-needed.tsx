@@ -2,10 +2,7 @@
 
 import Link from 'next/link';
 import { AlertTriangle, AlertCircle, Info, ChevronRight } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLatestHealthChecks } from '@/lib/queries/health-checks';
-import { useLocaleStore } from '@/stores/locale-store';
-import { t } from '@/lib/i18n';
 import type { ServiceCardData, DashboardMetrics } from '@/types';
 
 interface ActionNeededProps {
@@ -23,42 +20,30 @@ interface ActionItem {
   href: string;
 }
 
-const severityOrder: Record<Severity, number> = { error: 0, warning: 1, info: 2 };
-
 const severityConfig: Record<Severity, { icon: typeof AlertCircle; color: string; bg: string }> = {
   error: {
     icon: AlertCircle,
     color: 'text-red-600 dark:text-red-400',
-    bg: 'bg-red-50 dark:bg-red-950/30',
+    bg: 'bg-red-500/10 border-red-500/20',
   },
   warning: {
     icon: AlertTriangle,
     color: 'text-amber-600 dark:text-amber-400',
-    bg: 'bg-amber-50 dark:bg-amber-950/30',
+    bg: 'bg-amber-500/10 border-amber-500/20',
   },
   info: {
     icon: Info,
     color: 'text-blue-600 dark:text-blue-400',
-    bg: 'bg-blue-50 dark:bg-blue-950/30',
+    bg: 'bg-blue-500/10 border-blue-500/20',
   },
 };
 
+const severityOrder: Record<Severity, number> = { error: 0, warning: 1, info: 2 };
+
 export function ActionNeeded({ projectId, allCards, metrics }: ActionNeededProps) {
-  const { locale } = useLocaleStore();
   const { data: healthChecks } = useLatestHealthChecks(projectId);
 
   const items: ActionItem[] = [];
-
-  // Missing env vars
-  const missingEnvCount = allCards.filter((c) => c.envTotal > 0 && c.envFilled < c.envTotal).length;
-  if (missingEnvCount > 0) {
-    items.push({
-      severity: 'warning',
-      message: t(locale, 'project.actionNeeded.missingEnv'),
-      count: missingEnvCount,
-      href: `/project/${projectId}/env`,
-    });
-  }
 
   // Unhealthy services
   if (healthChecks) {
@@ -66,38 +51,28 @@ export function ActionNeeded({ projectId, allCards, metrics }: ActionNeededProps
     if (unhealthyCount > 0) {
       items.push({
         severity: 'error',
-        message: t(locale, 'project.actionNeeded.unhealthyService'),
-        count: unhealthyCount,
+        message: `비정상 서비스 ${unhealthyCount}개`,
         href: `/project/${projectId}/monitoring?tab=health`,
       });
     }
+  }
+
+  // Missing env vars
+  const missingEnvCount = allCards.filter((c) => c.envTotal > 0 && c.envFilled < c.envTotal).length;
+  if (missingEnvCount > 0) {
+    items.push({
+      severity: 'warning',
+      message: `환경변수 미입력 ${missingEnvCount}개`,
+      href: `/project/${projectId}/env`,
+    });
   }
 
   // Budget exceeded
   if (metrics.isOverBudget) {
     items.push({
       severity: 'warning',
-      message: '월간 예산을 초과했습니다',
+      message: '월간 예산 초과',
       href: `/project/${projectId}/costs`,
-    });
-  } else if (
-    metrics.budgetUsagePercent != null &&
-    metrics.budgetUsagePercent >= 80
-  ) {
-    // Budget 80% 사전 경고
-    items.push({
-      severity: 'info',
-      message: `월간 예산의 ${metrics.budgetUsagePercent}%를 사용했습니다`,
-      href: `/project/${projectId}/costs`,
-    });
-  }
-
-  // No services
-  if (metrics.totalServices === 0) {
-    items.push({
-      severity: 'info',
-      message: t(locale, 'project.actionNeeded.noServices'),
-      href: `/project/${projectId}/integrations`,
     });
   }
 
@@ -106,34 +81,23 @@ export function ActionNeeded({ projectId, allCards, metrics }: ActionNeededProps
   items.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold">
-          {t(locale, 'project.actionNeeded.title')} ({items.length}{t(locale, 'project.actionNeeded.count')})
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0 space-y-1.5">
-        {items.map((item, i) => {
-          const config = severityConfig[item.severity];
-          const Icon = config.icon;
-          return (
-            <Link
-              key={i}
-              href={item.href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:opacity-80 ${config.bg}`}
-            >
-              <Icon className={`h-4 w-4 shrink-0 ${config.color}`} />
-              <span className="flex-1 text-sm">
-                {item.message}
-                {item.count != null && (
-                  <span className="ml-1 font-medium">{item.count}{t(locale, 'project.actionNeeded.count')}</span>
-                )}
-              </span>
-              <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-            </Link>
-          );
-        })}
-      </CardContent>
-    </Card>
+    <div className="flex flex-wrap items-center gap-2">
+      {items.map((item, i) => {
+        const config = severityConfig[item.severity];
+        const Icon = config.icon;
+        return (
+          <Link
+            key={i}
+            prefetch={false}
+            href={item.href}
+            className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs transition-opacity hover:opacity-80 ${config.bg}`}
+          >
+            <Icon className={`h-3.5 w-3.5 shrink-0 ${config.color}`} />
+            <span>{item.message}</span>
+            <ChevronRight className="h-3 w-3 text-muted-foreground" />
+          </Link>
+        );
+      })}
+    </div>
   );
 }

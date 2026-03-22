@@ -11,7 +11,6 @@ import { ProjectHeroCard } from './project-hero-card';
 import { HealthRingCard } from './health-ring-card';
 import { ConnectionFlowMap } from './connection-flow-map';
 import { ActionNeeded } from './action-needed';
-import { OnboardingChecklist } from './onboarding-checklist';
 import type { DashboardResponse, ServiceCardData } from '@/types';
 
 interface BentoDashboardLayoutProps {
@@ -84,14 +83,11 @@ export function BentoDashboardLayout({ data }: BentoDashboardLayoutProps) {
         </div>
       </div>
 
-      {/* Row 2: Architecture Flow */}
-      <ConnectionFlowMap allCards={allCards} connections={connections} projectId={project.id} onServiceClick={handleServiceClick} />
+      {/* Row 2: Action alerts (inline strip) */}
+      <ActionNeeded projectId={project.id} allCards={allCards} metrics={metrics} />
 
-      {/* Row 3: Action Needed + Onboarding */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <ActionNeeded projectId={project.id} allCards={allCards} metrics={metrics} />
-        <OnboardingChecklist projectId={project.id} metrics={metrics} />
-      </div>
+      {/* Row 3: Architecture Flow */}
+      <ConnectionFlowMap allCards={allCards} connections={connections} projectId={project.id} onServiceClick={handleServiceClick} />
     </div>
   );
 }

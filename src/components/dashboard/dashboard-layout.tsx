@@ -16,7 +16,6 @@ import { MyProjectCard } from './my-project-card';
 import { DevtoolsRow } from './devtools-row';
 import { ActionNeeded } from './action-needed';
 import { HealthSummaryStrip } from './health-summary-strip';
-import { OnboardingChecklist } from './onboarding-checklist';
 import type { DashboardResponse, DashboardLayer, ServiceCardData } from '@/types';
 
 interface DashboardLayoutProps {
@@ -172,10 +171,6 @@ export function DashboardLayout({ data }: DashboardLayoutProps) {
         <HealthSummaryStrip projectId={project.id} allCards={allCards} />
       </div>
 
-      {/* Onboarding checklist */}
-      <div className="hidden md:block">
-        <OnboardingChecklist projectId={project.id} metrics={metrics} />
-      </div>
 
       {/* Mobile layout */}
       <div className="md:hidden">
@@ -202,7 +197,6 @@ export function DashboardLayout({ data }: DashboardLayoutProps) {
           <div className="space-y-4">
             <MyProjectCard project={project} metrics={metrics} allCards={allCards} />
             <HealthSummaryStrip projectId={project.id} allCards={allCards} />
-            <OnboardingChecklist projectId={project.id} metrics={metrics} />
           </div>
         )}
         {activeTab === 'frontend' && (
