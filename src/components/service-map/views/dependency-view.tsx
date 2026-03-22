@@ -216,9 +216,10 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
 
   // Compute optimal handle pair for zone/service connections.
   // Uses atan2-based 4-quadrant selection (48° horizontal sectors).
-  const computeHandles = useCallback((srcId: string, tgtId: string) => {
-    const srcNode = nodesRef.current.find((n) => n.id === srcId);
-    const tgtNode = nodesRef.current.find((n) => n.id === tgtId);
+  // Takes explicit nodeList to avoid stale ref issues.
+  const computeHandles = useCallback((srcId: string, tgtId: string, nodeList: Node[]) => {
+    const srcNode = nodeList.find((n) => n.id === srcId);
+    const tgtNode = nodeList.find((n) => n.id === tgtId);
     if (!srcNode || !tgtNode) return { sourceHandle: 'zs-right', targetHandle: 'zt-left' };
 
     const srcCx = srcNode.position.x + ((srcNode.style?.width as number) || 160) / 2;
@@ -253,12 +254,12 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
   const [nodes, setNodes] = useState<Node[]>(layoutedNodes);
   nodesRef.current = nodes;
 
-  // Build zone-level visual edges with optimized handle directions
-  // Depend on zonePositionOverrides/zoneSizeOverrides so handles recalculate when zones reposition
-  // (NOT on `nodes` — that causes render loop: nodes→zoneEdges→useEffect→setNodes→nodes)
+  // Build zone-level visual edges with optimized handle directions.
+  // Uses layoutedNodes (from useServiceMapLayout) as the position source —
+  // this recalculates whenever zone positions/sizes change, preventing stale handles.
   const zoneEdges = useMemo<Edge[]>(() => {
     return zoneConnections.map((zc) => {
-      const handles = computeHandles(zc.source, zc.target);
+      const handles = computeHandles(zc.source, zc.target, layoutedNodes);
       return {
         id: `zc-${zc.id}`,
         source: zc.source,
@@ -273,8 +274,7 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
         },
       };
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [zoneConnections, removeZoneConnection, computeHandles, zonePositionOverrides, zoneSizeOverrides]);
+  }, [zoneConnections, removeZoneConnection, computeHandles, layoutedNodes]);
 
   const allEdges = useMemo(() => [...layoutedEdges, ...zoneEdges], [layoutedEdges, zoneEdges]);
 
