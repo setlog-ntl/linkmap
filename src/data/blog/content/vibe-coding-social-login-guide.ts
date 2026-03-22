@@ -1,4 +1,4 @@
-export const content = `> **KEY:** "구글로 로그인" 버튼 하나 넣으려다 콘솔 3개를 오가며 반나절을 날린 적 있으신가요? 소셜 로그인은 코드보다 **설정이 진짜 관문**입니다. 이 글은 OAuth가 뭔지부터 시작해서, 카카오/구글 로그인을 Supabase Auth로 연결하는 전 과정을 정리합니다.
+export const content = `> **KEY:** "구글로 로그인" 버튼 하나 넣으려다 콘솔 3개를 오가며 반나절을 날린 적 있으신가요? 소셜 로그인은 코드보다 **설정이 진짜 관문**입니다. 이 글은 OAuth가 뭔지, 왜 필요한지, 어디서 막히는지를 정리하고, 실제 설정은 스크린샷이 포함된 [인증 가이드](/guides/auth)로 안내합니다.
 
 ## "로그인 기능 추가해줘" — AI에게 말했더니 생긴 일
 
@@ -10,7 +10,7 @@ AI에게 "구글 로그인 추가해줘"라고 말하면, 깔끔한 코드가 �
 
 코드는 맞는데 안 됩니다. AI가 만든 코드에는 문제가 없었습니다. 문제는 **Google Cloud Console에서 앱을 등록하지 않은 것**이었습니다. AI는 코드를 만들어줄 수 있지만, 외부 서비스 콘솔에서 클릭하고 키를 발급받는 과정까지 대신해주지는 못합니다.
 
-이 글은 그 "콘솔 설정"이 어떤 건지, 왜 필요한지, 어디서 막히는지를 정리합니다.
+이 글은 그 "콘솔 설정"이 어떤 건지, 왜 필요한지, 어디서 막히는지를 정리합니다. 콘솔에서 실제로 클릭하는 과정은 [인증 가이드](/guides/auth)에 스크린샷과 함께 정리해뒀으니, 이 글로 전체 그림을 잡고 가이드로 실행하는 순서를 추천합니다.
 
 ---
 
@@ -82,33 +82,23 @@ AI에게 "구글 로그인 추가해줘"라고 말하면, 깔끔한 코드가 �
 
 차이가 명확합니다. 그런데 여기서 중요한 게 하나 있습니다: **Supabase가 줄여주는 건 "코드"이지, "콘솔 설정"이 아닙니다.** Google Cloud Console에서 앱을 등록하고, 카카오 개발자 사이트에서 키를 발급받는 과정은 본인이 직접 해야 합니다.
 
-이 콘솔 설정이 초보자에게 가장 어려운 부분입니다. 아래에서 구글과 카카오를 각각 어떻게 연결하는지 정리합니다.
-
 > **TIP:** Supabase 자체가 처음이라면 [Supabase 입문 가이드](/blog/supabase-for-vibe-coders)에서 프로젝트 생성부터 시작하세요. 이 글은 Supabase 프로젝트가 이미 있다는 전제로 진행합니다.
 
 ---
 
-## 구글 로그인 — 3단계로 끝내기
+## 구글 로그인 — 흐름만 알면 콘솔이 무섭지 않다
 
-구글 로그인은 비교적 직관적입니다. "콘솔에서 앱 등록 → Supabase에 키 입력 → 코드 작성" 3단계면 됩니다.
+구글 로그인의 전체 흐름은 3단계입니다: **Google Cloud Console에서 앱 등록 → Supabase에 키 입력 → 코드 작성.** 각 단계에서 뭘 하는 건지만 이해하면 됩니다.
 
-### 1단계: Google Cloud Console에서 앱 등록
+1. **Google Cloud Console**: "나는 이런 앱이야"라고 구글에 등록하고, Client ID와 Client Secret을 발급받습니다
+2. **Supabase 대시보드**: 받은 키를 Supabase의 Google Provider 설정에 붙여넣습니다
+3. **코드**: AI에게 로그인 버튼과 callback 라우트를 만들어달라고 요청합니다
 
-[Google Cloud Console](https://console.cloud.google.com)에 들어가서 OAuth 2.0 클라이언트를 만듭니다.
+여기서 가장 많이 실수하는 건 **1단계의 Redirect URI**입니다. 이 주소가 한 글자라도 다르면 "redirect_uri_mismatch" 에러가 나옵니다.
 
-- 프로젝트 생성 → API 및 서비스 → 사용자 인증 정보
-- OAuth 2.0 클라이언트 ID 만들기
-- **Redirect URI 입력이 핵심입니다:** \`https://<your-project>.supabase.co/auth/v1/callback\`
+> **TIP:** 1~2단계의 실제 클릭 과정은 [구글 로그인 설정 가이드 — 스크린샷 포함 7단계](/guides/auth/google)에서 화면별로 안내합니다. 이 글에서 전체 그림을 잡고, 가이드에서 실행하는 순서를 추천합니다.
 
-여기서 Redirect URI를 빼먹거나 오타를 내면, 나중에 "redirect_uri_mismatch" 에러가 나옵니다. 이게 가장 흔한 실수입니다.
-
-### 2단계: Supabase 대시보드에 키 입력
-
-Supabase 대시보드 → Authentication → Providers → Google 활성화 후, 1단계에서 받은 Client ID와 Client Secret을 붙여넣습니다. 끝입니다.
-
-### 3단계: AI에게 코드 요청
-
-이제 코드는 AI에게 맡기세요. 이런 식으로 요청하면 됩니다:
+3단계 코드는 AI에게 맡기세요. 이렇게 요청하면 됩니다:
 
 \`\`\`
 Supabase Auth로 Google OAuth 소셜 로그인을 추가해줘.
@@ -120,39 +110,21 @@ Supabase Auth로 Google OAuth 소셜 로그인을 추가해줘.
 
 마지막 줄 **"/auth/callback 라우트 코드도 같이 만들어줘"** 가 중요합니다. 이걸 빼먹으면 로그인 후 빈 화면이 뜹니다. 뒤에서 다시 다룹니다.
 
-> **TIP:** 각 단계의 스크린샷이 필요하다면 [구글 로그인 가이드](/guides/auth/google)를 참고하세요.
-
 ---
 
-## 카카오 로그인 — 구글보다 한 단계가 더 있다
+## 카카오 로그인 — 구글과 뭐가 다른가
 
-카카오 로그인을 설정하다가 "어, 왜 Supabase Provider 목록에 카카오가 없지?"라고 당황하신 분이 많을 겁니다. 맞습니다. Supabase 기본 목록에는 카카오가 없습니다. **OIDC(OpenID Connect) Provider**로 직접 등록해야 합니다.
+카카오 로그인을 설정하다가 "어, 왜 Supabase Provider 목록에 카카오가 없지?"라고 당황하신 분이 많을 겁니다. 맞습니다. Supabase 기본 목록에는 카카오가 없습니다.
 
-이 한 단계 차이 때문에 카카오 로그인에서 많이들 멈춥니다. 하나씩 정리해보겠습니다.
+구글과의 핵심 차이점 2가지만 기억하세요:
 
-### 카카오 개발자 콘솔에서 할 일
+**1. OIDC Provider로 직접 등록해야 합니다.** Supabase에서 "Add new provider" → OIDC를 선택하고 카카오 정보를 직접 입력해야 합니다. 이 한 단계 차이 때문에 많이들 멈추는데, [카카오 로그인 가이드](/guides/auth/kakao)에서 스크린샷으로 안내하고 있으니 따라하면 됩니다.
 
-[Kakao Developers](https://developers.kakao.com)에 들어가서:
+**2. 카카오 콘솔에서 추가 설정이 필요합니다.** OpenID Connect를 수동으로 활성화해야 하고, 이메일을 필수 동의로 받으려면 비즈앱 전환도 필요합니다. 겁먹을 필요 없습니다 — 개인 개발자도 사업자등록번호 없이 전환할 수 있습니다.
 
-1. **애플리케이션 추가** → 앱 키 중 REST API 키를 메모합니다
-2. **카카오 로그인 활성화** → Redirect URI를 등록합니다
-3. **OpenID Connect 활성화** — 이게 핵심입니다. 카카오 로그인 → 고급 → OpenID Connect 활성화를 켜야 합니다. 이걸 안 켜면 Supabase에서 연동이 안 됩니다
-4. **동의항목 설정** → 이메일, 프로필 정보 등 필요한 항목을 선택합니다
+> **TIP:** 카카오 콘솔의 OpenID Connect 활성화, 동의항목 설정, Supabase OIDC 등록까지의 전 과정은 [카카오 로그인 설정 가이드 — 스크린샷 포함 6단계](/guides/auth/kakao)에서 확인하세요.
 
-> **WARNING:** 이메일을 "필수 동의"로 받으려면 **비즈앱 전환**이 필요합니다. 겁먹을 필요 없습니다 — 개인 개발자도 사업자등록번호 없이 전환할 수 있습니다. 카카오 앱 설정 → 비즈니스 → 비즈앱 전환에서 진행하면 됩니다.
-
-### Supabase에 OIDC Provider로 등록
-
-Supabase 대시보드 → Authentication → Providers → **"Add new provider"** → OIDC를 선택하고:
-
-- **Provider Name:** kakao
-- **Client ID:** 카카오 REST API 키
-- **Client Secret:** 카카오 보안 탭에서 생성한 Client Secret
-- **Issuer URL:** \`https://kauth.kakao.com\`
-
-### AI에게 코드 요청
-
-카카오는 OIDC provider라서, AI에게 요청할 때 이 점을 알려줘야 합니다:
+코드는 구글과 거의 같지만, AI에게 요청할 때 **OIDC라는 점을 꼭 알려줘야** 합니다. 안 그러면 기본 Provider 목록에서 카카오를 찾으려다 엉뚱한 코드가 나옵니다:
 
 \`\`\`
 Supabase Auth로 카카오 로그인을 추가해줘.
@@ -162,10 +134,6 @@ Supabase Auth로 카카오 로그인을 추가해줘.
 - 인증 후 /auth/callback에서 code 교환 후 /dashboard로 리다이렉트
 - signInWithOAuth의 options.queryParams에 provider: "kakao" 전달
 \`\`\`
-
-이 프롬프트에서 **"OIDC provider로 등록되어 있어"** 와 **"provider 이름은 kakao"** 를 꼭 알려주세요. 안 그러면 AI가 기본 Provider 목록에서 카카오를 찾으려다 엉뚱한 코드를 만들어냅니다.
-
-> **TIP:** [카카오 로그인 가이드](/guides/auth/kakao)에서 OIDC 설정과 동의항목까지 스크린샷과 함께 확인할 수 있습니다.
 
 ---
 
@@ -239,6 +207,19 @@ Supabase Auth로 카카오 로그인을 추가해줘.
 여기서 핵심: **Google/카카오의 키는 내 코드나 \`.env\`에 넣는 게 아닙니다.** Supabase 대시보드에 입력하면 Supabase가 대신 관리해줍니다. 코드에 직접 키를 넣으려다가 보안 사고가 나는 경우가 많으니, 이 구조를 기억해두세요.
 
 > **TIP:** 프로젝트가 커지면서 연결하는 서비스가 늘어나면 "이 키가 어디서 온 거였지?"가 헷갈리기 시작합니다. [Linkmap](https://www.linkmap.biz)으로 어떤 서비스에 어떤 키가 연결되어 있는지 시각화하면 관리가 훨씬 편해집니다. [서비스 카탈로그](https://www.linkmap.biz/services)에서 Supabase, Google, Kakao를 포함한 128개 서비스의 연결 방법을 확인하세요.
+
+---
+
+## 이 글과 가이드, 뭘 먼저 봐야 할까?
+
+| 콘텐츠 | 역할 | 언제 보면 좋은지 |
+|--------|------|---------------|
+| **이 블로그 글** | 전체 그림 잡기 — 왜 필요한지, 어디서 막히는지, AI에게 어떻게 요청하는지 | 소셜 로그인을 처음 접할 때 |
+| [인증 가이드 (개요)](/guides/auth) | 앱 로그인 vs 서비스 연동의 2층 구조 이해 | 인증 전체를 이해하고 싶을 때 |
+| [구글 로그인 가이드](/guides/auth/google) | Google Cloud Console 7단계 — 스크린샷 12장 | 구글 콘솔에서 실제로 클릭할 때 |
+| [카카오 로그인 가이드](/guides/auth/kakao) | Kakao Developers 6단계 — 스크린샷 10장 | 카카오 콘솔에서 실제로 설정할 때 |
+
+추천 순서: **이 글**(개념 + 감 잡기) → **가이드**(스크린샷 따라 설정) → **다시 이 글의 AI 프롬프트**(코드 생성)
 
 ---
 
