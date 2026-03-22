@@ -73,12 +73,28 @@ interface GuideJsonLdInput {
   title: string;
   description: string;
   readingTime?: string;
+  parentSlug?: string;
   faqs?: Array<{ q: string; a: string }>;
 }
 
 export function generateGuideJsonLd(input: GuideJsonLdInput) {
   const guideMeta = GUIDE_DATA.find((g) => g.slug === input.slug);
   const url = `${SITE_URL}/guides/${input.slug}`;
+
+  // 서브가이드인 경우 부모 slug로 breadcrumb 구성
+  const parentSlug = input.parentSlug;
+  const parentMeta = parentSlug ? GUIDE_DATA.find((g) => g.slug === parentSlug) : undefined;
+
+  const breadcrumbItems = [
+    { '@type': 'ListItem', position: 1, name: '홈', item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: '가이드', item: `${SITE_URL}/guides` },
+  ];
+  if (parentMeta) {
+    breadcrumbItems.push({ '@type': 'ListItem', position: 3, name: parentMeta.title, item: `${SITE_URL}${parentMeta.href}` });
+    breadcrumbItems.push({ '@type': 'ListItem', position: 4, name: input.title, item: url });
+  } else {
+    breadcrumbItems.push({ '@type': 'ListItem', position: 3, name: input.title, item: url });
+  }
 
   const graph: Record<string, unknown>[] = [
     {
@@ -93,6 +109,10 @@ export function generateGuideJsonLd(input: GuideJsonLdInput) {
       ...(guideMeta?.readingTime && {
         timeRequired: `PT${parseInt(guideMeta.readingTime)}M`,
       }),
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: breadcrumbItems,
     },
   ];
 

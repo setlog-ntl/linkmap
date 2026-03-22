@@ -5,7 +5,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: ['/', '/services', '/pricing', '/guides', '/guides/', '/blog', '/blog/', '/faq', '/glossary'],
+        // 공개 페이지: /, /services, /pricing, /guides, /blog, /faq, /glossary,
+        //              /oneclick, /showcase, /demo 는 disallow 하지 않으므로 자동 허용
         disallow: [
           '/dashboard',
           '/project/',
@@ -13,6 +14,8 @@ export default function robots(): MetadataRoute.Robots {
           '/api/',
           '/auth/',
           '/admin/',
+          '/feedback',
+          '/my-sites/',
         ],
       },
       {
@@ -25,8 +28,18 @@ export default function robots(): MetadataRoute.Robots {
           'Applebot-Extended',
           'Yeti',
         ],
-        allow: ['/', '/services', '/pricing', '/guides/', '/blog/', '/faq', '/glossary', '/llms.txt'],
-        disallow: ['/dashboard', '/project/', '/settings/', '/api/', '/auth/', '/admin/'],
+        allow: ['/llms.txt'],
+        disallow: [
+          '/dashboard',
+          '/project/',
+          '/settings/',
+          '/api/',
+          '/auth/',
+          '/admin/',
+          '/feedback',
+          '/my-sites/',
+          '/demo/',
+        ],
       },
     ],
     sitemap: 'https://www.linkmap.biz/sitemap.xml',
