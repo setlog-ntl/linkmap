@@ -131,6 +131,8 @@ export const SERVICE_IDS_V2 = {
   google_antigravity: '10000000-0000-4000-a000-000000000138',
   // Workflow Automation
   n8n: '10000000-0000-4000-a000-000000000139',
+  // AI UI Design
+  google_stitch: '10000000-0000-4000-a000-000000000140',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -4900,6 +4902,57 @@ export const servicesV2: ServiceSeedV2[] = [
       starter: '$0 (셀프호스팅)',
       growth: '€50',
       enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Google Stitch
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.google_stitch,
+    name: 'Google Stitch',
+    slug: 'google-stitch',
+    category: 'ai',
+    description:
+      'Google Labs의 AI UI 디자인 도구입니다. 텍스트·이미지 프롬프트로 모바일·웹 UI를 생성하고, 프론트엔드 코드로 내보낼 수 있습니다. Voice Canvas, Vibe Design 등 AI 네이티브 디자인 기능을 제공합니다.',
+    description_ko:
+      'Google Labs의 AI UI 디자인 도구입니다. 텍스트·이미지 프롬프트로 모바일·웹 UI를 생성하고, 프론트엔드 코드로 내보낼 수 있습니다. Voice Canvas, Vibe Design 등 AI 네이티브 디자인 기능을 제공합니다.',
+    icon_url: null,
+    website_url: 'https://stitch.withgoogle.com',
+    docs_url: 'https://github.com/google-labs-code/stitch-sdk',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '무료 사용 가능 (Google Labs 실험 단계)',
+      plans: [{ name: 'Free', price: '$0' }],
+    },
+    required_env_vars: [
+      {
+        name: 'GOOGLE_STITCH_API_KEY',
+        public: false,
+        description: 'Google Stitch API key for programmatic UI generation',
+        description_ko: 'Google Stitch API 키 (프로그래매틱 UI 생성용)',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'ai_creative',
+    popularity_score: 70,
+    difficulty_level: 'beginner',
+    tags: ['ai', 'ui-design', 'code-generation', 'prototyping', 'google-labs', 'vibe-design', 'frontend'],
+    alternatives: ['google-antigravity'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'angular', 'svelte'],
+      language: ['javascript', 'typescript'],
+    },
+    official_sdks: {
+      npm: 'https://github.com/google-labs-code/stitch-sdk',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$0',
+      enterprise: 'N/A',
     },
   },
 ];
