@@ -6,6 +6,10 @@ import { computeZoneLayout, domainToZone, type ZoneConfig, type LayoutPreset, NO
 import { getNeighborhood, isNodeHighlighted, isEdgeHighlighted } from '@/lib/layout/graph-utils';
 import type { ServiceDomain } from '@/types';
 
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
 /** Zone center info for zone-aware edge routing */
 interface ZoneCenter {
   cx: number;
@@ -32,16 +36,66 @@ export interface UseServiceMapLayoutReturn {
   neighborSet: Set<string> | null;
 }
 
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Get the center point of a node. */
+function nodeCenter(node: Node): { cx: number; cy: number } {
+  const w = (node.style?.width as number) || NODE_WIDTH;
+  const h = (node.style?.height as number) || NODE_HEIGHT;
+  return { cx: node.position.x + w / 2, cy: node.position.y + h / 2 };
+}
+
 /**
- * Pick the best handle pair for an edge between two nodes.
+ * Convert a direction vector (dx, dy) → the best source/target handle pair.
  *
- * For **intra-zone** edges we use pure node-center deltas.
- * For **inter-zone** edges we blend node-direction with zone-direction.
- *   – If the zone direction clearly dominates one axis (ratio > 1.8),
- *     we follow the zone axis with a very high weight (90 %).
- *   – Otherwise we use 70/30 zone/node blend.
- * A small horizontal bias (×1.15) is applied so layouts read left-to-right
- * naturally and edges only go vertical when the vertical gap is clearly larger.
+ * Uses `atan2` for precise angle-based 4-quadrant selection.
+ * The quadrant boundaries are at ±48° (slightly wider horizontal sectors
+ * because diagrams are typically wider than tall).
+ *
+ *       -132°   -48°
+ *          ╲  top  ╱
+ *   left    ╲    ╱    right
+ *          ╱      ╲
+ *         ╱ bottom ╲
+ *       132°    48°
+ */
+const H_HALF = (48 * Math.PI) / 180; // 48° in radians
+
+function directionToHandles(
+  dx: number,
+  dy: number,
+): { sourceHandle: string; targetHandle: string } {
+  const angle = Math.atan2(dy, dx); // -π..π  (0 = right)
+
+  // right sector:  -48° .. +48°
+  if (angle >= -H_HALF && angle <= H_HALF) {
+    return { sourceHandle: 'source-right', targetHandle: 'left' };
+  }
+  // bottom sector: +48° .. +132°
+  if (angle > H_HALF && angle < Math.PI - H_HALF) {
+    return { sourceHandle: 'source-bottom', targetHandle: 'top' };
+  }
+  // top sector:    -132° .. -48°
+  if (angle < -H_HALF && angle > -(Math.PI - H_HALF)) {
+    return { sourceHandle: 'source-top', targetHandle: 'bottom' };
+  }
+  // left sector:   ±132° .. ±180°
+  return { sourceHandle: 'source-left', targetHandle: 'right' };
+}
+
+// ---------------------------------------------------------------------------
+// Handle selection — angle-based, zone-independent
+// ---------------------------------------------------------------------------
+
+/**
+ * Select the best handle pair for an edge between two nodes.
+ *
+ * **Strategy**: pure node-to-node `atan2` angle decides the handle.
+ * Zone information is used **only** as a tie-breaker when the angle is
+ * within ±8° of a quadrant boundary.  This prevents zone blending from
+ * collapsing distinct target directions into a single handle.
  */
 function computeEdgeHandles(
   srcNode: Node,
@@ -50,88 +104,65 @@ function computeEdgeHandles(
   srcZoneKey?: string,
   tgtZoneKey?: string,
 ): { sourceHandle: string; targetHandle: string } {
-  const sw = (srcNode.style?.width as number) || NODE_WIDTH;
-  const sh = (srcNode.style?.height as number) || NODE_HEIGHT;
-  const tw = (tgtNode.style?.width as number) || NODE_WIDTH;
-  const th = (tgtNode.style?.height as number) || NODE_HEIGHT;
+  const { cx: srcCx, cy: srcCy } = nodeCenter(srcNode);
+  const { cx: tgtCx, cy: tgtCy } = nodeCenter(tgtNode);
 
-  const srcCx = srcNode.position.x + sw / 2;
-  const srcCy = srcNode.position.y + sh / 2;
-  const tgtCx = tgtNode.position.x + tw / 2;
-  const tgtCy = tgtNode.position.y + th / 2;
+  const dx = tgtCx - srcCx;
+  const dy = tgtCy - srcCy;
 
-  let dx = tgtCx - srcCx;
-  let dy = tgtCy - srcCy;
-
-  // Zone-aware blending for inter-zone edges
+  // For inter-zone edges near a quadrant boundary, nudge by zone direction
   if (zoneCenters && srcZoneKey && tgtZoneKey && srcZoneKey !== tgtZoneKey) {
-    const srcZC = zoneCenters.get(srcZoneKey);
-    const tgtZC = zoneCenters.get(tgtZoneKey);
-    if (srcZC && tgtZC) {
-      const zdx = tgtZC.cx - srcZC.cx;
-      const zdy = tgtZC.cy - srcZC.cy;
-      const azx = Math.abs(zdx);
-      const azy = Math.abs(zdy);
+    const angle = Math.atan2(dy, dx);
+    const BOUNDARY_ZONE = (8 * Math.PI) / 180; // ±8°
 
-      // When one zone axis clearly dominates (e.g. zones side-by-side)
-      // use a very strong zone bias so edges don't exit from the wrong side.
-      const ratio = azx > 0 && azy > 0 ? Math.max(azx, azy) / Math.min(azx, azy) : 10;
-      const zoneWeight = ratio > 1.8 ? 0.9 : 0.7;
-      const nodeWeight = 1 - zoneWeight;
+    // Check if angle is near any boundary (±48°, ±132°)
+    const boundaries = [H_HALF, Math.PI - H_HALF, -H_HALF, -(Math.PI - H_HALF)];
+    const nearBoundary = boundaries.some((b) => Math.abs(angle - b) < BOUNDARY_ZONE);
 
-      dx = zdx * zoneWeight + dx * nodeWeight;
-      dy = zdy * zoneWeight + dy * nodeWeight;
+    if (nearBoundary) {
+      const srcZC = zoneCenters.get(srcZoneKey);
+      const tgtZC = zoneCenters.get(tgtZoneKey);
+      if (srcZC && tgtZC) {
+        // Light nudge (20%) toward zone direction to break the tie
+        const zdx = tgtZC.cx - srcZC.cx;
+        const zdy = tgtZC.cy - srcZC.cy;
+        return directionToHandles(dx + zdx * 0.2, dy + zdy * 0.2);
+      }
     }
   }
 
-  // Slight horizontal bias — diagrams are typically wider than tall,
-  // so horizontal routing is more natural / readable.
-  const HORIZONTAL_BIAS = 1.15;
-  if (Math.abs(dx) * HORIZONTAL_BIAS >= Math.abs(dy)) {
-    return dx > 0
-      ? { sourceHandle: 'source-right', targetHandle: 'left' }
-      : { sourceHandle: 'source-left', targetHandle: 'right' };
-  }
-  return dy > 0
-    ? { sourceHandle: 'source-bottom', targetHandle: 'top' }
-    : { sourceHandle: 'source-top', targetHandle: 'bottom' };
+  return directionToHandles(dx, dy);
 }
 
-/** Helper: get node center */
-function nodeCenter(node: Node): { cx: number; cy: number } {
-  const w = (node.style?.width as number) || NODE_WIDTH;
-  const h = (node.style?.height as number) || NODE_HEIGHT;
-  return { cx: node.position.x + w / 2, cy: node.position.y + h / 2 };
-}
+// ---------------------------------------------------------------------------
+// Spread offsets — replaces the old "fanOut" perpendicular handle swap
+// ---------------------------------------------------------------------------
 
 /**
- * Fan-out post-processing for congested handles.
+ * When multiple edges share the same handle on a node, instead of forcing
+ * them onto perpendicular handles (which creates unnatural curves), we keep
+ * the same handle direction and spread the exit/entry points along the
+ * handle's edge.
  *
- * When a single node has 3+ edges sharing the same source or target handle,
- * the outer edges are redistributed to perpendicular handles based on
- * where their counterpart node actually is on the secondary axis.
- *
- * Example: GitHub (bottom) has 5 edges all using `source-top` to targets
- * spread across BACKEND zone. After fan-out:
- *   - leftmost targets  → `source-left`  (exits left, curves up)
- *   - center targets    → `source-top`   (kept)
- *   - rightmost targets → `source-right` (exits right, curves up)
+ * The spread data is written into `edge.data.srcSpreadIndex / srcSpreadTotal`
+ * (and `tgtSpreadIndex / tgtSpreadTotal` for the target side).
+ * `connection-edge.tsx` reads these to shift the Bezier endpoints.
  */
-function fanOutCongestedHandles(edges: Edge[], nodeMap: Map<string, Node>): void {
-  fanOutOneSide(edges, nodeMap, 'source');
-  fanOutOneSide(edges, nodeMap, 'target');
+function assignSpreadOffsets(edges: Edge[], nodeMap: Map<string, Node>): void {
+  assignSpreadOneSide(edges, nodeMap, 'source');
+  assignSpreadOneSide(edges, nodeMap, 'target');
 }
 
-function fanOutOneSide(
+function assignSpreadOneSide(
   edges: Edge[],
   nodeMap: Map<string, Node>,
   side: 'source' | 'target',
 ): void {
   const handleProp: 'sourceHandle' | 'targetHandle' =
     side === 'source' ? 'sourceHandle' : 'targetHandle';
-  const otherHandleProp: 'sourceHandle' | 'targetHandle' =
-    side === 'source' ? 'targetHandle' : 'sourceHandle';
   const otherSide: 'source' | 'target' = side === 'source' ? 'target' : 'source';
+  const spreadIdxKey = side === 'source' ? 'srcSpreadIndex' : 'tgtSpreadIndex';
+  const spreadTotalKey = side === 'source' ? 'srcSpreadTotal' : 'tgtSpreadTotal';
 
   // Group edges by (nodeId, handle)
   const groups = new Map<string, number[]>();
@@ -142,7 +173,7 @@ function fanOutOneSide(
   }
 
   for (const [key, indices] of groups) {
-    if (indices.length < 3) continue;
+    if (indices.length < 2) continue;
 
     const sepIdx = key.indexOf('::');
     const nodeId = key.slice(0, sepIdx);
@@ -153,9 +184,7 @@ function fanOutOneSide(
     const { cx: ncx, cy: ncy } = nodeCenter(node);
     const isVertical = handle.endsWith('top') || handle.endsWith('bottom');
 
-    // Sort edges by the secondary-axis offset of the OTHER node.
-    // For a vertical handle (top/bottom), the secondary axis is X.
-    // For a horizontal handle (left/right), the secondary axis is Y.
+    // Sort by the secondary-axis position of the other-side node
     const sorted = indices.map((idx) => {
       const otherNode = nodeMap.get(edges[idx][otherSide] ?? '');
       if (!otherNode) return { idx, offset: 0 };
@@ -164,47 +193,22 @@ function fanOutOneSide(
     });
     sorted.sort((a, b) => a.offset - b.offset);
 
-    // How many to spread to each perpendicular side
-    const spreadCount = Math.max(1, Math.ceil((sorted.length - 1) / 3));
-
-    // Determine perpendicular handle names
-    const prefix = side === 'source' ? 'source-' : '';
-    const beforeHandle = isVertical ? `${prefix}left` : `${prefix}top`;
-    const afterHandle = isVertical ? `${prefix}right` : `${prefix}bottom`;
-
-    for (let i = 0; i < sorted.length; i++) {
+    // Write spread index/total into edge data
+    const total = sorted.length;
+    for (let i = 0; i < total; i++) {
       const { idx } = sorted[i];
-      let newHandle: string | undefined;
-
-      if (i < spreadCount) {
-        newHandle = beforeHandle;
-      } else if (i >= sorted.length - spreadCount) {
-        newHandle = afterHandle;
-      }
-
-      if (newHandle && newHandle !== handle) {
-        edges[idx] = { ...edges[idx], [handleProp]: newHandle };
-
-        // Recompute the OTHER side's handle: it should face toward this node.
-        const otherNode = nodeMap.get(edges[idx][otherSide] ?? '');
-        if (otherNode) {
-          const { cx: ocx, cy: ocy } = nodeCenter(otherNode);
-          // Vector from other node → this node
-          const rdx = ncx - ocx;
-          const rdy = ncy - ocy;
-          const otherPrefix = side === 'source' ? '' : 'source-';
-          let recomputedHandle: string;
-          if (Math.abs(rdx) >= Math.abs(rdy)) {
-            recomputedHandle = rdx > 0 ? `${otherPrefix}right` : `${otherPrefix}left`;
-          } else {
-            recomputedHandle = rdy > 0 ? `${otherPrefix}bottom` : `${otherPrefix}top`;
-          }
-          edges[idx] = { ...edges[idx], [otherHandleProp]: recomputedHandle };
-        }
-      }
+      const existingData = (edges[idx].data ?? {}) as Record<string, unknown>;
+      edges[idx] = {
+        ...edges[idx],
+        data: { ...existingData, [spreadIdxKey]: i, [spreadTotalKey]: total },
+      };
     }
   }
 }
+
+// ---------------------------------------------------------------------------
+// Main hook
+// ---------------------------------------------------------------------------
 
 export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServiceMapLayoutReturn {
   const {
@@ -282,9 +286,9 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
     });
   }, [zoneResult.nodes, focusedNodeId, neighborSet]);
 
-  // Apply handles + focus dimming to edges (zone-aware for inter-zone edges)
+  // Compute handles (angle-based) + spread offsets + focus dimming
   const layoutedEdges = useMemo<Edge[]>(() => {
-    // Pass 1: compute initial handles per edge
+    // Pass 1: angle-based handle selection per edge
     const result = rawEdges.map((edge) => {
       const srcNode = nodeMap.get(edge.source);
       const tgtNode = nodeMap.get(edge.target);
@@ -308,9 +312,9 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
       };
     });
 
-    // Pass 2: fan-out — redistribute congested handles so multi-edge
-    // nodes spread connections naturally instead of stacking on one handle
-    fanOutCongestedHandles(result, nodeMap);
+    // Pass 2: assign spread offsets for congested handles
+    // (edges keep their handle direction, but exit/entry points are distributed)
+    assignSpreadOffsets(result, nodeMap);
 
     return result;
   }, [rawEdges, nodeMap, focusedNodeId, neighborSet, zoneCenters, nodeZoneMap]);

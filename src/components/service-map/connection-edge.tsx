@@ -71,7 +71,6 @@ function ConnectionEdge({
     const dx = targetX - sourceX;
     const dy = targetY - sourceY;
     const len = Math.sqrt(dx * dx + dy * dy) || 1;
-    // Perpendicular unit vector
     const px = -dy / len;
     const py = dx / len;
     adjustedSourceX += px * parallelOffset;
@@ -80,8 +79,35 @@ function ConnectionEdge({
     adjustedTargetY += py * parallelOffset;
   }
 
-  // Adaptive curvature: lower for long edges (avoids wide sweeping arcs),
-  // higher for short edges or perpendicular handle pairs.
+  // Spread offset: when multiple edges share the same handle on a node,
+  // distribute their exit/entry points along the handle edge.
+  // Written by assignSpreadOffsets() in useServiceMapLayout.
+  const srcSpreadIndex = edgeData?.srcSpreadIndex as number | undefined;
+  const srcSpreadTotal = edgeData?.srcSpreadTotal as number | undefined;
+  const tgtSpreadIndex = edgeData?.tgtSpreadIndex as number | undefined;
+  const tgtSpreadTotal = edgeData?.tgtSpreadTotal as number | undefined;
+
+  if (srcSpreadTotal !== undefined && srcSpreadTotal > 1 && srcSpreadIndex !== undefined) {
+    const maxSpread = Math.min(50, (srcSpreadTotal - 1) * 12);
+    const offset = srcSpreadTotal > 1
+      ? ((srcSpreadIndex / (srcSpreadTotal - 1)) - 0.5) * maxSpread
+      : 0;
+    const isSourceVertical = sourcePosition === 'top' || sourcePosition === 'bottom';
+    if (isSourceVertical) adjustedSourceX += offset;
+    else adjustedSourceY += offset;
+  }
+
+  if (tgtSpreadTotal !== undefined && tgtSpreadTotal > 1 && tgtSpreadIndex !== undefined) {
+    const maxSpread = Math.min(50, (tgtSpreadTotal - 1) * 12);
+    const offset = tgtSpreadTotal > 1
+      ? ((tgtSpreadIndex / (tgtSpreadTotal - 1)) - 0.5) * maxSpread
+      : 0;
+    const isTargetVertical = targetPosition === 'top' || targetPosition === 'bottom';
+    if (isTargetVertical) adjustedTargetX += offset;
+    else adjustedTargetY += offset;
+  }
+
+  // Adaptive curvature
   const edgeLength = Math.sqrt(
     (adjustedTargetX - adjustedSourceX) ** 2 + (adjustedTargetY - adjustedSourceY) ** 2,
   );
@@ -89,7 +115,6 @@ function ConnectionEdge({
     (sourcePosition === 'left' || sourcePosition === 'right') !==
     (targetPosition === 'left' || targetPosition === 'right');
   const baseCurvature = isPerpendicularHandles ? 0.35 : 0.25;
-  // Scale down for long edges (>400px), scale up for short (<120px)
   const curvature = edgeLength > 400
     ? baseCurvature * 0.6
     : edgeLength < 120

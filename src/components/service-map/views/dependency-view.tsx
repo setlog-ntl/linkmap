@@ -210,8 +210,7 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
   const zoneDragStartRef = useRef<Map<string, { x: number; y: number }>>(new Map());
 
   // Compute optimal handle pair for zone/service connections.
-  // Uses a horizontal bias (×1.15) so edges prefer left↔right routing,
-  // matching the natural reading direction of the layout.
+  // Uses atan2-based 4-quadrant selection (48° horizontal sectors).
   const computeHandles = useCallback((srcId: string, tgtId: string) => {
     const srcNode = nodesRef.current.find((n) => n.id === srcId);
     const tgtNode = nodesRef.current.find((n) => n.id === tgtId);
@@ -229,16 +228,21 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
     const sp = isZoneSrc ? 'zs' : 'source';
     const tp = isZoneTgt ? 'zt' : '';
 
-    // Horizontal bias for more readable routing
-    const HORIZONTAL_BIAS = 1.15;
-    if (Math.abs(dx) * HORIZONTAL_BIAS >= Math.abs(dy)) {
-      return dx > 0
-        ? { sourceHandle: `${sp}-right`, targetHandle: tp ? `${tp}-left` : 'left' }
-        : { sourceHandle: `${sp}-left`, targetHandle: tp ? `${tp}-right` : 'right' };
-    }
-    return dy > 0
-      ? { sourceHandle: `${sp}-bottom`, targetHandle: tp ? `${tp}-top` : 'top' }
-      : { sourceHandle: `${sp}-top`, targetHandle: tp ? `${tp}-bottom` : 'bottom' };
+    // atan2-based quadrant with widened horizontal sectors (48°)
+    const angle = Math.atan2(dy, dx);
+    const H = (48 * Math.PI) / 180;
+    type Dir = 'right' | 'bottom' | 'left' | 'top';
+    let dir: Dir;
+    if (angle >= -H && angle <= H) dir = 'right';
+    else if (angle > H && angle < Math.PI - H) dir = 'bottom';
+    else if (angle < -H && angle > -(Math.PI - H)) dir = 'top';
+    else dir = 'left';
+
+    const opposite: Record<Dir, Dir> = { right: 'left', left: 'right', top: 'bottom', bottom: 'top' };
+    return {
+      sourceHandle: `${sp}-${dir}`,
+      targetHandle: tp ? `${tp}-${opposite[dir]}` : opposite[dir],
+    };
   }, []);
 
   const [nodes, setNodes] = useState<Node[]>(layoutedNodes);
