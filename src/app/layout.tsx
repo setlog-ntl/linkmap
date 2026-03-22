@@ -44,6 +44,11 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     type: "website",
   },
+  verification: {
+    other: {
+      "naver-site-verification": "eda0a2e0ae94431654bff58eb59c6b20657cd708",
+    },
+  },
   twitter: {
     card: "summary_large_image",
     title: "Linkmap - 바이브 코딩 플랫폼 | 서비스 시각화부터 원클릭 배포까지",
