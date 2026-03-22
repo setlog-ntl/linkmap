@@ -286,7 +286,18 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
     });
   }, [zoneResult.nodes, focusedNodeId, neighborSet]);
 
-  // Compute handles (angle-based) + spread offsets + focus dimming
+  // Collect service node positions for obstacle detection
+  const serviceNodeList = useMemo(() => {
+    const list: { id: string; cx: number; cy: number }[] = [];
+    for (const n of zoneResult.nodes) {
+      if (n.type === 'zone') continue;
+      const { cx, cy } = nodeCenter(n);
+      list.push({ id: n.id, cx, cy });
+    }
+    return list;
+  }, [zoneResult.nodes]);
+
+  // Compute handles (angle-based) + spread offsets + obstacle detection + focus dimming
   const layoutedEdges = useMemo<Edge[]>(() => {
     // Pass 1: angle-based handle selection per edge
     const result = rawEdges.map((edge) => {
@@ -304,11 +315,43 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
         ? { opacity: isEdgeHighlighted(edge, focusedNodeId, neighborSet) ? 1 : 0.1 }
         : {};
 
+      // Pass 1.5: detect obstacle nodes between source and target
+      let obstacleData: Record<string, unknown> = {};
+      if (srcNode && tgtNode) {
+        const { cx: sx, cy: sy } = nodeCenter(srcNode);
+        const { cx: tx, cy: ty } = nodeCenter(tgtNode);
+        const minX = Math.min(sx, tx);
+        const maxX = Math.max(sx, tx);
+        const minY = Math.min(sy, ty);
+        const maxY = Math.max(sy, ty);
+        const margin = NODE_HEIGHT;
+
+        const obstacles: number[] = [];
+        for (const sn of serviceNodeList) {
+          if (sn.id === edge.source || sn.id === edge.target) continue;
+          // Check if node center falls within the edge's expanded bounding box
+          if (
+            sn.cx > minX + NODE_WIDTH * 0.5 &&
+            sn.cx < maxX - NODE_WIDTH * 0.5 &&
+            sn.cy > minY - margin &&
+            sn.cy < maxY + margin
+          ) {
+            obstacles.push(sn.cy);
+          }
+        }
+
+        if (obstacles.length > 0) {
+          const avgCy = obstacles.reduce((a, b) => a + b, 0) / obstacles.length;
+          obstacleData = { obstacleCy: avgCy };
+        }
+      }
+
       return {
         ...edge,
         sourceHandle: edge.sourceHandle || handles.sourceHandle,
         targetHandle: edge.targetHandle || handles.targetHandle,
         style: { ...edge.style, ...focusDim },
+        data: { ...edge.data, ...obstacleData },
       };
     });
 
@@ -317,7 +360,7 @@ export function useServiceMapLayout(params: UseServiceMapLayoutParams): UseServi
     assignSpreadOffsets(result, nodeMap);
 
     return result;
-  }, [rawEdges, nodeMap, focusedNodeId, neighborSet, zoneCenters, nodeZoneMap]);
+  }, [rawEdges, nodeMap, focusedNodeId, neighborSet, zoneCenters, nodeZoneMap, serviceNodeList]);
 
   return { layoutedNodes, layoutedEdges, neighborSet };
 }

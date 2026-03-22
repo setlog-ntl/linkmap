@@ -121,15 +121,42 @@ function ConnectionEdge({
       ? baseCurvature * 1.3
       : baseCurvature;
 
-  const [edgePath, labelX, labelY] = getBezierPath({
-    sourceX: adjustedSourceX,
-    sourceY: adjustedSourceY,
-    targetX: adjustedTargetX,
-    targetY: adjustedTargetY,
-    sourcePosition,
-    targetPosition,
-    curvature,
-  });
+  // Node-aware avoidance: if an obstacle node lies between source and target,
+  // generate a custom cubic bezier that arcs above or below the obstacle.
+  const obstacleCy = edgeData?.obstacleCy as number | undefined;
+
+  let edgePath: string;
+  let labelX: number;
+  let labelY: number;
+
+  if (obstacleCy !== undefined) {
+    const sx = adjustedSourceX;
+    const sy = adjustedSourceY;
+    const tx = adjustedTargetX;
+    const ty = adjustedTargetY;
+    const midX = (sx + tx) / 2;
+    const midY = (sy + ty) / 2;
+    const NODE_H = 72;
+    // Arc away from the obstacle: if obstacle is below midpoint, arc above; else arc below
+    const avoidOffset = obstacleCy > midY ? -(NODE_H + 24) : (NODE_H + 24);
+    const cp1x = sx + (tx - sx) * 0.25;
+    const cp1y = midY + avoidOffset;
+    const cp2x = sx + (tx - sx) * 0.75;
+    const cp2y = midY + avoidOffset;
+    edgePath = `M ${sx} ${sy} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${tx} ${ty}`;
+    labelX = midX;
+    labelY = midY + avoidOffset * 0.5;
+  } else {
+    [edgePath, labelX, labelY] = getBezierPath({
+      sourceX: adjustedSourceX,
+      sourceY: adjustedSourceY,
+      targetX: adjustedTargetX,
+      targetY: adjustedTargetY,
+      sourcePosition,
+      targetPosition,
+      curvature,
+    });
+  }
 
   // Dim edges not connected to hovered node
   const isRelatedToHoveredNode = hoveredNodeId

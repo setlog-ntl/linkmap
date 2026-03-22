@@ -17,6 +17,7 @@ const NODE_WIDTH = 180;
 const NODE_HEIGHT = 72;
 const NODE_GAP_X = 50;
 const NODE_GAP_Y = 64;        // wide vertical gap for line routing
+const STAGGER_OFFSET = Math.round(NODE_HEIGHT * 0.5); // 36px — odd columns shifted down
 const ZONE_PADDING = 50;      // generous padding inside zone
 const ZONE_HEADER = 48;
 const BASE_ZONE_GAP = 140;
@@ -124,14 +125,15 @@ export function autoArrange(
     const pad = ZONE_PADDING + extraPad;
 
     const minCols = cols;
+    const stagger = cols > 1 ? STAGGER_OFFSET : 0;
     zoneSizes[zone.id] = {
       width: Math.max(
         minCols * NODE_WIDTH + (minCols - 1) * NODE_GAP_X + 2 * pad,
         2 * NODE_WIDTH + NODE_GAP_X + 2 * pad,  // minimum 2-col width
       ),
       height: Math.max(
-        ZONE_HEADER + NODE_HEIGHT + 2 * pad,
-        ZONE_HEADER + rows * NODE_HEIGHT + (rows - 1) * NODE_GAP_Y + 2 * pad,
+        ZONE_HEADER + NODE_HEIGHT + stagger + 2 * pad,
+        ZONE_HEADER + rows * NODE_HEIGHT + (rows - 1) * NODE_GAP_Y + stagger + 2 * pad,
       ),
     };
   }
@@ -289,9 +291,10 @@ export function autoArrange(
     sortedNodeIds.forEach((nodeId, idx) => {
       const localRow = Math.floor(idx / cols);
       const localCol = idx % cols;
+      const baseY = pos.y + ZONE_HEADER + pad + localRow * (NODE_HEIGHT + NODE_GAP_Y);
       nodePositions[nodeId] = {
         x: pos.x + pad + localCol * (NODE_WIDTH + NODE_GAP_X),
-        y: pos.y + ZONE_HEADER + pad + localRow * (NODE_HEIGHT + NODE_GAP_Y),
+        y: baseY + (localCol % 2 === 1 ? STAGGER_OFFSET : 0),
       };
     });
   }

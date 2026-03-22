@@ -72,8 +72,9 @@ const NODE_HEIGHT = 72;
 const NODE_GAP_X = 40;
 const NODE_GAP_Y = 32;
 const INNER_COLS = 3;
+const STAGGER_OFFSET = Math.round(NODE_HEIGHT * 0.5); // 36px — odd columns shifted down
 const MIN_ZONE_WIDTH = INNER_COLS * NODE_WIDTH + (INNER_COLS - 1) * NODE_GAP_X + 2 * ZONE_PADDING;
-const MIN_ZONE_HEIGHT = ZONE_HEADER_HEIGHT + NODE_HEIGHT + 2 * ZONE_PADDING;
+const MIN_ZONE_HEIGHT = ZONE_HEADER_HEIGHT + NODE_HEIGHT + STAGGER_OFFSET + 2 * ZONE_PADDING;
 
 // ── Layout Result ──────────────────────────────────────────────
 
@@ -122,7 +123,8 @@ export function computeZoneLayout(
     const rows = Math.max(1, Math.ceil(count / INNER_COLS));
     const cols = Math.min(count || 1, INNER_COLS);
     const w = Math.max(MIN_ZONE_WIDTH, cols * NODE_WIDTH + (cols - 1) * NODE_GAP_X + 2 * ZONE_PADDING);
-    const h = Math.max(MIN_ZONE_HEIGHT, ZONE_HEADER_HEIGHT + rows * NODE_HEIGHT + (rows - 1) * NODE_GAP_Y + 2 * ZONE_PADDING);
+    const stagger = cols > 1 ? STAGGER_OFFSET : 0;
+    const h = Math.max(MIN_ZONE_HEIGHT, ZONE_HEADER_HEIGHT + rows * NODE_HEIGHT + (rows - 1) * NODE_GAP_Y + stagger + 2 * ZONE_PADDING);
     return { w, h };
   });
 
@@ -197,7 +199,8 @@ export function computeZoneLayout(
       const localRow = Math.floor(idx / INNER_COLS);
       const localCol = idx % INNER_COLS;
       const absX = pos.x + ZONE_PADDING + localCol * (NODE_WIDTH + NODE_GAP_X);
-      const absY = pos.y + ZONE_HEADER_HEIGHT + ZONE_PADDING + localRow * (NODE_HEIGHT + NODE_GAP_Y);
+      const baseY = pos.y + ZONE_HEADER_HEIGHT + ZONE_PADDING + localRow * (NODE_HEIGHT + NODE_GAP_Y);
+      const absY = baseY + (localCol % 2 === 1 ? STAGGER_OFFSET : 0);
       resultNodes.push({ ...original, position: { x: absX, y: absY }, zIndex: 10 });
     });
   }
@@ -259,12 +262,13 @@ export function computeAutoFitSize(serviceCount: number): { width: number; heigh
   const count = Math.max(0, serviceCount);
   const rows = Math.max(1, Math.ceil(count / INNER_COLS));
   const cols = Math.min(count || 1, INNER_COLS);
+  const stagger = cols > 1 ? STAGGER_OFFSET : 0;
   return {
     width: Math.max(MIN_ZONE_WIDTH, cols * NODE_WIDTH + (cols - 1) * NODE_GAP_X + 2 * ZONE_PADDING),
-    height: Math.max(MIN_ZONE_HEIGHT, ZONE_HEADER_HEIGHT + rows * NODE_HEIGHT + (rows - 1) * NODE_GAP_Y + 2 * ZONE_PADDING),
+    height: Math.max(MIN_ZONE_HEIGHT, ZONE_HEADER_HEIGHT + rows * NODE_HEIGHT + (rows - 1) * NODE_GAP_Y + stagger + 2 * ZONE_PADDING),
   };
 }
 
 // ── Exports ────────────────────────────────────────────────────
 
-export { NODE_WIDTH, NODE_HEIGHT, ZONE_PADDING, ZONE_HEADER_HEIGHT };
+export { NODE_WIDTH, NODE_HEIGHT, ZONE_PADDING, ZONE_HEADER_HEIGHT, STAGGER_OFFSET };
