@@ -193,8 +193,19 @@ export function useServiceMapData(projectId: string, options?: ServiceMapOptions
         .eq('id', projectId)
         .single();
       if (project) {
+        const p = project as Record<string, unknown>;
         setProjectName(project.name);
-        setMainServiceId((project as Record<string, unknown>).main_service_id as string | null ?? null);
+        setMainServiceId(p.main_service_id as string | null ?? null);
+        setProjectMeta({
+          id: project.id,
+          description: p.description as string | null ?? null,
+          iconType: p.icon_type as string | null ?? null,
+          iconValue: p.icon_value as string | null ?? null,
+          linkUrl: p.link_url as string | null ?? null,
+          isShowcase: (p.is_showcase as boolean) ?? false,
+          showcaseDescription: p.showcase_description as string | null ?? null,
+          showcaseCategory: p.showcase_category as ShowcaseCategory | null ?? null,
+        });
       }
     };
     fetchProject();

@@ -31,6 +31,7 @@ import { useServiceMapStore } from '@/stores/service-map-store';
 import { t } from '@/lib/i18n';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { ServiceMapData } from '@/components/service-map/hooks/useServiceMapData';
+import { getServiceIconUrl } from '@/lib/constants/service-brands';
 
 const nodeTypes = {
   service: ServiceNode,
@@ -86,14 +87,21 @@ const MapViewInner = memo(function MapViewInner({ data, projectId, isReadOnly = 
   const [searchQuery, setSearchQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
 
-  // 프로젝트 아이콘: emoji → iconEmoji, brand/custom → iconUrl 없음(서비스맵 자체 아이콘)
-  const projectIconEmoji = data.projectMeta?.iconType === 'emoji' ? data.projectMeta.iconValue : null;
+  // 프로젝트 아이콘: emoji → iconEmoji, brand → ServiceIcon URL, custom → 직접 URL
+  const meta = data.projectMeta;
+  const projectIconEmoji = meta?.iconType === 'emoji' ? meta.iconValue : null;
+  const projectIconUrl = meta?.iconType === 'brand' && meta.iconValue
+    ? getServiceIconUrl(meta.iconValue) ?? null
+    : meta?.iconType === 'custom' && meta.iconValue
+      ? meta.iconValue
+      : null;
 
   const { nodes: layoutNodes, edges: layoutEdges } = useRadialMapNodes({
     services: data.services,
     userConnections: data.userConnections,
     projectName: data.projectName,
     projectIconEmoji,
+    projectIconUrl,
     searchQuery,
     focusedNodeId,
     filterStatuses: filterStatuses.length > 0 ? filterStatuses : undefined,
