@@ -24,7 +24,20 @@ export interface BlogPostMeta {
 
 export const BLOG_POSTS_META: BlogPostMeta[] = [
   // ======================================================================
-  // 새 포스트 — Cloudflare Workers + Next.js prefetch 503 해결기
+  // 새 포스트 — 소셜 로그인 가이드
+  // ======================================================================
+  {
+    slug: 'vibe-coding-social-login-guide',
+    title: '"구글로 로그인" 버튼 하나에 반나절이 걸린 이유 — 카카오/구글 소셜 로그인 완전 가이드',
+    description: 'AI가 로그인 코드는 만들어줬는데 실행하면 에러만 나옵니다. 문제는 콘솔 설정이었습니다. OAuth 개념부터 카카오·구글 연결, 초보자가 반드시 겪는 에러 3가지까지 정리합니다.',
+    category: 'tutorial',
+    tags: ['소셜 로그인', '카카오 로그인', '구글 로그인', 'OAuth', 'Supabase Auth'],
+    publishedAt: '2026-03-24',
+    readingTime: '10분',
+    relatedGuides: ['auth', 'env', 'supabase', 'deploy'],
+  },
+  // ======================================================================
+  // Cloudflare Workers + Next.js prefetch 503 해결기
   // ======================================================================
   {
     slug: 'cloudflare-workers-nextjs-prefetch-503-fix',

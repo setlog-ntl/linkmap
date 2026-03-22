@@ -31,6 +31,7 @@ import { content as c25 } from './content/vibe-coding-secret-leak-crisis';
 import { content as c26 } from './content/vibe-coding-security-checklist';
 import { content as c27 } from './content/vibe-coding-side-project-monetization';
 import { content as c28 } from './content/vibe-coding-stripe-payment-guide';
+import { content as cSocialLogin } from './content/vibe-coding-social-login-guide';
 import { content as c29 } from './content/vibe-coding-success-stories';
 import { content as c30 } from './content/vibe-coding-tools-comparison-2026';
 import { content as c31 } from './content/vibe-coding-vs-traditional-coding';
@@ -38,6 +39,7 @@ import { content as c32 } from './content/what-is-vibe-coding';
 import { content as c33 } from './content/why-dotenv-is-dangerous';
 
 export const CONTENT_MAP: Record<string, string> = {
+  'vibe-coding-social-login-guide': cSocialLogin,
   'cloudflare-workers-nextjs-prefetch-503-fix': cWorkersPrefetch,
   'ai-agent-reads-your-env': c0,
   'ai-code-security-reality': c1,
