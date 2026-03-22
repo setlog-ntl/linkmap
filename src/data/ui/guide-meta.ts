@@ -105,7 +105,7 @@ export const SUB_GUIDE_LIST: SubGuideMeta[] = [
   { slug: 'overview', parentSlug: 'ai-tools', title: '개요 — 바이브코딩이란?', description: 'AI와 대화하며 코딩하는 새로운 개발 방식', icon: FileText, readingTime: '4분', href: '/guides/ai-tools' },
   { slug: 'prompt-engineering', parentSlug: 'ai-tools', title: '프롬프트 엔지니어링', description: '좋은 지시 구조, 컨텍스트 관리, 규격 문서 작성', icon: Code, readingTime: '5분', href: '/guides/ai-tools/prompt-engineering' },
   { slug: 'cursor-claude', parentSlug: 'ai-tools', title: 'Cursor / Claude Code 활용법', description: '설치, 설정, 실전 워크플로우', icon: Terminal, readingTime: '4분', href: '/guides/ai-tools/cursor-claude' },
-  { slug: 'ai-api', parentSlug: 'ai-tools', title: 'AI API 연동 기초', description: 'OpenAI/Anthropic API, 토큰, 비용 관리, 스트리밍', icon: Cpu, readingTime: '4분', href: '/guides/ai-tools/ai-api' },
+  { slug: 'ai-api', parentSlug: 'ai-tools', title: 'AI API 연동 기초', description: 'OpenAI/Anthropic/Gemini API, 토큰, 비용 비교, 스트리밍', icon: Cpu, readingTime: '5분', href: '/guides/ai-tools/ai-api' },
 
   // ── 보안 (security) ──
   { slug: 'overview', parentSlug: 'security', title: '개요 — 웹 보안이 중요한 이유', description: 'AI 코드의 보안 취약점과 왜 신경 써야 하는지', icon: FileText, readingTime: '3분', href: '/guides/security' },

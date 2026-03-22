@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { ScrollReveal } from '@/components/landing/scroll-reveal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +29,17 @@ const apiKeySteps = [
     envKey: 'ANTHROPIC_API_KEY',
     color: 'border-purple-200 dark:border-purple-800',
   },
+  {
+    provider: 'Google Gemini',
+    steps: [
+      'aistudio.google.com 접속 → Google 계정 로그인',
+      '"Get API key" → "Create API key" 클릭',
+      '키를 복사해 .env.local에 저장: GEMINI_API_KEY=AI...',
+      '무료 티어 제공 (분당 15회, 일 1,500회 요청)',
+    ],
+    envKey: 'GEMINI_API_KEY',
+    color: 'border-blue-200 dark:border-blue-800',
+  },
 ];
 
 const pricingTable = [
@@ -35,11 +47,16 @@ const pricingTable = [
   { model: 'GPT-4o mini', provider: 'OpenAI', input: '$0.15', output: '$0.60', context: '128K', badge: '가성비' },
   { model: 'Claude Sonnet 4', provider: 'Anthropic', input: '$3', output: '$15', context: '200K', badge: '코딩 추천' },
   { model: 'Claude Haiku 3.5', provider: 'Anthropic', input: '$0.80', output: '$4', context: '200K', badge: '가성비' },
-  { model: 'Gemini 2.0 Flash', provider: 'Google', input: '무료 티어', output: '무료 티어', context: '1M', badge: '무료' },
+  { model: 'Gemini 2.5 Pro', provider: 'Google', input: '$1.25', output: '$10', context: '1M', badge: '고성능' },
+  { model: 'Gemini 2.5 Flash', provider: 'Google', input: '$0.15', output: '$0.60', context: '1M', badge: '가성비' },
+  { model: 'Gemini 2.0 Flash', provider: 'Google', input: '무료 티어', output: '무료 티어', context: '1M', badge: '입문 추천' },
 ];
 
-const streamingCode = `// src/app/api/chat/route.ts
-import { NextRequest } from 'next/server';
+const streamingExamples = {
+  openai: {
+    label: 'OpenAI',
+    file: 'src/app/api/chat/route.ts',
+    code: `import { NextRequest } from 'next/server';
 
 export async function POST(req: NextRequest) {
   const { message } = await req.json();
@@ -55,16 +72,75 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: message }],
-        stream: true,  // 스트리밍 활성화
+        stream: true,
       }),
     },
   );
 
-  // ReadableStream으로 클라이언트에 전달
   return new Response(response.body, {
     headers: { 'Content-Type': 'text/event-stream' },
   });
-}`;
+}`,
+  },
+  anthropic: {
+    label: 'Anthropic',
+    file: 'src/app/api/chat/route.ts',
+    code: `import { NextRequest } from 'next/server';
+
+export async function POST(req: NextRequest) {
+  const { message } = await req.json();
+
+  const response = await fetch(
+    'https://api.anthropic.com/v1/messages',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY!,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        stream: true,
+        messages: [{ role: 'user', content: message }],
+      }),
+    },
+  );
+
+  return new Response(response.body, {
+    headers: { 'Content-Type': 'text/event-stream' },
+  });
+}`,
+  },
+  gemini: {
+    label: 'Google Gemini',
+    file: 'src/app/api/chat/route.ts',
+    code: `import { NextRequest } from 'next/server';
+
+export async function POST(req: NextRequest) {
+  const { message } = await req.json();
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  const response = await fetch(
+    \`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=\${apiKey}\`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: message }] }],
+      }),
+    },
+  );
+
+  return new Response(response.body, {
+    headers: { 'Content-Type': 'text/event-stream' },
+  });
+}`,
+  },
+} as const;
+
+type StreamingProvider = keyof typeof streamingExamples;
 
 const costTips = [
   {
@@ -84,12 +160,20 @@ const costTips = [
   },
   {
     title: '사용량 알림 설정',
-    desc: 'OpenAI/Anthropic 대시보드에서 월 예산 한도를 설정하세요. 한도 도달 시 자동 차단됩니다.',
+    desc: 'OpenAI/Anthropic/Google 대시보드에서 월 예산 한도를 설정하세요. 한도 도달 시 자동 차단됩니다.',
     icon: '🔔',
+  },
+  {
+    title: '무료 티어 활용',
+    desc: 'Gemini API는 분당 15회, 일 1,500회까지 무료입니다. 프로토타입이나 학습 단계에서 적극 활용하세요.',
+    icon: '🎁',
   },
 ];
 
 export function AiApiContent() {
+  const [activeTab, setActiveTab] = useState<StreamingProvider>('openai');
+  const activeExample = streamingExamples[activeTab];
+
   return (
     <div className="py-6 space-y-0">
       {/* 헤더 */}
@@ -102,7 +186,7 @@ export function AiApiContent() {
         </div>
         <p className="text-muted-foreground mb-8 max-w-2xl leading-relaxed">
           내 앱에 AI 기능을 넣으려면 AI API를 연동해야 합니다.
-          API 키 발급부터 비용 관리까지 단계별로 안내합니다.
+          OpenAI, Anthropic, Google Gemini — 3대 제공사의 API 키 발급부터 비용 비교, 스트리밍 구현까지 안내합니다.
         </p>
       </ScrollReveal>
 
@@ -116,7 +200,7 @@ export function AiApiContent() {
         </ScrollReveal>
 
         <ScrollReveal delay={0.1}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mb-8">
             {apiKeySteps.map((provider) => (
               <Card key={provider.provider} className={provider.color}>
                 <CardHeader className="pb-3">
@@ -134,7 +218,9 @@ export function AiApiContent() {
                     ))}
                   </div>
                   <div className="rounded border bg-muted/50 px-3 py-2">
-                    <code className="text-[10px] font-mono text-muted-foreground">{provider.envKey}=sk-...</code>
+                    <code className="text-[10px] font-mono text-muted-foreground">
+                      {provider.envKey}={provider.provider === 'Google Gemini' ? 'AI...' : 'sk-...'}
+                    </code>
                   </div>
                 </CardContent>
               </Card>
@@ -143,7 +229,7 @@ export function AiApiContent() {
         </ScrollReveal>
 
         <ScrollReveal delay={0.15}>
-          <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 max-w-2xl mb-8">
+          <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 max-w-3xl mb-8">
             <p className="text-xs text-red-700 dark:text-red-300">
               <strong>보안 주의:</strong> API 키를 코드에 직접 작성하거나 GitHub에 올리지 마세요.
               반드시 <code className="font-mono bg-red-100 dark:bg-red-900/40 px-1 rounded">.env.local</code>에 저장하고,
@@ -199,7 +285,7 @@ export function AiApiContent() {
             <p className="text-sm text-muted-foreground leading-relaxed">
               <strong className="text-foreground">비용 감 잡기:</strong> 간단한 챗봇 앱에서
               하루 100명이 각 5번 대화하면, GPT-4o mini 기준 월 약 $2~5 수준입니다.
-              시작 단계에서는 크게 걱정할 금액이 아닙니다.
+              Gemini 2.0 Flash는 무료 티어로 시작할 수 있어 비용 부담 없이 프로토타입을 만들 수 있습니다.
             </p>
           </div>
         </ScrollReveal>
@@ -216,15 +302,81 @@ export function AiApiContent() {
         </ScrollReveal>
 
         <ScrollReveal delay={0.1}>
-          <div className="max-w-2xl mb-8">
+          <div className="max-w-3xl mb-8">
+            <div className="flex gap-1 mb-2">
+              {(Object.keys(streamingExamples) as StreamingProvider[]).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                    activeTab === key
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  }`}
+                >
+                  {streamingExamples[key].label}
+                </button>
+              ))}
+            </div>
             <div className="rounded-lg border bg-muted/50">
               <div className="px-4 py-2 border-b">
-                <span className="text-xs text-muted-foreground font-mono">src/app/api/chat/route.ts</span>
+                <span className="text-xs text-muted-foreground font-mono">{activeExample.file}</span>
               </div>
               <pre className="p-4 text-[10px] font-mono overflow-x-auto leading-relaxed whitespace-pre-wrap text-muted-foreground">
-                {streamingCode}
+                {activeExample.code}
               </pre>
             </div>
+          </div>
+        </ScrollReveal>
+      </section>
+
+      {/* 제공사별 비교 */}
+      <section className="scroll-mt-24 py-8 md:py-12">
+        <ScrollReveal>
+          <h2 className="text-xl md:text-2xl font-bold mb-3">제공사별 특징 비교</h2>
+          <p className="text-muted-foreground mb-6 max-w-2xl text-sm">
+            어떤 API를 선택해야 할지 고민된다면, 각 제공사의 강점을 비교해보세요.
+          </p>
+        </ScrollReveal>
+
+        <ScrollReveal delay={0.1}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl">
+            <div className="rounded-lg border bg-card p-4">
+              <div className="text-sm font-semibold mb-2 text-green-600 dark:text-green-400">OpenAI</div>
+              <ul className="space-y-1.5 text-xs text-muted-foreground">
+                <li>- 가장 넓은 생태계, 레퍼런스 풍부</li>
+                <li>- GPT-4o: 범용 추천, 이미지 입력 지원</li>
+                <li>- Function calling, JSON mode 안정적</li>
+                <li>- 단점: 무료 티어 없음</li>
+              </ul>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="text-sm font-semibold mb-2 text-purple-600 dark:text-purple-400">Anthropic</div>
+              <ul className="space-y-1.5 text-xs text-muted-foreground">
+                <li>- Claude: 코딩·분석·긴 문서에 강점</li>
+                <li>- 200K 컨텍스트로 긴 코드 분석 유리</li>
+                <li>- 안전성 높은 응답, 환각 적음</li>
+                <li>- 단점: 무료 티어 없음</li>
+              </ul>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="text-sm font-semibold mb-2 text-blue-600 dark:text-blue-400">Google Gemini</div>
+              <ul className="space-y-1.5 text-xs text-muted-foreground">
+                <li>- 무료 티어 제공 (입문·프로토타입 최적)</li>
+                <li>- 1M 토큰 컨텍스트 (업계 최대)</li>
+                <li>- 멀티모달: 텍스트, 이미지, 오디오, 비디오</li>
+                <li>- Google 서비스(Sheets, Docs) 연동 용이</li>
+              </ul>
+            </div>
+          </div>
+        </ScrollReveal>
+
+        <ScrollReveal delay={0.15}>
+          <div className="mt-4 p-3 rounded-lg bg-muted/50 border max-w-3xl">
+            <p className="text-xs text-muted-foreground">
+              <strong className="text-foreground">추천:</strong> 처음 시작한다면 <strong className="text-foreground">Gemini 무료 티어</strong>로 시작하고,
+              프로덕션에서는 용도에 맞는 모델을 선택하세요. 챗봇은 GPT-4o, 코드 분석은 Claude, 멀티모달은 Gemini가 강합니다.
+            </p>
           </div>
         </ScrollReveal>
       </section>
