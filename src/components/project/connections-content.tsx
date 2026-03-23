@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, Fragment, useMemo } from 'react';
+import { useState, Fragment, useMemo, useCallback } from 'react';
 import {
   Cable, Wand2, Trash2, Plus, RefreshCw, Clock, ArrowRight,
-  ChevronDown, ChevronUp, Filter, Zap, Shield, Database,
+  ChevronUp, Filter, Zap, Shield, Database,
   Globe, AlertTriangle, CheckCircle2, XCircle, Pause,
 } from 'lucide-react';
 import { ImpactAnalysisPanel } from '@/components/project/impact-analysis-panel';
@@ -12,7 +12,18 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { ServiceIcon } from '@/components/ui/service-icon';
 import { cn } from '@/lib/utils';
 import {
   useProjectConnections,
@@ -23,7 +34,7 @@ import {
   useAutoConnect,
   useVerifyConnection,
 } from '@/lib/queries/connections';
-import { useProjectServices } from '@/lib/queries/services';
+import { useProjectServices, useCatalogServices } from '@/lib/queries/services';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import type { UserConnectionType, ConnectionStatus, ConnectionEnvironment } from '@/types';
@@ -32,17 +43,16 @@ import type { UserConnectionType, ConnectionStatus, ConnectionEnvironment } from
 const CONNECTION_TYPE_CONFIG: Record<UserConnectionType, {
   label: string;
   color: string;
-  bgColor: string;
   icon: typeof Database;
   desc: string;
 }> = {
-  uses:          { label: '사용',       color: '#3b82f6', bgColor: 'bg-blue-50 dark:bg-blue-900/20',    icon: Database,       desc: '서비스 사용' },
-  api_call:      { label: 'API 호출',   color: '#8b5cf6', bgColor: 'bg-violet-50 dark:bg-violet-900/20', icon: Zap,            desc: 'API 호출' },
-  data_transfer: { label: '데이터 전달', color: '#f97316', bgColor: 'bg-orange-50 dark:bg-orange-900/20', icon: ArrowRight,     desc: '데이터 전송' },
-  integrates:    { label: '연동',       color: '#22c55e', bgColor: 'bg-green-50 dark:bg-green-900/20',   icon: Cable,          desc: '양방향 통합' },
-  auth_provider: { label: '인증 제공',   color: '#ec4899', bgColor: 'bg-pink-50 dark:bg-pink-900/20',    icon: Shield,         desc: '인증 제공' },
-  webhook:       { label: '웹훅',       color: '#14b8a6', bgColor: 'bg-teal-50 dark:bg-teal-900/20',    icon: Globe,          desc: '웹훅 이벤트' },
-  sdk:           { label: 'SDK',        color: '#6366f1', bgColor: 'bg-indigo-50 dark:bg-indigo-900/20', icon: Database,       desc: 'SDK 연동' },
+  uses:          { label: '사용',       color: '#3b82f6', icon: Database,   desc: '서비스 사용' },
+  api_call:      { label: 'API 호출',   color: '#8b5cf6', icon: Zap,        desc: 'API 호출' },
+  data_transfer: { label: '데이터 전달', color: '#f97316', icon: ArrowRight, desc: '데이터 전송' },
+  integrates:    { label: '연동',       color: '#22c55e', icon: Cable,      desc: '양방향 통합' },
+  auth_provider: { label: '인증 제공',   color: '#ec4899', icon: Shield,     desc: '인증 제공' },
+  webhook:       { label: '웹훅',       color: '#14b8a6', icon: Globe,      desc: '웹훅 이벤트' },
+  sdk:           { label: 'SDK',        color: '#6366f1', icon: Database,   desc: 'SDK 연동' },
 };
 
 const STATUS_CONFIG: Record<ConnectionStatus, {
@@ -57,22 +67,12 @@ const STATUS_CONFIG: Record<ConnectionStatus, {
   pending:  { label: '대기',   color: '#f59e0b', icon: AlertTriangle, badge: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
 };
 
-const ENVIRONMENTS: { value: ConnectionEnvironment | 'all'; label: string; icon: string }[] = [
-  { value: 'all',         label: '전체',       icon: '🌐' },
-  { value: 'development', label: '개발',       icon: '🔧' },
-  { value: 'staging',     label: '스테이징',    icon: '🧪' },
-  { value: 'production',  label: '프로덕션',    icon: '🚀' },
+const ENVIRONMENTS: { value: ConnectionEnvironment | 'all'; label: string }[] = [
+  { value: 'all',         label: '전체' },
+  { value: 'development', label: '개발' },
+  { value: 'staging',     label: '스테이징' },
+  { value: 'production',  label: '프로덕션' },
 ];
-
-const TYPE_KEYS: Record<UserConnectionType, string> = {
-  uses: 'connections.typeUses',
-  integrates: 'connections.typeIntegrates',
-  data_transfer: 'connections.typeDataTransfer',
-  api_call: 'connections.typeApiCall',
-  auth_provider: 'connections.typeAuthProvider',
-  webhook: 'connections.typeWebhook',
-  sdk: 'connections.typeSdk',
-};
 
 const STATUS_KEYS: Record<ConnectionStatus, string> = {
   active: 'connections.statusActive',
@@ -107,9 +107,11 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
   const [newTarget, setNewTarget] = useState('');
   const [newType, setNewType] = useState<UserConnectionType>('uses');
   const [newEnv, setNewEnv] = useState<ConnectionEnvironment>('all');
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const { data: connections, isLoading } = useProjectConnections(projectId, envFilter === 'all' ? undefined : envFilter);
   const { data: services } = useProjectServices(projectId);
+  const { data: catalogServices } = useCatalogServices();
   const { data: suggestions } = useAutoConnectSuggestions(projectId);
   const createMutation = useCreateConnection(projectId);
   const updateMutation = useUpdateConnection(projectId);
@@ -117,15 +119,41 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
   const autoConnectMutation = useAutoConnect(projectId);
   const verifyMutation = useVerifyConnection(projectId);
 
+  // 서비스 이름 맵: projectServices 우선, catalogServices fallback
   const serviceMap = useMemo(() => {
     const map = new Map<string, string>();
+    // catalogServices를 먼저 넣고
+    if (catalogServices) {
+      for (const svc of catalogServices) {
+        map.set(svc.id, svc.name);
+      }
+    }
+    // projectServices로 덮어쓰기 (더 정확한 정보)
     if (services) {
       for (const ps of services) {
         if (ps.service) map.set(ps.service.id, ps.service.name);
       }
     }
     return map;
-  }, [services]);
+  }, [services, catalogServices]);
+
+  // 서비스 slug 맵 (아이콘 표시용)
+  const serviceSlugMap = useMemo(() => {
+    const map = new Map<string, string>();
+    if (catalogServices) {
+      for (const svc of catalogServices) {
+        map.set(svc.id, svc.slug);
+      }
+    }
+    if (services) {
+      for (const ps of services) {
+        if (ps.service) map.set(ps.service.id, ps.service.slug);
+      }
+    }
+    return map;
+  }, [services, catalogServices]);
+
+  const getServiceName = useCallback((id: string) => serviceMap.get(id) ?? '알 수 없는 서비스', [serviceMap]);
 
   // Status summary counts
   const statusCounts = useMemo(() => {
@@ -185,9 +213,22 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
     });
   };
 
+  const confirmDelete = () => {
+    if (!pendingDeleteId) return;
+    deleteMutation.mutate(pendingDeleteId, {
+      onSuccess: () => {
+        setPendingDeleteId(null);
+        toast.success('연결이 삭제되었습니다');
+      },
+      onError: () => {
+        toast.error('삭제에 실패했습니다');
+      },
+    });
+  };
+
   return (
     <div className="space-y-6">
-      {/* ─── 헤더 + 상태 요약 카드 ─── */}
+      {/* ─── 헤더 ─── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-lg font-bold flex items-center gap-2">
@@ -208,7 +249,8 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
               className="gap-1.5"
             >
               <Wand2 className="h-4 w-4 text-violet-500" />
-              자동 연결 ({suggestions.length}건)
+              자동 연결
+              <Badge variant="secondary" className="text-[10px] ml-0.5">{suggestions.length}</Badge>
             </Button>
           )}
           <Button size="sm" onClick={() => setShowCreate(!showCreate)} className="gap-1.5">
@@ -218,7 +260,7 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
         </div>
       </div>
 
-      {/* ─── 상태 요약 카드 4개 ─── */}
+      {/* ─── 상태 요약 카드 ─── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {(Object.entries(STATUS_CONFIG) as [ConnectionStatus, typeof STATUS_CONFIG[ConnectionStatus]][]).map(([key, cfg]) => {
           const Icon = cfg.icon;
@@ -250,6 +292,7 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
           {ENVIRONMENTS.map((env) => (
             <button
               key={env.value}
+              type="button"
               onClick={() => setEnvFilter(env.value)}
               className={cn(
                 'px-3 py-1.5 rounded-lg text-sm font-medium transition-all border',
@@ -258,7 +301,6 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
                   : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/50'
               )}
             >
-              <span className="mr-1">{env.icon}</span>
               {env.label}
             </button>
           ))}
@@ -282,7 +324,12 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
                   </SelectTrigger>
                   <SelectContent>
                     {[...serviceMap.entries()].map(([id, name]) => (
-                      <SelectItem key={id} value={id} className="text-sm">{name}</SelectItem>
+                      <SelectItem key={id} value={id} className="text-sm">
+                        <span className="flex items-center gap-2">
+                          {serviceSlugMap.has(id) && <ServiceIcon serviceId={serviceSlugMap.get(id)!} size={14} />}
+                          {name}
+                        </span>
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -295,7 +342,12 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
                   </SelectTrigger>
                   <SelectContent>
                     {[...serviceMap.entries()].map(([id, name]) => (
-                      <SelectItem key={id} value={id} className="text-sm">{name}</SelectItem>
+                      <SelectItem key={id} value={id} className="text-sm">
+                        <span className="flex items-center gap-2">
+                          {serviceSlugMap.has(id) && <ServiceIcon serviceId={serviceSlugMap.get(id)!} size={14} />}
+                          {name}
+                        </span>
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -324,17 +376,26 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
                   </SelectTrigger>
                   <SelectContent>
                     {ENVIRONMENTS.map((env) => (
-                      <SelectItem key={env.value} value={env.value} className="text-sm">{env.icon} {env.label}</SelectItem>
+                      <SelectItem key={env.value} value={env.value} className="text-sm">{env.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex items-end">
-                <Button onClick={handleCreate} disabled={createMutation.isPending || !newSource || !newTarget} className="w-full h-9">
+              <div className="flex items-end gap-2">
+                <Button onClick={handleCreate} disabled={createMutation.isPending || !newSource || !newTarget || newSource === newTarget} className="flex-1 h-9">
                   연결 생성
+                </Button>
+                <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => setShowCreate(false)}>
+                  <XCircle className="h-4 w-4" />
                 </Button>
               </div>
             </div>
+            {newSource && newTarget && newSource === newTarget && (
+              <p className="text-xs text-destructive mt-2 flex items-center gap-1">
+                <AlertTriangle className="h-3 w-3" />
+                소스와 타겟이 같은 서비스일 수 없습니다
+              </p>
+            )}
           </CardContent>
         </Card>
       )}
@@ -346,9 +407,7 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
             <CardTitle className="text-sm flex items-center gap-2">
               <Wand2 className="h-4 w-4 text-violet-500" />
               자동 연결 제안
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 font-medium">
-                {suggestions.length}건
-              </span>
+              <Badge variant="secondary" className="text-[10px]">{suggestions.length}건</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0">
@@ -358,9 +417,11 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
                 return (
                   <div key={i} className="flex items-center justify-between text-sm py-2 px-3 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{serviceMap.get(s.source_service_id) ?? '?'}</span>
+                      {serviceSlugMap.has(s.source_service_id) && <ServiceIcon serviceId={serviceSlugMap.get(s.source_service_id)!} size={16} />}
+                      <span className="font-medium">{getServiceName(s.source_service_id)}</span>
                       <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="font-medium">{serviceMap.get(s.target_service_id) ?? '?'}</span>
+                      {serviceSlugMap.has(s.target_service_id) && <ServiceIcon serviceId={serviceSlugMap.get(s.target_service_id)!} size={16} />}
+                      <span className="font-medium">{getServiceName(s.target_service_id)}</span>
                       <span
                         className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
                         style={{ backgroundColor: `${typeConfig.color}15`, color: typeConfig.color }}
@@ -368,7 +429,7 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
                         {typeConfig.label}
                       </span>
                     </div>
-                    <span className="text-xs text-muted-foreground max-w-[200px] truncate">{s.reason}</span>
+                    <span className="text-xs text-muted-foreground max-w-[200px] truncate hidden sm:inline">{s.reason}</span>
                   </div>
                 );
               })}
@@ -377,7 +438,7 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
         </Card>
       )}
 
-      {/* ─── 연결 목록 (카드 기반) ─── */}
+      {/* ─── 연결 목록 ─── */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-muted-foreground">
@@ -410,6 +471,10 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
               const statusConfig = STATUS_CONFIG[conn.connection_status] || STATUS_CONFIG.active;
               const StatusIcon = statusConfig.icon;
               const isExpanded = expandedHistoryId === conn.id;
+              const sourceName = getServiceName(conn.source_service_id);
+              const targetName = getServiceName(conn.target_service_id);
+              const sourceSlug = serviceSlugMap.get(conn.source_service_id);
+              const targetSlug = serviceSlugMap.get(conn.target_service_id);
 
               return (
                 <Fragment key={conn.id}>
@@ -418,57 +483,59 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
                     conn.connection_status === 'error' && 'border-red-200 dark:border-red-900/40',
                   )}>
                     <CardContent className="p-4">
-                      <div className="flex items-center gap-4">
-                        {/* 연결 타입 아이콘 */}
-                        <div
-                          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                          style={{ backgroundColor: `${typeConfig.color}12` }}
-                        >
-                          <typeConfig.icon className="h-5 w-5" style={{ color: typeConfig.color }} />
-                        </div>
-
+                      {/* 모바일: 세로 스택 / 데스크탑: 가로 배치 */}
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                         {/* 소스 → 타겟 */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span className="font-semibold text-sm truncate max-w-[140px]">
-                              {serviceMap.get(conn.source_service_id) ?? conn.source_service_id.slice(0, 8)}
-                            </span>
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <div
+                            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                            style={{ backgroundColor: `${typeConfig.color}12` }}
+                          >
+                            <typeConfig.icon className="h-4 w-4" style={{ color: typeConfig.color }} />
+                          </div>
+                          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              {sourceSlug && <ServiceIcon serviceId={sourceSlug} size={16} />}
+                              <span className="font-semibold text-sm truncate">{sourceName}</span>
+                            </div>
                             <svg width="20" height="10" viewBox="0 0 20 10" className="flex-shrink-0" style={{ color: typeConfig.color }}>
                               <line x1="0" y1="5" x2="15" y2="5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                               <polygon points="14,2 20,5 14,8" fill="currentColor" />
                             </svg>
-                            <span className="font-semibold text-sm truncate max-w-[140px]">
-                              {serviceMap.get(conn.target_service_id) ?? conn.target_service_id.slice(0, 8)}
-                            </span>
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              {targetSlug && <ServiceIcon serviceId={targetSlug} size={16} />}
+                              <span className="font-semibold text-sm truncate">{targetName}</span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            {/* 타입 뱃지 */}
-                            <span
-                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium"
-                              style={{ backgroundColor: `${typeConfig.color}10`, color: typeConfig.color }}
-                            >
-                              {typeConfig.label}
+                        </div>
+
+                        {/* 뱃지 영역 */}
+                        <div className="flex items-center gap-2 flex-shrink-0 flex-wrap sm:flex-nowrap">
+                          {/* 타입 뱃지 */}
+                          <span
+                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium whitespace-nowrap"
+                            style={{ backgroundColor: `${typeConfig.color}10`, color: typeConfig.color }}
+                          >
+                            {typeConfig.label}
+                          </span>
+                          {conn.description && (
+                            <span className="text-xs text-muted-foreground truncate max-w-[160px] hidden lg:inline">
+                              {conn.description}
                             </span>
-                            {conn.description && (
-                              <>
-                                <span className="opacity-30">|</span>
-                                <span className="truncate max-w-[200px]">{conn.description}</span>
-                              </>
-                            )}
-                          </div>
+                          )}
                         </div>
 
                         {/* 상태 뱃지 */}
                         <div className="flex items-center gap-1.5 flex-shrink-0">
                           <span className={cn(
-                            'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium',
+                            'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium whitespace-nowrap',
                             statusConfig.badge,
                           )}>
                             <StatusIcon className="h-3 w-3" />
                             {statusConfig.label}
                           </span>
                           {conn.last_verified_at && (
-                            <span className="text-[10px] text-muted-foreground">
+                            <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                               {formatVerifiedAt(conn.last_verified_at)}
                             </span>
                           )}
@@ -494,41 +561,55 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
 
                         {/* 액션 버튼 */}
                         <div className="flex items-center gap-0.5 flex-shrink-0">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className={cn(
-                              'h-8 w-8 p-0',
-                              isExpanded ? 'text-brand-blue' : 'text-muted-foreground hover:text-brand-blue',
-                            )}
-                            title="변경 이력"
-                            onClick={() => setExpandedHistoryId(isExpanded ? null : conn.id)}
-                          >
-                            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-muted-foreground hover:text-brand-blue"
-                            title="상태 검증"
-                            disabled={verifyMutation.isPending && verifyMutation.variables === conn.id}
-                            onClick={() => handleVerify(conn.id)}
-                          >
-                            <RefreshCw className={cn('h-4 w-4', verifyMutation.isPending && verifyMutation.variables === conn.id && 'animate-spin')} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-                            title="삭제"
-                            onClick={() => {
-                              if (window.confirm('이 연결을 삭제하시겠습니까?')) {
-                                deleteMutation.mutate(conn.id);
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className={cn(
+                                    'h-8 w-8 p-0',
+                                    isExpanded ? 'text-brand-blue' : 'text-muted-foreground hover:text-brand-blue',
+                                  )}
+                                  onClick={() => setExpandedHistoryId(isExpanded ? null : conn.id)}
+                                >
+                                  {isExpanded ? <ChevronUp className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>변경 이력</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 text-muted-foreground hover:text-brand-blue"
+                                  disabled={verifyMutation.isPending && verifyMutation.variables === conn.id}
+                                  onClick={() => handleVerify(conn.id)}
+                                >
+                                  <RefreshCw className={cn('h-4 w-4', verifyMutation.isPending && verifyMutation.variables === conn.id && 'animate-spin')} />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>상태 검증</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                                  onClick={() => setPendingDeleteId(conn.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>삭제</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </div>
                       </div>
                     </CardContent>
@@ -556,6 +637,35 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
           serviceOptions={[...serviceMap.entries()].map(([id, name]) => ({ id, name }))}
         />
       )}
+
+      {/* ─── 삭제 확인 다이얼로그 ─── */}
+      <AlertDialog open={!!pendingDeleteId} onOpenChange={(open) => { if (!open) setPendingDeleteId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>연결 삭제</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingDeleteId && connections ? (() => {
+                const conn = connections.find((c) => c.id === pendingDeleteId);
+                if (!conn) return '이 연결을 삭제하시겠습니까?';
+                return `${getServiceName(conn.source_service_id)} → ${getServiceName(conn.target_service_id)} 연결을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`;
+              })() : '이 연결을 삭제하시겠습니까?'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={(e) => {
+                e.preventDefault();
+                confirmDelete();
+              }}
+              disabled={deleteMutation.isPending}
+            >
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
