@@ -32,7 +32,11 @@ import { content as c26 } from './content/vibe-coding-security-checklist';
 import { content as c27 } from './content/vibe-coding-side-project-monetization';
 import { content as c28 } from './content/vibe-coding-stripe-payment-guide';
 import { content as cSocialLogin } from './content/vibe-coding-social-login-guide';
-import { content as c29 } from './content/vibe-coding-success-stories';
+import { content as c34 } from './content/cursor-ai-beginner-guide';
+import { content as c35 } from './content/oneclick-deploy-linkmap-guide';
+import { content as c36 } from './content/nocode-vs-vibe-coding';
+import { content as c37 } from './content/vibe-coding-maintenance-guide';
+import { content as c38 } from './content/vibe-coding-community-guide';
 import { content as c30 } from './content/vibe-coding-tools-comparison-2026';
 import { content as c31 } from './content/vibe-coding-vs-traditional-coding';
 import { content as c32 } from './content/what-is-vibe-coding';
@@ -70,7 +74,11 @@ export const CONTENT_MAP: Record<string, string> = {
   'vibe-coding-security-checklist': c26,
   'vibe-coding-side-project-monetization': c27,
   'vibe-coding-stripe-payment-guide': c28,
-  'vibe-coding-success-stories': c29,
+  'cursor-ai-beginner-guide': c34,
+  'oneclick-deploy-linkmap-guide': c35,
+  'nocode-vs-vibe-coding': c36,
+  'vibe-coding-maintenance-guide': c37,
+  'vibe-coding-community-guide': c38,
   'vibe-coding-tools-comparison-2026': c30,
   'vibe-coding-vs-traditional-coding': c31,
   'what-is-vibe-coding': c32,

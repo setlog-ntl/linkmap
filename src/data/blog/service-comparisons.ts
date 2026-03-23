@@ -1680,9 +1680,14 @@ export const VIBE_ECOSYSTEM_RELATED_POSTS: RelatedPost[] = [
     relevance: '입문 가이드',
   },
   {
-    slug: 'vibe-coding-success-stories',
-    title: '비개발자가 바이브코딩으로 실제 서비스를 만든 사례 5선',
-    relevance: '실제 성공 사례',
+    slug: 'cursor-ai-beginner-guide',
+    title: 'Cursor AI 완전 정복 -- 비개발자를 위한 AI 코딩 에디터 시작 가이드',
+    relevance: 'AI 코딩 도구 실전 가이드',
+  },
+  {
+    slug: 'nocode-vs-vibe-coding',
+    title: 'No-code vs Vibe Coding -- Wix로 만들까, AI로 코딩할까',
+    relevance: 'No-code/Vibe Coding 비교',
   },
   {
     slug: 'vibe-coding-vs-traditional-coding',
