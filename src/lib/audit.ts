@@ -122,6 +122,7 @@ export type AuditAction =
   | 'credential.decrypt'
   | 'credential.bulk_update'
   | 'credential.bulk_delete'
+  | 'credential.export'
   | 'env_var.raw_read'
   | 'env_var.raw_update'
   | 'project.share_toggle'

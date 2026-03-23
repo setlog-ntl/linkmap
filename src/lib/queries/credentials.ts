@@ -186,6 +186,32 @@ export function useBulkDeleteCredentials(projectId: string) {
   });
 }
 
+export function useExportCredentials() {
+  return useMutation({
+    mutationFn: async (params: {
+      project_id: string;
+      ids: string[];
+    }): Promise<{
+      entries: Array<{
+        label: string;
+        username: string;
+        password: string | null;
+        environment: string;
+        service_id: string | null;
+        purpose: string;
+      }>;
+    }> => {
+      const res = await fetch('/api/credentials/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      });
+      if (!res.ok) throw new Error('내보내기 실패');
+      return res.json();
+    },
+  });
+}
+
 export function useDecryptCredential() {
   return useMutation({
     mutationFn: async (params: { id: string; field?: 'username' | 'password' | 'both' }): Promise<{ username?: string; password?: string }> => {

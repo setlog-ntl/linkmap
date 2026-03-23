@@ -10,14 +10,23 @@ import {
   useDecryptCredential,
   useBulkUpdateCredentials,
   useBulkDeleteCredentials,
+  useExportCredentials,
 } from '@/lib/queries/credentials';
 import { useProjectServices, useCatalogServices } from '@/lib/queries/services';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import {
   Dialog,
   DialogContent,
@@ -42,7 +51,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, UserCheck, Loader2, ShieldCheck, Eye, EyeOff, CheckSquare, X, Pencil, Trash2 } from 'lucide-react';
+import {
+  Plus, UserCheck, Loader2, ShieldCheck, Eye, EyeOff,
+  CheckSquare, X, Pencil, Trash2, List, LayoutGrid,
+  AlertTriangle, Clock, ShieldAlert, Download,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { CredentialsTable } from '@/components/credentials/credentials-table';
 import type { ServiceCredential, CredentialPurpose } from '@/types';
@@ -63,6 +76,72 @@ const envOptions = [
   { value: 'production', label: 'Production' },
 ];
 
+// Password strength checker
+function getPasswordStrength(pw: string): { score: number; label: string; color: string } {
+  if (!pw) return { score: 0, label: '', color: '' };
+  let score = 0;
+  if (pw.length >= 8) score += 20;
+  if (pw.length >= 12) score += 10;
+  if (pw.length >= 16) score += 10;
+  if (/[a-z]/.test(pw)) score += 10;
+  if (/[A-Z]/.test(pw)) score += 15;
+  if (/\d/.test(pw)) score += 15;
+  if (/[^a-zA-Z0-9]/.test(pw)) score += 20;
+  score = Math.min(score, 100);
+  if (score < 30) return { score, label: '매우 약함', color: 'bg-red-500' };
+  if (score < 50) return { score, label: '약함', color: 'bg-orange-500' };
+  if (score < 70) return { score, label: '보통', color: 'bg-yellow-500' };
+  if (score < 90) return { score, label: '강함', color: 'bg-green-500' };
+  return { score, label: '매우 강함', color: 'bg-emerald-500' };
+}
+
+function getDaysSince(dateStr: string): number {
+  return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function sanitizeFilename(name: string): string {
+  return name.replace(/[^a-zA-Z0-9가-힣_-]/g, '_').toLowerCase();
+}
+
+function generateEnvContent(
+  entries: Array<{ label: string; username: string; password: string | null; environment: string; purpose: string }>,
+  serviceName: string,
+): string {
+  const lines: string[] = [
+    `# ${serviceName} credentials (exported from Linkmap)`,
+    `# Generated: ${new Date().toISOString().split('T')[0]}`,
+    '',
+  ];
+
+  for (const entry of entries) {
+    const key = entry.label
+      .toUpperCase()
+      .replace(/[^A-Z0-9가-힣]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '');
+    lines.push(`# ${entry.label} (${entry.purpose}, ${entry.environment})`);
+    lines.push(`${key}_USERNAME=${entry.username}`);
+    if (entry.password) {
+      lines.push(`${key}_PASSWORD=${entry.password}`);
+    }
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+function downloadEnvFile(content: string, filename: string): void {
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 export default function ProjectCredentialsPage() {
   const params = useParams();
   const projectId = params.id as string;
@@ -75,6 +154,7 @@ export default function ProjectCredentialsPage() {
   const decryptCredential = useDecryptCredential();
   const bulkUpdateCredentials = useBulkUpdateCredentials(projectId);
   const bulkDeleteCredentials = useBulkDeleteCredentials(projectId);
+  const exportCredentials = useExportCredentials();
 
   // State
   const [addOpen, setAddOpen] = useState(false);
@@ -87,6 +167,7 @@ export default function ProjectCredentialsPage() {
   const [filterPurpose, setFilterPurpose] = useState<string>('__all__');
   const [filterService, setFilterService] = useState<string>('__all__');
   const [showPassword, setShowPassword] = useState(false);
+  const [groupByService, setGroupByService] = useState(false);
 
   // Bulk edit state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -131,13 +212,30 @@ export default function ProjectCredentialsPage() {
     return map;
   }, [projectServices, catalogServices]);
 
-  // Unique services used in credentials (for filter dropdown)
   const usedServices = useMemo(() => {
     const serviceIds = new Set(credentials.filter((c) => c.service_id).map((c) => c.service_id!));
     return Array.from(serviceIds)
       .map((id) => ({ id, name: serviceNameMap.get(id) || id }))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [credentials, serviceNameMap]);
+
+  // Security stats
+  const securityStats = useMemo(() => {
+    const noPassword = credentials.filter((c) => !c.encrypted_password).length;
+    const oldCreds = credentials.filter((c) => getDaysSince(c.updated_at) >= 90).length;
+    const totalServices = new Set(credentials.filter((c) => c.service_id).map((c) => c.service_id)).size;
+    const unlinked = credentials.filter((c) => !c.service_id).length;
+
+    let score = 100;
+    if (credentials.length > 0) {
+      const noPasswordPenalty = (noPassword / credentials.length) * 30;
+      const oldCredsPenalty = (oldCreds / credentials.length) * 30;
+      const unlinkedPenalty = (unlinked / credentials.length) * 10;
+      score = Math.max(0, Math.round(100 - noPasswordPenalty - oldCredsPenalty - unlinkedPenalty));
+    }
+
+    return { noPassword, oldCreds, totalServices, unlinked, score };
+  }, [credentials]);
 
   const filteredCredentials = useMemo(() => {
     let list = credentials;
@@ -163,6 +261,11 @@ export default function ProjectCredentialsPage() {
     return list;
   }, [credentials, search, filterPurpose, filterService, serviceNameMap]);
 
+  const revealedCount = useMemo(
+    () => Object.values(showValues).filter(Boolean).length,
+    [showValues]
+  );
+
   const toggleShowValue = useCallback(
     async (id: string) => {
       if (showValues[id]) {
@@ -185,15 +288,26 @@ export default function ProjectCredentialsPage() {
     [showValues, decryptCredential]
   );
 
+  const hideAll = useCallback(() => {
+    setShowValues({});
+    setDecryptedData({});
+    toast.success('모든 값을 숨겼습니다');
+  }, []);
+
+  const handleAutoHide = useCallback((id: string) => {
+    setShowValues((prev) => ({ ...prev, [id]: false }));
+    setDecryptedData((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  }, []);
+
   // Selection handlers
   const toggleSelect = useCallback((id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
       return next;
     });
   }, []);
@@ -214,7 +328,38 @@ export default function ProjectCredentialsPage() {
     });
   }, [filteredCredentials]);
 
+  const selectServiceGroup = useCallback((serviceId: string | null) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      const groupIds = filteredCredentials
+        .filter((c) => (serviceId === null ? !c.service_id : c.service_id === serviceId))
+        .map((c) => c.id);
+      const allSelected = groupIds.every((id) => next.has(id));
+      if (allSelected) {
+        groupIds.forEach((id) => next.delete(id));
+      } else {
+        groupIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+  }, [filteredCredentials]);
+
   const clearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
+  const setFilterPurposeAndClear = useCallback((v: string) => {
+    setFilterPurpose(v);
+    setSelectedIds(new Set());
+  }, []);
+
+  const setFilterServiceAndClear = useCallback((v: string) => {
+    setFilterService(v);
+    setSelectedIds(new Set());
+  }, []);
+
+  const setSearchAndClear = useCallback((v: string) => {
+    setSearch(v);
     setSelectedIds(new Set());
   }, []);
 
@@ -363,12 +508,67 @@ export default function ProjectCredentialsPage() {
     }
   };
 
+  // Service-specific handlers
+  const handleAddForService = useCallback((serviceId: string | null) => {
+    resetAddForm();
+    setNewServiceId(serviceId);
+    setAddOpen(true);
+  }, []);
+
+  const handleBulkEditGroup = useCallback((serviceId: string | null) => {
+    const groupCreds = filteredCredentials.filter((c) =>
+      serviceId === null ? !c.service_id : c.service_id === serviceId
+    );
+    if (groupCreds.length === 0) return;
+    const newSelected = new Set(groupCreds.map((c) => c.id));
+    setSelectedIds(newSelected);
+    setBulkPurpose('__unchanged__');
+    setBulkEnv('__unchanged__');
+    setBulkServiceId('__unchanged__');
+    setBulkEditOpen(true);
+  }, [filteredCredentials]);
+
+  const handleExportGroup = useCallback(async (serviceId: string | null) => {
+    const groupCreds = filteredCredentials.filter((c) =>
+      serviceId === null ? !c.service_id : c.service_id === serviceId
+    );
+    if (groupCreds.length === 0) return;
+    const ids = groupCreds.map((c) => c.id);
+    const serviceName = serviceId ? (serviceNameMap.get(serviceId) || 'unknown') : 'unlinked';
+
+    try {
+      const result = await exportCredentials.mutateAsync({ project_id: projectId, ids });
+      const envContent = generateEnvContent(result.entries, serviceName);
+      downloadEnvFile(envContent, `${sanitizeFilename(serviceName)}.env`);
+      toast.success(`${groupCreds.length}개 자격증명이 내보내기되었습니다`);
+    } catch {
+      toast.error('내보내기에 실패했습니다');
+    }
+  }, [filteredCredentials, serviceNameMap, exportCredentials, projectId]);
+
+  const handleExportAll = useCallback(async () => {
+    if (filteredCredentials.length === 0) return;
+    const ids = filteredCredentials.map((c) => c.id);
+
+    try {
+      const result = await exportCredentials.mutateAsync({ project_id: projectId, ids });
+      const envContent = generateEnvContent(result.entries, 'all');
+      downloadEnvFile(envContent, 'credentials.env');
+      toast.success(`${filteredCredentials.length}개 자격증명이 내보내기되었습니다`);
+    } catch {
+      toast.error('내보내기에 실패했습니다');
+    }
+  }, [filteredCredentials, exportCredentials, projectId]);
+
+  const newPasswordStrength = getPasswordStrength(newPassword);
+  const editPasswordStrength = getPasswordStrength(editPassword);
+
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-20 rounded-lg" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-24 rounded-lg" />
           ))}
         </div>
         {[1, 2, 3].map((i) => (
@@ -380,48 +580,110 @@ export default function ProjectCredentialsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Stats Header */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+      {/* Security Dashboard */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Security Score */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              보안 점수
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="text-2xl font-bold">{securityStats.score}점</div>
+            <Progress
+              value={securityStats.score}
+              className="h-1.5"
+            />
+          </CardContent>
+        </Card>
+
+        {/* Total */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">전체 계정</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{credentials.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {securityStats.totalServices}개 서비스 연결
+            </p>
           </CardContent>
         </Card>
+
+        {/* Warnings */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">연결된 서비스</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+              <AlertTriangle className="h-3.5 w-3.5" />
+              주의 필요
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {new Set(credentials.filter((c) => c.service_id).map((c) => c.service_id)).size}
+            <div className="space-y-1">
+              {securityStats.noPassword > 0 && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 cursor-help">
+                        <ShieldAlert className="h-3 w-3" />
+                        비밀번호 미설정 {securityStats.noPassword}개
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent><p>비밀번호 없이 아이디만 저장된 계정입니다</p></TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              {securityStats.oldCreds > 0 && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 cursor-help">
+                        <Clock className="h-3 w-3" />
+                        90일 이상 경과 {securityStats.oldCreds}개
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent><p>90일 이상 변경되지 않은 자격증명은 교체를 권장합니다</p></TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              {securityStats.noPassword === 0 && securityStats.oldCreds === 0 && (
+                <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
+                  <ShieldCheck className="h-3 w-3" />
+                  문제 없음
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
-        <Card className="hidden lg:block">
+
+        {/* Encryption */}
+        <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">보안</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">암호화</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
               <ShieldCheck className="h-4 w-4" />
-              AES-256 암호화
+              AES-256-GCM
             </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              모든 값 암호화 저장
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filter Bar */}
+      {/* Filter + View Toggle Bar */}
       <div className="flex flex-col sm:flex-row gap-3">
         <Input
           placeholder="라벨, 서비스명으로 검색..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => setSearchAndClear(e.target.value)}
           className="sm:max-w-xs"
         />
-        <Select value={filterPurpose} onValueChange={setFilterPurpose}>
+        <Select value={filterPurpose} onValueChange={setFilterPurposeAndClear}>
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="용도 필터" />
           </SelectTrigger>
@@ -434,7 +696,7 @@ export default function ProjectCredentialsPage() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={filterService} onValueChange={setFilterService}>
+        <Select value={filterService} onValueChange={setFilterServiceAndClear}>
           <SelectTrigger className="w-[160px]">
             <SelectValue placeholder="서비스 필터" />
           </SelectTrigger>
@@ -449,6 +711,55 @@ export default function ProjectCredentialsPage() {
           </SelectContent>
         </Select>
         <div className="flex-1" />
+
+        {/* Revealed values indicator + hide all */}
+        {revealedCount > 0 && (
+          <Button variant="outline" size="sm" onClick={hideAll} className="gap-2">
+            <EyeOff className="h-3.5 w-3.5" />
+            전체 숨기기
+            <Badge variant="secondary" className="text-[10px] ml-1">{revealedCount}</Badge>
+          </Button>
+        )}
+
+        {/* View toggle */}
+        <div className="flex items-center border rounded-md">
+          <Button
+            variant={groupByService ? 'ghost' : 'secondary'}
+            size="sm"
+            className="rounded-r-none h-9 gap-1.5"
+            onClick={() => setGroupByService(false)}
+          >
+            <List className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">리스트</span>
+          </Button>
+          <Button
+            variant={groupByService ? 'secondary' : 'ghost'}
+            size="sm"
+            className="rounded-l-none h-9 gap-1.5"
+            onClick={() => setGroupByService(true)}
+          >
+            <LayoutGrid className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">서비스별</span>
+          </Button>
+        </div>
+
+        {filteredCredentials.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportAll}
+            disabled={exportCredentials.isPending}
+            className="gap-2"
+          >
+            {exportCredentials.isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Download className="h-3.5 w-3.5" />
+            )}
+            <span className="hidden sm:inline">내보내기</span>
+          </Button>
+        )}
+
         <Button onClick={() => setAddOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           계정 추가
@@ -488,7 +799,38 @@ export default function ProjectCredentialsPage() {
         selectedIds={selectedIds}
         onToggleSelect={toggleSelect}
         onToggleSelectAll={toggleSelectAll}
+        groupByService={groupByService}
+        onSelectServiceGroup={selectServiceGroup}
+        onAutoHide={handleAutoHide}
+        onAddForService={handleAddForService}
+        onBulkEditGroup={handleBulkEditGroup}
+        onExportGroup={handleExportGroup}
       />
+
+      {/* Security Tips */}
+      {credentials.length > 0 && (securityStats.noPassword > 0 || securityStats.oldCreds > 0) && (
+        <Card className="border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20">
+          <CardContent className="py-3 px-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+              <div className="space-y-1 text-sm">
+                <p className="font-medium text-amber-800 dark:text-amber-300">보안 개선 제안</p>
+                <ul className="text-xs text-amber-700 dark:text-amber-400 space-y-0.5">
+                  {securityStats.noPassword > 0 && (
+                    <li>비밀번호가 설정되지 않은 계정 {securityStats.noPassword}개를 확인하세요</li>
+                  )}
+                  {securityStats.oldCreds > 0 && (
+                    <li>90일 이상 변경되지 않은 자격증명 {securityStats.oldCreds}개의 비밀번호 교체를 권장합니다</li>
+                  )}
+                  {securityStats.unlinked > 0 && (
+                    <li>서비스에 연결되지 않은 계정 {securityStats.unlinked}개를 정리하세요</li>
+                  )}
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Add Dialog */}
       <Dialog open={addOpen} onOpenChange={(open) => { if (!open) resetAddForm(); setAddOpen(open); }}>
@@ -570,6 +912,16 @@ export default function ProjectCredentialsPage() {
                   {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 </Button>
               </div>
+              {newPassword && (
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Progress value={newPasswordStrength.score} className={`h-1.5 flex-1 [&>div]:${newPasswordStrength.color}`} />
+                    <span className={`text-[10px] font-medium ${newPasswordStrength.score < 50 ? 'text-red-500' : newPasswordStrength.score < 70 ? 'text-yellow-500' : 'text-green-500'}`}>
+                      {newPasswordStrength.label}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label>서비스 (선택)</Label>
@@ -695,6 +1047,16 @@ export default function ProjectCredentialsPage() {
                   {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 </Button>
               </div>
+              {editPassword && (
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Progress value={editPasswordStrength.score} className={`h-1.5 flex-1 [&>div]:${editPasswordStrength.color}`} />
+                    <span className={`text-[10px] font-medium ${editPasswordStrength.score < 50 ? 'text-red-500' : editPasswordStrength.score < 70 ? 'text-yellow-500' : 'text-green-500'}`}>
+                      {editPasswordStrength.label}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label>서비스</Label>
