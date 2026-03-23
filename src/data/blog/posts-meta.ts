@@ -193,16 +193,6 @@ export const BLOG_POSTS_META: BlogPostMeta[] = [
     relatedGuides: ['github', 'env', 'deploy', 'ai-tools'],
   },
   {
-    slug: 'vibe-coding-community-guide',
-    title: '바이브코딩 막힐 때 도움받는 곳 — 2026 커뮤니티 총정리',
-    description: '혼자 코딩하다 막히면 어디서 물어보나? 한국 바이브코딩 커뮤니티, 해외 Discord, AI에게 질문하는 법까지 초보자를 위한 도움 창구 가이드.',
-    category: 'vibe-coding',
-    tags: ['바이브코딩 커뮤니티', 'AI 코딩 도움', '개발자 커뮤니티', '바이브코딩 질문', '코딩 막힐 때'],
-    publishedAt: '2026-03-23',
-    readingTime: '6분',
-    relatedGuides: ['ai-tools', 'github'],
-  },
-  {
     slug: 'vibe-coding-deploy-guide',
     title: '바이브코딩 프로젝트 배포 완전 정복 — Vercel, Cloudflare, Netlify',
     description: '바이브코딩으로 만든 앱을 실제 인터넷에 공개하는 방법. Vercel, Cloudflare Pages, Netlify 3대 플랫폼을 무료 플랜 기준으로 비교하고 배포 방법을 안내합니다.',

@@ -36,7 +36,6 @@ import { content as c34 } from './content/cursor-ai-beginner-guide';
 import { content as c35 } from './content/oneclick-deploy-linkmap-guide';
 import { content as c36 } from './content/nocode-vs-vibe-coding';
 import { content as c37 } from './content/vibe-coding-maintenance-guide';
-import { content as c38 } from './content/vibe-coding-community-guide';
 import { content as c30 } from './content/vibe-coding-tools-comparison-2026';
 import { content as c31 } from './content/vibe-coding-vs-traditional-coding';
 import { content as c32 } from './content/what-is-vibe-coding';
@@ -78,7 +77,6 @@ export const CONTENT_MAP: Record<string, string> = {
   'oneclick-deploy-linkmap-guide': c35,
   'nocode-vs-vibe-coding': c36,
   'vibe-coding-maintenance-guide': c37,
-  'vibe-coding-community-guide': c38,
   'vibe-coding-tools-comparison-2026': c30,
   'vibe-coding-vs-traditional-coding': c31,
   'what-is-vibe-coding': c32,
