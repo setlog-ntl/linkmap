@@ -19,7 +19,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import {
   Tooltip,
@@ -54,7 +53,7 @@ import {
 import {
   Plus, UserCheck, Loader2, ShieldCheck, Eye, EyeOff,
   CheckSquare, X, Pencil, Trash2, List, LayoutGrid,
-  AlertTriangle, Clock, ShieldAlert, Download,
+  Clock, ShieldAlert, Download,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { CredentialsTable } from '@/components/credentials/credentials-table';
@@ -167,7 +166,7 @@ export default function ProjectCredentialsPage() {
   const [filterPurpose, setFilterPurpose] = useState<string>('__all__');
   const [filterService, setFilterService] = useState<string>('__all__');
   const [showPassword, setShowPassword] = useState(false);
-  const [groupByService, setGroupByService] = useState(false);
+  const [groupByService, setGroupByService] = useState(true);
 
   // Bulk edit state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -580,190 +579,135 @@ export default function ProjectCredentialsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Security Dashboard */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {/* Security Score */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              보안 점수
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="text-2xl font-bold">{securityStats.score}점</div>
-            <Progress
-              value={securityStats.score}
-              className="h-1.5"
-            />
-          </CardContent>
-        </Card>
-
-        {/* Total */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">전체 계정</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{credentials.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {securityStats.totalServices}개 서비스 연결
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Warnings */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-              <AlertTriangle className="h-3.5 w-3.5" />
-              주의 필요
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-1">
-              {securityStats.noPassword > 0 && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 cursor-help">
-                        <ShieldAlert className="h-3 w-3" />
-                        비밀번호 미설정 {securityStats.noPassword}개
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent><p>비밀번호 없이 아이디만 저장된 계정입니다</p></TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-              {securityStats.oldCreds > 0 && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 cursor-help">
-                        <Clock className="h-3 w-3" />
-                        90일 이상 경과 {securityStats.oldCreds}개
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent><p>90일 이상 변경되지 않은 자격증명은 교체를 권장합니다</p></TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-              {securityStats.noPassword === 0 && securityStats.oldCreds === 0 && (
-                <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
-                  <ShieldCheck className="h-3 w-3" />
-                  문제 없음
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Encryption */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">암호화</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-              <ShieldCheck className="h-4 w-4" />
-              AES-256-GCM
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              모든 값 암호화 저장
-            </p>
-          </CardContent>
-        </Card>
+      {/* Security Summary — 한 줄 인라인 */}
+      <div className="flex flex-wrap items-center gap-3 px-4 py-2.5 rounded-lg border bg-card">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-1.5 cursor-help">
+                <ShieldCheck className={`h-4 w-4 ${securityStats.score >= 80 ? 'text-green-500' : securityStats.score >= 50 ? 'text-yellow-500' : 'text-red-500'}`} />
+                <span className="text-sm font-bold">{securityStats.score}점</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>보안 점수 (AES-256-GCM 암호화)</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <span className="text-border">|</span>
+        <span className="text-sm text-muted-foreground">
+          계정 <span className="font-semibold text-foreground">{credentials.length}</span>
+        </span>
+        <span className="text-sm text-muted-foreground">
+          서비스 <span className="font-semibold text-foreground">{securityStats.totalServices}</span>
+        </span>
+        {securityStats.noPassword > 0 && (
+          <>
+            <span className="text-border">|</span>
+            <span className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+              <ShieldAlert className="h-3 w-3" />
+              비밀번호 없음 {securityStats.noPassword}
+            </span>
+          </>
+        )}
+        {securityStats.oldCreds > 0 && (
+          <span className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            90일+ {securityStats.oldCreds}
+          </span>
+        )}
       </div>
 
-      {/* Filter + View Toggle Bar */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <Input
-          placeholder="라벨, 서비스명으로 검색..."
-          value={search}
-          onChange={(e) => setSearchAndClear(e.target.value)}
-          className="sm:max-w-xs"
-        />
-        <Select value={filterPurpose} onValueChange={setFilterPurposeAndClear}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="용도 필터" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="__all__">전체 용도</SelectItem>
-            {purposeOptions.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={filterService} onValueChange={setFilterServiceAndClear}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="서비스 필터" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="__all__">전체 서비스</SelectItem>
-            <SelectItem value="__none__">미연결</SelectItem>
-            {usedServices.map((svc) => (
-              <SelectItem key={svc.id} value={svc.id}>
-                {svc.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <div className="flex-1" />
+      {/* Toolbar: 뷰 토글 + 필터 + 액션 */}
+      <div className="flex flex-col gap-2">
+        {/* 1줄: 뷰 토글 + 검색 + 필터 + 액션 */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* 뷰 토글 (서비스별 먼저) */}
+          <div className="flex items-center border rounded-md">
+            <Button
+              variant={groupByService ? 'secondary' : 'ghost'}
+              size="sm"
+              className="rounded-r-none h-8 gap-1 px-2.5 text-xs"
+              onClick={() => setGroupByService(true)}
+            >
+              <LayoutGrid className="h-3.5 w-3.5" />
+              서비스별
+            </Button>
+            <Button
+              variant={groupByService ? 'ghost' : 'secondary'}
+              size="sm"
+              className="rounded-l-none h-8 gap-1 px-2.5 text-xs"
+              onClick={() => setGroupByService(false)}
+            >
+              <List className="h-3.5 w-3.5" />
+              전체
+            </Button>
+          </div>
 
-        {/* Revealed values indicator + hide all */}
-        {revealedCount > 0 && (
-          <Button variant="outline" size="sm" onClick={hideAll} className="gap-2">
-            <EyeOff className="h-3.5 w-3.5" />
-            전체 숨기기
-            <Badge variant="secondary" className="text-[10px] ml-1">{revealedCount}</Badge>
-          </Button>
-        )}
+          <Input
+            placeholder="검색..."
+            value={search}
+            onChange={(e) => setSearchAndClear(e.target.value)}
+            className="h-8 w-40 sm:w-48 text-sm"
+          />
+          <Select value={filterPurpose} onValueChange={setFilterPurposeAndClear}>
+            <SelectTrigger className="w-[120px] h-8 text-xs">
+              <SelectValue placeholder="용도" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">전체 용도</SelectItem>
+              {purposeOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterService} onValueChange={setFilterServiceAndClear}>
+            <SelectTrigger className="w-[130px] h-8 text-xs">
+              <SelectValue placeholder="서비스" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">전체 서비스</SelectItem>
+              <SelectItem value="__none__">미연결</SelectItem>
+              {usedServices.map((svc) => (
+                <SelectItem key={svc.id} value={svc.id}>{svc.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        {/* View toggle */}
-        <div className="flex items-center border rounded-md">
-          <Button
-            variant={groupByService ? 'ghost' : 'secondary'}
-            size="sm"
-            className="rounded-r-none h-9 gap-1.5"
-            onClick={() => setGroupByService(false)}
-          >
-            <List className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">리스트</span>
-          </Button>
-          <Button
-            variant={groupByService ? 'secondary' : 'ghost'}
-            size="sm"
-            className="rounded-l-none h-9 gap-1.5"
-            onClick={() => setGroupByService(true)}
-          >
-            <LayoutGrid className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">서비스별</span>
+          <div className="flex-1" />
+
+          {revealedCount > 0 && (
+            <Button variant="ghost" size="sm" onClick={hideAll} className="h-8 gap-1 text-xs px-2">
+              <EyeOff className="h-3.5 w-3.5" />
+              숨기기
+              <Badge variant="secondary" className="text-[9px] px-1">{revealedCount}</Badge>
+            </Button>
+          )}
+          {filteredCredentials.length > 0 && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={handleExportAll}
+                    disabled={exportCredentials.isPending}
+                  >
+                    {exportCredentials.isPending ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Download className="h-3.5 w-3.5" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>전체 .env 내보내기</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          <Button size="sm" className="h-8 gap-1" onClick={() => setAddOpen(true)}>
+            <Plus className="h-3.5 w-3.5" />
+            추가
           </Button>
         </div>
-
-        {filteredCredentials.length > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportAll}
-            disabled={exportCredentials.isPending}
-            className="gap-2"
-          >
-            {exportCredentials.isPending ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Download className="h-3.5 w-3.5" />
-            )}
-            <span className="hidden sm:inline">내보내기</span>
-          </Button>
-        )}
-
-        <Button onClick={() => setAddOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          계정 추가
-        </Button>
       </div>
 
       {/* Bulk Action Bar */}
@@ -806,31 +750,6 @@ export default function ProjectCredentialsPage() {
         onBulkEditGroup={handleBulkEditGroup}
         onExportGroup={handleExportGroup}
       />
-
-      {/* Security Tips */}
-      {credentials.length > 0 && (securityStats.noPassword > 0 || securityStats.oldCreds > 0) && (
-        <Card className="border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20">
-          <CardContent className="py-3 px-4">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-              <div className="space-y-1 text-sm">
-                <p className="font-medium text-amber-800 dark:text-amber-300">보안 개선 제안</p>
-                <ul className="text-xs text-amber-700 dark:text-amber-400 space-y-0.5">
-                  {securityStats.noPassword > 0 && (
-                    <li>비밀번호가 설정되지 않은 계정 {securityStats.noPassword}개를 확인하세요</li>
-                  )}
-                  {securityStats.oldCreds > 0 && (
-                    <li>90일 이상 변경되지 않은 자격증명 {securityStats.oldCreds}개의 비밀번호 교체를 권장합니다</li>
-                  )}
-                  {securityStats.unlinked > 0 && (
-                    <li>서비스에 연결되지 않은 계정 {securityStats.unlinked}개를 정리하세요</li>
-                  )}
-                </ul>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Add Dialog */}
       <Dialog open={addOpen} onOpenChange={(open) => { if (!open) resetAddForm(); setAddOpen(open); }}>
