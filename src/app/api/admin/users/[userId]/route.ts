@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isAdmin } from '@/lib/admin';
-import { unauthorizedError, apiError, serverError } from '@/lib/api/errors';
+import { unauthorizedError, apiError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 
 export interface AdminUserDetailProject {

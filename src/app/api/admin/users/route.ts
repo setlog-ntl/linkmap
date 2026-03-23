@@ -1,9 +1,22 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isAdmin } from '@/lib/admin';
 import { unauthorizedError, apiError, serverError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
+
+export interface AdminUserRow {
+  id: string;
+  email: string;
+  name: string | null;
+  avatarUrl: string | null;
+  provider: string | null;
+  plan: string;
+  projectCount: number;
+  deployCount: number;
+  createdAt: string;
+  lastSignInAt: string | null;
+}
 
 export interface AdminUserStats {
   kpis: {
@@ -28,15 +41,25 @@ export interface AdminUserStats {
     createdAt: string;
     lastSignInAt: string | null;
   }>;
+  allUsers: AdminUserRow[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
 
   const admin = await isAdmin(user.id);
   if (!admin) return apiError('관리자 권한이 필요합니다', 403);
+
+  const { searchParams } = request.nextUrl;
+  const page = Math.max(1, Number(searchParams.get('page') ?? '1'));
+  const limit = Math.min(100, Math.max(1, Number(searchParams.get('limit') ?? '20')));
+  const search = searchParams.get('search')?.trim() ?? '';
+  const sort = searchParams.get('sort') ?? 'created_at';
 
   const adminSupabase = createAdminClient();
 
@@ -73,12 +96,18 @@ export async function GET() {
     return serverError('프로젝트 조회에 실패했습니다');
   }
 
+  // 배포 수 조회
+  const { data: deploys } = await adminSupabase
+    .from('homepage_deploys')
+    .select('user_id');
+
   // auth.users에서 로그인 메타데이터 조회 (admin API)
   const { data: authUsersData } = await adminSupabase.auth.admin.listUsers({ perPage: 1000 });
 
   const allProfiles = profiles ?? [];
   const allSubscriptions = subscriptions ?? [];
   const allProjects = projects ?? [];
+  const allDeploys = deploys ?? [];
 
   // auth.users 메타데이터 맵
   interface AuthMeta { lastSignInAt: string | null; provider: string | null; avatarUrl: string | null }
@@ -103,6 +132,12 @@ export async function GET() {
   const projectCountMap = new Map<string, number>();
   for (const proj of allProjects) {
     projectCountMap.set(proj.user_id, (projectCountMap.get(proj.user_id) ?? 0) + 1);
+  }
+
+  // user_id → deployCount 맵
+  const deployCountMap = new Map<string, number>();
+  for (const dep of allDeploys) {
+    deployCountMap.set(dep.user_id, (deployCountMap.get(dep.user_id) ?? 0) + 1);
   }
 
   // 날짜 경계
@@ -164,7 +199,7 @@ export async function GET() {
     count,
   }));
 
-  // 최근 가입자 10명
+  // 최근 가입자 10명 (기존 호환)
   const recentProfiles = [...allProfiles]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 10);
@@ -184,6 +219,54 @@ export async function GET() {
     };
   });
 
+  // 전체 사용자 목록 (검색 + 정렬 + 페이지네이션)
+  const lowerSearch = search.toLowerCase();
+  const filteredProfiles = search
+    ? allProfiles.filter(
+        (p) =>
+          p.email.toLowerCase().includes(lowerSearch) ||
+          (p.name ?? '').toLowerCase().includes(lowerSearch)
+      )
+    : allProfiles;
+
+  // 전체 사용자를 UserRow로 매핑
+  const allUserRows: AdminUserRow[] = filteredProfiles.map((p) => {
+    const meta = authMetaMap.get(p.id);
+    return {
+      id: p.id,
+      email: p.email,
+      name: p.name,
+      avatarUrl: meta?.avatarUrl ?? null,
+      provider: meta?.provider ?? null,
+      plan: planMap.get(p.id) ?? 'free',
+      projectCount: projectCountMap.get(p.id) ?? 0,
+      deployCount: deployCountMap.get(p.id) ?? 0,
+      createdAt: p.created_at,
+      lastSignInAt: meta?.lastSignInAt ?? null,
+    };
+  });
+
+  // 정렬
+  allUserRows.sort((a, b) => {
+    switch (sort) {
+      case 'last_sign_in':
+        return (
+          new Date(b.lastSignInAt ?? '1970-01-01').getTime() -
+          new Date(a.lastSignInAt ?? '1970-01-01').getTime()
+        );
+      case 'project_count':
+        return b.projectCount - a.projectCount;
+      case 'deploy_count':
+        return b.deployCount - a.deployCount;
+      default: // created_at desc
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+  });
+
+  const total = allUserRows.length;
+  const offset = (page - 1) * limit;
+  const paginatedUsers = allUserRows.slice(offset, offset + limit);
+
   await logAudit(user.id, {
     action: 'admin.users_stats_view',
     resourceType: 'admin',
@@ -202,6 +285,10 @@ export async function GET() {
     registrationTrend,
     planDistribution,
     recentUsers,
+    allUsers: paginatedUsers,
+    total,
+    page,
+    limit,
   };
 
   return NextResponse.json(result);

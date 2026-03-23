@@ -116,7 +116,8 @@ export const queryKeys = {
     result: (projectId: string) => ['analyze', 'result', projectId] as const,
   },
   admin: {
-    users: ['admin', 'users'] as const,
+    users: (params?: Record<string, unknown>) => ['admin', 'users', params ?? {}] as const,
+    userDetail: (userId: string) => ['admin', 'user-detail', userId] as const,
     visitors: ['admin', 'visitors'] as const,
     usageStats: ['admin', 'usage-stats'] as const,
   },

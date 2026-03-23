@@ -1,12 +1,21 @@
 'use client';
 
-import { Users, UserPlus, TrendingUp, Calendar, RefreshCw, MonitorSmartphone, Globe, Network, ChevronDown, MessageSquarePlus } from 'lucide-react';
+import { useState, useDeferredValue } from 'react';
+import {
+  Users, UserPlus, TrendingUp, Calendar, RefreshCw, MonitorSmartphone,
+  Globe, Network, ChevronDown, MessageSquarePlus, Search, ChevronLeft,
+  ChevronRight, FolderOpen, Rocket,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from '@/components/ui/accordion';
@@ -14,6 +23,8 @@ import { useAdminUserStats } from '@/lib/queries/admin-users';
 import { useAdminVisitorStats } from '@/lib/queries/admin-visitors';
 import { useFeedbackList } from '@/lib/queries/feedback';
 import type { VisitorByIp } from '@/app/api/admin/visitors/route';
+import type { AdminUserRow } from '@/app/api/admin/users/route';
+import UserDetailSheet from './user-detail-sheet';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
@@ -62,7 +73,20 @@ function KpiSkeleton() {
 }
 
 function UsersTab() {
-  const { data, isLoading, isError } = useAdminUserStats();
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('created_at');
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  const deferredSearch = useDeferredValue(search);
+
+  const { data, isLoading, isError } = useAdminUserStats({
+    page,
+    limit: 20,
+    search: deferredSearch,
+    sort,
+  });
 
   if (isError) {
     return (
@@ -77,12 +101,20 @@ function UsersTab() {
   const kpis = data?.kpis;
   const trend = data?.registrationTrend ?? [];
   const planDist = data?.planDistribution ?? [];
-  const recentUsers = data?.recentUsers ?? [];
+  const allUsers = data?.allUsers ?? [];
+  const total = data?.total ?? 0;
+  const limit = data?.limit ?? 20;
+  const totalPages = Math.ceil(total / limit);
   const trendWithLabel = trend.map((t) => ({ ...t, label: formatDate(t.date) }));
+
+  const handleUserClick = (userId: string) => {
+    setSelectedUserId(userId);
+    setSheetOpen(true);
+  };
 
   return (
     <div className="space-y-6">
-      {/* ① KPI 카드 */}
+      {/* KPI 카드 */}
       {isLoading ? (
         <KpiSkeleton />
       ) : (
@@ -126,7 +158,7 @@ function UsersTab() {
         </div>
       )}
 
-      {/* ② 플랜 분포 배지 */}
+      {/* 플랜 분포 배지 */}
       {!isLoading && (
         <div className="flex items-center gap-3 flex-wrap">
           <span className="text-sm text-muted-foreground font-medium">플랜 분포</span>
@@ -136,7 +168,7 @@ function UsersTab() {
         </div>
       )}
 
-      {/* ③ 차트 2열 */}
+      {/* 차트 2열 */}
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card><CardContent className="pt-6"><Skeleton className="h-52 w-full" /></CardContent></Card>
@@ -172,46 +204,10 @@ function UsersTab() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">누적 가입자 (30일)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={trendWithLabel}>
-                  <XAxis dataKey="label" tick={{ fontSize: 11 }} interval={4} />
-                  <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-                  <Tooltip
-                    formatter={(value: number | undefined) => [`${(value ?? 0).toLocaleString()}명`, '누적 가입자'] as [string, string]}
-                    labelFormatter={(label) => `날짜: ${String(label)}`}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="cumulative"
-                    stroke="#34C07A"
-                    fill="#34C07A"
-                    fillOpacity={0.3}
-                    strokeWidth={2}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* ④ PieChart + 최근 가입자 */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card><CardContent className="pt-6"><Skeleton className="h-64 w-full" /></CardContent></Card>
-          <Card><CardContent className="pt-6"><Skeleton className="h-64 w-full" /></CardContent></Card>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader>
               <CardTitle className="text-base">플랜 분포</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={240}>
+              <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
                   <Pie
                     data={planDist}
@@ -219,8 +215,8 @@ function UsersTab() {
                     nameKey="label"
                     cx="50%"
                     cy="50%"
-                    innerRadius={60}
-                    outerRadius={90}
+                    innerRadius={50}
+                    outerRadius={80}
                   >
                     {planDist.map((entry) => (
                       <Cell
@@ -235,75 +231,165 @@ function UsersTab() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">최근 가입자 (최대 10명)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {recentUsers.map((u) => {
-                  const initials = (u.name ?? u.email).charAt(0).toUpperCase();
-                  const badgeVariant = PLAN_BADGE_VARIANT[u.plan] ?? 'secondary';
-                  return (
-                    <li key={u.id} className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        {u.avatarUrl ? (
-                          <img src={u.avatarUrl} alt="" className="h-full w-full rounded-full object-cover" />
-                        ) : (
-                          <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-                        )}
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-sm font-medium truncate">{u.name ?? u.email}</p>
-                          {u.provider && (
-                            <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 shrink-0">
-                              {u.provider}
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {u.email}
-                          {u.lastSignInAt && (
-                            <span className="ml-2 text-green-600 dark:text-green-400">
-                              마지막 로그인: {formatDateTime(u.lastSignInAt)}
-                            </span>
-                          )}
-                        </p>
-                      </div>
-                      <Badge
-                        variant={badgeVariant}
-                        className={
-                          u.plan === 'pro'
-                            ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                            : u.plan === 'team'
-                              ? 'border-purple-500 text-purple-600'
-                              : ''
-                        }
-                      >
-                        {u.plan}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground shrink-0">
-                        프로젝트 {u.projectCount}개
-                      </span>
-                      <span className="text-xs text-muted-foreground shrink-0">
-                        {formatFullDate(u.createdAt)}
-                      </span>
-                    </li>
-                  );
-                })}
-                {recentUsers.length === 0 && (
-                  <li className="text-sm text-muted-foreground text-center py-4">
-                    가입자가 없습니다.
-                  </li>
-                )}
-              </ul>
-            </CardContent>
-          </Card>
         </div>
       )}
+
+      {/* 전체 사용자 목록 */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <CardTitle className="text-base">전체 사용자 ({total}명)</CardTitle>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="이름 또는 이메일 검색..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
+                  className="pl-9 h-9 w-48 md:w-64"
+                />
+              </div>
+              <Select value={sort} onValueChange={(v) => { setSort(v); setPage(1); }}>
+                <SelectTrigger className="h-9 w-36">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="created_at">가입일순</SelectItem>
+                  <SelectItem value="last_sign_in">최근 로그인순</SelectItem>
+                  <SelectItem value="project_count">프로젝트 많은순</SelectItem>
+                  <SelectItem value="deploy_count">배포 많은순</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-14 w-full" />
+              ))}
+            </div>
+          ) : allUsers.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">
+              {search ? '검색 결과가 없습니다.' : '사용자가 없습니다.'}
+            </p>
+          ) : (
+            <>
+              <div className="space-y-1">
+                {allUsers.map((u: AdminUserRow) => (
+                  <UserRow key={u.id} user={u} onClick={handleUserClick} />
+                ))}
+              </div>
+
+              {/* 페이지네이션 */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4 pt-3 border-t">
+                  <p className="text-xs text-muted-foreground">
+                    {total}명 중 {(page - 1) * limit + 1}~{Math.min(page * limit, total)}
+                  </p>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page <= 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm px-2">
+                      {page} / {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={page >= totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 사용자 상세 Sheet */}
+      <UserDetailSheet
+        userId={selectedUserId}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+      />
     </div>
+  );
+}
+
+function UserRow({ user, onClick }: { user: AdminUserRow; onClick: (id: string) => void }) {
+  const initials = (user.name ?? user.email).charAt(0).toUpperCase();
+  const badgeVariant = PLAN_BADGE_VARIANT[user.plan] ?? 'secondary';
+
+  return (
+    <button
+      type="button"
+      onClick={() => onClick(user.id)}
+      className="w-full flex items-center gap-3 py-2.5 px-3 rounded-md hover:bg-muted/50 transition-colors text-left"
+    >
+      <Avatar className="h-8 w-8 shrink-0">
+        {user.avatarUrl ? (
+          <img src={user.avatarUrl} alt="" className="h-full w-full rounded-full object-cover" />
+        ) : (
+          <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+        )}
+      </Avatar>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <p className="text-sm font-medium truncate">{user.name ?? user.email}</p>
+          {user.provider && (
+            <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 shrink-0">
+              {user.provider}
+            </Badge>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground truncate">
+          {user.email}
+          {user.lastSignInAt && (
+            <span className="ml-2 text-green-600 dark:text-green-400">
+              로그인: {formatDateTime(user.lastSignInAt)}
+            </span>
+          )}
+        </p>
+      </div>
+      <Badge
+        variant={badgeVariant}
+        className={
+          user.plan === 'pro'
+            ? 'bg-blue-500 hover:bg-blue-600 text-white'
+            : user.plan === 'team'
+              ? 'border-purple-500 text-purple-600'
+              : ''
+        }
+      >
+        {user.plan}
+      </Badge>
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+          <FolderOpen className="h-3 w-3" />
+          {user.projectCount}
+        </span>
+        <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+          <Rocket className="h-3 w-3" />
+          {user.deployCount}
+        </span>
+      </div>
+      <span className="text-xs text-muted-foreground shrink-0 hidden md:inline">
+        {formatFullDate(user.createdAt)}
+      </span>
+    </button>
   );
 }
 
@@ -547,17 +633,14 @@ function VisitorsTab() {
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="pl-4 space-y-3 pt-1">
-                        {/* 방문 기간 */}
                         <div className="text-xs text-muted-foreground">
                           첫 방문: {formatDateTime(v.firstSeen)} · 마지막: {formatDateTime(v.lastSeen)}
                         </div>
-                        {/* UA */}
                         {v.userAgent && (
                           <p className="text-xs text-muted-foreground truncate">
                             <span className="font-medium">UA:</span> {v.userAgent}
                           </p>
                         )}
-                        {/* 주요 방문 페이지 */}
                         <div>
                           <p className="text-xs font-medium mb-1.5">주요 방문 페이지</p>
                           <ul className="space-y-1">

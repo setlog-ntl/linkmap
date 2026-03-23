@@ -26,7 +26,7 @@ import {
 import {
   Eye, EyeOff, Pencil, Trash2, Copy, MoreHorizontal,
   UserCheck, ExternalLink, ChevronDown, ChevronRight,
-  Clock, AlertTriangle, Shield, Plus, Download,
+  Clock, AlertTriangle, Plus, Download,
 } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { toast } from 'sonner';
@@ -123,7 +123,6 @@ export function CredentialsTable({
   const countdownIntervalsRef = useRef<Map<string, ReturnType<typeof setInterval>>>(new Map());
 
   const startAutoHide = useCallback((id: string) => {
-    // Clear existing
     const existingTimer = timersRef.current.get(id);
     if (existingTimer) clearTimeout(existingTimer);
     const existingInterval = countdownIntervalsRef.current.get(id);
@@ -166,7 +165,6 @@ export function CredentialsTable({
     });
   }, []);
 
-  // Start/stop auto-hide when showValues changes
   useEffect(() => {
     for (const id of Object.keys(showValues)) {
       if (showValues[id]) {
@@ -212,7 +210,6 @@ export function CredentialsTable({
     }
   }, [decryptedData, handleSecureCopy]);
 
-  // Service grouping
   const serviceGroups = useMemo((): ServiceGroup[] => {
     if (!groupByService) return [];
     const groupMap = new Map<string, ServiceCredential[]>();
@@ -238,7 +235,7 @@ export function CredentialsTable({
   if (credentials.length === 0) {
     return (
       <Card>
-        <CardContent>
+        <CardContent className="py-10">
           <EmptyState
             icon={UserCheck}
             title="등록된 계정 정보가 없습니다"
@@ -258,40 +255,44 @@ export function CredentialsTable({
     const countdown = autoHideCountdowns[cred.id];
     const noPassword = !cred.encrypted_password;
 
-    const gridCols = showServiceColumn
-      ? (selectable ? 'sm:grid-cols-[36px_1fr_160px_100px_100px_80px_60px]' : 'sm:grid-cols-[1fr_160px_100px_100px_80px_60px]')
-      : (selectable ? 'sm:grid-cols-[36px_1fr_160px_100px_80px_60px]' : 'sm:grid-cols-[1fr_160px_100px_80px_60px]');
-
     return (
       <div
         key={cred.id}
-        className={`flex flex-col sm:grid gap-2 sm:gap-4 p-3 sm:p-4 sm:items-center hover:bg-muted/30 transition-colors ${isSelected ? 'bg-brand-blue/5 dark:bg-brand-blue/10' : ''} ${gridCols}`}
+        className={`group flex items-center gap-3 px-3 py-2.5 hover:bg-muted/40 transition-colors ${isSelected ? 'bg-brand-blue/5 dark:bg-brand-blue/10' : ''}`}
       >
         {selectable && (
-          <div className="flex items-center">
-            <Checkbox
-              checked={isSelected}
-              onCheckedChange={() => onToggleSelect!(cred.id)}
-              aria-label={`${cred.label} 선택`}
-            />
-          </div>
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={() => onToggleSelect!(cred.id)}
+            aria-label={`${cred.label} 선택`}
+            className="shrink-0"
+          />
         )}
 
-        {/* Label + Username */}
-        <div className="min-w-0 space-y-1">
-          <div className="flex items-center gap-2">
+        {/* Label + badges */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
             <span className="text-sm font-medium truncate">{cred.label}</span>
+            <Badge variant="outline" className={`text-[10px] shrink-0 ${purposeColors[cred.purpose]}`}>
+              {purposeLabels[cred.purpose]}
+            </Badge>
+            <Badge variant="secondary" className="text-[10px] shrink-0">
+              {envLabels[cred.environment] || cred.environment}
+            </Badge>
+            {showServiceColumn && cred.service_id && serviceNameMap.has(cred.service_id) && (
+              <Badge variant="outline" className="text-[10px] truncate max-w-[100px] shrink-0">
+                {serviceNameMap.get(cred.service_id)}
+              </Badge>
+            )}
             {cred.website_url && (
-              <a href={cred.website_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+              <a href={cred.website_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground shrink-0">
                 <ExternalLink className="h-3 w-3" />
               </a>
             )}
             {noPassword && (
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger>
-                    <AlertTriangle className="h-3 w-3 text-amber-500" />
-                  </TooltipTrigger>
+                  <TooltipTrigger><AlertTriangle className="h-3 w-3 text-amber-500 shrink-0" /></TooltipTrigger>
                   <TooltipContent><p>비밀번호 미설정</p></TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -300,103 +301,86 @@ export function CredentialsTable({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <Clock className={`h-3 w-3 ${ageWarning.level === 'danger' ? 'text-red-500' : 'text-amber-500'}`} />
+                    <Clock className={`h-3 w-3 shrink-0 ${ageWarning.level === 'danger' ? 'text-red-500' : 'text-amber-500'}`} />
                   </TooltipTrigger>
                   <TooltipContent><p>{ageWarning.label}</p></TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             )}
           </div>
-          <div className="flex items-center gap-1">
+        </div>
+
+        {/* Credentials (ID / PW) */}
+        <div className="hidden sm:flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1 w-[140px]">
             <code className="text-xs text-muted-foreground font-mono truncate">
-              {isShowing && data?.username ? data.username : '\u2022'.repeat(12)}
+              {isShowing && data?.username ? data.username : '\u2022'.repeat(10)}
             </code>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 shrink-0"
-              onClick={() => onToggleShow(cred.id)}
-              disabled={isDecrypting}
-              title={isShowing ? '숨기기' : '표시'}
-            >
-              {isShowing ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-            </Button>
-            {isShowing && countdown !== undefined && (
-              <span className="text-[10px] text-muted-foreground tabular-nums">{countdown}s</span>
-            )}
           </div>
-        </div>
-
-        {/* Password */}
-        <div className="flex items-center gap-1 min-w-0">
-          {cred.encrypted_password ? (
-            <code className="text-xs text-muted-foreground font-mono truncate">
-              {isShowing && data?.password ? data.password : '\u2022'.repeat(12)}
-            </code>
-          ) : (
-            <span className="text-xs text-muted-foreground">-</span>
-          )}
-        </div>
-
-        {/* Purpose */}
-        <div>
-          <Badge variant="outline" className={`text-[10px] ${purposeColors[cred.purpose]}`}>
-            {purposeLabels[cred.purpose]}
-          </Badge>
-        </div>
-
-        {/* Service (only in flat view) */}
-        {showServiceColumn && (
-          <div className="min-w-0">
-            {cred.service_id && serviceNameMap.has(cred.service_id) ? (
-              <Badge variant="outline" className="text-[10px] truncate max-w-full">
-                {serviceNameMap.get(cred.service_id)}
-              </Badge>
+          <span className="text-muted-foreground/40">/</span>
+          <div className="flex items-center gap-1 w-[120px]">
+            {cred.encrypted_password ? (
+              <code className="text-xs text-muted-foreground font-mono truncate">
+                {isShowing && data?.password ? data.password : '\u2022'.repeat(10)}
+              </code>
             ) : (
               <span className="text-xs text-muted-foreground">-</span>
             )}
           </div>
-        )}
+        </div>
 
-        {/* Environment */}
-        <div>
-          <Badge variant="secondary" className="text-[10px]">
-            {envLabels[cred.environment] || cred.environment}
-          </Badge>
+        {/* Mobile: credentials below label */}
+        <div className="flex sm:hidden items-center gap-1 text-xs text-muted-foreground font-mono">
+          {isShowing && data?.username ? data.username : '\u2022'.repeat(8)}
+        </div>
+
+        {/* Show/Hide + countdown */}
+        <div className="flex items-center gap-0.5 shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={() => onToggleShow(cred.id)}
+            disabled={isDecrypting}
+            title={isShowing ? '숨기기' : '표시'}
+          >
+            {isShowing ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+          </Button>
+          {isShowing && countdown !== undefined && (
+            <span className="text-[10px] text-muted-foreground tabular-nums w-5 text-center">{countdown}s</span>
+          )}
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onEdit(cred)}>
-                <Pencil className="mr-2 h-4 w-4" />
-                수정
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity">
+              <MoreHorizontal className="h-3.5 w-3.5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onEdit(cred)}>
+              <Pencil className="mr-2 h-3.5 w-3.5" />
+              수정
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => handleCopyUsername(cred.id)}>
+              <Copy className="mr-2 h-3.5 w-3.5" />
+              아이디 복사
+            </DropdownMenuItem>
+            {cred.encrypted_password && (
+              <DropdownMenuItem onClick={() => handleCopyPassword(cred.id)}>
+                <Copy className="mr-2 h-3.5 w-3.5" />
+                비밀번호 복사
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleCopyUsername(cred.id)}>
-                <Copy className="mr-2 h-4 w-4" />
-                아이디 복사
-              </DropdownMenuItem>
-              {cred.encrypted_password && (
-                <DropdownMenuItem onClick={() => handleCopyPassword(cred.id)}>
-                  <Copy className="mr-2 h-4 w-4" />
-                  비밀번호 복사
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onDelete(cred.id)} className="text-destructive">
-                <Trash2 className="mr-2 h-4 w-4" />
-                삭제
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+            )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => onDelete(cred.id)} className="text-destructive">
+              <Trash2 className="mr-2 h-3.5 w-3.5" />
+              삭제
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     );
   };
@@ -405,27 +389,22 @@ export function CredentialsTable({
     const allSelected = selectable && credentials.length > 0 && credentials.every((c) => selectedIds!.has(c.id));
     const someSelected = selectable && credentials.some((c) => selectedIds!.has(c.id)) && !allSelected;
 
-    const gridCols = showServiceColumn
-      ? (selectable ? 'sm:grid-cols-[36px_1fr_160px_100px_100px_80px_60px]' : 'sm:grid-cols-[1fr_160px_100px_100px_80px_60px]')
-      : (selectable ? 'sm:grid-cols-[36px_1fr_160px_100px_80px_60px]' : 'sm:grid-cols-[1fr_160px_100px_80px_60px]');
-
     return (
-      <div className={`hidden sm:grid gap-4 px-4 py-2 border-b bg-muted/50 text-xs font-medium text-muted-foreground ${gridCols}`}>
+      <div className="hidden sm:flex items-center gap-3 px-3 py-2 border-b bg-muted/50 text-xs font-medium text-muted-foreground">
         {selectable && (
-          <div className="flex items-center">
-            <Checkbox
-              checked={allSelected ? true : someSelected ? 'indeterminate' : false}
-              onCheckedChange={() => onToggleSelectAll!()}
-              aria-label="전체 선택"
-            />
-          </div>
+          <Checkbox
+            checked={allSelected ? true : someSelected ? 'indeterminate' : false}
+            onCheckedChange={() => onToggleSelectAll!()}
+            aria-label="전체 선택"
+            className="shrink-0"
+          />
         )}
-        <div>라벨 / 아이디</div>
-        <div>비밀번호</div>
-        <div>용도</div>
-        {showServiceColumn && <div>서비스</div>}
-        <div>환경</div>
-        <div></div>
+        <div className="flex-1">라벨</div>
+        <div className="w-[140px]">아이디</div>
+        <div className="w-3" />
+        <div className="w-[120px]">비밀번호</div>
+        <div className="w-7" />
+        <div className="w-7" />
       </div>
     );
   };
@@ -433,7 +412,7 @@ export function CredentialsTable({
   // Grouped view
   if (groupByService && serviceGroups.length > 0) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-2">
         {serviceGroups.map((group) => (
           <ServiceGroupCard
             key={group.serviceId || '__none__'}
@@ -502,82 +481,64 @@ function ServiceGroupCard({
   };
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <Collapsible open={open} onOpenChange={setOpen}>
-        <div className="flex items-center gap-3 px-4 py-3 border-b bg-muted/30">
+        <div className="flex items-center gap-2 px-3 py-2 border-b bg-muted/30">
           {selectable && (
             <Checkbox
               checked={allInGroupSelected ? true : someInGroupSelected ? 'indeterminate' : false}
               onCheckedChange={handleGroupSelect}
               aria-label={`${group.serviceName} 전체 선택`}
+              className="shrink-0"
             />
           )}
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="gap-2 p-0 h-auto hover:bg-transparent">
-              {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-              <Shield className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium text-sm">{group.serviceName}</span>
-            </Button>
+            <button className="flex items-center gap-1.5 hover:text-foreground transition-colors text-left min-w-0">
+              {open ? <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
+              <span className="font-medium text-sm truncate">{group.serviceName}</span>
+              <span className="text-xs text-muted-foreground shrink-0">{group.credentials.length}</span>
+            </button>
           </CollapsibleTrigger>
-          <Badge variant="secondary" className="text-[10px]">{group.credentials.length}</Badge>
           <div className="flex-1" />
-          <div className="flex items-center gap-1">
+          <div className="flex items-center">
             {onAddForService && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={(e) => { e.stopPropagation(); onAddForService(group.serviceId); }}
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>계정 추가</p></TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={(e) => { e.stopPropagation(); onAddForService(group.serviceId); }}
+                title="계정 추가"
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
             )}
             {onBulkEditGroup && group.credentials.length > 0 && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={(e) => { e.stopPropagation(); onBulkEditGroup(group.serviceId); }}
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>일괄 수정</p></TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={(e) => { e.stopPropagation(); onBulkEditGroup(group.serviceId); }}
+                title="일괄 수정"
+              >
+                <Pencil className="h-3 w-3" />
+              </Button>
             )}
             {onExportGroup && group.credentials.length > 0 && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={(e) => { e.stopPropagation(); onExportGroup(group.serviceId); }}
-                    >
-                      <Download className="h-3.5 w-3.5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>.env 내보내기</p></TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={(e) => { e.stopPropagation(); onExportGroup(group.serviceId); }}
+                title=".env 내보내기"
+              >
+                <Download className="h-3 w-3" />
+              </Button>
             )}
             {selectable && onSelectServiceGroup && selectedInGroup === 0 && (
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-xs h-7"
+                className="text-[11px] h-6 px-2"
                 onClick={() => {
                   groupIds.filter((id) => !selectedIds!.has(id)).forEach((id) => onToggleSelect!(id));
                 }}
@@ -588,11 +549,9 @@ function ServiceGroupCard({
           </div>
         </div>
         <CollapsibleContent>
-          <CardContent className="p-0">
-            <div className="divide-y">
-              {group.credentials.map((cred) => renderRow(cred, false))}
-            </div>
-          </CardContent>
+          <div className="divide-y">
+            {group.credentials.map((cred) => renderRow(cred, false))}
+          </div>
         </CollapsibleContent>
       </Collapsible>
     </Card>
