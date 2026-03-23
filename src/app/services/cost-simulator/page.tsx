@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-export const revalidate = 86400; // ISR: 24시간 캐시 (비용 데이터 변경 빈도 낮음)
+export const revalidate = false; // 완전 정적: 코드 하드코딩 데이터 → 배포 시에만 변경 (Workers CPU 10ms 제한 대응)
 
 export const metadata: Metadata = {
   title: '비용 시뮬레이터 | Linkmap',

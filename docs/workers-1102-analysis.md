@@ -173,12 +173,58 @@ next/og → satori (2.9MB)
 
 ### 장기 개선 방향
 
-1. **KV 캐시 워밍업 스크립트** — 배포 후 주요 공개 페이지 10개 자동 요청 (ISR 캐시 미스 방지)
+1. ~~**KV 캐시 워밍업 스크립트**~~ → ✅ 03-23 구현 완료 (`scripts/warm-cache.sh` + CI 연동)
 2. **Paid Plan 검토** — CPU 제한 10ms → 50ms (Bundled) 또는 30s (Unbound)
-3. **번들 크기 모니터링 자동화** — CI에서 서버 번들 크기 경고
+3. ~~**번들 크기 모니터링 자동화**~~ → ✅ 03-23 CI 체크 추가 (`.github/workflows/deploy-cloudflare.yml`)
 4. **블로그 content 분리** — `BLOG_POSTS` content를 개별 파일로 분리하여 서버 번들 추가 경량화
 
 ---
 
+## 2026-03-23 재발 및 근본 해결
+
+### 재발 상황
+
+| 항목 | 내용 |
+|------|------|
+| **시각** | 2026-03-23 00:21:43 UTC |
+| **에러** | Error 1102 (Worker exceeded resource limits) |
+| **트리거** | 3/22 10회 배포 → KV 캐시 전면 무효화 → cold start SSR |
+
+### 근본 원인
+
+Phase 2에서 `revalidate`를 3600→86400으로 연장했으나, 이는 **24시간마다 full SSR 재발** + **배포마다 KV 캐시 리셋**이라는 구조적 문제를 해결하지 못했다.
+
+```
+배포 → KV 캐시 무효화 → 첫 요청에서 full SSR → CPU 10ms 초과 → 1102
+revalidate 만료 → full SSR → CPU 10ms 초과 → 1102
+```
+
+해당 페이지들의 데이터는 **모두 코드에 하드코딩** → 런타임 SSR이 불필요.
+
+### Phase 3: 완전 정적화 + 재발 방지 체계 (03-23)
+
+| # | 최적화 내용 | 변경 파일 |
+|---|-------------|-----------|
+| 3-1 | ISR `revalidate` 86400/3600 → **false** (완전 정적) | 7개 페이지 |
+| 3-2 | 캐시 워밍업 스크립트 + CI 연동 | `scripts/warm-cache.sh`, CI yml |
+| 3-3 | ESLint `no-link-prefetch` 규칙 | `eslint-rules/no-link-prefetch.mjs` |
+| 3-4 | 서버 번들 크기 CI 체크 (10MB 경고) | CI yml |
+| 3-5 | CLAUDE.md Workers-Safe 체크리스트 | `CLAUDE.md` |
+| 3-6 | 통합 운영 가이드 | `docs/workers-operations-guide.md` |
+
+**Phase 3 핵심:** `revalidate = false`로 ISR 자체를 제거. 빌드 시점에 HTML을 생성하고, 이후에는 KV에서 정적 파일만 서빙. 런타임 SSR이 완전히 사라지므로 CPU 10ms 제한에 걸릴 수 없다.
+
+**대상 페이지 (7개):**
+- `src/app/services/page.tsx` (86400→false)
+- `src/app/services/[slug]/page.tsx` (86400→false)
+- `src/app/services/compare/page.tsx` (86400→false)
+- `src/app/services/cost-simulator/page.tsx` (86400→false)
+- `src/app/blog/page.tsx` (86400→false)
+- `src/app/demo/page.tsx` (3600→false)
+- `src/app/showcase/[id]/layout.tsx` (3600→false)
+
+---
+
 *보고서 작성일: 2026-03-20*
+*최종 업데이트: 2026-03-23 (Phase 3 근본 해결)*
 *분석 도구: Cloudflare GraphQL Analytics API, Next.js Bundle Analyzer*

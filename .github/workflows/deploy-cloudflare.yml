@@ -72,6 +72,19 @@ jobs:
           SUPABASE_WEBHOOK_SECRET: ${{ secrets.SUPABASE_WEBHOOK_SECRET }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
 
+      - name: Check server bundle size
+        run: |
+          if [ -f ".open-next/worker.js" ]; then
+            SIZE=$(stat -c%s ".open-next/worker.js" 2>/dev/null || stat -f%z ".open-next/worker.js" 2>/dev/null || echo "0")
+            SIZE_MB=$((SIZE / 1024 / 1024))
+            echo "📦 Worker bundle size: ${SIZE_MB}MB (${SIZE} bytes)"
+            if [ "$SIZE_MB" -gt 10 ]; then
+              echo "::warning::Worker bundle exceeds 10MB (${SIZE_MB}MB). Consider code splitting or removing large dependencies."
+            fi
+          else
+            echo "⚠️ .open-next/worker.js not found, skipping size check"
+          fi
+
       - name: Deploy to Cloudflare Workers
         run: npx wrangler deploy
         env:
@@ -79,3 +92,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+      - name: Warm ISR cache
+        continue-on-error: true
+        run: bash scripts/warm-cache.sh https://linkmap.biz

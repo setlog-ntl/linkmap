@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 86400;
+export const revalidate = false; // 완전 정적: 코드 하드코딩 데이터 → 배포 시에만 변경 (Workers CPU 10ms 제한 대응)
 
 export default function BlogPage() {
   const posts = getPublishedPostsMeta();

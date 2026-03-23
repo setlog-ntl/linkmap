@@ -1,6 +1,7 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import noLinkPrefetch from "./eslint-rules/no-link-prefetch.mjs";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -24,11 +25,20 @@ const eslintConfig = defineConfig([
     "coverage/**",
   ]),
   {
+    plugins: {
+      "linkmap": {
+        rules: {
+          "no-link-prefetch": noLinkPrefetch,
+        },
+      },
+    },
     rules: {
       // React 19 strict rules — downgrade to warnings for now
       "react-hooks/error-boundaries": "warn",
       "react-hooks/set-state-in-effect": "warn",
       "react-hooks/refs": "warn",
+      // Workers Free Plan: prefetch={false} 필수
+      "linkmap/no-link-prefetch": "error",
     },
   },
 ]);

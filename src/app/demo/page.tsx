@@ -1,4 +1,4 @@
-export const revalidate = 3600; // ISR: 1시간 캐시
+export const revalidate = false; // 완전 정적: 데모 데이터 배포 시에만 변경 (Workers CPU 10ms 제한 대응)
 
 import { createAdminClient } from '@/lib/supabase/admin';
 import { Header } from '@/components/layout/header';

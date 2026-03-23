@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import type { Metadata } from 'next';
 
-export const revalidate = 3600; // ISR: 1시간 캐시
+export const revalidate = false; // 완전 정적: 쇼케이스 데이터 배포 시에만 변경 (Workers CPU 10ms 제한 대응)
 
 const CATEGORY_LABELS: Record<string, string> = {
   portfolio: '포트폴리오',
