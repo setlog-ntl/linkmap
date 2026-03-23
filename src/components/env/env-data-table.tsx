@@ -16,7 +16,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { IconTooltip } from '@/components/ui/icon-tooltip';
-import { Eye, EyeOff, Pencil, Trash2, Copy, Check, MoreHorizontal, Key as KeyIcon, ChevronDown, AlertTriangle } from 'lucide-react';
+import { Eye, EyeOff, Pencil, Trash2, Copy, Check, MoreHorizontal, Key as KeyIcon, ChevronDown, AlertTriangle, Braces } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -43,6 +43,7 @@ interface EnvDataTableProps {
   onCopy: (envVar: EnvironmentVariable) => void;
   onCopyValue?: (envVar: EnvironmentVariable) => void;
   serviceGroups?: EnvServiceGroup[];
+  onRawEditGroup?: (serviceId: string | null, serviceName: string) => void;
 }
 
 export function EnvDataTable({
@@ -57,6 +58,7 @@ export function EnvDataTable({
   onCopy,
   onCopyValue,
   serviceGroups,
+  onRawEditGroup,
 }: EnvDataTableProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -253,6 +255,7 @@ export function EnvDataTable({
             key={group.serviceId ?? '__unlinked__'}
             group={group}
             renderEnvRow={renderEnvRow}
+            onRawEditGroup={onRawEditGroup}
           />
         ))}
       </div>
@@ -285,9 +288,11 @@ export function EnvDataTable({
 function ServiceGroupCard({
   group,
   renderEnvRow,
+  onRawEditGroup,
 }: {
   group: EnvServiceGroup;
   renderEnvRow: (envVar: EnvironmentVariable, showServiceColumn: boolean) => React.ReactNode;
+  onRawEditGroup?: (serviceId: string | null, serviceName: string) => void;
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -295,27 +300,44 @@ function ServiceGroupCard({
     <Card>
       <CardContent className="p-0">
         {/* Service group header */}
-        <button
-          type="button"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="flex items-center gap-3 w-full px-4 py-3 bg-muted/50 hover:bg-muted/70 transition-colors text-left border-b"
-        >
-          <ChevronDown
-            className={cn(
-              'h-4 w-4 text-muted-foreground transition-transform shrink-0',
-              isCollapsed && '-rotate-90'
+        <div className="flex items-center gap-3 px-4 py-3 bg-muted/50 border-b">
+          <button
+            type="button"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="flex items-center gap-3 flex-1 hover:opacity-80 transition-opacity text-left"
+          >
+            <ChevronDown
+              className={cn(
+                'h-4 w-4 text-muted-foreground transition-transform shrink-0',
+                isCollapsed && '-rotate-90'
+              )}
+            />
+            {group.serviceSlug ? (
+              <ServiceIcon serviceId={group.serviceSlug} size={18} />
+            ) : (
+              <KeyIcon className="h-4.5 w-4.5 text-muted-foreground" />
             )}
-          />
-          {group.serviceSlug ? (
-            <ServiceIcon serviceId={group.serviceSlug} size={18} />
-          ) : (
-            <KeyIcon className="h-4.5 w-4.5 text-muted-foreground" />
+            <span className="text-sm font-medium">{group.serviceName}</span>
+            <Badge variant="secondary" className="text-[10px]">
+              {group.envVars.length}개
+            </Badge>
+          </button>
+          {onRawEditGroup && group.envVars.length > 0 && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 shrink-0"
+                  onClick={() => onRawEditGroup(group.serviceId, group.serviceName)}
+                >
+                  <Braces className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>ENV/JSON 일괄 편집</TooltipContent>
+            </Tooltip>
           )}
-          <span className="text-sm font-medium">{group.serviceName}</span>
-          <Badge variant="secondary" className="text-[10px] ml-auto">
-            {group.envVars.length}개
-          </Badge>
-        </button>
+        </div>
 
         {/* Env var rows */}
         {!isCollapsed && (

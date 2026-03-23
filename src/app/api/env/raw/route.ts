@@ -8,6 +8,7 @@ import { z } from 'zod';
 const getSchema = z.object({
   project_id: z.string().uuid(),
   environment: z.enum(['development', 'staging', 'production']),
+  service_id: z.string().uuid().nullable().optional(),
 });
 
 const putSchema = z.object({
@@ -28,13 +29,15 @@ export async function GET(request: NextRequest) {
   if (!user) return unauthorizedError();
 
   const { searchParams } = new URL(request.url);
+  const serviceIdParam = searchParams.get('service_id');
   const parsed = getSchema.safeParse({
     project_id: searchParams.get('project_id'),
     environment: searchParams.get('environment'),
+    service_id: serviceIdParam === '__none__' ? null : serviceIdParam || undefined,
   });
   if (!parsed.success) return apiError('잘못된 요청 파라미터입니다', 400);
 
-  const { project_id, environment } = parsed.data;
+  const { project_id, environment, service_id: filterServiceId } = parsed.data;
 
   // 프로젝트 소유권 확인
   const { data: project } = await supabase
@@ -45,13 +48,23 @@ export async function GET(request: NextRequest) {
     .single();
   if (!project) return notFoundError('프로젝트');
 
-  const { data: envVars } = await supabase
+  let query = supabase
     .from('environment_variables')
     .select('id, key_name, encrypted_value, is_secret, service_id, description')
     .eq('project_id', project_id)
     .eq('environment', environment)
-    .is('deleted_at', null)
-    .order('key_name');
+    .is('deleted_at', null);
+
+  // 서비스 필터 적용
+  if (filterServiceId !== undefined) {
+    if (filterServiceId === null) {
+      query = query.is('service_id', null);
+    } else {
+      query = query.eq('service_id', filterServiceId);
+    }
+  }
+
+  const { data: envVars } = await query.order('key_name');
 
   const vars = (envVars ?? []).map((v) => {
     try {

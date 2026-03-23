@@ -107,6 +107,8 @@ export default function ProjectEnvPage() {
   const [editServiceId, setEditServiceId] = useState<string | null>(null);
   const [editEnvironment, setEditEnvironment] = useState<Environment>('development');
   const [rawEditorOpen, setRawEditorOpen] = useState(false);
+  const [rawEditorServiceId, setRawEditorServiceId] = useState<string | null | undefined>(undefined);
+  const [rawEditorServiceName, setRawEditorServiceName] = useState<string | undefined>(undefined);
   const [copyEnvOpen, setCopyEnvOpen] = useState(false);
   const [viewMode, setViewMode] = useState<EnvViewMode>('all');
   const [syncResultOpen, setSyncResultOpen] = useState(false);
@@ -406,7 +408,11 @@ export default function ProjectEnvPage() {
         search={search}
         onSearchChange={setSearch}
         onAddClick={() => setAddOpen(true)}
-        onRawEditorClick={() => setRawEditorOpen(true)}
+        onRawEditorClick={() => {
+          setRawEditorServiceId(undefined);
+          setRawEditorServiceName(undefined);
+          setRawEditorOpen(true);
+        }}
         onCopyEnvClick={() => setCopyEnvOpen(true)}
         envCounts={envCounts}
         viewMode={viewMode}
@@ -426,6 +432,11 @@ export default function ProjectEnvPage() {
         onCopy={handleCopy}
         onCopyValue={handleCopyValue}
         serviceGroups={serviceGroups}
+        onRawEditGroup={(serviceId, serviceName) => {
+          setRawEditorServiceId(serviceId);
+          setRawEditorServiceName(serviceName);
+          setRawEditorOpen(true);
+        }}
       />
 
       {/* 일괄 편집 */}
@@ -434,6 +445,8 @@ export default function ProjectEnvPage() {
         onOpenChange={setRawEditorOpen}
         projectId={projectId}
         environment={activeEnv}
+        serviceId={rawEditorServiceId}
+        serviceName={rawEditorServiceName}
         onUpdated={async () => {
           await Promise.all([
             queryClient.invalidateQueries({ queryKey: queryKeys.envVars.byProject(projectId) }),

@@ -32,6 +32,8 @@ interface EnvRawEditorDialogProps {
   projectId: string;
   environment: Environment;
   onUpdated: () => void;
+  serviceId?: string | null;
+  serviceName?: string;
 }
 
 type EditorFormat = 'env' | 'json';
@@ -70,6 +72,8 @@ export function EnvRawEditorDialog({
   projectId,
   environment,
   onUpdated,
+  serviceId,
+  serviceName,
 }: EnvRawEditorDialogProps) {
   const [format, setFormat] = useState<EditorFormat>('env');
   const [content, setContent] = useState('');
@@ -88,7 +92,10 @@ export function EnvRawEditorDialog({
   useEffect(() => {
     if (!open) return;
     setLoading(true);
-    fetch(`/api/env/raw?project_id=${projectId}&environment=${environment}`)
+    const serviceParam = serviceId !== undefined
+      ? `&service_id=${serviceId === null ? '__none__' : serviceId}`
+      : '';
+    fetch(`/api/env/raw?project_id=${projectId}&environment=${environment}${serviceParam}`)
       .then((r) => r.json())
       .then((data: { vars?: RawEnvVar[] }) => {
         const vars = data.vars ?? [];
@@ -101,7 +108,7 @@ export function EnvRawEditorDialog({
       .finally(() => setLoading(false));
     // format은 초기 로드 시에만 사용
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, projectId, environment]);
+  }, [open, projectId, environment, serviceId]);
 
   // 탭 전환 시 현재 편집 내용을 파싱하고 다른 형식으로 변환
   const handleFormatChange = useCallback((newFormat: string) => {
@@ -150,7 +157,8 @@ export function EnvRawEditorDialog({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${environment}${ext}`;
+    const prefix = serviceName ? `${serviceName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_` : '';
+    a.download = `${prefix}${environment}${ext}`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success(`${environment}${ext} 파일이 다운로드되었습니다`);
@@ -195,9 +203,14 @@ export function EnvRawEditorDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[700px] max-h-[85dvh] flex flex-col">
         <DialogHeader className="shrink-0">
-          <DialogTitle>일괄 편집</DialogTitle>
+          <DialogTitle>
+            {serviceName ? `${serviceName} 일괄 편집` : '일괄 편집'}
+          </DialogTitle>
           <DialogDescription>
-            환경변수를 텍스트로 직접 편집하세요. 추가, 수정, 삭제가 한 번에 반영됩니다.
+            {serviceName
+              ? `${serviceName} 서비스의 환경변수를 텍스트로 직접 편집하세요.`
+              : '환경변수를 텍스트로 직접 편집하세요.'}{' '}
+            추가, 수정, 삭제가 한 번에 반영됩니다.
           </DialogDescription>
         </DialogHeader>
 
