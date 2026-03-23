@@ -355,49 +355,54 @@ export function ServicesContent({ projectId }: ServicesContentProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">서비스 목록</h2>
-        <div className="flex items-center gap-2">
-          {services.length > 0 && (
-            <>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="서비스 검색..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  className="pl-8 w-[220px] h-9"
-                  aria-label="서비스 검색"
-                />
-              </div>
-              <div className="flex border rounded-md">
-                <Button
-                  variant={viewMode === 'flat' ? 'secondary' : 'ghost'}
-                  size="icon"
-                  className="h-9 w-9 rounded-r-none"
-                  onClick={() => setViewMode('flat')}
-                  aria-label="전체 보기"
-                >
-                  <ListIcon className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'category' ? 'secondary' : 'ghost'}
-                  size="icon"
-                  className="h-9 w-9 rounded-l-none"
-                  onClick={() => setViewMode('category')}
-                  aria-label="카테고리별 보기"
-                >
-                  <Layers className="h-4 w-4" />
-                </Button>
-              </div>
-            </>
-          )}
-          <AddServiceDialog
-            projectId={projectId}
-            existingServiceIds={services.map((s) => s.service_id)}
-            onAdd={handleAddService}
-          />
-        </div>
+      {/* 헤더 + 도구 */}
+      <div className="flex flex-wrap items-center gap-2">
+        <h2 className="text-lg font-semibold mr-1">서비스 목록</h2>
+        {services.length > 0 && (
+          <Badge variant="secondary" className="text-xs">{services.length}</Badge>
+        )}
+        <div className="flex-1" />
+        {services.length > 0 && (
+          <>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                placeholder="검색..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="pl-8 w-40 h-8 text-sm"
+                aria-label="서비스 검색"
+              />
+            </div>
+            <div className="flex border rounded-md">
+              <Button
+                variant={viewMode === 'category' ? 'secondary' : 'ghost'}
+                size="sm"
+                className="h-8 rounded-r-none gap-1 px-2 text-xs"
+                onClick={() => setViewMode('category')}
+                aria-label="카테고리별 보기"
+              >
+                <Layers className="h-3.5 w-3.5" />
+                카테고리별
+              </Button>
+              <Button
+                variant={viewMode === 'flat' ? 'secondary' : 'ghost'}
+                size="sm"
+                className="h-8 rounded-l-none gap-1 px-2 text-xs"
+                onClick={() => setViewMode('flat')}
+                aria-label="전체 보기"
+              >
+                <ListIcon className="h-3.5 w-3.5" />
+                전체
+              </Button>
+            </div>
+          </>
+        )}
+        <AddServiceDialog
+          projectId={projectId}
+          existingServiceIds={services.map((s) => s.service_id)}
+          onAdd={handleAddService}
+        />
       </div>
 
       {services.length === 0 ? (

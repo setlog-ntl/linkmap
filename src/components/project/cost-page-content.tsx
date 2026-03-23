@@ -154,74 +154,46 @@ export function CostPageContent({ projectId, isDemo = false, reportHref }: CostP
         {summaryLine.text}
       </div>
 
-      {/* Header row with AI report button */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-muted-foreground">비용 관리</h2>
-
-        <div className="flex items-center gap-2">
-          {reportChecked && hasReport ? (
-            /* 기존 리포트 있음 → "AI 리포트 보기" + 생성 시간 */
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                <span>{formatRelativeTime(storedReport!.generatedAt)}</span>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-1.5 h-8 text-xs border-brand-blue/30 text-brand-blue hover:bg-brand-blue/5"
-                asChild
-              >
-                <Link prefetch={false} href={reportLink}>
-                  <FileText className="h-3.5 w-3.5" />
-                  AI 리포트 보기
-                </Link>
-              </Button>
-              {!isDemo && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="gap-1.5 h-8 text-xs text-muted-foreground"
-                  disabled={costSummary.services.length === 0}
-                  asChild
-                >
-                  <Link prefetch={false} href={reportLink}>
-                    <Sparkles className="h-3.5 w-3.5" />
-                    재생성
-                  </Link>
-                </Button>
-              )}
-            </div>
-          ) : isDemo ? (
-            /* 데모 모드 + 리포트 없음 → 비활성화 */
-            <div className="flex items-center gap-1.5">
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5">데모</Badge>
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-1.5 h-8 text-xs"
-                disabled
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                AI 리포트
-              </Button>
-            </div>
-          ) : (
-            /* 리포트 없음 → 생성 */
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-1.5 h-8 text-xs"
-              disabled={costSummary.services.length === 0}
-              asChild
-            >
+      {/* AI 리포트 바 */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex-1" />
+        {reportChecked && hasReport ? (
+          <>
+            <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {formatRelativeTime(storedReport!.generatedAt)}
+            </span>
+            <Button size="sm" variant="outline" className="gap-1 h-7 text-xs" asChild>
               <Link prefetch={false} href={reportLink}>
-                <Sparkles className="h-3.5 w-3.5" />
+                <FileText className="h-3.5 w-3.5" />
                 AI 리포트
               </Link>
             </Button>
-          )}
-        </div>
+            {!isDemo && (
+              <Button size="sm" variant="ghost" className="gap-1 h-7 text-xs text-muted-foreground" disabled={costSummary.services.length === 0} asChild>
+                <Link prefetch={false} href={reportLink}>
+                  <Sparkles className="h-3 w-3" />
+                  재생성
+                </Link>
+              </Button>
+            )}
+          </>
+        ) : isDemo ? (
+          <>
+            <Badge variant="secondary" className="text-[10px]">데모</Badge>
+            <Button size="sm" variant="outline" className="gap-1 h-7 text-xs" disabled>
+              <Sparkles className="h-3.5 w-3.5" />
+              AI 리포트
+            </Button>
+          </>
+        ) : (
+          <Button size="sm" variant="outline" className="gap-1 h-7 text-xs" disabled={costSummary.services.length === 0} asChild>
+            <Link prefetch={false} href={reportLink}>
+              <Sparkles className="h-3.5 w-3.5" />
+              AI 리포트
+            </Link>
+          </Button>
+        )}
       </div>
 
       <CostBudgetCard
