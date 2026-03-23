@@ -88,20 +88,14 @@ export async function POST(
     if (error) return serverError('조회 기록 실패');
   }
 
-  // view_count +1
+  // view_count +1 (RPC로 RLS 우회)
   const table = source === 'deploy' ? 'homepage_deploys' : 'projects';
-  const { data: current } = await supabase
-    .from(table)
-    .select('view_count')
-    .eq('id', id)
-    .maybeSingle();
-
-  if (current) {
-    await supabase
-      .from(table)
-      .update({ view_count: (current.view_count ?? 0) + 1 })
-      .eq('id', id);
-  }
+  await supabase.rpc('increment_showcase_counter', {
+    p_table: table,
+    p_id: id,
+    p_column: 'view_count',
+    p_delta: 1,
+  });
 
   return NextResponse.json({ recorded: true });
 }

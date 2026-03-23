@@ -113,18 +113,11 @@ async function updateLikeCount(
 ) {
   const table = source === 'deploy' ? 'homepage_deploys' : 'projects';
 
-  // 현재 카운트 조회 후 업데이트
-  const { data } = await supabase
-    .from(table)
-    .select('like_count')
-    .eq('id', showcaseId)
-    .maybeSingle();
-
-  if (data) {
-    const newCount = Math.max(0, (data.like_count ?? 0) + delta);
-    await supabase
-      .from(table)
-      .update({ like_count: newCount })
-      .eq('id', showcaseId);
-  }
+  // RPC로 RLS 우회하여 카운트 업데이트
+  await supabase.rpc('increment_showcase_counter', {
+    p_table: table,
+    p_id: showcaseId,
+    p_column: 'like_count',
+    p_delta: delta,
+  });
 }

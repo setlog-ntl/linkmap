@@ -33,20 +33,14 @@ export async function DELETE(
 
   if (error) return serverError('댓글 삭제 실패');
 
-  // 4. 댓글 수 감소
+  // 4. 댓글 수 감소 (RPC로 RLS 우회)
   const table = comment.showcase_source === 'deploy' ? 'homepage_deploys' : 'projects';
-  const { data: item } = await supabase
-    .from(table)
-    .select('comment_count')
-    .eq('id', id)
-    .maybeSingle();
-
-  if (item) {
-    await supabase
-      .from(table)
-      .update({ comment_count: Math.max(0, (item.comment_count ?? 0) - 1) })
-      .eq('id', id);
-  }
+  await supabase.rpc('increment_showcase_counter', {
+    p_table: table,
+    p_id: id,
+    p_column: 'comment_count',
+    p_delta: -1,
+  });
 
   return NextResponse.json({ success: true });
 }

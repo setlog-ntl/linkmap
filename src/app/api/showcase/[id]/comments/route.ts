@@ -16,6 +16,7 @@ export async function GET(
   const { id } = await params;
   const supabase = await createClient();
 
+  // profiles 조인 시도
   const { data: comments, error } = await supabase
     .from('showcase_comments')
     .select(`
@@ -35,12 +36,43 @@ export async function GET(
     .order('created_at', { ascending: true })
     .limit(100);
 
-  if (error) return serverError('댓글 조회 실패');
+  if (!error) {
+    const formatted = (comments || []).map((c) => {
+      const prof = Array.isArray(c.profiles) ? c.profiles[0] ?? null : c.profiles ?? null;
+      return { ...c, profiles: prof };
+    });
+    return NextResponse.json({ comments: formatted });
+  }
 
-  const formatted = (comments || []).map((c) => {
-    const prof = Array.isArray(c.profiles) ? c.profiles[0] ?? null : c.profiles ?? null;
-    return { ...c, profiles: prof };
-  });
+  // profiles 조인 실패 시 별도 조회 fallback
+  const { data: rawComments, error: rawError } = await supabase
+    .from('showcase_comments')
+    .select('id, showcase_id, showcase_source, user_id, content, created_at, updated_at')
+    .eq('showcase_id', id)
+    .order('created_at', { ascending: true })
+    .limit(100);
+
+  if (rawError) return serverError('댓글 조회 실패');
+
+  // user_id 목록으로 profiles 일괄 조회
+  const userIds = [...new Set((rawComments || []).map((c) => c.user_id))];
+  const profileMap = new Map<string, { name: string | null; avatar_url: string | null }>();
+
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, name, avatar_url')
+      .in('id', userIds);
+
+    for (const p of profiles || []) {
+      profileMap.set(p.id, { name: p.name, avatar_url: p.avatar_url });
+    }
+  }
+
+  const formatted = (rawComments || []).map((c) => ({
+    ...c,
+    profiles: profileMap.get(c.user_id) ?? null,
+  }));
 
   return NextResponse.json({ comments: formatted });
 }
@@ -73,38 +105,26 @@ export async function POST(
       user_id: user.id,
       content,
     })
-    .select(`
-      id,
-      showcase_id,
-      showcase_source,
-      user_id,
-      content,
-      created_at,
-      updated_at,
-      profiles:user_id (
-        name,
-        avatar_url
-      )
-    `)
+    .select('id, showcase_id, showcase_source, user_id, content, created_at, updated_at')
     .single();
 
   if (error) return serverError('댓글 작성 실패');
 
-  // 4. 댓글 수 증가
-  const table = source === 'deploy' ? 'homepage_deploys' : 'projects';
-  const { data: item } = await supabase
-    .from(table)
-    .select('comment_count')
-    .eq('id', id)
+  // 프로필 조회
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('name, avatar_url')
+    .eq('id', user.id)
     .maybeSingle();
 
-  if (item) {
-    await supabase
-      .from(table)
-      .update({ comment_count: (item.comment_count ?? 0) + 1 })
-      .eq('id', id);
-  }
+  // 4. 댓글 수 증가 (RPC로 RLS 우회)
+  const table = source === 'deploy' ? 'homepage_deploys' : 'projects';
+  await supabase.rpc('increment_showcase_counter', {
+    p_table: table,
+    p_id: id,
+    p_column: 'comment_count',
+    p_delta: 1,
+  });
 
-  const prof = Array.isArray(comment.profiles) ? comment.profiles[0] ?? null : comment.profiles ?? null;
-  return NextResponse.json({ ...comment, profiles: prof }, { status: 201 });
+  return NextResponse.json({ ...comment, profiles: profile ?? null }, { status: 201 });
 }
