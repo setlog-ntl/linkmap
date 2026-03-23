@@ -126,7 +126,8 @@ export type AuditAction =
   | 'env_var.raw_read'
   | 'env_var.raw_update'
   | 'project.share_toggle'
-  | 'zone_layout.upsert';
+  | 'zone_layout.upsert'
+  | 'admin.user_detail_view';
 
 interface AuditLogEntry {
   action: AuditAction;
