@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google AI Studio & Gemini API - 2026.03 업데이트 정리</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #8b5cf6;
+      --accent2: #38bdf8;
+      --green: #4ade80;
+      --orange: #fb923c;
+      --red: #f87171;
+      --blue: #60a5fa;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Pretendard Variable', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; padding: 2rem; max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    h2 { font-size: 1.4rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); color: var(--accent2); }
+    h3 { font-size: 1.1rem; margin: 1.2rem 0 0.6rem; color: var(--green); }
+    p, li { color: var(--muted); font-size: 0.92rem; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+    .badge-new { background: #4ade8022; color: var(--green); border: 1px solid #4ade8044; }
+    .badge-update { background: #fb923c22; color: var(--orange); border: 1px solid #fb923c44; }
+    .badge-deprecated { background: #f8717122; color: var(--red); border: 1px solid #f8717144; }
+    .badge-stable { background: #60a5fa22; color: var(--blue); border: 1px solid #60a5fa44; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; margin-bottom: 1rem; }
+    .card-highlight { border-color: var(--accent); box-shadow: 0 0 20px #8b5cf611; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+    th { background: #1e293b; color: var(--accent2); text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--border); }
+    td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--muted); }
+    tr:hover td { background: #ffffff06; }
+    code { background: #0f172a; padding: 2px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--green); font-family: 'Geist Mono', monospace; }
+    pre { background: #0f172a; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; overflow-x: auto; margin: 0.8rem 0; }
+    pre code { background: none; padding: 0; font-size: 0.82rem; line-height: 1.5; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .timeline-item { position: relative; padding-left: 1.5rem; margin-bottom: 1rem; }
+    .timeline-item::before { content: ''; position: absolute; left: 0; top: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .timeline-date { font-size: 0.78rem; color: var(--accent); font-weight: 600; }
+    .meta { font-size: 0.78rem; color: var(--muted); margin-bottom: 2rem; }
+    .tag { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 0.72rem; background: #ffffff08; color: var(--muted); margin: 2px; }
+    .summary-box { background: linear-gradient(135deg, #8b5cf611, #38bdf811); border: 1px solid var(--accent); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
+    .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .pros li::before { content: '+'; color: var(--green); font-weight: bold; margin-right: 6px; }
+    .cons li::before { content: '-'; color: var(--red); font-weight: bold; margin-right: 6px; }
+    ul { list-style: none; padding-left: 0; }
+    li { margin-bottom: 4px; }
+    @media (max-width: 640px) { .grid-2, .pros-cons { grid-template-columns: 1fr; } body { padding: 1rem; } }
+  </style>
+</head>
+<body>
+
+<h1>Google AI Studio & Gemini API</h1>
+<p class="meta">
+  lastUpdated: 2026-03-24 | Linkmap 서비스 가이드 업데이트 프리뷰
+  <br>
+  <span class="tag">ai</span><span class="tag">multimodal</span><span class="tag">google</span><span class="tag">llm</span><span class="tag">image-gen</span><span class="tag">video-gen</span><span class="tag">tts</span><span class="tag">grounding</span>
+</p>
+
+<!-- ============================== -->
+<h2>1. Google AI Studio란?</h2>
+<!-- ============================== -->
+<div class="card card-highlight">
+  <p>
+    <strong>Google AI Studio</strong>(<a href="https://aistudio.google.com" style="color:var(--accent2)">aistudio.google.com</a>)는
+    Google의 Gemini 모델 패밀리에 접근하기 위한 <strong>웹 기반 통합 개발 플랫폼</strong>입니다.
+  </p>
+  <br>
+  <p>2025~2026년 사이 단순한 "프롬프트 플레이그라운드"에서 <strong>풀스택 앱 빌더</strong>로 진화했습니다:</p>
+  <ul style="margin-top: 0.8rem;">
+    <li>- <strong>Build Mode</strong> (바이브 코딩): 자연어로 React 앱을 생성·배포</li>
+    <li>- <strong>Full-stack Runtime</strong>: 서버 사이드 로직, 시크릿 관리, npm 패키지 지원</li>
+    <li>- <strong>API 키 발급</strong>: 결제 수단 없이 무료 티어 즉시 사용 가능</li>
+    <li>- <strong>프로토타이핑</strong>: 모델 테스트, 프롬프트 엔지니어링, 코드 생성</li>
+    <li>- <strong>Prepay/Postpay 빌링</strong>: 2026년 3월부터 AI Studio 내 직접 결제 플랜 지원</li>
+  </ul>
+</div>
+
+<!-- ============================== -->
+<h2>2. 사용 가능한 모델 (2026년 3월 기준)</h2>
+<!-- ============================== -->
+
+<h3>Gemini 3 시리즈 <span class="badge badge-new">NEW</span></h3>
+<table>
+  <thead>
+    <tr><th>모델</th><th>상태</th><th>특징</th><th>입력 가격 (1M 토큰)</th><th>출력 가격 (1M 토큰)</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>gemini-3.1-pro-preview</code></td>
+      <td><span class="badge badge-new">Preview</span></td>
+      <td>최고 추론, 에이전트, 바이브 코딩</td>
+      <td>-</td>
+      <td>$12 (<=200K) / $18 (>200K)</td>
+    </tr>
+    <tr>
+      <td><code>gemini-3-flash-preview</code></td>
+      <td><span class="badge badge-new">Preview</span></td>
+      <td>프론티어급 성능, 저비용</td>
+      <td>$0.50 (텍스트) / $1.00 (오디오)</td>
+      <td>$3.00</td>
+    </tr>
+    <tr>
+      <td><code>gemini-3.1-flash-lite-preview</code></td>
+      <td><span class="badge badge-new">Preview</span></td>
+      <td>초경량, 고속</td>
+      <td>$0.25 (텍스트) / $0.50 (오디오)</td>
+      <td>$1.50</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Gemini 2.5 시리즈 <span class="badge badge-stable">Stable</span></h3>
+<table>
+  <thead>
+    <tr><th>모델</th><th>상태</th><th>특징</th><th>입력 가격 (1M 토큰)</th><th>출력 가격 (1M 토큰)</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>gemini-2.5-pro</code></td>
+      <td><span class="badge badge-stable">Stable</span></td>
+      <td>딥 리즈닝, 코딩, Adaptive Thinking</td>
+      <td>$1.25 (<=200K) / $2.50 (>200K)</td>
+      <td>$10 (<=200K) / $15 (>200K)</td>
+    </tr>
+    <tr>
+      <td><code>gemini-2.5-flash</code></td>
+      <td><span class="badge badge-stable">Stable</span></td>
+      <td>고성능 가성비, 추론 지원</td>
+      <td>$0.30 (텍스트) / $1.00 (오디오)</td>
+      <td>$2.50</td>
+    </tr>
+    <tr>
+      <td><code>gemini-2.5-flash-lite</code></td>
+      <td><span class="badge badge-stable">Stable</span></td>
+      <td>가장 빠르고 저렴한 2.5 모델</td>
+      <td>$0.10 (텍스트) / $0.30 (오디오)</td>
+      <td>$0.40</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>특수 모델</h3>
+<table>
+  <thead>
+    <tr><th>모델</th><th>용도</th><th>상태</th><th>가격</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>Imagen 4</code></td><td>이미지 생성 (최대 2K 해상도)</td><td><span class="badge badge-stable">Stable</span></td><td>$0.02~$0.06/이미지</td></tr>
+    <tr><td><code>Veo 3.1</code></td><td>시네마틱 비디오 생성</td><td><span class="badge badge-new">Preview</span></td><td>$0.15~$0.60/초</td></tr>
+    <tr><td><code>Lyria</code></td><td>음악 생성</td><td><span class="badge badge-update">Experimental</span></td><td>-</td></tr>
+    <tr><td><code>Gemini 2.5 Flash TTS</code></td><td>텍스트-투-스피치</td><td><span class="badge badge-new">Preview</span></td><td>출력 $10/1M 토큰</td></tr>
+    <tr><td><code>Gemini Embedding 2</code></td><td>멀티모달 임베딩</td><td><span class="badge badge-new">Preview</span></td><td>텍스트 $0.20/1M</td></tr>
+    <tr><td><code>Computer Use</code></td><td>UI 자동화 (클릭/타이핑/탐색)</td><td><span class="badge badge-new">Preview</span></td><td>-</td></tr>
+    <tr><td><code>Deep Research</code></td><td>에이전틱 멀티스텝 리서치</td><td><span class="badge badge-new">Preview</span></td><td>-</td></tr>
+  </tbody>
+</table>
+
+<h3>폐기 예정 모델 <span class="badge badge-deprecated">Deprecated</span></h3>
+<div class="card">
+  <ul>
+    <li>- <code>gemini-2.0-flash</code>, <code>gemini-2.0-flash-lite</code> → <strong>2026년 6월 1일 종료</strong></li>
+    <li>- <code>gemini-3-pro-preview</code> → 2026년 3월 9일 종료 (→ <code>gemini-3.1-pro-preview</code>로 자동 전환)</li>
+    <li>- <code>gemini-1.5-pro</code>, <code>gemini-1.5-flash</code> → 2025년 9월 29일 종료 완료</li>
+    <li>- <code>text-embedding-004</code> → 2026년 1월 14일 종료 완료</li>
+  </ul>
+</div>
+
+<!-- ============================== -->
+<h2>3. 주요 기능 업데이트 (2025~2026)</h2>
+<!-- ============================== -->
+
+<div class="grid-2">
+  <div class="card">
+    <h3>Grounding</h3>
+    <ul>
+      <li>- <strong>Google Search</strong>: 실시간 웹 정보 기반 응답 ($14/1,000쿼리, 무료 티어 있음)</li>
+      <li>- <strong>Google Maps</strong>: 위치 데이터 기반 응답 ($25/1,000프롬프트, Gemini 3 지원)</li>
+      <li>- <strong>URL Context</strong>: 특정 URL 내용 기반 응답 (GA)</li>
+      <li>- <strong>File Search</strong>: 커스텀 데이터 기반 응답 (Preview)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>코드 실행 & 멀티 툴</h3>
+    <ul>
+      <li>- Python 코드 직접 실행 (계산, 시각화, 데이터 처리)</li>
+      <li>- <strong>멀티 툴 사용</strong>: 코드 실행 + Google Search 동시 사용 가능</li>
+      <li>- 빌트인 툴 + 커스텀 Function Calling 조합 (2026.03)</li>
+      <li>- 비동기 Function Call (Live API)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>미디어 생성</h3>
+    <ul>
+      <li>- <strong>Imagen 4</strong>: 텍스트→이미지, 2K 해상도, 텍스트 렌더링 개선</li>
+      <li>- <strong>Veo 3.1</strong>: 비디오 생성, 4K 해상도, 오디오 포함, 이미지→비디오</li>
+      <li>- <strong>Lyria</strong>: 음악 생성 (실험적)</li>
+      <li>- <strong>네이티브 이미지 생성</strong>: Gemini 모델 자체에서 이미지 생성/편집</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>실시간 & 음성</h3>
+    <ul>
+      <li>- <strong>Live API</strong>: 서브초 네이티브 오디오 스트리밍</li>
+      <li>- <strong>TTS</strong>: 스타일·페이싱 세밀 제어, 대화 핸들링</li>
+      <li>- <strong>STT</strong>: 음성 활동 감지, 중단 처리</li>
+      <li>- 텍스트 스트리밍 + 토큰 사용량 리포팅</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>에이전트 기능</h3>
+    <ul>
+      <li>- <strong>Computer Use</strong>: 화면 보고 UI 작업 수행 (클릭/타이핑/탐색)</li>
+      <li>- <strong>Deep Research</strong>: 수백 개 소스에서 멀티스텝 자율 리서치</li>
+      <li>- <strong>Robotics</strong>: 물리 공간 이해 및 멀티스텝 태스크 계획</li>
+      <li>- ADK (Agent Development Kit) 연동</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>개발자 도구</h3>
+    <ul>
+      <li>- <strong>Batch API</strong>: 비동기 대량 처리, 50% 비용 절감</li>
+      <li>- <strong>Context Caching</strong>: 반복 컨텍스트 비용 절감</li>
+      <li>- <strong>OpenAI 호환 API</strong>: 기존 OpenAI SDK로 Gemini 호출 가능</li>
+      <li>- <strong>Logging & Datasets</strong>: API 로그 수집 및 데이터셋 관리</li>
+      <li>- 파일 크기 제한 100MB로 확대 (기존 20MB)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================== -->
+<h2>4. SDK 정보</h2>
+<!-- ============================== -->
+<div class="card">
+  <table>
+    <thead>
+      <tr><th>패키지</th><th>상태</th><th>최신 버전</th><th>비고</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>@google/genai</code></td>
+        <td><span class="badge badge-stable">GA (권장)</span></td>
+        <td>v1.46.0</td>
+        <td>AI Studio + Vertex AI 통합 SDK. npm 1,374개 프로젝트 사용 중</td>
+      </tr>
+      <tr>
+        <td><code>@google/generative-ai</code></td>
+        <td><span class="badge badge-deprecated">Deprecated</span></td>
+        <td>-</td>
+        <td>구버전. 신규 프로젝트에서 사용 금지, @google/genai로 마이그레이션 필수</td>
+      </tr>
+      <tr>
+        <td><code>google-genai</code> (Python)</td>
+        <td><span class="badge badge-stable">GA</span></td>
+        <td>-</td>
+        <td>Python 통합 SDK</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ============================== -->
+<h2>5. 무료 티어 & 가격 비교</h2>
+<!-- ============================== -->
+<div class="summary-box">
+  <h3 style="color: var(--accent2); margin-top:0;">무료 티어 (AI Studio)</h3>
+  <p>모든 모델에 무료 티어 제공 — <strong>결제 수단 등록 불필요</strong></p>
+  <ul style="margin-top: 0.5rem;">
+    <li>- Gemini 2.5 Flash: RPM 제한 내 무료 사용</li>
+    <li>- Gemini 2.5 Pro: RPM 제한 내 무료 사용</li>
+    <li>- Gemini 3 시리즈: 무료 티어 제공</li>
+    <li>- 주의: 무료 티어 데이터는 모델 개선에 사용될 수 있음</li>
+  </ul>
+</div>
+
+<h3>경쟁사 가격 비교 (2026.03 기준)</h3>
+<table>
+  <thead>
+    <tr><th>모델</th><th>제공사</th><th>입력 (1M 토큰)</th><th>출력 (1M 토큰)</th><th>컨텍스트</th><th>무료 티어</th></tr>
+  </thead>
+  <tbody>
+    <tr style="background: #4ade8008;"><td><strong>Gemini 2.5 Flash-Lite</strong></td><td>Google</td><td>$0.10</td><td>$0.40</td><td>1M</td><td>O</td></tr>
+    <tr><td>Gemini 2.5 Flash</td><td>Google</td><td>$0.30</td><td>$2.50</td><td>1M</td><td>O</td></tr>
+    <tr><td>Gemini 2.5 Pro</td><td>Google</td><td>$1.25</td><td>$10.00</td><td>1M</td><td>O</td></tr>
+    <tr><td>Gemini 3 Flash</td><td>Google</td><td>$0.50</td><td>$3.00</td><td>-</td><td>O</td></tr>
+    <tr><td>Gemini 3.1 Pro</td><td>Google</td><td>-</td><td>$12~18</td><td>-</td><td>제한적</td></tr>
+    <tr style="border-top: 2px solid var(--border);"><td>GPT-4o</td><td>OpenAI</td><td>$2.50</td><td>$10.00</td><td>128K</td><td>X</td></tr>
+    <tr><td>GPT-4o mini</td><td>OpenAI</td><td>$0.15</td><td>$0.60</td><td>128K</td><td>X</td></tr>
+    <tr><td>Claude Sonnet 4</td><td>Anthropic</td><td>$3.00</td><td>$15.00</td><td>200K</td><td>X</td></tr>
+    <tr><td>Claude Haiku 3.5</td><td>Anthropic</td><td>$0.80</td><td>$4.00</td><td>200K</td><td>X</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================== -->
+<h2>6. 빠른 시작 (Quick Start)</h2>
+<!-- ============================== -->
+<div class="card">
+  <h3 style="margin-top: 0;">Step 1. SDK 설치</h3>
+  <pre><code>npm install @google/genai</code></pre>
+
+  <h3>Step 2. API 키 설정</h3>
+  <pre><code># .env.local
+GEMINI_API_KEY=AIza...</code></pre>
+  <p style="font-size: 0.82rem;">API 키는 <a href="https://aistudio.google.com/app/apikey" style="color: var(--accent2);">Google AI Studio</a>에서 무료 발급</p>
+
+  <h3>Step 3. 기본 사용 (TypeScript)</h3>
+  <pre><code>import { GoogleGenAI } from '@google/genai';
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+// 텍스트 생성 (Gemini 2.5 Flash 추천)
+const response = await ai.models.generateContent({
+  model: 'gemini-2.5-flash',
+  contents: '양자 컴퓨팅을 쉽게 설명해줘.',
+});
+console.log(response.text);
+
+// 멀티모달: 이미지 + 텍스트
+const vision = await ai.models.generateContent({
+  model: 'gemini-2.5-flash',
+  contents: [
+    { inlineData: { mimeType: 'image/jpeg', data: base64ImageData } },
+    '이 이미지에서 보이는 것을 설명해줘.',
+  ],
+});
+
+// 채팅 세션 (상태 유지)
+const chat = ai.chats.create({ model: 'gemini-2.5-flash' });
+const reply = await chat.sendMessage({ message: '2+2는?' });
+console.log(reply.text);</code></pre>
+
+  <h3>Step 4. 스트리밍 (Next.js API Route)</h3>
+  <pre><code>import { GoogleGenAI } from '@google/genai';
+import { NextRequest } from 'next/server';
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+
+export async function POST(req: NextRequest) {
+  const { message } = await req.json();
+
+  const stream = await ai.models.generateContentStream({
+    model: 'gemini-2.5-flash',
+    contents: message,
+  });
+
+  const encoder = new TextEncoder();
+  const readable = new ReadableStream({
+    async start(controller) {
+      for await (const chunk of stream) {
+        const text = chunk.text ?? '';
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
+      }
+      controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+      controller.close();
+    },
+  });
+
+  return new Response(readable, {
+    headers: { 'Content-Type': 'text/event-stream' },
+  });
+}</code></pre>
+</div>
+
+<!-- ============================== -->
+<h2>7. 주의사항 & 팁</h2>
+<!-- ============================== -->
+<div class="pros-cons">
+  <div class="card">
+    <h3 style="margin-top:0; color: var(--green);">장점 (Pros)</h3>
+    <ul class="pros">
+      <li>결제 수단 없이 사용 가능한 넉넉한 무료 플랜</li>
+      <li>텍스트·이미지·오디오·비디오·PDF 네이티브 멀티모달</li>
+      <li>최대 1M 토큰 초장문 컨텍스트 (2.5 Pro)</li>
+      <li>이미지/비디오/음악 생성까지 단일 API로 통합</li>
+      <li>OpenAI 호환 API로 기존 코드 마이그레이션 용이</li>
+      <li>Batch API로 대량 처리 시 50% 비용 절감</li>
+      <li>Build Mode로 코딩 없이 앱 프로토타이핑 가능</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0; color: var(--red);">단점 (Cons)</h3>
+    <ul class="cons">
+      <li>높은 토큰 사용량 시 종량제 비용이 빠르게 증가</li>
+      <li>API 인터페이스가 자주 변경 — 모델 lifecycle 주의 필요</li>
+      <li>무료 티어 데이터가 모델 개선에 사용될 수 있음</li>
+      <li>Gemini 3 시리즈는 아직 Preview — 프로덕션 사용 시 주의</li>
+      <li>일부 지역에서 기능 제한 (성인 콘텐츠 생성 등)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0;">Common Pitfalls</h3>
+  <table>
+    <thead>
+      <tr><th>문제</th><th>해결</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>구버전 <code>@google/generative-ai</code> 사용</td>
+        <td><code>@google/genai</code>으로 마이그레이션. import를 <code>GoogleGenAI</code>로 변경</td>
+      </tr>
+      <tr>
+        <td>폐기된 <code>gemini-2.0-flash</code> 모델 사용</td>
+        <td>2026.06.01 종료 예정. <code>gemini-2.5-flash</code> 또는 <code>gemini-3-flash-preview</code>로 전환</td>
+      </tr>
+      <tr>
+        <td>브라우저에서 직접 API 호출</td>
+        <td>API 키 노출 위험. 프로덕션에서는 반드시 서버 프록시 사용</td>
+      </tr>
+      <tr>
+        <td>무료 티어 속도 제한 초과</td>
+        <td>요청 큐잉/캐싱 구현. 프로덕션은 Pay-as-you-go 전환</td>
+      </tr>
+      <tr>
+        <td>Grounding 비용 미인지</td>
+        <td>Google Search grounding은 별도 과금 ($14/1,000쿼리). 필요한 요청에만 활성화</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ============================== -->
+<h2>8. 최근 타임라인 (2026.01~03)</h2>
+<!-- ============================== -->
+<div class="card">
+  <div class="timeline-item">
+    <div class="timeline-date">2026.03.23</div>
+    <p>Prepay/Postpay 빌링 플랜 롤아웃</p>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-date">2026.03.19</div>
+    <p>AI Studio UI 대규모 개편 + OpenAI 호환 <code>gemini-3-pro-image-preview</code> 지원</p>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-date">2026.03.18</div>
+    <p>빌트인 툴 + Function Calling 동시 사용 지원, Maps grounding Gemini 3 확장</p>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-date">2026.03.10</div>
+    <p>멀티모달 임베딩 모델 <code>gemini-embedding-2-preview</code> 출시</p>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-date">2026.03.03</div>
+    <p>Gemini 3.1 Flash-Lite Preview 출시</p>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-date">2026.02.19</div>
+    <p>Gemini 3.1 Pro Preview 출시 (향상된 추론 + 멀티모달)</p>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-date">2026.02.18</div>
+    <p>Gemini 2.0 Flash/Flash-Lite 폐기 예고 (2026.06.01 종료)</p>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-date">2026.01.29</div>
+    <p>Computer Use 도구 Gemini 3 Pro/Flash 지원</p>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-date">2026.01.08</div>
+    <p>Cloud Storage 버킷/Pre-signed URL 입력 지원, 파일 크기 100MB 확대</p>
+  </div>
+</div>
+
+<!-- ============================== -->
+<h2>9. Linkmap 서비스 항목 변경사항</h2>
+<!-- ============================== -->
+<div class="card card-highlight">
+  <h3 style="margin-top:0; color: var(--accent);">업데이트 예정 파일</h3>
+  <table>
+    <thead>
+      <tr><th>파일</th><th>변경 내용</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>services.ts</code></td>
+        <td>
+          - SDK URL: <code>@google/generative-ai</code> → <code>@google/genai</code><br>
+          - description 업데이트 (이미지/비디오 생성 포함)<br>
+          - free_tier_details 현행화<br>
+          - tags에 image-gen, video-gen, tts, grounding 추가
+        </td>
+      </tr>
+      <tr>
+        <td><code>service-guides-batch3.ts</code></td>
+        <td>
+          - 코드 예제 모델: <code>gemini-2.0-flash</code> → <code>gemini-2.5-flash</code><br>
+          - 새 pitfall 추가 (폐기 모델, Grounding 비용)<br>
+          - pros/cons 확장 (이미지/비디오 생성, Batch API, OpenAI 호환)<br>
+          - 임베딩 모델: <code>text-embedding-004</code> → <code>gemini-embedding-001</code>
+        </td>
+      </tr>
+      <tr>
+        <td><code>ai-api-content.tsx</code></td>
+        <td>
+          - pricingTable: Gemini 2.0 Flash → 2.5 Flash-Lite 교체<br>
+          - 스트리밍 예제 모델 업데이트<br>
+          - 무료 티어 설명 현행화
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p style="text-align: center; margin-top: 3rem; color: var(--muted); font-size: 0.8rem;">
+  Generated for Linkmap | 2026-03-24 | Sources: ai.google.dev, npmjs.com, androidsage.com
+</p>
+
+</body>
+</html>

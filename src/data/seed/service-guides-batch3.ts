@@ -192,7 +192,7 @@ GEMINI_API_KEY=AIza...`,
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const response = await ai.models.generateContent({
-  model: 'gemini-2.0-flash',
+  model: 'gemini-2.5-flash',
   contents: 'Explain machine learning in simple terms.',
 });
 console.log(response.text);`,
@@ -203,16 +203,16 @@ console.log(response.text);`,
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// Text generation
+// Text generation (Gemini 2.5 Flash — best price-performance)
 const text = await ai.models.generateContent({
-  model: 'gemini-2.0-flash',
+  model: 'gemini-2.5-flash',
   contents: 'Write a one-paragraph summary of quantum computing.',
 });
 console.log(text.text);
 
 // Multimodal: image + text
 const vision = await ai.models.generateContent({
-  model: 'gemini-2.0-flash',
+  model: 'gemini-2.5-flash',
   contents: [
     { inlineData: { mimeType: 'image/jpeg', data: base64ImageData } },
     'Describe what you see in this image.',
@@ -221,9 +221,18 @@ const vision = await ai.models.generateContent({
 console.log(vision.text);
 
 // Chat session (stateful)
-const chat = ai.chats.create({ model: 'gemini-2.0-flash' });
+const chat = ai.chats.create({ model: 'gemini-2.5-flash' });
 const reply = await chat.sendMessage({ message: 'What is 2+2?' });
-console.log(reply.text);`,
+console.log(reply.text);
+
+// Streaming
+const stream = await ai.models.generateContentStream({
+  model: 'gemini-2.5-flash',
+  contents: 'Tell me a story.',
+});
+for await (const chunk of stream) {
+  process.stdout.write(chunk.text ?? '');
+}`,
     },
     common_pitfalls: [
       {
@@ -248,6 +257,22 @@ import { GoogleGenAI } from '@google/genai';`,
         problem: 'Free tier has strict RPM/RPD limits that are easy to hit during development',
         solution: 'Implement request queuing or caching for repeated identical prompts. Upgrade to pay-as-you-go for production.',
       },
+      {
+        title: 'Using deprecated gemini-2.0-flash model',
+        title_ko: '폐기 예정 gemini-2.0-flash 모델 사용',
+        problem: 'gemini-2.0-flash and gemini-2.0-flash-lite are deprecated and will shut down on June 1, 2026',
+        solution: 'Migrate to gemini-2.5-flash (stable) or gemini-3-flash-preview for new projects.',
+        code: `// Deprecated — shuts down 2026-06-01
+model: 'gemini-2.0-flash'
+// Recommended replacement
+model: 'gemini-2.5-flash'`,
+      },
+      {
+        title: 'Unexpected grounding costs',
+        title_ko: 'Grounding 비용 미인지',
+        problem: 'Google Search grounding is billed separately at $14/1,000 queries after free tier',
+        solution: 'Only enable grounding when real-time web data is needed. Monitor usage in AI Studio billing dashboard.',
+      },
     ],
     integration_tips: [
       {
@@ -255,14 +280,14 @@ import { GoogleGenAI } from '@google/genai';`,
         tip: 'Use @langchain/google-genai package to integrate Gemini into LangChain pipelines, supporting chat, embeddings, and structured output',
         tip_ko: '@langchain/google-genai 패키지로 Gemini를 LangChain 파이프라인에 통합 — 채팅, 임베딩, 구조화 출력 지원',
         code: `import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-const model = new ChatGoogleGenerativeAI({ model: 'gemini-2.0-flash' });`,
+const model = new ChatGoogleGenerativeAI({ model: 'gemini-2.5-flash' });`,
       },
       {
         with_service_slug: 'pinecone',
-        tip: 'Use Gemini text-embedding-004 to generate embeddings and store in Pinecone for semantic search and RAG applications',
-        tip_ko: 'Gemini text-embedding-004으로 임베딩을 생성하고 Pinecone에 저장하여 의미 검색·RAG 구현',
+        tip: 'Use gemini-embedding-001 to generate embeddings and store in Pinecone for semantic search and RAG applications',
+        tip_ko: 'gemini-embedding-001로 임베딩을 생성하고 Pinecone에 저장하여 의미 검색·RAG 구현',
         code: `const embeddingResult = await ai.models.embedContent({
-  model: 'text-embedding-004',
+  model: 'gemini-embedding-001',
   contents: 'Your text here',
 });
 const vector = embeddingResult.embeddings[0].values;`,
@@ -271,11 +296,17 @@ const vector = embeddingResult.embeddings[0].values;`,
     pros: [
       { text: 'Generous free tier with no credit card required (AI Studio)', text_ko: '결제 수단 없이 사용 가능한 넉넉한 무료 플랜 (AI Studio)' },
       { text: 'Native multimodal support (text, image, audio, video, PDF)', text_ko: '텍스트·이미지·오디오·비디오·PDF 네이티브 멀티모달 지원' },
-      { text: 'Extremely long context window (up to 1M tokens on Gemini 1.5 Pro)', text_ko: '최대 100만 토큰 초장문 컨텍스트 (Gemini 1.5 Pro)' },
+      { text: 'Up to 1M token context window (Gemini 2.5 Pro)', text_ko: '최대 100만 토큰 초장문 컨텍스트 (Gemini 2.5 Pro)' },
+      { text: 'Image/video/music generation via single API (Imagen 4, Veo 3.1, Lyria)', text_ko: '이미지/비디오/음악 생성을 단일 API로 통합 (Imagen 4, Veo 3.1, Lyria)' },
+      { text: 'OpenAI-compatible API endpoint for easy migration', text_ko: 'OpenAI 호환 API 엔드포인트로 기존 코드 마이그레이션 용이' },
+      { text: 'Batch API offers 50% cost reduction for bulk processing', text_ko: 'Batch API로 대량 처리 시 50% 비용 절감' },
+      { text: 'Build Mode enables vibe coding — create apps with natural language', text_ko: 'Build Mode로 자연어만으로 앱 프로토타이핑 가능' },
     ],
     cons: [
       { text: 'Pay-as-you-go pricing can escalate quickly with high token usage', text_ko: '높은 토큰 사용량 시 종량제 비용이 빠르게 증가' },
-      { text: 'API surface changes frequently — older SDK versions may break', text_ko: 'API 인터페이스가 자주 변경되어 구버전 SDK가 깨질 수 있음' },
+      { text: 'API surface and model lifecycle change frequently — monitor changelog', text_ko: 'API 인터페이스와 모델 수명주기가 자주 변경 — changelog 모니터링 필수' },
+      { text: 'Free tier data may be used to improve Google products', text_ko: '무료 티어 데이터가 Google 제품 개선에 사용될 수 있음' },
+      { text: 'Gemini 3 series still in Preview — not recommended for production', text_ko: 'Gemini 3 시리즈 아직 Preview — 프로덕션 사용 시 주의' },
     ],
     api_key_url: 'https://aistudio.google.com/app/apikey',
     api_key_url_label: 'Google AI Studio',

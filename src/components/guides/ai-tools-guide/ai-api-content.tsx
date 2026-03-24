@@ -35,7 +35,7 @@ const apiKeySteps = [
       'aistudio.google.com 접속 → Google 계정 로그인',
       '"Get API key" → "Create API key" 클릭',
       '키를 복사해 .env.local에 저장: GEMINI_API_KEY=AI...',
-      '무료 티어 제공 (분당 15회, 일 1,500회 요청)',
+      '모든 모델 무료 티어 제공 (RPM 제한, 결제 수단 불필요)',
     ],
     envKey: 'GEMINI_API_KEY',
     color: 'border-blue-200 dark:border-blue-800',
@@ -48,8 +48,8 @@ const pricingTable = [
   { model: 'Claude Sonnet 4', provider: 'Anthropic', input: '$3', output: '$15', context: '200K', badge: '코딩 추천' },
   { model: 'Claude Haiku 3.5', provider: 'Anthropic', input: '$0.80', output: '$4', context: '200K', badge: '가성비' },
   { model: 'Gemini 2.5 Pro', provider: 'Google', input: '$1.25', output: '$10', context: '1M', badge: '고성능' },
-  { model: 'Gemini 2.5 Flash', provider: 'Google', input: '$0.15', output: '$0.60', context: '1M', badge: '가성비' },
-  { model: 'Gemini 2.0 Flash', provider: 'Google', input: '무료 티어', output: '무료 티어', context: '1M', badge: '입문 추천' },
+  { model: 'Gemini 2.5 Flash', provider: 'Google', input: '$0.30', output: '$2.50', context: '1M', badge: '범용 추천' },
+  { model: 'Gemini 2.5 Flash-Lite', provider: 'Google', input: '$0.10', output: '$0.40', context: '1M', badge: '가성비+무료' },
 ];
 
 const streamingExamples = {
@@ -117,23 +117,33 @@ export async function POST(req: NextRequest) {
     label: 'Google Gemini',
     file: 'src/app/api/chat/route.ts',
     code: `import { NextRequest } from 'next/server';
+import { GoogleGenAI } from '@google/genai';
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
 export async function POST(req: NextRequest) {
   const { message } = await req.json();
-  const apiKey = process.env.GEMINI_API_KEY;
 
-  const response = await fetch(
-    \`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=\${apiKey}\`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: message }] }],
-      }),
+  const stream = await ai.models.generateContentStream({
+    model: 'gemini-2.5-flash',
+    contents: message,
+  });
+
+  const encoder = new TextEncoder();
+  const readable = new ReadableStream({
+    async start(controller) {
+      for await (const chunk of stream) {
+        const text = chunk.text ?? '';
+        controller.enqueue(
+          encoder.encode(\`data: \${JSON.stringify({ text })}\\n\\n\`),
+        );
+      }
+      controller.enqueue(encoder.encode('data: [DONE]\\n\\n'));
+      controller.close();
     },
-  );
+  });
 
-  return new Response(response.body, {
+  return new Response(readable, {
     headers: { 'Content-Type': 'text/event-stream' },
   });
 }`,
@@ -165,7 +175,7 @@ const costTips = [
   },
   {
     title: '무료 티어 활용',
-    desc: 'Gemini API는 분당 15회, 일 1,500회까지 무료입니다. 프로토타입이나 학습 단계에서 적극 활용하세요.',
+    desc: 'Gemini API는 모든 모델에 무료 티어를 제공합니다. 결제 수단 없이 바로 시작 가능 — 프로토타입이나 학습에 적극 활용하세요.',
     icon: '🎁',
   },
 ];

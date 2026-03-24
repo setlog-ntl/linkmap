@@ -29,7 +29,7 @@ export const SERVICE_DESCRIPTIONS: Record<string, string> = {
   'aws-s3': 'AWS 객체 스토리지 — 대용량 파일 저장',
   github: '코드 호스팅·협업·CI/CD — Git 플랫폼',
   'claude-code': 'Claude 기반 AI 코딩 어시스턴트 CLI',
-  'google-gemini': 'Google 멀티모달 AI 모델 API',
+  'google-gemini': 'Google 멀티모달 AI 플랫폼 — 텍스트·이미지·비디오 생성 & 이해',
   'kakao-login': '카카오계정 소셜 로그인 — 한국 최다 사용',
   'google-oauth': 'Google 계정 기반 OAuth 인증',
   'naver-login': '네이버 계정 소셜 로그인',

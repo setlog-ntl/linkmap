@@ -1536,15 +1536,15 @@ export const services: ServiceSeed[] = [
     dashboard_layer: 'devtools',
     dashboard_subcategory: 'ai',
     description:
-      'Google\'s multimodal AI model family supporting text, image, audio, and video understanding with generous free tier and competitive pricing.',
+      'Google\'s multimodal AI platform supporting text, image, audio, video understanding and generation (Imagen 4, Veo 3.1, TTS) with generous free tier, grounding, and competitive pricing.',
     description_ko:
-      'Google의 멀티모달 AI 모델로, 텍스트·이미지·오디오·비디오를 이해하며 넉넉한 무료 티어와 경쟁력 있는 가격을 제공합니다.',
+      'Google의 멀티모달 AI 플랫폼으로, 텍스트·이미지·오디오·비디오 이해 및 생성(Imagen 4, Veo 3.1, TTS)을 지원하며 넉넉한 무료 티어, 그라운딩, 경쟁력 있는 가격을 제공합니다.',
     icon_url: null,
     website_url: 'https://ai.google.dev',
     docs_url: 'https://ai.google.dev/docs',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'Free: 15 RPM, 1,500 일일 요청, 1M 토큰 컨텍스트',
+      free_tier_details: 'Free: 모든 모델 무료 티어 제공 (RPM 제한), 결제 수단 불필요, 최대 1M 토큰 컨텍스트',
       plans: [
         { name: 'Free', price: '$0/월' },
         { name: 'Pay-as-you-go', price: '사용량 기반' },
@@ -1562,13 +1562,13 @@ export const services: ServiceSeed[] = [
     subcategory: 'multimodal_ai',
     popularity_score: 85,
     difficulty_level: 'beginner',
-    tags: ['ai', 'multimodal', 'google', 'llm', 'vision', 'gemini', '제미나이'],
+    tags: ['ai', 'multimodal', 'google', 'llm', 'vision', 'gemini', '제미나이', 'image-gen', 'video-gen', 'tts', 'grounding'],
     alternatives: ['openai', 'anthropic'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'express', 'flask', 'django'],
       language: ['typescript', 'javascript', 'python', 'go', 'java', 'kotlin', 'swift'],
     },
-    official_sdks: { npm: 'https://www.npmjs.com/package/@google/generative-ai' },
+    official_sdks: { npm: 'https://www.npmjs.com/package/@google/genai' },
     free_tier_quality: 'excellent',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 5,
