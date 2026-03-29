@@ -1,9 +1,17 @@
 'use client';
 
-import { useMemo } from 'react';
-import { Check, X, Loader2, Plus } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Check, X, Loader2, Plus, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import {
   Command,
   CommandInput,
@@ -43,12 +51,24 @@ export function CatalogSidebar({
   const { catalogSidebarOpen, setCatalogSidebarOpen } = useServiceMapStore();
   const addService = useAddProjectService(projectId);
 
+  const [instanceDialog, setInstanceDialog] = useState<{ serviceId: string; serviceName: string } | null>(null);
+  const [instanceLabel, setInstanceLabel] = useState('');
+
   const addedServiceIds = useMemo(
     () => new Set(projectServices.map((ps) => ps.service_id)),
     [projectServices]
   );
 
-  // 글로벌 서비스: easyCategory별 그룹핑
+  // 서비스별 등록된 인스턴스 수
+  const serviceInstanceCount = useMemo(() => {
+    const counts = new Map<string, number>();
+    projectServices.forEach((ps) => {
+      counts.set(ps.service_id, (counts.get(ps.service_id) || 0) + 1);
+    });
+    return counts;
+  }, [projectServices]);
+
+  // 글로벌 서비스: easyCategory��� 그룹핑
   const grouped = useMemo(() => {
     const groups: Record<EasyCategory, Service[]> = {} as Record<EasyCategory, Service[]>;
     for (const cat of EASY_CATEGORY_ORDER) {
@@ -69,19 +89,33 @@ export function CatalogSidebar({
     [catalogServices]
   );
 
-  const handleAddService = (serviceId: string) => {
-    if (addedServiceIds.has(serviceId) || addService.isPending) return;
+  const handleAddService = (serviceId: string, serviceName: string) => {
+    if (addService.isPending) return;
+    // 이미 추가된 서비스면 인스턴스 라벨 입력 다이얼로그 표시
+    if (addedServiceIds.has(serviceId)) {
+      setInstanceDialog({ serviceId, serviceName });
+      setInstanceLabel('');
+      return;
+    }
     addService.mutate(serviceId);
+  };
+
+  const handleAddInstance = () => {
+    if (!instanceDialog || !instanceLabel.trim() || addService.isPending) return;
+    addService.mutate(
+      { serviceId: instanceDialog.serviceId, instanceLabel: instanceLabel.trim() },
+      { onSuccess: () => setInstanceDialog(null) }
+    );
   };
 
   const renderServiceItem = (svc: Service) => {
     const isAdded = addedServiceIds.has(svc.id);
+    const count = serviceInstanceCount.get(svc.id) || 0;
     return (
       <CommandItem
         key={svc.id}
         value={`${svc.name} ${svc.description_ko || svc.description || ''}`}
-        onSelect={() => handleAddService(svc.id)}
-        disabled={isAdded}
+        onSelect={() => handleAddService(svc.id, svc.name)}
         className="flex items-center gap-2"
       >
         <ServiceIcon serviceId={svc.slug} iconEmoji={svc.icon_emoji} size={16} />
@@ -94,7 +128,13 @@ export function CatalogSidebar({
           )}
         </div>
         {isAdded && (
-          <Check className="h-4 w-4 text-green-500 shrink-0" />
+          <div className="flex items-center gap-1 shrink-0">
+            {count > 1 && (
+              <span className="text-[10px] text-muted-foreground">{count}개</span>
+            )}
+            <Check className="h-4 w-4 text-green-500" />
+            <Copy className="h-3 w-3 text-muted-foreground" />
+          </div>
         )}
       </CommandItem>
     );
@@ -172,6 +212,39 @@ export function CatalogSidebar({
           </Command>
         </motion.div>
       )}
+
+      {/* 인스턴스 라벨 입력 다이얼로그 */}
+      <Dialog open={!!instanceDialog} onOpenChange={(open) => !open && setInstanceDialog(null)}>
+        <DialogContent className="sm:max-w-[360px]">
+          <DialogHeader>
+            <DialogTitle>{instanceDialog?.serviceName} 인스턴스 추가</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              같은 서비스를 구분할 별칭을 입력하세요.
+            </p>
+            <Input
+              placeholder="예: 메인 DB, 분석용 DB"
+              value={instanceLabel}
+              onChange={(e) => setInstanceLabel(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddInstance()}
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setInstanceDialog(null)}>
+              취소
+            </Button>
+            <Button
+              onClick={handleAddInstance}
+              disabled={!instanceLabel.trim() || addService.isPending}
+            >
+              {addService.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+              추가
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AnimatePresence>
   );
 }

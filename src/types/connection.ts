@@ -8,6 +8,8 @@ export interface UserConnection {
   project_id: string;
   source_service_id: string;
   target_service_id: string;
+  source_ps_id?: string | null;
+  target_ps_id?: string | null;
   connection_type: UserConnectionType;
   connection_status: ConnectionStatus;
   environment?: ConnectionEnvironment;

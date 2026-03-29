@@ -88,13 +88,25 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
     [dependencies]
   );
 
-  const serviceIdToNodeId = useMemo(() => {
-    const map = new Map<string, string>();
+  // service_id → node_id(s) 매핑 (다중 인스턴스 지원: 1:N)
+  const serviceIdToNodeIds = useMemo(() => {
+    const map = new Map<string, string[]>();
     filteredServices.forEach((ps) => {
-      map.set(ps.service_id, ps.id);
+      const existing = map.get(ps.service_id) || [];
+      existing.push(ps.id);
+      map.set(ps.service_id, existing);
     });
     return map;
   }, [filteredServices]);
+
+  // 하위 호환: 단일 매핑 (첫 번째 인스턴스 반환)
+  const serviceIdToNodeId = useMemo(() => {
+    const map = new Map<string, string>();
+    serviceIdToNodeIds.forEach((nodeIds, serviceId) => {
+      map.set(serviceId, nodeIds[0]);
+    });
+    return map;
+  }, [serviceIdToNodeIds]);
 
   // nodeId → service_id lookup
   const nodeIdToServiceId = useMemo(() => {
@@ -143,12 +155,16 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
       const isMatch = nameMatch && statusMatch;
       const isMainService = mainServiceId === ps.id;
 
+      // 다중 인스턴스일 때 라벨에 instance_label 표시
+      const baseName = ps.service?.name || 'Unknown';
+      const displayLabel = ps.instance_label ? `${baseName} (${ps.instance_label})` : baseName;
+
       return {
         id: ps.id,
         type: 'service',
         position: { x: 0, y: 0 },
         data: {
-          label: ps.service?.name || 'Unknown',
+          label: displayLabel,
           category,
           status: ps.status,
           slug: ps.service?.slug,
@@ -165,29 +181,31 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
   const rawEdges = useMemo<Edge[]>(() => {
     const edges: Edge[] = [];
 
-    // Dependency edges
+    // Dependency edges (다중 인스턴스: 모든 source 인스턴스 → 모든 target 인스턴스)
     relevantDependencies.forEach((dep) => {
-      const sourceNodeId = serviceIdToNodeId.get(dep.service_id);
-      const targetNodeId = serviceIdToNodeId.get(dep.depends_on_service_id);
-      if (sourceNodeId && targetNodeId) {
-        edges.push({
-          id: `dep-${dep.id}`,
-          source: sourceNodeId,
-          target: targetNodeId,
-          type: 'connection',
-          data: {
-            connectionType: dep.dependency_type as DependencyType,
-            sourceName: serviceNames[dep.service_id],
-            targetName: serviceNames[dep.depends_on_service_id],
-          },
-        });
+      const sourceNodeIds = serviceIdToNodeIds.get(dep.service_id) || [];
+      const targetNodeIds = serviceIdToNodeIds.get(dep.depends_on_service_id) || [];
+      for (const srcId of sourceNodeIds) {
+        for (const tgtId of targetNodeIds) {
+          edges.push({
+            id: `dep-${dep.id}-${srcId}-${tgtId}`,
+            source: srcId,
+            target: tgtId,
+            type: 'connection',
+            data: {
+              connectionType: dep.dependency_type as DependencyType,
+              sourceName: serviceNames[dep.service_id],
+              targetName: serviceNames[dep.depends_on_service_id],
+            },
+          });
+        }
       }
     });
 
-    // User connection edges
+    // User connection edges (ps_id 우선, 없으면 service_id 폴백)
     userConnections.forEach((conn) => {
-      const sourceNodeId = serviceIdToNodeId.get(conn.source_service_id);
-      const targetNodeId = serviceIdToNodeId.get(conn.target_service_id);
+      const sourceNodeId = conn.source_ps_id || serviceIdToNodeId.get(conn.source_service_id);
+      const targetNodeId = conn.target_ps_id || serviceIdToNodeId.get(conn.target_service_id);
       if (sourceNodeId && targetNodeId) {
         edges.push({
           id: `uc-${conn.id}`,
@@ -225,7 +243,7 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
     }
 
     return edges;
-  }, [relevantDependencies, userConnections, serviceIdToNodeId, handleDeleteUserConnection, serviceNames]);
+  }, [relevantDependencies, userConnections, serviceIdToNodeIds, serviceIdToNodeId, handleDeleteUserConnection, serviceNames]);
 
   return {
     serviceNodes,

@@ -6,6 +6,7 @@ export interface ServiceCredential {
   id: string;
   project_id: string;
   service_id: string | null;
+  project_service_id?: string | null;
   label: string;
   encrypted_username: string;
   encrypted_password: string | null;

@@ -19,13 +19,15 @@ export const createConnectionSchema = z.object({
   project_id: z.string().uuid('유효하지 않은 프로젝트 ID'),
   source_service_id: z.string().uuid('유효하지 않은 소스 서비스 ID'),
   target_service_id: z.string().uuid('유효하지 않은 타겟 서비스 ID'),
+  source_ps_id: z.string().uuid().nullable().optional(),
+  target_ps_id: z.string().uuid().nullable().optional(),
   connection_type: connectionTypeEnum,
   connection_status: connectionStatusEnum.optional().default('active'),
   environment: connectionEnvironmentEnum.optional().default('all'),
   label: z.string().max(100).nullable().optional(),
   description: z.string().max(500).nullable().optional(),
-}).refine((data) => data.source_service_id !== data.target_service_id, {
-  message: '소스와 타겟 서비스가 같을 수 없습니다',
+}).refine((data) => data.source_service_id !== data.target_service_id || (data.source_ps_id && data.target_ps_id && data.source_ps_id !== data.target_ps_id), {
+  message: '소스와 타겟이 같을 수 없습니다',
   path: ['target_service_id'],
 });
 

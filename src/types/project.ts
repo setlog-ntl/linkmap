@@ -36,6 +36,7 @@ export interface ProjectService {
   id: string;
   project_id: string;
   service_id: string;
+  instance_label?: string | null;
   status: ServiceStatus;
   notes: string | null;
   account_identifier: string | null;

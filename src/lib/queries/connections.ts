@@ -30,6 +30,8 @@ interface CreateConnectionParams {
   project_id: string;
   source_service_id: string;
   target_service_id: string;
+  source_ps_id?: string | null;
+  target_ps_id?: string | null;
   connection_type: UserConnectionType;
   connection_status?: ConnectionStatus;
   environment?: string;
@@ -64,6 +66,8 @@ export function useCreateConnection(projectId: string) {
         project_id: params.project_id,
         source_service_id: params.source_service_id,
         target_service_id: params.target_service_id,
+        source_ps_id: params.source_ps_id ?? null,
+        target_ps_id: params.target_ps_id ?? null,
         connection_type: params.connection_type,
         connection_status: params.connection_status ?? 'active',
         environment: (params.environment as UserConnection['environment']) ?? 'all',

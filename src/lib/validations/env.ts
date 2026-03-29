@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const createEnvVarSchema = z.object({
   project_id: z.string().uuid('유효하지 않은 프로젝트 ID'),
   service_id: z.string().uuid().nullable().optional(),
+  project_service_id: z.string().uuid().nullable().optional(),
   key_name: z
     .string()
     .min(1, '변수 이름은 필수입니다')
@@ -27,6 +28,7 @@ export const updateEnvVarSchema = z.object({
   is_secret: z.boolean().optional(),
   description: z.string().max(500).nullable().optional(),
   service_id: z.string().uuid().nullable().optional(),
+  project_service_id: z.string().uuid().nullable().optional(),
 });
 
 export const syncEnvServicesSchema = z.object({

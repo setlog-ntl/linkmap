@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
   const parsed = createEnvVarSchema.safeParse(body);
   if (!parsed.success) return validationError(parsed.error);
 
-  const { project_id, service_id, key_name, value, environment, is_secret, description } = parsed.data;
+  const { project_id, service_id, project_service_id, key_name, value, environment, is_secret, description } = parsed.data;
 
   const { data: project } = await supabase
     .from('projects')
@@ -39,11 +39,25 @@ export async function POST(request: NextRequest) {
   const { exactMap, prefixMap } = await buildServiceMapsFromDB(supabase);
   const resolvedServiceId = resolveServiceId(key_name, service_id, exactMap, prefixMap);
 
+  // project_service_id 자동 해석: 명시적 지정이 없으면, 해당 서비스 인스턴스가 1개일 때 자동 할당
+  let resolvedPsId = project_service_id ?? null;
+  if (!resolvedPsId && resolvedServiceId) {
+    const { data: instances } = await supabase
+      .from('project_services')
+      .select('id')
+      .eq('project_id', project_id)
+      .eq('service_id', resolvedServiceId);
+    if (instances?.length === 1) {
+      resolvedPsId = instances[0].id;
+    }
+  }
+
   const { data, error } = await supabase
     .from('environment_variables')
     .insert({
       project_id,
       service_id: resolvedServiceId,
+      project_service_id: resolvedPsId,
       key_name,
       encrypted_value,
       environment,

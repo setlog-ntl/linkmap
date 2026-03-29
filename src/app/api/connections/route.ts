@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
   const parsed = createConnectionSchema.safeParse(body);
   if (!parsed.success) return validationError(parsed.error);
 
-  const { project_id, source_service_id, target_service_id, connection_type, connection_status, environment, label, description } = parsed.data;
+  const { project_id, source_service_id, target_service_id, source_ps_id, target_ps_id, connection_type, connection_status, environment, label, description } = parsed.data;
 
   // Verify project ownership
   const { data: project } = await supabase
@@ -62,6 +62,8 @@ export async function POST(request: NextRequest) {
       project_id,
       source_service_id,
       target_service_id,
+      source_ps_id: source_ps_id ?? null,
+      target_ps_id: target_ps_id ?? null,
       connection_type,
       connection_status: connection_status ?? 'active',
       environment: environment ?? 'all',

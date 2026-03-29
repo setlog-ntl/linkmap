@@ -6,6 +6,7 @@ export interface ServiceAccount {
   id: string;
   project_id: string | null;
   service_id: string;
+  project_service_id?: string | null;
   user_id: string;
   connection_type: ServiceAccountConnectionType;
   // OAuth fields (encrypted, not returned to client)

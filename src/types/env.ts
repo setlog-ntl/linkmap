@@ -4,6 +4,7 @@ export interface EnvironmentVariable {
   id: string;
   project_id: string;
   service_id: string | null;
+  project_service_id?: string | null;
   key_name: string;
   encrypted_value: string;
   environment: Environment;

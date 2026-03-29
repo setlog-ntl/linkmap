@@ -153,6 +153,31 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
     return map;
   }, [services, catalogServices]);
 
+  // 인스턴스 기반 서비스 옵션 (연결 생성 셀렉트용)
+  // ps.id → { service_id, displayName, slug }
+  const instanceOptions = useMemo(() => {
+    if (!services) return [];
+    // service_id별 인스턴스 수 계산
+    const countMap = new Map<string, number>();
+    services.forEach((ps) => countMap.set(ps.service_id, (countMap.get(ps.service_id) || 0) + 1));
+
+    return services.map((ps) => {
+      const baseName = ps.service?.name || '알 수 없는 서비스';
+      const hasMultiple = (countMap.get(ps.service_id) || 0) > 1;
+      const displayName = hasMultiple && ps.instance_label
+        ? `${baseName} (${ps.instance_label})`
+        : hasMultiple
+          ? `${baseName} #${services.filter(s => s.service_id === ps.service_id).indexOf(ps) + 1}`
+          : baseName;
+      return {
+        psId: ps.id,
+        serviceId: ps.service_id,
+        displayName,
+        slug: ps.service?.slug || '',
+      };
+    });
+  }, [services]);
+
   const getServiceName = useCallback((id: string) => serviceMap.get(id) ?? '알 수 없는 서비스', [serviceMap]);
 
   // Status summary counts
@@ -181,11 +206,16 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
 
   const handleCreate = () => {
     if (!newSource || !newTarget || newSource === newTarget) return;
+    // newSource/newTarget은 ps.id (인스턴스 ID)
+    const srcOpt = instanceOptions.find((o) => o.psId === newSource);
+    const tgtOpt = instanceOptions.find((o) => o.psId === newTarget);
     createMutation.mutate(
       {
         project_id: projectId,
-        source_service_id: newSource,
-        target_service_id: newTarget,
+        source_service_id: srcOpt?.serviceId || newSource,
+        target_service_id: tgtOpt?.serviceId || newTarget,
+        source_ps_id: newSource,
+        target_ps_id: newTarget,
         connection_type: newType,
         environment: newEnv,
       },
@@ -323,11 +353,11 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
                     <SelectValue placeholder="선택..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {[...serviceMap.entries()].map(([id, name]) => (
-                      <SelectItem key={id} value={id} className="text-sm">
+                    {instanceOptions.map((opt) => (
+                      <SelectItem key={opt.psId} value={opt.psId} className="text-sm">
                         <span className="flex items-center gap-2">
-                          {serviceSlugMap.has(id) && <ServiceIcon serviceId={serviceSlugMap.get(id)!} size={14} />}
-                          {name}
+                          {opt.slug && <ServiceIcon serviceId={opt.slug} size={14} />}
+                          {opt.displayName}
                         </span>
                       </SelectItem>
                     ))}
@@ -341,11 +371,11 @@ export function ConnectionsContent({ projectId }: ConnectionsContentProps) {
                     <SelectValue placeholder="선택..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {[...serviceMap.entries()].map(([id, name]) => (
-                      <SelectItem key={id} value={id} className="text-sm">
+                    {instanceOptions.map((opt) => (
+                      <SelectItem key={opt.psId} value={opt.psId} className="text-sm">
                         <span className="flex items-center gap-2">
-                          {serviceSlugMap.has(id) && <ServiceIcon serviceId={serviceSlugMap.get(id)!} size={14} />}
-                          {name}
+                          {opt.slug && <ServiceIcon serviceId={opt.slug} size={14} />}
+                          {opt.displayName}
                         </span>
                       </SelectItem>
                     ))}

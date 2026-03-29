@@ -186,12 +186,15 @@ export function useAddProjectService(projectId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (serviceId: string) => {
+    mutationFn: async (params: string | { serviceId: string; instanceLabel?: string }) => {
+      const serviceId = typeof params === 'string' ? params : params.serviceId;
+      const instanceLabel = typeof params === 'string' ? null : (params.instanceLabel ?? null);
       const supabase = createClient();
       const { error } = await supabase.from('project_services').insert({
         project_id: projectId,
         service_id: serviceId,
         status: 'not_started',
+        instance_label: instanceLabel,
       });
       if (error) throw error;
     },
