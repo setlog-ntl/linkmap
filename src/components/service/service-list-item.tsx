@@ -270,8 +270,16 @@ function AddToProjectItem({
 }) {
   const addService = useAddProjectService(projectId);
 
+  const [showLabelInput, setShowLabelInput] = useState(false);
+  const [instanceLabel, setInstanceLabel] = useState('');
+
   const handleAdd = () => {
-    if (alreadyAdded || isAdding) return;
+    if (isAdding) return;
+    // 이미 추가된 서비스: 인스턴스 라벨 입력
+    if (alreadyAdded) {
+      setShowLabelInput(true);
+      return;
+    }
     onAddStart();
     addService.mutate(serviceId, {
       onSuccess: () => {
@@ -285,10 +293,64 @@ function AddToProjectItem({
     });
   };
 
+  const handleAddInstance = () => {
+    if (!instanceLabel.trim() || isAdding) return;
+    onAddStart();
+    addService.mutate(
+      { serviceId, instanceLabel: instanceLabel.trim() },
+      {
+        onSuccess: () => {
+          toast.success(`${serviceName} (${instanceLabel.trim()})을(를) "${projectName}"에 추가했습니다`);
+          setShowLabelInput(false);
+          setInstanceLabel('');
+          onAddEnd();
+        },
+        onError: () => {
+          toast.error('서비스 추가에 실패했습니다');
+          onAddEnd();
+        },
+      }
+    );
+  };
+
+  if (showLabelInput) {
+    return (
+      <div className="px-2.5 py-1.5 space-y-1.5">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <FolderKanban className="h-3 w-3" />
+          <span className="truncate">{projectName}</span>
+        </div>
+        <div className="flex gap-1.5">
+          <input
+            className="flex-1 text-xs px-2 py-1 rounded border bg-background min-w-0"
+            placeholder="별칭 (예: 메인 DB)"
+            value={instanceLabel}
+            onChange={(e) => setInstanceLabel(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAddInstance()}
+            autoFocus
+          />
+          <button
+            onClick={handleAddInstance}
+            disabled={!instanceLabel.trim()}
+            className="text-xs px-2 py-1 rounded bg-primary text-primary-foreground disabled:opacity-50"
+          >
+            추가
+          </button>
+          <button
+            onClick={() => { setShowLabelInput(false); setInstanceLabel(''); }}
+            className="text-xs px-1.5 py-1 rounded text-muted-foreground hover:bg-accent"
+          >
+            취소
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <button
       onClick={handleAdd}
-      disabled={alreadyAdded || isAdding}
+      disabled={isAdding}
       className="w-full flex items-center gap-2 px-2.5 py-2 rounded-md text-sm hover:bg-accent disabled:cursor-default transition-colors group/item"
     >
       {isFavorited ? (
@@ -298,9 +360,9 @@ function AddToProjectItem({
       )}
       <span className="flex-1 text-left truncate">{projectName}</span>
       {alreadyAdded ? (
-        <span className="flex items-center gap-1 text-[11px] text-green-600 shrink-0">
-          <Check className="h-3.5 w-3.5" />
-          추가됨
+        <span className="flex items-center gap-1 text-[11px] text-brand-blue shrink-0">
+          <Plus className="h-3 w-3" />
+          인스턴스 추가
         </span>
       ) : isAdding ? (
         <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0 text-muted-foreground" />

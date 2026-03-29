@@ -46,7 +46,7 @@ const categoryLabels: Partial<Record<ServiceCategory, string>> = {
 interface AddServiceDialogProps {
   projectId: string;
   existingServiceIds: string[];
-  onAdd: (serviceId: string) => Promise<void>;
+  onAdd: (serviceId: string, instanceLabel?: string) => Promise<void>;
 }
 
 export function AddServiceDialog({ projectId: _projectId, existingServiceIds, onAdd }: AddServiceDialogProps) {
@@ -57,6 +57,8 @@ export function AddServiceDialog({ projectId: _projectId, existingServiceIds, on
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | 'all'>('all');
   const [loading, setLoading] = useState(false);
   const [adding, setAdding] = useState<string | null>(null);
+  const [instanceDialog, setInstanceDialog] = useState<{ serviceId: string; serviceName: string } | null>(null);
+  const [instanceLabel, setInstanceLabel] = useState('');
   const deleteMutation = useDeleteCustomService();
   const { data: matches } = useCustomServiceMatches(open);
   const migrateMutation = useMigrateCustomService();
@@ -102,7 +104,6 @@ export function AddServiceDialog({ projectId: _projectId, existingServiceIds, on
 
   const { globalServices, customServices } = useMemo(() => {
     const filtered = services.filter((s) => {
-      if (existingServiceIds.includes(s.id)) return false;
       if (selectedCategory !== 'all' && s.category !== selectedCategory) return false;
       if (search) {
         const q = search.toLowerCase();
@@ -120,10 +121,27 @@ export function AddServiceDialog({ projectId: _projectId, existingServiceIds, on
     };
   }, [services, existingServiceIds, selectedCategory, search]);
 
-  const handleAdd = async (serviceId: string) => {
+  const handleAdd = async (serviceId: string, serviceName?: string) => {
+    // 이미 추가된 서비스면 인스턴스 라벨 입력 다이얼로그 표시
+    if (existingServiceIds.includes(serviceId)) {
+      setInstanceDialog({ serviceId, serviceName: serviceName || serviceId });
+      setInstanceLabel('');
+      return;
+    }
     setAdding(serviceId);
     try {
       await onAdd(serviceId);
+    } finally {
+      setAdding(null);
+    }
+  };
+
+  const handleAddInstance = async () => {
+    if (!instanceDialog || !instanceLabel.trim()) return;
+    setAdding(instanceDialog.serviceId);
+    try {
+      await onAdd(instanceDialog.serviceId, instanceLabel.trim());
+      setInstanceDialog(null);
     } finally {
       setAdding(null);
     }
@@ -231,10 +249,11 @@ export function AddServiceDialog({ projectId: _projectId, existingServiceIds, on
         )}
         <Button
           size="sm"
-          onClick={() => handleAdd(service.id)}
+          variant={existingServiceIds.includes(service.id) ? 'outline' : 'default'}
+          onClick={() => handleAdd(service.id, service.name)}
           disabled={adding === service.id}
         >
-          {adding === service.id ? '추가 중...' : '추가'}
+          {adding === service.id ? '추가 중...' : existingServiceIds.includes(service.id) ? '인스턴스 추가' : '추가'}
         </Button>
       </div>
     </div>
@@ -332,6 +351,31 @@ export function AddServiceDialog({ projectId: _projectId, existingServiceIds, on
           </ScrollArea>
         </div>
       </DialogContent>
+
+      {/* 인스턴스 라벨 입력 다이얼로그 */}
+      <Dialog open={!!instanceDialog} onOpenChange={(v) => !v && setInstanceDialog(null)}>
+        <DialogContent className="sm:max-w-[360px]">
+          <DialogHeader>
+            <DialogTitle>{instanceDialog?.serviceName} 인스턴스 추가</DialogTitle>
+            <DialogDescription>
+              같은 서비스를 구분할 별칭을 입력하세요.
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            placeholder="예: 메인 DB, 분석용 DB"
+            value={instanceLabel}
+            onChange={(e) => setInstanceLabel(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAddInstance()}
+            autoFocus
+          />
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setInstanceDialog(null)}>취소</Button>
+            <Button onClick={handleAddInstance} disabled={!instanceLabel.trim() || adding === instanceDialog?.serviceId}>
+              {adding === instanceDialog?.serviceId ? '추가 중...' : '추가'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }

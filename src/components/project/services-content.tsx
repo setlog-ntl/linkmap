@@ -335,8 +335,12 @@ export function ServicesContent({ projectId }: ServicesContentProps) {
     return groups;
   }, [filteredServices, viewMode]);
 
-  const handleAddService = async (serviceId: string) => {
-    await addService.mutateAsync(serviceId);
+  const handleAddService = async (serviceId: string, instanceLabel?: string) => {
+    if (instanceLabel) {
+      await addService.mutateAsync({ serviceId, instanceLabel });
+    } else {
+      await addService.mutateAsync(serviceId);
+    }
   };
 
   const handleRemoveService = async (projectServiceId: string) => {
