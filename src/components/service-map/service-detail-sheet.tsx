@@ -31,7 +31,7 @@ import { queryKeys } from '@/lib/queries/keys';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { useUpdateProjectServiceAccount } from '@/lib/queries/services';
+import { useUpdateProjectServiceAccount, useUpdateProjectServiceNotes } from '@/lib/queries/services';
 import { cn } from '@/lib/utils';
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
@@ -248,6 +248,18 @@ export function ServiceDetailSheet({
                   projectId={projectId}
                   currentValue={service.account_identifier}
                 />
+              )}
+
+              {/* 용도/목적 */}
+              {projectId && (
+                <>
+                  <Separator />
+                  <SheetNotesField
+                    projectServiceId={service.id}
+                    projectId={projectId}
+                    currentValue={service.notes}
+                  />
+                </>
               )}
 
               {/* 링크 */}
@@ -903,6 +915,68 @@ function SheetCodeBlock({ code }: { code: string }) {
       >
         {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
       </Button>
+    </div>
+  );
+}
+
+function SheetNotesField({ projectServiceId, projectId, currentValue }: {
+  projectServiceId: string;
+  projectId: string;
+  currentValue: string | null;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [value, setValue] = useState(currentValue || '');
+  const updateNotes = useUpdateProjectServiceNotes(projectId);
+
+  const handleSave = useCallback(() => {
+    const trimmed = value.trim();
+    setIsEditing(false);
+    updateNotes.mutate(
+      { projectServiceId, notes: trimmed || null },
+      {
+        onSuccess: () => toast.success('용도가 저장되었습니다'),
+        onError: (err) => {
+          toast.error(`저장 실패: ${err.message}`);
+          setValue(currentValue || '');
+        },
+      },
+    );
+  }, [value, projectServiceId, updateNotes, currentValue]);
+
+  return (
+    <div>
+      <h4 className="text-sm font-medium mb-2">용도</h4>
+      {isEditing ? (
+        <div className="space-y-1.5">
+          <Input
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="이 서비스의 용도를 입력하세요"
+            className="h-8 text-xs"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSave();
+              if (e.key === 'Escape') { setValue(currentValue || ''); setIsEditing(false); }
+            }}
+          />
+          <div className="flex gap-1.5">
+            <Button size="sm" variant="default" className="h-6 text-xs" onClick={handleSave}>저장</Button>
+            <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { setValue(currentValue || ''); setIsEditing(false); }}>취소</Button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => setIsEditing(true)}
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-full text-left group"
+        >
+          {currentValue ? (
+            <span className="text-foreground">{currentValue}</span>
+          ) : (
+            <span className="italic">용도를 입력하세요</span>
+          )}
+          <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+        </button>
+      )}
     </div>
   );
 }

@@ -151,6 +151,11 @@ function ServiceAccordionItem({
             <p className="text-xs text-muted-foreground truncate">
               {ps.service?.description_ko || ps.service?.description}
             </p>
+            {ps.notes && (
+              <p className="text-[11px] text-brand-blue mt-0.5 truncate">
+                {ps.notes}
+              </p>
+            )}
             {ps.account_identifier ? (
               <span className="inline-flex items-center gap-1 mt-1 font-mono text-[11px] text-foreground bg-muted border rounded px-1.5 py-0.5 group/acct">
                 <User className="h-3 w-3 shrink-0" />
@@ -335,9 +340,9 @@ export function ServicesContent({ projectId }: ServicesContentProps) {
     return groups;
   }, [filteredServices, viewMode]);
 
-  const handleAddService = async (serviceId: string, instanceLabel?: string) => {
-    if (instanceLabel) {
-      await addService.mutateAsync({ serviceId, instanceLabel });
+  const handleAddService = async (serviceId: string, instanceLabel?: string, notes?: string) => {
+    if (instanceLabel || notes) {
+      await addService.mutateAsync({ serviceId, instanceLabel, notes });
     } else {
       await addService.mutateAsync(serviceId);
     }

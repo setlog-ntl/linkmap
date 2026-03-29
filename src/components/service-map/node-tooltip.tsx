@@ -16,6 +16,7 @@ interface NodeTooltipProps {
   domain?: string;
   category?: string;
   description?: string;
+  notes?: string;
   isMainService?: boolean;
   envFilled?: number;
   envTotal?: number;
@@ -29,7 +30,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
   error:       { label: '오류',    color: 'text-red-500' },
 };
 
-export function NodeTooltip({ children, label, status, domain, category, description, isMainService, envFilled, envTotal, lastHealthCheck }: NodeTooltipProps) {
+export function NodeTooltip({ children, label, status, domain, category, description, notes, isMainService, envFilled, envTotal, lastHealthCheck }: NodeTooltipProps) {
   const statusInfo = statusLabels[status] || statusLabels.not_started;
   const categoryLabel = category ? allCategoryLabels[category as ServiceCategory] : undefined;
   const domainLabel = domain ? domainLabels[domain as ServiceDomain] : undefined;
@@ -48,6 +49,12 @@ export function NodeTooltip({ children, label, status, domain, category, descrip
 
         {description && (
           <p className="text-[10px] text-muted-foreground/80 leading-relaxed">{description}</p>
+        )}
+
+        {notes && (
+          <p className="text-[10px] text-brand-blue leading-relaxed">
+            <span className="text-muted-foreground">용도:</span> {notes}
+          </p>
         )}
 
         {/* Info rows */}

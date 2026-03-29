@@ -46,7 +46,7 @@ const categoryLabels: Partial<Record<ServiceCategory, string>> = {
 interface AddServiceDialogProps {
   projectId: string;
   existingServiceIds: string[];
-  onAdd: (serviceId: string, instanceLabel?: string) => Promise<void>;
+  onAdd: (serviceId: string, instanceLabel?: string, notes?: string) => Promise<void>;
 }
 
 export function AddServiceDialog({ projectId: _projectId, existingServiceIds, onAdd }: AddServiceDialogProps) {
@@ -59,6 +59,7 @@ export function AddServiceDialog({ projectId: _projectId, existingServiceIds, on
   const [adding, setAdding] = useState<string | null>(null);
   const [instanceDialog, setInstanceDialog] = useState<{ serviceId: string; serviceName: string } | null>(null);
   const [instanceLabel, setInstanceLabel] = useState('');
+  const [instanceNotes, setInstanceNotes] = useState('');
   const deleteMutation = useDeleteCustomService();
   const { data: matches } = useCustomServiceMatches(open);
   const migrateMutation = useMigrateCustomService();
@@ -126,6 +127,7 @@ export function AddServiceDialog({ projectId: _projectId, existingServiceIds, on
     if (existingServiceIds.includes(serviceId)) {
       setInstanceDialog({ serviceId, serviceName: serviceName || serviceId });
       setInstanceLabel('');
+      setInstanceNotes('');
       return;
     }
     setAdding(serviceId);
@@ -140,7 +142,7 @@ export function AddServiceDialog({ projectId: _projectId, existingServiceIds, on
     if (!instanceDialog || !instanceLabel.trim()) return;
     setAdding(instanceDialog.serviceId);
     try {
-      await onAdd(instanceDialog.serviceId, instanceLabel.trim());
+      await onAdd(instanceDialog.serviceId, instanceLabel.trim(), instanceNotes.trim() || undefined);
       setInstanceDialog(null);
     } finally {
       setAdding(null);
@@ -361,13 +363,27 @@ export function AddServiceDialog({ projectId: _projectId, existingServiceIds, on
               같은 서비스를 구분할 별칭을 입력하세요.
             </DialogDescription>
           </DialogHeader>
-          <Input
-            placeholder="예: 메인 DB, 분석용 DB"
-            value={instanceLabel}
-            onChange={(e) => setInstanceLabel(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAddInstance()}
-            autoFocus
-          />
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">별칭</label>
+              <Input
+                placeholder="예: 메인 DB, 분석용 DB"
+                value={instanceLabel}
+                onChange={(e) => setInstanceLabel(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddInstance()}
+                autoFocus
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">용도 <span className="text-muted-foreground/60">(선택)</span></label>
+              <Input
+                placeholder="예: 사용자 인증 및 데이터 저장"
+                value={instanceNotes}
+                onChange={(e) => setInstanceNotes(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddInstance()}
+              />
+            </div>
+          </div>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setInstanceDialog(null)}>취소</Button>
             <Button onClick={handleAddInstance} disabled={!instanceLabel.trim() || adding === instanceDialog?.serviceId}>

@@ -169,6 +169,7 @@ export function useServiceMapNodes(params: UseServiceMapNodesParams): UseService
           status: ps.status,
           slug: ps.service?.slug,
           description: ps.service?.description_ko || ps.service?.description || (ps.service?.slug ? getServiceDescription(ps.service.slug) : undefined),
+          notes: ps.notes || undefined,
           highlighted: isMatch,
           domain: domain || 'integration',
           isMainService,

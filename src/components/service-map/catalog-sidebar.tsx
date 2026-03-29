@@ -53,6 +53,7 @@ export function CatalogSidebar({
 
   const [instanceDialog, setInstanceDialog] = useState<{ serviceId: string; serviceName: string } | null>(null);
   const [instanceLabel, setInstanceLabel] = useState('');
+  const [instanceNotes, setInstanceNotes] = useState('');
 
   const addedServiceIds = useMemo(
     () => new Set(projectServices.map((ps) => ps.service_id)),
@@ -95,6 +96,7 @@ export function CatalogSidebar({
     if (addedServiceIds.has(serviceId)) {
       setInstanceDialog({ serviceId, serviceName });
       setInstanceLabel('');
+      setInstanceNotes('');
       return;
     }
     addService.mutate(serviceId);
@@ -103,7 +105,11 @@ export function CatalogSidebar({
   const handleAddInstance = () => {
     if (!instanceDialog || !instanceLabel.trim() || addService.isPending) return;
     addService.mutate(
-      { serviceId: instanceDialog.serviceId, instanceLabel: instanceLabel.trim() },
+      {
+        serviceId: instanceDialog.serviceId,
+        instanceLabel: instanceLabel.trim(),
+        notes: instanceNotes.trim() || undefined,
+      },
       { onSuccess: () => setInstanceDialog(null) }
     );
   };
@@ -219,17 +225,29 @@ export function CatalogSidebar({
           <DialogHeader>
             <DialogTitle>{instanceDialog?.serviceName} 인스턴스 추가</DialogTitle>
           </DialogHeader>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
               같은 서비스를 구분할 별칭을 입력하세요.
             </p>
-            <Input
-              placeholder="예: 메인 DB, 분석용 DB"
-              value={instanceLabel}
-              onChange={(e) => setInstanceLabel(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddInstance()}
-              autoFocus
-            />
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">별칭</label>
+              <Input
+                placeholder="예: 메인 DB, 분석용 DB"
+                value={instanceLabel}
+                onChange={(e) => setInstanceLabel(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddInstance()}
+                autoFocus
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">용도 <span className="text-muted-foreground/60">(선택)</span></label>
+              <Input
+                placeholder="예: 사용자 인증 및 데이터 저장"
+                value={instanceNotes}
+                onChange={(e) => setInstanceNotes(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddInstance()}
+              />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setInstanceDialog(null)}>

@@ -186,15 +186,17 @@ export function useAddProjectService(projectId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: string | { serviceId: string; instanceLabel?: string }) => {
+    mutationFn: async (params: string | { serviceId: string; instanceLabel?: string; notes?: string }) => {
       const serviceId = typeof params === 'string' ? params : params.serviceId;
       const instanceLabel = typeof params === 'string' ? null : (params.instanceLabel ?? null);
+      const notes = typeof params === 'string' ? null : (params.notes ?? null);
       const supabase = createClient();
       const { error } = await supabase.from('project_services').insert({
         project_id: projectId,
         service_id: serviceId,
         status: 'not_started',
         instance_label: instanceLabel,
+        notes,
       });
       if (error) throw error;
     },
@@ -239,6 +241,27 @@ export function useUpdateProjectServiceAccount(projectId: string) {
         .single();
       if (error) throw error;
       if (!data) throw new Error('업데이트 권한이 없거나 대상을 찾을 수 없습니다');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.services.byProject(projectId) });
+    },
+  });
+}
+
+export function useUpdateProjectServiceNotes(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ projectServiceId, notes }: {
+      projectServiceId: string;
+      notes: string | null;
+    }) => {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from('project_services')
+        .update({ notes })
+        .eq('id', projectServiceId);
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.services.byProject(projectId) });

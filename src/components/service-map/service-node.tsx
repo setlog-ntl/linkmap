@@ -268,7 +268,7 @@ function ServiceNode({ id, data }: NodeProps) {
   );
 
   return (
-    <NodeTooltip label={d.label} status={d.status} domain={d.domain} category={d.category} description={d.description} isMainService={isMain}>
+    <NodeTooltip label={d.label} status={d.status} domain={d.domain} category={d.category} description={d.description} notes={d.notes as string | undefined} isMainService={isMain}>
       {nodeContent}
     </NodeTooltip>
   );
