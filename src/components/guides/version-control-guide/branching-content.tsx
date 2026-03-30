@@ -65,6 +65,8 @@ const namingConventions = [
 export function BranchingContent() {
   return (
     <div className="py-8 space-y-12">
+      <h1 className="text-3xl md:text-4xl font-bold">브랜치 전략</h1>
+
       {/* 전략 비교 */}
       <ScrollReveal>
         <h2 className="text-2xl md:text-3xl font-bold mb-3">브랜치 전략 3가지 비교</h2>

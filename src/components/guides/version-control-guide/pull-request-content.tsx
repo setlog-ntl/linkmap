@@ -57,6 +57,8 @@ const goodPrTips = [
 export function PullRequestContent() {
   return (
     <div className="py-8 space-y-12">
+      <h1 className="text-3xl md:text-4xl font-bold">PR과 코드 리뷰</h1>
+
       {/* PR이란? */}
       <ScrollReveal>
         <h2 className="text-2xl md:text-3xl font-bold mb-3">Pull Request란?</h2>

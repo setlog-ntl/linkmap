@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linkmap QA 개선 기획</title>
+  <style>
+    :root {
+      --brand-blue: #2563eb;
+      --brand-green: #10b981;
+      --brand-blue-light: #dbeafe;
+      --brand-green-light: #d1fae5;
+      --critical: #dc2626;
+      --critical-bg: #fef2f2;
+      --warning: #f59e0b;
+      --warning-bg: #fffbeb;
+      --info: #6b7280;
+      --info-bg: #f9fafb;
+      --bg: #ffffff;
+      --bg-subtle: #f8fafc;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --size-s: #3b82f6;
+      --size-m: #f59e0b;
+      --size-l: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text);
+      background: var(--bg-subtle);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+      color: white;
+      padding: 2.5rem 2rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+    }
+    .header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .header .meta {
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+
+    /* Summary Cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .summary-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .summary-card .number {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .summary-card .label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+    .summary-card.critical .number { color: var(--critical); }
+    .summary-card.warning .number { color: var(--warning); }
+    .summary-card.pass .number { color: var(--brand-green); }
+    .summary-card.total .number { color: var(--brand-blue); }
+
+    /* Sections */
+    .section {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 1.25rem;
+      overflow: hidden;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .section-header:hover {
+      background: var(--bg-subtle);
+    }
+    .section-header h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section-header .priority-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+    .p0 .priority-badge { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .p1 .priority-badge { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+    .p2 .priority-badge { background: var(--brand-blue-light); color: var(--brand-blue); border: 1px solid #bfdbfe; }
+    .p3 .priority-badge { background: var(--bg-subtle); color: var(--text-muted); border: 1px solid var(--border); }
+
+    .section-header .chevron {
+      font-size: 1.2rem;
+      transition: transform 0.2s;
+      color: var(--text-muted);
+    }
+    .section.collapsed .chevron {
+      transform: rotate(-90deg);
+    }
+    .section.collapsed .section-body {
+      display: none;
+    }
+    .section-body {
+      padding: 0 1.5rem 1.5rem;
+    }
+
+    /* Issue Cards */
+    .issue-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      background: var(--bg-subtle);
+    }
+    .issue-card:last-child { margin-bottom: 0; }
+    .issue-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .issue-card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+    .tag-group {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.1rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .tag.severity-critical { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .tag.severity-warning { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+    .tag.size-s { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+    .tag.size-m { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+    .tag.size-l { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .tag.area {
+      background: var(--brand-green-light);
+      color: #059669;
+      border: 1px solid #a7f3d0;
+    }
+
+    .issue-detail {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+    .issue-detail strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .issue-action {
+      font-size: 0.85rem;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.6rem 0.8rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Timeline */
+    .timeline-section {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .timeline-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+    }
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0.5rem;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(to bottom, var(--critical), var(--warning), var(--brand-blue), var(--brand-green));
+      border-radius: 2px;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 1.5rem;
+      padding-left: 0.75rem;
+    }
+    .timeline-item:last-child { margin-bottom: 0; }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -1.75rem;
+      top: 0.35rem;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 3px solid var(--border);
+      background: var(--bg);
+    }
+    .timeline-item.p0::before { border-color: var(--critical); background: #fef2f2; }
+    .timeline-item.p1::before { border-color: var(--warning); background: #fffbeb; }
+    .timeline-item.p2::before { border-color: var(--brand-blue); background: var(--brand-blue-light); }
+    .timeline-item.p3::before { border-color: var(--brand-green); background: var(--brand-green-light); }
+
+    .timeline-date {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+    .timeline-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    .timeline-items {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      list-style: none;
+      padding: 0;
+    }
+    .timeline-items li {
+      padding: 0.15rem 0;
+    }
+    .timeline-items li::before {
+      content: '- ';
+      color: var(--brand-blue);
+    }
+
+    /* KPI Table */
+    .kpi-section {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .kpi-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .kpi-group {
+      margin-bottom: 1.25rem;
+    }
+    .kpi-group:last-child { margin-bottom: 0; }
+    .kpi-group h3 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--brand-blue);
+      margin-bottom: 0.5rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    th, td {
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: var(--bg-subtle);
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    td:nth-child(2) { color: var(--critical); font-weight: 600; }
+    td:nth-child(3) { color: var(--brand-green); font-weight: 600; }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Print */
+    @media print {
+      body { background: white; }
+      .container { padding: 0; max-width: 100%; }
+      .header { break-after: avoid; }
+      .section { break-inside: avoid; }
+      .section.collapsed .section-body { display: block !important; }
+      .section-header .chevron { display: none; }
+      .issue-card { break-inside: avoid; }
+      @page { margin: 1.5cm; }
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .container { padding: 1rem; }
+      .header { padding: 1.5rem 1rem; }
+      .header h1 { font-size: 1.35rem; }
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .issue-card-header { flex-direction: column; }
+      .section-body { padding: 0 1rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>Linkmap QA 개선 기획</h1>
+    <div class="meta">
+      점검일: 2026-03-30 &nbsp;|&nbsp; 대상: linkmap.biz &nbsp;|&nbsp; 149개 페이지 Playwright MCP 점검 기반
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-grid">
+    <div class="summary-card total">
+      <div class="number">144</div>
+      <div class="label">점검 페이지</div>
+    </div>
+    <div class="summary-card pass">
+      <div class="number">70.1%</div>
+      <div class="label">PASS (101개)</div>
+    </div>
+    <div class="summary-card critical">
+      <div class="number">30</div>
+      <div class="label">FAIL (20.8%)</div>
+    </div>
+    <div class="summary-card warning">
+      <div class="number">8</div>
+      <div class="label">WARNING (5.6%)</div>
+    </div>
+  </div>
+
+  <!-- P0 -->
+  <div class="section p0" id="section-p0">
+    <div class="section-header" onclick="toggleSection('section-p0')">
+      <h2><span class="priority-badge">P0</span> 즉시 조치 (당일 완료)</h2>
+      <span class="chevron">&#9660;</span>
+    </h2>
+    </div>
+    <div class="section-body">
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P0-1. warm-cache.sh 누락 경로 추가</div>
+          <div class="tag-group">
+            <span class="tag severity-critical">CRITICAL</span>
+            <span class="tag size-s">S</span>
+            <span class="tag area">인프라</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> warm-cache.sh에 12개 경로만 등록 &#8594; 30개 페이지 503</div>
+        <div class="issue-detail"><strong>원인:</strong> /signup, /reset-password, /terms, /faq, /glossary, /demo/project/* 등 누락</div>
+        <div class="issue-action"><strong>조치:</strong> PAGES 배열에 누락된 공개 페이지 전체 추가. /login, /signup, /terms, /privacy, /demo/* 우선</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P0-2. 즉시 캐시 워밍 실행</div>
+          <div class="tag-group">
+            <span class="tag severity-critical">CRITICAL</span>
+            <span class="tag size-s">S</span>
+            <span class="tag area">인프라</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> 배포 후 캐시 워밍 미실행 &#8594; 30개 페이지 접근 불가</div>
+        <div class="issue-detail"><strong>원인:</strong> 수동 배포 시 워밍 스크립트 미실행</div>
+        <div class="issue-action"><strong>조치:</strong> <code>bash scripts/warm-cache.sh https://linkmap.biz</code> 즉시 실행 후 실패 경로 재확인</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P0-3. /login, /signup 렌더링 전략 검토</div>
+          <div class="tag-group">
+            <span class="tag severity-critical">CRITICAL</span>
+            <span class="tag size-m">M</span>
+            <span class="tag area">프론트엔드</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> 인증 페이지 503 &#8594; 신규 사용자 유입 완전 차단</div>
+        <div class="issue-detail"><strong>원인:</strong> force-dynamic 또는 캐시 미적용으로 매 요청마다 CPU 10ms 초과</div>
+        <div class="issue-action"><strong>조치:</strong> 인증 폼은 클라이언트 컴포넌트이므로 페이지 셸을 <code>revalidate = false</code> 정적화 검토. Supabase Auth는 클라이언트에서 호출하므로 서버 측 동적 렌더링 불필요 가능</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P0-4. /terms, /privacy 페이지 가용성 확보</div>
+          <div class="tag-group">
+            <span class="tag severity-critical">CRITICAL</span>
+            <span class="tag size-s">S</span>
+            <span class="tag area">인프라 / 프론트엔드</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> 법적 준수 페이지 접근 불가</div>
+        <div class="issue-detail"><strong>원인:</strong> /terms 누락 + 캐시 만료 후 503</div>
+        <div class="issue-action"><strong>조치:</strong> 경로 추가 + 두 페이지 모두 <code>revalidate = false</code> 정적 빌드 확인</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- P1 -->
+  <div class="section p1" id="section-p1">
+    <div class="section-header" onclick="toggleSection('section-p1')">
+      <h2><span class="priority-badge">P1</span> 단기 개선 (1주 이내)</h2>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P1-1. 503 에러 시 사용자 친화적 fallback UI</div>
+          <div class="tag-group">
+            <span class="tag severity-critical">CRITICAL</span>
+            <span class="tag size-m">M</span>
+            <span class="tag area">프론트엔드</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> Workers 503 발생 시 Cloudflare 기본 에러 페이지 노출 (브랜드 경험 단절)</div>
+        <div class="issue-action"><strong>조치:</strong> 커스텀 에러 페이지 구현. "잠시 후 다시 시도해주세요" 메시지 + 자동 새로고침 옵션</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P1-2. /project/[id]/integrations 리다이렉트 수정 (C2)</div>
+          <div class="tag-group">
+            <span class="tag severity-critical">CRITICAL</span>
+            <span class="tag size-m">M</span>
+            <span class="tag area">프론트엔드 / 백엔드</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> 통합 페이지 &#8594; 가이드 리다이렉트 + 인증 세션 유실</div>
+        <div class="issue-action"><strong>조치:</strong> 에러 핸들링 강화 + 503 시 리다이렉트 방지 + 인증 세션 유지 확인</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P1-3. /services/compare 비교 데이터 보완 (W1)</div>
+          <div class="tag-group">
+            <span class="tag severity-warning">WARNING</span>
+            <span class="tag size-m">M</span>
+            <span class="tag area">데이터 / 프론트엔드</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> 비교표 핵심 데이터(타입, 무료 티어, DX 점수)가 모두 "-" 표시</div>
+        <div class="issue-action"><strong>조치:</strong> 비교 데이터 소스 확인 + 누락 필드 보완 + UI 데이터 바인딩 검증</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P1-4. CI/CD 배포 후 자동 캐시 워밍 확인</div>
+          <div class="tag-group">
+            <span class="tag severity-critical">CRITICAL</span>
+            <span class="tag size-s">S</span>
+            <span class="tag area">인프라 / DevOps</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> 배포 후 캐시 워밍이 안정적으로 실행되지 않을 가능성</div>
+        <div class="issue-action"><strong>조치:</strong> CI/CD 설정 확인 + 배포 완료 대기 후 실행 + 워밍 실패 시 알림</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P1-5. /project/[id]/audit 리다이렉트 확인 (W2)</div>
+          <div class="tag-group">
+            <span class="tag severity-warning">WARNING</span>
+            <span class="tag size-s">S</span>
+            <span class="tag area">프론트엔드</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> 감사 로그 페이지가 /settings로 리다이렉트</div>
+        <div class="issue-action"><strong>조치:</strong> 의도적 리다이렉트인지 버그인지 확인 후 적절히 처리</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P1-6. /project/[id]/health 빈 콘텐츠 수정 (W3)</div>
+          <div class="tag-group">
+            <span class="tag severity-warning">WARNING</span>
+            <span class="tag size-m">M</span>
+            <span class="tag area">프론트엔드</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> 헬스 체크 페이지가 빈 화면으로 렌더링</div>
+        <div class="issue-action"><strong>조치:</strong> empty state UI 추가 + API 에러 메시지 표시 + 설정 안내 CTA</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- P2 -->
+  <div class="section p2 collapsed" id="section-p2">
+    <div class="section-header" onclick="toggleSection('section-p2')">
+      <h2><span class="priority-badge">P2</span> 중기 개선 (2~4주)</h2>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P2-1. /admin/users 사용자 데이터 로딩 수정 (W4)</div>
+          <div class="tag-group">
+            <span class="tag severity-warning">WARNING</span>
+            <span class="tag size-m">M</span>
+            <span class="tag area">백엔드</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> "전체 사용자 (0명)" 표시 &#8212; RLS 또는 API 문제 가능</div>
+        <div class="issue-action"><strong>조치:</strong> admin API 쿼리 + RLS 정책 + profiles 테이블 조회 권한 확인</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P2-2. /admin/showcase 사이드바 메뉴 추가 (W5)</div>
+          <div class="tag-group">
+            <span class="tag severity-warning">WARNING</span>
+            <span class="tag size-s">S</span>
+            <span class="tag area">프론트엔드</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> 쇼케이스 관리 페이지를 사이드바에서 찾을 수 없음</div>
+        <div class="issue-action"><strong>조치:</strong> 관리자 사이드바 네비게이션에 showcase 메뉴 항목 추가</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P2-3. 가이드 H1 태그 추가 (W6)</div>
+          <div class="tag-group">
+            <span class="tag severity-warning">WARNING</span>
+            <span class="tag size-s">S</span>
+            <span class="tag area">콘텐츠 / 프론트엔드</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> branching, pull-request 가이드에 H1 태그 미감지</div>
+        <div class="issue-action"><strong>조치:</strong> H1 추가 + 전체 가이드 H1 일관성 점검 (접근성/SEO)</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P2-4. 설정 페이지 경로 정리 (W7)</div>
+          <div class="tag-group">
+            <span class="tag severity-warning">WARNING</span>
+            <span class="tag size-m">M</span>
+            <span class="tag area">프론트엔드</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> /settings 하위 6개 경로 미존재 (코드 존재, 프로덕션 미노출)</div>
+        <div class="issue-action"><strong>조치:</strong> 의도 확인 후 코드 정리 또는 빌드 포함 결정</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P2-5. 데모 페이지 안정성 강화</div>
+          <div class="tag-group">
+            <span class="tag severity-critical">CRITICAL</span>
+            <span class="tag size-m">M</span>
+            <span class="tag area">프론트엔드</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> /demo 및 하위 페이지 전체 접근 불가 (503)</div>
+        <div class="issue-action"><strong>조치:</strong> 데모 페이지 셸 정적화 검토 + 빌드 타임 데이터 포함 + 프리로딩 전략</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- P3 -->
+  <div class="section p3 collapsed" id="section-p3">
+    <div class="section-header" onclick="toggleSection('section-p3')">
+      <h2><span class="priority-badge">P3</span> 장기 개선 (1~3개월)</h2>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P3-1. Workers Paid Plan 전환 검토</div>
+          <div class="tag-group">
+            <span class="tag size-s">S(기술)</span>
+            <span class="tag size-l">L(비즈니스)</span>
+            <span class="tag area">인프라 / 경영</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> Free Plan CPU 10ms 제한이 503의 근본 원인</div>
+        <div class="issue-action"><strong>조치:</strong> Paid Plan ($5/mo, CPU 50ms) 전환 시 비용 대비 효과 분석 + 트래픽 증가 시뮬레이션</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P3-2. 에러 모니터링 시스템 도입</div>
+          <div class="tag-group">
+            <span class="tag size-l">L</span>
+            <span class="tag area">인프라</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> 503 에러 사전 감지 불가 (Sentry 삭제 후 대체 미도입)</div>
+        <div class="issue-action"><strong>조치:</strong> Cloudflare Analytics/Logpush 활용 + 503 자동 감지 &#8594; warm-cache 트리거</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P3-3. 페이지 성능 예산(Performance Budget) 수립</div>
+          <div class="tag-group">
+            <span class="tag size-l">L</span>
+            <span class="tag area">프론트엔드 / DevOps</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> Workers CPU 제한 하에서 페이지별 성능 관리 체계 부재</div>
+        <div class="issue-action"><strong>조치:</strong> 서버 번들 크기 상한 설정 + CI 자동 감지 + 신규 페이지 CPU 테스트 체크리스트</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card-header">
+          <div class="issue-card-title">P3-4. 자동화된 QA 파이프라인 구축</div>
+          <div class="tag-group">
+            <span class="tag size-l">L</span>
+            <span class="tag area">QA / DevOps</span>
+          </div>
+        </div>
+        <div class="issue-detail"><strong>이슈:</strong> 수동 QA 점검 의존 &#8594; 회귀 감지 지연</div>
+        <div class="issue-action"><strong>조치:</strong> Playwright 스모크 테스트 30개 페이지 + 배포 후 자동 실행 + 실패 시 롤백/알림</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="timeline-section">
+    <h2>실행 로드맵</h2>
+    <div class="timeline">
+
+      <div class="timeline-item p0">
+        <div class="timeline-date">3/30 (당일)</div>
+        <div class="timeline-title">P0: 즉시 조치</div>
+        <ul class="timeline-items">
+          <li>warm-cache.sh 경로 추가 (1h)</li>
+          <li>캐시 워밍 실행 (30m)</li>
+          <li>/login, /signup 렌더링 전략 검토 (2h)</li>
+          <li>/terms, /privacy 가용성 확보 (30m)</li>
+        </ul>
+      </div>
+
+      <div class="timeline-item p1">
+        <div class="timeline-date">3/31 ~ 4/6 (1주차)</div>
+        <div class="timeline-title">P1: 단기 개선</div>
+        <ul class="timeline-items">
+          <li>503 fallback UI (3일)</li>
+          <li>integrations 리다이렉트 수정 (2일)</li>
+          <li>compare 데이터 보완 (2일)</li>
+          <li>CI/CD 캐시 워밍 확인 (1일)</li>
+          <li>audit 리다이렉트 확인 (0.5일)</li>
+          <li>health 빈 콘텐츠 수정 (2일)</li>
+        </ul>
+      </div>
+
+      <div class="timeline-item p2">
+        <div class="timeline-date">4/7 ~ 4/27 (2~4주차)</div>
+        <div class="timeline-title">P2: 중기 개선</div>
+        <ul class="timeline-items">
+          <li>admin/users 데이터 수정 (2일)</li>
+          <li>admin/showcase 메뉴 추가 (1일)</li>
+          <li>가이드 H1 태그 추가 (1일)</li>
+          <li>설정 페이지 경로 정리 (3일)</li>
+          <li>데모 페이지 안정성 강화 (3일)</li>
+        </ul>
+      </div>
+
+      <div class="timeline-item p3">
+        <div class="timeline-date">5월 ~ 6월 (1~3개월)</div>
+        <div class="timeline-title">P3: 장기 개선</div>
+        <ul class="timeline-items">
+          <li>Workers Paid Plan 검토 (ongoing)</li>
+          <li>에러 모니터링 시스템 (2주)</li>
+          <li>성능 예산 수립 (2주)</li>
+          <li>자동 QA 파이프라인 (3주)</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-section">
+    <h2>성과 지표 (KPI)</h2>
+
+    <div class="kpi-group">
+      <h3>P0 완료 후 (당일)</h3>
+      <table>
+        <thead>
+          <tr><th>지표</th><th>현재</th><th>목표</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>공개 페이지 가용성</td><td>70.1%</td><td>95%+</td></tr>
+          <tr><td>/login, /signup 접근 성공률</td><td>0%</td><td>100%</td></tr>
+          <tr><td>503 에러 페이지 수</td><td>30개</td><td>0개</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="kpi-group">
+      <h3>P1 완료 후 (1주)</h3>
+      <table>
+        <thead>
+          <tr><th>지표</th><th>현재</th><th>목표</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>전체 페이지 가용성</td><td>70.1%</td><td>99%+</td></tr>
+          <tr><td>WARNING 이슈 해소</td><td>0/7</td><td>4/7</td></tr>
+          <tr><td>503 시 사용자 이탈률</td><td>100%</td><td>&lt;30%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="kpi-group">
+      <h3>P2 완료 후 (1개월)</h3>
+      <table>
+        <thead>
+          <tr><th>지표</th><th>현재</th><th>목표</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>WARNING 이슈 해소</td><td>0/7</td><td>7/7</td></tr>
+          <tr><td>관리자 기능 정상률</td><td>66%</td><td>100%</td></tr>
+          <tr><td>가이드 접근성 점수</td><td>95%</td><td>100%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="kpi-group">
+      <h3>P3 완료 후 (3개월)</h3>
+      <table>
+        <thead>
+          <tr><th>지표</th><th>현재</th><th>목표</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>배포 후 자동 QA 커버리지</td><td>0%</td><td>80%+</td></tr>
+          <tr><td>503 에러 자동 감지 시간</td><td>N/A</td><td>&lt;5분</td></tr>
+          <tr><td>프로덕션 에러 MTTR</td><td>수동 의존</td><td>&lt;30분</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    Linkmap QA 개선 기획 &mdash; 2026-03-30 &nbsp;|&nbsp; linkmap.biz
+  </div>
+
+</div>
+
+<script>
+  function toggleSection(id) {
+    const section = document.getElementById(id);
+    section.classList.toggle('collapsed');
+  }
+</script>
+
+</body>
+</html>

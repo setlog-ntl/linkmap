@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linkmap QA 점검 보고서 — 2026-03-30</title>
+<style>
+  :root {
+    --brand-blue: #2563eb;
+    --brand-green: #10b981;
+    --critical: #dc2626;
+    --critical-bg: #fef2f2;
+    --critical-border: #fecaca;
+    --warning: #d97706;
+    --warning-bg: #fffbeb;
+    --warning-border: #fde68a;
+    --info: #2563eb;
+    --info-bg: #eff6ff;
+    --info-border: #bfdbfe;
+    --pass: #16a34a;
+    --pass-bg: #f0fdf4;
+    --pass-border: #bbf7d0;
+    --na: #6b7280;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-800);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, var(--brand-blue), #1d4ed8);
+    color: white;
+    padding: 40px 0 32px;
+  }
+  header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  header .meta { font-size: 14px; opacity: 0.85; display: flex; gap: 24px; flex-wrap: wrap; }
+  header .meta span { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* Cards */
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+    margin: -28px 0 32px;
+    position: relative;
+    z-index: 1;
+  }
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  }
+  .card .number { font-size: 36px; font-weight: 800; line-height: 1.1; }
+  .card .label { font-size: 13px; color: var(--gray-600); margin-top: 4px; }
+  .card.total .number { color: var(--gray-900); }
+  .card.pass .number { color: var(--pass); }
+  .card.warning .number { color: var(--warning); }
+  .card.fail .number { color: var(--critical); }
+  .card.na .number { color: var(--na); }
+
+  /* Donut Chart */
+  .chart-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+  .donut-container { position: relative; width: 200px; height: 200px; }
+  .donut-container svg { transform: rotate(-90deg); }
+  .donut-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .donut-center .pct { font-size: 32px; font-weight: 800; color: var(--pass); }
+  .donut-center .sub { font-size: 12px; color: var(--gray-600); }
+  .chart-legend { display: flex; flex-direction: column; gap: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+  /* Section */
+  section { margin-bottom: 36px; }
+  section > h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--gray-200);
+    color: var(--gray-900);
+  }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  table th, table td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--gray-200); }
+  table th { background: var(--gray-100); font-weight: 600; color: var(--gray-700); font-size: 13px; text-transform: uppercase; letter-spacing: 0.03em; }
+  table td { color: var(--gray-800); }
+  table tbody tr:hover { background: var(--gray-50); }
+  table .num { text-align: center; font-variant-numeric: tabular-nums; }
+
+  /* Badge */
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .badge-critical { background: #fee2e2; color: var(--critical); }
+  .badge-warning { background: #fef3c7; color: var(--warning); }
+  .badge-info { background: #dbeafe; color: var(--info); }
+  .badge-pass { background: #dcfce7; color: var(--pass); }
+  .badge-na { background: var(--gray-200); color: var(--gray-600); }
+
+  /* Issue blocks */
+  .issue-block {
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    border-left: 5px solid;
+  }
+  .issue-block h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .issue-block p, .issue-block li { font-size: 14px; }
+  .issue-block ul { padding-left: 20px; margin-top: 6px; }
+  .issue-block li { margin-bottom: 3px; }
+  .issue-block .field { font-weight: 600; color: var(--gray-700); }
+
+  .issue-critical { background: var(--critical-bg); border-color: var(--critical); }
+  .issue-critical h3 { color: var(--critical); }
+  .issue-warning { background: var(--warning-bg); border-color: var(--warning); }
+  .issue-warning h3 { color: var(--warning); }
+  .issue-info { background: var(--info-bg); border-color: var(--info); }
+  .issue-info h3 { color: var(--info); }
+
+  /* Details */
+  details {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  details summary {
+    padding: 14px 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before {
+    content: '\25B6';
+    font-size: 11px;
+    transition: transform 0.2s;
+    color: var(--gray-600);
+  }
+  details[open] summary::before { transform: rotate(90deg); }
+  details .detail-body { padding: 0 20px 16px; }
+  details .detail-body code {
+    background: var(--gray-100);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: 'Geist Mono', 'Fira Code', monospace;
+    color: var(--gray-800);
+  }
+  .path-list { column-count: 2; column-gap: 24px; list-style: none; padding: 0; }
+  .path-list li { padding: 3px 0; font-size: 13px; font-family: 'Geist Mono', monospace; color: var(--gray-700); break-inside: avoid; }
+
+  /* Conclusion */
+  .conclusion {
+    background: white;
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 40px;
+  }
+  .conclusion h2 { border: none; padding: 0; margin-bottom: 12px; }
+  .conclusion ol { padding-left: 22px; }
+  .conclusion li { margin-bottom: 8px; font-size: 14px; }
+  .conclusion .priority { font-weight: 700; }
+  .conclusion .priority.p0 { color: var(--critical); }
+  .conclusion .priority.p1 { color: var(--warning); }
+  .conclusion .priority.p2 { color: var(--info); }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 24px 0;
+    font-size: 13px;
+    color: var(--gray-600);
+    border-top: 1px solid var(--gray-200);
+  }
+
+  /* Progress bar in table */
+  .bar-cell { position: relative; min-width: 120px; }
+  .bar-bg { height: 8px; background: var(--gray-200); border-radius: 4px; overflow: hidden; display: flex; }
+  .bar-pass { background: var(--pass); height: 100%; }
+  .bar-warn { background: var(--warning); height: 100%; }
+  .bar-fail { background: var(--critical); height: 100%; }
+  .bar-na { background: var(--na); height: 100%; }
+
+  /* Print */
+  @media print {
+    body { background: white; font-size: 12px; }
+    header { background: var(--brand-blue) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .summary-cards { margin-top: 16px; }
+    .card { box-shadow: none; border: 1px solid var(--gray-200); }
+    details { break-inside: avoid; }
+    details[open] { break-inside: auto; }
+    .issue-block, .conclusion { break-inside: avoid; }
+    .no-print { display: none; }
+  }
+
+  @media (max-width: 640px) {
+    .summary-cards { grid-template-columns: repeat(2, 1fr); }
+    .chart-section { flex-direction: column; gap: 20px; }
+    .path-list { column-count: 1; }
+    header h1 { font-size: 22px; }
+    .container { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="container">
+    <h1>Linkmap QA 점검 보고서</h1>
+    <div class="meta">
+      <span>&#128197; 점검일: 2026-03-30</span>
+      <span>&#127760; 대상: https://linkmap.biz</span>
+      <span>&#128196; 총 점검 페이지: 149개</span>
+    </div>
+  </div>
+</header>
+
+<!-- Summary Cards -->
+<div class="container">
+  <div class="summary-cards">
+    <div class="card total">
+      <div class="number">149</div>
+      <div class="label">총 점검 항목</div>
+    </div>
+    <div class="card pass">
+      <div class="number">101</div>
+      <div class="label">PASS (70.1%)</div>
+    </div>
+    <div class="card warning">
+      <div class="number">8</div>
+      <div class="label">WARNING (5.6%)</div>
+    </div>
+    <div class="card fail">
+      <div class="number">30</div>
+      <div class="label">FAIL (20.8%)</div>
+    </div>
+    <div class="card na">
+      <div class="number">5</div>
+      <div class="label">N/A (3.5%)</div>
+    </div>
+  </div>
+
+  <!-- Donut Chart -->
+  <div class="chart-section">
+    <div class="donut-container">
+      <!-- total circumference = 2 * pi * 80 = 502.65 -->
+      <!-- PASS: 70.1% = 352.4, WARNING: 5.6% = 28.1, FAIL: 20.8% = 104.6, NA: 3.5% = 17.6 -->
+      <svg width="200" height="200" viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="80" fill="none" stroke="#e5e7eb" stroke-width="28"/>
+        <!-- PASS -->
+        <circle cx="100" cy="100" r="80" fill="none" stroke="#16a34a" stroke-width="28"
+          stroke-dasharray="352.4 150.3" stroke-dashoffset="0"/>
+        <!-- WARNING -->
+        <circle cx="100" cy="100" r="80" fill="none" stroke="#d97706" stroke-width="28"
+          stroke-dasharray="28.1 474.6" stroke-dashoffset="-352.4"/>
+        <!-- FAIL -->
+        <circle cx="100" cy="100" r="80" fill="none" stroke="#dc2626" stroke-width="28"
+          stroke-dasharray="104.6 398.1" stroke-dashoffset="-380.5"/>
+        <!-- N/A -->
+        <circle cx="100" cy="100" r="80" fill="none" stroke="#6b7280" stroke-width="28"
+          stroke-dasharray="17.6 485.1" stroke-dashoffset="-485.1"/>
+      </svg>
+      <div class="donut-center">
+        <div class="pct">70.1%</div>
+        <div class="sub">통과율</div>
+      </div>
+    </div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div> PASS &mdash; 101건 (70.1%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div> WARNING &mdash; 8건 (5.6%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div> FAIL &mdash; 30건 (20.8%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#6b7280"></div> N/A &mdash; 5건 (3.5%)</div>
+    </div>
+  </div>
+
+  <!-- Section: Area Results -->
+  <section>
+    <h2>영역별 점검 결과</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>영역</th>
+          <th class="num">총</th>
+          <th class="num">PASS</th>
+          <th class="num">WARNING</th>
+          <th class="num">FAIL</th>
+          <th class="num">N/A</th>
+          <th style="min-width:140px">분포</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>공개 핵심</td><td class="num">28</td><td class="num">11</td><td class="num">1</td><td class="num">16</td><td class="num">0</td>
+          <td><div class="bar-bg"><div class="bar-pass" style="width:39.3%"></div><div class="bar-warn" style="width:3.6%"></div><div class="bar-fail" style="width:57.1%"></div></div></td>
+        </tr>
+        <tr>
+          <td>가이드 전반</td><td class="num">39</td><td class="num">24</td><td class="num">2</td><td class="num">13</td><td class="num">0</td>
+          <td><div class="bar-bg"><div class="bar-pass" style="width:61.5%"></div><div class="bar-warn" style="width:5.1%"></div><div class="bar-fail" style="width:33.3%"></div></div></td>
+        </tr>
+        <tr>
+          <td>가이드 후반</td><td class="num">42</td><td class="num">40</td><td class="num">2</td><td class="num">0</td><td class="num">0</td>
+          <td><div class="bar-bg"><div class="bar-pass" style="width:95.2%"></div><div class="bar-warn" style="width:4.8%"></div></div></td>
+        </tr>
+        <tr>
+          <td>대시보드</td><td class="num">5</td><td class="num">5</td><td class="num">0</td><td class="num">0</td><td class="num">0</td>
+          <td><div class="bar-bg"><div class="bar-pass" style="width:100%"></div></div></td>
+        </tr>
+        <tr>
+          <td>프로젝트</td><td class="num">14</td><td class="num">10</td><td class="num">3</td><td class="num">1</td><td class="num">0</td>
+          <td><div class="bar-bg"><div class="bar-pass" style="width:71.4%"></div><div class="bar-warn" style="width:21.4%"></div><div class="bar-fail" style="width:7.1%"></div></div></td>
+        </tr>
+        <tr>
+          <td>설정</td><td class="num">10</td><td class="num">5</td><td class="num">0</td><td class="num">0</td><td class="num">5</td>
+          <td><div class="bar-bg"><div class="bar-pass" style="width:50%"></div><div class="bar-na" style="width:50%"></div></div></td>
+        </tr>
+        <tr>
+          <td>관리자</td><td class="num">6</td><td class="num">6</td><td class="num">0</td><td class="num">0</td><td class="num">0</td>
+          <td><div class="bar-bg"><div class="bar-pass" style="width:100%"></div></div></td>
+        </tr>
+        <tr style="font-weight:700; background:var(--gray-100);">
+          <td>합계</td><td class="num">144*</td><td class="num">101</td><td class="num">8</td><td class="num">30</td><td class="num">5</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px; color:var(--gray-600); margin-top:8px;">* 영역별 합계 144건 (일부 항목은 교차 영역으로 분류, 전체 고유 페이지 149건)</p>
+  </section>
+
+  <!-- CRITICAL Issues -->
+  <section>
+    <h2><span class="badge badge-critical">CRITICAL</span> 심각 이슈 (2건)</h2>
+
+    <div class="issue-block issue-critical">
+      <h3>C1. Cloudflare Workers Error 1102 &mdash; 503 에러 대량 발생</h3>
+      <p><span class="field">영향:</span> 30개 페이지 접근 불가 (전체의 20.8%)</p>
+      <p><span class="field">원인:</span> Workers Free Plan CPU 10ms 제한 초과 (캐시 미워밍 페이지)</p>
+      <p style="margin-top:8px;"><span class="field">영향받는 페이지 (주요):</span></p>
+      <ul>
+        <li><code>/login</code>, <code>/signup</code>, <code>/reset-password</code> &mdash; 신규 사용자 유입 완전 차단</li>
+        <li><code>/demo</code>, <code>/demo/project/*</code> &mdash; 데모 체험 불가</li>
+        <li><code>/terms</code>, <code>/privacy</code> &mdash; 법적 준수 위반 가능</li>
+        <li><code>/faq</code>, <code>/glossary</code>, <code>/feedback</code>, <code>/showcase</code> &mdash; 공개 콘텐츠 접근 불가</li>
+        <li>13개 가이드 페이지 (auth, api-basics, automation, backend 카테고리)</li>
+      </ul>
+      <p style="margin-top:10px;"><span class="field">권장 조치:</span> <code>bash scripts/warm-cache.sh</code> 실행 + 누락 경로 추가</p>
+    </div>
+
+    <div class="issue-block issue-critical">
+      <h3>C2. /project/[id]/integrations &mdash; 가이드 페이지로 리다이렉트 + 인증 세션 유실</h3>
+      <p><span class="field">영향:</span> 통합 페이지 접근 불가, 로그인 상태 풀림</p>
+      <p><span class="field">원인:</span> Workers 503 에러 후 캐시된 가이드 페이지로 잘못된 리다이렉트</p>
+      <p style="margin-top:10px;"><span class="field">권장 조치:</span> 에러 핸들링 개선 + 503 시 적절한 fallback 표시</p>
+    </div>
+  </section>
+
+  <!-- WARNING Issues -->
+  <section>
+    <h2><span class="badge badge-warning">WARNING</span> 경고 이슈 (7건)</h2>
+
+    <div class="issue-block issue-warning">
+      <h3>W1. /services/compare &mdash; 비교표 데이터 누락</h3>
+      <p>비교표의 타입, 무료 티어, DX 점수가 모두 &ldquo;-&rdquo;로 표시됨</p>
+    </div>
+    <div class="issue-block issue-warning">
+      <h3>W2. /project/[id]/audit &mdash; /settings로 리다이렉트</h3>
+      <p>감사 로그 페이지에 접근하면 설정 페이지로 리다이렉트되어 감사 로그 확인 불가</p>
+    </div>
+    <div class="issue-block issue-warning">
+      <h3>W3. /project/[id]/health &mdash; 빈 콘텐츠 렌더링</h3>
+      <p>Workers 503 에러 이후 빈 페이지가 렌더링됨</p>
+    </div>
+    <div class="issue-block issue-warning">
+      <h3>W4. /admin/users &mdash; &ldquo;전체 사용자 (0명)&rdquo; 표시</h3>
+      <p>데이터가 정상 로딩되지 않았을 가능성 있음</p>
+    </div>
+    <div class="issue-block issue-warning">
+      <h3>W5. /admin/showcase &mdash; 사이드바 메뉴 미표시</h3>
+      <p>관리자 페이지 사이드바 내비게이션이 표시되지 않음</p>
+    </div>
+    <div class="issue-block issue-warning">
+      <h3>W6. 가이드 H1 태그 미감지</h3>
+      <p><code>/guides/branching</code>, <code>/guides/pull-request</code> 페이지에서 H1 태그가 감지되지 않음</p>
+    </div>
+    <div class="issue-block issue-warning">
+      <h3>W7. 설정 페이지 6개 경로 미존재</h3>
+      <p><code>/settings/connections</code>, <code>/settings/tokens</code>, <code>/settings/services</code>, <code>/settings/danger</code>, <code>/settings/accounts</code>, <code>/settings/profile</code>(→account 리다이렉트)</p>
+    </div>
+  </section>
+
+  <!-- INFO -->
+  <section>
+    <h2><span class="badge badge-info">INFO</span> 참고사항</h2>
+
+    <div class="issue-block issue-info">
+      <ul style="list-style:none; padding:0;">
+        <li style="margin-bottom:8px;">&#8226; 모바일 body width 376px (1px overflow) &mdash; 실질적 문제 없음</li>
+        <li style="margin-bottom:8px;">&#8226; GA, Clarity <code>ERR_ABORTED</code> &mdash; 페이지 전환 시 정상 동작</li>
+        <li style="margin-bottom:8px;">&#8226; Supabase API 호출 모두 200 정상 응답</li>
+        <li>&#8226; React Flow canvas는 accessibility snapshot에서 확인 불가 (정상 동작)</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 503 Error Pages (collapsible) -->
+  <section>
+    <h2>상세 페이지 목록</h2>
+
+    <details>
+      <summary><span class="badge badge-critical">FAIL</span> 503 에러 실패 페이지 (30개)</summary>
+      <div class="detail-body">
+        <h4 style="margin:12px 0 8px; font-size:14px; color:var(--gray-700);">공개 핵심 (16건)</h4>
+        <ul class="path-list">
+          <li><code>/blog/cloudflare-workers-nextjs-prefetch-503-fix</code></li>
+          <li><code>/demo</code></li>
+          <li><code>/demo/project/demo-1</code></li>
+          <li><code>/demo/project/demo-1/service-map</code></li>
+          <li><code>/demo/project/demo-1/services</code></li>
+          <li><code>/demo/project/demo-1/costs</code></li>
+          <li><code>/demo/project/demo-1/env</code></li>
+          <li><code>/demo/project/demo-1/connections</code></li>
+          <li><code>/showcase</code></li>
+          <li><code>/faq</code></li>
+          <li><code>/glossary</code></li>
+          <li><code>/feedback</code></li>
+          <li><code>/terms</code></li>
+          <li><code>/privacy</code></li>
+          <li><code>/login</code></li>
+          <li><code>/signup</code></li>
+          <li><code>/reset-password</code></li>
+        </ul>
+
+        <h4 style="margin:16px 0 8px; font-size:14px; color:var(--gray-700);">가이드 전반 (13건)</h4>
+        <ul class="path-list">
+          <li><code>/guides/auth/google</code></li>
+          <li><code>/guides/auth/kakao</code></li>
+          <li><code>/guides/api-basics</code></li>
+          <li><code>/guides/api-basics/api-auth</code></li>
+          <li><code>/guides/api-basics/error-handling</code></li>
+          <li><code>/guides/api-basics/fetch-axios</code></li>
+          <li><code>/guides/automation</code></li>
+          <li><code>/guides/automation/scheduling</code></li>
+          <li><code>/guides/automation/sns-api</code></li>
+          <li><code>/guides/automation/webhook</code></li>
+          <li><code>/guides/backend</code></li>
+          <li><code>/guides/backend/baas</code></li>
+          <li><code>/guides/backend/database</code></li>
+        </ul>
+
+        <h4 style="margin:16px 0 8px; font-size:14px; color:var(--gray-700);">프로젝트 (1건)</h4>
+        <ul class="path-list">
+          <li><code>/project/[id]/integrations</code></li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary><span class="badge badge-pass">PASS</span> 통과 페이지 (101개)</summary>
+      <div class="detail-body">
+
+        <h4 style="margin:12px 0 8px; font-size:14px; color:var(--gray-700);">공개 핵심</h4>
+        <ul class="path-list">
+          <li><code>/</code></li>
+          <li><code>/pricing</code></li>
+          <li><code>/services</code></li>
+          <li><code>/services/compare</code></li>
+          <li><code>/services/cost-simulator</code></li>
+          <li><code>/services/supabase</code></li>
+          <li><code>/services/vercel</code></li>
+          <li><code>/services/stripe</code></li>
+          <li><code>/blog</code></li>
+          <li><code>/blog/vibe-coding-social-login-guide</code></li>
+          <li><code>/oneclick</code></li>
+        </ul>
+
+        <h4 style="margin:16px 0 8px; font-size:14px; color:var(--gray-700);">가이드 (64건)</h4>
+        <ul class="path-list">
+          <li><code>/guides</code> (인덱스)</li>
+          <li><code>/guides/ai-tools/*</code></li>
+          <li><code>/guides/cloudflare/*</code></li>
+          <li><code>/guides/communication/*</code></li>
+          <li><code>/guides/deploy/*</code></li>
+          <li><code>/guides/design-ui/*</code></li>
+          <li><code>/guides/domain</code></li>
+          <li><code>/guides/env/*</code></li>
+          <li><code>/guides/frontend/*</code></li>
+          <li><code>/guides/github/*</code></li>
+          <li><code>/guides/monitoring/*</code></li>
+          <li><code>/guides/openai/*</code></li>
+          <li><code>/guides/package-manager/*</code></li>
+          <li><code>/guides/payment/*</code></li>
+          <li><code>/guides/security/*</code></li>
+          <li><code>/guides/server/*</code></li>
+          <li><code>/guides/supabase/*</code></li>
+          <li><code>/guides/vercel/*</code></li>
+          <li><code>/guides/version-control/*</code></li>
+        </ul>
+
+        <h4 style="margin:16px 0 8px; font-size:14px; color:var(--gray-700);">대시보드 (5건)</h4>
+        <ul class="path-list">
+          <li><code>/dashboard</code></li>
+          <li><code>/sites/manage</code></li>
+          <li><code>/sites/new</code></li>
+          <li><code>/sites/showcase</code></li>
+          <li><code>/trash</code></li>
+        </ul>
+
+        <h4 style="margin:16px 0 8px; font-size:14px; color:var(--gray-700);">프로젝트 (10건)</h4>
+        <ul class="path-list">
+          <li><code>/project/[id]</code></li>
+          <li><code>/project/[id]/service-map</code></li>
+          <li><code>/project/[id]/costs</code></li>
+          <li><code>/project/[id]/costs/report</code></li>
+          <li><code>/project/[id]/connections</code></li>
+          <li><code>/project/[id]/env</code></li>
+          <li><code>/project/[id]/env/conflicts</code></li>
+          <li><code>/project/[id]/credentials</code></li>
+          <li><code>/project/[id]/monitoring</code></li>
+          <li><code>/project/[id]/settings</code></li>
+        </ul>
+
+        <h4 style="margin:16px 0 8px; font-size:14px; color:var(--gray-700);">설정 (4건)</h4>
+        <ul class="path-list">
+          <li><code>/settings/account</code></li>
+          <li><code>/settings/billing</code></li>
+          <li><code>/settings/github</code></li>
+          <li><code>/settings/developer</code></li>
+        </ul>
+
+        <h4 style="margin:16px 0 8px; font-size:14px; color:var(--gray-700);">관리자 (6건)</h4>
+        <ul class="path-list">
+          <li><code>/admin/ai-config</code></li>
+          <li><code>/admin/users</code></li>
+          <li><code>/admin/usage-stats</code></li>
+          <li><code>/admin/improvements</code></li>
+          <li><code>/admin/deploy-errors</code></li>
+          <li><code>/admin/showcase</code></li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary><span class="badge badge-na">N/A</span> 해당없음 (5건)</summary>
+      <div class="detail-body">
+        <p style="font-size:14px; margin:8px 0;">설정 영역에서 존재하지 않는 경로로 확인된 5개 페이지 (W7 참조)</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- Conclusion -->
+  <div class="conclusion">
+    <h2>결론 및 권장사항</h2>
+    <p style="margin-bottom:16px; font-size:15px;">
+      전체 149개 페이지 중 <strong>101개(70.1%)</strong>가 정상 통과했으나,
+      <strong>30개(20.8%)</strong> 페이지가 Cloudflare Workers 503 에러로 접근 불가 상태입니다.
+      특히 로그인/회원가입 페이지가 차단되어 <strong>신규 사용자 유입이 완전히 막혀 있는 상황</strong>이므로
+      즉각적인 조치가 필요합니다.
+    </p>
+
+    <ol>
+      <li>
+        <span class="priority p0">[P0 - 즉시]</span>
+        <code>scripts/warm-cache.sh</code>에 누락된 30개 경로 추가 후 캐시 워밍 실행.
+        로그인/회원가입/데모/법적 페이지 최우선 복구.
+      </li>
+      <li>
+        <span class="priority p0">[P0 - 즉시]</span>
+        <code>/project/[id]/integrations</code> 에러 핸들링 개선 &mdash; 503 시 가이드 페이지로의 잘못된 리다이렉트 방지 및 세션 유실 문제 해결.
+      </li>
+      <li>
+        <span class="priority p1">[P1 - 이번 주]</span>
+        <code>/services/compare</code> 비교표 데이터 표시 수정 (타입, 무료 티어, DX 점수 &ldquo;-&rdquo; 문제).
+      </li>
+      <li>
+        <span class="priority p1">[P1 - 이번 주]</span>
+        <code>/project/[id]/audit</code> 감사 로그 페이지 라우팅 수정 (현재 /settings로 잘못된 리다이렉트).
+      </li>
+      <li>
+        <span class="priority p1">[P1 - 이번 주]</span>
+        설정 페이지 미존재 경로 6개 정리 &mdash; 제거 또는 올바른 경로로 리다이렉트.
+      </li>
+      <li>
+        <span class="priority p2">[P2 - 다음 스프린트]</span>
+        가이드 페이지 H1 태그 누락 수정 (<code>branching</code>, <code>pull-request</code>).
+      </li>
+      <li>
+        <span class="priority p2">[P2 - 다음 스프린트]</span>
+        관리자 페이지 데이터 로딩 확인 (users 0명 표시, showcase 사이드바).
+      </li>
+    </ol>
+  </div>
+
+  <footer>
+    Linkmap QA 점검 보고서 &mdash; 2026-03-30 &mdash; 자동 생성
+  </footer>
+</div>
+
+</body>
+</html>

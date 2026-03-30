@@ -164,11 +164,14 @@ export function CompareClient({ comparisons, services }: CompareClientProps) {
                           <td className="py-2 px-3 font-medium text-muted-foreground">
                             {criterion.name_ko || criterion.name}
                           </td>
-                          {serviceIds.map((id, si) => (
-                            <td key={si} className="py-2 px-3">
-                              {criterion.values[id] || '-'}
-                            </td>
-                          ))}
+                          {serviceIds.map((id, si) => {
+                            const slug = serviceMap.get(id)?.slug || id;
+                            return (
+                              <td key={si} className="py-2 px-3">
+                                {criterion.values[slug] || criterion.values[id] || '-'}
+                              </td>
+                            );
+                          })}
                         </tr>
                       ))}
                     </tbody>

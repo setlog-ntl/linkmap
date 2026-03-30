@@ -61,6 +61,8 @@ const scenarios = [
 export function ConflictContent() {
   return (
     <div className="py-8 space-y-12">
+      <h1 className="text-3xl md:text-4xl font-bold">충돌 해결</h1>
+
       {/* 충돌 발생 원리 */}
       <ScrollReveal>
         <h2 className="text-2xl md:text-3xl font-bold mb-3">충돌은 왜 발생할까?</h2>

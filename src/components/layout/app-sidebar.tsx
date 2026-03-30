@@ -274,6 +274,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
     { label: '기능 통계', href: '/admin/usage-stats', icon: BarChart3 },
     { label: '개선사항 관리', href: '/admin/improvements', icon: Lightbulb },
     { label: '배포 오류 로그', href: '/admin/deploy-errors', icon: Bug },
+    { label: '쇼케이스 관리', href: '/admin/showcase', icon: Trophy },
   ];
 
   const isActive = (href: string, exact?: boolean) => {

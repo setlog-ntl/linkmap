@@ -39,6 +39,7 @@ interface ServiceNodeData {
   status: string;
   slug?: string;
   description?: string;
+  notes?: string;
   highlighted?: boolean;
   focusOpacity?: number;
   domain?: string;
@@ -232,14 +233,20 @@ function ServiceNode({ id, data }: NodeProps) {
             <span className="text-sm text-muted-foreground">&#9881;</span>
           )}
         </div>
-        {/* Name + Category */}
+        {/* Name + Category + Notes */}
         <div className="min-w-0 flex flex-col">
           <span className="font-semibold text-[12px] truncate max-w-[90px] leading-tight tracking-tight">
             {d.label}
           </span>
-          <span className="text-[10px] text-muted-foreground mt-0.5 truncate max-w-[90px]">
-            {CATEGORY_LABELS[category] || category}
-          </span>
+          {d.notes ? (
+            <span className="text-[9px] text-brand-blue/80 mt-0.5 truncate max-w-[90px] leading-tight">
+              {d.notes}
+            </span>
+          ) : (
+            <span className="text-[10px] text-muted-foreground mt-0.5 truncate max-w-[90px]">
+              {CATEGORY_LABELS[category] || category}
+            </span>
+          )}
         </div>
       </div>
 
