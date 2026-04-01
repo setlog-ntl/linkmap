@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic';
+export const revalidate = false;
 
 import { redirect } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';

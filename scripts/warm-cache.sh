@@ -46,6 +46,8 @@ PAGES=(
   "/demo/project/demo-1/costs"
   "/demo/project/demo-1/env"
   "/demo/project/demo-1/connections"
+  "/demo/project/demo-1/settings"
+  "/demo/project/demo-1/costs/report"
   "/demo/project/demo-2"
   "/demo/project/demo-3"
   "/demo/project/demo-4"
