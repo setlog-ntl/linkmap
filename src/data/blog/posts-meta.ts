@@ -24,6 +24,19 @@ export interface BlogPostMeta {
 
 export const BLOG_POSTS_META: BlogPostMeta[] = [
   // ======================================================================
+  // 새 포스트 — Cloudflare Workers Error 1102 해결기
+  // ======================================================================
+  {
+    slug: 'cloudflare-workers-error-1102-cpu-limit-fix',
+    title: 'Error 1102 해결기 — Cloudflare Workers CPU 10ms 제한과 Next.js 공개 페이지 최적화',
+    description: '내 사이트에 Error 1102가 떴습니다. Cloudflare Workers Free Plan의 CPU 10ms 제한을 초과했기 때문입니다. 원인을 찾는 과정, force-dynamic vs revalidate=false 차이, Observability 설정까지 초보자도 이해할 수 있게 설명합니다.',
+    category: 'deploy-ops',
+    tags: ['Cloudflare Workers 에러', 'Error 1102', 'CPU 제한', 'force-dynamic', 'Next.js 배포 최적화'],
+    publishedAt: '2026-04-02',
+    readingTime: '9분',
+    relatedGuides: ['cloudflare', 'deploy', 'vercel', 'env'],
+  },
+  // ======================================================================
   // 새 포스트 — 소셜 로그인 가이드
   // ======================================================================
   {
