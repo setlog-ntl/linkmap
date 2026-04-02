@@ -1167,7 +1167,7 @@ export function ContactInfo({ config, accentColor }: Props) {
     config.phone ? { icon: Phone, label: config.phone, href: \`tel:\${config.phone.replace(/[^+\\d]/g, '')}\`, isExternal: false, ariaLabel: t('contact.call') } : null,
     address ? { icon: MapPin, label: address, href: \`https://maps.google.com/?q=\${encodeURIComponent(address)}\`, isExternal: true, ariaLabel: t('contact.map') } : null,
     config.website ? { icon: Globe, label: config.website.replace(/^https?:\\/\\//, ''), href: config.website, isExternal: true, ariaLabel: t('contact.website') } : null,
-    ...(((config as unknown as Record<string, unknown>).extraContacts ?? []) as Array<{ type: string; label: string; value: string }>).map((extra) => {
+    ...(config.extraContacts ?? []).map((extra) => {
       const href = getExtraContactHref(extra.type, extra.value);
       const Icon = getExtraContactIcon(extra.type);
       return { icon: Icon, label: \`\${extra.label}: \${extra.value}\`, href: href || '#', isExternal: extra.type === 'link', ariaLabel: extra.label };
@@ -1529,8 +1529,11 @@ export function ThemeToggle() {
 }`;
 
 const namecardConfig = `export interface SocialItem { platform: string; url: string; label?: string; }
+export interface ExtraContactItem { type: 'email' | 'phone' | 'link' | 'text'; label: string; value: string; }
 
 export type DesignPreset = 'pro' | 'corporate' | 'creative' | 'minimal-dark';
+
+const _basePath = process.env.NEXT_PUBLIC_REPO_NAME ? \\\`/\\\${process.env.NEXT_PUBLIC_REPO_NAME}\\\` : '';
 
 function parseJSON<T>(raw: string | undefined, fallback: T): T {
   if (!raw) return fallback;
@@ -1555,9 +1558,10 @@ export const siteConfig = {
   addressEn: process.env.NEXT_PUBLIC_ADDRESS_EN || null,
   website: process.env.NEXT_PUBLIC_WEBSITE || null,
   socials: parseJSON<SocialItem[]>(process.env.NEXT_PUBLIC_SOCIALS, []),
+  extraContacts: parseJSON<ExtraContactItem[]>(process.env.NEXT_PUBLIC_EXTRA_CONTACTS, []),
   avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || null,
   accentColor: process.env.NEXT_PUBLIC_ACCENT_COLOR || '#3b82f6',
-  designPreset: parsePreset(process.env.NEXT_PUBLIC_DESIGN_PRESET),
+  designPreset: parsePreset(process.env.NEXT_PUBLIC_DESIGN_PRESET || 'pro'),
   fontFamily: process.env.NEXT_PUBLIC_FONT_FAMILY || 'Pretendard Variable',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
