@@ -230,6 +230,8 @@ export function generateDigitalNamecardPreview(
   imageMap: Record<string, string>,
 ): string {
   const accentColor = getVal(state, 'theme', 'accentColor', '#3b82f6');
+  const designPreset = getVal(state, 'theme', 'designPreset', 'pro');
+  const fontFamily = getVal(state, 'theme', 'fontFamily', 'Pretendard Variable');
   const activeModules = getActiveModules(state);
 
   const sectionRenderers: Record<string, () => string> = {
@@ -248,9 +250,10 @@ export function generateDigitalNamecardPreview(
     .join('');
 
   const bodyContent = `<div class="nc-card">${sections}</div>`;
-  const baseCss = buildBaseCSS('default');
+  const baseCss = buildBaseCSS(designPreset);
   const templateCss = buildNamecardCSS(accentColor);
   const fullCss = `${baseCss}\n${templateCss}`;
+  const font = fontFamily !== 'Pretendard Variable' ? fontFamily : undefined;
 
-  return wrapInHtml(fullCss, bodyContent, 'default');
+  return wrapInHtml(fullCss, bodyContent, designPreset, font);
 }

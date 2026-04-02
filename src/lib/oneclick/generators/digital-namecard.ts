@@ -18,22 +18,24 @@ import {
 } from './base-generator';
 
 // ─── 모듈 컴포넌트 매핑 ─────────────────────
+// FlippableCard가 내부에서 ProfileCard/ContactInfo/SocialLinks를 조합
+// page.tsx에는 FlippableCard만 import되므로 개별 모듈 컴포넌트 렌더링 불필요
 
 const MODULE_COMPONENTS: Record<string, ComponentMapping> = {
   profile: {
     importName: 'ProfileCard',
     importPath: '@/components/profile-card',
-    render: '            <ProfileCard config={siteConfig} />',
+    render: '',
   },
   contact: {
     importName: 'ContactInfo',
     importPath: '@/components/contact-info',
-    render: '            <ContactInfo config={siteConfig} />',
+    render: '',
   },
   socials: {
     importName: 'SocialLinks',
     importPath: '@/components/social-links',
-    render: '            {siteConfig.socials.length > 0 && <SocialLinks socials={siteConfig.socials} accentColor={siteConfig.accentColor} />}',
+    render: '',
   },
 };
 
@@ -61,13 +63,26 @@ function generateConfigTs(state: ModuleConfigState): string {
   const accentColor = /^#[0-9a-fA-F]{6}$/.test(rawAccent) ? rawAccent : '#3b82f6';
   const socialItems = (socials.items as unknown[]) || [];
 
+  // designPreset, fontFamily (번들 config와 동기화)
+  const validPresets = ['pro', 'corporate', 'creative', 'minimal-dark'];
+  const rawPreset = (theme.designPreset as string) || 'pro';
+  const designPreset = validPresets.includes(rawPreset) ? rawPreset : 'pro';
+  const fontFamily = (theme.fontFamily as string) || 'Pretendard Variable';
+
   return `export interface SocialItem { platform: string; url: string; }
+
+export type DesignPreset = 'pro' | 'corporate' | 'creative' | 'minimal-dark';
 
 ${genBasePathConst()}
 
 function parseJSON<T>(raw: string | undefined, fallback: T): T {
   if (!raw) return fallback;
   try { return JSON.parse(raw) as T; } catch { return fallback; }
+}
+
+function parsePreset(raw: string | undefined): DesignPreset {
+  const valid: DesignPreset[] = ['pro', 'corporate', 'creative', 'minimal-dark'];
+  return valid.includes(raw as DesignPreset) ? (raw as DesignPreset) : 'pro';
 }
 
 export const siteConfig = {
@@ -85,6 +100,8 @@ export const siteConfig = {
   socials: parseJSON<SocialItem[]>(process.env.NEXT_PUBLIC_SOCIALS, ${buildSocialsArray(socialItems)}),
   avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || ${avatarUrl ? imagePathExpr(avatarUrl) : 'null'},
   accentColor: process.env.NEXT_PUBLIC_ACCENT_COLOR || '${esc(accentColor)}',
+  designPreset: parsePreset(process.env.NEXT_PUBLIC_DESIGN_PRESET || '${esc(designPreset)}'),
+  fontFamily: process.env.NEXT_PUBLIC_FONT_FAMILY || '${esc(fontFamily)}',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 
@@ -93,47 +110,24 @@ export type SiteConfig = typeof siteConfig;
 }
 
 // ─── Page 생성 ───────────────────────────────
+// FlippableCard 기반 구조 (번들 namecardPage와 동일)
+// FlippableCard 내부에서 ProfileCard/ContactInfo/SocialLinks를 조건 렌더링
 
-function generatePageTsx(state: ModuleConfigState): string {
-  const activeModules = state.order.filter((id) => state.enabled.includes(id));
-
-  const imports: string[] = [
-    "import { siteConfig } from '@/lib/config';",
-  ];
-  const renders: string[] = [];
-
-  // contact 활성화 시 QrCode + SaveContactButton 자동 포함
-  let needsQr = false;
-
-  for (const id of activeModules) {
-    const comp = MODULE_COMPONENTS[id];
-    if (!comp) continue; // theme 등 컴포넌트 없는 모듈 스킵
-    imports.push(`import { ${comp.importName} } from '${comp.importPath}';`);
-    renders.push(comp.render);
-    if (id === 'contact') needsQr = true;
-  }
-
-  if (needsQr) {
-    imports.push("import { QrCode } from '@/components/qr-code';");
-    imports.push("import { SaveContactButton } from '@/components/save-contact-button';");
-    renders.push('            <QrCode config={siteConfig} />');
-    renders.push('            <SaveContactButton config={siteConfig} />');
-  }
-
-  imports.push("import { Footer } from '@/components/footer';");
-
-  return `${imports.join('\n')}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function generatePageTsx(_state: ModuleConfigState): string {
+  return `import { siteConfig } from '@/lib/config';
+import { FlippableCard } from '@/components/flippable-card';
+import { Footer } from '@/components/footer';
 
 export default function Home() {
   return (
-    <main id="main" className="min-h-screen flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-sm mx-auto">
-        <div className="print-card rounded-2xl shadow-lg overflow-hidden bg-white dark:bg-gray-800">
-          <div className="h-2" style={{ background: \`linear-gradient(90deg, \${siteConfig.accentColor}, \${siteConfig.accentColor}dd)\` }} />
-          <div className="p-6 space-y-5">
-${renders.join('\n')}
-          </div>
-        </div>
+    <main
+      id="main"
+      data-preset={siteConfig.designPreset}
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', background: 'var(--page-bg)', color: 'var(--page-text)', transition: 'background 0.4s, color 0.4s' }}
+    >
+      <div style={{ width: '100%', maxWidth: 400 }}>
+        <FlippableCard config={siteConfig} />
         <Footer />
       </div>
     </main>
@@ -171,9 +165,6 @@ function parseConfigToState(
   // Contact
   const email = extractString('email');
   if (email !== null) state.values.contact.email = email;
-  // extractNullable은 null 리터럴과 키 미존재 둘 다 null 반환.
-  // phone은 defaultValue가 비어있지 않으므로, null 리터럴(빈 값 의도) 여부를
-  // 직접 확인해 빈 문자열로 복원한다.
   const phone = extractNullable('phone');
   if (phone !== null) {
     state.values.contact.phone = phone;
@@ -196,6 +187,18 @@ function parseConfigToState(
   // Theme
   const accentColor = extractString('accentColor');
   if (accentColor !== null) state.values.theme.accentColor = accentColor;
+  const fontFamily = extractString('fontFamily');
+  if (fontFamily !== null) state.values.theme.fontFamily = fontFamily;
+  // designPreset: parsePreset() 호출이므로 extractString으로 직접 추출 불가
+  // 대신 정규식으로 파싱
+  const presetMatch = siteBlock.match(/designPreset:\s*parsePreset\(.*?\)/);
+  if (presetMatch) {
+    // 이미 프리셋 함수 호출 형태 → 기존 값 유지 (사용자가 변경하면 새로 생성)
+    // env 변수 기본값 'pro'로 초기화됨 (buildInitialState에서)
+  }
+  // fallback: 직접 문자열로 지정된 경우
+  const dpStr = extractString('designPreset');
+  if (dpStr !== null) state.values.theme.designPreset = dpStr;
 
   return state;
 }
@@ -209,6 +212,9 @@ export const digitalNamecardGenerator: TemplateGenerator = {
   parseConfigToState,
   moduleComponents: MODULE_COMPONENTS,
   importToModuleMap: {
+    // FlippableCard wraps all three content modules
+    FlippableCard: ['profile', 'contact', 'socials'],
+    // Backward compatibility: flat layout에서 편집한 사이트용
     ProfileCard: 'profile',
     ContactInfo: 'contact',
     SocialLinks: 'socials',

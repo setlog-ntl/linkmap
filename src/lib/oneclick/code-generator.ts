@@ -104,7 +104,7 @@ export function generateLayoutTsx(
   baseCode: string
 ): string {
   const hero = state.values.hero || {};
-  const font = (hero.fontFamily as string) || 'Pretendard';
+  const font = (hero.fontFamily as string) || (state.values.theme?.fontFamily as string) || 'Pretendard';
   if (font === 'Pretendard') return baseCode;
 
   let code = baseCode;
@@ -220,6 +220,21 @@ export function generateFiles(
 
     const fontFamily = (hero.fontFamily as string) || 'Pretendard';
     if (fontFamily !== 'Pretendard') {
+      const layoutBase = currentFiles['src/app/layout.tsx'];
+      if (layoutBase) {
+        files.push({
+          path: 'src/app/layout.tsx',
+          content: generateLayoutTsx(state, layoutBase),
+        });
+      }
+    }
+  }
+
+  // Phase 2: digital-namecard fontFamily 처리
+  if (currentFiles && isDigitalNamecard) {
+    const theme = state.values.theme || {};
+    const fontFamily = (theme.fontFamily as string) || 'Pretendard Variable';
+    if (fontFamily !== 'Pretendard Variable' && fontFamily !== 'Pretendard') {
       const layoutBase = currentFiles['src/app/layout.tsx'];
       if (layoutBase) {
         files.push({
