@@ -83,6 +83,7 @@ export function OneclickSidePanel({ deployments }: OneclickSidePanelProps) {
         </div>
         <Link
           href="/sites/manage"
+          prefetch={false}
           className="text-[11px] text-muted-foreground hover:text-foreground flex items-center gap-0.5 transition-colors"
         >
           전체보기
@@ -139,6 +140,7 @@ export function OneclickSidePanel({ deployments }: OneclickSidePanelProps) {
                   )}
                   <Link
                     href={`/sites/${deploy.id}/edit`}
+                    prefetch={false}
                     className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors ml-auto"
                   >
                     <Pencil className="h-3 w-3" />
@@ -153,6 +155,7 @@ export function OneclickSidePanel({ deployments }: OneclickSidePanelProps) {
         {remaining > 0 && (
           <Link
             href="/sites/manage"
+            prefetch={false}
             className="flex items-center justify-center gap-1 py-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
           >
             +{remaining}개 더 보기

@@ -39,6 +39,7 @@ export default function ProjectDashboardPage() {
         <div className="mt-3 text-right">
           <Link
             href={`/project/${projectId}/monitoring`}
+            prefetch={false}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             상세 모니터링 보기 →

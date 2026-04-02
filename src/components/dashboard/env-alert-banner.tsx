@@ -29,6 +29,7 @@ export function EnvAlertBanner({ projectId, allCards }: EnvAlertBannerProps) {
               <Link
                 key={s.projectServiceId}
                 href={`/project/${projectId}/env`}
+                prefetch={false}
                 className="inline-flex items-center gap-1 rounded-md bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60 transition-colors"
               >
                 {s.name}

@@ -46,6 +46,7 @@ export async function GET() {
   // Filter to GitHub only (service.slug = 'github')
   const githubConnections = (data || []).filter(
     (row) => (row.service as unknown as { slug: string })?.slug === 'github'
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ).map(({ service: _service, ...rest }) => rest);
 
   // Enrich with linked project info

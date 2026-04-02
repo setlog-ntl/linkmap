@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
 }
 
 // GET: 액션 이력 조회
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();

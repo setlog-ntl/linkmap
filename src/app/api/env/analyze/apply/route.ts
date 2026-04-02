@@ -5,7 +5,6 @@ import { unauthorizedError, notFoundError, validationError, serverError } from '
 import { logAudit } from '@/lib/audit';
 import { encrypt } from '@/lib/crypto';
 import { suggestAutoConnections } from '@/lib/connections/auto-connect';
-import type { Service } from '@/types';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();

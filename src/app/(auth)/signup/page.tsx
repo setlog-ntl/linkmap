@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,6 @@ import { Github, Loader2, RefreshCw } from 'lucide-react';
 import { GoogleIcon } from '@/components/icons/google-icon';
 
 export default function SignupPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
 

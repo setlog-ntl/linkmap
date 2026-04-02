@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { encrypt, decrypt } from '@/lib/crypto';
+import { encrypt } from '@/lib/crypto';
 import { createEnvVarSchema, updateEnvVarSchema } from '@/lib/validations/env';
 import { unauthorizedError, notFoundError, validationError, quotaExceededError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';

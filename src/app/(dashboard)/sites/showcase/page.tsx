@@ -179,6 +179,7 @@ export default function MyShowcasePage() {
                       <div className="flex items-center gap-2">
                         <Link
                           href={`/showcase/${item.id}`}
+                          prefetch={false}
                           className="font-semibold hover:underline truncate"
                         >
                           {item.site_name}

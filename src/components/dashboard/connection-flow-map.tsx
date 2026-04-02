@@ -259,6 +259,7 @@ export function ConnectionFlowMap({
       <div className="flex justify-center pb-4">
         <Link
           href={`/project/${projectId}/integrations`}
+          prefetch={false}
           className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors"
         >
           <Plus className="h-3.5 w-3.5" />
