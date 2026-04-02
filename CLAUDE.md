@@ -64,8 +64,8 @@ npm run dev / build / typecheck / lint / test / test:coverage
 - Sentry/Logger 제거됨 (Workers 호환 문제)
 - **Link prefetch={false} 필수**: 모든 `<Link>` 컴포넌트에 `prefetch={false}` 적용 — Workers Free Plan에서 자동 prefetch가 RSC 동시 요청 폭발→503 유발 (`docs/workers-503-prefetch-resolution.md` 참조). ESLint `linkmap/no-link-prefetch` 규칙으로 자동 검출
 - **원클릭 템플릿 패키지 버전**: `shared-template-files.ts`와 하드코딩 package.json의 버전은 반드시 npm 레지스트리에 실제 존재하는 정식 릴리스여야 함 (캐럿`^` 금지, `-dev`/`-rc` 금지). 변경 시 `npm view <pkg>@<ver> version`으로 검증 필수
-- **Workers Free Plan CPU 10ms**: 공개 페이지는 `revalidate = false` 기본. 동적 데이터 필수인 경우만 ISR, `force-dynamic`은 인증 페이지만 허용
-- **배포 후 캐시 워밍업**: CI 자동 실행. 수동 배포 시 `bash scripts/warm-cache.sh`
+- **Workers CPU limits 필수 설정**: `wrangler.jsonc`에 `"limits": { "cpu_ms": 30000 }` 명시 필수. 미설정 시 Paid Plan에서도 Free 수준(10ms)이 적용되어 1102 에러 발생. 공개 페이지는 `revalidate = false` 기본, 동적 데이터 필수인 경우만 ISR, `force-dynamic`은 인증 페이지만 허용
+- **배포 후 캐시 워밍업 필수**: CI 자동 실행. 수동 배포 시 `npm run deploy:workers` (wrangler deploy + warm-cache 원샷 실행)
 - **서버 번들 대형 라이브러리 금지**: dynamic import + ssr:false 또는 optimizePackageImports
 
 ## MCP Supabase 사용 규칙
