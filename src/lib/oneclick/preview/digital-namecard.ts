@@ -90,6 +90,20 @@ function renderContactSection(state: ModuleConfigState): string {
       </div>`);
   }
 
+  // 추가 연락처
+  const extraItems = getArr(state, 'contact', 'extraItems') as Array<{ type: string; label: string; value: string }>;
+  for (const extra of extraItems) {
+    if (!extra.label || !extra.value) continue;
+    const icon = extra.type === 'email' ? '&#9993;' : extra.type === 'phone' ? '&#9742;' : '&#128279;';
+    const isLink = extra.type === 'email' || extra.type === 'phone' || extra.type === 'link';
+    const href = extra.type === 'email' ? `mailto:${esc(extra.value)}` : extra.type === 'phone' ? `tel:${esc(extra.value)}` : esc(extra.value);
+    rows.push(`
+      <div class="nc-contact-row">
+        <span class="nc-contact-icon">${icon}</span>
+        ${isLink ? `<a href="${href}"${extra.type === 'link' ? ' target="_blank" rel="noopener noreferrer"' : ''}>${esc(extra.label)}: ${esc(extra.value)}</a>` : `<span>${esc(extra.label)}: ${esc(extra.value)}</span>`}
+      </div>`);
+  }
+
   if (rows.length === 0) return '';
 
   return `

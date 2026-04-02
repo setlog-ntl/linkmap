@@ -39,6 +39,17 @@ const MODULE_COMPONENTS: Record<string, ComponentMapping> = {
   },
 };
 
+// ─── 추가 연락처 배열 빌더 ──────────────────────
+
+function buildExtraContactsArray(items: unknown[]): string {
+  if (!Array.isArray(items) || items.length === 0) return '[]';
+  const entries = items.map((item) => {
+    const v = item as Record<string, string>;
+    return `  { type: '${esc(v.type || 'text')}', label: '${esc(v.label || '')}', value: '${esc(sanitizeUrl(v.value || ''))}' }`;
+  });
+  return `[\n${entries.join(',\n')}\n]`;
+}
+
 // ─── Config 생성 ─────────────────────────────
 
 function generateConfigTs(state: ModuleConfigState): string {
@@ -59,6 +70,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const address = (contact.address as string) || '';
   const addressEn = (contact.addressEn as string) || '';
   const website = sanitizeUrl((contact.website as string) || '');
+  const extraItems = (contact.extraItems as unknown[]) || [];
   const rawAccent = (theme.accentColor as string) || '';
   const accentColor = /^#[0-9a-fA-F]{6}$/.test(rawAccent) ? rawAccent : '#3b82f6';
   const socialItems = (socials.items as unknown[]) || [];
@@ -69,7 +81,10 @@ function generateConfigTs(state: ModuleConfigState): string {
   const designPreset = validPresets.includes(rawPreset) ? rawPreset : 'pro';
   const fontFamily = (theme.fontFamily as string) || 'Pretendard Variable';
 
+  const extraContactsArr = buildExtraContactsArray(extraItems);
+
   return `export interface SocialItem { platform: string; url: string; label?: string; }
+export interface ExtraContactItem { type: 'email' | 'phone' | 'link' | 'text'; label: string; value: string; }
 
 export type DesignPreset = 'pro' | 'corporate' | 'creative' | 'minimal-dark';
 
@@ -98,6 +113,7 @@ export const siteConfig = {
   addressEn: process.env.NEXT_PUBLIC_ADDRESS_EN || ${addressEn ? `'${esc(addressEn)}'` : 'null'},
   website: process.env.NEXT_PUBLIC_WEBSITE || ${website ? `'${esc(website)}'` : 'null'},
   socials: parseJSON<SocialItem[]>(process.env.NEXT_PUBLIC_SOCIALS, ${buildSocialsArray(socialItems)}),
+  extraContacts: parseJSON<ExtraContactItem[]>(process.env.NEXT_PUBLIC_EXTRA_CONTACTS, ${extraContactsArr}),
   avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || ${avatarUrl ? imagePathExpr(avatarUrl) : 'null'},
   accentColor: process.env.NEXT_PUBLIC_ACCENT_COLOR || '${esc(accentColor)}',
   designPreset: parsePreset(process.env.NEXT_PUBLIC_DESIGN_PRESET || '${esc(designPreset)}'),
@@ -177,6 +193,28 @@ function parseConfigToState(
   if (addressEn !== null) state.values.contact.addressEn = addressEn;
   const website = extractNullable('website');
   if (website !== null) state.values.contact.website = website;
+
+  // Extra Contacts
+  try {
+    const extraMatch = configContent.match(
+      /extraContacts:\s*parseJSON<ExtraContactItem\[\]>\([^,]+,\s*(\[[\s\S]*?\])\s*\)/
+    );
+    if (extraMatch?.[1]) {
+      const items: Record<string, string>[] = [];
+      const objRe = /\{([\s\S]*?)\}/g;
+      let m;
+      while ((m = objRe.exec(extraMatch[1])) !== null) {
+        const obj: Record<string, string> = {};
+        const fieldRe = /(\w+):\s*'((?:[^'\\]|\\.)*)'/g;
+        let fm;
+        while ((fm = fieldRe.exec(m[1])) !== null) {
+          obj[fm[1]] = fm[2].replace(/\\(.)/g, '$1');
+        }
+        if (obj.label) items.push(obj);
+      }
+      if (items.length > 0) state.values.contact.extraItems = items;
+    }
+  } catch { /* 기본값 유지 */ }
 
   // Socials
   try {

@@ -1138,11 +1138,25 @@ export default function Home() {
 
 const namecardContactInfo = `'use client';
 
-import { Phone, Mail, MapPin, Globe } from 'lucide-react';
+import { Phone, Mail, MapPin, Globe, Link as LinkIcon } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useLocale } from '@/lib/i18n';
 
 interface Props { config: SiteConfig; accentColor?: string; }
+
+function getExtraContactHref(type: string, value: string): string | null {
+  if (type === 'email') return \`mailto:\${value}\`;
+  if (type === 'phone') return \`tel:\${value.replace(/[^+\\d]/g, '')}\`;
+  if (type === 'link') return value;
+  return null;
+}
+
+function getExtraContactIcon(type: string) {
+  if (type === 'email') return Mail;
+  if (type === 'phone') return Phone;
+  if (type === 'link') return LinkIcon;
+  return Globe;
+}
 
 export function ContactInfo({ config, accentColor }: Props) {
   const { t, locale } = useLocale();
@@ -1153,6 +1167,11 @@ export function ContactInfo({ config, accentColor }: Props) {
     config.phone ? { icon: Phone, label: config.phone, href: \`tel:\${config.phone.replace(/[^+\\d]/g, '')}\`, isExternal: false, ariaLabel: t('contact.call') } : null,
     address ? { icon: MapPin, label: address, href: \`https://maps.google.com/?q=\${encodeURIComponent(address)}\`, isExternal: true, ariaLabel: t('contact.map') } : null,
     config.website ? { icon: Globe, label: config.website.replace(/^https?:\\/\\//, ''), href: config.website, isExternal: true, ariaLabel: t('contact.website') } : null,
+    ...((config as Record<string, unknown>).extraContacts as Array<{ type: string; label: string; value: string }> || []).map((extra) => {
+      const href = getExtraContactHref(extra.type, extra.value);
+      const Icon = getExtraContactIcon(extra.type);
+      return { icon: Icon, label: \`\${extra.label}: \${extra.value}\`, href: href || '#', isExternal: extra.type === 'link', ariaLabel: extra.label };
+    }),
   ].filter(Boolean) as Array<{ icon: typeof Phone; label: string; href: string; isExternal: boolean; ariaLabel: string }>;
   if (items.length === 0) return null;
   return (
