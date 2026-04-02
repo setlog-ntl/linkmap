@@ -69,7 +69,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const designPreset = validPresets.includes(rawPreset) ? rawPreset : 'pro';
   const fontFamily = (theme.fontFamily as string) || 'Pretendard Variable';
 
-  return `export interface SocialItem { platform: string; url: string; }
+  return `export interface SocialItem { platform: string; url: string; label?: string; }
 
 export type DesignPreset = 'pro' | 'corporate' | 'creative' | 'minimal-dark';
 

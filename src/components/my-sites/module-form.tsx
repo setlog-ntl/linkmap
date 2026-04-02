@@ -357,6 +357,8 @@ function ArrayFieldRenderer({
                 youtube: 'https://youtube.com/@channel',
                 tiktok: 'https://tiktok.com/@username',
                 threads: 'https://threads.net/@username',
+                'naver-blog': 'https://blog.naver.com/blogid',
+                other: 'https://example.com',
               };
               const ph = platformPlaceholders[itemRecord.platform as string];
               if (ph) dynamicField = { ...subField, placeholder: ph };

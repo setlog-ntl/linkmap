@@ -97,7 +97,8 @@ export function buildSocialsArray(items: unknown[]): string {
   if (!Array.isArray(items) || items.length === 0) return '[]';
   const entries = items.map((item) => {
     const v = item as Record<string, string>;
-    return `  { platform: '${esc(v.platform || '')}', url: '${esc(sanitizeUrl(v.url || ''))}' }`;
+    const labelPart = v.label ? `, label: '${esc(v.label)}'` : '';
+    return `  { platform: '${esc(v.platform || '')}', url: '${esc(sanitizeUrl(v.url || ''))}'${labelPart} }`;
   });
   return `[\n${entries.join(',\n')}\n]`;
 }

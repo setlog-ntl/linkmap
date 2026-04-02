@@ -145,8 +145,18 @@ export const linkCardModuleSchema: TemplateModuleSchema = {
                 { value: 'linkedin', label: 'LinkedIn' },
                 { value: 'tiktok', label: 'TikTok' },
                 { value: 'threads', label: 'Threads' },
+                { value: 'naver-blog', label: '네이버 블로그' },
                 { value: 'facebook', label: 'Facebook' },
+                { value: 'other', label: '기타 (직접 입력)' },
               ],
+            },
+            {
+              key: 'label',
+              type: 'text',
+              label: '표시 이름',
+              labelEn: 'Display Label',
+              defaultValue: '',
+              placeholder: '기타 선택 시 표시할 이름',
             },
             {
               key: 'url',

@@ -636,6 +636,7 @@ const linkCardConfig = `export interface LinkItem {
 export interface SocialItem {
   platform: string;
   url: string;
+  label?: string;
 }
 
 const DEMO_LINKS: LinkItem[] = [
@@ -1399,6 +1400,14 @@ function TikTokIcon({ size = 20 }: { size?: number }) {
   );
 }
 
+function NaverBlogIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M16.273 12.845 7.376 0H0v24h7.726V11.156L16.624 24H24V0h-7.727v12.845Z" />
+    </svg>
+  );
+}
+
 function ThreadsIcon({ size = 20 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -1425,6 +1434,7 @@ const socialLabels: Record<string, string> = {
   youtube: 'YouTube',
   tiktok: 'TikTok',
   threads: 'Threads',
+  'naver-blog': '네이버 블로그',
 };
 
 interface Props { socials: SocialItem[]; accentColor: string; }
@@ -1435,26 +1445,29 @@ export function SocialLinks({ socials, accentColor }: Props) {
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
       {socials.map((social, i) => {
         const platform = social.platform.toLowerCase();
-        const label = socialLabels[platform] ?? social.platform;
+        const displayLabel = (social as Record<string, string>).label || socialLabels[platform] || social.platform;
         const isX = platform === 'twitter' || platform === 'x';
         const isTikTok = platform === 'tiktok';
         const isThreads = platform === 'threads';
-        const Icon = (isX || isTikTok || isThreads) ? null : (socialIcons[platform] ?? Globe);
+        const isNaverBlog = platform === 'naver-blog';
+        const hasCustomIcon = isX || isTikTok || isThreads || isNaverBlog;
+        const Icon = hasCustomIcon ? null : (socialIcons[platform] ?? Globe);
         return (
           <a
             key={i}
             href={social.url}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={label}
+            aria-label={displayLabel}
             className="social-chip"
             style={{ borderColor: accentColor, color: accentColor }}
           >
             {isX && <XIcon size={14} />}
             {isTikTok && <TikTokIcon size={14} />}
             {isThreads && <ThreadsIcon size={14} />}
+            {isNaverBlog && <NaverBlogIcon size={14} />}
             {Icon && <Icon size={14} />}
-            {label}
+            {displayLabel}
           </a>
         );
       })}
@@ -1496,7 +1509,7 @@ export function ThemeToggle() {
   );
 }`;
 
-const namecardConfig = `export interface SocialItem { platform: string; url: string; }
+const namecardConfig = `export interface SocialItem { platform: string; url: string; label?: string; }
 
 export type DesignPreset = 'pro' | 'corporate' | 'creative' | 'minimal-dark';
 
