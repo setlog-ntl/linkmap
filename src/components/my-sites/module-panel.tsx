@@ -40,6 +40,7 @@ import type {
   ModuleConfigState,
   ModuleDef,
 } from '@/lib/module-schema';
+import { validateModuleState } from '@/lib/oneclick/validate-module-state';
 import { ModuleForm } from './module-form';
 import { SplitButton } from './split-button';
 import type { Locale } from '@/lib/i18n';
@@ -398,6 +399,25 @@ export function ModulePanel({
     [activeId, schema.modules]
   );
 
+  const runValidation = useCallback((): boolean => {
+    const result = validateModuleState(state, schema);
+    if (!result.valid) {
+      const first = result.errors[0];
+      toast.error(`${first.moduleName}: ${first.message}${result.errors.length > 1 ? ` 외 ${result.errors.length - 1}건` : ''}`);
+      setSelectedModuleId(first.moduleId);
+      return false;
+    }
+    return true;
+  }, [state, schema]);
+
+  const handleValidatedSaveOnly = useCallback(() => {
+    if (runValidation()) onSaveOnly();
+  }, [runValidation, onSaveOnly]);
+
+  const handleValidatedSaveAndDeploy = useCallback(() => {
+    if (runValidation()) onSaveAndDeploy();
+  }, [runValidation, onSaveAndDeploy]);
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* 패널 헤더 */}
@@ -611,8 +631,8 @@ export function ModulePanel({
       {/* 하단 CTA (sticky) */}
       <div className="flex-shrink-0 border-t p-3 bg-background">
         <SplitButton
-          onSaveAndDeploy={onSaveAndDeploy}
-          onSaveOnly={onSaveOnly}
+          onSaveAndDeploy={handleValidatedSaveAndDeploy}
+          onSaveOnly={handleValidatedSaveOnly}
           isApplying={isApplying}
           isDeploying={isDeploying}
         />

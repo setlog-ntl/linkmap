@@ -87,7 +87,12 @@ export const digitalNamecardModuleSchema: TemplateModuleSchema = {
           labelEn: 'Email',
           defaultValue: 'hello@example.com',
           placeholder: 'you@example.com',
-          validation: { required: true },
+          validation: {
+            required: true,
+            inputType: 'email',
+            pattern: '^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$',
+            patternMessage: '올바른 이메일 형식을 입력하세요',
+          },
         },
         {
           key: 'phone',
@@ -96,6 +101,11 @@ export const digitalNamecardModuleSchema: TemplateModuleSchema = {
           labelEn: 'Phone',
           defaultValue: '010-1234-5678',
           placeholder: '010-0000-0000',
+          validation: {
+            inputType: 'tel',
+          },
+          helpText: '예: 010-1234-5678, +82-10-1234-5678',
+          helpTextEn: 'e.g. 010-1234-5678, +82-10-1234-5678',
         },
         {
           key: 'address',
@@ -120,6 +130,8 @@ export const digitalNamecardModuleSchema: TemplateModuleSchema = {
           labelEn: 'Website',
           defaultValue: '',
           placeholder: 'https://example.com',
+          helpText: 'https://를 포함하여 입력하세요',
+          helpTextEn: 'Include https:// in the URL',
         },
       ],
       affectedFiles: ['src/lib/config.ts'],

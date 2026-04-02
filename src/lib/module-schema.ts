@@ -24,7 +24,16 @@ export interface ModuleFieldDef {
     maxLength?: number;
     min?: number;
     max?: number;
+    /** 정규식 패턴 문자열 (클라이언트/서버 양측 검증용) */
+    pattern?: string;
+    /** 패턴 불일치 시 표시할 메시지 */
+    patternMessage?: string;
+    /** HTML input type 지정 (자동완성 활성화용) */
+    inputType?: 'email' | 'tel' | 'url';
   };
+  /** 필드 하단 안내 텍스트 */
+  helpText?: string;
+  helpTextEn?: string;
   /** array 타입 전용 — 배열 요소의 필드 정의 */
   itemSchema?: ModuleFieldDef[];
   maxItems?: number;

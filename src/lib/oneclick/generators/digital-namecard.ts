@@ -6,6 +6,7 @@ import type { ModuleConfigState, TemplateModuleSchema } from '@/lib/module-schem
 import type { TemplateGenerator, ComponentMapping } from './base-generator';
 import {
   esc,
+  sanitizeUrl,
   buildSocialsArray,
   normalizeImagePath,
   genBasePathConst,
@@ -55,8 +56,9 @@ function generateConfigTs(state: ModuleConfigState): string {
   const phone = contact.phone != null ? (contact.phone as string) : '';
   const address = (contact.address as string) || '';
   const addressEn = (contact.addressEn as string) || '';
-  const website = (contact.website as string) || '';
-  const accentColor = (theme.accentColor as string) || '#3b82f6';
+  const website = sanitizeUrl((contact.website as string) || '');
+  const rawAccent = (theme.accentColor as string) || '';
+  const accentColor = /^#[0-9a-fA-F]{6}$/.test(rawAccent) ? rawAccent : '#3b82f6';
   const socialItems = (socials.items as unknown[]) || [];
 
   return `export interface SocialItem { platform: string; url: string; }

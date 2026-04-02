@@ -6,6 +6,13 @@ import type { ModuleConfigState, TemplateModuleSchema } from '@/lib/module-schem
 
 // ─── 문자열 유틸 ─────────────────────────────
 
+/** 위험한 URL 프로토콜 제거 (XSS 방지) */
+export function sanitizeUrl(url: string): string {
+  const trimmed = url.trim();
+  if (/^(javascript|data|vbscript):/i.test(trimmed)) return '';
+  return trimmed;
+}
+
 /** 문자열 리터럴에 안전한 이스케이프 (빌드 파괴 방지) */
 export function esc(s: string): string {
   return s
@@ -90,7 +97,7 @@ export function buildSocialsArray(items: unknown[]): string {
   if (!Array.isArray(items) || items.length === 0) return '[]';
   const entries = items.map((item) => {
     const v = item as Record<string, string>;
-    return `  { platform: '${esc(v.platform || '')}', url: '${esc(v.url || '')}' }`;
+    return `  { platform: '${esc(v.platform || '')}', url: '${esc(sanitizeUrl(v.url || ''))}' }`;
   });
   return `[\n${entries.join(',\n')}\n]`;
 }

@@ -75,26 +75,45 @@ interface FieldRendererProps {
 
 function FieldRenderer({ field, value, onChange, locale, deployId, onImagePreview }: FieldRendererProps) {
   const label = locale === 'en' && field.labelEn ? field.labelEn : field.label;
+  const isRequired = field.validation?.required;
+  const helpText = locale === 'en' && field.helpTextEn ? field.helpTextEn : field.helpText;
+
+  const labelNode = (
+    <Label className="text-xs font-medium">
+      {label}
+      {isRequired && <span className="text-destructive ml-0.5">*</span>}
+    </Label>
+  );
 
   switch (field.type) {
     case 'text': {
       const textVal = (value as string) ?? '';
-      const isRequired = field.validation?.required;
       const maxLen = field.validation?.maxLength;
-      const showError = isRequired && !textVal.trim();
+      const showEmpty = isRequired && !textVal.trim();
+      const pattern = field.validation?.pattern;
+      const showPatternError = !showEmpty && pattern && textVal.trim() && !new RegExp(pattern).test(textVal);
+      const inputType = field.validation?.inputType ?? 'text';
       return (
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium">{label}</Label>
+          {labelNode}
           <Input
-            type="text"
+            type={inputType}
             value={textVal}
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder}
-            className={`h-8 text-sm ${showError ? 'border-destructive' : ''}`}
+            className={`h-8 text-sm ${showEmpty || showPatternError ? 'border-destructive' : ''}`}
             maxLength={maxLen}
           />
-          {showError && (
+          {showEmpty && (
             <p className="text-[11px] text-destructive">필수 입력 항목입니다</p>
+          )}
+          {showPatternError && (
+            <p className="text-[11px] text-destructive">
+              {field.validation?.patternMessage ?? '입력 형식을 확인하세요'}
+            </p>
+          )}
+          {helpText && !showEmpty && !showPatternError && (
+            <p className="text-[11px] text-muted-foreground">{helpText}</p>
           )}
         </div>
       );
@@ -110,16 +129,17 @@ function FieldRenderer({ field, value, onChange, locale, deployId, onImagePrevie
           deployId={deployId}
           locale={locale}
           onImagePreview={onImagePreview}
+          required={isRequired}
+          helpText={helpText}
         />
       );
 
     case 'textarea': {
       const textareaVal = (value as string) ?? '';
-      const isRequired = field.validation?.required;
       const showError = isRequired && !textareaVal.trim();
       return (
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium">{label}</Label>
+          {labelNode}
           <Textarea
             value={textareaVal}
             onChange={(e) => onChange(e.target.value)}
@@ -140,7 +160,7 @@ function FieldRenderer({ field, value, onChange, locale, deployId, onImagePrevie
       const showColorError = colorVal.length > 0 && !isValidHex;
       return (
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium">{label}</Label>
+          {labelNode}
           <div className="flex items-center gap-2">
             <div className="relative h-9 w-12 rounded-lg border overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-shadow"
               style={{ backgroundColor: isValidHex ? colorVal : '#000000' }}
@@ -169,7 +189,7 @@ function FieldRenderer({ field, value, onChange, locale, deployId, onImagePrevie
     case 'number':
       return (
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium">{label}</Label>
+          {labelNode}
           <Input
             type="number"
             value={(value as number) ?? 0}
@@ -184,7 +204,7 @@ function FieldRenderer({ field, value, onChange, locale, deployId, onImagePrevie
     case 'boolean':
       return (
         <div className="flex items-center justify-between">
-          <Label className="text-xs font-medium">{label}</Label>
+          {labelNode}
           <Switch
             checked={!!value}
             onCheckedChange={(checked) => onChange(checked)}
@@ -197,7 +217,7 @@ function FieldRenderer({ field, value, onChange, locale, deployId, onImagePrevie
       const selectedValue = (value as string) ?? '';
       return (
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium">{label}</Label>
+          {labelNode}
           <Select
             value={selectedValue}
             onValueChange={(v) => onChange(v)}
@@ -323,16 +343,34 @@ function ArrayFieldRenderer({
               <Trash2 className="h-3 w-3" />
             </Button>
           </div>
-          {field.itemSchema?.map((subField) => (
-            <FieldRenderer
-              key={subField.key}
-              field={subField}
-              value={(item as Record<string, unknown>)[subField.key]}
-              onChange={(val) => handleItemChange(index, subField.key, val)}
-              locale={locale}
-              deployId={deployId}
-            />
-          ))}
+          {field.itemSchema?.map((subField) => {
+            // 소셜 링크: 선택된 플랫폼에 따라 URL placeholder 동적 변경
+            const itemRecord = item as Record<string, unknown>;
+            let dynamicField = subField;
+            if (subField.key === 'url' && subField.type === 'url' && itemRecord.platform) {
+              const platformPlaceholders: Record<string, string> = {
+                linkedin: 'https://linkedin.com/in/username',
+                twitter: 'https://x.com/username',
+                instagram: 'https://instagram.com/username',
+                github: 'https://github.com/username',
+                facebook: 'https://facebook.com/username',
+                youtube: 'https://youtube.com/@channel',
+                tiktok: 'https://tiktok.com/@username',
+              };
+              const ph = platformPlaceholders[itemRecord.platform as string];
+              if (ph) dynamicField = { ...subField, placeholder: ph };
+            }
+            return (
+              <FieldRenderer
+                key={subField.key}
+                field={dynamicField}
+                value={itemRecord[subField.key]}
+                onChange={(val) => handleItemChange(index, subField.key, val)}
+                locale={locale}
+                deployId={deployId}
+              />
+            );
+          })}
         </div>
       ))}
 
@@ -405,6 +443,8 @@ interface ImageUrlFieldProps {
   deployId?: string;
   locale: string;
   onImagePreview?: (path: string, dataUrl: string) => void;
+  required?: boolean;
+  helpText?: string;
 }
 
 /** /public/images/... → /images/... 경로 보정 */
@@ -415,7 +455,7 @@ function fixPublicPath(path: string): string {
   return path;
 }
 
-function ImageUrlField({ label, value, onChange, placeholder, deployId, locale, onImagePreview }: ImageUrlFieldProps) {
+function ImageUrlField({ label, value, onChange, placeholder, deployId, locale, onImagePreview, required, helpText }: ImageUrlFieldProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -496,14 +536,32 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale, 
     value.startsWith('/public/images/')
   );
 
+  const handleUrlBlur = useCallback(() => {
+    if (!value) return;
+    // 위험 프로토콜 차단
+    if (/^(javascript|data|vbscript):/i.test(value.trim())) {
+      onChange('');
+      toast.error('허용되지 않는 URL 형식입니다');
+      return;
+    }
+    // https:// 자동 추가 (로컬 경로 제외)
+    if (value.trim() && !value.startsWith('http') && !value.startsWith('/')) {
+      onChange(`https://${value.trim()}`);
+    }
+  }, [value, onChange]);
+
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs font-medium">{label}</Label>
+      <Label className="text-xs font-medium">
+        {label}
+        {required && <span className="text-destructive ml-0.5">*</span>}
+      </Label>
       <div className="flex items-center gap-1.5">
         <Input
           type="url"
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onBlur={handleUrlBlur}
           placeholder={placeholder}
           className="h-8 text-sm flex-1"
         />
@@ -599,6 +657,9 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale, 
             />
           </div>
         )
+      )}
+      {helpText && (
+        <p className="text-[11px] text-muted-foreground">{helpText}</p>
       )}
     </div>
   );
