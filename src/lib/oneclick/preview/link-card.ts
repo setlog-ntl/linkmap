@@ -87,7 +87,9 @@ function renderProfileSection(
   imageMap: Record<string, string>,
 ): string {
   const name = getVal(state, 'profile', 'name', '');
+  const nameEn = getVal(state, 'profile', 'nameEn', '');
   const bio = getVal(state, 'profile', 'bio', '');
+  const bioEn = getVal(state, 'profile', 'bioEn', '');
   const avatarUrl = getVal(state, 'profile', 'avatarUrl', '');
   const avatarSrc = resolveImageSrc(avatarUrl, liveUrl, imageMap);
 
@@ -103,7 +105,9 @@ function renderProfileSection(
     <section class="lc-profile">
       ${avatarHtml}
       <h1 class="lc-name" style="color:${theme.text}">${esc(name)}</h1>
+      ${nameEn ? `<p class="lc-name-en" style="color:${theme.textMuted};font-size:0.85rem;margin:0 0 0.25rem;">${esc(nameEn)}</p>` : ''}
       ${bio ? `<p class="lc-bio" style="color:${theme.textMuted}">${esc(bio)}</p>` : ''}
+      ${bioEn ? `<p class="lc-bio-en" style="color:${theme.textMuted};font-size:0.8rem;margin:0.25rem 0 0;opacity:0.8;">${esc(bioEn)}</p>` : ''}
     </section>`;
 }
 

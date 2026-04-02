@@ -90,6 +90,7 @@ function renderHeroSection(
   const name = getVal(state, 'hero', 'name', '');
   const nameEn = getVal(state, 'hero', 'nameEn', '');
   const title = getVal(state, 'hero', 'title', '');
+  const titleEn = getVal(state, 'hero', 'titleEn', '');
   const tagline = getVal(state, 'hero', 'tagline', '');
   const taglineEn = getVal(state, 'hero', 'taglineEn', '');
   const avatarUrl = getVal(state, 'hero', 'avatarUrl', '');
@@ -119,6 +120,7 @@ function renderHeroSection(
         ${avatarHtml}
         <p class="fp-hero-name-label">${esc(name)}</p>
         <h1 class="fp-hero-title" style="background:linear-gradient(to right, ${esc(gradientFrom)}, ${esc(gradientTo)});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">${esc(title || name)}</h1>
+        ${titleEn ? `<p style="font-size:15px;color:var(--text-secondary);margin:0 0 4px;font-weight:500;">${esc(titleEn)}</p>` : ''}
         ${nameEn ? `<p style="font-size:14px;color:var(--text-secondary);margin:0 0 8px;">${esc(nameEn)}</p>` : ''}
         <p class="fp-hero-tagline">${esc(tagline)}</p>
         ${taglineEn ? `<p style="font-size:14px;color:var(--text-secondary);margin:0 0 16px;">${esc(taglineEn)}</p>` : ''}
