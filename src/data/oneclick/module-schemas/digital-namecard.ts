@@ -35,7 +35,7 @@ export const digitalNamecardModuleSchema: TemplateModuleSchema = {
           label: '직함',
           labelEn: 'Title',
           defaultValue: '프리랜서 개발자',
-          validation: { required: true, maxLength: 100 },
+          validation: { maxLength: 100 },
         },
         {
           key: 'titleEn',
