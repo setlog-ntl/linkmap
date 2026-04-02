@@ -169,6 +169,7 @@ export const digitalNamecardModuleSchema: TemplateModuleSchema = {
                 { value: 'facebook', label: 'Facebook' },
                 { value: 'youtube', label: 'YouTube' },
                 { value: 'tiktok', label: 'TikTok' },
+                { value: 'threads', label: 'Threads' },
               ],
             },
             {

@@ -144,6 +144,7 @@ export const linkCardModuleSchema: TemplateModuleSchema = {
                 { value: 'github', label: 'GitHub' },
                 { value: 'linkedin', label: 'LinkedIn' },
                 { value: 'tiktok', label: 'TikTok' },
+                { value: 'threads', label: 'Threads' },
                 { value: 'facebook', label: 'Facebook' },
               ],
             },

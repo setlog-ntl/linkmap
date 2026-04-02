@@ -397,6 +397,7 @@ export const personalBrandModuleSchema: TemplateModuleSchema = {
                 { value: 'github', label: 'GitHub' },
                 { value: 'linkedin', label: 'LinkedIn' },
                 { value: 'tiktok', label: 'TikTok' },
+                { value: 'threads', label: 'Threads' },
               ],
             },
             {

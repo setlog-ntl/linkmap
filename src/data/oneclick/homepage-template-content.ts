@@ -1399,6 +1399,14 @@ function TikTokIcon({ size = 20 }: { size?: number }) {
   );
 }
 
+function ThreadsIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.59 12c.025 3.086.718 5.496 2.057 7.164 1.432 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.34-.776-.94-1.41-1.738-1.854a7.025 7.025 0 0 1-.345 2.994c-.442 1.237-1.2 2.202-2.233 2.835-1.008.618-2.22.908-3.6.862-1.658-.055-3.005-.646-3.895-1.71-.82-.98-1.263-2.264-1.248-3.614.03-2.514 1.89-4.336 4.636-4.544l.091-.004c1.478-.042 2.794.34 3.803 1.105.473.358.857.794 1.145 1.293.553-.14 1.06-.227 1.512-.247h.029c.576 0 1.11.15 1.59.447.94.582 1.524 1.59 1.736 2.998.136.895.094 1.97-.123 3.095-.68 3.512-2.834 5.638-6.44 6.34-.592.116-1.22.175-1.87.181zm-.036-9.894c-1.73.135-2.683 1.133-2.7 2.818-.01.845.27 1.556.788 2.003.538.464 1.328.71 2.288.743.898.03 1.685-.163 2.342-.574.672-.42 1.168-1.055 1.472-1.886.33-.9.382-1.87.152-2.804-.424-.254-.93-.387-1.504-.397-.168 0-.35.01-.546.032a8.545 8.545 0 0 0-2.292.065z" />
+    </svg>
+  );
+}
+
 const socialIcons: Record<string, LucideIcon> = {
   linkedin: Linkedin,
   instagram: Instagram,
@@ -1416,6 +1424,7 @@ const socialLabels: Record<string, string> = {
   facebook: 'Facebook',
   youtube: 'YouTube',
   tiktok: 'TikTok',
+  threads: 'Threads',
 };
 
 interface Props { socials: SocialItem[]; accentColor: string; }
@@ -1429,7 +1438,8 @@ export function SocialLinks({ socials, accentColor }: Props) {
         const label = socialLabels[platform] ?? social.platform;
         const isX = platform === 'twitter' || platform === 'x';
         const isTikTok = platform === 'tiktok';
-        const Icon = (isX || isTikTok) ? null : (socialIcons[platform] ?? Globe);
+        const isThreads = platform === 'threads';
+        const Icon = (isX || isTikTok || isThreads) ? null : (socialIcons[platform] ?? Globe);
         return (
           <a
             key={i}
@@ -1442,6 +1452,7 @@ export function SocialLinks({ socials, accentColor }: Props) {
           >
             {isX && <XIcon size={14} />}
             {isTikTok && <TikTokIcon size={14} />}
+            {isThreads && <ThreadsIcon size={14} />}
             {Icon && <Icon size={14} />}
             {label}
           </a>
