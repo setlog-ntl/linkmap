@@ -227,16 +227,17 @@ function parseConfigToState(
   if (accentColor !== null) state.values.theme.accentColor = accentColor;
   const fontFamily = extractString('fontFamily');
   if (fontFamily !== null) state.values.theme.fontFamily = fontFamily;
-  // designPreset: parsePreset() 호출이므로 extractString으로 직접 추출 불가
-  // 대신 정규식으로 파싱
-  const presetMatch = siteBlock.match(/designPreset:\s*parsePreset\(.*?\)/);
-  if (presetMatch) {
-    // 이미 프리셋 함수 호출 형태 → 기존 값 유지 (사용자가 변경하면 새로 생성)
-    // env 변수 기본값 'pro'로 초기화됨 (buildInitialState에서)
+  // designPreset: parsePreset(env || 'value') 형태에서 폴백 문자열 추출
+  const presetFnMatch = siteBlock.match(
+    /designPreset:\s*parsePreset\(\s*(?:process\.env\.\w+\s*\|\|\s*)?'([^']*)'/
+  );
+  if (presetFnMatch?.[1]) {
+    state.values.theme.designPreset = presetFnMatch[1];
+  } else {
+    // fallback: 직접 문자열로 지정된 경우
+    const dpStr = extractString('designPreset');
+    if (dpStr !== null) state.values.theme.designPreset = dpStr;
   }
-  // fallback: 직접 문자열로 지정된 경우
-  const dpStr = extractString('designPreset');
-  if (dpStr !== null) state.values.theme.designPreset = dpStr;
 
   return state;
 }
