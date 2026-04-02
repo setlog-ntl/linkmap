@@ -30,6 +30,20 @@ export const digitalNamecardModuleSchema: TemplateModuleSchema = {
           defaultValue: 'Gildong Hong',
         },
         {
+          key: 'company',
+          type: 'text',
+          label: '회사명',
+          labelEn: 'Company',
+          defaultValue: '',
+        },
+        {
+          key: 'companyEn',
+          type: 'text',
+          label: '영문 회사명',
+          labelEn: 'English Company',
+          defaultValue: '',
+        },
+        {
           key: 'title',
           type: 'text',
           label: '직함',
@@ -43,20 +57,6 @@ export const digitalNamecardModuleSchema: TemplateModuleSchema = {
           label: '영문 직함',
           labelEn: 'English Title',
           defaultValue: 'Freelance Developer',
-        },
-        {
-          key: 'company',
-          type: 'text',
-          label: '회사명',
-          labelEn: 'Company',
-          defaultValue: '',
-        },
-        {
-          key: 'companyEn',
-          type: 'text',
-          label: '영문 회사명',
-          labelEn: 'English Company',
-          defaultValue: '',
         },
         {
           key: 'avatarUrl',

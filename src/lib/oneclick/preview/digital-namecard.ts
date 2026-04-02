@@ -48,8 +48,8 @@ function renderProfileSection(
       ${avatarHtml}
       <h1 class="nc-name">${esc(name)}</h1>
       ${nameEn ? `<p class="nc-name-en">${esc(nameEn)}</p>` : ''}
-      <p class="nc-title">${esc(title)}${titleEn ? ` <span class="nc-en">${esc(titleEn)}</span>` : ''}</p>
       ${companyLine}
+      ${title ? `<p class="nc-title">${esc(title)}${titleEn ? ` <span class="nc-en">${esc(titleEn)}</span>` : ''}</p>` : ''}
     </section>`;
 }
 

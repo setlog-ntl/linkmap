@@ -1303,11 +1303,13 @@ export function ProfileCard({ config }: Props) {
       {nameSecondary && (
         <p style={{ fontSize: '0.8125rem', color: 'var(--card-sub)', marginBottom: 4 }}>{nameSecondary}</p>
       )}
-      {/* Title */}
-      <p style={{ fontSize: '0.9375rem', fontWeight: 600, color: config.accentColor }}>{title}</p>
       {/* Company */}
       {company && (
         <p style={{ fontSize: '0.8125rem', color: 'var(--card-sub)', marginTop: 2 }}>{company}</p>
+      )}
+      {/* Title */}
+      {title && (
+        <p style={{ fontSize: '0.9375rem', fontWeight: 600, color: config.accentColor }}>{title}</p>
       )}
     </div>
   );
