@@ -156,6 +156,32 @@ export const subcategories: SubcategorySeed[] = [
   { id: 'header_bidding', category: 'advertising', name: 'Header Bidding', name_ko: '헤더 비딩', description: 'Programmatic header bidding and ad serving', description_ko: '프로그래매틱 헤더 비딩 및 광고 서버' },
   { id: 'retargeting', category: 'advertising', name: 'Retargeting', name_ko: '리타겟팅', description: 'Retargeting and performance advertising', description_ko: '리타겟팅 및 퍼포먼스 광고' },
 
+  // --- ai (추가) ---
+  { id: 'vibe_coding', category: 'ai', name: 'Vibe Coding Platform', name_ko: '바이브 코딩 플랫폼', description: 'AI-powered app builders for non-coders', description_ko: 'AI 기반 앱 빌더 (비개발자용 풀스택 생성)' },
+  { id: 'llm_router', category: 'ai', name: 'LLM Router', name_ko: 'LLM 라우터', description: 'Multi-LLM routing and gateway services', description_ko: '멀티 LLM 라우팅 및 게이트웨이' },
+  { id: 'ai_framework', category: 'ai', name: 'AI Framework', name_ko: 'AI 프레임워크', description: 'AI application development SDKs and frameworks', description_ko: 'AI 앱 개발 SDK 및 프레임워크' },
+  { id: 'model_hub', category: 'ai', name: 'Model Hub', name_ko: '모델 허브', description: 'ML model hosting, sharing, and inference platforms', description_ko: 'ML 모델 호스팅·공유·추론 플랫폼' },
+
+  // --- database (추가) ---
+  { id: 'edge_db', category: 'database', name: 'Edge Database', name_ko: '에지 데이터베이스', description: 'Edge-native distributed databases', description_ko: '에지 네이티브 분산 데이터베이스' },
+  { id: 'reactive_backend', category: 'database', name: 'Reactive Backend', name_ko: '리액티브 백엔드', description: 'Realtime reactive backend platforms with built-in DB', description_ko: '실시간 리액티브 백엔드 플랫폼 (DB 내장)' },
+  { id: 'orm', category: 'database', name: 'ORM', name_ko: 'ORM', description: 'Object-relational mapping tools for databases', description_ko: '데이터베이스 ORM 도구' },
+
+  // --- deploy (추가) ---
+  { id: 'selfhost_paas', category: 'deploy', name: 'Self-hosted PaaS', name_ko: '셀프호스트 PaaS', description: 'Open-source self-hosted deployment platforms', description_ko: '오픈소스 셀프호스트 배포 플랫폼' },
+
+  // --- auth (추가) ---
+  { id: 'enterprise_sso', category: 'auth', name: 'Enterprise SSO', name_ko: '엔터프라이즈 SSO', description: 'Enterprise SSO, SAML, and directory sync', description_ko: '엔터프라이즈 SSO, SAML, 디렉터리 동기화' },
+
+  // --- push (추가) ---
+  { id: 'notification_infra', category: 'push', name: 'Notification Infrastructure', name_ko: '알림 인프라', description: 'Multi-channel notification orchestration (email, SMS, push, in-app)', description_ko: '멀티채널 알림 오케스트레이션 (이메일, SMS, 푸시, 인앱)' },
+
+  // --- cms (추가) ---
+  { id: 'git_cms', category: 'cms', name: 'Git-based CMS', name_ko: 'Git 기반 CMS', description: 'Git-backed content management systems', description_ko: 'Git 저장소 기반 콘텐츠 관리 시스템' },
+
+  // --- payment (추가) ---
+  { id: 'subscription_mor', category: 'payment', name: 'MoR Billing', name_ko: 'MoR 결제', description: 'Merchant of Record billing with tax automation', description_ko: '세금 자동 처리 포함 판매대행(MoR) 결제' },
+
   // --- sns ---
   { id: 'social-media', category: 'sns', name: 'Social Media', name_ko: '소셜 미디어', description: 'Social media platform APIs', description_ko: '소셜 미디어 플랫폼 API' },
   { id: 'video-platform', category: 'sns', name: 'Video Platform', name_ko: '영상 플랫폼', description: 'Video sharing platform APIs', description_ko: '영상 공유 플랫폼 API' },

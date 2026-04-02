@@ -136,6 +136,25 @@ export const SERVICE_IDS_V2 = {
   n8n: '10000000-0000-4000-a000-000000000139',
   // AI UI Design
   google_stitch: '10000000-0000-4000-a000-000000000140',
+  // ── Batch 1: 트렌딩 서비스 2024-2026 ──
+  cursor: '10000000-0000-4000-a000-000000000141',
+  github_copilot: '10000000-0000-4000-a000-000000000142',
+  bolt_new: '10000000-0000-4000-a000-000000000143',
+  lovable: '10000000-0000-4000-a000-000000000144',
+  v0: '10000000-0000-4000-a000-000000000145',
+  replit: '10000000-0000-4000-a000-000000000146',
+  cline: '10000000-0000-4000-a000-000000000147',
+  openrouter: '10000000-0000-4000-a000-000000000148',
+  huggingface: '10000000-0000-4000-a000-000000000149',
+  replicate: '10000000-0000-4000-a000-000000000150',
+  convex: '10000000-0000-4000-a000-000000000151',
+  turso: '10000000-0000-4000-a000-000000000152',
+  prisma: '10000000-0000-4000-a000-000000000153',
+  paddle: '10000000-0000-4000-a000-000000000154',
+  payload_cms: '10000000-0000-4000-a000-000000000155',
+  axiom: '10000000-0000-4000-a000-000000000156',
+  betterstack: '10000000-0000-4000-a000-000000000157',
+  novu: '10000000-0000-4000-a000-000000000158',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -4956,6 +4975,1050 @@ export const servicesV2: ServiceSeedV2[] = [
       starter: '$0',
       growth: '$0',
       enterprise: 'N/A',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Cursor
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.cursor,
+    name: 'Cursor',
+    slug: 'cursor',
+    category: 'ai',
+    description:
+      'VS Code 포크 기반 AI 코드 에디터입니다. GPT-4, Claude 등 최신 LLM을 내장해 코드 자동완성·채팅·에이전트 기능을 제공하며, 바이브코딩의 대표 도구로 자리잡고 있습니다.',
+    description_ko:
+      'VS Code 포크 기반 AI 코드 에디터입니다. GPT-4, Claude 등 최신 LLM을 내장해 코드 자동완성·채팅·에이전트 기능을 제공하며, 바이브코딩의 대표 도구로 자리잡고 있습니다.',
+    icon_url: null,
+    website_url: 'https://cursor.com',
+    docs_url: 'https://docs.cursor.com',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Hobby 플랜 무료 (월 2,000 완성, 50 slow 요청)',
+      plans: [
+        { name: 'Hobby', price: '$0/월' },
+        { name: 'Pro', price: '$20/월' },
+        { name: 'Business', price: '$40/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'OPENAI_API_KEY',
+        public: false,
+        optional: true,
+        description: 'OpenAI API key (optional, only needed when using your own API key in Cursor settings)',
+        description_ko: 'OpenAI API 키 (선택, Cursor 설정에서 자체 키 사용 시)',
+      },
+      {
+        name: 'ANTHROPIC_API_KEY',
+        public: false,
+        optional: true,
+        description: 'Anthropic API key (optional, only needed when using your own API key in Cursor settings)',
+        description_ko: 'Anthropic API 키 (선택, Cursor 설정에서 자체 키 사용 시)',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'code_assistant',
+    popularity_score: 95,
+    difficulty_level: 'beginner',
+    tags: ['cursor', 'ai-ide', 'vibe-coding', 'code-editor', 'llm', '커서', 'AI코딩', '바이브코딩'],
+    alternatives: ['windsurf', 'claude-code', 'github-copilot'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'svelte', 'nuxt', 'express', 'fastify', 'django', 'rails', 'flask'],
+      language: ['javascript', 'typescript', 'python', 'go', 'rust', 'java', 'ruby', 'php', 'csharp'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$20/월',
+      enterprise: '$40/월',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // GitHub Copilot
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.github_copilot,
+    name: 'GitHub Copilot',
+    slug: 'github-copilot',
+    category: 'ai',
+    description:
+      'GitHub의 AI 페어 프로그래머입니다. IDE 내 코드 자동완성부터 Agent 모드까지 지원하며, 코드베이스 컨텍스트를 이해하고 PR 리뷰·이슈 해결을 자동화합니다.',
+    description_ko:
+      'GitHub의 AI 페어 프로그래머입니다. IDE 내 코드 자동완성부터 Agent 모드까지 지원하며, 코드베이스 컨텍스트를 이해하고 PR 리뷰·이슈 해결을 자동화합니다.',
+    icon_url: null,
+    website_url: 'https://github.com/features/copilot',
+    docs_url: 'https://docs.github.com/en/copilot',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Free 티어: 월 2,000 완성, 50 채팅 메시지',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Individual', price: '$10/월' },
+        { name: 'Business', price: '$19/유저/월' },
+        { name: 'Enterprise', price: '$39/유저/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'GITHUB_COPILOT_TOKEN',
+        public: false,
+        optional: true,
+        description: 'GitHub Copilot token (auto-managed by IDE extension)',
+        description_ko: 'GitHub Copilot 토큰 (IDE 확장이 자동 관리)',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'code_assistant',
+    popularity_score: 97,
+    difficulty_level: 'beginner',
+    tags: ['copilot', 'github', 'ai-coding', 'pair-programming', 'llm', '코파일럿', '깃허브', 'AI코딩'],
+    alternatives: ['cursor', 'windsurf', 'claude-code'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'svelte', 'nuxt', 'express', 'fastify', 'django', 'rails', 'flask', 'spring'],
+      language: ['javascript', 'typescript', 'python', 'go', 'rust', 'java', 'ruby', 'php', 'csharp', 'cpp', 'c'],
+    },
+    official_sdks: {
+      vscode: 'https://marketplace.visualstudio.com/items?itemName=GitHub.copilot',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$10/월',
+      enterprise: '$19/유저/월',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Bolt.new
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.bolt_new,
+    name: 'Bolt.new',
+    slug: 'bolt-new',
+    category: 'ai',
+    description:
+      'StackBlitz 기반 AI 풀스택 앱 생성 플랫폼입니다. 프롬프트 한 줄로 브라우저 안에서 즉시 실행 가능한 풀스택 앱을 생성·편집·배포할 수 있습니다.',
+    description_ko:
+      'StackBlitz 기반 AI 풀스택 앱 생성 플랫폼입니다. 프롬프트 한 줄로 브라우저 안에서 즉시 실행 가능한 풀스택 앱을 생성·편집·배포할 수 있습니다.',
+    icon_url: null,
+    website_url: 'https://bolt.new',
+    docs_url: 'https://docs.bolt.new',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Free: 일 토큰 한도, Pro $20/월, Unlimited $100/월',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Pro', price: '$20/월' },
+        { name: 'Unlimited', price: '$100/월' },
+      ],
+    },
+    required_env_vars: [],
+    domain: 'ai_ml',
+    subcategory: 'vibe_coding',
+    popularity_score: 88,
+    difficulty_level: 'beginner',
+    tags: ['bolt', 'stackblitz', 'vibe-coding', 'app-builder', 'fullstack', 'no-code', '볼트', '바이브코딩', '앱빌더'],
+    alternatives: ['lovable', 'replit', 'v0'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'svelte'],
+      language: ['javascript', 'typescript'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'limited',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 1,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$20/월',
+      enterprise: '$100/월',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Lovable
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.lovable,
+    name: 'Lovable',
+    slug: 'lovable',
+    category: 'ai',
+    description:
+      'AI 기반 풀스택 앱 빌더(구 GPT Engineer)입니다. 프롬프트로 앱을 생성하고 Supabase 통합 및 배포까지 원스톱으로 처리합니다.',
+    description_ko:
+      'AI 기반 풀스택 앱 빌더(구 GPT Engineer)입니다. 프롬프트로 앱을 생성하고 Supabase 통합 및 배포까지 원스톱으로 처리합니다.',
+    icon_url: null,
+    website_url: 'https://lovable.dev',
+    docs_url: 'https://docs.lovable.dev',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Free: 5 생성 포함, 이후 유료 전환',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Starter', price: '$20/월' },
+        { name: 'Launch', price: '$50/월' },
+        { name: 'Scale', price: '$100/월' },
+      ],
+    },
+    required_env_vars: [],
+    domain: 'ai_ml',
+    subcategory: 'vibe_coding',
+    popularity_score: 85,
+    difficulty_level: 'beginner',
+    tags: ['lovable', 'gpt-engineer', 'vibe-coding', 'app-builder', 'supabase', 'fullstack', '러블리', '바이브코딩', '앱빌더'],
+    alternatives: ['bolt-new', 'replit', 'v0'],
+    compatibility: {
+      framework: ['next', 'react'],
+      language: ['javascript', 'typescript'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'limited',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 1,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$20/월',
+      enterprise: '$100/월',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // v0 by Vercel
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.v0,
+    name: 'v0 by Vercel',
+    slug: 'v0',
+    category: 'ai',
+    description:
+      'Vercel의 AI UI 생성 도구입니다. 텍스트 프롬프트로 React/Next.js + shadcn/ui 컴포넌트를 즉시 생성하고, Vercel에 바로 배포할 수 있습니다.',
+    description_ko:
+      'Vercel의 AI UI 생성 도구입니다. 텍스트 프롬프트로 React/Next.js + shadcn/ui 컴포넌트를 즉시 생성하고, Vercel에 바로 배포할 수 있습니다.',
+    icon_url: null,
+    website_url: 'https://v0.dev',
+    docs_url: 'https://v0.dev/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Free: 일 생성 크레딧 제한, Premium $20/월',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Premium', price: '$20/월' },
+      ],
+    },
+    required_env_vars: [],
+    domain: 'ai_ml',
+    subcategory: 'vibe_coding',
+    popularity_score: 87,
+    difficulty_level: 'beginner',
+    tags: ['v0', 'vercel', 'ui-generation', 'shadcn', 'react', 'next', 'component', '브이제로', 'UI생성', '바이브코딩'],
+    alternatives: ['bolt-new', 'lovable', 'google-stitch'],
+    compatibility: {
+      framework: ['next', 'react'],
+      language: ['javascript', 'typescript'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 1,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$20/월',
+      enterprise: '$20/월',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Replit
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.replit,
+    name: 'Replit',
+    slug: 'replit',
+    category: 'ai',
+    description:
+      '클라우드 IDE + AI 에이전트 올인원 플랫폼입니다. 프롬프트로 풀스택 앱을 생성·실행·배포할 수 있으며, 협업 코딩 환경을 제공합니다.',
+    description_ko:
+      '클라우드 IDE + AI 에이전트 올인원 플랫폼입니다. 프롬프트로 풀스택 앱을 생성·실행·배포할 수 있으며, 협업 코딩 환경을 제공합니다.',
+    icon_url: null,
+    website_url: 'https://replit.com',
+    docs_url: 'https://docs.replit.com',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Free: 기본 환경 제공, Core $25/월',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Core', price: '$25/월' },
+        { name: 'Teams', price: '$15/시트/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'REPLIT_DB_URL',
+        public: false,
+        optional: true,
+        description: 'Replit built-in key-value database URL (auto-provided inside Replit environment)',
+        description_ko: 'Replit 내장 키-값 DB URL (Replit 환경 내에서 자동 제공)',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'vibe_coding',
+    popularity_score: 82,
+    difficulty_level: 'beginner',
+    tags: ['replit', 'cloud-ide', 'vibe-coding', 'deployment', 'collaboration', 'ai-agent', '리플릿', '클라우드IDE', '바이브코딩'],
+    alternatives: ['bolt-new', 'lovable'],
+    compatibility: {
+      framework: ['next', 'react', 'express', 'flask', 'django', 'rails'],
+      language: ['javascript', 'typescript', 'python', 'go', 'ruby'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 2,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$25/월',
+      enterprise: '$15/시트/월',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Cline
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.cline,
+    name: 'Cline',
+    slug: 'cline',
+    category: 'ai',
+    description:
+      'VS Code용 오픈소스 AI 코딩 에이전트입니다. OpenAI, Anthropic, 로컬 모델 등 어떤 LLM이든 연결 가능하며, 파일 읽기·쓰기·터미널 실행까지 자율적으로 수행합니다.',
+    description_ko:
+      'VS Code용 오픈소스 AI 코딩 에이전트입니다. OpenAI, Anthropic, 로컬 모델 등 어떤 LLM이든 연결 가능하며, 파일 읽기·쓰기·터미널 실행까지 자율적으로 수행합니다.',
+    icon_url: null,
+    website_url: 'https://cline.bot',
+    docs_url: 'https://github.com/cline/cline',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '오픈소스 무료 (LLM API 비용만 별도 부담)',
+      plans: [{ name: 'Open Source', price: '$0 (API 비용 별도)' }],
+    },
+    required_env_vars: [
+      {
+        name: 'OPENAI_API_KEY',
+        public: false,
+        optional: true,
+        description: 'OpenAI API key for use with Cline (model-dependent)',
+        description_ko: 'Cline에서 OpenAI 모델 사용 시 필요한 API 키',
+      },
+      {
+        name: 'ANTHROPIC_API_KEY',
+        public: false,
+        optional: true,
+        description: 'Anthropic API key for use with Cline (model-dependent)',
+        description_ko: 'Cline에서 Anthropic 모델 사용 시 필요한 API 키',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'code_assistant',
+    popularity_score: 78,
+    difficulty_level: 'intermediate',
+    tags: ['cline', 'vscode', 'ai-agent', 'open-source', 'coding', 'llm', '클라인', 'AI에이전트', '코딩'],
+    alternatives: ['cursor', 'claude-code', 'windsurf'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'svelte', 'nuxt', 'express', 'fastify', 'django', 'rails', 'flask'],
+      language: ['javascript', 'typescript', 'python', 'go', 'rust', 'java', 'ruby', 'php', 'csharp'],
+    },
+    official_sdks: {
+      vscode: 'https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    github_stars: 25000,
+    monthly_cost_estimate: {
+      starter: '$0 (OSS)',
+      growth: 'API 사용량 기반',
+      enterprise: 'API 사용량 기반',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // OpenRouter
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.openrouter,
+    name: 'OpenRouter',
+    slug: 'openrouter',
+    category: 'ai',
+    description:
+      '멀티 LLM API 라우터입니다. 단일 API 키로 OpenAI, Anthropic, Google, Meta 등 100개 이상의 모델에 접근할 수 있으며, 폴백·로드밸런싱·비용 최적화를 자동으로 처리합니다.',
+    description_ko:
+      '멀티 LLM API 라우터입니다. 단일 API 키로 OpenAI, Anthropic, Google, Meta 등 100개 이상의 모델에 접근할 수 있으며, 폴백·로드밸런싱·비용 최적화를 자동으로 처리합니다.',
+    icon_url: null,
+    website_url: 'https://openrouter.ai',
+    docs_url: 'https://openrouter.ai/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '일부 무료 모델 제공, 유료 모델은 종량제',
+      plans: [
+        { name: 'Free Models', price: '$0' },
+        { name: 'Pay-as-you-go', price: '모델별 토큰 단가 적용' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'OPENROUTER_API_KEY',
+        public: false,
+        description: 'OpenRouter API key for accessing 100+ LLM models via unified API',
+        description_ko: 'OpenRouter API 키 (100개 이상 LLM 모델 통합 접근용)',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'llm_router',
+    popularity_score: 80,
+    difficulty_level: 'beginner',
+    tags: ['openrouter', 'llm-router', 'multi-model', 'api-gateway', 'openai', 'anthropic', '오픈라우터', 'LLM라우터', '멀티모델'],
+    alternatives: ['openai', 'anthropic', 'groq'],
+    compatibility: {
+      framework: ['next', 'react', 'express', 'fastify', 'hono', 'django', 'flask'],
+      language: ['javascript', 'typescript', 'python'],
+    },
+    official_sdks: {
+      javascript: 'https://openrouter.ai/docs/community-libraries',
+    },
+    free_tier_quality: 'limited',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '사용량 기반',
+      enterprise: '사용량 기반',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Hugging Face
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.huggingface,
+    name: 'Hugging Face',
+    slug: 'huggingface',
+    category: 'ai',
+    description:
+      '오픈소스 ML 모델 허브입니다. 100만 개 이상의 모델·데이터셋을 호스팅하며, Inference API, Spaces(무료 배포), AutoTrain 파인튜닝 기능을 제공합니다.',
+    description_ko:
+      '오픈소스 ML 모델 허브입니다. 100만 개 이상의 모델·데이터셋을 호스팅하며, Inference API, Spaces(무료 배포), AutoTrain 파인튜닝 기능을 제공합니다.',
+    icon_url: null,
+    website_url: 'https://huggingface.co',
+    docs_url: 'https://huggingface.co/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Free: Inference API 제한적 사용, Spaces 무료 호스팅',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Pro', price: '$9/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'HF_TOKEN',
+        public: false,
+        description: 'Hugging Face API token for Inference API and private model access',
+        description_ko: 'Hugging Face API 토큰 (Inference API 및 비공개 모델 접근용)',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'model_hub',
+    popularity_score: 92,
+    difficulty_level: 'intermediate',
+    tags: ['huggingface', 'ml-models', 'transformers', 'inference', 'open-source', 'llm', '허깅페이스', '모델허브', 'AI'],
+    alternatives: ['replicate', 'together-ai'],
+    compatibility: {
+      framework: ['next', 'react', 'express', 'fastify', 'django', 'flask'],
+      language: ['python', 'javascript', 'typescript', 'rust'],
+    },
+    official_sdks: {
+      python: 'https://github.com/huggingface/huggingface_hub',
+      javascript: 'https://github.com/huggingface/huggingface.js',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$9/월',
+      enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Replicate
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.replicate,
+    name: 'Replicate',
+    slug: 'replicate',
+    category: 'ai',
+    description:
+      '클라우드 ML 모델 실행 API 플랫폼입니다. API 한 줄로 Stable Diffusion, Llama, Whisper 등 오픈소스 모델을 서버 없이 실행할 수 있으며, 커스텀 모델 배포도 지원합니다.',
+    description_ko:
+      '클라우드 ML 모델 실행 API 플랫폼입니다. API 한 줄로 Stable Diffusion, Llama, Whisper 등 오픈소스 모델을 서버 없이 실행할 수 있으며, 커스텀 모델 배포도 지원합니다.',
+    icon_url: null,
+    website_url: 'https://replicate.com',
+    docs_url: 'https://replicate.com/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '신규 가입 시 무료 크레딧 제공, 이후 GPU 초당 과금',
+      plans: [
+        { name: 'Pay-as-you-go', price: 'GPU 초당 과금' },
+        { name: 'Deployments', price: '전용 GPU 예약 비용' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'REPLICATE_API_TOKEN',
+        public: false,
+        description: 'Replicate API token for running ML models via API',
+        description_ko: 'Replicate API 토큰 (ML 모델 API 실행용)',
+      },
+    ],
+    domain: 'ai_ml',
+    subcategory: 'model_hub',
+    popularity_score: 80,
+    difficulty_level: 'beginner',
+    tags: ['replicate', 'ml-serving', 'model-api', 'gpu', 'stable-diffusion', 'image-generation', '레플리케이트', '모델서빙', 'AI'],
+    alternatives: ['huggingface', 'modal', 'together-ai'],
+    compatibility: {
+      framework: ['next', 'react', 'express'],
+      language: ['javascript', 'typescript', 'python', 'go', 'swift'],
+    },
+    official_sdks: {
+      javascript: 'https://github.com/replicate/replicate-javascript',
+      python: 'https://github.com/replicate/replicate-python',
+    },
+    free_tier_quality: 'limited',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 5,
+    monthly_cost_estimate: {
+      starter: '$0 (크레딧)',
+      growth: '사용량 기반',
+      enterprise: '사용량 기반',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Convex
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.convex,
+    name: 'Convex',
+    slug: 'convex',
+    category: 'database',
+    description:
+      '리액티브 서버리스 백엔드 플랫폼입니다. 실시간 데이터베이스, 서버 함수, 스케줄링, 파일 스토리지, 인증을 하나의 플랫폼에서 제공하며, 상태 변경을 클라이언트에 자동으로 푸시합니다.',
+    description_ko:
+      '리액티브 서버리스 백엔드 플랫폼입니다. 실시간 데이터베이스, 서버 함수, 스케줄링, 파일 스토리지, 인증을 하나의 플랫폼에서 제공하며, 상태 변경을 클라이언트에 자동으로 푸시합니다.',
+    icon_url: null,
+    website_url: 'https://convex.dev',
+    docs_url: 'https://docs.convex.dev',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Free: 넉넉한 무료 한도 제공 (함수 호출 100만/월, DB 1GB)',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Pro', price: '$25/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'CONVEX_DEPLOYMENT',
+        public: false,
+        description: 'Convex deployment name (e.g. dev:project-name-123)',
+        description_ko: 'Convex 배포 이름 (예: dev:project-name-123)',
+      },
+      {
+        name: 'NEXT_PUBLIC_CONVEX_URL',
+        public: true,
+        description: 'Convex deployment URL for client-side connection',
+        description_ko: 'Convex 배포 URL (클라이언트 연결용 공개 키)',
+      },
+    ],
+    domain: 'backend',
+    subcategory: 'reactive_backend',
+    popularity_score: 75,
+    difficulty_level: 'beginner',
+    tags: ['convex', 'reactive', 'realtime', 'serverless', 'backend', 'database', '컨벡스', '리액티브', '실시간DB'],
+    alternatives: ['supabase', 'firebase'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'svelte'],
+      language: ['javascript', 'typescript'],
+    },
+    official_sdks: {
+      javascript: 'https://github.com/get-convex/convex-js',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'high',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$25/월',
+      enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Turso
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.turso,
+    name: 'Turso',
+    slug: 'turso',
+    category: 'database',
+    description:
+      'libSQL(SQLite 포크) 기반 에지 분산 데이터베이스입니다. 글로벌 복제로 초저지연을 달성하며, 수천 개의 멀티 테넌트 DB를 저비용으로 운영할 수 있습니다.',
+    description_ko:
+      'libSQL(SQLite 포크) 기반 에지 분산 데이터베이스입니다. 글로벌 복제로 초저지연을 달성하며, 수천 개의 멀티 테넌트 DB를 저비용으로 운영할 수 있습니다.',
+    icon_url: null,
+    website_url: 'https://turso.tech',
+    docs_url: 'https://docs.turso.tech',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Free: DB 500개, 스토리지 9GB, 월 1억 행 읽기 포함',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Scaler', price: '$29/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'TURSO_DATABASE_URL',
+        public: false,
+        description: 'Turso database connection URL (libsql://...)',
+        description_ko: 'Turso 데이터베이스 연결 URL (libsql://...)',
+      },
+      {
+        name: 'TURSO_AUTH_TOKEN',
+        public: false,
+        description: 'Turso database authentication token',
+        description_ko: 'Turso 데이터베이스 인증 토큰',
+      },
+    ],
+    domain: 'backend',
+    subcategory: 'edge_db',
+    popularity_score: 72,
+    difficulty_level: 'intermediate',
+    tags: ['turso', 'libsql', 'sqlite', 'edge-database', 'distributed', 'multi-tenant', '터소', '에지DB', 'SQLite'],
+    alternatives: ['neon', 'planetscale', 'supabase'],
+    compatibility: {
+      framework: ['next', 'react', 'express', 'hono'],
+      language: ['javascript', 'typescript', 'python', 'go', 'rust'],
+    },
+    official_sdks: {
+      javascript: 'https://github.com/tursodatabase/libsql-client-ts',
+      python: 'https://github.com/tursodatabase/libsql-client-py',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$29/월',
+      enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Prisma
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.prisma,
+    name: 'Prisma',
+    slug: 'prisma',
+    category: 'database',
+    description:
+      'TypeScript/Node.js 차세대 ORM입니다. 타입 안전 쿼리 빌더, 선언형 스키마 마이그레이션, Prisma Studio GUI를 제공하며 PostgreSQL, MySQL, SQLite, MongoDB 등을 지원합니다.',
+    description_ko:
+      'TypeScript/Node.js 차세대 ORM입니다. 타입 안전 쿼리 빌더, 선언형 스키마 마이그레이션, Prisma Studio GUI를 제공하며 PostgreSQL, MySQL, SQLite, MongoDB 등을 지원합니다.',
+    icon_url: null,
+    website_url: 'https://www.prisma.io',
+    docs_url: 'https://www.prisma.io/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'ORM 자체는 오픈소스 무료, Prisma Accelerate/Pulse는 별도 유료',
+      plans: [
+        { name: 'ORM (OSS)', price: '$0' },
+        { name: 'Accelerate', price: '$29/월~' },
+        { name: 'Pulse', price: '$29/월~' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'DATABASE_URL',
+        public: false,
+        description: 'Database connection string for Prisma (PostgreSQL, MySQL, SQLite, etc.)',
+        description_ko: 'Prisma DB 연결 문자열 (PostgreSQL, MySQL, SQLite 등)',
+      },
+    ],
+    domain: 'backend',
+    subcategory: 'orm',
+    popularity_score: 90,
+    difficulty_level: 'beginner',
+    tags: ['prisma', 'orm', 'typescript', 'database', 'migration', 'type-safe', 'postgresql', '프리즈마', 'ORM', '데이터베이스'],
+    alternatives: ['supabase', 'neon'],
+    compatibility: {
+      framework: ['next', 'express', 'fastify', 'hono', 'nuxt'],
+      language: ['javascript', 'typescript'],
+    },
+    official_sdks: {
+      npm: 'https://www.npmjs.com/package/prisma',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 15,
+    github_stars: 40000,
+    monthly_cost_estimate: {
+      starter: '$0 (OSS)',
+      growth: '$29/월 (Accelerate)',
+      enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Paddle
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.paddle,
+    name: 'Paddle',
+    slug: 'paddle',
+    category: 'payment',
+    description:
+      'SaaS Merchant of Record(MoR) 결제 플랫폼입니다. 글로벌 세금·VAT·컴플라이언스를 Paddle이 대신 처리하며, 구독 관리·청구서·환불을 통합 제공합니다.',
+    description_ko:
+      'SaaS Merchant of Record(MoR) 결제 플랫폼입니다. 글로벌 세금·VAT·컴플라이언스를 Paddle이 대신 처리하며, 구독 관리·청구서·환불을 통합 제공합니다.',
+    icon_url: null,
+    website_url: 'https://www.paddle.com',
+    docs_url: 'https://developer.paddle.com',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '무료 샌드박스 환경 제공, 프로덕션은 거래금액의 5%+50¢',
+      plans: [
+        { name: 'Sandbox', price: '$0' },
+        { name: 'Production', price: '5% + $0.50/건' },
+        { name: 'Enterprise', price: '문의 (맞춤 요율)' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'PADDLE_API_KEY',
+        public: false,
+        description: 'Paddle API key for server-side operations (billing, subscriptions)',
+        description_ko: 'Paddle 서버 사이드 API 키 (결제·구독 처리용)',
+      },
+      {
+        name: 'PADDLE_WEBHOOK_SECRET',
+        public: false,
+        description: 'Paddle webhook signing secret for verifying webhook payloads',
+        description_ko: 'Paddle 웹훅 서명 시크릿 (페이로드 검증용)',
+      },
+      {
+        name: 'NEXT_PUBLIC_PADDLE_CLIENT_TOKEN',
+        public: true,
+        description: 'Paddle client-side token for Paddle.js checkout integration',
+        description_ko: 'Paddle.js 결제창 연동용 클라이언트 토큰 (공개 가능)',
+      },
+    ],
+    domain: 'business',
+    subcategory: 'subscription_mor',
+    popularity_score: 72,
+    difficulty_level: 'intermediate',
+    tags: ['paddle', 'payment', 'mor', 'billing', 'subscription', 'tax', 'saas', '패들', '결제', '구독'],
+    alternatives: ['stripe', 'lemon-squeezy', 'polar'],
+    compatibility: {
+      framework: ['next', 'react', 'express'],
+      language: ['javascript', 'typescript', 'python', 'go', 'php'],
+    },
+    official_sdks: {
+      javascript: 'https://github.com/PaddleHQ/paddle-js-wrapper',
+      node: 'https://github.com/PaddleHQ/paddle-node-sdk',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 30,
+    monthly_cost_estimate: {
+      starter: '$0 (샌드박스)',
+      growth: '5% + $0.50/건',
+      enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Payload CMS
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.payload_cms,
+    name: 'Payload CMS',
+    slug: 'payload-cms',
+    category: 'cms',
+    description:
+      'Next.js 네이티브 헤드리스 CMS입니다. 앱 안에 직접 내장 가능하며, 코드 퍼스트 스키마 정의, 자동 REST/GraphQL API, 내장 어드민 UI를 제공합니다.',
+    description_ko:
+      'Next.js 네이티브 헤드리스 CMS입니다. 앱 안에 직접 내장 가능하며, 코드 퍼스트 스키마 정의, 자동 REST/GraphQL API, 내장 어드민 UI를 제공합니다.',
+    icon_url: null,
+    website_url: 'https://payloadcms.com',
+    docs_url: 'https://payloadcms.com/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: '오픈소스 셀프호스팅 무료, Payload Cloud $35/월~',
+      plans: [
+        { name: 'Self-hosted (OSS)', price: '$0' },
+        { name: 'Payload Cloud', price: '$35/월~' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'PAYLOAD_SECRET',
+        public: false,
+        description: 'Payload CMS secret key used for encryption and JWT signing',
+        description_ko: 'Payload CMS 암호화 및 JWT 서명용 시크릿 키',
+      },
+      {
+        name: 'DATABASE_URI',
+        public: false,
+        description: 'Database connection URI for Payload (MongoDB or PostgreSQL)',
+        description_ko: 'Payload DB 연결 URI (MongoDB 또는 PostgreSQL)',
+      },
+      {
+        name: 'PAYLOAD_PUBLIC_SERVER_URL',
+        public: true,
+        description: 'Public server URL for Payload CMS (used for media and redirects)',
+        description_ko: 'Payload CMS 공개 서버 URL (미디어 및 리다이렉트용)',
+      },
+    ],
+    domain: 'business',
+    subcategory: 'headless-cms',
+    popularity_score: 78,
+    difficulty_level: 'intermediate',
+    tags: ['payload', 'cms', 'headless', 'nextjs', 'open-source', 'graphql', '페이로드', 'CMS', '헤드리스'],
+    alternatives: ['sanity', 'contentful', 'strapi'],
+    compatibility: {
+      framework: ['next', 'express'],
+      language: ['javascript', 'typescript'],
+    },
+    official_sdks: {
+      npm: 'https://www.npmjs.com/package/payload',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 20,
+    github_stars: 30000,
+    monthly_cost_estimate: {
+      starter: '$0 (셀프호스팅)',
+      growth: '$35/월',
+      enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Axiom
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.axiom,
+    name: 'Axiom',
+    slug: 'axiom',
+    category: 'logging',
+    description:
+      '서버리스 환경에 최적화된 로그 분석 플랫폼입니다. Vercel 네이티브 통합을 제공하며, 수집한 로그·이벤트를 실시간으로 쿼리·시각화하고 무제한 데이터 보존을 지원합니다.',
+    description_ko:
+      '서버리스 환경에 최적화된 로그 분석 플랫폼입니다. Vercel 네이티브 통합을 제공하며, 수집한 로그·이벤트를 실시간으로 쿼리·시각화하고 무제한 데이터 보존을 지원합니다.',
+    icon_url: null,
+    website_url: 'https://axiom.co',
+    docs_url: 'https://axiom.co/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Free: 월 500GB 인제스트, 30일 보존',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Pro', price: '$25/월~' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'AXIOM_TOKEN',
+        public: false,
+        description: 'Axiom API token for ingesting logs and events',
+        description_ko: 'Axiom 로그·이벤트 수집용 API 토큰',
+      },
+      {
+        name: 'AXIOM_ORG_ID',
+        public: false,
+        description: 'Axiom organization ID',
+        description_ko: 'Axiom 조직 ID',
+      },
+      {
+        name: 'AXIOM_DATASET',
+        public: false,
+        description: 'Axiom dataset name to ingest data into',
+        description_ko: '데이터를 수집할 Axiom 데이터셋 이름',
+      },
+    ],
+    domain: 'observability',
+    subcategory: 'log_management',
+    popularity_score: 73,
+    difficulty_level: 'beginner',
+    tags: ['axiom', 'logging', 'observability', 'vercel', 'serverless', 'analytics', '액시옴', '로그', '모니터링'],
+    alternatives: ['datadog', 'logrocket', 'sentry'],
+    compatibility: {
+      framework: ['next', 'express', 'hono'],
+      language: ['javascript', 'typescript', 'python', 'go', 'rust'],
+    },
+    official_sdks: {
+      javascript: 'https://github.com/axiomhq/axiom-js',
+      python: 'https://github.com/axiomhq/axiom-py',
+      go: 'https://github.com/axiomhq/axiom-go',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$25/월~',
+      enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Better Stack
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.betterstack,
+    name: 'Better Stack',
+    slug: 'betterstack',
+    category: 'monitoring',
+    description:
+      '올인원 관측성 플랫폼입니다. 업타임 모니터링, 로그 관리(Logtail), 상태 페이지, 온콜 인시던트 관리를 단일 대시보드에서 제공합니다.',
+    description_ko:
+      '올인원 관측성 플랫폼입니다. 업타임 모니터링, 로그 관리(Logtail), 상태 페이지, 온콜 인시던트 관리를 단일 대시보드에서 제공합니다.',
+    icon_url: null,
+    website_url: 'https://betterstack.com',
+    docs_url: 'https://betterstack.com/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Free: 업타임 5개 모니터, 로그 1GB/월',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Plus', price: '$29/월' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'BETTERSTACK_API_TOKEN',
+        public: false,
+        description: 'Better Stack API token for uptime and incident management',
+        description_ko: 'Better Stack API 토큰 (업타임·인시던트 관리용)',
+      },
+      {
+        name: 'LOGTAIL_SOURCE_TOKEN',
+        public: false,
+        description: 'Logtail source token for log ingestion (Better Stack Logs)',
+        description_ko: 'Logtail 소스 토큰 (Better Stack 로그 전송용)',
+      },
+    ],
+    domain: 'observability',
+    subcategory: 'monitoring-apm',
+    popularity_score: 70,
+    difficulty_level: 'beginner',
+    tags: ['betterstack', 'uptime', 'logging', 'status-page', 'incident', 'logtail', '베터스택', '업타임', '모니터링', '상태페이지'],
+    alternatives: ['sentry', 'datadog'],
+    compatibility: {
+      framework: ['next', 'express', 'hono'],
+      language: ['javascript', 'typescript', 'python', 'go', 'ruby', 'php'],
+    },
+    official_sdks: {
+      javascript: 'https://github.com/BetterStackHQ/logtail-js',
+      python: 'https://github.com/BetterStackHQ/logtail-python',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 10,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$29/월',
+      enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Novu
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.novu,
+    name: 'Novu',
+    slug: 'novu',
+    category: 'push',
+    description:
+      '오픈소스 멀티채널 알림 인프라입니다. 이메일·SMS·푸시·인앱·채팅 알림을 단일 API로 오케스트레이션하며, 노코드 워크플로우 에디터와 사용자 선호 관리 기능을 내장합니다.',
+    description_ko:
+      '오픈소스 멀티채널 알림 인프라입니다. 이메일·SMS·푸시·인앱·채팅 알림을 단일 API로 오케스트레이션하며, 노코드 워크플로우 에디터와 사용자 선호 관리 기능을 내장합니다.',
+    icon_url: null,
+    website_url: 'https://novu.co',
+    docs_url: 'https://docs.novu.co',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Free: 월 30,000 이벤트 포함, 이후 종량제',
+      plans: [
+        { name: 'Free', price: '$0/월 (30K 이벤트)' },
+        { name: 'Business', price: '종량제' },
+        { name: 'Enterprise', price: '문의' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'NOVU_API_KEY',
+        public: false,
+        description: 'Novu API key for triggering notifications via server-side SDK',
+        description_ko: 'Novu 서버 사이드 알림 트리거용 API 키',
+      },
+      {
+        name: 'NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER',
+        public: true,
+        description: 'Novu application identifier for client-side in-app notification inbox',
+        description_ko: 'Novu 인앱 알림 수신함 연동용 클라이언트 공개 식별자',
+      },
+    ],
+    domain: 'communication',
+    subcategory: 'notification_infra',
+    popularity_score: 72,
+    difficulty_level: 'intermediate',
+    tags: ['novu', 'notifications', 'multi-channel', 'email', 'sms', 'push', 'in-app', 'open-source', '노부', '알림', '멀티채널'],
+    alternatives: ['onesignal', 'twilio'],
+    compatibility: {
+      framework: ['next', 'react', 'express', 'nestjs'],
+      language: ['javascript', 'typescript', 'python', 'go', 'ruby', 'php'],
+    },
+    official_sdks: {
+      javascript: 'https://github.com/novuhq/novu/tree/main/packages/node',
+      python: 'https://github.com/novuhq/novu-python',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 15,
+    github_stars: 35000,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '종량제',
+      enterprise: '문의',
     },
   },
 ];
