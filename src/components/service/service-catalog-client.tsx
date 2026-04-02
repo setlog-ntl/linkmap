@@ -260,7 +260,7 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
               <Link
                 key={service.id}
                 href={`/services/${service.slug}`}
-                className="flex items-center gap-2 shrink-0 px-3 py-2 rounded-lg border bg-card hover:bg-muted transition-colors"
+                className="flex items-center gap-2 shrink-0 px-3 py-2 rounded-lg border bg-card hover:bg-muted transition-colors" prefetch={false}
               >
                 <ServiceIcon serviceId={service.slug} size={20} />
                 <span className="text-sm font-medium whitespace-nowrap">{service.name}</span>
@@ -654,7 +654,7 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
                         <Link
                           key={s.id}
                           href={`/services/${s.slug}`}
-                          className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-card hover:bg-muted transition-colors"
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-card hover:bg-muted transition-colors" prefetch={false}
                         >
                           <ServiceIcon serviceId={s.slug} size={16} />
                           <span className="text-sm font-medium">{s.name}</span>
@@ -1001,7 +1001,7 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
                   <Link
                     key={s.id}
                     href={`/services/${s.slug}`}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-card hover:bg-muted transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-card hover:bg-muted transition-colors" prefetch={false}
                   >
                     <ServiceIcon serviceId={s.slug} size={16} />
                     <span className="text-sm font-medium">{s.name}</span>

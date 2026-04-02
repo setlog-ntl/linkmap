@@ -494,7 +494,7 @@ function refineSameRowAlignment(
 
   if (unadjusted.length && newPositions.length) {
     const lastAdjustedY = Math.max(...newPositions.map(np => np.y));
-    let nextY = lastAdjustedY + NODE_H + GAP_Y;
+    const nextY = lastAdjustedY + NODE_H + GAP_Y;
 
     // Re-sort unadjusted by their current column and Y
     unadjusted.sort((a, b) => {

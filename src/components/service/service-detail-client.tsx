@@ -460,7 +460,7 @@ export function ServiceDetailClient({ service, guide, costTiers, dependencies }:
                           <div>
                             <Link
                               href={`/services/${dep.depends_on_service?.slug}`}
-                              className="font-medium text-sm hover:text-primary transition-colors"
+                              className="font-medium text-sm hover:text-primary transition-colors" prefetch={false}
                             >
                               {dep.depends_on_service?.name || 'Unknown'}
                             </Link>

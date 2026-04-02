@@ -39,7 +39,7 @@ export function SettingsNav() {
               isActive
                 ? 'bg-accent text-accent-foreground font-medium'
                 : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-            )}
+            )} prefetch={false}
           >
             <link.icon className="h-4 w-4 shrink-0" />
             <span>{label}</span>
