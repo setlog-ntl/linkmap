@@ -57,6 +57,7 @@ jobs:
           POLAR_WEBHOOK_SECRET: ${{ secrets.POLAR_WEBHOOK_SECRET }}
 
       - name: Set Cloudflare Workers secrets
+        continue-on-error: true
         run: |
           echo "$POLAR_ACCESS_TOKEN" | npx wrangler secret put POLAR_ACCESS_TOKEN
           echo "$POLAR_WEBHOOK_SECRET" | npx wrangler secret put POLAR_WEBHOOK_SECRET
