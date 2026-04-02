@@ -253,9 +253,11 @@ export function buildMenuItemsArray(items: unknown[], defaultEmoji = '🍽️'):
     lines.push(`    price: '${esc(String(v.price || ''))}',`);
     lines.push(`    category: '${esc(String(v.category || ''))}',`);
     lines.push(`    emoji: '${esc(String(v.emoji || defaultEmoji))}',`);
+    if (v.priceSub) lines.push(`    priceSub: '${esc(String(v.priceSub))}',`);
     if (v.imageUrl) lines.push(`    imageUrl: '${esc(String(v.imageUrl))}',`);
     if (v.isNew === true || v.isNew === 'true') lines.push('    isNew: true,');
     if (v.isPopular === true || v.isPopular === 'true') lines.push('    isPopular: true,');
+    if (v.isSeason === true || v.isSeason === 'true') lines.push('    isSeason: true,');
     return `  {\n${lines.join('\n')}\n  }`;
   });
   return `[\n${entries.join(',\n')}\n]`;
@@ -286,6 +288,7 @@ export function parseMenuFromConfig(configContent: string): Record<string, unkno
     (match, obj) => {
       if (/isNew:\s*true/.test(match)) (obj as Record<string, unknown>).isNew = true;
       if (/isPopular:\s*true/.test(match)) (obj as Record<string, unknown>).isPopular = true;
+      if (/isSeason:\s*true/.test(match)) (obj as Record<string, unknown>).isSeason = true;
     }
   ) as Record<string, unknown>[];
 }
@@ -429,11 +432,13 @@ export function createSmallBizGenerator(
   desc: string;
   descEn?: string;
   price: string;
+  priceSub?: string;
   category: string;
   emoji: string;
   imageUrl?: string;
   isNew?: boolean;
   isPopular?: boolean;
+  isSeason?: boolean;
 }
 
 export interface BusinessHour {

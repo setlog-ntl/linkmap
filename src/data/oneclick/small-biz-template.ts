@@ -1951,6 +1951,7 @@ export const siteConfig = {
   kakaoChannelUrl: process.env.NEXT_PUBLIC_KAKAO_CHANNEL_URL || '',
   primaryColor: process.env.NEXT_PUBLIC_PRIMARY_COLOR || '#c8a97e',
   fontFamily: process.env.NEXT_PUBLIC_FONT_FAMILY || 'Nanum Myeongjo',
+  designPreset: process.env.NEXT_PUBLIC_DESIGN_PRESET || 'default',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
 

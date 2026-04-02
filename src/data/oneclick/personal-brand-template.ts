@@ -724,7 +724,7 @@ export default function Home() {
   return (
     <>
       <NavHeader />
-      <main>
+      <main id="main">
         <HeroSection config={siteConfig} />
         <AboutSection config={siteConfig} />
         <ValuesSection values={siteConfig.values} />
@@ -1446,6 +1446,7 @@ export interface HighlightItem {
 export interface SocialItem {
   platform: string;
   url: string;
+  label?: string;
 }
 
 const DEMO_VALUES: ValueItem[] = [

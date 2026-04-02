@@ -639,6 +639,13 @@ export interface SocialItem {
   label?: string;
 }
 
+/** 배경 스타일: light | gradient | solid | mesh | aurora | glass | dark */
+export type BgStyle = 'light' | 'gradient' | 'solid' | 'mesh' | 'aurora' | 'glass' | 'dark';
+/** 카드 스타일: rounded | pill | square | glass | neon | outline */
+export type CardStyle = 'rounded' | 'pill' | 'square' | 'glass' | 'neon' | 'outline';
+/** 폰트 패밀리: system | serif | mono | display */
+export type FontFamily = 'system' | 'serif' | 'mono' | 'display';
+
 const DEMO_LINKS: LinkItem[] = [
   { title: '내 블로그', titleEn: 'My Blog', url: 'https://blog.example.com', icon: 'pen-line' },
   { title: 'YouTube 채널', titleEn: 'YouTube Channel', url: 'https://youtube.com', icon: 'youtube' },
@@ -662,10 +669,11 @@ export const siteConfig = {
   bio: process.env.NEXT_PUBLIC_BIO || '일상을 기록하는 콘텐츠 크리에이터',
   bioEn: process.env.NEXT_PUBLIC_BIO_EN || 'Content creator documenting everyday life',
   avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || 'https://plus.unsplash.com/premium_photo-1664475228198-ffce9c2b6a41?w=200&q=85&auto=format&fit=crop&crop=faces&facepad=2',
-  theme: process.env.NEXT_PUBLIC_THEME || 'minimal',
-  bgStyle: process.env.NEXT_PUBLIC_BG_STYLE || 'light',
-  cardStyle: process.env.NEXT_PUBLIC_CARD_STYLE || 'rounded',
-  primaryColor: '#6366f1',
+  theme: process.env.NEXT_PUBLIC_THEME || 'light',
+  bgStyle: (process.env.NEXT_PUBLIC_BG_STYLE || 'light') as BgStyle,
+  primaryColor: process.env.NEXT_PUBLIC_PRIMARY_COLOR || '#6366f1',
+  cardStyle: (process.env.NEXT_PUBLIC_CARD_STYLE || 'rounded') as CardStyle,
+  fontFamily: (process.env.NEXT_PUBLIC_FONT_FAMILY || 'system') as FontFamily,
   links: parseJSON<LinkItem[]>(process.env.NEXT_PUBLIC_LINKS, DEMO_LINKS),
   socials: parseJSON<SocialItem[]>(process.env.NEXT_PUBLIC_SOCIALS, []),
   youtubeUrl: process.env.NEXT_PUBLIC_YOUTUBE_URL || null,

@@ -87,6 +87,7 @@ function generateConfigTs(state: ModuleConfigState): string {
 export interface SocialItem {
   platform: string;
   url: string;
+  label?: string;
 }
 
 /** 배경 스타일: light | gradient | solid | mesh | aurora | glass | dark */

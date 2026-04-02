@@ -187,7 +187,7 @@ export const linkCardModuleSchema: TemplateModuleSchema = {
           type: 'color',
           label: '메인 색상',
           labelEn: 'Primary Color',
-          defaultValue: '#ff8c69',
+          defaultValue: '#6366f1',
         },
         {
           key: 'bgStyle',

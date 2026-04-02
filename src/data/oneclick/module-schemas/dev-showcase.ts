@@ -281,6 +281,13 @@ export const devShowcaseModuleSchema: TemplateModuleSchema = {
               validation: { required: true },
             },
             {
+              key: 'titleEn',
+              type: 'text',
+              label: '영문 제목',
+              labelEn: 'English Title',
+              defaultValue: '',
+            },
+            {
               key: 'url',
               type: 'url',
               label: 'URL',

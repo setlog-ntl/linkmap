@@ -137,6 +137,7 @@ export interface HighlightItem {
 export interface SocialItem {
   platform: string;
   url: string;
+  label?: string;
 }
 
 const DEMO_VALUES: ValueItem[] = ${buildValuesArray(valuesItems)};
