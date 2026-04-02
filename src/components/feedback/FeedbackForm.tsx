@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +18,8 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Gift } from 'lucide-react';
 import { useCreateFeedback } from '@/lib/queries/feedback';
+import { getPageContext, formatPageContext } from '@/lib/utils/page-context';
+import { PageTreePicker } from './PageTreePicker';
 import type { FeatureRequestCategory } from '@/types/feedback';
 
 interface FeedbackFormProps {
@@ -25,6 +28,10 @@ interface FeedbackFormProps {
 }
 
 export function FeedbackForm({ onSuccess, onCancel }: FeedbackFormProps) {
+  const pathname = usePathname();
+  const autoDetectedKey = formatPageContext(getPageContext(pathname));
+
+  const [pageContext, setPageContext] = useState(autoDetectedKey);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<FeatureRequestCategory>('feature');
@@ -44,7 +51,13 @@ export function FeedbackForm({ onSuccess, onCancel }: FeedbackFormProps) {
     }
 
     createFeedback(
-      { title: title.trim(), description: description.trim(), category, is_anonymous: isAnonymous },
+      {
+        title: title.trim(),
+        description: description.trim(),
+        category,
+        is_anonymous: isAnonymous,
+        page_context: pageContext,
+      },
       {
         onSuccess: () => {
           toast.success('요청이 등록되었습니다');
@@ -64,6 +77,21 @@ export function FeedbackForm({ onSuccess, onCancel }: FeedbackFormProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* 대상 페이지 */}
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">
+              피드백 대상 페이지
+              {pageContext === autoDetectedKey && (
+                <span className="ml-1 text-brand-blue">자동 감지됨</span>
+              )}
+            </Label>
+            <PageTreePicker
+              value={pageContext}
+              onChange={setPageContext}
+              currentPageKey={autoDetectedKey}
+            />
+          </div>
+
           <div className="space-y-1.5">
             <Label htmlFor="feedback-title">제목</Label>
             <Input

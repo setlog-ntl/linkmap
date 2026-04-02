@@ -69,19 +69,52 @@ const PAGE_PATTERNS: PagePattern[] = [
   { pattern: /^\/glossary/, category: '용어집', name: '용어집' },
 ];
 
-export const PAGE_CATEGORIES = [
-  '대시보드',
-  '사이트',
-  '프로젝트',
-  '설정',
-  '서비스',
-  '가이드',
-  '요금제',
-  '피드백',
-  '관리자',
-  '블로그',
-  '기타',
-] as const;
+export interface PageTreeNode {
+  key: string;
+  label: string;
+  children?: PageTreeNode[];
+}
+
+export const PAGE_TREE: PageTreeNode[] = [
+  { key: '대시보드', label: '대시보드' },
+  { key: '사이트', label: '사이트', children: [
+    { key: '사이트 > 사이트 목록', label: '사이트 목록' },
+    { key: '사이트 > 새 사이트', label: '새 사이트' },
+    { key: '사이트 > 사이트 관리', label: '사이트 관리' },
+    { key: '사이트 > 쇼케이스', label: '쇼케이스' },
+  ]},
+  { key: '프로젝트', label: '프로젝트', children: [
+    { key: '프로젝트 > 프로젝트 개요', label: '프로젝트 개요' },
+    { key: '프로젝트 > 서비스 관리', label: '서비스 관리' },
+    { key: '프로젝트 > 서비스맵', label: '서비스맵' },
+    { key: '프로젝트 > 환경변수', label: '환경변수' },
+    { key: '프로젝트 > 비용 분석', label: '비용 분석' },
+    { key: '프로젝트 > 연결 관리', label: '연결 관리' },
+    { key: '프로젝트 > 통합 관리', label: '통합 관리' },
+    { key: '프로젝트 > 모니터링', label: '모니터링' },
+    { key: '프로젝트 > 상태 확인', label: '상태 확인' },
+    { key: '프로젝트 > 인증정보', label: '인증정보' },
+    { key: '프로젝트 > 프로젝트 설정', label: '프로젝트 설정' },
+    { key: '프로젝트 > 활동 로그', label: '활동 로그' },
+  ]},
+  { key: '설정', label: '설정', children: [
+    { key: '설정 > 계정', label: '계정' },
+    { key: '설정 > 프로필', label: '프로필' },
+    { key: '설정 > 요금 관리', label: '요금 관리' },
+    { key: '설정 > GitHub 연동', label: 'GitHub 연동' },
+    { key: '설정 > 서비스 연결', label: '서비스 연결' },
+    { key: '설정 > 서비스 설정', label: '서비스 설정' },
+    { key: '설정 > 토큰 관리', label: '토큰 관리' },
+  ]},
+  { key: '서비스', label: '서비스 카탈로그', children: [
+    { key: '서비스 > 서비스 비교', label: '서비스 비교' },
+    { key: '서비스 > 비용 시뮬레이터', label: '비용 시뮬레이터' },
+  ]},
+  { key: '가이드', label: '가이드' },
+  { key: '요금제', label: '요금제' },
+  { key: '피드백', label: '피드백' },
+  { key: '기타', label: '기타' },
+];
 
 export function getPageContext(pathname: string): PageContext {
   for (const { pattern, category, name } of PAGE_PATTERNS) {

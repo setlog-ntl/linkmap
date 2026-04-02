@@ -14,14 +14,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { MapPin } from 'lucide-react';
 import { useCreateFeedback } from '@/lib/queries/feedback';
-import {
-  PAGE_CATEGORIES,
-  formatPageContext,
-  type PageContext,
-} from '@/lib/utils/page-context';
+import { formatPageContext, type PageContext } from '@/lib/utils/page-context';
+import { PageTreePicker } from './PageTreePicker';
 import type { FeatureRequestCategory } from '@/types/feedback';
 
 interface QuickFeedbackFormProps {
@@ -30,17 +25,14 @@ interface QuickFeedbackFormProps {
 }
 
 export function QuickFeedbackForm({ defaultPageContext, onSuccess }: QuickFeedbackFormProps) {
-  const [pageCategory, setPageCategory] = useState(defaultPageContext.pageCategory);
+  const autoDetectedKey = formatPageContext(defaultPageContext);
+  const [pageContext, setPageContext] = useState(autoDetectedKey);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<FeatureRequestCategory>('feature');
   const [isAnonymous, setIsAnonymous] = useState(false);
 
   const { mutate: createFeedback, isPending } = useCreateFeedback();
-
-  const currentContext: PageContext = pageCategory === defaultPageContext.pageCategory
-    ? defaultPageContext
-    : { pageCategory, pageName: pageCategory };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +51,7 @@ export function QuickFeedbackForm({ defaultPageContext, onSuccess }: QuickFeedba
         description: description.trim(),
         category,
         is_anonymous: isAnonymous,
-        page_context: formatPageContext(currentContext),
+        page_context: pageContext,
       },
       {
         onSuccess: () => {
@@ -75,29 +67,19 @@ export function QuickFeedbackForm({ defaultPageContext, onSuccess }: QuickFeedba
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* 페이지 컨텍스트 */}
+      {/* 페이지 컨텍스트 — 트리 피커 */}
       <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground flex items-center gap-1">
-          <MapPin className="h-3 w-3" />
+        <Label className="text-xs text-muted-foreground">
           피드백 대상 페이지
+          {pageContext === autoDetectedKey && (
+            <span className="ml-1 text-brand-blue">자동 감지됨</span>
+          )}
         </Label>
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="shrink-0">
-            {formatPageContext(currentContext)}
-          </Badge>
-          <Select value={pageCategory} onValueChange={setPageCategory}>
-            <SelectTrigger className="h-8 text-xs">
-              <SelectValue placeholder="변경" />
-            </SelectTrigger>
-            <SelectContent>
-              {PAGE_CATEGORIES.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <PageTreePicker
+          value={pageContext}
+          onChange={setPageContext}
+          currentPageKey={autoDetectedKey}
+        />
       </div>
 
       {/* 카테고리 */}
