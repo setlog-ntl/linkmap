@@ -10,7 +10,7 @@ import {
   FileSpreadsheet,
   ExternalLink,
   Loader2,
-  Link,
+  Link as LinkIcon,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -55,7 +55,7 @@ function formatFileSize(bytes: number): string {
 }
 
 function getFileIcon(fileType: string | null) {
-  if (!fileType) return <Link className="h-4 w-4 text-brand-blue" />;
+  if (!fileType) return <LinkIcon className="h-4 w-4 text-brand-blue" />;
   if (fileType.startsWith('image/')) return <Image className="h-4 w-4 text-blue-500" />;
   if (fileType.includes('spreadsheet') || fileType.includes('excel') || fileType === 'text/csv') {
     return <FileSpreadsheet className="h-4 w-4 text-green-600" />;
@@ -272,7 +272,7 @@ export function CostAttachmentsPanel({
               </>
             ) : (
               <>
-                <Link className="h-3 w-3 mr-1" />
+                <LinkIcon className="h-3 w-3 mr-1" />
                 링크 저장
               </>
             )}

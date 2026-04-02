@@ -87,6 +87,7 @@ export function FeedbackDetail({ id, isLoggedIn, isAdmin, currentUserId }: Feedb
       {/* 뒤로가기 */}
       <Link
         href="/feedback"
+        prefetch={false}
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />

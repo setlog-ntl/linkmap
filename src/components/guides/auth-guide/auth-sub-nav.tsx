@@ -30,6 +30,7 @@ export function AuthSubNav() {
             <Link
               key={item.href}
               href={item.href}
+              prefetch={false}
               className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                 isActive
                   ? 'bg-primary text-primary-foreground'

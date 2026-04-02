@@ -147,6 +147,7 @@ export function CompareClient({ comparisons, services }: CompareClientProps) {
                             {serviceMap.get(serviceIds[i])?.slug ? (
                               <Link
                                 href={`/services/${serviceMap.get(serviceIds[i])?.slug}`}
+                                prefetch={false}
                                 className="hover:text-primary transition-colors"
                               >
                                 {name}

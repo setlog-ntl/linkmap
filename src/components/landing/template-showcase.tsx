@@ -46,6 +46,7 @@ export function TemplateShowcase() {
               <ScrollReveal key={tpl.slug} delay={i * 0.08}>
                 <Link
                   href={`/sites/new?template=${tpl.slug}`}
+                  prefetch={false}
                   className="group flex flex-col rounded-xl border border-border bg-card overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-primary/25"
                 >
                   {/* Wireframe preview */}

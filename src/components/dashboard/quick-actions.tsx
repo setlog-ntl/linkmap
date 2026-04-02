@@ -62,6 +62,7 @@ export function QuickActions({ onNewProject }: QuickActionsProps) {
           <Link
             key={action.labelKey}
             href={action.href}
+            prefetch={false}
             className={`flex items-center gap-3 rounded-xl border border-border/50 px-4 py-3 text-sm font-medium transition-colors ${action.color}`}
           >
             <Icon className="h-4 w-4 shrink-0" />

@@ -89,6 +89,7 @@ export async function POST(req: NextRequest) {
 }
 
 // GET: 액션 이력 조회
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(_req: NextRequest) {
   const supabase = await createClient();
 

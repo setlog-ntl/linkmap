@@ -128,7 +128,8 @@ export async function DELETE(
   if (!deploy) return notFoundError('배포');
 
   const existingConfig = (deploy.config_data as Record<string, unknown>) || {};
-  const { moduleDraft: _, ...rest } = existingConfig;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { moduleDraft: _moduleDraft, ...rest } = existingConfig;
 
   const { error } = await supabase
     .from('homepage_deploys')

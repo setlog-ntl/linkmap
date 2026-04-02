@@ -6,7 +6,6 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { AppHeader } from '@/components/layout/app-header';
 import { ProjectLayoutContent } from '@/components/project/project-layout-content';
-import { ProjectTabs } from '@/components/project/project-tabs';
 import { ServiceDetailSheetGlobal } from '@/components/service-map/service-detail-sheet-global';
 import { ServiceDetailResolver } from '@/components/service-map/service-detail-resolver';
 import type { Profile } from '@/types';

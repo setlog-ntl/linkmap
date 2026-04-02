@@ -59,6 +59,7 @@ export function ProjectTabs({ projectId }: ProjectTabsProps) {
               <Link
                 key={tab.href}
                 href={tabPath}
+                prefetch={false}
                 className={cn(
                   'flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-colors',
                   isActive
