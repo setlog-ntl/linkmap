@@ -13,6 +13,7 @@ export const createFeedbackSchema = z.object({
     error: '올바른 카테고리를 선택해주세요',
   }),
   is_anonymous: z.boolean().optional().default(false),
+  page_context: z.string().max(200).nullable().optional(),
 });
 
 export const updateFeedbackSchema = z.object({

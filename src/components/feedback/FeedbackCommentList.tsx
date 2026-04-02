@@ -113,7 +113,7 @@ export function FeedbackCommentList({ feedbackId, isLoggedIn }: FeedbackCommentL
       ) : (
         <div className="text-center py-4 text-sm text-muted-foreground border rounded-lg">
           댓글을 작성하려면{' '}
-          <a href="/signin" className="text-brand-blue hover:underline font-medium">
+          <a href="/login" className="text-brand-blue hover:underline font-medium">
             로그인
           </a>
           이 필요합니다.

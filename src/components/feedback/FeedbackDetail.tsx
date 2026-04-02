@@ -36,7 +36,7 @@ export function FeedbackDetail({ id, isLoggedIn, isAdmin, currentUserId }: Feedb
   const handleVote = () => {
     if (!isLoggedIn) {
       toast.info('로그인 후 이용 가능합니다', {
-        action: { label: '로그인', onClick: () => { window.location.href = '/signin'; } },
+        action: { label: '로그인', onClick: () => { window.location.href = '/login'; } },
       });
       return;
     }

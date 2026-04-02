@@ -51,7 +51,7 @@ export function FeedbackBoard({ isLoggedIn }: FeedbackBoardProps) {
         <Button
           onClick={() => {
             if (!isLoggedIn) {
-              window.location.href = '/signin';
+              window.location.href = '/login';
               return;
             }
             setShowForm(true);

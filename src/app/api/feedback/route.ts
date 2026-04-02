@@ -101,11 +101,11 @@ export async function POST(request: NextRequest) {
     return apiError(parsed.error.issues[0].message, 400);
   }
 
-  const { title, description, category, is_anonymous } = parsed.data;
+  const { title, description, category, is_anonymous, page_context } = parsed.data;
 
   const { data, error } = await supabase
     .from('feature_requests')
-    .insert({ user_id: user.id, title, description, category, is_anonymous })
+    .insert({ user_id: user.id, title, description, category, is_anonymous, page_context: page_context ?? null })
     .select()
     .single();
 
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     action: 'feedback.create',
     resourceType: 'feature_request',
     resourceId: data.id as string,
-    details: { title, category },
+    details: { title, category, page_context: page_context ?? undefined },
   });
 
   return NextResponse.json({ item: data }, { status: 201 });

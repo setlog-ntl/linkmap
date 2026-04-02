@@ -83,7 +83,7 @@ export function useCreateFeedback() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: { title: string; description: string; category: string; is_anonymous?: boolean }) => {
+    mutationFn: async (input: { title: string; description: string; category: string; is_anonymous?: boolean; page_context?: string | null }) => {
       const res = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

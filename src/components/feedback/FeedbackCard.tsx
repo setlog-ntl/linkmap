@@ -37,7 +37,7 @@ export function FeedbackCard({ item, isLoggedIn }: FeedbackCardProps) {
     if (!isLoggedIn) {
       toast.info('로그인 후 이용 가능합니다', {
         description: '투표하려면 로그인이 필요합니다.',
-        action: { label: '로그인', onClick: () => { window.location.href = '/signin'; } },
+        action: { label: '로그인', onClick: () => { window.location.href = '/login'; } },
       });
       return;
     }

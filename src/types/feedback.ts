@@ -18,6 +18,7 @@ export interface FeatureRequest {
   status: FeatureRequestStatus;
   vote_count: number;
   admin_note: string | null;
+  page_context: string | null;
   is_anonymous: boolean;
   created_at: string;
   updated_at: string;
