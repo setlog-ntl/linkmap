@@ -24,6 +24,58 @@ export interface BlogPostMeta {
 
 export const BLOG_POSTS_META: BlogPostMeta[] = [
   // ======================================================================
+  // 새 포스트 — AI API 타임아웃 비동기 처리 패턴
+  // ======================================================================
+  {
+    slug: 'async-ai-api-timeout-fix',
+    title: 'AI API 호출이 자꾸 타임아웃 난다면 — 무거운 작업의 비동기 처리 패턴',
+    description: 'AI가 만들어준 코드가 느리거나 Vercel 10초 타임아웃에 걸린다면 처리 구조 문제입니다. Next.js after() 함수로 응답을 먼저 보내고 백그라운드에서 OCR·AI API를 처리하는 3단계 비동기 패턴을 정리합니다.',
+    category: 'tutorial',
+    tags: ['AI API 타임아웃', '비동기 처리', 'Next.js after', 'OCR 처리', '바이브 코딩'],
+    publishedAt: '2026-04-02',
+    readingTime: '8분',
+    relatedGuides: ['backend', 'api-basics', 'deploy', 'env'],
+  },
+  // ======================================================================
+  // 새 포스트 — 무료 CDN 의존성 함정
+  // ======================================================================
+  {
+    slug: 'free-cdn-dependency-trap',
+    title: 'archive.org에 올린 음악 파일 36곡이 갑자기 사라졌다 — 무료 외부 CDN·호스팅 의존성 함정과 탈출 전략',
+    description: 'archive.org에 올린 배경 음악 70곡 중 36곡이 예고 없이 접근 불가가 됐습니다. 무료 외부 호스팅의 숨겨진 비용, 어떤 파일을 외부에 맡기면 안 되는지, 직접 호스팅으로 전환하는 실전 전략 3가지를 정리합니다.',
+    category: 'insight',
+    tags: ['무료 CDN 위험', '외부 서비스 의존성', 'archive.org', '파일 호스팅', '바이브코딩 실수'],
+    publishedAt: '2026-04-02',
+    readingTime: '7분',
+    relatedGuides: ['supabase', 'github', 'deploy', 'cloudflare'],
+  },
+  // ======================================================================
+  // 새 포스트 — Zod parse vs safeParse
+  // ======================================================================
+  {
+    slug: 'zod-parse-vs-safeparse-500-error',
+    title: '입력 검증에서 500 에러가 나는 이유 — Zod parse vs safeParse 완전 정리',
+    description: 'AI가 생성한 API 코드에 Zod parse()가 있으면 잘못된 입력 하나로 서버가 500 에러를 뱉습니다. safeParse()와의 차이, 왜 AI는 위험한 쪽을 쓰는지, 그리고 실전 5단계 패턴까지 초보자도 이해할 수 있게 설명합니다.',
+    category: 'tutorial',
+    tags: ['Zod', 'API 입력 검증', '500 에러 해결', 'safeParse', 'Next.js API'],
+    publishedAt: '2026-04-02',
+    readingTime: '8분',
+    relatedGuides: ['backend', 'env', 'frontend', 'auth'],
+  },
+  // ======================================================================
+  // 새 포스트 — Hydration Mismatch 해결기
+  // ======================================================================
+  {
+    slug: 'nextjs-hydration-mismatch-fix',
+    title: 'Hydration Mismatch — 왜 새로고침하면 화면이 깨질까? Next.js 완전 해결 가이드',
+    description: '로컬에서는 괜찮은데 배포 후 새로고침하면 화면이 깨집니다. 다크모드·언어 설정·로그인 상태가 대표적 원인입니다. 서버와 브라우저의 차이, useEffect 패턴, suppressHydrationWarning 사용 기준까지 초보자도 이해할 수 있게 설명합니다.',
+    category: 'deploy-ops',
+    tags: ['Hydration Mismatch', 'Next.js 에러', '새로고침 화면 깨짐', 'useEffect', 'SSR 오류'],
+    publishedAt: '2026-04-02',
+    readingTime: '8분',
+    relatedGuides: ['frontend', 'deploy', 'vercel', 'supabase'],
+  },
+  // ======================================================================
   // 새 포스트 — Cloudflare Workers Error 1102 해결기
   // ======================================================================
   {

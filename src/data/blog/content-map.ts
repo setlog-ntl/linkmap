@@ -1,7 +1,11 @@
 // Auto-generated content map — slug → content string
 // Each content file exports: export const content = `...`;
 
+import { content as cAsyncTimeout } from './content/async-ai-api-timeout-fix';
+import { content as cFreeCdn } from './content/free-cdn-dependency-trap';
 import { content as c0 } from './content/ai-agent-reads-your-env';
+import { content as cZodSafeParse } from './content/zod-parse-vs-safeparse-500-error';
+import { content as cHydration } from './content/nextjs-hydration-mismatch-fix';
 import { content as cWorkers1102 } from './content/cloudflare-workers-error-1102-cpu-limit-fix';
 import { content as cWorkersPrefetch } from './content/cloudflare-workers-nextjs-prefetch-503-fix';
 import { content as c1 } from './content/ai-code-security-reality';
@@ -43,6 +47,10 @@ import { content as c32 } from './content/what-is-vibe-coding';
 import { content as c33 } from './content/why-dotenv-is-dangerous';
 
 export const CONTENT_MAP: Record<string, string> = {
+  'async-ai-api-timeout-fix': cAsyncTimeout,
+  'free-cdn-dependency-trap': cFreeCdn,
+  'zod-parse-vs-safeparse-500-error': cZodSafeParse,
+  'nextjs-hydration-mismatch-fix': cHydration,
   'vibe-coding-social-login-guide': cSocialLogin,
   'cloudflare-workers-error-1102-cpu-limit-fix': cWorkers1102,
   'cloudflare-workers-nextjs-prefetch-503-fix': cWorkersPrefetch,
