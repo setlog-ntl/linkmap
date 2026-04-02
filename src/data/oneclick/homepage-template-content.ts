@@ -1167,7 +1167,7 @@ export function ContactInfo({ config, accentColor }: Props) {
     config.phone ? { icon: Phone, label: config.phone, href: \`tel:\${config.phone.replace(/[^+\\d]/g, '')}\`, isExternal: false, ariaLabel: t('contact.call') } : null,
     address ? { icon: MapPin, label: address, href: \`https://maps.google.com/?q=\${encodeURIComponent(address)}\`, isExternal: true, ariaLabel: t('contact.map') } : null,
     config.website ? { icon: Globe, label: config.website.replace(/^https?:\\/\\//, ''), href: config.website, isExternal: true, ariaLabel: t('contact.website') } : null,
-    ...((config as Record<string, unknown>).extraContacts as Array<{ type: string; label: string; value: string }> || []).map((extra) => {
+    ...(((config as unknown as Record<string, unknown>).extraContacts ?? []) as Array<{ type: string; label: string; value: string }>).map((extra) => {
       const href = getExtraContactHref(extra.type, extra.value);
       const Icon = getExtraContactIcon(extra.type);
       return { icon: Icon, label: \`\${extra.label}: \${extra.value}\`, href: href || '#', isExternal: extra.type === 'link', ariaLabel: extra.label };
@@ -1464,7 +1464,7 @@ export function SocialLinks({ socials, accentColor }: Props) {
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
       {socials.map((social, i) => {
         const platform = social.platform.toLowerCase();
-        const displayLabel = (social as Record<string, string>).label || socialLabels[platform] || social.platform;
+        const displayLabel = social.label || socialLabels[platform] || social.platform;
         const isX = platform === 'twitter' || platform === 'x';
         const isTikTok = platform === 'tiktok';
         const isThreads = platform === 'threads';
