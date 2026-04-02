@@ -63,7 +63,7 @@ const nextConfig: NextConfig = {
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com https://static.cloudflareinsights.com https://www.clarity.ms https://scripts.clarity.ms",
       "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com",
       "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com data:",
-      "img-src 'self' data: blob: https://*.supabase.co https://avatars.githubusercontent.com https://lh3.googleusercontent.com https://www.google-analytics.com https://www.googletagmanager.com https://cdn.jsdelivr.net https://c.clarity.ms https://c.bing.com https://images.unsplash.com https://plus.unsplash.com",
+      "img-src 'self' data: blob: https://*.supabase.co https://avatars.githubusercontent.com https://lh3.googleusercontent.com https://www.google-analytics.com https://www.googletagmanager.com https://*.google.com https://*.google.co.kr https://cdn.jsdelivr.net https://c.clarity.ms https://c.bing.com https://images.unsplash.com https://plus.unsplash.com",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://stats.g.doubleclick.net https://cloudflareinsights.com https://j.clarity.ms https://c.clarity.ms https://v.clarity.ms https://c.bing.com",
       "frame-src https://js.stripe.com https://*.supabase.co https://*.github.io",
       "object-src 'none'",
