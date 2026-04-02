@@ -1533,7 +1533,7 @@ export interface ExtraContactItem { type: 'email' | 'phone' | 'link' | 'text'; l
 
 export type DesignPreset = 'pro' | 'corporate' | 'creative' | 'minimal-dark';
 
-const _basePath = process.env.NEXT_PUBLIC_REPO_NAME ? \\\`/\\\${process.env.NEXT_PUBLIC_REPO_NAME}\\\` : '';
+const _basePath = process.env.NEXT_PUBLIC_REPO_NAME ? \`/\${process.env.NEXT_PUBLIC_REPO_NAME}\` : '';
 
 function parseJSON<T>(raw: string | undefined, fallback: T): T {
   if (!raw) return fallback;
