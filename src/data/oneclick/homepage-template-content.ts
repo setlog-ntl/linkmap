@@ -1315,27 +1315,20 @@ export function ProfileCard({ config }: Props) {
 
 const namecardQrCode = `'use client';
 
+import { useEffect, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { generateVCard } from '@/lib/vcard';
-import type { SiteConfig } from '@/lib/config';
 
-interface Props { config: SiteConfig; }
+interface Props { config: { accentColor: string }; }
 
 export function QrCode({ config }: Props) {
-  const vcard = generateVCard({
-    name: config.name,
-    title: config.title,
-    company: config.company,
-    email: config.email,
-    phone: config.phone,
-    address: config.address,
-    website: config.website,
-  });
+  const [url, setUrl] = useState('');
+  useEffect(() => { setUrl(window.location.href); }, []);
+  if (!url) return null;
   return (
     <QRCodeSVG
-      value={vcard}
+      value={url}
       size={88}
-      level="M"
+      level="L"
       bgColor="#ffffff"
       fgColor="#111827"
     />
