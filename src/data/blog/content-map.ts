@@ -1,6 +1,7 @@
 // Auto-generated content map — slug → content string
 // Each content file exports: export const content = `...`;
 
+import { content as cWhyNeedDb } from './content/vibe-coding-why-you-need-database';
 import { content as cAsyncTimeout } from './content/async-ai-api-timeout-fix';
 import { content as cFreeCdn } from './content/free-cdn-dependency-trap';
 import { content as c0 } from './content/ai-agent-reads-your-env';
@@ -47,6 +48,7 @@ import { content as c32 } from './content/what-is-vibe-coding';
 import { content as c33 } from './content/why-dotenv-is-dangerous';
 
 export const CONTENT_MAP: Record<string, string> = {
+  'vibe-coding-why-you-need-database': cWhyNeedDb,
   'async-ai-api-timeout-fix': cAsyncTimeout,
   'free-cdn-dependency-trap': cFreeCdn,
   'zod-parse-vs-safeparse-500-error': cZodSafeParse,
