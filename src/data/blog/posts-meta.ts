@@ -4,6 +4,15 @@ import type { BlogCategory } from './blog-categories';
 // BlogPostMeta — content를 제외한 경량 메타데이터
 // ---------------------------------------------------------------------------
 
+/** 콘텐츠 표현 유형 — 기본값 'utility' (기존 전체) */
+export type BlogContentType = 'utility' | 'narrative';
+
+export interface BlogSeriesMeta {
+  id: string;
+  order: number;
+  totalParts?: number;
+}
+
 export interface BlogPostMeta {
   slug: string;
   title: string;
@@ -16,6 +25,10 @@ export interface BlogPostMeta {
   crossPostUrl?: string;
   relatedGuides?: string[];
   ogImage?: string;
+  contentType?: BlogContentType;
+  series?: BlogSeriesMeta;
+  narrativeHook?: string;
+  relatedPosts?: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -23,6 +36,23 @@ export interface BlogPostMeta {
 // ---------------------------------------------------------------------------
 
 export const BLOG_POSTS_META: BlogPostMeta[] = [
+  // ======================================================================
+  // 서사 시리즈 — 사용자에서 창작자로 1편
+  // ======================================================================
+  {
+    slug: 'user-to-creator-1-not-a-maker',
+    title: '사용자에서 창작자로 ① — 나는 만드는 사람이 아니었다',
+    description: '코딩은 전문가의 영역이라 믿었다. 세 번의 시도, 세 번의 포기. 그리고 AI가 코드를 짜주기 시작한 2025년, 그 경계가 사라지기 시작했다.',
+    category: 'vibe-coding',
+    tags: ['바이브 코딩', '사용자에서 창작자로', '시대 전환', '바이브코딩 입문', 'AI 코딩'],
+    publishedAt: '2026-04-03',
+    readingTime: '7분',
+    relatedGuides: ['env', 'deploy'],
+    contentType: 'narrative',
+    series: { id: 'user-to-creator', order: 1, totalParts: 5 },
+    narrativeHook: '만드는 건 만드는 사람이 하는 거지 — 그 생각이 틀렸다',
+    relatedPosts: ['what-is-vibe-coding', 'vibe-coding-getting-started-guide', 'cursor-ai-beginner-guide'],
+  },
   // ======================================================================
   // 새 포스트 — AI로 만든 서비스가 "이쁜 쓰레기"가 되는 이유: DB 기초
   // ======================================================================
@@ -136,6 +166,9 @@ export const BLOG_POSTS_META: BlogPostMeta[] = [
     publishedAt: '2026-03-18',
     readingTime: '8분',
     relatedGuides: ['env', 'deploy', 'github'],
+    contentType: 'narrative',
+    series: { id: 'linkmap-dev-story', order: 3, totalParts: 3 },
+    narrativeHook: '3개월 수수께끼가 10초 만에 풀렸다',
   },
   {
     slug: 'linkmap-dev-story-2-ai-as-teammate',
@@ -146,6 +179,9 @@ export const BLOG_POSTS_META: BlogPostMeta[] = [
     publishedAt: '2026-03-16',
     readingTime: '9분',
     relatedGuides: ['supabase', 'env', 'backend'],
+    contentType: 'narrative',
+    series: { id: 'linkmap-dev-story', order: 2, totalParts: 3 },
+    narrativeHook: 'AI는 구현을 담당하고, 사람은 설계를 담당한다',
   },
   {
     slug: 'linkmap-dev-story-1-infra-battle',
@@ -156,6 +192,9 @@ export const BLOG_POSTS_META: BlogPostMeta[] = [
     publishedAt: '2026-03-14',
     readingTime: '8분',
     relatedGuides: ['env', 'deploy', 'auth'],
+    contentType: 'narrative',
+    series: { id: 'linkmap-dev-story', order: 1, totalParts: 3 },
+    narrativeHook: '코드는 30분, 콘솔 설정은 3시간',
   },
   {
     slug: 'vibe-coding-stripe-payment-guide',

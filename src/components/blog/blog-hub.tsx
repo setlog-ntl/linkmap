@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Clock, Calendar, Link2, Check } from 'lucide-react';
+import { ArrowRight, Clock, Calendar, Link2, Check, BookOpen } from 'lucide-react';
 import { IconTooltip } from '@/components/ui/icon-tooltip';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -10,6 +10,7 @@ import {
   getBlogCategoryOrder,
   type BlogCategory,
 } from '@/data/blog/blog-categories';
+import { BLOG_SERIES, getSeriesPostSlugs } from '@/data/blog/blog-series';
 import type { BlogPostMeta } from '@/data/blog/posts';
 
 /** ISO date → "2026년 3월 18일" (환경 무관 결정적 포맷) */
@@ -60,12 +61,16 @@ function CopyLinkButton({ slug }: { slug: string }) {
 function PostCard({ post }: { post: BlogPostMeta }) {
   const cat = BLOG_CATEGORIES[post.category];
   const CatIcon = cat.icon;
+  const isNarrative = post.contentType === 'narrative';
 
   return (
     <Link
       href={`/blog/${post.slug}`}
       prefetch={false}
-      className="group relative flex flex-col gap-3 rounded-lg border bg-card p-5 shadow-sm transition-all hover:border-brand-blue/50 hover:shadow-md"
+      className={`group relative flex flex-col gap-3 rounded-lg border bg-card p-5 shadow-sm transition-all hover:border-brand-blue/50 hover:shadow-md ${
+        isNarrative ? 'border-l-4 border-l-transparent bg-gradient-to-r from-blue-50/30 to-green-50/30 dark:from-blue-950/10 dark:to-green-950/10' : ''
+      }`}
+      style={isNarrative ? { borderLeftColor: 'transparent', borderImage: 'linear-gradient(to bottom, var(--color-brand-blue), var(--color-brand-green)) 1' } : undefined}
     >
       {/* Category + Tags + Copy */}
       <div className="flex items-center justify-between">
@@ -76,6 +81,11 @@ function PostCard({ post }: { post: BlogPostMeta }) {
           <span className="text-xs font-medium text-muted-foreground">
             {cat.label}
           </span>
+          {isNarrative && post.series && (
+            <Badge variant="outline" className="text-xs border-brand-blue/30 text-brand-blue">
+              {post.series.order}/{post.series.totalParts ?? '?'}편
+            </Badge>
+          )}
         </div>
         <div className="flex items-center gap-1.5">
           {post.tags.length > 0 && (
@@ -86,6 +96,13 @@ function PostCard({ post }: { post: BlogPostMeta }) {
           <CopyLinkButton slug={post.slug} />
         </div>
       </div>
+
+      {/* Narrative Hook */}
+      {isNarrative && post.narrativeHook && (
+        <p className="text-xs italic text-brand-blue/70 dark:text-brand-blue/50 -mb-1">
+          &ldquo;{post.narrativeHook}&rdquo;
+        </p>
+      )}
 
       {/* Title + Description */}
       <div className="space-y-1.5">
@@ -120,21 +137,38 @@ export function BlogHub({ posts }: { posts: BlogPostMeta[] }) {
   const categoriesWithPosts = categories.filter(
     (cat) => posts.some((p) => p.category === cat)
   );
-  const [activeCategory, setActiveCategory] = useState<BlogCategory | 'all'>('all');
+  const [activeCategory, setActiveCategory] = useState<BlogCategory | 'all' | 'narrative'>('all');
+
+  const narrativeCount = useMemo(() => posts.filter((p) => p.contentType === 'narrative').length, [posts]);
 
   const filteredPosts = activeCategory === 'all'
     ? posts
-    : posts.filter((p) => p.category === activeCategory);
+    : activeCategory === 'narrative'
+      ? posts.filter((p) => p.contentType === 'narrative')
+      : posts.filter((p) => p.category === activeCategory);
 
-  // 카테고리별로 그룹핑
-  const groupedPosts = categoriesWithPosts
-    .filter((cat) => activeCategory === 'all' || cat === activeCategory)
-    .map((cat) => ({
-      key: cat,
-      ...BLOG_CATEGORIES[cat],
-      posts: filteredPosts.filter((p) => p.category === cat),
-    }))
-    .filter((g) => g.posts.length > 0);
+  // 시리즈 배너 데이터 (글이 있는 시리즈만)
+  const seriesWithPosts = useMemo(() =>
+    BLOG_SERIES
+      .map((s) => {
+        const slugs = getSeriesPostSlugs(s.id, posts);
+        return { ...s, postCount: slugs.length, firstSlug: slugs[0] };
+      })
+      .filter((s) => s.postCount > 0),
+    [posts],
+  );
+
+  // 카테고리별로 그룹핑 (서사 필터일 때는 단일 그룹)
+  const groupedPosts = activeCategory === 'narrative'
+    ? [{ key: 'narrative' as const, label: '서사', description: '시대 전환의 이야기', icon: BookOpen, posts: filteredPosts }]
+    : categoriesWithPosts
+        .filter((cat) => activeCategory === 'all' || cat === activeCategory)
+        .map((cat) => ({
+          key: cat,
+          ...BLOG_CATEGORIES[cat],
+          posts: filteredPosts.filter((p) => p.category === cat),
+        }))
+        .filter((g) => g.posts.length > 0);
 
   return (
     <div className="py-12 md:py-16 space-y-10">
@@ -160,6 +194,20 @@ export function BlogHub({ posts }: { posts: BlogPostMeta[] }) {
             전체
             <span className="text-xs opacity-60">({posts.length})</span>
           </button>
+          {narrativeCount > 0 && (
+            <button
+              onClick={() => setActiveCategory('narrative')}
+              className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                activeCategory === 'narrative'
+                  ? 'border-brand-blue bg-brand-blue/10 text-brand-blue font-medium'
+                  : 'text-muted-foreground hover:border-brand-blue/30 hover:text-foreground'
+              }`}
+            >
+              <BookOpen className="h-3 w-3" />
+              서사
+              <span className="text-xs opacity-60">({narrativeCount})</span>
+            </button>
+          )}
           {categoriesWithPosts.map((catKey) => {
             const cat = BLOG_CATEGORIES[catKey];
             const CatIcon = cat.icon;
@@ -179,6 +227,31 @@ export function BlogHub({ posts }: { posts: BlogPostMeta[] }) {
                 {cat.label}
                 <span className="text-xs opacity-60">({count})</span>
               </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Series Banners — 전체 또는 서사 필터에서만 표시 */}
+      {(activeCategory === 'all' || activeCategory === 'narrative') && seriesWithPosts.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {seriesWithPosts.map((s) => {
+            const SIcon = s.icon;
+            return (
+              <Link
+                key={s.id}
+                href={`/blog/${s.firstSlug}`}
+                prefetch={false}
+                className="group rounded-lg border bg-gradient-to-br from-blue-50/50 to-green-50/50 dark:from-blue-950/20 dark:to-green-950/20 p-5 transition-all hover:border-brand-blue/50 hover:shadow-md"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <SIcon className="h-4 w-4 text-brand-blue" />
+                  <span className="text-sm font-semibold group-hover:text-brand-blue transition-colors">{s.title}</span>
+                  <Badge variant="outline" className="ml-auto text-xs">{s.postCount}편</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">{s.description}</p>
+                <p className="text-xs italic text-brand-blue/60">&ldquo;{s.tagline}&rdquo;</p>
+              </Link>
             );
           })}
         </div>

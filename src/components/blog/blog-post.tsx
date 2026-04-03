@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback, type ReactNode, type Compone
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ArrowLeft, ArrowRight, Calendar, Clock, Tag, ExternalLink, ChevronRight, List, Link2, Check, Share2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar, Clock, Tag, ExternalLink, ChevronRight, List, Link2, Check, Share2, BookOpen } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { BLOG_CATEGORIES } from '@/data/blog/blog-categories';
@@ -377,6 +377,80 @@ function PostNavigation({ prev, next }: { prev: NavPost | null; next: NavPost | 
 }
 
 // ---------------------------------------------------------------------------
+// Series Navigation
+// ---------------------------------------------------------------------------
+interface SeriesNavProps {
+  seriesTitle: string;
+  seriesPosts: { slug: string; title: string; order: number }[];
+  currentSlug: string;
+}
+
+function SeriesNav({ seriesTitle, seriesPosts, currentSlug }: SeriesNavProps) {
+  return (
+    <nav className="not-prose mb-8 rounded-lg border bg-gradient-to-r from-blue-50/50 to-green-50/50 dark:from-blue-950/20 dark:to-green-950/20 p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <BookOpen className="h-4 w-4 text-brand-blue" />
+        <span className="text-sm font-semibold">{seriesTitle}</span>
+        <span className="text-xs text-muted-foreground ml-auto">{seriesPosts.length}편 시리즈</span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {seriesPosts.map((sp) => {
+          const isCurrent = sp.slug === currentSlug;
+          return isCurrent ? (
+            <span
+              key={sp.slug}
+              className="inline-flex items-center gap-1 rounded-md border border-brand-blue bg-brand-blue/10 px-2.5 py-1 text-xs font-medium text-brand-blue"
+            >
+              {sp.order}편
+            </span>
+          ) : (
+            <Link
+              key={sp.slug}
+              href={`/blog/${sp.slug}`}
+              prefetch={false}
+              className="inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs text-muted-foreground hover:border-brand-blue/50 hover:text-brand-blue transition-colors"
+            >
+              {sp.order}편
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Related Posts (서사 ↔ 유틸리티 크로스 레퍼런스)
+// ---------------------------------------------------------------------------
+function RelatedPostsSection({ posts }: { posts: { slug: string; title: string; contentType?: string }[] }) {
+  if (posts.length === 0) return null;
+  return (
+    <div className="mt-8 rounded-lg border bg-muted/30 p-6">
+      <h3 className="font-semibold mb-3 flex items-center gap-2">
+        <BookOpen className="h-4 w-4 text-brand-blue" />
+        관련 블로그 글
+      </h3>
+      <div className="space-y-2">
+        {posts.map((rp) => (
+          <Link
+            key={rp.slug}
+            href={`/blog/${rp.slug}`}
+            prefetch={false}
+            className="flex items-center gap-3 rounded-md p-2 hover:bg-muted transition-colors"
+          >
+            <ChevronRight className="h-4 w-4 text-brand-blue" />
+            <span className="text-sm font-medium">{rp.title}</span>
+            {rp.contentType === 'narrative' && (
+              <Badge variant="outline" className="ml-auto text-xs border-brand-blue/30 text-brand-blue">서사</Badge>
+            )}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main Component
 // ---------------------------------------------------------------------------
 export interface RelatedGuideInfo {
@@ -386,16 +460,33 @@ export interface RelatedGuideInfo {
   readingTime?: string;
 }
 
+export interface RelatedPostInfo {
+  slug: string;
+  title: string;
+  contentType?: string;
+}
+
+export interface SeriesNavData {
+  seriesId: string;
+  seriesTitle: string;
+  seriesTagline: string;
+  seriesPosts: { slug: string; title: string; order: number }[];
+}
+
 interface BlogPostViewProps {
   post: BlogPost;
   prevPost?: NavPost | null;
   nextPost?: NavPost | null;
   relatedGuideInfos?: RelatedGuideInfo[];
+  relatedPostInfos?: RelatedPostInfo[];
+  seriesNav?: SeriesNavData | null;
 }
 
-export function BlogPostView({ post, prevPost = null, nextPost = null, relatedGuideInfos = [] }: BlogPostViewProps) {
+export function BlogPostView({ post, prevPost = null, nextPost = null, relatedGuideInfos = [], relatedPostInfos = [], seriesNav = null }: BlogPostViewProps) {
   const cat = BLOG_CATEGORIES[post.category];
   const CatIcon = cat.icon;
+  const isNarrative = post.contentType === 'narrative';
+  const proseClass = `prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-lg prose-h3:mt-6 prose-p:leading-relaxed prose-img:rounded-lg prose-strong:text-foreground${isNarrative ? ' prose-lg' : ''}`;
 
   // Split content at "---" to insert CTA in middle
   const contentParts = post.content.split(/\n---\n/);
@@ -457,11 +548,20 @@ export function BlogPostView({ post, prevPost = null, nextPost = null, relatedGu
           )}
         </header>
 
+        {/* Series Navigation */}
+        {seriesNav && (
+          <SeriesNav
+            seriesTitle={seriesNav.seriesTitle}
+            seriesPosts={seriesNav.seriesPosts}
+            currentSlug={post.slug}
+          />
+        )}
+
         {/* Table of Contents */}
         <TableOfContents content={post.content} />
 
         {/* Content — first half */}
-        <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-lg prose-h3:mt-6 prose-p:leading-relaxed prose-img:rounded-lg prose-strong:text-foreground">
+        <div className={proseClass}>
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>{firstHalf}</ReactMarkdown>
         </div>
 
@@ -470,7 +570,7 @@ export function BlogPostView({ post, prevPost = null, nextPost = null, relatedGu
 
         {/* Content — second half */}
         {secondHalf && (
-          <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-lg prose-h3:mt-6 prose-p:leading-relaxed prose-img:rounded-lg prose-strong:text-foreground">
+          <div className={proseClass}>
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>{secondHalf}</ReactMarkdown>
           </div>
         )}
@@ -497,6 +597,9 @@ export function BlogPostView({ post, prevPost = null, nextPost = null, relatedGu
             </div>
           </div>
         )}
+
+        {/* Related Posts */}
+        <RelatedPostsSection posts={relatedPostInfos} />
 
         {/* Cross-post notice */}
         {post.crossPostUrl && (

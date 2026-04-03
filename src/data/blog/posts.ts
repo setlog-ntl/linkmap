@@ -8,7 +8,13 @@ export type { BlogCategory } from './blog-categories';
 // Metadata re-exports
 // ---------------------------------------------------------------------------
 export { BLOG_POSTS_META } from './posts-meta';
-export type { BlogPostMeta } from './posts-meta';
+export type { BlogPostMeta, BlogContentType, BlogSeriesMeta } from './posts-meta';
+
+// ---------------------------------------------------------------------------
+// Series re-exports
+// ---------------------------------------------------------------------------
+export { BLOG_SERIES, getSeriesById, getSeriesPostSlugs } from './blog-series';
+export type { BlogSeriesInfo } from './blog-series';
 
 import type { BlogCategory } from './blog-categories';
 import { BLOG_POSTS_META, type BlogPostMeta } from './posts-meta';
@@ -79,4 +85,18 @@ export function getAllTags(): string[] {
     for (const tag of post.tags) tagSet.add(tag);
   }
   return Array.from(tagSet).sort();
+}
+
+/** 서사(narrative) 콘텐츠만 최신순 반환 */
+export function getPublishedNarratives(): BlogPostMeta[] {
+  return [...BLOG_POSTS_META]
+    .filter((p) => p.contentType === 'narrative')
+    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+}
+
+/** 특정 시리즈의 포스트 메타를 순번(order) 순으로 반환 */
+export function getSeriesPosts(seriesId: string): BlogPostMeta[] {
+  return BLOG_POSTS_META
+    .filter((p) => p.series?.id === seriesId)
+    .sort((a, b) => a.series!.order - b.series!.order);
 }

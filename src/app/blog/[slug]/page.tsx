@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getBlogPostBySlug, getPublishedPosts, getPublishedPostSlugs } from '@/data/blog/posts';
+import { getBlogPostBySlug, getPublishedPosts, getPublishedPostSlugs, getSeriesPosts, BLOG_POSTS_META } from '@/data/blog/posts';
+import { getSeriesById } from '@/data/blog/blog-series';
 import { GUIDE_DATA } from '@/data/ui/guide-data';
 import { generateBlogJsonLd } from '@/lib/seo/json-ld';
 import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { BlogPostView } from '@/components/blog/blog-post';
-import type { RelatedGuideInfo } from '@/components/blog/blog-post';
+import type { RelatedGuideInfo, RelatedPostInfo, SeriesNavData } from '@/components/blog/blog-post';
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
@@ -62,6 +63,28 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     return acc;
   }, []);
 
+  // 시리즈 네비게이션 데이터 (icon은 직렬화 불가 → 이름만 전달)
+  let seriesNav: SeriesNavData | null = null;
+  if (post.series) {
+    const seriesInfo = getSeriesById(post.series.id);
+    if (seriesInfo) {
+      const sp = getSeriesPosts(post.series.id);
+      seriesNav = {
+        seriesId: seriesInfo.id,
+        seriesTitle: seriesInfo.title,
+        seriesTagline: seriesInfo.tagline,
+        seriesPosts: sp.map((p) => ({ slug: p.slug, title: p.title, order: p.series!.order })),
+      };
+    }
+  }
+
+  // relatedPosts 서버 측 해석
+  const relatedPostInfos: RelatedPostInfo[] = (post.relatedPosts ?? []).reduce<RelatedPostInfo[]>((acc, rpSlug) => {
+    const rp = BLOG_POSTS_META.find((p) => p.slug === rpSlug);
+    if (rp) acc.push({ slug: rp.slug, title: rp.title, contentType: rp.contentType });
+    return acc;
+  }, []);
+
   const jsonLd = generateBlogJsonLd({
     slug: post.slug,
     title: post.title,
@@ -80,6 +103,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         prevPost={prevPost}
         nextPost={nextPost}
         relatedGuideInfos={relatedGuideInfos}
+        relatedPostInfos={relatedPostInfos}
+        seriesNav={seriesNav}
       />
     </>
   );
