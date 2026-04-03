@@ -7,7 +7,7 @@ import remarkGfm from 'remark-gfm';
 import { ArrowLeft, ArrowRight, Calendar, Clock, Tag, ExternalLink, ChevronRight, List, Link2, Check, Share2, BookOpen } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BLOG_CATEGORIES } from '@/data/blog/blog-categories';
+import { BLOG_TOPIC_TAGS } from '@/data/blog/blog-tags';
 import type { BlogPost } from '@/data/blog/posts-content';
 
 /** ISO date → "2026년 3월 18일" (환경 무관 결정적 포맷) */
@@ -483,7 +483,7 @@ interface BlogPostViewProps {
 }
 
 export function BlogPostView({ post, prevPost = null, nextPost = null, relatedGuideInfos = [], relatedPostInfos = [], seriesNav = null }: BlogPostViewProps) {
-  const cat = BLOG_CATEGORIES[post.category];
+  const cat = BLOG_TOPIC_TAGS[post.topicTags[0]];
   const CatIcon = cat.icon;
   const isNarrative = post.contentType === 'narrative';
   const proseClass = `prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-lg prose-h3:mt-6 prose-p:leading-relaxed prose-img:rounded-lg prose-strong:text-foreground${isNarrative ? ' prose-lg' : ''}`;

@@ -6,10 +6,10 @@ import { ArrowRight, Clock, Calendar, Link2, Check, BookOpen } from 'lucide-reac
 import { IconTooltip } from '@/components/ui/icon-tooltip';
 import { Badge } from '@/components/ui/badge';
 import {
-  BLOG_CATEGORIES,
-  getBlogCategoryOrder,
-  type BlogCategory,
-} from '@/data/blog/blog-categories';
+  BLOG_TOPIC_TAGS,
+  getTopicTagOrder,
+  type BlogTopicTag,
+} from '@/data/blog/blog-tags';
 import { BLOG_SERIES, getSeriesPostSlugs } from '@/data/blog/blog-series';
 import type { BlogPostMeta } from '@/data/blog/posts';
 
@@ -59,8 +59,8 @@ function CopyLinkButton({ slug }: { slug: string }) {
 }
 
 function PostCard({ post }: { post: BlogPostMeta }) {
-  const cat = BLOG_CATEGORIES[post.category];
-  const CatIcon = cat.icon;
+  const primaryTag = BLOG_TOPIC_TAGS[post.topicTags[0]];
+  const PrimaryIcon = primaryTag.icon;
   const isNarrative = post.contentType === 'narrative';
 
   return (
@@ -72,15 +72,20 @@ function PostCard({ post }: { post: BlogPostMeta }) {
       }`}
       style={isNarrative ? { borderLeftColor: 'transparent', borderImage: 'linear-gradient(to bottom, var(--color-brand-blue), var(--color-brand-green)) 1' } : undefined}
     >
-      {/* Category + Tags + Copy */}
+      {/* Topic Tags + SEO Tag + Copy */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
-            <CatIcon className="h-4 w-4 text-brand-blue" />
+            <PrimaryIcon className="h-4 w-4 text-brand-blue" />
           </div>
           <span className="text-xs font-medium text-muted-foreground">
-            {cat.label}
+            {primaryTag.label}
           </span>
+          {post.topicTags.length > 1 && (
+            <span className="text-xs text-muted-foreground/60">
+              +{post.topicTags.length - 1}
+            </span>
+          )}
           {isNarrative && post.series && (
             <Badge variant="outline" className="text-xs border-brand-blue/30 text-brand-blue">
               {post.series.order}/{post.series.totalParts ?? '?'}편
@@ -133,19 +138,45 @@ function PostCard({ post }: { post: BlogPostMeta }) {
 }
 
 export function BlogHub({ posts }: { posts: BlogPostMeta[] }) {
-  const categories = getBlogCategoryOrder();
-  const categoriesWithPosts = categories.filter(
-    (cat) => posts.some((p) => p.category === cat)
+  const allTags = getTopicTagOrder();
+  const tagsWithPosts = allTags.filter(
+    (tag) => posts.some((p) => p.topicTags.includes(tag))
   );
-  const [activeCategory, setActiveCategory] = useState<BlogCategory | 'all' | 'narrative'>('all');
+
+  // 다중 태그 토글 상태
+  const [activeTags, setActiveTags] = useState<Set<BlogTopicTag>>(new Set());
+  // 스토리 토글 상태
+  const [showNarrativeOnly, setShowNarrativeOnly] = useState(false);
 
   const narrativeCount = useMemo(() => posts.filter((p) => p.contentType === 'narrative').length, [posts]);
 
-  const filteredPosts = activeCategory === 'all'
-    ? posts
-    : activeCategory === 'narrative'
-      ? posts.filter((p) => p.contentType === 'narrative')
-      : posts.filter((p) => p.category === activeCategory);
+  const toggleTag = useCallback((tag: BlogTopicTag) => {
+    setActiveTags((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag)) next.delete(tag);
+      else next.add(tag);
+      return next;
+    });
+  }, []);
+
+  const clearFilters = useCallback(() => {
+    setActiveTags(new Set());
+    setShowNarrativeOnly(false);
+  }, []);
+
+  // 필터링: 태그 + 스토리 AND 조건
+  const filteredPosts = useMemo(() => {
+    let result = posts;
+    if (activeTags.size > 0) {
+      result = result.filter((p) => p.topicTags.some((t) => activeTags.has(t)));
+    }
+    if (showNarrativeOnly) {
+      result = result.filter((p) => p.contentType === 'narrative');
+    }
+    return result;
+  }, [posts, activeTags, showNarrativeOnly]);
+
+  const isAllActive = activeTags.size === 0 && !showNarrativeOnly;
 
   // 시리즈 배너 데이터 (글이 있는 시리즈만)
   const seriesWithPosts = useMemo(() =>
@@ -158,17 +189,25 @@ export function BlogHub({ posts }: { posts: BlogPostMeta[] }) {
     [posts],
   );
 
-  // 카테고리별로 그룹핑 (스토리 필터일 때는 단일 그룹)
-  const groupedPosts = activeCategory === 'narrative'
-    ? [{ key: 'narrative' as const, label: '스토리', description: '시대 전환의 이야기', icon: BookOpen, posts: filteredPosts }]
-    : categoriesWithPosts
-        .filter((cat) => activeCategory === 'all' || cat === activeCategory)
-        .map((cat) => ({
-          key: cat,
-          ...BLOG_CATEGORIES[cat],
-          posts: filteredPosts.filter((p) => p.category === cat),
-        }))
-        .filter((g) => g.posts.length > 0);
+  // 태그별 그룹핑 (전체일 때) 또는 시간순 단일 그룹 (필터 활성 시)
+  const groupedPosts = useMemo(() => {
+    if (showNarrativeOnly && activeTags.size === 0) {
+      return [{ key: 'narrative' as const, label: '스토리', description: '시대 전환의 이야기', icon: BookOpen, posts: filteredPosts }];
+    }
+    if (activeTags.size > 0) {
+      // 선택된 태그가 있으면 시간순 단일 그룹
+      const labels = [...activeTags].map((t) => BLOG_TOPIC_TAGS[t].label).join(' + ');
+      return [{ key: 'filtered' as const, label: labels + (showNarrativeOnly ? ' 스토리' : ''), description: '', icon: BookOpen, posts: filteredPosts }];
+    }
+    // 전체: 태그별 그룹
+    return tagsWithPosts
+      .map((tag) => ({
+        key: tag,
+        ...BLOG_TOPIC_TAGS[tag],
+        posts: filteredPosts.filter((p) => p.topicTags.includes(tag)),
+      }))
+      .filter((g) => g.posts.length > 0);
+  }, [filteredPosts, activeTags, showNarrativeOnly, tagsWithPosts]);
 
   return (
     <div className="py-12 md:py-16 space-y-10">
@@ -180,13 +219,14 @@ export function BlogHub({ posts }: { posts: BlogPostMeta[] }) {
         </p>
       </div>
 
-      {/* Category Filter Tabs */}
-      {categoriesWithPosts.length > 1 && (
+      {/* Filter Tabs: 전체 + 스토리 토글 | 태그 토글들 */}
+      {tagsWithPosts.length > 1 && (
         <div className="flex flex-wrap justify-center gap-2">
+          {/* 전체 버튼 */}
           <button
-            onClick={() => setActiveCategory('all')}
+            onClick={clearFilters}
             className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
-              activeCategory === 'all'
+              isAllActive
                 ? 'border-brand-blue bg-brand-blue/10 text-brand-blue font-medium'
                 : 'text-muted-foreground hover:border-brand-blue/30 hover:text-foreground'
             }`}
@@ -194,13 +234,15 @@ export function BlogHub({ posts }: { posts: BlogPostMeta[] }) {
             전체
             <span className="text-xs opacity-60">({posts.length})</span>
           </button>
+
+          {/* 스토리 토글 */}
           {narrativeCount > 0 && (
             <button
-              onClick={() => setActiveCategory('narrative')}
+              onClick={() => setShowNarrativeOnly((prev) => !prev)}
               className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
-                activeCategory === 'narrative'
-                  ? 'border-brand-blue bg-brand-blue/10 text-brand-blue font-medium'
-                  : 'text-muted-foreground hover:border-brand-blue/30 hover:text-foreground'
+                showNarrativeOnly
+                  ? 'border-brand-green bg-brand-green/10 text-brand-green font-medium'
+                  : 'text-muted-foreground hover:border-brand-green/30 hover:text-foreground'
               }`}
             >
               <BookOpen className="h-3 w-3" />
@@ -208,23 +250,28 @@ export function BlogHub({ posts }: { posts: BlogPostMeta[] }) {
               <span className="text-xs opacity-60">({narrativeCount})</span>
             </button>
           )}
-          {categoriesWithPosts.map((catKey) => {
-            const cat = BLOG_CATEGORIES[catKey];
-            const CatIcon = cat.icon;
-            const count = posts.filter((p) => p.category === catKey).length;
-            const isActive = activeCategory === catKey;
+
+          {/* 구분선 */}
+          <div className="hidden sm:block w-px h-7 bg-border self-center" />
+
+          {/* 태그 토글 버튼들 */}
+          {tagsWithPosts.map((tagKey) => {
+            const tag = BLOG_TOPIC_TAGS[tagKey];
+            const TagIcon = tag.icon;
+            const count = posts.filter((p) => p.topicTags.includes(tagKey)).length;
+            const isActive = activeTags.has(tagKey);
             return (
               <button
-                key={catKey}
-                onClick={() => setActiveCategory(catKey)}
+                key={tagKey}
+                onClick={() => toggleTag(tagKey)}
                 className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
                   isActive
                     ? 'border-brand-blue bg-brand-blue/10 text-brand-blue font-medium'
                     : 'text-muted-foreground hover:border-brand-blue/30 hover:text-foreground'
                 }`}
               >
-                <CatIcon className="h-3 w-3" />
-                {cat.label}
+                <TagIcon className="h-3 w-3" />
+                {tag.label}
                 <span className="text-xs opacity-60">({count})</span>
               </button>
             );
@@ -233,7 +280,7 @@ export function BlogHub({ posts }: { posts: BlogPostMeta[] }) {
       )}
 
       {/* Series Banners — 전체 또는 스토리 필터에서만 표시 */}
-      {(activeCategory === 'all' || activeCategory === 'narrative') && seriesWithPosts.length > 0 && (
+      {(isAllActive || (showNarrativeOnly && activeTags.size === 0)) && seriesWithPosts.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {seriesWithPosts.map((s) => {
             const SIcon = s.icon;
@@ -257,13 +304,16 @@ export function BlogHub({ posts }: { posts: BlogPostMeta[] }) {
         </div>
       )}
 
-      {/* Posts by Category Sections */}
+      {/* Posts by Group Sections */}
       {filteredPosts.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-muted-foreground text-lg">아직 발행된 글이 없습니다.</p>
-          <p className="text-sm text-muted-foreground mt-2">
-            곧 바이브 코딩과 환경변수 관리에 대한 글을 발행합니다.
-          </p>
+          <p className="text-muted-foreground text-lg">선택한 필터에 해당하는 글이 없습니다.</p>
+          <button
+            onClick={clearFilters}
+            className="mt-3 text-sm text-brand-blue hover:underline"
+          >
+            필터 초기화
+          </button>
         </div>
       ) : (
         <div className="space-y-10">
@@ -271,8 +321,8 @@ export function BlogHub({ posts }: { posts: BlogPostMeta[] }) {
             const GroupIcon = group.icon;
             return (
               <section key={group.key}>
-                {/* Category Section Header */}
-                {activeCategory === 'all' && (
+                {/* Section Header — 전체 보기에서만 표시 */}
+                {isAllActive && (
                   <div className="flex items-center gap-2 mb-4">
                     <div className="flex h-7 w-7 items-center justify-center rounded-md bg-brand-blue/10">
                       <GroupIcon className="h-3.5 w-3.5 text-brand-blue" />

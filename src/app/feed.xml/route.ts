@@ -29,7 +29,7 @@ export function GET() {
       <guid isPermaLink="true">${SITE_URL}/blog/${post.slug}</guid>
       <description>${escapeXml(post.description)}</description>
       <pubDate>${new Date(post.publishedAt).toUTCString()}</pubDate>
-      <category>${escapeXml(post.category)}</category>
+      <category>${escapeXml(post.topicTags[0])}</category>
     </item>`
     )
     .join('\n');

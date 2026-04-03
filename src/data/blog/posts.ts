@@ -1,8 +1,11 @@
 // ---------------------------------------------------------------------------
-// Categories & types — blog-categories.ts에서 re-export (역호환)
+// Topic tags & types — blog-tags.ts에서 re-export
 // ---------------------------------------------------------------------------
-export { BLOG_CATEGORIES, getBlogCategoryOrder } from './blog-categories';
-export type { BlogCategory } from './blog-categories';
+export { BLOG_TOPIC_TAGS, getTopicTagOrder } from './blog-tags';
+export type { BlogTopicTag } from './blog-tags';
+// Backward compat
+export { BLOG_CATEGORIES, getBlogCategoryOrder } from './blog-tags';
+export type { BlogCategory } from './blog-tags';
 
 // ---------------------------------------------------------------------------
 // Metadata re-exports
