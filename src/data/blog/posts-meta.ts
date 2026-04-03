@@ -37,7 +37,7 @@ export interface BlogPostMeta {
 
 export const BLOG_POSTS_META: BlogPostMeta[] = [
   // ======================================================================
-  // 새 포스트 — 바이브코딩 병렬 세션 덮어쓰기 함정과 Git 워크트리 해결법
+  // 스토리 — 병렬 세션 덮어쓰기 함정 경험담
   // ======================================================================
   {
     slug: 'vibe-coding-parallel-session-trap',
@@ -48,6 +48,8 @@ export const BLOG_POSTS_META: BlogPostMeta[] = [
     publishedAt: '2026-04-03',
     readingTime: '8분',
     relatedGuides: ['github', 'version-control', 'env', 'deploy'],
+    contentType: 'narrative',
+    narrativeHook: '빠르겠지 했는데, 한 시간 작업이 흔적도 없이 사라졌다',
   },
   // ======================================================================
   // 스토리 시리즈 — 사용자에서 창작자로 1편
