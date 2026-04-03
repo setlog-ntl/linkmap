@@ -7,6 +7,8 @@ const SITE_DESCRIPTION = '바이브 코딩 플랫폼 — 서비스 시각화, �
 // 빌드 시점에 고정 — new Date()를 런타임 호출하면 동적 렌더링 트리거됨
 const BUILD_DATE = '2026-03-22';
 
+export const revalidate = false; // 완전 정적: 배포 시에만 변경 (Workers CPU 제한 대응)
+
 function escapeXml(str: string): string {
   return str
     .replace(/&/g, '&amp;')

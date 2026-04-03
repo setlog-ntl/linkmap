@@ -16,52 +16,12 @@ export type { BlogPostMeta, BlogContentType, BlogSeriesMeta } from './posts-meta
 export { BLOG_SERIES, getSeriesById, getSeriesPostSlugs } from './blog-series';
 export type { BlogSeriesInfo } from './blog-series';
 
-import type { BlogCategory } from './blog-categories';
 import { BLOG_POSTS_META, type BlogPostMeta } from './posts-meta';
-import { CONTENT_MAP } from './content-map';
 
 // ---------------------------------------------------------------------------
-// Types
+// Content-dependent functions → posts-content.ts로 분리됨
+// 콘텐츠(BlogPost, getBlogPostBySlug 등)가 필요하면 @/data/blog/posts-content에서 import
 // ---------------------------------------------------------------------------
-
-export interface BlogPost extends BlogPostMeta {
-  /** react-markdown으로 렌더링할 본문 (Markdown) */
-  content: string;
-}
-
-// ---------------------------------------------------------------------------
-// Internal: 전체 BlogPost[] 캐시
-// ---------------------------------------------------------------------------
-
-let _postsCache: BlogPost[] | null = null;
-
-function getFullPosts(): BlogPost[] {
-  if (_postsCache) return _postsCache;
-  _postsCache = BLOG_POSTS_META.map((meta) => ({
-    ...meta,
-    content: CONTENT_MAP[meta.slug] ?? '',
-  }));
-  return _postsCache;
-}
-
-// ---------------------------------------------------------------------------
-// Helpers (기존 API 유지 — 역호환)
-// ---------------------------------------------------------------------------
-
-export function getBlogPostBySlug(slug: string): BlogPost | undefined {
-  const meta = BLOG_POSTS_META.find((p) => p.slug === slug);
-  if (!meta) return undefined;
-  return { ...meta, content: CONTENT_MAP[slug] ?? '' };
-}
-
-export function getBlogPostsByCategory(category: BlogCategory): BlogPost[] {
-  return getFullPosts().filter((p) => p.category === category);
-}
-
-export function getPublishedPosts(): BlogPost[] {
-  return getFullPosts()
-    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
-}
 
 /** content를 제외한 경량 목록 (클라이언트 번들 최소화) */
 export function getPublishedPostsMeta(): BlogPostMeta[] {
@@ -87,7 +47,7 @@ export function getAllTags(): string[] {
   return Array.from(tagSet).sort();
 }
 
-/** 서사(narrative) 콘텐츠만 최신순 반환 */
+/** 스토리(narrative) 콘텐츠만 최신순 반환 */
 export function getPublishedNarratives(): BlogPostMeta[] {
   return [...BLOG_POSTS_META]
     .filter((p) => p.contentType === 'narrative')

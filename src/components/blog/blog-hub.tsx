@@ -158,9 +158,9 @@ export function BlogHub({ posts }: { posts: BlogPostMeta[] }) {
     [posts],
   );
 
-  // 카테고리별로 그룹핑 (서사 필터일 때는 단일 그룹)
+  // 카테고리별로 그룹핑 (스토리 필터일 때는 단일 그룹)
   const groupedPosts = activeCategory === 'narrative'
-    ? [{ key: 'narrative' as const, label: '서사', description: '시대 전환의 이야기', icon: BookOpen, posts: filteredPosts }]
+    ? [{ key: 'narrative' as const, label: '스토리', description: '시대 전환의 이야기', icon: BookOpen, posts: filteredPosts }]
     : categoriesWithPosts
         .filter((cat) => activeCategory === 'all' || cat === activeCategory)
         .map((cat) => ({
@@ -204,7 +204,7 @@ export function BlogHub({ posts }: { posts: BlogPostMeta[] }) {
               }`}
             >
               <BookOpen className="h-3 w-3" />
-              서사
+              스토리
               <span className="text-xs opacity-60">({narrativeCount})</span>
             </button>
           )}
@@ -232,7 +232,7 @@ export function BlogHub({ posts }: { posts: BlogPostMeta[] }) {
         </div>
       )}
 
-      {/* Series Banners — 전체 또는 서사 필터에서만 표시 */}
+      {/* Series Banners — 전체 또는 스토리 필터에서만 표시 */}
       {(activeCategory === 'all' || activeCategory === 'narrative') && seriesWithPosts.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {seriesWithPosts.map((s) => {

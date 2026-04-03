@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getBlogPostBySlug, getPublishedPosts, getPublishedPostSlugs, getSeriesPosts, BLOG_POSTS_META } from '@/data/blog/posts';
+import { getBlogPostBySlug, getPublishedPosts } from '@/data/blog/posts-content';
+import { getPublishedPostSlugs, getSeriesPosts, BLOG_POSTS_META } from '@/data/blog/posts';
 import { getSeriesById } from '@/data/blog/blog-series';
 import { GUIDE_DATA } from '@/data/ui/guide-data';
 import { generateBlogJsonLd } from '@/lib/seo/json-ld';

@@ -1,14 +1,16 @@
 import { GUIDE_DATA } from '@/data/ui/guide-data';
-import { getPublishedPosts } from '@/data/blog/posts';
+import { getPublishedPostsMeta } from '@/data/blog/posts';
 
 const SITE_URL = 'https://www.linkmap.biz';
+
+export const revalidate = false; // 완전 정적: 배포 시에만 변경 (Workers CPU 제한 대응)
 
 export function GET() {
   const guideLines = GUIDE_DATA.map(
     (g) => `- ${g.title}: ${g.description} → ${SITE_URL}${g.href}`
   ).join('\n');
 
-  const publishedPosts = getPublishedPosts();
+  const publishedPosts = getPublishedPostsMeta();
   const blogLines = publishedPosts.length > 0
     ? publishedPosts.map(
         (p) => `- ${p.title}: ${p.description} → ${SITE_URL}/blog/${p.slug}`

@@ -8,7 +8,7 @@ import { ArrowLeft, ArrowRight, Calendar, Clock, Tag, ExternalLink, ChevronRight
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { BLOG_CATEGORIES } from '@/data/blog/blog-categories';
-import type { BlogPost } from '@/data/blog/posts';
+import type { BlogPost } from '@/data/blog/posts-content';
 
 /** ISO date → "2026년 3월 18일" (환경 무관 결정적 포맷) */
 function formatDateKR(iso: string): string {
@@ -420,7 +420,7 @@ function SeriesNav({ seriesTitle, seriesPosts, currentSlug }: SeriesNavProps) {
 }
 
 // ---------------------------------------------------------------------------
-// Related Posts (서사 ↔ 유틸리티 크로스 레퍼런스)
+// Related Posts (스토리 ↔ 유틸리티 크로스 레퍼런스)
 // ---------------------------------------------------------------------------
 function RelatedPostsSection({ posts }: { posts: { slug: string; title: string; contentType?: string }[] }) {
   if (posts.length === 0) return null;
@@ -441,7 +441,7 @@ function RelatedPostsSection({ posts }: { posts: { slug: string; title: string; 
             <ChevronRight className="h-4 w-4 text-brand-blue" />
             <span className="text-sm font-medium">{rp.title}</span>
             {rp.contentType === 'narrative' && (
-              <Badge variant="outline" className="ml-auto text-xs border-brand-blue/30 text-brand-blue">서사</Badge>
+              <Badge variant="outline" className="ml-auto text-xs border-brand-blue/30 text-brand-blue">스토리</Badge>
             )}
           </Link>
         ))}

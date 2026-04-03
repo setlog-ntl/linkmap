@@ -50,7 +50,7 @@ export const BLOG_POSTS_META: BlogPostMeta[] = [
     relatedGuides: ['github', 'version-control', 'env', 'deploy'],
   },
   // ======================================================================
-  // 서사 시리즈 — 사용자에서 창작자로 1편
+  // 스토리 시리즈 — 사용자에서 창작자로 1편
   // ======================================================================
   {
     slug: 'user-to-creator-1-not-a-maker',
