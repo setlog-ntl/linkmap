@@ -10,4 +10,3 @@ export * from './dashboard';
 export * from './team';
 export * from './feedback';
 export * from './credential';
-export * from './mcp';

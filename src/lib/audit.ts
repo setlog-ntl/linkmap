@@ -127,11 +127,7 @@ export type AuditAction =
   | 'env_var.raw_update'
   | 'project.share_toggle'
   | 'zone_layout.upsert'
-  | 'admin.user_detail_view'
-  | 'mcp_config.create'
-  | 'mcp_config.update'
-  | 'mcp_config.delete'
-  | 'mcp_env_var.create';
+  | 'admin.user_detail_view';
 
 interface AuditLogEntry {
   action: AuditAction;

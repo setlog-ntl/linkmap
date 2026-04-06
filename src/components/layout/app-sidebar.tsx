@@ -9,7 +9,7 @@ import {
   List, Link2, Key, Settings, BookOpen, ChevronDown, ChevronRight,
   LogOut, Bot, User, GitBranch, Wrench, FolderKanban, Plus, LayoutDashboard, LayoutGrid,
   Globe, ExternalLink, Loader2, AlertTriangle, Pencil, Star, ArrowRight, Trash2, DollarSign, Users, BarChart3, Lightbulb, Trophy, Bug, Check, X, GripVertical,
-  Code, Palette, Workflow, Plug,
+  Code, Palette, Workflow,
 } from 'lucide-react';
 import { GUIDE_CATEGORIES_DATA, LEARNING_STAGES_DATA, getGuideDataByCategory } from '@/data/ui/guide-data';
 import type { LucideIcon } from 'lucide-react';
@@ -86,7 +86,6 @@ function getProjectSubNav(projectId: string) {
     { labelKey: 'project.serviceMap', href: `/project/${projectId}/service-map`, icon: MapIcon },
     { labelKey: 'project.costs', href: `/project/${projectId}/costs`, icon: DollarSign },
     { labelKey: 'project.connections', href: `/project/${projectId}/connections`, icon: Link2 },
-    { labelKey: 'project.mcp', href: `/project/${projectId}/mcp`, icon: Plug },
     { labelKey: 'project.envVars', href: `/project/${projectId}/env`, icon: Key },
     { labelKey: 'project.settings', href: `/project/${projectId}/settings`, icon: Settings },
   ];
