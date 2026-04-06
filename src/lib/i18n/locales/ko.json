@@ -63,6 +63,7 @@
     "services": "서비스 목록",
     "envVars": "비밀 키",
     "connections": "연결 관리",
+    "mcp": "MCP 연결",
     "health": "상태 모니터링",
     "audit": "감사 로그",
     "settings": "설정",

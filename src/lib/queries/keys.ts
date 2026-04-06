@@ -143,4 +143,11 @@ export const queryKeys = {
   share: {
     status: (projectId: string) => ['share', 'status', projectId] as const,
   },
+  mcp: {
+    servers: ['mcp', 'servers'] as const,
+    byProject: (projectId: string) => ['mcp', 'configs', projectId] as const,
+    detail: (configId: string) => ['mcp', 'configs', 'detail', configId] as const,
+    envVars: (configId: string) => ['mcp', 'configs', configId, 'env-vars'] as const,
+    recommend: (projectId: string) => ['mcp', 'recommend', projectId] as const,
+  },
 } as const;

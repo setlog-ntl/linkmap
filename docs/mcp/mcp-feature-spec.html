@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linkmap MCP 연결 관리 기능 명세서</title>
+<style>
+  :root {
+    --brand-blue: #3b82f6;
+    --brand-green: #22c55e;
+    --mcp-purple: #a855f7;
+    --bg: #0f172a;
+    --bg-card: #1e293b;
+    --bg-card-hover: #334155;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border: #334155;
+    --accent: #a855f7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 0;
+  }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 50%, #042f2e 100%);
+    padding: 80px 40px 60px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(168,85,247,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(59,130,246,0.06) 0%, transparent 50%);
+  }
+  .hero > * { position: relative; }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(168,85,247,0.15);
+    border: 1px solid rgba(168,85,247,0.3);
+    color: #c084fc;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: 42px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #e2e8f0, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+  }
+  .hero p { color: var(--text-muted); font-size: 17px; max-width: 600px; margin: 0 auto; }
+  .hero-meta { margin-top: 24px; display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
+  .hero-meta span { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+  .hero-meta .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-green { background: var(--brand-green); }
+  .dot-blue { background: var(--brand-blue); }
+  .dot-purple { background: var(--mcp-purple); }
+
+  /* Container */
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+  /* Section */
+  .section { margin-bottom: 56px; }
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--mcp-purple);
+    margin-bottom: 8px;
+  }
+  .section h2 { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+  .section > p { color: var(--text-muted); margin-bottom: 24px; font-size: 15px; }
+
+  /* Cards */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: rgba(168,85,247,0.4); }
+  .card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .card p { color: var(--text-muted); font-size: 13px; }
+
+  /* Badge */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-purple { background: rgba(168,85,247,0.15); color: #c084fc; }
+  .badge-blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .badge-green { background: rgba(34,197,94,0.15); color: #4ade80; }
+  .badge-orange { background: rgba(249,115,22,0.15); color: #fb923c; }
+  .badge-gray { background: rgba(148,163,184,0.15); color: #94a3b8; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; padding: 12px 16px; border-bottom: 2px solid var(--border); color: var(--text-muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: rgba(168,85,247,0.03); }
+
+  /* ER Diagram */
+  .er-diagram {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    overflow-x: auto;
+  }
+  .er-box {
+    display: inline-block;
+    background: var(--bg);
+    border: 2px solid;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 8px;
+    min-width: 220px;
+    vertical-align: top;
+  }
+  .er-box.primary { border-color: var(--mcp-purple); }
+  .er-box.secondary { border-color: var(--brand-blue); }
+  .er-box.tertiary { border-color: var(--brand-green); }
+  .er-box.quaternary { border-color: #f59e0b; }
+  .er-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .er-field { font-size: 12px; color: var(--text-muted); font-family: 'Geist Mono', monospace; padding: 2px 0; }
+  .er-field .pk { color: #f59e0b; font-weight: 600; }
+  .er-field .fk { color: var(--brand-blue); }
+
+  /* Code block */
+  .code-block {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    overflow-x: auto;
+    font-family: 'Geist Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #e6edf3;
+  }
+  .code-block .comment { color: #8b949e; }
+  .code-block .keyword { color: #ff7b72; }
+  .code-block .string { color: #a5d6ff; }
+  .code-block .type { color: #d2a8ff; }
+
+  /* Flow diagram */
+  .flow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 20px 0; }
+  .flow-step {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 20px;
+    text-align: center;
+    min-width: 140px;
+  }
+  .flow-step .num { font-size: 11px; color: var(--mcp-purple); font-weight: 700; }
+  .flow-step .label { font-size: 13px; font-weight: 600; margin-top: 4px; }
+  .flow-arrow { color: var(--text-muted); font-size: 20px; }
+
+  /* Phase timeline */
+  .timeline { position: relative; padding-left: 32px; }
+  .timeline::before { content: ''; position: absolute; left: 11px; top: 8px; bottom: 8px; width: 2px; background: var(--border); }
+  .timeline-item { position: relative; margin-bottom: 24px; }
+  .timeline-dot {
+    position: absolute;
+    left: -32px;
+    top: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+  }
+  .timeline-dot.done { background: var(--brand-green); }
+  .timeline-dot.pending { background: var(--border); }
+  .timeline-item h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .timeline-item p { font-size: 13px; color: var(--text-muted); }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin: 24px 0; }
+  .stat {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+  }
+  .stat .value { font-size: 32px; font-weight: 800; background: linear-gradient(135deg, var(--mcp-purple), var(--brand-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .stat .label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+  /* File tree */
+  .file-tree { font-family: 'Geist Mono', monospace; font-size: 13px; line-height: 2; }
+  .file-tree .dir { color: var(--brand-blue); font-weight: 600; }
+  .file-tree .new { color: var(--brand-green); }
+  .file-tree .modified { color: #f59e0b; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 28px; }
+    .hero { padding: 40px 20px; }
+    .card-grid { grid-template-columns: 1fr; }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/></svg>
+    Phase 1-2 Complete
+  </div>
+  <h1>MCP 연결 관리 기능</h1>
+  <p>AI 코딩 도구(Claude Code, Cursor, Windsurf)의 MCP 서버 설정을 Linkmap에서 중앙 관리하고 서비스맵에서 시각화합니다</p>
+  <div class="hero-meta">
+    <span><span class="dot dot-green"></span> DB 마이그레이션 적용 완료</span>
+    <span><span class="dot dot-purple"></span> 18개 MCP 서버 시드 데이터</span>
+    <span><span class="dot dot-blue"></span> 빌드 & 타입체크 통과</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><div class="value">4</div><div class="label">신규 DB 테이블</div></div>
+    <div class="stat"><div class="value">18</div><div class="label">MCP 서버 카탈로그</div></div>
+    <div class="stat"><div class="value">7</div><div class="label">API 엔드포인트</div></div>
+    <div class="stat"><div class="value">25</div><div class="label">변경/생성 파일</div></div>
+  </div>
+
+  <!-- 1. Overview -->
+  <div class="section">
+    <div class="section-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+      Overview
+    </div>
+    <h2>기능 개요</h2>
+    <p>MCP(Model Context Protocol)는 AI 코딩 도구가 외부 서비스에 접근하기 위한 표준 프로토콜입니다. Linkmap의 MCP 연결 관리 기능은 사용자가 프로젝트에서 사용하는 MCP 서버를 통합 관리하고, 기존 서비스 의존성과 함께 시각화할 수 있게 합니다.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          MCP 서버 카탈로그
+        </h3>
+        <p>Supabase, GitHub, Cloudflare 등 18개 공식/커뮤니티 MCP 서버를 사전 등록. 원클릭 추가 및 설정 위저드 제공.</p>
+      </div>
+      <div class="card">
+        <h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+          Import / Export
+        </h3>
+        <p>mcp.json, claude_desktop_config.json, .cursor/mcp.json 포맷 자동 감지. 붙여넣기 또는 파일 업로드로 가져오기.</p>
+      </div>
+      <div class="card">
+        <h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          서비스 연결 자동 추천
+        </h3>
+        <p>프로젝트에 추가된 서비스를 분석하여 관련 MCP 서버를 자동 추천. 스코어링 알고리즘 기반.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Architecture -->
+  <div class="section">
+    <div class="section-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+      Architecture
+    </div>
+    <h2>핵심 설계: MCP = 서비스와 별개의 1급 엔티티</h2>
+    <p>MCP 서버는 기존 서비스(Supabase, Stripe 등)와 별도로 관리됩니다. MCP는 "AI 도구 &rarr; 서비스" 브릿지 역할이므로 서비스와 다른 라이프사이클을 가집니다.</p>
+
+    <div class="er-diagram">
+      <div class="er-box primary">
+        <div class="er-title"><span style="color:var(--mcp-purple)">&#9632;</span> mcp_servers</div>
+        <div class="er-field"><span class="pk">PK</span> id UUID</div>
+        <div class="er-field">name, slug (UNIQUE)</div>
+        <div class="er-field">provider, transport</div>
+        <div class="er-field">npm_package, command</div>
+        <div class="er-field">default_args TEXT[]</div>
+        <div class="er-field">required_env_vars JSONB</div>
+        <div class="er-field">related_service_ids UUID[]</div>
+        <div class="er-field">tags, difficulty_level</div>
+        <div class="er-field">popularity_score, is_official</div>
+      </div>
+      <div class="er-box secondary">
+        <div class="er-title"><span style="color:var(--brand-blue)">&#9632;</span> project_mcp_configs</div>
+        <div class="er-field"><span class="pk">PK</span> id UUID</div>
+        <div class="er-field"><span class="fk">FK</span> project_id &rarr; projects</div>
+        <div class="er-field"><span class="fk">FK</span> mcp_server_id &rarr; mcp_servers</div>
+        <div class="er-field">custom_name, transport</div>
+        <div class="er-field">command, args, url</div>
+        <div class="er-field">enabled, environment</div>
+        <div class="er-field">metadata JSONB, notes</div>
+        <div class="er-field"><span class="fk">FK</span> created_by &rarr; auth.users</div>
+        <div class="er-field">deleted_at (soft delete)</div>
+      </div>
+      <div class="er-box tertiary">
+        <div class="er-title"><span style="color:var(--brand-green)">&#9632;</span> mcp_config_env_vars</div>
+        <div class="er-field"><span class="pk">PK</span> id UUID</div>
+        <div class="er-field"><span class="fk">FK</span> mcp_config_id</div>
+        <div class="er-field">key_name TEXT</div>
+        <div class="er-field">encrypted_value (AES-256-GCM)</div>
+        <div class="er-field">is_secret BOOLEAN</div>
+        <div class="er-field"><span class="fk">FK</span> source_env_var_id (optional)</div>
+      </div>
+      <div class="er-box quaternary">
+        <div class="er-title"><span style="color:#f59e0b">&#9632;</span> mcp_service_links</div>
+        <div class="er-field"><span class="pk">PK</span> id UUID</div>
+        <div class="er-field"><span class="fk">FK</span> mcp_config_id</div>
+        <div class="er-field"><span class="fk">FK</span> service_id &rarr; services</div>
+        <div class="er-field">link_type CHECK</div>
+        <div class="er-field">UNIQUE(config, service)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. MCP Server Catalog -->
+  <div class="section">
+    <div class="section-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 18a4 4 0 0 0-8 0"/><circle cx="12" cy="11" r="3"/><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="8" x2="8" y1="2" y2="4"/><line x1="16" x2="16" y1="2" y2="4"/></svg>
+      Catalog
+    </div>
+    <h2>MCP 서버 카탈로그 (18개)</h2>
+    <p>공식 및 커뮤니티 MCP 서버가 사전 등록되어 있으며, 프로젝트 서비스와 자동 매칭됩니다.</p>
+
+    <table>
+      <thead>
+        <tr><th>MCP 서버</th><th>Provider</th><th>Transport</th><th>관련 서비스</th><th>난이도</th><th>인기도</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Supabase MCP</strong></td><td><span class="badge badge-green">@supabase</span></td><td>stdio</td><td>Supabase</td><td><span class="badge badge-green">beginner</span></td><td>95</td></tr>
+        <tr><td><strong>GitHub MCP</strong></td><td><span class="badge badge-blue">@mcp</span></td><td>stdio</td><td>GitHub, GitHub Actions</td><td><span class="badge badge-green">beginner</span></td><td>92</td></tr>
+        <tr><td><strong>Cloudflare MCP</strong></td><td><span class="badge badge-orange">@cloudflare</span></td><td><span class="badge badge-purple">SSE</span></td><td>Cloudflare</td><td><span class="badge badge-green">beginner</span></td><td>85</td></tr>
+        <tr><td><strong>Vercel MCP</strong></td><td><span class="badge badge-blue">@vercel</span></td><td>stdio</td><td>Vercel</td><td><span class="badge badge-green">beginner</span></td><td>82</td></tr>
+        <tr><td><strong>Playwright MCP</strong></td><td><span class="badge badge-purple">@anthropic</span></td><td>stdio</td><td>Playwright</td><td><span class="badge badge-green">beginner</span></td><td>80</td></tr>
+        <tr><td><strong>PostgreSQL MCP</strong></td><td><span class="badge badge-blue">@mcp</span></td><td>stdio</td><td>Neon, PlanetScale, Supabase</td><td><span class="badge badge-orange">intermediate</span></td><td>78</td></tr>
+        <tr><td><strong>Stripe MCP</strong></td><td><span class="badge badge-purple">@stripe</span></td><td>stdio</td><td>Stripe</td><td><span class="badge badge-orange">intermediate</span></td><td>76</td></tr>
+        <tr><td><strong>Slack MCP</strong></td><td><span class="badge badge-blue">@mcp</span></td><td>stdio</td><td>Slack API</td><td><span class="badge badge-orange">intermediate</span></td><td>75</td></tr>
+        <tr><td><strong>Sentry MCP</strong></td><td><span class="badge badge-orange">@sentry</span></td><td>stdio</td><td>Sentry</td><td><span class="badge badge-green">beginner</span></td><td>74</td></tr>
+        <tr><td><strong>Brave Search MCP</strong></td><td><span class="badge badge-blue">@mcp</span></td><td>stdio</td><td>-</td><td><span class="badge badge-green">beginner</span></td><td>72</td></tr>
+        <tr><td><strong>Notion MCP</strong></td><td><span class="badge badge-gray">community</span></td><td>stdio</td><td>Notion API</td><td><span class="badge badge-green">beginner</span></td><td>70</td></tr>
+        <tr><td><strong>Fetch MCP</strong></td><td><span class="badge badge-blue">@mcp</span></td><td>stdio</td><td>-</td><td><span class="badge badge-green">beginner</span></td><td>70</td></tr>
+        <tr><td><strong>Memory MCP</strong></td><td><span class="badge badge-blue">@mcp</span></td><td>stdio</td><td>-</td><td><span class="badge badge-green">beginner</span></td><td>68</td></tr>
+        <tr><td><strong>Linear MCP</strong></td><td><span class="badge badge-gray">community</span></td><td>stdio</td><td>Linear API</td><td><span class="badge badge-green">beginner</span></td><td>65</td></tr>
+        <tr><td><strong>Filesystem MCP</strong></td><td><span class="badge badge-blue">@mcp</span></td><td>stdio</td><td>-</td><td><span class="badge badge-green">beginner</span></td><td>65</td></tr>
+        <tr><td><strong>Upstash MCP</strong></td><td><span class="badge badge-green">@upstash</span></td><td>stdio</td><td>Upstash Redis</td><td><span class="badge badge-green">beginner</span></td><td>64</td></tr>
+        <tr><td><strong>Linkmap MCP</strong></td><td><span class="badge badge-purple">@linkmap</span></td><td>stdio</td><td>-</td><td><span class="badge badge-green">beginner</span></td><td>60</td></tr>
+        <tr><td><strong>NotebookLM MCP</strong></td><td><span class="badge badge-gray">community</span></td><td>stdio</td><td>-</td><td><span class="badge badge-orange">intermediate</span></td><td>55</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4. API Routes -->
+  <div class="section">
+    <div class="section-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      API
+    </div>
+    <h2>API 엔드포인트</h2>
+
+    <table>
+      <thead><tr><th>Method</th><th>Route</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/mcp/servers</code></td><td>MCP 카탈로그 조회 (?search, ?service_id)</td></tr>
+        <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/mcp/configs</code></td><td>프로젝트 MCP 설정 목록 (?project_id)</td></tr>
+        <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/mcp/configs</code></td><td>MCP 설정 생성 (env_vars, service_links 포함)</td></tr>
+        <tr><td><span class="badge badge-orange">PATCH</span></td><td><code>/api/mcp/configs/[id]</code></td><td>설정 수정 (활성/비활성 토글 등)</td></tr>
+        <tr><td><span class="badge badge-purple">DELETE</span></td><td><code>/api/mcp/configs/[id]</code></td><td>소프트 삭제</td></tr>
+        <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/mcp/configs/[id]/env-vars</code></td><td>MCP별 환경변수 조회 (값 미포함)</td></tr>
+        <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/mcp/configs/[id]/env-vars</code></td><td>환경변수 추가 (AES-256-GCM 암호화)</td></tr>
+        <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/mcp/import</code></td><td>설정 파일 파싱 (3포맷 자동 감지)</td></tr>
+        <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/mcp/export</code></td><td>설정 파일 생성/다운로드</td></tr>
+        <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/mcp/recommend</code></td><td>프로젝트 기반 MCP 서버 추천</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 5. User Flow -->
+  <div class="section">
+    <div class="section-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      User Flow
+    </div>
+    <h2>사용자 흐름</h2>
+
+    <h3 style="margin: 20px 0 12px; font-size: 15px;">Import 흐름</h3>
+    <div class="flow">
+      <div class="flow-step"><div class="num">01</div><div class="label">JSON 붙여넣기</div></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step"><div class="num">02</div><div class="label">포맷 자동 감지</div></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step"><div class="num">03</div><div class="label">카탈로그 매칭</div></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step"><div class="num">04</div><div class="label">프리뷰 확인</div></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step"><div class="num">05</div><div class="label">가져오기 완료</div></div>
+    </div>
+
+    <h3 style="margin: 20px 0 12px; font-size: 15px;">수동 추가 흐름 (3단계 위저드)</h3>
+    <div class="flow">
+      <div class="flow-step"><div class="num">01</div><div class="label">MCP 서버 선택<br><small style="color:var(--text-muted)">카탈로그 or 커스텀</small></div></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step"><div class="num">02</div><div class="label">환경변수 설정<br><small style="color:var(--text-muted)">기존 env var 자동 매칭</small></div></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step"><div class="num">03</div><div class="label">확인 & 저장</div></div>
+    </div>
+  </div>
+
+  <!-- 6. UI Structure -->
+  <div class="section">
+    <div class="section-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/></svg>
+      UI
+    </div>
+    <h2>MCP 페이지 구성 (/project/[id]/mcp)</h2>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>
+          <span class="badge badge-purple">섹션 1</span>
+          AI 도구 연결 현황
+        </h3>
+        <p>카드 그리드로 설정된 MCP 서버 표시. 활성/비활성 토글, transport 뱃지, 편집/삭제 드롭다운. 빈 상태 시 CTA 제공.</p>
+      </div>
+      <div class="card">
+        <h3>
+          <span class="badge badge-blue">섹션 2</span>
+          추천 MCP 서버
+        </h3>
+        <p>프로젝트 서비스 기반 자동 추천. 스코어링: is_official &times; 2 + popularity + difficulty 가중치. 원클릭 or 설정 후 추가.</p>
+      </div>
+      <div class="card">
+        <h3>
+          <span class="badge badge-green">섹션 3</span>
+          설정 내보내기
+        </h3>
+        <p>Claude Desktop / Claude Code / Cursor 포맷 선택. JSON 프리뷰 + 복사 + 다운로드. 환경변수 값 미포함 (보안).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. File Structure -->
+  <div class="section">
+    <div class="section-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+      Files
+    </div>
+    <h2>변경 파일 구조</h2>
+
+    <div class="code-block file-tree">
+<span class="dir">src/types/</span>
+  <span class="new">+ mcp.ts</span>                          <span class="comment">-- McpServer, ProjectMcpConfig, McpServiceLink 등</span>
+  <span class="modified">~ index.ts</span>                        <span class="comment">-- barrel export 추가</span>
+
+<span class="dir">src/data/seed/</span>
+  <span class="new">+ mcp-servers.ts</span>                   <span class="comment">-- 18개 MCP 서버 시드 데이터</span>
+
+<span class="dir">src/lib/</span>
+  <span class="dir">validations/</span>
+    <span class="new">+ mcp.ts</span>                        <span class="comment">-- Zod 스키마 (create, update, import, env var)</span>
+  <span class="dir">mcp/</span>
+    <span class="new">+ parse-mcp-config.ts</span>           <span class="comment">-- 3포맷 자동 파서</span>
+  <span class="dir">queries/</span>
+    <span class="new">+ mcp.ts</span>                        <span class="comment">-- TanStack Query 훅 6개</span>
+    <span class="modified">~ keys.ts</span>                       <span class="comment">-- MCP queryKeys 추가</span>
+  <span class="modified">~ audit.ts</span>                         <span class="comment">-- MCP AuditAction 4개 추가</span>
+
+<span class="dir">src/app/api/mcp/</span>
+  <span class="dir">servers/</span>
+    <span class="new">+ route.ts</span>                      <span class="comment">-- GET 카탈로그</span>
+  <span class="dir">configs/</span>
+    <span class="new">+ route.ts</span>                      <span class="comment">-- GET/POST</span>
+    <span class="dir">[id]/</span>
+      <span class="new">+ route.ts</span>                    <span class="comment">-- GET/PATCH/DELETE</span>
+      <span class="dir">env-vars/</span>
+        <span class="new">+ route.ts</span>                  <span class="comment">-- GET/POST</span>
+  <span class="dir">import/</span>
+    <span class="new">+ route.ts</span>                      <span class="comment">-- POST 파싱</span>
+  <span class="dir">export/</span>
+    <span class="new">+ route.ts</span>                      <span class="comment">-- GET 생성</span>
+  <span class="dir">recommend/</span>
+    <span class="new">+ route.ts</span>                      <span class="comment">-- GET 추천</span>
+
+<span class="dir">src/app/project/[id]/mcp/</span>
+  <span class="new">+ page.tsx</span>                         <span class="comment">-- MCP 페이지 라우트</span>
+
+<span class="dir">src/components/mcp/</span>
+  <span class="new">+ mcp-content.tsx</span>                  <span class="comment">-- 메인 페이지 (3섹션)</span>
+  <span class="new">+ mcp-import-dialog.tsx</span>            <span class="comment">-- Import 다이얼로그</span>
+  <span class="new">+ mcp-setup-wizard.tsx</span>             <span class="comment">-- 3단계 설정 위저드</span>
+  <span class="new">+ mcp-export-panel.tsx</span>             <span class="comment">-- Export 패널</span>
+
+<span class="dir">src/components/</span>
+  <span class="dir">project/</span>
+    <span class="modified">~ project-tabs.tsx</span>              <span class="comment">-- MCP 탭 추가 (Plug 아이콘)</span>
+  <span class="dir">layout/</span>
+    <span class="modified">~ app-sidebar.tsx</span>              <span class="comment">-- MCP 사이드바 항목 추가</span>
+
+<span class="dir">src/lib/i18n/locales/</span>
+  <span class="modified">~ ko.json</span>                         <span class="comment">-- "mcp": "MCP 연결"</span>
+  <span class="modified">~ en.json</span>                         <span class="comment">-- "mcp": "MCP"</span>
+
+<span class="dir">supabase/migrations/</span>
+  <span class="new">+ 095_mcp_servers.sql</span>              <span class="comment">-- 4테이블 + RLS + 인덱스 + 트리거</span>
+    </div>
+  </div>
+
+  <!-- 8. Implementation Timeline -->
+  <div class="section">
+    <div class="section-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Timeline
+    </div>
+    <h2>구현 단계</h2>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-dot done">&#10003;</div>
+        <h4>Phase 1: 기반 레이어 <span class="badge badge-green">완료</span></h4>
+        <p>DB 마이그레이션 4개 테이블 + RLS, TypeScript 타입, 시드 데이터 18개, Zod 스키마, API 라우트 7개, TanStack Query 훅 6개, MCP config 파서</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot done">&#10003;</div>
+        <h4>Phase 2: MCP 탭 UI <span class="badge badge-green">완료</span></h4>
+        <p>/project/[id]/mcp 페이지, 프로젝트 탭/사이드바 추가, MCP 카드 그리드, Import Dialog, Setup Wizard, Export Panel, 빈 상태 + CTA</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot pending">3</div>
+        <h4>Phase 3: Import/Export 고도화 <span class="badge badge-gray">예정</span></h4>
+        <p>파일 드래그앤드롭, env var 자동 매칭 강화, 내보내기 시 env var 값 옵트인</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot pending">4</div>
+        <h4>Phase 4: 서비스맵 통합 <span class="badge badge-gray">예정</span></h4>
+        <p>MCP 서버 노드 (보라색 점선 테두리), mcp_access 엣지 스타일, devtools 존 배치, 표시/숨기기 토글</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot pending">5</div>
+        <h4>Phase 5: 스마트 기능 <span class="badge badge-gray">예정</span></h4>
+        <p>MCP 연결 테스트, env var 교차 참조, 서비스 디테일 시트 MCP 탭, packages/mcp-server 업데이트</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Security -->
+  <div class="section">
+    <div class="section-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Security
+    </div>
+    <h2>보안 설계</h2>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>RLS 정책</h3>
+        <p>모든 테이블에 Row Level Security 적용. 카탈로그는 인증 사용자 전체 읽기, 프로젝트 데이터는 소유자/팀원만 접근. 관리자만 카탈로그 수정 가능.</p>
+      </div>
+      <div class="card">
+        <h3>환경변수 암호화</h3>
+        <p>AES-256-GCM 대칭 암호화로 MCP 환경변수 저장. 기존 crypto 모듈 재사용. Export 시 값 미포함 (기본).</p>
+      </div>
+      <div class="card">
+        <h3>감사 로그</h3>
+        <p>MCP 설정 생성/수정/삭제, 환경변수 생성 시 logAudit() 호출. mcp_config.create, .update, .delete, mcp_env_var.create 4개 액션.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="text-align: center; padding: 40px 0; border-top: 1px solid var(--border); margin-top: 40px;">
+    <p style="color: var(--text-muted); font-size: 13px;">
+      Linkmap MCP Feature Spec &mdash; 2026-04-06 &mdash; Phase 1-2 Complete
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

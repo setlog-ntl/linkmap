@@ -63,6 +63,7 @@
     "services": "Services",
     "envVars": "Secrets",
     "connections": "Connections",
+    "mcp": "MCP",
     "health": "Health Monitor",
     "audit": "Audit Log",
     "settings": "Settings",
