@@ -25,6 +25,7 @@ import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
+import { MfaSection } from '@/components/settings/mfa-section';
 
 interface UserProfile {
   id: string;
@@ -197,6 +198,9 @@ export default function AccountPage() {
           </CardContent>
         </Card>
       </section>
+
+      {/* 2FA Section */}
+      <MfaSection />
 
       {/* Danger Zone */}
       <section>

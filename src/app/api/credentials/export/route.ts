@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { decrypt } from '@/lib/crypto';
 import { exportCredentialSchema } from '@/lib/validations/credential';
 import { unauthorizedError, validationError } from '@/lib/api/errors';
+import { requireMfa } from '@/lib/api/mfa-guard';
 import { logAudit } from '@/lib/audit';
 import type { DbCredentialWithProject } from '@/lib/supabase/types';
 
@@ -10,6 +11,9 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
+
+  const mfaResponse = await requireMfa(supabase);
+  if (mfaResponse) return mfaResponse;
 
   let body: unknown;
   try {

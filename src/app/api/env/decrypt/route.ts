@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { decrypt } from '@/lib/crypto';
 import { unauthorizedError, notFoundError, apiError } from '@/lib/api/errors';
+import { requireMfa } from '@/lib/api/mfa-guard';
 import { logAudit } from '@/lib/audit';
 import { z } from 'zod';
 import type { DbEnvVarWithProject } from '@/lib/supabase/types';
@@ -14,6 +15,9 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
+
+  const mfaResponse = await requireMfa(supabase);
+  if (mfaResponse) return mfaResponse;
 
   let body: unknown;
   try {

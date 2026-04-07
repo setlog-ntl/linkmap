@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, apiError, validationError } from '@/lib/api/errors';
+import { requireMfa } from '@/lib/api/mfa-guard';
 import { checkoutRequestSchema } from '@/lib/validations/stripe';
 import { logAudit } from '@/lib/audit';
 
@@ -8,6 +9,9 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
+
+  const mfaResponse = await requireMfa(supabase);
+  if (mfaResponse) return mfaResponse;
 
   const stripeKey = process.env.STRIPE_SECRET_KEY;
   if (!stripeKey) return apiError('결제 시스템이 설정되지 않았습니다', 503);

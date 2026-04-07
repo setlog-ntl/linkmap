@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, notFoundError, serverError } from '@/lib/api/errors';
+import { requireMfa } from '@/lib/api/mfa-guard';
 import { logAudit } from '@/lib/audit';
 
 export async function DELETE(
@@ -11,6 +12,9 @@ export async function DELETE(
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
+
+  const mfaResponse = await requireMfa(supabase);
+  if (mfaResponse) return mfaResponse;
 
   const { data: existing } = await supabase
     .from('projects')

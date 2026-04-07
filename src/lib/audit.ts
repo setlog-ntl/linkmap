@@ -130,7 +130,11 @@ export type AuditAction =
   | 'env_var.raw_update'
   | 'project.share_toggle'
   | 'zone_layout.upsert'
-  | 'admin.user_detail_view';
+  | 'admin.user_detail_view'
+  | 'mfa.enable'
+  | 'mfa.disable'
+  | 'mfa.verify'
+  | 'mfa.recovery_used';
 
 interface AuditLogEntry {
   action: AuditAction;

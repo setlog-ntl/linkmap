@@ -1,7 +1,7 @@
 # Linkmap Database Schema Reference
 
-> **Last Updated**: 2026-03-21
-> **Migrations**: 001 ~ 091 (91 files)
+> **Last Updated**: 2026-04-07
+> **Migrations**: 001 ~ 096 (96 files)
 > **Engine**: Supabase (PostgreSQL 15+)
 
 이 문서는 바이브코딩 시 DB 구조를 빠르게 참조하기 위한 스키마 레퍼런스입니다.
@@ -40,6 +40,7 @@
 | name | TEXT | YES | NULL | |
 | avatar_url | TEXT | YES | NULL | |
 | is_admin | BOOLEAN | NO | false | M019에서 추가, M021 트리거로 보호 |
+| mfa_enabled | BOOLEAN | NO | false | M096에서 추가 — 2FA 활성화 플래그 |
 | created_at | TIMESTAMPTZ | NO | now() | |
 | updated_at | TIMESTAMPTZ | NO | now() | |
 
@@ -626,6 +627,20 @@
 ---
 
 ## 10. Audit & Monitoring Tables
+
+### mfa_recovery_codes
+> M096 — 2FA 복구 코드 (SHA-256 해시 저장)
+
+| Column | Type | Nullable | Default |
+|--------|------|----------|---------|
+| id | UUID PK | NO | gen_random_uuid() |
+| user_id | UUID FK | NO | - | → auth.users(id) ON DELETE CASCADE |
+| code_hash | TEXT | NO | - | SHA-256 해시 |
+| used_at | TIMESTAMPTZ | YES | NULL | 사용 시각 (NULL이면 미사용) |
+| created_at | TIMESTAMPTZ | NO | now() |
+
+**Indexes**: `idx_mfa_recovery_codes_user_id`
+**RLS**: 본인 SELECT만, INSERT/DELETE는 service_role
 
 ### audit_logs
 

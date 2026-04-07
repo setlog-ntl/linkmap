@@ -38,6 +38,16 @@ export function quotaExceededError(resource: string, current: number, max: numbe
   );
 }
 
+export function mfaRequiredError() {
+  return NextResponse.json(
+    {
+      error: '2단계 인증이 필요합니다',
+      code: 'MFA_REQUIRED',
+    },
+    { status: 403 },
+  );
+}
+
 export function proRequiredError(feature: string) {
   return NextResponse.json(
     {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, serverError, apiError } from '@/lib/api/errors';
+import { requireMfa } from '@/lib/api/mfa-guard';
 import { randomBytes, createHash } from 'crypto';
 import { z } from 'zod';
 
@@ -33,6 +34,9 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
+
+  const mfaResponse = await requireMfa(supabase);
+  if (mfaResponse) return mfaResponse;
 
   const body = await request.json();
   const parsed = createTokenSchema.safeParse(body);

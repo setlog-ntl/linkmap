@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { unauthorizedError, apiError, serverError } from '@/lib/api/errors';
+import { requireMfa } from '@/lib/api/mfa-guard';
 import { logAudit } from '@/lib/audit';
 import { z } from 'zod';
 
@@ -14,6 +15,9 @@ export async function DELETE(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
+
+  const mfaResponse = await requireMfa(supabase);
+  if (mfaResponse) return mfaResponse;
 
   // 2. Zod safeParse — 확인 문구 검증
   const body = await request.json();

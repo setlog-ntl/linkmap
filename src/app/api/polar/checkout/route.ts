@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, apiError, validationError } from '@/lib/api/errors';
+import { requireMfa } from '@/lib/api/mfa-guard';
 import { polarCheckoutRequestSchema } from '@/lib/validations/polar';
 import { logAudit } from '@/lib/audit';
 import { getRuntimeEnv } from '@/lib/env';
@@ -10,6 +11,9 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
+
+  const mfaResponse = await requireMfa(supabase);
+  if (mfaResponse) return mfaResponse;
 
   // Step 2: 환경변수 확인
   const accessToken = getRuntimeEnv('POLAR_ACCESS_TOKEN');
