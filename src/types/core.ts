@@ -95,6 +95,27 @@ export interface Subscription {
   status: string;
   current_period_start: string | null;
   current_period_end: string | null;
+  canceled_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type RefundStatus = 'pending' | 'succeeded' | 'failed' | 'canceled';
+export type RefundReason = 'customer_request' | 'satisfaction_guarantee' | 'duplicate' | 'fraudulent' | 'other';
+
+export interface RefundHistory {
+  id: string;
+  user_id: string;
+  polar_subscription_id: string | null;
+  polar_order_id: string | null;
+  polar_refund_id: string | null;
+  amount: number;
+  currency: string;
+  reason: RefundReason;
+  status: RefundStatus;
+  requested_at: string;
+  processed_at: string | null;
+  admin_note: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linkmap 프로젝트 청사진</title>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e293b;
+    --border-active: #3b82f6;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+    --brand-blue: #3b82f6;
+    --brand-green: #10b981;
+    --accent-purple: #8b5cf6;
+    --accent-amber: #f59e0b;
+    --accent-rose: #f43f5e;
+    --accent-cyan: #06b6d4;
+    --accent-emerald: #34d399;
+    --tag-bg: #1e293b;
+    --radius: 10px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 0;
+  }
+  .header {
+    background: linear-gradient(135deg, #0f172a 0%, #1a1040 50%, #0f172a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(59,130,246,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(16,185,129,0.06) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .header h1 {
+    font-size: 2.5rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; margin-bottom: 8px; position: relative;
+  }
+  .header .subtitle { color: var(--text-muted); font-size: 1.05rem; position: relative; }
+  .header .meta {
+    margin-top: 16px; display: flex; justify-content: center;
+    gap: 20px; font-size: 0.85rem; color: var(--text-dim); position: relative; flex-wrap: wrap;
+  }
+  .container { max-width: 1400px; margin: 0 auto; padding: 32px 24px; }
+  .tabs {
+    display: flex; gap: 4px; background: var(--surface); border-radius: 12px;
+    padding: 4px; margin-bottom: 32px; overflow-x: auto; border: 1px solid var(--border);
+  }
+  .tab {
+    padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem;
+    font-weight: 500; color: var(--text-muted); white-space: nowrap; transition: all 0.2s;
+    border: none; background: transparent; font-family: inherit;
+  }
+  .tab:hover { color: var(--text); background: var(--surface2); }
+  .tab.active { background: var(--brand-blue); color: white; box-shadow: 0 2px 8px rgba(59,130,246,0.3); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 24px; overflow: hidden;
+  }
+  .section-header {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer; user-select: none; transition: background 0.15s;
+  }
+  .section-header:hover { background: var(--surface2); }
+  .section-header .icon { font-size: 1.2rem; }
+  .section-header h3 { font-size: 1rem; font-weight: 600; flex: 1; }
+  .section-header .count {
+    background: var(--tag-bg); color: var(--text-muted);
+    padding: 2px 10px; border-radius: 20px; font-size: 0.78rem;
+  }
+  .section-header .chevron { transition: transform 0.2s; color: var(--text-dim); }
+  .section-header.collapsed .chevron { transform: rotate(-90deg); }
+  .section-body { padding: 16px 20px; }
+  .section-body.collapsed { display: none; }
+  .tree { list-style: none; }
+  .tree li { position: relative; padding: 4px 0 4px 28px; }
+  .tree li::before {
+    content: ''; position: absolute; left: 8px; top: 0; bottom: 0;
+    width: 1px; background: var(--border);
+  }
+  .tree li::after {
+    content: ''; position: absolute; left: 8px; top: 16px;
+    width: 14px; height: 1px; background: var(--border);
+  }
+  .tree li:last-child::before { height: 16px; }
+  .tree > li:first-child::before { top: 16px; }
+  .tree-item {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 4px 10px; border-radius: 6px; font-size: 0.88rem; transition: background 0.15s;
+  }
+  .tree-item:hover { background: var(--surface2); }
+  .tree-item .route {
+    font-family: 'Geist Mono', 'JetBrains Mono', monospace;
+    color: var(--brand-blue); font-size: 0.82rem;
+  }
+  .tree-item .label { color: var(--text); }
+  .tree-item .badge { font-size: 0.7rem; padding: 1px 6px; border-radius: 4px; font-weight: 500; }
+  .badge-public { background: rgba(16,185,129,0.15); color: var(--brand-green); }
+  .badge-auth { background: rgba(59,130,246,0.15); color: var(--brand-blue); }
+  .badge-admin { background: rgba(243,63,94,0.15); color: var(--accent-rose); }
+  .badge-pro { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+  .badge-dev { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
+  .badge-legacy { background: rgba(100,116,139,0.15); color: var(--text-dim); }
+  .features-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px;
+  }
+  .feature-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; transition: border-color 0.2s, transform 0.15s;
+  }
+  .feature-card:hover { border-color: var(--border-active); transform: translateY(-1px); }
+  .feature-card h4 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .feature-card p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; }
+  .feature-card .tech-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tech-tag {
+    background: var(--tag-bg); color: var(--text-dim); padding: 2px 8px;
+    border-radius: 4px; font-size: 0.75rem; font-family: 'Geist Mono', monospace;
+  }
+  .service-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;
+  }
+  .service-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; transition: border-color 0.2s;
+  }
+  .service-card:hover { border-color: var(--border-active); }
+  .service-card .svc-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .service-card .svc-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;
+  }
+  .service-card .svc-name { font-weight: 600; font-size: 0.95rem; }
+  .service-card .svc-status { margin-left: auto; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; }
+  .status-active { background: rgba(16,185,129,0.15); color: var(--brand-green); }
+  .status-legacy { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
+  .status-dev { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+  .service-card .svc-desc { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 8px; }
+  .service-card .svc-envs { display: flex; flex-wrap: wrap; gap: 4px; }
+  .env-tag {
+    font-family: 'Geist Mono', monospace; font-size: 0.7rem;
+    background: rgba(59,130,246,0.08); color: var(--brand-blue); padding: 2px 6px; border-radius: 3px;
+  }
+  .matrix-wrapper { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+  .matrix-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 900px; }
+  .matrix-table th, .matrix-table td { padding: 10px 12px; border: 1px solid var(--border); text-align: center; white-space: nowrap; }
+  .matrix-table th { background: var(--surface2); font-weight: 600; position: sticky; top: 0; z-index: 1; }
+  .matrix-table th:first-child, .matrix-table td:first-child {
+    text-align: left; position: sticky; left: 0; background: var(--surface); z-index: 2; min-width: 160px;
+  }
+  .matrix-table th:first-child { background: var(--surface2); z-index: 3; }
+  .matrix-table tr:hover td { background: var(--surface2); }
+  .matrix-table tr:hover td:first-child { background: var(--surface2); }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--brand-blue); }
+  .dot-green { background: var(--brand-green); }
+  .dot-amber { background: var(--accent-amber); }
+  .dot-purple { background: var(--accent-purple); }
+  .api-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .api-table th, .api-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); text-align: left; }
+  .api-table th { color: var(--text-dim); font-weight: 500; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .api-table tr:hover td { background: rgba(59,130,246,0.04); }
+  .method { font-family: 'Geist Mono', monospace; font-size: 0.75rem; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+  .method-get { background: rgba(16,185,129,0.15); color: var(--brand-green); }
+  .method-post { background: rgba(59,130,246,0.15); color: var(--brand-blue); }
+  .method-patch { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
+  .method-delete { background: rgba(243,63,94,0.15); color: var(--accent-rose); }
+  .method-put { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+  .endpoint { font-family: 'Geist Mono', monospace; font-size: 0.8rem; color: var(--text); }
+  .flow-wrapper {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 32px; overflow-x: auto;
+  }
+  .flow-diagram { display: flex; flex-direction: column; gap: 24px; min-width: 800px; }
+  .flow-row { display: flex; align-items: center; gap: 16px; flex-wrap: nowrap; }
+  .flow-node {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 18px; font-size: 0.85rem; font-weight: 500; white-space: nowrap;
+    transition: border-color 0.2s, box-shadow 0.2s; cursor: default;
+  }
+  .flow-node:hover { border-color: var(--brand-blue); box-shadow: 0 0 12px rgba(59,130,246,0.15); }
+  .flow-node.primary { border-color: var(--brand-blue); background: rgba(59,130,246,0.08); }
+  .flow-node.success { border-color: var(--brand-green); background: rgba(16,185,129,0.08); }
+  .flow-node.warning { border-color: var(--accent-amber); background: rgba(245,158,11,0.08); }
+  .flow-node.pro { border-color: var(--accent-purple); background: rgba(139,92,246,0.08); }
+  .flow-arrow { color: var(--text-dim); font-size: 1.2rem; flex-shrink: 0; }
+  .flow-branch {
+    display: flex; flex-direction: column; gap: 8px;
+    padding-left: 40px; border-left: 2px solid var(--border); margin-left: 12px;
+  }
+  .flow-branch-item { display: flex; align-items: center; gap: 10px; }
+  .flow-branch-item::before { content: ''; width: 16px; height: 1px; background: var(--border); flex-shrink: 0; }
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px; margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; text-align: center;
+  }
+  .stat-card .stat-value {
+    font-size: 1.8rem; font-weight: 700;
+    background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .stat-card .stat-label { font-size: 0.78rem; color: var(--text-dim); margin-top: 2px; }
+  .search-bar { margin-bottom: 20px; }
+  .search-bar input {
+    width: 100%; padding: 10px 16px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; color: var(--text);
+    font-size: 0.9rem; font-family: inherit; outline: none; transition: border-color 0.2s;
+  }
+  .search-bar input:focus { border-color: var(--brand-blue); }
+  .search-bar input::placeholder { color: var(--text-dim); }
+  @media (max-width: 768px) {
+    .header { padding: 32px 16px; }
+    .header h1 { font-size: 1.8rem; }
+    .container { padding: 16px 12px; }
+    .features-grid, .service-grid { grid-template-columns: 1fr; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Linkmap 프로젝트 청사진</h1>
+  <p class="subtitle">외부 서비스 연결 시각화 + API 키 / 환경변수 관리 플랫폼</p>
+  <div class="meta">
+    <span>최종 업데이트: 2026-04-06</span>
+    <span>Next.js 16 + Supabase + Cloudflare Workers</span>
+    <span>API 엔드포인트 ~176개</span>
+    <span>DB 테이블 35+</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 통계 -->
+  <div class="stats-bar">
+    <div class="stat-card"><div class="stat-value">155+</div><div class="stat-label">페이지 / 라우트</div></div>
+    <div class="stat-card"><div class="stat-value">176</div><div class="stat-label">API 엔드포인트</div></div>
+    <div class="stat-card"><div class="stat-value">90+</div><div class="stat-label">서비스 카탈로그</div></div>
+    <div class="stat-card"><div class="stat-value">12</div><div class="stat-label">외부 연동 서비스</div></div>
+    <div class="stat-card"><div class="stat-value">35+</div><div class="stat-label">DB 테이블</div></div>
+    <div class="stat-card"><div class="stat-value">86+</div><div class="stat-label">가이드 (메인+서브)</div></div>
+    <div class="stat-card"><div class="stat-value">17+</div><div class="stat-label">배포 템플릿</div></div>
+    <div class="stat-card"><div class="stat-value">7</div><div class="stat-label">Zustand 스토어</div></div>
+  </div>
+
+  <!-- 탭 -->
+  <div class="tabs">
+    <button class="tab active" onclick="showPanel('tree')">메뉴 트리</button>
+    <button class="tab" onclick="showPanel('features')">핵심 기능</button>
+    <button class="tab" onclick="showPanel('services')">외부 서비스</button>
+    <button class="tab" onclick="showPanel('api')">API 엔드포인트</button>
+    <button class="tab" onclick="showPanel('matrix')">연결 매트릭스</button>
+    <button class="tab" onclick="showPanel('flow')">데이터 흐름</button>
+  </div>
+
+  <!-- 패널 1: 메뉴 트리 -->
+  <div id="panel-tree" class="panel active">
+    <div class="search-bar">
+      <input type="text" placeholder="라우트 검색... (예: /dashboard, /api, /guides)" oninput="filterTree(this.value)">
+    </div>
+
+    <!-- 공개 -->
+    <div class="section">
+      <div class="section-header" onclick="toggleSection(this)">
+        <span class="icon">&#127760;</span>
+        <h3>공개 라우트 (비인증)</h3>
+        <span class="count">50+ 라우트</span>
+        <span class="chevron">&#9660;</span>
+      </div>
+      <div class="section-body">
+        <ul class="tree" id="tree-public">
+          <li><span class="tree-item"><span class="route">/</span> <span class="label">랜딩 페이지 (히어로, 기능소개, 가격, 소셜프루프)</span> <span class="badge badge-public">공개</span></span>
+            <ul class="tree">
+              <li><span class="tree-item"><span class="route">/login</span> <span class="label">로그인 (이메일/비밀번호 + Google/GitHub OAuth)</span></span></li>
+              <li><span class="tree-item"><span class="route">/signup</span> <span class="label">회원가입</span></span></li>
+              <li><span class="tree-item"><span class="route">/reset-password</span> <span class="label">비밀번호 재설정</span></span></li>
+            </ul>
+          </li>
+          <li><span class="tree-item"><span class="route">/pricing</span> <span class="label">요금제 (Free / Pro / Team)</span></span></li>
+          <li><span class="tree-item"><span class="route">/faq</span> <span class="label">자주 묻는 질문</span></span></li>
+          <li><span class="tree-item"><span class="route">/glossary</span> <span class="label">개발 용어 사전</span></span></li>
+          <li><span class="tree-item"><span class="route">/privacy</span> <span class="label">개인정보 처리방침</span></span></li>
+          <li><span class="tree-item"><span class="route">/terms</span> <span class="label">이용약관</span></span></li>
+          <li><span class="tree-item"><span class="route">/services</span> <span class="label">서비스 카탈로그 (90+종)</span></span>
+            <ul class="tree">
+              <li><span class="tree-item"><span class="route">/services/[slug]</span> <span class="label">개별 서비스 상세</span></span></li>
+              <li><span class="tree-item"><span class="route">/services/compare</span> <span class="label">서비스 비교</span></span></li>
+              <li><span class="tree-item"><span class="route">/services/cost-simulator</span> <span class="label">비용 시뮬레이터</span></span></li>
+            </ul>
+          </li>
+          <li><span class="tree-item"><span class="route">/blog</span> <span class="label">블로그 허브</span></span>
+            <ul class="tree">
+              <li><span class="tree-item"><span class="route">/blog/[slug]</span> <span class="label">포스트 상세</span></span></li>
+            </ul>
+          </li>
+          <li><span class="tree-item"><span class="route">/showcase</span> <span class="label">커뮤니티 쇼케이스</span></span>
+            <ul class="tree">
+              <li><span class="tree-item"><span class="route">/showcase/[id]</span> <span class="label">쇼케이스 상세 (좋아요, 댓글, 조회수)</span></span></li>
+            </ul>
+          </li>
+          <li><span class="tree-item"><span class="route">/feedback</span> <span class="label">기능 요청 게시판</span></span>
+            <ul class="tree">
+              <li><span class="tree-item"><span class="route">/feedback/[id]</span> <span class="label">요청 상세 (투표, 댓글)</span></span></li>
+            </ul>
+          </li>
+          <li><span class="tree-item"><span class="route">/shared/map/[token]</span> <span class="label">공유된 서비스맵 (토큰 기반)</span></span></li>
+          <li><span class="tree-item"><span class="route">/demo</span> <span class="label">데모 프로젝트 (비로그인 체험)</span></span>
+            <ul class="tree">
+              <li><span class="tree-item"><span class="route">/demo/project/[id]/services</span> <span class="label">데모 서비스 목록</span></span></li>
+              <li><span class="tree-item"><span class="route">/demo/project/[id]/service-map</span> <span class="label">데모 서비스맵</span></span></li>
+              <li><span class="tree-item"><span class="route">/demo/project/[id]/costs</span> <span class="label">데모 비용 추적</span></span></li>
+              <li><span class="tree-item"><span class="route">/demo/project/[id]/env</span> <span class="label">데모 환경변수</span></span></li>
+              <li><span class="tree-item"><span class="route">/demo/project/[id]/connections</span> <span class="label">데모 서비스 연결</span></span></li>
+            </ul>
+          </li>
+          <li><span class="tree-item"><span class="route">/guides</span> <span class="label">가이드 허브 (22개 메인 + 64개 서브)</span></span>
+            <ul class="tree">
+              <li><span class="tree-item"><span class="label"><strong>1단계: 시작</strong></span></span>
+                <ul class="tree">
+                  <li><span class="tree-item"><span class="route">/guides/ai-tools</span> <span class="label">AI 도구 활용 (서브 3개)</span></span></li>
+                  <li><span class="tree-item"><span class="route">/guides/frontend</span> <span class="label">프론트엔드 기초 (서브 2개)</span></span></li>
+                  <li><span class="tree-item"><span class="route">/guides/package-manager</span> <span class="label">패키지 매니저 (서브 3개)</span></span></li>
+                  <li><span class="tree-item"><span class="route">/guides/version-control</span> <span class="label">Git/버전 관리 (서브 3개)</span></span></li>
+                </ul>
+              </li>
+              <li><span class="tree-item"><span class="label"><strong>2단계: 개발</strong></span></span>
+                <ul class="tree">
+                  <li><span class="tree-item"><span class="route">/guides/env</span> <span class="label">환경변수 관리 (서브 2개)</span></span></li>
+                  <li><span class="tree-item"><span class="route">/guides/api-basics</span> <span class="label">API 연동 기초 (서브 3개)</span></span></li>
+                  <li><span class="tree-item"><span class="route">/guides/backend</span> <span class="label">백엔드 기초 (서브 2개)</span></span></li>
+                  <li><span class="tree-item"><span class="route">/guides/auth</span> <span class="label">인증 구현 (서브 2개)</span></span></li>
+                </ul>
+              </li>
+              <li><span class="tree-item"><span class="label"><strong>3단계: 완성</strong></span></span>
+                <ul class="tree">
+                  <li><span class="tree-item"><span class="route">/guides/design-ui</span> <span class="label">디자인/UI (서브 3개)</span></span></li>
+                  <li><span class="tree-item"><span class="route">/guides/security</span> <span class="label">보안 기초 (서브 3개)</span></span></li>
+                </ul>
+              </li>
+              <li><span class="tree-item"><span class="label"><strong>4단계: 배포</strong></span></span>
+                <ul class="tree">
+                  <li><span class="tree-item"><span class="route">/guides/domain</span> <span class="label">도메인 연결 (서브 2개)</span></span></li>
+                  <li><span class="tree-item"><span class="route">/guides/server</span> <span class="label">서버/호스팅 (서브 2개)</span></span></li>
+                  <li><span class="tree-item"><span class="route">/guides/deploy</span> <span class="label">배포하기 (서브 3개)</span></span></li>
+                </ul>
+              </li>
+              <li><span class="tree-item"><span class="label"><strong>5단계: 확장</strong></span></span>
+                <ul class="tree">
+                  <li><span class="tree-item"><span class="route">/guides/communication</span> <span class="label">알림 연동 (서브 3개)</span></span></li>
+                  <li><span class="tree-item"><span class="route">/guides/payment</span> <span class="label">결제 연동 (서브 3개)</span></span></li>
+                  <li><span class="tree-item"><span class="route">/guides/monitoring</span> <span class="label">모니터링 (서브 3개)</span></span></li>
+                  <li><span class="tree-item"><span class="route">/guides/automation</span> <span class="label">자동화 (서브 3개)</span></span></li>
+                </ul>
+              </li>
+              <li><span class="tree-item"><span class="label"><strong>서비스별 가이드</strong></span></span>
+                <ul class="tree">
+                  <li><span class="tree-item"><span class="route">/guides/github</span> <span class="label">GitHub 연동</span></span></li>
+                  <li><span class="tree-item"><span class="route">/guides/cloudflare</span> <span class="label">Cloudflare 연동</span></span></li>
+                  <li><span class="tree-item"><span class="route">/guides/openai</span> <span class="label">OpenAI 연동</span></span></li>
+                  <li><span class="tree-item"><span class="route">/guides/supabase</span> <span class="label">Supabase 연동</span></span></li>
+                  <li><span class="tree-item"><span class="route">/guides/vercel</span> <span class="label">Vercel 연동</span></span></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 인증 필요 -->
+    <div class="section">
+      <div class="section-header" onclick="toggleSection(this)">
+        <span class="icon">&#128274;</span>
+        <h3>인증 필요 라우트</h3>
+        <span class="count">40+ 라우트</span>
+        <span class="chevron">&#9660;</span>
+      </div>
+      <div class="section-body">
+        <ul class="tree" id="tree-auth">
+          <li><span class="tree-item"><span class="route">/dashboard</span> <span class="label">메인 대시보드 (프로젝트 목록, 즐겨찾기, 빠른 액션)</span> <span class="badge badge-auth">인증</span></span>
+            <ul class="tree">
+              <li><span class="tree-item"><span class="route">/trash</span> <span class="label">휴지통 (소프트 삭제 복구)</span></span></li>
+            </ul>
+          </li>
+          <li><span class="tree-item"><span class="route">/sites</span> <span class="label">원클릭 배포</span> <span class="badge badge-auth">인증</span></span>
+            <ul class="tree">
+              <li><span class="tree-item"><span class="route">/sites/new</span> <span class="label">템플릿 선택 + 배포 시작</span></span></li>
+              <li><span class="tree-item"><span class="route">/sites/manage</span> <span class="label">배포된 사이트 관리</span></span></li>
+              <li><span class="tree-item"><span class="route">/sites/showcase</span> <span class="label">쇼케이스 등록</span></span></li>
+              <li><span class="tree-item"><span class="route">/sites/[deployId]</span> <span class="label">배포 상세</span></span></li>
+              <li><span class="tree-item"><span class="route">/sites/[deployId]/edit</span> <span class="label">사이트 에디터 (코드 편집, 모듈 관리)</span></span></li>
+            </ul>
+          </li>
+          <li><span class="tree-item"><span class="route">/project/[id]</span> <span class="label">프로젝트 상세</span> <span class="badge badge-auth">인증+소유자</span></span>
+            <ul class="tree">
+              <li><span class="tree-item"><span class="route">/project/[id]/services</span> <span class="label">서비스 목록 (레이어별 정리)</span></span></li>
+              <li><span class="tree-item"><span class="route">/project/[id]/service-map</span> <span class="label">서비스맵 (React Flow 인터랙티브 시각화)</span></span></li>
+              <li><span class="tree-item"><span class="route">/project/[id]/costs</span> <span class="label">비용 추적 (서비스별 월간/연간)</span></span></li>
+              <li><span class="tree-item"><span class="route">/project/[id]/costs/report</span> <span class="label">AI 비용 리포트</span> <span class="badge badge-pro">Pro</span></span></li>
+              <li><span class="tree-item"><span class="route">/project/[id]/connections</span> <span class="label">서비스 연결 관리 (의존성)</span></span></li>
+              <li><span class="tree-item"><span class="route">/project/[id]/env</span> <span class="label">환경변수 관리 (AES-256-GCM 암호화)</span></span></li>
+              <li><span class="tree-item"><span class="route">/project/[id]/env/conflicts</span> <span class="label">환경변수 충돌 해결</span></span></li>
+              <li><span class="tree-item"><span class="route">/project/[id]/credentials</span> <span class="label">API 자격증명 관리</span></span></li>
+              <li><span class="tree-item"><span class="route">/project/[id]/audit</span> <span class="label">감사 로그</span></span></li>
+              <li><span class="tree-item"><span class="route">/project/[id]/health</span> <span class="label">헬스 체크 타임라인</span></span></li>
+              <li><span class="tree-item"><span class="route">/project/[id]/integrations</span> <span class="label">서드파티 연동</span></span></li>
+              <li><span class="tree-item"><span class="route">/project/[id]/monitoring</span> <span class="label">에러 추적/모니터링</span></span></li>
+              <li><span class="tree-item"><span class="route">/project/[id]/settings</span> <span class="label">프로젝트 설정</span></span></li>
+            </ul>
+          </li>
+          <li><span class="tree-item"><span class="route">/settings</span> <span class="label">사용자 설정</span> <span class="badge badge-auth">인증</span></span>
+            <ul class="tree">
+              <li><span class="tree-item"><span class="route">/settings/account</span> <span class="label">계정 정보</span></span></li>
+              <li><span class="tree-item"><span class="route">/settings/profile</span> <span class="label">프로필 커스터마이징</span></span></li>
+              <li><span class="tree-item"><span class="route">/settings/billing</span> <span class="label">구독 및 결제</span></span></li>
+              <li><span class="tree-item"><span class="route">/settings/github</span> <span class="label">GitHub 연동 설정</span></span></li>
+              <li><span class="tree-item"><span class="route">/settings/developer</span> <span class="label">API 토큰 / 개발자 설정</span></span></li>
+              <li><span class="tree-item"><span class="route">/settings/connections</span> <span class="label">서비스 연결 관리</span></span></li>
+              <li><span class="tree-item"><span class="route">/settings/danger</span> <span class="label">위험 구역 (계정 삭제)</span></span></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 관리자 -->
+    <div class="section">
+      <div class="section-header" onclick="toggleSection(this)">
+        <span class="icon">&#128737;</span>
+        <h3>관리자 전용 라우트</h3>
+        <span class="count">6 라우트</span>
+        <span class="chevron">&#9660;</span>
+      </div>
+      <div class="section-body">
+        <ul class="tree" id="tree-admin">
+          <li><span class="tree-item"><span class="route">/admin/ai-config</span> <span class="label">AI 설정 콘솔 (프롬프트, 모델, 가드레일, 페르소나)</span> <span class="badge badge-admin">관리자</span></span></li>
+          <li><span class="tree-item"><span class="route">/admin/showcase</span> <span class="label">쇼케이스 관리 (월간 픽 선정)</span> <span class="badge badge-admin">관리자</span></span></li>
+          <li><span class="tree-item"><span class="route">/admin/deploy-errors</span> <span class="label">배포 오류 모니터링</span> <span class="badge badge-admin">관리자</span></span></li>
+          <li><span class="tree-item"><span class="route">/admin/improvements</span> <span class="label">기능 개선 추적</span> <span class="badge badge-admin">관리자</span></span></li>
+          <li><span class="tree-item"><span class="route">/admin/usage-stats</span> <span class="label">플랫폼 사용 통계</span> <span class="badge badge-admin">관리자</span></span></li>
+          <li><span class="tree-item"><span class="route">/admin/users</span> <span class="label">사용자 관리</span> <span class="badge badge-admin">관리자</span></span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 패널 2: 핵심 기능 -->
+  <div id="panel-features" class="panel">
+    <div class="features-grid">
+      <div class="feature-card">
+        <h4>&#128506; 서비스맵 시각화</h4>
+        <p>서비스 간 연결을 인터랙티브하게 시각화합니다. 헥사곤 노드, 7가지 엣지 타입(사용/통합/데이터전송/API호출/인증/웹훅/SDK), Zone 기반 레이아웃, Undo/Redo 50단계, 멀티셀렉트, 토큰 기반 공개 공유를 지원합니다.</p>
+        <div class="tech-tags">
+          <span class="tech-tag">React Flow</span>
+          <span class="tech-tag">@xyflow/react</span>
+          <span class="tech-tag">dynamic import</span>
+          <span class="tech-tag">Zustand 스토어</span>
+          <span class="tech-tag">DAG 레이아웃</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <h4>&#9889; 원클릭 배포</h4>
+        <p>3단계 마법사: 템플릿 선택 &rarr; GitHub 연결 &rarr; Fork &amp; GitHub Pages 배포. 17+ 템플릿, 인브라우저 코드 에디터(라이브 프리뷰), 모듈 기반 아키텍처로 기능 ON/OFF, 배포 전 Diff 뷰를 제공합니다.</p>
+        <div class="tech-tags">
+          <span class="tech-tag">GitHub API</span>
+          <span class="tech-tag">GitHub Pages</span>
+          <span class="tech-tag">템플릿 시스템</span>
+          <span class="tech-tag">코드 에디터</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <h4>&#128274; 환경변수 관리</h4>
+        <p>AES-256-GCM 서버 사이드 암호화 저장. 환경별(개발/스테이징/프로덕션) 관리, GitHub Secrets 자동 동기화(NaCl 암호화), 환경 간 충돌 감지 및 해결, AI 기반 ENV Doctor 진단을 제공합니다.</p>
+        <div class="tech-tags">
+          <span class="tech-tag">AES-256-GCM</span>
+          <span class="tech-tag">NaCl</span>
+          <span class="tech-tag">GitHub Secrets</span>
+          <span class="tech-tag">환경 동기화</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <h4>&#129302; AI 어시스턴트 (Pro)</h4>
+        <p>Stack Architect(아키텍처 추천), ENV Doctor(환경변수 진단), Cost Report(비용 분석), Service Compare(서비스 비교), Map Narrate(아키텍처 설명 생성). 스트리밍 채팅, 드래그 가능 패널, 마크다운 지원.</p>
+        <div class="tech-tags">
+          <span class="tech-tag">OpenAI gpt-4o</span>
+          <span class="tech-tag">Anthropic</span>
+          <span class="tech-tag">Google AI</span>
+          <span class="tech-tag">SSE 스트리밍</span>
+          <span class="tech-tag">함수 호출</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <h4>&#128176; 비용 추적</h4>
+        <p>서비스별 월간/연간 비용 관리, 티어 기반 가격 계산, 프로젝트 예산 설정 및 초과 알림, OpenAI API 사용량 별도 추적, 영수증/인보이스 첨부 기능, AI 비용 분석 리포트를 제공합니다.</p>
+        <div class="tech-tags">
+          <span class="tech-tag">예산 알림</span>
+          <span class="tech-tag">환율 API</span>
+          <span class="tech-tag">AI 분석</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <h4>&#128154; 헬스 체크 &amp; 모니터링</h4>
+        <p>10개 외부 서비스 어댑터로 연결 상태 확인. 상태 이력 타임라인 시각화, 스파크라인 트렌드 차트, 연결 변경 시 의존 서비스 영향 분석(임팩트 분석)을 제공합니다.</p>
+        <div class="tech-tags">
+          <span class="tech-tag">10개 어댑터</span>
+          <span class="tech-tag">타임라인</span>
+          <span class="tech-tag">스파크라인</span>
+          <span class="tech-tag">임팩트 분석</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <h4>&#127942; 쇼케이스 &amp; 커뮤니티</h4>
+        <p>배포된 프로젝트를 쇼케이스에 공개 등록. 좋아요, 댓글, 조회수 추적, 리더보드(주간/월간/전체), 관리자 월간 픽 선정, 배지(성취) 시스템을 제공합니다.</p>
+        <div class="tech-tags">
+          <span class="tech-tag">리더보드</span>
+          <span class="tech-tag">배지</span>
+          <span class="tech-tag">월간 픽</span>
+          <span class="tech-tag">댓글</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <h4>&#128218; 가이드 시스템</h4>
+        <p>22개 메인 + 64개 서브 가이드, 5단계 학습 과정(시작 &rarr; 개발 &rarr; 완성 &rarr; 배포 &rarr; 확장). GitHub, Cloudflare, OpenAI, Supabase, Vercel 서비스별 단계별 연동 안내를 포함합니다.</p>
+        <div class="tech-tags">
+          <span class="tech-tag">5단계 학습</span>
+          <span class="tech-tag">86+ 페이지</span>
+          <span class="tech-tag">브레드크럼 탐색</span>
+          <span class="tech-tag">단계별 안내</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <h4>&#128101; 기능 요청 게시판</h4>
+        <p>커뮤니티 기능 제안 보드. 투표 시스템으로 인기 기능 파악, 댓글 토론, 관리자 상태 업데이트 및 관리자 노트를 지원합니다.</p>
+        <div class="tech-tags">
+          <span class="tech-tag">투표</span>
+          <span class="tech-tag">댓글</span>
+          <span class="tech-tag">상태 추적</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <h4>&#128736; 관리자 패널</h4>
+        <p>AI 설정(프롬프트, 모델, 가드레일, 페르소나), 사용자 관리, 플랫폼 분석, 배포 오류 모니터링, 쇼케이스 큐레이션, AI 플레이그라운드(테스트)를 제공합니다.</p>
+        <div class="tech-tags">
+          <span class="tech-tag">AI 설정</span>
+          <span class="tech-tag">사용자 통계</span>
+          <span class="tech-tag">배포 오류</span>
+          <span class="tech-tag">플레이그라운드</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <h4>&#128279; 서비스 카탈로그</h4>
+        <p>90+ 서비스 목록(인증 방식, 환경변수 템플릿, API 엔드포인트 포함), 비교 도구, 비용 시뮬레이터. 사용자 정의 커스텀 서비스 생성 및 글로벌 서비스 매칭 기능도 지원합니다.</p>
+        <div class="tech-tags">
+          <span class="tech-tag">90+ 서비스</span>
+          <span class="tech-tag">비교</span>
+          <span class="tech-tag">비용 시뮬레이터</span>
+          <span class="tech-tag">커스텀 서비스</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <h4>&#128100; 자격증명 관리</h4>
+        <p>AES-256-GCM으로 API 키/자격증명 암호화 저장. UI에서 마스킹 표시, 온디맨드 복호화(감사 로그 기록), 서비스별/프로젝트별 정리를 지원합니다.</p>
+        <div class="tech-tags">
+          <span class="tech-tag">AES-256-GCM</span>
+          <span class="tech-tag">감사 로그</span>
+          <span class="tech-tag">마스킹 표시</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 패널 3: 외부 서비스 -->
+  <div id="panel-services" class="panel">
+    <div class="service-grid">
+      <div class="service-card">
+        <div class="svc-header">
+          <div class="svc-icon" style="background:rgba(59,130,246,0.15);">&#9729;</div>
+          <div><div class="svc-name">Supabase</div></div>
+          <span class="svc-status status-active">활성</span>
+        </div>
+        <div class="svc-desc">인증(Google/GitHub OAuth), PostgreSQL DB(35+ 테이블, RLS), Storage(파일, 아바타), Webhooks</div>
+        <div class="svc-envs">
+          <span class="env-tag">NEXT_PUBLIC_SUPABASE_URL</span>
+          <span class="env-tag">NEXT_PUBLIC_SUPABASE_ANON_KEY</span>
+          <span class="env-tag">SUPABASE_SERVICE_ROLE_KEY</span>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="svc-header">
+          <div class="svc-icon" style="background:rgba(100,116,139,0.15);">&#128025;</div>
+          <div><div class="svc-name">GitHub</div></div>
+          <span class="svc-status status-active">활성</span>
+        </div>
+        <div class="svc-desc">OAuth 로그인, 레포지토리 관리, Secrets 동기화(NaCl 암호화), GitHub Pages 배포, Fork, Actions CI/CD</div>
+        <div class="svc-envs">
+          <span class="env-tag">GITHUB_OAUTH_CLIENT_ID</span>
+          <span class="env-tag">GITHUB_OAUTH_CLIENT_SECRET</span>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="svc-header">
+          <div class="svc-icon" style="background:rgba(245,158,11,0.15);">&#9729;</div>
+          <div><div class="svc-name">Cloudflare</div></div>
+          <span class="svc-status status-active">활성</span>
+        </div>
+        <div class="svc-desc">Workers(프로덕션 호스팅), KV 네임스페이스(ISR 캐시), AI Gateway(OpenAI 프록시), Pages(원클릭 배포 대상)</div>
+        <div class="svc-envs">
+          <span class="env-tag">wrangler.jsonc</span>
+          <span class="env-tag">NEXT_CACHE_KV</span>
+          <span class="env-tag">CF_AIG_TOKEN</span>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="svc-header">
+          <div class="svc-icon" style="background:rgba(16,185,129,0.15);">&#129302;</div>
+          <div><div class="svc-name">OpenAI</div></div>
+          <span class="svc-status status-active">활성</span>
+        </div>
+        <div class="svc-desc">메인 AI 프로바이더: 채팅 완성, 구조화된 출력, 함수 호출, SSE 스트리밍. 기본 모델: gpt-4o</div>
+        <div class="svc-envs">
+          <span class="env-tag">OPENAI_API_KEY</span>
+          <span class="env-tag">OPENAI_BASE_URL</span>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="svc-header">
+          <div class="svc-icon" style="background:rgba(139,92,246,0.15);">&#129302;</div>
+          <div><div class="svc-name">Anthropic (Claude)</div></div>
+          <span class="svc-status status-active">활성</span>
+        </div>
+        <div class="svc-desc">대체 AI 프로바이더: 채팅 완성. claude-3-* 모델. callAiProvider() 통합 인터페이스로 호출</div>
+        <div class="svc-envs">
+          <span class="env-tag">ANTHROPIC_API_KEY</span>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="svc-header">
+          <div class="svc-icon" style="background:rgba(59,130,246,0.15);">&#129302;</div>
+          <div><div class="svc-name">Google AI (Gemini)</div></div>
+          <span class="svc-status status-active">활성</span>
+        </div>
+        <div class="svc-desc">대체 AI 프로바이더: 채팅 완성. gemini-* 모델. 관리자 패널에서 설정 가능</div>
+        <div class="svc-envs">
+          <span class="env-tag">GOOGLE_AI_API_KEY</span>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="svc-header">
+          <div class="svc-icon" style="background:rgba(16,185,129,0.15);">&#128176;</div>
+          <div><div class="svc-name">Polar</div></div>
+          <span class="svc-status status-active">주력</span>
+        </div>
+        <div class="svc-desc">주력 결제: 구독(Pro/Team), 체크아웃 세션, 고객 포탈, 웹훅(subscription.active/updated/canceled 등)</div>
+        <div class="svc-envs">
+          <span class="env-tag">POLAR_ACCESS_TOKEN</span>
+          <span class="env-tag">POLAR_WEBHOOK_SECRET</span>
+          <span class="env-tag">NEXT_PUBLIC_POLAR_PRODUCT_PRO</span>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="svc-header">
+          <div class="svc-icon" style="background:rgba(139,92,246,0.15);">&#128176;</div>
+          <div><div class="svc-name">Stripe</div></div>
+          <span class="svc-status status-legacy">레거시</span>
+        </div>
+        <div class="svc-desc">레거시 결제(Polar로 마이그레이션 중): 구독, 빌링, 인보이스, 웹훅(HMAC-SHA256 서명 검증)</div>
+        <div class="svc-envs">
+          <span class="env-tag">STRIPE_SECRET_KEY</span>
+          <span class="env-tag">STRIPE_WEBHOOK_SECRET</span>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="svc-header">
+          <div class="svc-icon" style="background:rgba(59,130,246,0.15);">&#128176;</div>
+          <div><div class="svc-name">Toss Payments</div></div>
+          <span class="svc-status status-dev">개발 중</span>
+        </div>
+        <div class="svc-desc">한국 결제 게이트웨이: 현재 501 반환(미구현). 향후 한국 시장 결제 대응용 플레이스홀더</div>
+        <div class="svc-envs">
+          <span class="env-tag">TOSS_SECRET_KEY</span>
+          <span class="env-tag">NEXT_PUBLIC_TOSS_CLIENT_KEY</span>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="svc-header">
+          <div class="svc-icon" style="background:rgba(243,63,94,0.15);">&#9993;</div>
+          <div><div class="svc-name">Resend</div></div>
+          <span class="svc-status status-active">활성</span>
+        </div>
+        <div class="svc-desc">트랜잭션 이메일: 환영 메일, 헬스 알림, 팀 초대, 구독 변경 알림</div>
+        <div class="svc-envs">
+          <span class="env-tag">RESEND_API_KEY</span>
+          <span class="env-tag">RESEND_FROM_EMAIL</span>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="svc-header">
+          <div class="svc-icon" style="background:rgba(245,158,11,0.15);">&#128200;</div>
+          <div><div class="svc-name">Google Analytics 4</div></div>
+          <span class="svc-status status-active">활성</span>
+        </div>
+        <div class="svc-desc">페이지뷰, 이벤트 추적, 사용자 행동 분석. 루트 레이아웃에 gtag.js로 통합</div>
+        <div class="svc-envs">
+          <span class="env-tag">NEXT_PUBLIC_GA_MEASUREMENT_ID</span>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="svc-header">
+          <div class="svc-icon" style="background:rgba(6,182,212,0.15);">&#128065;</div>
+          <div><div class="svc-name">Microsoft Clarity</div></div>
+          <span class="svc-status status-active">활성</span>
+        </div>
+        <div class="svc-desc">세션 녹화, 히트맵, 사용자 행동 인사이트. 루트 레이아웃에 스크립트 주입</div>
+        <div class="svc-envs">
+          <span class="env-tag">NEXT_PUBLIC_CLARITY_ID</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 패널 4: API 엔드포인트 -->
+  <div id="panel-api" class="panel">
+    <div class="search-bar">
+      <input type="text" placeholder="API 검색... (예: /projects, /ai, /github)" oninput="filterApi(this.value)">
+    </div>
+
+    <div class="section" data-domain="auth">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3>인증 &amp; OAuth</h3><span class="count">7</span><span class="chevron">&#9660;</span>
+      </div>
+      <div class="section-body">
+        <table class="api-table"><thead><tr><th>메서드</th><th>엔드포인트</th><th>설명</th><th>외부 서비스</th></tr></thead><tbody>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/auth/webhook</td><td>Supabase 인증 웹훅 (신규 사용자)</td><td>Supabase, Resend</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/oauth/[provider]/authorize</td><td>OAuth 플로우 시작 (GitHub)</td><td>GitHub OAuth</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/oauth/[provider]/callback</td><td>OAuth 콜백 처리</td><td>GitHub API</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="section" data-domain="projects">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3>프로젝트</h3><span class="count">22</span><span class="chevron">&#9660;</span>
+      </div>
+      <div class="section-body">
+        <table class="api-table"><thead><tr><th>메서드</th><th>엔드포인트</th><th>설명</th><th>외부 서비스</th></tr></thead><tbody>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/projects</td><td>프로젝트 목록</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/projects</td><td>프로젝트 생성</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/projects/[id]</td><td>프로젝트 상세 조회</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-patch">PATCH</span></td><td class="endpoint">/api/projects/[id]</td><td>프로젝트 수정</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-delete">DEL</span></td><td class="endpoint">/api/projects/[id]</td><td>소프트 삭제</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/projects/[id]/restore</td><td>삭제 복구</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/projects/[id]/cost-summary</td><td>비용 요약</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/projects/[id]/dashboard</td><td>대시보드 데이터</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/projects/reorder</td><td>프로젝트 순서 변경</td><td>Supabase</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="section" data-domain="env">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3>환경변수</h3><span class="count">13</span><span class="chevron">&#9660;</span>
+      </div>
+      <div class="section-body">
+        <table class="api-table"><thead><tr><th>메서드</th><th>엔드포인트</th><th>설명</th><th>외부 서비스</th></tr></thead><tbody>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/env</td><td>환경변수 목록 (암호화 상태)</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/env</td><td>환경변수 생성</td><td>Supabase, AES-256-GCM</td></tr>
+          <tr><td><span class="method method-patch">PATCH</span></td><td class="endpoint">/api/env</td><td>환경변수 수정</td><td>Supabase, AES-256-GCM</td></tr>
+          <tr><td><span class="method method-delete">DEL</span></td><td class="endpoint">/api/env</td><td>환경변수 삭제</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/env/download</td><td>.env 파일 다운로드</td><td>AES-256-GCM</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/env/decrypt</td><td>단일 변수 복호화</td><td>AES-256-GCM</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/env/sync</td><td>환경 간 동기화</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/env/bulk</td><td>일괄 작업</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/env/conflicts</td><td>충돌 감지</td><td>Supabase</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="section" data-domain="github">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3>GitHub 연동</h3><span class="count">7</span><span class="chevron">&#9660;</span>
+      </div>
+      <div class="section-body">
+        <table class="api-table"><thead><tr><th>메서드</th><th>엔드포인트</th><th>설명</th><th>외부 서비스</th></tr></thead><tbody>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/github/repos</td><td>사용자 레포 목록</td><td>GitHub API</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/github/repos/link</td><td>레포를 프로젝트에 연결</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-delete">DEL</span></td><td class="endpoint">/api/github/repos/link</td><td>레포 연결 해제</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/github/secrets</td><td>레포 시크릿 목록</td><td>GitHub API</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/github/secrets</td><td>환경변수를 GitHub Secrets로 푸시</td><td>GitHub API, NaCl</td></tr>
+          <tr><td><span class="method method-delete">DEL</span></td><td class="endpoint">/api/github/secrets</td><td>시크릿 삭제</td><td>GitHub API</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="section" data-domain="ai">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3>AI 기능 (Pro 플랜)</h3><span class="count">8</span><span class="chevron">&#9660;</span>
+      </div>
+      <div class="section-body">
+        <table class="api-table"><thead><tr><th>메서드</th><th>엔드포인트</th><th>설명</th><th>외부 서비스</th></tr></thead><tbody>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/ai/chat</td><td>Stack Architect 채팅 (SSE 스트리밍)</td><td>OpenAI</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/ai/env-doctor</td><td>환경변수 진단</td><td>OpenAI</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/ai/stack-recommend</td><td>스택 추천</td><td>OpenAI</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/ai/cost-report</td><td>AI 비용 분석</td><td>OpenAI</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/ai/map-narrate</td><td>아키텍처 내러티브 생성</td><td>OpenAI</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/ai/compare-services</td><td>서비스 비교 분석</td><td>OpenAI</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/ai/command</td><td>AI 명령 실행</td><td>OpenAI</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/ai/feature-config</td><td>기능 설정 조회</td><td>Supabase</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="section" data-domain="payments">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3>결제</h3><span class="count">6+</span><span class="chevron">&#9660;</span>
+      </div>
+      <div class="section-body">
+        <table class="api-table"><thead><tr><th>메서드</th><th>엔드포인트</th><th>설명</th><th>외부 서비스</th></tr></thead><tbody>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/polar/checkout</td><td>Polar 체크아웃 세션</td><td>Polar API</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/polar/portal</td><td>고객 포탈</td><td>Polar API</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/polar/webhook</td><td>Polar 웹훅 핸들러</td><td>Polar</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/stripe/checkout</td><td>Stripe 체크아웃 (레거시)</td><td>Stripe API</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/stripe/webhook</td><td>Stripe 웹훅</td><td>Stripe</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/toss/confirm</td><td>Toss 결제 확인 (501 미구현)</td><td>Toss (개발 중)</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="section" data-domain="oneclick">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3>원클릭 배포</h3><span class="count">15</span><span class="chevron">&#9660;</span>
+      </div>
+      <div class="section-body">
+        <table class="api-table"><thead><tr><th>메서드</th><th>엔드포인트</th><th>설명</th><th>외부 서비스</th></tr></thead><tbody>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/oneclick/templates</td><td>템플릿 목록</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/oneclick/deploy</td><td>배포 생성</td><td>GitHub, Cloudflare</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/oneclick/deployments</td><td>배포 목록</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/oneclick/deployments/[id]/redeploy</td><td>재배포</td><td>GitHub</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/oneclick/deployments/[id]/upload</td><td>파일 업로드</td><td>Supabase Storage</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/oneclick/preflight</td><td>배포 전 사전 검사</td><td>GitHub API</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="section" data-domain="showcase">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3>쇼케이스 &amp; 커뮤니티</h3><span class="count">16</span><span class="chevron">&#9660;</span>
+      </div>
+      <div class="section-body">
+        <table class="api-table"><thead><tr><th>메서드</th><th>엔드포인트</th><th>설명</th><th>외부 서비스</th></tr></thead><tbody>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/showcase</td><td>공개 쇼케이스 목록</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/showcase/[id]</td><td>쇼케이스 상세</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/showcase/[id]/likes</td><td>좋아요/취소</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/showcase/leaderboard</td><td>커뮤니티 리더보드</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/showcase/monthly-picks</td><td>월간 추천</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/showcase/[id]/comments</td><td>댓글 작성</td><td>Supabase</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="section" data-domain="admin">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3>관리자</h3><span class="count">24</span><span class="chevron">&#9660;</span>
+      </div>
+      <div class="section-body">
+        <table class="api-table"><thead><tr><th>메서드</th><th>엔드포인트</th><th>설명</th><th>외부 서비스</th></tr></thead><tbody>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/admin/ai-config</td><td>AI 설정 조회</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-put">PUT</span></td><td class="endpoint">/api/admin/ai-config</td><td>AI 설정 수정</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/admin/ai-personas</td><td>AI 페르소나 목록</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/admin/ai-guardrails</td><td>안전 가드레일</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/admin/ai-usage</td><td>AI 토큰 사용량</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/admin/visitors</td><td>방문자 분석</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/admin/usage-stats</td><td>플랫폼 사용 통계</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/admin/users</td><td>사용자 목록</td><td>Supabase</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="section" data-domain="util">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3>유틸리티</h3><span class="count">8</span><span class="chevron">&#9660;</span>
+      </div>
+      <div class="section-body">
+        <table class="api-table"><thead><tr><th>메서드</th><th>엔드포인트</th><th>설명</th><th>외부 서비스</th></tr></thead><tbody>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/exchange-rate</td><td>USD &rarr; KRW 환율</td><td>open.er-api.com</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/track</td><td>이벤트 추적</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/health-check</td><td>서비스 헬스 상태</td><td>10개 어댑터</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/indexnow</td><td>SEO 인덱스 제출</td><td>IndexNow (Bing)</td></tr>
+          <tr><td><span class="method method-get">GET</span></td><td class="endpoint">/api/shared/map/[token]</td><td>공유 서비스맵 (공개)</td><td>Supabase</td></tr>
+          <tr><td><span class="method method-post">POST</span></td><td class="endpoint">/api/seed</td><td>DB 시딩 (개발용)</td><td>Supabase</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 패널 5: 연결 매트릭스 -->
+  <div id="panel-matrix" class="panel">
+    <h3 style="margin-bottom:16px;font-size:1.1rem;">메뉴-서비스 연결 청사진</h3>
+    <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:20px;">각 점은 해당 메뉴/기능 영역이 어떤 외부 서비스와 연결되어 있는지를 나타냅니다.</p>
+    <div class="matrix-wrapper">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th>메뉴 / 기능</th>
+            <th>Supabase</th>
+            <th>GitHub</th>
+            <th>Cloudflare</th>
+            <th>OpenAI</th>
+            <th>Anthropic</th>
+            <th>Google AI</th>
+            <th>Polar</th>
+            <th>Stripe</th>
+            <th>Resend</th>
+            <th>GA4</th>
+            <th>Clarity</th>
+            <th>IndexNow</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>랜딩 페이지</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot dot-green"></span></td><td><span class="dot dot-green"></span></td><td></td></tr>
+          <tr><td>로그인 / 회원가입</td><td><span class="dot"></span></td><td><span class="dot"></span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>대시보드</td><td><span class="dot"></span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>서비스맵</td><td><span class="dot"></span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>환경변수 관리</td><td><span class="dot"></span></td><td><span class="dot"></span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>비용 추적</td><td><span class="dot"></span></td><td></td><td></td><td><span class="dot dot-purple"></span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>헬스 체크</td><td><span class="dot"></span></td><td><span class="dot"></span></td><td><span class="dot"></span></td><td><span class="dot"></span></td><td><span class="dot"></span></td><td></td><td><span class="dot"></span></td><td><span class="dot"></span></td><td><span class="dot"></span></td><td></td><td></td><td></td></tr>
+          <tr><td>AI 채팅</td><td><span class="dot"></span></td><td></td><td><span class="dot dot-amber"></span></td><td><span class="dot dot-purple"></span></td><td><span class="dot dot-purple"></span></td><td><span class="dot dot-purple"></span></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>AI ENV Doctor</td><td><span class="dot"></span></td><td></td><td></td><td><span class="dot dot-purple"></span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>원클릭 배포</td><td><span class="dot"></span></td><td><span class="dot"></span></td><td><span class="dot"></span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>사이트 에디터</td><td><span class="dot"></span></td><td><span class="dot"></span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>쇼케이스</td><td><span class="dot"></span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>결제 / 구독</td><td><span class="dot"></span></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot dot-green"></span></td><td><span class="dot dot-amber"></span></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>GitHub Secrets 동기화</td><td><span class="dot"></span></td><td><span class="dot"></span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>가이드</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot dot-green"></span></td><td><span class="dot dot-green"></span></td><td></td></tr>
+          <tr><td>블로그</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot dot-green"></span></td><td><span class="dot dot-green"></span></td><td><span class="dot dot-green"></span></td></tr>
+          <tr><td>이메일 알림</td><td><span class="dot"></span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot"></span></td><td></td><td></td><td></td></tr>
+          <tr><td>관리자 패널</td><td><span class="dot"></span></td><td></td><td></td><td><span class="dot dot-purple"></span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>API 토큰</td><td><span class="dot"></span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>자격증명</td><td><span class="dot"></span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>기능 요청</td><td><span class="dot"></span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>팀 관리</td><td><span class="dot"></span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot"></span></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:20px;font-size:0.8rem;color:var(--text-dim);flex-wrap:wrap;">
+      <span><span class="dot" style="vertical-align:middle;"></span> 핵심 의존성</span>
+      <span><span class="dot dot-green" style="vertical-align:middle;"></span> 분석 / 추적</span>
+      <span><span class="dot dot-purple" style="vertical-align:middle;"></span> AI 프로바이더 (Pro)</span>
+      <span><span class="dot dot-amber" style="vertical-align:middle;"></span> 게이트웨이 / 레거시</span>
+    </div>
+  </div>
+
+  <!-- 패널 6: 데이터 흐름 -->
+  <div id="panel-flow" class="panel">
+    <h3 style="margin-bottom:16px;font-size:1.1rem;">Linkmap 데이터 흐름 아키텍처</h3>
+
+    <div class="flow-wrapper" style="margin-bottom:24px;">
+      <h4 style="margin-bottom:16px;color:var(--brand-blue);">사용자 여정 흐름</h4>
+      <div class="flow-diagram">
+        <div class="flow-row">
+          <div class="flow-node">사용자</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-node primary">로그인 (Supabase Auth / GitHub OAuth)</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-node primary">대시보드</div>
+        </div>
+        <div class="flow-branch">
+          <div class="flow-branch-item">
+            <div class="flow-node primary">프로젝트 생성</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node">서비스 추가 (카탈로그 90+)</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node success">서비스맵 (React Flow)</div>
+          </div>
+          <div class="flow-branch-item">
+            <div class="flow-node">환경변수 추가</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node">AES-256-GCM 암호화</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node success">GitHub Secrets 동기화 (NaCl)</div>
+          </div>
+          <div class="flow-branch-item">
+            <div class="flow-node">서비스 연결</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node">헬스 체크 (10개 어댑터)</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node warning">임팩트 분석</div>
+          </div>
+          <div class="flow-branch-item">
+            <div class="flow-node">비용 추적</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node">예산 알림</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node pro">AI 비용 리포트 (OpenAI)</div>
+          </div>
+        </div>
+
+        <div class="flow-row" style="margin-top:16px;">
+          <div class="flow-node">사용자</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-node primary">원클릭 배포</div>
+        </div>
+        <div class="flow-branch">
+          <div class="flow-branch-item">
+            <div class="flow-node">템플릿 선택 (17+종)</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node">GitHub Fork</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node success">GitHub Pages 배포</div>
+          </div>
+          <div class="flow-branch-item">
+            <div class="flow-node">사이트 에디터</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node">모듈 시스템</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node success">재배포</div>
+          </div>
+          <div class="flow-branch-item">
+            <div class="flow-node success">쇼케이스 등록</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node">좋아요 / 댓글 / 리더보드</div>
+          </div>
+        </div>
+
+        <div class="flow-row" style="margin-top:16px;">
+          <div class="flow-node pro">AI 어시스턴트 (Pro 플랜)</div>
+        </div>
+        <div class="flow-branch">
+          <div class="flow-branch-item">
+            <div class="flow-node pro">Stack Architect</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node">아키텍처 추천</div>
+          </div>
+          <div class="flow-branch-item">
+            <div class="flow-node pro">ENV Doctor</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node">보안 + 네이밍 진단</div>
+          </div>
+          <div class="flow-branch-item">
+            <div class="flow-node pro">서비스 비교</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node">나란히 비교 분석</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-wrapper">
+      <h4 style="margin-bottom:16px;color:var(--brand-green);">보안 &amp; 데이터 흐름</h4>
+      <div class="flow-diagram">
+        <div class="flow-row">
+          <div class="flow-node warning">사용자 입력</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-node">Zod safeParse</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-node">인증 확인 (getUser)</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-node">소유권 검증</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-node primary">비즈니스 로직</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-node success">logAudit()</div>
+        </div>
+        <div style="margin-top:16px;">
+          <div class="flow-row">
+            <div class="flow-node">민감 데이터</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node warning">AES-256-GCM 암호화</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node">Supabase (RLS)</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node warning">온디맨드 복호화</div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-node success">마스킹 UI</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+function toggleSection(header) {
+  header.classList.toggle('collapsed');
+  header.nextElementSibling.classList.toggle('collapsed');
+}
+function filterTree(query) {
+  const q = query.toLowerCase().trim();
+  document.querySelectorAll('#panel-tree .tree-item').forEach(item => {
+    const li = item.closest('li');
+    if (!q) { li.style.display = ''; return; }
+    li.style.display = item.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+function filterApi(query) {
+  const q = query.toLowerCase().trim();
+  document.querySelectorAll('#panel-api .api-table tbody tr').forEach(row => {
+    if (!q) { row.style.display = ''; return; }
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+</script>
+
+</body>
+</html>

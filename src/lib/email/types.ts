@@ -21,7 +21,7 @@ export type EmailPayload =
   | {
       type: 'subscription_change';
       to: string;
-      changeType: 'upgraded' | 'updated' | 'canceled';
+      changeType: 'upgraded' | 'updated' | 'canceled' | 'refunded';
       plan?: string;
       status?: string;
     };

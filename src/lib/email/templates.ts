@@ -157,7 +157,7 @@ export function buildTeamInviteEmail(params: {
 }
 
 export function buildSubscriptionChangeEmail(params: {
-  changeType: 'upgraded' | 'updated' | 'canceled';
+  changeType: 'upgraded' | 'updated' | 'canceled' | 'refunded';
   plan?: string;
   status?: string;
 }): { subject: string; html: string } {
@@ -176,6 +176,11 @@ export function buildSubscriptionChangeEmail(params: {
       title: '구독이 해지되었습니다',
       body: '구독이 해지되어 무료 플랜으로 전환되었습니다. 언제든 다시 구독할 수 있습니다.',
       color: '#dc2626',
+    },
+    refunded: {
+      title: '환불이 완료되었습니다',
+      body: '요청하신 환불이 정상적으로 처리되었습니다. 환불 금액은 결제 수단에 따라 영업일 기준 3~5일 내에 반영됩니다.',
+      color: '#f59e0b',
     },
   };
 

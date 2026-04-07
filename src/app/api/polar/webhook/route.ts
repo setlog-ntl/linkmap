@@ -219,6 +219,54 @@ async function getHandler(): Promise<WebhookHandler> {
         },
       });
     },
+
+    onOrderRefunded: async (payload) => {
+      const order = payload.data;
+      const userId = resolveUserId(order.customer, order.metadata);
+      if (!userId) return;
+
+      const adminClient = createAdminClient();
+
+      // refund_history 상태 업데이트
+      await adminClient
+        .from('refund_history')
+        .update({
+          status: 'succeeded',
+          processed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('polar_order_id', order.id)
+        .eq('user_id', userId);
+
+      // 환불 이메일 발송
+      const { data: profile } = await adminClient
+        .from('profiles')
+        .select('email')
+        .eq('id', userId)
+        .single();
+
+      if (profile?.email) {
+        const sent = await sendEmail({
+          type: 'subscription_change',
+          to: profile.email,
+          changeType: 'refunded',
+        });
+        await logAudit(userId, {
+          action: sent ? 'email.subscription_change' : 'email.send_failed',
+          resourceType: 'refund',
+          details: { changeType: 'refunded', sent },
+        });
+      }
+
+      await logAudit(userId, {
+        action: 'payment.refund_completed',
+        resourceType: 'refund',
+        details: {
+          orderId: order.id,
+          provider: 'polar',
+        },
+      });
+    },
   });
   return _handler;
 }

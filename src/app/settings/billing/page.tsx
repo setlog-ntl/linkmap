@@ -5,10 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CreditCard, ExternalLink, Calendar, Loader2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { CreditCard, ExternalLink, Calendar, Loader2, AlertTriangle, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSubscription } from '@/lib/queries/subscription';
+import { queryKeys } from '@/lib/queries/keys';
 import type { SubscriptionPlan } from '@/types';
 
 const planLabel: Record<SubscriptionPlan, string> = {
@@ -34,7 +38,11 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'destructive'> = {
 export default function BillingPage() {
   const { data: subscription, isLoading } = useSubscription();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [portalLoading, setPortalLoading] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   const plan: SubscriptionPlan = subscription?.plan ?? 'free';
   const status = subscription?.status ?? 'active';
@@ -54,6 +62,30 @@ export default function BillingPage() {
       toast.error('네트워크 오류가 발생했습니다');
     } finally {
       setPortalLoading(false);
+    }
+  }
+
+  async function handleCancel() {
+    setCancelLoading(true);
+    try {
+      const res = await fetch('/api/polar/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: cancelReason }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || '구독 취소에 실패했습니다');
+        return;
+      }
+      toast.success('구독이 취소되었습니다. 현재 빌링 기간까지 서비스를 이용할 수 있습니다.');
+      await queryClient.invalidateQueries({ queryKey: queryKeys.subscription.current });
+      setCancelDialogOpen(false);
+      setCancelReason('');
+    } catch {
+      toast.error('네트워크 오류가 발생했습니다');
+    } finally {
+      setCancelLoading(false);
     }
   }
 
@@ -151,6 +183,157 @@ export default function BillingPage() {
           </div>
         </CardContent>
       </Card>
+
+      {isPaid && status !== 'canceled' && (
+        <Card className="border-destructive/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              구독 취소
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              구독을 취소하더라도 현재 빌링 기간 종료일
+              {subscription?.current_period_end && (
+                <>
+                  (
+                  {new Date(subscription.current_period_end).toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                  )
+                </>
+              )}
+              까지 {planLabel[plan]} 기능을 계속 이용할 수 있습니다.
+            </p>
+            <Button
+              variant="destructive"
+              onClick={() => setCancelDialogOpen(true)}
+            >
+              구독 취소
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>정말 구독을 취소하시겠습니까?</DialogTitle>
+            <DialogDescription>
+              현재 빌링 기간
+              {subscription?.current_period_end && (
+                <>
+                  (
+                  {new Date(subscription.current_period_end).toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                  )
+                </>
+              )}
+              까지는 {planLabel[plan]} 기능을 계속 이용할 수 있습니다. 이후 Free 플랜으로 전환됩니다.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <label htmlFor="cancel-reason" className="text-sm font-medium">
+              취소 사유 (선택사항)
+            </label>
+            <Textarea
+              id="cancel-reason"
+              placeholder="취소하시는 이유를 알려주시면 서비스 개선에 참고하겠습니다."
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              rows={3}
+            />
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setCancelDialogOpen(false)}
+              disabled={cancelLoading}
+            >
+              구독 유지
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancel}
+              disabled={cancelLoading}
+            >
+              {cancelLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              구독 취소
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {isPaid && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <RotateCcw className="h-5 w-5" />
+              환불 안내
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              결제일로부터 7일 이내에 환불을 요청할 수 있습니다.
+            </p>
+            {(() => {
+              const periodStart = subscription?.current_period_start;
+              if (!periodStart) {
+                return (
+                  <p className="text-sm text-muted-foreground">
+                    결제 정보를 확인할 수 없습니다. 환불이 필요하시면 고객센터에 문의해주세요.
+                  </p>
+                );
+              }
+              const startDate = new Date(periodStart);
+              const daysSincePayment = Math.floor(
+                (Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+              );
+              const isWithinRefundPeriod = daysSincePayment <= 7;
+
+              return (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4" />
+                    <span>
+                      결제일:{' '}
+                      {startDate.toLocaleDateString('ko-KR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                      {isWithinRefundPeriod
+                        ? ` (${7 - daysSincePayment}일 남음)`
+                        : ' (환불 가능 기간 만료)'}
+                    </span>
+                  </div>
+                  {isWithinRefundPeriod ? (
+                    <div className="rounded-md border border-muted bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+                      <p>
+                        현재 셀프 환불 기능은 준비 중입니다. 환불이 필요하시면{' '}
+                        <strong>support@linkmap.run</strong>으로 문의해주세요.
+                      </p>
+                      <p className="mt-1">
+                        향후 주문 이력 기능이 추가되면 셀프 환불이 가능해질 예정입니다.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-destructive">
+                      환불 가능 기간(결제일로부터 7일)이 지났습니다.
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
