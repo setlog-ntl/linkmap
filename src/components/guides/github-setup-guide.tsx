@@ -43,6 +43,7 @@ interface GuideStep {
   };
   tips: Array<{ text: string; isCode?: boolean }>;
   estimatedMinutes: number;
+  detailUrl?: string;
 }
 
 const STEPS: GuideStep[] = [
@@ -53,29 +54,42 @@ const STEPS: GuideStep[] = [
     icon: User,
     actionLabel: 'GitHub 가입하기',
     actionUrl: 'https://github.com/signup',
+    detailUrl: '/guides/github/git-setup',
     tips: [
-      { text: '이메일 주소만 있으면 가입할 수 있습니다' },
-      { text: '사용자 이름은 영문과 숫자로 짧게 정하세요 (예: my-name)' },
-      { text: '무료 플랜으로 충분합니다 — 유료 결제 없이 시작하세요' },
+      { text: '이메일 주소만 있으면 가입할 수 있습니다 — 구글, 네이버, 카카오 이메일 모두 가능' },
+      { text: '사용자 이름은 GitHub URL에 포함됩니다 (예: github.com/my-name). 짧고 기억하기 쉬운 영문+숫자로 정하세요' },
+      { text: '비밀번호는 8자 이상, 숫자와 소문자를 포함해야 합니다' },
+      { text: '이메일 인증 코드가 발송됩니다 — 스팸 폴더도 확인하세요' },
+      { text: '무료 플랜(Free)으로 충분합니다 — Private 저장소, 무제한 협업자 모두 무료' },
+      { text: '사용자 이름은 나중에 변경 가능하지만, 연동된 서비스(Vercel 등)에 영향을 줄 수 있으니 신중하게 정하세요' },
     ],
     estimatedMinutes: 3,
   },
   {
     id: 1,
     title: 'Git 설치',
-    subtitle: 'Git은 코드 변경 사항을 기록하는 도구입니다. 컴퓨터에 설치하세요.',
+    subtitle: 'Git은 코드 변경 사항을 기록하는 도구입니다. Cursor, VS Code에서 코드를 저장하려면 필요합니다.',
     icon: Download,
     actionLabel: 'Git 다운로드',
     actionUrl: 'https://git-scm.com/downloads',
+    detailUrl: '/guides/github/git-setup',
     secondaryAction: {
       label: 'GitHub Desktop (더 쉬움)',
       url: 'https://desktop.github.com',
     },
     tips: [
-      { text: 'Windows: 다운로드 후 설치 파일을 실행하세요. 설정은 모두 기본값으로 "Next"만 누르면 됩니다' },
-      { text: 'Mac: 터미널에서 아래 명령어를 입력하면 자동으로 설치됩니다' },
+      { text: '⚡ 명령어가 어렵다면? GitHub Desktop을 설치하면 Git이 자동으로 함께 설치됩니다. 클릭만으로 commit, push가 가능합니다' },
+      { text: '— Windows —' },
+      { text: 'git-scm.com에서 다운로드 후 설치 파일을 실행하세요. 설정은 모두 기본값으로 "Next"만 누르면 됩니다' },
+      { text: '설치 완료 후 Git Bash 또는 터미널에서 확인:' },
       { text: 'git --version', isCode: true },
-      { text: 'GitHub Desktop을 사용하면 명령어 없이 클릭만으로 Git을 사용할 수 있습니다' },
+      { text: '— macOS —' },
+      { text: '터미널에서 아래 명령어를 입력하면 자동 설치 프롬프트가 나타납니다:' },
+      { text: 'git --version', isCode: true },
+      { text: 'Homebrew가 있다면: brew install git' },
+      { text: '— Linux (Ubuntu/Debian) —' },
+      { text: 'sudo apt update && sudo apt install git', isCode: true },
+      { text: '설치 확인: 위 명령어 실행 후 "git version 2.x.x" 같은 출력이 나오면 성공입니다' },
     ],
     estimatedMinutes: 5,
   },
@@ -86,27 +100,37 @@ const STEPS: GuideStep[] = [
     icon: GitBranch,
     actionLabel: '새 저장소 만들기',
     actionUrl: 'https://github.com/new',
+    detailUrl: '/guides/github/first-repo',
     tips: [
-      { text: 'Repository name에 프로젝트 이름을 영문으로 입력하세요 (예: my-first-app)' },
-      { text: '"Public"은 누구나 볼 수 있고, "Private"은 나만 볼 수 있습니다' },
-      { text: '"Add a README file"을 체크하면 설명 페이지가 자동 생성됩니다' },
+      { text: 'Repository name에 프로젝트 이름을 영문으로 입력하세요 (예: my-first-app). 소문자와 하이픈(-) 사용 권장' },
+      { text: '"Public"은 누구나 볼 수 있고, "Private"은 나와 초대한 사람만 볼 수 있습니다. 처음에는 Private 추천' },
+      { text: '"Add a README file"을 체크하면 프로젝트 설명 페이지가 자동 생성됩니다' },
+      { text: '"Add .gitignore"에서 사용할 프레임워크 선택 (예: Node) — 불필요한 파일이 올라가는 것을 방지합니다' },
       { text: '"Create repository" 버튼을 누르면 끝!' },
+      { text: '만들어진 저장소 페이지에서 초록색 "Code" 버튼 → SSH 탭의 주소를 복사하면 나중에 clone할 때 사용합니다' },
     ],
     estimatedMinutes: 2,
   },
   {
     id: 3,
     title: '기본 설정',
-    subtitle: '코드 저장 시 누가 작성했는지 기록하기 위한 설정입니다.',
+    subtitle: '커밋할 때 누가 작성했는지 기록하기 위한 설정입니다. 한 번만 하면 됩니다.',
     icon: Settings,
     actionLabel: 'GitHub 프로필 설정',
     actionUrl: 'https://github.com/settings/profile',
+    detailUrl: '/guides/github/git-setup',
     tips: [
-      { text: '터미널(명령 프롬프트)을 열고 아래 두 줄을 입력하세요:' },
+      { text: '터미널(Windows: Git Bash 또는 명령 프롬프트, Mac: 터미널)을 열고 아래 명령어를 입력하세요:' },
       { text: 'git config --global user.name "내이름"', isCode: true },
       { text: 'git config --global user.email "내이메일@example.com"', isCode: true },
-      { text: 'GitHub에서 사용한 이름과 이메일을 똑같이 입력하면 됩니다' },
-      { text: 'GitHub Desktop을 사용하면 로그인만 하면 자동 설정됩니다' },
+      { text: '⚠️ GitHub에서 사용한 이름과 이메일을 똑같이 입력해야 커밋 기록이 프로필에 연결됩니다' },
+      { text: '추가 권장 설정 — 기본 브랜치 이름을 main으로 설정:' },
+      { text: 'git config --global init.defaultBranch main', isCode: true },
+      { text: 'Windows 사용자 — 줄바꿈 자동 변환 설정:' },
+      { text: 'git config --global core.autocrlf true', isCode: true },
+      { text: '설정 확인:' },
+      { text: 'git config --list', isCode: true },
+      { text: 'GitHub Desktop을 사용하면 로그인만 하면 위 설정이 자동으로 됩니다' },
     ],
     estimatedMinutes: 2,
   },
@@ -122,10 +146,19 @@ const STEPS: GuideStep[] = [
       url: 'https://code.visualstudio.com',
     },
     tips: [
-      { text: 'Cursor는 AI가 내장된 에디터로, 바이브 코딩에 가장 적합합니다' },
-      { text: 'VS Code도 무료이며 확장 프로그램으로 AI 기능을 추가할 수 있습니다' },
-      { text: '에디터 설치 후 "Clone Repository"로 방금 만든 저장소를 열 수 있습니다' },
-      { text: 'Cursor에서 Cmd+K (Mac) 또는 Ctrl+K (Windows)를 누르면 AI에게 코드를 요청할 수 있습니다' },
+      { text: 'Cursor는 AI가 내장된 에디터로, 바이브 코딩에 가장 적합합니다. 무료 플랜으로 시작하세요' },
+      { text: 'VS Code도 무료이며 GitHub Copilot 등 AI 확장을 추가할 수 있습니다' },
+      { text: '— 에디터에서 저장소 연결하기 —' },
+      { text: '에디터 설치 후 터미널에서 방금 만든 저장소를 clone하세요:' },
+      { text: 'git clone git@github.com:내아이디/저장소이름.git', isCode: true },
+      { text: '또는 에디터에서 Ctrl+Shift+P → "Git: Clone" → 저장소 URL 붙여넣기' },
+      { text: '— 코드 저장하기 (첫 커밋) —' },
+      { text: 'git add .', isCode: true },
+      { text: 'git commit -m "feat: 초기 프로젝트 설정"', isCode: true },
+      { text: 'git push', isCode: true },
+      { text: '— AI 코딩 단축키 —' },
+      { text: 'Cursor: Cmd+K (Mac) / Ctrl+K (Windows) → AI에게 코드 작성 요청' },
+      { text: 'Cursor: Cmd+L (Mac) / Ctrl+L (Windows) → AI 채팅으로 질문하기' },
     ],
     estimatedMinutes: 3,
   },
@@ -404,6 +437,16 @@ export function GitHubSetupGuide() {
                           </li>
                         ))}
                       </ul>
+                      {step.detailUrl && (
+                        <div className="mt-4 pt-3 border-t">
+                          <Button variant="link" asChild className="h-auto p-0 text-sm">
+                            <Link prefetch={false} href={step.detailUrl}>
+                              더 자세한 설명 보기
+                              <ArrowRight className="ml-1 h-3 w-3" />
+                            </Link>
+                          </Button>
+                        </div>
+                      )}
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
