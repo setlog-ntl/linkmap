@@ -15,6 +15,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import Image from 'next/image';
 import {
   ExternalLink,
   Check,
@@ -29,6 +30,15 @@ import {
   Copy,
   type LucideIcon,
 } from 'lucide-react';
+import { githubIllustrations } from './github-guide/github-illustrations';
+
+interface StepPreview {
+  /** 실제 캡처 이미지 경로 (없으면 illustration 사용) */
+  src?: string;
+  alt: string;
+  /** SVG 일러스트레이션 폴백 키 */
+  illustrationKey?: string;
+}
 
 interface GuideStep {
   id: number;
@@ -44,6 +54,7 @@ interface GuideStep {
   tips: Array<{ text: string; isCode?: boolean }>;
   estimatedMinutes: number;
   detailUrl?: string;
+  preview?: StepPreview;
 }
 
 const STEPS: GuideStep[] = [
@@ -64,6 +75,11 @@ const STEPS: GuideStep[] = [
       { text: '사용자 이름은 나중에 변경 가능하지만, 연동된 서비스(Vercel 등)에 영향을 줄 수 있으니 신중하게 정하세요' },
     ],
     estimatedMinutes: 3,
+    preview: {
+      src: '/img/guides/github/01-signup-page.png',
+      alt: 'GitHub 가입 페이지 — 이메일, 비밀번호, 사용자 이름 입력',
+      illustrationKey: 'signup',
+    },
   },
   {
     id: 1,
@@ -92,6 +108,11 @@ const STEPS: GuideStep[] = [
       { text: '설치 확인: 위 명령어 실행 후 "git version 2.x.x" 같은 출력이 나오면 성공입니다' },
     ],
     estimatedMinutes: 5,
+    preview: {
+      src: '/img/guides/github/02-git-download-main.png',
+      alt: 'Git 다운로드 페이지 — OS별 설치 파일 선택',
+      illustrationKey: 'git-download',
+    },
   },
   {
     id: 2,
@@ -110,6 +131,10 @@ const STEPS: GuideStep[] = [
       { text: '만들어진 저장소 페이지에서 초록색 "Code" 버튼 → SSH 탭의 주소를 복사하면 나중에 clone할 때 사용합니다' },
     ],
     estimatedMinutes: 2,
+    preview: {
+      alt: 'GitHub 새 저장소 생성 폼',
+      illustrationKey: 'new-repo',
+    },
   },
   {
     id: 3,
@@ -133,6 +158,10 @@ const STEPS: GuideStep[] = [
       { text: 'GitHub Desktop을 사용하면 로그인만 하면 위 설정이 자동으로 됩니다' },
     ],
     estimatedMinutes: 2,
+    preview: {
+      alt: 'git config 설정 터미널',
+      illustrationKey: 'git-config',
+    },
   },
   {
     id: 4,
@@ -161,6 +190,10 @@ const STEPS: GuideStep[] = [
       { text: 'Cursor: Cmd+L (Mac) / Ctrl+L (Windows) → AI 채팅으로 질문하기' },
     ],
     estimatedMinutes: 3,
+    preview: {
+      src: '/img/guides/github/05-cursor-homepage.png',
+      alt: 'Cursor AI 에디터 홈페이지',
+    },
   },
 ];
 
@@ -364,6 +397,24 @@ export function GitHubSetupGuide() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Step preview image */}
+                {step.preview && (
+                  <div className="rounded-lg border overflow-hidden bg-muted/30">
+                    {step.preview.src ? (
+                      <Image
+                        src={step.preview.src}
+                        alt={step.preview.alt}
+                        width={640}
+                        height={360}
+                        className="w-full h-auto"
+                        sizes="(max-width: 768px) 100vw, 640px"
+                      />
+                    ) : step.preview.illustrationKey ? (
+                      githubIllustrations[step.preview.illustrationKey]
+                    ) : null}
+                  </div>
+                )}
+
                 {/* Action buttons */}
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button asChild size="lg">
