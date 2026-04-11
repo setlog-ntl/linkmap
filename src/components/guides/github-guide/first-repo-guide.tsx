@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { StepCardWithScreenshot } from '../auth-guide/step-card-with-screenshot';
+import { firstRepoSteps } from './first-repo-screenshots';
 
 const sections = [
   { id: 'overview', label: '개요' },
@@ -111,7 +113,8 @@ export function FirstRepoGuide() {
 
         {/* 레포 생성 */}
         <section id="create-repo">
-          <h2 className="text-2xl font-bold mb-4">GitHub에서 저장소 생성</h2>
+          <StepCardWithScreenshot data={firstRepoSteps[0]} colorScheme="blue" />
+          <h2 className="text-2xl font-bold mb-4 mt-8">GitHub에서 저장소 생성</h2>
           <div className="space-y-4">
             <ol className="list-decimal list-inside text-sm text-muted-foreground space-y-2 leading-relaxed">
               <li>
@@ -155,7 +158,8 @@ export function FirstRepoGuide() {
 
         {/* git init */}
         <section id="git-init">
-          <h2 className="text-2xl font-bold mb-4">git init — 로컬 프로젝트 초기화</h2>
+          <StepCardWithScreenshot data={firstRepoSteps[1]} colorScheme="emerald" />
+          <h2 className="text-2xl font-bold mb-4 mt-8">git init — 로컬 프로젝트 초기화</h2>
           <p className="text-muted-foreground text-sm mb-4">
             기존 로컬 프로젝트를 GitHub에 연결하는 방법입니다.
             GitHub에서 빈 저장소를 먼저 만든 뒤 아래 순서로 진행하세요.
@@ -193,7 +197,8 @@ cd my-project`}
 
         {/* 첫 커밋 */}
         <section id="first-commit">
-          <h2 className="text-2xl font-bold mb-4">첫 커밋 만들기</h2>
+          <StepCardWithScreenshot data={firstRepoSteps[2]} colorScheme="yellow" />
+          <h2 className="text-2xl font-bold mb-4 mt-8">첫 커밋 만들기</h2>
           <p className="text-muted-foreground text-sm mb-4">
             커밋은 코드 변경 사항의 스냅샷입니다. 의미 있는 단위로 커밋하면 나중에
             히스토리를 추적하기 쉽습니다.
@@ -233,7 +238,8 @@ git log --oneline`}
 
         {/* git push */}
         <section id="push">
-          <h2 className="text-2xl font-bold mb-4">GitHub에 push하기</h2>
+          <StepCardWithScreenshot data={firstRepoSteps[3]} colorScheme="blue" />
+          <h2 className="text-2xl font-bold mb-4 mt-8">GitHub에 push하기</h2>
           <div className="space-y-4">
             <pre className="bg-muted rounded-lg p-4 text-sm font-mono overflow-x-auto">
 {`# main 브랜치로 첫 번째 push (upstream 설정 포함)
@@ -269,7 +275,8 @@ git push`}
 
         {/* .gitignore */}
         <section id="gitignore">
-          <h2 className="text-2xl font-bold mb-4">.gitignore 설정</h2>
+          <StepCardWithScreenshot data={firstRepoSteps[4]} colorScheme="emerald" />
+          <h2 className="text-2xl font-bold mb-4 mt-8">.gitignore 설정</h2>
           <p className="text-muted-foreground text-sm mb-4">
             .gitignore 파일에 패턴을 추가하면 해당 파일은 Git이 추적하지 않습니다.
             환경변수 파일, node_modules, 빌드 결과물은 반드시 gitignore에 추가해야 합니다.

@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { StepCardWithScreenshot } from '../auth-guide/step-card-with-screenshot';
+import { gitSetupSteps } from './github-screenshots';
 
 const sections = [
   { id: 'overview', label: '개요' },
@@ -110,7 +112,8 @@ export function GitSetupGuide() {
 
         {/* Git 설치 */}
         <section id="install-git">
-          <h2 className="text-2xl font-bold mb-4">Git 설치</h2>
+          <StepCardWithScreenshot data={gitSetupSteps[0]} colorScheme="blue" />
+          <h2 className="text-2xl font-bold mb-4 mt-8">Git 설치</h2>
           <div className="space-y-6">
             <div>
               <h3 className="font-semibold mb-2">Windows</h3>
@@ -164,7 +167,8 @@ git --version`}
 
         {/* GitHub 가입 */}
         <section id="signup">
-          <h2 className="text-2xl font-bold mb-4">GitHub 가입</h2>
+          <StepCardWithScreenshot data={gitSetupSteps[1]} colorScheme="emerald" />
+          <h2 className="text-2xl font-bold mb-4 mt-8">GitHub 가입</h2>
           <div className="space-y-6">
             <div>
               <h3 className="font-semibold mb-2">가입 방법</h3>
@@ -194,7 +198,11 @@ git --version`}
 
         {/* SSH 키 설정 */}
         <section id="ssh">
-          <h2 className="text-2xl font-bold mb-4">SSH 키 설정</h2>
+          <StepCardWithScreenshot data={gitSetupSteps[2]} colorScheme="yellow" />
+          <div className="mt-6">
+            <StepCardWithScreenshot data={gitSetupSteps[3]} colorScheme="yellow" />
+          </div>
+          <h2 className="text-2xl font-bold mb-4 mt-8">SSH 키 설정</h2>
           <p className="text-muted-foreground text-sm mb-4">
             SSH 키를 설정하면 매번 비밀번호를 입력하지 않고 안전하게 GitHub와 통신할 수 있습니다.
             2021년부터 GitHub는 HTTPS 비밀번호 인증을 지원하지 않으므로 SSH 또는 토큰 방식을 사용해야 합니다.
@@ -254,7 +262,8 @@ cat ~/.ssh/id_ed25519.pub`}
 
         {/* git config */}
         <section id="config">
-          <h2 className="text-2xl font-bold mb-4">git config 기본 설정</h2>
+          <StepCardWithScreenshot data={gitSetupSteps[4]} colorScheme="blue" />
+          <h2 className="text-2xl font-bold mb-4 mt-8">git config 기본 설정</h2>
           <p className="text-muted-foreground text-sm mb-4">
             커밋할 때 누가 작성했는지 기록하기 위해 이름과 이메일을 설정합니다.
             GitHub에 가입할 때 사용한 이메일과 동일하게 설정해야 커밋이 프로필에 연결됩니다.
