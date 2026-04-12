@@ -230,6 +230,34 @@ const globalsCss = `@import "tailwindcss";
   --color-primary: #818cf8;
   --color-secondary: #c084fc;
   --brand-gradient: linear-gradient(135deg, #818cf8, #c084fc);
+  --bg: #0f0f0f;
+  --bg-alt: #171717;
+  --text-primary: #f0f0f0;
+  --text-secondary: #a0a0a0;
+  --surface-elevated: #1a1a1a;
+  --surface-border: #2a2a2a;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
+  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.3);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,.5);
+}
+
+/* ── Preset: Terminal ── */
+[data-preset="terminal"] {
+  --brand-primary: #10b981;
+  --brand-secondary: #34d399;
+  --brand-glow: rgba(16, 185, 129, 0.15);
+  --color-primary: #10b981;
+  --color-secondary: #34d399;
+  --brand-gradient: linear-gradient(135deg, #10b981, #34d399);
+  --bg: #0a0a0a;
+  --bg-alt: #111111;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --surface-elevated: #1a1a1a;
+  --surface-border: #1e293b;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
+  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.3);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,.5);
 }
 
 html {
