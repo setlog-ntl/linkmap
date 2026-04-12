@@ -5,6 +5,7 @@
 
 import type { ModuleConfigState, TemplateModuleSchema } from '@/lib/module-schema';
 import { getGenerator } from './generators';
+import { generatePresetCss } from './generators/personal-brand';
 
 // ─── 공개 API: 개별 config 생성 (하위 호환) ──
 
@@ -158,6 +159,20 @@ export function generateFiles(
     { path: 'src/lib/config.ts', content: generator.generateConfigTs(state) },
     { path: 'src/app/page.tsx', content: generator.generatePageTsx(state) },
   ];
+
+  // personal-brand: 항상 프리셋 CSS override 파일 생성
+  // (기존 배포의 globals.css에 프리셋 CSS가 없거나, gradientFrom/To가 프리셋 기본값과 다를 수 있음)
+  const isPersonalBrand = !isDevShowcase && !isDigitalNamecard && !isLinkCard && !isSmallBiz && !isFreelancer;
+  if (isPersonalBrand) {
+    const hero = state.values.hero || {};
+    const designPreset = (hero.designPreset as string) || 'creator';
+    const gradientFrom = (hero.gradientFrom as string) || '#ee5b2b';
+    const gradientTo = (hero.gradientTo as string) || '#f59e0b';
+    files.push({
+      path: 'src/app/preset-override.css',
+      content: generatePresetCss(designPreset, gradientFrom, gradientTo),
+    });
+  }
 
   // Phase 2: 컴포넌트 파일 변경 (personal-brand + freelancer-page)
   if (currentFiles && !isDevShowcase && !isDigitalNamecard && !isLinkCard && !isSmallBiz) {
