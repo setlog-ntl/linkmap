@@ -1,6 +1,7 @@
 // Auto-generated content map — slug → content string
 // Each content file exports: export const content = `...`;
 
+import { content as cPromptLogSystem } from './content/vibe-coding-prompt-log-system';
 import { content as cParallelSessionTrap } from './content/vibe-coding-parallel-session-trap';
 import { content as cUserToCreator1 } from './content/user-to-creator-1-not-a-maker';
 import { content as cWhyNeedDb } from './content/vibe-coding-why-you-need-database';
@@ -50,6 +51,7 @@ import { content as c32 } from './content/what-is-vibe-coding';
 import { content as c33 } from './content/why-dotenv-is-dangerous';
 
 export const CONTENT_MAP: Record<string, string> = {
+  'vibe-coding-prompt-log-system': cPromptLogSystem,
   'vibe-coding-parallel-session-trap': cParallelSessionTrap,
   'user-to-creator-1-not-a-maker': cUserToCreator1,
   'vibe-coding-why-you-need-database': cWhyNeedDb,

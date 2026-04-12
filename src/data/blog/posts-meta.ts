@@ -37,6 +37,22 @@ export interface BlogPostMeta {
 
 export const BLOG_POSTS_META: BlogPostMeta[] = [
   // ======================================================================
+  // 스토리 — 프롬프트 로그 시스템 팁
+  // ======================================================================
+  {
+    slug: 'vibe-coding-prompt-log-system',
+    title: '바이브 코딩 3개월 차, 어제 뭘 시켰는지 기억이 안 난다 — 프롬프트 로그 시스템으로 맥락 잃지 않기',
+    description: 'AI에게 지시한 내용과 의사결정을 경량 마크다운 로그로 기록하면 맥락이 보존됩니다. 프롬프트 로그 시스템의 구조, 엔트리 포맷, 중요도 분류, AI 도구 연동 팁까지 — 마크다운 파일 3개로 시작하는 최소한의 기록 습관을 공유합니다.',
+    topicTags: ['vibe-coding'],
+    tags: ['바이브 코딩', '프롬프트 관리', '프로젝트 관리', '개발 기록', '바이브코딩 팁'],
+    publishedAt: '2026-04-13',
+    readingTime: '8분',
+    relatedGuides: ['github', 'env', 'deploy', 'backend'],
+    contentType: 'narrative',
+    narrativeHook: '코드는 남는데 왜 그렇게 만들었는지는 사라진다',
+    relatedPosts: ['vibe-coding-parallel-session-trap', 'vibe-coding-prompt-writing-guide', 'vibe-coding-common-mistakes'],
+  },
+  // ======================================================================
   // 스토리 — 병렬 세션 덮어쓰기 함정 경험담
   // ======================================================================
   {
