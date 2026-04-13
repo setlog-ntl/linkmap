@@ -24,6 +24,8 @@ interface ServiceDetailState {
   pendingIdentifier: ServiceDetailPendingId | null;
   /** Whether sheet is open */
   isOpen: boolean;
+  /** Whether the panel is in expanded (wide) mode */
+  isExpanded: boolean;
 
   /** Open with full data (from service map views) */
   openSheet: (data: ServiceDetailFullData) => void;
@@ -33,14 +35,21 @@ interface ServiceDetailState {
   resolvePending: (data: ServiceDetailFullData) => void;
   /** Update account_identifier in current fullData */
   updateAccountIdentifier: (value: string | null) => void;
+  /** Toggle expanded (wide) mode */
+  toggleExpanded: () => void;
   /** Close the sheet */
   closeSheet: () => void;
 }
+
+/** Panel width constants */
+export const PANEL_WIDTH_NORMAL = 380;
+export const PANEL_WIDTH_EXPANDED = 560;
 
 export const useServiceDetailStore = create<ServiceDetailState>((set) => ({
   fullData: null,
   pendingIdentifier: null,
   isOpen: false,
+  isExpanded: false,
 
   openSheet: (data) =>
     set({ fullData: data, pendingIdentifier: null, isOpen: true }),
@@ -62,6 +71,9 @@ export const useServiceDetailStore = create<ServiceDetailState>((set) => ({
       };
     }),
 
+  toggleExpanded: () =>
+    set((s) => ({ isExpanded: !s.isExpanded })),
+
   closeSheet: () =>
-    set({ fullData: null, pendingIdentifier: null, isOpen: false }),
+    set({ fullData: null, pendingIdentifier: null, isOpen: false, isExpanded: false }),
 }));

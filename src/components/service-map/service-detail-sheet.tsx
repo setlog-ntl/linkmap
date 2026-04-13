@@ -23,7 +23,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { ExternalLink, BookOpen, GitFork, Activity, Loader2, X as XIcon, KeyRound, Lightbulb, Copy, Check, UserPlus, User, Pencil } from 'lucide-react';
+import { ExternalLink, BookOpen, GitFork, Activity, Loader2, X as XIcon, KeyRound, Lightbulb, Copy, Check, UserPlus, User, Pencil, Maximize2, Minimize2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
@@ -36,7 +36,7 @@ import { cn } from '@/lib/utils';
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { SERVICE_GUIDE_HREF } from '@/data/ui/guide-meta';
-import { useServiceDetailStore } from '@/stores/service-detail-store';
+import { useServiceDetailStore, PANEL_WIDTH_NORMAL, PANEL_WIDTH_EXPANDED } from '@/stores/service-detail-store';
 import type { ProjectService, Service, ServiceDependency, ServiceCategory, ServiceDomain, EnvironmentVariable, ServiceGuide, ServiceFeatureGuide, ServiceSignupGuide } from '@/types';
 
 interface ServiceDetailSheetProps {
@@ -75,6 +75,9 @@ export function ServiceDetailSheet({
   loading = false,
 }: ServiceDetailSheetProps) {
   const [activeTab, setActiveTab] = useState('overview');
+  const isExpanded = useServiceDetailStore((s) => s.isExpanded);
+  const toggleExpanded = useServiceDetailStore((s) => s.toggleExpanded);
+  const panelWidth = isExpanded ? PANEL_WIDTH_EXPANDED : PANEL_WIDTH_NORMAL;
   const psId = service?.id || '';
   const svcId = service?.service_id || '';
   const { data: healthChecks = [] } = useHealthChecks(psId);
@@ -101,13 +104,13 @@ export function ServiceDetailSheet({
   }
 
   const containerClasses = cn(
-    'fixed top-16 right-4 bottom-4 w-[380px] z-50 transition-transform duration-300 ease-in-out flex flex-col pointer-events-auto',
+    'fixed top-16 right-4 bottom-4 z-50 transition-all duration-300 ease-in-out flex flex-col pointer-events-auto',
     'bg-background/80 dark:bg-zinc-950/80 backdrop-blur-xl border shadow-2xl rounded-xl overflow-hidden'
   );
 
   if (showLoading) {
     return (
-      <div className={containerClasses}>
+      <div className={containerClasses} style={{ width: panelWidth }}>
         <div className="p-4 flex items-start justify-between">
           <div className="space-y-2">
             <Skeleton className="h-5 w-40" />
@@ -170,18 +173,29 @@ export function ServiceDetailSheet({
   };
 
   return (
-    <div className={containerClasses}>
+    <div className={containerClasses} style={{ width: panelWidth }}>
       {/* 헤더 */}
       <div className="flex items-start justify-between p-4 pb-2 shrink-0">
-        <div>
+        <div className="flex-1 min-w-0">
           <h2 className="text-lg font-semibold tracking-tight">{svc?.name}</h2>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-1 truncate">
             {svc?.description_ko || svc?.description}
           </p>
         </div>
-        <Button variant="ghost" size="icon" className="-mt-1 -mr-1" onClick={() => onOpenChange(false)}>
-          <XIcon className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-0.5 -mt-1 -mr-1 shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={toggleExpanded}
+            title={isExpanded ? '패널 축소' : '패널 확장'}
+          >
+            {isExpanded ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenChange(false)}>
+            <XIcon className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {/* 탭 */}
@@ -361,6 +375,7 @@ export function ServiceDetailSheet({
                   serviceId={service.service_id}
                   requiredEnvVars={requiredEnvVars}
                   envVars={envVars.filter((ev) => ev.service_id === service.service_id)}
+                  isExpanded={isExpanded}
                 />
               ) : (
                 <p className="text-xs text-muted-foreground py-2">

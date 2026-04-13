@@ -38,6 +38,7 @@ interface ServiceEnvVarsSectionProps {
   serviceId: string;
   requiredEnvVars: EnvVarTemplate[];
   envVars: EnvironmentVariable[];
+  isExpanded?: boolean;
 }
 
 const environments: { value: Environment; label: string }[] = [
@@ -51,6 +52,7 @@ export function ServiceEnvVarsSection({
   serviceId,
   requiredEnvVars,
   envVars,
+  isExpanded = false,
 }: ServiceEnvVarsSectionProps) {
   const [activeEnv, setActiveEnv] = useState<Environment>('development');
   const [addingKey, setAddingKey] = useState<string | null>(null);
@@ -287,7 +289,9 @@ export function ServiceEnvVarsSection({
   };
 
   const maskValue = (encrypted: string) => {
-    return '••••' + encrypted.slice(-4);
+    // 암호화된 값의 마지막 4자를 힌트로 표시
+    const suffix = encrypted.slice(-4);
+    return isExpanded ? `••••••••${suffix}` : `••••${suffix}`;
   };
 
   const renderEnvVarRow = (ev: EnvironmentVariable) => {
@@ -296,141 +300,143 @@ export function ServiceEnvVarsSection({
 
     if (isEditing) {
       return (
-        <div key={ev.id} className="flex items-center gap-1.5 py-1.5">
+        <div key={ev.id} className={`py-1.5 ${isExpanded ? 'space-y-1.5' : 'flex items-center gap-1.5'}`}>
           <span className="text-xs font-mono truncate flex-1 min-w-0">{ev.key_name}</span>
-          <Input
-            className="h-7 text-xs w-[120px]"
-            placeholder="새 값"
-            type="password"
-            value={formValue}
-            onChange={(e) => setFormValue(e.target.value)}
-            autoFocus
-          />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6"
-            onClick={() => handleUpdate(ev.id)}
-            disabled={!formValue || updateEnvVar.isPending}
-          >
-            {updateEnvVar.isPending ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : (
-              <Check className="h-3 w-3 text-green-600" />
-            )}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6"
-            onClick={() => {
-              setEditingId(null);
-              setFormValue('');
-            }}
-          >
-            <X className="h-3 w-3" />
-          </Button>
+          <div className="flex items-center gap-1.5">
+            <Input
+              className={`h-7 text-xs ${isExpanded ? 'flex-1' : 'w-[120px]'}`}
+              placeholder="새 값"
+              type="password"
+              value={formValue}
+              onChange={(e) => setFormValue(e.target.value)}
+              autoFocus
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 shrink-0"
+              onClick={() => handleUpdate(ev.id)}
+              disabled={!formValue || updateEnvVar.isPending}
+            >
+              {updateEnvVar.isPending ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Check className="h-3 w-3 text-green-600" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 shrink-0"
+              onClick={() => {
+                setEditingId(null);
+                setFormValue('');
+              }}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
       );
     }
 
     return (
-      <div key={ev.id} className="flex items-center gap-1.5 py-1.5 group">
-        <span className="text-xs font-mono truncate min-w-0 flex-1">{ev.key_name}</span>
-        <span className="text-xs text-muted-foreground font-mono truncate max-w-[80px]">
-          {decrypted || maskValue(ev.encrypted_value)}
-        </span>
-        <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-5 w-5"
-            onClick={() => handleCopyEnvVar(ev)}
-            disabled={copyingId === ev.id}
-            title="복사"
-          >
-            {copyingId === ev.id ? (
-              <Check className="h-3 w-3 text-green-600" />
-            ) : (
-              <Copy className="h-3 w-3" />
-            )}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-5 w-5"
-            onClick={() => handleDecrypt(ev.id)}
-            disabled={decryptEnvVar.isPending}
-            title={decrypted ? '숨기기' : '복호화'}
-          >
-            {decrypted ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-5 w-5"
-            onClick={() => {
-              setEditingId(ev.id);
-              setFormValue('');
-            }}
-            title="수정"
-          >
-            <Pencil className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`h-5 w-5 text-destructive ${pendingDeleteId === ev.id ? 'bg-destructive/10' : ''}`}
-            onClick={() => handleDelete(ev.id)}
-            disabled={deleteEnvVar.isPending}
-            title={pendingDeleteId === ev.id ? '삭제 확인' : '삭제'}
-          >
-            {pendingDeleteId === ev.id ? (
-              <Check className="h-3 w-3" />
-            ) : (
-              <Trash2 className="h-3 w-3" />
-            )}
-          </Button>
-        </div>
+      <div key={ev.id} className={`py-1.5 group ${
+        isExpanded
+          ? 'rounded-md border border-transparent hover:border-border hover:bg-muted/30 px-2 -mx-2 transition-colors'
+          : 'flex items-center gap-1.5'
+      }`}>
+        {isExpanded ? (
+          /* 확장 모드: 키-값 2행 레이아웃 */
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono font-medium truncate min-w-0">{ev.key_name}</span>
+              <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleCopyEnvVar(ev)} disabled={copyingId === ev.id} title="복사">
+                  {copyingId === ev.id ? <Check className="h-3 w-3 text-green-600" /> : <Copy className="h-3 w-3" />}
+                </Button>
+                <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleDecrypt(ev.id)} disabled={decryptEnvVar.isPending} title={decrypted ? '숨기기' : '복호화'}>
+                  {decrypted ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                </Button>
+                <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => { setEditingId(ev.id); setFormValue(''); }} title="수정">
+                  <Pencil className="h-3 w-3" />
+                </Button>
+                <Button variant="ghost" size="icon" className={`h-5 w-5 text-destructive ${pendingDeleteId === ev.id ? 'bg-destructive/10' : ''}`} onClick={() => handleDelete(ev.id)} disabled={deleteEnvVar.isPending} title={pendingDeleteId === ev.id ? '삭제 확인' : '삭제'}>
+                  {pendingDeleteId === ev.id ? <Check className="h-3 w-3" /> : <Trash2 className="h-3 w-3" />}
+                </Button>
+              </div>
+            </div>
+            <span className="text-xs text-muted-foreground font-mono block truncate">
+              {decrypted || maskValue(ev.encrypted_value)}
+            </span>
+          </div>
+        ) : (
+          /* 기본 모드: 1행 인라인 */
+          <>
+            <span className="text-xs font-mono truncate min-w-0 flex-1">{ev.key_name}</span>
+            <span className="text-xs text-muted-foreground font-mono truncate max-w-[80px]">
+              {decrypted || maskValue(ev.encrypted_value)}
+            </span>
+            <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleCopyEnvVar(ev)} disabled={copyingId === ev.id} title="복사">
+                {copyingId === ev.id ? <Check className="h-3 w-3 text-green-600" /> : <Copy className="h-3 w-3" />}
+              </Button>
+              <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleDecrypt(ev.id)} disabled={decryptEnvVar.isPending} title={decrypted ? '숨기기' : '복호화'}>
+                {decrypted ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+              </Button>
+              <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => { setEditingId(ev.id); setFormValue(''); }} title="수정">
+                <Pencil className="h-3 w-3" />
+              </Button>
+              <Button variant="ghost" size="icon" className={`h-5 w-5 text-destructive ${pendingDeleteId === ev.id ? 'bg-destructive/10' : ''}`} onClick={() => handleDelete(ev.id)} disabled={deleteEnvVar.isPending} title={pendingDeleteId === ev.id ? '삭제 확인' : '삭제'}>
+                {pendingDeleteId === ev.id ? <Check className="h-3 w-3" /> : <Trash2 className="h-3 w-3" />}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     );
   };
 
   const renderAddForm = (keyName: string, isSecret: boolean, description?: string) => (
-    <div className="flex items-center gap-1.5 py-1.5">
+    <div className={`py-1.5 ${isExpanded ? 'space-y-1.5' : 'flex items-center gap-1.5'}`}>
       <span className="text-xs font-mono truncate flex-1 min-w-0">{keyName}</span>
-      <Input
-        className="h-7 text-xs w-[120px]"
-        placeholder="값 입력"
-        type={isSecret ? 'password' : 'text'}
-        value={formValue}
-        onChange={(e) => setFormValue(e.target.value)}
-        autoFocus
-      />
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-6 w-6"
-        onClick={() => handleAdd(keyName, isSecret, description)}
-        disabled={!formValue || addEnvVar.isPending}
-      >
-        {addEnvVar.isPending ? (
-          <Loader2 className="h-3 w-3 animate-spin" />
-        ) : (
-          <Check className="h-3 w-3 text-green-600" />
-        )}
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-6 w-6"
-        onClick={() => {
-          setAddingKey(null);
-          setFormValue('');
-        }}
-      >
-        <X className="h-3 w-3" />
-      </Button>
+      {isExpanded && description && (
+        <p className="text-[10px] text-muted-foreground">{description}</p>
+      )}
+      <div className="flex items-center gap-1.5">
+        <Input
+          className={`h-7 text-xs ${isExpanded ? 'flex-1' : 'w-[120px]'}`}
+          placeholder="값 입력"
+          type={isSecret ? 'password' : 'text'}
+          value={formValue}
+          onChange={(e) => setFormValue(e.target.value)}
+          autoFocus
+        />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 shrink-0"
+          onClick={() => handleAdd(keyName, isSecret, description)}
+          disabled={!formValue || addEnvVar.isPending}
+        >
+          {addEnvVar.isPending ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            <Check className="h-3 w-3 text-green-600" />
+          )}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 shrink-0"
+          onClick={() => {
+            setAddingKey(null);
+            setFormValue('');
+          }}
+        >
+          <X className="h-3 w-3" />
+        </Button>
+      </div>
     </div>
   );
 
@@ -497,35 +503,49 @@ export function ServiceEnvVarsSection({
         </div>
       </div>
 
-      {/* Environment tabs */}
+      {/* Environment tabs with count badges */}
       <div className="flex gap-1 mb-3">
-        {environments.map((env) => (
-          <button
-            key={env.value}
-            onClick={() => {
-              setActiveEnv(env.value);
-              setAddingKey(null);
-              setAddingCustom(false);
-              setEditingId(null);
-              setFormValue('');
-              setFormKey('');
-            }}
-            className={`text-xs px-2.5 py-1 rounded-md transition-colors ${
-              activeEnv === env.value
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-            }`}
-          >
-            {env.label}
-          </button>
-        ))}
+        {environments.map((env) => {
+          const envCount = envVars.filter(
+            (ev) => ev.service_id === serviceId && ev.environment === env.value
+          ).length;
+          return (
+            <button
+              key={env.value}
+              onClick={() => {
+                setActiveEnv(env.value);
+                setAddingKey(null);
+                setAddingCustom(false);
+                setEditingId(null);
+                setFormValue('');
+                setFormKey('');
+              }}
+              className={`text-xs px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 ${
+                activeEnv === env.value
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              {env.label}
+              {envCount > 0 && (
+                <span className={`text-[10px] min-w-[16px] h-4 px-1 rounded-full inline-flex items-center justify-center font-medium ${
+                  activeEnv === env.value
+                    ? 'bg-primary-foreground/20 text-primary-foreground'
+                    : 'bg-foreground/10 text-muted-foreground'
+                }`}>
+                  {envCount}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* RAW Editor */}
       {rawEditorMode && (
         <div className="space-y-2 mb-3">
           <textarea
-            className="w-full h-48 text-xs font-mono rounded-md border bg-muted/40 p-2 resize-none focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground"
+            className={`w-full text-xs font-mono rounded-md border bg-muted/40 p-2 resize-none focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground ${isExpanded ? 'h-64' : 'h-48'}`}
             placeholder={`.env 형식으로 붙여넣기\nKEY=VALUE\nAPI_KEY=your_key`}
             value={rawEditorText}
             onChange={(e) => setRawEditorText(e.target.value)}
@@ -716,67 +736,103 @@ export function ServiceEnvVarsSection({
       {!rawEditorMode && addingCustom && (
         <>
           <Separator className="my-2" />
-          <div className="space-y-1.5">
-            <Input
-              className="h-7 text-xs"
-              placeholder="KEY_NAME"
-              value={formKey}
-              onChange={(e) => setFormKey(e.target.value.toUpperCase())}
-              onPaste={(e) => {
-                const text = e.clipboardData.getData('text');
-                const parsed = parseEnvLine(text);
-                if (parsed) {
-                  e.preventDefault();
-                  setFormKey(parsed.key);
-                  setFormValue(parsed.value);
-                }
-              }}
-              autoFocus
-            />
-            <Input
-              className="h-7 text-xs"
-              placeholder="값 입력"
-              type="password"
-              value={formValue}
-              onChange={(e) => setFormValue(e.target.value)}
-              onPaste={(e) => {
-                const text = e.clipboardData.getData('text').trim();
-                const unquoted = (text.startsWith('"') && text.endsWith('"')) || (text.startsWith("'") && text.endsWith("'"))
-                  ? text.slice(1, -1)
-                  : text;
-                if (unquoted !== text) {
-                  e.preventDefault();
-                  setFormValue(unquoted);
-                }
-              }}
-            />
-            <div className="flex gap-1.5">
-              <Button
-                size="sm"
-                className="h-6 text-xs"
-                onClick={() => handleAdd(formKey, true)}
-                disabled={!formKey || !formValue || addEnvVar.isPending}
-              >
-                {addEnvVar.isPending ? (
-                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                ) : (
-                  <Check className="h-3 w-3 mr-1" />
-                )}
-                저장
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 text-xs"
-                onClick={() => {
-                  setAddingCustom(false);
-                  setFormKey('');
-                  setFormValue('');
-                }}
-              >
-                취소
-              </Button>
-            </div>
+          <div className={`space-y-1.5 ${isExpanded ? 'rounded-md border bg-muted/20 p-2.5' : ''}`}>
+            {isExpanded ? (
+              /* 확장 모드: 키-값 가로 배치 */
+              <>
+                <div className="flex gap-1.5">
+                  <Input
+                    className="h-7 text-xs flex-1"
+                    placeholder="KEY_NAME"
+                    value={formKey}
+                    onChange={(e) => setFormKey(e.target.value.toUpperCase())}
+                    onPaste={(e) => {
+                      const text = e.clipboardData.getData('text');
+                      const parsed = parseEnvLine(text);
+                      if (parsed) {
+                        e.preventDefault();
+                        setFormKey(parsed.key);
+                        setFormValue(parsed.value);
+                      }
+                    }}
+                    autoFocus
+                  />
+                  <span className="text-xs text-muted-foreground self-center">=</span>
+                  <Input
+                    className="h-7 text-xs flex-[2]"
+                    placeholder="값 입력"
+                    type="password"
+                    value={formValue}
+                    onChange={(e) => setFormValue(e.target.value)}
+                    onPaste={(e) => {
+                      const text = e.clipboardData.getData('text').trim();
+                      const unquoted = (text.startsWith('"') && text.endsWith('"')) || (text.startsWith("'") && text.endsWith("'"))
+                        ? text.slice(1, -1)
+                        : text;
+                      if (unquoted !== text) {
+                        e.preventDefault();
+                        setFormValue(unquoted);
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex gap-1.5">
+                  <Button size="sm" className="h-6 text-xs" onClick={() => handleAdd(formKey, true)} disabled={!formKey || !formValue || addEnvVar.isPending}>
+                    {addEnvVar.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Check className="h-3 w-3 mr-1" />}
+                    저장
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => { setAddingCustom(false); setFormKey(''); setFormValue(''); }}>
+                    취소
+                  </Button>
+                </div>
+              </>
+            ) : (
+              /* 기본 모드: 세로 배치 */
+              <>
+                <Input
+                  className="h-7 text-xs"
+                  placeholder="KEY_NAME"
+                  value={formKey}
+                  onChange={(e) => setFormKey(e.target.value.toUpperCase())}
+                  onPaste={(e) => {
+                    const text = e.clipboardData.getData('text');
+                    const parsed = parseEnvLine(text);
+                    if (parsed) {
+                      e.preventDefault();
+                      setFormKey(parsed.key);
+                      setFormValue(parsed.value);
+                    }
+                  }}
+                  autoFocus
+                />
+                <Input
+                  className="h-7 text-xs"
+                  placeholder="값 입력"
+                  type="password"
+                  value={formValue}
+                  onChange={(e) => setFormValue(e.target.value)}
+                  onPaste={(e) => {
+                    const text = e.clipboardData.getData('text').trim();
+                    const unquoted = (text.startsWith('"') && text.endsWith('"')) || (text.startsWith("'") && text.endsWith("'"))
+                      ? text.slice(1, -1)
+                      : text;
+                    if (unquoted !== text) {
+                      e.preventDefault();
+                      setFormValue(unquoted);
+                    }
+                  }}
+                />
+                <div className="flex gap-1.5">
+                  <Button size="sm" className="h-6 text-xs" onClick={() => handleAdd(formKey, true)} disabled={!formKey || !formValue || addEnvVar.isPending}>
+                    {addEnvVar.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Check className="h-3 w-3 mr-1" />}
+                    저장
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => { setAddingCustom(false); setFormKey(''); setFormValue(''); }}>
+                    취소
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </>
       )}

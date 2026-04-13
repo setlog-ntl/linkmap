@@ -11,7 +11,7 @@ import { ViewLevelSwitcher } from '@/components/service-map/view-level-switcher'
 import { MapView } from '@/components/service-map/views/map-view';
 import { DependencyView } from '@/components/service-map/views/dependency-view';
 import { useServiceMapStore } from '@/stores/service-map-store';
-import { useServiceDetailStore } from '@/stores/service-detail-store';
+import { useServiceDetailStore, PANEL_WIDTH_NORMAL, PANEL_WIDTH_EXPANDED } from '@/stores/service-detail-store';
 import { useServiceMapData } from '@/components/service-map/hooks/useServiceMapData';
 
 interface ServiceMapInnerProps {
@@ -23,6 +23,8 @@ function ServiceMapInner({ isReadOnly = false }: ServiceMapInnerProps) {
   const projectId = params.id as string;
   const { viewLevel } = useServiceMapStore();
   const isSheetOpen = useServiceDetailStore((s) => s.isOpen);
+  const isExpanded = useServiceDetailStore((s) => s.isExpanded);
+  const panelWidth = isExpanded ? PANEL_WIDTH_EXPANDED : PANEL_WIDTH_NORMAL;
 
   // OAuth success redirect handling (로그인 상태에서만)
   useEffect(() => {
@@ -73,7 +75,7 @@ function ServiceMapInner({ isReadOnly = false }: ServiceMapInnerProps) {
       <div className="flex flex-col w-full h-full relative">
         <div
           className="absolute top-16 z-10 flex items-center gap-4 transition-all duration-300"
-          style={{ right: isSheetOpen ? 'calc(380px + 1.5rem)' : '1rem' }}
+          style={{ right: isSheetOpen ? `calc(${panelWidth}px + 1.5rem)` : '1rem' }}
         >
           <ViewLevelSwitcher />
         </div>
