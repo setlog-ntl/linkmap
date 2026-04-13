@@ -320,6 +320,74 @@ export function parseGalleryFromConfig(configContent: string): Record<string, st
   return items;
 }
 
+// ─── Small-Biz 프리셋 CSS 생성 ────────────────
+
+interface SmallBizPresetVars {
+  bg?: string;
+  bgAlt?: string;
+  textPrimary?: string;
+  textSecondary?: string;
+  surfaceBorder?: string;
+}
+
+const SMALL_BIZ_PRESET_THEME: Record<string, SmallBizPresetVars> = {
+  'warm-serif': {
+    bg: '#faf7f2', bgAlt: '#f5f0e8',
+    surfaceBorder: '#e8e0d0',
+  },
+  'modern-minimal': {
+    bg: '#fafafa', bgAlt: '#f5f5f5',
+    surfaceBorder: '#e5e5e5',
+  },
+  'warm-earth': {
+    bg: '#fefce8', bgAlt: '#fef3c7',
+    surfaceBorder: '#fde68a',
+  },
+  midnight: {
+    bg: '#0f0f0f', bgAlt: '#171717',
+    textPrimary: '#f0f0f0', textSecondary: '#a0a0a0',
+    surfaceBorder: '#2a2a2a',
+  },
+};
+
+function hexToRgbStrSb(hex: string): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `${r}, ${g}, ${b}`;
+}
+
+export function generateSmallBizPresetCss(
+  designPreset: string,
+  primaryColor: string,
+): string {
+  const theme = SMALL_BIZ_PRESET_THEME[designPreset];
+  const isDark = designPreset === 'midnight';
+
+  let css = `/* ── Preset Override (auto-generated) ── */
+:root {
+  --color-primary: ${primaryColor};
+  --brand-primary: ${primaryColor};
+  --brand-glow: rgba(${hexToRgbStrSb(primaryColor)}, 0.15);`;
+
+  if (theme) {
+    if (theme.bg) css += `\n  --bg: ${theme.bg};`;
+    if (theme.bgAlt) css += `\n  --bg-alt: ${theme.bgAlt};`;
+    if (theme.textPrimary) css += `\n  --text-primary: ${theme.textPrimary};`;
+    if (theme.textSecondary) css += `\n  --text-secondary: ${theme.textSecondary};`;
+    if (theme.surfaceBorder) css += `\n  --surface-border: ${theme.surfaceBorder};`;
+  }
+
+  if (isDark) {
+    css += `\n  color-scheme: dark;`;
+    css += `\n  --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);`;
+  }
+
+  css += `\n}\n`;
+  return css;
+}
+
 /** Small-Biz 계열 MODULE_COMPONENTS (small-biz, small-biz-cafe 공통)
  * hours와 location은 실제 템플릿에서 InfoSection으로 통합되어 있음 */
 export const SMALL_BIZ_MODULE_COMPONENTS: Record<string, ComponentMapping> = {
@@ -490,9 +558,13 @@ export type SiteConfig = typeof siteConfig;
   }
 
   function generatePageTsx(state: ModuleConfigState): string {
+    const hero = state.values.hero || {};
+    const designPreset = (hero.designPreset as string) || 'default';
+
     const activeModules = state.order.filter((id) => state.enabled.includes(id));
     const imports: string[] = [
       "import { siteConfig } from '@/lib/config';",
+      "import '@/app/preset-override.css';",
       "import { NavHeader } from '@/components/nav-header';",
     ];
     const renders: string[] = [];
@@ -519,11 +591,24 @@ export type SiteConfig = typeof siteConfig;
 
     imports.push("import { Footer } from '@/components/footer';");
 
+    const presetSync = `
+function PresetSync() {
+  return (
+    <script
+      dangerouslySetInnerHTML={{
+        __html: "document.documentElement.setAttribute('data-preset','" + (siteConfig.designPreset || '${esc(designPreset)}') + "')"
+      }}
+    />
+  );
+}`;
+
     return `${imports.join('\n')}
+${presetSync}
 
 export default function Home() {
   return (
     <>
+      <PresetSync />
       <NavHeader />
       <main id="main">
 ${renders.join('\n')}

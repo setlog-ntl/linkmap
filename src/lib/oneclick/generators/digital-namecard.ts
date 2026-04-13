@@ -17,6 +17,77 @@ import {
   buildInitialState,
 } from './base-generator';
 
+// ─── 프리셋 CSS 생성 ────────────────────────
+
+interface NamecardPresetVars {
+  pageBg: string;
+  pageText: string;
+  cardBg: string;
+  cardBorder: string;
+  textSecondary: string;
+  dividerColor: string;
+}
+
+const NAMECARD_PRESET_THEME: Record<string, NamecardPresetVars> = {
+  pro: {
+    pageBg: '#f8fafc', pageText: '#1e293b',
+    cardBg: '#ffffff', cardBorder: '#e2e8f0',
+    textSecondary: '#64748b', dividerColor: '#e2e8f0',
+  },
+  corporate: {
+    pageBg: '#f1f5f9', pageText: '#0f172a',
+    cardBg: '#ffffff', cardBorder: '#cbd5e1',
+    textSecondary: '#475569', dividerColor: '#cbd5e1',
+  },
+  creative: {
+    pageBg: '#faf5ff', pageText: '#1e1b4b',
+    cardBg: '#ffffff', cardBorder: '#e9d5ff',
+    textSecondary: '#6b21a8', dividerColor: '#e9d5ff',
+  },
+  'minimal-dark': {
+    pageBg: '#0f172a', pageText: '#f1f5f9',
+    cardBg: '#1e293b', cardBorder: '#334155',
+    textSecondary: '#94a3b8', dividerColor: '#334155',
+  },
+};
+
+function hexToRgbStr(hex: string): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `${r}, ${g}, ${b}`;
+}
+
+export function generateNamecardPresetCss(
+  designPreset: string,
+  accentColor: string,
+): string {
+  const theme = NAMECARD_PRESET_THEME[designPreset] || NAMECARD_PRESET_THEME.pro;
+  const isDark = designPreset === 'minimal-dark';
+
+  let css = `/* ── Preset Override (auto-generated) ── */
+:root {
+  --accent-color: ${accentColor};
+  --accent-glow: rgba(${hexToRgbStr(accentColor)}, 0.15);
+  --page-bg: ${theme.pageBg};
+  --page-text: ${theme.pageText};
+  --card-bg: ${theme.cardBg};
+  --card-border: ${theme.cardBorder};
+  --text-secondary: ${theme.textSecondary};
+  --divider-color: ${theme.dividerColor};`;
+
+  if (isDark) {
+    css += `\n  color-scheme: dark;`;
+    css += `\n  --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);`;
+  } else {
+    css += `\n  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);`;
+  }
+
+  css += `\n}\n`;
+  return css;
+}
+
 // ─── 모듈 컴포넌트 매핑 ─────────────────────
 // FlippableCard가 내부에서 ProfileCard/ContactInfo/SocialLinks를 조합
 // page.tsx에는 FlippableCard만 import되므로 개별 모듈 컴포넌트 렌더링 불필요
@@ -132,6 +203,7 @@ export type SiteConfig = typeof siteConfig;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function generatePageTsx(_state: ModuleConfigState): string {
   return `import { siteConfig } from '@/lib/config';
+import '@/app/preset-override.css';
 import { FlippableCard } from '@/components/flippable-card';
 import { Footer } from '@/components/footer';
 

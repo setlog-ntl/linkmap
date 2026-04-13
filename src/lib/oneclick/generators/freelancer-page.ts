@@ -18,6 +18,75 @@ import {
   unescapeString,
 } from './base-generator';
 
+// ─── 프리셋 CSS 생성 ────────────────────────
+
+interface FreelancerPresetVars {
+  bg?: string;
+  bgAlt?: string;
+  textPrimary?: string;
+  textSecondary?: string;
+  surfaceElevated?: string;
+  surfaceBorder?: string;
+}
+
+const FREELANCER_PRESET_THEME: Record<string, FreelancerPresetVars> = {
+  agency: {},
+  'creative-minimal': {},
+  'warm-earth': {
+    bg: '#fefce8', bgAlt: '#fef3c7',
+    surfaceBorder: '#fde68a',
+  },
+  midnight: {
+    bg: '#0f0f0f', bgAlt: '#171717',
+    textPrimary: '#f0f0f0', textSecondary: '#a0a0a0',
+    surfaceElevated: '#1a1a1a', surfaceBorder: '#2a2a2a',
+  },
+};
+
+function hexToRgbStr(hex: string): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `${r}, ${g}, ${b}`;
+}
+
+export function generateFreelancerPresetCss(
+  designPreset: string,
+  gradientFrom: string,
+  gradientTo: string,
+): string {
+  const theme = FREELANCER_PRESET_THEME[designPreset];
+  const isDark = designPreset === 'midnight';
+
+  let css = `/* ── Preset Override (auto-generated) ── */
+html[data-preset] {
+  --brand-primary: ${gradientFrom};
+  --brand-secondary: ${gradientTo};
+  --brand-glow: rgba(${hexToRgbStr(gradientFrom)}, 0.15);
+  --brand-gradient: linear-gradient(135deg, ${gradientFrom}, ${gradientTo});
+  --color-primary: ${gradientFrom};
+  --color-accent: ${gradientTo};`;
+
+  if (theme) {
+    if (theme.bg) css += `\n  --bg: ${theme.bg};`;
+    if (theme.bgAlt) css += `\n  --bg-alt: ${theme.bgAlt};`;
+    if (theme.textPrimary) css += `\n  --text-primary: ${theme.textPrimary};`;
+    if (theme.textSecondary) css += `\n  --text-secondary: ${theme.textSecondary};`;
+    if (theme.surfaceElevated) css += `\n  --surface-elevated: ${theme.surfaceElevated};`;
+    if (theme.surfaceBorder) css += `\n  --surface-border: ${theme.surfaceBorder};`;
+  }
+
+  if (isDark) {
+    css += `\n  --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);`;
+    css += `\n  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.3);`;
+    css += `\n  --shadow-lg: 0 12px 40px rgba(0,0,0,.5);`;
+  }
+
+  css += `\n}\n`;
+  return css;
+}
+
 // ─── 배열 빌더 ──────────────────────────────
 
 function buildServicesArray(items: unknown[]): string {
@@ -265,9 +334,13 @@ export type SiteConfig = typeof siteConfig;
 // ─── Page 생성 ───────────────────────────────
 
 function generatePageTsx(state: ModuleConfigState): string {
+  const hero = state.values.hero || {};
+  const designPreset = (hero.designPreset as string) || 'default';
+
   const activeModules = state.order.filter((id) => state.enabled.includes(id));
   const imports: string[] = [
     "import { siteConfig } from '@/lib/config';",
+    "import '@/app/preset-override.css';",
     "import { NavHeader } from '@/components/nav-header';",
   ];
   const renders: string[] = [];
@@ -281,11 +354,24 @@ function generatePageTsx(state: ModuleConfigState): string {
 
   imports.push("import { Footer } from '@/components/footer';");
 
+  const presetSync = `
+function PresetSync() {
+  return (
+    <script
+      dangerouslySetInnerHTML={{
+        __html: "document.documentElement.setAttribute('data-preset','" + (siteConfig.designPreset || '${esc(designPreset)}') + "')"
+      }}
+    />
+  );
+}`;
+
   return `${imports.join('\n')}
+${presetSync}
 
 export default function Home() {
   return (
     <>
+      <PresetSync />
       <NavHeader />
       <main id="main">
 ${renders.join('\n')}

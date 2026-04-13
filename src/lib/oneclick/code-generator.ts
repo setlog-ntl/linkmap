@@ -6,6 +6,11 @@
 import type { ModuleConfigState, TemplateModuleSchema } from '@/lib/module-schema';
 import { getGenerator } from './generators';
 import { generatePresetCss } from './generators/personal-brand';
+import { generateDevShowcasePresetCss } from './generators/dev-showcase';
+import { generateNamecardPresetCss } from './generators/digital-namecard';
+import { generateLinkCardPresetCss } from './generators/link-card';
+import { generateFreelancerPresetCss } from './generators/freelancer-page';
+import { generateSmallBizPresetCss } from './generators/base-generator';
 
 // ─── 공개 API: 개별 config 생성 (하위 호환) ──
 
@@ -160,11 +165,12 @@ export function generateFiles(
     { path: 'src/app/page.tsx', content: generator.generatePageTsx(state) },
   ];
 
-  // personal-brand: 항상 프리셋 CSS override 파일 생성
-  // (기존 배포의 globals.css에 프리셋 CSS가 없거나, gradientFrom/To가 프리셋 기본값과 다를 수 있음)
+  // 모든 템플릿: 항상 프리셋 CSS override 파일 생성
+  // (미리보기는 동적으로 CSS를 생성하지만, 배포 코드에는 프리셋 CSS가 없거나 불완전할 수 있음)
   const isPersonalBrand = !isDevShowcase && !isDigitalNamecard && !isLinkCard && !isSmallBiz && !isFreelancer;
+  const hero = state.values.hero || {};
+
   if (isPersonalBrand) {
-    const hero = state.values.hero || {};
     const designPreset = (hero.designPreset as string) || 'creator';
     const gradientFrom = (hero.gradientFrom as string) || '#ee5b2b';
     const gradientTo = (hero.gradientTo as string) || '#f59e0b';
@@ -172,12 +178,47 @@ export function generateFiles(
       path: 'src/app/preset-override.css',
       content: generatePresetCss(designPreset, gradientFrom, gradientTo),
     });
+  } else if (isDevShowcase) {
+    const designPreset = (hero.designPreset as string) || 'github-dark';
+    files.push({
+      path: 'src/app/preset-override.css',
+      content: generateDevShowcasePresetCss(designPreset),
+    });
+  } else if (isDigitalNamecard) {
+    const theme = state.values.theme || {};
+    const designPreset = (theme.designPreset as string) || 'pro';
+    const accentColor = (theme.accentColor as string) || '#3b82f6';
+    files.push({
+      path: 'src/app/preset-override.css',
+      content: generateNamecardPresetCss(designPreset, accentColor),
+    });
+  } else if (isLinkCard) {
+    const theme = state.values.theme || {};
+    const primaryColor = (theme.primaryColor as string) || '#6366f1';
+    const bgStyle = (theme.bgStyle as string) || 'light';
+    files.push({
+      path: 'src/app/preset-override.css',
+      content: generateLinkCardPresetCss(primaryColor, bgStyle),
+    });
+  } else if (isSmallBiz) {
+    const designPreset = (hero.designPreset as string) || 'default';
+    const primaryColor = (hero.primaryColor as string) || '#c8a97e';
+    files.push({
+      path: 'src/app/preset-override.css',
+      content: generateSmallBizPresetCss(designPreset, primaryColor),
+    });
+  } else if (isFreelancer) {
+    const designPreset = (hero.designPreset as string) || 'default';
+    const gradientFrom = (hero.gradientFrom as string) || '#5b13ec';
+    const gradientTo = (hero.gradientTo as string) || '#06b6d4';
+    files.push({
+      path: 'src/app/preset-override.css',
+      content: generateFreelancerPresetCss(designPreset, gradientFrom, gradientTo),
+    });
   }
 
   // Phase 2: 컴포넌트 파일 변경 (personal-brand + freelancer-page)
   if (currentFiles && !isDevShowcase && !isDigitalNamecard && !isLinkCard && !isSmallBiz) {
-    const hero = state.values.hero || {};
-
     const defaultFrom = isFreelancer ? '#5b13ec' : '#ee5b2b';
     const defaultTo = isFreelancer ? '#06b6d4' : '#f59e0b';
     if (hero.gradientFrom && hero.gradientFrom !== defaultFrom ||
@@ -262,7 +303,6 @@ export function generateFiles(
 
   // Phase 2: small-biz 컴포넌트 파일 변경
   if (currentFiles && isSmallBiz) {
-    const hero = state.values.hero || {};
     const primaryColor = (hero.primaryColor as string) || '#d47311';
 
     if (primaryColor !== '#d47311') {
