@@ -4,13 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import {
-  DifficultyBadge,
-  FreeTierBadge,
-  GithubStarsBadge,
-  CostEstimateBadge,
-  VendorLockInBadge,
-} from '@/components/service/service-badges';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { HealthTimeline } from '@/components/project/health-timeline';
 import { allCategoryLabels } from '@/lib/constants/service-filters';
 import { domainLabels } from '@/lib/constants/service-filters';
@@ -23,7 +17,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { ExternalLink, BookOpen, GitFork, Activity, Loader2, X as XIcon, KeyRound, Lightbulb, Copy, Check, UserPlus, User, Pencil, Maximize2, Minimize2 } from 'lucide-react';
+import { ExternalLink, BookOpen, GitFork, Activity, Loader2, X as XIcon, KeyRound, Lightbulb, Copy, Check, UserPlus, User, Pencil, Maximize2, Minimize2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
@@ -31,7 +25,7 @@ import { queryKeys } from '@/lib/queries/keys';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { useUpdateProjectServiceAccount, useUpdateProjectServiceNotes } from '@/lib/queries/services';
+import { useUpdateProjectServiceAccount, useUpdateProjectServiceNotes, useRemoveProjectService } from '@/lib/queries/services';
 import { cn } from '@/lib/utils';
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
@@ -77,7 +71,9 @@ export function ServiceDetailSheet({
   const [activeTab, setActiveTab] = useState('overview');
   const isExpanded = useServiceDetailStore((s) => s.isExpanded);
   const toggleExpanded = useServiceDetailStore((s) => s.toggleExpanded);
+  const closeSheet = useServiceDetailStore((s) => s.closeSheet);
   const panelWidth = isExpanded ? PANEL_WIDTH_EXPANDED : PANEL_WIDTH_NORMAL;
+  const removeService = useRemoveProjectService(projectId || '');
   const psId = service?.id || '';
   const svcId = service?.service_id || '';
   const { data: healthChecks = [] } = useHealthChecks(psId);
@@ -214,7 +210,6 @@ export function ServiceDetailSheet({
             <TabsTrigger value="guide" className="text-xs flex-1">가이드</TabsTrigger>
           )}
           <TabsTrigger value="connections" className="text-xs flex-1">연결</TabsTrigger>
-          <TabsTrigger value="health" className="text-xs flex-1">상태</TabsTrigger>
         </TabsList>
 
         {/* 개요 탭 */}
@@ -238,24 +233,7 @@ export function ServiceDetailSheet({
 
               <Separator />
 
-              {/* 서비스 정보 배지 */}
-              <div>
-                <h4 className="text-sm font-medium mb-3">서비스 정보</h4>
-                <div className="space-y-2.5">
-                  <div className="flex flex-wrap gap-2 items-center">
-                    <DifficultyBadge level={svc?.difficulty_level} />
-                    <FreeTierBadge quality={svc?.free_tier_quality} />
-                    <VendorLockInBadge risk={svc?.vendor_lock_in_risk} />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <GithubStarsBadge stars={svc?.github_stars} />
-                    <CostEstimateBadge estimate={svc?.monthly_cost_estimate} />
-                  </div>
-                </div>
-              </div>
-
               {/* 계정 정보 */}
-              <Separator />
               {projectId && (
                 <SheetAccountField
                   projectServiceId={service.id}
@@ -361,6 +339,33 @@ export function ServiceDetailSheet({
                   </>
                 );
               })()}
+
+              {/* 서비스 제거 */}
+              {projectId && (
+                <>
+                  <Separator />
+                  <ConfirmDialog
+                    trigger={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-center text-destructive border-destructive/30 hover:bg-destructive/5"
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mr-2" />
+                        프로젝트에서 제거
+                      </Button>
+                    }
+                    title="서비스를 제거하시겠습니까?"
+                    description={`${svc?.name}을(를) 이 프로젝트에서 제거합니다. 서비스 자체는 삭제되지 않으며, 연결된 환경변수도 함께 삭제됩니다.`}
+                    confirmLabel="제거"
+                    onConfirm={async () => {
+                      await removeService.mutateAsync(service.id);
+                      closeSheet();
+                      toast.success(`${svc?.name}이(가) 프로젝트에서 제거되었습니다`);
+                    }}
+                  />
+                </>
+              )}
             </div>
           </ScrollArea>
         </TabsContent>
@@ -622,6 +627,15 @@ export function ServiceDetailSheet({
                 </Button>
               </div>
 
+              {/* 상태 이력 (기존 상태 탭에서 통합) */}
+              <div className="bg-muted/40 rounded-lg p-3">
+                {recentChecks.length > 0 ? (
+                  <HealthTimeline checks={recentChecks} />
+                ) : (
+                  <p className="text-xs text-muted-foreground">연결 검증 이력이 없습니다.</p>
+                )}
+              </div>
+
               {dependencies.length > 0 && (
                 <>
                   <Separator />
@@ -650,46 +664,6 @@ export function ServiceDetailSheet({
               {!projectId && dependencies.length === 0 && (
                 <p className="text-xs text-muted-foreground py-2">연결 정보가 없습니다.</p>
               )}
-            </div>
-          </ScrollArea>
-        </TabsContent>
-
-        {/* 상태 탭 */}
-        <TabsContent value="health" className="flex-1 overflow-hidden min-h-0 m-0 data-[state=active]:flex data-[state=active]:flex-col">
-          <ScrollArea className="flex-1 w-full min-h-0">
-            <div className="space-y-4 p-4 pt-2 pb-6">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium flex items-center gap-1.5">
-                  <Activity className="h-4 w-4 text-blue-500" />
-                  연결 및 상태
-                </h4>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRunCheck}
-                  disabled={runHealthCheck.isPending}
-                  className="h-8 text-xs"
-                >
-                  {runHealthCheck.isPending ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    '상태 업데이트'
-                  )}
-                </Button>
-              </div>
-
-              <div className="bg-muted/40 rounded-lg p-3">
-                {requiredEnvVars.length > 0 && (
-                  <p className="text-xs text-muted-foreground mb-3">
-                    필수 환경변수: {requiredEnvVars.length}개
-                  </p>
-                )}
-                {recentChecks.length > 0 ? (
-                  <HealthTimeline checks={recentChecks} />
-                ) : (
-                  <p className="text-xs text-muted-foreground">이 서비스에 대한 연결 검증 이력이 없습니다.</p>
-                )}
-              </div>
             </div>
           </ScrollArea>
         </TabsContent>
