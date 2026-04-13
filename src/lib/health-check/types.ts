@@ -1,6 +1,7 @@
 export interface HealthCheckAdapter {
   serviceSlug: string;
   requiredEnvVars: string[];
+  optionalEnvVars?: string[];
   check(envVars: Record<string, string>): Promise<HealthCheckResult>;
 }
 

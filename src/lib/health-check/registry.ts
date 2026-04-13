@@ -33,11 +33,12 @@ export function getAdapter(slug: string): HealthCheckAdapter | null {
 
 export function getOrCreateAdapter(
   slug: string,
-  requiredEnvVarNames: string[]
+  requiredEnvVarNames: string[],
+  optionalEnvVarNames: string[] = []
 ): HealthCheckAdapter {
   const existing = adapters.get(slug);
   if (existing) return existing;
-  return createGenericAdapter(slug, requiredEnvVarNames);
+  return createGenericAdapter(slug, requiredEnvVarNames, optionalEnvVarNames);
 }
 
 export function listAdapters(): string[] {

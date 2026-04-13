@@ -7,13 +7,14 @@ export type { HealthCheckResult, HealthCheckAdapter, HealthCheckStatus } from '.
 interface RunHealthCheckParams {
   serviceSlug: string;
   requiredEnvVarNames: string[];
+  optionalEnvVarNames?: string[];
   encryptedEnvVars: Array<{ key_name: string; encrypted_value: string }>;
 }
 
 export async function runHealthCheck(params: RunHealthCheckParams): Promise<HealthCheckResult> {
-  const { serviceSlug, requiredEnvVarNames, encryptedEnvVars } = params;
+  const { serviceSlug, requiredEnvVarNames, optionalEnvVarNames = [], encryptedEnvVars } = params;
 
-  const adapter = getOrCreateAdapter(serviceSlug, requiredEnvVarNames);
+  const adapter = getOrCreateAdapter(serviceSlug, requiredEnvVarNames, optionalEnvVarNames);
 
   // Decrypt env vars into a temporary map
   const decryptedVars: Record<string, string> = {};

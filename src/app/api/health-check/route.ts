@@ -53,15 +53,20 @@ export async function POST(request: NextRequest) {
       .eq('project_id', projectService.project_id)
       .eq('environment', environment);
 
-    // Get required env var names from service catalog
-    const requiredEnvVarNames = (service.required_env_vars || []).map(
-      (v: { name: string }) => v.name
-    );
+    // Get required/optional env var names from service catalog
+    const allEnvVarDefs = (service.required_env_vars || []) as Array<{ name: string; optional?: boolean }>;
+    const requiredEnvVarNames = allEnvVarDefs
+      .filter((v) => !v.optional)
+      .map((v) => v.name);
+    const optionalEnvVarNames = allEnvVarDefs
+      .filter((v) => v.optional)
+      .map((v) => v.name);
 
     // Run health check
     const result = await runHealthCheck({
       serviceSlug: service.slug,
       requiredEnvVarNames,
+      optionalEnvVarNames,
       encryptedEnvVars: envVars || [],
     });
 
