@@ -62,6 +62,8 @@ export async function GET() {
       await Promise.allSettled(
         stuckDeploys.map((d) => refreshDeployStatus(supabase, d, githubToken))
       );
+    } else {
+      console.warn(`[deployments] GitHub 토큰 확인 실패 — stuck 배포 ${stuckDeploys.length}건 새로고침 생략 (user: ${user.id})`);
     }
   }
 

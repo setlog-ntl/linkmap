@@ -16,6 +16,7 @@ import type { ModuleConfigState } from '@/lib/module-schema';
 interface SocialItem {
   platform: string;
   url: string;
+  label?: string;
 }
 
 function renderProfileSection(
@@ -125,7 +126,7 @@ function renderSocialsSection(state: ModuleConfigState, accentColor: string): st
       <a class="nc-social-pill" href="${esc(item.url)}" target="_blank" rel="noopener noreferrer"
          style="border-color:${esc(brandColor)}; color:${esc(brandColor)}">
         ${svg ? `<span class="nc-social-svg">${svg}</span>` : ''}
-        ${esc(item.platform)}
+        ${esc(item.label || item.platform)}
       </a>`;
     })
     .join('');

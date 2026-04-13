@@ -17,6 +17,42 @@ export interface ValidationResult {
   errors: ValidationError[];
 }
 
+/** 스칼라 필드 하나를 검증하고 오류를 errors 배열에 추가 */
+function validateScalarField(
+  val: unknown,
+  field: { key: string; label: string; validation?: { required?: boolean; pattern?: string; patternMessage?: string } },
+  moduleId: string,
+  moduleName: string,
+  fieldKey: string,
+  errors: ValidationError[],
+): void {
+  const strVal = typeof val === 'string' ? val.trim() : '';
+
+  if (field.validation?.required && !strVal) {
+    errors.push({
+      moduleId,
+      moduleName,
+      fieldKey,
+      fieldLabel: field.label,
+      message: `${field.label}은(는) 필수 입력 항목입니다`,
+    });
+    return;
+  }
+
+  if (field.validation?.pattern && strVal) {
+    const re = new RegExp(field.validation.pattern);
+    if (!re.test(strVal)) {
+      errors.push({
+        moduleId,
+        moduleName,
+        fieldKey,
+        fieldLabel: field.label,
+        message: field.validation.patternMessage ?? `${field.label} 형식을 확인하세요`,
+      });
+    }
+  }
+}
+
 /** 활성 모듈의 필수 필드 누락 및 패턴 불일치 검사 */
 export function validateModuleState(
   state: ModuleConfigState,
@@ -30,36 +66,35 @@ export function validateModuleState(
     const values = state.values[mod.id] || {};
 
     for (const field of mod.fields) {
-      if (field.type === 'array') continue; // 배열은 개별 항목 검증 스킵
+      // 배열 필드: 각 아이템의 서브필드를 개별 검증
+      if (field.type === 'array') {
+        const items = values[field.key];
+        if (!Array.isArray(items) || !field.itemSchema) continue;
 
-      const val = values[field.key];
-      const strVal = typeof val === 'string' ? val.trim() : '';
-
-      // 필수 필드 누락
-      if (field.validation?.required && !strVal) {
-        errors.push({
-          moduleId: mod.id,
-          moduleName: mod.name,
-          fieldKey: field.key,
-          fieldLabel: field.label,
-          message: `${field.label}은(는) 필수 입력 항목입니다`,
-        });
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i] as Record<string, unknown>;
+          for (const subField of field.itemSchema) {
+            validateScalarField(
+              item[subField.key],
+              subField,
+              mod.id,
+              mod.name,
+              `${field.key}[${i}].${subField.key}`,
+              errors,
+            );
+          }
+        }
         continue;
       }
 
-      // 패턴 검증
-      if (field.validation?.pattern && strVal) {
-        const re = new RegExp(field.validation.pattern);
-        if (!re.test(strVal)) {
-          errors.push({
-            moduleId: mod.id,
-            moduleName: mod.name,
-            fieldKey: field.key,
-            fieldLabel: field.label,
-            message: field.validation.patternMessage ?? `${field.label} 형식을 확인하세요`,
-          });
-        }
-      }
+      validateScalarField(
+        values[field.key],
+        field,
+        mod.id,
+        mod.name,
+        field.key,
+        errors,
+      );
     }
   }
 

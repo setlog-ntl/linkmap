@@ -21,6 +21,7 @@ interface LinkItem {
 interface SocialItem {
   platform: string;
   url: string;
+  label?: string;
 }
 
 type BgStyle = 'light' | 'dark' | 'gradient' | 'solid' | 'mesh' | 'aurora' | 'glass';
@@ -155,11 +156,11 @@ function renderSocialsSection(
   const icons = items
     .map((item) => {
       const svg = getSocialIconSvg(item.platform, 20, theme.text);
-      const fallback = svg || esc(item.platform);
+      const fallback = svg || esc(item.label || item.platform);
       return `
       <a class="lc-social-icon"
          href="${esc(item.url)}" target="_blank" rel="noopener noreferrer"
-         title="${esc(item.platform)}"
+         title="${esc(item.label || item.platform)}"
          style="color:${theme.text}">
         ${fallback}
       </a>`;

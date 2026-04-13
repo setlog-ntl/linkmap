@@ -82,14 +82,16 @@ export async function PATCH(
   const templateSlug = (deploy.homepage_templates as unknown as Record<string, unknown>)?.slug as string | undefined;
   if (templateSlug) {
     const schema = getModuleSchema(templateSlug);
-    if (schema) {
-      const validIds = new Set(schema.modules.map((m) => m.id));
-      const { values, enabled, order } = parsed.data.moduleDraft.state;
-      const allIds = [...Object.keys(values), ...enabled, ...order];
-      const invalidId = allIds.find((id) => !validIds.has(id));
-      if (invalidId) {
-        return apiError(`유효하지 않은 모듈 ID: ${invalidId}`, 400);
-      }
+    if (!schema) {
+      console.warn(`[draft] 모듈 스키마를 찾을 수 없음: ${templateSlug}`);
+      return apiError(`모듈 스키마를 찾을 수 없습니다: ${templateSlug}`, 500);
+    }
+    const validIds = new Set(schema.modules.map((m) => m.id));
+    const { values, enabled, order } = parsed.data.moduleDraft.state;
+    const allIds = [...Object.keys(values), ...enabled, ...order];
+    const invalidId = allIds.find((id) => !validIds.has(id));
+    if (invalidId) {
+      return apiError(`유효하지 않은 모듈 ID: ${invalidId}`, 400);
     }
   }
 

@@ -30,6 +30,16 @@ import {
   TrendingUp,
   Image,
   Mail,
+  Briefcase,
+  MessageSquare,
+  ListOrdered,
+  Share2,
+  Palette,
+  Store,
+  BookOpen,
+  UtensilsCrossed,
+  Clock,
+  MapPin,
   ChevronUp,
   ChevronDown,
   GripVertical,
@@ -47,7 +57,7 @@ import type { Locale } from '@/lib/i18n';
 import type { ModulePreset } from '@/data/oneclick/module-presets';
 import { getModulePresets } from '@/data/oneclick/module-presets';
 
-// 아이콘 매핑
+// 아이콘 매핑 — 모든 모듈 스키마에서 사용하는 아이콘
 const ICON_MAP: Record<string, React.ElementType> = {
   Sparkles,
   User,
@@ -55,6 +65,16 @@ const ICON_MAP: Record<string, React.ElementType> = {
   TrendingUp,
   Image,
   Mail,
+  Briefcase,
+  MessageSquare,
+  ListOrdered,
+  Share2,
+  Palette,
+  Store,
+  BookOpen,
+  UtensilsCrossed,
+  Clock,
+  MapPin,
 };
 
 // ── Sortable Module Card ──────────────────────

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -286,7 +286,15 @@ function ArrayFieldRenderer({
   locale,
   deployId,
 }: ArrayFieldRendererProps) {
-  const items = Array.isArray(value) ? value : [];
+  // defaultValue에서 로드된 아이템에 _id가 없으면 자동 부여 (React key 안정화)
+  const items = useMemo(() => {
+    if (!Array.isArray(value)) return [];
+    return value.map((item) => {
+      const rec = item as Record<string, unknown>;
+      if (rec._id) return item;
+      return { ...rec, _id: crypto.randomUUID() };
+    });
+  }, [value]);
   const label = locale === 'en' && field.labelEn ? field.labelEn : field.label;
   const canAdd = !field.maxItems || items.length < field.maxItems;
 
