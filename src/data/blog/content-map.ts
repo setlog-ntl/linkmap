@@ -4,6 +4,10 @@
 import { content as cPromptLogSystem } from './content/vibe-coding-prompt-log-system';
 import { content as cParallelSessionTrap } from './content/vibe-coding-parallel-session-trap';
 import { content as cUserToCreator1 } from './content/user-to-creator-1-not-a-maker';
+import { content as cUserToCreator2 } from './content/user-to-creator-2-ai-writes-code';
+import { content as cUserToCreator3 } from './content/user-to-creator-3-nobody-can-use-it';
+import { content as cUserToCreator4 } from './content/user-to-creator-4-secrets-on-github';
+import { content as cUserToCreator5 } from './content/user-to-creator-5-thinking-as-user';
 import { content as cWhyNeedDb } from './content/vibe-coding-why-you-need-database';
 import { content as cAsyncTimeout } from './content/async-ai-api-timeout-fix';
 import { content as cFreeCdn } from './content/free-cdn-dependency-trap';
@@ -54,6 +58,10 @@ export const CONTENT_MAP: Record<string, string> = {
   'vibe-coding-prompt-log-system': cPromptLogSystem,
   'vibe-coding-parallel-session-trap': cParallelSessionTrap,
   'user-to-creator-1-not-a-maker': cUserToCreator1,
+  'user-to-creator-2-ai-writes-code': cUserToCreator2,
+  'user-to-creator-3-nobody-can-use-it': cUserToCreator3,
+  'user-to-creator-4-secrets-on-github': cUserToCreator4,
+  'user-to-creator-5-thinking-as-user': cUserToCreator5,
   'vibe-coding-why-you-need-database': cWhyNeedDb,
   'async-ai-api-timeout-fix': cAsyncTimeout,
   'free-cdn-dependency-trap': cFreeCdn,

@@ -68,6 +68,74 @@ export const BLOG_POSTS_META: BlogPostMeta[] = [
     narrativeHook: '빠르겠지 했는데, 한 시간 작업이 흔적도 없이 사라졌다',
   },
   // ======================================================================
+  // 스토리 시리즈 — 사용자에서 창작자로 5편
+  // ======================================================================
+  {
+    slug: 'user-to-creator-5-thinking-as-user',
+    title: '사용자에서 창작자로 ⑤ — 사용자가 되어 생각하다',
+    description: '직접 매일 쓰는 앱을 만드니 보이기 시작했다. 버튼 위치, 로딩 속도, 에러 메시지 — 사용자였기에 알 수 있는 것들. 만드는 사람이 된 후 다시 사용자의 눈으로 돌아온 여정의 마지막 이야기.',
+    topicTags: ['vibe-coding'],
+    tags: ['바이브 코딩', '사용자에서 창작자로', 'UX', '사용자 경험', '독서 기록', '서비스 개선', '시리즈 완결'],
+    publishedAt: '2026-04-12',
+    readingTime: '10분',
+    relatedGuides: ['deploy', 'frontend', 'monitoring'],
+    contentType: 'narrative',
+    series: { id: 'user-to-creator', order: 5, totalParts: 5 },
+    narrativeHook: '내가 만든 앱의 가장 까다로운 사용자는 나 자신이었다',
+    relatedPosts: ['vibe-coding-maintenance-guide', 'vibe-coding-learning-roadmap', 'vibe-coding-can-you-build-saas'],
+  },
+  // ======================================================================
+  // 스토리 시리즈 — 사용자에서 창작자로 4편
+  // ======================================================================
+  {
+    slug: 'user-to-creator-4-secrets-on-github',
+    title: '사용자에서 창작자로 ④ — 비밀번호를 깃허브에 올렸다',
+    description: 'API 키가 코드에 박혀 있었다. 깃허브에 푸시했다. 몇 분 만에 알림이 왔다. 환경변수, .gitignore, 시크릿 관리 — 아무도 미리 알려주지 않은 보안의 기초를 사고로 배웠다.',
+    topicTags: ['vibe-coding'],
+    tags: ['바이브 코딩', '사용자에서 창작자로', '보안', '환경변수', 'API 키 유출', '.gitignore', 'GitHub'],
+    publishedAt: '2026-04-10',
+    readingTime: '10분',
+    relatedGuides: ['env', 'security', 'github'],
+    contentType: 'narrative',
+    series: { id: 'user-to-creator', order: 4, totalParts: 5 },
+    narrativeHook: '깃허브 알림 메일의 제목에 내 API 키가 적혀 있었다',
+    relatedPosts: ['vibe-coding-secret-leak-crisis', 'api-key-leak-incident-response', 'env-file-exposure-crisis'],
+  },
+  // ======================================================================
+  // 스토리 시리즈 — 사용자에서 창작자로 3편
+  // ======================================================================
+  {
+    slug: 'user-to-creator-3-nobody-can-use-it',
+    title: '사용자에서 창작자로 ③ — 만들었는데 아무도 못 쓴다',
+    description: 'localhost:3000을 공유했더니 "접속이 안 돼"라는 답이 돌아왔다. 배포, 도메인, 환경변수 — 코드 바깥의 세계가 존재했다. 내 컴퓨터에서만 도는 앱을 세상에 내놓기까지의 이야기.',
+    topicTags: ['vibe-coding'],
+    tags: ['바이브 코딩', '사용자에서 창작자로', '배포', 'Vercel', '환경변수', 'localhost', '서비스 런칭'],
+    publishedAt: '2026-04-08',
+    readingTime: '10분',
+    relatedGuides: ['deploy', 'env', 'domain'],
+    contentType: 'narrative',
+    series: { id: 'user-to-creator', order: 3, totalParts: 5 },
+    narrativeHook: 'localhost:3000을 카톡에 보내고 1분 뒤 깨달았다',
+    relatedPosts: ['vibe-coding-deploy-guide', 'oneclick-deploy-linkmap-guide', 'vibe-coding-launch-checklist'],
+  },
+  // ======================================================================
+  // 스토리 시리즈 — 사용자에서 창작자로 2편
+  // ======================================================================
+  {
+    slug: 'user-to-creator-2-ai-writes-code',
+    title: '사용자에서 창작자로 ② — AI가 코드를 짜주는 순간',
+    description: 'Cursor에서 "독서 기록 앱 만들어줘"라고 쳤다. 코드가 나왔다. 동작도 했다. 그런데 뭘 만든 건지 몰랐다. AI가 코드를 짜주는 순간, 진짜 시작되는 건 코딩이 아니라 "무엇을 만들지 정리하는 일"이었다.',
+    topicTags: ['vibe-coding'],
+    tags: ['바이브 코딩', '사용자에서 창작자로', 'AI 코딩', 'Cursor', '프롬프트 작성', 'PRD', '문서화'],
+    publishedAt: '2026-04-06',
+    readingTime: '10분',
+    relatedGuides: ['ai-tools', 'frontend', 'version-control'],
+    contentType: 'narrative',
+    series: { id: 'user-to-creator', order: 2, totalParts: 5 },
+    narrativeHook: 'AI가 짜준 코드가 동작하는 건 시작이 아니라 함정이었다',
+    relatedPosts: ['vibe-coding-prompt-writing-guide', 'cursor-ai-beginner-guide', 'vibe-coding-common-mistakes'],
+  },
+  // ======================================================================
   // 스토리 시리즈 — 사용자에서 창작자로 1편
   // ======================================================================
   {
@@ -81,7 +149,7 @@ export const BLOG_POSTS_META: BlogPostMeta[] = [
     relatedGuides: ['env', 'deploy'],
     contentType: 'narrative',
     series: { id: 'user-to-creator', order: 1, totalParts: 5 },
-    narrativeHook: '5년간의 불만이 사실은 가장 정확한 기획서였다',
+    narrativeHook: '그동안 쌓인 불만이 사실은 가장 정확한 기획서였다',
     relatedPosts: ['what-is-vibe-coding', 'vibe-coding-getting-started-guide', 'cursor-ai-beginner-guide'],
   },
   // ======================================================================
