@@ -76,6 +76,8 @@ export function generateLinkCardPresetCss(
   --lc-primary-rgb: ${hexToRgbStr(primaryColor)};
   --color-primary: ${primaryColor};`;
 
+  const isColorBg = ['gradient', 'solid', 'mesh'].includes(bgStyle);
+
   if (isDark) {
     css += `
   --lc-bg-from: #0f172a;
@@ -84,6 +86,12 @@ export function generateLinkCardPresetCss(
   --lc-text-muted: rgba(245,243,255,0.7);
   --lc-card-bg: ${primaryColor}14;
   --lc-card-border: ${primaryColor}33;`;
+  } else if (isColorBg) {
+    css += `
+  --lc-text: #ffffff;
+  --lc-text-muted: rgba(255,255,255,0.85);
+  --lc-card-bg: rgba(255,255,255,0.15);
+  --lc-card-border: rgba(255,255,255,0.28);`;
   } else {
     css += `
   --lc-text: #111827;

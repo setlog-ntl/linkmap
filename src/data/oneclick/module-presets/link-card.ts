@@ -20,37 +20,39 @@ export const linkCardPresets: ModulePreset[] = [
     },
   },
   {
-    // 시원한 블루 그래디언트 — 알약형 카드로 차별화
+    // 딥 오션 그래디언트 — 알약형 카드로 차별화
+    // primaryColor #1d4ed8: 진한 블루 — 흰 텍스트 대비 8.6:1 (WCAG AAA 충족)
     id: 'ocean-breeze',
     name: '오션 브리즈',
     nameEn: 'Ocean Breeze',
-    description: '스카이블루 그래디언트 배경 + 알약형 카드 — 시원하고 깔끔한 감성',
-    descriptionEn: 'Sky blue gradient + pill cards — cool and clean aesthetic',
-    colors: ['#0ea5e9', '#38bdf8'],
+    description: '딥 블루 그래디언트 배경 + 알약형 카드 — 시원하고 깊은 감성',
+    descriptionEn: 'Deep blue gradient + pill cards — cool and deep aesthetic',
+    colors: ['#1d4ed8', '#2563eb'],
     state: {
       values: {
         theme: {
           bgStyle: 'gradient',
           cardStyle: 'pill',
-          primaryColor: '#0ea5e9',
+          primaryColor: '#1d4ed8',
         },
       },
     },
   },
   {
     // 판톤 올해의 색 모카무스 — 단색 배경 + 직각 카드로 클래식 감성
+    // primaryColor #7d5c4e: 모카무스 다크 — 흰 텍스트 대비 6.1:1 (WCAG AA 충족)
     id: 'mocha-latte',
     name: '모카 라떼',
     nameEn: 'Mocha Latte',
-    description: '판톤 2025 모카무스 + 직각 카드 — 따뜻하고 차분한 카페 감성',
-    descriptionEn: 'Pantone 2025 Mocha Mousse + square cards — warm cafe aesthetic',
-    colors: ['#9b7968', '#c4a882'],
+    description: '모카무스 딥 톤 + 직각 카드 — 따뜻하고 차분한 카페 감성',
+    descriptionEn: 'Deep mocha mousse + square cards — warm cafe aesthetic',
+    colors: ['#7d5c4e', '#b8956e'],
     state: {
       values: {
         theme: {
           bgStyle: 'solid',
           cardStyle: 'square',
-          primaryColor: '#9b7968',
+          primaryColor: '#7d5c4e',
         },
       },
     },
