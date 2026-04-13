@@ -347,28 +347,26 @@ export function ServiceEnvVarsSection({
           : 'flex items-center gap-1.5'
       }`}>
         {isExpanded ? (
-          /* 확장 모드: 키-값 2행 레이아웃 */
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono font-medium truncate min-w-0">{ev.key_name}</span>
-              <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleCopyEnvVar(ev)} disabled={copyingId === ev.id} title="복사">
-                  {copyingId === ev.id ? <Check className="h-3 w-3 text-green-600" /> : <Copy className="h-3 w-3" />}
-                </Button>
-                <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleDecrypt(ev.id)} disabled={decryptEnvVar.isPending} title={decrypted ? '숨기기' : '복호화'}>
-                  {decrypted ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                </Button>
-                <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => { setEditingId(ev.id); setFormValue(''); }} title="수정">
-                  <Pencil className="h-3 w-3" />
-                </Button>
-                <Button variant="ghost" size="icon" className={`h-5 w-5 text-destructive ${pendingDeleteId === ev.id ? 'bg-destructive/10' : ''}`} onClick={() => handleDelete(ev.id)} disabled={deleteEnvVar.isPending} title={pendingDeleteId === ev.id ? '삭제 확인' : '삭제'}>
-                  {pendingDeleteId === ev.id ? <Check className="h-3 w-3" /> : <Trash2 className="h-3 w-3" />}
-                </Button>
-              </div>
-            </div>
-            <span className="text-xs text-muted-foreground font-mono block truncate">
+          /* 확장 모드: Railway 스타일 키 = 값 인라인 */
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono font-medium shrink-0 min-w-[120px] max-w-[200px] truncate">{ev.key_name}</span>
+            <span className="text-xs text-muted-foreground font-mono truncate flex-1 min-w-0">
               {decrypted || maskValue(ev.encrypted_value)}
             </span>
+            <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+              <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleDecrypt(ev.id)} disabled={decryptEnvVar.isPending} title={decrypted ? '숨기기' : '복호화'}>
+                {decrypted ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+              </Button>
+              <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleCopyEnvVar(ev)} disabled={copyingId === ev.id} title="복사">
+                {copyingId === ev.id ? <Check className="h-3 w-3 text-green-600" /> : <Copy className="h-3 w-3" />}
+              </Button>
+              <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => { setEditingId(ev.id); setFormValue(''); }} title="수정">
+                <Pencil className="h-3 w-3" />
+              </Button>
+              <Button variant="ghost" size="icon" className={`h-5 w-5 text-destructive ${pendingDeleteId === ev.id ? 'bg-destructive/10' : ''}`} onClick={() => handleDelete(ev.id)} disabled={deleteEnvVar.isPending} title={pendingDeleteId === ev.id ? '삭제 확인' : '삭제'}>
+                  {pendingDeleteId === ev.id ? <Check className="h-3 w-3" /> : <Trash2 className="h-3 w-3" />}
+              </Button>
+            </div>
           </div>
         ) : (
           /* 기본 모드: 1행 인라인 */
@@ -446,11 +444,24 @@ export function ServiceEnvVarsSection({
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-sm font-medium flex items-center gap-1.5">
           <Key className="h-3.5 w-3.5" />
-          환경변수
-          {totalRequired > 0 && (
-            <Badge variant="secondary" className="text-[10px] h-4 px-1.5 ml-1">
-              {configuredCount}/{totalRequired}
-            </Badge>
+          {isExpanded ? (
+            <>
+              {filteredVars.length > 0 ? `${filteredVars.length}개 변수` : '환경변수'}
+              {totalRequired > 0 && (
+                <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
+                  {configuredCount}/{totalRequired} 설정
+                </Badge>
+              )}
+            </>
+          ) : (
+            <>
+              환경변수
+              {totalRequired > 0 && (
+                <Badge variant="secondary" className="text-[10px] h-4 px-1.5 ml-1">
+                  {configuredCount}/{totalRequired}
+                </Badge>
+              )}
+            </>
           )}
         </h4>
         <div className="flex gap-1">
@@ -473,8 +484,18 @@ export function ServiceEnvVarsSection({
             size="icon"
             className="h-6 w-6"
             onClick={() => {
-              setRawEditorMode((v) => !v);
-              setRawEditorText('');
+              const entering = !rawEditorMode;
+              setRawEditorMode(entering);
+              // Raw Editor 진입 시 기존 변수를 ENV 형식으로 로드
+              if (entering && filteredVars.length > 0) {
+                const existingLines = filteredVars.map((ev) => {
+                  const val = decryptedValues[ev.id];
+                  return val ? `${ev.key_name}=${val}` : `${ev.key_name}=`;
+                });
+                setRawEditorText(existingLines.join('\n'));
+              } else {
+                setRawEditorText('');
+              }
               setAddingCustom(false);
               setAddingKey(null);
               setEditingId(null);
@@ -544,38 +565,61 @@ export function ServiceEnvVarsSection({
       {/* RAW Editor */}
       {rawEditorMode && (
         <div className="space-y-2 mb-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+              Raw Editor {filteredVars.length > 0 && `(${filteredVars.length}개 로드됨)`}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-5 text-[10px] px-1.5"
+              onClick={() => {
+                navigator.clipboard.writeText(rawEditorText);
+                toast.success('ENV 복사됨');
+              }}
+              disabled={!rawEditorText.trim()}
+            >
+              <Copy className="h-2.5 w-2.5 mr-1" />
+              Copy ENV
+            </Button>
+          </div>
           <textarea
-            className={`w-full text-xs font-mono rounded-md border bg-muted/40 p-2 resize-none focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground ${isExpanded ? 'h-64' : 'h-48'}`}
+            className={`w-full text-xs font-mono rounded-md border bg-muted/40 p-3 resize-none focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground leading-relaxed ${isExpanded ? 'h-72' : 'h-48'}`}
             placeholder={`.env 형식으로 붙여넣기\nKEY=VALUE\nAPI_KEY=your_key`}
             value={rawEditorText}
             onChange={(e) => setRawEditorText(e.target.value)}
             autoFocus
           />
-          <div className="flex gap-1.5">
-            <Button
-              size="sm"
-              className="h-6 text-xs"
-              onClick={handleBulkSave}
-              disabled={!rawEditorText.trim() || addEnvVar.isPending || updateEnvVar.isPending}
-            >
-              {(addEnvVar.isPending || updateEnvVar.isPending) ? (
-                <Loader2 className="h-3 w-3 animate-spin mr-1" />
-              ) : (
-                <Check className="h-3 w-3 mr-1" />
-              )}
-              저장
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 text-xs"
-              onClick={() => {
-                setRawEditorMode(false);
-                setRawEditorText('');
-              }}
-            >
-              취소
-            </Button>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground">
+              {parseEnvContent(rawEditorText).length}개 변수 감지
+            </span>
+            <div className="flex gap-1.5">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 text-xs"
+                onClick={() => {
+                  setRawEditorMode(false);
+                  setRawEditorText('');
+                }}
+              >
+                취소
+              </Button>
+              <Button
+                size="sm"
+                className="h-6 text-xs"
+                onClick={handleBulkSave}
+                disabled={!rawEditorText.trim() || addEnvVar.isPending || updateEnvVar.isPending}
+              >
+                {(addEnvVar.isPending || updateEnvVar.isPending) ? (
+                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                ) : (
+                  <Check className="h-3 w-3 mr-1" />
+                )}
+                변수 저장
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -602,25 +646,53 @@ export function ServiceEnvVarsSection({
             }
 
             return (
-              <div key={template.name} className="flex items-center gap-1.5 py-1.5">
-                <span className="text-xs font-mono truncate flex-1 min-w-0 text-muted-foreground">
-                  {template.name}
-                </span>
-                <Badge variant="outline" className="text-[10px] h-4 px-1 text-muted-foreground">
-                  미설정
-                </Badge>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-5 w-5"
-                  onClick={() => {
-                    setAddingKey(template.name);
-                    setFormValue('');
-                  }}
-                  title="추가"
-                >
-                  <Plus className="h-3 w-3" />
-                </Button>
+              <div key={template.name} className={`py-1.5 ${isExpanded ? 'rounded-md border border-dashed border-muted-foreground/20 px-2.5 -mx-2 mb-1' : 'flex items-center gap-1.5'}`}>
+                {isExpanded ? (
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 min-w-0">
+                      <span className="text-xs font-mono text-muted-foreground">{template.name}</span>
+                      {(template.description_ko || template.description) && (
+                        <p className="text-[10px] text-muted-foreground/60 truncate mt-0.5">{template.description_ko || template.description}</p>
+                      )}
+                    </div>
+                    <Badge variant="outline" className="text-[10px] h-4 px-1 text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-600 shrink-0">
+                      미설정
+                    </Badge>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-5 text-[10px] px-1.5 shrink-0"
+                      onClick={() => {
+                        setAddingKey(template.name);
+                        setFormValue('');
+                      }}
+                    >
+                      <Plus className="h-2.5 w-2.5 mr-0.5" />
+                      설정
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <span className="text-xs font-mono truncate flex-1 min-w-0 text-muted-foreground">
+                      {template.name}
+                    </span>
+                    <Badge variant="outline" className="text-[10px] h-4 px-1 text-muted-foreground">
+                      미설정
+                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5"
+                      onClick={() => {
+                        setAddingKey(template.name);
+                        setFormValue('');
+                      }}
+                      title="추가"
+                    >
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                  </>
+                )}
               </div>
             );
           })}
@@ -679,36 +751,45 @@ export function ServiceEnvVarsSection({
                     }
 
                     return (
-                      <div key={template.name} className="flex items-center gap-1.5 py-1.5 group">
-                        <span className="text-xs font-mono truncate flex-1 min-w-0 text-muted-foreground/60">
-                          {template.name}
-                        </span>
-                        <Badge variant="outline" className="text-[10px] h-4 px-1 text-muted-foreground/50">
-                          선택
-                        </Badge>
-                        <div className="flex gap-0.5">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-5 w-5"
-                            onClick={() => {
-                              setAddingKey(template.name);
-                              setFormValue('');
-                            }}
-                            title="추가"
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground"
-                            onClick={() => setDismissedKeys((prev) => new Set([...prev, template.name]))}
-                            title="목록에서 숨기기"
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
+                      <div key={template.name} className={`py-1.5 group ${isExpanded ? 'rounded-md border border-dashed border-muted-foreground/10 px-2.5 -mx-2 mb-1' : 'flex items-center gap-1.5'}`}>
+                        {isExpanded ? (
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 min-w-0">
+                              <span className="text-xs font-mono text-muted-foreground/60">{template.name}</span>
+                              {(template.description_ko || template.description) && (
+                                <p className="text-[10px] text-muted-foreground/40 truncate mt-0.5">{template.description_ko || template.description}</p>
+                              )}
+                            </div>
+                            <Badge variant="outline" className="text-[10px] h-4 px-1 text-muted-foreground/50 shrink-0">
+                              선택
+                            </Badge>
+                            <div className="flex gap-0.5 shrink-0">
+                              <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => { setAddingKey(template.name); setFormValue(''); }} title="추가">
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground" onClick={() => setDismissedKeys((prev) => new Set([...prev, template.name]))} title="목록에서 숨기기">
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <span className="text-xs font-mono truncate flex-1 min-w-0 text-muted-foreground/60">
+                              {template.name}
+                            </span>
+                            <Badge variant="outline" className="text-[10px] h-4 px-1 text-muted-foreground/50">
+                              선택
+                            </Badge>
+                            <div className="flex gap-0.5">
+                              <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => { setAddingKey(template.name); setFormValue(''); }} title="추가">
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground" onClick={() => setDismissedKeys((prev) => new Set([...prev, template.name]))} title="목록에서 숨기기">
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </>
+                        )}
                       </div>
                     );
                   })}

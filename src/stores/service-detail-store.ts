@@ -43,7 +43,7 @@ interface ServiceDetailState {
 
 /** Panel width constants */
 export const PANEL_WIDTH_NORMAL = 380;
-export const PANEL_WIDTH_EXPANDED = 560;
+export const PANEL_WIDTH_EXPANDED = 680;
 
 export const useServiceDetailStore = create<ServiceDetailState>((set) => ({
   fullData: null,
