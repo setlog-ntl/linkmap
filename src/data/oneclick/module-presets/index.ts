@@ -6,6 +6,7 @@ import { digitalNamecardPresets } from './digital-namecard';
 import { linkCardPresets } from './link-card';
 import { smallBizPresets } from './small-biz';
 import { smallBizCafePresets } from './small-biz-cafe';
+import { invitationPresets } from './invitation';
 
 const PRESET_MAP: Record<string, ModulePreset[]> = {
   'personal-brand': personalBrandPresets,
@@ -15,6 +16,7 @@ const PRESET_MAP: Record<string, ModulePreset[]> = {
   'link-card': linkCardPresets,
   'small-biz': smallBizPresets,
   'small-biz-cafe': smallBizCafePresets,
+  'invitation': invitationPresets,
 };
 
 export function getModulePresets(templateSlug: string): ModulePreset[] {

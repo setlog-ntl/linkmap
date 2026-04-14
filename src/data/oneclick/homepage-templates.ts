@@ -589,4 +589,35 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     display_order: 15,
     deploy_target: 'github_pages',
   },
+
+  // ── Phase 5: Expansion ──────────────────
+  {
+    id: 'b2c3d4e5-0016-4000-9000-000000000016',
+    slug: 'invitation',
+    name: 'Mobile Invitation',
+    name_ko: '모바일 초대장',
+    description:
+      'Versatile mobile invitation page for gatherings, birthdays, celebrations, and events. D-Day countdown, venue map, photo gallery, and payment info.',
+    description_ko:
+      '모임, 생일, 축하, 행사를 위한 범용 모바일 초대장. D-Day 카운트다운, 장소 안내, 포토 갤러리, 송금 안내.',
+    preview_image_url: null,
+    github_owner: 'linkmap-templates',
+    github_repo: 'invitation',
+    default_branch: 'main',
+    framework: 'nextjs',
+    required_env_vars: [
+      { key: 'NEXT_PUBLIC_TITLE', description: '초대장 제목', required: true },
+      { key: 'NEXT_PUBLIC_EVENT_TYPE', description: '초대 유형 (gathering/birthday/wedding/baby/celebration/corporate/custom)', required: false },
+      { key: 'NEXT_PUBLIC_SUBTITLE', description: '부제목', required: false },
+      { key: 'NEXT_PUBLIC_HOSTS', description: '주최자 목록 JSON', required: false },
+      { key: 'NEXT_PUBLIC_GALLERY', description: '갤러리 이미지 URL JSON', required: false },
+      { key: 'NEXT_PUBLIC_ACCOUNTS', description: '계좌 정보 JSON', required: false },
+      { key: 'NEXT_PUBLIC_CONTACTS', description: '연락처 목록 JSON', required: false },
+    ],
+    tags: ['invitation', 'event', 'gathering', 'birthday', 'celebration', 'mobile', 'nextjs'],
+    is_premium: false,
+    is_active: true,
+    display_order: 8,
+    deploy_target: 'github_pages',
+  },
 ];

@@ -6,6 +6,7 @@ import { digitalNamecardModuleSchema } from './digital-namecard';
 import { freelancerPageModuleSchema } from './freelancer-page';
 import { smallBizModuleSchema } from './small-biz';
 import { smallBizCafeModuleSchema } from './small-biz-cafe';
+import { invitationModuleSchema } from './invitation';
 
 const schemaMap: Record<string, TemplateModuleSchema> = {
   'personal-brand': personalBrandModuleSchema,
@@ -15,6 +16,7 @@ const schemaMap: Record<string, TemplateModuleSchema> = {
   'freelancer-page': freelancerPageModuleSchema,
   'small-biz': smallBizModuleSchema,
   'small-biz-cafe': smallBizCafeModuleSchema,
+  'invitation': invitationModuleSchema,
 };
 
 /** 템플릿 slug로 모듈 스키마 조회 (없으면 null) */

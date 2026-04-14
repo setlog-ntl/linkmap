@@ -28,6 +28,7 @@ import { digitalNamecardGenerator } from './digital-namecard';
 import { freelancerPageGenerator } from './freelancer-page';
 import { smallBizGenerator } from './small-biz';
 import { smallBizCafeGenerator } from './small-biz-cafe';
+import { invitationGenerator } from './invitation';
 import type { TemplateGenerator } from './base-generator';
 
 /** 모든 등록된 generator */
@@ -39,6 +40,7 @@ const generators: TemplateGenerator[] = [
   freelancerPageGenerator,
   smallBizGenerator,
   smallBizCafeGenerator,
+  invitationGenerator,
 ];
 
 /** slug → generator 매핑 (O(1) 조회) */
@@ -60,3 +62,4 @@ export { digitalNamecardGenerator } from './digital-namecard';
 export { freelancerPageGenerator } from './freelancer-page';
 export { smallBizGenerator } from './small-biz';
 export { smallBizCafeGenerator } from './small-biz-cafe';
+export { invitationGenerator } from './invitation';
