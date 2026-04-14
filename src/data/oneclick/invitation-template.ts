@@ -7,7 +7,6 @@ import {
   sharedNextConfig as nextConfig,
   sharedAnimatedReveal as animatedReveal,
   sharedSectionWrapper as sectionWrapper,
-  sharedLanguageToggle as languageToggle,
   makePackageJson,
 } from './shared-template-files';
 
@@ -942,7 +941,6 @@ export const invitationTemplate: HomepageTemplateContent = {
     { path: 'src/lib/config.ts', content: configTs },
     { path: 'src/components/AnimatedReveal.tsx', content: animatedReveal },
     { path: 'src/components/SectionWrapper.tsx', content: sectionWrapper },
-    { path: 'src/components/LanguageToggle.tsx', content: languageToggle },
     { path: 'src/components/hero-section.tsx', content: heroSection },
     { path: 'src/components/countdown-section.tsx', content: countdownSection },
     { path: 'src/components/hosts-section.tsx', content: hostsSection },
