@@ -32,7 +32,7 @@ export async function GET() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: \\\`linear-gradient(160deg, \\\${siteConfig.gradientFrom} 0%, \\\${siteConfig.gradientTo} 100%)\\\`,
+          background: \`linear-gradient(160deg, \${siteConfig.gradientFrom} 0%, \${siteConfig.gradientTo} 100%)\`,
           fontFamily: 'sans-serif',
           padding: '48px',
         }}
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: siteConfig.title,
     description: siteConfig.subtitle,
-    images: [\\\`\\\${basePath}/api/og\\\`],
+    images: [\`\${basePath}/api/og\`],
     type: 'website',
   },
 };
@@ -170,8 +170,8 @@ const EVENT_EMOJI: Record<string, string> = {
 export function HeroSection({ config }: Props) {
   const emoji = EVENT_EMOJI[config.eventType] || EVENT_EMOJI.custom;
   const bgStyle = config.heroImageUrl
-    ? { backgroundImage: \\\`url(\\\${config.heroImageUrl})\\\`, backgroundSize: 'cover', backgroundPosition: 'center' }
-    : { background: \\\`linear-gradient(160deg, \\\${config.gradientFrom}, \\\${config.gradientTo})\\\` };
+    ? { backgroundImage: \`url(\${config.heroImageUrl})\`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : { background: \`linear-gradient(160deg, \${config.gradientFrom}, \${config.gradientTo})\` };
 
   return (
     <section className="relative min-h-[65vh] flex flex-col items-center justify-center text-center px-6 py-24" style={bgStyle}>
@@ -244,7 +244,7 @@ export function CountdownSection({ config }: Props) {
   const [timeLeft, setTimeLeft] = useState<ReturnType<typeof getTimeLeft> | null>(null);
 
   const targetMs = useMemo(
-    () => new Date(\\\`\\\${config.eventDate}T\\\${config.eventTime || '00:00'}:00\\\`).getTime(),
+    () => new Date(\`\${config.eventDate}T\${config.eventTime || '00:00'}:00\`).getTime(),
     [config.eventDate, config.eventTime],
   );
 
@@ -317,7 +317,7 @@ export function HostsSection({ config }: Props) {
               <p className="text-sm" style={{ color: 'var(--inv-text-secondary)' }}>{host.role}</p>
               <p className="font-semibold" style={{ color: 'var(--inv-text-primary)' }}>{host.name}</p>
               {host.phone && (
-                <a href={\\\`tel:\\\${host.phone}\\\`} className="mt-1 text-sm underline" style={{ color: 'var(--inv-accent)' }}>
+                <a href={\`tel:\${host.phone}\`} className="mt-1 text-sm underline" style={{ color: 'var(--inv-accent)' }}>
                   {host.phone}
                 </a>
               )}
@@ -400,10 +400,10 @@ export function GallerySection({ config }: Props) {
         <h2 className="text-xl font-semibold text-center mb-6" style={{ color: 'var(--inv-text-primary)' }}>
           갤러리
         </h2>
-        <div className="max-w-lg mx-auto grid gap-2" style={{ gridTemplateColumns: \\\`repeat(\\\${config.galleryColumns}, 1fr)\\\` }}>
+        <div className="max-w-lg mx-auto grid gap-2" style={{ gridTemplateColumns: \`repeat(\${config.galleryColumns}, 1fr)\` }}>
           {config.galleryImages.map((url, i) => (
             <div key={i} className="aspect-square overflow-hidden rounded-lg">
-              <img src={url} alt={\\\`Photo \\\${i + 1}\\\`} className="w-full h-full object-cover" loading="lazy" />
+              <img src={url} alt={\`Photo \${i + 1}\`} className="w-full h-full object-cover" loading="lazy" />
             </div>
           ))}
         </div>
@@ -503,7 +503,7 @@ export function ContactSection({ config }: Props) {
                 {c.role && <span className="text-xs" style={{ color: 'var(--inv-text-secondary)' }}>{c.role} </span>}
                 <span className="font-medium" style={{ color: 'var(--inv-text-primary)' }}>{c.name}</span>
               </div>
-              <a href={\\\`tel:\\\${c.phone}\\\`} className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'var(--inv-accent)' }}>
+              <a href={\`tel:\${c.phone}\`} className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'var(--inv-accent)' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                 전화
               </a>
