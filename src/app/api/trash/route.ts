@@ -102,22 +102,28 @@ export async function DELETE() {
   // homepage_deploys → connections → env_vars → projects 순서로 영구 삭제
   if (projectIds.length > 0) {
     // 연결된 배포 기록 삭제 (원클릭배포 + 쇼케이스 동기화)
-    await supabase
+    const { error: deployError } = await supabase
       .from('homepage_deploys')
       .delete()
       .in('project_id', projectIds);
 
-    await supabase
+    if (deployError) return serverError(`배포 기록 삭제 실패: ${deployError.message}`);
+
+    const { error: connError } = await supabase
       .from('user_connections')
       .delete()
       .in('project_id', projectIds)
       .not('deleted_at', 'is', null);
 
-    await supabase
+    if (connError) return serverError(`연결 삭제 실패: ${connError.message}`);
+
+    const { error: envError } = await supabase
       .from('environment_variables')
       .delete()
       .in('project_id', projectIds)
       .not('deleted_at', 'is', null);
+
+    if (envError) return serverError(`환경변수 삭제 실패: ${envError.message}`);
   }
 
   const { error } = await supabase

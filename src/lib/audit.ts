@@ -134,7 +134,11 @@ export type AuditAction =
   | 'mfa.enable'
   | 'mfa.disable'
   | 'mfa.verify'
-  | 'mfa.recovery_used';
+  | 'mfa.recovery_used'
+  | 'mcp.sync_services'
+  | 'mcp.detect'
+  | 'api_token.create'
+  | 'api_token.delete';
 
 interface AuditLogEntry {
   action: AuditAction;

@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, serverError, apiError } from '@/lib/api/errors';
 import { requireMfa } from '@/lib/api/mfa-guard';
+import { logAudit } from '@/lib/audit';
 import { randomBytes, createHash } from 'crypto';
 import { z } from 'zod';
+
+const VALID_SCOPES = ['read', 'write', 'admin'] as const;
 
 const createTokenSchema = z.object({
   name: z.string().min(1, '토큰 이름은 필수입니다').max(100),
   expires_in_days: z.number().min(1).max(365).optional(),
+  scopes: z.array(z.enum(VALID_SCOPES)).min(1, '최소 1개 이상의 권한이 필요합니다').optional(),
 });
 
 function hashToken(token: string): string {
@@ -21,7 +25,7 @@ export async function GET() {
 
   const { data: tokens, error } = await supabase
     .from('api_tokens')
-    .select('id, name, last_used_at, expires_at, created_at')
+    .select('id, name, scopes, last_used_at, expires_at, created_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
@@ -50,18 +54,28 @@ export async function POST(request: NextRequest) {
     ? new Date(Date.now() + parsed.data.expires_in_days * 86400000).toISOString()
     : null;
 
+  const scopes = parsed.data.scopes ?? ['read', 'write'];
+
   const { data, error } = await supabase
     .from('api_tokens')
     .insert({
       user_id: user.id,
       name: parsed.data.name,
       token_hash: tokenHash,
+      scopes,
       expires_at: expiresAt,
     })
-    .select('id, name, expires_at, created_at')
+    .select('id, name, scopes, expires_at, created_at')
     .single();
 
   if (error) return serverError(error.message);
+
+  await logAudit(user.id, {
+    action: 'api_token.create',
+    resourceType: 'api_token',
+    resourceId: data.id,
+    details: { name: parsed.data.name, scopes },
+  });
 
   // Return the raw token only once
   return NextResponse.json({ ...data, token: rawToken }, { status: 201 });
@@ -71,6 +85,9 @@ export async function DELETE(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
+
+  const mfaResponse = await requireMfa(supabase);
+  if (mfaResponse) return mfaResponse;
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
@@ -83,6 +100,12 @@ export async function DELETE(request: NextRequest) {
     .eq('user_id', user.id);
 
   if (error) return serverError(error.message);
+
+  await logAudit(user.id, {
+    action: 'api_token.delete',
+    resourceType: 'api_token',
+    resourceId: id,
+  });
 
   return NextResponse.json({ success: true });
 }

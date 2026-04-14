@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
 
   const supabase = await createClient();
 
+  try {
   switch (type) {
     case 'checkout.session.completed': {
       const session = data.object;
@@ -290,6 +291,13 @@ export async function POST(request: NextRequest) {
       }
       break;
     }
+  }
+  } catch (err) {
+    console.error(`Stripe webhook handler failed for event type "${type}":`, err);
+    return NextResponse.json(
+      { error: 'Webhook processing failed' },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ received: true });

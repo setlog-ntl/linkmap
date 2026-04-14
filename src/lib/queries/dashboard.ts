@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from './keys';
+import { staleTime } from './stale-time';
 import type { DashboardResponse } from '@/types';
 
 export function useDashboard(projectId: string) {
@@ -13,8 +14,8 @@ export function useDashboard(projectId: string) {
       return res.json();
     },
     enabled: !!projectId,
-    staleTime: 30_000,
-    refetchInterval: 60_000,
+    staleTime: staleTime.dashboard,
+    refetchInterval: staleTime.dashboard,
     refetchOnWindowFocus: true,
   });
 }

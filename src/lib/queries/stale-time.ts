@@ -20,4 +20,8 @@ export const staleTime = {
   github: 60 * 1000,
   /** 휴지통 — 30초 */
   trash: 30 * 1000,
+  /** 대시보드 — 5분 (다중 병렬 쿼리, 빈번 갱신 불필요) */
+  dashboard: 5 * 60 * 1000,
+  /** 연결 계정 — 5분 (변경 빈도 낮음) */
+  linkedAccount: 5 * 60 * 1000,
 } as const;

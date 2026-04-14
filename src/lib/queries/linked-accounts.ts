@@ -53,7 +53,7 @@ export function useLinkedAccounts(projectId: string) {
       return data.map(mapRowToLinkedAccount);
     },
     enabled: !!projectId,
-    staleTime: 30_000,
+    staleTime: 5 * 60_000,
   });
 }
 
@@ -81,7 +81,7 @@ export function useLinkedAccountsByService(projectId: string, _serviceSlug: stri
       return data.map(mapRowToLinkedAccount);
     },
     enabled: !!projectId,
-    staleTime: 30_000,
+    staleTime: 5 * 60_000,
   });
 }
 
@@ -131,7 +131,7 @@ export function useLinkedResources(projectId: string, resourceType: string) {
       });
     },
     enabled: !!projectId,
-    staleTime: 30_000,
+    staleTime: 5 * 60_000,
   });
 }
 

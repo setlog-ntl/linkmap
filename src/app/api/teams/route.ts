@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { unauthorizedError, serverError } from '@/lib/api/errors';
+import { unauthorizedError, serverError, apiError } from '@/lib/api/errors';
 import { z } from 'zod';
 
 const createTeamSchema = z.object({
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const parsed = createTeamSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
+    return apiError(parsed.error.issues[0].message, 400);
   }
 
   const { data: team, error } = await supabase
@@ -63,12 +63,18 @@ export async function POST(request: NextRequest) {
   if (error) return serverError(error.message);
 
   // Add owner as admin member
-  await supabase.from('team_members').insert({
+  const { error: memberError } = await supabase.from('team_members').insert({
     team_id: team.id,
     user_id: user.id,
     role: 'admin',
     invited_by: user.id,
   });
+
+  if (memberError) {
+    // 보상: 생성된 팀 롤백
+    await supabase.from('teams').delete().eq('id', team.id);
+    return serverError('팀 멤버 등록에 실패했습니다. 다시 시도해주세요.');
+  }
 
   return NextResponse.json(team, { status: 201 });
 }

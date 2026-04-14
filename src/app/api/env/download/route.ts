@@ -2,14 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { decrypt } from '@/lib/crypto';
 import { requireMfa } from '@/lib/api/mfa-guard';
+import { unauthorizedError, apiError, notFoundError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  if (!user) return unauthorizedError();
 
   const mfaResponse = await requireMfa(supabase);
   if (mfaResponse) return mfaResponse;
@@ -18,9 +17,7 @@ export async function GET(request: NextRequest) {
   const projectId = searchParams.get('project_id');
   const environment = searchParams.get('environment') || 'development';
 
-  if (!projectId) {
-    return NextResponse.json({ error: 'Missing project_id' }, { status: 400 });
-  }
+  if (!projectId) return apiError('project_id가 필요합니다', 400);
 
   // Verify project ownership
   const { data: project } = await supabase
@@ -30,9 +27,7 @@ export async function GET(request: NextRequest) {
     .eq('user_id', user.id)
     .single();
 
-  if (!project) {
-    return NextResponse.json({ error: 'Project not found' }, { status: 404 });
-  }
+  if (!project) return notFoundError('프로젝트');
 
   const { data: envVars } = await supabase
     .from('environment_variables')
@@ -57,18 +52,26 @@ export async function GET(request: NextRequest) {
     '',
   ];
 
-  for (const envVar of envVars) {
-    if (envVar.description) {
-      lines.push(`# ${envVar.description}`);
+  const BATCH_SIZE = 50;
+  for (let i = 0; i < envVars.length; i += BATCH_SIZE) {
+    const batch = envVars.slice(i, i + BATCH_SIZE);
+    for (const envVar of batch) {
+      if (envVar.description) {
+        lines.push(`# ${envVar.description}`);
+      }
+      try {
+        const value = decrypt(envVar.encrypted_value);
+        lines.push(`${envVar.key_name}=${value}`);
+      } catch {
+        lines.push(`# ERROR: Could not decrypt ${envVar.key_name}`);
+        lines.push(`${envVar.key_name}=`);
+      }
+      lines.push('');
     }
-    try {
-      const value = decrypt(envVar.encrypted_value);
-      lines.push(`${envVar.key_name}=${value}`);
-    } catch {
-      lines.push(`# ERROR: Could not decrypt ${envVar.key_name}`);
-      lines.push(`${envVar.key_name}=`);
+    // Workers CPU 시간 제한 완화를 위한 이벤트루프 양보
+    if (i + BATCH_SIZE < envVars.length) {
+      await new Promise((resolve) => setTimeout(resolve, 0));
     }
-    lines.push('');
   }
 
   await logAudit(user.id, {
