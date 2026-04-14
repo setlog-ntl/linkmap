@@ -489,9 +489,9 @@ export function CountdownSection({ config }: Props) {
         )}
         {timeLeft?.expired && (
           <div className="animate-fade-up mb-4">
-            <span className="text-3xl mb-2 block">\\u{1F389}</span>
+            <span className="text-3xl mb-2 block">{'\\u{1F389}'}</span>
             <p className="text-lg font-semibold" style={{ color: 'var(--inv-accent)' }}>
-              \\u{1F38A} \\uD589\\uC0AC\\uAC00 \\uC2DC\\uC791\\uB418\\uC5C8\\uC2B5\\uB2C8\\uB2E4! \\u{1F38A}
+              {'\\u{1F38A}'} 행사가 시작되었습니다! {'\\u{1F38A}'}
             </p>
           </div>
         )}
@@ -591,7 +591,7 @@ export function LocationSection({ config }: Props) {
     <AnimatedReveal>
       <section className="py-12 px-6">
         <h2 className="text-xl font-semibold text-center mb-6" style={{ fontSize: 'var(--inv-text-section)', color: 'var(--inv-text-primary)' }}>
-          \\uC7A5\\uC18C \\uC548\\uB0B4
+          장소 안내
         </h2>
         <div className="max-w-md mx-auto rounded-2xl p-6 inv-card">
           {config.venueName && (
@@ -607,14 +607,14 @@ export function LocationSection({ config }: Props) {
               <a href={config.kakaoMapUrl} target="_blank" rel="noopener noreferrer"
                 className="flex-1 text-center py-2.5 rounded-xl text-sm font-medium transition-transform btn-press"
                 style={{ background: '#FEE500', color: '#191919', boxShadow: 'var(--inv-shadow-sm)' }}>
-                \\uCE74\\uCE74\\uC624\\uB9F5
+                카카오맵
               </a>
             )}
             {config.naverMapUrl && (
               <a href={config.naverMapUrl} target="_blank" rel="noopener noreferrer"
                 className="flex-1 text-center py-2.5 rounded-xl text-sm font-medium text-white transition-transform btn-press"
                 style={{ background: '#03C75A', boxShadow: 'var(--inv-shadow-sm)' }}>
-                \\uB124\\uC774\\uBC84\\uB9F5
+                네이버맵
               </a>
             )}
           </div>
@@ -623,12 +623,12 @@ export function LocationSection({ config }: Props) {
             <div className="mt-5 pt-4 space-y-2" style={{ borderTop: '1px solid var(--inv-card-border)' }}>
               {config.parkingInfo && (
                 <p className="flex items-center gap-2 text-sm" style={{ color: 'var(--inv-text-secondary)' }}>
-                  <span>\\u{1F17F}\\u{FE0F}</span> {config.parkingInfo}
+                  <span>{'\\u{1F17F}\\u{FE0F}'}</span> {config.parkingInfo}
                 </p>
               )}
               {config.transitInfo && (
                 <p className="flex items-center gap-2 text-sm" style={{ color: 'var(--inv-text-secondary)' }}>
-                  <span>\\u{1F68C}</span> {config.transitInfo}
+                  <span>{'\\u{1F68C}'}</span> {config.transitInfo}
                 </p>
               )}
             </div>
@@ -656,7 +656,7 @@ export function GallerySection({ config }: Props) {
     <AnimatedReveal>
       <section className="py-12 px-6">
         <h2 className="text-xl font-semibold text-center mb-6" style={{ fontSize: 'var(--inv-text-section)', color: 'var(--inv-text-primary)' }}>
-          \\uAC24\\uB7EC\\uB9AC
+          갤러리
         </h2>
 
         {/* Horizontal scroll carousel */}
@@ -716,13 +716,13 @@ function CopyButton({ text }: { text: string }) {
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(text);
       } else {
-        window.prompt('\\uBCF5\\uC0AC\\uD574\\uC8FC\\uC138\\uC694:', text);
+        window.prompt('복사해주세요:', text);
         return;
       }
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      window.prompt('\\uBCF5\\uC0AC\\uD574\\uC8FC\\uC138\\uC694:', text);
+      window.prompt('복사해주세요:', text);
     }
   };
   return (
@@ -734,7 +734,7 @@ function CopyButton({ text }: { text: string }) {
         color: copied ? '#fff' : 'var(--inv-accent)',
       }}
     >
-      {copied ? '\\u2713 \\uBCF5\\uC0AC\\uB428' : '\\uBCF5\\uC0AC'}
+      {copied ? '\\u2713 복사됨' : '복사'}
     </button>
   );
 }
@@ -773,7 +773,7 @@ export function AccountSection({ config }: Props) {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="#191919">
                 <path d="M12 3C6.48 3 2 6.58 2 10.9c0 2.78 1.8 5.22 4.5 6.6-.2.73-.72 2.65-.82 3.06-.13.5.18.49.38.36.16-.11 2.5-1.7 3.51-2.39.47.07.95.1 1.43.1 5.52 0 10-3.58 10-7.73C22 6.58 17.52 3 12 3z"/>
               </svg>
-              \\uCE74\\uCE74\\uC624\\uD398\\uC774\\uB85C \\uC1A1\\uAE08\\uD558\\uAE30
+              카카오페이로 송금하기
             </a>
           )}
         </div>
@@ -800,7 +800,7 @@ export function ContactSection({ config }: Props) {
     <AnimatedReveal>
       <section className="py-12 px-6">
         <h2 className="text-xl font-semibold text-center mb-6" style={{ fontSize: 'var(--inv-text-section)', color: 'var(--inv-text-primary)' }}>
-          \\uC5F0\\uB77D\\uCC98
+          연락처
         </h2>
         <div className="max-w-md mx-auto space-y-3">
           {config.contacts.map((c, i) => (
@@ -826,7 +826,7 @@ export function ContactSection({ config }: Props) {
                   style={{ background: 'var(--inv-accent-glow)', color: 'var(--inv-accent)' }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                  \\uC804\\uD654
+                  전화
                 </a>
                 <a
                   href={\`sms:\${c.phone}\`}
@@ -834,7 +834,7 @@ export function ContactSection({ config }: Props) {
                   style={{ background: 'var(--inv-accent-glow)', color: 'var(--inv-accent)' }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                  \\uBB38\\uC790
+                  문자
                 </a>
               </div>
             </div>
