@@ -370,7 +370,7 @@ function parseConfigToState(
     locVals.naverMapUrl = ext.extractString('naverMapUrl') ?? locVals.naverMapUrl;
 
     // hosts
-    const hostsArr = parseArrayConstant(configContent, /const DEMO_HOSTS.*?\n\];/s, 'name');
+    const hostsArr = parseArrayConstant(configContent, /const DEMO_HOSTS[\s\S]*?\n\];/, 'name');
     if (hostsArr.length > 0) {
       (state.values['hosts'] as Record<string, unknown>).items = hostsArr;
     }
@@ -382,13 +382,13 @@ function parseConfigToState(
     }
 
     // accounts
-    const accountsArr = parseArrayConstant(configContent, /const DEMO_ACCOUNTS.*?\n\];/s, 'label');
+    const accountsArr = parseArrayConstant(configContent, /const DEMO_ACCOUNTS[\s\S]*?\n\];/, 'label');
     if (accountsArr.length > 0) {
       (state.values['account'] as Record<string, unknown>).items = accountsArr;
     }
 
     // contacts
-    const contactsArr = parseArrayConstant(configContent, /const DEMO_CONTACTS.*?\n\];/s, 'name');
+    const contactsArr = parseArrayConstant(configContent, /const DEMO_CONTACTS[\s\S]*?\n\];/, 'name');
     if (contactsArr.length > 0) {
       (state.values['contact'] as Record<string, unknown>).items = contactsArr;
     }
