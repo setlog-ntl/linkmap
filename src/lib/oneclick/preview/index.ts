@@ -10,6 +10,7 @@ import { generateFreelancerPagePreview } from './freelancer-page';
 import { generateLinkCardPreview } from './link-card';
 import { generateSmallBizPreview } from './small-biz';
 import { generateSmallBizCafePreview } from './small-biz-cafe';
+import { generateInvitationPreview } from './invitation';
 
 type PreviewGenerator = (
   state: ModuleConfigState,
@@ -25,6 +26,7 @@ const GENERATORS: Record<string, PreviewGenerator> = {
   'link-card': generateLinkCardPreview,
   'small-biz': generateSmallBizPreview,
   'small-biz-cafe': generateSmallBizCafePreview,
+  'invitation': generateInvitationPreview,
 };
 
 export function generatePreviewHtml(

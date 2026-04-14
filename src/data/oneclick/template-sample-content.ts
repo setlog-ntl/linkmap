@@ -1215,6 +1215,96 @@ export const smallBizCafeSample: { ko: SmallBizContent; en: SmallBizContent } = 
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Invitation (모바일 초대장) Sample Content
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface InvitationContent {
+  title: string;
+  titleEn: string;
+  subtitle: string;
+  subtitleEn: string;
+  eventType: string;
+  eventDate: string;
+  eventTime: string;
+  eventDateLabel: string;
+  eventDateLabelEn: string;
+  hostsTitle: string;
+  hostsTitleEn: string;
+  hosts: Array<{ name: string; nameEn: string; role: string; roleEn: string; phone: string }>;
+  venueName: string;
+  venueNameEn: string;
+  venueAddress: string;
+  venueAddressEn: string;
+  accountTitle: string;
+  accountTitleEn: string;
+  accounts: Array<{ label: string; bankName: string; accountNumber: string; holder: string }>;
+  contacts: Array<{ name: string; phone: string; role: string }>;
+}
+
+export const invitationSample: { ko: InvitationContent; en: InvitationContent } = {
+  ko: {
+    title: '함께해 주세요',
+    titleEn: "You're Invited",
+    subtitle: '소중한 자리에 초대합니다',
+    subtitleEn: 'We warmly invite you to join us',
+    eventType: 'gathering',
+    eventDate: '2026-06-15',
+    eventTime: '14:00',
+    eventDateLabel: '2026년 6월 15일 토요일 오후 2시',
+    eventDateLabelEn: 'Saturday, June 15, 2026 at 2:00 PM',
+    hostsTitle: '초대하는 사람',
+    hostsTitleEn: 'Hosted by',
+    hosts: [
+      { name: '홍길동', nameEn: 'Gildong Hong', role: '주최자', roleEn: 'Host', phone: '010-1234-5678' },
+      { name: '김영희', nameEn: 'Younghee Kim', role: '공동 주최', roleEn: 'Co-host', phone: '010-9876-5432' },
+    ],
+    venueName: '서울숲 커뮤니티센터 3층',
+    venueNameEn: 'Seoul Forest Community Center 3F',
+    venueAddress: '서울 성동구 서울숲2길 32-14',
+    venueAddressEn: '32-14 Seoulsup 2-gil, Seongdong-gu, Seoul',
+    accountTitle: '마음 전하기',
+    accountTitleEn: 'Send Your Wishes',
+    accounts: [
+      { label: '모임 회비', bankName: '국민은행', accountNumber: '123-456-789012', holder: '홍길동' },
+    ],
+    contacts: [
+      { name: '홍길동', phone: '010-1234-5678', role: '주최자' },
+      { name: '김영희', phone: '010-9876-5432', role: '공동 주최' },
+    ],
+  },
+  en: {
+    title: "You're Invited",
+    titleEn: "You're Invited",
+    subtitle: 'We warmly invite you to join us',
+    subtitleEn: 'We warmly invite you to join us',
+    eventType: 'gathering',
+    eventDate: '2026-06-15',
+    eventTime: '14:00',
+    eventDateLabel: 'Saturday, June 15, 2026 at 2:00 PM',
+    eventDateLabelEn: 'Saturday, June 15, 2026 at 2:00 PM',
+    hostsTitle: 'Hosted by',
+    hostsTitleEn: 'Hosted by',
+    hosts: [
+      { name: 'Gildong Hong', nameEn: 'Gildong Hong', role: 'Host', roleEn: 'Host', phone: '010-1234-5678' },
+      { name: 'Younghee Kim', nameEn: 'Younghee Kim', role: 'Co-host', roleEn: 'Co-host', phone: '010-9876-5432' },
+    ],
+    venueName: 'Seoul Forest Community Center 3F',
+    venueNameEn: 'Seoul Forest Community Center 3F',
+    venueAddress: '32-14 Seoulsup 2-gil, Seongdong-gu, Seoul',
+    venueAddressEn: '32-14 Seoulsup 2-gil, Seongdong-gu, Seoul',
+    accountTitle: 'Send Your Wishes',
+    accountTitleEn: 'Send Your Wishes',
+    accounts: [
+      { label: 'Gathering Fee', bankName: 'Kookmin Bank', accountNumber: '123-456-789012', holder: 'Gildong Hong' },
+    ],
+    contacts: [
+      { name: 'Gildong Hong', phone: '010-1234-5678', role: 'Host' },
+      { name: 'Younghee Kim', phone: '010-9876-5432', role: 'Co-host' },
+    ],
+  },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Convenience lookup by template slug
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1226,6 +1316,7 @@ export const templateSampleContent = {
   'small-biz': smallBizSample,
   'small-biz-cafe': smallBizCafeSample,
   'link-card': linkHubSample,
+  'invitation': invitationSample,
 } as const;
 
 export type TemplateSampleSlug = keyof typeof templateSampleContent;

@@ -11,4 +11,5 @@ export const TEMPLATE_USE_CASES: Record<string, { ko: string[]; en: string[] }> 
   'small-biz':        { ko: ['요리주점/레스토랑', '소상공인'],   en: ['Restaurant/Bar', 'Small Biz'] },
   'small-biz-cafe':   { ko: ['카페/커피', '소상공인'],         en: ['Cafe/Coffee', 'Small Biz'] },
   'link-card':  { ko: ['크리에이터', '링크 모음'],       en: ['Creator', 'SNS Profile'] },
+  'invitation': { ko: ['모임/파티', '생일/축하'],         en: ['Gathering/Party', 'Birthday/Event'] },
 };
