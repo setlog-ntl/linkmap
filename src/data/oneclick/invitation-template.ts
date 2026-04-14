@@ -83,6 +83,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           crossOrigin="anonymous"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body className="antialiased">{children}</body>
     </html>
@@ -108,10 +113,38 @@ const globalsCss = `@import 'tailwindcss';
   --inv-gradient-to: #d4a853;
 }
 
+* { -webkit-tap-highlight-color: transparent; }
+
+html { scroll-behavior: smooth; }
+
 body {
   background: var(--inv-bg);
   color: var(--inv-text-primary);
   font-family: 'Nanum Myeongjo', 'Pretendard Variable', serif;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 카운트다운 숫자 폰트 */
+.tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* 부드러운 섹션 구분선 */
+section + section { border-top: 1px solid var(--inv-card-border); }
+
+/* 모바일 최적화 */
+@media (max-width: 640px) {
+  h1 { font-size: 1.75rem !important; }
+  h2 { font-size: 1.25rem !important; }
+}
+
+/* 접근성: 모션 감소 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 `;
 
@@ -124,22 +157,35 @@ import { AnimatedReveal } from './AnimatedReveal';
 
 interface Props { config: { title: string; titleEn?: string; subtitle: string; subtitleEn?: string; heroImageUrl: string; gradientFrom: string; gradientTo: string; eventType: string; } }
 
+const EVENT_EMOJI: Record<string, string> = {
+  gathering: '\\u{1F389}',
+  birthday: '\\u{1F382}',
+  wedding: '\\u{1F48D}',
+  baby: '\\u{1F476}',
+  celebration: '\\u{1F389}',
+  corporate: '\\u{1F3E2}',
+  custom: '\\u{2728}',
+};
+
 export function HeroSection({ config }: Props) {
+  const emoji = EVENT_EMOJI[config.eventType] || EVENT_EMOJI.custom;
   const bgStyle = config.heroImageUrl
     ? { backgroundImage: \\\`url(\\\${config.heroImageUrl})\\\`, backgroundSize: 'cover', backgroundPosition: 'center' }
     : { background: \\\`linear-gradient(160deg, \\\${config.gradientFrom}, \\\${config.gradientTo})\\\` };
 
   return (
-    <section className="relative min-h-[60vh] flex flex-col items-center justify-center text-center px-6 py-20" style={bgStyle}>
+    <section className="relative min-h-[65vh] flex flex-col items-center justify-center text-center px-6 py-24" style={bgStyle}>
       {config.heroImageUrl && <div className="absolute inset-0 bg-black/30" />}
       <AnimatedReveal>
-        <div className="relative z-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-white leading-snug whitespace-pre-line">
+        <div className="relative z-10 max-w-md mx-auto">
+          <div className="text-4xl mb-6 animate-bounce" style={{ animationDuration: '2s' }}>{emoji}</div>
+          <h1 className="text-3xl md:text-4xl font-bold text-white leading-snug whitespace-pre-line drop-shadow-sm">
             {config.title}
           </h1>
           {config.subtitle && (
-            <p className="mt-4 text-lg text-white/85">{config.subtitle}</p>
+            <p className="mt-5 text-base md:text-lg text-white/80 leading-relaxed">{config.subtitle}</p>
           )}
+          <div className="mt-8 w-12 h-px mx-auto bg-white/40" />
         </div>
       </AnimatedReveal>
     </section>
@@ -152,10 +198,10 @@ export function HeroSection({ config }: Props) {
 // ──────────────────────────────────────────────
 const countdownSection = `'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AnimatedReveal } from './AnimatedReveal';
 
-interface Props { config: { eventDate: string; eventTime: string; eventDateLabel: string; showCountdown: boolean; countdownStyle: 'flip' | 'simple'; } }
+interface Props { config: { eventDate: string; eventTime: string; eventDateLabel: string; eventDateLabelEn?: string; showCountdown: boolean; countdownStyle: 'flip' | 'simple'; } }
 
 function getTimeLeft(targetDate: Date) {
   const now = new Date();
@@ -172,36 +218,57 @@ function getTimeLeft(targetDate: Date) {
 
 function FlipCard({ value, label }: { value: number; label: string }) {
   return (
-    <div className="flex flex-col items-center">
-      <div className="relative w-16 h-20 md:w-20 md:h-24 rounded-lg overflow-hidden shadow-md" style={{ background: 'var(--inv-card-bg)', border: '1px solid var(--inv-card-border)' }}>
-        <div className="flex items-center justify-center h-full text-2xl md:text-3xl font-bold" style={{ color: 'var(--inv-accent)' }}>
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative w-16 h-20 md:w-20 md:h-24 rounded-xl overflow-hidden shadow-md" style={{ background: 'var(--inv-card-bg)', border: '1px solid var(--inv-card-border)' }}>
+        <div className="flex items-center justify-center h-full text-2xl md:text-3xl font-bold tabular-nums" style={{ color: 'var(--inv-accent)' }}>
           {String(value).padStart(2, '0')}
         </div>
       </div>
-      <span className="mt-2 text-xs" style={{ color: 'var(--inv-text-secondary)' }}>{label}</span>
+      <span className="text-[10px] uppercase tracking-wider font-medium" style={{ color: 'var(--inv-text-secondary)' }}>{label}</span>
+    </div>
+  );
+}
+
+function SimpleCounter({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="text-center px-3">
+      <div className="text-3xl md:text-4xl font-bold tabular-nums" style={{ color: 'var(--inv-accent)' }}>
+        {String(value).padStart(2, '0')}
+      </div>
+      <div className="text-[10px] uppercase tracking-wider mt-1" style={{ color: 'var(--inv-text-secondary)' }}>{label}</div>
     </div>
   );
 }
 
 export function CountdownSection({ config }: Props) {
   const [timeLeft, setTimeLeft] = useState<ReturnType<typeof getTimeLeft> | null>(null);
-  const target = new Date(\\\`\\\${config.eventDate}T\\\${config.eventTime || '00:00'}:00\\\`);
+
+  const targetMs = useMemo(
+    () => new Date(\\\`\\\${config.eventDate}T\\\${config.eventTime || '00:00'}:00\\\`).getTime(),
+    [config.eventDate, config.eventTime],
+  );
 
   useEffect(() => {
+    const target = new Date(targetMs);
     setTimeLeft(getTimeLeft(target));
     const timer = setInterval(() => setTimeLeft(getTimeLeft(target)), 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [targetMs]);
+
+  const CounterCard = config.countdownStyle === 'simple' ? SimpleCounter : FlipCard;
 
   return (
     <AnimatedReveal>
-      <section className="py-12 px-6 text-center" style={{ background: 'var(--inv-bg-alt)' }}>
+      <section className="py-14 px-6 text-center" style={{ background: 'var(--inv-bg-alt)' }}>
         {config.showCountdown && timeLeft && !timeLeft.expired && (
-          <div className="flex justify-center gap-3 md:gap-4 mb-6">
-            <FlipCard value={timeLeft.days} label="DAYS" />
-            <FlipCard value={timeLeft.hours} label="HOURS" />
-            <FlipCard value={timeLeft.minutes} label="MIN" />
-            <FlipCard value={timeLeft.seconds} label="SEC" />
+          <div className="flex justify-center gap-3 md:gap-5 mb-8">
+            <CounterCard value={timeLeft.days} label="DAYS" />
+            <div className="flex items-center text-xl font-light pt-[-8px]" style={{ color: 'var(--inv-text-secondary)' }}>:</div>
+            <CounterCard value={timeLeft.hours} label="HOURS" />
+            <div className="flex items-center text-xl font-light" style={{ color: 'var(--inv-text-secondary)' }}>:</div>
+            <CounterCard value={timeLeft.minutes} label="MIN" />
+            <div className="flex items-center text-xl font-light" style={{ color: 'var(--inv-text-secondary)' }}>:</div>
+            <CounterCard value={timeLeft.seconds} label="SEC" />
           </div>
         )}
         {timeLeft?.expired && (
@@ -209,7 +276,7 @@ export function CountdownSection({ config }: Props) {
             행사가 시작되었습니다!
           </p>
         )}
-        <p className="text-base" style={{ color: 'var(--inv-text-secondary)' }}>
+        <p className="text-base font-medium" style={{ color: 'var(--inv-text-primary)' }}>
           {config.eventDateLabel}
         </p>
       </section>
