@@ -31,6 +31,7 @@ export interface SubGuideData {
 
 export const GUIDE_DATA: GuideData[] = [
   // 기본 개념
+  { slug: 'ai-basics', title: 'AI 기초 이해', description: 'AI가 어떻게 작동하는지 기본 원리', category: 'concept', badge: '입문', readingTime: '20분', href: '/guides/ai-basics' },
   { slug: 'ai-tools', title: 'AI 도구 활용', description: 'AI 도구로 코드를 생성하는 법', category: 'concept', badge: '바이브코딩 필수', readingTime: '15분', href: '/guides/ai-tools' },
   { slug: 'frontend', title: '프론트엔드 기초', description: '화면을 만드는 기본 원리', category: 'concept', badge: '입문', readingTime: '12분', href: '/guides/frontend' },
   { slug: 'package-manager', title: '패키지 매니저', description: 'npm과 의존성 관리 기초', category: 'concept', badge: '입문', readingTime: '10분', href: '/guides/package-manager' },
@@ -81,6 +82,12 @@ export const SUB_GUIDE_DATA: SubGuideData[] = [
   { slug: 'vercel-deploy', parentSlug: 'deploy', title: 'Vercel 배포 가이드', description: '가입부터 첫 배포, Preview URL, 커스텀 도메인까지', readingTime: '7분', href: '/guides/deploy/vercel-deploy' },
   { slug: 'github-actions', parentSlug: 'deploy', title: 'GitHub Actions 가이드', description: 'CI/CD 핵심 개념, YAML 문법, 실전 워크플로우', readingTime: '8분', href: '/guides/deploy/github-actions' },
   { slug: 'cicd', parentSlug: 'deploy', title: 'CI/CD 배포 파이프라인', description: 'GitHub Actions로 자동 배포 구축', readingTime: '5분', href: '/guides/deploy/cicd' },
+  // ── AI 기초 이해 (ai-basics) ──
+  { slug: 'overview', parentSlug: 'ai-basics', title: '개요 — LLM이란?', description: '대규모 언어 모델의 개념과 작동 원리', readingTime: '4분', href: '/guides/ai-basics' },
+  { slug: 'models', parentSlug: 'ai-basics', title: 'AI 모델 비교', description: '주요 AI 모델 특징, 가격, 상황별 추천', readingTime: '6분', href: '/guides/ai-basics/models' },
+  { slug: 'prompt-basics', parentSlug: 'ai-basics', title: '프롬프트 기초', description: '좋은 프롬프트 구조, 제로샷/퓨샷, CoT', readingTime: '5분', href: '/guides/ai-basics/prompt-basics' },
+  { slug: 'ai-trends', parentSlug: 'ai-basics', title: 'AI 트렌드', description: 'AI 에이전트, MCP, 코딩 에이전트', readingTime: '5분', href: '/guides/ai-basics/ai-trends' },
+  // ── AI 도구 (ai-tools) ──
   { slug: 'overview', parentSlug: 'ai-tools', title: '개요 — 바이브코딩이란?', description: 'AI와 대화하며 코딩하는 새로운 개발 방식', readingTime: '4분', href: '/guides/ai-tools' },
   { slug: 'prompt-engineering', parentSlug: 'ai-tools', title: '프롬프트 엔지니어링', description: '좋은 지시 구조, 컨텍스트 관리, 규격 문서 작성', readingTime: '5분', href: '/guides/ai-tools/prompt-engineering' },
   { slug: 'cursor-claude', parentSlug: 'ai-tools', title: 'Cursor / Claude Code 활용법', description: '설치, 설정, 실전 워크플로우', readingTime: '4분', href: '/guides/ai-tools/cursor-claude' },
@@ -162,7 +169,7 @@ export interface LearningStageData {
 }
 
 export const LEARNING_STAGES_DATA: LearningStageData[] = [
-  { id: 'start', label: '시작', description: 'AI 도구와 개발 환경 세팅', slugs: ['ai-tools', 'frontend', 'package-manager', 'version-control'] },
+  { id: 'start', label: '시작', description: 'AI 이해와 개발 환경 세팅', slugs: ['ai-basics', 'ai-tools', 'frontend', 'package-manager', 'version-control'] },
   { id: 'develop', label: '개발', description: '핵심 기능 구현에 필요한 개념', slugs: ['env', 'api-basics', 'backend', 'auth'] },
   { id: 'polish', label: '완성', description: '디자인과 보안 마무리', slugs: ['design-ui', 'security'] },
   { id: 'deploy', label: '배포', description: '도메인 연결, 서버, 배포 자동화', slugs: ['domain', 'server', 'deploy'] },

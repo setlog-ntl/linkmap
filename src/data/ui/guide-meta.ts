@@ -1,4 +1,4 @@
-import { BookOpen, Wrench, Key, Shield, Monitor, Server, Globe, Github, Cloud, Bot, Database, Triangle, Chrome, MessageCircle, FileText, FolderOpen, Rocket, RefreshCw, Atom, CloudCog, GitBranch, Terminal, Package, KeyRound, Zap, Link2, ServerCog, ShoppingCart, Network, ShieldCheck, Palette, Mail, CreditCard, Activity, Workflow, Plug, Cpu, Code, Smartphone, AlertTriangle, Lock, Globe2, Layers, Search, ToggleRight, Bell, Send, Radio, Webhook, Timer, Share2 } from 'lucide-react';
+import { BookOpen, Wrench, Key, Shield, Monitor, Server, Globe, Github, Cloud, Bot, Database, Triangle, Chrome, MessageCircle, FileText, FolderOpen, Rocket, RefreshCw, Atom, CloudCog, GitBranch, Terminal, Package, KeyRound, Zap, Link2, ServerCog, ShoppingCart, Network, ShieldCheck, Palette, Mail, CreditCard, Activity, Workflow, Plug, Cpu, Code, Smartphone, AlertTriangle, Lock, Globe2, Layers, Search, ToggleRight, Bell, Send, Radio, Webhook, Timer, Share2, Brain, TrendingUp } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export type GuideCategory = 'concept' | 'service';
@@ -21,6 +21,8 @@ export const GUIDE_CATEGORIES: Record<GuideCategory, { label: string; icon: Luci
 
 export const GUIDE_LIST: GuideMeta[] = [
   // ── 기본 개념 (바이브코딩 학습 순서대로 정렬) ──
+  // 0: AI 기초 이해 — AI 원리, 모델 비교, 프롬프트 기초
+  { slug: 'ai-basics', title: 'AI 기초 이해', description: 'AI가 어떻게 작동하는지 기본 원리', category: 'concept', icon: Brain, badge: '입문', readingTime: '20분', href: '/guides/ai-basics' },
   // 1~4: 시작 단계 — AI 도구 선택, 화면 만들기, 패키지 설치, 코드 관리
   { slug: 'ai-tools', title: 'AI 도구 활용', description: 'AI 도구로 코드를 생성하는 법', category: 'concept', icon: Bot, badge: '바이브코딩 필수', readingTime: '15분', href: '/guides/ai-tools' },
   { slug: 'frontend', title: '프론트엔드 기초', description: '화면을 만드는 기본 원리', category: 'concept', icon: Monitor, badge: '입문', readingTime: '12분', href: '/guides/frontend' },
@@ -100,6 +102,12 @@ export const SUB_GUIDE_LIST: SubGuideMeta[] = [
   { slug: 'vercel-deploy', parentSlug: 'deploy', title: 'Vercel 배포 가이드', description: '가입부터 첫 배포, Preview URL, 커스텀 도메인까지', icon: Triangle, readingTime: '7분', href: '/guides/deploy/vercel-deploy' },
   { slug: 'github-actions', parentSlug: 'deploy', title: 'GitHub Actions 가이드', description: 'CI/CD 핵심 개념, YAML 문법, 실전 워크플로우', icon: GitBranch, readingTime: '8분', href: '/guides/deploy/github-actions' },
   { slug: 'cicd', parentSlug: 'deploy', title: 'CI/CD 배포 파이프라인', description: 'GitHub Actions로 자동 배포 구축', icon: RefreshCw, readingTime: '5분', href: '/guides/deploy/cicd' },
+
+  // ── AI 기초 이해 (ai-basics) ──
+  { slug: 'overview', parentSlug: 'ai-basics', title: '개요 — LLM이란?', description: '대규모 언어 모델의 개념과 작동 원리', icon: FileText, readingTime: '4분', href: '/guides/ai-basics' },
+  { slug: 'models', parentSlug: 'ai-basics', title: 'AI 모델 비교', description: '주요 AI 모델 특징, 가격, 상황별 추천', icon: Layers, readingTime: '6분', href: '/guides/ai-basics/models' },
+  { slug: 'prompt-basics', parentSlug: 'ai-basics', title: '프롬프트 기초', description: '좋은 프롬프트 구조, 제로샷/퓨샷, CoT', icon: MessageCircle, readingTime: '5분', href: '/guides/ai-basics/prompt-basics' },
+  { slug: 'ai-trends', parentSlug: 'ai-basics', title: 'AI 트렌드', description: 'AI 에이전트, MCP, 코딩 에이전트', icon: TrendingUp, readingTime: '5분', href: '/guides/ai-basics/ai-trends' },
 
   // ── AI 도구 (ai-tools) ──
   { slug: 'overview', parentSlug: 'ai-tools', title: '개요 — 바이브코딩이란?', description: 'AI와 대화하며 코딩하는 새로운 개발 방식', icon: FileText, readingTime: '4분', href: '/guides/ai-tools' },
@@ -223,7 +231,7 @@ export interface LearningStage {
 }
 
 export const LEARNING_STAGES: LearningStage[] = [
-  { id: 'start', label: '시작', description: 'AI 도구와 개발 환경 세팅', icon: Bot, slugs: ['ai-tools', 'frontend', 'package-manager', 'version-control'] },
+  { id: 'start', label: '시작', description: 'AI 이해와 개발 환경 세팅', icon: Bot, slugs: ['ai-basics', 'ai-tools', 'frontend', 'package-manager', 'version-control'] },
   { id: 'develop', label: '개발', description: '핵심 기능 구현에 필요한 개념', icon: Code, slugs: ['env', 'api-basics', 'backend', 'auth'] },
   { id: 'polish', label: '완성', description: '디자인과 보안 마무리', icon: Palette, slugs: ['design-ui', 'security'] },
   { id: 'deploy', label: '배포', description: '도메인 연결, 서버, 배포 자동화', icon: Rocket, slugs: ['domain', 'server', 'deploy'] },
@@ -248,7 +256,7 @@ export const LEARNING_PATHS: LearningPath[] = [
     description: '코딩 경험 0 → AI로 첫 웹앱 배포까지',
     icon: Bot,
     badge: '첫 프로젝트',
-    guideSlugs: ['ai-tools', 'env', 'frontend', 'design-ui', 'backend', 'deploy'],
+    guideSlugs: ['ai-basics', 'ai-tools', 'env', 'frontend', 'design-ui', 'backend', 'deploy'],
   },
   {
     id: 'dev-tools',

@@ -54,6 +54,7 @@ PAGES=(
 
   # ── 가이드 인덱스 ──
   "/guides"
+  "/guides/ai-basics"
   "/guides/ai-tools"
   "/guides/auth"
   "/guides/api-basics"
