@@ -6,62 +6,13 @@ import {
   sharedPostcssConfig as postcssConfig,
   sharedNextConfig as nextConfig,
   sharedAnimatedReveal as animatedReveal,
-  sharedSectionWrapper as sectionWrapper,
   makePackageJson,
 } from './shared-template-files';
 
 const packageJson = makePackageJson('invitation');
 
-// ──────────────────────────────────────────────
-// src/app/api/og/route.tsx
-// ──────────────────────────────────────────────
-const ogRoute = `import { ImageResponse } from 'next/og';
-import { siteConfig } from '@/lib/config';
-
-export const dynamic = 'force-static';
-
-export async function GET() {
-  const emoji = {
-    gathering: '\\u{1F389}',
-    birthday: '\\u{1F382}',
-    wedding: '\\u{1F48D}',
-    baby: '\\u{1F476}',
-    celebration: '\\u{1F389}',
-    corporate: '\\u{1F3E2}',
-    custom: '\\u{2728}',
-  }[siteConfig.eventType] || '\\u{2728}';
-
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: \`linear-gradient(160deg, \${siteConfig.gradientFrom} 0%, \${siteConfig.gradientTo} 100%)\`,
-          fontFamily: 'sans-serif',
-          padding: '48px',
-        }}
-      >
-        <div style={{ fontSize: '4rem', marginBottom: '12px' }}>{emoji}</div>
-        <div style={{ fontSize: '3rem', fontWeight: 700, color: '#fff', textAlign: 'center' }}>
-          {siteConfig.title}
-        </div>
-        <div style={{ fontSize: '1.4rem', color: 'rgba(255,255,255,0.85)', marginTop: '16px', textAlign: 'center' }}>
-          {siteConfig.subtitle}
-        </div>
-        <div style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.65)', marginTop: '24px' }}>
-          {siteConfig.eventDateLabel}
-        </div>
-      </div>
-    ),
-    { width: 1200, height: 630 },
-  );
-}
-`;
+// OG route 제거 — next/og의 ImageResponse가 output:'export' 시
+// 내부 폰트 URL 해석 실패로 빌드 크래시 (TypeError: Invalid URL)
 
 // ──────────────────────────────────────────────
 // src/app/layout.tsx
@@ -70,22 +21,18 @@ const layoutTsx = `import type { Metadata } from 'next';
 import { siteConfig } from '@/lib/config';
 import './globals.css';
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-
 export const metadata: Metadata = {
   title: siteConfig.title,
   description: siteConfig.subtitle,
   openGraph: {
     title: siteConfig.title,
     description: siteConfig.subtitle,
-    images: [\`\${basePath}/api/og\`],
     type: 'website',
   },
   twitter: {
-    card: 'summary_large_image',
+    card: 'summary',
     title: siteConfig.title,
     description: siteConfig.subtitle,
-    images: [\`\${basePath}/api/og\`],
   },
 };
 
@@ -384,7 +331,7 @@ export function HeroSection({ config }: Props) {
 const countdownSection = `'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { AnimatedReveal } from './AnimatedReveal';
+import { AnimatedReveal } from './animated-reveal';
 
 interface Props { config: { eventDate: string; eventTime: string; eventDateLabel: string; eventDateLabelEn?: string; showCountdown: boolean; countdownStyle: 'flip' | 'simple'; } }
 
@@ -508,7 +455,7 @@ export function CountdownSection({ config }: Props) {
 // ──────────────────────────────────────────────
 const hostsSection = `'use client';
 
-import { AnimatedReveal } from './AnimatedReveal';
+import { AnimatedReveal } from './animated-reveal';
 
 interface HostItem { name: string; nameEn?: string; role: string; roleEn?: string; phone?: string; avatarUrl?: string; }
 interface Props { config: { hostsTitle: string; hostsTitleEn?: string; hosts: HostItem[]; } }
@@ -570,7 +517,7 @@ export function HostsSection({ config }: Props) {
 // ──────────────────────────────────────────────
 const locationSection = `'use client';
 
-import { AnimatedReveal } from './AnimatedReveal';
+import { AnimatedReveal } from './animated-reveal';
 
 interface Props { config: { venueName: string; venueAddress: string; kakaoMapUrl: string; naverMapUrl: string; parkingInfo: string; transitInfo: string; } }
 
@@ -644,7 +591,7 @@ export function LocationSection({ config }: Props) {
 // ──────────────────────────────────────────────
 const gallerySection = `'use client';
 
-import { AnimatedReveal } from './AnimatedReveal';
+import { AnimatedReveal } from './animated-reveal';
 
 interface Props { config: { galleryImages: string[]; galleryColumns: number; } }
 
@@ -703,7 +650,7 @@ export function GallerySection({ config }: Props) {
 const accountSection = `'use client';
 
 import { useState } from 'react';
-import { AnimatedReveal } from './AnimatedReveal';
+import { AnimatedReveal } from './animated-reveal';
 
 interface AccountItem { label: string; bankName: string; accountNumber: string; holder: string; }
 interface Props { config: { accountTitle: string; accounts: AccountItem[]; kakaoPayUrl: string; } }
@@ -787,7 +734,7 @@ export function AccountSection({ config }: Props) {
 // ──────────────────────────────────────────────
 const contactSection = `'use client';
 
-import { AnimatedReveal } from './AnimatedReveal';
+import { AnimatedReveal } from './animated-reveal';
 
 interface ContactItem { name: string; phone: string; role?: string; }
 interface Props { config: { contacts: ContactItem[]; } }
@@ -937,10 +884,8 @@ export const invitationTemplate: HomepageTemplateContent = {
     { path: 'src/app/layout.tsx', content: layoutTsx },
     { path: 'src/app/page.tsx', content: pageTsx },
     { path: 'src/app/globals.css', content: globalsCss },
-    { path: 'src/app/api/og/route.tsx', content: ogRoute },
     { path: 'src/lib/config.ts', content: configTs },
-    { path: 'src/components/AnimatedReveal.tsx', content: animatedReveal },
-    { path: 'src/components/SectionWrapper.tsx', content: sectionWrapper },
+    { path: 'src/components/animated-reveal.tsx', content: animatedReveal },
     { path: 'src/components/hero-section.tsx', content: heroSection },
     { path: 'src/components/countdown-section.tsx', content: countdownSection },
     { path: 'src/components/hosts-section.tsx', content: hostsSection },
