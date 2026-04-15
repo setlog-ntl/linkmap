@@ -67,8 +67,9 @@ function renderHero(
   return `
     <section class="inv-hero" style="${bgStyle}">
       ${imgSrc ? '<div class="inv-hero-overlay"></div>' : ''}
+      <div class="inv-hero-vignette"></div>
       <div class="inv-hero-content">
-        <div class="inv-hero-emoji">${emoji}</div>
+        <div class="inv-hero-emoji-ring"><span class="inv-hero-emoji">${emoji}</span></div>
         <h1 class="inv-hero-title">${esc(title)}</h1>
         ${subtitle ? `<p class="inv-hero-subtitle">${esc(subtitle)}</p>` : ''}
         <div class="inv-hero-divider"></div>
@@ -102,7 +103,7 @@ function renderHosts(state: ModuleConfigState, v: InvPresetVars, liveUrl: string
     const avatarSrc = resolveImageSrc(h.avatarUrl || '', liveUrl, imageMap);
     const avatar = avatarSrc
       ? `<img class="inv-host-avatar" src="${esc(avatarSrc)}" alt="${esc(h.name || '')}" />`
-      : `<div class="inv-host-avatar inv-host-avatar--initial" style="background:${esc(v.accentGlow)};color:${esc(v.accent)};">${esc((h.name || '?').charAt(0))}</div>`;
+      : `<div class="inv-host-avatar inv-host-avatar--initial" style="background:linear-gradient(135deg,${esc(v.accent)},${esc(v.cardBorder)});color:#fff;">${esc((h.name || '?').charAt(0))}</div>`;
     return `
       <div class="inv-host">
         ${avatar}
@@ -178,10 +179,12 @@ function renderAccount(state: ModuleConfigState, v: InvPresetVars): string {
   const accountsHtml = items.map((item) => {
     const a = item as Record<string, string>;
     return `
-      <div class="inv-account-item" style="background:${esc(v.cardBg)};border:1px solid ${esc(v.cardBorder)};">
-        <p class="inv-account-label" style="color:${esc(v.textSecondary)};">${esc(a.label || '')}</p>
-        <p style="color:${esc(v.textPrimary)};">${esc(a.bankName || '')} ${esc(a.accountNumber || '')}</p>
-        <p class="inv-account-holder" style="color:${esc(v.textSecondary)};">${esc(a.holder || '')}</p>
+      <div class="inv-account-item" style="background:${esc(v.cardBg)};border:1px solid ${esc(v.cardBorder)};border-left:3px solid ${esc(v.accent)};">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.375rem;">
+          <span class="inv-account-badge" style="background:${esc(v.accentGlow)};color:${esc(v.accent)};">${esc(a.label || '')}</span>
+          <span style="font-size:0.8125rem;color:${esc(v.textSecondary)};">${esc(a.holder || '')}</span>
+        </div>
+        <p style="color:${esc(v.textPrimary)};font-weight:500;"><span style="color:${esc(v.textSecondary)};font-size:0.875rem;">${esc(a.bankName || '')}</span> ${esc(a.accountNumber || '')}</p>
       </div>`;
   }).join('');
 
@@ -204,12 +207,15 @@ function renderContact(state: ModuleConfigState, v: InvPresetVars): string {
   const contactsHtml = items.map((item) => {
     const c = item as Record<string, string>;
     return `
-      <div class="inv-contact-row" style="background:${esc(v.cardBg)};border:1px solid ${esc(v.cardBorder)};">
-        <div>
-          ${c.role ? `<span class="inv-contact-role" style="color:${esc(v.textSecondary)};">${esc(c.role)} </span>` : ''}
-          <span style="color:${esc(v.textPrimary)};font-weight:500;">${esc(c.name || '')}</span>
+      <div class="inv-contact-row" style="background:${esc(v.cardBg)};border:1px solid ${esc(v.cardBorder)};border-left:3px solid ${esc(v.accent)};">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          ${c.role ? `<span class="inv-contact-role" style="background:${esc(v.accentGlow)};color:${esc(v.accent)};border:1px solid ${esc(v.accentGlow)};">${esc(c.role)}</span>` : ''}
+          <span style="color:${esc(v.textPrimary)};font-weight:600;">${esc(c.name || '')}</span>
         </div>
-        ${c.phone ? `<a href="tel:${esc(c.phone)}" class="inv-contact-phone" style="color:${esc(v.accent)};">&#9742; 전화</a>` : ''}
+        ${c.phone ? `<div style="display:flex;gap:0.5rem;">
+          <a href="tel:${esc(c.phone)}" class="inv-btn-preview" style="background:${esc(v.accent)};color:#fff;">&#9742; 전화</a>
+          <a href="sms:${esc(c.phone)}" class="inv-btn-preview" style="background:${esc(v.accentGlow)};color:${esc(v.accent)};">&#9993; 문자</a>
+        </div>` : ''}
       </div>`;
   }).join('');
 
@@ -229,51 +235,54 @@ function buildInvitationCSS(v: InvPresetVars): string {
 
     .inv-hero { position: relative; min-height: 65vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 6rem 1.5rem; }
     .inv-hero-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.3); }
+    .inv-hero-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.25) 100%); }
     .inv-hero-content { position: relative; z-index: 1; max-width: 24rem; margin: 0 auto; }
-    .inv-hero-emoji { font-size: 2.5rem; margin-bottom: 1.5rem; }
-    .inv-hero-title { font-size: 1.875rem; font-weight: 700; color: #fff; line-height: 1.4; white-space: pre-line; text-shadow: 0 1px 4px rgba(0,0,0,0.2); }
-    .inv-hero-subtitle { margin-top: 1.25rem; font-size: 1rem; color: rgba(255,255,255,0.8); line-height: 1.6; }
-    .inv-hero-divider { margin-top: 2rem; width: 3rem; height: 1px; background: rgba(255,255,255,0.4); margin-left: auto; margin-right: auto; }
+    .inv-hero-emoji-ring { display: flex; align-items: center; justify-content: center; width: 96px; height: 96px; margin: 0 auto 2rem; border-radius: 50%; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); }
+    .inv-hero-emoji { font-size: 3rem; line-height: 1; }
+    .inv-hero-title { font-size: 1.875rem; font-weight: 700; color: #fff; line-height: 1.4; white-space: pre-line; text-shadow: 0 2px 16px rgba(0,0,0,0.3), 0 0 40px rgba(255,255,255,0.08); letter-spacing: -0.01em; }
+    .inv-hero-subtitle { margin-top: 1.25rem; font-size: 1rem; color: rgba(255,255,255,0.8); line-height: 1.6; letter-spacing: 0.04em; }
+    .inv-hero-divider { margin: 2rem auto 0; width: 4rem; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); }
 
-    .inv-section { padding: 3.5rem 1.5rem; text-align: center; }
-    .inv-section + .inv-section { border-top: 1px solid ${v.cardBorder}; }
+    .inv-section { padding: clamp(2.5rem, 6vw, 3.5rem) clamp(1.25rem, 5vw, 2rem); text-align: center; }
+    .inv-section + .inv-section::before { content: ''; display: block; width: 60px; height: 1px; margin: 0 auto 0; background: linear-gradient(90deg, transparent, ${v.accent}, transparent); opacity: 0.3; }
     .inv-section-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; }
 
     .inv-countdown { display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 1.5rem; }
-    .inv-countdown-card { width: 5rem; padding: 1rem; border-radius: 0.75rem; text-align: center; }
-    .inv-countdown-num { font-size: 1.5rem; font-weight: 700; }
+    .inv-countdown-card { width: 4rem; height: 5rem; display: flex; align-items: center; justify-content: center; border-radius: 0.75rem; text-align: center; background: ${v.cardBg}; border: 1px solid ${v.cardBorder}; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .inv-countdown-num { font-size: 1.75rem; font-weight: 700; }
     .inv-date-label { font-size: 1rem; font-weight: 500; }
 
-    .inv-hosts { display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; max-width: 28rem; margin: 0 auto; }
-    .inv-host { display: flex; flex-direction: column; align-items: center; text-align: center; }
-    .inv-host-avatar { width: 5rem; height: 5rem; border-radius: 50%; object-fit: cover; margin-bottom: 0.75rem; }
-    .inv-host-avatar--initial { display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
-    .inv-host-role { font-size: 0.875rem; margin: 0; }
-    .inv-host-name { font-weight: 600; margin: 0.25rem 0 0; }
-    .inv-host-phone { font-size: 0.875rem; margin-top: 0.25rem; text-decoration: underline; }
+    .inv-hosts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1.25rem; max-width: 28rem; margin: 0 auto; }
+    .inv-host { display: flex; flex-direction: column; align-items: center; text-align: center; background: ${v.cardBg}; border: 1px solid ${v.cardBorder}; border-radius: 1rem; padding: 1.5rem 1rem; position: relative; overflow: hidden; }
+    .inv-host::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, ${v.accent}, ${v.cardBorder}); }
+    .inv-host-avatar { width: 4.5rem; height: 4.5rem; border-radius: 50%; object-fit: cover; margin-bottom: 0.75rem; }
+    .inv-host-avatar--initial { display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+    .inv-host-role { font-size: 0.8125rem; margin: 0; }
+    .inv-host-name { font-weight: 600; font-size: 1rem; margin: 0.125rem 0 0; }
+    .inv-host-phone { font-size: 0.8125rem; margin-top: 0.75rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1rem; border-radius: 999px; background: ${v.accentGlow}; color: ${v.accent}; }
 
-    .inv-card { max-width: 28rem; margin: 0 auto; border-radius: 0.75rem; padding: 1.5rem; }
-    .inv-venue-name { font-size: 1.125rem; font-weight: 600; margin: 0; }
-    .inv-venue-addr { font-size: 0.875rem; margin: 0.25rem 0 0; }
-    .inv-map-buttons { display: flex; gap: 0.75rem; margin-top: 1rem; }
-    .inv-map-btn { flex: 1; text-align: center; padding: 0.625rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; text-decoration: none; }
-    .inv-info-block { margin-top: 1rem; padding-top: 1rem; }
-    .inv-info-line { font-size: 0.875rem; margin: 0.25rem 0; }
+    .inv-card { max-width: 28rem; margin: 0 auto; border-radius: 1rem; padding: 1.5rem; position: relative; overflow: hidden; background: ${v.cardBg}; border: 1px solid ${v.cardBorder}; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .inv-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, ${v.accent}, ${v.cardBorder}); }
+    .inv-venue-name { font-size: 1.0625rem; font-weight: 600; margin: 0; }
+    .inv-venue-addr { font-size: 0.875rem; margin: 0.125rem 0 0; }
+    .inv-map-buttons { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+    .inv-map-btn { flex: 1; text-align: center; padding: 0.75rem; border-radius: 999px; font-size: 0.875rem; font-weight: 500; text-decoration: none; min-height: 44px; display: flex; align-items: center; justify-content: center; }
+    .inv-info-block { margin-top: 1.25rem; padding-top: 1.25rem; padding-left: 0.75rem; border-left: 3px solid ${v.accentGlow}; }
+    .inv-info-line { font-size: 0.875rem; margin: 0.375rem 0; text-align: left; }
 
     .inv-gallery { display: grid; gap: 0.5rem; max-width: 28rem; margin: 0 auto; }
-    .inv-gallery-item { aspect-ratio: 1; overflow: hidden; border-radius: 0.5rem; }
-    .inv-gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+    .inv-gallery-item { aspect-ratio: 1; overflow: hidden; border-radius: 0.75rem; }
+    .inv-gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
 
     .inv-accounts { max-width: 28rem; margin: 0 auto; display: flex; flex-direction: column; gap: 0.75rem; }
-    .inv-account-item { border-radius: 0.75rem; padding: 1rem; text-align: left; }
-    .inv-account-label { font-size: 0.875rem; font-weight: 500; margin: 0 0 0.25rem; }
-    .inv-account-holder { font-size: 0.75rem; margin: 0.25rem 0 0; }
-    .inv-kakaopay-btn { display: block; max-width: 28rem; margin: 0.75rem auto 0; text-align: center; padding: 0.75rem; border-radius: 0.75rem; background: #FEE500; color: #191919; font-weight: 500; font-size: 0.875rem; text-decoration: none; }
+    .inv-account-item { border-radius: 1rem; padding: 1.25rem; text-align: left; }
+    .inv-account-badge { font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 999px; }
+    .inv-kakaopay-btn { display: flex; align-items: center; justify-content: center; gap: 0.5rem; max-width: 28rem; margin: 0.75rem auto 0; text-align: center; padding: 0.75rem; border-radius: 999px; background: #FEE500; color: #191919; font-weight: 500; font-size: 0.875rem; text-decoration: none; min-height: 44px; }
 
-    .inv-contacts { max-width: 28rem; margin: 0 auto; display: flex; flex-direction: column; gap: 0.5rem; }
-    .inv-contact-row { display: flex; align-items: center; justify-content: space-between; border-radius: 0.75rem; padding: 0.875rem 1.25rem; }
-    .inv-contact-role { font-size: 0.75rem; }
-    .inv-contact-phone { font-size: 0.875rem; font-weight: 500; text-decoration: none; }
+    .inv-contacts { max-width: 28rem; margin: 0 auto; display: flex; flex-direction: column; gap: 0.75rem; }
+    .inv-contact-row { display: flex; align-items: center; justify-content: space-between; border-radius: 1rem; padding: 1rem 1.25rem; }
+    .inv-contact-role { font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.625rem; border-radius: 999px; }
+    .inv-btn-preview { font-size: 0.8125rem; font-weight: 500; text-decoration: none; padding: 0.5rem 1rem; border-radius: 999px; display: inline-flex; align-items: center; gap: 0.375rem; min-height: 40px; }
 
     .inv-footer { padding: 1.5rem; text-align: center; font-size: 0.75rem; background: ${v.bgAlt}; color: ${v.textSecondary}; }
     .inv-footer a { opacity: 0.6; text-decoration: none; color: inherit; }
