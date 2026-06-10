@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HeroSection } from './automation-guide/hero-section';
+import { GuideTLDR } from '@/components/guides/common';
 import { WhatIsAutomationSection } from './automation-guide/what-is-automation-section';
 import { AutomationTypesSection } from './automation-guide/automation-types-section';
 import { UseCasesSection } from './automation-guide/use-cases-section';
@@ -46,6 +47,19 @@ export function AutomationGuide() {
   return (
     <div>
       <HeroSection />
+
+      <div className="max-w-2xl mx-auto mb-6 px-1">
+        <GuideTLDR
+          level="입문"
+          readingTime="10분"
+          points={[
+            '자동화는 반복되는 수작업을 코드가 알아서 하게 만드는 거예요.',
+            '웹훅은 "어떤 일이 생기면 알려줘" 하는 이벤트 알림 방식이에요.',
+            '정해진 시간에 작업을 돌리는 스케줄링(cron)·큐도 자주 써요.',
+          ]}
+          youCanDo="반복 작업을 줄이고 서비스 간 연동을 자동으로 굴릴 수 있어요."
+        />
+      </div>
 
       {/* Sticky section nav */}
       <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">

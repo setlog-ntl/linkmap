@@ -27,7 +27,7 @@ const claudeCodeSteps = [
   {
     step: 1,
     title: '설치',
-    detail: 'npm install -g @anthropic-ai/claude-code 실행. Node.js 18 이상 필요.',
+    detail: 'npm install -g @anthropic-ai/claude-code 실행. Node.js 20 이상 권장(LTS).',
   },
   {
     step: 2,

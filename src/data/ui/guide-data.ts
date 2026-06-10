@@ -45,6 +45,7 @@ export const GUIDE_DATA: GuideData[] = [
   { slug: 'domain', title: '도메인 연결', description: '도메인 구매와 연결 방법', category: 'concept', readingTime: '8분', href: '/guides/domain' },
   { slug: 'server', title: '서버·호스팅', description: '호스팅 서비스 선택과 설정', category: 'concept', readingTime: '10분', href: '/guides/server' },
   { slug: 'deploy', title: '배포하기', description: '앱을 인터넷에 배포하기', category: 'concept', readingTime: '10분', href: '/guides/deploy' },
+  { slug: 'troubleshooting', title: '흔한 에러 해결', description: '자주 만나는 에러를 증상별로 해결', category: 'concept', badge: '문제 해결', readingTime: '훑어보기 5분', href: '/guides/troubleshooting' },
   { slug: 'communication', title: '알림 연동', description: '이메일·알림 연동 방법', category: 'concept', readingTime: '10분', href: '/guides/communication' },
   { slug: 'payment', title: '결제 연동', description: '결제 시스템 연동 기초', category: 'concept', readingTime: '12분', href: '/guides/payment' },
   { slug: 'monitoring', title: '모니터링', description: '에러 추적과 성능 모니터링', category: 'concept', readingTime: '10분', href: '/guides/monitoring' },
@@ -82,11 +83,13 @@ export const SUB_GUIDE_DATA: SubGuideData[] = [
   { slug: 'vercel-deploy', parentSlug: 'deploy', title: 'Vercel 배포 가이드', description: '가입부터 첫 배포, Preview URL, 커스텀 도메인까지', readingTime: '7분', href: '/guides/deploy/vercel-deploy' },
   { slug: 'github-actions', parentSlug: 'deploy', title: 'GitHub Actions 가이드', description: 'CI/CD 핵심 개념, YAML 문법, 실전 워크플로우', readingTime: '8분', href: '/guides/deploy/github-actions' },
   { slug: 'cicd', parentSlug: 'deploy', title: 'CI/CD 배포 파이프라인', description: 'GitHub Actions로 자동 배포 구축', readingTime: '5분', href: '/guides/deploy/cicd' },
+  { slug: 'post-deploy-checklist', parentSlug: 'deploy', title: '배포 후 첫 점검', description: '도메인·HTTPS·환경변수·에러·성능 12가지 점검', badge: '체크리스트', readingTime: '8분', href: '/guides/deploy/post-deploy-checklist' },
   // ── AI 기초 이해 (ai-basics) ──
   { slug: 'overview', parentSlug: 'ai-basics', title: '개요 — LLM이란?', description: '대규모 언어 모델의 개념과 작동 원리', readingTime: '4분', href: '/guides/ai-basics' },
   { slug: 'models', parentSlug: 'ai-basics', title: 'AI 모델 비교', description: '주요 AI 모델 특징, 가격, 상황별 추천', readingTime: '6분', href: '/guides/ai-basics/models' },
   { slug: 'prompt-basics', parentSlug: 'ai-basics', title: '프롬프트 기초', description: '좋은 프롬프트 구조, 제로샷/퓨샷, CoT', readingTime: '5분', href: '/guides/ai-basics/prompt-basics' },
   { slug: 'ai-trends', parentSlug: 'ai-basics', title: 'AI 트렌드', description: 'AI 에이전트, MCP, 코딩 에이전트', readingTime: '5분', href: '/guides/ai-basics/ai-trends' },
+  { slug: 'cost-saving', parentSlug: 'ai-basics', title: 'AI 비용 관리 · 토큰 절약', description: '토큰·요금 구조, 비용 폭탄 방지, 모델 선택 가성비', readingTime: '6분', href: '/guides/ai-basics/cost-saving' },
   // ── AI 도구 (ai-tools) ──
   { slug: 'overview', parentSlug: 'ai-tools', title: '개요 — 바이브코딩이란?', description: 'AI와 대화하며 코딩하는 새로운 개발 방식', readingTime: '4분', href: '/guides/ai-tools' },
   { slug: 'prompt-engineering', parentSlug: 'ai-tools', title: '프롬프트 엔지니어링', description: '좋은 지시 구조, 컨텍스트 관리, 규격 문서 작성', readingTime: '5분', href: '/guides/ai-tools/prompt-engineering' },

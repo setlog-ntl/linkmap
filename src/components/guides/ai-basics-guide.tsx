@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HeroSection } from './ai-basics-guide/hero-section';
+import { GuideTLDR } from '@/components/guides/common';
 import { HowAiWorksSection } from './ai-basics-guide/how-ai-works-section';
 import { AiModelsSection } from './ai-basics-guide/ai-models-section';
 import { SafeUsageSection } from './ai-basics-guide/safe-usage-section';
@@ -46,6 +47,19 @@ export function AiBasicsGuide() {
   return (
     <div>
       <HeroSection />
+
+      <div className="max-w-2xl mx-auto mb-6 px-1">
+        <GuideTLDR
+          level="왕초보"
+          readingTime="20분"
+          points={[
+            'AI(LLM)는 수많은 글에서 패턴을 배워 "다음에 올 단어"를 확률로 예측하는 도구예요.',
+            '모델마다 똑똑함·속도·가격이 달라요 — 작업에 맞게 고르는 게 핵심이에요.',
+            'AI는 가끔 틀린 답을 자신 있게 말해요(환각). 중요한 내용은 꼭 직접 확인하세요.',
+          ]}
+          youCanDo="AI 도구를 골라 바이브코딩을 시작할 기본기를 갖춰요."
+        />
+      </div>
 
       {/* Sticky section nav */}
       <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">

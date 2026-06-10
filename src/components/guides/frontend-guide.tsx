@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HeroSection } from './frontend-guide/hero-section';
+import { GuideTLDR } from '@/components/guides/common';
 import { BrowserRenderingSection } from './frontend-guide/browser-rendering-section';
 import { ComponentsSection } from './frontend-guide/components-section';
 import { RenderingModesSection } from './frontend-guide/rendering-modes-section';
@@ -48,6 +49,19 @@ export function FrontendGuide() {
   return (
     <div>
       <HeroSection />
+
+      <div className="max-w-2xl mx-auto mb-6 px-1">
+        <GuideTLDR
+          level="입문"
+          readingTime="12분"
+          points={[
+            '프론트엔드는 사용자가 직접 보고 누르는 "화면"을 만드는 영역이에요.',
+            '브라우저는 HTML(뼈대)·CSS(꾸미기)·JS(동작)를 받아 화면을 그려요.',
+            'CSR·SSR·SSG는 "언제·어디서 화면을 그리느냐"의 차이 — 상황에 맞게 골라요.',
+          ]}
+          youCanDo="AI가 만든 화면 코드의 구조를 이해하고 어디를 고칠지 잡을 수 있어요."
+        />
+      </div>
 
       {/* Sticky section nav */}
       <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HeroSection } from './deploy-guide/hero-section';
+import { GuideTLDR } from '@/components/guides/common';
 import { DeployBasicsSection } from './deploy-guide/deploy-basics-section';
 import { DeployFlowSection } from './deploy-guide/deploy-flow-section';
 import { PlatformsSection } from './deploy-guide/platforms-section';
@@ -46,6 +47,19 @@ export function DeployGuide() {
   return (
     <div>
       <HeroSection />
+
+      <div className="max-w-2xl mx-auto mb-6 px-1">
+        <GuideTLDR
+          level="입문"
+          readingTime="10분"
+          points={[
+            '배포는 내 컴퓨터에만 있던 코드를 인터넷에 "공개"하는 일이에요.',
+            'GitHub에 코드를 올리면 Vercel·Cloudflare가 자동으로 배포해줘요(자동 배포).',
+            '로컬에 있던 환경변수를 배포 플랫폼에도 똑같이 등록해야 정상 작동해요.',
+          ]}
+          youCanDo="내가 만든 사이트를 실제 인터넷 주소로 공개할 수 있어요."
+        />
+      </div>
 
       {/* Sticky section nav */}
       <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">

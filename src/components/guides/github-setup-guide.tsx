@@ -31,6 +31,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { githubIllustrations } from './github-guide/github-illustrations';
+import { GuideTLDR } from '@/components/guides/common';
 
 interface StepPreview {
   /** 실제 캡처 이미지 경로 (없으면 illustration 사용) */
@@ -293,6 +294,21 @@ export function GitHubSetupGuide() {
             </div>
             <Progress value={progressPercent} className="h-2" />
           </div>
+        </div>
+      </ScrollReveal>
+
+      <ScrollReveal delay={0.05}>
+        <div className="max-w-2xl mx-auto mb-10">
+          <GuideTLDR
+            level="왕초보"
+            readingTime="15분"
+            points={[
+              'GitHub은 코드를 저장·공유하고 변경 이력을 관리하는 공간이에요.',
+              '가입 → Git 설치 → 저장소 생성 → 커밋 → 푸시, 5단계면 끝나요.',
+              '커밋은 "저장 지점", 푸시는 "GitHub에 올리기"라고 생각하면 쉬워요.',
+            ]}
+            youCanDo="내 코드를 GitHub에 올리고 배포 서비스와 연결할 준비가 돼요."
+          />
         </div>
       </ScrollReveal>
 

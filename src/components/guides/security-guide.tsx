@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HeroSection } from './security-guide/hero-section';
+import { GuideTLDR } from '@/components/guides/common';
 import { WhySecuritySection } from './security-guide/why-security-section';
 import { CommonMistakesSection } from './security-guide/common-mistakes-section';
 import { ChecklistSection } from './security-guide/checklist-section';
@@ -46,6 +47,19 @@ export function SecurityGuide() {
   return (
     <div>
       <HeroSection />
+
+      <div className="max-w-2xl mx-auto mb-6 px-1">
+        <GuideTLDR
+          level="필수"
+          readingTime="12분"
+          points={[
+            'AI가 만든 코드도 보안 구멍이 있을 수 있어요 — 그대로 믿으면 위험해요.',
+            '비밀 키 노출, XSS·SQL Injection 같은 흔한 공격은 기본만 알아도 막을 수 있어요.',
+            'HTTPS와 입력 검증은 "기본 중의 기본" 보안 장치예요.',
+          ]}
+          youCanDo="배포 전 최소한의 보안 점검을 스스로 할 수 있어요."
+        />
+      </div>
 
       {/* Sticky section nav */}
       <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">

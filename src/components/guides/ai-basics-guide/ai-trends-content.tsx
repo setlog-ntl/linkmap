@@ -24,7 +24,7 @@ const codingTools = [
     name: 'Claude Code',
     approach: '에이전트 퍼스트',
     interface: '터미널/CLI, VS Code/JetBrains 확장',
-    strength: '자율적 파일 탐색, 코드 수정, 명령 실행. Cursor 대비 5.5배 토큰 효율적.',
+    strength: '자율적 파일 탐색, 코드 수정, 명령 실행. 터미널 기반의 자율 실행과 토큰 효율에 강점.',
     bestFor: '대규모 리팩토링, 아키텍처 변경, 복잡한 디버깅',
     badge: 'bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300',
   },

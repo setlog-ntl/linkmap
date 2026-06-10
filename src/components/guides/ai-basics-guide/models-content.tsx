@@ -11,44 +11,45 @@ const modelDetails = [
     provider: 'Anthropic (Claude)',
     badge: 'bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300',
     models: [
-      { name: 'Claude Opus 4.6', context: '1M 토큰', maxOutput: '64K', input: '$5.00', output: '$25.00', features: '최고 수준 추론, 코딩 벤치마크(SWE-bench) 1위. 확장된 사고(extended thinking) 지원. 복잡한 분석, 대규모 코드 리팩토링, 보안 감사에 최적.' },
-      { name: 'Claude Sonnet 4.6', context: '1M 토큰', maxOutput: '64K', input: '$3.00', output: '$15.00', features: '속도와 지능의 균형. 에이전틱 검색 성능 개선, 토큰 효율적. 일상 코딩, 문서 작성, 분석에 적합.' },
-      { name: 'Claude Haiku 4.5', context: '200K 토큰', maxOutput: '8K', input: '$1.00', output: '$5.00', features: '가장 빠른 응답 속도. 간단한 분류, 고객 지원, 빠른 데이터 추출에 적합.' },
+      { name: 'Claude Fable 5', context: '1M 토큰', maxOutput: '128K', input: '$10.00', output: '$50.00', features: '가장 강력한 모델. 최고난도 추론과 장기 에이전트 작업에 특화. 비용이 높아 정말 어려운 작업에만 권장.' },
+      { name: 'Claude Opus 4.8', context: '1M 토큰', maxOutput: '128K', input: '$5.00', output: '$25.00', features: '최상위 추론·코딩. 복잡한 분석, 대규모 리팩토링, 자율 에이전트 작업에 강함.' },
+      { name: 'Claude Sonnet 4.6', context: '1M 토큰', maxOutput: '64K', input: '$3.00', output: '$15.00', features: '속도와 지능의 균형. 일상 코딩, 문서 작성, 분석에 가성비 좋은 기본 선택.' },
+      { name: 'Claude Haiku 4.5', context: '200K 토큰', maxOutput: '64K', input: '$1.00', output: '$5.00', features: '가장 빠른 응답 속도. 간단한 분류, 고객 지원, 빠른 데이터 추출에 적합.' },
     ],
   },
   {
-    provider: 'OpenAI (GPT / o 시리즈)',
+    provider: 'OpenAI (GPT)',
     badge: 'bg-green-100 dark:bg-green-900/60 text-green-700 dark:text-green-300',
     models: [
-      { name: 'GPT-5.4', context: '1M 토큰', maxOutput: '-', input: '$2.50', output: '$15.00', features: '범용 최고 수준. Standard/Thinking/Pro/Mini/Nano 5가지 변형. 가장 넓은 생태계.' },
-      { name: 'o3', context: '200K 토큰', maxOutput: '-', input: '$2.00', output: '$16.00', features: '추론 특화 모델. 내부 사고 토큰이 출력 비용에 포함되어 실제 비용이 5~20배 높을 수 있으므로 주의.' },
-      { name: 'o4-mini', context: '200K 토큰', maxOutput: '-', input: '$1.10', output: '$4.40', features: '경제적인 추론 모델. 일상적 추론 작업에 비용 효율적.' },
+      { name: 'GPT-5.5', context: '대용량', maxOutput: '-', input: '$5.00', output: '$30.00', features: '최신 플래그십. 범용 최고 수준에 가장 넓은 생태계. 캐시 입력 시 최대 90% 절감.' },
+      { name: 'GPT-5.4', context: '대용량', maxOutput: '-', input: '$2.50', output: '$15.00', features: '균형형. 일상 코딩·챗봇에 가성비 좋은 선택. 추론 변형(thinking)도 제공.' },
+      { name: 'GPT-5.4 nano', context: '대용량', maxOutput: '-', input: '$0.20', output: '$1.25', features: '초경제형. 대량·단순 작업에 비용 효율적.' },
     ],
   },
   {
     provider: 'Google (Gemini)',
     badge: 'bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300',
     models: [
-      { name: 'Gemini 2.5 Pro', context: '1M 토큰', maxOutput: '-', input: '$1.25', output: '$10.00', features: '멀티모달(텍스트+이미지+동영상) 강점. 긴 문서 분석, 영상 이해에 특히 강함.' },
-      { name: 'Gemini 2.5 Flash', context: '1M 토큰', maxOutput: '-', input: '$0.30', output: '$2.50', features: '초고속 처리. 매우 경제적. 빠른 응답이 필요한 챗봇, 간단한 작업에 최적.' },
+      { name: 'Gemini 3.1 Pro', context: '1M+ 토큰', maxOutput: '-', input: '$2.00', output: '$18.00', features: '멀티모달(텍스트+이미지+동영상) 강점. 긴 문서 분석, 영상 이해에 특히 강함.' },
+      { name: 'Gemini 3.5 Flash', context: '1M+ 토큰', maxOutput: '-', input: '$1.50', output: '$9.00', features: '최신 중급. 속도와 품질의 균형, 캐시 입력 저렴.' },
+      { name: 'Gemini 2.5 Flash-Lite', context: '1M 토큰', maxOutput: '-', input: '$0.10', output: '$0.40', features: '초고속·초경제. 빠른 응답이 필요한 챗봇, 간단한 작업에 최적.' },
     ],
   },
   {
-    provider: 'Meta (Llama) / DeepSeek',
+    provider: '오픈소스 (DeepSeek / Llama)',
     badge: 'bg-orange-100 dark:bg-orange-900/60 text-orange-700 dark:text-orange-300',
     models: [
-      { name: 'Llama 4 Scout', context: '10M 토큰', maxOutput: '-', input: '$0.11', output: '$0.34', features: '완전 오픈소스. 10M 토큰이라는 압도적 컨텍스트 윈도우. 자체 서버에서 무료 운영 가능.' },
-      { name: 'Llama 4 Maverick', context: '10M 토큰', maxOutput: '-', input: '$0.20', output: '$0.60', features: '오픈소스, 높은 성능. 프라이버시 중요 또는 비용 최소화에 적합.' },
-      { name: 'DeepSeek V3.2', context: '128K 토큰', maxOutput: '-', input: '$0.28', output: '$0.42', features: '오픈소스. GPT-5.4 성능의 90%를 1/50 가격에. 극강의 가성비.' },
-      { name: 'DeepSeek R1', context: '128K 토큰', maxOutput: '-', input: '$0.55', output: '$2.19', features: '추론 특화 오픈소스 모델.' },
+      { name: 'DeepSeek V4 Flash', context: '대용량', maxOutput: '-', input: '$0.14', output: '$0.28', features: '프론티어급 중 가장 저렴. 극강의 가성비. (기존 V3.2·R1은 V4로 통합됨)' },
+      { name: 'DeepSeek V4 Pro', context: '대용량', maxOutput: '-', input: '$1.74', output: '$3.48', features: '오픈소스 고성능 추론. 성능과 비용의 균형이 필요할 때.' },
+      { name: 'Llama 4 Maverick', context: '10M 토큰', maxOutput: '-', input: '$0.20', output: '$0.60', features: '완전 오픈소스. 자체 서버에서 독립 운영 가능 — 프라이버시가 중요할 때 적합. (가격은 호스팅 제공사 기준)' },
     ],
   },
 ];
 
 const comparisonAxes = [
-  { axis: '성능 vs 비용', desc: '프론티어 모델(Opus, GPT-5.4)은 최고 성능이지만 비싸고, 오픈소스(DeepSeek, Llama)는 90% 성능을 1/10 가격에 제공' },
-  { axis: '속도 vs 정확도', desc: '빠른 모델(Flash, Haiku)은 간단한 작업에, 느리지만 정확한 모델(Opus, o3)은 복잡한 추론에 적합' },
-  { axis: '범용 vs 특화', desc: 'GPT-5.4/Claude Sonnet은 범용 만능, o3/R1은 수학·코딩 추론 특화' },
+  { axis: '성능 vs 비용', desc: '프론티어 모델(Fable 5, Opus 4.8, GPT-5.5)은 최고 성능이지만 비싸고, 오픈소스(DeepSeek, Llama)는 그 성능의 상당 부분을 훨씬 저렴하게 제공' },
+  { axis: '속도 vs 정확도', desc: '빠른 모델(Flash, Haiku)은 간단한 작업에, 느리지만 정확한 모델(Opus, Fable)은 복잡한 추론에 적합' },
+  { axis: '범용 vs 특화', desc: 'GPT·Claude Sonnet은 범용 만능, 추론 특화 모델(thinking 변형, DeepSeek)은 수학·코딩 추론에 강함' },
   { axis: '프라이버시', desc: '클라우드 API는 데이터가 외부로 전송되지만, 오픈소스(Llama)는 자체 서버에서 완전 독립 운영 가능' },
 ];
 
@@ -66,7 +67,7 @@ export function ModelsContent() {
         <p className="text-muted-foreground mb-2 max-w-2xl leading-relaxed">
           2026년 주요 AI 모델의 성능, 가격, 특징을 상세히 비교합니다.
         </p>
-        <p className="text-[10px] text-muted-foreground mb-8">가격: 100만 토큰당 USD (입력 / 출력) | 마지막 업데이트: 2026-04-15</p>
+        <p className="text-[10px] text-muted-foreground mb-8">가격: 100만 토큰당 USD (입력 / 출력) · 공식 가격표 기준 | 마지막 업데이트: 2026-06-11</p>
       </ScrollReveal>
 
       {/* 제공사별 상세 */}

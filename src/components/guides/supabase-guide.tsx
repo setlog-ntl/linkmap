@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { GuideTLDR } from '@/components/guides/common';
 
 const sections = [
   { id: 'overview', label: '개요' },
@@ -61,6 +62,19 @@ export function SupabaseGuide() {
           </div>
         </div>
       </section>
+
+      <div className="max-w-3xl mt-6">
+        <GuideTLDR
+          level="입문"
+          readingTime="설정 10분"
+          points={[
+            'Supabase는 PostgreSQL 기반 BaaS — DB·인증·스토리지를 한 번에 제공해요.',
+            'URL·anon 키는 클라이언트용, service_role 키는 서버 전용(절대 노출 금지)이에요.',
+            '새 테이블엔 반드시 RLS를 켜세요 — 안 켜면 anon 키를 아는 누구나 데이터에 접근해요.',
+          ]}
+          youCanDo="백엔드 서버를 직접 안 만들고도 데이터베이스·로그인을 갖춘 앱을 만들 수 있어요."
+        />
+      </div>
 
       {/* Sticky nav */}
       <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">

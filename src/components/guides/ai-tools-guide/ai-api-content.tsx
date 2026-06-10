@@ -43,12 +43,12 @@ const apiKeySteps = [
 ];
 
 const pricingTable = [
-  { model: 'GPT-4o', provider: 'OpenAI', input: '$2.5', output: '$10', context: '128K', badge: '범용 추천' },
-  { model: 'GPT-4o mini', provider: 'OpenAI', input: '$0.15', output: '$0.60', context: '128K', badge: '가성비' },
-  { model: 'Claude Sonnet 4', provider: 'Anthropic', input: '$3', output: '$15', context: '200K', badge: '코딩 추천' },
-  { model: 'Claude Haiku 3.5', provider: 'Anthropic', input: '$0.80', output: '$4', context: '200K', badge: '가성비' },
-  { model: 'Gemini 2.5 Pro', provider: 'Google', input: '$1.25', output: '$10', context: '1M', badge: '고성능' },
-  { model: 'Gemini 2.5 Flash', provider: 'Google', input: '$0.30', output: '$2.50', context: '1M', badge: '범용 추천' },
+  { model: 'GPT-5.4', provider: 'OpenAI', input: '$2.50', output: '$15', context: '대용량', badge: '범용 추천' },
+  { model: 'GPT-5.4 nano', provider: 'OpenAI', input: '$0.20', output: '$1.25', context: '대용량', badge: '가성비' },
+  { model: 'Claude Sonnet 4.6', provider: 'Anthropic', input: '$3', output: '$15', context: '1M', badge: '코딩 추천' },
+  { model: 'Claude Haiku 4.5', provider: 'Anthropic', input: '$1', output: '$5', context: '200K', badge: '빠름' },
+  { model: 'Gemini 3.1 Pro', provider: 'Google', input: '$2', output: '$18', context: '1M+', badge: '고성능' },
+  { model: 'Gemini 3.5 Flash', provider: 'Google', input: '$1.50', output: '$9', context: '1M+', badge: '범용 추천' },
   { model: 'Gemini 2.5 Flash-Lite', provider: 'Google', input: '$0.10', output: '$0.40', context: '1M', badge: '가성비+무료' },
 ];
 
@@ -165,7 +165,7 @@ const costTips = [
   },
   {
     title: '모델 선택 최적화',
-    desc: '간단한 작업은 저렴한 모델(GPT-4o mini, Haiku)을, 복잡한 작업만 고성능 모델을 사용합니다.',
+    desc: '간단한 작업은 저렴한 모델(GPT-5.4 nano, Haiku)을, 복잡한 작업만 고성능 모델을 사용합니다.',
     icon: '🎯',
   },
   {
@@ -294,8 +294,8 @@ export function AiApiContent() {
           <div className="max-w-2xl mb-8 rounded-lg border bg-card shadow-sm p-4">
             <p className="text-sm text-muted-foreground leading-relaxed">
               <strong className="text-foreground">비용 감 잡기:</strong> 간단한 챗봇 앱에서
-              하루 100명이 각 5번 대화하면, GPT-4o mini 기준 월 약 $2~5 수준입니다.
-              Gemini 2.0 Flash는 무료 티어로 시작할 수 있어 비용 부담 없이 프로토타입을 만들 수 있습니다.
+              하루 100명이 각 5번 대화하면, GPT-5.4 nano 같은 저가 모델 기준 월 약 $2~5 수준입니다.
+              Gemini Flash 계열은 무료 티어로 시작할 수 있어 비용 부담 없이 프로토타입을 만들 수 있습니다.
             </p>
           </div>
         </ScrollReveal>
@@ -355,7 +355,7 @@ export function AiApiContent() {
               <div className="text-sm font-semibold mb-2 text-green-600 dark:text-green-400">OpenAI</div>
               <ul className="space-y-1.5 text-xs text-muted-foreground">
                 <li>- 가장 넓은 생태계, 레퍼런스 풍부</li>
-                <li>- GPT-4o: 범용 추천, 이미지 입력 지원</li>
+                <li>- GPT-5.4: 범용 추천, 이미지 입력 지원</li>
                 <li>- Function calling, JSON mode 안정적</li>
                 <li>- 단점: 무료 티어 없음</li>
               </ul>
@@ -364,7 +364,7 @@ export function AiApiContent() {
               <div className="text-sm font-semibold mb-2 text-purple-600 dark:text-purple-400">Anthropic</div>
               <ul className="space-y-1.5 text-xs text-muted-foreground">
                 <li>- Claude: 코딩·분석·긴 문서에 강점</li>
-                <li>- 200K 컨텍스트로 긴 코드 분석 유리</li>
+                <li>- 최대 1M 컨텍스트로 긴 코드 분석 유리</li>
                 <li>- 안전성 높은 응답, 환각 적음</li>
                 <li>- 단점: 무료 티어 없음</li>
               </ul>
@@ -373,7 +373,7 @@ export function AiApiContent() {
               <div className="text-sm font-semibold mb-2 text-blue-600 dark:text-blue-400">Google Gemini</div>
               <ul className="space-y-1.5 text-xs text-muted-foreground">
                 <li>- 무료 티어 제공 (입문·프로토타입 최적)</li>
-                <li>- 1M 토큰 컨텍스트 (업계 최대)</li>
+                <li>- 1M+ 토큰 컨텍스트 (대용량 강점)</li>
                 <li>- 멀티모달: 텍스트, 이미지, 오디오, 비디오</li>
                 <li>- Google 서비스(Sheets, Docs) 연동 용이</li>
               </ul>
@@ -385,7 +385,7 @@ export function AiApiContent() {
           <div className="mt-4 p-3 rounded-lg bg-muted/50 border max-w-3xl">
             <p className="text-xs text-muted-foreground">
               <strong className="text-foreground">추천:</strong> 처음 시작한다면 <strong className="text-foreground">Gemini 무료 티어</strong>로 시작하고,
-              프로덕션에서는 용도에 맞는 모델을 선택하세요. 챗봇은 GPT-4o, 코드 분석은 Claude, 멀티모달은 Gemini가 강합니다.
+              프로덕션에서는 용도에 맞는 모델을 선택하세요. 챗봇은 GPT-5.4, 코드 분석은 Claude, 멀티모달은 Gemini가 강합니다.
             </p>
           </div>
         </ScrollReveal>

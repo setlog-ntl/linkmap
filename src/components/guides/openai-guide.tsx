@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { GuideTLDR } from '@/components/guides/common';
 
 const sections = [
   { id: 'overview', label: '개요' },
@@ -47,7 +48,7 @@ export function OpenAIGuide() {
             OpenAI 연동 가이드
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            GPT-4o, DALL-E, Whisper, 임베딩 등 OpenAI API를 Next.js 프로젝트에 안전하게
+            GPT-5, DALL-E, Whisper, 임베딩 등 OpenAI API를 Next.js 프로젝트에 안전하게
             연동하는 방법을 단계별로 설명합니다. API 키 보안부터 스트리밍, 비용 관리까지
             실무에서 꼭 필요한 내용만 담았습니다.
           </p>
@@ -60,6 +61,19 @@ export function OpenAIGuide() {
           </div>
         </div>
       </section>
+
+      <div className="max-w-3xl mt-6">
+        <GuideTLDR
+          level="입문"
+          readingTime="15분"
+          points={[
+            'OpenAI API 하나로 GPT·이미지(DALL-E)·음성(Whisper)·임베딩 모델을 모두 쓸 수 있어요.',
+            'API 키는 서버(API Route)에서만 — NEXT_PUBLIC_ 붙이면 브라우저에 노출돼요.',
+            'max_tokens를 꼭 설정해 예상치 못한 비용 폭탄을 막으세요.',
+          ]}
+          youCanDo="내 앱에 AI 채팅·생성 기능을 안전하게 붙일 수 있어요."
+        />
+      </div>
 
       {/* Sticky nav */}
       <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">
@@ -86,13 +100,13 @@ export function OpenAIGuide() {
         <section id="overview">
           <h2 className="text-2xl font-bold mb-4">OpenAI란?</h2>
           <p className="text-muted-foreground leading-relaxed mb-6">
-            OpenAI는 GPT-4o(텍스트), DALL-E 3(이미지), Whisper(음성→텍스트), text-embedding-3(벡터 검색) 등
+            OpenAI는 GPT-5(텍스트), DALL-E 3(이미지), Whisper(음성→텍스트), text-embedding-3(벡터 검색) 등
             다양한 AI 모델을 REST API로 제공하는 플랫폼입니다. 단일 API 키로 모든 모델을 사용할 수 있어
             Next.js 프로젝트에 AI 기능을 빠르게 추가할 수 있습니다.
           </p>
           <div className="grid sm:grid-cols-2 gap-4">
             {[
-              { label: 'GPT-4o', desc: '텍스트·이미지 이해, 채팅, 코드 생성' },
+              { label: 'GPT-5', desc: '텍스트·이미지 이해, 채팅, 코드 생성' },
               { label: 'text-embedding-3', desc: '시맨틱 검색, 유사도 분석, RAG' },
               { label: 'DALL-E 3', desc: '텍스트 → 이미지 생성' },
               { label: 'Whisper', desc: '음성 → 텍스트 변환' },
@@ -159,7 +173,7 @@ export async function POST(req: Request) {
   const { message } = await req.json()
 
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'gpt-5.4',
     messages: [{ role: 'user', content: message }],
     max_tokens: 1024,
   })
@@ -191,7 +205,7 @@ export async function POST(req: Request) {
   const { message } = await req.json()
 
   const stream = await openai.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'gpt-5.4',
     messages: [{ role: 'user', content: message }],
     stream: true,
     max_tokens: 1024,
@@ -224,7 +238,7 @@ export async function POST(req: Request) {
                 <p className="font-semibold text-sm mb-2">⚠️ max_tokens 반드시 설정</p>
                 <p className="text-sm text-muted-foreground">
                   설정하지 않으면 모델이 최대 길이까지 응답하여 예상치 못한 비용이 발생합니다.
-                  일반 챗봇은 <code>1024</code>, 긴 문서 생성은 <code>4096</code>으로 제한하세요.
+                  일반 챗봇은 <code>1024</code>, 긴 문서 생성은 <code>4096</code> 이상으로 제한하세요.
                 </p>
               </CardContent>
             </Card>
@@ -241,9 +255,9 @@ export async function POST(req: Request) {
                 </thead>
                 <tbody className="divide-y">
                   {[
-                    { model: 'gpt-4o', input: '$2.50', output: '$10.00', use: '고성능 범용' },
-                    { model: 'gpt-4o-mini', input: '$0.15', output: '$0.60', use: '저비용 범용' },
-                    { model: 'o1-mini', input: '$3.00', output: '$12.00', use: '추론 특화' },
+                    { model: 'gpt-5.5', input: '$5.00', output: '$30.00', use: '최신 플래그십' },
+                    { model: 'gpt-5.4', input: '$2.50', output: '$15.00', use: '고성능 범용' },
+                    { model: 'gpt-5.4-nano', input: '$0.20', output: '$1.25', use: '저비용 범용' },
                     { model: 'text-embedding-3-small', input: '$0.02', output: '—', use: '벡터 임베딩' },
                   ].map((r) => (
                     <tr key={r.model} className="hover:bg-muted/50">

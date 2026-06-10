@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { GuideTLDR } from '@/components/guides/common';
 
 const sections = [
   { id: 'overview', label: '개요' },
@@ -60,6 +61,19 @@ export function VercelGuide() {
           </div>
         </div>
       </section>
+
+      <div className="max-w-3xl mt-6">
+        <GuideTLDR
+          level="입문"
+          readingTime="15분"
+          points={[
+            'Vercel은 Next.js를 만든 팀의 배포 플랫폼 — GitHub 연동만으로 자동 배포돼요.',
+            'push할 때마다 자동 빌드·배포되고, PR마다 미리보기(Preview) URL이 생겨요.',
+            '로컬 .env의 값을 Vercel 대시보드에도 등록해야 정상 작동해요.',
+          ]}
+          youCanDo="GitHub에 올린 Next.js 앱을 무료로 인터넷에 배포할 수 있어요."
+        />
+      </div>
 
       {/* Sticky nav */}
       <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">

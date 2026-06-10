@@ -1,15 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { ScrollReveal } from '@/components/landing/scroll-reveal';
 import { Button } from '@/components/ui/button';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 import { ArrowRight } from 'lucide-react';
+import { FaqSection as CommonFaqSection } from '@/components/guides/common';
 
 const faqs = [
   {
@@ -56,37 +50,10 @@ const faqs = [
 
 export function FaqSection() {
   return (
-    <section id="faq" className="scroll-mt-24 py-12 md:py-16">
-      <ScrollReveal>
-        <h2 className="text-2xl md:text-3xl font-bold mb-3">자주 묻는 질문</h2>
-        <p className="text-muted-foreground mb-8 max-w-2xl">
-          인증 관련해서 가장 많이 궁금해하시는 부분을 정리했습니다.
-        </p>
-      </ScrollReveal>
-
-      <ScrollReveal delay={0.1}>
-        <div className="max-w-2xl">
-          <Accordion type="single" collapsible className="space-y-2">
-            {faqs.map((faq, i) => (
-              <AccordionItem
-                key={i}
-                value={`faq-${i}`}
-                className="rounded-lg border px-4"
-              >
-                <AccordionTrigger className="text-left font-medium hover:no-underline">
-                  {faq.q}
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground leading-relaxed">
-                  {faq.a}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </div>
-      </ScrollReveal>
-
-      {/* CTA */}
-      <ScrollReveal delay={0.2}>
+    <CommonFaqSection
+      items={faqs}
+      description="인증 관련해서 가장 많이 궁금해하시는 부분을 정리했습니다."
+      footer={
         <div className="mt-12 text-center">
           <p className="text-muted-foreground mb-4">
             인증 설정이 이해되셨다면, 지금 바로 시작해 보세요!
@@ -103,7 +70,7 @@ export function FaqSection() {
             </Button>
           </div>
         </div>
-      </ScrollReveal>
-    </section>
+      }
+    />
   );
 }

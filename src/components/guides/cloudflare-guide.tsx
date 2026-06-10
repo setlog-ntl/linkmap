@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/accordion';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
+import { GuideTLDR } from '@/components/guides/common';
 import {
   Cloud,
   Terminal,
@@ -305,6 +306,21 @@ export function CloudflareGuide() {
             </div>
             <Progress value={progressPercent} className="h-2" />
           </div>
+        </div>
+      </ScrollReveal>
+
+      <ScrollReveal delay={0.05}>
+        <div className="max-w-2xl mx-auto mb-10">
+          <GuideTLDR
+            level="입문"
+            readingTime="40분"
+            points={[
+              'Cloudflare는 CDN·DNS·보안·배포(Workers)를 한 곳에서 제공하는 플랫폼이에요.',
+              '계정 생성 → 도메인 연결 → Workers 배포 → 시크릿 설정 순서로 진행해요.',
+              '환경변수(시크릿)는 wrangler로 따로 등록해야 배포본에서 읽혀요.',
+            ]}
+            youCanDo="내 사이트를 Cloudflare로 빠르고 안전하게 배포할 수 있어요."
+          />
         </div>
       </ScrollReveal>
 

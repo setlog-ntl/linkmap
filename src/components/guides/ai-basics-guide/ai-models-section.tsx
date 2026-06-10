@@ -9,7 +9,7 @@ const providers = [
     name: 'Anthropic',
     color: 'bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300',
     models: [
-      { name: 'Claude Opus 4.6', context: '1M', price: '$5 / $25', strength: '최고 수준 추론, 코딩 1위' },
+      { name: 'Claude Opus 4.8', context: '1M', price: '$5 / $25', strength: '최상위 추론·코딩' },
       { name: 'Claude Sonnet 4.6', context: '1M', price: '$3 / $15', strength: '성능/비용 균형' },
       { name: 'Claude Haiku 4.5', context: '200K', price: '$1 / $5', strength: '최고 속도' },
     ],
@@ -18,34 +18,35 @@ const providers = [
     name: 'OpenAI',
     color: 'bg-green-100 dark:bg-green-900/60 text-green-700 dark:text-green-300',
     models: [
-      { name: 'GPT-5.4', context: '1M', price: '$2.50 / $15', strength: '범용 최고 수준' },
-      { name: 'o3', context: '200K', price: '$2 / $16', strength: '추론 특화' },
-      { name: 'o4-mini', context: '200K', price: '$1.10 / $4.40', strength: '경제적 추론' },
+      { name: 'GPT-5.5', context: '대용량', price: '$5 / $30', strength: '최신 플래그십' },
+      { name: 'GPT-5.4', context: '대용량', price: '$2.50 / $15', strength: '균형형, 가성비' },
+      { name: 'GPT-5.4 nano', context: '대용량', price: '$0.20 / $1.25', strength: '초경제형' },
     ],
   },
   {
     name: 'Google',
     color: 'bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300',
     models: [
-      { name: 'Gemini 2.5 Pro', context: '1M', price: '$1.25 / $10', strength: '멀티모달 강점' },
-      { name: 'Gemini 2.5 Flash', context: '1M', price: '$0.30 / $2.50', strength: '초고속, 가성비' },
+      { name: 'Gemini 3.1 Pro', context: '1M+', price: '$2 / $18', strength: '멀티모달 강점' },
+      { name: 'Gemini 3.5 Flash', context: '1M+', price: '$1.50 / $9', strength: '최신 중급' },
+      { name: 'Gemini 2.5 Flash-Lite', context: '1M', price: '$0.10 / $0.40', strength: '초고속, 가성비' },
     ],
   },
   {
-    name: 'Meta / DeepSeek',
+    name: '오픈소스 (DeepSeek / Llama)',
     color: 'bg-orange-100 dark:bg-orange-900/60 text-orange-700 dark:text-orange-300',
     models: [
-      { name: 'Llama 4 Scout', context: '10M', price: '$0.11 / $0.34', strength: '오픈소스, 최대 컨텍스트' },
-      { name: 'DeepSeek V3.2', context: '128K', price: '$0.28 / $0.42', strength: '오픈소스, 극강 가성비' },
+      { name: 'DeepSeek V4 Flash', context: '대용량', price: '$0.14 / $0.28', strength: '극강 가성비' },
+      { name: 'Llama 4 Maverick', context: '10M', price: '$0.20 / $0.60', strength: '오픈소스, 자체 호스팅' },
     ],
   },
 ];
 
 const recommendations = [
   { situation: '처음 AI를 써보는 경우', models: 'ChatGPT 또는 Claude', reason: '무료 티어, 사용 쉬움' },
-  { situation: '코딩/개발 작업', models: 'Claude Opus 4.6 또는 Claude Code', reason: '코딩 벤치마크 1위' },
-  { situation: '비용 최소화', models: 'DeepSeek V3.2 또는 Gemini Flash', reason: '가격 대비 성능 최고' },
-  { situation: '긴 문서 분석', models: 'Gemini 2.5 Pro 또는 Llama 4', reason: '1M~10M 토큰 컨텍스트' },
+  { situation: '코딩/개발 작업', models: 'Claude Opus 4.8 또는 Claude Code', reason: '코딩 성능 강력' },
+  { situation: '비용 최소화', models: 'DeepSeek V4 Flash 또는 Gemini Flash-Lite', reason: '가격 대비 성능 최고' },
+  { situation: '긴 문서 분석', models: 'Gemini 3.1 Pro 또는 Llama 4', reason: '1M~10M 토큰 컨텍스트' },
   { situation: '프라이버시 중요', models: 'Llama 4 (자체 호스팅)', reason: '오픈소스, 데이터 외부 전송 없음' },
   { situation: '빠른 응답 필요', models: 'Gemini Flash 또는 Claude Haiku', reason: '최고 속도' },
 ];

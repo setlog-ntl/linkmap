@@ -63,6 +63,7 @@ PAGES=(
   "/guides/cloudflare"
   "/guides/communication"
   "/guides/deploy"
+  "/guides/troubleshooting"
   "/guides/design-ui"
   "/guides/domain"
   "/guides/env"
@@ -79,6 +80,8 @@ PAGES=(
   "/guides/version-control"
 
   # ── 가이드 상세 (503 빈발 경로 우선) ──
+  "/guides/ai-basics/cost-saving"
+  "/guides/deploy/post-deploy-checklist"
   "/guides/auth/google"
   "/guides/auth/kakao"
   "/guides/api-basics/api-auth"

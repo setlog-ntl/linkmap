@@ -1,6 +1,5 @@
 'use client';
 
-import { ScrollReveal } from '@/components/landing/scroll-reveal';
 import {
   KeyRound,
   Fingerprint,
@@ -15,16 +14,9 @@ import {
   TableProperties,
   ArrowRightLeft,
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { GlossarySection as CommonGlossarySection, type GlossaryEntry } from '@/components/guides/common';
 
-interface GlossaryItem {
-  term: string;
-  icon: LucideIcon;
-  metaphor: string;
-  description: string;
-}
-
-const glossary: GlossaryItem[] = [
+const glossary: GlossaryEntry[] = [
   {
     term: 'OAuth',
     icon: KeyRound,
@@ -113,51 +105,11 @@ const glossary: GlossaryItem[] = [
 
 export function GlossarySection() {
   return (
-    <section id="glossary" className="scroll-mt-24 py-12 md:py-16">
-      <ScrollReveal>
-        <div className="mb-8">
-          <div className="inline-flex items-center gap-2 text-xs font-semibold text-purple-600 dark:text-purple-400 mb-2 tracking-wide uppercase">
-            <div className="w-2 h-2 rounded-full bg-purple-500" />
-            Glossary
-          </div>
-          <h2 className="text-2xl md:text-3xl font-bold mb-3">
-            인증 용어 사전
-          </h2>
-          <p className="text-muted-foreground max-w-2xl">
-            인증 관련 용어가 헷갈릴 때 참고하세요. 일상적인 비유와 함께
-            설명합니다.
-          </p>
-        </div>
-      </ScrollReveal>
-
-      <ScrollReveal delay={0.1}>
-        <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {glossary.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={item.term}
-                className="rounded-xl border bg-card p-5 flex flex-col gap-3"
-              >
-                <dt className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center shrink-0">
-                    <Icon className="w-4.5 h-4.5 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <div>
-                    <span className="font-semibold text-sm">{item.term}</span>
-                    <span className="ml-2 text-xs text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 px-2 py-0.5 rounded-full">
-                      {item.metaphor}
-                    </span>
-                  </div>
-                </dt>
-                <dd className="text-sm text-muted-foreground leading-relaxed">
-                  {item.description}
-                </dd>
-              </div>
-            );
-          })}
-        </dl>
-      </ScrollReveal>
-    </section>
+    <CommonGlossarySection
+      items={glossary}
+      title="인증 용어 사전"
+      description="인증 관련 용어가 헷갈릴 때 참고하세요. 일상적인 비유와 함께 설명합니다."
+      accent="purple"
+    />
   );
 }

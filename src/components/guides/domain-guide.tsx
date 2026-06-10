@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HeroSection } from './domain-guide/hero-section';
+import { GuideTLDR } from '@/components/guides/common';
 import { DomainBasicsSection } from './domain-guide/domain-basics-section';
 import { UrlAnatomySection } from './domain-guide/url-anatomy-section';
 import { RegistrarsSection } from './domain-guide/registrars-section';
@@ -46,6 +47,19 @@ export function DomainGuide() {
   return (
     <div>
       <HeroSection />
+
+      <div className="max-w-2xl mx-auto mb-6 px-1">
+        <GuideTLDR
+          level="입문"
+          readingTime="8분"
+          points={[
+            '도메인은 외우기 어려운 IP 주소 대신 쓰는 "인터넷 주소(이름)"예요.',
+            '도메인을 사고, DNS 레코드(A·CNAME)로 내 사이트에 연결해요.',
+            '연결 후 적용까지 시간이 걸릴 수 있어요(전파). 조급해하지 마세요.',
+          ]}
+          youCanDo="내 사이트에 나만의 도메인을 사서 연결할 수 있어요."
+        />
+      </div>
 
       {/* Sticky section nav */}
       <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">

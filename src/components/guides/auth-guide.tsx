@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HeroSection } from './auth-guide/hero-section';
+import { GuideTLDR } from '@/components/guides/common';
 import { AuthBasicsSection } from './auth-guide/auth-basics-section';
 import { GuideLinkCards } from './auth-guide/guide-link-cards';
 import { AppLoginSection } from './auth-guide/app-login-section';
@@ -52,6 +53,19 @@ export function AuthGuide() {
   return (
     <div>
       <HeroSection />
+
+      <div className="max-w-2xl mx-auto mb-6 px-1">
+        <GuideTLDR
+          level="입문"
+          readingTime="15분"
+          points={[
+            '인증(Authentication)은 "누구인지" 확인하는 과정 — 곧 로그인이에요.',
+            '"Google로 로그인"은 비밀번호 없이 권한만 빌려 쓰는 OAuth 방식이에요.',
+            '로그인 상태는 세션·토큰으로 유지되고, 콜백 URL이 정확해야 작동해요.',
+          ]}
+          youCanDo="소셜 로그인을 붙이고 흔한 리다이렉트 오류를 스스로 해결할 수 있어요."
+        />
+      </div>
 
       {/* 핵심 개념: 두 가지 인증 레이어 */}
       <AuthBasicsSection />

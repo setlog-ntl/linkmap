@@ -1,4 +1,4 @@
-import { BookOpen, Wrench, Key, Shield, Monitor, Server, Globe, Github, Cloud, Bot, Database, Triangle, Chrome, MessageCircle, FileText, FolderOpen, Rocket, RefreshCw, Atom, CloudCog, GitBranch, Terminal, Package, KeyRound, Zap, Link2, ServerCog, ShoppingCart, Network, ShieldCheck, Palette, Mail, CreditCard, Activity, Workflow, Plug, Cpu, Code, Smartphone, AlertTriangle, Lock, Globe2, Layers, Search, ToggleRight, Bell, Send, Radio, Webhook, Timer, Share2, Brain, TrendingUp } from 'lucide-react';
+import { BookOpen, Wrench, Key, Shield, Monitor, Server, Globe, Github, Cloud, Bot, Database, Triangle, Chrome, MessageCircle, FileText, FolderOpen, Rocket, RefreshCw, Atom, CloudCog, GitBranch, Terminal, Package, KeyRound, Zap, Link2, ServerCog, ShoppingCart, Network, ShieldCheck, Palette, Mail, CreditCard, Activity, Workflow, Plug, Cpu, Code, Smartphone, AlertTriangle, Lock, Globe2, Layers, Search, ToggleRight, Bell, Send, Radio, Webhook, Timer, Share2, Brain, TrendingUp, LifeBuoy, Coins, ListChecks } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export type GuideCategory = 'concept' | 'service';
@@ -40,6 +40,7 @@ export const GUIDE_LIST: GuideMeta[] = [
   { slug: 'domain', title: '도메인 연결', description: '도메인 구매와 연결 방법', category: 'concept', icon: Globe, readingTime: '8분', href: '/guides/domain' },
   { slug: 'server', title: '서버·호스팅', description: '호스팅 서비스 선택과 설정', category: 'concept', icon: ServerCog, readingTime: '10분', href: '/guides/server' },
   { slug: 'deploy', title: '배포하기', description: '앱을 인터넷에 배포하기', category: 'concept', icon: Rocket, readingTime: '10분', href: '/guides/deploy' },
+  { slug: 'troubleshooting', title: '흔한 에러 해결', description: '자주 만나는 에러를 증상별로 해결', category: 'concept', icon: LifeBuoy, badge: '문제 해결', readingTime: '훑어보기 5분', href: '/guides/troubleshooting' },
   // 14~17: 확장 단계 — 알림, 결제, 모니터링, 자동화
   { slug: 'communication', title: '알림 연동', description: '이메일·알림 연동 방법', category: 'concept', icon: Mail, readingTime: '10분', href: '/guides/communication' },
   { slug: 'payment', title: '결제 연동', description: '결제 시스템 연동 기초', category: 'concept', icon: CreditCard, readingTime: '12분', href: '/guides/payment' },
@@ -102,12 +103,14 @@ export const SUB_GUIDE_LIST: SubGuideMeta[] = [
   { slug: 'vercel-deploy', parentSlug: 'deploy', title: 'Vercel 배포 가이드', description: '가입부터 첫 배포, Preview URL, 커스텀 도메인까지', icon: Triangle, readingTime: '7분', href: '/guides/deploy/vercel-deploy' },
   { slug: 'github-actions', parentSlug: 'deploy', title: 'GitHub Actions 가이드', description: 'CI/CD 핵심 개념, YAML 문법, 실전 워크플로우', icon: GitBranch, readingTime: '8분', href: '/guides/deploy/github-actions' },
   { slug: 'cicd', parentSlug: 'deploy', title: 'CI/CD 배포 파이프라인', description: 'GitHub Actions로 자동 배포 구축', icon: RefreshCw, readingTime: '5분', href: '/guides/deploy/cicd' },
+  { slug: 'post-deploy-checklist', parentSlug: 'deploy', title: '배포 후 첫 점검', description: '도메인·HTTPS·환경변수·에러·성능 12가지 점검', icon: ListChecks, badge: '체크리스트', readingTime: '8분', href: '/guides/deploy/post-deploy-checklist' },
 
   // ── AI 기초 이해 (ai-basics) ──
   { slug: 'overview', parentSlug: 'ai-basics', title: '개요 — LLM이란?', description: '대규모 언어 모델의 개념과 작동 원리', icon: FileText, readingTime: '4분', href: '/guides/ai-basics' },
   { slug: 'models', parentSlug: 'ai-basics', title: 'AI 모델 비교', description: '주요 AI 모델 특징, 가격, 상황별 추천', icon: Layers, readingTime: '6분', href: '/guides/ai-basics/models' },
   { slug: 'prompt-basics', parentSlug: 'ai-basics', title: '프롬프트 기초', description: '좋은 프롬프트 구조, 제로샷/퓨샷, CoT', icon: MessageCircle, readingTime: '5분', href: '/guides/ai-basics/prompt-basics' },
   { slug: 'ai-trends', parentSlug: 'ai-basics', title: 'AI 트렌드', description: 'AI 에이전트, MCP, 코딩 에이전트', icon: TrendingUp, readingTime: '5분', href: '/guides/ai-basics/ai-trends' },
+  { slug: 'cost-saving', parentSlug: 'ai-basics', title: 'AI 비용 관리 · 토큰 절약', description: '토큰·요금 구조, 비용 폭탄 방지, 모델 선택 가성비', icon: Coins, readingTime: '6분', href: '/guides/ai-basics/cost-saving' },
 
   // ── AI 도구 (ai-tools) ──
   { slug: 'overview', parentSlug: 'ai-tools', title: '개요 — 바이브코딩이란?', description: 'AI와 대화하며 코딩하는 새로운 개발 방식', icon: FileText, readingTime: '4분', href: '/guides/ai-tools' },
@@ -234,7 +237,7 @@ export const LEARNING_STAGES: LearningStage[] = [
   { id: 'start', label: '시작', description: 'AI 이해와 개발 환경 세팅', icon: Bot, slugs: ['ai-basics', 'ai-tools', 'frontend', 'package-manager', 'version-control'] },
   { id: 'develop', label: '개발', description: '핵심 기능 구현에 필요한 개념', icon: Code, slugs: ['env', 'api-basics', 'backend', 'auth'] },
   { id: 'polish', label: '완성', description: '디자인과 보안 마무리', icon: Palette, slugs: ['design-ui', 'security'] },
-  { id: 'deploy', label: '배포', description: '도메인 연결, 서버, 배포 자동화', icon: Rocket, slugs: ['domain', 'server', 'deploy'] },
+  { id: 'deploy', label: '배포', description: '도메인 연결, 서버, 배포 자동화', icon: Rocket, slugs: ['domain', 'server', 'deploy', 'troubleshooting'] },
   { id: 'scale', label: '확장', description: '알림, 결제, 모니터링, 자동화', icon: Workflow, slugs: ['communication', 'payment', 'monitoring', 'automation'] },
 ];
 
@@ -264,7 +267,7 @@ export const LEARNING_PATHS: LearningPath[] = [
     description: '앱을 만든 후 "제대로" 관리하는 법',
     icon: Wrench,
     badge: '개발 생산성',
-    guideSlugs: ['version-control', 'package-manager', 'security', 'api-basics', 'domain', 'server'],
+    guideSlugs: ['version-control', 'package-manager', 'security', 'api-basics', 'domain', 'server', 'troubleshooting'],
   },
   {
     id: 'scale-up',

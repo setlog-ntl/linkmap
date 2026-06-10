@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HeroSection } from './package-manager-guide/hero-section';
+import { GuideTLDR } from '@/components/guides/common';
 import { WhatIsPmSection } from './package-manager-guide/what-is-pm-section';
 import { ComparisonSection } from './package-manager-guide/comparison-section';
 import { EssentialsSection } from './package-manager-guide/essentials-section';
@@ -46,6 +47,19 @@ export function PackageManagerGuide() {
   return (
     <div>
       <HeroSection />
+
+      <div className="max-w-2xl mx-auto mb-6 px-1">
+        <GuideTLDR
+          level="입문"
+          readingTime="10분"
+          points={[
+            '패키지 매니저(npm)는 남이 만든 코드(라이브러리)를 받아 설치·관리하는 도구예요.',
+            'package.json은 내 프로젝트가 어떤 패키지에 의존하는지 적은 "목록표"예요.',
+            'npm install 한 번이면 필요한 코드를 한꺼번에 받아와요.',
+          ]}
+          youCanDo="에러 없이 패키지를 설치하고 흔한 의존성 문제를 스스로 풀 수 있어요."
+        />
+      </div>
 
       {/* Sticky section nav */}
       <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">

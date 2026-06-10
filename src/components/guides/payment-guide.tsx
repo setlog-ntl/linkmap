@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HeroSection } from './payment-guide/hero-section';
+import { GuideTLDR } from '@/components/guides/common';
 import { PaymentFlowSection } from './payment-guide/payment-flow-section';
 import { PgComparisonSection } from './payment-guide/pg-comparison-section';
 import { ImplementationSection } from './payment-guide/implementation-section';
@@ -46,6 +47,19 @@ export function PaymentGuide() {
   return (
     <div>
       <HeroSection />
+
+      <div className="max-w-2xl mx-auto mb-6 px-1">
+        <GuideTLDR
+          level="입문"
+          readingTime="12분"
+          points={[
+            '온라인 결제는 PG사(Stripe·토스)가 카드 정보를 안전하게 대신 처리해줘요.',
+            '결제는 "테스트 모드"에서 충분히 연습한 뒤 실제 모드로 전환해요.',
+            '결제 완료는 웹훅으로 확인하고, 중복 처리를 막는 멱등성이 중요해요.',
+          ]}
+          youCanDo="내 서비스에 안전하게 결제 기능을 붙이는 큰 그림을 이해해요."
+        />
+      </div>
 
       {/* Sticky section nav */}
       <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">

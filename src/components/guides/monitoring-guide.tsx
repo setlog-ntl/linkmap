@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HeroSection } from './monitoring-guide/hero-section';
+import { GuideTLDR } from '@/components/guides/common';
 import { WhyMonitoringSection } from './monitoring-guide/why-monitoring-section';
 import { ToolsOverviewSection } from './monitoring-guide/tools-overview-section';
 import { GettingStartedSection } from './monitoring-guide/getting-started-section';
@@ -46,6 +47,19 @@ export function MonitoringGuide() {
   return (
     <div>
       <HeroSection />
+
+      <div className="max-w-2xl mx-auto mb-6 px-1">
+        <GuideTLDR
+          level="입문"
+          readingTime="10분"
+          points={[
+            '배포하면 끝이 아니에요 — 사용자가 겪는 에러는 모니터링해야 보여요.',
+            '에러 추적(Sentry)·웹 분석(GA)·세션 리플레이로 문제를 빨리 찾아요.',
+            '피처 플래그로 새 기능을 일부 사용자에게만 점진적으로 열 수 있어요.',
+          ]}
+          youCanDo="배포 후 문제를 빨리 발견하고 대응하는 체계를 갖출 수 있어요."
+        />
+      </div>
 
       {/* Sticky section nav */}
       <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">

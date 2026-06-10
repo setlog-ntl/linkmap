@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HeroSection } from './ai-tools-guide/hero-section';
+import { GuideTLDR } from '@/components/guides/common';
 import { VibeCodingSection } from './ai-tools-guide/vibe-coding-section';
 import { AiLandscapeSection } from './ai-tools-guide/ai-landscape-section';
 import { GettingStartedSection } from './ai-tools-guide/getting-started-section';
@@ -46,6 +47,19 @@ export function AiToolsGuide() {
   return (
     <div>
       <HeroSection />
+
+      <div className="max-w-2xl mx-auto mb-6 px-1">
+        <GuideTLDR
+          level="왕초보"
+          readingTime="15분"
+          points={[
+            '바이브코딩은 코드를 직접 타이핑하지 않고 AI와 대화하며 만드는 방식이에요.',
+            'Cursor·Claude Code 같은 도구가 코드 작성·수정·실행을 대신 해줘요.',
+            '핵심은 "무엇을, 어떻게" 정확히 지시하는 능력 — 도구보다 지시가 중요해요.',
+          ]}
+          youCanDo="나에게 맞는 AI 코딩 도구를 골라 첫 프로젝트 작업을 시작할 수 있어요."
+        />
+      </div>
 
       {/* Sticky section nav */}
       <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">

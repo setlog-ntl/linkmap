@@ -9,6 +9,7 @@ import { NextPublicSection } from './env-guide/next-public-section';
 import { DeployPlatformSection } from './env-guide/deploy-platform-section';
 import { ChecklistSection } from './env-guide/checklist-section';
 import { FaqSection } from './env-guide/faq-section';
+import { GuideTLDR } from '@/components/guides/common';
 
 const sections = [
   { id: 'what-is-env', label: '개념' },
@@ -54,6 +55,19 @@ export function EnvGuide() {
   return (
     <div>
       <HeroSection />
+
+      <div className="max-w-2xl mx-auto mb-6 px-1">
+        <GuideTLDR
+          level="필수"
+          readingTime="10분"
+          points={[
+            'API 키·비밀번호 같은 민감한 값은 코드에 직접 쓰지 않고 .env 파일에 따로 보관해요.',
+            'NEXT_PUBLIC_ 접두사가 붙으면 브라우저에 노출돼요 — 비밀 키엔 절대 붙이지 마세요.',
+            '.env는 GitHub에 올리면 안 돼요. 한 번 노출되면 즉시 키를 새로 발급(교체)하세요.',
+          ]}
+          youCanDo="키를 안전하게 관리하고 배포 후 흔한 '환경변수 에러'를 스스로 해결할 수 있어요."
+        />
+      </div>
 
       {/* Sticky section nav */}
       <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">

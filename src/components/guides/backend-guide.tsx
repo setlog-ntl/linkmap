@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HeroSection } from './backend-guide/hero-section';
+import { GuideTLDR } from '@/components/guides/common';
 import { ApiSection } from './backend-guide/api-section';
 import { DatabaseSection } from './backend-guide/database-section';
 import { BaasSection } from './backend-guide/baas-section';
@@ -46,6 +47,19 @@ export function BackendGuide() {
   return (
     <div>
       <HeroSection />
+
+      <div className="max-w-2xl mx-auto mb-6 px-1">
+        <GuideTLDR
+          level="입문"
+          readingTime="10분"
+          points={[
+            '백엔드는 화면 뒤에서 데이터를 저장·처리하는 "주방" 같은 영역이에요.',
+            '데이터베이스에 데이터를 보관하고, API로 꺼내 화면에 전달해요.',
+            'Supabase·Firebase 같은 BaaS를 쓰면 서버를 직접 안 만들고도 백엔드를 가질 수 있어요.',
+          ]}
+          youCanDo="데이터를 저장하고 불러오는 앱의 뒷단을 이해하고 연결할 수 있어요."
+        />
+      </div>
 
       {/* Sticky section nav */}
       <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">

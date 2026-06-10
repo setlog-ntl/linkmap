@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HeroSection } from './api-basics-guide/hero-section';
+import { GuideTLDR } from '@/components/guides/common';
 import { WhatIsApiSection } from './api-basics-guide/what-is-api-section';
 import { HttpBasicsSection } from './api-basics-guide/http-basics-section';
 import { RealWorldSection } from './api-basics-guide/real-world-section';
@@ -46,6 +47,19 @@ export function ApiBasicsGuide() {
   return (
     <div>
       <HeroSection />
+
+      <div className="max-w-2xl mx-auto mb-6 px-1">
+        <GuideTLDR
+          level="입문"
+          readingTime="12분"
+          points={[
+            'API는 두 프로그램이 정해진 약속대로 데이터를 주고받는 "창구"예요.',
+            'fetch로 요청을 보내고, 상태 코드(200·404·500)로 성공·실패를 확인해요.',
+            '에러는 try/catch로 잡아 사용자에게 친절한 메시지를 보여줘요.',
+          ]}
+          youCanDo="외부 서비스의 데이터를 불러와 내 화면에 보여줄 수 있어요."
+        />
+      </div>
 
       {/* Sticky section nav */}
       <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">

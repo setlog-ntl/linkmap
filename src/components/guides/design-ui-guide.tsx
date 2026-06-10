@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HeroSection } from './design-ui-guide/hero-section';
+import { GuideTLDR } from '@/components/guides/common';
 import { DesignBasicsSection } from './design-ui-guide/design-basics-section';
 import { CssApproachSection } from './design-ui-guide/css-approach-section';
 import { QuickStartSection } from './design-ui-guide/quick-start-section';
@@ -46,6 +47,19 @@ export function DesignUiGuide() {
   return (
     <div>
       <HeroSection />
+
+      <div className="max-w-2xl mx-auto mb-6 px-1">
+        <GuideTLDR
+          level="입문"
+          readingTime="10분"
+          points={[
+            '보기 좋은 UI의 기본은 색·글자·여백 3가지를 일관되게 쓰는 거예요.',
+            'Tailwind CSS는 클래스 이름만으로 빠르게 스타일을 입히는 도구예요.',
+            'shadcn/ui 같은 컴포넌트를 가져다 쓰면 디자인 시간을 크게 줄여요.',
+          ]}
+          youCanDo="AI가 만든 화면을 더 보기 좋고 일관되게 다듬을 수 있어요."
+        />
+      </div>
 
       {/* Sticky section nav */}
       <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">
