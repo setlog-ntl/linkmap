@@ -19,6 +19,9 @@
 | [06-template-reselection-plan.md](./06-template-reselection-plan.md) | 템플릿 계획 |
 | [07-enhancement-plan.md](./07-enhancement-plan.md) | Phase 1-2 스프린트 상세 기획 |
 | [08-modular-template-editor.md](./08-modular-template-editor.md) | 모듈형 에디터 기획 (Phase 1~4 완료) |
+| [09-premium-upgrade-plan.md](./09-premium-upgrade-plan.md) | 프리미엄 고도화 기획 |
+| [10-premium-implementation-plan.md](./10-premium-implementation-plan.md) | 프리미엄 구현 계획 |
+| [11-deploy-stabilization.md](./11-deploy-stabilization.md) | **배포 안정화 & 범용성 보강** (2026-06, 빌드 재현성·하드닝·quota 원자화) |
 | [PMO.md](./PMO.md) | 프로젝트 관리 마스터 문서 |
 
 ---
@@ -49,7 +52,7 @@
 | GitHub OAuth | 프로젝트-무관 OAuth 연결 | 구현 완료 |
 | 배포 사전 검사 | 계정/쿼터/사이트명 중복 프리플라이트 | 구현 완료 |
 | GitHub Pages 배포 | 레포 생성 → Pages 활성화 → 파일 푸시 | 구현 완료 |
-| 배포 상태 폴링 | 3초 간격, 최대 5분 타임아웃 | 구현 완료 |
+| 배포 상태 폴링 | 지수 백오프(2-10s), 15분 타임아웃(상태우선) — 상세 [11](./11-deploy-stabilization.md) | 구현 완료 |
 | 쿼터 관리 | 플랜별 배포 한도 (free: 3, pro: 무제한) | 구현 완료 |
 
 ### 2.2 관리 기능 (Management)
