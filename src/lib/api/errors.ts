@@ -5,6 +5,14 @@ export function apiError(message: string, status: number) {
   return NextResponse.json({ error: message }, { status });
 }
 
+/**
+ * 안정적 에러 코드를 포함한 응답. 클라이언트가 메시지 문구가 아닌 `code`로 분기하도록 한다.
+ * (원클릭 배포 실패 등 — code는 deploy-error-logger의 카테고리와 동일 어휘 사용)
+ */
+export function apiErrorWithCode(message: string, status: number, code: string) {
+  return NextResponse.json({ error: message, code }, { status });
+}
+
 export function unauthorizedError() {
   return apiError('인증이 필요합니다', 401);
 }

@@ -41,7 +41,10 @@ export async function POST(
 
   const [owner, repo] = deploy.forked_repo_full_name.split('/');
 
-  // 기존 레포의 package.json에 존재하지 않는 패키지 버전이 있으면 자동 패치
+  // 레거시 레포(package-lock.json 없이 `npm install` 사용)의 알려진 버전 문제 자동 패치.
+  // 신규 배포는 package-lock.json + `npm ci`로 고정된 정식 버전(typescript 5.7.2, tailwindcss 4.0.17)을
+  // 쓰므로 아래 조건(=== '5.7.0' / '4.0.0')에 매칭되지 않는다 → 패치 미발생, lockfile 비동기화 위험 없음.
+  // (즉 이 패치는 lockfile 도입 이전에 생성된 레포에만 작동한다.)
   try {
     const file = await getFileContent(githubToken, owner, repo, 'package.json');
     const content = Buffer.from(file.content, 'base64').toString('utf-8');

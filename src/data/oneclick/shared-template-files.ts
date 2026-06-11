@@ -3,6 +3,9 @@
 // deploy.yml, tsconfig, postcss, next.config, 공통 컴포넌트
 // ──────────────────────────────────────────────
 
+import standardLock from './locks/standard.lock.json';
+import namecardLock from './locks/namecard.lock.json';
+
 // ──────────────────────────────────────────────
 // Build / Config Files
 // ──────────────────────────────────────────────
@@ -62,7 +65,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install
+      - run: npm ci
       - name: Build
         run: npm run build
         env:
@@ -162,6 +165,30 @@ export function makePackageJson(name: string): string {
     null,
     2
   ) + '\n';
+}
+
+/** 의존성 세트 — deploy.yml의 `npm ci`가 요구하는 package-lock.json 변형 */
+export type LockVariant = 'standard' | 'namecard';
+
+/**
+ * 템플릿별 package-lock.json 생성.
+ * 저장된 정규 lockfile(scripts/gen-template-lockfiles.mjs로 생성)에 템플릿명만 주입한다.
+ * 해석된 의존성 트리는 name과 무관하므로 variant별 1개 자산을 재사용.
+ * @param name    package.json의 name과 일치해야 함 (npm ci 정합성)
+ * @param variant 'standard'(기본) | 'namecard'(qrcode.react 포함)
+ */
+export function makePackageLock(name: string, variant: LockVariant = 'standard'): string {
+  const base = variant === 'namecard' ? namecardLock : standardLock;
+  // 순수 JSON이므로 deep clone 후 name 주입 (원본 import 객체 불변 유지)
+  const lock = JSON.parse(JSON.stringify(base)) as {
+    name?: string;
+    packages?: Record<string, { name?: string }>;
+  };
+  lock.name = name;
+  if (lock.packages && lock.packages['']) {
+    lock.packages[''].name = name;
+  }
+  return JSON.stringify(lock, null, 2) + '\n';
 }
 
 // ──────────────────────────────────────────────

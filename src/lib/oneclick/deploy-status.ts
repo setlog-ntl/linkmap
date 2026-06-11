@@ -28,7 +28,7 @@ export interface ResolveDeployOptions {
   retryCount?: number;
 }
 
-/** Deploy timeout: 15 minutes from last deploy attempt (GitHub Actions 평균 3-5분, 최악 8분 + CDN 2분 + 여유 5분) */
+/** 타임아웃: 마지막 활동(updated_at: 배포 시작/재배포/편집) 기준 15분 무진전 시 에러 (GitHub Actions 평균 3-5분, 최악 8분 + CDN 2분 + 여유 5분) */
 const DEPLOY_TIMEOUT_MS = 15 * 60 * 1000;
 
 /**
@@ -66,22 +66,21 @@ export async function resolveDeployStatus(
   const [owner, repo] = repoFullName.split('/');
   const retryCount = options?.retryCount ?? 0;
 
-  // Timeout check: 마지막 배포 시작(updated_at) 기준으로 10분 초과 시 에러
-  // updated_at은 batch-update 커밋 시 deploy_status='building'으로 업데이트될 때 자동 갱신
+  // Timeout: 마지막 활동(updated_at) 기준 15분 무진전 시 에러.
+  // updated_at은 redeploy/batch-update가 갱신하므로 오래된 배포의 재배포도 그 시점부터 새 윈도우를 받는다.
+  // ⚠️ created_at 기준 절대 상한은 두지 않는다 — 60분 이상 된 배포를 재배포할 때 즉시 타임아웃되는 버그가 되기 때문.
+  // 타임아웃 판정은 GitHub 실제 상태를 확인한 "뒤"에 한다(아래) — 느려도 성공한 빌드를 잘못 실패시키지 않기 위함.
+  const now = Date.now();
   const timeoutBase = options?.updatedAt ?? options?.createdAt;
-  if (timeoutBase) {
-    const elapsed = Date.now() - new Date(timeoutBase).getTime();
-    if (elapsed > DEPLOY_TIMEOUT_MS && currentDeployStatus !== 'ready') {
-      return {
-        deployStatus: 'error',
-        pagesStatus: 'errored',
-        pagesUrl: currentPagesUrl,
-        deploymentUrl: null,
-        errorMessage: '배포 시간이 초과되었습니다. 재배포를 시도해주세요.',
-        changed: currentDeployStatus !== 'error',
-      };
-    }
-  }
+  const timedOut = timeoutBase != null && now - new Date(timeoutBase).getTime() > DEPLOY_TIMEOUT_MS;
+  const timeoutResult = (): DeployStatusResult => ({
+    deployStatus: 'error',
+    pagesStatus: 'errored',
+    pagesUrl: currentPagesUrl,
+    deploymentUrl: null,
+    errorMessage: '배포 시간이 초과되었습니다. 재배포를 시도해주세요.',
+    changed: currentDeployStatus !== 'error',
+  });
 
   try {
     const pagesInfo = await getGitHubPagesStatus(githubToken, owner, repo);
@@ -168,6 +167,13 @@ export async function resolveDeployStatus(
       }
     }
 
+    // GitHub 실제 상태를 확정한 뒤, 여전히 building인 경우에만 타임아웃 적용.
+    // → 느리게라도 ready가 됐거나 명확히 error로 판정된 빌드는 시계와 무관하게 그대로 보고
+    //   (혼잡한 GitHub 러너로 15분을 넘겨 성공한 빌드를 잘못 실패시키지 않기 위함 — 범용성).
+    if (timedOut && newDeployStatus !== 'ready' && newDeployStatus !== 'error') {
+      return timeoutResult();
+    }
+
     const changed = newDeployStatus !== currentDeployStatus || newPagesStatus !== currentPagesStatus;
     const resolvedPagesUrl = pagesInfo.html_url || currentPagesUrl;
 
@@ -182,7 +188,8 @@ export async function resolveDeployStatus(
     };
   } catch (err) {
     if (err instanceof GitHubApiError && err.status === 404) {
-      // Pages not yet enabled — keep current status
+      // Pages not yet enabled — 아직 활성화 전. 단 마지막 활동 후 15분 초과면 실패로 판정.
+      if (timedOut) return timeoutResult();
       return {
         deployStatus: currentDeployStatus,
         pagesStatus: currentPagesStatus,

@@ -242,7 +242,7 @@ function ErrorCard({
   }
 
   const details = errorMessage
-    ? getErrorDetails(errorMessage, deployStatus ?? null, locale)
+    ? getErrorDetails(errorMessage, deployStatus ?? null, locale, errorCode ?? undefined)
     : null;
 
   return (

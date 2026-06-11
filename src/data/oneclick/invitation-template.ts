@@ -7,9 +7,11 @@ import {
   sharedNextConfig as nextConfig,
   sharedAnimatedReveal as animatedReveal,
   makePackageJson,
+  makePackageLock,
 } from './shared-template-files';
 
 const packageJson = makePackageJson('invitation');
+const packageLock = makePackageLock('invitation');
 
 // ──────────────────────────────────────────────
 // src/app/layout.tsx
@@ -1126,6 +1128,7 @@ export const invitationTemplate: HomepageTemplateContent = {
     { path: '.gitignore', content: gitignore },
     { path: '.github/workflows/deploy.yml', content: deployYml },
     { path: 'package.json', content: packageJson },
+    { path: 'package-lock.json', content: packageLock },
     { path: 'tsconfig.json', content: tsconfigJson },
     { path: 'postcss.config.mjs', content: postcssConfig },
     { path: 'next.config.ts', content: nextConfig },

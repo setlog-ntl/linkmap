@@ -102,7 +102,8 @@ export const linkCardModuleSchema: TemplateModuleSchema = {
               label: '아이콘 이모지',
               labelEn: 'Icon Emoji',
               defaultValue: '',
-              validation: { maxLength: 4 },
+              // 이모지(예: 🛍️) 또는 lucide 아이콘 키(예: 'pen-line', 'instagram')를 허용 — 아이콘 키 길이 수용
+              validation: { maxLength: 20 },
             },
           ],
         },

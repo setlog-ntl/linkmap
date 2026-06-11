@@ -14,9 +14,11 @@ import {
   sharedThemeToggle as themeToggle,
   sharedLanguageToggle as languageToggle,
   makePackageJson,
+  makePackageLock,
 } from './shared-template-files';
 
 const packageJson = makePackageJson('small-biz-cafe');
+const packageLock = makePackageLock('small-biz-cafe');
 
 // ──────────────────────────────────────────────
 // src/app/api/og/route.tsx
@@ -2769,6 +2771,7 @@ export const smallBizCafeTemplate: HomepageTemplateContent = {
     { path: '.gitignore', content: gitignore },
     { path: '.github/workflows/deploy.yml', content: deployYml },
     { path: 'package.json', content: packageJson },
+    { path: 'package-lock.json', content: packageLock },
     { path: 'tsconfig.json', content: tsconfigJson },
     { path: 'postcss.config.mjs', content: postcssConfig },
     { path: 'next.config.ts', content: nextConfig },

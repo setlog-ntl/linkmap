@@ -12,9 +12,11 @@ import {
   sharedCountUp as countUp,
   sharedPremiumAnimations,
   makePackageJson,
+  makePackageLock,
 } from './shared-template-files';
 
 const packageJson = makePackageJson('personal-brand');
+const packageLock = makePackageLock('personal-brand');
 
 // ──────────────────────────────────────────────
 // src/app/api/og/route.tsx
@@ -1664,6 +1666,7 @@ export const personalBrandTemplate: HomepageTemplateContent = {
     { path: '.gitignore', content: gitignore },
     { path: '.github/workflows/deploy.yml', content: deployYml },
     { path: 'package.json', content: packageJson },
+    { path: 'package-lock.json', content: packageLock },
     { path: 'tsconfig.json', content: tsconfigJson },
     { path: 'postcss.config.mjs', content: postcssConfig },
     { path: 'next.config.ts', content: nextConfig },

@@ -12,6 +12,8 @@
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "validate:jsonld": "npx tsx scripts/validate-jsonld.ts",
+    "gen:template-locks": "node scripts/gen-template-lockfiles.mjs",
+    "verify:template-locks": "node scripts/verify-template-lockfiles.mjs",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "analyze": "ANALYZE=true next build",

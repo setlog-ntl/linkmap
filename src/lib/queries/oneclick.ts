@@ -416,6 +416,11 @@ function getBackoffInterval(pollCount: number): number {
   return intervals[Math.min(pollCount, intervals.length - 1)];
 }
 
+// 폴링 안전망 — 서버 타임아웃(15분/절대 60분)을 클라가 못 받는 비정상 상황 대비.
+// 10s 간격 기준 240회 ≈ 40분으로 서버 절대 상한보다 넉넉.
+const MAX_POLLS = 240;
+const MAX_CONSECUTIVE_FAILURES = 8;
+
 export function useDeployStatus(deployId: string | null, enabled: boolean = true) {
   const queryClient = useQueryClient();
 
@@ -431,6 +436,9 @@ export function useDeployStatus(deployId: string | null, enabled: boolean = true
     },
     enabled: !!deployId && enabled,
     refetchInterval: (query) => {
+      // 연속 네트워크 실패 누적 시 폴링 중단 (오프라인/서버 다운에서 무한 재시도 방지)
+      if (query.state.fetchFailureCount >= MAX_CONSECUTIVE_FAILURES) return false;
+
       const data = query.state.data;
       if (!data) return 2000;
 
@@ -441,6 +449,9 @@ export function useDeployStatus(deployId: string | null, enabled: boolean = true
         }
         return false;
       }
+
+      // 하드 폴 캡 — 서버가 끝내 터미널 상태를 주지 않아도 무한 폴링하지 않도록 안전망
+      if (query.state.dataUpdateCount >= MAX_POLLS) return false;
 
       return getBackoffInterval(query.state.dataUpdateCount);
     },

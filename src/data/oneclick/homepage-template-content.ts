@@ -18,6 +18,7 @@ import {
   sharedGitignore,
   sharedAnimatedReveal,
   makePackageJson,
+  makePackageLock,
 } from './shared-template-files';
 
 export interface TemplateFile {
@@ -1777,6 +1778,7 @@ export const homepageTemplates: HomepageTemplateContent[] = [
       { path: '.gitignore', content: sharedGitignore },
       { path: '.github/workflows/deploy.yml', content: deployWorkflow },
       { path: 'package.json', content: linkCardPackageJson },
+      { path: 'package-lock.json', content: makePackageLock('link-card') },
       { path: 'tsconfig.json', content: sharedTsConfig },
       { path: 'postcss.config.mjs', content: sharedPostcssConfig },
       { path: 'next.config.ts', content: sharedNextConfig },
@@ -1805,6 +1807,7 @@ export const homepageTemplates: HomepageTemplateContent[] = [
       { path: '.gitignore', content: sharedGitignore },
       { path: '.github/workflows/deploy.yml', content: deployWorkflow },
       { path: 'package.json', content: namecardPackageJson },
+      { path: 'package-lock.json', content: makePackageLock('digital-namecard', 'namecard') },
       { path: 'tsconfig.json', content: sharedTsConfig },
       { path: 'postcss.config.mjs', content: sharedPostcssConfig },
       { path: 'next.config.ts', content: sharedNextConfig },

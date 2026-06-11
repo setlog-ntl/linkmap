@@ -11,9 +11,11 @@ import {
   sharedLanguageToggle as languageToggle,
   sharedRotatingText as rotatingText,
   makePackageJson,
+  makePackageLock,
 } from './shared-template-files';
 
 const packageJson = makePackageJson('freelancer-page');
+const packageLock = makePackageLock('freelancer-page');
 
 // ──────────────────────────────────────────────
 // src/app/api/og/route.tsx
@@ -1598,6 +1600,7 @@ export const freelancerPageTemplate: HomepageTemplateContent = {
     { path: '.gitignore', content: gitignore },
     { path: '.github/workflows/deploy.yml', content: deployYml },
     { path: 'package.json', content: packageJson },
+    { path: 'package-lock.json', content: packageLock },
     { path: 'tsconfig.json', content: tsconfigJson },
     { path: 'postcss.config.mjs', content: postcssConfig },
     { path: 'next.config.ts', content: nextConfig },

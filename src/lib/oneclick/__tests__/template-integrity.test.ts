@@ -1,7 +1,26 @@
 import { describe, it, expect } from 'vitest';
+import ts from 'typescript';
 import { getGenerator } from '../generators';
+import { buildInitialState } from '../generators/base-generator';
+import { validateModuleState } from '../validate-module-state';
 import { getModuleSchema } from '@/data/oneclick/module-schemas';
 import { getTemplateBySlug } from '@/data/oneclick/homepage-template-content';
+
+/** TypeScript transpileModule로 구문 오류만 검출 (타입 체크 없음). 구문 에러 진단 배열 반환. */
+function syntaxErrors(code: string, fileName: string): string[] {
+  const result = ts.transpileModule(code, {
+    fileName,
+    reportDiagnostics: true,
+    compilerOptions: {
+      jsx: ts.JsxEmit.Preserve,
+      module: ts.ModuleKind.ESNext,
+      target: ts.ScriptTarget.ESNext,
+    },
+  });
+  return (result.diagnostics ?? [])
+    .filter((d) => d.category === ts.DiagnosticCategory.Error)
+    .map((d) => ts.flattenDiagnosticMessageText(d.messageText, '\n'));
+}
 
 /**
  * 템플릿 무결성 검증 — 제너레이터 ↔ 템플릿 파일 ↔ 스키마 일관성
@@ -100,6 +119,42 @@ describe('템플릿 무결성 검증', () => {
       });
     });
   }
+
+  describe('생성 코드 구문 검증', () => {
+    // 제너레이터가 default 상태로 만든 config.ts/page.tsx가 구문상 유효한지 검증.
+    // 제너레이터 버그(따옴표 누락, 깨진 보간 등)가 배포 빌드 실패로 이어지기 전에 차단.
+    for (const slug of TEMPLATE_SLUGS) {
+      it(`[${slug}] default 상태 생성 코드가 구문상 유효`, () => {
+        const schema = getModuleSchema(slug);
+        if (!schema) return;
+        const generator = getGenerator(slug);
+        const state = buildInitialState(schema);
+
+        const configCode = generator.generateConfigTs(state);
+        const configErrors = syntaxErrors(configCode, 'config.ts');
+        expect(configErrors, `config.ts 구문 오류:\n${configErrors.join('\n')}`).toEqual([]);
+
+        const pageCode = generator.generatePageTsx(state);
+        const pageErrors = syntaxErrors(pageCode, 'page.tsx');
+        expect(pageErrors, `page.tsx 구문 오류:\n${pageErrors.join('\n')}`).toEqual([]);
+      });
+    }
+  });
+
+  describe('default 상태 검증 안전성', () => {
+    // 새 형식/범위 검증(min/max/url/email/maxItems)이 실제 배포되는 default 값을
+    // 잘못 막지 않는지 보장. default에서 발생 가능한 건 '필수(빈 값)' 오류뿐이어야 함.
+    for (const slug of TEMPLATE_SLUGS) {
+      it(`[${slug}] default 상태에 형식/범위 오류 없음`, () => {
+        const schema = getModuleSchema(slug);
+        if (!schema) return;
+        const state = buildInitialState(schema);
+        const { errors } = validateModuleState(state, schema);
+        const nonRequired = errors.filter((e) => !e.message.includes('필수'));
+        expect(nonRequired, JSON.stringify(nonRequired, null, 2)).toEqual([]);
+      });
+    }
+  });
 
   describe('프리셋 검증', () => {
     for (const slug of TEMPLATE_SLUGS) {
