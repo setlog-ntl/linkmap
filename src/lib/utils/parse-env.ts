@@ -1,3 +1,5 @@
+import { normalizeEnvKey, ENV_KEY_REGEX } from '@/lib/utils/env-key';
+
 export interface ParsedEnvVar {
   key: string;
   value: string;
@@ -33,8 +35,7 @@ export function parseEnvLine(text: string): ParsedEnvVar | null {
     value = value.slice(1, -1);
   }
 
-  // Normalize key: uppercase + non-alphanumeric → underscore
-  const key = rawKey.toUpperCase().replace(/[^A-Z0-9_]/g, '_');
+  const key = normalizeEnvKey(rawKey);
 
   return { key, value };
 }
@@ -72,8 +73,8 @@ function parseJsonContent(content: string): ParsedEnvVar[] {
       for (const item of data) {
         if (item && typeof item === 'object' && 'key' in item && 'value' in item) {
           const obj = item as { key: string; value: string };
-          const key = String(obj.key).toUpperCase().replace(/[^A-Z0-9_]/g, '_');
-          if (/^[A-Z][A-Z0-9_]*$/.test(key)) {
+          const key = normalizeEnvKey(String(obj.key));
+          if (ENV_KEY_REGEX.test(key)) {
             vars.push({ key, value: String(obj.value) });
           }
         }
@@ -81,8 +82,8 @@ function parseJsonContent(content: string): ParsedEnvVar[] {
     } else if (data && typeof data === 'object') {
       // Object with key-value pairs
       for (const [rawKey, rawValue] of Object.entries(data as Record<string, unknown>)) {
-        const key = rawKey.toUpperCase().replace(/[^A-Z0-9_]/g, '_');
-        if (/^[A-Z][A-Z0-9_]*$/.test(key)) {
+        const key = normalizeEnvKey(rawKey);
+        if (ENV_KEY_REGEX.test(key)) {
           vars.push({ key, value: String(rawValue) });
         }
       }
@@ -115,7 +116,7 @@ function parseDockerComposeContent(content: string): ParsedEnvVar[] {
     const dashMatch = trimmed.match(/^-\s+(.+)$/);
     if (dashMatch) {
       const parsed = parseEnvLine(dashMatch[1]);
-      if (parsed && /^[A-Z][A-Z0-9_]*$/.test(parsed.key)) {
+      if (parsed && ENV_KEY_REGEX.test(parsed.key)) {
         vars.push(parsed);
       }
     }
@@ -148,7 +149,7 @@ export function parseEnvContent(content: string): ParsedEnvVar[] {
 
   for (const line of lines) {
     const parsed = parseEnvLine(line);
-    if (parsed && /^[A-Z][A-Z0-9_]*$/.test(parsed.key)) {
+    if (parsed && ENV_KEY_REGEX.test(parsed.key)) {
       vars.push(parsed);
     }
   }

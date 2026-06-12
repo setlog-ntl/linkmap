@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { decrypt, encrypt } from '@/lib/crypto';
 import { unauthorizedError, notFoundError, apiError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
+import { envKeyNameSchema } from '@/lib/validations/env';
 import { z } from 'zod';
 
 const getSchema = z.object({
@@ -15,7 +16,7 @@ const putSchema = z.object({
   project_id: z.string().uuid(),
   environment: z.enum(['development', 'staging', 'production']),
   vars: z.array(z.object({
-    key: z.string().min(1).regex(/^[A-Z][A-Z0-9_]*$/),
+    key: envKeyNameSchema,
     value: z.string(),
   })).max(200),
 });

@@ -1,14 +1,11 @@
 import { z } from 'zod';
+import { envKeyNameSchema } from '@/lib/validations/env';
 
 export const bulkEnvVarSchema = z.object({
   project_id: z.string().uuid('유효하지 않은 프로젝트 ID'),
   variables: z.array(
     z.object({
-      key_name: z
-        .string()
-        .min(1, '변수 이름은 필수입니다')
-        .max(255)
-        .regex(/^[A-Z][A-Z0-9_]*$/, '변수 이름은 대문자, 숫자, 밑줄만 허용'),
+      key_name: envKeyNameSchema,
       value: z.string().max(10000, '값은 10,000자를 초과할 수 없습니다').default(''),
       environment: z.enum(['development', 'staging', 'production']).default('development'),
       is_secret: z.boolean().default(true),

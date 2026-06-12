@@ -57,6 +57,12 @@ function createMockSupabase(overrides: {
   return {
     auth: {
       getUser: vi.fn().mockResolvedValue({ data: { user: mockUser } }),
+      mfa: {
+        getAuthenticatorAssuranceLevel: vi.fn().mockResolvedValue({
+          data: { currentLevel: 'aal1', nextLevel: 'aal1' },
+          error: null,
+        }),
+      },
     },
     from: vi.fn((table: string) => {
       callCounts[table] = (callCounts[table] ?? 0) + 1;
@@ -119,7 +125,7 @@ describe('GET /api/env/download', () => {
 
     expect(res.status).toBe(404);
     const body = await res.json();
-    expect(body.error).toContain('not found');
+    expect(body.error).toContain('찾을 수 없습니다');
   });
 
   it('returns .env file content for a valid request', async () => {

@@ -50,7 +50,7 @@ export function useAddEnvVar(projectId: string) {
         (err as unknown as Record<string, unknown>).max = data.max;
         throw err;
       }
-      return res.json();
+      return res.json() as Promise<EnvironmentVariable & { decrypted_value?: string }>;
     },
     onMutate: async (vars) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.envVars.byProject(projectId) });
@@ -84,6 +84,15 @@ export function useAddEnvVar(projectId: string) {
   });
 }
 
+async function throwDecryptError(res: Response): Promise<never> {
+  const data = await res.json().catch(() => ({} as { error?: string; code?: string }));
+  throw new Error(
+    data.code === 'MFA_REQUIRED'
+      ? '값을 보려면 2단계 인증이 필요합니다. 설정에서 인증 후 다시 시도해주세요.'
+      : data.error || '값 복호화에 실패했습니다',
+  );
+}
+
 export function useDecryptEnvVar() {
   return useMutation({
     mutationFn: async (id: string): Promise<string> => {
@@ -92,9 +101,32 @@ export function useDecryptEnvVar() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),
       });
-      if (!res.ok) throw new Error('복호화 실패');
+      if (!res.ok) await throwDecryptError(res);
       const data = await res.json();
       return data.value;
+    },
+  });
+}
+
+const DECRYPT_BATCH_SIZE = 200;
+
+/** 여러 환경변수를 한 번에 복호화 (전체 보기 / .env 전체 복사용) */
+export function useDecryptManyEnvVars() {
+  return useMutation({
+    mutationFn: async (ids: string[]): Promise<Record<string, string>> => {
+      const merged: Record<string, string> = {};
+      for (let i = 0; i < ids.length; i += DECRYPT_BATCH_SIZE) {
+        const chunk = ids.slice(i, i + DECRYPT_BATCH_SIZE);
+        const res = await fetch('/api/env/decrypt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: chunk }),
+        });
+        if (!res.ok) await throwDecryptError(res);
+        const data = await res.json();
+        Object.assign(merged, data.values as Record<string, string>);
+      }
+      return merged;
     },
   });
 }

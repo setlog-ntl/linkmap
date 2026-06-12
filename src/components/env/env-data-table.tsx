@@ -16,7 +16,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { IconTooltip } from '@/components/ui/icon-tooltip';
-import { Eye, EyeOff, Pencil, Trash2, Copy, Check, MoreHorizontal, Key as KeyIcon, ChevronDown, AlertTriangle, Braces } from 'lucide-react';
+import { Eye, EyeOff, Pencil, Trash2, Copy, Check, MoreHorizontal, Key as KeyIcon, ChevronDown, AlertTriangle, Braces, ShieldCheck } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { useLocaleStore } from '@/stores/locale-store';
@@ -42,6 +42,8 @@ interface EnvDataTableProps {
   onDelete: (id: string) => void;
   onCopy: (envVar: EnvironmentVariable) => void;
   onCopyValue?: (envVar: EnvironmentVariable) => void;
+  /** 저장 후 선택적으로 실행하는 연결 검증 (서비스 연결된 변수만) */
+  onVerify?: (envVar: EnvironmentVariable) => void;
   serviceGroups?: EnvServiceGroup[];
   onRawEditGroup?: (serviceId: string | null, serviceName: string) => void;
 }
@@ -57,6 +59,7 @@ export function EnvDataTable({
   onDelete,
   onCopy,
   onCopyValue,
+  onVerify,
   serviceGroups,
   onRawEditGroup,
 }: EnvDataTableProps) {
@@ -104,8 +107,8 @@ export function EnvDataTable({
       className={cn(
         'flex flex-col gap-2 p-3 sm:p-4 sm:items-center hover:bg-muted/30 transition-colors',
         showServiceColumn
-          ? 'sm:grid sm:grid-cols-[1fr_200px_140px_100px_120px] sm:gap-4'
-          : 'sm:grid sm:grid-cols-[1fr_200px_100px_120px] sm:gap-4'
+          ? 'sm:grid sm:grid-cols-[1fr_1.5fr_140px_100px_120px] sm:gap-4'
+          : 'sm:grid sm:grid-cols-[1fr_1.5fr_100px_120px] sm:gap-4'
       )}
     >
       {/* Key name + badge */}
@@ -141,12 +144,31 @@ export function EnvDataTable({
       </div>
 
       {/* Value + copy button */}
-      <div className="flex items-center gap-1 min-w-0">
-        <code className="text-xs text-muted-foreground font-mono truncate">
-          {showValues[envVar.id] && decryptedValues[envVar.id] !== undefined
-            ? decryptedValues[envVar.id]
-            : maskValue(envVar.encrypted_value)}
-        </code>
+      <div className="flex items-start sm:items-center gap-1 min-w-0">
+        {showValues[envVar.id] && decryptedValues[envVar.id] !== undefined ? (
+          decryptedValues[envVar.id] === '' ? (
+            <span className="text-xs text-muted-foreground italic">(빈 값)</span>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => handleCopyValue(envVar)}
+                  className="min-w-0 text-left cursor-pointer rounded-sm hover:bg-muted/60 transition-colors"
+                >
+                  <code className="text-xs font-mono break-all whitespace-pre-wrap">
+                    {decryptedValues[envVar.id]}
+                  </code>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>클릭하여 값 복사</TooltipContent>
+            </Tooltip>
+          )
+        ) : (
+          <code className="text-xs text-muted-foreground font-mono truncate">
+            {maskValue(envVar.encrypted_value)}
+          </code>
+        )}
         {onCopyValue && (
           <IconTooltip label="복사">
             <Button
@@ -233,6 +255,12 @@ export function EnvDataTable({
                 값 복사
               </DropdownMenuItem>
             )}
+            {onVerify && envVar.project_service_id && (
+              <DropdownMenuItem onClick={() => onVerify(envVar)}>
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                연결 검증 (선택)
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               onClick={() => onDelete(envVar.id)}
               className="text-destructive"
@@ -267,7 +295,7 @@ export function EnvDataTable({
     <Card>
       <CardContent className="p-0">
         {/* Header row - hidden on mobile */}
-        <div className="hidden sm:grid sm:grid-cols-[1fr_200px_140px_100px_120px] gap-4 px-4 py-2 border-b bg-muted/50 text-xs font-medium text-muted-foreground">
+        <div className="hidden sm:grid sm:grid-cols-[1fr_1.5fr_140px_100px_120px] gap-4 px-4 py-2 border-b bg-muted/50 text-xs font-medium text-muted-foreground">
           <div>키 이름</div>
           <div>값</div>
           <div>서비스</div>
@@ -343,7 +371,7 @@ function ServiceGroupCard({
         {!isCollapsed && (
           <>
             {/* Header row for grouped mode (no service column) */}
-            <div className="hidden sm:grid sm:grid-cols-[1fr_200px_100px_120px] gap-4 px-4 py-2 border-b bg-muted/30 text-xs font-medium text-muted-foreground">
+            <div className="hidden sm:grid sm:grid-cols-[1fr_1.5fr_100px_120px] gap-4 px-4 py-2 border-b bg-muted/30 text-xs font-medium text-muted-foreground">
               <div>키 이름</div>
               <div>값</div>
               <div>수정일</div>

@@ -4,15 +4,22 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queries/keys';
 import { useParams, useRouter } from 'next/navigation';
-import { useEnvVars, useAddEnvVar, useDeleteEnvVar, useDecryptEnvVar, useUpdateEnvVar, useSyncEnvServices } from '@/lib/queries/env-vars';
+import { useEnvVars, useAddEnvVar, useDeleteEnvVar, useDecryptEnvVar, useUpdateEnvVar, useSyncEnvServices, useDecryptManyEnvVars } from '@/lib/queries/env-vars';
+import { useRunHealthCheck } from '@/lib/queries/health-checks';
 import { useProjectServices, useCatalogServices, useAddProjectService } from '@/lib/queries/services';
 import { useProject } from '@/lib/queries/projects';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import {
   Dialog,
   DialogContent,
@@ -38,8 +45,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { AlertTriangle, GitBranch, Loader2 } from 'lucide-react';
+import { AlertTriangle, ChevronRight, GitBranch, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { normalizeEnvKey } from '@/lib/utils/env-key';
 import {
   buildEnvKeyServiceMap,
   buildEnvPrefixServiceMap,
@@ -77,9 +86,11 @@ export default function ProjectEnvPage() {
   const addEnvVar = useAddEnvVar(projectId);
   const deleteEnvVar = useDeleteEnvVar(projectId);
   const decryptEnvVar = useDecryptEnvVar();
+  const decryptManyEnvVars = useDecryptManyEnvVars();
   const updateEnvVar = useUpdateEnvVar(projectId);
   const syncEnvServices = useSyncEnvServices(projectId);
   const addProjectService = useAddProjectService(projectId);
+  const runHealthCheck = useRunHealthCheck();
 
   const { locale } = useLocaleStore();
   const { data: linkedRepos = [] } = useLinkedRepos(projectId);
@@ -104,6 +115,8 @@ export default function ProjectEnvPage() {
   const [newServiceId, setNewServiceId] = useState<string | null>(null);
   const [autoDetectedService, setAutoDetectedService] = useState<EnvServiceMatch | null>(null);
   const [manualServiceSelect, setManualServiceSelect] = useState(false);
+  const [addDetailsOpen, setAddDetailsOpen] = useState(false);
+  const [editDetailsOpen, setEditDetailsOpen] = useState(false);
   const [editServiceId, setEditServiceId] = useState<string | null>(null);
   const [editEnvironment, setEditEnvironment] = useState<Environment>('development');
   const [rawEditorOpen, setRawEditorOpen] = useState(false);
@@ -214,9 +227,30 @@ export default function ProjectEnvPage() {
     return groups;
   }, [viewMode, filteredVars, serviceNameMap, serviceSlugMap]);
 
+  /** 저장 후 선택적으로 실행하는 연결 검증 — 저장을 막지 않는다 */
+  const handleVerifyService = useCallback(async (projectServiceId: string, environment: Environment) => {
+    const toastId = toast.loading('서비스 연결을 검증하는 중...');
+    try {
+      const result = await runHealthCheck.mutateAsync({
+        project_service_id: projectServiceId,
+        environment,
+      });
+      if (result.status === 'healthy') {
+        toast.success(result.message || '정상적으로 연결되었습니다', { id: toastId });
+      } else if (result.status === 'degraded') {
+        toast.warning(result.message || '연결은 되지만 일부 설정이 누락되었습니다', { id: toastId });
+      } else {
+        toast.error(result.message || '검증에 실패했습니다. 값을 다시 확인해주세요. (저장된 값은 유지됩니다)', { id: toastId });
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '검증 실행에 실패했습니다', { id: toastId });
+    }
+  }, [runHealthCheck]);
+
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newKey.trim()) return;
+    const finalKey = normalizeEnvKey(newKey);
+    if (!finalKey) return;
     try {
       // 감지된 서비스가 프로젝트에 없으면 자동 추가
       if (newServiceId && !projectServiceIds.has(newServiceId)) {
@@ -226,8 +260,8 @@ export default function ProjectEnvPage() {
           // 이미 존재하는 경우 무시 (race condition 방어)
         }
       }
-      await addEnvVar.mutateAsync({
-        key_name: newKey.trim(),
+      const created = await addEnvVar.mutateAsync({
+        key_name: finalKey,
         value: newValue,
         environment: activeEnv,
         is_secret: newIsSecret,
@@ -242,6 +276,14 @@ export default function ProjectEnvPage() {
       setNewServiceId(null);
       setAutoDetectedService(null);
       setManualServiceSelect(false);
+      setAddDetailsOpen(false);
+      const psId = created?.project_service_id;
+      toast.success('환경변수가 저장되었습니다', {
+        description: '검증은 선택사항이에요. 필요할 때 각 변수 메뉴에서 실행할 수 있습니다.',
+        ...(psId
+          ? { action: { label: '지금 검증', onClick: () => handleVerifyService(psId, activeEnv) } }
+          : {}),
+      });
     } catch (err: unknown) {
       const error = err as { code?: string; message?: string };
       if (error.code === 'QUOTA_EXCEEDED') {
@@ -281,10 +323,52 @@ export default function ProjectEnvPage() {
       const value = await decryptEnvVar.mutateAsync(id);
       setDecryptedValues((prev) => ({ ...prev, [id]: value }));
       setShowValues((prev) => ({ ...prev, [id]: true }));
-    } catch {
-      // silently fail - user can retry
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '값 복호화에 실패했습니다');
     }
   }, [showValues, decryptEnvVar]);
+
+  /** 현재 목록(필터 적용) 전체가 표시 중인지 */
+  const allShown = filteredVars.length > 0 && filteredVars.every((v) => showValues[v.id]);
+
+  /** 현재 목록의 모든 값을 한 번에 표시/숨기기 — 메모장처럼 전체를 보고 복사할 수 있게 */
+  const handleToggleShowAll = useCallback(async () => {
+    if (allShown) {
+      setShowValues({});
+      setDecryptedValues({});
+      return;
+    }
+    if (filteredVars.length === 0) return;
+    try {
+      const values = await decryptManyEnvVars.mutateAsync(filteredVars.map((v) => v.id));
+      setDecryptedValues((prev) => ({ ...prev, ...values }));
+      setShowValues((prev) => {
+        const next = { ...prev };
+        for (const id of Object.keys(values)) next[id] = true;
+        return next;
+      });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '값 복호화에 실패했습니다');
+    }
+  }, [allShown, filteredVars, decryptManyEnvVars]);
+
+  /** 현재 목록 전체를 KEY=value(.env) 형식으로 클립보드에 복사 */
+  const handleCopyAllEnv = useCallback(async () => {
+    if (filteredVars.length === 0) {
+      toast.info('복사할 변수가 없습니다');
+      return;
+    }
+    try {
+      const values = await decryptManyEnvVars.mutateAsync(filteredVars.map((v) => v.id));
+      const lines = filteredVars
+        .filter((v) => values[v.id] !== undefined)
+        .map((v) => `${v.key_name}=${values[v.id]}`);
+      await navigator.clipboard.writeText(lines.join('\n'));
+      toast.success(`${lines.length}개 변수를 .env 형식으로 복사했습니다`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '값 복호화에 실패했습니다');
+    }
+  }, [filteredVars, decryptManyEnvVars]);
 
   const openEditDialog = async (envVar: EnvironmentVariable) => {
     setEditTarget(envVar);
@@ -308,7 +392,7 @@ export default function ProjectEnvPage() {
     if (!editTarget) return;
     await updateEnvVar.mutateAsync({
       id: editTarget.id,
-      key_name: editKey.trim() || undefined,
+      key_name: normalizeEnvKey(editKey) || undefined,
       value: editValue || undefined,
       environment: editEnvironment !== editTarget.environment ? editEnvironment : undefined,
       is_secret: editIsSecret,
@@ -323,6 +407,8 @@ export default function ProjectEnvPage() {
     setShowValues((prev) => ({ ...prev, [editTarget.id]: false }));
     setEditOpen(false);
     setEditTarget(null);
+    setEditDetailsOpen(false);
+    toast.success('환경변수가 저장되었습니다');
   };
 
   const handleCopy = (envVar: EnvironmentVariable) => {
@@ -417,6 +503,10 @@ export default function ProjectEnvPage() {
         envCounts={envCounts}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
+        onToggleShowAll={handleToggleShowAll}
+        allShown={allShown}
+        onCopyAllClick={handleCopyAllEnv}
+        bulkBusy={decryptManyEnvVars.isPending}
       />
 
       {/* Data Table */}
@@ -431,6 +521,11 @@ export default function ProjectEnvPage() {
         onDelete={handleDelete}
         onCopy={handleCopy}
         onCopyValue={handleCopyValue}
+        onVerify={(envVar) => {
+          if (envVar.project_service_id) {
+            handleVerifyService(envVar.project_service_id, envVar.environment);
+          }
+        }}
         serviceGroups={serviceGroups}
         onRawEditGroup={(serviceId, serviceName) => {
           setRawEditorServiceId(serviceId);
@@ -512,15 +607,15 @@ export default function ProjectEnvPage() {
           <DialogHeader>
             <DialogTitle>환경변수 추가</DialogTitle>
             <DialogDescription>
-              KEY=VALUE 형식을 그대로 붙여넣으면 자동으로 분리됩니다. 여러 줄을 붙여넣으면 일괄 가져오기로 전환됩니다.
+              메모장에 쓰듯 그대로 붙여넣으세요. KEY=VALUE는 자동으로 나뉘고, 여러 줄은 일괄 가져오기로 전환됩니다.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAdd} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="env-key">변수 이름</Label>
+              <Label htmlFor="env-key">이름</Label>
               <Input
                 id="env-key"
-                placeholder="NEXT_PUBLIC_EXAMPLE_KEY"
+                placeholder="OPENAI_API_KEY"
                 value={newKey}
                 onChange={(e) => {
                   const key = e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '_');
@@ -564,40 +659,7 @@ export default function ProjectEnvPage() {
                 className="font-mono"
                 required
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="env-value">값</Label>
-              <Input
-                id="env-value"
-                placeholder="sk_live_..."
-                value={newValue}
-                onChange={(e) => setNewValue(e.target.value)}
-                onPaste={(e) => {
-                  const text = e.clipboardData.getData('text').trim();
-                  const unquoted = (text.startsWith('"') && text.endsWith('"')) || (text.startsWith("'") && text.endsWith("'"))
-                    ? text.slice(1, -1)
-                    : text;
-                  if (unquoted !== text) {
-                    e.preventDefault();
-                    setNewValue(unquoted);
-                  }
-                }}
-                className="font-mono"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="env-desc">설명 (선택)</Label>
-              <Input
-                id="env-desc"
-                placeholder="Supabase Project URL"
-                value={newDesc}
-                onChange={(e) => setNewDesc(e.target.value)}
-              />
-            </div>
-            {/* Service Selection */}
-            <div className="space-y-2">
-              <Label>{t(locale, 'envVar.service')}</Label>
-              {autoDetectedService && !manualServiceSelect ? (
+              {autoDetectedService && !manualServiceSelect && (
                 <div className="flex items-center gap-2">
                   <Badge variant={autoDetectedService.confidence === 'exact' ? 'default' : 'secondary'}
                     className={autoDetectedService.confidence === 'exact'
@@ -616,38 +678,95 @@ export default function ProjectEnvPage() {
                     variant="ghost"
                     size="sm"
                     className="h-6 text-xs"
-                    onClick={() => setManualServiceSelect(true)}
+                    onClick={() => {
+                      setManualServiceSelect(true);
+                      setAddDetailsOpen(true);
+                    }}
                   >
                     {t(locale, 'envVar.changeService')}
                   </Button>
                 </div>
-              ) : (
-                <Select
-                  value={newServiceId ?? '__none__'}
-                  onValueChange={(val) => setNewServiceId(val === '__none__' ? null : val)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t(locale, 'envVar.selectService')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">{t(locale, 'envVar.noServiceLinked')}</SelectItem>
-                    {catalogServices.map((svc) => (
-                      <SelectItem key={svc.id} value={svc.id}>{svc.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               )}
             </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="env-secret"
-                checked={newIsSecret}
-                onCheckedChange={(checked) => setNewIsSecret(checked as boolean)}
+            <div className="space-y-2">
+              <Label htmlFor="env-value">값</Label>
+              <Textarea
+                id="env-value"
+                placeholder="sk_live_... (여러 줄 키도 그대로 붙여넣을 수 있어요)"
+                value={newValue}
+                rows={3}
+                onChange={(e) => setNewValue(e.target.value)}
+                onPaste={(e) => {
+                  const text = e.clipboardData.getData('text').trim();
+                  const unquoted = (text.startsWith('"') && text.endsWith('"')) || (text.startsWith("'") && text.endsWith("'"))
+                    ? text.slice(1, -1)
+                    : text;
+                  if (unquoted !== text) {
+                    e.preventDefault();
+                    setNewValue(unquoted);
+                  }
+                }}
+                className="font-mono text-sm resize-y"
               />
-              <Label htmlFor="env-secret" className="text-sm">
-                민감한 값 (Secret)
-              </Label>
+              <p className="text-xs text-muted-foreground">
+                형식 검사 없이 그대로 저장됩니다. 키 검증은 저장 후 원할 때 실행하세요.
+              </p>
             </div>
+            {/* 상세 설정 — 초보자는 이름·값만으로 충분 */}
+            <Collapsible open={addDetailsOpen} onOpenChange={setAddDetailsOpen}>
+              <CollapsibleTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 gap-1 px-1 text-xs text-muted-foreground"
+                >
+                  <ChevronRight className={cn('h-3.5 w-3.5 transition-transform', addDetailsOpen && 'rotate-90')} />
+                  상세 설정 (설명 · 서비스 · 공개 여부)
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-4 pt-2">
+                <div className="space-y-2">
+                  <Label htmlFor="env-desc">설명 (선택)</Label>
+                  <Input
+                    id="env-desc"
+                    placeholder="Supabase Project URL"
+                    value={newDesc}
+                    onChange={(e) => setNewDesc(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t(locale, 'envVar.service')}</Label>
+                  <Select
+                    value={newServiceId ?? '__none__'}
+                    onValueChange={(val) => {
+                      setNewServiceId(val === '__none__' ? null : val);
+                      setManualServiceSelect(true);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t(locale, 'envVar.selectService')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">{t(locale, 'envVar.noServiceLinked')}</SelectItem>
+                      {catalogServices.map((svc) => (
+                        <SelectItem key={svc.id} value={svc.id}>{svc.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="env-secret"
+                    checked={newIsSecret}
+                    onCheckedChange={(checked) => setNewIsSecret(checked as boolean)}
+                  />
+                  <Label htmlFor="env-secret" className="text-sm">
+                    민감한 값 (Secret)
+                  </Label>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
             {newKey.startsWith('NEXT_PUBLIC_') && newIsSecret && (
               <div className="flex items-start gap-2 rounded-md border border-destructive/50 bg-destructive/5 p-3">
                 <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
@@ -661,7 +780,7 @@ export default function ProjectEnvPage() {
                 취소
               </Button>
               <Button type="submit" disabled={addEnvVar.isPending || !newKey.trim()}>
-                {addEnvVar.isPending ? '추가 중...' : '추가'}
+                {addEnvVar.isPending ? '저장 중...' : '저장'}
               </Button>
             </DialogFooter>
           </form>
@@ -704,11 +823,11 @@ export default function ProjectEnvPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>환경변수 수정</DialogTitle>
-            <DialogDescription>변수의 이름, 값, 환경, 서비스를 수정할 수 있습니다.</DialogDescription>
+            <DialogDescription>값이 자동으로 표시됩니다. 수정 후 저장하세요.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEdit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-key">변수 이름</Label>
+              <Label htmlFor="edit-key">이름</Label>
               <Input
                 id="edit-key"
                 value={editKey}
@@ -728,9 +847,10 @@ export default function ProjectEnvPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-value">값</Label>
-              <Input
+              <Textarea
                 id="edit-value"
                 value={editValue}
+                rows={3}
                 onChange={(e) => setEditValue(e.target.value)}
                 onPaste={(e) => {
                   const text = e.clipboardData.getData('text').trim();
@@ -742,63 +862,77 @@ export default function ProjectEnvPage() {
                     setEditValue(unquoted);
                   }
                 }}
-                className="font-mono"
+                className="font-mono text-sm resize-y"
                 placeholder={decryptEnvVar.isPending ? '복호화 중...' : ''}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-desc">설명 (선택)</Label>
-              <Input
-                id="edit-desc"
-                value={editDesc}
-                onChange={(e) => setEditDesc(e.target.value)}
-              />
-            </div>
-            {/* Environment Selection */}
-            <div className="space-y-2">
-              <Label>환경</Label>
-              <Select
-                value={editEnvironment}
-                onValueChange={(v) => setEditEnvironment(v as Environment)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="development">개발 (Development)</SelectItem>
-                  <SelectItem value="staging">스테이징 (Staging)</SelectItem>
-                  <SelectItem value="production">프로덕션 (Production)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {/* Edit Service Selection */}
-            <div className="space-y-2">
-              <Label>{t(locale, 'envVar.service')}</Label>
-              <Select
-                value={editServiceId ?? '__none__'}
-                onValueChange={(val) => setEditServiceId(val === '__none__' ? null : val)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t(locale, 'envVar.selectService')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">{t(locale, 'envVar.noServiceLinked')}</SelectItem>
-                  {catalogServices.map((svc) => (
-                    <SelectItem key={svc.id} value={svc.id}>{svc.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="edit-secret"
-                checked={editIsSecret}
-                onCheckedChange={(checked) => setEditIsSecret(checked as boolean)}
-              />
-              <Label htmlFor="edit-secret" className="text-sm">
-                민감한 값 (Secret)
-              </Label>
-            </div>
+            {/* 상세 설정 */}
+            <Collapsible open={editDetailsOpen} onOpenChange={setEditDetailsOpen}>
+              <CollapsibleTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 gap-1 px-1 text-xs text-muted-foreground"
+                >
+                  <ChevronRight className={cn('h-3.5 w-3.5 transition-transform', editDetailsOpen && 'rotate-90')} />
+                  상세 설정 (환경 · 서비스 · 설명 · 공개 여부)
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-4 pt-2">
+                <div className="space-y-2">
+                  <Label>환경</Label>
+                  <Select
+                    value={editEnvironment}
+                    onValueChange={(v) => setEditEnvironment(v as Environment)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="development">개발 (Development)</SelectItem>
+                      <SelectItem value="staging">스테이징 (Staging)</SelectItem>
+                      <SelectItem value="production">프로덕션 (Production)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>{t(locale, 'envVar.service')}</Label>
+                  <Select
+                    value={editServiceId ?? '__none__'}
+                    onValueChange={(val) => setEditServiceId(val === '__none__' ? null : val)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t(locale, 'envVar.selectService')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">{t(locale, 'envVar.noServiceLinked')}</SelectItem>
+                      {catalogServices.map((svc) => (
+                        <SelectItem key={svc.id} value={svc.id}>{svc.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-desc">설명 (선택)</Label>
+                  <Input
+                    id="edit-desc"
+                    value={editDesc}
+                    onChange={(e) => setEditDesc(e.target.value)}
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="edit-secret"
+                    checked={editIsSecret}
+                    onCheckedChange={(checked) => setEditIsSecret(checked as boolean)}
+                  />
+                  <Label htmlFor="edit-secret" className="text-sm">
+                    민감한 값 (Secret)
+                  </Label>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setEditOpen(false)}>
                 취소

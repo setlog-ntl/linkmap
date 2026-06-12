@@ -15,7 +15,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Search, Plus, List, Layers, Braces, Share2 } from 'lucide-react';
+import { Search, Plus, List, Layers, Braces, Share2, Eye, EyeOff, Copy } from 'lucide-react';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
@@ -40,6 +40,12 @@ interface EnvFilterBarProps {
   envCounts: Record<Environment, number>;
   viewMode?: EnvViewMode;
   onViewModeChange?: (mode: EnvViewMode) => void;
+  /** 현재 목록의 모든 값 표시/숨기기 토글 */
+  onToggleShowAll?: () => void;
+  allShown?: boolean;
+  /** 현재 목록 전체를 .env 형식으로 클립보드 복사 */
+  onCopyAllClick?: () => void;
+  bulkBusy?: boolean;
 }
 
 export function EnvFilterBar({
@@ -53,6 +59,10 @@ export function EnvFilterBar({
   envCounts,
   viewMode = 'all',
   onViewModeChange,
+  onToggleShowAll,
+  allShown = false,
+  onCopyAllClick,
+  bulkBusy = false,
 }: EnvFilterBarProps) {
   const { locale } = useLocaleStore();
   const [inputValue, setInputValue] = useState(search);
@@ -124,6 +134,38 @@ export function EnvFilterBar({
       )}
 
         <div className="flex gap-2">
+          {onToggleShowAll && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={onToggleShowAll}
+                  disabled={bulkBusy}
+                  aria-label={allShown ? '모든 값 숨기기' : '모든 값 표시'}
+                >
+                  {allShown ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{allShown ? '모든 값 숨기기' : '모든 값 표시'}</TooltipContent>
+            </Tooltip>
+          )}
+          {onCopyAllClick && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={onCopyAllClick}
+                  disabled={bulkBusy}
+                  aria-label="전체를 .env 형식으로 복사"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>전체를 .env 형식으로 복사</TooltipContent>
+            </Tooltip>
+          )}
           {onCopyEnvClick && (
             <Tooltip>
               <TooltipTrigger asChild>
