@@ -28,6 +28,8 @@
 - TanStack Query + Zustand | Zod v4 | next-themes | sonner (react-hot-toast 금지) | lucide-react (타 아이콘 금지)
 - 디자인: Circuit Blue-Green v2, `brand-blue/green` 토큰, `bg-card shadow-sm` (글래스모피즘 금지, 헤더만 예외)
 - 폰트: Pretendard Variable (CDN) + Geist Mono
+- 결제: 3종 — Stripe(해외 카드) / Polar(MoR) / Toss(국내). API: `src/app/api/{stripe,polar,toss}`
+- MFA: TOTP 2FA 지원 (migration 096, `src/components/mfa/`)
 
 ## Content Objectivity (블로그/비교 콘텐츠 객관성)
 - 비교분석 콘텐츠는 편향 없이 객관적 데이터 기반으로 작성
@@ -75,12 +77,12 @@ npm run dev / build / typecheck / lint / test / test:coverage
 - 단, 사용자가 대화 중 명시적으로 "MCP 연결됨" 또는 직접 MCP 관련 작업을 요청한 경우에는 바로 실행해도 됨
 
 ## Database Rules
-- 스키마: `docs/db-schema.md` | 마이그레이션: `supabase/migrations/NNN_*.sql` (현재 040)
+- 스키마: `docs/db-schema.md` | 마이그레이션: `supabase/migrations/NNN_*.sql` (현재 100)
 - **마이그레이션 후 3-step**: ① `src/types/` 동기화 → ② `src/lib/queries/` 반영 → ③ `docs/db-schema.md` 업데이트
 - 새 테이블: RLS + 정책 + created_at 필수
-- 타입 매핑: core(profiles/subscriptions/tokens), service(services/catalog), project(projects/bindings), env(env_vars/health), connection(user_connections), service-account, ai(ai_*), dashboard(view models)
+- 타입 매핑: core(profiles/subscriptions/tokens), service(services/catalog), project(projects/bindings), env(env_vars/health), connection(user_connections), service-account, credential, feedback, team, ai(ai_*), dashboard(view models)
 - DB CHECK 변경 → TS union type 동기화 필수
-- 기존 마이그레이션 수정 금지 (새 파일로 ALTER)
+- 기존 마이그레이션 수정 금지 (새 파일로 ALTER) — 번호 중복 주의: 042/043/072/073 (×2)
 
 ## Testing
 - `mockResolvedValue` 필수 (`Once` 금지 — 리렌더링 실패)
@@ -90,16 +92,28 @@ npm run dev / build / typecheck / lint / test / test:coverage
 
 ## File Structure (축약)
 ```
-src/app/          — (auth), (dashboard), project/[id]/, services/, pricing/, settings/
-src/app/api/      — 15 groups: account, admin, ai, connections, env, github, health-check, oauth, oneclick, projects, seed, service-accounts, stripe, teams, tokens
-src/components/   — ui/, layout/, project/, service/, service-map/, ai/, dashboard/, oneclick/, github/, settings/, landing/, env/, icons/, guides/, admin/, my-sites/
-src/lib/          — api/, ai/, crypto/, github/(13files), hooks/, i18n/, oneclick/, queries/(16hooks), supabase/, validations/, connections/, constants/, env/, health-check/, layout/, mappers/, utils/
-                    root: audit.ts, admin.ts, quota.ts, module-schema.ts, utils.ts, deploy-error-map.ts
-src/stores/       — ui-store, project-store, locale-store, service-map-store
-src/types/        — 8 domain files + barrel
-src/data/         — seed/, oneclick/, templates/, ui/
+src/app/          — (auth), (dashboard), project/[id]/, services/, pricing/, settings/, admin/, blog/, demo/,
+                    guides/, glossary/, faq/, feedback/, my-sites/, oneclick/, shared/, showcase/ + SEO(sitemap/robots/feed/llms.txt)
+src/app/api/      — 31 groups: account, admin, ai, auth, bot-log, connections, credentials, demo, env, exchange-rate,
+                    feedback, github, health-check, indexnow, mcp, oauth, oneclick, polar, projects, seed,
+                    service-accounts, services, shared, showcase, stripe, teams, tokens, toss, track, trash
+src/components/   — ui/, layout/, project/, service/, service-map/, ai/, dashboard/, oneclick/, github/, settings/,
+                    landing/, env/, icons/, guides/, admin/, my-sites/, blog/, credentials/, demo/, feedback/,
+                    mfa/, seo/, showcase/, tracking/ + command-palette/error-boundary/theme-toggle/providers
+src/lib/          — api/, ai/, openai/, crypto/, email/, github/(13files), hooks/, i18n/, oneclick/, queries/(29hooks),
+                    supabase/, validations/, connections/, constants/, env/, health-check/, layout/, mappers/, seo/, utils/
+                    root: audit.ts, admin.ts, quota.ts, module-schema.ts, utils.ts, env.ts, deploy-error-map.ts
+src/stores/       — ui-store, project-store, locale-store, service-map-store, ai-chat-store, dashboard-store, service-detail-store
+src/types/        — 11 domain files (ai, connection, core, credential, dashboard, env, feedback, project, service, service-account, team) + barrel
+src/data/         — seed/, oneclick/, templates/, blog/, demo/, landing/, seo/, ui/ + service-connections.ts, hero-flow-config.ts
 packages/         — mcp-server/, cli/
 ```
+
+## Prompt Log (작업 로그)
+- P0/P1 작업 완료 시 `docs/log/YYYY-MM.md`에 엔트리 추가 (포맷: `docs/log/README.md` 참조)
+- P2(단순 버그/타이포), 커밋 메시지로 충분한 작업은 기록 불필요
+- 월별 파일 없으면 새로 생성 (예: `2026-05.md`)
+- 전략적 전환점은 `docs/log/milestone.md`에도 추가
 
 ## Reference Docs
 | 찾는 것 | 위치 |

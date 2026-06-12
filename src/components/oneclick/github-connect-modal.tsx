@@ -86,6 +86,24 @@ export function GitHubConnectModal({
                 <ExternalLink className="h-3 w-3" />
                 {t(locale, 'githubConnect.redirectNotice')}
               </p>
+              {/* GitHub 미보유 초급 사용자 안내 — 게이트에서 막히지 않도록 가입 경로 제공 (2026-06-12 E2E A-4/A-5) */}
+              <div className="rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground space-y-1.5">
+                <p>
+                  GitHub 계정이 없으신가요?{' '}
+                  <a
+                    href="/guides/github"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary font-medium hover:underline"
+                  >
+                    가입 가이드 보기
+                  </a>{' '}
+                  — 무료이며 2~3분이면 만들 수 있어요.
+                </p>
+                <p className="text-muted-foreground/80">
+                  새 기기에서 로그인하면 GitHub이 이메일로 보안 코드를 요청할 수 있어요.
+                </p>
+              </div>
             </div>
           )}
         </div>

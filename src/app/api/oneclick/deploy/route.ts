@@ -19,7 +19,13 @@ function humanizeSlug(slug: string): string {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/** 배포 실패 시 생성된 리소스 정리 (projectId는 GitHub 단계 실패 시 null일 수 있음) */
+/**
+ * 배포 실패 시 생성된 리소스 정리 (projectId는 GitHub 단계 실패 시 null일 수 있음).
+ *
+ * 반환: 삭제하지 못한 고아 GitHub 레포(`owner/repo`) 또는 null.
+ * OAuth 토큰에 `delete_repo` 스코프가 없어 레포 삭제는 항상 403으로 실패할 수 있다 —
+ * silent catch로 삼키지 않고 호출자에게 알려 사용자 안내·로깅에 사용한다. (2026-06-12 E2E B-3)
+ */
 async function cleanupResources(
   supabase: Awaited<ReturnType<typeof createClient>>,
   projectId: string | null,
@@ -27,12 +33,15 @@ async function cleanupResources(
   githubToken?: string,
   repoOwner?: string,
   repoName?: string,
-) {
-  // 1. GitHub 레포 삭제 (있으면)
+): Promise<{ orphanRepo: string | null }> {
+  let orphanRepo: string | null = null;
+  // 1. GitHub 레포 삭제 (있으면) — 실패 시 고아 레포로 보고
   if (githubToken && repoOwner && repoName) {
     try {
       await deleteRepo(githubToken, repoOwner, repoName);
-    } catch { /* best effort */ }
+    } catch {
+      orphanRepo = `${repoOwner}/${repoName}`;
+    }
   }
   // 2. 복사된 service_account 삭제 (있으면)
   if (copiedServiceAccountId) {
@@ -42,6 +51,14 @@ async function cleanupResources(
   if (projectId) {
     await supabase.from('projects').delete().eq('id', projectId);
   }
+  return { orphanRepo };
+}
+
+/** 고아 레포 발생 시 사용자 안내 문구 (없으면 빈 문자열) */
+function orphanRepoNotice(orphanRepo: string | null): string {
+  return orphanRepo
+    ? ` 생성된 GitHub 저장소(github.com/${orphanRepo})는 자동 정리되지 않았습니다. GitHub에서 직접 삭제할 수 있어요.`
+    : '';
 }
 
 export async function POST(request: NextRequest) {
@@ -277,23 +294,23 @@ export async function POST(request: NextRequest) {
           continue;
         }
         // Fatal — 레포 정리 후 반환
-        await cleanupResources(supabase, null, null, githubToken, repoOwner, repoName);
+        const { orphanRepo } = await cleanupResources(supabase, null, null, githubToken, repoOwner, repoName);
         const errMsg = err instanceof GitHubApiError ? err.message : 'GitHub Pages 활성화 실패';
         return failDeploy({
-          message: `GitHub Pages 활성화 실패: ${errMsg}`,
+          message: `GitHub Pages 활성화 실패: ${errMsg}${orphanRepoNotice(orphanRepo)}`,
           httpStatus: err instanceof GitHubApiError ? err.status : 502,
           failedStep: '설정 중', siteName: finalSiteName,
-          errorContext: { repo: repoResult.full_name },
+          errorContext: { repo: repoResult.full_name, orphan_repo: orphanRepo },
         });
       }
     }
 
     if (!pagesEnabled) {
-      await cleanupResources(supabase, null, null, githubToken, repoOwner, repoName);
+      const { orphanRepo } = await cleanupResources(supabase, null, null, githubToken, repoOwner, repoName);
       return failDeploy({
-        message: 'GitHub Pages 활성화 시간 초과. 다시 시도해주세요.',
+        message: `GitHub Pages 활성화 시간 초과. 다시 시도해주세요.${orphanRepoNotice(orphanRepo)}`,
         httpStatus: 502, failedStep: '설정 중', siteName: finalSiteName,
-        errorContext: { repo: repoResult.full_name },
+        errorContext: { repo: repoResult.full_name, orphan_repo: orphanRepo },
       });
     }
 
@@ -323,15 +340,15 @@ export async function POST(request: NextRequest) {
     }
 
     if (pushError) {
-      await cleanupResources(supabase, null, null, githubToken, repoOwner, repoName);
+      const { orphanRepo } = await cleanupResources(supabase, null, null, githubToken, repoOwner, repoName);
       const pushErrMsg = pushError instanceof GitHubApiError
         ? `파일 업로드 실패: ${pushError.message}`
         : '템플릿 파일 업로드 중 오류가 발생했습니다';
       return failDeploy({
-        message: pushErrMsg,
+        message: `${pushErrMsg}${orphanRepoNotice(orphanRepo)}`,
         httpStatus: pushError instanceof GitHubApiError ? pushError.status : 502,
         failedStep: '준비 중', siteName: finalSiteName,
-        errorContext: { repo: repoResult.full_name },
+        errorContext: { repo: repoResult.full_name, orphan_repo: orphanRepo },
       });
     }
 
@@ -352,8 +369,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (projectError || !project) {
-      await cleanupResources(supabase, null, null, githubToken, repoOwner, repoName);
-      return serverError(projectError?.message ?? '프로젝트 생성에 실패했습니다');
+      const { orphanRepo } = await cleanupResources(supabase, null, null, githubToken, repoOwner, repoName);
+      return serverError(`${projectError?.message ?? '프로젝트 생성에 실패했습니다'}${orphanRepoNotice(orphanRepo)}`);
     }
 
     // Copy user-level service account to project
@@ -394,14 +411,27 @@ export async function POST(request: NextRequest) {
     });
 
     if (deployError || !createResult) {
-      await cleanupResources(supabase, project.id, copiedServiceAccountId, githubToken, repoOwner, repoName);
-      return serverError(deployError?.message ?? '배포 레코드 생성에 실패했습니다');
+      const { orphanRepo } = await cleanupResources(supabase, project.id, copiedServiceAccountId, githubToken, repoOwner, repoName);
+      return serverError(`${deployError?.message ?? '배포 레코드 생성에 실패했습니다'}${orphanRepoNotice(orphanRepo)}`);
     }
 
     const deployResult = createResult as { allowed: boolean; current: number; max: number; deploy_id?: string };
     if (!deployResult.allowed || !deployResult.deploy_id) {
       // 동시 배포로 한도 초과 — 생성된 GitHub 레포·프로젝트·SA 정리 후 쿼터 에러
-      await cleanupResources(supabase, project.id, copiedServiceAccountId, githubToken, repoOwner, repoName);
+      const { orphanRepo } = await cleanupResources(supabase, project.id, copiedServiceAccountId, githubToken, repoOwner, repoName);
+      if (orphanRepo) {
+        // 쿼터 응답 형태는 유지(클라이언트 업그레이드 UI 의존) — 고아 레포는 로깅으로 가시화
+        void logDeployError({
+          userId: user.id,
+          templateId: template_id,
+          templateSlug: template.slug,
+          siteName: finalSiteName,
+          errorMessage: `쿼터 초과로 배포 중단 — 고아 레포 정리 실패 (github.com/${orphanRepo})`,
+          failedStep: '정리 중',
+          httpStatus: 403,
+          errorContext: { orphan_repo: orphanRepo },
+        });
+      }
       return quotaExceededError('사이트 배포', deployResult.current, deployResult.max);
     }
     const deployId = deployResult.deploy_id;

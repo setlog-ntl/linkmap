@@ -1,7 +1,7 @@
 # Linkmap Database Schema Reference
 
-> **Last Updated**: 2026-04-07
-> **Migrations**: 001 ~ 096 (96 files)
+> **Last Updated**: 2026-04-13
+> **Migrations**: 001 ~ 097 (97 files)
 > **Engine**: Supabase (PostgreSQL 15+)
 
 이 문서는 바이브코딩 시 DB 구조를 빠르게 참조하기 위한 스키마 레퍼런스입니다.
@@ -381,15 +381,16 @@
 
 ### api_tokens
 
-| Column | Type | Nullable | Default |
-|--------|------|----------|---------|
-| id | UUID PK | NO | gen_random_uuid() |
-| user_id | UUID FK | NO | → auth.users(id) |
-| name | TEXT | NO | - |
-| token_hash | TEXT UNIQUE | NO | - |
-| last_used_at | TIMESTAMPTZ | YES | NULL |
-| expires_at | TIMESTAMPTZ | YES | NULL |
-| created_at | TIMESTAMPTZ | NO | now() |
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | UUID PK | NO | gen_random_uuid() | |
+| user_id | UUID FK | NO | → auth.users(id) | |
+| name | TEXT | NO | - | |
+| token_hash | TEXT UNIQUE | NO | - | |
+| scopes | TEXT[] | NO | '{read,write}' | CHECK: `<@ ARRAY['read','write','admin']` (M097) |
+| last_used_at | TIMESTAMPTZ | YES | NULL | |
+| expires_at | TIMESTAMPTZ | YES | NULL | |
+| created_at | TIMESTAMPTZ | NO | now() | |
 
 **RLS**: 본인만 관리
 **TS Type**: `ApiToken` (`src/types/core.ts`)
@@ -892,8 +893,9 @@ CREATE TYPE team_role AS ENUM ('admin', 'editor', 'viewer');
 ```
 supabase/migrations/NNN_description.sql
 ```
-- NNN: 3자리 숫자 (001~072)
-- 다음 마이그레이션: **073**
+- NNN: 3자리 숫자 (001~100)
+- 다음 마이그레이션: **101**
+- 최근: 099 `fix_quota_enum_cast` — 052·098 함수의 `plan_quotas.plan`(enum) vs TEXT 비교 오류(`42883`)에 `::subscription_plan` 캐스트 적용 (프로덕션 배포 500 핫픽스, 2026-06-12 E2E에서 발견) / 100 `admin_quota_bypass_rpc` — `create_homepage_deploy_atomic`에 `profiles.is_admin` 무제한 바이패스 추가 (quota.ts 정책과 일치화)
 
 ### 마이그레이션 작성 규칙
 1. **IF NOT EXISTS / IF EXISTS** 사용 → idempotent하게

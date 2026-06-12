@@ -146,7 +146,7 @@ export function DeployProgress({ status, template }: DeployProgressProps) {
               {isCompleted
                 ? t(locale, 'deployProgress.completed')
                 : isError
-                  ? t(locale, 'deployStep.maintenanceTitle')
+                  ? '배포에 실패했습니다'
                   : isTimeout
                     ? t(locale, 'deployProgress.timeout')
                     : t(locale, 'deployProgress.preparingSite')}
@@ -177,7 +177,7 @@ export function DeployProgress({ status, template }: DeployProgressProps) {
               {isError && (
                 <Badge variant="outline" className="gap-1 border-amber-500 text-amber-600">
                   <AlertTriangle className="h-3 w-3" />
-                  {t(locale, 'deployStep.maintenanceTitle')}
+                  배포 실패
                 </Badge>
               )}
               {isTimeout && (

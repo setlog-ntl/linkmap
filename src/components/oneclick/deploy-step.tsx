@@ -253,7 +253,7 @@ function ErrorCard({
             <AlertTriangle className="h-8 w-8 text-amber-500" />
           </div>
           <h3 className="text-lg font-semibold">
-            {t(locale, 'deployStep.maintenanceTitle')}
+            배포에 실패했습니다
           </h3>
 
           {details ? (
@@ -282,7 +282,7 @@ function ErrorCard({
         <div className="flex items-center justify-center gap-2 py-2">
           <div className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
           <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-            {t(locale, 'deployStep.maintenanceNotice')}
+            입력한 내용은 그대로 유지돼요 — 다시 시도하면 이어서 진행됩니다
           </span>
         </div>
 

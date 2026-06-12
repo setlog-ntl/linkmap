@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>원클릭 배포 E2E 종합 리포트 — 2026-06-12</title>
+<style>
+  :root {
+    --bg: #0b1220; --card: #111a2c; --card2: #0e1626; --border: #1e2a44;
+    --text: #e2e8f0; --muted: #94a3b8; --blue: #38bdf8; --green: #34d399;
+    --red: #f87171; --orange: #fb923c; --yellow: #fbbf24; --info: #64748b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Pretendard', -apple-system, 'Segoe UI', sans-serif; line-height: 1.65; padding: 40px 20px; }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; background: linear-gradient(90deg, var(--blue), var(--green)); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 6px; }
+  .sub { color: var(--muted); margin-bottom: 28px; font-size: .95rem; }
+  h2 { font-size: 1.25rem; margin: 38px 0 14px; color: var(--blue); border-left: 4px solid var(--blue); padding-left: 12px; }
+  h3 { font-size: 1.02rem; margin: 20px 0 10px; color: var(--green); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .card .num { font-size: 1.7rem; font-weight: 800; }
+  .card .lbl { color: var(--muted); font-size: .85rem; margin-top: 4px; }
+  .pass { color: var(--green); } .fail { color: var(--red); } .warn { color: var(--yellow); }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 6px; background: var(--card); border-radius: 10px; overflow: hidden; font-size: .9rem; }
+  th { background: var(--card2); color: var(--blue); text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--border); white-space: nowrap; }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: .76rem; font-weight: 700; white-space: nowrap; }
+  .b-crit { background: rgba(248,113,113,.15); color: var(--red); border: 1px solid var(--red); }
+  .b-high { background: rgba(251,146,60,.15); color: var(--orange); border: 1px solid var(--orange); }
+  .b-warn { background: rgba(251,191,36,.13); color: var(--yellow); border: 1px solid var(--yellow); }
+  .b-info { background: rgba(100,116,139,.18); color: var(--muted); border: 1px solid var(--info); }
+  .b-pass { background: rgba(52,211,153,.13); color: var(--green); border: 1px solid var(--green); }
+  .b-fixed { background: rgba(56,189,248,.13); color: var(--blue); border: 1px solid var(--blue); }
+  code { background: var(--card2); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; font-family: 'Geist Mono', Consolas, monospace; font-size: .84em; color: var(--green); }
+  .flow { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; margin: 14px 0; }
+  .flow ol { margin-left: 20px; } .flow li { margin: 7px 0; }
+  .timeline { border-left: 2px solid var(--border); margin: 14px 0 14px 8px; padding-left: 22px; }
+  .tl-item { position: relative; margin-bottom: 14px; }
+  .tl-item::before { content: ''; position: absolute; left: -28px; top: 7px; width: 10px; height: 10px; border-radius: 50%; background: var(--blue); }
+  .tl-item.red::before { background: var(--red); } .tl-item.green::before { background: var(--green); } .tl-item.orange::before { background: var(--orange); }
+  .tl-time { color: var(--muted); font-size: .82rem; font-family: 'Geist Mono', monospace; }
+  .next { background: linear-gradient(135deg, rgba(56,189,248,.07), rgba(52,211,153,.07)); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin: 14px 0; }
+  .step-num { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--blue); color: #04111f; font-weight: 800; font-size: .85rem; margin-right: 10px; }
+  a { color: var(--blue); text-decoration: none; } a:hover { text-decoration: underline; }
+  .links { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+  .links a { background: var(--card); border: 1px solid var(--border); padding: 8px 14px; border-radius: 9px; font-size: .88rem; }
+  .footer { color: var(--muted); font-size: .8rem; margin-top: 44px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .insight { background: var(--card2); border-left: 4px solid var(--green); border-radius: 0 10px 10px 0; padding: 14px 18px; margin: 10px 0; font-size: .92rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>원클릭 배포 E2E 종합 리포트</h1>
+<div class="sub">2026-06-12 · 프로덕션 linkmap.biz · Playwright MCP 실측 · 코드 <code>7aa74c05</code> + 핫픽스 migration 099·100</div>
+
+<div class="cards">
+  <div class="card"><div class="num pass">2/2</div><div class="lbl">케이스 PASS (핫픽스 후)</div></div>
+  <div class="card"><div class="num fail">1 / 2</div><div class="lbl">CRITICAL / HIGH 결함</div></div>
+  <div class="card"><div class="num" style="color:var(--blue)">2건</div><div class="lbl">프로덕션 핫픽스 적용</div></div>
+  <div class="card"><div class="num warn">13건</div><div class="lbl">총 발견사항</div></div>
+  <div class="card"><div class="num pass">~12분</div><div class="lbl">가입→라이브 (신규 사용자)</div></div>
+</div>
+
+<h2>1. 한눈에 보기</h2>
+<div class="flow">
+  <b>테스트 시작 시점, 프로덕션의 원클릭 배포는 전면 차단 상태였다.</b> 어제(06-11) 안정화 배포에 포함된 migration 098의
+  PostgreSQL enum 타입 비교 버그(<code>subscription_plan = text</code>)로 <b>모든 사용자의 배포가 500</b>으로 실패하고 있었고,
+  그 뒤에는 관리자 쿼터 바이패스 누락(B-6)이 겹쳐 있었다. 테스트 중 DB 핫픽스 2건(<code>099</code>·<code>100</code>)을 적용해
+  복구했고, 이후 <b>두 페르소나 모두 가입/로그인 → 배포 → 모듈 수정 → 라이브 반영까지 완주</b>를 실증했다.
+</div>
+
+<h2>2. 케이스별 결과</h2>
+<table>
+  <tr><th>케이스</th><th>페르소나</th><th>판정</th><th>핵심 검증</th><th>산출 사이트</th></tr>
+  <tr>
+    <td><b>Case B</b></td>
+    <td>기존 GitHub 연동 사용자<br>(관리자)</td>
+    <td><span class="badge b-pass">PASS</span></td>
+    <td>게이트 미발동 단축 경로 · 이름충돌 자동 suffix(<code>-vg</code>) · 빌드 95초 · 모듈 수정→라이브 2분 · 원자 커밋</td>
+    <td><a href="https://setlog-ntl.github.io/e2e-b-0612-vg/" target="_blank">e2e-b-0612-vg</a><br>(디지털 명함)</td>
+  </tr>
+  <tr>
+    <td><b>Case A</b></td>
+    <td>GitHub 미보유 신규 초급자<br>(이메일 가입, free)</td>
+    <td><span class="badge b-pass">PASS</span></td>
+    <td>가입→인증→게이트 모달→보조계정 OAuth→<b>왕복 후 상태보존("배포 진행")</b>→free 쿼터 정상→모듈 수정→라이브 3분</td>
+    <td><a href="https://cdhnayajeil-code.github.io/e2e-a-linkcard/" target="_blank">e2e-a-linkcard</a><br>(링크카드)</td>
+  </tr>
+</table>
+
+<h3>실측 타임라인 (Case B 중심)</h3>
+<div class="timeline">
+  <div class="tl-item"><span class="tl-time">11:16</span> — 1차 배포 시도 → <b class="fail">500</b> <code>operator does not exist: subscription_plan = text</code> (B-2 발견)</div>
+  <div class="tl-item red"><span class="tl-time">11:27</span> — <b>핫픽스 1</b>: migration <code>099_fix_quota_enum_cast</code> 프로덕션 적용 (052·098 함수 3개)</div>
+  <div class="tl-item orange"><span class="tl-time">11:31</span> — 2차 시도 → <b class="fail">403</b> QUOTA_EXCEEDED 43/3 (B-6 발견: RPC 관리자 바이패스 누락 — B-2가 가리던 버그)</div>
+  <div class="tl-item red"><span class="tl-time">11:34</span> — <b>핫픽스 2</b>: migration <code>100_admin_quota_bypass_rpc</code> 적용</div>
+  <div class="tl-item green"><span class="tl-time">11:35</span> — 3차 시도 → <b class="pass">201</b> · 빌드 95초 · 라이브 200</div>
+  <div class="tl-item green"><span class="tl-time">11:42</span> — 모듈 수정(마커+테마) → batch-update 커밋 → <b class="pass">~2분 후 라이브 반영</b></div>
+  <div class="tl-item"><span class="tl-time">11:45~12:13</span> — Case A: 신규 가입부터 전체 여정 완주 (<b class="pass">~12분</b>, 핫픽스가 일반 사용자 경로에서도 검증됨)</div>
+</div>
+
+<h2>3. 발견사항 전체 (13건)</h2>
+<table>
+  <tr><th>ID</th><th>심각도</th><th>상태</th><th>내용</th><th>위치</th></tr>
+  <tr><td>B-2</td><td><span class="badge b-crit">CRITICAL</span></td><td><span class="badge b-fixed">수정완료</span></td><td>RPC enum=TEXT 비교 → 모든 배포 500 (06-11부터). 고아 repo <code>mypage-bm</code>·<code>mypage-4l</code>이 증거</td><td>migration 098 → <b>099로 수정</b></td></tr>
+  <tr><td>B-6</td><td><span class="badge b-high">HIGH</span></td><td><span class="badge b-fixed">수정완료</span></td><td>RPC에 <code>profiles.is_admin</code> 바이패스 누락 — 앱 레벨 quota.ts와 정책 불일치</td><td>migration 098 → <b>100으로 수정</b></td></tr>
+  <tr><td>B-3</td><td><span class="badge b-high">HIGH</span></td><td><span class="badge b-warn">진행중</span></td><td>배포 실패 시 cleanup의 <code>deleteRepo</code>가 <code>delete_repo</code> 스코프 부재로 403 → silent catch → <b>고아 repo 누적</b> (이번 테스트로 2개 추가 발생)</td><td><code>deploy/route.ts:34</code></td></tr>
+  <tr><td>B-1</td><td><span class="badge b-warn">WARNING</span></td><td><span class="badge b-warn">진행중</span></td><td>미존재 repo 이름에 "이미 존재" 거짓 경고 — raw fetch에 <b>User-Agent 누락</b>(GitHub API 403→<code>≠404</code>=존재 오판)</td><td><code>preflight/route.ts:69</code></td></tr>
+  <tr><td>A-4</td><td><span class="badge b-warn">WARNING</span></td><td><span class="badge b-warn">진행중</span></td><td><b>GitHub 계정 없는 사용자용 가입 안내 부재</b> + 랜딩 "Google 계정 하나면 GitHub 가입 자동" 문구와 실기능 불일치 — 1순위 타겟(바이브코더) 직결</td><td>GitHubConnectModal / 랜딩</td></tr>
+  <tr><td>B-4</td><td><span class="badge b-warn">WARNING</span></td><td><span class="badge b-warn">진행중</span></td><td>배포 실패 화면 제목이 "템플릿 업데이트 중"·"더 나은 경험을 위해 준비 중" — 실패를 진행 중으로 오인</td><td>위저드 에러 화면</td></tr>
+  <tr><td>B-5</td><td><span class="badge b-warn">WARNING</span></td><td><span class="badge b-warn">진행중</span></td><td>"다시 시도" 클릭 시 사이트명·템플릿 선택 초기화 (입력 유실)</td><td>위저드</td></tr>
+  <tr><td>A-2</td><td><span class="badge b-warn">WARNING</span></td><td><span class="badge b-warn">진행중</span></td><td>만료/사용된 인증 링크 진입 시 화면 안내·재발송 CTA 없음 (URL 파라미터로만 전달)</td><td><code>/login</code></td></tr>
+  <tr><td>A-5</td><td><span class="badge b-warn">WARNING</span></td><td><span class="badge b-info">백로그</span></td><td>GitHub Device Verification(메일 코드) 사전 안내 없음 — 초급자 이탈 지점</td><td>게이트 모달 (A-4와 함께)</td></tr>
+  <tr><td>A-1</td><td><span class="badge b-info">INFO</span></td><td><span class="badge b-info">백로그</span></td><td>가입 확인 카드에 스팸함 안내 없음</td><td><code>/signup</code></td></tr>
+  <tr><td>A-3</td><td><span class="badge b-info">INFO</span></td><td><span class="badge b-info">백로그</span></td><td>초보자 가이드에 GitHub 자체 설명 없음</td><td>위저드 가이드</td></tr>
+  <tr><td>B-7</td><td><span class="badge b-info">INFO</span></td><td><span class="badge b-info">백로그</span></td><td>/sites/manage에서 삭제된 배포의 미리보기 iframe 404 다수 (콘솔 에러 29건)</td><td>manage 페이지</td></tr>
+  <tr><td>B-8</td><td><span class="badge b-info">INFO</span></td><td><span class="badge b-info">백로그</span></td><td>배포 템플릿 favicon이 루트 도메인 참조 → 404 (basePath 미적용)</td><td>템플릿 번들</td></tr>
+</table>
+
+<h2>4. 다음 단계 로드맵 (순서대로 진행)</h2>
+<div class="next">
+  <p style="margin-bottom:12px"><b>이번 세션에서 바로 진행</b> — 코드 수정 (P1, 사용자 경험 직결 + 데이터 위생):</p>
+  <table>
+    <tr><th></th><th>작업</th><th>대상</th><th>방침</th></tr>
+    <tr><td><span class="step-num">1</span></td><td><b>B-1</b> preflight 거짓 경고</td><td><code>preflight/route.ts</code></td><td>raw fetch → 공용 <code>githubFetch</code>(UA 포함) 사용, 404/200 외 상태는 <code>null</code>(unknown) 처리</td></tr>
+    <tr><td><span class="step-num">2</span></td><td><b>B-3</b> 고아 repo</td><td><code>deploy/route.ts</code></td><td>스코프 추가(권한 위협↑) 대신: cleanup 실패를 로깅 + 에러 응답에 고아 repo URL·삭제 안내 포함</td></tr>
+    <tr><td><span class="step-num">3</span></td><td><b>B-4/B-5</b> 위저드 에러 UX</td><td>위저드 컴포넌트</td><td>에러 전용 카피 교체 + 재시도 시 템플릿·사이트명 보존</td></tr>
+    <tr><td><span class="step-num">4</span></td><td><b>A-2</b> 만료 인증링크</td><td><code>/login</code></td><td>error 파라미터 감지 배너 + "인증 메일 재발송" CTA</td></tr>
+    <tr><td><span class="step-num">5</span></td><td><b>A-4/A-5</b> 게이트 모달 퀵윈</td><td>GitHubConnectModal</td><td>"GitHub 계정이 없으신가요? → 가입 가이드" 링크 + 보안 코드 안내 한 줄</td></tr>
+    <tr><td><span class="step-num">6</span></td><td>검증 + 커밋</td><td>—</td><td>typecheck·lint·관련 테스트 → migration 099·100 + 문서 + 코드 일괄 커밋</td></tr>
+  </table>
+  <p style="margin-top:14px"><b>별도 기획 검토 (이번 범위 외)</b>:</p>
+  <ul style="margin-left:22px; margin-top:6px">
+    <li><b>A-4 본편</b>: GitHub 미보유자 온보딩 전략 — 랜딩 "GitHub 가입 자동" 문구의 실제 구현(가이드형 vs 위임형) 또는 문구 현실화 → <code>feature-advisor</code> 기획 검토 권장</li>
+    <li><b>B-7·B-8·A-1·A-3</b>: INFO급 마찰 — 다음 스프린트 백로그</li>
+    <li><b>고아 repo 정리(수동)</b>: <code>setlog-ntl/{e2e-b-0612, e2e-b-0612-dw, mypage-bm, mypage-4l}</code> — GitHub에서 직접 삭제</li>
+    <li><b>테스트 산출물 정리</b>: 사이트 2개(repo+Linkmap 레코드) + 테스트 계정(<code>+lmtest-a1</code>) + 보조 계정 OAuth 승인 revoke</li>
+  </ul>
+</div>
+
+<h2>5. 인사이트</h2>
+<div class="insight">① <b>PL/pgSQL의 enum=TEXT 비교</b>는 리터럴(<code>'free'</code>)은 통과하지만 변수 경유(<code>COALESCE(v_plan,...)</code>)는 42883으로 죽는다 — RPC를 크리티컬 패스에 넣을 땐 <b>프로덕션 스키마 타입으로 실행 검증</b>이 필수.</div>
+<div class="insight">② <b>정책 이중화는 드리프트를 낳는다</b> — 사전 체크(quota.ts, admin 바이패스 있음)와 DB RPC(없음)가 갈라져 관리자만 차단되는 버그 발생. 단일 소스 또는 계약 테스트 필요.</div>
+<div class="insight">③ <b>E2E가 아니면 못 잡는 버그였다</b> — 단위 테스트는 mock DB라 enum 타입 불일치를 통과시킴. 흐름 테스트 체계(<code>docs/e2e-flows/</code>)의 존재 가치를 첫 실행에서 실증.</div>
+
+<h2>6. 산출 문서</h2>
+<div class="links">
+  <a href="./scenario.md">📋 시나리오 정의서</a>
+  <a href="./run-case-b.md">📊 Case B 실행 리포트</a>
+  <a href="./run-case-a.md">📊 Case A 실행 리포트</a>
+  <a href="../README.md">📖 e2e-flows 방법론</a>
+  <a href="./screenshots/">🖼 스크린샷 25장</a>
+</div>
+
+<div class="footer">
+  Generated 2026-06-12 · Linkmap E2E Flow Test · 환경: 프로덕션 linkmap.biz · 실행: Claude Code + Playwright MCP + Supabase MCP<br>
+  핫픽스: <code>supabase/migrations/099_fix_quota_enum_cast.sql</code>, <code>100_admin_quota_bypass_rpc.sql</code> (프로덕션 적용 완료, git 커밋 대기)
+</div>
+
+</div>
+</body>
+</html>

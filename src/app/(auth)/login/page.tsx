@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Github, Loader2 } from 'lucide-react';
+import { Github, Loader2, MailWarning } from 'lucide-react';
 import { GoogleIcon } from '@/components/icons/google-icon';
 
 export default function LoginPage() {
@@ -27,6 +27,32 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<string | null>(null);
+
+  // 인증 링크 만료/재사용으로 리다이렉트된 경우 (Supabase verify → ?error=Email link is invalid or has expired)
+  // URL 파라미터로만 전달되어 사용자가 원인을 알 수 없었음 — 배너 + 재발송 CTA 제공 (2026-06-12 E2E A-2)
+  const authErrorParam = searchParams.get('error');
+  const isExpiredLink = !!authErrorParam && /invalid|expired/i.test(authErrorParam);
+  const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent'>('idle');
+
+  const handleResendConfirmation = async () => {
+    if (!email) {
+      setError('재발송할 이메일 주소를 아래에 먼저 입력해주세요.');
+      return;
+    }
+    setError(null);
+    setResendState('sending');
+    const { error: resendError } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirect)}` },
+    });
+    if (resendError) {
+      setError(resendError.message);
+      setResendState('idle');
+      return;
+    }
+    setResendState('sent');
+  };
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +99,39 @@ export default function LoginPage() {
           <CardDescription>계정에 로그인하여 프로젝트를 관리하세요</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {isExpiredLink && (
+            <div className="rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-3 space-y-2">
+              <div className="flex items-start gap-2">
+                <MailWarning className="h-4 w-4 mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                <div className="text-sm text-amber-800 dark:text-amber-200 space-y-1">
+                  <p className="font-medium">인증 링크가 만료되었거나 이미 사용되었습니다.</p>
+                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                    이미 인증을 완료했다면 아래에서 그대로 로그인하세요. 인증이 안 된 경우
+                    이메일을 입력한 뒤 재발송을 눌러주세요.
+                  </p>
+                </div>
+              </div>
+              {resendState === 'sent' ? (
+                <p className="text-xs font-medium text-green-700 dark:text-green-400 pl-6">
+                  인증 메일을 다시 보냈습니다. 받은편지함(스팸함 포함)을 확인해주세요.
+                </p>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="ml-6 h-7 text-xs border-amber-300 dark:border-amber-700"
+                  onClick={handleResendConfirmation}
+                  disabled={resendState === 'sending'}
+                >
+                  {resendState === 'sending' ? (
+                    <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
+                  ) : null}
+                  인증 메일 재발송
+                </Button>
+              )}
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <Button
               variant="outline"

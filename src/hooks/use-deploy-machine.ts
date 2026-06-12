@@ -51,6 +51,9 @@ interface ErrorState {
   canRetry: boolean;
   deployId: string | null;
   projectId: string | null;
+  /** 재시도 시 폼 복원용 — 직전 입력 보존 (없으면 null/'' — 2026-06-12 E2E B-5) */
+  template: string | null;
+  siteName: string;
 }
 
 export type DeployState =
@@ -159,9 +162,15 @@ function deployReducer(state: DeployState, action: DeployAction): DeployState {
         canRetry: true,
         deployId: action.deployId ?? null,
         projectId: action.projectId ?? null,
+        // 직전 단계(deploying/polling 등)의 입력을 보존해 재시도 시 폼 복원
+        template: 'template' in state ? state.template : null,
+        siteName: 'siteName' in state ? state.siteName : '',
       };
 
     case 'RETRY':
+      if (state.phase === 'error') {
+        return { phase: 'selecting', template: state.template, siteName: state.siteName };
+      }
       return { phase: 'selecting', template: null, siteName: '' };
 
     default:

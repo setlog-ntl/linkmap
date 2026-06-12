@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError } from '@/lib/api/errors';
 import { safeDecryptToken } from '@/lib/github/token';
+import { getRepo, GitHubApiError } from '@/lib/github/api';
 
 /**
  * GET /api/oneclick/preflight?site_name=xxx
@@ -65,17 +66,17 @@ export async function GET(request: NextRequest) {
       account.id
     );
     if (!('error' in decryptResult) && githubUsername) {
+      // 공용 githubFetch 사용 (User-Agent 포함 — raw fetch는 GitHub API가 403으로 거부해
+      // 미존재 이름도 "이미 존재"로 오판하는 거짓 양성 발생. 2026-06-12 E2E B-1)
       try {
-        const res = await fetch(`https://api.github.com/repos/${githubUsername}/${siteName}`, {
-          headers: {
-            Authorization: `Bearer ${decryptResult.token}`,
-            Accept: 'application/vnd.github+json',
-          },
-        });
-        // 404 = available, 200 = exists
-        siteNameAvailable = res.status === 404;
-      } catch {
-        siteNameAvailable = null; // Unknown
+        await getRepo(decryptResult.token, githubUsername, siteName);
+        siteNameAvailable = false; // 200 = exists
+      } catch (e) {
+        if (e instanceof GitHubApiError && e.status === 404) {
+          siteNameAvailable = true; // 404 = available
+        } else {
+          siteNameAvailable = null; // 403/401/네트워크 등 — 단정하지 않음 (unknown)
+        }
       }
     }
   }
