@@ -130,11 +130,14 @@ export interface PlanQuota {
   max_homepage_deploys: number;
 }
 
+export type ApiTokenScope = 'read' | 'write' | 'admin';
+
 export interface ApiToken {
   id: string;
   user_id: string;
   name: string;
   token_hash: string;
+  scopes: ApiTokenScope[];
   last_used_at: string | null;
   expires_at: string | null;
   created_at: string;

@@ -13,12 +13,13 @@ import {
 } from '@/lib/queries/services';
 import { CreateCustomServiceDialog } from '@/components/service/create-custom-service-dialog';
 import {
-  Key, Plus, Wrench, Pencil, Trash2,
+  Plus, Wrench, Pencil, Trash2,
   AlertTriangle, ArrowRightLeft,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
+import { ApiTokenManager } from '@/components/settings/api-token-manager';
 
 export default function DeveloperPage() {
   const { locale } = useLocaleStore();
@@ -59,11 +60,7 @@ export default function DeveloperPage() {
       <section>
         <h2 className="text-lg font-bold mb-2">{t(locale, 'account.apiTokensTab')}</h2>
         <p className="text-[13px] text-muted-foreground mb-5">{t(locale, 'account.developerDesc')}</p>
-        <EmptyState
-          icon={Key}
-          title={t(locale, 'developer.apiTokenTitle')}
-          description={t(locale, 'account.comingSoon')}
-        />
+        <ApiTokenManager />
       </section>
 
       {/* Custom Services */}

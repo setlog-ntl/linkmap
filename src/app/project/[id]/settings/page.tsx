@@ -20,6 +20,7 @@ import { t } from '@/lib/i18n';
 import { useLinkedRepos, useUnlinkRepo } from '@/lib/queries/github';
 import { RepoSelector } from '@/components/github/repo-selector';
 import { AuditContent } from '@/components/project/audit-content';
+import { McpSetupGuide } from '@/components/project/mcp-setup-guide';
 
 const roleIcons: Record<string, React.ReactNode> = {
   admin: <Shield className="h-4 w-4" />,
@@ -285,6 +286,9 @@ export default function ProjectSettingsPage() {
 
       {/* GitHub Integration */}
       <GitHubSettingsCard projectId={projectId} />
+
+      {/* MCP Integration */}
+      <McpSetupGuide projectId={projectId} projectName={project?.name || ''} />
 
       {/* Change History (Audit Log) */}
       <Card id="audit">

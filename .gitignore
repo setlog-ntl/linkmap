@@ -83,3 +83,7 @@ docs/db-uploads/
 # Local design references
 *.jpeg
 *.jpg
+
+# packages 워크스페이스 산출물 (mcp-server 등)
+packages/*/node_modules/
+packages/*/dist/
