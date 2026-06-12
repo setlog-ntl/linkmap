@@ -71,6 +71,12 @@ function createMockSupabase(overrides: {
   return {
     auth: {
       getUser: vi.fn().mockResolvedValue({ data: { user: mockUser } }),
+      mfa: {
+        getAuthenticatorAssuranceLevel: vi.fn().mockResolvedValue({
+          data: { currentLevel: 'aal1', nextLevel: 'aal1' },
+          error: null,
+        }),
+      },
     },
     from: vi.fn((table: string) => {
       callCounts[table] = (callCounts[table] ?? 0) + 1;
