@@ -12,21 +12,24 @@ interface McpSetupGuideProps {
   projectName: string;
 }
 
-export function McpSetupGuide({ projectId, projectName }: McpSetupGuideProps) {
-  const [copiedField, setCopiedField] = useState<string | null>(null);
-
-  const copyToClipboard = (text: string, field: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedField(field);
-    setTimeout(() => setCopiedField(null), 2000);
-  };
-
-  const CopyButton = ({ text, field }: { text: string; field: string }) => (
+// 렌더 중 컴포넌트 생성 금지(react-hooks/static-components) — 모듈 레벨로 추출
+function CopyButton({
+  text,
+  field,
+  copiedField,
+  onCopy,
+}: {
+  text: string;
+  field: string;
+  copiedField: string | null;
+  onCopy: (text: string, field: string) => void;
+}) {
+  return (
     <Button
       variant="ghost"
       size="sm"
       className="h-6 px-2"
-      onClick={() => copyToClipboard(text, field)}
+      onClick={() => onCopy(text, field)}
     >
       {copiedField === field ? (
         <Check className="h-3 w-3 text-green-500" />
@@ -35,6 +38,16 @@ export function McpSetupGuide({ projectId, projectName }: McpSetupGuideProps) {
       )}
     </Button>
   );
+}
+
+export function McpSetupGuide({ projectId }: McpSetupGuideProps) {
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
 
   const claudeCodeConfig = `{
   "mcpServers": {
@@ -79,7 +92,7 @@ export function McpSetupGuide({ projectId, projectName }: McpSetupGuideProps) {
         <div className="flex items-center gap-2 rounded-md bg-muted p-3">
           <span className="text-sm font-medium">프로젝트 ID:</span>
           <code className="text-sm font-mono text-brand-blue">{projectId}</code>
-          <CopyButton text={projectId} field="project-id" />
+          <CopyButton text={projectId} field="project-id" copiedField={copiedField} onCopy={copyToClipboard} />
         </div>
 
         {/* 설치 가이드 탭 */}
@@ -98,7 +111,7 @@ export function McpSetupGuide({ projectId, projectName }: McpSetupGuideProps) {
                   {claudeCodeConfig}
                 </pre>
                 <div className="absolute top-2 right-2">
-                  <CopyButton text={claudeCodeConfig} field="claude-config" />
+                  <CopyButton text={claudeCodeConfig} field="claude-config" copiedField={copiedField} onCopy={copyToClipboard} />
                 </div>
               </div>
             </div>
@@ -125,7 +138,7 @@ export function McpSetupGuide({ projectId, projectName }: McpSetupGuideProps) {
                   {syncCommand}
                 </pre>
                 <div className="absolute top-2 right-2">
-                  <CopyButton text={syncCommand} field="sync-command" />
+                  <CopyButton text={syncCommand} field="sync-command" copiedField={copiedField} onCopy={copyToClipboard} />
                 </div>
               </div>
             </div>
@@ -139,7 +152,7 @@ export function McpSetupGuide({ projectId, projectName }: McpSetupGuideProps) {
                   {cursorConfig}
                 </pre>
                 <div className="absolute top-2 right-2">
-                  <CopyButton text={cursorConfig} field="cursor-config" />
+                  <CopyButton text={cursorConfig} field="cursor-config" copiedField={copiedField} onCopy={copyToClipboard} />
                 </div>
               </div>
             </div>
