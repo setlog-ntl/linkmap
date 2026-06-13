@@ -49,7 +49,7 @@ const plans: Plan[] = [
     yearlyPrice: '$99',
     yearlyMonthlyEquiv: '$8.25',
     deployLimit: 10,
-    featureKeys: ['pricing.proF1', 'pricing.proF2', 'pricing.proF3', 'pricing.proF4', 'pricing.proF5'],
+    featureKeys: ['pricing.proF1', 'pricing.proF2', 'pricing.proF3', 'pricing.proF4', 'pricing.proF5', 'pricing.proF6', 'pricing.proF7'],
     isFree: false,
     popular: true,
     planKey: 'pro',
