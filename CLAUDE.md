@@ -77,7 +77,7 @@ npm run dev / build / typecheck / lint / test / test:coverage
 - 단, 사용자가 대화 중 명시적으로 "MCP 연결됨" 또는 직접 MCP 관련 작업을 요청한 경우에는 바로 실행해도 됨
 
 ## Database Rules
-- 스키마: `docs/db-schema.md` | 마이그레이션: `supabase/migrations/NNN_*.sql` (현재 100)
+- 스키마: `docs/db-schema.md` | 마이그레이션: `supabase/migrations/NNN_*.sql` (현재 101)
 - **마이그레이션 후 3-step**: ① `src/types/` 동기화 → ② `src/lib/queries/` 반영 → ③ `docs/db-schema.md` 업데이트
 - 새 테이블: RLS + 정책 + created_at 필수
 - 타입 매핑: core(profiles/subscriptions/tokens), service(services/catalog), project(projects/bindings), env(env_vars/health), connection(user_connections), service-account, credential, feedback, team, ai(ai_*), dashboard(view models)

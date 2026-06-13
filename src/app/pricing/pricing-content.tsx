@@ -19,6 +19,8 @@ interface Plan {
   monthlyPrice: string;
   yearlyPrice: string;
   yearlyMonthlyEquiv: string;
+  /** 원클릭(홈페이지) 배포 계정당 한도 — quota.ts/plan_quotas의 max_homepage_deploys와 동기화 */
+  deployLimit: number;
   featureKeys: string[];
   isFree: boolean;
   popular: boolean;
@@ -33,6 +35,7 @@ const plans: Plan[] = [
     monthlyPrice: '$0',
     yearlyPrice: '$0',
     yearlyMonthlyEquiv: '$0',
+    deployLimit: 3,
     featureKeys: ['pricing.freeF1', 'pricing.freeF2', 'pricing.freeF3', 'pricing.freeF4', 'pricing.freeF5', 'pricing.freeF6', 'pricing.freeF7'],
     isFree: true,
     popular: false,
@@ -45,6 +48,7 @@ const plans: Plan[] = [
     monthlyPrice: '$9.9',
     yearlyPrice: '$99',
     yearlyMonthlyEquiv: '$8.25',
+    deployLimit: 10,
     featureKeys: ['pricing.proF1', 'pricing.proF2', 'pricing.proF3', 'pricing.proF4', 'pricing.proF5'],
     isFree: false,
     popular: true,
@@ -57,6 +61,7 @@ const plans: Plan[] = [
     monthlyPrice: '$29',
     yearlyPrice: '$290',
     yearlyMonthlyEquiv: '$24.17',
+    deployLimit: 50,
     featureKeys: ['pricing.teamF1', 'pricing.teamF2', 'pricing.teamF3', 'pricing.teamF4', 'pricing.teamF5', 'pricing.teamF6', 'pricing.teamF7'],
     isFree: false,
     popular: false,
@@ -199,6 +204,12 @@ export function PricingContent() {
             </CardHeader>
             <CardContent className="space-y-4">
               <ul className="space-y-3">
+                <li className="flex items-center gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-500 shrink-0" />
+                  {locale === 'ko'
+                    ? `원클릭 배포 ${plan.deployLimit}개`
+                    : `${plan.deployLimit} one-click deploys`}
+                </li>
                 {plan.featureKeys.map((key) => (
                   <li key={key} className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-green-500 shrink-0" />
