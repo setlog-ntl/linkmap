@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { unauthorizedError, notFoundError } from '@/lib/api/errors';
+import { isAdmin } from '@/lib/admin';
+import { logAudit } from '@/lib/audit';
 import { z } from 'zod';
 
 const showcaseSchema = z.object({
@@ -36,7 +39,14 @@ export async function PATCH(
     .single();
 
   if (!project) return notFoundError('프로젝트');
-  if (project.user_id !== user.id) return unauthorizedError();
+
+  // 권한: 소유자는 모든 액션 가능. 관리자는 모더레이션(unregister)만 가능 — 타인 콘텐츠 등록/수정 불가.
+  const isOwner = project.user_id === user.id;
+  let actingAsAdmin = false;
+  if (!isOwner) {
+    actingAsAdmin = await isAdmin(user.id);
+    if (!actingAsAdmin || action !== 'unregister') return unauthorizedError();
+  }
 
   if (action === 'register') {
     const { error } = await supabase
@@ -55,7 +65,9 @@ export async function PATCH(
   }
 
   if (action === 'unregister') {
-    const { error } = await supabase
+    // 관리자가 타인 행을 내릴 때는 RLS(update own projects: user_id=auth.uid())를 우회해야 하므로 admin client 사용.
+    const writeClient = actingAsAdmin ? createAdminClient() : supabase;
+    const { error } = await writeClient
       .from('projects')
       .update({
         is_showcase: false,
@@ -67,6 +79,17 @@ export async function PATCH(
       .eq('id', id);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // 관리자가 타인의 쇼케이스를 내린 경우 모더레이션 감사 로그
+    if (actingAsAdmin) {
+      await logAudit(user.id, {
+        action: 'showcase.admin_remove',
+        resourceType: 'project',
+        resourceId: id,
+        details: { owner_id: project.user_id, source: 'project' },
+      });
+    }
+
     return NextResponse.json({ is_showcase: false });
   }
 

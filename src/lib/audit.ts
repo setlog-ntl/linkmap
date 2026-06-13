@@ -138,7 +138,8 @@ export type AuditAction =
   | 'mcp.sync_services'
   | 'mcp.detect'
   | 'api_token.create'
-  | 'api_token.delete';
+  | 'api_token.delete'
+  | 'showcase.admin_remove';
 
 interface AuditLogEntry {
   action: AuditAction;

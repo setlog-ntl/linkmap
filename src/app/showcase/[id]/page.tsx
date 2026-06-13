@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ShowcaseLikeButton } from '@/components/showcase/showcase-like-button';
 import { ShowcaseShareButton } from '@/components/showcase/showcase-share-button';
 import { ShowcaseComments } from '@/components/showcase/showcase-comments';
+import { ShowcaseRemoveButton } from '@/components/showcase/showcase-remove-button';
 import {
   ArrowLeft,
   ExternalLink,
@@ -41,12 +42,22 @@ export default function ShowcaseDetailPage({
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeFailed, setIframeFailed] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
+  const [isAdminUser, setIsAdminUser] = useState(false);
   const recordView = useRecordShowcaseView();
 
   useEffect(() => {
     const supabase = createBrowserClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       setCurrentUserId(user?.id);
+      if (user) {
+        // 본인 프로필 행은 RLS상 self-read 허용 — is_admin 조회로 모더레이션 권한 판단
+        const { data } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', user.id)
+          .single();
+        setIsAdminUser(data?.is_admin === true);
+      }
     }).catch(() => {});
   }, []);
 
@@ -106,6 +117,8 @@ export default function ShowcaseDetailPage({
     : null;
   const authorName = item.profiles?.name || '익명';
   const authorInitial = authorName.charAt(0).toUpperCase();
+  const isOwner = !!currentUserId && item.user_id === currentUserId;
+  const canRemove = isOwner || isAdminUser;
   const categoryLabel = item.showcase_category
     ? SHOWCASE_CATEGORIES.find((c) => c.value === item.showcase_category)?.label
     : null;
@@ -358,6 +371,23 @@ export default function ShowcaseDetailPage({
               </span>
             </div>
           </div>
+
+          {/* 쇼케이스 내리기 — 제작자 또는 관리자(모더레이션) */}
+          {canRemove && (
+            <div className="rounded-lg border p-4">
+              <ShowcaseRemoveButton
+                showcaseId={id}
+                source={item.source || 'deploy'}
+                isOwner={isOwner}
+                isAdmin={isAdminUser}
+              />
+              {isAdminUser && !isOwner && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  관리자에게만 보이는 모더레이션 도구입니다.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
