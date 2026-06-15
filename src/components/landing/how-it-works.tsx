@@ -138,7 +138,7 @@ export function HowItWorks() {
           </div>
         </div>
 
-        <div className="relative grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 lg:gap-10 max-w-6xl mx-auto">
+        <div className="relative grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 sm:gap-8 lg:gap-10 max-w-6xl mx-auto">
           {/* Connecting Line (Desktop) */}
           <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-px z-0">
             <div className={`h-full ${persona === 'beginner' ? 'bg-brand-green/20' : 'bg-brand-blue/20'} transition-colors duration-300`} />
@@ -146,16 +146,22 @@ export function HowItWorks() {
 
           {steps.map((step, i) => {
             const Icon = step.icon;
-            const activeColor = persona === 'beginner' ? 'brand-green' : 'brand-blue';
+            const isBeginner = persona === 'beginner';
+            // 동적 Tailwind 클래스(`group-hover:border-${activeColor}`)는 컴파일되지 않으므로
+            // 정적 클래스를 조건부로 적용한다.
+            const circleHoverBorder = isBeginner
+              ? 'group-hover:border-brand-green/40'
+              : 'group-hover:border-brand-blue/40';
+            const iconColor = isBeginner ? 'text-brand-green' : 'text-brand-blue';
             return (
               <ScrollReveal key={`${persona}-${i}`} delay={i * 0.12}>
                 <div className="relative z-10 flex flex-col items-center text-center group">
                   {/* Step circle */}
-                  <div className={`flex h-14 w-14 sm:h-20 sm:w-20 items-center justify-center rounded-xl sm:rounded-2xl bg-card border border-border shadow-sm mb-4 sm:mb-6 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-md group-hover:border-${activeColor}/40 relative`}>
+                  <div className={`flex h-14 w-14 sm:h-20 sm:w-20 items-center justify-center rounded-xl sm:rounded-2xl bg-card border border-border shadow-sm mb-4 sm:mb-6 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-md ${circleHoverBorder} relative`}>
                     <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-bold text-muted-foreground">
                       {step.number}
                     </span>
-                    <Icon className={`w-6 h-6 sm:w-8 sm:h-8 text-${activeColor} transition-transform duration-300 group-hover:scale-110`} />
+                    <Icon className={`w-6 h-6 sm:w-8 sm:h-8 ${iconColor} transition-transform duration-300 group-hover:scale-110`} />
                   </div>
 
                   <h3 className="text-sm sm:text-lg font-bold text-foreground tracking-tight mb-1 sm:mb-2">

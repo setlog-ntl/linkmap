@@ -181,7 +181,8 @@ function GitHubConnectionCard({ connection }: { connection: GitHubConnection }) 
         )}
           <Tooltip>
             <TooltipTrigger asChild>
-              <span>
+              {/* 비활성화 사유가 hover 툴팁에만 있어 터치 기기에서 보이지 않음 — aria-label로 사유 노출 */}
+              <span aria-label={hasLinkedRepos ? t(locale, 'account.deleteBlocked') : undefined}>
                 {hasLinkedRepos ? (
                   <span className="text-[13px] text-muted-foreground/50 cursor-not-allowed">Delete Data</span>
                 ) : (

@@ -193,7 +193,7 @@ const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;`}</pre>
                   <div>
                     <h4 className="text-xs font-semibold text-muted-foreground mb-2">CLI 명령어</h4>
                     <div className="rounded-md border bg-background/60">
-                      <pre className="p-3 text-[10px] font-mono">{platform.cliCommand}</pre>
+                      <pre className="p-3 text-[10px] font-mono overflow-x-auto">{platform.cliCommand}</pre>
                     </div>
                     <div className="mt-3 p-3 rounded-md bg-background/40 border">
                       <p className="text-[10px] text-muted-foreground leading-relaxed">

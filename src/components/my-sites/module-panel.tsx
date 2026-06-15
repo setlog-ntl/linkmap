@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
@@ -135,45 +135,50 @@ function SortableModuleCard({
       onClick={() => onSelect(moduleId)}
     >
       <div className="flex items-center gap-1.5">
+        {/* 모바일: 드래그 핸들 터치 영역 확대 (44px 근접) */}
         <button
-          className="p-0.5 cursor-grab active:cursor-grabbing touch-none text-muted-foreground hover:text-foreground"
+          className="p-2 md:p-0.5 -m-1 md:m-0 cursor-grab active:cursor-grabbing touch-none text-muted-foreground hover:text-foreground"
           {...attributes}
           {...listeners}
           onClick={(e) => e.stopPropagation()}
+          aria-label="순서 변경 핸들"
         >
-          <GripVertical className="h-3 w-3" />
+          <GripVertical className="h-4 w-4 md:h-3 md:w-3" />
         </button>
         <Switch
           checked={isEnabled}
           onCheckedChange={(checked) => onToggle(moduleId, checked)}
           disabled={mod.required}
-          className="scale-75"
+          className="scale-100 md:scale-75"
           onClick={(e) => e.stopPropagation()}
         />
         <Icon className="h-3.5 w-3.5 flex-shrink-0" />
         <span className="text-xs font-medium truncate flex-1">
           {locale === 'en' && mod.nameEn ? mod.nameEn : mod.name}
         </span>
-        <div className="flex flex-col gap-0">
+        {/* 모바일: 위/아래 이동 버튼 터치 영역 확대 */}
+        <div className="flex flex-col gap-0.5 md:gap-0">
           <button
-            className="p-0.5 hover:bg-muted rounded disabled:opacity-30"
+            className="p-1.5 md:p-0.5 hover:bg-muted rounded disabled:opacity-30"
             onClick={(e) => {
               e.stopPropagation();
               onMoveUp(moduleId);
             }}
             disabled={index === 0}
+            aria-label="위로 이동"
           >
-            <ChevronUp className="h-2.5 w-2.5" />
+            <ChevronUp className="h-3.5 w-3.5 md:h-2.5 md:w-2.5" />
           </button>
           <button
-            className="p-0.5 hover:bg-muted rounded disabled:opacity-30"
+            className="p-1.5 md:p-0.5 hover:bg-muted rounded disabled:opacity-30"
             onClick={(e) => {
               e.stopPropagation();
               onMoveDown(moduleId);
             }}
             disabled={index === totalCount - 1}
+            aria-label="아래로 이동"
           >
-            <ChevronDown className="h-2.5 w-2.5" />
+            <ChevronDown className="h-3.5 w-3.5 md:h-2.5 md:w-2.5" />
           </button>
         </div>
       </div>
@@ -210,18 +215,33 @@ function DisabledModulesSection({
   locale,
 }: DisabledModulesSectionProps) {
   const [open, setOpen] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const handleToggle = useCallback(() => {
+    setOpen((prev) => {
+      const next = !prev;
+      // 펼칠 때: 목록이 스크롤 영역 밖이면 보이도록 스크롤
+      if (next) {
+        requestAnimationFrame(() => {
+          listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+      }
+      return next;
+    });
+  }, []);
+
   return (
     <div className="px-4 pb-2">
       <button
         className="text-[11px] font-medium text-muted-foreground mb-1.5 flex items-center gap-1"
-        onClick={() => setOpen(!open)}
+        onClick={handleToggle}
       >
         <Plus className="h-3 w-3" />
         섹션 추가 ({moduleIds.length})
         <ChevronDown className={`h-3 w-3 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="space-y-1">
+        <div ref={listRef} className="space-y-1">
           {moduleIds.map((id) => {
             const mod = schema.modules.find((m) => m.id === id);
             if (!mod) return null;
@@ -309,7 +329,8 @@ export function ModulePanel({
   );
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    // 터치 환경: 탭과 드래그 오인 방지를 위해 활성화 거리 상향
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -460,7 +481,8 @@ export function ModulePanel({
         {presets.length > 0 && (
           <div className="px-4 pb-2">
             <span className="text-[11px] font-medium text-muted-foreground mb-1.5 block">색상테마</span>
-            <div className="flex gap-1.5 flex-wrap">
+            {/* 모바일: 줄바꿈 대신 가로 스크롤 한 줄 (-mx로 가장자리까지 스크롤) */}
+            <div className="flex gap-1.5 flex-nowrap overflow-x-auto md:flex-wrap -mx-4 px-4 md:mx-0 md:px-0 pb-1 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {presets.map((preset) => {
                 // 프리셋의 values가 현재 state와 일치하는지 비교
                 const isActive = (() => {
@@ -478,7 +500,7 @@ export function ModulePanel({
                 return (
                   <button
                     key={preset.id}
-                    className={`flex items-center gap-1.5 text-[10px] px-2.5 py-1.5 rounded-full border transition-all duration-200 font-medium ${
+                    className={`flex items-center gap-1.5 text-[10px] px-2.5 py-1.5 rounded-full border transition-all duration-200 font-medium shrink-0 ${
                       isActive
                         ? 'border-primary bg-primary/10 shadow-sm ring-1 ring-primary/20'
                         : 'hover:bg-primary/10 hover:border-primary hover:shadow-sm'
@@ -576,7 +598,8 @@ export function ModulePanel({
         {/* 구분선 + 선택된 모듈 편집 폼 */}
         {selectedModule && state.enabled.includes(selectedModule.id) ? (
           <div className="px-4 pb-4 border-t pt-3">
-            <div className="mb-4 flex items-start gap-2">
+            {/* 모바일: 헤더-폼 간격 축소 */}
+            <div className="mb-2.5 md:mb-4 flex items-start gap-2">
               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                 {(() => {
                   const Icon = ICON_MAP[selectedModule.icon] ?? Sparkles;

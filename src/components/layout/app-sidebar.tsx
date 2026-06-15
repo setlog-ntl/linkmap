@@ -176,8 +176,9 @@ function InlineEditableName({
           e.stopPropagation();
           setIsEditing(true);
         }}
-        className="shrink-0 opacity-0 group-hover/editable:opacity-100 transition-opacity"
+        className="shrink-0 opacity-0 group-hover/editable:opacity-100 max-md:opacity-100 transition-opacity p-1 -m-1"
         title="이름 수정"
+        aria-label="이름 수정"
       >
         <Pencil className="h-2.5 w-2.5 text-muted-foreground hover:text-foreground" />
       </button>

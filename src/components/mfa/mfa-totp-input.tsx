@@ -53,7 +53,7 @@ export function MfaTotpInput({ value, onChange, disabled, className }: MfaTotpIn
   );
 
   return (
-    <div className={cn('flex gap-2 justify-center', className)}>
+    <div className={cn('flex flex-wrap gap-1.5 md:gap-2 justify-center', className)}>
       {digits.map((digit, i) => (
         <Input
           key={i}
@@ -66,7 +66,7 @@ export function MfaTotpInput({ value, onChange, disabled, className }: MfaTotpIn
           onKeyDown={(e) => handleKeyDown(i, e)}
           onPaste={i === 0 ? handlePaste : undefined}
           disabled={disabled}
-          className="h-12 w-10 text-center text-lg font-mono bg-muted border-border"
+          className="h-11 w-9 md:h-12 md:w-10 text-center text-lg font-mono bg-muted border-border"
           autoComplete="one-time-code"
         />
       ))}

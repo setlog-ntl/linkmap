@@ -257,23 +257,24 @@ function ErrorCard({
           </h3>
 
           {details ? (
-            <div className="text-left mx-auto max-w-md space-y-2">
-              <p className="text-sm text-muted-foreground">
+            /* 모바일(390px)에서 max-w-md는 의미 없음 → 전폭 사용, 텍스트 축소 */
+            <div className="text-left mx-auto max-w-none md:max-w-md space-y-2">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 <span className="font-medium">{t(locale, 'deployStep.errorCause')}: </span>
                 {details.cause}
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 <span className="font-medium">{t(locale, 'deployStep.errorSolution')}: </span>
                 {details.solution}
               </p>
               {details.failedStep && (
-                <p className="text-xs text-muted-foreground/70">
+                <p className="text-[11px] sm:text-xs text-muted-foreground/70">
                   {t(locale, 'deployStep.failedAt')}: {details.failedStep}
                 </p>
               )}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            <p className="text-xs sm:text-sm text-muted-foreground max-w-none md:max-w-md mx-auto">
               {t(locale, 'deployStep.maintenanceDesc')}
             </p>
           )}

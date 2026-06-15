@@ -93,7 +93,7 @@ export function DemoProjectGrid({ projects, isLoggedIn }: DemoProjectGridProps) 
 
       {/* 통계 */}
       {projects.length > 0 && (
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
           <StatCard icon={Layers} value={projects.length} label="전체 프로젝트" />
           <StatCard icon={Puzzle} value={totalServices} label="연결된 서비스" />
           <StatCard icon={GitBranch} value={totalRepos} label="GitHub 저장소" />

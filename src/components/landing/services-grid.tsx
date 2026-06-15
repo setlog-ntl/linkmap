@@ -67,7 +67,7 @@ export function ServicesGrid() {
                 <button
                   key={f.value}
                   onClick={() => setFilter(f.value)}
-                  className={`rounded-lg px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm font-medium transition-all duration-200 ${
+                  className={`rounded-lg whitespace-nowrap text-[11px] sm:text-xs px-2 py-1 sm:px-3 sm:py-2 font-medium transition-all duration-200 ${
                     filter === f.value
                       ? 'bg-card text-brand-blue font-bold shadow-sm border border-brand-blue/20'
                       : 'text-muted-foreground hover:text-foreground'

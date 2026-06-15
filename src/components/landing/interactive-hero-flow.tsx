@@ -16,7 +16,8 @@ import FlowLayerNode from './flow-layer-node';
 import FlowServiceNode from './flow-service-node';
 import HeroGroupNode from './hero-group-node';
 import { getServiceEmoji } from '@/lib/constants/service-brands';
-import { NODE_OFFSETS, GROUP_CONFIGS, LAYOUT } from '@/data/hero-flow-config';
+import { NODE_OFFSETS, NODE_OFFSETS_MOBILE, GROUP_CONFIGS, LAYOUT } from '@/data/hero-flow-config';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const nodeTypes = {
     layer: FlowLayerNode,
@@ -154,15 +155,19 @@ const baseEdges: Edge[] = [
 /* ─────────────────── Component ─────────────────── */
 export function InteractiveHeroFlow() {
     const [hoveredEdge, setHoveredEdge] = useState<string | null>(null);
+    const isMobile = useIsMobile();
 
     const currentNodes = useMemo(() => {
         const isClient = typeof window !== 'undefined';
         const cx = isClient ? window.innerWidth / 2 : 700;
         const { groupPadding: GP, groupWidth: GW, nodeHeight: NODE_H } = LAYOUT;
 
+        // 모바일에서는 좁은 폭에 맞춘 오프셋 사용 (데스크톱은 기존 유지)
+        const offsets = isMobile ? NODE_OFFSETS_MOBILE : NODE_OFFSETS;
+
         // Convert service/layer node offsets → absolute positions
         const positions: Record<string, { x: number; y: number }> = {};
-        for (const [id, offset] of Object.entries(NODE_OFFSETS)) {
+        for (const [id, offset] of Object.entries(offsets)) {
             positions[id] = { x: cx + offset.dx, y: offset.dy };
         }
 
@@ -207,7 +212,7 @@ export function InteractiveHeroFlow() {
             }
             return clone;
         });
-    }, []);
+    }, [isMobile]);
 
     const currentEdges = useMemo(() => {
         return baseEdges.map(e => {
@@ -230,18 +235,32 @@ export function InteractiveHeroFlow() {
         setHoveredEdge(null);
     }, []);
 
+    // 모바일: fitView가 minZoom 0.1까지 축소해 가독성이 깨지므로
+    // 고정 줌(0.6)으로 다이어그램을 중앙에 노출한다. (데스크톱은 fitView 유지)
+    const mobileViewport = useMemo(() => {
+        if (!isMobile) return undefined;
+        const vw = typeof window !== 'undefined' ? window.innerWidth : 390;
+        const zoom = 0.6;
+        // 노드가 cx(=vw/2) 기준으로 배치되므로, cx*zoom 만큼 좌측으로 이동시켜
+        // 화면 가로 중앙에 다이어그램 중심이 오도록 한다.
+        const cx = vw / 2;
+        return { x: cx - cx * zoom, y: 24, zoom };
+    }, [isMobile]);
+
     return (
         <div className="absolute inset-0 z-0 opacity-85 dark:opacity-90">
             <ReactFlow
+                key={isMobile ? 'mobile' : 'desktop'}
                 nodes={currentNodes}
                 edges={currentEdges}
                 nodeTypes={nodeTypes}
                 connectionLineType={ConnectionLineType.SmoothStep}
                 onEdgeMouseEnter={onEdgeMouseEnter}
                 onEdgeMouseLeave={onEdgeMouseLeave}
-                fitView
+                fitView={!isMobile}
                 fitViewOptions={{ padding: 0.18, minZoom: 0.2 }}
-                minZoom={0.1}
+                defaultViewport={mobileViewport}
+                minZoom={isMobile ? 0.6 : 0.1}
                 maxZoom={1.2}
                 panOnDrag={false}
                 zoomOnScroll={false}

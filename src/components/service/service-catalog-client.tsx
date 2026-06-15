@@ -255,7 +255,8 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
             <Sparkles className="h-4 w-4 text-amber-500" />
             <span className="text-sm font-medium">인기 서비스</span>
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          {/* 모바일: 가로 스크롤 가능 표시를 위해 우측 페이드 마스크 적용 */}
+          <div className="flex gap-2 overflow-x-auto pb-1 [mask-image:linear-gradient(to_right,black_88%,transparent)] md:[mask-image:none]">
             {featuredServices.map((service) => (
               <Link
                 key={service.id}

@@ -137,48 +137,54 @@ export function CompareClient({ comparisons, services }: CompareClientProps) {
             <CardContent className="space-y-6">
               {/* Comparison table */}
               {criteria.length > 0 && (
-                <ScrollArea className="w-full">
-                  <table className="w-full text-sm border-collapse min-w-[600px]">
-                    <thead>
-                      <tr className="border-b bg-muted/50">
-                        <th className="text-left py-2 px-3 font-medium w-[160px]">기준</th>
-                        {serviceNames.map((name, i) => (
-                          <th key={i} className="text-left py-2 px-3 font-medium">
-                            {serviceMap.get(serviceIds[i])?.slug ? (
-                              <Link
-                                href={`/services/${serviceMap.get(serviceIds[i])?.slug}`}
-                                prefetch={false}
-                                className="hover:text-primary transition-colors"
-                              >
-                                {name}
-                              </Link>
-                            ) : (
-                              name
-                            )}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {criteria.map((criterion, ci) => (
-                        <tr key={ci} className="border-b">
-                          <td className="py-2 px-3 font-medium text-muted-foreground">
-                            {criterion.name_ko || criterion.name}
-                          </td>
-                          {serviceIds.map((id, si) => {
-                            const slug = serviceMap.get(id)?.slug || id;
-                            return (
-                              <td key={si} className="py-2 px-3">
-                                {criterion.values[slug] || criterion.values[id] || '-'}
-                              </td>
-                            );
-                          })}
+                <>
+                  {/* 모바일: 가로 스크롤 안내 (표가 넓어 잘림) */}
+                  <p className="md:hidden text-xs text-muted-foreground mb-2">
+                    &larr; 좌우로 스크롤하여 전체 비교를 확인하세요
+                  </p>
+                  <ScrollArea className="w-full">
+                    <table className="w-full text-xs md:text-sm border-collapse min-w-[600px]">
+                      <thead>
+                        <tr className="border-b bg-muted/50">
+                          <th className="text-left py-2 px-2 md:px-3 font-medium w-[120px] md:w-[160px]">기준</th>
+                          {serviceNames.map((name, i) => (
+                              <th key={i} className="text-left py-2 px-2 md:px-3 font-medium">
+                              {serviceMap.get(serviceIds[i])?.slug ? (
+                                <Link
+                                  href={`/services/${serviceMap.get(serviceIds[i])?.slug}`}
+                                  prefetch={false}
+                                  className="hover:text-primary transition-colors"
+                                >
+                                  {name}
+                                </Link>
+                              ) : (
+                                name
+                              )}
+                            </th>
+                          ))}
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <ScrollBar orientation="horizontal" />
-                </ScrollArea>
+                      </thead>
+                      <tbody>
+                        {criteria.map((criterion, ci) => (
+                          <tr key={ci} className="border-b">
+                            <td className="py-2 px-2 md:px-3 font-medium text-muted-foreground">
+                              {criterion.name_ko || criterion.name}
+                            </td>
+                            {serviceIds.map((id, si) => {
+                              const slug = serviceMap.get(id)?.slug || id;
+                              return (
+                                <td key={si} className="py-2 px-2 md:px-3">
+                                  {criterion.values[slug] || criterion.values[id] || '-'}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
+                </>
               )}
 
               {/* Recommendations */}

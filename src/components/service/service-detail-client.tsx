@@ -158,7 +158,7 @@ export function ServiceDetailClient({ service, guide, costTiers, dependencies }:
         {/* Tab 1: Overview */}
         <TabsContent value="overview" className="space-y-6 mt-6">
           {/* Metadata grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <MetaCard label="난이도">
               <DifficultyBadge level={service.difficulty_level} />
             </MetaCard>

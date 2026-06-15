@@ -998,7 +998,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     }
     if (selectedPath) {
       return (
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 min-h-0 flex overflow-hidden">
           {/* 라인 넘버 거터 */}
           <div
             ref={lineNumberRef}
@@ -1301,7 +1301,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       </div>
 
       {/* ===== 메인 영역 ===== */}
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
         {/* 모바일 파일 오버레이 */}
         {showMobileFiles && (
           <div className="absolute inset-0 z-30 md:hidden flex">
@@ -1515,17 +1515,18 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         </div>
 
         {/* ===== 모바일: 탭 전환 방식 ===== */}
-        <div className="flex md:hidden flex-1 flex-col overflow-hidden">
+        {/* min-h-0: flex 자식이 부모 높이를 넘지 않고 내부 스크롤되도록 (탭 전환 시 점프 방지) */}
+        <div className="flex md:hidden flex-1 min-h-0 flex-col overflow-hidden">
           {/* 코드 탭 */}
           {mobileTab === 'code' && (
-            <div className="flex flex-col flex-1 overflow-hidden">
+            <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
               {renderEditor()}
             </div>
           )}
 
           {/* 미리보기 탭 */}
           {mobileTab === 'preview' && (
-            <div className="flex flex-col flex-1 overflow-hidden">
+            <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
               <div className="px-3 py-1.5 flex items-center gap-2 bg-muted/20 text-xs text-muted-foreground border-b flex-shrink-0">
                 <Eye className="h-3 w-3" />
                 <span>{t(locale, 'editor.preview')}</span>
@@ -1544,7 +1545,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                   </Badge>
                 ) : null}
               </div>
-              <div className="flex-1 overflow-hidden relative">
+              <div className="flex-1 min-h-0 overflow-hidden relative">
                 {renderBuildOverlay()}
                 {renderPreview()}
               </div>
@@ -1553,7 +1554,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
 
           {/* 모듈 탭 */}
           {mobileTab === 'modules' && moduleSchema && moduleState && (
-            <div className="flex flex-col flex-1 overflow-hidden">
+            <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
               <ModulePanel
                 schema={moduleSchema}
                 state={moduleState}

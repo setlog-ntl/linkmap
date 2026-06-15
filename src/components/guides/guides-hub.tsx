@@ -62,7 +62,8 @@ export function GuidesHub() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 overflow-x-auto scrollbar-hide border-b pb-px">
+      {/* 모바일: 가로 스크롤 가능 표시를 위해 우측 페이드 마스크 적용 */}
+      <div className="flex gap-1 overflow-x-auto scrollbar-none border-b pb-px [mask-image:linear-gradient(to_right,black_85%,transparent)] md:[mask-image:none]">
         {tabs.map((tab) => (
           <button
             key={tab.key}

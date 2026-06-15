@@ -111,9 +111,9 @@ export function EnvDataTable({
           : 'sm:grid sm:grid-cols-[1fr_1.5fr_100px_120px] sm:gap-4'
       )}
     >
-      {/* Key name + badge */}
-      <div className="flex items-center gap-2 min-w-0">
-        <code className="text-sm font-mono font-medium truncate">
+      {/* Key name + badge — 모바일에서는 줄바꿈 허용해 키와 배지 충돌 방지 */}
+      <div className="flex items-center gap-2 min-w-0 max-sm:flex-wrap">
+        <code className="text-sm font-mono font-medium truncate max-w-full">
           {envVar.key_name}
         </code>
         {isPublicSecretConflict(envVar) ? (
@@ -165,7 +165,7 @@ export function EnvDataTable({
             </Tooltip>
           )
         ) : (
-          <code className="text-xs text-muted-foreground font-mono truncate">
+          <code className="text-xs text-muted-foreground font-mono truncate max-w-full min-w-0 flex-1">
             {maskValue(envVar.encrypted_value)}
           </code>
         )}
@@ -174,7 +174,7 @@ export function EnvDataTable({
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 shrink-0"
+              className="h-8 w-8 sm:h-7 sm:w-7 shrink-0"
               onClick={() => handleCopyValue(envVar)}
             >
               {copiedId === envVar.id ? (
@@ -189,7 +189,7 @@ export function EnvDataTable({
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 shrink-0"
+            className="h-8 w-8 sm:h-7 sm:w-7 shrink-0"
             onClick={() => onToggleShow(envVar.id)}
             disabled={isDecrypting}
           >

@@ -75,7 +75,7 @@ export function FeedbackForm({ onSuccess, onCancel }: FeedbackFormProps) {
       <CardHeader className="pb-3">
         <CardTitle className="text-base">새 요청 작성</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 md:p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* 대상 페이지 */}
           <div className="space-y-1.5">

@@ -13,7 +13,6 @@ import { ViewLevelSwitcher } from '@/components/service-map/view-level-switcher'
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { useServiceMapStore } from '@/stores/service-map-store';
 import { useServiceMapData } from '@/components/service-map/hooks/useServiceMapData';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { SHOWCASE_CATEGORIES } from '@/types/core';
 
 const STATUS_DOT: Record<string, string> = {
@@ -36,7 +35,6 @@ interface SharedMapClientProps {
 
 function SharedMapInner({ shareToken }: SharedMapClientProps) {
   const { viewLevel } = useServiceMapStore();
-  const isMobile = useIsMobile();
   const [panelExpanded, setPanelExpanded] = useState(false);
 
   const data = useServiceMapData('', { mode: 'shared', shareToken });
@@ -160,13 +158,13 @@ function SharedMapInner({ shareToken }: SharedMapClientProps) {
           </div>
         </div>
 
-        {/* 프로젝트 정보 — 모바일 하단 콜랩서블 카드 */}
-        <div className="absolute bottom-0 left-0 right-0 z-10 md:hidden">
+        {/* 프로젝트 정보 — 모바일 하단 콜랩서블 카드 (맵 인터랙션 영역 확보 위해 최대 높이 제한) */}
+        <div className="absolute bottom-0 left-0 right-0 z-10 md:hidden pb-safe-bar">
           <div className="bg-background/90 backdrop-blur-md border-t shadow-sm">
-            {/* 축소 헤더 — 항상 표시 */}
+            {/* 축소 헤더 — 항상 표시 (슬림 바) */}
             <button
               onClick={() => setPanelExpanded(!panelExpanded)}
-              className="w-full flex items-center gap-2 px-3 py-2.5 min-h-[48px]"
+              className="w-full flex items-center gap-2 px-3 py-2 min-h-12"
             >
               {projectMeta.iconType === 'emoji' && projectMeta.iconValue && (
                 <span className="text-lg shrink-0">{projectMeta.iconValue}</span>
@@ -195,9 +193,9 @@ function SharedMapInner({ shareToken }: SharedMapClientProps) {
               </span>
             </button>
 
-            {/* 펼침 컨텐츠 */}
+            {/* 펼침 컨텐츠 — 맵 터치 영역(≥55dvh) 보장을 위해 45dvh로 제한 */}
             {panelExpanded && (
-              <div className="max-h-[55vh] overflow-y-auto border-t px-3 py-2 space-y-2">
+              <div className="max-h-[45dvh] overflow-y-auto border-t px-3 py-2 space-y-2">
                 {/* 설명 */}
                 {projectMeta.description && (
                   <p className="text-xs text-muted-foreground">{projectMeta.description}</p>

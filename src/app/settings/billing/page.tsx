@@ -250,7 +250,8 @@ export default function BillingPage() {
               rows={3}
             />
           </div>
-          <DialogFooter className="gap-2 sm:gap-0">
+          {/* 모바일: 세로 스택 / sm 이상: 우측 정렬 가로 배치 */}
+          <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end sm:gap-0">
             <Button
               variant="outline"
               onClick={() => setCancelDialogOpen(false)}

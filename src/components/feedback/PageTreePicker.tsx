@@ -156,7 +156,7 @@ export function PageTreePicker({ value, onChange, currentPageKey }: PageTreePick
           <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-72 p-2" align="start">
+      <PopoverContent className="w-[calc(100vw-2rem)] md:w-72 p-2" align="start">
         <div className="space-y-0.5 max-h-72 overflow-y-auto">
           {PAGE_TREE.map((node) => (
             <TreeBranch

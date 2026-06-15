@@ -25,7 +25,9 @@ import { queryKeys } from '@/lib/queries/keys';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { useUpdateProjectServiceAccount, useUpdateProjectServiceNotes, useRemoveProjectService } from '@/lib/queries/services';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
@@ -69,6 +71,7 @@ export function ServiceDetailSheet({
   loading = false,
 }: ServiceDetailSheetProps) {
   const [activeTab, setActiveTab] = useState('overview');
+  const isMobile = useIsMobile();
   const isExpanded = useServiceDetailStore((s) => s.isExpanded);
   const toggleExpanded = useServiceDetailStore((s) => s.toggleExpanded);
   const closeSheet = useServiceDetailStore((s) => s.closeSheet);
@@ -105,16 +108,18 @@ export function ServiceDetailSheet({
   );
 
   if (showLoading) {
-    return (
-      <div className={containerClasses} style={{ width: panelWidth }}>
+    const loadingBody = (
+      <>
         <div className="p-4 flex items-start justify-between">
           <div className="space-y-2">
             <Skeleton className="h-5 w-40" />
             <Skeleton className="h-4 w-60" />
           </div>
-          <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
-            <XIcon className="h-4 w-4" />
-          </Button>
+          {!isMobile && (
+            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
+              <XIcon className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         <div className="space-y-4 px-4 pb-4">
           <div className="flex gap-2"><Skeleton className="h-5 w-16" /><Skeleton className="h-5 w-20" /></div>
@@ -123,6 +128,25 @@ export function ServiceDetailSheet({
           <Separator />
           <Skeleton className="h-16 w-full" />
         </div>
+      </>
+    );
+
+    // 모바일: 바텀 시트로 렌더링
+    if (isMobile) {
+      return (
+        <Sheet open={open} onOpenChange={onOpenChange}>
+          <SheetContent side="bottom" className="rounded-t-2xl max-h-[80dvh] overflow-y-auto pb-safe-bar p-0">
+            <SheetTitle className="sr-only">서비스 상세</SheetTitle>
+            <div className="mx-auto mt-2 mb-1 h-1.5 w-10 rounded-full bg-muted-foreground/30" />
+            {loadingBody}
+          </SheetContent>
+        </Sheet>
+      );
+    }
+
+    return (
+      <div className={containerClasses} style={{ width: panelWidth }}>
+        {loadingBody}
       </div>
     );
   }
@@ -168,30 +192,33 @@ export function ServiceDetailSheet({
     );
   };
 
-  return (
-    <div className={containerClasses} style={{ width: panelWidth }}>
-      {/* 헤더 */}
+  const panelBody = (
+    <>
+      {/* 헤더 — 모바일에서는 제목 축소, 설명 1줄 클램프 */}
       <div className="flex items-start justify-between p-4 pb-2 shrink-0">
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-semibold tracking-tight">{svc?.name}</h2>
-          <p className="text-sm text-muted-foreground mt-1 truncate">
+          <h2 className={cn('font-semibold tracking-tight', isMobile ? 'text-base' : 'text-lg')}>{svc?.name}</h2>
+          <p className={cn('text-sm text-muted-foreground mt-1', isMobile ? 'line-clamp-1' : 'truncate')}>
             {svc?.description_ko || svc?.description}
           </p>
         </div>
-        <div className="flex items-center gap-0.5 -mt-1 -mr-1 shrink-0">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={toggleExpanded}
-            title={isExpanded ? '패널 축소' : '패널 확장'}
-          >
-            {isExpanded ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
-          </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenChange(false)}>
-            <XIcon className="h-4 w-4" />
-          </Button>
-        </div>
+        {/* 데스크톱: 확장/닫기 버튼 (모바일은 시트 자체 닫기 버튼 사용) */}
+        {!isMobile && (
+          <div className="flex items-center gap-0.5 -mt-1 -mr-1 shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={toggleExpanded}
+              title={isExpanded ? '패널 축소' : '패널 확장'}
+            >
+              {isExpanded ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+            </Button>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenChange(false)}>
+              <XIcon className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* 탭 */}
@@ -668,6 +695,25 @@ export function ServiceDetailSheet({
           </ScrollArea>
         </TabsContent>
       </Tabs>
+    </>
+  );
+
+  // 모바일: 바텀 시트로 렌더링 (데스크톱 플로팅 패널은 그대로 유지)
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[80dvh] overflow-y-auto pb-safe-bar p-0 flex flex-col">
+          <SheetTitle className="sr-only">{svc?.name || '서비스 상세'}</SheetTitle>
+          <div className="mx-auto mt-2 mb-1 h-1.5 w-10 rounded-full bg-muted-foreground/30 shrink-0" />
+          {panelBody}
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <div className={containerClasses} style={{ width: panelWidth }}>
+      {panelBody}
     </div>
   );
 }

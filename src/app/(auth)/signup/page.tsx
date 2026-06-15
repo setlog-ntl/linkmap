@@ -153,7 +153,8 @@ export default function SignupPage() {
           <CardDescription>Linkmap에서 프로젝트 설정을 시작하세요</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          {/* 모바일(390px)에서 2열이 좁아 한 줄씩 쌓고, sm 이상에서 2열 — 모바일 UX */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Button
               variant="outline"
               onClick={() => handleOAuthLogin('google')}

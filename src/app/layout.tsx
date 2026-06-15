@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
@@ -58,6 +58,14 @@ export const metadata: Metadata = {
     description:
       "3분 만에 내 홈페이지 배포 + 서비스 맵으로 연결 구조 시각화. 초보자부터 개발자까지, 무료로 시작할 수 있습니다.",
   },
+};
+
+// 모바일 토대: 노치/홈인디케이터 안전영역 대응(viewport-fit=cover).
+// 접근성을 위해 사용자 확대(pinch-zoom)는 의도적으로 막지 않음.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
