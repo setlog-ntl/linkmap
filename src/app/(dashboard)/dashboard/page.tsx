@@ -314,25 +314,27 @@ export default function DashboardPage() {
         </div>
       ) : (
         <>
-          {/* View mode toggle */}
+          {/* View mode toggle — 모바일에서는 아이콘만, sm 이상에서 라벨 표시 */}
           <div className="flex items-center gap-1 mb-4">
             <Button
               variant={viewMode === 'card' ? 'secondary' : 'ghost'}
               size="sm"
-              className="h-8 px-3 gap-1.5"
+              className="size-8 sm:size-auto sm:h-8 sm:px-3 gap-1"
               onClick={() => handleViewModeChange('card')}
+              aria-label={t(locale, 'dashboard.viewCard')}
             >
               <LayoutGrid className="h-4 w-4" />
-              <span className="text-xs">{t(locale, 'dashboard.viewCard')}</span>
+              <span className="hidden sm:inline text-xs">{t(locale, 'dashboard.viewCard')}</span>
             </Button>
             <Button
               variant={viewMode === 'list' ? 'secondary' : 'ghost'}
               size="sm"
-              className="h-8 px-3 gap-1.5"
+              className="size-8 sm:size-auto sm:h-8 sm:px-3 gap-1"
               onClick={() => handleViewModeChange('list')}
+              aria-label={t(locale, 'dashboard.viewList')}
             >
               <List className="h-4 w-4" />
-              <span className="text-xs">{t(locale, 'dashboard.viewList')}</span>
+              <span className="hidden sm:inline text-xs">{t(locale, 'dashboard.viewList')}</span>
             </Button>
           </div>
 

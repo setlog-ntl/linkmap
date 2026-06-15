@@ -49,8 +49,8 @@ export function AppHeader({ projectName, profile }: AppHeaderProps) {
       <AppBreadcrumbs projectName={projectName} />
 
       {/* Right side actions */}
-      <div className="ml-auto flex items-center gap-1.5">
-        {/* Command Palette */}
+      <div className="ml-auto flex items-center gap-1 md:gap-1.5">
+        {/* Command Palette — 데스크톱: 검색 바 */}
         <Button
           variant="outline"
           size="sm"
@@ -63,6 +63,19 @@ export function AppHeader({ projectName, profile }: AppHeaderProps) {
             <span className="text-xs">⌘</span>K
           </kbd>
         </Button>
+
+        {/* Command Palette — 모바일: 아이콘 버튼 */}
+        <IconTooltip label={t(locale, 'commandPalette.search')}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden h-8 w-8 touch-target text-muted-foreground"
+            onClick={() => setCommandOpen(true)}
+            aria-label={t(locale, 'commandPalette.search')}
+          >
+            <Search className="h-4 w-4" />
+          </Button>
+        </IconTooltip>
 
         {/* Language Toggle */}
         <DropdownMenu>

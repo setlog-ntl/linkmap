@@ -55,7 +55,7 @@ export function TemplateShowcase() {
 
                     {/* Recommended badge */}
                     {isRecommended && (
-                      <Badge className="absolute top-2.5 left-2.5 gap-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5">
+                      <Badge className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 gap-1 bg-primary text-primary-foreground text-[9px] sm:text-[10px] px-1.5 py-0.5">
                         <Star className="h-3 w-3" />
                         추천
                       </Badge>
@@ -65,7 +65,7 @@ export function TemplateShowcase() {
                     {!isRecommended && (
                       <Badge
                         variant="secondary"
-                        className="absolute top-2.5 right-2.5 text-[10px] px-1.5 py-0.5"
+                        className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 text-[9px] sm:text-[10px] px-1.5 py-0.5"
                       >
                         무료
                       </Badge>

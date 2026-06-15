@@ -74,8 +74,9 @@ export function AuthGuide() {
       <GuideLinkCards />
 
       {/* Section nav for remaining content */}
-      <nav className="sticky top-12 z-20 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">
-        <div className="flex gap-1 overflow-x-auto py-3 scrollbar-hide">
+      <nav className="sticky top-[var(--header-height)] z-20 bg-background/80 backdrop-blur-sm border-b -mx-4 px-4 sm:mx-0 sm:px-0">
+        {/* 모바일: 가로 스크롤 가능 표시를 위해 우측 페이드 마스크 적용 */}
+        <div className="flex gap-1 overflow-x-auto py-3 scrollbar-none [mask-image:linear-gradient(to_right,black_85%,transparent)] md:[mask-image:none]">
           {sections.map((s) => (
             <button
               key={s.id}

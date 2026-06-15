@@ -170,7 +170,7 @@ export function PricingContent() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
         {plans.map((plan) => (
           <Card key={plan.nameKey} className={`${plan.planKey === currentPlan ? 'border-primary shadow-lg ring-2 ring-primary/20' : plan.popular && currentPlan === 'free' ? 'border-primary shadow-lg' : ''} ${plan.planKey === 'team' && currentPlan !== 'team' ? 'opacity-60' : ''} relative`}>
             {plan.planKey === currentPlan && (

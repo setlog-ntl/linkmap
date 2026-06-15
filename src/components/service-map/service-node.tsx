@@ -85,7 +85,7 @@ function ServiceNode({ id, data }: NodeProps) {
 
   const nodeContent = (
     <div
-      className="relative"
+      className="relative cursor-pointer"
       style={{
         width: NODE_W,
         height: NODE_H,
@@ -98,6 +98,9 @@ function ServiceNode({ id, data }: NodeProps) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
+      {/* 전체 카드 탭 영역 — 터치 시 노드 어디를 눌러도 선택되도록 풀커버 히트 레이어 */}
+      <div className="absolute inset-0 z-0" aria-hidden />
+
       {/* SVG border with status-based stroke */}
       <svg
         viewBox={`0 0 ${NODE_W} ${NODE_H}`}

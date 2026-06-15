@@ -43,7 +43,7 @@ export function FeedbackFilters({
   onSortChange,
 }: FeedbackFiltersProps) {
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
       {/* 카테고리 필터 */}
       <div className="flex items-center gap-2 flex-wrap">
         <Badge
@@ -65,13 +65,14 @@ export function FeedbackFilters({
         ))}
       </div>
 
-      <div className="ml-auto flex items-center gap-2">
+      {/* 모바일: 전체 너비로 쌓기 / md 이상: 우측 정렬 */}
+      <div className="flex items-center gap-2 md:ml-auto">
         {/* 상태 필터 */}
         <Select
           value={status ?? 'all'}
           onValueChange={(v) => onStatusChange(v === 'all' ? undefined : (v as FeatureRequestStatus))}
         >
-          <SelectTrigger className="w-32 h-8 text-xs">
+          <SelectTrigger className="w-full md:w-32 h-8 text-xs">
             <SelectValue placeholder="상태" />
           </SelectTrigger>
           <SelectContent>
@@ -86,7 +87,7 @@ export function FeedbackFilters({
 
         {/* 정렬 */}
         <Select value={sort} onValueChange={(v) => onSortChange(v as FeedbackSortOrder)}>
-          <SelectTrigger className="w-28 h-8 text-xs">
+          <SelectTrigger className="w-full md:w-28 h-8 text-xs">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

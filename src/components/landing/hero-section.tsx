@@ -136,12 +136,12 @@ export function HeroSection() {
       </div>
 
       {/* ── Area 2: Interactive Flow showcase (dedicated space below text) ── */}
-      <div className="relative h-[320px] sm:h-[520px] lg:h-[740px] -mt-4 sm:-mt-8">
+      <div className="relative h-[420px] sm:h-[520px] lg:h-[740px] -mt-4 sm:-mt-8">
         {/* Top fade: blend into text area */}
         <div className="absolute inset-x-0 top-0 h-10 z-10 bg-gradient-to-b from-background/70 to-transparent pointer-events-none" />
         <InteractiveHeroFlow />
         {/* 섹션 범례 — 하단 그라데이션 위에 확실히 노출되도록 z-30 */}
-        <div className="absolute bottom-12 sm:bottom-16 inset-x-0 z-30 flex items-center justify-center gap-4 sm:gap-8 pointer-events-none">
+        <div className="absolute bottom-12 sm:bottom-16 inset-x-0 z-30 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:gap-x-8 px-4 pointer-events-none">
           {([
             { label: 'DATABASE', color: 'text-amber-400' },
             { label: 'AUTH',     color: 'text-emerald-400' },

@@ -286,15 +286,15 @@ const MapViewInner = memo(function MapViewInner({ data, projectId, isReadOnly = 
         </Button>
       </div>
 
-      {/* Status filter chips — simplified (4 statuses only, no ViewGroup) */}
-      <div className="absolute top-14 sm:top-16 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 sm:gap-1.5 flex-wrap justify-center max-w-[calc(100vw-2rem)]">
+      {/* Status filter chips — 모바일은 가로 스크롤 단일 행, 데스크톱은 중앙 정렬 */}
+      <div className="absolute top-14 sm:top-16 left-0 right-0 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-10 flex items-center gap-1 sm:gap-1.5 flex-nowrap sm:flex-wrap justify-start sm:justify-center overflow-x-auto sm:overflow-visible scrollbar-none px-3 sm:px-0 sm:max-w-[calc(100vw-2rem)]">
         {STATUS_FILTER_OPTIONS.map((opt) => {
           const isActive = filterStatuses.includes(opt.key);
           return (
             <button
               key={opt.key}
               onClick={() => toggleFilterStatus(opt.key)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium border transition-all"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium border transition-all shrink-0"
               style={{
                 borderColor: isActive ? opt.color : 'var(--border)',
                 background: isActive ? `${opt.color}18` : 'var(--background)',
@@ -338,7 +338,8 @@ const MapViewInner = memo(function MapViewInner({ data, projectId, isReadOnly = 
           edgeTypes={edgeTypes}
           proOptions={{ hideAttribution: true }}
         >
-          <Controls />
+          {/* 모바일: 하단 패널과 충돌 방지를 위해 우상단으로 이동 */}
+          <Controls position={isMobile ? 'top-right' : 'bottom-left'} />
           {!isMobile && (
             <MiniMap
               nodeStrokeWidth={3}

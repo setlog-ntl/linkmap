@@ -34,7 +34,7 @@ export default function FaqPage() {
     <div className="min-h-screen flex flex-col">
       <JsonLdScript data={faqJsonLd} />
       <Header profile={null} />
-      <main className="flex-1 container py-12 max-w-3xl mx-auto">
+      <main className="flex-1 container px-4 sm:px-6 py-12 max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold mb-2">자주 묻는 질문</h1>
         <p className="text-muted-foreground mb-10">
           바이브 코딩, 환경변수, 배포, 보안에 대해 궁금한 점을 찾아보세요.

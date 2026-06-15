@@ -26,7 +26,14 @@ export function SettingsNav() {
   const { locale } = useLocaleStore();
 
   return (
-    <nav className="flex flex-col gap-1">
+    // 모바일: 가로 스크롤 탭 스트립(콘텐츠를 아래로 밀지 않음) / md 이상: 세로 사이드바
+    <nav
+      className={cn(
+        'flex gap-1',
+        'flex-row overflow-x-auto -mx-1 px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+        'md:flex-col md:overflow-visible md:mx-0 md:px-0 md:pb-0',
+      )}
+    >
       {settingsLinks.map((link) => {
         const isActive = pathname === link.href;
         const label = link.label ?? t(locale, link.key ?? '');
@@ -35,14 +42,14 @@ export function SettingsNav() {
             key={link.href}
             href={link.href}
             className={cn(
-              'flex items-center gap-2.5 px-3 py-2 text-sm rounded-md transition-colors',
+              'flex items-center gap-2.5 px-3 py-2 text-xs md:text-sm rounded-md transition-colors shrink-0 md:shrink',
               isActive
                 ? 'bg-accent text-accent-foreground font-medium'
                 : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
             )} prefetch={false}
           >
             <link.icon className="h-4 w-4 shrink-0" />
-            <span>{label}</span>
+            <span className="truncate">{label}</span>
           </Link>
         );
       })}

@@ -46,6 +46,7 @@ import { SnapGuideLines } from '@/components/service-map/snap-guide-lines';
 import { useServiceMapNodes } from '@/components/service-map/hooks/useServiceMapNodes';
 import { useServiceMapLayout } from '@/components/service-map/hooks/useServiceMapLayout';
 import { useServiceMapInteractions } from '@/components/service-map/hooks/useServiceMapInteractions';
+import { useIsMobile } from '@/hooks/use-mobile';
 import type { ServiceMapData } from '@/components/service-map/hooks/useServiceMapData';
 import type { UserConnectionType, ServiceDomain } from '@/types';
 import type { Edge as ReactFlowEdge } from '@xyflow/react';
@@ -90,6 +91,7 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
 
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
+  const isMobile = useIsMobile();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showAiPanel, setShowAiPanel] = useState(false);
@@ -698,19 +700,22 @@ export const DependencyView = memo(function DependencyView({ data, projectId, is
             nodesDraggable={!isReadOnly}
             nodesConnectable={!isReadOnly}
           >
-            <Controls />
-            <MiniMap
-              nodeStrokeWidth={3}
-              nodeColor={(node: Node) => {
-                if (node.type === 'zone') return 'var(--muted)';
-                const st = (node.data as Record<string, unknown>)?.status as string | undefined;
-                return STATUS_MINIMAP_COLORS[st ?? 'not_started'] ?? '#475569';
-              }}
-              zoomable
-              pannable
-              maskColor={isDark ? 'rgba(15, 29, 47, 0.85)' : undefined}
-              style={isDark ? { backgroundColor: 'var(--card)' } : undefined}
-            />
+            {/* 모바일: 하단 패널과 충돌 방지를 위해 우상단으로 이동 */}
+            <Controls position={isMobile ? 'top-right' : 'bottom-left'} />
+            {!isMobile && (
+              <MiniMap
+                nodeStrokeWidth={3}
+                nodeColor={(node: Node) => {
+                  if (node.type === 'zone') return 'var(--muted)';
+                  const st = (node.data as Record<string, unknown>)?.status as string | undefined;
+                  return STATUS_MINIMAP_COLORS[st ?? 'not_started'] ?? '#475569';
+                }}
+                zoomable
+                pannable
+                maskColor={isDark ? 'rgba(15, 29, 47, 0.85)' : undefined}
+                style={isDark ? { backgroundColor: 'var(--card)' } : undefined}
+              />
+            )}
             {isDark ? (
               <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="oklch(0.35 0.02 250)" style={{ opacity: 0.25 }} />
             ) : (

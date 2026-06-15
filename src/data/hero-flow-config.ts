@@ -34,6 +34,29 @@ export const NODE_OFFSETS: Record<string, NodeOffset> = {
   github:     { dx:  -80, dy: 305 },
 };
 
+// ── 모바일(<768px) 전용 오프셋 ──
+// 좁은 폭(~390px)에서 고정 줌으로도 읽히도록 가로 간격을 좁히고
+// 세로로 더 촘촘하게 배치한다. (데스크톱 NODE_OFFSETS는 유지)
+export const NODE_OFFSETS_MOBILE: Record<string, NodeOffset> = {
+  // ── Database (상단 가로 배치) ──
+  supabase:   { dx: -130, dy:  20 },
+  firebase:   { dx:   10, dy:  20 },
+  // ── Auth (좌측 세로) ──
+  google:     { dx: -180, dy:  90 },
+  kakao:      { dx: -180, dy: 150 },
+  naver:      { dx: -180, dy: 210 },
+  // ── Center hub ──
+  myapp:      { dx:  -60, dy: 140 },
+  // ── AI (우측) ──
+  openai:     { dx:  120, dy:  90 },
+  gemini:     { dx:  120, dy: 150 },
+  // ── Deploy (우측 하단) ──
+  vercel:     { dx:  120, dy: 230 },
+  cloudflare: { dx:  120, dy: 290 },
+  // ── GitHub CI/CD (중앙 하단) ──
+  github:     { dx:  -60, dy: 265 },
+};
+
 // ── 그룹 색상 ──
 export type GroupColorHint = 'green' | 'purple' | 'blue' | 'amber' | 'red' | 'cyan' | 'orange' | 'pink' | 'outer';
 

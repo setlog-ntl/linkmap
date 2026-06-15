@@ -151,7 +151,7 @@ export function CatalogSidebar({
       {catalogSidebarOpen && (
         <motion.div
           initial={{ width: 0, opacity: 0 }}
-          animate={{ width: 'min(280px, 85vw)' as unknown as number, opacity: 1 }}
+          animate={{ width: 'min(280px, 72vw)' as unknown as number, opacity: 1 }}
           exit={{ width: 0, opacity: 0 }}
           transition={{ duration: 0.2 }}
           className="h-full border-r bg-background flex flex-col overflow-hidden shrink-0"

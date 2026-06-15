@@ -49,8 +49,7 @@ export function ShowcaseCard({ item }: ShowcaseCardProps) {
       <Link
         prefetch={false}
         href={`/showcase/${item.id}`}
-        className="block relative w-full border-b cursor-pointer"
-        style={{ height: '200px' }}
+        className="block relative w-full h-40 sm:h-48 md:h-60 border-b cursor-pointer"
       >
         {previewImage ? (
           /* 이미지가 있을 때 */

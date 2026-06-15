@@ -36,9 +36,9 @@ export default async function SettingsLayout({
         <AppHeader />
         <main className="flex-1 bg-background">
           <div className="container py-8 max-w-5xl mx-auto">
-            <div className="flex flex-col md:flex-row gap-8">
-              {/* Settings sub-nav */}
-              <aside className="md:w-52 shrink-0">
+            <div className="flex flex-col md:flex-row gap-4 md:gap-8">
+              {/* Settings sub-nav — 모바일은 상단 가로 탭, md 이상은 좌측 사이드바 */}
+              <aside className="w-full md:w-52 shrink-0">
                 <SettingsNav />
               </aside>
               {/* Content */}

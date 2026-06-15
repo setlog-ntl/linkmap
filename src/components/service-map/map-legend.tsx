@@ -33,7 +33,7 @@ interface MapLegendProps {
 
 export function MapLegend({ onClose }: MapLegendProps) {
   return (
-    <div className="absolute bottom-4 right-4 z-20 w-[220px] rounded-lg border bg-background/95 backdrop-blur-sm shadow-lg">
+    <div className="hidden md:block absolute bottom-4 right-4 z-20 w-[220px] rounded-lg border bg-background/95 backdrop-blur-sm shadow-lg">
       <div className="flex items-center justify-between px-3 pt-2.5 pb-1.5">
         <span className="text-sm font-medium">범례</span>
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>

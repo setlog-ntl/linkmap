@@ -24,7 +24,7 @@ export function FeedbackFab() {
     <>
       <Button
         size="icon"
-        className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full shadow-lg bg-brand-blue text-white hover:bg-brand-blue/90"
+        className="fixed bottom-safe-6 right-6 z-50 h-12 w-12 rounded-full shadow-lg bg-brand-blue text-white hover:bg-brand-blue/90"
         onClick={() => setOpen(true)}
         title="기능 요청 / 피드백"
       >

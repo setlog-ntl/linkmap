@@ -183,10 +183,10 @@ export function AnnotatedScreenshot({
           aria-label="이미지 확대"
         >
           <button
-            className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+            className="absolute top-6 right-6 md:top-4 md:right-4 z-10 w-12 h-12 md:w-10 md:h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
             onClick={close}
           >
-            <X className="w-5 h-5 text-white" />
+            <X className="w-6 h-6 md:w-5 md:h-5 text-white" />
             <span className="sr-only">닫기</span>
           </button>
           <div

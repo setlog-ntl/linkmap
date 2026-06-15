@@ -11,8 +11,8 @@ export function Footer() {
   return (
     <footer className="bg-[var(--circuit-950)] text-muted-foreground">
       <div className="container py-8 md:py-12">
-        <div className="grid grid-cols-2 md:grid-cols-7 gap-8">
-          <div className="col-span-2 md:col-span-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-6 md:gap-8">
+          <div className="sm:col-span-2 md:col-span-1">
             <Link href="/" prefetch={false} className="flex items-center gap-1 font-bold text-lg mb-3">
               <span className="text-brand-green">Link</span>
               <span className="text-white">map</span>
@@ -30,7 +30,7 @@ export function Footer() {
             </ul>
           </div>
           {/* 기본 개념 — 학습 단계별 요약 */}
-          <div className="col-span-2 md:col-span-2">
+          <div className="sm:col-span-2 md:col-span-2">
             <h4 className="font-semibold text-sm mb-3 text-white">{GUIDE_CATEGORIES_DATA.concept.label}</h4>
             <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
               {LEARNING_STAGES_DATA.map((stage) => {

@@ -349,14 +349,15 @@ export function TemplateCard({ template, isSelected, locale, onSelect }: Templat
 
         {/* Info */}
         <div className="p-3 sm:p-4 pt-2.5 sm:pt-3">
-          <h4 className="font-semibold text-xs sm:text-sm">
+          {/* 모바일 2열 카드: 한글 이름·설명 오버플로 방지 */}
+          <h4 className="font-semibold text-[11px] sm:text-sm leading-snug">
             {locale === 'ko' ? template.name_ko : template.name}
           </h4>
-          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+          <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 line-clamp-1 sm:line-clamp-2">
             {locale === 'ko' ? template.description_ko : template.description}
           </p>
           {useCases && (
-            <div className="flex flex-wrap gap-1 mt-2">
+            <div className="flex flex-wrap gap-0.5 sm:gap-1 mt-2">
               {(locale === 'ko' ? useCases.ko : useCases.en).map((tag) => (
                 <Badge key={tag} variant="outline" className="text-[10px] px-1.5 py-0 h-4">
                   {tag}

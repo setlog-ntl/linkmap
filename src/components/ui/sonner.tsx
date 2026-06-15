@@ -9,13 +9,17 @@ import {
 } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme()
+  const isMobile = useIsMobile()
 
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
+      // 모바일: 하단 FAB와 겹치지 않도록 상단 중앙, 데스크톱: 우측 하단
+      position={isMobile ? "top-center" : "bottom-right"}
       className="toaster group"
       icons={{
         success: <CircleCheckIcon className="size-4" />,

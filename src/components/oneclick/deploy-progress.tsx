@@ -141,8 +141,8 @@ export function DeployProgress({ status, template }: DeployProgressProps) {
           )}
 
           {/* Header */}
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="font-semibold truncate min-w-0">
               {isCompleted
                 ? t(locale, 'deployProgress.completed')
                 : isError
@@ -151,10 +151,10 @@ export function DeployProgress({ status, template }: DeployProgressProps) {
                     ? t(locale, 'deployProgress.timeout')
                     : t(locale, 'deployProgress.preparingSite')}
             </h3>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               {isRunning && (
-                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
+                <span className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
+                  <Clock className="h-3 w-3 shrink-0" />
                   {elapsedTime} {t(locale, 'deployProgress.elapsed')}
                 </span>
               )}
@@ -197,8 +197,8 @@ export function DeployProgress({ status, template }: DeployProgressProps) {
             />
           </div>
 
-          {/* Steps */}
-          <div className="space-y-3">
+          {/* Steps — 단계가 많아도 뷰포트를 넘지 않도록 스크롤 */}
+          <div className="space-y-3 max-h-[60vh] overflow-y-auto">
             {status.steps.map((step) => {
               const IconComponent = getStepIcon(step.name);
               const isActive = step.status === 'in_progress';

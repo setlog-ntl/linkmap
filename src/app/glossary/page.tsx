@@ -35,7 +35,7 @@ export default function GlossaryPage() {
     <div className="min-h-screen flex flex-col">
       <JsonLdScript data={glossaryJsonLd} />
       <Header profile={null} />
-      <main className="flex-1 container py-12 max-w-4xl mx-auto">
+      <main className="flex-1 container px-4 sm:px-6 py-12 max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-2">바이브 코딩 용어집</h1>
         <p className="text-muted-foreground mb-10">
           바이브 코딩과 웹 개발에 자주 등장하는 용어를 한/영 정의로 쉽게 설명합니다.

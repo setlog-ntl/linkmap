@@ -48,7 +48,7 @@ function CopyLinkButton({ slug }: { slug: string }) {
         className={`flex h-7 w-7 items-center justify-center rounded-md border transition-all ${
           copied
             ? 'border-brand-green bg-green-50 text-green-600 dark:bg-green-950/30'
-            : 'border-transparent opacity-0 group-hover:opacity-100 hover:border-brand-blue/50 hover:text-brand-blue'
+            : 'border-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:border-brand-blue/50 hover:text-brand-blue'
         }`}
       >
         {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
@@ -103,7 +103,7 @@ function PrimaryFeaturedCard({ post }: { post: BlogPostMeta }) {
         <h2 className="text-2xl md:text-3xl font-bold tracking-tight group-hover:text-brand-blue transition-colors duration-200 line-clamp-2 leading-tight">
           {post.title}
         </h2>
-        <p className="text-muted-foreground text-base leading-relaxed line-clamp-3">
+        <p className="text-muted-foreground text-sm md:text-base leading-relaxed line-clamp-2 md:line-clamp-3">
           {post.description}
         </p>
       </div>

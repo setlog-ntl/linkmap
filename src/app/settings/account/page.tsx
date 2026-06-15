@@ -138,8 +138,8 @@ export default function AccountPage() {
       <section>
         <h2 className="text-lg font-bold mb-5">{t(locale, 'account.myAccount')}</h2>
         <Card className="bg-card border-border">
-          <CardContent className="p-7">
-            <div className="flex items-center gap-5">
+          <CardContent className="p-5 md:p-7">
+            <div className="flex flex-col md:flex-row md:items-start gap-3 md:gap-5">
               <div className="relative">
                 <Avatar className="h-16 w-16 ring-2 ring-border">
                   <AvatarImage src={profile.avatarUrl} alt={profile.name} />

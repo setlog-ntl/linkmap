@@ -129,7 +129,7 @@ export default function ShowcasePage() {
           type="button"
           onClick={() => setSelectedCategory(null)}
           className={cn(
-            'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+            'px-4 py-2 text-[12px] sm:px-3 sm:py-1.5 sm:text-xs rounded-full font-medium border transition-colors',
             !selectedCategory
               ? 'bg-brand-blue text-white border-brand-blue'
               : 'bg-muted text-muted-foreground border-transparent hover:bg-muted/80'
@@ -143,7 +143,7 @@ export default function ShowcasePage() {
             type="button"
             onClick={() => setSelectedCategory(selectedCategory === cat.value ? null : cat.value)}
             className={cn(
-              'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+              'px-4 py-2 text-[12px] sm:px-3 sm:py-1.5 sm:text-xs rounded-full font-medium border transition-colors',
               selectedCategory === cat.value
                 ? 'bg-brand-blue text-white border-brand-blue'
                 : 'bg-muted text-muted-foreground border-transparent hover:bg-muted/80'
@@ -163,7 +163,7 @@ export default function ShowcasePage() {
               type="button"
               onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
               className={cn(
-                'px-2 py-1 rounded text-[11px] transition-colors',
+                'px-3 py-1.5 text-[12px] sm:px-2 sm:py-1 sm:text-[11px] rounded transition-colors',
                 selectedTag === tag
                   ? 'bg-brand-green/20 text-brand-green font-medium'
                   : 'bg-muted/60 text-muted-foreground hover:bg-muted'

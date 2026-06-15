@@ -391,7 +391,8 @@ export function TemplatePickerStep({
         <Label htmlFor="site-name" className="text-base font-semibold">
           {t(locale, 'templatePicker.siteName')}
         </Label>
-        <div className="flex gap-2 items-start">
+        {/* 모바일: 세로 스택 — 입력창 눌림·에러 메시지 잘림 방지 */}
+        <div className="flex flex-col md:flex-row gap-2 md:items-start">
           <div className="flex-1 space-y-1.5">
             <div className="relative">
               {TemplateIcon && (
@@ -418,7 +419,7 @@ export function TemplatePickerStep({
             onClick={handleNext}
             disabled={!canProceed || isDeploying}
             size="default"
-            className="gap-2 shrink-0 h-10"
+            className="gap-2 shrink-0 h-10 w-full md:w-auto"
           >
             {isDeploying ? (
               <>
@@ -437,9 +438,10 @@ export function TemplatePickerStep({
           {t(locale, 'templatePicker.siteNameHint')}
         </p>
         {/* Live URL preview */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
-          <Globe className="h-3.5 w-3.5 flex-shrink-0" />
-          <span className="font-mono truncate">
+        <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
+          <Globe className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+          {/* 모바일: URL 전체 표시 (잘림 방지) */}
+          <span className="font-mono break-all whitespace-normal text-[10px] sm:text-xs">
             https://{urlUsername}.github.io/{siteName || t(locale, 'templatePicker.urlPlaceholder')}
           </span>
         </div>

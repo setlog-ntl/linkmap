@@ -34,7 +34,8 @@ export function ModuleForm({ fields, values, onChange, locale, deployId, onImage
   const hasGradient = fields.some(f => f.key === 'gradientFrom') && fields.some(f => f.key === 'gradientTo');
 
   return (
-    <div className="space-y-4">
+    /* 모바일: 필드 간격 축소 — 좁은 화면에서 폼이 너무 길어지지 않도록 */
+    <div className="space-y-2.5 md:space-y-4">
       {/* 그래디언트 실시간 미리보기 */}
       {hasGradient && gradientFrom && gradientTo && (
         <div className="space-y-1.5">
@@ -336,7 +337,7 @@ function ArrayFieldRenderer({
       {items.map((item, index) => (
         <div
           key={((item as Record<string, unknown>)?._id as string) || `item-${index}`}
-          className="border rounded-lg p-3 space-y-2 bg-muted/20 relative group"
+          className="border rounded-lg p-2 sm:p-3 space-y-2 bg-muted/20 relative group"
         >
           <div className="flex items-center justify-between mb-1">
             <span className="text-[10px] font-medium text-muted-foreground">
@@ -351,37 +352,40 @@ function ArrayFieldRenderer({
               <Trash2 className="h-3 w-3" />
             </Button>
           </div>
-          {field.itemSchema?.map((subField) => {
-            // 소셜 링크: 선택된 플랫폼에 따라 URL placeholder 동적 변경
-            const itemRecord = item as Record<string, unknown>;
-            let dynamicField = subField;
-            if (subField.key === 'url' && subField.type === 'url' && itemRecord.platform) {
-              const platformPlaceholders: Record<string, string> = {
-                linkedin: 'https://linkedin.com/in/username',
-                twitter: 'https://x.com/username',
-                instagram: 'https://instagram.com/username',
-                github: 'https://github.com/username',
-                facebook: 'https://facebook.com/username',
-                youtube: 'https://youtube.com/@channel',
-                tiktok: 'https://tiktok.com/@username',
-                threads: 'https://threads.net/@username',
-                'naver-blog': 'https://blog.naver.com/blogid',
-                other: 'https://example.com',
-              };
-              const ph = platformPlaceholders[itemRecord.platform as string];
-              if (ph) dynamicField = { ...subField, placeholder: ph };
-            }
-            return (
-              <FieldRenderer
-                key={subField.key}
-                field={dynamicField}
-                value={itemRecord[subField.key]}
-                onChange={(val) => handleItemChange(index, subField.key, val)}
-                locale={locale}
-                deployId={deployId}
-              />
-            );
-          })}
+          {/* 모바일: 1열, 데스크탑: 2열로 서브필드 배치 (라벨 줄바꿈 완화) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+            {field.itemSchema?.map((subField) => {
+              // 소셜 링크: 선택된 플랫폼에 따라 URL placeholder 동적 변경
+              const itemRecord = item as Record<string, unknown>;
+              let dynamicField = subField;
+              if (subField.key === 'url' && subField.type === 'url' && itemRecord.platform) {
+                const platformPlaceholders: Record<string, string> = {
+                  linkedin: 'https://linkedin.com/in/username',
+                  twitter: 'https://x.com/username',
+                  instagram: 'https://instagram.com/username',
+                  github: 'https://github.com/username',
+                  facebook: 'https://facebook.com/username',
+                  youtube: 'https://youtube.com/@channel',
+                  tiktok: 'https://tiktok.com/@username',
+                  threads: 'https://threads.net/@username',
+                  'naver-blog': 'https://blog.naver.com/blogid',
+                  other: 'https://example.com',
+                };
+                const ph = platformPlaceholders[itemRecord.platform as string];
+                if (ph) dynamicField = { ...subField, placeholder: ph };
+              }
+              return (
+                <FieldRenderer
+                  key={subField.key}
+                  field={dynamicField}
+                  value={itemRecord[subField.key]}
+                  onChange={(val) => handleItemChange(index, subField.key, val)}
+                  locale={locale}
+                  deployId={deployId}
+                />
+              );
+            })}
+          </div>
         </div>
       ))}
 

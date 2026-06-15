@@ -123,7 +123,7 @@ export function PricingSection() {
                   ))}
                 </ul>
                 <Button
-                  className={`mt-8 w-full rounded-xl py-3 h-auto text-sm font-bold transition-all duration-200 ${
+                  className={`mt-8 w-full rounded-xl py-3 h-auto min-h-[44px] text-sm font-bold transition-all duration-200 ${
                     plan.highlighted
                       ? 'bg-brand-blue text-white hover:bg-brand-blue/90 hover:shadow-md active:scale-[0.98]'
                       : 'bg-muted border border-border text-foreground hover:bg-muted/80 dark:bg-secondary dark:hover:bg-secondary/80'
