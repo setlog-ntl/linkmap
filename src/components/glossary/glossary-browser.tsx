@@ -1,5 +1,13 @@
 'use client';
 
+// ─────────────────────────────────────────────────────────────────────────
+// 모바일 대응 규칙 (수정 시 유지할 것 — 상세: docs/glossary-system.md)
+//  · 카드 그리드: grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 (모바일 1열)
+//  · 필터 칩 행: 숨기지 말고 scrollbar-none + 페이드 마스크로 가로 스크롤 어포던스 노출
+//  · 터치 타깃: 칩·검색 X버튼 모바일 ≥44px(min-h-[44px] sm:min-h-0 / h-11 w-11)
+//  · 전역 body{overflow-x:clip}이 페이지 가로 오버플로우를 가드 (memory: mobile-foundation)
+// ─────────────────────────────────────────────────────────────────────────
+
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Search, ArrowRight, Sparkles, X } from 'lucide-react';
@@ -68,13 +76,13 @@ export function GlossaryBrowser() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="용어 검색 — 예: 환경변수, API, OAuth, env..."
-          className="w-full h-14 rounded-xl border bg-card shadow-sm pl-12 pr-12 text-base outline-none transition-colors focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+          className="w-full h-14 rounded-xl border bg-card shadow-sm pl-12 pr-14 text-base outline-none transition-colors focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
           aria-label="용어 검색"
         />
         {query && (
           <button
             onClick={() => setQuery('')}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground transition-colors"
             aria-label="검색어 지우기"
           >
             <X className="h-5 w-5" />
@@ -162,7 +170,8 @@ function FilterChip({
     <button
       onClick={onClick}
       className={cn(
-        'shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors cursor-pointer',
+        // 모바일 터치 타깃 44px(min-h), 데스크톱은 컴팩트(sm:min-h-0)
+        'inline-flex items-center justify-center shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 min-h-[44px] sm:min-h-0 text-sm font-medium transition-colors cursor-pointer',
         active
           ? 'border-brand-blue bg-brand-blue/10 text-brand-blue'
           : 'border-border bg-card text-muted-foreground hover:text-foreground hover:border-brand-blue/40'

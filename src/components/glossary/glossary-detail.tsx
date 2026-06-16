@@ -1,3 +1,10 @@
+// ─────────────────────────────────────────────────────────────────────────
+// 모바일 대응 규칙 (수정 시 유지할 것 — 상세: docs/glossary-system.md)
+//  · 본문 폭 max-w-3xl + 레이아웃 container px-4로 모바일 좌우 여백 확보
+//  · 예시(mono) 블록: break-words 로 긴 토큰(URL·코드) 가로 오버플로우 방지
+//  · 관련어 칩: 모바일 터치 타깃 ≥44px(min-h-[44px] sm:min-h-0), flex-wrap
+//  · 헤더 배지: flex-wrap, 제목 text-2xl md:text-3xl
+// ─────────────────────────────────────────────────────────────────────────
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -97,7 +104,7 @@ export function GlossaryDetail({ entry }: { entry: GlossaryEntry }) {
             <h2 className="font-semibold text-sm">실제 예시</h2>
           </div>
           <div className="rounded-lg border bg-muted/40 p-4">
-            <p className="text-sm text-foreground/90 leading-relaxed font-mono">{entry.example}</p>
+            <p className="text-sm text-foreground/90 leading-relaxed font-mono break-words">{entry.example}</p>
           </div>
         </section>
       )}
@@ -115,7 +122,7 @@ export function GlossaryDetail({ entry }: { entry: GlossaryEntry }) {
                 key={rel.slug}
                 href={`/glossary/${rel.slug}`}
                 prefetch={false}
-                className="inline-flex items-center gap-1.5 rounded-full border bg-card px-3 py-1.5 text-sm hover:border-brand-blue/50 hover:text-brand-blue transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-full border bg-card px-3 py-1.5 min-h-[44px] sm:min-h-0 text-sm hover:border-brand-blue/50 hover:text-brand-blue transition-colors"
               >
                 <span>{getGlossaryEmoji(rel)}</span>
                 {rel.term}

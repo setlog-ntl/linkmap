@@ -124,3 +124,4 @@ packages/         — mcp-server/, cli/
 | 서비스맵 V2 | `docs/service-map-v2.md` |
 | AI 모듈 맵 | `docs/ai-module-map.md` |
 | 모듈 에디터 | `docs/onelink/08-modular-template-editor.md` |
+| 용어사전(추가법·모바일 규칙) | `docs/glossary-system.md` |
