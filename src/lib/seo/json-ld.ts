@@ -353,7 +353,7 @@ export function generateGlossaryJsonLd(
   return {
     '@context': 'https://schema.org',
     '@type': 'DefinedTermSet',
-    name: '바이브 코딩 용어집 | Linkmap',
+    name: '바이브 코딩 용어사전 | Linkmap',
     url: `${SITE_URL}/glossary`,
     hasDefinedTerm: terms.map((t) => ({
       '@type': 'DefinedTerm',
@@ -361,5 +361,46 @@ export function generateGlossaryJsonLd(
       description: t.definition,
       inDefinedTermSet: `${SITE_URL}/glossary`,
     })),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Glossary term (single page) — DefinedTerm + BreadcrumbList
+// ---------------------------------------------------------------------------
+
+interface GlossaryTermJsonLdInput {
+  slug: string;
+  term: string;
+  termEn: string;
+  definition: string;
+}
+
+export function generateGlossaryTermJsonLd(input: GlossaryTermJsonLdInput) {
+  const url = `${SITE_URL}/glossary/${input.slug}`;
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'DefinedTerm',
+        name: input.term,
+        alternateName: input.termEn,
+        description: input.definition,
+        url,
+        inLanguage: 'ko',
+        inDefinedTermSet: {
+          '@type': 'DefinedTermSet',
+          name: '바이브 코딩 용어사전 | Linkmap',
+          url: `${SITE_URL}/glossary`,
+        },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '홈', item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: '용어사전', item: `${SITE_URL}/glossary` },
+          { '@type': 'ListItem', position: 3, name: input.term, item: url },
+        ],
+      },
+    ],
   };
 }
