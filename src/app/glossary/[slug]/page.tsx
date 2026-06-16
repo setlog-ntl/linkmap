@@ -9,8 +9,9 @@ import {
   getGlossaryEntry,
 } from '@/data/seo/glossary-terms';
 
+// 완전 정적: generateStaticParams가 모든 용어를 프리렌더, 그 외 slug는 notFound()
+// (blog/[slug]·services/[slug]와 동일한 Workers-safe 패턴 — dynamicParams=false는 OpenNext에서 프리렌더 라우트 404 유발 위험이 있어 사용하지 않음)
 export const revalidate = false;
-export const dynamicParams = false;
 
 export function generateStaticParams() {
   return GLOSSARY_ENTRIES.map((entry) => ({ slug: entry.slug }));
