@@ -49,7 +49,8 @@ export default function GlossaryPage() {
       <div className="text-center space-y-3 mb-10">
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight">용어사전</h1>
         <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-          바이브 코딩과 웹 개발에서 만나는 용어를, 코딩을 처음 접하는 분도 이해할 수 있도록
+          바이브 코딩과 웹 개발에서 만나는 용어를, 코딩을 처음 접하는 분도 이해할 수 있도록{' '}
+          {/* 모바일에서는 br이 숨겨지므로 위 줄 끝의 {' '}로 단어 붙음 방지 */}
           <br className="hidden sm:block" />
           비유와 실제 예시로 풀어 설명합니다.
         </p>
