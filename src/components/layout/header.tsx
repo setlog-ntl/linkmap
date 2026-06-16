@@ -18,7 +18,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { IconTooltip } from '@/components/ui/icon-tooltip';
-import { Menu, Globe, Search, BookOpen, PenLine, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench, ArrowRight, Rocket, BarChart3, Trophy, Code, Palette, Workflow } from 'lucide-react';
+import { Menu, Globe, Search, BookOpen, PenLine, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench, ArrowRight, Rocket, BarChart3, Trophy, Code, Palette, Workflow, Library } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { GUIDE_CATEGORIES_DATA, LEARNING_STAGES_DATA, GUIDE_DATA, getGuideDataByCategory } from '@/data/ui/guide-data';
 
@@ -218,6 +218,16 @@ export function Header({ profile: profileProp }: HeaderProps) {
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <Link
+        href="/glossary"
+        prefetch={false}
+        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+        onClick={() => setSidebarOpen(false)}
+      >
+        <Library className="h-3.5 w-3.5" />
+        용어사전
+      </Link>
     </>
   );
 
@@ -515,6 +525,20 @@ export function Header({ profile: profileProp }: HeaderProps) {
                     {guide.title}
                   </Link>
                 ))}
+
+                <div className="border-t my-2" />
+
+                {/* 용어사전 */}
+                <Link
+                  href="/glossary"
+                  prefetch={false}
+                  className="text-sm font-medium text-foreground hover:text-brand-blue transition-colors px-2.5 py-1.5 flex items-center gap-2"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <Library className="h-4 w-4" />
+                  용어사전
+                  <ArrowRight className="h-3.5 w-3.5 ml-auto" />
+                </Link>
 
                 <div className="border-t my-2" />
                 {!profile ? (

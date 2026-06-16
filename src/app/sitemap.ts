@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { GUIDE_DATA, SUB_GUIDE_DATA } from '@/data/ui/guide-data';
 import { SERVICE_SLUGS } from '@/data/seed/service-slugs';
 import { getBlogSitemapEntries } from '@/data/blog/posts';
+import { GLOSSARY_ENTRIES } from '@/data/seo/glossary-terms';
 
 const BASE_URL = 'https://www.linkmap.biz';
 
@@ -56,5 +57,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...guidePages, ...subGuidePages, ...blogPages, ...servicePages];
+  const glossaryPages: MetadataRoute.Sitemap = GLOSSARY_ENTRIES.map((entry) => ({
+    url: `${BASE_URL}/glossary/${entry.slug}`,
+    lastModified: BUILD_DATE,
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }));
+
+  return [
+    ...staticPages,
+    ...guidePages,
+    ...subGuidePages,
+    ...blogPages,
+    ...servicePages,
+    ...glossaryPages,
+  ];
 }
