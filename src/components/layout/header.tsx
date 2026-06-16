@@ -456,6 +456,16 @@ export function Header({ profile: profileProp }: HeaderProps) {
                   블로그
                 </Link>
 
+                <Link
+                  href="/glossary"
+                  prefetch={false}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <Library className="h-4 w-4" />
+                  용어사전
+                </Link>
+
                 <div className="border-t my-2" />
 
                 {/* 가이드 — 전체 보기 최상단 */}
@@ -525,20 +535,6 @@ export function Header({ profile: profileProp }: HeaderProps) {
                     {guide.title}
                   </Link>
                 ))}
-
-                <div className="border-t my-2" />
-
-                {/* 용어사전 */}
-                <Link
-                  href="/glossary"
-                  prefetch={false}
-                  className="text-sm font-medium text-foreground hover:text-brand-blue transition-colors px-2.5 py-1.5 flex items-center gap-2"
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <Library className="h-4 w-4" />
-                  용어사전
-                  <ArrowRight className="h-3.5 w-3.5 ml-auto" />
-                </Link>
 
                 <div className="border-t my-2" />
                 {!profile ? (
