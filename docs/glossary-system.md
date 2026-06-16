@@ -74,6 +74,10 @@
 | 반응형 줄바꿈 | `<br className="hidden sm:block" />` 앞에는 반드시 `{' '}` (모바일에서 br 숨김 시 단어 붙음 방지) | `page.tsx` hero |
 | 가로 오버플로우 가드 | 전역 `body { overflow-x: clip }` (memory: mobile-foundation) | globals.css |
 
+### 헤더 진입점(중요)
+- 데스크톱: 상단 nav의 **가이드 드롭다운 옆**(`header.tsx` navLinks).
+- 모바일: 햄버거 시트에서 **블로그 바로 다음 = 가이드 트리 위**에 배치. 가이드 트리(전체보기+기본개념 5단계+서비스 5개) **뒤에 두면 스크롤에 묻혀 "안 보임"** 신고가 발생하므로, 반드시 가이드 섹션 위(상위 항목)에 둘 것.
+
 ### 데이터 작성 시 모바일 주의
 - `example`에 공백 없는 매우 긴 토큰을 넣어도 `break-words`로 래핑되지만, 가독성을 위해 가능하면 의미 단위로 공백을 둘 것.
 - `oneLiner`·`analogy.body`는 길어도 됨(자동 래핑). 단, 카드의 `oneLiner`는 `line-clamp-3`로 잘리므로 핵심을 앞에 둘 것.
