@@ -38,6 +38,7 @@ const TEMPLATE_SLUGS = [
   'small-biz-cafe',
   'digital-namecard',
   'link-card',
+  'invitation',
 ] as const;
 
 // 템플릿 파일 번들이 있는 슬러그 (digital-namecard, link-card는 템플릿 없음)
@@ -47,6 +48,7 @@ const SLUGS_WITH_TEMPLATE_FILES = [
   'freelancer-page',
   'small-biz',
   'small-biz-cafe',
+  'invitation',
 ] as const;
 
 describe('템플릿 무결성 검증', () => {
