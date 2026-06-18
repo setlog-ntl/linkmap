@@ -6,6 +6,7 @@ import type { ModuleConfigState, TemplateModuleSchema } from '@/lib/module-schem
 import type { TemplateGenerator, ComponentMapping } from './base-generator';
 import {
   esc,
+  sanitizeUrl,
   buildGalleryArray,
   normalizeImagePath,
   genBasePathConst,
@@ -77,6 +78,12 @@ interface InvitationPresetVars {
   cardBg: string;
   cardBorder: string;
   isDark?: boolean;
+  isGlass?: boolean;
+  bgGrad?: string;
+  glassBg?: string;
+  glassBorder?: string;
+  glassShadow?: string;
+  accent2?: string;
 }
 
 const INVITATION_PRESET_THEME: Record<string, InvitationPresetVars> = {
@@ -100,6 +107,16 @@ const INVITATION_PRESET_THEME: Record<string, InvitationPresetVars> = {
     bg: '#f8fdf6', bgAlt: '#f0f8ec', textPrimary: '#1a2e1a', textSecondary: '#4a6741',
     accent: '#5c8a4d', accentGlow: 'rgba(92,138,77,0.15)', cardBg: '#ffffff', cardBorder: '#d4e8cb',
   },
+  'minimal-glass': {
+    bg: '#f5f3ff', bgAlt: '#eef2ff', textPrimary: '#1f2430', textSecondary: '#6b7280',
+    accent: '#a78bfa', accentGlow: 'rgba(167,139,250,0.18)', cardBg: 'rgba(255,255,255,0.55)', cardBorder: 'rgba(255,255,255,0.7)',
+    isGlass: true,
+    bgGrad: 'linear-gradient(160deg,#f5f3ff,#fdf2f8,#eef2ff)',
+    glassBg: 'rgba(255,255,255,0.55)',
+    glassBorder: 'rgba(255,255,255,0.7)',
+    glassShadow: '0 8px 32px rgba(31,38,135,0.12)',
+    accent2: '#f9a8d4',
+  },
 };
 
 function generateInvitationPresetCss(
@@ -108,7 +125,7 @@ function generateInvitationPresetCss(
   gradientTo: string,
 ): string {
   const vars = INVITATION_PRESET_THEME[designPreset] ?? INVITATION_PRESET_THEME['elegant-gold'];
-  return `/* invitation preset: ${designPreset} — auto-generated */
+  let css = `/* invitation preset: ${designPreset} — auto-generated */
 :root {
   --inv-bg: ${vars.bg};
   --inv-bg-alt: ${vars.bgAlt};
@@ -119,8 +136,27 @@ function generateInvitationPresetCss(
   --inv-card-bg: ${vars.cardBg};
   --inv-card-border: ${vars.cardBorder};
   --inv-gradient-from: ${gradientFrom};
-  --inv-gradient-to: ${gradientTo};
+  --inv-gradient-to: ${gradientTo};`;
+
+  if (vars.isGlass) {
+    css += `
+  --inv-bg-grad: ${vars.bgGrad ?? ''};
+  --inv-glass-bg: ${vars.glassBg ?? ''};
+  --inv-glass-border: ${vars.glassBorder ?? ''};
+  --inv-glass-shadow: ${vars.glassShadow ?? ''};
+  --inv-accent-2: ${vars.accent2 ?? ''};`;
+  }
+
+  css += `
 }`;
+
+  if (vars.isGlass) {
+    css += `
+.inv-card,.inv-card-accent{background:var(--inv-glass-bg);border-color:var(--inv-glass-border);box-shadow:var(--inv-glass-shadow);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);}
+@supports not (backdrop-filter:blur(1px)){.inv-card,.inv-card-accent{background:rgba(255,255,255,0.92);}}`;
+  }
+
+  return css;
 }
 
 // ─── MODULE_COMPONENTS ──────────────────────
@@ -161,6 +197,26 @@ const MODULE_COMPONENTS: Record<string, ComponentMapping> = {
     importPath: '@/components/contact-section',
     render: '<ContactSection config={siteConfig} />',
   },
+  message: {
+    importName: 'MessageSection',
+    importPath: '@/components/message-section',
+    render: '<MessageSection config={siteConfig} />',
+  },
+  share: {
+    importName: 'ShareSection',
+    importPath: '@/components/share-section',
+    render: '<ShareSection config={siteConfig} />',
+  },
+  rsvp: {
+    importName: 'RsvpSection',
+    importPath: '@/components/rsvp-section',
+    render: '<RsvpSection config={siteConfig} />',
+  },
+  footer: {
+    importName: 'FooterSection',
+    importPath: '@/components/footer-section',
+    render: '<FooterSection config={siteConfig} />',
+  },
 };
 
 // ─── IMPORT→MODULE MAP ──────────────────────
@@ -173,6 +229,10 @@ const importToModuleMap: Record<string, string | string[]> = {
   GallerySection: 'gallery',
   AccountSection: 'account',
   ContactSection: 'contact',
+  MessageSection: 'message',
+  ShareSection: 'share',
+  RsvpSection: 'rsvp',
+  FooterSection: 'footer',
 };
 
 // ─── generateConfigTs ───────────────────────
@@ -185,6 +245,10 @@ function generateConfigTs(state: ModuleConfigState): string {
   const gallery = (state.values['gallery'] ?? {}) as Record<string, unknown>;
   const account = (state.values['account'] ?? {}) as Record<string, unknown>;
   const contact = (state.values['contact'] ?? {}) as Record<string, unknown>;
+  const message = (state.values['message'] ?? {}) as Record<string, unknown>;
+  const share = (state.values['share'] ?? {}) as Record<string, unknown>;
+  const rsvp = (state.values['rsvp'] ?? {}) as Record<string, unknown>;
+  const footer = (state.values['footer'] ?? {}) as Record<string, unknown>;
 
   const hostsArr = buildHostsArray((hosts.items as unknown[]) ?? []);
   const accountsArr = buildAccountsArray((account.items as unknown[]) ?? []);
@@ -280,6 +344,32 @@ export const siteConfig = {
 
   // contact
   contacts: parseJSON<ContactItem[]>(process.env.NEXT_PUBLIC_CONTACTS, DEMO_CONTACTS),
+
+  // message
+  messageTitle: '${esc(String(message.messageTitle ?? '인사말'))}',
+  messageTitleEn: '${esc(String(message.messageTitleEn ?? 'Greeting'))}',
+  messageBody: '${esc(String(message.messageBody ?? '소중한 분들을 초대합니다.'))}',
+  messageAlign: '${esc(String(message.align ?? 'center'))}' as 'center' | 'left',
+
+  // share
+  shareTitle: '${esc(String(share.shareTitle ?? '초대장 공유하기'))}',
+  shareTitleEn: '${esc(String(share.shareTitleEn ?? 'Share'))}',
+  enableKakao: ${share.enableKakao !== false},
+  enableCopy: ${share.enableCopy !== false},
+  enableQr: ${share.enableQr === true},
+  kakaoJsKey: '${esc(String(share.kakaoJsKey ?? ''))}',
+
+  // rsvp
+  rsvpTitle: '${esc(String(rsvp.rsvpTitle ?? '참석 여부 회신'))}',
+  rsvpTitleEn: '${esc(String(rsvp.rsvpTitleEn ?? 'RSVP'))}',
+  rsvpDescription: '${esc(String(rsvp.rsvpDescription ?? '참석 여부를 알려주시면 감사하겠습니다.'))}',
+  rsvpUrl: '${esc(sanitizeUrl(String(rsvp.rsvpUrl ?? '')))}',
+  rsvpButtonLabel: '${esc(String(rsvp.rsvpButtonLabel ?? '참석 여부 알리기'))}',
+
+  // footer
+  closingMessage: '${esc(String(footer.closingMessage ?? '참석해 주셔서 감사합니다.'))}',
+  closingMessageEn: '${esc(String(footer.closingMessageEn ?? 'Thank you for joining us.'))}',
+  showPoweredBy: ${footer.showPoweredBy !== false},
 };
 `;
 }
@@ -316,14 +406,9 @@ export default function Home() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: \`${presetCss}\` }} />
-      <main className="min-h-screen" style={{ background: 'var(--inv-bg)' }}>
+      <main className="min-h-screen" style={{ background: 'var(--inv-bg-grad, var(--inv-bg))' }}>
 ${sections.join('\n')}
       </main>
-      <footer className="py-6 text-center text-xs" style={{ color: 'var(--inv-text-secondary)', background: 'var(--inv-bg-alt)' }}>
-        <a href="https://linkmap.pages.dev" target="_blank" rel="noopener noreferrer" className="opacity-60 hover:opacity-100 transition-opacity">
-          Powered by Linkmap
-        </a>
-      </footer>
     </>
   );
 }
@@ -392,6 +477,40 @@ function parseConfigToState(
     if (contactsArr.length > 0) {
       (state.values['contact'] as Record<string, unknown>).items = contactsArr;
     }
+
+    // message
+    const msgVals = state.values['message'] as Record<string, unknown>;
+    msgVals.messageTitle = ext.extractString('messageTitle') ?? msgVals.messageTitle;
+    msgVals.messageTitleEn = ext.extractString('messageTitleEn') ?? msgVals.messageTitleEn;
+    msgVals.messageBody = ext.extractString('messageBody') ?? msgVals.messageBody;
+    msgVals.align = ext.extractString('messageAlign') ?? msgVals.align;
+
+    // share
+    const shareVals = state.values['share'] as Record<string, unknown>;
+    shareVals.shareTitle = ext.extractString('shareTitle') ?? shareVals.shareTitle;
+    shareVals.shareTitleEn = ext.extractString('shareTitleEn') ?? shareVals.shareTitleEn;
+    shareVals.kakaoJsKey = ext.extractString('kakaoJsKey') ?? shareVals.kakaoJsKey;
+    const enableKakaoMatch = /enableKakao:\s*(true|false)/.exec(siteBlock);
+    if (enableKakaoMatch) shareVals.enableKakao = enableKakaoMatch[1] !== 'false';
+    const enableCopyMatch = /enableCopy:\s*(true|false)/.exec(siteBlock);
+    if (enableCopyMatch) shareVals.enableCopy = enableCopyMatch[1] !== 'false';
+    const enableQrMatch = /enableQr:\s*(true|false)/.exec(siteBlock);
+    if (enableQrMatch) shareVals.enableQr = enableQrMatch[1] === 'true';
+
+    // rsvp
+    const rsvpVals = state.values['rsvp'] as Record<string, unknown>;
+    rsvpVals.rsvpTitle = ext.extractString('rsvpTitle') ?? rsvpVals.rsvpTitle;
+    rsvpVals.rsvpTitleEn = ext.extractString('rsvpTitleEn') ?? rsvpVals.rsvpTitleEn;
+    rsvpVals.rsvpDescription = ext.extractString('rsvpDescription') ?? rsvpVals.rsvpDescription;
+    rsvpVals.rsvpUrl = ext.extractString('rsvpUrl') ?? rsvpVals.rsvpUrl;
+    rsvpVals.rsvpButtonLabel = ext.extractString('rsvpButtonLabel') ?? rsvpVals.rsvpButtonLabel;
+
+    // footer
+    const footerVals = state.values['footer'] as Record<string, unknown>;
+    footerVals.closingMessage = ext.extractString('closingMessage') ?? footerVals.closingMessage;
+    footerVals.closingMessageEn = ext.extractString('closingMessageEn') ?? footerVals.closingMessageEn;
+    const showPoweredByMatch = /showPoweredBy:\s*(true|false)/.exec(siteBlock);
+    if (showPoweredByMatch) footerVals.showPoweredBy = showPoweredByMatch[1] !== 'false';
   } catch {
     // 파싱 실패 시 초기 상태 반환
   }

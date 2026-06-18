@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linkmap 신규 템플릿 기획 — 모바일 초대장 (invitation)</title>
+<style>
+  :root { --primary: #b8860b; --primary-light: #d4a853; --bg: #fafaf8; --card: #fff; --text: #1a1a1a; --muted: #6b7280; --border: #e5e7eb; --radius: 12px; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard Variable', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+  .container { max-width: 960px; margin: 0 auto; padding: 40px 24px; }
+  h1 { font-size: 2rem; margin-bottom: 8px; }
+  h2 { font-size: 1.4rem; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+  h3 { font-size: 1.1rem; margin: 24px 0 12px; color: var(--primary); }
+  p, li { font-size: 0.95rem; color: #374151; }
+  .badge { display: inline-block; background: var(--primary); color: #fff; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 12px; }
+  .meta { display: flex; gap: 24px; flex-wrap: wrap; margin: 16px 0 32px; }
+  .meta-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; flex: 1; min-width: 200px; }
+  .meta-item dt { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .meta-item dd { font-size: 1.1rem; font-weight: 600; margin-top: 4px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin: 16px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9rem; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { background: #f9fafb; font-weight: 600; font-size: 0.8rem; color: var(--muted); text-transform: uppercase; }
+  .required { color: #dc2626; font-weight: 700; }
+  .optional { color: #059669; }
+  .swatch-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 12px 0; }
+  .swatch { width: 180px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+  .swatch-color { height: 80px; display: flex; align-items: center; justify-content: center; }
+  .swatch-info { padding: 10px 12px; background: #fff; }
+  .swatch-info strong { font-size: 0.85rem; display: block; }
+  .swatch-info span { font-size: 0.75rem; color: var(--muted); }
+  .wireframe { background: #f3f4f6; border: 2px dashed #d1d5db; border-radius: var(--radius); padding: 32px; margin: 20px 0; }
+  .wire-section { background: #fff; border: 1px solid #d1d5db; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; color: var(--muted); font-size: 0.85rem; }
+  .wire-section.hero { min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #b8860b22, #d4a85322); }
+  .wire-section.hero .title { font-size: 1.3rem; color: var(--text); font-weight: 700; }
+  .wire-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .highlight { background: #fef3c7; border-left: 4px solid var(--primary); padding: 16px 20px; border-radius: 0 var(--radius) var(--radius) 0; margin: 16px 0; }
+  .tag { display: inline-block; background: #f3f4f6; padding: 3px 10px; border-radius: 6px; font-size: 0.8rem; margin: 2px; }
+  .priority-badge { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
+  .p-high { background: #fef2f2; color: #dc2626; }
+  .p-mid { background: #fffbeb; color: #d97706; }
+  .scenario { background: #f0f9ff; border-radius: var(--radius); padding: 16px 20px; margin: 8px 0; font-style: italic; color: #1e40af; }
+  footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<span class="badge">Template #1</span>
+<h1>모바일 초대장 (Mobile Invitation)</h1>
+<p>결혼식, 돌잔치, 생일, 모임 등 경조사 초대장을 원클릭으로 만들고 카카오톡/인스타로 공유</p>
+
+<div class="meta">
+  <dl class="meta-item"><dt>Template Slug</dt><dd>invitation</dd></dl>
+  <dl class="meta-item"><dt>구현 우선순위</dt><dd><span class="priority-badge p-high">2순위 (높음)</span></dd></dl>
+  <dl class="meta-item"><dt>예상 작업량</dt><dd>중간</dd></dl>
+  <dl class="meta-item"><dt>카테고리</dt><dd>개인 / 경조사</dd></dl>
+</div>
+
+<h2>1. 타겟 사용자 & 시나리오</h2>
+<div class="card">
+  <h3>1차 타겟</h3>
+  <p>결혼 준비 커플, 돌잔치/백일 준비 부모, 생일 파티 기획자</p>
+  <h3>2차 타겟</h3>
+  <p>바이브코더가 지인 행사를 위해 빠르게 만들어주는 케이스, 소규모 모임(동창회, 동호회) 주최자</p>
+  <h3>사용 시나리오</h3>
+  <div class="scenario">"다음 달 결혼식인데 모바일 청첩장을 직접 만들고 싶어요. 바른청첩장은 월 구독이 부담되고..."</div>
+  <div class="scenario">"아이 돌잔치 초대장을 카카오톡으로 공유하고 싶어요. 디자인은 프리셋으로 골라서 바로!"</div>
+  <div class="scenario">"회사 송년회 초대장을 만들어야 하는데, URL 하나면 되니까 이걸로 하자"</div>
+</div>
+
+<h2>2. 시장성 & 수요 분석</h2>
+<div class="card">
+  <table>
+    <tr><th>지표</th><th>수치/설명</th></tr>
+    <tr><td>한국 연간 결혼 건수</td><td>약 19만건 (모바일 청첩장 비율 90%+)</td></tr>
+    <tr><td>돌잔치/백일/생일</td><td>연 수백만 건의 초대장 수요</td></tr>
+    <tr><td>기존 서비스 가격</td><td>바른청첩장 월 4,900원~, 빈티지레터 건당 2만원~</td></tr>
+    <tr><td>Linkmap 차별점</td><td>무료 + GitHub Pages 영구 호스팅 + 완전 커스터마이징</td></tr>
+    <tr><td>계절성</td><td>봄(3~5월), 가을(9~11월) 최성수기</td></tr>
+    <tr><td>바이럴 계수</td><td><strong>매우 높음</strong> — 초대장 자체가 공유 행위</td></tr>
+  </table>
+</div>
+
+<div class="highlight">
+  <strong>핵심 인사이트:</strong> 초대장은 만든 사람이 직접 수십~수백 명에게 공유하므로, 한 건의 생성이 수백 건의 서비스 노출로 이어짐. "Powered by Linkmap" 푸터가 자연스러운 마케팅 채널이 됨.
+</div>
+
+<h2>3. 모듈 구성</h2>
+
+<table>
+  <thead>
+    <tr><th>모듈</th><th>타입</th><th>설명</th><th>주요 필드</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Hero (초대 메인)</strong></td>
+      <td><span class="required">필수</span></td>
+      <td>초대장의 메인 비주얼과 제목</td>
+      <td>
+        <code>eventType</code> (wedding/birthday/baby/gathering/custom)<br>
+        <code>title</code>, <code>subtitle</code><br>
+        <code>heroImageUrl</code><br>
+        <code>gradientFrom</code>, <code>gradientTo</code>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>DDay (카운트다운)</strong></td>
+      <td><span class="required">필수</span></td>
+      <td>D-Day 플립 카운트다운 + 일시 표시</td>
+      <td>
+        <code>eventDate</code> (ISO 8601)<br>
+        <code>eventTime</code><br>
+        <code>showCountdown</code> (boolean)<br>
+        <code>countdownStyle</code> (flip/simple)
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Hosts (주인공 소개)</strong></td>
+      <td><span class="optional">선택</span></td>
+      <td>결혼 커플 또는 행사 주인공 정보</td>
+      <td>
+        <code>hosts[]</code>: name, role, avatarUrl, phone<br>
+        <code>couplePhoto</code> (웨딩용)
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Location (장소 안내)</strong></td>
+      <td><span class="optional">선택</span></td>
+      <td>장소, 지도 연동, 교통 정보</td>
+      <td>
+        <code>venueName</code>, <code>venueAddress</code><br>
+        <code>kakaoMapUrl</code>, <code>naverMapUrl</code><br>
+        <code>parkingInfo</code>, <code>transitInfo</code>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Gallery (포토)</strong></td>
+      <td><span class="optional">선택</span></td>
+      <td>사진 갤러리 (웨딩 촬영, 성장 앨범 등)</td>
+      <td>
+        <code>images[]</code>, <code>columns</code> (2/3/4)<br>
+        <code>autoSlide</code> (boolean)
+      </td>
+    </tr>
+    <tr>
+      <td><strong>GuestBook (축의금)</strong></td>
+      <td><span class="optional">선택</span></td>
+      <td>계좌번호 복사 + 카카오페이 연동</td>
+      <td>
+        <code>bankAccounts[]</code>: bankName, accountNumber, holder<br>
+        <code>kakaoPayUrl</code>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>RSVP (참석 확인)</strong></td>
+      <td><span class="optional">선택</span></td>
+      <td>참석 여부 확인 폼</td>
+      <td>
+        <code>rsvpEnabled</code>, <code>rsvpFormUrl</code><br>
+        <code>rsvpDeadline</code>, <code>mealChoice</code>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Contact (연락처)</strong></td>
+      <td><span class="optional">선택</span></td>
+      <td>신랑/신부 측 연락처</td>
+      <td><code>contacts[]</code>: name, phone, role</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>4. 프리셋 테마</h2>
+<div class="swatch-row">
+  <div class="swatch">
+    <div class="swatch-color" style="background: linear-gradient(135deg, #b8860b, #d4a853);">
+      <span style="color:#fff; font-weight:700; font-size:0.9rem;">Aa</span>
+    </div>
+    <div class="swatch-info">
+      <strong>Elegant Gold</strong>
+      <span>우아한 웨딩 | 세리프 폰트</span>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-color" style="background: linear-gradient(135deg, #e8a0bf, #f5d0e0);">
+      <span style="color:#fff; font-weight:700; font-size:0.9rem;">Aa</span>
+    </div>
+    <div class="swatch-info">
+      <strong>Romantic Pink</strong>
+      <span>로맨틱 핑크 | 꽃잎 장식</span>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-color" style="background: linear-gradient(135deg, #1a1a1a, #555555);">
+      <span style="color:#fff; font-weight:700; font-size:0.9rem;">Aa</span>
+    </div>
+    <div class="swatch-info">
+      <strong>Modern Minimal</strong>
+      <span>모던 미니멀 | 산세리프</span>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-color" style="background: linear-gradient(135deg, #ff6b6b, #ffd93d);">
+      <span style="color:#fff; font-weight:700; font-size:0.9rem;">Aa</span>
+    </div>
+    <div class="swatch-info">
+      <strong>Festive</strong>
+      <span>축제/생일 | 컨페티 애니메이션</span>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-color" style="background: linear-gradient(135deg, #5c8a4d, #8fbc8f);">
+      <span style="color:#fff; font-weight:700; font-size:0.9rem;">Aa</span>
+    </div>
+    <div class="swatch-info">
+      <strong>Natural Garden</strong>
+      <span>자연/가든 | 보태니컬</span>
+    </div>
+  </div>
+</div>
+
+<h2>5. 와이어프레임</h2>
+<div class="wireframe">
+  <p style="text-align:center; font-size:0.8rem; color:#9ca3af; margin-bottom:16px;">모바일 뷰 (390px) 기준</p>
+  <div class="wire-section hero">
+    <span style="font-size:2rem;">&#128141;</span>
+    <div class="title">민수 & 지연의 결혼식에<br>초대합니다</div>
+    <span style="font-size:0.85rem; color:#6b7280; margin-top:8px;">2026년 5월 23일 토요일 오후 2시</span>
+  </div>
+  <div class="wire-section" style="background:#fef3c7;">
+    <strong>D-Day 카운트다운</strong><br>
+    <span style="font-size:1.8rem; font-weight:700; letter-spacing:8px;">42일 06:12:30</span><br>
+    <span style="font-size:0.75rem;">플립 애니메이션 / 심플 숫자 선택 가능</span>
+  </div>
+  <div class="wire-grid">
+    <div class="wire-section">
+      <span style="font-size:1.5rem;">&#128104;</span><br>
+      <strong>신랑</strong> 김민수<br>
+      <span style="font-size:0.8rem;">김OO · 박OO의 장남</span>
+    </div>
+    <div class="wire-section">
+      <span style="font-size:1.5rem;">&#128105;</span><br>
+      <strong>신부</strong> 이지연<br>
+      <span style="font-size:0.8rem;">이OO · 최OO의 차녀</span>
+    </div>
+  </div>
+  <div class="wire-section">
+    <strong>장소 안내</strong><br>
+    서울 강남구 삼성동 코엑스 아티움<br>
+    <span style="font-size:0.8rem;">[카카오맵] [네이버맵] [길찾기]</span>
+  </div>
+  <div class="wire-section">
+    <strong>갤러리</strong><br>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-top:8px;">
+      <div style="height:50px; background:#e5e7eb; border-radius:4px;"></div>
+      <div style="height:50px; background:#e5e7eb; border-radius:4px;"></div>
+      <div style="height:50px; background:#e5e7eb; border-radius:4px;"></div>
+    </div>
+  </div>
+  <div class="wire-section" style="background:#f0fdf4;">
+    <strong>축의금 안내</strong><br>
+    <span style="font-size:0.85rem;">신랑측: 국민은행 123-456-789 (김민수)</span><br>
+    <span style="font-size:0.8rem; padding:4px 12px; background:#fee2e2; border-radius:4px; display:inline-block; margin-top:4px;">[계좌번호 복사]</span>
+    <span style="font-size:0.8rem; padding:4px 12px; background:#fde68a; border-radius:4px; display:inline-block; margin-top:4px;">[카카오페이]</span>
+  </div>
+  <div class="wire-section">
+    <strong>참석 여부</strong><br>
+    <span style="font-size:0.85rem;">[참석합니다] [불참합니다]</span>
+  </div>
+</div>
+
+<h2>6. 차별화 포인트</h2>
+<div class="card">
+  <ul style="padding-left:20px;">
+    <li><strong>D-Day 플립 카운트다운</strong> — 기존 공유 CountUp 컴포넌트 변형 활용</li>
+    <li><strong>카카오맵/네이버맵 원탭 길찾기</strong> — 모바일 딥링크 연동</li>
+    <li><strong>계좌번호 클립보드 복사</strong> — 한 탭으로 복사 완료</li>
+    <li><strong>카카오페이 직접 연동</strong> — QR 없이 URL로 송금</li>
+    <li><strong>카카오톡 공유 최적화</strong> — OG 메타태그 + 썸네일 자동 생성</li>
+    <li><strong>이벤트 타입별 UI 분기</strong> — 결혼/돌잔치/생일/모임 각각 최적화된 레이아웃</li>
+    <li><strong>기존 event-page와 차별</strong> — event-page는 컨퍼런스/밋업용(스피커, 타임테이블). invitation은 개인 경조사 특화</li>
+  </ul>
+</div>
+
+<h2>7. 기존 컴포넌트 재사용</h2>
+<div class="card">
+  <table>
+    <tr><th>기존 컴포넌트/유틸</th><th>활용 방식</th></tr>
+    <tr><td><code>CountUp</code> (shared-template-files)</td><td>D-Day 카운트다운으로 변형 (카운트업 → 카운트다운)</td></tr>
+    <tr><td><code>AnimatedReveal</code></td><td>각 섹션 스크롤 등장 애니메이션</td></tr>
+    <tr><td><code>SectionWrapper</code></td><td>모듈 섹션 래퍼</td></tr>
+    <tr><td><code>Gallery 모듈</code></td><td>포토 갤러리 섹션 그대로 재사용</td></tr>
+    <tr><td><code>SocialIcon</code></td><td>연락처 아이콘</td></tr>
+    <tr><td>OG 메타 생성 패턴</td><td>카카오톡 공유용 메타태그</td></tr>
+  </table>
+</div>
+
+<footer>
+  Linkmap Template Planning Document &mdash; 2026-04-13 &mdash; invitation (모바일 초대장)
+</footer>
+
+</div>
+</body>
+</html>

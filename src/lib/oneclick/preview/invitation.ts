@@ -13,6 +13,7 @@ import type { ModuleConfigState } from '@/lib/module-schema';
 interface InvPresetVars {
   bg: string; bgAlt: string; textPrimary: string; textSecondary: string;
   accent: string; accentGlow: string; cardBg: string; cardBorder: string;
+  isGlass?: boolean;
 }
 
 const PRESET_VARS: Record<string, InvPresetVars> = {
@@ -35,6 +36,11 @@ const PRESET_VARS: Record<string, InvPresetVars> = {
   'natural-garden': {
     bg: '#f8fdf6', bgAlt: '#f0f8ec', textPrimary: '#1a2e1a', textSecondary: '#4a6741',
     accent: '#5c8a4d', accentGlow: 'rgba(92,138,77,0.15)', cardBg: '#ffffff', cardBorder: '#d4e8cb',
+  },
+  'minimal-glass': {
+    bg: '#f5f3ff', bgAlt: '#eef2ff', textPrimary: '#1f2430', textSecondary: '#6b7280',
+    accent: '#a78bfa', accentGlow: 'rgba(167,139,250,0.18)', cardBg: 'rgba(255,255,255,0.6)', cardBorder: 'rgba(255,255,255,0.7)',
+    isGlass: true,
   },
 };
 
@@ -226,11 +232,83 @@ function renderContact(state: ModuleConfigState, v: InvPresetVars): string {
     </section>`;
 }
 
+function renderMessage(state: ModuleConfigState, v: InvPresetVars): string {
+  const messageTitle = getVal(state, 'message', 'messageTitle', '인사말');
+  const messageBody = getVal(state, 'message', 'messageBody', '');
+  const align = getVal(state, 'message', 'align', 'center');
+  if (!messageBody) return '';
+  return `
+    <section class="inv-section">
+      <h2 class="inv-section-title" style="color:${esc(v.textPrimary)};">${esc(messageTitle)}</h2>
+      <p class="inv-message-body" style="text-align:${esc(align)};">${esc(messageBody)}</p>
+    </section>`;
+}
+
+function renderShare(state: ModuleConfigState, v: InvPresetVars): string {
+  const shareTitle = getVal(state, 'share', 'shareTitle', '초대장 공유하기');
+  const enableKakao = getVal(state, 'share', 'enableKakao', 'true') !== 'false';
+  const enableCopy = getVal(state, 'share', 'enableCopy', 'true') !== 'false';
+  const enableQr = getVal(state, 'share', 'enableQr', 'false') === 'true';
+  if (!enableKakao && !enableCopy && !enableQr) return '';
+  const kakaoBtn = enableKakao
+    ? `<button class="inv-share-btn inv-share-kakao">&#128170; 카카오톡 공유</button>`
+    : '';
+  const copyBtn = enableCopy
+    ? `<button class="inv-share-btn inv-share-copy" style="background:${esc(v.accentGlow)};color:${esc(v.accent)};">&#128279; 링크 복사</button>`
+    : '';
+  const qrBlock = enableQr
+    ? `<div class="inv-qr-placeholder">QR 코드</div>`
+    : '';
+  return `
+    <section class="inv-section" style="background:${esc(v.bgAlt)};">
+      <h2 class="inv-section-title" style="color:${esc(v.textPrimary)};">${esc(shareTitle)}</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:center;margin-bottom:${enableQr ? '1.25rem' : '0'};">
+        ${kakaoBtn}${copyBtn}
+      </div>
+      ${qrBlock}
+    </section>`;
+}
+
+function renderRsvp(state: ModuleConfigState, v: InvPresetVars): string {
+  const rsvpTitle = getVal(state, 'rsvp', 'rsvpTitle', '참석 여부 회신');
+  const rsvpDescription = getVal(state, 'rsvp', 'rsvpDescription', '');
+  const rsvpUrl = getVal(state, 'rsvp', 'rsvpUrl', '');
+  const rsvpButtonLabel = getVal(state, 'rsvp', 'rsvpButtonLabel', '참석 여부 알리기');
+  if (!rsvpUrl) return '';
+  return `
+    <section class="inv-section">
+      <h2 class="inv-section-title" style="color:${esc(v.textPrimary)};">${esc(rsvpTitle)}</h2>
+      ${rsvpDescription ? `<p class="inv-rsvp-desc">${esc(rsvpDescription)}</p>` : ''}
+      <a href="${esc(rsvpUrl)}" target="_blank" rel="noopener noreferrer" class="inv-rsvp-btn" style="background:${esc(v.accent)};color:#fff;">${esc(rsvpButtonLabel)}</a>
+    </section>`;
+}
+
+function renderFooter(state: ModuleConfigState): string {
+  const closingMessage = getVal(state, 'footer', 'closingMessage', '');
+  const showPoweredBy = getVal(state, 'footer', 'showPoweredBy', 'true') !== 'false';
+  const poweredBy = showPoweredBy
+    ? `<a href="https://linkmap.pages.dev" target="_blank" rel="noopener noreferrer">Powered by Linkmap</a>`
+    : '';
+  return `
+    <div class="inv-footer">
+      ${closingMessage ? `<p class="inv-closing">${esc(closingMessage)}</p>` : ''}
+      ${poweredBy}
+    </div>`;
+}
+
 // ── CSS ──────────────────────────────────────────
 
 function buildInvitationCSS(v: InvPresetVars): string {
+  const bodyBg = v.isGlass
+    ? `linear-gradient(160deg,#f5f3ff,#fdf2f8,#eef2ff)`
+    : v.bg;
+  const glassCardCss = v.isGlass
+    ? `
+    .inv-card,.inv-card-accent { background: rgba(255,255,255,0.55) !important; border-color: rgba(255,255,255,0.7) !important; box-shadow: 0 8px 32px rgba(31,38,135,0.12) !important; backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); }
+    @supports not (backdrop-filter:blur(1px)) { .inv-card,.inv-card-accent { background: rgba(255,255,255,0.92) !important; } }`
+    : '';
   return `
-    body { background: ${v.bg}; color: ${v.textPrimary}; margin: 0; font-family: 'Nanum Myeongjo', 'Pretendard Variable', serif; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    body { background: ${bodyBg}; color: ${v.textPrimary}; margin: 0; font-family: 'Nanum Myeongjo', 'Pretendard Variable', serif; line-height: 1.7; -webkit-font-smoothing: antialiased; }
     * { box-sizing: border-box; }
 
     .inv-hero { position: relative; min-height: 65vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 6rem 1.5rem; }
@@ -287,10 +365,20 @@ function buildInvitationCSS(v: InvPresetVars): string {
     .inv-footer { padding: 1.5rem; text-align: center; font-size: 0.75rem; background: ${v.bgAlt}; color: ${v.textSecondary}; }
     .inv-footer a { opacity: 0.6; text-decoration: none; color: inherit; }
 
+    .inv-message-body { white-space: pre-line; font-size: 1rem; line-height: 1.8; color: ${v.textPrimary}; max-width: 28rem; margin: 0 auto; }
+    .inv-share-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 999px; font-size: 0.875rem; font-weight: 500; text-decoration: none; min-height: 44px; cursor: pointer; border: none; }
+    .inv-share-kakao { background: #FEE500; color: #191919; }
+    .inv-share-copy { background: ${v.accentGlow}; color: ${v.accent}; }
+    .inv-qr-placeholder { width: 160px; height: 160px; margin: 0 auto; background: ${v.cardBg}; border: 1px solid ${v.cardBorder}; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: ${v.textSecondary}; }
+    .inv-rsvp-desc { font-size: 0.9375rem; color: ${v.textSecondary}; margin-bottom: 1.25rem; }
+    .inv-rsvp-btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.75rem 2rem; border-radius: 999px; background: ${v.accent}; color: #fff; font-size: 0.9375rem; font-weight: 500; text-decoration: none; min-height: 44px; }
+    .inv-closing { white-space: pre-line; font-size: 0.9375rem; line-height: 1.8; color: ${v.textSecondary}; max-width: 24rem; margin: 0 auto 1.25rem; }
+
     @media (max-width: 640px) {
       .inv-hero-title { font-size: 1.5rem; }
       .inv-section-title { font-size: 1.125rem; }
     }
+    ${glassCardCss}
   `;
 }
 
@@ -315,6 +403,10 @@ export function generateInvitationPreview(
     gallery: () => renderGallery(state, v, liveUrl, imageMap),
     account: () => renderAccount(state, v),
     contact: () => renderContact(state, v),
+    message: () => renderMessage(state, v),
+    share: () => renderShare(state, v),
+    rsvp: () => renderRsvp(state, v),
+    footer: () => renderFooter(state),
   };
 
   const sections = activeModules
@@ -325,7 +417,12 @@ export function generateInvitationPreview(
     .filter(Boolean)
     .join('');
 
-  const bodyContent = `${sections}<div class="inv-footer"><a href="https://linkmap.pages.dev" target="_blank" rel="noopener noreferrer">Powered by Linkmap</a></div>`;
+  // If footer module is not active, fall back to a minimal powered-by footer
+  const hasFooterModule = activeModules.includes('footer');
+  const fallbackFooter = hasFooterModule
+    ? ''
+    : `<div class="inv-footer"><a href="https://linkmap.pages.dev" target="_blank" rel="noopener noreferrer">Powered by Linkmap</a></div>`;
+  const bodyContent = `${sections}${fallbackFooter}`;
   const css = buildInvitationCSS(v);
   const font = fontFamily !== 'Pretendard Variable' ? fontFamily : undefined;
 

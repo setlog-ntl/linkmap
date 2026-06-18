@@ -91,4 +91,22 @@ export const invitationPresets: ModulePreset[] = [
       },
     },
   },
+  {
+    id: 'minimal-glass',
+    name: '미니멀 글래스',
+    nameEn: 'Minimal Glass',
+    description: '반투명 유리 카드 + 부드러운 그래디언트 — 트렌디한 글래스모피즘',
+    descriptionEn: 'Translucent glass cards on a soft gradient — trendy glassmorphism',
+    colors: ['#a78bfa', '#f9a8d4'],
+    state: {
+      values: {
+        hero: {
+          designPreset: 'minimal-glass',
+          gradientFrom: '#a78bfa',
+          gradientTo: '#f9a8d4',
+          fontFamily: 'Pretendard',
+        },
+      },
+    },
+  },
 ];
