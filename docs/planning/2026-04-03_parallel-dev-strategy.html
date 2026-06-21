@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linkmap 병렬 개발 충돌 방지 전략</title>
+<style>
+  :root {
+    --bg: #0a0f1a;
+    --card: #111827;
+    --card-hover: #1a2332;
+    --border: #1e2d3d;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --brand-blue: #3b82f6;
+    --brand-green: #10b981;
+    --accent: #6366f1;
+    --red: #ef4444;
+    --amber: #f59e0b;
+    --radius: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 0 32px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .page-header .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .page-header .date {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 8px;
+  }
+
+  /* ── Layout ── */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+  }
+
+  section {
+    margin-bottom: 40px;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--brand-blue);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 16px 0 8px;
+  }
+
+  p, li {
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  ul, ol {
+    padding-left: 20px;
+    margin: 8px 0 16px;
+  }
+
+  li { margin-bottom: 4px; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card:hover {
+    background: var(--card-hover);
+  }
+
+  /* ── Problem Diagram ── */
+  .diagram {
+    background: #0d1321;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin: 16px 0;
+    font-family: 'Geist Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--muted);
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .diagram .highlight { color: var(--brand-blue); }
+  .diagram .danger { color: var(--red); }
+  .diagram .success { color: var(--brand-green); }
+  .diagram .warn { color: var(--amber); }
+
+  /* ── Comparison Table ── */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .compare-table th {
+    background: #1a2332;
+    color: var(--brand-blue);
+    padding: 12px;
+    text-align: left;
+    border: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .compare-table td {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .compare-table tr:hover td {
+    background: var(--card-hover);
+  }
+
+  /* ── Tags ── */
+  .tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .tag-green { background: #064e3b; color: #6ee7b7; }
+  .tag-blue { background: #1e3a5f; color: #93c5fd; }
+  .tag-amber { background: #451a03; color: #fcd34d; }
+  .tag-red { background: #450a0a; color: #fca5a5; }
+  .tag-purple { background: #2e1065; color: #c4b5fd; }
+
+  /* ── Option Cards ── */
+  .option-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .option-card.recommended {
+    border-color: var(--brand-green);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+  }
+  .option-card.recommended::before {
+    content: 'RECOMMENDED';
+    position: absolute;
+    top: -10px;
+    right: 16px;
+    background: var(--brand-green);
+    color: #000;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 4px;
+  }
+  .option-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .option-num {
+    background: var(--brand-blue);
+    color: #fff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .pros-cons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .pros h4 { color: var(--brand-green); font-size: 13px; margin-bottom: 6px; }
+  .cons h4 { color: var(--red); font-size: 13px; margin-bottom: 6px; }
+  .pros li, .cons li { font-size: 12px; margin-bottom: 2px; }
+
+  /* ── Score Bar ── */
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+    font-size: 12px;
+  }
+  .score-label {
+    width: 80px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .score-bar {
+    flex: 1;
+    height: 6px;
+    background: #1e2d3d;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .score-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+  .score-fill.green { background: var(--brand-green); }
+  .score-fill.blue { background: var(--brand-blue); }
+  .score-fill.amber { background: var(--amber); }
+  .score-fill.red { background: var(--red); }
+  .score-value {
+    width: 30px;
+    text-align: right;
+    color: var(--muted);
+    font-family: monospace;
+  }
+
+  /* ── Decision Matrix ── */
+  .decision-box {
+    background: linear-gradient(135deg, #0f172a, #1a1040);
+    border: 2px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin: 24px 0;
+  }
+  .decision-box h3 {
+    color: var(--accent);
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+  .decision-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+  }
+  .decision-item:last-child { border-bottom: none; }
+  .decision-q {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    flex: 1;
+  }
+  .decision-a {
+    color: var(--muted);
+    font-size: 13px;
+    flex: 1;
+  }
+
+  /* ── Flow Diagram ── */
+  .flow-step {
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 0;
+  }
+  .flow-line {
+    width: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .flow-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--brand-blue);
+    flex-shrink: 0;
+    margin-top: 14px;
+  }
+  .flow-connector {
+    width: 2px;
+    flex: 1;
+    background: var(--border);
+  }
+  .flow-content {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin: 4px 0 4px 8px;
+    flex: 1;
+  }
+  .flow-content h4 {
+    font-size: 13px;
+    color: var(--brand-blue);
+    margin-bottom: 4px;
+  }
+  .flow-content p {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  /* ── Alert ── */
+  .alert {
+    padding: 16px;
+    border-radius: var(--radius);
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .alert-warn {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: var(--amber);
+  }
+  .alert-info {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #93c5fd;
+  }
+  .alert-success {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #6ee7b7;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--muted);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  @media (max-width: 640px) {
+    .pros-cons { grid-template-columns: 1fr; }
+    .compare-table { font-size: 11px; }
+    .compare-table th, .compare-table td { padding: 6px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ Header ══════════ -->
+<div class="page-header">
+  <h1>병렬 개발 충돌 방지 전략</h1>
+  <div class="subtitle">여러 Claude Code 세션을 동시에 돌릴 때 커밋 충돌 없이 작업하는 방법</div>
+  <div class="date">2026-04-03 | Linkmap Planning Document</div>
+</div>
+
+<div class="container">
+
+<!-- ══════════ 1. 문제 진단 ══════════ -->
+<section>
+  <h2>1. 문제 진단: 왜 롤백이 발생하는가?</h2>
+
+  <div class="card">
+    <h3>핵심 원인: 같은 브랜치에서 여러 세션이 동시 커밋</h3>
+    <p>여러 Claude Code 세션이 <strong>같은 main 브랜치</strong>에서 작업하면, 각 세션은 자신이 읽은 시점의 파일 상태를 기준으로 수정합니다. 세션 A가 커밋한 후 세션 B가 같은 파일을 수정하면, B는 A의 변경사항을 모르는 상태에서 커밋하므로 A의 작업이 사실상 덮어써집니다.</p>
+  </div>
+
+  <div class="diagram"><span class="highlight">시간축 →</span>
+
+<span class="highlight">세션 A (블로그)</span>     파일 읽음 ──── 수정 중 ──── <span class="success">커밋 A</span> ─────────────────
+<span class="highlight">세션 B (서비스맵)</span>   파일 읽음 ──────────── 수정 중 ──── <span class="danger">커밋 B (A 덮어씀)</span>
+
+<span class="warn">공유 파일 예시:</span>
+  - src/data/seed/*.ts        (여러 기능이 참조)
+  - src/types/*.ts             (타입 정의 공유)
+  - src/lib/queries/keys.ts    (쿼리키 팩토리)
+  - src/components/layout/*    (레이아웃 컴포넌트)
+
+<span class="danger">특히 위험한 패턴:</span>
+  - barrel export (index.ts) 수정 충돌
+  - 같은 시드 파일에 서로 다른 데이터 추가
+  - 공통 유틸 함수 변경</div>
+
+  <div class="alert alert-warn">
+    <strong>현재 우회 방법:</strong> 서로 완전히 다른 영역(예: 블로그 vs 서비스맵)을 작업하여 파일 겹침을 방지. 이 방법은 작동하지만, 프로젝트가 복잡해질수록 "완전히 다른 영역"을 보장하기 어려워집니다. 특히 types, lib, data 폴더의 공유 파일이 예상치 못하게 겹칠 수 있습니다.
+  </div>
+</section>
+
+<!-- ══════════ 2. 해결 옵션 ══════════ -->
+<section>
+  <h2>2. 해결 옵션 비교</h2>
+
+  <!-- Option A -->
+  <div class="option-card">
+    <div class="option-title">
+      <span class="option-num">A</span>
+      현행 유지 — 영역 분리 + 주의
+    </div>
+    <p>지금처럼 각 세션이 완전히 다른 영역을 작업하고, 공유 파일 수정을 피하는 방식을 계속 유지합니다.</p>
+
+    <div style="margin: 12px 0;">
+      <span class="tag tag-green">변경 없음</span>
+      <span class="tag tag-blue">즉시 적용</span>
+    </div>
+
+    <div class="score-row">
+      <span class="score-label">생산성</span>
+      <div class="score-bar"><div class="score-fill green" style="width:70%"></div></div>
+      <span class="score-value">7/10</span>
+    </div>
+    <div class="score-row">
+      <span class="score-label">안전성</span>
+      <div class="score-bar"><div class="score-fill amber" style="width:50%"></div></div>
+      <span class="score-value">5/10</span>
+    </div>
+    <div class="score-row">
+      <span class="score-label">확장성</span>
+      <div class="score-bar"><div class="score-fill red" style="width:30%"></div></div>
+      <span class="score-value">3/10</span>
+    </div>
+
+    <div class="pros-cons">
+      <div class="pros">
+        <h4>장점</h4>
+        <ul>
+          <li>지금 바로 사용 가능</li>
+          <li>추가 학습/설정 없음</li>
+          <li>간단한 작업에 충분</li>
+        </ul>
+      </div>
+      <div class="cons">
+        <h4>단점</h4>
+        <ul>
+          <li>공유 파일 수정 시 충돌 위험 상존</li>
+          <li>기능이 복잡해질수록 "다른 영역" 보장 어려움</li>
+          <li>수동으로 영역 관리하는 인지 부하</li>
+          <li>실수 시 롤백/충돌 해결 시간 소모</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="option-card recommended">
+    <div class="option-title">
+      <span class="option-num">B</span>
+      경량 워크트리 — 기존 /wt 스킬 활용 (PR 없이)
+    </div>
+    <p>이미 구현된 <code>/wt-new</code>로 워크트리를 만들되, <strong>PR 생성 없이 직접 main에 머지</strong>하는 간소화 버전. 브랜치 격리의 안전성 + 바이브코딩의 속도를 동시에 확보합니다.</p>
+
+    <div style="margin: 12px 0;">
+      <span class="tag tag-green">이미 도구 있음</span>
+      <span class="tag tag-blue">워크플로우만 변경</span>
+      <span class="tag tag-purple">PR 생략 가능</span>
+    </div>
+
+    <div class="score-row">
+      <span class="score-label">생산성</span>
+      <div class="score-bar"><div class="score-fill green" style="width:85%"></div></div>
+      <span class="score-value">8.5/10</span>
+    </div>
+    <div class="score-row">
+      <span class="score-label">안전성</span>
+      <div class="score-bar"><div class="score-fill green" style="width:85%"></div></div>
+      <span class="score-value">8.5/10</span>
+    </div>
+    <div class="score-row">
+      <span class="score-label">확장성</span>
+      <div class="score-bar"><div class="score-fill green" style="width:80%"></div></div>
+      <span class="score-value">8/10</span>
+    </div>
+
+    <h3>간소화된 워크플로우</h3>
+    <div class="flow-step">
+      <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+      <div class="flow-content">
+        <h4>Step 1: 워크트리 생성</h4>
+        <p><code>/wt-new "블로그 시리즈 추가"</code> → 자동으로 별도 폴더 + 브랜치 생성</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+      <div class="flow-content">
+        <h4>Step 2: 작업 + 커밋</h4>
+        <p>해당 워크트리에서 자유롭게 작업. 다른 세션과 완전히 격리됨</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+      <div class="flow-content">
+        <h4>Step 3: 머지 (PR 생략)</h4>
+        <p><code>/wt-done</code> 또는 새 <code>/wt-merge</code> 커맨드 → main으로 직접 머지 + 충돌 시 즉시 알림</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-line"><div class="flow-dot" style="background: var(--brand-green)"></div></div>
+      <div class="flow-content">
+        <h4>Step 4: 자동 정리</h4>
+        <p>워크트리 삭제 + 브랜치 삭제. 깨끗한 상태로 복귀</p>
+      </div>
+    </div>
+
+    <div class="pros-cons">
+      <div class="pros">
+        <h4>장점</h4>
+        <ul>
+          <li>각 세션이 물리적으로 격리 (파일 겹침 불가)</li>
+          <li>충돌 시 머지 단계에서 명확히 감지</li>
+          <li>PR 없이도 안전한 병렬 작업</li>
+          <li>이미 /wt-new 도구가 구현되어 있음</li>
+          <li>기존 작업 방식에서 커맨드 1개만 추가</li>
+        </ul>
+      </div>
+      <div class="cons">
+        <h4>단점</h4>
+        <ul>
+          <li>워크트리당 npm install 시간 (초기 1회)</li>
+          <li>디스크 공간 약간 추가 사용</li>
+          <li>머지 시 충돌 해결이 필요할 수 있음</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="option-card">
+    <div class="option-title">
+      <span class="option-num">C</span>
+      자동 동기화 훅 — 커밋 전 자동 pull + rebase
+    </div>
+    <p>Claude Code 훅(hook)으로 <strong>커밋 전에 자동으로 git pull --rebase</strong>를 실행하여 다른 세션의 변경사항을 먼저 반영한 뒤 커밋합니다.</p>
+
+    <div style="margin: 12px 0;">
+      <span class="tag tag-amber">훅 설정 필요</span>
+      <span class="tag tag-blue">main 직접 작업</span>
+    </div>
+
+    <div class="score-row">
+      <span class="score-label">생산성</span>
+      <div class="score-bar"><div class="score-fill green" style="width:80%"></div></div>
+      <span class="score-value">8/10</span>
+    </div>
+    <div class="score-row">
+      <span class="score-label">안전성</span>
+      <div class="score-bar"><div class="score-fill amber" style="width:60%"></div></div>
+      <span class="score-value">6/10</span>
+    </div>
+    <div class="score-row">
+      <span class="score-label">확장성</span>
+      <div class="score-bar"><div class="score-fill amber" style="width:50%"></div></div>
+      <span class="score-value">5/10</span>
+    </div>
+
+    <div class="pros-cons">
+      <div class="pros">
+        <h4>장점</h4>
+        <ul>
+          <li>기존 워크플로우 거의 변경 없음</li>
+          <li>main에서 직접 작업 가능</li>
+          <li>단순 충돌은 자동 해결</li>
+        </ul>
+      </div>
+      <div class="cons">
+        <h4>단점</h4>
+        <ul>
+          <li>rebase 충돌 시 세션이 멈춤</li>
+          <li>같은 파일 수정 시 여전히 수동 해결 필요</li>
+          <li>rebase 중 워킹 디렉토리 오염 가능</li>
+          <li>근본적 해결이 아닌 증상 완화</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option D -->
+  <div class="option-card">
+    <div class="option-title">
+      <span class="option-num">D</span>
+      세션 락 — 작업 영역 선언 + 파일 잠금
+    </div>
+    <p>각 세션이 시작할 때 작업할 파일/폴더를 선언하고, 다른 세션이 해당 파일을 수정하지 못하도록 소프트 락을 거는 방식입니다.</p>
+
+    <div style="margin: 12px 0;">
+      <span class="tag tag-red">커스텀 구현 필요</span>
+      <span class="tag tag-amber">복잡도 높음</span>
+    </div>
+
+    <div class="score-row">
+      <span class="score-label">생산성</span>
+      <div class="score-bar"><div class="score-fill amber" style="width:50%"></div></div>
+      <span class="score-value">5/10</span>
+    </div>
+    <div class="score-row">
+      <span class="score-label">안전성</span>
+      <div class="score-bar"><div class="score-fill green" style="width:90%"></div></div>
+      <span class="score-value">9/10</span>
+    </div>
+    <div class="score-row">
+      <span class="score-label">확장성</span>
+      <div class="score-bar"><div class="score-fill amber" style="width:50%"></div></div>
+      <span class="score-value">5/10</span>
+    </div>
+
+    <div class="pros-cons">
+      <div class="pros">
+        <h4>장점</h4>
+        <ul>
+          <li>파일 수준에서 충돌 원천 차단</li>
+          <li>어떤 세션이 어떤 파일을 쓰는지 명확</li>
+        </ul>
+      </div>
+      <div class="cons">
+        <h4>단점</h4>
+        <ul>
+          <li>락 관리 시스템 직접 구현해야 함</li>
+          <li>세션이 비정상 종료 시 락 해제 문제</li>
+          <li>예상 못한 파일 의존성 처리 어려움</li>
+          <li>바이브코딩과 정반대의 무거운 프로세스</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ 3. 종합 비교 ══════════ -->
+<section>
+  <h2>3. 종합 비교 매트릭스</h2>
+
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>기준</th>
+        <th>A. 현행 유지</th>
+        <th>B. 경량 워크트리</th>
+        <th>C. 자동 동기화</th>
+        <th>D. 세션 락</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>설정 난이도</strong></td>
+        <td><span class="tag tag-green">없음</span></td>
+        <td><span class="tag tag-green">낮음</span></td>
+        <td><span class="tag tag-amber">중간</span></td>
+        <td><span class="tag tag-red">높음</span></td>
+      </tr>
+      <tr>
+        <td><strong>바이브코딩 친화</strong></td>
+        <td>좋음</td>
+        <td><strong>매우 좋음</strong></td>
+        <td>좋음</td>
+        <td>나쁨</td>
+      </tr>
+      <tr>
+        <td><strong>충돌 방지 수준</strong></td>
+        <td>수동 의존</td>
+        <td><strong>물리적 격리</strong></td>
+        <td>부분 자동</td>
+        <td>완전 차단</td>
+      </tr>
+      <tr>
+        <td><strong>세션 3개+ 병렬</strong></td>
+        <td>위험 증가</td>
+        <td><strong>안전</strong></td>
+        <td>충돌 확률 급증</td>
+        <td>안전하나 느림</td>
+      </tr>
+      <tr>
+        <td><strong>공유 파일 수정</strong></td>
+        <td>직접 관리 필요</td>
+        <td><strong>머지 시 자동 감지</strong></td>
+        <td>rebase로 부분 해결</td>
+        <td>락으로 차단</td>
+      </tr>
+      <tr>
+        <td><strong>디스크 사용</strong></td>
+        <td>최소</td>
+        <td>중간 (~200MB/wt)</td>
+        <td>최소</td>
+        <td>최소</td>
+      </tr>
+      <tr>
+        <td><strong>PR/CI 필요 여부</strong></td>
+        <td>불필요</td>
+        <td><strong>선택적</strong></td>
+        <td>불필요</td>
+        <td>불필요</td>
+      </tr>
+      <tr>
+        <td><strong>추가 개발 필요</strong></td>
+        <td>없음</td>
+        <td>/wt-merge 커맨드 1개</td>
+        <td>훅 설정</td>
+        <td>락 시스템 전체</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ══════════ 4. 추천안 상세 ══════════ -->
+<section>
+  <h2>4. 추천안: B + A 혼합 전략</h2>
+
+  <div class="alert alert-success">
+    <strong>핵심 제안:</strong> 작업 규모에 따라 A(현행)와 B(워크트리)를 유연하게 혼합합니다.
+    큰 기능은 워크트리로, 작은 수정은 main에서 직접. PR은 완전 생략.
+  </div>
+
+  <div class="card">
+    <h3>상황별 워크플로우 가이드</h3>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>작업 유형</th>
+          <th>방법</th>
+          <th>이유</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>타이포 수정, CSS 미세조정</td>
+          <td><span class="tag tag-green">main 직접</span></td>
+          <td>충돌 가능성 거의 없음</td>
+        </tr>
+        <tr>
+          <td>1개 파일 내 수정</td>
+          <td><span class="tag tag-green">main 직접</span></td>
+          <td>다른 세션과 겹칠 확률 낮음</td>
+        </tr>
+        <tr>
+          <td>새 블로그 포스트 추가</td>
+          <td><span class="tag tag-blue">워크트리</span></td>
+          <td>posts-meta.ts, content-map.ts 등 공유 파일 수정</td>
+        </tr>
+        <tr>
+          <td>새 서비스 추가/수정</td>
+          <td><span class="tag tag-blue">워크트리</span></td>
+          <td>seed 파일, 타입, 쿼리 등 여러 파일 연쇄 수정</td>
+        </tr>
+        <tr>
+          <td>컴포넌트 리팩토링</td>
+          <td><span class="tag tag-blue">워크트리</span></td>
+          <td>import 변경이 다른 파일에 영향</td>
+        </tr>
+        <tr>
+          <td>DB 마이그레이션 포함 작업</td>
+          <td><span class="tag tag-purple">워크트리 필수</span></td>
+          <td>types + queries + schema 동시 변경</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>필요한 구현: /wt-merge 커맨드 (PR 없는 빠른 머지)</h3>
+    <p>기존 <code>/wt-done</code>에서 PR/CI 단계를 제거한 경량 버전:</p>
+    <div class="diagram"><span class="highlight">/wt-merge 워크플로우:</span>
+
+1. 현재 워크트리의 변경사항 커밋 확인
+2. main 브랜치 최신 상태로 pull
+3. main에 머지 (--no-ff 또는 squash 선택)
+4. <span class="warn">충돌 발생 시:</span> 충돌 파일 목록 표시 + 해결 안내
+5. <span class="success">성공 시:</span> 워크트리 삭제 + 브랜치 삭제 + main 복귀
+
+<span class="highlight">소요 시간:</span> ~10초 (PR+CI 대비 5분+ 절약)</div>
+  </div>
+</section>
+
+<!-- ══════════ 5. 현행 유지 시 리스크 ══════════ -->
+<section>
+  <h2>5. 현행(A) 유지 시 알아야 할 것들</h2>
+
+  <div class="card">
+    <h3>현재 방식도 괜찮은 경우</h3>
+    <ul>
+      <li>동시 세션이 2개 이하이고, 작업 영역이 명확히 다를 때</li>
+      <li>공유 파일(types, lib, data)을 동시에 수정하지 않을 때</li>
+      <li>각 세션의 작업이 30분 이내로 짧을 때 (겹칠 시간이 적음)</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>위험해지는 시점</h3>
+    <ul>
+      <li>3개 이상 세션을 동시 운영하기 시작할 때</li>
+      <li>새 서비스/블로그/기능 추가처럼 여러 파일을 건드리는 작업이 겹칠 때</li>
+      <li><code>src/types/</code>, <code>src/data/seed/</code>, <code>src/lib/queries/</code> 같은 허브 파일을 두 세션이 동시에 수정할 때</li>
+      <li>작업 시간이 길어져서 다른 세션의 커밋을 모르고 작업하는 시간이 늘어날 때</li>
+    </ul>
+  </div>
+
+  <div class="alert alert-warn">
+    <strong>솔직한 평가:</strong> 현재 방식은 "조심하면 괜찮다"입니다. 문제는 바이브코딩의 핵심 가치가 "조심하지 않아도 되는 것"이라는 점입니다. 워크트리는 "조심하지 않아도 안전한" 환경을 제공합니다.
+  </div>
+</section>
+
+<!-- ══════════ 6. 의사결정 가이드 ══════════ -->
+<section>
+  <h2>6. 의사결정 가이드</h2>
+
+  <div class="decision-box">
+    <h3>아래 질문에 답하면 최적 전략이 결정됩니다</h3>
+
+    <div class="decision-item">
+      <div class="decision-q">Q1. 동시에 몇 개 세션을 운영하나요?</div>
+      <div class="decision-a">
+        <strong>1~2개:</strong> A(현행)로 충분<br>
+        <strong>3개+:</strong> B(워크트리) 강력 추천
+      </div>
+    </div>
+
+    <div class="decision-item">
+      <div class="decision-q">Q2. 공유 파일(types, seed, queries)을 동시에 수정하는 경우가 있나요?</div>
+      <div class="decision-a">
+        <strong>거의 없음:</strong> A로 충분<br>
+        <strong>가끔 있음:</strong> B 추천<br>
+        <strong>자주 있음:</strong> B 필수
+      </div>
+    </div>
+
+    <div class="decision-item">
+      <div class="decision-q">Q3. 워크트리 생성 시 npm install (~30초) 대기가 괜찮은가요?</div>
+      <div class="decision-a">
+        <strong>괜찮음:</strong> B 적합<br>
+        <strong>싫음:</strong> A + 조심 or C(자동 동기화)
+      </div>
+    </div>
+
+    <div class="decision-item">
+      <div class="decision-q">Q4. PR/CI 프로세스를 유지하고 싶은가요?</div>
+      <div class="decision-a">
+        <strong>필요 없음:</strong> B의 /wt-merge (PR 생략) 사용<br>
+        <strong>중요 기능만:</strong> B의 /wt-done (PR+CI) 선택적 사용<br>
+        <strong>항상 필요:</strong> 기존 /wt-done 유지
+      </div>
+    </div>
+
+    <div class="decision-item">
+      <div class="decision-q">Q5. 롤백 사고가 얼마나 자주 발생하나요?</div>
+      <div class="decision-a">
+        <strong>월 1회 미만:</strong> A로 충분, 사고 시 수동 복구<br>
+        <strong>주 1회+:</strong> B로 전환하여 원천 차단
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>결정 매트릭스 요약</h3>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>당신의 상황</th>
+          <th>추천 전략</th>
+          <th>구현 필요 사항</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>세션 2개 이하, 다른 영역 작업</td>
+          <td><strong>A. 현행 유지</strong></td>
+          <td>없음</td>
+        </tr>
+        <tr>
+          <td>세션 2~3개, 가끔 겹침</td>
+          <td><strong>B. 경량 워크트리 (추천)</strong></td>
+          <td>/wt-merge 커맨드 1개 추가</td>
+        </tr>
+        <tr>
+          <td>빠른 수정 위주, 큰 기능 적음</td>
+          <td><strong>A + C 혼합</strong></td>
+          <td>pre-commit 훅 설정</td>
+        </tr>
+        <tr>
+          <td>세션 3개+, 공유 파일 자주 수정</td>
+          <td><strong>B 필수</strong></td>
+          <td>/wt-merge + /wt-new 활용</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════ 7. 다음 단계 ══════════ -->
+<section>
+  <h2>7. 다음 단계 (의사결정 후)</h2>
+
+  <div class="card">
+    <h3>Option B 선택 시 구현 로드맵</h3>
+    <ol>
+      <li><strong>/wt-merge 커맨드 작성</strong> — .claude/commands/wt-merge.md (PR 없는 빠른 머지)</li>
+      <li><strong>기존 /wt-new 개선</strong> — npm install 캐시 활용으로 속도 향상 (선택)</li>
+      <li><strong>CLAUDE.md에 워크플로우 가이드 추가</strong> — 언제 워크트리를 쓸지 판단 기준</li>
+      <li><strong>1주일 테스트 운영</strong> — 실제 작업에서 워크트리 사용해보고 피드백</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3>Option A 유지 시 보완 사항</h3>
+    <ol>
+      <li><strong>위험 파일 목록 문서화</strong> — 동시 수정 금지 파일 리스트</li>
+      <li><strong>세션 시작 시 체크리스트</strong> — 다른 세션이 어떤 영역 작업 중인지 확인</li>
+      <li><strong>커밋 전 pull 습관화</strong> — 수동이지만 효과적</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ══════════ Footer ══════════ -->
+<div class="footer">
+  Linkmap Planning Document | 2026-04-03 | 의사결정 후 구현 진행
+</div>
+
+</div>
+</body>
+</html>

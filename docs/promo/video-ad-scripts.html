@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linkmap 영상 광고 스크립트 관리</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --card-bg: #111;
+    --card-border: #222;
+    --text: #fafafa;
+    --text-muted: #888;
+    --text-dim: #666;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --primary-bg: rgba(59,130,246,0.1);
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.1);
+    --purple: #a855f7;
+    --purple-bg: rgba(168,85,247,0.1);
+    --orange: #f97316;
+    --orange-bg: rgba(249,115,22,0.1);
+    --cyan: #06b6d4;
+    --cyan-bg: rgba(6,182,212,0.1);
+    --pink: #ec4899;
+    --pink-bg: rgba(236,72,153,0.1);
+    --ring: rgba(59,130,246,0.2);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg); color: var(--text);
+    min-height: 100vh; padding: 40px 20px 80px;
+    line-height: 1.7;
+  }
+  .container { max-width: 1080px; margin: 0 auto; }
+
+  /* Header */
+  .page-header { text-align: center; margin-bottom: 48px; }
+  .page-header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+  .page-header .subtitle { color: var(--text-muted); font-size: 1rem; }
+  .page-header .tool-link {
+    display: inline-block; margin-top: 12px; padding: 6px 16px;
+    background: var(--primary-bg); color: var(--primary); border-radius: 8px;
+    font-size: 0.85rem; text-decoration: none; border: 1px solid rgba(59,130,246,0.2);
+  }
+  .page-header .tool-link:hover { background: rgba(59,130,246,0.2); }
+  .badge-date { display: inline-block; margin-top: 8px; padding: 3px 10px; border-radius: 9999px; font-size: 0.75rem; background: #1a1a2e; color: var(--text-muted); }
+
+  /* Section */
+  .section { margin-bottom: 48px; }
+  .section-title {
+    font-size: 1.35rem; font-weight: 700; margin-bottom: 20px;
+    padding-bottom: 12px; border-bottom: 1px solid var(--card-border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title .icon { font-size: 1.2rem; }
+
+  /* Cards */
+  .card {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 12px; padding: 24px; margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: #333; }
+  .card-label {
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em;
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 12px; }
+
+  /* Script card */
+  .script-card { position: relative; }
+  .script-card .tone-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 9999px;
+    font-size: 0.75rem; font-weight: 600; margin-bottom: 12px;
+  }
+  .tone-professional .tone-badge { background: var(--primary-bg); color: var(--primary); }
+  .tone-friendly .tone-badge { background: var(--green-bg); color: var(--green); }
+  .tone-energetic .tone-badge { background: var(--orange-bg); color: var(--orange); }
+  .tone-custom .tone-badge { background: var(--purple-bg); color: var(--purple); }
+
+  .script-text {
+    font-size: 1rem; line-height: 1.9; color: #ddd;
+    background: #0d0d0d; border-radius: 8px; padding: 16px 20px;
+    border-left: 3px solid var(--card-border);
+    white-space: pre-wrap; cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .script-text:hover { border-left-color: var(--primary); }
+  .script-text.copied { border-left-color: var(--green); }
+
+  .script-meta {
+    display: flex; gap: 16px; margin-top: 12px; font-size: 0.8rem; color: var(--text-muted);
+    flex-wrap: wrap;
+  }
+  .script-meta span { display: flex; align-items: center; gap: 4px; }
+
+  .copy-toast {
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--green); color: #000; padding: 10px 24px; border-radius: 10px;
+    font-size: 0.875rem; font-weight: 600; opacity: 0; pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s; z-index: 100;
+  }
+  .copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Product info */
+  .info-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  @media (max-width: 680px) { .info-grid { grid-template-columns: 1fr; } }
+
+  .info-item { padding: 16px; background: #0d0d0d; border-radius: 8px; }
+  .info-item .label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+  .info-item .value { font-size: 0.95rem; }
+
+  /* Selling points */
+  .selling-points { list-style: none; }
+  .selling-points li {
+    padding: 12px 16px; background: #0d0d0d; border-radius: 8px;
+    margin-bottom: 8px; display: flex; align-items: flex-start; gap: 10px;
+    font-size: 0.95rem;
+  }
+  .selling-points .sp-icon { color: var(--green); font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+
+  /* Voice table */
+  .voice-table { width: 100%; border-collapse: collapse; }
+  .voice-table th {
+    text-align: left; padding: 10px 14px; font-size: 0.75rem;
+    color: var(--text-muted); border-bottom: 1px solid var(--card-border);
+    font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .voice-table td {
+    padding: 12px 14px; border-bottom: 1px solid #1a1a1a; font-size: 0.9rem;
+  }
+  .voice-table tr:hover td { background: #0d0d0d; }
+  .voice-table .voice-name { font-weight: 600; }
+  .voice-table .voice-desc { color: var(--text-muted); font-size: 0.82rem; }
+  .voice-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 6px;
+    font-size: 0.72rem; font-weight: 600;
+  }
+  .voice-badge.recommended { background: var(--primary-bg); color: var(--primary); }
+  .voice-badge.selected { background: var(--green-bg); color: var(--green); }
+
+  /* Target table */
+  .target-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  .target-table th {
+    text-align: left; padding: 10px 14px; font-size: 0.75rem;
+    color: var(--text-muted); border-bottom: 1px solid var(--card-border);
+    font-weight: 600;
+  }
+  .target-table td {
+    padding: 10px 14px; border-bottom: 1px solid #1a1a1a; font-size: 0.88rem;
+  }
+  .target-table tr:hover td { background: #0d0d0d; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 8px 18px; border-radius: 8px; border: 1px solid var(--card-border);
+    background: transparent; color: var(--text-muted); cursor: pointer;
+    font-size: 0.85rem; font-weight: 500; transition: all 0.2s;
+    font-family: inherit;
+  }
+  .tab-btn:hover { border-color: #444; color: var(--text); }
+  .tab-btn.active { background: var(--primary-bg); border-color: var(--primary); color: var(--primary); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Workflow */
+  .workflow-steps {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 680px) { .workflow-steps { grid-template-columns: repeat(2, 1fr); } }
+  .wf-step {
+    text-align: center; padding: 20px 12px; background: #0d0d0d;
+    border-radius: 10px; border: 1px solid var(--card-border);
+    position: relative;
+  }
+  .wf-step .step-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%; font-size: 0.8rem; font-weight: 700;
+    background: var(--primary-bg); color: var(--primary); margin-bottom: 8px;
+  }
+  .wf-step .step-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+  .wf-step .step-desc { font-size: 0.75rem; color: var(--text-muted); }
+
+  /* Status */
+  .status-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+  .status-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 500;
+  }
+  .status-chip.done { background: var(--green-bg); color: var(--green); }
+  .status-chip.progress { background: var(--primary-bg); color: var(--primary); }
+  .status-chip.planned { background: #1a1a2e; color: var(--text-muted); }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .status-chip.done .status-dot { background: var(--green); }
+  .status-chip.progress .status-dot { background: var(--primary); }
+  .status-chip.planned .status-dot { background: var(--text-muted); }
+
+  /* Utility */
+  .mt-8 { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .text-muted { color: var(--text-muted); }
+  .text-sm { font-size: 0.85rem; }
+  .divider { height: 1px; background: var(--card-border); margin: 32px 0; }
+
+  /* Audio player mock */
+  .audio-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; background: #0d0d0d; border-radius: 8px;
+    margin-bottom: 8px; cursor: pointer; transition: background 0.2s;
+  }
+  .audio-row:hover { background: #151515; }
+  .audio-play-btn {
+    width: 32px; height: 32px; border-radius: 50%; border: none;
+    background: var(--primary); color: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; flex-shrink: 0; transition: background 0.2s;
+  }
+  .audio-play-btn:hover { background: var(--primary-hover); }
+  .audio-play-btn.playing { background: var(--green); }
+  .audio-info { flex: 1; }
+  .audio-info .name { font-weight: 600; font-size: 0.9rem; }
+  .audio-info .desc { font-size: 0.78rem; color: var(--text-muted); }
+  .audio-duration { font-size: 0.78rem; color: var(--text-dim); }
+
+  /* TTS controls */
+  .tts-controls {
+    display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;
+  }
+  .tts-btn {
+    padding: 6px 14px; border-radius: 8px; border: 1px solid var(--card-border);
+    background: transparent; color: var(--text-muted); cursor: pointer;
+    font-size: 0.8rem; font-family: inherit; transition: all 0.2s;
+  }
+  .tts-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .tts-btn.active { background: var(--primary-bg); border-color: var(--primary); color: var(--primary); }
+
+  select.voice-select {
+    padding: 8px 12px; border-radius: 8px; border: 1px solid var(--card-border);
+    background: #0d0d0d; color: var(--text); font-size: 0.85rem;
+    font-family: inherit; cursor: pointer; min-width: 160px;
+  }
+  select.voice-select:focus { outline: none; border-color: var(--primary); }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Linkmap 영상 광고 스크립트</h1>
+    <div class="subtitle">제품 설명 영상 제작을 위한 스크립트 · 셀링 포인트 · 음성 설정 관리</div>
+    <div class="badge-date">최종 업데이트: 2026-03-21</div>
+    <br>
+    <a class="tool-link" href="https://gwanggo.jocoding.io/video-ad-create?category=productDescription" target="_blank">
+      gwanggo.jocoding.io 영상 제작 도구 열기 &rarr;
+    </a>
+  </div>
+
+
+  <!-- ============================================ -->
+  <!-- 1. 영상 제작 워크플로우 -->
+  <!-- ============================================ -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🎬</span> 영상 제작 워크플로우</div>
+
+    <div class="workflow-steps">
+      <div class="wf-step">
+        <div class="step-num">1</div>
+        <div class="step-title">제품/아바타</div>
+        <div class="step-desc">제품 선택 · 설명 · 셀링 포인트 입력</div>
+      </div>
+      <div class="wf-step">
+        <div class="step-num">2</div>
+        <div class="step-title">영상 정보</div>
+        <div class="step-desc">영상 스타일 · 배경 · 길이 설정</div>
+      </div>
+      <div class="wf-step">
+        <div class="step-num">3</div>
+        <div class="step-title">대본/음성</div>
+        <div class="step-desc">톤 선택 · AI 음성 · 대본 확정</div>
+      </div>
+      <div class="wf-step">
+        <div class="step-num">4</div>
+        <div class="step-title">생성</div>
+        <div class="step-desc">영상 렌더링 · 다운로드</div>
+      </div>
+    </div>
+
+    <div class="status-row">
+      <span class="status-chip done"><span class="status-dot"></span>제품 정보 입력 완료</span>
+      <span class="status-chip done"><span class="status-dot"></span>스크립트 작성 완료</span>
+      <span class="status-chip progress"><span class="status-dot"></span>음성 선택 진행 중</span>
+      <span class="status-chip planned"><span class="status-dot"></span>영상 생성 대기</span>
+    </div>
+  </div>
+
+
+  <!-- ============================================ -->
+  <!-- 2. 제품 정보 (Step 1 입력값) -->
+  <!-- ============================================ -->
+  <div class="section">
+    <div class="section-title"><span class="icon">📦</span> 제품 정보 (gwanggo.jocoding.io 입력값)</div>
+
+    <div class="card">
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="label">제품명</div>
+          <div class="value"><strong>linkmap</strong></div>
+        </div>
+        <div class="info-item">
+          <div class="label">카테고리</div>
+          <div class="value">productDescription (제품 설명 영상)</div>
+        </div>
+        <div class="info-item">
+          <div class="label">제품 설명 (현재)</div>
+          <div class="value" style="color:var(--orange);">서비스보기 플랫폼</div>
+        </div>
+        <div class="info-item">
+          <div class="label">제품 설명 (추천 수정안)</div>
+          <div class="value" style="color:var(--green);">바이브 코딩 플랫폼 — 원클릭 배포 · 서비스 시각화 · 환경변수 관리</div>
+        </div>
+      </div>
+
+      <div class="mt-16">
+        <div class="card-label" style="color:var(--text-muted);">셀링 포인트 (+ 포인트 추가에 입력)</div>
+        <ul class="selling-points">
+          <li><span class="sp-icon">✓</span> 코드 없이 3분 만에 사이트 배포 (원클릭 배포)</li>
+          <li><span class="sp-icon">✓</span> 서비스 연결을 맵으로 한눈에 시각화</li>
+          <li><span class="sp-icon">✓</span> API 키 · 환경변수 AES-256 암호화 관리</li>
+          <li><span class="sp-icon">✓</span> 6종 템플릿 (명함 · 홈페이지 · 가게홍보 · 링크카드 · 포트폴리오 · 개발자홈)</li>
+          <li><span class="sp-icon">✓</span> AI 어시스턴트 7종 (채팅 · 진단 · 분석 · 추천)</li>
+          <li><span class="sp-icon">✓</span> 90개+ 서비스 가이드 &amp; 단계별 체크리스트</li>
+          <li><span class="sp-icon">✓</span> 초보자부터 개발자까지 단계별 성장</li>
+          <li><span class="sp-icon">✓</span> Google 계정으로 완전 무료 시작</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================ -->
+  <!-- 3. AI 생성 스크립트 (gwanggo.jocoding.io 결과) -->
+  <!-- ============================================ -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🤖</span> AI 생성 스크립트 (gwanggo.jocoding.io 결과)</div>
+    <p class="text-sm text-muted" style="margin-bottom:16px;">클릭하면 클립보드에 복사됩니다.</p>
+
+    <div class="card script-card tone-professional">
+      <span class="tone-badge">전문적</span>
+      <span class="voice-badge selected" style="margin-left:8px;">Selected</span>
+      <h3>전문적 톤 — 약 46초</h3>
+      <div class="script-text" onclick="copyScript(this)">효율적인 개발 환경을 찾으신다면 linkmap을 추천합니다. 서비스 연결 시각화부터 환경변수 관리까지, 복잡한 배포 과정을 단 3분 만에 해결해 주네요. 초보자부터 전문가까지 단계별로 성장할 수 있는 이 플랫폼, 구글 계정만 있으면 완전 무료입니다. 신뢰할 수 있는 개발 파트너로 지금 시작해 보세요.</div>
+      <div class="script-meta">
+        <span>📝 171자</span>
+        <span>⏱️ ~46초</span>
+        <span>🎙️ 음성: Ellen (전문적/확신)</span>
+        <span>📊 용도: 제품 소개 메인</span>
+      </div>
+    </div>
+
+    <div class="card script-card tone-friendly">
+      <span class="tone-badge">친근한</span>
+      <h3>친근한 톤 — 약 45초</h3>
+      <div class="script-text" onclick="copyScript(this)">요즘 진짜 핫한 거 발견했는데! linkmap이라고, 코딩 배포가 3분이면 끝나요. 시각화가 잘 돼서 관리도 진짜 편하고, 쓰다 보면 실력이 쑥쑥 느는 기분? 구글 아이디로 바로 시작할 수 있고 완전 무료라서 부담도 없어요. 코딩 초보든 개발자든 한번 써보면 진짜 편해요!</div>
+      <div class="script-meta">
+        <span>📝 ~160자</span>
+        <span>⏱️ ~45초</span>
+        <span>🎙️ 추천 음성: Hope (밝고 친근)</span>
+        <span>📊 용도: SNS 광고</span>
+      </div>
+    </div>
+
+    <div class="card script-card tone-energetic">
+      <span class="tone-badge">활기찬</span>
+      <h3>활기찬 톤 — 약 46초</h3>
+      <div class="script-text" onclick="copyScript(this)">이거 써보고 진짜 깜놀했어요! 배포가 딱 3분 만에 된다니까요? linkmap 하나면 서비스 시각화랑 관리까지 한방에 끝! 초보자도 코딩 고수로 만들어주는 역대급 플랫폼이에요. 구글 계정만 있으면 바로 시작, 게다가 완전 무료! 지금 바로 linkmap 검색하세요!</div>
+      <div class="script-meta">
+        <span>📝 ~155자</span>
+        <span>⏱️ ~46초</span>
+        <span>🎙️ 추천 음성: Juniper (활기찬)</span>
+        <span>📊 용도: 숏폼/릴스</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================ -->
+  <!-- 4. 커스텀 스크립트 (직접 작성) -->
+  <!-- ============================================ -->
+  <div class="section">
+    <div class="section-title"><span class="icon">✍️</span> 커스텀 스크립트 (타겟별 작성)</div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(event, 'tab-beginner')">바이브 코딩 입문</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-oneclick')">원클릭 배포</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-growth')">성장 스토리</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-review')">리뷰형</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-smallbiz')">소상공인</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-short')">숏폼 15초</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-dev')">개발자</button>
+    </div>
+
+    <!-- 바이브 코딩 입문 -->
+    <div id="tab-beginner" class="tab-content active">
+      <div class="card script-card tone-custom">
+        <span class="tone-badge">바이브 코딩 입문자 타겟</span>
+        <h3>A. 첫 GitHub 체험 — 약 40초</h3>
+        <div class="script-text" onclick="copyScript(this)">코딩 한 번도 안 해봤는데 홈페이지 만들 수 있을까요?
+저도 처음엔 반신반의했는데, linkmap에서 템플릿 고르고 버튼 한 번 눌렀더니 3분 만에 내 홈페이지가 생겼습니다.
+GitHub가 뭔지 몰라도 괜찮아요. 배포까지 알아서 해주니까요.
+코드 없이 나만의 사이트를 만들고 싶다면, 지금 linkmap을 시작해 보세요.</div>
+        <div class="script-meta">
+          <span>📝 ~150자</span>
+          <span>⏱️ ~40초</span>
+          <span>🎯 타겟: 코딩 입문자, 바이브코딩 관심자</span>
+          <span>🎙️ 추천: Hope / Juniper</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 원클릭 배포 -->
+    <div id="tab-oneclick" class="tab-content">
+      <div class="card script-card tone-custom">
+        <span class="tone-badge">원클릭 배포 강조</span>
+        <h3>B. 세 단계면 끝 — 약 42초</h3>
+        <div class="script-text" onclick="copyScript(this)">홈페이지 하나 만들려고 코딩 공부부터 해야 하나 고민되셨나요?
+linkmap은 템플릿 선택, 내용 입력, 원클릭 배포. 이 세 단계면 끝입니다.
+디지털 명함, 가게 홍보, 포트폴리오까지 6가지 템플릿이 준비되어 있고, 전부 무료예요.
+복잡한 건 linkmap이 할게요. 여러분은 어떤 사이트를 만들지만 고르세요.</div>
+        <div class="script-meta">
+          <span>📝 ~160자</span>
+          <span>⏱️ ~42초</span>
+          <span>🎯 타겟: 홈페이지가 필요한 일반인</span>
+          <span>🎙️ 추천: Ellen / Jane</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 성장 스토리 -->
+    <div id="tab-growth" class="tab-content">
+      <div class="card script-card tone-custom">
+        <span class="tone-badge">초보자 → 성장 스토리</span>
+        <h3>C. 단계별 성장 — 약 43초</h3>
+        <div class="script-text" onclick="copyScript(this)">처음엔 링크 카드 하나 만들려고 시작했는데, 지금은 프로젝트 3개를 관리하고 있습니다.
+linkmap은 코드를 몰라도 시작할 수 있고, 성장하면 서비스 연결 관리까지 확장됩니다.
+원클릭 배포로 쉽게 입문하고, 서비스맵으로 체계적으로 관리하세요.
+초보자도, 개발자도, 한 서비스에서 단계별로 성장할 수 있습니다.</div>
+        <div class="script-meta">
+          <span>📝 ~155자</span>
+          <span>⏱️ ~43초</span>
+          <span>🎯 타겟: 입문 후 확장하는 사용자</span>
+          <span>🎙️ 추천: Juniper / Ellen</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 리뷰형 -->
+    <div id="tab-review" class="tab-content">
+      <div class="card script-card tone-custom">
+        <span class="tone-badge">리뷰 · 추천형</span>
+        <h3>D. 자연스러운 추천 — 약 44초</h3>
+        <div class="script-text" onclick="copyScript(this)">요즘 외부 서비스 연결이 복잡해서 고민이신가요?
+제가 최근 유용하게 사용 중인 linkmap을 소개합니다.
+원클릭 배포로 코드 없이 3분 만에 사이트를 만들 수 있고, 연결된 서비스를 맵으로 한눈에 정리해 줘서 관리가 정말 쉬워요.
+초보자도 따라 할 수 있는 가이드까지 제공됩니다.
+쉽고 체계적인 서비스 관리를 원하신다면, 지금 linkmap을 시작해 보세요.</div>
+        <div class="script-meta">
+          <span>📝 ~175자</span>
+          <span>⏱️ ~44초</span>
+          <span>🎯 타겟: SNS 게시물 / 범용</span>
+          <span>🎙️ 추천: Juniper / Arabella</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 소상공인 -->
+    <div id="tab-smallbiz" class="tab-content">
+      <div class="card script-card tone-custom">
+        <span class="tone-badge">소상공인 타겟</span>
+        <h3>E. 우리 가게 홍보 — 약 38초</h3>
+        <div class="script-text" onclick="copyScript(this)">우리 가게 홈페이지, 비용 들여서 만들어야 하나 고민되셨죠?
+linkmap에서 가게 홍보 템플릿을 선택하면, 메뉴판과 지도, 전화 버튼까지 갖춘 홍보 페이지가 무료로 만들어집니다.
+코딩 지식 전혀 필요 없고, 카카오맵 연동에 원터치 전화까지 지원해요.
+우리 가게 홍보, 3분이면 충분합니다.</div>
+        <div class="script-meta">
+          <span>📝 ~145자</span>
+          <span>⏱️ ~38초</span>
+          <span>🎯 타겟: 카페 · 음식점 · 소상공인</span>
+          <span>🎙️ 추천: Hope / Jane</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 숏폼 -->
+    <div id="tab-short" class="tab-content">
+      <div class="card script-card tone-custom">
+        <span class="tone-badge">숏폼/릴스 15초</span>
+        <h3>F. 임팩트 15초 — 약 15초</h3>
+        <div class="script-text" onclick="copyScript(this)">코딩 몰라도 홈페이지 만들 수 있다고?
+linkmap에서 템플릿 고르고, 버튼 한 번이면 3분 만에 내 사이트 완성.
+명함, 포트폴리오, 가게 홍보까지. 전부 무료.
+지금 시작해 보세요.</div>
+        <div class="script-meta">
+          <span>📝 ~90자</span>
+          <span>⏱️ ~15초</span>
+          <span>🎯 타겟: 릴스 · 쇼츠 · TikTok</span>
+          <span>🎙️ 추천: Hope (밝고 빠른 톤)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 개발자 -->
+    <div id="tab-dev" class="tab-content">
+      <div class="card script-card tone-custom">
+        <span class="tone-badge">개발자 커뮤니티</span>
+        <h3>G. 개발자 공감형 — 약 42초</h3>
+        <div class="script-text" onclick="copyScript(this)">프로젝트에 Supabase, Stripe, Vercel 다 연결해 놓고 뭐가 어디 붙어있는지 까먹은 적 있죠?
+linkmap은 서비스 연결을 맵으로 시각화해 주고, API 키와 환경변수를 한곳에서 암호화 관리해 줍니다.
+거기에 AI가 아키텍처 분석까지 해줘요.
+흩어진 서비스 설정, 이제 한 화면에서 정리하세요.</div>
+        <div class="script-meta">
+          <span>📝 ~155자</span>
+          <span>⏱️ ~42초</span>
+          <span>🎯 타겟: 개발자 커뮤니티 · 디스코드</span>
+          <span>🎙️ 추천: Ellen / Kuon</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================ -->
+  <!-- 5. AI 음성 설정 -->
+  <!-- ============================================ -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🎙️</span> AI 음성 설정 (gwanggo.jocoding.io)</div>
+    <p class="text-sm text-muted" style="margin-bottom:16px;">
+      gwanggo.jocoding.io에서 제공하는 AI 음성 목록입니다. 재생 버튼으로 브라우저 TTS 샘플을 들어볼 수 있습니다.
+    </p>
+
+    <div class="card">
+      <div class="card-label" style="color:var(--pink);">FEMALE VOICES</div>
+
+      <div class="audio-row" onclick="speakSample('Ellen', '효율적인 개발 환경을 찾으신다면 linkmap을 추천합니다.', this)">
+        <button class="audio-play-btn" title="샘플 재생">▶</button>
+        <div class="audio-info">
+          <div class="name">Ellen <span class="voice-badge selected">현재 선택</span></div>
+          <div class="desc">Serious, Direct and Confident / Conversational — 전문적이고 확신 있는 톤</div>
+        </div>
+        <div class="audio-duration">전문적 스크립트에 적합</div>
+      </div>
+
+      <div class="audio-row" onclick="speakSample('Juniper', '요즘 진짜 핫한 거 발견했는데! linkmap이라고, 코딩 배포가 3분이면 끝나요.', this)">
+        <button class="audio-play-btn" title="샘플 재생">▶</button>
+        <div class="audio-info">
+          <div class="name">Juniper</div>
+          <div class="desc">Grounded and Professional / Conversational — 안정적이고 전문적인 대화체</div>
+        </div>
+        <div class="audio-duration">리뷰형 · 성장 스토리에 적합</div>
+      </div>
+
+      <div class="audio-row" onclick="speakSample('Jane', '홈페이지 하나 만들려고 코딩 공부부터 해야 하나 고민되셨나요?', this)">
+        <button class="audio-play-btn" title="샘플 재생">▶</button>
+        <div class="audio-info">
+          <div class="name">Jane</div>
+          <div class="desc">Professional Audiobook Reader / Narration — 차분한 나레이션 스타일</div>
+        </div>
+        <div class="audio-duration">원클릭 배포 · 소상공인에 적합</div>
+      </div>
+
+      <div class="audio-row" onclick="speakSample('Arabella', '쉽고 체계적인 서비스 관리를 원하신다면, 지금 linkmap을 시작해 보세요.', this)">
+        <button class="audio-play-btn" title="샘플 재생">▶</button>
+        <div class="audio-info">
+          <div class="name">Arabella</div>
+          <div class="desc">Mysterious and Emotive / Narration — 감성적이고 몰입감 있는 톤</div>
+        </div>
+        <div class="audio-duration">브랜드 스토리텔링에 적합</div>
+      </div>
+
+      <div class="audio-row" onclick="speakSample('Hope', '코딩 몰라도 홈페이지 만들 수 있다고? linkmap에서 버튼 한 번이면 끝!', this)">
+        <button class="audio-play-btn" title="샘플 재생">▶</button>
+        <div class="audio-info">
+          <div class="name">Hope <span class="voice-badge recommended">추천</span></div>
+          <div class="desc">Upbeat and Clear / Social Media — 밝고 또렷한 소셜 미디어 톤</div>
+        </div>
+        <div class="audio-duration">숏폼 · SNS · 입문자에 최적</div>
+      </div>
+
+      <div class="audio-row" onclick="speakSample('Kuon', '흩어진 서비스 설정, 이제 한 화면에서 정리하세요.', this)">
+        <button class="audio-play-btn" title="샘플 재생">▶</button>
+        <div class="audio-info">
+          <div class="name">Kuon</div>
+          <div class="desc">Calm and Collected — 차분하고 절제된 톤</div>
+        </div>
+        <div class="audio-duration">개발자 타겟에 적합</div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="card-label" style="color:var(--cyan);">MALE VOICES (gwanggo.jocoding.io에서 Male 탭 확인)</div>
+      <p class="text-sm text-muted">Male 탭의 음성 옵션은 영상 제작 도구에서 직접 확인하세요.</p>
+    </div>
+  </div>
+
+
+  <!-- ============================================ -->
+  <!-- 6. 스크립트별 추천 매칭 -->
+  <!-- ============================================ -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🎯</span> 스크립트 × 음성 × 용도 매칭</div>
+
+    <div class="card">
+      <table class="target-table">
+        <thead>
+          <tr>
+            <th>스크립트</th>
+            <th>톤</th>
+            <th>추천 음성</th>
+            <th>용도</th>
+            <th>길이</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>전문적 (AI)</strong></td>
+            <td>전문</td>
+            <td>Ellen</td>
+            <td>메인 제품 소개</td>
+            <td>~46초</td>
+          </tr>
+          <tr>
+            <td><strong>친근한 (AI)</strong></td>
+            <td>친근</td>
+            <td>Hope</td>
+            <td>SNS 광고</td>
+            <td>~45초</td>
+          </tr>
+          <tr>
+            <td><strong>활기찬 (AI)</strong></td>
+            <td>활기</td>
+            <td>Juniper</td>
+            <td>숏폼 광고</td>
+            <td>~46초</td>
+          </tr>
+          <tr style="border-top:2px solid #333;">
+            <td><strong>A. 바이브 코딩</strong></td>
+            <td>공감</td>
+            <td>Hope / Juniper</td>
+            <td>입문자 커뮤니티</td>
+            <td>~40초</td>
+          </tr>
+          <tr>
+            <td><strong>B. 원클릭 배포</strong></td>
+            <td>안내</td>
+            <td>Ellen / Jane</td>
+            <td>기능 소개</td>
+            <td>~42초</td>
+          </tr>
+          <tr>
+            <td><strong>C. 성장 스토리</strong></td>
+            <td>스토리</td>
+            <td>Juniper / Ellen</td>
+            <td>블로그 · 체험기</td>
+            <td>~43초</td>
+          </tr>
+          <tr>
+            <td><strong>D. 리뷰형</strong></td>
+            <td>추천</td>
+            <td>Juniper / Arabella</td>
+            <td>SNS · 범용</td>
+            <td>~44초</td>
+          </tr>
+          <tr>
+            <td><strong>E. 소상공인</strong></td>
+            <td>친근</td>
+            <td>Hope / Jane</td>
+            <td>소상공인 커뮤니티</td>
+            <td>~38초</td>
+          </tr>
+          <tr>
+            <td><strong>F. 숏폼 15초</strong></td>
+            <td>임팩트</td>
+            <td>Hope</td>
+            <td>릴스 · 쇼츠</td>
+            <td>~15초</td>
+          </tr>
+          <tr>
+            <td><strong>G. 개발자</strong></td>
+            <td>공감</td>
+            <td>Ellen / Kuon</td>
+            <td>개발자 커뮤니티</td>
+            <td>~42초</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+  <!-- ============================================ -->
+  <!-- 7. gwanggo.jocoding.io 설정 가이드 -->
+  <!-- ============================================ -->
+  <div class="section">
+    <div class="section-title"><span class="icon">⚙️</span> gwanggo.jocoding.io 입력 가이드</div>
+
+    <div class="card">
+      <h3 style="margin-bottom:16px;">Step 1: 제품/아바타 설정</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="label">제품 선택</div>
+          <div class="value">linkmap</div>
+        </div>
+        <div class="info-item">
+          <div class="label">제품 설명</div>
+          <div class="value">바이브 코딩 플랫폼 — 원클릭 배포 · 서비스 시각화 · 환경변수 관리</div>
+        </div>
+      </div>
+      <div class="mt-16">
+        <div class="label" style="font-size:0.75rem; color:var(--text-muted); font-weight:600; margin-bottom:8px;">셀링 포인트 (복사해서 하나씩 추가)</div>
+        <div class="script-text" onclick="copyScript(this)" style="font-size:0.9rem; line-height:2.2;">코드 없이 3분 만에 사이트 배포
+서비스 연결 맵으로 한눈에 시각화
+API 키 · 환경변수 AES-256 암호화
+6종 무료 템플릿 (명함·홈페이지·가게홍보·링크카드·포트폴리오·개발자홈)
+AI 어시스턴트 7종 지원
+90개+ 서비스 가이드 & 체크리스트
+초보자부터 개발자까지 단계별 성장
+Google 계정으로 완전 무료</div>
+      </div>
+    </div>
+
+    <div class="card mt-16">
+      <h3 style="margin-bottom:16px;">Step 3: 대본/음성 추천 설정</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="label">메인 영상 (제품 소개)</div>
+          <div class="value">전문적 톤 + <strong>Ellen</strong> 음성</div>
+        </div>
+        <div class="info-item">
+          <div class="label">SNS 광고 영상</div>
+          <div class="value">친근한 톤 + <strong>Hope</strong> 음성</div>
+        </div>
+        <div class="info-item">
+          <div class="label">숏폼 (릴스/쇼츠)</div>
+          <div class="value">활기찬 톤 + <strong>Hope</strong> 음성</div>
+        </div>
+        <div class="info-item">
+          <div class="label">개발자 타겟</div>
+          <div class="value">전문적 톤 + <strong>Ellen</strong> 또는 <strong>Kuon</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.container -->
+
+
+<!-- Toast -->
+<div class="copy-toast" id="copyToast">클립보드에 복사되었습니다</div>
+
+<script>
+/* Tab switching */
+function switchTab(e, tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  e.currentTarget.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+/* Copy script text */
+function copyScript(el) {
+  const text = el.textContent.trim();
+  navigator.clipboard.writeText(text).then(() => {
+    el.classList.add('copied');
+    const toast = document.getElementById('copyToast');
+    toast.classList.add('show');
+    setTimeout(() => { toast.classList.remove('show'); el.classList.remove('copied'); }, 1800);
+  });
+}
+
+/* Browser TTS for voice samples */
+let currentUtterance = null;
+let currentRow = null;
+
+function speakSample(voiceName, text, row) {
+  if (!('speechSynthesis' in window)) {
+    alert('이 브라우저는 TTS를 지원하지 않습니다.');
+    return;
+  }
+
+  const btn = row.querySelector('.audio-play-btn');
+
+  if (currentUtterance && speechSynthesis.speaking) {
+    speechSynthesis.cancel();
+    if (currentRow) {
+      currentRow.querySelector('.audio-play-btn').classList.remove('playing');
+      currentRow.querySelector('.audio-play-btn').textContent = '▶';
+    }
+    if (currentRow === row) {
+      currentRow = null;
+      currentUtterance = null;
+      return;
+    }
+  }
+
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'ko-KR';
+  utter.rate = 0.95;
+  utter.pitch = 1.0;
+
+  const voices = speechSynthesis.getVoices();
+  const koVoice = voices.find(v => v.lang.startsWith('ko'));
+  if (koVoice) utter.voice = koVoice;
+
+  btn.classList.add('playing');
+  btn.textContent = '⏸';
+  currentUtterance = utter;
+  currentRow = row;
+
+  utter.onend = () => {
+    btn.classList.remove('playing');
+    btn.textContent = '▶';
+    currentUtterance = null;
+    currentRow = null;
+  };
+
+  speechSynthesis.speak(utter);
+}
+
+if ('speechSynthesis' in window) {
+  speechSynthesis.getVoices();
+  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+}
+</script>
+
+</body>
+</html>

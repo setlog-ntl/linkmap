@@ -11,16 +11,16 @@ export function useSubscription() {
     queryFn: async (): Promise<Subscription | null> => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
+      // maybeSingle: 구독 레코드가 없어도(신규/무료 사용자) 406이 아닌 200 + null 반환
       const { data, error } = await supabase
         .from('subscriptions')
         .select('*')
         .eq('user_id', user.id)
-        .single();
-      if (error?.code === 'PGRST116') return null; // 레코드 없음 → free 플랜
-      // 406: 테이블 미존재 또는 스키마 불일치 → free 플랜으로 폴백
+        .maybeSingle();
+      // 테이블 미존재 또는 스키마 불일치(PGRST204/406) → free 플랜으로 폴백
       if (error?.code === 'PGRST204' || error?.message?.includes('406')) return null;
       if (error) throw error;
-      return data as Subscription;
+      return (data as Subscription) ?? null;
     },
     staleTime: 1000 * 60 * 5,
   });

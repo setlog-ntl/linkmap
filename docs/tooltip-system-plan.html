@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linkmap 툴팁 시스템 도입 기획</title>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --bg-card: #111827;
+      --bg-card-hover: #1a2236;
+      --border: #1e293b;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-heading: #f1f5f9;
+      --brand-blue: #3b82f6;
+      --brand-green: #22c55e;
+      --accent-purple: #8b5cf6;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-cyan: #06b6d4;
+      --code-bg: #1e293b;
+      --table-header: #0f172a;
+      --table-row-alt: #0d1525;
+      --tag-bg: rgba(59, 130, 246, 0.15);
+      --tag-text: #60a5fa;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 60px 40px 50px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 50%, rgba(34, 197, 94, 0.06) 0%, transparent 50%);
+      animation: drift 20s ease-in-out infinite;
+    }
+
+    @keyframes drift {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-20px, 10px); }
+    }
+
+    .hero > * { position: relative; z-index: 1; }
+
+    .hero h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .hero .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: 1px solid;
+    }
+
+    .badge-blue { background: rgba(59,130,246,0.12); color: #60a5fa; border-color: rgba(59,130,246,0.25); }
+    .badge-green { background: rgba(34,197,94,0.12); color: #4ade80; border-color: rgba(34,197,94,0.25); }
+    .badge-purple { background: rgba(139,92,246,0.12); color: #a78bfa; border-color: rgba(139,92,246,0.25); }
+    .badge-amber { background: rgba(245,158,11,0.12); color: #fbbf24; border-color: rgba(245,158,11,0.25); }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 32px 80px;
+    }
+
+    .toc {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-bottom: 48px;
+    }
+
+    .toc h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+    }
+
+    .toc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 8px;
+    }
+
+    .toc a {
+      color: var(--brand-blue);
+      text-decoration: none;
+      font-size: 0.92rem;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toc a:hover {
+      background: rgba(59, 130, 246, 0.1);
+      color: #93bbfd;
+    }
+
+    .toc a .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--brand-blue);
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    section {
+      margin-bottom: 48px;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text-heading);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border);
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h2 .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      margin: 28px 0 12px;
+    }
+
+    h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--brand-blue);
+      margin: 20px 0 10px;
+    }
+
+    p {
+      margin-bottom: 14px;
+      color: var(--text);
+    }
+
+    .goal-box {
+      background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(34,197,94,0.06));
+      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin: 20px 0;
+      font-size: 0.95rem;
+    }
+
+    .goal-box strong {
+      color: var(--brand-blue);
+    }
+
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .principle-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .principle-card:hover {
+      border-color: rgba(59,130,246,0.3);
+      transform: translateY(-2px);
+    }
+
+    .principle-card .number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--brand-blue), var(--accent-purple));
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .principle-card h4 {
+      color: var(--text-heading);
+      margin: 0 0 6px;
+      font-size: 0.95rem;
+    }
+
+    .principle-card p {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      margin: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+
+    thead {
+      background: var(--table-header);
+    }
+
+    th {
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 700;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:nth-child(even) {
+      background: var(--table-row-alt);
+    }
+
+    tbody tr:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .tier-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .tier-1 { background: rgba(59,130,246,0.15); color: #60a5fa; }
+    .tier-2 { background: rgba(139,92,246,0.15); color: #a78bfa; }
+    .tier-3 { background: rgba(245,158,11,0.15); color: #fbbf24; }
+
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 36px 0 20px;
+      padding: 16px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      border-left: 4px solid;
+    }
+
+    .phase-header.p1 { border-left-color: var(--brand-blue); }
+    .phase-header.p2 { border-left-color: var(--brand-green); }
+    .phase-header.p3 { border-left-color: var(--accent-purple); }
+    .phase-header.p4 { border-left-color: var(--accent-amber); }
+    .phase-header.p5 { border-left-color: var(--accent-cyan); }
+
+    .phase-header .phase-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .phase-header.p1 .phase-num { background: rgba(59,130,246,0.15); color: var(--brand-blue); }
+    .phase-header.p2 .phase-num { background: rgba(34,197,94,0.15); color: var(--brand-green); }
+    .phase-header.p3 .phase-num { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+    .phase-header.p4 .phase-num { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
+    .phase-header.p5 .phase-num { background: rgba(6,182,212,0.15); color: var(--accent-cyan); }
+
+    .phase-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .sub-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 22px;
+      margin: 12px 0;
+    }
+
+    .sub-item h4 {
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sub-item .file-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: 'Geist Mono', 'JetBrains Mono', monospace;
+      margin: 4px 2px;
+    }
+
+    .sub-item .file-tag.new {
+      background: rgba(34,197,94,0.12);
+      color: #4ade80;
+    }
+
+    .sub-item .reason {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      margin-top: 6px;
+      padding-left: 14px;
+      border-left: 2px solid var(--border);
+    }
+
+    code {
+      font-family: 'Geist Mono', 'JetBrains Mono', 'Fira Code', monospace;
+      background: var(--code-bg);
+      color: #e879f9;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 0.85em;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 22px;
+      overflow-x: auto;
+      margin: 12px 0;
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: var(--text);
+    }
+
+    .keyword { color: #c084fc; }
+    .string { color: #34d399; }
+    .type { color: #60a5fa; }
+    .comment { color: #64748b; }
+    .prop { color: #fbbf24; }
+
+    .priority-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-right: 8px;
+    }
+
+    .p0 { background: rgba(243,63,94,0.15); color: #fb7185; }
+    .p1-tag { background: rgba(245,158,11,0.15); color: #fbbf24; }
+    .p2-tag { background: rgba(59,130,246,0.15); color: #60a5fa; }
+
+    ul {
+      padding-left: 20px;
+      margin: 8px 0;
+    }
+
+    li {
+      margin: 6px 0;
+      color: var(--text);
+    }
+
+    li::marker {
+      color: var(--brand-blue);
+    }
+
+    .file-table td:first-child {
+      font-family: 'Geist Mono', 'JetBrains Mono', monospace;
+      color: var(--tag-text);
+      font-size: 0.84rem;
+    }
+
+    .benchmark-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+      margin: 16px 0;
+    }
+
+    .benchmark-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      transition: border-color 0.2s;
+    }
+
+    .benchmark-card:hover {
+      border-color: rgba(59,130,246,0.3);
+    }
+
+    .benchmark-card .name {
+      font-weight: 700;
+      color: var(--text-heading);
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    .benchmark-card .point {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    .check-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .check-list li {
+      padding: 10px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 8px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.92rem;
+    }
+
+    .check-list li .check-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: rgba(34,197,94,0.12);
+      color: var(--brand-green);
+      font-size: 0.75rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .check-list li code {
+      font-size: 0.82em;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+
+    @media (max-width: 768px) {
+      .hero { padding: 40px 20px 36px; }
+      .hero h1 { font-size: 1.7rem; }
+      .container { padding: 24px 16px 60px; }
+      .toc-grid { grid-template-columns: 1fr; }
+      .principles { grid-template-columns: 1fr; }
+      .benchmark-grid { grid-template-columns: 1fr; }
+      table { font-size: 0.82rem; }
+      th, td { padding: 8px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Linkmap 툴팁 시스템 도입 기획</h1>
+  <p class="subtitle">
+    사용자가 모든 아이콘/기능을 즉시 이해할 수 있도록 체계적 툴팁을 도입하되,<br>
+    사용 흐름에 방해되지 않고 관리가 간편한 시스템 구축
+  </p>
+  <div class="badge-row">
+    <span class="badge badge-blue">3-Tier 계층 구조</span>
+    <span class="badge badge-green">5 Phase 구현</span>
+    <span class="badge badge-purple">16개 파일 수정</span>
+    <span class="badge badge-amber">3개 신규 생성</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- TOC -->
+  <div class="toc">
+    <h3>목차</h3>
+    <div class="toc-grid">
+      <a href="#context"><span class="num">1</span> Context</a>
+      <a href="#principles"><span class="num">2</span> 설계 원칙</a>
+      <a href="#tiers"><span class="num">3</span> Tier 정의</a>
+      <a href="#phases"><span class="num">4</span> 구현 계획 (Phase 1~5)</a>
+      <a href="#files"><span class="num">5</span> 주요 파일 목록</a>
+      <a href="#verify"><span class="num">6</span> 검증 방법</a>
+      <a href="#benchmark"><span class="num">7</span> 벤치마킹 참조</a>
+    </div>
+  </div>
+
+  <!-- Context -->
+  <section id="context">
+    <h2><span class="icon" style="background:rgba(59,130,246,0.12);color:var(--brand-blue);">📋</span> Context</h2>
+    <p>
+      Linkmap의 서비스맵, 대시보드, 환경변수 테이블 등에서 <strong>아이콘 전용 버튼</strong>(Copy, Eye, Edit 등)과 <strong>서비스 아이콘</strong>(ServiceIcon)이 설명 없이 사용되고 있어, 사용자가 기능을 직관적으로 이해하기 어려운 상황입니다.
+    </p>
+    <p>
+      현재 <strong>11개 파일</strong>에서 Tooltip을 사용 중이나 일관성 없이 적용되어 있고, 전역 <code>delayDuration=0</code>은 업계 안티패턴으로 진단되었습니다.
+    </p>
+    <div class="goal-box">
+      <strong>벤치마킹 결과</strong> (Vercel, Linear, Figma, Notion, GitHub): 업계 표준은 <strong>300ms</strong>이며, Radix <code>skipDelayDuration</code>을 활용한 연속 탐색 최적화가 서비스맵에 최적.
+    </div>
+  </section>
+
+  <!-- 설계 원칙 -->
+  <section id="principles">
+    <h2><span class="icon" style="background:rgba(139,92,246,0.12);color:var(--accent-purple);">⚙️</span> 설계 원칙</h2>
+    <div class="principles">
+      <div class="principle-card">
+        <div class="number">1</div>
+        <h4>3-Tier 계층 구조</h4>
+        <p>정보 밀도별 구분 — Simple Label / Service Label / Rich Info</p>
+      </div>
+      <div class="principle-card">
+        <div class="number">2</div>
+        <h4>의도적 트리거</h4>
+        <p>delay 300ms 기본, skip delay 200ms로 연속 탐색 지원</p>
+      </div>
+      <div class="principle-card">
+        <div class="number">3</div>
+        <h4>데이터 중앙 관리</h4>
+        <p>DB <code>description_ko</code> + 정적 상수로 이중 관리</p>
+      </div>
+      <div class="principle-card">
+        <div class="number">4</div>
+        <h4>컴포지션 패턴</h4>
+        <p>ServiceIcon은 순수 렌더링 유지, 외부 래퍼로 Tooltip 결합</p>
+      </div>
+      <div class="principle-card">
+        <div class="number">5</div>
+        <h4>접근성 준수</h4>
+        <p><code>aria-label</code> + <code>role="tooltip"</code> + 키보드 포커스 지원</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tier 정의 -->
+  <section id="tiers">
+    <h2><span class="icon" style="background:rgba(34,197,94,0.12);color:var(--brand-green);">📊</span> Tier 정의</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Tier</th>
+          <th>대상</th>
+          <th>정보</th>
+          <th>Delay</th>
+          <th>예시</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tier-badge tier-1">Tier 1</span></td>
+          <td>아이콘 전용 버튼</td>
+          <td>1줄 행동 동사</td>
+          <td>400ms (전역)</td>
+          <td>"복사", "편집", "값 표시"</td>
+        </tr>
+        <tr>
+          <td><span class="tier-badge tier-2">Tier 2</span></td>
+          <td>ServiceIcon (목록/카드)</td>
+          <td>이름 + 카테고리</td>
+          <td>300ms</td>
+          <td>"Supabase — 데이터베이스"</td>
+        </tr>
+        <tr>
+          <td><span class="tier-badge tier-3">Tier 3</span></td>
+          <td>서비스맵 노드, 경고 배지</td>
+          <td>이름/상태/카테고리/env 진행률</td>
+          <td>300ms</td>
+          <td>기존 NodeTooltip 패턴</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- 구현 계획 -->
+  <section id="phases">
+    <h2><span class="icon" style="background:rgba(245,158,11,0.12);color:var(--accent-amber);">🚀</span> 구현 계획</h2>
+
+    <!-- Phase 1 -->
+    <div class="phase-header p1">
+      <span class="phase-num">P1</span>
+      <h3>Phase 1: 기반 정비 (전역 설정 + 래퍼 컴포넌트)</h3>
+    </div>
+
+    <div class="sub-item">
+      <h4>1-1. 전역 TooltipProvider 설정 변경</h4>
+      <div><span class="file-tag">src/components/providers.tsx</span></div>
+      <ul>
+        <li><code>delayDuration={0}</code> → <code>delayDuration={400}</code></li>
+        <li><code>skipDelayDuration={200}</code> 추가</li>
+      </ul>
+      <div class="reason">업계 표준 적용 + 서비스맵 연속 탐색 최적화</div>
+    </div>
+
+    <div class="sub-item">
+      <h4>1-2. tooltip.tsx sideOffset 기본값 변경</h4>
+      <div><span class="file-tag">src/components/ui/tooltip.tsx</span></div>
+      <ul>
+        <li><code>sideOffset</code> 기본값 <code>0</code> → <code>4</code></li>
+      </ul>
+      <div class="reason">트리거 요소를 가리지 않도록 간격 확보 (NNGroup 권장)</div>
+    </div>
+
+    <div class="sub-item">
+      <h4>1-3. IconTooltip 래퍼 컴포넌트 생성 <span class="tier-badge tier-1">Tier 1</span></h4>
+      <div><span class="file-tag new">src/components/ui/icon-tooltip.tsx (신규)</span></div>
+      <pre><code><span class="keyword">interface</span> <span class="type">IconTooltipProps</span> {
+  <span class="prop">label</span>: <span class="type">string</span>;
+  <span class="prop">shortcut</span>?: <span class="type">string</span>;        <span class="comment">// 단축키 (예: "Ctrl+C")</span>
+  <span class="prop">side</span>?: <span class="string">'top'</span> | <span class="string">'bottom'</span> | <span class="string">'left'</span> | <span class="string">'right'</span>;
+  <span class="prop">children</span>: <span class="type">React.ReactNode</span>;
+}</code></pre>
+    </div>
+
+    <div class="sub-item">
+      <h4>1-4. ServiceTooltip 래퍼 컴포넌트 생성 <span class="tier-badge tier-2">Tier 2</span></h4>
+      <div><span class="file-tag new">src/components/ui/service-tooltip.tsx (신규)</span></div>
+      <pre><code><span class="keyword">interface</span> <span class="type">ServiceTooltipProps</span> {
+  <span class="prop">serviceId</span>: <span class="type">string</span>;
+  <span class="prop">serviceName</span>: <span class="type">string</span>;
+  <span class="prop">category</span>?: <span class="type">string</span>;
+  <span class="prop">description</span>?: <span class="type">string</span>;
+  <span class="prop">side</span>?: <span class="string">'top'</span> | <span class="string">'bottom'</span> | <span class="string">'left'</span> | <span class="string">'right'</span>;
+  <span class="prop">children</span>: <span class="type">React.ReactNode</span>;
+}</code></pre>
+    </div>
+
+    <div class="sub-item">
+      <h4>1-5. 중복 TooltipProvider 제거</h4>
+      <div>
+        <span class="file-tag">src/components/env/env-data-table.tsx</span>
+        <span class="file-tag">src/components/env/env-filter-bar.tsx</span>
+      </div>
+      <div class="reason">전역 Provider가 이미 존재하므로 로컬 <code>&lt;TooltipProvider&gt;</code> 래핑 제거</div>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="phase-header p2">
+      <span class="phase-num">P2</span>
+      <h3>Phase 2: Tier 1 — 아이콘 버튼 전수 적용</h3>
+    </div>
+
+    <div class="sub-item">
+      <h4><span class="priority-tag p0">P0 핵심</span> 핵심 동작 버튼</h4>
+      <ul>
+        <li><span class="file-tag">env-data-table.tsx</span> — Copy("복사"), Eye/EyeOff("값 표시"/"숨기기"), Pencil("수정"), MoreHorizontal("더보기")</li>
+        <li><span class="file-tag">map-toolbar.tsx</span> — 기존 title → IconTooltip 전환 ("전체 보기", "PNG 다운로드", "자동 정렬", "범례")</li>
+        <li><span class="file-tag">node-edit-toolbar.tsx</span> — "연결 시작", "상세 보기", "서비스 제거"</li>
+      </ul>
+    </div>
+
+    <div class="sub-item">
+      <h4><span class="priority-tag p1-tag">P1</span> 레이아웃 / 네비게이션</h4>
+      <ul>
+        <li><span class="file-tag">header.tsx</span> — 테마 토글, 사용자 메뉴</li>
+        <li><span class="file-tag">app-header.tsx</span> — 모바일 메뉴</li>
+        <li><span class="file-tag">blog-hub.tsx</span> — "링크 복사"</li>
+      </ul>
+    </div>
+
+    <div class="sub-item">
+      <h4><span class="priority-tag p2-tag">P2</span> 기능 패널</h4>
+      <ul>
+        <li><span class="file-tag">ai-chat-panel.tsx</span> — "대화 초기화", "최대화/복원"</li>
+        <li><span class="file-tag">service-item.tsx</span> — ExternalLink("외부 링크")</li>
+        <li><span class="file-tag">layer-card.tsx</span> — 레이어 아이콘 (Monitor/Server/Wrench)</li>
+      </ul>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="phase-header p3">
+      <span class="phase-num">P3</span>
+      <h3>Phase 3: Tier 2 — 서비스 아이콘 툴팁</h3>
+    </div>
+
+    <div class="sub-item">
+      <h4>3-1. 서비스 설명 상수 생성</h4>
+      <div><span class="file-tag new">src/lib/constants/service-descriptions.ts (신규)</span></div>
+      <ul>
+        <li>형태: <code>Record&lt;string, string&gt;</code> — slug별 50자 이내 한 줄 설명</li>
+        <li>소스: seed 데이터 <code>services.ts</code>의 <code>description_ko</code> 축약</li>
+        <li>헬퍼: <code>getServiceDescription(slug: string): string | undefined</code></li>
+      </ul>
+    </div>
+
+    <div class="sub-item">
+      <h4>3-2. ServiceTooltip 적용 대상</h4>
+      <ul>
+        <li><span class="file-tag">dashboard/service-item.tsx</span> — 대시보드 서비스 카드</li>
+        <li><span class="file-tag">dashboard/connection-flow-map.tsx</span> — FlowPill 내 서비스 아이콘</li>
+        <li><span class="file-tag">service/add-service-dialog.tsx</span> — 서비스 선택 다이얼로그</li>
+        <li><span class="file-tag">service/service-list-item.tsx</span> — 서비스 목록</li>
+      </ul>
+    </div>
+
+    <!-- Phase 4 -->
+    <div class="phase-header p4">
+      <span class="phase-num">P4</span>
+      <h3>Phase 4: Tier 3 — NodeTooltip 고도화</h3>
+    </div>
+
+    <div class="sub-item">
+      <h4>4-1. description 필드 추가</h4>
+      <ul>
+        <li><span class="file-tag">service-map/node-tooltip.tsx</span> — <code>description</code> prop 추가, 이름 아래에 1줄 설명 표시</li>
+        <li><span class="file-tag">service-map/service-node.tsx</span> — <code>ServiceNodeData</code>에 <code>description</code> 추가</li>
+        <li>데이터 소스: DB의 <code>services.description_ko</code> (useServiceMapNodes 훅에서 이미 접근 가능)</li>
+      </ul>
+    </div>
+
+    <!-- Phase 5 -->
+    <div class="phase-header p5">
+      <span class="phase-num">P5</span>
+      <h3>Phase 5: 모바일 대응</h3>
+    </div>
+
+    <div class="sub-item">
+      <h4>모바일 최적화 전략</h4>
+      <ul>
+        <li>기존 <code>src/hooks/use-mobile.ts</code> 활용</li>
+        <li>아이콘 버튼: 모바일에서 가능한 경우 텍스트 라벨 병행 (<code>hidden sm:inline</code> 패턴 확대)</li>
+        <li>서비스맵 노드: 모바일 탭 시 하단 Sheet로 상세 정보 (기존 <code>Sheet</code> 컴포넌트 활용)</li>
+        <li>Radix Tooltip은 터치에서 long-press로 동작 (기본 지원)</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- 주요 파일 목록 -->
+  <section id="files">
+    <h2><span class="icon" style="background:rgba(6,182,212,0.12);color:var(--accent-cyan);">📁</span> 주요 파일 목록</h2>
+
+    <h3>수정 대상 (13개 파일)</h3>
+    <table class="file-table">
+      <thead>
+        <tr><th>파일</th><th>변경 내용</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>providers.tsx</td><td>delayDuration=400, skipDelayDuration=200</td></tr>
+        <tr><td>ui/tooltip.tsx</td><td>sideOffset 기본값 0→4</td></tr>
+        <tr><td>env/env-data-table.tsx</td><td>중복 TooltipProvider 제거 + IconTooltip 적용</td></tr>
+        <tr><td>env/env-filter-bar.tsx</td><td>중복 TooltipProvider 제거</td></tr>
+        <tr><td>service-map/node-tooltip.tsx</td><td>description prop 추가</td></tr>
+        <tr><td>service-map/service-node.tsx</td><td>ServiceNodeData에 description 추가</td></tr>
+        <tr><td>service-map/map-toolbar.tsx</td><td>title → IconTooltip 전환</td></tr>
+        <tr><td>service-map/node-edit-toolbar.tsx</td><td>title → IconTooltip 전환</td></tr>
+        <tr><td>dashboard/service-item.tsx</td><td>ServiceTooltip 적용</td></tr>
+        <tr><td>dashboard/layer-card.tsx</td><td>IconTooltip 적용</td></tr>
+        <tr><td>dashboard/connection-flow-map.tsx</td><td>ServiceTooltip 적용</td></tr>
+        <tr><td>layout/header.tsx</td><td>IconTooltip 적용</td></tr>
+        <tr><td>ai/ai-chat-panel.tsx</td><td>IconTooltip 적용</td></tr>
+      </tbody>
+    </table>
+
+    <h3>신규 생성 (3개 파일)</h3>
+    <table class="file-table">
+      <thead>
+        <tr><th>파일</th><th>용도</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>ui/icon-tooltip.tsx</td><td>Tier 1 래퍼 (아이콘 버튼용)</td></tr>
+        <tr><td>ui/service-tooltip.tsx</td><td>Tier 2 래퍼 (서비스 아이콘용)</td></tr>
+        <tr><td>constants/service-descriptions.ts</td><td>서비스 한 줄 설명 중앙 저장소</td></tr>
+      </tbody>
+    </table>
+
+    <h3>재사용 기존 유틸</h3>
+    <table class="file-table">
+      <thead>
+        <tr><th>파일</th><th>용도</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>ui/tooltip.tsx</td><td>기반 Tooltip 컴포넌트 (Radix)</td></tr>
+        <tr><td>constants/service-brands.ts</td><td>서비스 아이콘/색상 메타데이터</td></tr>
+        <tr><td>constants/service-filters.ts</td><td>allCategoryLabels, domainLabels</td></tr>
+        <tr><td>hooks/use-mobile.ts</td><td>모바일 감지 훅</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- 검증 방법 -->
+  <section id="verify">
+    <h2><span class="icon" style="background:rgba(34,197,94,0.12);color:var(--brand-green);">✅</span> 검증 방법</h2>
+    <ul class="check-list">
+      <li>
+        <span class="check-icon">1</span>
+        <div><strong>타입 체크</strong>: <code>npm run typecheck</code> — 모든 인터페이스 변경 반영 확인</div>
+      </li>
+      <li>
+        <span class="check-icon">2</span>
+        <div><strong>빌드</strong>: <code>npm run build</code> — 빌드 성공 확인</div>
+      </li>
+      <li>
+        <span class="check-icon">3</span>
+        <div>
+          <strong>로컬 확인</strong> (<code>npm run dev</code>):
+          <ul style="margin-top: 8px;">
+            <li>서비스맵 노드 호버 → NodeTooltip에 description 표시</li>
+            <li>아이콘 버튼(Copy, Eye 등) 호버 → 400ms 후 Simple Label 표시</li>
+            <li>연속 호버 시 skipDelay(200ms) 동작 확인 (두 번째부터 즉시 표시)</li>
+            <li>대시보드 서비스 아이콘 호버 → 서비스명 + 카테고리 표시</li>
+            <li>모바일 뷰포트(375px)에서 long-press 동작 확인</li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <span class="check-icon">4</span>
+        <div><strong>접근성</strong>: 키보드 Tab으로 아이콘 버튼 포커스 시 Tooltip 표시 확인</div>
+      </li>
+      <li>
+        <span class="check-icon">5</span>
+        <div><strong>기존 테스트</strong>: <code>npm run test</code> — 기존 테스트 깨지지 않는지 확인</div>
+      </li>
+    </ul>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- 벤치마킹 참조 -->
+  <section id="benchmark">
+    <h2><span class="icon" style="background:rgba(243,63,94,0.12);color:var(--accent-rose);">🔍</span> 벤치마킹 참조</h2>
+    <p style="margin-bottom: 16px;">상세 보고서: <code>docs/benchmark/tooltip-ux-trends/report.md</code></p>
+    <div class="benchmark-grid">
+      <div class="benchmark-card">
+        <div class="name">Vercel</div>
+        <div class="point"><code>skipDelayDuration</code>으로 연속 탐색 최적화</div>
+      </div>
+      <div class="benchmark-card">
+        <div class="name">GitHub Primer</div>
+        <div class="point">3단계 delay 분류 (short/medium/long), Label vs Description 구분</div>
+      </div>
+      <div class="benchmark-card">
+        <div class="name">Linear</div>
+        <div class="point">단축키 표시로 파워유저 전환 유도</div>
+      </div>
+      <div class="benchmark-card">
+        <div class="name">Figma</div>
+        <div class="point">밀집 아이콘 환경에서 빠른 delay</div>
+      </div>
+      <div class="benchmark-card">
+        <div class="name">Notion</div>
+        <div class="point">Progressive disclosure — 맥락별 다른 정보 수준</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>

@@ -73,7 +73,24 @@ polar listen http://localhost:3000/api/polar/webhook
 7. 사용자: success URL로 redirect
 ```
 
-## 6. Stripe 마이그레이션 노트
+## 6. 트러블슈팅
+
+### `Product is archived` (checkout 502)
+- **증상**: `/api/polar/checkout` 502, 응답에 `PolarRequestValidationError` / `"Product is archived."` + 거부된 product ID.
+- **원인**: `NEXT_PUBLIC_POLAR_PRODUCT_*`에 설정된 product ID가 Polar 대시보드에서 **아카이브(보관)** 상태. 아카이브 상품은 checkout에 사용할 수 없음.
+- **조치**:
+  1. Polar Dashboard → Products에서 거부된 ID와 일치하는 상품을 찾는다(4개 env 값 중 어느 것인지 확인 — PRO/TEAM × 월/연).
+  2. 해당 상품을 **un-archive** 하거나, 활성 상품을 새로 만들고 그 **새 product ID**로 교체.
+  3. 배포 환경(Cloudflare/Vercel)과 `.env.local`의 `NEXT_PUBLIC_POLAR_PRODUCT_*` 값을 갱신.
+  4. **재배포 필수** — `NEXT_PUBLIC_*`는 빌드 타임에 번들로 굳어지므로 env만 바꾸고 재배포하지 않으면 반영되지 않음.
+- 미설정/빈 값이면 checkout 호출 없이 "서비스 안정화 후 결제 연결" 토스트만 노출(`pricing-content.tsx`).
+
+### subscriptions 406 (콘솔 네트워크 오류)
+- **증상**: 브라우저 콘솔에 `rest/v1/subscriptions?select=*&user_id=eq...` 406.
+- **원인**: 구독 레코드가 없는(신규/무료) 사용자에 `.single()`을 쓰면 PostgREST가 406 반환. 기능상 free 폴백으로 처리되지만 콘솔 오류로 남음.
+- **조치**: `src/lib/queries/subscription.ts`에서 `.single()` → `.maybeSingle()`로 0건도 200+null 반환하게 수정(적용 완료).
+
+## 7. Stripe 마이그레이션 노트
 
 - 기존 Stripe 코드(`/api/stripe/`)는 유지 (기존 구독자 호환)
 - 새 구독은 모두 Polar로 처리

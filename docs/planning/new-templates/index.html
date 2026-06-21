@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linkmap 신규 템플릿 5종 기획 총괄</title>
+<style>
+  :root { --bg: #f8fafc; --card: #fff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --radius: 16px; --brand: #2563eb; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard Variable', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+  .container { max-width: 1000px; margin: 0 auto; padding: 48px 24px; }
+  h1 { font-size: 2.2rem; text-align: center; margin-bottom: 8px; }
+  .subtitle { text-align: center; color: var(--muted); font-size: 1rem; margin-bottom: 40px; }
+  h2 { font-size: 1.4rem; margin: 48px 0 20px; padding-bottom: 8px; border-bottom: 2px solid var(--brand); }
+
+  .template-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 24px 0; }
+  @media (max-width: 640px) { .template-grid { grid-template-columns: 1fr; } }
+
+  .template-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+  .template-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+  .template-card.featured { grid-column: 1 / -1; }
+  .card-header { padding: 24px; display: flex; align-items: center; gap: 16px; }
+  .card-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+  .card-body { padding: 0 24px 24px; }
+  .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .tag { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+  .tag-priority { background: #fef2f2; color: #dc2626; }
+  .tag-status { background: #f0fdf4; color: #16a34a; }
+  .tag-effort { background: #f0f9ff; color: #0369a1; }
+  .tag-viral { background: #fdf4ff; color: #a21caf; }
+
+  .card-link { display: inline-block; margin-top: 16px; padding: 8px 20px; background: var(--brand); color: #fff; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-decoration: none; transition: background 0.2s; }
+  .card-link:hover { background: #1d4ed8; }
+
+  .summary-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+  .summary-table th, .summary-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .summary-table th { background: #f1f5f9; font-weight: 600; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; }
+  .priority-1 { color: #dc2626; font-weight: 700; }
+  .priority-2 { color: #ea580c; font-weight: 700; }
+  .priority-3 { color: #d97706; font-weight: 700; }
+
+  .insight-box { background: linear-gradient(135deg, #eff6ff, #f5f3ff); border: 1px solid #c7d2fe; border-radius: var(--radius); padding: 24px; margin: 24px 0; }
+  .insight-box h3 { font-size: 1rem; color: var(--brand); margin-bottom: 8px; }
+
+  .existing-templates { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+  .existing-tag { padding: 6px 14px; background: #e2e8f0; border-radius: 8px; font-size: 0.8rem; color: #475569; }
+
+  footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Linkmap 신규 템플릿 5종 기획</h1>
+<p class="subtitle">바이브코더 타겟 | 원클릭 배포 확장 | 2026-04-13</p>
+
+<h2>현재 운영 중인 템플릿 (7종)</h2>
+<div class="existing-templates">
+  <span class="existing-tag">Personal Brand (개인 브랜드)</span>
+  <span class="existing-tag">Dev Showcase (개발자 포트폴리오)</span>
+  <span class="existing-tag">Link Card (링크 카드)</span>
+  <span class="existing-tag">Digital Namecard (디지털 명함)</span>
+  <span class="existing-tag">Freelancer Page (프리랜서 포트폴리오)</span>
+  <span class="existing-tag">Small Biz (소상공인)</span>
+  <span class="existing-tag">Small Biz Cafe (카페)</span>
+</div>
+
+<h2>신규 템플릿 5종</h2>
+
+<div class="template-grid">
+
+  <!-- 1. Resume Site -->
+  <div class="template-card">
+    <div class="card-header">
+      <div class="card-icon" style="background:#dbeafe;">&#128196;</div>
+      <div>
+        <div style="font-size:1.15rem; font-weight:700;">온라인 이력서</div>
+        <div style="font-size:0.85rem; color:var(--muted);">resume-site</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p style="font-size:0.9rem;">취업 준비생/이직자를 위한 범용 웹 이력서. 노션 이력서의 진화형.</p>
+      <div class="card-tags">
+        <span class="tag tag-priority">1순위</span>
+        <span class="tag tag-status">시드 데이터 존재</span>
+        <span class="tag tag-effort">작업량: 낮음</span>
+      </div>
+      <a href="02-resume-site.html" class="card-link">상세 기획서 보기</a>
+    </div>
+  </div>
+
+  <!-- 2. Invitation -->
+  <div class="template-card">
+    <div class="card-header">
+      <div class="card-icon" style="background:#fef3c7;">&#128141;</div>
+      <div>
+        <div style="font-size:1.15rem; font-weight:700;">모바일 초대장</div>
+        <div style="font-size:0.85rem; color:var(--muted);">invitation</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p style="font-size:0.9rem;">결혼식, 돌잔치, 생일 초대장. D-Day 카운트다운 + 카카오 공유 최적화.</p>
+      <div class="card-tags">
+        <span class="tag tag-priority">2순위</span>
+        <span class="tag tag-viral">바이럴성 최상</span>
+        <span class="tag tag-effort">작업량: 중간</span>
+      </div>
+      <a href="01-invitation.html" class="card-link">상세 기획서 보기</a>
+    </div>
+  </div>
+
+  <!-- 3. Pet Profile -->
+  <div class="template-card">
+    <div class="card-header">
+      <div class="card-icon" style="background:#fef9c3;">&#128054;</div>
+      <div>
+        <div style="font-size:1.15rem; font-weight:700;">펫 프로필</div>
+        <div style="font-size:0.85rem; color:var(--muted);">pet-profile</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p style="font-size:0.9rem;">MZ세대 반려동물 프로필. 성격 태그, 실종 모드, 건강 정보.</p>
+      <div class="card-tags">
+        <span class="tag tag-priority">3순위</span>
+        <span class="tag tag-viral">바이럴성 최상</span>
+        <span class="tag tag-effort">작업량: 중간</span>
+      </div>
+      <a href="05-pet-profile.html" class="card-link">상세 기획서 보기</a>
+    </div>
+  </div>
+
+  <!-- 4. Class Landing -->
+  <div class="template-card">
+    <div class="card-header">
+      <div class="card-icon" style="background:#ede9fe;">&#127891;</div>
+      <div>
+        <div style="font-size:1.15rem; font-weight:700;">클래스/강의 소개</div>
+        <div style="font-size:0.85rem; color:var(--muted);">class-landing</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p style="font-size:0.9rem;">온라인 강의/원데이 클래스 랜딩. 가격표, 커리큘럼, 수강 후기.</p>
+      <div class="card-tags">
+        <span class="tag tag-priority">4순위</span>
+        <span class="tag tag-effort">작업량: 중간</span>
+      </div>
+      <a href="03-class-landing.html" class="card-link">상세 기획서 보기</a>
+    </div>
+  </div>
+
+  <!-- 5. Photo Gallery - full width -->
+  <div class="template-card featured">
+    <div class="card-header">
+      <div class="card-icon" style="background:#f3f4f6;">&#128247;</div>
+      <div>
+        <div style="font-size:1.15rem; font-weight:700;">포토 갤러리</div>
+        <div style="font-size:0.85rem; color:var(--muted);">photo-gallery</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p style="font-size:0.9rem;">사진작가/아티스트를 위한 비주얼 포트폴리오. Masonry 레이아웃, 라이트박스 풀스크린 뷰어, 컬렉션 분류. 기술적 구현 복잡도가 가장 높아 5순위이나, 완성 시 차별화가 가장 큼.</p>
+      <div class="card-tags">
+        <span class="tag tag-priority">5순위</span>
+        <span class="tag tag-effort">작업량: 높음</span>
+      </div>
+      <a href="04-photo-gallery.html" class="card-link">상세 기획서 보기</a>
+    </div>
+  </div>
+
+</div>
+
+<h2>구현 우선순위 & 비교</h2>
+<table class="summary-table">
+  <thead>
+    <tr>
+      <th>순위</th>
+      <th>템플릿</th>
+      <th>핵심 타겟</th>
+      <th>작업량</th>
+      <th>바이럴성</th>
+      <th>선정 이유</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="priority-1">1</td>
+      <td><strong>resume-site</strong></td>
+      <td>취준생/이직자</td>
+      <td>낮음</td>
+      <td>중간</td>
+      <td>시드 데이터 존재 + 범용 수요 최대</td>
+    </tr>
+    <tr>
+      <td class="priority-1">2</td>
+      <td><strong>invitation</strong></td>
+      <td>결혼/돌잔치</td>
+      <td>중간</td>
+      <td><strong>최상</strong></td>
+      <td>연 수백만건 수요 + 자연 바이럴</td>
+    </tr>
+    <tr>
+      <td class="priority-2">3</td>
+      <td><strong>pet-profile</strong></td>
+      <td>MZ 펫팸족</td>
+      <td>중간</td>
+      <td><strong>최상</strong></td>
+      <td>바이럴 잠재력 + 블루오션</td>
+    </tr>
+    <tr>
+      <td class="priority-3">4</td>
+      <td><strong>class-landing</strong></td>
+      <td>강사/코치</td>
+      <td>중간</td>
+      <td>중간</td>
+      <td>크리에이터 이코노미 성장</td>
+    </tr>
+    <tr>
+      <td class="priority-3">5</td>
+      <td><strong>photo-gallery</strong></td>
+      <td>사진작가</td>
+      <td>높음</td>
+      <td>낮음</td>
+      <td>비주얼 차별화 최대</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="insight-box">
+  <h3>핵심 인사이트</h3>
+  <ul style="padding-left:20px; font-size:0.9rem;">
+    <li><strong>resume-site</strong>: 시드 데이터가 이미 존재하므로 가장 빠르게 출시 가능 (활성화 + 템플릿 파일만)</li>
+    <li><strong>invitation + pet-profile</strong>: 템플릿 자체가 공유 대상이 되므로 "Powered by Linkmap" 자연 마케팅 채널</li>
+    <li>5개 모두 기존 공유 컴포넌트(AnimatedReveal, CountUp, Gallery, SocialIcon) 재사용으로 개발 효율 극대화</li>
+    <li>카테고리 확장: 현재 "개인/크리에이터 4 + 비즈니스 2" → 추가 후 "개인 7 + 비즈니스 3 + 교육 1 + 반려동물 1"</li>
+  </ul>
+</div>
+
+<footer>
+  Linkmap New Template Planning &mdash; 2026-04-13 &mdash; 바이브코더 타겟 원클릭 배포 확장 전략
+</footer>
+
+</div>
+</body>
+</html>

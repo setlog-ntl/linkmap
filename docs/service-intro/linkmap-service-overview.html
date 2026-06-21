@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linkmap 서비스 소개</title>
+<style>
+  :root {
+    --bg: #0a0f1c;
+    --card: #111827;
+    --border: #1e293b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --blue: #3b82f6;
+    --green: #22c55e;
+    --violet: #8b5cf6;
+    --amber: #f59e0b;
+    --orange: #f97316;
+    --pink: #ec4899;
+    --cyan: #06b6d4;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 0;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: 80px 24px 60px;
+    background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.06), rgba(34,197,94,0.04));
+    border-bottom: 1px solid var(--border);
+  }
+  .hero h1 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--blue), var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 16px;
+  }
+  .hero .tagline {
+    font-size: 1.15rem;
+    color: var(--muted);
+    max-width: 700px;
+    margin: 0 auto 28px;
+  }
+  .hero .url {
+    display: inline-block;
+    color: var(--blue);
+    text-decoration: none;
+    font-size: 0.9rem;
+    border: 1px solid rgba(59,130,246,0.3);
+    padding: 6px 18px;
+    border-radius: 100px;
+    transition: all 0.2s;
+  }
+  .hero .url:hover { background: rgba(59,130,246,0.1); }
+  .hero .date { color: var(--muted); font-size: 0.8rem; margin-top: 12px; }
+
+  /* Section */
+  section { padding: 56px 0; border-bottom: 1px solid var(--border); }
+  section:last-child { border-bottom: none; }
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2 .num {
+    display: inline-flex;
+    width: 32px; height: 32px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(59,130,246,0.12);
+    color: var(--blue);
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 28px 0 12px;
+    color: var(--text);
+  }
+  p, li { color: var(--muted); font-size: 0.95rem; }
+  p { margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 16px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--text); }
+
+  /* Cards grid */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin: 20px 0; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: rgba(59,130,246,0.3); }
+  .card h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card p { font-size: 0.88rem; margin-bottom: 0; }
+  .card .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  /* Stats strip */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin: 24px 0;
+  }
+  .stat {
+    text-align: center;
+    padding: 20px 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+  .stat .value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--blue);
+    display: block;
+  }
+  .stat .label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.88rem;
+  }
+  th, td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: rgba(59,130,246,0.06);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  td { color: var(--muted); }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* Pricing */
+  .pricing { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0; }
+  .plan {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    position: relative;
+  }
+  .plan.popular { border-color: var(--blue); }
+  .plan.popular::after {
+    content: 'POPULAR';
+    position: absolute;
+    top: -10px;
+    right: 16px;
+    background: var(--blue);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.05em;
+  }
+  .plan .name { font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  .plan .price { font-size: 1.8rem; font-weight: 800; color: var(--text); margin-bottom: 16px; }
+  .plan .price span { font-size: 0.85rem; font-weight: 400; color: var(--muted); }
+  .plan ul { list-style: none; padding: 0; }
+  .plan li { padding: 4px 0; font-size: 0.85rem; color: var(--muted); }
+  .plan li::before { content: ''; margin-right: 6px; }
+
+  /* Funnel diagram */
+  .funnel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin: 20px 0;
+  }
+  .funnel-row {
+    padding: 20px 24px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+  .funnel-row.top { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.15); }
+  .funnel-row.bottom { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.12); }
+  .funnel-row .title { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+  .funnel-row .desc { font-size: 0.85rem; color: var(--muted); }
+  .funnel-arrow { text-align: center; color: var(--muted); font-size: 1.2rem; margin: 4px 0; }
+
+  /* Template grid */
+  .tmpl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin: 16px 0; }
+  .tmpl {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 0.85rem;
+  }
+  .tmpl .name { font-weight: 600; color: var(--text); }
+  .tmpl .desc { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+  /* Comparison table */
+  .cmp-table td:first-child { color: var(--text); font-weight: 500; }
+  .cmp-table .yes { color: var(--green); }
+  .cmp-table .no { color: var(--muted); opacity: 0.5; }
+  .cmp-table .highlight { color: var(--blue); font-weight: 600; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 40px 24px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    border-top: 1px solid var(--border);
+  }
+  .footer a { color: var(--blue); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 1.8rem; }
+    .pricing { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .cards { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <h1>Linkmap</h1>
+  <p class="tagline">
+    외부 서비스 연결을 시각화하고, 환경변수를 안전하게 관리하며,<br>
+    원클릭으로 웹사이트를 배포하는 DevTools 플랫폼
+  </p>
+  <a class="url" href="https://www.linkmap.biz" target="_blank">www.linkmap.biz</a>
+  <p class="date">2026년 3월 기준</p>
+</div>
+
+<div class="container">
+
+<!-- Stats -->
+<section>
+  <h2><span class="num">0</span> 서비스 현황</h2>
+  <div class="stats">
+    <div class="stat"><span class="value">79</span><span class="label">지원 서비스</span></div>
+    <div class="stat"><span class="value">139</span><span class="label">API 엔드포인트</span></div>
+    <div class="stat"><span class="value">17</span><span class="label">배포 템플릿</span></div>
+    <div class="stat"><span class="value">35+</span><span class="label">블로그 포스트</span></div>
+    <div class="stat"><span class="value">161</span><span class="label">가이드 페이지</span></div>
+    <div class="stat"><span class="value">93</span><span class="label">DB 마이그레이션</span></div>
+    <div class="stat"><span class="value">35+</span><span class="label">DB 테이블</span></div>
+    <div class="stat"><span class="value">102+</span><span class="label">테스트</span></div>
+  </div>
+</section>
+
+<!-- Core Value -->
+<section>
+  <h2><span class="num">1</span> 핵심 가치</h2>
+
+  <div class="funnel">
+    <div class="funnel-row top">
+      <div class="title">1층 (진입) &mdash; 원클릭 배포로 시작</div>
+      <div class="desc">템플릿 선택 &rarr; 내용 편집 &rarr; 3분 배포 완료 &nbsp;|&nbsp; 타겟: 코딩 경험 0인 바이브 코더</div>
+    </div>
+    <div class="funnel-arrow">&darr;</div>
+    <div class="funnel-row bottom">
+      <div class="title">2층 (성장) &mdash; 배우면서 만들고, 만들면서 관리한다</div>
+      <div class="desc">가이드 학습 &rarr; 서비스 연결 &rarr; 환경변수 관리 &rarr; AI 분석 &nbsp;|&nbsp; 타겟: 성장하는 개발자</div>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <h4>&#x1f5fa; 서비스 시각화</h4>
+      <p>프로젝트에 연결된 모든 외부 서비스를 인터랙티브 맵으로 한눈에 파악. React Flow 기반 3가지 뷰 제공.</p>
+    </div>
+    <div class="card">
+      <h4>&#x1f510; 환경변수 안전 관리</h4>
+      <p>AES-256-GCM 암호화로 API 키/시크릿을 안전하게 저장. 환경별 분리, GitHub Secrets 동기화.</p>
+    </div>
+    <div class="card">
+      <h4>&#x1f680; 원클릭 배포</h4>
+      <p>17종 템플릿으로 코딩 없이 3분 만에 웹사이트 배포. GitHub Pages 자동 파이프라인.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section>
+  <h2><span class="num">2</span> 주요 기능</h2>
+
+  <div class="cards">
+    <div class="card">
+      <h4>&#x1f5fa; 서비스맵</h4>
+      <p>한눈에 보기 / 맵 보기 / 의존성 보기 3가지 뷰. Zone 그룹핑(Frontend/Backend/DevTools/ETC), 편집 모드, 포커스 모드, 공유 링크 생성.</p>
+    </div>
+    <div class="card">
+      <h4>&#x1f511; 환경변수</h4>
+      <p>AES-256-GCM 암호화 저장. dev/staging/prod 환경 분리. .env 다운로드, GitHub Secrets 동기화, 충돌 감지, 복원 기능.</p>
+    </div>
+    <div class="card">
+      <h4>&#x1f4e6; 원클릭 배포</h4>
+      <p>17종 템플릿: 링크 카드, 디지털 명함, 개발자 포트폴리오, 소상공인, 카페, SaaS 랜딩 등. GitHub Pages 무료 배포, 환경변수 자동 주입.</p>
+    </div>
+    <div class="card">
+      <h4>&#x1f916; AI 분석 (7가지)</h4>
+      <p>AI Chat, Stack Architect, Env Doctor, Cost Report, Map Narrator, Service Comparison, Command. OpenAI/Anthropic/Google 지원.</p>
+    </div>
+    <div class="card">
+      <h4>&#x1f465; 팀 협업</h4>
+      <p>Owner/Editor/Viewer 역할 관리. 프로젝트별 권한, 감사 로그, 최대 25명 (Team 플랜).</p>
+    </div>
+    <div class="card">
+      <h4>&#x1f4ca; 대시보드</h4>
+      <p>Architecture Flow 파이프라인, Health Score, 비용 관리, 온보딩 체크리스트, 빠른 실행 패널.</p>
+    </div>
+    <div class="card">
+      <h4>&#x1f3c6; 쇼케이스</h4>
+      <p>프로젝트 공개, 좋아요/댓글, 월간 픽, 리더보드. portfolio/business/blog/landing/community 카테고리.</p>
+    </div>
+    <div class="card">
+      <h4>&#x1f527; 개발자 도구</h4>
+      <p>MCP 서버 (Claude/Cursor 통합, 6개 도구), CLI (10개 명령어), API 토큰, linkmap.json 스키마.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Templates -->
+<section>
+  <h2><span class="num">3</span> 원클릭 배포 템플릿 (17종)</h2>
+  <div class="tmpl-grid">
+    <div class="tmpl"><div class="name">Link Card</div><div class="desc">SNS 링크 카드 (Linktree 대안)</div></div>
+    <div class="tmpl"><div class="name">Digital Namecard</div><div class="desc">온라인 명함 (vCard/NFC)</div></div>
+    <div class="tmpl"><div class="name">Personal Brand</div><div class="desc">개인 브랜딩 페이지</div></div>
+    <div class="tmpl"><div class="name">Dev Showcase</div><div class="desc">개발자 포트폴리오</div></div>
+    <div class="tmpl"><div class="name">Freelancer Page</div><div class="desc">프리랜서 홍보 페이지</div></div>
+    <div class="tmpl"><div class="name">Resume Site</div><div class="desc">이력서 사이트</div></div>
+    <div class="tmpl"><div class="name">Small Business</div><div class="desc">소상공인 홈페이지</div></div>
+    <div class="tmpl"><div class="name">Small Biz Cafe</div><div class="desc">카페/음식점 전용</div></div>
+    <div class="tmpl"><div class="name">Product Landing</div><div class="desc">상품 랜딩 페이지</div></div>
+    <div class="tmpl"><div class="name">SaaS Landing</div><div class="desc">SaaS 서비스 소개</div></div>
+    <div class="tmpl"><div class="name">QR Menu Pro</div><div class="desc">QR 메뉴판</div></div>
+    <div class="tmpl"><div class="name">Newsletter</div><div class="desc">뉴스레터 구독 페이지</div></div>
+    <div class="tmpl"><div class="name">Community Hub</div><div class="desc">커뮤니티 허브</div></div>
+    <div class="tmpl"><div class="name">Study Recruit</div><div class="desc">스터디 모집 페이지</div></div>
+    <div class="tmpl"><div class="name">Event Page</div><div class="desc">이벤트/행사 페이지</div></div>
+    <div class="tmpl"><div class="name">Nonprofit</div><div class="desc">비영리 기관 사이트</div></div>
+    <div class="tmpl"><div class="name">+ 커스텀</div><div class="desc">사용자 템플릿 추가</div></div>
+  </div>
+</section>
+
+<!-- Service Catalog -->
+<section>
+  <h2><span class="num">4</span> 서비스 카탈로그 (79개)</h2>
+  <table>
+    <tr><th>카테고리</th><th>서비스 예시</th><th>수량</th></tr>
+    <tr><td><strong>AI/ML</strong></td><td>OpenAI, Anthropic, Gemini, Groq, DeepSeek, Perplexity, ElevenLabs</td><td>15+</td></tr>
+    <tr><td><strong>배포/호스팅</strong></td><td>Vercel, Netlify, Cloudflare, Railway, Render, Fly.io</td><td>8+</td></tr>
+    <tr><td><strong>데이터베이스</strong></td><td>Supabase, Firebase, PlanetScale, Neon, MongoDB Atlas</td><td>6+</td></tr>
+    <tr><td><strong>인증/로그인</strong></td><td>Clerk, NextAuth, Kakao, Google, Apple, GitHub OAuth</td><td>6+</td></tr>
+    <tr><td><strong>소셜 API</strong></td><td>Instagram, YouTube, X(Twitter), TikTok, LinkedIn, Threads</td><td>6+</td></tr>
+    <tr><td><strong>분석</strong></td><td>GA4, Mixpanel, Plausible, PostHog, Microsoft Clarity</td><td>5+</td></tr>
+    <tr><td><strong>이메일/SMS</strong></td><td>Resend, SendGrid, Twilio, OneSignal</td><td>4+</td></tr>
+    <tr><td><strong>도메인</strong></td><td>Namecheap, GoDaddy, Cloudflare Registrar</td><td>4+</td></tr>
+    <tr><td><strong>광고</strong></td><td>Google AdSense, Kakao AdFit, Criteo, Taboola</td><td>4+</td></tr>
+    <tr><td><strong>결제/CMS/스토리지</strong></td><td>Stripe, Sanity, Cloudinary, AWS S3 등</td><td>10+</td></tr>
+  </table>
+</section>
+
+<!-- Content Assets -->
+<section>
+  <h2><span class="num">5</span> 콘텐츠 자산</h2>
+
+  <h3>가이드 (50+ 메인, 161개 서브)</h3>
+  <table>
+    <tr><th>학습 단계</th><th>가이드</th><th>핵심 내용</th></tr>
+    <tr><td>시작 (4개)</td><td>AI 도구, 프론트엔드, 패키지 매니저, 버전 관리</td><td>도구 선택, 화면 만들기, npm, Git</td></tr>
+    <tr><td>개발 (4개)</td><td>환경변수, API, 백엔드, 인증</td><td>시크릿 관리, REST API, DB, 로그인</td></tr>
+    <tr><td>완성 (2개)</td><td>디자인/UI, 보안</td><td>UI 원칙, 웹 보안 체크리스트</td></tr>
+    <tr><td>배포 (3개)</td><td>도메인, 서버, 배포</td><td>도메인 연결, 호스팅, 배포 방식</td></tr>
+    <tr><td>확장 (4개)</td><td>알림, 결제, 모니터링, 자동화</td><td>이메일/알림, Stripe, 에러 추적</td></tr>
+  </table>
+  <p>서비스 특화 가이드: GitHub(30분) / Cloudflare(40분) / OpenAI(15분) / Supabase(20분) / Vercel(15분)</p>
+
+  <h3>블로그 (35개 게시글)</h3>
+  <table>
+    <tr><th>카테고리</th><th>수량</th><th>대표 콘텐츠</th></tr>
+    <tr><td>바이브 코딩</td><td>14</td><td>시작 가이드, 학습 로드맵, 도구 비교, 포트폴리오 30분</td></tr>
+    <tr><td>보안/시크릿</td><td>7</td><td>.env 위험성, 시크릿 유출 통계(2,380만 건/년)</td></tr>
+    <tr><td>AI 코드 보안</td><td>3</td><td>AI 생성 코드 보안 결함(45%), 보안 체크리스트</td></tr>
+    <tr><td>비즈니스</td><td>4</td><td>수익 모델($100-1,000/월), Stripe 연동</td></tr>
+    <tr><td>기술/개발 스토리</td><td>8</td><td>Supabase 입문, 503 에러 해결, ERP 담당자 개발기</td></tr>
+  </table>
+</section>
+
+<!-- Pricing -->
+<section>
+  <h2><span class="num">6</span> 요금제</h2>
+  <div class="pricing">
+    <div class="plan">
+      <div class="name">Free</div>
+      <div class="price">&#8361;0</div>
+      <ul>
+        <li>프로젝트 3개</li>
+        <li>환경변수 프로젝트당 20개</li>
+        <li>서비스 프로젝트당 10개</li>
+        <li>원클릭 배포 3개</li>
+        <li>서비스맵 기본</li>
+      </ul>
+    </div>
+    <div class="plan popular">
+      <div class="name">Pro</div>
+      <div class="price">&#8361;9,900<span>/월</span></div>
+      <ul>
+        <li>프로젝트 20개</li>
+        <li>환경변수 프로젝트당 100개</li>
+        <li>서비스 프로젝트당 50개</li>
+        <li>원클릭 배포 무제한</li>
+        <li>AI 분석/추천</li>
+        <li>API 토큰</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="name">Team</div>
+      <div class="price">&#8361;29,900<span>/월</span></div>
+      <ul>
+        <li>프로젝트 100개</li>
+        <li>환경변수 프로젝트당 500개</li>
+        <li>서비스 프로젝트당 100개</li>
+        <li>원클릭 배포 무제한</li>
+        <li>팀원 25명</li>
+        <li>감사 로그</li>
+        <li>우선 지원</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Tech Stack -->
+<section>
+  <h2><span class="num">7</span> 기술 스택</h2>
+  <div class="cards">
+    <div class="card">
+      <h4>Frontend</h4>
+      <p>Next.js 16 (App Router), Tailwind CSS, shadcn/ui, React Flow, TanStack Query, Zustand, Zod v4</p>
+    </div>
+    <div class="card">
+      <h4>Backend</h4>
+      <p>Supabase (PostgreSQL + Auth + RLS), Next.js API Routes (139개), AES-256-GCM 암호화</p>
+    </div>
+    <div class="card">
+      <h4>Infrastructure</h4>
+      <p>Cloudflare Workers, Cloudflare CDN, Rate Limiting (Cloudflare Rules), Google/GitHub OAuth</p>
+    </div>
+  </div>
+</section>
+
+<!-- Security -->
+<section>
+  <h2><span class="num">8</span> 보안</h2>
+  <div class="cards">
+    <div class="card">
+      <h4>&#x1f512; AES-256-GCM 암호화</h4>
+      <p>환경변수, OAuth 토큰, API 키, Webhook 시크릿 등 모든 민감 정보를 256비트 키로 암호화 저장.</p>
+    </div>
+    <div class="card">
+      <h4>&#x1f6e1; Row-Level Security</h4>
+      <p>모든 테이블에 RLS 적용. API 5단계 검증: 인증 &rarr; 입력 검증 &rarr; 소유권 확인 &rarr; 비즈니스 로직 &rarr; 감사 로그.</p>
+    </div>
+    <div class="card">
+      <h4>&#x1f4cb; 감사 로그</h4>
+      <p>환경변수 CRUD, 서비스 계정, 팀원 관리, API 토큰, 프로젝트 삭제 등 모든 민감 작업 기록.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Competition -->
+<section>
+  <h2><span class="num">9</span> 경쟁 포지셔닝</h2>
+  <table class="cmp-table">
+    <tr><th>비교 항목</th><th>Doppler</th><th>Infisical</th><th>Linkmap</th></tr>
+    <tr><td>핵심</td><td>시크릿 관리</td><td>오픈소스 시크릿</td><td class="highlight">시각화 + 배포 + 관리</td></tr>
+    <tr><td>가격</td><td>$21/사용자/월</td><td>$9/사용자/월</td><td class="highlight">&#8361;9,900/월 (고정)</td></tr>
+    <tr><td>서비스 시각화</td><td class="no">X</td><td class="no">X</td><td class="yes">O</td></tr>
+    <tr><td>원클릭 배포</td><td class="no">X</td><td class="no">X</td><td class="yes">O (17종)</td></tr>
+    <tr><td>AI 분석</td><td class="no">X</td><td class="no">X</td><td class="yes">O (7가지)</td></tr>
+    <tr><td>한국어</td><td class="no">X</td><td class="no">X</td><td class="yes">O (Korean-first)</td></tr>
+    <tr><td>가이드/학습</td><td>문서만</td><td>문서만</td><td class="yes">O (161개 가이드)</td></tr>
+    <tr><td>셀프호스팅</td><td class="no">X</td><td class="yes">O</td><td class="no">X</td></tr>
+    <tr><td>엔터프라이즈</td><td class="yes">O</td><td class="yes">O</td><td>제한적</td></tr>
+  </table>
+  <h3>Linkmap만의 차별점</h3>
+  <ul>
+    <li><strong>시각화 중심</strong> &mdash; 서비스맵으로 아키텍처를 "보면서" 관리</li>
+    <li><strong>바이브 코더 친화</strong> &mdash; 코딩 경험 0인 사용자도 3분 배포</li>
+    <li><strong>한국어 퍼스트</strong> &mdash; UI, 가이드, 블로그 모두 한국어</li>
+    <li><strong>올인원</strong> &mdash; 시각화 + 환경변수 + 배포 + AI + 가이드를 한 곳에서</li>
+  </ul>
+</section>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <p>Linkmap &copy; 2026 &mdash; <a href="https://www.linkmap.biz" target="_blank">www.linkmap.biz</a></p>
+  <p style="margin-top: 6px;">본 문서는 2026년 3월 기준 서비스 현황을 정리한 것입니다.</p>
+</div>
+
+</body>
+</html>

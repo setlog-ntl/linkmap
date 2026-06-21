@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Service-Sync 통합 기획서 v2 | Linkmap</title>
+  <style>
+    :root {
+      --brand-blue: #2563eb;
+      --brand-green: #10b981;
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #334155;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --green: #10b981;
+      --purple: #a78bfa;
+      --cyan: #22d3ee;
+      --orange: #f97316;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 1340px;
+      margin: 0 auto;
+    }
+
+    /* ── Typography ── */
+    h1 { font-size: 2.2rem; background: linear-gradient(135deg, var(--brand-blue), var(--brand-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+    h2 { font-size: 1.4rem; color: var(--brand-blue); margin-top: 3rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--brand-green); margin-top: 1.5rem; margin-bottom: 0.5rem; }
+    .meta { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    .tag { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+    .tag-red { background: rgba(239,68,68,0.2); color: #fca5a5; }
+    .tag-yellow { background: rgba(245,158,11,0.2); color: #fcd34d; }
+    .tag-green { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+    .tag-blue { background: rgba(37,99,235,0.2); color: #93c5fd; }
+    .tag-purple { background: rgba(167,139,250,0.2); color: #c4b5fd; }
+    p { margin: 0.4rem 0; }
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+    a { color: var(--brand-blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { background: var(--bg-card); color: var(--brand-green); padding: 0.1rem 0.35rem; border-radius: 4px; font-family: 'Geist Mono', 'Fira Code', monospace; font-size: 0.83em; }
+    pre { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; font-family: 'Geist Mono', 'Fira Code', monospace; font-size: 0.83rem; line-height: 1.5; margin: 1rem 0; }
+
+    /* ── Card ── */
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1rem 0; transition: border-color 0.2s; }
+    .card:hover { border-color: var(--brand-blue); }
+
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+    th { background: var(--bg-card); color: var(--brand-blue); text-align: left; padding: 0.7rem 0.8rem; border-bottom: 2px solid var(--border); font-weight: 600; white-space: nowrap; }
+    td { padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); }
+    tr:hover td { background: rgba(30,41,59,0.5); }
+
+    /* ── Verdict ── */
+    .verdict-banner { border-radius: 12px; padding: 1.5rem 2rem; margin: 2rem 0; display: flex; align-items: center; gap: 1.5rem; background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(16,185,129,0.08)); border: 1px solid rgba(245,158,11,0.3); }
+    .verdict-banner .verdict-score { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, var(--yellow), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; flex-shrink: 0; }
+    .verdict-banner .verdict-text h2 { color: var(--yellow); border: none; margin: 0; font-size: 1.2rem; }
+    .verdict-banner .verdict-text p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.3rem; }
+
+    /* ── Section Summary ── */
+    .section-summary { background: rgba(37,99,235,0.08); border-left: 3px solid var(--brand-blue); padding: 1rem 1.2rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: 0.9rem; }
+
+    /* ── Score Grid ── */
+    .score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+    .score-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; text-align: center; }
+    .score-card .role { color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem; }
+    .score-card .score { font-size: 1.6rem; font-weight: 700; }
+    .score-card .score.s3 { color: var(--yellow); }
+    .score-card .score.s4 { color: var(--green); }
+    .score-card .desc { color: var(--text-muted); font-size: 0.8rem; margin-top: 0.3rem; }
+
+    /* ── Trend Cards ── */
+    .trend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+    .trend-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; position: relative; overflow: hidden; }
+    .trend-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+    .trend-card.t-red::before { background: var(--red); }
+    .trend-card.t-blue::before { background: var(--brand-blue); }
+    .trend-card.t-green::before { background: var(--green); }
+    .trend-card.t-purple::before { background: var(--purple); }
+    .trend-card.t-yellow::before { background: var(--yellow); }
+    .trend-card .trend-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.5rem; }
+    .trend-card .trend-stat { font-size: 1.8rem; font-weight: 800; margin: 0.5rem 0; }
+    .trend-card .trend-stat.red { color: var(--red); }
+    .trend-card .trend-stat.blue { color: var(--brand-blue); }
+    .trend-card .trend-stat.green { color: var(--green); }
+    .trend-card .trend-stat.purple { color: var(--purple); }
+    .trend-card .trend-stat.yellow { color: var(--yellow); }
+    .trend-card .trend-desc { color: var(--text-muted); font-size: 0.82rem; }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 0; margin-bottom: -1px; position: relative; z-index: 1; flex-wrap: wrap; }
+    .tab-btn { padding: 0.7rem 1.2rem; background: var(--bg); border: 1px solid var(--border); border-bottom: none; border-radius: 8px 8px 0 0; color: var(--text-muted); font-size: 0.85rem; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .tab-btn:hover { color: var(--text); background: var(--bg-card); }
+    .tab-btn.active { background: var(--bg-card); color: var(--brand-blue); border-color: var(--brand-blue); border-bottom: 1px solid var(--bg-card); }
+    .tab-content { display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: 0 10px 10px 10px; padding: 1.5rem; }
+    .tab-content.active { display: block; }
+
+    /* ── Comparison Bar ── */
+    .cmp-bar-wrap { display: flex; align-items: center; gap: 0.5rem; }
+    .cmp-bar { height: 8px; border-radius: 4px; background: var(--brand-blue); opacity: 0.7; }
+    .cmp-bar.green { background: var(--green); }
+
+    /* ── Risk Items ── */
+    .risk-item { display: flex; gap: 1rem; align-items: flex-start; margin: 0.8rem 0; }
+    .risk-icon { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; }
+    .risk-icon.critical { background: rgba(239,68,68,0.2); color: var(--red); }
+    .risk-icon.warning { background: rgba(245,158,11,0.2); color: var(--yellow); }
+    .risk-icon.ok { background: rgba(16,185,129,0.2); color: var(--green); }
+
+    /* ── Quick Win Grid ── */
+    .qw-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1rem 0; }
+    .qw-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.2rem; display: flex; gap: 0.8rem; align-items: flex-start; }
+    .qw-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+    .qw-icon.small { background: rgba(16,185,129,0.15); }
+    .qw-icon.mid { background: rgba(37,99,235,0.15); }
+    .qw-title { font-weight: 600; font-size: 0.9rem; }
+    .qw-desc { color: var(--text-muted); font-size: 0.8rem; margin-top: 0.2rem; }
+    .qw-effort { font-size: 0.7rem; margin-top: 0.3rem; }
+
+    /* ══════════════════════════════════════
+       VISUAL DIAGRAM STYLES (NEW)
+       ══════════════════════════════════════ */
+
+    /* ── Analogy Box ── */
+    .analogy-box {
+      background: linear-gradient(135deg, rgba(37,99,235,0.06), rgba(16,185,129,0.06));
+      border: 1px dashed rgba(37,99,235,0.3);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+    .analogy-box .analogy-label {
+      position: absolute;
+      top: -10px;
+      left: 16px;
+      background: var(--bg);
+      padding: 0 8px;
+      font-size: 0.75rem;
+      color: var(--brand-blue);
+      font-weight: 600;
+    }
+    .analogy-box .emoji { font-size: 1.5rem; margin-right: 0.5rem; }
+
+    /* ── SVG Diagram Container ── */
+    .diagram-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+    }
+    .diagram-container svg { display: block; margin: 0 auto; }
+    .diagram-container .diagram-caption {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-top: 1rem;
+      font-style: italic;
+    }
+
+    /* ── Visual Step Flow ── */
+    .step-flow {
+      display: flex;
+      gap: 0;
+      margin: 2rem 0;
+      position: relative;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    .step-item {
+      flex: 1;
+      min-width: 160px;
+      text-align: center;
+      position: relative;
+      padding: 0 0.3rem;
+    }
+    .step-number {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin: 0 auto 8px;
+      position: relative;
+      z-index: 2;
+    }
+    .step-number.blue { background: rgba(37,99,235,0.2); color: var(--brand-blue); border: 2px solid var(--brand-blue); }
+    .step-number.green { background: rgba(16,185,129,0.2); color: var(--green); border: 2px solid var(--green); }
+    .step-number.yellow { background: rgba(245,158,11,0.2); color: var(--yellow); border: 2px solid var(--yellow); }
+    .step-number.purple { background: rgba(167,139,250,0.2); color: var(--purple); border: 2px solid var(--purple); }
+    .step-icon { font-size: 1.6rem; margin-bottom: 4px; }
+    .step-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; }
+    .step-desc { color: var(--text-muted); font-size: 0.75rem; line-height: 1.4; }
+    .step-arrow {
+      position: absolute;
+      top: 22px;
+      right: -12px;
+      font-size: 1.2rem;
+      color: var(--border);
+      z-index: 1;
+    }
+
+    /* ── Side-by-Side Compare ── */
+    .compare-side {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .compare-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: relative;
+    }
+    .compare-panel.bad { border-color: rgba(239,68,68,0.3); }
+    .compare-panel.good { border-color: rgba(16,185,129,0.3); }
+    .compare-panel .panel-badge {
+      position: absolute;
+      top: -10px;
+      left: 16px;
+      padding: 2px 12px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .compare-panel.bad .panel-badge { background: rgba(239,68,68,0.2); color: #fca5a5; }
+    .compare-panel.good .panel-badge { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+    .compare-panel h3 { margin-top: 0.5rem; }
+
+    /* ── Positioning Map ── */
+    .pos-map {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 2rem;
+      margin: 1.5rem 0;
+      position: relative;
+      min-height: 340px;
+    }
+    .pos-map .axis-label { position: absolute; font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; }
+    .pos-map .axis-label.top { top: 0.5rem; left: 50%; transform: translateX(-50%); }
+    .pos-map .axis-label.bottom { bottom: 0.5rem; left: 50%; transform: translateX(-50%); }
+    .pos-map .axis-label.left { left: 0.5rem; top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; text-orientation: mixed; }
+    .pos-map .axis-label.right { right: 0.5rem; top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; text-orientation: mixed; }
+    .pos-dot { position: absolute; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+    .pos-dot.competitor { background: rgba(148,163,184,0.15); color: var(--text-muted); }
+    .pos-dot.linkmap { background: linear-gradient(135deg, rgba(37,99,235,0.3), rgba(16,185,129,0.3)); color: var(--brand-green); border: 1px solid rgba(16,185,129,0.4); font-size: 0.85rem; animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.3); } 50% { box-shadow: 0 0 12px 4px rgba(16,185,129,0.15); } }
+
+    /* ── Timeline ── */
+    .timeline { display: flex; gap: 0; margin: 2rem 0; position: relative; }
+    .timeline::before { content: ''; position: absolute; top: 28px; left: 0; right: 0; height: 3px; background: var(--border); }
+    .timeline-item { flex: 1; text-align: center; position: relative; padding: 0 0.5rem; }
+    .timeline-dot { width: 20px; height: 20px; border-radius: 50%; margin: 18px auto 12px; position: relative; z-index: 1; }
+    .timeline-dot.active { background: var(--brand-green); box-shadow: 0 0 12px rgba(16,185,129,0.4); }
+    .timeline-dot.pending { background: var(--bg-card); border: 2px solid var(--border); }
+    .timeline-label { font-size: 0.75rem; color: var(--text-muted); }
+    .timeline-title { font-weight: 700; font-size: 0.9rem; margin: 0.3rem 0; }
+    .timeline-desc { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* ── Footer ── */
+    .footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.8rem; text-align: center; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      h1 { font-size: 1.5rem; }
+      .compare-side { grid-template-columns: 1fr; }
+      .step-flow { flex-direction: column; align-items: center; }
+      .step-arrow { display: none; }
+      .timeline { flex-direction: column; gap: 0.5rem; }
+      .timeline::before { display: none; }
+      .verdict-banner { flex-direction: column; text-align: center; }
+      .pos-map { min-height: 380px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════ HEADER ═══════════════════ -->
+  <h1>Service-Sync 통합 기획서 v2</h1>
+  <div class="meta">
+    <span>2026-03-23</span><span>|</span><span>Linkmap</span><span>|</span>
+    <span class="tag tag-yellow">조건부추진</span>
+    <span class="tag tag-blue">CTO 검토</span>
+    <span class="tag tag-purple">기획 고도화</span>
+  </div>
+
+  <div class="verdict-banner">
+    <div class="verdict-score">3.3</div>
+    <div class="verdict-text">
+      <h2>조건부추진 (3.3 / 5.0)</h2>
+      <p>Phase 0(수동 Push 버튼) 3-5일로 가치 검증 후 단계적 확장. P1 백로그 완료 후 착수 권고.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ 핵심 개념 한눈에 보기 ═══════════════════ -->
+  <h2>0. 한눈에 이해하기 — 이 기능이 뭔가요?</h2>
+
+  <div class="analogy-box">
+    <div class="analogy-label">쉬운 비유</div>
+    <p><span class="emoji">📦</span><strong>택배 서비스에 비유하면...</strong></p>
+    <p style="margin-top:0.5rem;">
+      여러분이 <strong>여러 온라인 쇼핑몰</strong>(Vercel, Railway, Netlify)에서 물건을 팔고 있다고 상상해보세요.
+      각 쇼핑몰마다 <strong>배송 정보</strong>(API 키, 환경변수)를 따로 입력해야 합니다.<br>
+      배송 주소가 바뀌면? <strong>모든 쇼핑몰에 하나하나 들어가서 변경</strong>해야 합니다.
+    </p>
+    <p style="margin-top:0.8rem;">
+      <span class="emoji">✨</span><strong>Linkmap Service-Sync</strong>는 이걸 해결합니다:<br>
+      Linkmap에서 <strong>한 번만 수정</strong>하면, 연결된 모든 플랫폼에 <strong>자동으로 전달</strong>됩니다.
+    </p>
+  </div>
+
+  <!-- SVG: 핵심 개념 다이어그램 -->
+  <div class="diagram-container">
+    <svg width="820" height="320" viewBox="0 0 820 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Linkmap 중앙 허브 -->
+      <rect x="300" y="100" width="220" height="120" rx="16" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+      <text x="410" y="140" text-anchor="middle" fill="#10b981" font-size="16" font-weight="700" font-family="system-ui">Linkmap</text>
+      <text x="410" y="162" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="system-ui">환경변수 중앙 관리</text>
+      <text x="410" y="180" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="system-ui">API 키 암호화 저장</text>
+      <text x="410" y="200" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600" font-family="system-ui">한 곳에서 수정!</text>
+
+      <!-- 사용자 -->
+      <rect x="20" y="130" width="140" height="60" rx="12" fill="#1e293b" stroke="#2563eb" stroke-width="1.5"/>
+      <text x="90" y="157" text-anchor="middle" fill="#2563eb" font-size="20">👤</text>
+      <text x="90" y="177" text-anchor="middle" fill="#e2e8f0" font-size="11" font-family="system-ui">사용자 (바이브코더)</text>
+      <!-- 사용자 -> Linkmap -->
+      <line x1="160" y1="160" x2="296" y2="160" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="6 3"/>
+      <polygon points="296,155 306,160 296,165" fill="#2563eb"/>
+      <text x="228" y="152" text-anchor="middle" fill="#93c5fd" font-size="10" font-family="system-ui">API 키 등록/수정</text>
+
+      <!-- Vercel -->
+      <rect x="620" y="30" width="160" height="56" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+      <text x="700" y="55" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="600" font-family="system-ui">▲ Vercel</text>
+      <text x="700" y="73" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="system-ui">환경변수 자동 반영</text>
+      <!-- Linkmap -> Vercel -->
+      <path d="M520 140 Q570 80 616 58" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowG)"/>
+      <text x="565" y="85" text-anchor="middle" fill="#6ee7b7" font-size="10" font-weight="600" font-family="system-ui">Push</text>
+
+      <!-- Railway -->
+      <rect x="620" y="130" width="160" height="56" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+      <text x="700" y="155" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="600" font-family="system-ui">🚂 Railway</text>
+      <text x="700" y="173" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="system-ui">환경변수 자동 반영</text>
+      <!-- Linkmap -> Railway -->
+      <line x1="520" y1="160" x2="616" y2="158" stroke="#10b981" stroke-width="2" marker-end="url(#arrowG)"/>
+      <text x="568" y="152" text-anchor="middle" fill="#6ee7b7" font-size="10" font-weight="600" font-family="system-ui">Push</text>
+
+      <!-- Netlify -->
+      <rect x="620" y="230" width="160" height="56" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+      <text x="700" y="255" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="600" font-family="system-ui">◆ Netlify</text>
+      <text x="700" y="273" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="system-ui">환경변수 자동 반영</text>
+      <!-- Linkmap -> Netlify -->
+      <path d="M520 180 Q570 240 616 255" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowG)"/>
+      <text x="565" y="235" text-anchor="middle" fill="#6ee7b7" font-size="10" font-weight="600" font-family="system-ui">Push</text>
+
+      <!-- Arrow marker -->
+      <defs>
+        <marker id="arrowG" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#10b981"/>
+        </marker>
+        <marker id="arrowR" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#ef4444"/>
+        </marker>
+        <marker id="arrowB" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#2563eb"/>
+        </marker>
+      </defs>
+    </svg>
+    <div class="diagram-caption">Linkmap에서 환경변수를 수정하면, 연결된 Vercel/Railway/Netlify에 자동으로 Push됩니다</div>
+  </div>
+
+  <!-- ═══════════════════ Pull vs Push 비교 ═══════════════════ -->
+  <h2>1. 왜 Push 방식인가? (Pull vs Push 비교)</h2>
+
+  <div class="analogy-box">
+    <div class="analogy-label">쉬운 비유</div>
+    <p><span class="emoji">📬</span><strong>Pull</strong> = 매번 우체국에 가서 편지를 가져오는 것 (앱이 시작할 때마다 Linkmap에 요청)</p>
+    <p><span class="emoji">🚚</span><strong>Push</strong> = 택배 기사가 집까지 배달해주는 것 (Linkmap이 각 플랫폼에 직접 전달)</p>
+  </div>
+
+  <div class="compare-side">
+    <!-- Pull (기각) -->
+    <div class="compare-panel bad">
+      <div class="panel-badge">기각 (2.0/5.0)</div>
+      <h3 style="color:var(--red); margin-top:0.8rem;">Pull 방식 (중계 API)</h3>
+
+      <div class="diagram-container" style="padding:1rem; margin:0.8rem 0;">
+        <svg width="320" height="200" viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 외부 앱 -->
+          <rect x="10" y="20" width="100" height="50" rx="8" fill="#1e293b" stroke="#ef4444" stroke-width="1.5"/>
+          <text x="60" y="42" text-anchor="middle" fill="#fca5a5" font-size="10" font-family="system-ui">외부 앱</text>
+          <text x="60" y="57" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">(Vercel에서 실행)</text>
+          <!-- Linkmap -->
+          <rect x="200" y="20" width="100" height="50" rx="8" fill="#1e293b" stroke="#ef4444" stroke-width="1.5"/>
+          <text x="250" y="42" text-anchor="middle" fill="#fca5a5" font-size="10" font-family="system-ui">Linkmap</text>
+          <text x="250" y="57" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">(시크릿 서버)</text>
+          <!-- 요청 화살표 -->
+          <line x1="110" y1="38" x2="196" y2="38" stroke="#ef4444" stroke-width="1" stroke-dasharray="4 2" marker-end="url(#arrowR)"/>
+          <text x="153" y="32" text-anchor="middle" fill="#fca5a5" font-size="8" font-family="system-ui">매번 요청</text>
+          <!-- 응답 -->
+          <line x1="196" y1="52" x2="110" y2="52" stroke="#ef4444" stroke-width="1" marker-end="url(#arrowR)"/>
+          <text x="153" y="64" text-anchor="middle" fill="#fca5a5" font-size="8" font-family="system-ui">API 키 반환</text>
+
+          <!-- 위험 표시들 -->
+          <rect x="10" y="90" width="300" height="30" rx="6" fill="rgba(239,68,68,0.1)"/>
+          <text x="20" y="110" fill="#fca5a5" font-size="10" font-family="system-ui">❌ Linkmap 장애 → 앱 부팅 불가 (SPOF)</text>
+          <rect x="10" y="125" width="300" height="30" rx="6" fill="rgba(239,68,68,0.1)"/>
+          <text x="20" y="145" fill="#fca5a5" font-size="10" font-family="system-ui">❌ SDK 설치 필수 (바이브코더에겐 어려움)</text>
+          <rect x="10" y="160" width="300" height="30" rx="6" fill="rgba(239,68,68,0.1)"/>
+          <text x="20" y="180" fill="#fca5a5" font-size="10" font-family="system-ui">❌ "키의 키" 문제 — 토큰 유출 시 전체 노출</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Push (채택) -->
+    <div class="compare-panel good">
+      <div class="panel-badge">채택 (3.3/5.0)</div>
+      <h3 style="color:var(--green); margin-top:0.8rem;">Push 방식 (자동 동기화)</h3>
+
+      <div class="diagram-container" style="padding:1rem; margin:0.8rem 0;">
+        <svg width="320" height="200" viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Linkmap -->
+          <rect x="10" y="20" width="100" height="50" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+          <text x="60" y="42" text-anchor="middle" fill="#6ee7b7" font-size="10" font-family="system-ui">Linkmap</text>
+          <text x="60" y="57" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">(중앙 관리)</text>
+          <!-- Vercel -->
+          <rect x="200" y="5" width="100" height="35" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+          <text x="250" y="27" text-anchor="middle" fill="#e2e8f0" font-size="10" font-family="system-ui">▲ Vercel</text>
+          <!-- Railway -->
+          <rect x="200" y="48" width="100" height="35" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+          <text x="250" y="70" text-anchor="middle" fill="#e2e8f0" font-size="10" font-family="system-ui">🚂 Railway</text>
+          <!-- Push 화살표 -->
+          <line x1="110" y1="35" x2="196" y2="22" stroke="#10b981" stroke-width="1.5" marker-end="url(#arrowG)"/>
+          <line x1="110" y1="45" x2="196" y2="65" stroke="#10b981" stroke-width="1.5" marker-end="url(#arrowG)"/>
+          <text x="155" y="32" text-anchor="middle" fill="#6ee7b7" font-size="8" font-weight="600" font-family="system-ui">Push!</text>
+
+          <!-- 장점 표시들 -->
+          <rect x="10" y="90" width="300" height="30" rx="6" fill="rgba(16,185,129,0.1)"/>
+          <text x="20" y="110" fill="#6ee7b7" font-size="10" font-family="system-ui">✅ Linkmap 장애 → 영향 없음 (이미 전달됨)</text>
+          <rect x="10" y="125" width="300" height="30" rx="6" fill="rgba(16,185,129,0.1)"/>
+          <text x="20" y="145" fill="#6ee7b7" font-size="10" font-family="system-ui">✅ SDK 불필요 — 버튼 하나로 동기화</text>
+          <rect x="10" y="160" width="300" height="30" rx="6" fill="rgba(16,185,129,0.1)"/>
+          <text x="20" y="180" fill="#6ee7b7" font-size="10" font-family="system-ui">✅ 공식 API 사용 — 법적/보안 리스크 없음</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ 사용자 경험 플로우 ═══════════════════ -->
+  <h2>2. 사용자 경험 — 어떻게 쓰나요?</h2>
+
+  <div class="analogy-box">
+    <div class="analogy-label">바이브코더 기준</div>
+    <p>코딩을 전혀 몰라도 따라할 수 있는 <strong>6단계</strong>입니다. SDK 설치나 코드 작성이 필요 없습니다.</p>
+  </div>
+
+  <div class="step-flow">
+    <div class="step-item">
+      <div class="step-icon">🔧</div>
+      <div class="step-number blue">1</div>
+      <div class="step-title">프로젝트 설정</div>
+      <div class="step-desc">"동기화" 탭 클릭</div>
+      <div class="step-arrow">→</div>
+    </div>
+    <div class="step-item">
+      <div class="step-icon">🎯</div>
+      <div class="step-number blue">2</div>
+      <div class="step-title">플랫폼 선택</div>
+      <div class="step-desc">Vercel / Railway / Netlify 카드 클릭</div>
+      <div class="step-arrow">→</div>
+    </div>
+    <div class="step-item">
+      <div class="step-icon">🔑</div>
+      <div class="step-number yellow">3</div>
+      <div class="step-title">토큰 입력</div>
+      <div class="step-desc">플랫폼 토큰 붙여넣기 (1회만)</div>
+      <div class="step-arrow">→</div>
+    </div>
+    <div class="step-item">
+      <div class="step-icon">📂</div>
+      <div class="step-number blue">4</div>
+      <div class="step-title">프로젝트 선택</div>
+      <div class="step-desc">드롭다운에서 선택</div>
+      <div class="step-arrow">→</div>
+    </div>
+    <div class="step-item">
+      <div class="step-icon">🔄</div>
+      <div class="step-number green">5</div>
+      <div class="step-title">환경 매핑</div>
+      <div class="step-desc">production → production</div>
+      <div class="step-arrow">→</div>
+    </div>
+    <div class="step-item">
+      <div class="step-icon">✨</div>
+      <div class="step-number green">6</div>
+      <div class="step-title">자동 동기화 ON</div>
+      <div class="step-desc">이후 변경 시 자동 Push!</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ 기술 아키텍처 ═══════════════════ -->
+  <h2>3. 기술 아키텍처 — 내부에서 어떻게 작동하나요?</h2>
+
+  <div class="analogy-box">
+    <div class="analogy-label">쉬운 비유</div>
+    <p><span class="emoji">🏭</span><strong>공장 컨베이어 벨트</strong>에 비유하면: 환경변수가 변경되면 → 컨베이어 벨트(triggerAllSync)가 작동 → 각 플랫폼별 포장 라인(어댑터)에서 해당 플랫폼 형식으로 포장 → 배송(API 호출)</p>
+  </div>
+
+  <!-- SVG: 전체 아키텍처 -->
+  <div class="diagram-container">
+    <svg width="900" height="480" viewBox="0 0 900 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- 타이틀 -->
+      <text x="450" y="24" text-anchor="middle" fill="#94a3b8" font-size="12" font-family="system-ui">어댑터 패턴 기반 동기화 아키텍처</text>
+
+      <!-- 1. 환경변수 CUD -->
+      <rect x="20" y="50" width="180" height="70" rx="12" fill="#1e293b" stroke="#2563eb" stroke-width="2"/>
+      <text x="110" y="75" text-anchor="middle" fill="#2563eb" font-size="13" font-weight="700" font-family="system-ui">환경변수 변경</text>
+      <text x="110" y="95" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="system-ui">생성 / 수정 / 삭제</text>
+      <text x="110" y="110" text-anchor="middle" fill="#64748b" font-size="9" font-family="system-ui">src/app/api/env/route.ts</text>
+
+      <!-- Arrow 1->2 -->
+      <line x1="200" y1="85" x2="260" y2="85" stroke="#2563eb" stroke-width="2" marker-end="url(#arrowB)"/>
+
+      <!-- 2. triggerAllSync -->
+      <rect x="268" y="45" width="180" height="80" rx="12" fill="#1e293b" stroke="#a78bfa" stroke-width="2"/>
+      <text x="358" y="70" text-anchor="middle" fill="#a78bfa" font-size="13" font-weight="700" font-family="system-ui">triggerAllSync()</text>
+      <text x="358" y="90" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="system-ui">동기화 대상 조회</text>
+      <text x="358" y="105" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="system-ui">복호화 (AES-256-GCM)</text>
+      <text x="358" y="118" text-anchor="middle" fill="#64748b" font-size="9" font-family="system-ui">src/lib/sync/trigger.ts</text>
+
+      <!-- DB 조회 -->
+      <rect x="268" y="160" width="180" height="50" rx="10" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4 2"/>
+      <text x="358" y="182" text-anchor="middle" fill="#f59e0b" font-size="11" font-family="system-ui">📋 project_sync_targets</text>
+      <text x="358" y="200" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">auto_sync_enabled = true</text>
+      <line x1="358" y1="125" x2="358" y2="156" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4 2" marker-end="url(#arrowB)"/>
+
+      <!-- Arrow 2->3 (fan out) -->
+      <line x1="448" y1="65" x2="540" y2="55" stroke="#10b981" stroke-width="2" marker-end="url(#arrowG)"/>
+      <line x1="448" y1="85" x2="540" y2="155" stroke="#10b981" stroke-width="2" marker-end="url(#arrowG)"/>
+      <line x1="448" y1="95" x2="540" y2="255" stroke="#10b981" stroke-width="2" marker-end="url(#arrowG)"/>
+      <line x1="448" y1="105" x2="540" y2="355" stroke="#10b981" stroke-width="2" marker-end="url(#arrowG)"/>
+
+      <!-- 3a. GitHub Adapter -->
+      <rect x="548" y="35" width="150" height="50" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+      <text x="623" y="55" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="600" font-family="system-ui">GitHub 어댑터</text>
+      <text x="623" y="72" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">NaCl 암호화</text>
+      <line x1="698" y1="60" x2="750" y2="60" stroke="#334155" stroke-width="1.5" marker-end="url(#arrowG)"/>
+      <rect x="758" y="40" width="120" height="40" rx="8" fill="rgba(16,185,129,0.08)" stroke="#334155" stroke-width="1"/>
+      <text x="818" y="64" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="system-ui">GitHub Secrets</text>
+
+      <!-- 3b. Vercel Adapter -->
+      <rect x="548" y="135" width="150" height="50" rx="10" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+      <text x="623" y="155" text-anchor="middle" fill="#6ee7b7" font-size="11" font-weight="700" font-family="system-ui">▲ Vercel 어댑터</text>
+      <text x="623" y="172" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">REST API (upsert=true)</text>
+      <line x1="698" y1="160" x2="750" y2="160" stroke="#10b981" stroke-width="1.5" marker-end="url(#arrowG)"/>
+      <rect x="758" y="140" width="120" height="40" rx="8" fill="rgba(16,185,129,0.08)" stroke="#10b981" stroke-width="1"/>
+      <text x="818" y="164" text-anchor="middle" fill="#6ee7b7" font-size="10" font-family="system-ui">Vercel Env Vars</text>
+
+      <!-- Phase 1 badge -->
+      <rect x="548" y="127" width="52" height="16" rx="8" fill="rgba(16,185,129,0.2)"/>
+      <text x="574" y="138" text-anchor="middle" fill="#6ee7b7" font-size="8" font-weight="700" font-family="system-ui">Phase 1</text>
+
+      <!-- 3c. Railway Adapter -->
+      <rect x="548" y="235" width="150" height="50" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+      <text x="623" y="255" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="600" font-family="system-ui">🚂 Railway 어댑터</text>
+      <text x="623" y="272" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">GraphQL (variableUpsert)</text>
+      <line x1="698" y1="260" x2="750" y2="260" stroke="#334155" stroke-width="1.5" marker-end="url(#arrowG)"/>
+      <rect x="758" y="240" width="120" height="40" rx="8" fill="rgba(16,185,129,0.08)" stroke="#334155" stroke-width="1"/>
+      <text x="818" y="264" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="system-ui">Railway Variables</text>
+
+      <!-- 3d. Netlify Adapter -->
+      <rect x="548" y="335" width="150" height="50" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+      <text x="623" y="355" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="600" font-family="system-ui">◆ Netlify 어댑터</text>
+      <text x="623" y="372" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">REST API</text>
+      <line x1="698" y1="360" x2="750" y2="360" stroke="#334155" stroke-width="1.5" marker-end="url(#arrowG)"/>
+      <rect x="758" y="340" width="120" height="40" rx="8" fill="rgba(16,185,129,0.08)" stroke="#334155" stroke-width="1"/>
+      <text x="818" y="364" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="system-ui">Netlify Env Vars</text>
+
+      <!-- 4. 결과 기록 -->
+      <rect x="268" y="270" width="180" height="50" rx="10" fill="#1e293b" stroke="#22d3ee" stroke-width="1.5"/>
+      <text x="358" y="292" text-anchor="middle" fill="#22d3ee" font-size="11" font-weight="600" font-family="system-ui">📝 상태 기록 + 감사 로그</text>
+      <text x="358" y="310" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">last_sync_status + logAudit()</text>
+
+      <!-- 범례 -->
+      <rect x="20" y="420" width="860" height="45" rx="8" fill="rgba(30,41,59,0.5)" stroke="#334155" stroke-width="1"/>
+      <text x="40" y="447" fill="#94a3b8" font-size="10" font-family="system-ui">범례:</text>
+      <rect x="80" y="434" width="12" height="12" rx="2" fill="none" stroke="#2563eb" stroke-width="2"/>
+      <text x="98" y="447" fill="#93c5fd" font-size="10" font-family="system-ui">트리거</text>
+      <rect x="150" y="434" width="12" height="12" rx="2" fill="none" stroke="#a78bfa" stroke-width="2"/>
+      <text x="168" y="447" fill="#c4b5fd" font-size="10" font-family="system-ui">코어 로직</text>
+      <rect x="240" y="434" width="12" height="12" rx="2" fill="none" stroke="#10b981" stroke-width="2"/>
+      <text x="258" y="447" fill="#6ee7b7" font-size="10" font-family="system-ui">어댑터 (플랫폼별)</text>
+      <rect x="370" y="434" width="12" height="12" rx="2" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4 2"/>
+      <text x="388" y="447" fill="#fcd34d" font-size="10" font-family="system-ui">DB 조회</text>
+      <rect x="460" y="434" width="12" height="12" rx="2" fill="rgba(16,185,129,0.08)" stroke="#334155" stroke-width="1"/>
+      <text x="478" y="447" fill="#94a3b8" font-size="10" font-family="system-ui">외부 서비스</text>
+    </svg>
+    <div class="diagram-caption">어댑터 패턴: 새로운 플랫폼을 추가하려면 어댑터 파일 하나만 만들면 됩니다</div>
+  </div>
+
+  <!-- 코드 구조 -->
+  <h3>파일 구조 (어댑터 패턴)</h3>
+  <div class="card">
+    <pre>src/lib/sync/                          ← 새로 만들 디렉토리
+  ├── types.ts                         ← SyncAdapter 인터페이스 정의
+  ├── trigger.ts                       ← triggerAllSync() — 핵심 트리거
+  ├── adapter-registry.ts              ← 어댑터 등록/조회
+  ├── name-map.ts                      ← 플랫폼별 키 이름 매핑 규칙
+  └── adapters/                        ← 플랫폼별 어댑터
+      ├── github.ts                    ← 기존 auto-sync.ts에서 이동 (이미 구현!)
+      ├── vercel.ts                    ← Vercel REST API (Phase 0/1)
+      ├── railway.ts                   ← Railway GraphQL (Phase 2)
+      └── netlify.ts                   ← Netlify REST API (Phase 2)
+
+기존 코드 (70% 재활용):
+  src/lib/github/auto-sync.ts          ← 179줄, 완전 구현됨
+  src/lib/github/nacl-encrypt.ts       ← GitHub 전용 암호화
+  src/lib/crypto/index.ts              ← AES-256-GCM (공통 사용)
+  src/app/api/env/route.ts             ← 환경변수 CUD 트리거 (3곳)</pre>
+  </div>
+
+  <!-- ═══════════════════ 보안 아키텍처 ═══════════════════ -->
+  <h2>4. 보안 — 어떻게 안전한가요?</h2>
+
+  <div class="analogy-box">
+    <div class="analogy-label">쉬운 비유</div>
+    <p><span class="emoji">🏦</span><strong>은행 금고</strong>에 비유하면: API 키는 금고(AES-256-GCM)에 암호화되어 저장됩니다. 동기화할 때만 잠깐 꺼내서 → HTTPS 보안 통로로 전달 → 전달 후 각 플랫폼의 자체 금고에 보관됩니다.</p>
+  </div>
+
+  <!-- SVG: 보안 흐름 -->
+  <div class="diagram-container">
+    <svg width="800" height="200" viewBox="0 0 800 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- 1. 저장 -->
+      <rect x="20" y="40" width="140" height="120" rx="12" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="90" y="65" text-anchor="middle" fill="#f59e0b" font-size="20">🔒</text>
+      <text x="90" y="88" text-anchor="middle" fill="#fcd34d" font-size="11" font-weight="700" font-family="system-ui">암호화 저장</text>
+      <text x="90" y="106" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">AES-256-GCM</text>
+      <text x="90" y="120" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">Supabase DB</text>
+      <text x="90" y="148" text-anchor="middle" fill="#64748b" font-size="8" font-family="system-ui">복호화된 값은</text>
+      <text x="90" y="158" text-anchor="middle" fill="#64748b" font-size="8" font-family="system-ui">로그에 절대 기록 안 함</text>
+
+      <!-- Arrow -->
+      <line x1="160" y1="100" x2="220" y2="100" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrowB)"/>
+      <text x="190" y="92" text-anchor="middle" fill="#fcd34d" font-size="8" font-family="system-ui">복호화</text>
+
+      <!-- 2. 전달 -->
+      <rect x="228" y="40" width="180" height="120" rx="12" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+      <text x="318" y="65" text-anchor="middle" fill="#10b981" font-size="20">🔐</text>
+      <text x="318" y="88" text-anchor="middle" fill="#6ee7b7" font-size="11" font-weight="700" font-family="system-ui">HTTPS TLS 전송</text>
+      <text x="318" y="106" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">플랫폼 공식 API 사용</text>
+      <text x="318" y="120" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">최소 권한 토큰</text>
+      <text x="318" y="148" text-anchor="middle" fill="#64748b" font-size="8" font-family="system-ui">Doppler/Infisical과</text>
+      <text x="318" y="158" text-anchor="middle" fill="#64748b" font-size="8" font-family="system-ui">동일한 방식</text>
+
+      <!-- Arrow -->
+      <line x1="408" y1="100" x2="468" y2="100" stroke="#10b981" stroke-width="1.5" marker-end="url(#arrowG)"/>
+      <text x="438" y="92" text-anchor="middle" fill="#6ee7b7" font-size="8" font-family="system-ui">Push</text>
+
+      <!-- 3. 도착 -->
+      <rect x="476" y="40" width="140" height="120" rx="12" fill="#1e293b" stroke="#2563eb" stroke-width="1.5"/>
+      <text x="546" y="65" text-anchor="middle" fill="#2563eb" font-size="20">🏢</text>
+      <text x="546" y="88" text-anchor="middle" fill="#93c5fd" font-size="11" font-weight="700" font-family="system-ui">플랫폼 자체 관리</text>
+      <text x="546" y="106" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">Vercel/Railway/Netlify</text>
+      <text x="546" y="120" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">각자의 보안 정책 적용</text>
+      <text x="546" y="148" text-anchor="middle" fill="#64748b" font-size="8" font-family="system-ui">Linkmap 장애 시에도</text>
+      <text x="546" y="158" text-anchor="middle" fill="#64748b" font-size="8" font-family="system-ui">앱 정상 작동 (SPOF 없음)</text>
+
+      <!-- 4. 감사 로그 -->
+      <rect x="650" y="55" width="130" height="90" rx="10" fill="#1e293b" stroke="#22d3ee" stroke-width="1.5"/>
+      <text x="715" y="80" text-anchor="middle" fill="#22d3ee" font-size="16">📋</text>
+      <text x="715" y="100" text-anchor="middle" fill="#67e8f9" font-size="10" font-weight="600" font-family="system-ui">감사 로그</text>
+      <text x="715" y="116" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">누가, 언제, 어디로</text>
+      <text x="715" y="130" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">동기화했는지 기록</text>
+
+      <!-- Arrow to audit -->
+      <path d="M546 160 Q546 185 650 130" stroke="#22d3ee" stroke-width="1" stroke-dasharray="4 2" fill="none"/>
+    </svg>
+    <div class="diagram-caption">암호화 저장 → HTTPS 전송 → 플랫폼 자체 관리 + 모든 동기화 활동은 감사 로그에 기록</div>
+  </div>
+
+  <!-- ═══════════════════ 시장 트렌드 ═══════════════════ -->
+  <h2>5. 시장 현황 & 트렌드</h2>
+
+  <div class="trend-grid">
+    <div class="trend-card t-red">
+      <div class="trend-title">AI 시크릿 위기</div>
+      <div class="trend-stat red">2,865만</div>
+      <div class="trend-desc">2025년 GitHub 하드코딩 시크릿 수. AI 서비스 관련 <strong>81% 급증</strong>. 바이브코더의 API 키 관리 교육이 Linkmap의 고유 기회.</div>
+    </div>
+    <div class="trend-card t-blue">
+      <div class="trend-title">시크릿 관리 시장</div>
+      <div class="trend-stat blue">$80.5B</div>
+      <div class="trend-desc">2030년 전망 (CAGR 13.8%). SME 세그먼트 CAGR 16% — Linkmap 타겟과 일치.</div>
+    </div>
+    <div class="trend-card t-purple">
+      <div class="trend-title">Doppler MCP Server</div>
+      <div class="trend-stat purple">2026-02</div>
+      <div class="trend-desc">AI 에이전트가 시크릿 매니저와 직접 상호작용. Linkmap MCP에 환경변수 컨텍스트 추가 기회.</div>
+    </div>
+    <div class="trend-card t-yellow">
+      <div class="trend-title">HCP Vault Secrets EOL</div>
+      <div class="trend-stat yellow">2026-07</div>
+      <div class="trend-desc">HashiCorp 간편 시크릿 서비스 종료. 소규모 팀 시장 공백 발생.</div>
+    </div>
+    <div class="trend-card t-green">
+      <div class="trend-title">OIDC/WIF 확산</div>
+      <div class="trend-stat green">95%</div>
+      <div class="trend-desc">로테이션 오버헤드 감소. 다만 앱 API 키(OpenAI, Stripe)는 5년 내 정적 키 유지 예상.</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ 경쟁사 벤치마킹 ═══════════════════ -->
+  <h2>6. 경쟁사 벤치마킹 (10개 서비스)</h2>
+
+  <div style="overflow-x: auto;">
+    <table>
+      <thead>
+        <tr><th>서비스</th><th>유형</th><th>Push 동기화</th><th>통합 수</th><th>Free 플랜</th><th>초보자 친화</th><th>핵심 차별점</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Doppler</strong></td><td><span class="tag tag-purple">전문 SM</span></td><td style="color:var(--green);">70+ 서비스</td><td><div class="cmp-bar-wrap"><div class="cmp-bar green" style="width:140px;"></div> 70+</div></td><td>3명</td><td>중간</td><td>MCP Server, OIDC, 자동 로테이션</td></tr>
+        <tr><td><strong>Infisical</strong></td><td><span class="tag tag-purple">전문 SM</span></td><td style="color:var(--green);">Secret Sync</td><td><div class="cmp-bar-wrap"><div class="cmp-bar green" style="width:100px;"></div> 50+</div></td><td>5 identity</td><td>낮음</td><td>E2EE, 오픈소스(MIT), 동적 시크릿</td></tr>
+        <tr><td><strong>Vault</strong></td><td><span class="tag tag-red">엔터프라이즈</span></td><td style="color:var(--text-muted);">제한적</td><td>N/A</td><td>오픈소스</td><td>매우 낮음</td><td>HCP Secrets <span class="tag tag-red">EOL</span></td></tr>
+        <tr><td><strong>1Password</strong></td><td><span class="tag tag-blue">범용</span></td><td style="color:var(--red);">없음</td><td>CLI/SDK</td><td>$7.99/user</td><td>중간</td><td><code>op run</code> 주입, 높은 신뢰도</td></tr>
+        <tr><td><strong>Vercel</strong></td><td><span class="tag tag-green">플랫폼</span></td><td style="color:var(--yellow);">외부→Vercel</td><td>자체</td><td>포함</td><td>높음</td><td>환경별 분리, Marketplace 통합</td></tr>
+        <tr><td><strong>Railway</strong></td><td><span class="tag tag-green">플랫폼</span></td><td style="color:var(--yellow);">내부만</td><td>자체</td><td>$5 Trial</td><td>높음</td><td>Shared/Reference Variables</td></tr>
+        <tr><td><strong>Netlify</strong></td><td><span class="tag tag-green">플랫폼</span></td><td style="color:var(--yellow);">외부→Netlify</td><td>자체</td><td>포함</td><td>중간</td><td>4단계 스코프 분리</td></tr>
+        <tr><td><strong>Render</strong></td><td><span class="tag tag-green">플랫폼</span></td><td style="color:var(--red);">없음</td><td>자체</td><td>포함</td><td>높음</td><td>Environment Groups, 단순 UX</td></tr>
+        <tr><td><strong>AWS SM</strong></td><td><span class="tag tag-red">클라우드</span></td><td style="color:var(--yellow);">AWS 내부</td><td>AWS</td><td>$0.40/시크릿</td><td>매우 낮음</td><td>Lambda 기반 자동 로테이션</td></tr>
+        <tr><td><strong>GCP SM</strong></td><td><span class="tag tag-red">클라우드</span></td><td style="color:var(--yellow);">GCP 내부</td><td>GCP</td><td>6버전 무료</td><td>매우 낮음</td><td>WIF 지원, IAM 통합</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 포지셔닝 맵 -->
+  <h3>경쟁 포지셔닝 맵</h3>
+  <div class="pos-map">
+    <div class="axis-label top">전문 시크릿 관리</div>
+    <div class="axis-label bottom">범용 플랫폼 내장</div>
+    <div class="axis-label left">엔터프라이즈</div>
+    <div class="axis-label right">개인/소규모</div>
+    <div class="pos-dot competitor" style="top:18%;left:22%;">Vault</div>
+    <div class="pos-dot competitor" style="top:20%;left:40%;">Infisical</div>
+    <div class="pos-dot competitor" style="top:15%;right:22%;">Doppler</div>
+    <div class="pos-dot competitor" style="top:38%;left:15%;">1Password</div>
+    <div class="pos-dot competitor" style="bottom:25%;left:18%;">AWS SM</div>
+    <div class="pos-dot competitor" style="bottom:22%;left:35%;">GCP SM</div>
+    <div class="pos-dot competitor" style="bottom:30%;right:28%;">Vercel</div>
+    <div class="pos-dot competitor" style="bottom:35%;right:16%;">Railway</div>
+    <div class="pos-dot competitor" style="bottom:26%;right:38%;">Netlify</div>
+    <div class="pos-dot competitor" style="bottom:40%;right:10%;">Render</div>
+    <div class="pos-dot linkmap" style="bottom:16%;right:22%;">Linkmap</div>
+  </div>
+
+  <div class="section-summary">
+    <strong>Linkmap = 시크릿 매니저가 아닙니다.</strong> "시크릿이 어디에 연결되어 있는지 <strong>시각화</strong>하고, 적절한 곳으로 <strong>Push</strong>하는 허브." 서비스맵 + 원클릭 배포 + 서비스 카탈로그(85개)는 Doppler/Infisical에 없는 고유 자산.
+  </div>
+
+  <!-- ═══════════════════ 6축 분석 ═══════════════════ -->
+  <h2>7. 6축 심층 분석</h2>
+
+  <div class="score-grid">
+    <div class="score-card"><div class="role">기술 실현성</div><div class="score s4">4/5</div><div class="desc">기존 패턴 70% 재활용</div></div>
+    <div class="score-card"><div class="role">보안 제약</div><div class="score s3">3/5</div><div class="desc">증분 리스크 제한적</div></div>
+    <div class="score-card"><div class="role">시장 트렌드</div><div class="score s3">3/5</div><div class="desc">5년 내 유효</div></div>
+    <div class="score-card"><div class="role">핵심가치 정렬</div><div class="score s3">3/5</div><div class="desc">2층 리텐션 기능</div></div>
+    <div class="score-card"><div class="role">경쟁 우위</div><div class="score s3">3/5</div><div class="desc">시각화 결합 차별화</div></div>
+    <div class="score-card"><div class="role">MVP 전략</div><div class="score s4">4/5</div><div class="desc">Phase 0 = 3-5일</div></div>
+  </div>
+
+  <!-- 6축 상세 탭 -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('t1',this)">기술 실현성</button>
+    <button class="tab-btn" onclick="showTab('t2',this)">보안 제약</button>
+    <button class="tab-btn" onclick="showTab('t3',this)">시장 트렌드</button>
+    <button class="tab-btn" onclick="showTab('t4',this)">핵심가치</button>
+    <button class="tab-btn" onclick="showTab('t5',this)">경쟁 우위</button>
+    <button class="tab-btn" onclick="showTab('t6',this)">MVP 전략</button>
+  </div>
+
+  <div id="t1" class="tab-content active">
+    <h3 style="margin-top:0;">플랫폼 API 안정성</h3>
+    <table>
+      <thead><tr><th>플랫폼</th><th>API</th><th>Idempotent</th><th>안정성</th><th>Phase</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Vercel</strong></td><td>REST <code>/v10/projects/{id}/env</code></td><td style="color:var(--green);">upsert=true</td><td><span class="tag tag-green">높음</span></td><td>Phase 0/1</td></tr>
+        <tr><td><strong>Railway</strong></td><td>GraphQL <code>variableUpsert</code></td><td style="color:var(--green);">idempotent</td><td><span class="tag tag-yellow">중간</span></td><td>Phase 2</td></tr>
+        <tr><td><strong>Netlify</strong></td><td>REST <code>/api/v1/accounts/{id}/env</code></td><td style="color:var(--green);">PUT upsert</td><td><span class="tag tag-green">높음</span></td><td>Phase 2</td></tr>
+      </tbody>
+    </table>
+    <div class="risk-item">
+      <div class="risk-icon ok">OK</div>
+      <div><strong>Workers CPU 제한 문제 없음.</strong> I/O 대기는 CPU 시간에서 제외. 기존 GitHub auto-sync가 동일 패턴으로 정상 동작 중.</div>
+    </div>
+  </div>
+  <div id="t2" class="tab-content">
+    <h3 style="margin-top:0;">증분 리스크 평가</h3>
+    <table>
+      <thead><tr><th>리스크</th><th>수준</th><th>대응</th><th>새 리스크?</th></tr></thead>
+      <tbody>
+        <tr><td>단일 ENCRYPTION_KEY 유출</td><td><span class="tag tag-red">HIGH</span></td><td>기존 리스크</td><td style="color:var(--green);">아니오</td></tr>
+        <tr><td>토큰 스코프 과잉</td><td><span class="tag tag-yellow">MED</span></td><td>최소 권한 요청</td><td style="color:var(--yellow);">부분적</td></tr>
+        <tr><td>토큰 유출 시 blast radius</td><td><span class="tag tag-yellow">MED</span></td><td>환경변수 CRUD만</td><td style="color:var(--yellow);">부분적</td></tr>
+      </tbody>
+    </table>
+    <div class="section-summary"><strong>모든 플랫폼에서 허용.</strong> Doppler/Infisical이 동일 패턴(제3자 토큰 저장 + Push)으로 운영 중.</div>
+  </div>
+  <div id="t3" class="tab-content">
+    <h3 style="margin-top:0;">5년 후에도 유효할까?</h3>
+    <div class="risk-item"><div class="risk-icon warning">!</div><div><strong>OIDC</strong>는 CI/CD 인증에 주로 적용. 앱 API 키(OpenAI, Stripe)는 5년 내 정적 키 유지.</div></div>
+    <div class="risk-item"><div class="risk-icon ok">+</div><div><strong>MCP</strong>는 위협이 아닌 보완적 기회. Linkmap MCP Server에 환경변수 컨텍스트 추가 가능.</div></div>
+    <div class="risk-item"><div class="risk-icon warning">!</div><div>플랫폼들이 자체 multi-platform sync 출시 시 가치 감소 가능.</div></div>
+  </div>
+  <div id="t4" class="tab-content">
+    <h3 style="margin-top:0;">타겟별 동기화 필요성</h3>
+    <table>
+      <thead><tr><th>사용자</th><th>필요성</th><th>비율</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td>바이브코더 (1층)</td><td><span class="tag tag-yellow">낮음</span></td><td>60%</td><td>단일 플랫폼 원클릭 배포</td></tr>
+        <tr><td>성장 중 (1→2층)</td><td><span class="tag tag-yellow">중간</span></td><td>25%</td><td>2번째 프로젝트</td></tr>
+        <tr><td>소규모 개발자 (2층)</td><td><span class="tag tag-green">높음</span></td><td>15%</td><td>다중 프로젝트/플랫폼</td></tr>
+      </tbody>
+    </table>
+    <div class="section-summary"><strong>2층 리텐션 기능.</strong> 1층 진입과는 무관. 전환 비용 증가(Lock-in) 효과.</div>
+  </div>
+  <div id="t5" class="tab-content">
+    <h3 style="margin-top:0;">Linkmap만의 차별점</h3>
+    <table>
+      <thead><tr><th>항목</th><th>Doppler</th><th>Infisical</th><th>Linkmap</th></tr></thead>
+      <tbody>
+        <tr><td>통합 수</td><td>70+</td><td>50+</td><td style="color:var(--yellow);">4 (계획)</td></tr>
+        <tr><td><strong>서비스맵 시각화</strong></td><td style="color:var(--red);">없음</td><td style="color:var(--red);">없음</td><td style="color:var(--green);font-weight:700;">React Flow</td></tr>
+        <tr><td><strong>원클릭 배포</strong></td><td style="color:var(--red);">없음</td><td style="color:var(--red);">없음</td><td style="color:var(--green);font-weight:700;">6개 템플릿</td></tr>
+        <tr><td><strong>서비스 카탈로그</strong></td><td style="color:var(--red);">없음</td><td style="color:var(--red);">없음</td><td style="color:var(--green);font-weight:700;">85개</td></tr>
+        <tr><td>가격</td><td>$21/user</td><td>$18/identity</td><td style="color:var(--green);">Free</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="t6" class="tab-content">
+    <h3 style="margin-top:0;">대안 비교</h3>
+    <table>
+      <thead><tr><th>대안</th><th>설명</th><th>공수</th><th>가치</th></tr></thead>
+      <tbody>
+        <tr style="background:rgba(16,185,129,0.05);"><td><strong>Phase 0: 수동 Push</strong></td><td>"Vercel에 동기화" 버튼</td><td><strong>3-5일</strong></td><td><span class="tag tag-green">1순위</span></td></tr>
+        <tr><td>Phase 1: 자동 Push</td><td>환경변수 변경 시 자동</td><td>2주</td><td><span class="tag tag-green">높음</span></td></tr>
+        <tr><td>.env 복사 강화</td><td>"Vercel용으로 복사" 버튼</td><td>2일</td><td><span class="tag tag-yellow">낮음</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════════════ MVP 로드맵 ═══════════════════ -->
+  <h2>8. MVP 로드맵</h2>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-label">NOW</div>
+      <div class="timeline-dot active"></div>
+      <div class="timeline-title" style="color:var(--green);">Phase 0</div>
+      <div class="timeline-desc">수동 Push 버튼<br>Vercel Only<br><strong>3-5일</strong></div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">검증 후</div>
+      <div class="timeline-dot pending"></div>
+      <div class="timeline-title">Phase 1</div>
+      <div class="timeline-desc">자동 Push<br>Vercel + 어댑터 인프라<br><strong>2주</strong></div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">확장</div>
+      <div class="timeline-dot pending"></div>
+      <div class="timeline-title">Phase 2</div>
+      <div class="timeline-desc">Netlify + Railway<br>어댑터 추가<br><strong>1주</strong></div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">통합</div>
+      <div class="timeline-dot pending"></div>
+      <div class="timeline-title">Phase 3</div>
+      <div class="timeline-desc">GitHub 마이그레이션<br>레거시 정리<br><strong>TBD</strong></div>
+    </div>
+  </div>
+
+  <!-- Phase별 상세 -->
+  <h3>Phase별 상세 공수</h3>
+  <div class="card">
+    <table>
+      <thead><tr><th>Phase</th><th>작업</th><th>공수</th></tr></thead>
+      <tbody>
+        <tr style="background:rgba(16,185,129,0.05);"><td rowspan="4"><strong>Phase 0</strong><br>(3-5일)</td><td>Vercel 어댑터 기본 구현</td><td>1-2일</td></tr>
+        <tr style="background:rgba(16,185,129,0.05);"><td>"Vercel에 동기화" 버튼 UI</td><td>1일</td></tr>
+        <tr style="background:rgba(16,185,129,0.05);"><td>PAT 토큰 입력 + 프로젝트 선택</td><td>1일</td></tr>
+        <tr style="background:rgba(16,185,129,0.05);"><td>테스트 + 에러 핸들링</td><td>0.5-1일</td></tr>
+        <tr><td rowspan="3"><strong>Phase 1</strong><br>(2주)</td><td><code>src/lib/sync/</code> 어댑터 인프라 + Vercel 완성</td><td>3-5일</td></tr>
+        <tr><td>동기화 설정 UI + <code>project_sync_targets</code></td><td>2.5-3.5일</td></tr>
+        <tr><td>env CUD 트리거 통합 + 테스트</td><td>1.5-2일</td></tr>
+        <tr><td rowspan="2"><strong>Phase 2</strong><br>(1주)</td><td>Netlify REST + Railway GraphQL 어댑터</td><td>3-5일</td></tr>
+        <tr><td>UI 확장 + 테스트</td><td>2일</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- DB 스키마 -->
+  <h3>DB: <code>project_sync_targets</code></h3>
+  <div class="card">
+    <pre>CREATE TABLE project_sync_targets (
+  id UUID PK,
+  project_id FK -> projects(id),
+  user_id FK -> auth.users(id),
+  platform TEXT CHECK (IN ('github','vercel','railway','netlify')),
+  service_account_id FK -> service_accounts(id),
+  external_project_id TEXT NOT NULL,
+  external_project_name TEXT,
+  auto_sync_enabled BOOLEAN DEFAULT false,
+  sync_environment TEXT DEFAULT 'production',
+  target_environment TEXT,
+  last_synced_at TIMESTAMPTZ,
+  last_sync_status TEXT,
+  last_sync_error TEXT,
+  UNIQUE(project_id, platform, external_project_id, sync_environment)
+);</pre>
+  </div>
+
+  <!-- ═══════════════════ Quick Win ═══════════════════ -->
+  <h2>9. Quick Win (동기화 외 즉시 실행 가능)</h2>
+
+  <div class="qw-grid">
+    <div class="qw-item"><div class="qw-icon small">S</div><div><div class="qw-title">API 키 안전 관리 가이드</div><div class="qw-desc">원클릭 배포 시 "API 키를 코드에 넣지 마세요" 가이드 삽입</div><div class="qw-effort"><span class="tag tag-green">소</span></div></div></div>
+    <div class="qw-item"><div class="qw-icon small">S</div><div><div class="qw-title">시크릿 노후화 알림</div><div class="qw-desc">생성 후 90일 경과 시 갱신 권고</div><div class="qw-effort"><span class="tag tag-green">소</span></div></div></div>
+    <div class="qw-item"><div class="qw-icon small">S</div><div><div class="qw-title">Empty State 가이드</div><div class="qw-desc">환경변수 없을 때 인터랙티브 가이드</div><div class="qw-effort"><span class="tag tag-green">소</span></div></div></div>
+    <div class="qw-item"><div class="qw-icon mid">M</div><div><div class="qw-title">환경별 분리 UI</div><div class="qw-desc">dev/staging/prod 환경변수 분리</div><div class="qw-effort"><span class="tag tag-blue">중</span></div></div></div>
+    <div class="qw-item"><div class="qw-icon mid">M</div><div><div class="qw-title">Reference 변수</div><div class="qw-desc"><code>${{VAR_NAME}}</code> 참조 구문</div><div class="qw-effort"><span class="tag tag-blue">중</span></div></div></div>
+    <div class="qw-item"><div class="qw-icon mid">M</div><div><div class="qw-title">MCP 환경변수 컨텍스트</div><div class="qw-desc">AI 에이전트가 필요 환경변수 파악</div><div class="qw-effort"><span class="tag tag-blue">중</span></div></div></div>
+  </div>
+
+  <!-- ═══════════════════ 추진/보류 조건 ═══════════════════ -->
+  <h2>10. 추진/보류 조건</h2>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+    <div class="card" style="border-left: 3px solid var(--green);"><h3 style="color:var(--green);margin-top:0;">즉시 추진 조건</h3><ol><li>P1 백로그 1개 이상 완료</li><li>Phase 0 사용자 반응 양호</li><li>Vercel API 보안 감사 완료</li></ol></div>
+    <div class="card" style="border-left: 3px solid var(--red);"><h3 style="color:var(--red);margin-top:0;">보류 조건</h3><ol><li>Phase 0 후 2주간 사용자 0명</li><li>플랫폼 자체 multi-sync 출시</li><li>ENCRYPTION_KEY 심각성 재평가</li></ol></div>
+  </div>
+
+  <!-- ═══════════════════ 참고 자료 ═══════════════════ -->
+  <h2>11. 참고 자료</h2>
+  <div class="card">
+    <h3 style="margin-top:0;">플랫폼 API</h3>
+    <ul>
+      <li><a href="https://docs.vercel.com/docs/rest-api/reference/endpoints/projects/create-one-or-more-environment-variables">Vercel REST API</a></li>
+      <li><a href="https://docs.railway.com/guides/manage-variables">Railway Public API</a></li>
+      <li><a href="https://docs.netlify.com/build/environment-variables/overview/">Netlify Env Vars</a></li>
+    </ul>
+    <h3>경쟁사</h3>
+    <ul>
+      <li><a href="https://www.doppler.com/">Doppler</a> | <a href="https://www.doppler.com/integrations">통합 (70+)</a> | <a href="https://www.doppler.com/changes">MCP Server</a></li>
+      <li><a href="https://infisical.com/">Infisical</a> | <a href="https://github.com/Infisical/infisical">GitHub 12.7K stars</a></li>
+      <li><a href="https://developer.hashicorp.com/hcp/docs/vault-secrets/end-of-sale-announcement">HCP Vault EOL</a></li>
+    </ul>
+    <h3>시장/보안 트렌드</h3>
+    <ul>
+      <li><a href="https://blog.gitguardian.com/the-state-of-secrets-sprawl-2026/">GitGuardian 2026 보고서</a></li>
+      <li><a href="https://owasp.org/www-project-mcp-top-10/2025/MCP01-2025-Token-Mismanagement-and-Secret-Exposure">OWASP MCP Top 10</a></li>
+      <li><a href="https://www.mordorintelligence.com/industry-reports/secrets-management-solutions-market">시장 리포트</a></li>
+    </ul>
+    <h3>프로젝트 내부</h3>
+    <ul>
+      <li><code>src/lib/github/auto-sync.ts</code> — 기존 GitHub Push (179줄)</li>
+      <li><code>src/lib/crypto/index.ts</code> — AES-256-GCM</li>
+      <li><code>docs/benchmark/env-secrets-landscape/report.md</code> — 벤치마킹</li>
+    </ul>
+  </div>
+
+  <div class="footer">Linkmap Service-Sync 통합 기획서 v2 | 2026-03-23 | Powered by Claude Code</div>
+
+  <script>
+    function showTab(id, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      btn.classList.add('active');
+    }
+  </script>
+</body>
+</html>

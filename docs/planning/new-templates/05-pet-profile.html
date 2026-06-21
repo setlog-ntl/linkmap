@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linkmap 신규 템플릿 기획 — 펫 프로필 (pet-profile)</title>
+<style>
+  :root { --primary: #f59e0b; --primary-light: #fbbf24; --bg: #fffbeb; --card: #fff; --text: #1a1a1a; --muted: #6b7280; --border: #e5e7eb; --radius: 12px; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard Variable', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+  .container { max-width: 960px; margin: 0 auto; padding: 40px 24px; }
+  h1 { font-size: 2rem; margin-bottom: 8px; }
+  h2 { font-size: 1.4rem; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+  h3 { font-size: 1.1rem; margin: 24px 0 12px; color: #92400e; }
+  p, li { font-size: 0.95rem; color: #374151; }
+  .badge { display: inline-block; background: var(--primary); color: #fff; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 12px; }
+  .meta { display: flex; gap: 24px; flex-wrap: wrap; margin: 16px 0 32px; }
+  .meta-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; flex: 1; min-width: 200px; }
+  .meta-item dt { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .meta-item dd { font-size: 1.1rem; font-weight: 600; margin-top: 4px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin: 16px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9rem; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { background: #fffbeb; font-weight: 600; font-size: 0.8rem; color: var(--muted); text-transform: uppercase; }
+  .required { color: #dc2626; font-weight: 700; }
+  .optional { color: #059669; }
+  .swatch-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 12px 0; }
+  .swatch { width: 170px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+  .swatch-color { height: 80px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+  .swatch-info { padding: 10px 12px; background: #fff; }
+  .swatch-info strong { font-size: 0.85rem; display: block; }
+  .swatch-info span { font-size: 0.75rem; color: var(--muted); }
+  .wireframe { background: #f3f4f6; border: 2px dashed #d1d5db; border-radius: var(--radius); padding: 24px; margin: 20px 0; max-width: 400px; margin-left: auto; margin-right: auto; }
+  .wire-section { background: #fff; border: 1px solid #d1d5db; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; color: var(--muted); font-size: 0.85rem; }
+  .highlight { background: #fef3c7; border-left: 4px solid var(--primary); padding: 16px 20px; border-radius: 0 var(--radius) var(--radius) 0; margin: 16px 0; }
+  .scenario { background: #fffbeb; border-radius: var(--radius); padding: 16px 20px; margin: 8px 0; font-style: italic; color: #92400e; }
+  .priority-badge { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
+  .p-high { background: #fef2f2; color: #dc2626; }
+  .tag { display: inline-block; background: #fef3c7; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; margin: 2px; color: #92400e; }
+  .emergency-banner { background: #dc2626; color: #fff; padding: 12px 20px; border-radius: var(--radius); text-align: center; margin: 16px 0; font-weight: 700; }
+  footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<span class="badge">Template #5</span>
+<h1>펫 프로필 (Pet Profile)</h1>
+<p>MZ세대 반려동물 보호자를 위한 반려동물 소개 페이지. 바이럴성 최상, 신선한 포지셔닝.</p>
+
+<div class="meta">
+  <dl class="meta-item"><dt>Template Slug</dt><dd>pet-profile</dd></dl>
+  <dl class="meta-item"><dt>구현 우선순위</dt><dd><span class="priority-badge p-high">3순위</span></dd></dl>
+  <dl class="meta-item"><dt>예상 작업량</dt><dd>중간</dd></dl>
+  <dl class="meta-item"><dt>카테고리</dt><dd>개인 / 반려동물</dd></dl>
+</div>
+
+<div class="highlight">
+  <strong>바이럴 잠재력 최상:</strong> 반려동물 콘텐츠는 SNS 공유율 최상위. 펫 프로필 URL을 카카오톡/인스타로 공유하는 행위 자체가 자연 마케팅. "우리 아이 프로필이에요!" 한 마디가 수십 건의 서비스 노출.
+</div>
+
+<h2>1. 타겟 사용자 & 시나리오</h2>
+<div class="card">
+  <h3>1차 타겟</h3>
+  <p>MZ세대 반려동물 보호자 ("펫팸족") — 한국 반려동물 인구 1,500만+ (4가구 중 1가구)</p>
+  <h3>2차 타겟</h3>
+  <p>펫 인플루언서, 유기동물 보호소, 반려동물 관련 소상공인</p>
+  <h3>사용 시나리오</h3>
+  <div class="scenario">"우리 강아지 인스타를 정리해서 프로필 페이지를 만들고 싶어요"</div>
+  <div class="scenario">"산책 중 만난 사람에게 QR코드로 우리 고양이 소개하고 싶어요"</div>
+  <div class="scenario">"강아지가 실종됐을 때 긴급 배너가 뜨는 페이지가 있으면 좋겠어요"</div>
+  <div class="scenario">"동물병원 갈 때 접종 기록이랑 알러지 정보를 URL 하나로 보여주고 싶어요"</div>
+</div>
+
+<h2>2. 시장성 분석</h2>
+<div class="card">
+  <table>
+    <tr><th>지표</th><th>수치/설명</th></tr>
+    <tr><td>한국 반려동물 인구</td><td>1,500만+ (4가구 중 1가구)</td></tr>
+    <tr><td>펫 산업 규모</td><td>연 6조원+, 매년 10%+ 성장</td></tr>
+    <tr><td>펫 콘텐츠 SNS 공유율</td><td>일반 콘텐츠 대비 3~5배 높은 공유율</td></tr>
+    <tr><td>경쟁 서비스</td><td>전문 펫 프로필 서비스 거의 없음 — 블루오션</td></tr>
+    <tr><td>확장 가능성</td><td>펫시터, 펫호텔, 동물병원 등 펫 비즈니스 템플릿으로 발전</td></tr>
+    <tr><td>신선함</td><td>기존 Linkmap 템플릿 중 <strong>"사람이 아닌 대상"을 위한 최초</strong></td></tr>
+  </table>
+</div>
+
+<h2>3. 모듈 구성</h2>
+<table>
+  <thead>
+    <tr><th>모듈</th><th>타입</th><th>설명</th><th>주요 필드</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>PetHero (프로필 메인)</strong></td>
+      <td><span class="required">필수</span></td>
+      <td>반려동물 이름, 사진, 종, 한줄 소개</td>
+      <td>
+        <code>petName</code>, <code>species</code> (dog/cat/other)<br>
+        <code>breed</code>, <code>avatarUrl</code>, <code>heroImageUrl</code><br>
+        <code>tagline</code>, <code>birthday</code>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>PetInfo (기본 정보)</strong></td>
+      <td><span class="required">필수</span></td>
+      <td>성별, 체중, 성격 태그</td>
+      <td>
+        <code>gender</code>, <code>weight</code>, <code>color</code><br>
+        <code>personality[]</code> (태그)<br>
+        <code>favoriteThings[]</code>, <code>dislikedThings[]</code>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Gallery (포토 앨범)</strong></td>
+      <td><span class="optional">선택</span></td>
+      <td>기존 갤러리 모듈 재사용</td>
+      <td><code>images[]</code>, <code>columns</code>, <code>showAge</code> (사진별 나이 표시)</td>
+    </tr>
+    <tr>
+      <td><strong>Timeline (성장 기록)</strong></td>
+      <td><span class="optional">선택</span></td>
+      <td>입양일, 첫 산책 등 마일스톤</td>
+      <td><code>milestones[]</code>: date, title, description, imageUrl</td>
+    </tr>
+    <tr>
+      <td><strong>DailyRoutine (하루 일과)</strong></td>
+      <td><span class="optional">선택</span></td>
+      <td>시간별 일과 (재미 요소)</td>
+      <td><code>routines[]</code>: time, activity, emoji</td>
+    </tr>
+    <tr>
+      <td><strong>FamilyIntro (가족 소개)</strong></td>
+      <td><span class="optional">선택</span></td>
+      <td>보호자 & 다른 반려동물</td>
+      <td>
+        <code>family[]</code>: name, role, avatarUrl<br>
+        <code>otherPets[]</code>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Medical (건강 정보)</strong></td>
+      <td><span class="optional">선택</span></td>
+      <td>접종, 알러지, 병원 정보</td>
+      <td>
+        <code>vaccinations[]</code>, <code>allergies[]</code><br>
+        <code>vetName</code>, <code>vetPhone</code><br>
+        <code>microchipId</code>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Contact (보호자 연락)</strong></td>
+      <td><span class="optional">선택</span></td>
+      <td>보호자 연락처, 실종 모드</td>
+      <td>
+        <code>ownerName</code>, <code>phone</code>, <code>instagramUrl</code><br>
+        <code>showEmergencyBanner</code> (boolean)
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>4. 프리셋 테마</h2>
+<div class="swatch-row">
+  <div class="swatch">
+    <div class="swatch-color" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">&#128054;</div>
+    <div class="swatch-info">
+      <strong>Puppy</strong>
+      <span>따뜻한 앰버 | 발바닥 아이콘</span>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-color" style="background: linear-gradient(135deg, #8b5cf6, #c084fc);">&#128049;</div>
+    <div class="swatch-info">
+      <strong>Kitty</strong>
+      <span>라벤더 퍼플 | 고양이 실루엣</span>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-color" style="background: linear-gradient(135deg, #10b981, #34d399);">&#129422;</div>
+    <div class="swatch-info">
+      <strong>Tropical</strong>
+      <span>정글 그린 | 이국적 무드</span>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-color" style="background: linear-gradient(135deg, #ec4899, #f9a8d4);">&#128062;</div>
+    <div class="swatch-info">
+      <strong>Pastel</strong>
+      <span>파스텔 핑크 | 인스타 감성</span>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-color" style="background: linear-gradient(135deg, #27272a, #52525b);">&#128021;</div>
+    <div class="swatch-info">
+      <strong>Monochrome</strong>
+      <span>모노크롬 | 미니멀 세련</span>
+    </div>
+  </div>
+</div>
+
+<h2>5. 와이어프레임</h2>
+<p style="text-align:center; font-size:0.85rem; color:var(--muted);">모바일 뷰 (390px) 기준 — 펫 프로필은 모바일 퍼스트</p>
+
+<div class="wireframe">
+  <!-- Hero -->
+  <div class="wire-section" style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding:24px;">
+    <div style="width:100px; height:100px; border-radius:50%; background:#e5e7eb; margin:0 auto 12px; border:4px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.1);"></div>
+    <div style="font-size:1.4rem; font-weight:800; color:var(--text);">&#128054; 뽀삐</div>
+    <div style="font-size:0.85rem; color:#92400e;">골든 리트리버 | 3살 2개월</div>
+    <div style="font-size:0.8rem; color:#6b7280; margin-top:4px;">"세상에서 제일 착한 간식 도둑"</div>
+  </div>
+
+  <!-- Pet Info -->
+  <div class="wire-section">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; text-align:center; margin-bottom:12px;">
+      <div style="padding:8px; background:#fef3c7; border-radius:8px;">
+        <div style="font-size:0.7rem; color:#6b7280;">성별</div>
+        <div style="font-weight:600; font-size:0.9rem;">남아</div>
+      </div>
+      <div style="padding:8px; background:#fef3c7; border-radius:8px;">
+        <div style="font-size:0.7rem; color:#6b7280;">체중</div>
+        <div style="font-weight:600; font-size:0.9rem;">32kg</div>
+      </div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:0.75rem; color:#6b7280; margin-bottom:6px;">성격</div>
+      <span class="tag">활발한</span>
+      <span class="tag">간식러버</span>
+      <span class="tag">사람좋아</span>
+      <span class="tag">겁쟁이</span>
+    </div>
+    <div style="margin-top:12px;">
+      <div style="font-size:0.75rem; color:#6b7280; margin-bottom:4px;">좋아하는 것</div>
+      <span style="font-size:0.85rem;">&#128149; 공 던지기 &middot; 수박 &middot; 낮잠 &middot; 배 만져주기</span>
+    </div>
+    <div style="margin-top:8px;">
+      <div style="font-size:0.75rem; color:#6b7280; margin-bottom:4px;">싫어하는 것</div>
+      <span style="font-size:0.85rem;">&#128148; 목욕 &middot; 천둥소리 &middot; 고양이</span>
+    </div>
+  </div>
+
+  <!-- Daily Routine -->
+  <div class="wire-section" style="text-align:left;">
+    <strong style="display:block; text-align:center; margin-bottom:8px;">하루 일과</strong>
+    <div style="display:flex; align-items:center; gap:8px; padding:4px 0; border-bottom:1px solid #f3f4f6;">
+      <span style="font-size:0.75rem; color:#6b7280; width:45px;">07:00</span>
+      <span>&#127836; 아침밥 (사료 + 간식)</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px; padding:4px 0; border-bottom:1px solid #f3f4f6;">
+      <span style="font-size:0.75rem; color:#6b7280; width:45px;">09:00</span>
+      <span>&#128694; 아침 산책 (공원 1바퀴)</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px; padding:4px 0; border-bottom:1px solid #f3f4f6;">
+      <span style="font-size:0.75rem; color:#6b7280; width:45px;">12:00</span>
+      <span>&#128164; 낮잠 (소파 점령)</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px; padding:4px 0;">
+      <span style="font-size:0.75rem; color:#6b7280; width:45px;">18:00</span>
+      <span>&#127934; 저녁 산책 + 공놀이</span>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="wire-section" style="text-align:left;">
+    <strong style="display:block; text-align:center; margin-bottom:8px;">성장 기록</strong>
+    <div style="padding-left:16px; border-left:2px solid #fbbf24;">
+      <div style="padding:6px 0;">
+        <span style="font-size:0.7rem; color:#6b7280;">2023.03.15</span><br>
+        <strong style="font-size:0.85rem;">&#127881; 우리 가족이 된 날</strong>
+      </div>
+      <div style="padding:6px 0;">
+        <span style="font-size:0.7rem; color:#6b7280;">2023.04.01</span><br>
+        <strong style="font-size:0.85rem;">&#128062; 첫 산책 (무서워서 걷다 멈춤)</strong>
+      </div>
+      <div style="padding:6px 0;">
+        <span style="font-size:0.7rem; color:#6b7280;">2024.03.15</span><br>
+        <strong style="font-size:0.85rem;">&#127874; 첫 번째 생일!</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gallery -->
+  <div class="wire-section">
+    <strong>포토 앨범</strong>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-top:8px;">
+      <div style="height:60px; background:#fef3c7; border-radius:4px;"></div>
+      <div style="height:60px; background:#fde68a; border-radius:4px;"></div>
+      <div style="height:60px; background:#fef3c7; border-radius:4px;"></div>
+      <div style="height:60px; background:#fde68a; border-radius:4px;"></div>
+      <div style="height:60px; background:#fef3c7; border-radius:4px;"></div>
+      <div style="height:60px; background:#fde68a; border-radius:4px;"></div>
+    </div>
+  </div>
+
+  <!-- Contact -->
+  <div class="wire-section">
+    <strong>보호자 연락처</strong><br>
+    <span style="font-size:0.85rem;">김민수 (아빠) — 010-1234-5678</span><br>
+    <span style="font-size:0.8rem;">Instagram: @bboppi_golden</span>
+  </div>
+</div>
+
+<h3>실종 모드 (Emergency Banner)</h3>
+<div style="max-width:400px; margin:0 auto;">
+  <div class="emergency-banner">
+    &#128680; 실종 알림 &#128680;<br>
+    <span style="font-size:0.9rem; font-weight:400;">뽀삐를 찾고 있습니다!</span><br>
+    <span style="font-size:0.85rem; font-weight:400;">마지막 목격: 서울 성동구 뚝섬역 근처</span><br>
+    <span style="font-size:1rem; margin-top:4px; display:inline-block;">&#128222; 010-1234-5678</span>
+  </div>
+  <p style="text-align:center; font-size:0.75rem; color:#dc2626; margin-top:8px;">showEmergencyBanner: true 시 페이지 최상단에 고정</p>
+</div>
+
+<h2>6. 차별화 포인트</h2>
+<div class="card">
+  <ul style="padding-left:20px;">
+    <li><strong>바이럴성 극대화</strong> — 반려동물 콘텐츠 SNS 공유율 최상위, OG 이미지 자동 생성</li>
+    <li><strong>생일 D-Day / 나이 자동 계산</strong> — <code>birthday</code> 기반 "3살 2개월" 자동 표시</li>
+    <li><strong>성격 태그 시스템</strong> — 재미 요소 + 공유 욕구 자극 ("간식러버", "겁쟁이" 등)</li>
+    <li><strong>실종 모드</strong> — <code>showEmergencyBanner: true</code>로 긴급 배너 + 연락처 최상단</li>
+    <li><strong>건강 정보 모듈</strong> — 병원 방문 시 QR 코드로 접종/알러지 정보 전달</li>
+    <li><strong>NFC/QR 연동</strong> — digital-namecard의 vCard 기술 재활용하여 목걸이 인식 시 프로필 표시</li>
+    <li><strong>"사람이 아닌 대상" 최초</strong> — 기존 템플릿과 완전한 차별화, 신선한 포지셔닝</li>
+    <li><strong>하루 일과 모듈</strong> — 재미있는 시간표 형태로 공유 욕구 극대화</li>
+  </ul>
+</div>
+
+<h2>7. 기존 컴포넌트 재사용</h2>
+<div class="card">
+  <table>
+    <tr><th>기존 컴포넌트</th><th>활용</th></tr>
+    <tr><td><code>Gallery 모듈</code></td><td>포토 앨범 섹션 그대로 재사용</td></tr>
+    <tr><td><code>AnimatedReveal</code></td><td>각 섹션 등장 애니메이션</td></tr>
+    <tr><td><code>CountUp</code></td><td>생일 D-Day 카운트다운</td></tr>
+    <tr><td><code>SocialIcon</code></td><td>Instagram 등 소셜 아이콘</td></tr>
+    <tr><td><code>digital-namecard vCard</code></td><td>NFC/QR 인식 시 프로필 URL 연동</td></tr>
+    <tr><td><code>SectionWrapper</code></td><td>모듈 섹션 래퍼</td></tr>
+  </table>
+</div>
+
+<h2>8. 확장 로드맵</h2>
+<div class="card">
+  <table>
+    <tr><th>단계</th><th>기능</th><th>설명</th></tr>
+    <tr><td>v1 (출시)</td><td>기본 프로필 + 갤러리 + 성격 태그</td><td>MVP — 이것만으로도 바이럴 가능</td></tr>
+    <tr><td>v1.1</td><td>실종 모드 + 건강 정보</td><td>실용성 강화 — 차별화 핵심</td></tr>
+    <tr><td>v2 (확장)</td><td>펫 비즈니스 템플릿 (pet-biz)</td><td>펫시터, 펫호텔, 동물병원용 파생 템플릿</td></tr>
+    <tr><td>v3 (고도화)</td><td>다중 펫 프로필</td><td>한 페이지에 여러 반려동물 (2마리 이상 보호자)</td></tr>
+  </table>
+</div>
+
+<footer>
+  Linkmap Template Planning Document &mdash; 2026-04-13 &mdash; pet-profile (펫 프로필)
+</footer>
+
+</div>
+</body>
+</html>

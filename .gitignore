@@ -87,3 +87,15 @@ docs/db-uploads/
 # packages 워크스페이스 산출물 (mcp-server 등)
 packages/*/node_modules/
 packages/*/dist/
+
+# --- Sensitive / internal — NEVER commit to public repo (2026-06-21) ---
+docs/redteam/
+railway-*.png
+railway-*.md
+mcp-report/
+linkmap-*.png
+docs/planning/feature-ideas-2026-04.html
+linkmap/
+public/Untitled
+result.txt
+template-build-results.txt

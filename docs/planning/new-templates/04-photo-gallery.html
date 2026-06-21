@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linkmap 신규 템플릿 기획 — 포토 갤러리 (photo-gallery)</title>
+<style>
+  :root { --primary: #1a1a1a; --primary-light: #525252; --bg: #fafafa; --card: #fff; --text: #1a1a1a; --muted: #6b7280; --border: #e5e7eb; --radius: 12px; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard Variable', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+  .container { max-width: 960px; margin: 0 auto; padding: 40px 24px; }
+  h1 { font-size: 2rem; margin-bottom: 8px; }
+  h2 { font-size: 1.4rem; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+  h3 { font-size: 1.1rem; margin: 24px 0 12px; }
+  p, li { font-size: 0.95rem; color: #374151; }
+  .badge { display: inline-block; background: var(--primary); color: #fff; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 12px; }
+  .meta { display: flex; gap: 24px; flex-wrap: wrap; margin: 16px 0 32px; }
+  .meta-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; flex: 1; min-width: 200px; }
+  .meta-item dt { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .meta-item dd { font-size: 1.1rem; font-weight: 600; margin-top: 4px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin: 16px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9rem; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { background: #f9fafb; font-weight: 600; font-size: 0.8rem; color: var(--muted); text-transform: uppercase; }
+  .required { color: #dc2626; font-weight: 700; }
+  .optional { color: #059669; }
+  .swatch-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 12px 0; }
+  .swatch { width: 210px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+  .swatch-color { height: 80px; display: flex; align-items: center; justify-content: center; }
+  .swatch-info { padding: 10px 12px; background: #fff; }
+  .swatch-info strong { font-size: 0.85rem; display: block; }
+  .swatch-info span { font-size: 0.75rem; color: var(--muted); }
+  .wireframe { background: #f3f4f6; border: 2px dashed #d1d5db; border-radius: var(--radius); padding: 32px; margin: 20px 0; }
+  .wire-section { background: #fff; border: 1px solid #d1d5db; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; color: var(--muted); font-size: 0.85rem; }
+  .highlight { background: #f3f4f6; border-left: 4px solid var(--primary); padding: 16px 20px; border-radius: 0 var(--radius) var(--radius) 0; margin: 16px 0; }
+  .scenario { background: #f9fafb; border-radius: var(--radius); padding: 16px 20px; margin: 8px 0; font-style: italic; color: #374151; }
+  .priority-badge { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
+  .p-mid { background: #fffbeb; color: #d97706; }
+  /* Masonry demo */
+  .masonry-demo { columns: 3; column-gap: 8px; }
+  .masonry-item { break-inside: avoid; margin-bottom: 8px; border-radius: 6px; overflow: hidden; }
+  footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<span class="badge">Template #4</span>
+<h1>포토 갤러리 (Photo Gallery)</h1>
+<p>사진작가, 아티스트, 여행 블로거를 위한 비주얼 중심 포트폴리오. 사진이 주인공인 갤러리.</p>
+
+<div class="meta">
+  <dl class="meta-item"><dt>Template Slug</dt><dd>photo-gallery</dd></dl>
+  <dl class="meta-item"><dt>구현 우선순위</dt><dd><span class="priority-badge p-mid">5순위</span></dd></dl>
+  <dl class="meta-item"><dt>예상 작업량</dt><dd>높음 (Masonry+라이트박스)</dd></dl>
+  <dl class="meta-item"><dt>카테고리</dt><dd>크리에이터 / 비주얼</dd></dl>
+</div>
+
+<h2>1. 타겟 사용자 & 시나리오</h2>
+<div class="card">
+  <h3>1차 타겟</h3>
+  <p>사진작가, 일러스트레이터, 아티스트, 웨딩 스냅 작가</p>
+  <h3>2차 타겟</h3>
+  <p>여행 블로거, 푸드 포토그래퍼, 인스타그램 크리에이터</p>
+  <h3>사용 시나리오</h3>
+  <div class="scenario">"인스타에 올린 사진들을 포트폴리오 형태로 정리해서 클라이언트에게 보여주고 싶어요"</div>
+  <div class="scenario">"전시회 대신 온라인 갤러리를 열고 싶어요. 작품별 컬렉션으로 분류하고 풀스크린으로 감상"</div>
+  <div class="scenario">"웨딩 촬영 결과물을 신랑신부에게 전달할 갤러리 URL이 필요해요"</div>
+</div>
+
+<h2>2. freelancer-page 갤러리와의 차별화</h2>
+<div class="card">
+  <table>
+    <tr><th>항목</th><th>freelancer-page 갤러리 모듈</th><th>photo-gallery (신규)</th></tr>
+    <tr><td>갤러리 역할</td><td>전체 페이지의 1개 섹션</td><td><strong>갤러리 자체가 전체 페이지</strong></td></tr>
+    <tr><td>레이아웃</td><td>단순 그리드 (2~4열)</td><td>Masonry / Grid / 가로스크롤 선택</td></tr>
+    <tr><td>컬렉션 분류</td><td>없음</td><td><strong>앨범(컬렉션) 단위 분류 + 필터 탭</strong></td></tr>
+    <tr><td>라이트박스</td><td>없음</td><td><strong>풀스크린 뷰어 + 좌우 스와이프</strong></td></tr>
+    <tr><td>이미지 최적화</td><td>기본</td><td>Lazy Load + Blur Placeholder</td></tr>
+  </table>
+</div>
+
+<h2>3. 모듈 구성</h2>
+<table>
+  <thead>
+    <tr><th>모듈</th><th>타입</th><th>설명</th><th>주요 필드</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Hero (작가 소개)</strong></td>
+      <td><span class="required">필수</span></td>
+      <td>작가명, 대표작, 한줄 소개</td>
+      <td>
+        <code>name</code>, <code>tagline</code><br>
+        <code>avatarUrl</code>, <code>heroImageUrl</code><br>
+        <code>heroStyle</code> ("fullscreen"/"split"/"minimal")
+      </td>
+    </tr>
+    <tr>
+      <td><strong>GalleryGrid (갤러리)</strong></td>
+      <td><span class="required">필수</span></td>
+      <td>컬렉션별 이미지 갤러리</td>
+      <td>
+        <code>collections[]</code>: name, slug, coverImageUrl, description, images[]<br>
+        <code>layout</code> ("masonry"/"grid"/"horizontal-scroll")<br>
+        <code>columns</code> (2/3/4)<br>
+        <code>lightboxEnabled</code> (boolean)
+      </td>
+    </tr>
+    <tr>
+      <td><strong>About (작가 소개)</strong></td>
+      <td><span class="optional">선택</span></td>
+      <td>자기소개, 장비, 전문 분야</td>
+      <td>
+        <code>bio</code>, <code>bioEn</code><br>
+        <code>equipment[]</code>, <code>specialties[]</code>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Exhibitions (전시/수상)</strong></td>
+      <td><span class="optional">선택</span></td>
+      <td>전시 이력, 수상 경력</td>
+      <td><code>exhibitions[]</code>: title, venue, date, description</td>
+    </tr>
+    <tr>
+      <td><strong>Pricing (촬영 문의)</strong></td>
+      <td><span class="optional">선택</span></td>
+      <td>촬영 패키지, 견적 요청</td>
+      <td>
+        <code>packages[]</code>: name, price, description, includes[]<br>
+        <code>customQuoteEnabled</code>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Contact (연락)</strong></td>
+      <td><span class="optional">선택</span></td>
+      <td>이메일, Instagram, Behance</td>
+      <td><code>email</code>, <code>instagramUrl</code>, <code>behanceUrl</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>4. 프리셋 테마</h2>
+<div class="swatch-row">
+  <div class="swatch">
+    <div class="swatch-color" style="background: #ffffff; border-bottom: 1px solid #e5e7eb;">
+      <span style="color:#1a1a1a; font-weight:700; font-family:serif; font-size:1.1rem;">Aa</span>
+    </div>
+    <div class="swatch-info">
+      <strong>Gallery White</strong>
+      <span>화이트 갤러리 | 사진이 주인공</span>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-color" style="background: #0a0a0a;">
+      <span style="color:#fafafa; font-weight:700; font-family:serif; font-size:1.1rem;">Aa</span>
+    </div>
+    <div class="swatch-info">
+      <strong>Dark Room</strong>
+      <span>암실 무드 | 대비 극대화</span>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-color" style="background: linear-gradient(135deg, #1c1c1e, #3a3a3c);">
+      <span style="color:#d4d4d8; font-weight:700; font-family:Georgia,serif; font-size:1.1rem;">Aa</span>
+    </div>
+    <div class="swatch-info">
+      <strong>Editorial</strong>
+      <span>에디토리얼 매거진 | 세리프</span>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-color" style="background: linear-gradient(135deg, #4a3728, #8b7355);">
+      <span style="color:#f5f0e8; font-weight:700; font-family:Georgia,serif; font-size:1.1rem;">Aa</span>
+    </div>
+    <div class="swatch-info">
+      <strong>Film / Retro</strong>
+      <span>필름 그레인 | 크림 배경</span>
+    </div>
+  </div>
+</div>
+
+<h2>5. 와이어프레임</h2>
+
+<h3>Hero — Fullscreen 스타일</h3>
+<div class="wireframe" style="padding:0; overflow:hidden;">
+  <div style="height:200px; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), linear-gradient(135deg, #374151, #6b7280); display:flex; flex-direction:column; align-items:center; justify-content:center; color:#fff;">
+    <div style="font-size:1.8rem; font-weight:300; letter-spacing:4px; font-family:Georgia,serif;">STUDIO JIWON</div>
+    <div style="font-size:0.85rem; margin-top:8px; opacity:0.8; letter-spacing:2px;">PORTRAIT &middot; LANDSCAPE &middot; EDITORIAL</div>
+  </div>
+</div>
+
+<h3>갤러리 — 카테고리 필터 + Masonry 레이아웃</h3>
+<div class="wireframe">
+  <div style="display:flex; gap:12px; justify-content:center; margin-bottom:16px;">
+    <span style="padding:6px 16px; background:#1a1a1a; color:#fff; border-radius:20px; font-size:0.8rem;">All</span>
+    <span style="padding:6px 16px; background:#f3f4f6; border-radius:20px; font-size:0.8rem;">Portrait</span>
+    <span style="padding:6px 16px; background:#f3f4f6; border-radius:20px; font-size:0.8rem;">Landscape</span>
+    <span style="padding:6px 16px; background:#f3f4f6; border-radius:20px; font-size:0.8rem;">Wedding</span>
+    <span style="padding:6px 16px; background:#f3f4f6; border-radius:20px; font-size:0.8rem;">Street</span>
+  </div>
+
+  <div class="masonry-demo">
+    <div class="masonry-item" style="height:120px; background:#d1d5db;"></div>
+    <div class="masonry-item" style="height:180px; background:#9ca3af;"></div>
+    <div class="masonry-item" style="height:100px; background:#e5e7eb;"></div>
+    <div class="masonry-item" style="height:160px; background:#6b7280;"></div>
+    <div class="masonry-item" style="height:140px; background:#d1d5db;"></div>
+    <div class="masonry-item" style="height:200px; background:#9ca3af;"></div>
+    <div class="masonry-item" style="height:110px; background:#e5e7eb;"></div>
+    <div class="masonry-item" style="height:150px; background:#6b7280;"></div>
+    <div class="masonry-item" style="height:130px; background:#d1d5db;"></div>
+  </div>
+  <p style="text-align:center; font-size:0.75rem; color:#9ca3af; margin-top:12px;">Masonry 레이아웃 — 이미지 원본 비율 유지</p>
+</div>
+
+<h3>라이트박스 (이미지 클릭 시)</h3>
+<div class="wireframe" style="background:#0a0a0a; padding:24px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; color:#fff; margin-bottom:16px;">
+    <span style="font-size:0.8rem; opacity:0.6;">3 / 24</span>
+    <span style="font-size:1.2rem; cursor:pointer; opacity:0.6;">&#10005;</span>
+  </div>
+  <div style="display:flex; align-items:center; gap:16px;">
+    <span style="color:#fff; font-size:1.5rem; opacity:0.5;">&#10094;</span>
+    <div style="flex:1; height:200px; background:#374151; border-radius:4px;"></div>
+    <span style="color:#fff; font-size:1.5rem; opacity:0.5;">&#10095;</span>
+  </div>
+  <div style="text-align:center; color:#fff; margin-top:12px; opacity:0.7; font-size:0.85rem;">
+    Seoul Street, 2026 — Leica M11 | f/2.8 | 1/250s
+  </div>
+</div>
+
+<h2>6. 차별화 포인트</h2>
+<div class="card">
+  <ul style="padding-left:20px;">
+    <li><strong>Masonry 레이아웃</strong> — Pinterest 스타일, 이미지 원본 비율 유지</li>
+    <li><strong>라이트박스 풀스크린 뷰어</strong> — 클릭 시 전체화면, 좌우 스와이프/키보드 네비게이션</li>
+    <li><strong>컬렉션(앨범) 분류</strong> — 카테고리 필터 탭으로 포트폴리오 구조화</li>
+    <li><strong>이미지 Lazy Loading</strong> — Blur Placeholder로 쾌적한 로딩 경험</li>
+    <li><strong>가로 스크롤 모드</strong> — 히어로 영역에서 시네마틱 프레젠테이션</li>
+    <li><strong>EXIF 정보 표시</strong> — 라이트박스에서 카메라/렌즈/설정값 표시 (선택)</li>
+    <li><strong>촬영 패키지 모듈</strong> — 웨딩 스냅, 프로필 촬영 등 직접 예약 유도</li>
+  </ul>
+</div>
+
+<div class="highlight">
+  <strong>구현 난이도 참고:</strong> Masonry + Lightbox는 CSS columns + JS 이벤트 핸들러로 정적 사이트에서도 구현 가능. 외부 라이브러리 없이 바닐라 JS로 작성하여 번들 사이즈 최소화.
+</div>
+
+<h2>7. 기존 컴포넌트 재사용</h2>
+<div class="card">
+  <table>
+    <tr><th>기존 컴포넌트</th><th>활용</th></tr>
+    <tr><td><code>Gallery 모듈</code> (기존 템플릿)</td><td>기본 그리드 모드의 베이스 코드</td></tr>
+    <tr><td><code>AnimatedReveal</code></td><td>이미지 스크롤 등장 페이드인</td></tr>
+    <tr><td><code>SectionWrapper</code></td><td>About, Exhibitions 섹션 래퍼</td></tr>
+    <tr><td><code>SocialIcon</code></td><td>Instagram, Behance 아이콘</td></tr>
+    <tr><td><code>ThemeToggle</code></td><td>White/Dark 갤러리 테마 전환</td></tr>
+  </table>
+</div>
+
+<footer>
+  Linkmap Template Planning Document &mdash; 2026-04-13 &mdash; photo-gallery (포토 갤러리)
+</footer>
+
+</div>
+</body>
+</html>
