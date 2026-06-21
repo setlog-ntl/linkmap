@@ -162,6 +162,9 @@ export const subcategories: SubcategorySeed[] = [
   { id: 'ai_framework', category: 'ai', name: 'AI Framework', name_ko: 'AI 프레임워크', description: 'AI application development SDKs and frameworks', description_ko: 'AI 앱 개발 SDK 및 프레임워크' },
   { id: 'model_hub', category: 'ai', name: 'Model Hub', name_ko: '모델 허브', description: 'ML model hosting, sharing, and inference platforms', description_ko: 'ML 모델 호스팅·공유·추론 플랫폼' },
 
+  // --- deploy (추가) ---
+  { id: 'platform', category: 'deploy', name: 'Platform', name_ko: '플랫폼', description: 'Integrated development and deployment platforms', description_ko: '통합 개발·배포 플랫폼' },
+
   // --- database (추가) ---
   { id: 'edge_db', category: 'database', name: 'Edge Database', name_ko: '에지 데이터베이스', description: 'Edge-native distributed databases', description_ko: '에지 네이티브 분산 데이터베이스' },
   { id: 'reactive_backend', category: 'database', name: 'Reactive Backend', name_ko: '리액티브 백엔드', description: 'Realtime reactive backend platforms with built-in DB', description_ko: '실시간 리액티브 백엔드 플랫폼 (DB 내장)' },
