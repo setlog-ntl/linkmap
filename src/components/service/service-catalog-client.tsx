@@ -138,11 +138,17 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
     return result;
   }, [services]);
 
-  // Featured services top 6 by popularity (QW-3)
+  // Featured services: Linkmap·Anthropic(Claude)을 상단 고정 + 나머지 인기순 상위 (QW-3)
   const featuredServices = useMemo(() => {
-    return [...services]
+    const pinnedSlugs = ['linkmap', 'anthropic'];
+    const pinned = pinnedSlugs
+      .map((slug) => services.find((s) => s.slug === slug))
+      .filter((s): s is (typeof services)[number] => Boolean(s));
+    const rest = [...services]
+      .filter((s) => !pinnedSlugs.includes(s.slug))
       .sort((a, b) => (b.popularity_score || 0) - (a.popularity_score || 0))
       .slice(0, 6);
+    return [...pinned, ...rest];
   }, [services]);
 
   // Suggested services for empty state - tag/category partial match (QW-6)

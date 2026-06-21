@@ -127,4 +127,11 @@ export const SERVICE_SLUGS: string[] = [
   'fireworks-ai',
   'modal',
   'wandb',
+  // Vibe Coding / App Builder - Batch 2
+  'manus',
+  'devin',
+  'base44',
+  'rork',
+  'a0-dev',
+  'tempo-labs',
 ];

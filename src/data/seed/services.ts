@@ -814,7 +814,7 @@ export const services: ServiceSeed[] = [
   // -----------------------------------------------------------------------
   {
     id: SERVICE_IDS.anthropic,
-    name: 'Anthropic',
+    name: 'Anthropic (Claude)',
     slug: 'anthropic',
     category: 'ai',
     dashboard_layer: 'devtools',
@@ -842,9 +842,9 @@ export const services: ServiceSeed[] = [
     // V2 extended fields
     domain: 'ai_ml',
     subcategory: 'llm',
-    popularity_score: 88,
+    popularity_score: 95,
     difficulty_level: 'beginner',
-    tags: ['llm', 'claude', 'ai', 'safety', 'long-context', '앤트로픽'],
+    tags: ['llm', 'claude', 'ai', 'safety', 'long-context', '앤트로픽', '클로드'],
     alternatives: ['openai', 'groq'],
     compatibility: {
       framework: ['nextjs', 'react', 'express', 'fastapi'],

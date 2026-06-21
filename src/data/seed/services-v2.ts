@@ -155,6 +155,13 @@ export const SERVICE_IDS_V2 = {
   axiom: '10000000-0000-4000-a000-000000000156',
   betterstack: '10000000-0000-4000-a000-000000000157',
   novu: '10000000-0000-4000-a000-000000000158',
+  // Vibe Coding / App Builder - Batch 2
+  manus: '10000000-0000-4000-a000-000000000159',
+  devin: '10000000-0000-4000-a000-000000000160',
+  base44: '10000000-0000-4000-a000-000000000161',
+  rork: '10000000-0000-4000-a000-000000000162',
+  a0_dev: '10000000-0000-4000-a000-000000000163',
+  tempo_labs: '10000000-0000-4000-a000-000000000164',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -4814,7 +4821,7 @@ export const servicesV2: ServiceSeedV2[] = [
     required_env_vars: [],
     domain: 'devtools',
     subcategory: 'platform',
-    popularity_score: 70,
+    popularity_score: 88,
     difficulty_level: 'beginner',
     tags: ['서비스맵', '원클릭배포', '환경변수', '시각화', 'devtools', 'deploy', 'platform', 'korean', '바이브코딩', '링크맵'],
     alternatives: ['vercel', 'netlify', 'railway'],
@@ -5187,7 +5194,7 @@ export const servicesV2: ServiceSeedV2[] = [
     popularity_score: 88,
     difficulty_level: 'beginner',
     tags: ['bolt', 'stackblitz', 'vibe-coding', 'app-builder', 'fullstack', 'no-code', '볼트', '바이브코딩', '앱빌더'],
-    alternatives: ['lovable', 'replit', 'v0'],
+    alternatives: ['lovable', 'replit', 'v0', 'manus', 'base44'],
     compatibility: {
       framework: ['next', 'react', 'vue', 'svelte'],
       language: ['javascript', 'typescript'],
@@ -5234,7 +5241,7 @@ export const servicesV2: ServiceSeedV2[] = [
     popularity_score: 85,
     difficulty_level: 'beginner',
     tags: ['lovable', 'gpt-engineer', 'vibe-coding', 'app-builder', 'supabase', 'fullstack', '러블리', '바이브코딩', '앱빌더'],
-    alternatives: ['bolt-new', 'replit', 'v0'],
+    alternatives: ['bolt-new', 'replit', 'v0', 'manus', 'base44'],
     compatibility: {
       framework: ['next', 'react'],
       language: ['javascript', 'typescript'],
@@ -5279,7 +5286,7 @@ export const servicesV2: ServiceSeedV2[] = [
     popularity_score: 87,
     difficulty_level: 'beginner',
     tags: ['v0', 'vercel', 'ui-generation', 'shadcn', 'react', 'next', 'component', '브이제로', 'UI생성', '바이브코딩'],
-    alternatives: ['bolt-new', 'lovable', 'google-stitch'],
+    alternatives: ['bolt-new', 'lovable', 'google-stitch', 'tempo-labs'],
     compatibility: {
       framework: ['next', 'react'],
       language: ['javascript', 'typescript'],
@@ -5333,7 +5340,7 @@ export const servicesV2: ServiceSeedV2[] = [
     popularity_score: 82,
     difficulty_level: 'beginner',
     tags: ['replit', 'cloud-ide', 'vibe-coding', 'deployment', 'collaboration', 'ai-agent', '리플릿', '클라우드IDE', '바이브코딩'],
-    alternatives: ['bolt-new', 'lovable'],
+    alternatives: ['bolt-new', 'lovable', 'manus', 'base44', 'rork', 'a0-dev'],
     compatibility: {
       framework: ['next', 'react', 'express', 'flask', 'django', 'rails'],
       language: ['javascript', 'typescript', 'python', 'go', 'ruby'],
@@ -6080,6 +6087,284 @@ export const servicesV2: ServiceSeedV2[] = [
       starter: '$0',
       growth: '종량제',
       enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Manus
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.manus,
+    name: 'Manus',
+    slug: 'manus',
+    category: 'ai',
+    description:
+      '자율 AI 에이전트 플랫폼입니다. 웹 브라우징·코딩·파일 처리·데이터 분석을 AI가 스스로 계획·실행하며, 웹사이트·앱·리서치 보고서를 프롬프트 하나로 완성합니다.',
+    description_ko:
+      '자율 AI 에이전트 플랫폼입니다. 웹 브라우징·코딩·파일 처리·데이터 분석을 AI가 스스로 계획·실행하며, 웹사이트·앱·리서치 보고서를 프롬프트 하나로 완성합니다.',
+    icon_url: null,
+    website_url: 'https://manus.im',
+    docs_url: 'https://manus.im/blog',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Free: 일 300 크레딧 제공 (매일 초기화), 최대 5개 동시 태스크',
+      plans: [
+        { name: 'Free', price: '$0/월 (일 300 크레딧)' },
+        { name: 'Starter', price: '$20/월 (4,000 크레딧)' },
+        { name: 'Pro', price: '$40/월 (8,000 크레딧)' },
+        { name: 'Extended', price: '$200/월 (40,000 크레딧)' },
+      ],
+    },
+    required_env_vars: [],
+    domain: 'ai_ml',
+    subcategory: 'vibe_coding',
+    popularity_score: 88,
+    difficulty_level: 'beginner',
+    tags: ['manus', 'ai-agent', 'autonomous', 'vibe-coding', 'app-builder', 'research', 'web-browsing', '마누스', '자율에이전트', '바이브코딩'],
+    alternatives: ['bolt-new', 'lovable', 'replit', 'devin'],
+    compatibility: {
+      framework: ['next', 'react', 'vue', 'express', 'fastapi'],
+      language: ['javascript', 'typescript', 'python'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 1,
+    monthly_cost_estimate: {
+      starter: '$0 (일 300 크레딧)',
+      growth: '$20~$40/월',
+      enterprise: '$200/월~',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Devin (Cognition)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.devin,
+    name: 'Devin',
+    slug: 'devin',
+    category: 'ai',
+    description:
+      'Cognition이 개발한 자율 AI 소프트웨어 엔지니어입니다. 독립적인 가상 환경에서 코드 작성·테스트·PR 제출·배포까지 전 과정을 자율 수행하며, 팀 협업 워크플로우에 통합됩니다.',
+    description_ko:
+      'Cognition이 개발한 자율 AI 소프트웨어 엔지니어입니다. 독립적인 가상 환경에서 코드 작성·테스트·PR 제출·배포까지 전 과정을 자율 수행하며, 팀 협업 워크플로우에 통합됩니다.',
+    icon_url: null,
+    website_url: 'https://devin.ai',
+    docs_url: 'https://docs.devin.ai',
+    pricing_info: {
+      free_tier: false,
+      free_tier_details: '무료 플랜 없음. Core $20/월부터 시작 (ACU 종량제)',
+      plans: [
+        { name: 'Core', price: '$20/월 (ACU $2.25/개, 1 ACU ≈ 15분 작업)' },
+        { name: 'Team', price: '$500/월 (250 ACU 포함, 추가 $2.00/ACU)' },
+        { name: 'Enterprise', price: '문의 (VPC 배포, SAML SSO)' },
+      ],
+    },
+    required_env_vars: [],
+    domain: 'ai_ml',
+    subcategory: 'code_assistant',
+    popularity_score: 85,
+    difficulty_level: 'intermediate',
+    tags: ['devin', 'cognition', 'ai-engineer', 'autonomous', 'agentic', 'software-engineering', 'devops', '데빈', '자율엔지니어', 'AI에이전트'],
+    alternatives: ['cursor', 'cline', 'claude-code', 'manus'],
+    compatibility: {
+      framework: ['next', 'react', 'express', 'fastapi', 'django', 'rails', 'spring'],
+      language: ['javascript', 'typescript', 'python', 'go', 'java', 'ruby', 'rust'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'none',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 15,
+    monthly_cost_estimate: {
+      starter: '$20/월',
+      growth: '$500/월',
+      enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Base44 (Wix)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.base44,
+    name: 'Base44',
+    slug: 'base44',
+    category: 'ai',
+    description:
+      'Wix가 인수한 AI 기반 풀스택 앱 빌더입니다. 이중 크레딧 시스템(빌딩용 메시지 크레딧 + 운영용 인테그레이션 크레딧)으로 Stripe·Slack·OpenAI 등 네이티브 통합을 지원합니다.',
+    description_ko:
+      'Wix가 인수한 AI 기반 풀스택 앱 빌더입니다. 이중 크레딧 시스템(빌딩용 메시지 크레딧 + 운영용 인테그레이션 크레딧)으로 Stripe·Slack·OpenAI 등 네이티브 통합을 지원합니다.',
+    icon_url: null,
+    website_url: 'https://base44.com',
+    docs_url: 'https://base44.com/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Forever Free: 25 메시지 크레딧 + 100 인테그레이션 크레딧, 무제한 앱',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Starter', price: '$16/월 (연간)~' },
+        { name: 'Pro', price: '$160/월 (연간, 최상위)' },
+      ],
+    },
+    required_env_vars: [],
+    domain: 'ai_ml',
+    subcategory: 'vibe_coding',
+    popularity_score: 80,
+    difficulty_level: 'beginner',
+    tags: ['base44', 'wix', 'app-builder', 'vibe-coding', 'fullstack', 'no-code', 'stripe', 'openai', '베이스44', '바이브코딩', '앱빌더'],
+    alternatives: ['bolt-new', 'lovable', 'replit', 'manus'],
+    compatibility: {
+      framework: ['react'],
+      language: ['javascript'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'high',
+    setup_time_minutes: 2,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$16~$80/월',
+      enterprise: '$160/월',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Rork
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.rork,
+    name: 'Rork',
+    slug: 'rork',
+    category: 'ai',
+    description:
+      'AI 기반 모바일 앱 빌더입니다. React Native 기반 iOS·Android 앱을 프롬프트로 생성하며, 프리미엄 서비스인 Rork Max는 네이티브 Swift로 Apple 생태계 전용 앱을 빌드합니다.',
+    description_ko:
+      'AI 기반 모바일 앱 빌더입니다. React Native 기반 iOS·Android 앱을 프롬프트로 생성하며, 프리미엄 서비스인 Rork Max는 네이티브 Swift로 Apple 생태계 전용 앱을 빌드합니다.',
+    icon_url: null,
+    website_url: 'https://rork.com',
+    docs_url: 'https://rork.com/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Free: 월 35 크레딧 (일 5 크레딧 한도)',
+      plans: [
+        { name: 'Free', price: '$0/월 (35 크레딧)' },
+        { name: 'Junior', price: '$25/월 (100 크레딧)' },
+        { name: 'Middle', price: '$50/월' },
+        { name: 'Senior', price: '$100/월' },
+        { name: 'Rork Max', price: '$200/월 (네이티브 Swift)' },
+      ],
+    },
+    required_env_vars: [],
+    domain: 'ai_ml',
+    subcategory: 'vibe_coding',
+    popularity_score: 72,
+    difficulty_level: 'beginner',
+    tags: ['rork', 'mobile', 'ios', 'android', 'react-native', 'swift', 'app-builder', 'vibe-coding', '로크', '모바일앱', '바이브코딩'],
+    alternatives: ['a0-dev', 'bolt-new', 'replit'],
+    compatibility: {
+      framework: ['react-native', 'expo'],
+      language: ['javascript', 'typescript', 'swift'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'limited',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 2,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$25~$100/월',
+      enterprise: '$200/월 (Rork Max)',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // a0.dev
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.a0_dev,
+    name: 'a0.dev',
+    slug: 'a0-dev',
+    category: 'ai',
+    description:
+      'AI 기반 모바일 앱 빌더로, 프롬프트에서 iOS·Android 앱을 생성해 App Store와 Google Play에 직접 제출합니다. YC 출신으로 스토어 제출까지 원클릭으로 처리합니다.',
+    description_ko:
+      'AI 기반 모바일 앱 빌더로, 프롬프트에서 iOS·Android 앱을 생성해 App Store와 Google Play에 직접 제출합니다. YC 출신으로 스토어 제출까지 원클릭으로 처리합니다.',
+    icon_url: null,
+    website_url: 'https://a0.dev',
+    docs_url: 'https://a0.dev/docs',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Free: 일 메시지 한도 제공',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Pro', price: '$20/월 (일 100 메시지)' },
+      ],
+    },
+    required_env_vars: [],
+    domain: 'ai_ml',
+    subcategory: 'vibe_coding',
+    popularity_score: 68,
+    difficulty_level: 'beginner',
+    tags: ['a0dev', 'mobile', 'ios', 'android', 'app-store', 'google-play', 'vibe-coding', 'app-builder', 'yc', 'a0.dev', '모바일앱', '바이브코딩'],
+    alternatives: ['rork', 'bolt-new', 'replit'],
+    compatibility: {
+      framework: ['react-native', 'expo'],
+      language: ['javascript', 'typescript'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'limited',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 2,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$20/월',
+      enterprise: '문의',
+    },
+  },
+
+  // -----------------------------------------------------------------------
+  // Tempo Labs
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.tempo_labs,
+    name: 'Tempo',
+    slug: 'tempo-labs',
+    category: 'ai',
+    description:
+      'React 전용 AI 앱 빌더입니다. 멀티 에이전트 플래닝 시스템이 사용자 흐름도·아키텍처를 먼저 설계한 뒤 코드를 생성하며, 기존 React 코드베이스에 직접 통합할 수 있습니다.',
+    description_ko:
+      'React 전용 AI 앱 빌더입니다. 멀티 에이전트 플래닝 시스템이 사용자 흐름도·아키텍처를 먼저 설계한 뒤 코드를 생성하며, 기존 React 코드베이스에 직접 통합할 수 있습니다.',
+    icon_url: null,
+    website_url: 'https://tempo.new',
+    docs_url: 'https://docs.tempo.new',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details: 'Free: 월 30 크레딧 (일 5 크레딧 한도)',
+      plans: [
+        { name: 'Free', price: '$0/월 (30 크레딧)' },
+        { name: 'Pro', price: '$30/월 (150 크레딧)' },
+        { name: 'Agent+', price: '$4,500/월 (휴먼 어시스트 개발)' },
+      ],
+    },
+    required_env_vars: [],
+    domain: 'ai_ml',
+    subcategory: 'vibe_coding',
+    popularity_score: 65,
+    difficulty_level: 'beginner',
+    tags: ['tempo', 'tempo-labs', 'react', 'vibe-coding', 'app-builder', 'multi-agent', 'ui-generation', '템포', 'React빌더', '바이브코딩'],
+    alternatives: ['v0', 'bolt-new', 'lovable'],
+    compatibility: {
+      framework: ['react', 'next'],
+      language: ['javascript', 'typescript'],
+    },
+    official_sdks: {},
+    free_tier_quality: 'limited',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 3,
+    monthly_cost_estimate: {
+      starter: '$0',
+      growth: '$30/월',
+      enterprise: '$4,500/월',
     },
   },
 ];
