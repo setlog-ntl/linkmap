@@ -172,10 +172,15 @@
     -webkit-text-size-adjust: 100%;
     /* 헤더 높이 토큰 — 스티키 인페이지 네비 오프셋 기준 (h-14 = 3.5rem) */
     --header-height: 3.5rem;
+    /* 모바일 토대: 가로 오버플로우 가드는 반드시 뷰포트 스크롤 컨테이너(html)에 직접 걸어야 함.
+       body의 overflow-x:clip은 뷰포트로 전파되지 않아(clip은 hidden과 달리 비전파),
+       절대배치 장식 요소가 넘치면 페이지가 가로로 패닝되며 sticky 헤더(햄버거)가 화면 밖으로 밀려난다.
+       clip은 새 스크롤 컨테이너를 만들지 않고 overflow-y는 visible로 남아 sticky/세로 스크롤과 충돌하지 않음. */
+    overflow-x: clip;
   }
   body {
     @apply bg-background text-foreground;
-    /* 모바일 토대: 단일 요소가 넘쳐도 페이지 전체 가로 스크롤이 생기지 않도록 가드.
+    /* 모바일 토대: 단일 요소가 넘쳐도 페이지 전체 가로 스크롤이 생기지 않도록 가드(html과 이중 방어).
        clip은 새 스크롤 컨테이너를 만들지 않아 sticky 헤더와 충돌하지 않음. */
     overflow-x: clip;
   }
