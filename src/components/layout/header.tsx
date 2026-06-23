@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { IconTooltip } from '@/components/ui/icon-tooltip';
 import { Menu, Globe, Search, BookOpen, PenLine, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench, ArrowRight, Rocket, BarChart3, Trophy, Code, Palette, Workflow, Library } from 'lucide-react';
@@ -375,6 +375,8 @@ export function Header({ profile: profileProp }: HeaderProps) {
               </IconTooltip>
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
+              {/* 스크린리더용 제목 (Radix Dialog 접근성 요구) — 시각적으로는 숨김 */}
+              <SheetTitle className="sr-only">메뉴</SheetTitle>
               <nav className="flex flex-col gap-2 mt-8">
                 <Link
                   href="/sites/new"
