@@ -318,6 +318,31 @@
 
 ---
 
+### secure_notes
+> 보안 메모 — KEY=VALUE 가 아닌 자유 텍스트 민감값(백업코드/복구문구 등) 암호화 저장 (M103)
+
+| Column | Type | Nullable | Default |
+|--------|------|----------|---------|
+| id | UUID PK | NO | gen_random_uuid() |
+| project_id | UUID FK | NO | → projects(id) ON DELETE CASCADE |
+| service_id | UUID FK | YES | → services(id) ON DELETE SET NULL |
+| title | TEXT | NO | - |
+| category | TEXT | NO | 'other' |
+| encrypted_content | TEXT | NO | - (AES-256-GCM) |
+| environment | TEXT | NO | 'all' |
+| notes | TEXT | YES | NULL |
+| created_at | TIMESTAMPTZ | NO | now() |
+| updated_at | TIMESTAMPTZ | NO | now() |
+
+**CHECK category**: backup_code\|password\|recovery_phrase\|license_key\|connection_string\|pin\|api_note\|other
+**CHECK environment**: development\|staging\|production\|all
+**Indexes**: `idx_secure_notes_project`, `idx_secure_notes_project_service`
+**RLS**: `secure_notes_owner_all`(소유자 FOR ALL) + `secure_notes_team_read`(팀 멤버 SELECT)
+**TS Type**: `SecureNote` (`src/types/secure-note.ts`)
+**복호화**: `/api/secure-notes/decrypt` (MFA 가드 + 감사로그)
+
+---
+
 ## 5. Team & Auth Tables
 
 ### teams
@@ -928,6 +953,7 @@ supabase/migrations/NNN_description.sql
 | checklist_items | `ChecklistItem` | project.ts | ✅ |
 | user_checklist_progress | `UserChecklistProgress` | project.ts | ✅ |
 | environment_variables | `EnvironmentVariable` | env.ts | ✅ |
+| secure_notes | `SecureNote` | secure-note.ts | ✅ |
 | project_templates | `ProjectTemplate` | project.ts | ✅ |
 | service_domains | `ServiceDomainRecord` | service.ts | ✅ |
 | service_subcategories | `ServiceSubcategory` | service.ts | ✅ |

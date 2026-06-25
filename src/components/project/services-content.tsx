@@ -16,7 +16,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AddServiceDialog } from '@/components/service/add-service-dialog';
 import { ServiceChecklist } from '@/components/service/service-checklist';
 import { SetupWizard } from '@/components/service/setup-wizard';
-import { Trash2, ExternalLink, Wand2, List as ListIcon, User, Check, X, Activity, Loader2, Search, Layers, Copy } from 'lucide-react';
+import { ManualRegisterDialog } from '@/components/service/manual-register-dialog';
+import { Trash2, ExternalLink, Wand2, PencilLine, List as ListIcon, User, Check, X, Activity, Loader2, Search, Layers, Copy } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -126,6 +127,7 @@ function ServiceAccordionItem({
   runHealthCheck,
   onRemove,
   onWizard,
+  onManual,
 }: {
   ps: ProjectServiceWithService;
   projectId: string;
@@ -133,6 +135,7 @@ function ServiceAccordionItem({
   runHealthCheck: ReturnType<typeof useRunHealthCheck>;
   onRemove: (id: string) => void;
   onWizard: (ps: ProjectServiceWithService) => void;
+  onManual: (ps: ProjectServiceWithService) => void;
 }) {
   return (
     <AccordionItem value={ps.id} className="border rounded-lg px-4">
@@ -198,6 +201,16 @@ function ServiceAccordionItem({
             {ps.service && (
               <Button
                 variant="default"
+                size="sm"
+                onClick={() => onManual(ps)}
+              >
+                <PencilLine className="mr-1.5 h-3.5 w-3.5" />
+                수동 등록
+              </Button>
+            )}
+            {ps.service && (
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => onWizard(ps)}
               >
@@ -308,6 +321,7 @@ export function ServicesContent({ projectId }: ServicesContentProps) {
   const removeService = useRemoveProjectService(projectId);
   const runHealthCheck = useRunHealthCheck();
   const [wizardTarget, setWizardTarget] = useState<ProjectServiceWithService | null>(null);
+  const [manualTarget, setManualTarget] = useState<ProjectServiceWithService | null>(null);
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -463,6 +477,7 @@ export function ServicesContent({ projectId }: ServicesContentProps) {
                     runHealthCheck={runHealthCheck}
                     onRemove={handleRemoveService}
                     onWizard={setWizardTarget}
+                    onManual={setManualTarget}
                   />
                 ))}
               </Accordion>
@@ -480,6 +495,7 @@ export function ServicesContent({ projectId }: ServicesContentProps) {
               runHealthCheck={runHealthCheck}
               onRemove={handleRemoveService}
               onWizard={setWizardTarget}
+              onManual={setManualTarget}
             />
           ))}
         </Accordion>
@@ -492,6 +508,16 @@ export function ServicesContent({ projectId }: ServicesContentProps) {
           onOpenChange={(open) => { if (!open) setWizardTarget(null); }}
           service={wizardTarget.service}
           projectService={wizardTarget}
+          projectId={projectId}
+        />
+      )}
+
+      {manualTarget?.service && (
+        <ManualRegisterDialog
+          key={manualTarget.id}
+          open={!!manualTarget}
+          onOpenChange={(open) => { if (!open) setManualTarget(null); }}
+          service={manualTarget.service}
           projectId={projectId}
         />
       )}
