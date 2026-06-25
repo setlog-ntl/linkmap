@@ -51,3 +51,20 @@ export interface DbServiceCredential {
 export interface DbCredentialWithProject extends DbServiceCredential {
   project: { user_id: string };
 }
+
+export interface DbSecureNote {
+  id: string;
+  project_id: string;
+  service_id: string | null;
+  title: string;
+  category: string;
+  encrypted_content: string;
+  environment: string;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DbSecureNoteWithProject extends DbSecureNote {
+  project: { user_id: string };
+}

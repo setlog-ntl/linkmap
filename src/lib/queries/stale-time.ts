@@ -6,6 +6,8 @@ export const staleTime = {
   envVar: 15 * 1000,
   /** 계정 정보 — 30초 (등록 후 가끔 조회) */
   credential: 30 * 1000,
+  /** 보안 메모 — 30초 (등록 후 가끔 조회) */
+  secureNote: 30 * 1000,
   /** 헬스체크 — 60초 (외부 API 호출 비용) */
   healthCheck: 60 * 1000,
   /** 감사 로그 — 5분 (읽기 전용) */

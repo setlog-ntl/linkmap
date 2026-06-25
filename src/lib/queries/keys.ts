@@ -9,6 +9,9 @@ export const queryKeys = {
   credentials: {
     byProject: (projectId: string) => ['credentials', 'project', projectId] as const,
   },
+  secureNotes: {
+    byProject: (projectId: string) => ['secure-notes', 'project', projectId] as const,
+  },
   envVars: {
     byProject: (projectId: string) => ['env-vars', 'project', projectId] as const,
     stats: (projectId: string) => ['env-vars', 'stats', projectId] as const,
