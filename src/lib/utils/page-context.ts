@@ -32,7 +32,7 @@ const PAGE_PATTERNS: PagePattern[] = [
   { pattern: /^\/project\/[^/]+\/integrations/, category: '프로젝트', name: '통합 관리' },
   { pattern: /^\/project\/[^/]+\/monitoring/, category: '프로젝트', name: '모니터링' },
   { pattern: /^\/project\/[^/]+\/health/, category: '프로젝트', name: '상태 확인' },
-  { pattern: /^\/project\/[^/]+\/credentials/, category: '프로젝트', name: '인증정보' },
+  { pattern: /^\/project\/[^/]+\/credentials/, category: '프로젝트', name: '비밀키 관리' },
   { pattern: /^\/project\/[^/]+\/settings/, category: '프로젝트', name: '프로젝트 설정' },
   { pattern: /^\/project\/[^/]+\/audit/, category: '프로젝트', name: '활동 로그' },
   { pattern: /^\/project\/[^/]+$/, category: '프로젝트', name: '프로젝트 개요' },
@@ -107,7 +107,7 @@ export const PAGE_TREE: PageTreeNode[] = [
     { key: '프로젝트 > 통합 관리', label: '통합 관리' },
     { key: '프로젝트 > 모니터링', label: '모니터링' },
     { key: '프로젝트 > 상태 확인', label: '상태 확인' },
-    { key: '프로젝트 > 인증정보', label: '인증정보' },
+    { key: '프로젝트 > 비밀키 관리', label: '비밀키 관리' },
     { key: '프로젝트 > 활동 로그', label: '활동 로그' },
   ]},
   // ③ 탐색

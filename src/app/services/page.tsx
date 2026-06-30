@@ -20,7 +20,6 @@ import type { Service, ServiceDomainRecord } from '@/types';
 export default async function ServicesPage() {
   let services: Service[] = [];
   let domains: ServiceDomainRecord[] = [];
-  let guideServiceIds: string[] = [];
   let guideApiKeyMap: Record<string, { url: string; label: string | null }> = {};
 
   try {
@@ -33,7 +32,6 @@ export default async function ServicesPage() {
     services = (servicesRes.data ?? []) as Service[];
     domains = (domainsRes.data ?? []) as ServiceDomainRecord[];
     const guidesData = (guidesRes.data ?? []) as { service_id: string; api_key_url: string | null; api_key_url_label: string | null }[];
-    guideServiceIds = guidesData.map((g) => g.service_id);
     guideApiKeyMap = Object.fromEntries(
       guidesData
         .filter((g) => g.api_key_url)
@@ -62,7 +60,7 @@ export default async function ServicesPage() {
             내 프로젝트에 필요한 서비스를 쉽게 찾아 연결하세요
           </p>
         </div>
-        <ServiceCatalogClient services={services} domains={domains} usedServiceIds={[]} guideServiceIds={guideServiceIds} guideApiKeyMap={guideApiKeyMap} />
+        <ServiceCatalogClient services={services} domains={domains} usedServiceIds={[]} guideApiKeyMap={guideApiKeyMap} />
       </main>
       <Footer />
     </div>

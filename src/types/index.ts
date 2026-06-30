@@ -11,3 +11,4 @@ export * from './team';
 export * from './feedback';
 export * from './credential';
 export * from './secure-note';
+export * from './vault';

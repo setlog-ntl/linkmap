@@ -15,16 +15,14 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { AddServiceDialog } from '@/components/service/add-service-dialog';
 import { ServiceChecklist } from '@/components/service/service-checklist';
-import { SetupWizard } from '@/components/service/setup-wizard';
 import { ManualRegisterDialog } from '@/components/service/manual-register-dialog';
-import { Trash2, ExternalLink, Wand2, PencilLine, List as ListIcon, User, Check, X, Activity, Loader2, Search, Layers, Copy } from 'lucide-react';
+import { Trash2, ExternalLink, PencilLine, List as ListIcon, User, Check, X, Search, Layers, Copy } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { allCategoryLabels, allCategoryEmojis } from '@/lib/constants/service-filters';
-import { useRunHealthCheck } from '@/lib/queries/health-checks';
 import { toast } from 'sonner';
 import type { ServiceCategory, ProjectService, Service } from '@/types';
 import type { Locale } from '@/lib/i18n';
@@ -124,17 +122,13 @@ function ServiceAccordionItem({
   ps,
   projectId,
   locale,
-  runHealthCheck,
   onRemove,
-  onWizard,
   onManual,
 }: {
   ps: ProjectServiceWithService;
   projectId: string;
   locale: Locale;
-  runHealthCheck: ReturnType<typeof useRunHealthCheck>;
   onRemove: (id: string) => void;
-  onWizard: (ps: ProjectServiceWithService) => void;
   onManual: (ps: ProjectServiceWithService) => void;
 }) {
   return (
@@ -208,42 +202,6 @@ function ServiceAccordionItem({
                 수동 등록
               </Button>
             )}
-            {ps.service && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onWizard(ps)}
-              >
-                <Wand2 className="mr-1.5 h-3.5 w-3.5" />
-                빠른 설정
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={runHealthCheck.isPending && runHealthCheck.variables?.project_service_id === ps.id}
-              onClick={() => {
-                runHealthCheck.mutate(
-                  { project_service_id: ps.id },
-                  {
-                    onSuccess: (data) => {
-                      const label = data.status === 'healthy' ? '정상' : data.status === 'degraded' ? '경고' : '오류';
-                      toast.success(`${ps.service?.name}: 상태 ${label}`);
-                    },
-                    onError: () => {
-                      toast.error(`${ps.service?.name}: 점검 실패`);
-                    },
-                  },
-                );
-              }}
-            >
-              {runHealthCheck.isPending && runHealthCheck.variables?.project_service_id === ps.id ? (
-                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Activity className="mr-1.5 h-3.5 w-3.5" />
-              )}
-              상태 점검
-            </Button>
             {ps.service?.website_url && (
               <Button variant="outline" size="sm" asChild>
                 <a href={ps.service.website_url} target="_blank" rel="noopener noreferrer">
@@ -319,8 +277,6 @@ export function ServicesContent({ projectId }: ServicesContentProps) {
   const { data: services = [], isLoading } = useProjectServices(projectId);
   const addService = useAddProjectService(projectId);
   const removeService = useRemoveProjectService(projectId);
-  const runHealthCheck = useRunHealthCheck();
-  const [wizardTarget, setWizardTarget] = useState<ProjectServiceWithService | null>(null);
   const [manualTarget, setManualTarget] = useState<ProjectServiceWithService | null>(null);
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
@@ -474,9 +430,7 @@ export function ServicesContent({ projectId }: ServicesContentProps) {
                     ps={ps}
                     projectId={projectId}
                     locale={locale}
-                    runHealthCheck={runHealthCheck}
                     onRemove={handleRemoveService}
-                    onWizard={setWizardTarget}
                     onManual={setManualTarget}
                   />
                 ))}
@@ -492,24 +446,11 @@ export function ServicesContent({ projectId }: ServicesContentProps) {
               ps={ps}
               projectId={projectId}
               locale={locale}
-              runHealthCheck={runHealthCheck}
               onRemove={handleRemoveService}
-              onWizard={setWizardTarget}
               onManual={setManualTarget}
             />
           ))}
         </Accordion>
-      )}
-
-      {wizardTarget?.service && (
-        <SetupWizard
-          key={wizardTarget.id}
-          open={!!wizardTarget}
-          onOpenChange={(open) => { if (!open) setWizardTarget(null); }}
-          service={wizardTarget.service}
-          projectService={wizardTarget}
-          projectId={projectId}
-        />
       )}
 
       {manualTarget?.service && (

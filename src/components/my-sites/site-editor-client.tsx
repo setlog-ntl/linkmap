@@ -465,10 +465,17 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     fetch(`/api/oneclick/deployments/${deployId}/draft`)
       .then((r) => r.ok ? r.json() : null)
       .then((data) => {
-        if (data?.moduleDraft?.state) {
-          pendingDraftRef.current = data.moduleDraft.state as ModuleConfigState;
-          setShowDraftRestore(true);
+        const draftState = data?.moduleDraft?.state as ModuleConfigState | undefined;
+        if (!draftState) return;
+        // 현재 적용된(=parse된 config) 상태와 동일한 초안은 복원할 의미가 없다.
+        // 이미 반영된 내용을 "복원하시겠습니까?"로 묻는 false-positive 팝업을 막고 조용히 정리한다.
+        const current = moduleStateInitialRef.current;
+        if (current && JSON.stringify(draftState) === JSON.stringify(current)) {
+          deleteDraft.mutate(deployId);
+          return;
         }
+        pendingDraftRef.current = draftState;
+        setShowDraftRestore(true);
       })
       .catch(() => { /* 초안 없음 */ });
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -716,6 +723,9 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       if (moduleState) {
         moduleStateInitialRef.current = moduleState;
       }
+      // 적용/배포 완료 → 서버에 남은 초안 정리.
+      // 안 지우면 이미 반영된 변경이 초안으로 영구히 남아 재진입 때마다 "복원" 팝업이 뜬다.
+      deleteDraft.mutate(deployId);
 
       dispatchDialog({
         type: 'COMPLETE',
@@ -753,7 +763,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
         message: err instanceof Error ? err.message : t(locale, 'editor.applyFailed'),
       });
     }
-  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, fileCache, templateSlug, locale, queryClient]);
+  }, [moduleState, moduleSchema, selectedPath, batchApply, deployId, liveUrl, fileCache, templateSlug, locale, queryClient, deleteDraft]);
 
   // ── 모듈 → 코드에 적용 (다이얼로그 통합) ──
   const handleApplyModulesToCode = useCallback(async () => {
