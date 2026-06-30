@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ExternalLink, ArrowRight, KeyRound, Plus, FolderKanban, Check, Loader2, Search, Star } from 'lucide-react';
+import { ExternalLink, ArrowRight, Plus, FolderKanban, Loader2, Search, Star } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { ServiceTooltip } from '@/components/ui/service-tooltip';
 import { getServiceDescription } from '@/lib/constants/service-descriptions';
@@ -21,11 +21,10 @@ import type { Service, ServiceCategory } from '@/types';
 interface ServiceListItemProps {
   service: Service;
   isUsed?: boolean;
-  hasGuide?: boolean;
   apiKeyInfo?: { url: string; label: string | null } | null;
 }
 
-export function ServiceListItem({ service, isUsed = false, hasGuide = false, apiKeyInfo }: ServiceListItemProps) {
+export function ServiceListItem({ service, isUsed = false, apiKeyInfo }: ServiceListItemProps) {
   return (
     <Card className="hover:shadow-md transition-all duration-200 group">
       <div className="flex items-center gap-4 p-4">
@@ -74,13 +73,6 @@ export function ServiceListItem({ service, isUsed = false, hasGuide = false, api
         <div className="hidden sm:flex items-center gap-1.5 shrink-0">
           <AddToProjectButton serviceId={service.id} serviceName={service.name} />
 
-          {hasGuide && (
-            <Button variant="ghost" size="icon" className="h-8 w-8" asChild title="빠른 설정">
-              <Link prefetch={false} href={`/services/${service.slug}?tab=quickstart`} onClick={(e) => e.stopPropagation()}>
-                <KeyRound className="h-3.5 w-3.5" />
-              </Link>
-            </Button>
-          )}
           {apiKeyInfo && (
             <Button variant="ghost" size="icon" className="h-8 w-8" asChild title={apiKeyInfo.label || '키 설정'}>
               <a href={apiKeyInfo.url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>

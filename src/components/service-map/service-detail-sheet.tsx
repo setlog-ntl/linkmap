@@ -334,13 +334,13 @@ export function ServiceDetailSheet({
                           {guide.quick_start}
                         </p>
                       )}
-                      <div className="flex gap-2">
-                        {guideHref && (
+                      {guideHref && (
+                        <div className="flex gap-2">
                           <Button
                             variant="outline"
                             size="sm"
                             asChild
-                            className="flex-1 justify-center gap-2 text-primary border-primary/30 hover:bg-primary/5"
+                            className="w-full justify-center gap-2 text-primary border-primary/30 hover:bg-primary/5"
                           >
                             <Link prefetch={false} href={guideHref}>
                               <BookOpen className="h-3.5 w-3.5" />
@@ -348,20 +348,8 @@ export function ServiceDetailSheet({
                               <ExternalLink className="h-3 w-3" />
                             </Link>
                           </Button>
-                        )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className={cn(
-                            'justify-center gap-2 text-primary border-primary/30 hover:bg-primary/5',
-                            guideHref ? 'flex-1' : 'w-full',
-                          )}
-                          onClick={() => setActiveTab('guide')}
-                        >
-                          <Lightbulb className="h-3.5 w-3.5" />
-                          빠른 설정
-                        </Button>
-                      </div>
+                        </div>
+                      )}
                     </div>
                   </>
                 );

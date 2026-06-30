@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<!--
+  ════════════════════════════════════════════════════════════════
+  바이브코딩 무작정따라하기 — 1화 데모 산출물
+  "나만의 홈페이지를 만들어줘" → 원클릭 personal-brand 기본 페이지
+
+  ▸ 이 파일은 Linkmap 원클릭 배포의 personal-brand(나만의 홈페이지)
+    템플릿 "기본 페이지"를 교육용으로 재현한 단일 HTML입니다.
+  ▸ 구조 출처: src/lib/oneclick/preview/personal-brand.ts (섹션 빌더)
+                src/lib/oneclick/preview/base.ts        (디자인 토큰/CSS)
+                src/data/oneclick/module-schemas/personal-brand.ts (기본값)
+  ▸ 외부 의존성 0 — 인라인 CSS만 사용 (오프라인에서도 렌더).
+    실제 템플릿은 Unsplash 배경 이미지를 쓰지만, 교육 데모는
+    오프라인 안전을 위해 그라데이션 플레이스홀더로 대체했습니다.
+  ▸ 시크릿/키/내부경로/PII 미포함 (마스킹 가이드 준수).
+  ════════════════════════════════════════════════════════════════
+-->
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>이지원 — 나만의 홈페이지 (Linkmap 원클릭 데모)</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <style>
+/* ── Design Tokens (Light) — base.ts buildBaseCSS() ── */
+:root {
+  --brand-primary: #ee5b2b;
+  --brand-secondary: #f59e0b;
+  --brand-glow: rgba(238, 91, 43, 0.15);
+  --brand-gradient: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+  --bg: #ffffff;
+  --bg-alt: #faf9f7;
+  --text-primary: #1a1a1a;
+  --text-secondary: #5c5c5c;
+  --surface-elevated: #ffffff;
+  --surface-border: #e8e5e1;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,.1);
+  --radius-lg: 16px;
+  --radius-sm: 10px;
+  --transition: .3s cubic-bezier(.4,0,.2,1);
+  --section-gap: clamp(4rem, 8vw, 7rem);
+  --section-padding-x: clamp(1rem, 4vw, 3rem);
+  --text-hero: clamp(2.5rem, 6vw, 5rem);
+  --text-section: clamp(1.75rem, 3vw, 2.5rem);
+  --text-body: clamp(0.9375rem, 1vw, 1.0625rem);
+}
+
+/* ── Preset: Creator (기본 테마) ── */
+[data-preset="creator"] {
+  --brand-primary: #ee5b2b;
+  --brand-secondary: #f59e0b;
+  --brand-gradient: linear-gradient(135deg, #ee5b2b, #f59e0b);
+}
+
+/* ── Custom Gradient Override (hero gradientFrom/To) ── */
+[data-preset="creator"] {
+  --brand-primary: #ee5b2b;
+  --brand-secondary: #f59e0b;
+  --brand-gradient: linear-gradient(135deg, #ee5b2b, #f59e0b);
+}
+
+/* ── Base styles ── */
+body {
+  margin: 0;
+  font-family: 'Pretendard Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  transition: background .4s, color .4s;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+*, *::before, *::after { box-sizing: border-box; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; height: auto; }
+
+/* ── Section helpers ── */
+.section-alt { background: var(--bg-alt); }
+.section-gap { padding-top: var(--section-gap, 4rem); padding-bottom: var(--section-gap, 4rem); }
+.section-label {
+  font-size: .75rem; font-weight: 700; letter-spacing: .15em;
+  text-transform: uppercase; color: var(--brand-primary);
+  margin-bottom: 0.75rem; display: block;
+}
+.section-inner { max-width: 1080px; margin: 0 auto; padding: 0 var(--section-padding-x, 1.5rem); }
+
+/* ── Hero editorial (2-column) ── */
+.hero-editorial { display: grid; grid-template-columns: 1fr; gap: 3rem; align-items: center; width: 100%; }
+@media (min-width: 768px) { .hero-editorial { grid-template-columns: 1fr 1fr; gap: 4rem; } }
+.hero-editorial .hero-text-col { order: 1; }
+.hero-editorial .hero-img-col { order: 2; }
+.hero-image-wrapper {
+  position: relative; width: 100%; aspect-ratio: 16/10; max-height: 320px;
+  border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg);
+}
+@media (min-width: 768px) { .hero-image-wrapper { aspect-ratio: 4/5; max-height: none; } }
+/* 교육 데모: 실제 Unsplash 이미지 대신 그라데이션 플레이스홀더 */
+.hero-image-placeholder {
+  width: 100%; height: 100%;
+  background: var(--brand-gradient);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: clamp(3rem, 8vw, 6rem); font-weight: 800;
+  letter-spacing: .05em;
+}
+.hero-name-gradient {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* ── CTA button ── */
+.cta-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 32px; background: var(--brand-gradient); color: #fff;
+  border: none; border-radius: 50px; font-size: 1rem; font-weight: 600;
+  cursor: pointer; text-decoration: none;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--brand-glow); }
+
+/* ── Grid helpers ── */
+.grid-3 { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+@media (min-width: 640px) { .grid-3 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 768px) { .grid-3 { grid-template-columns: repeat(3, 1fr); } }
+
+/* ── Value card ── */
+.value-card {
+  background: var(--surface-elevated); border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg); padding: 2rem 1.75rem;
+  position: relative; overflow: hidden;
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+}
+.value-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--brand-gradient); transform: scaleX(0); transform-origin: left;
+  transition: transform .4s cubic-bezier(.4,0,.2,1);
+}
+.value-card:hover::before { transform: scaleX(1); }
+.value-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: var(--brand-primary); }
+.value-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: linear-gradient(135deg, rgba(238,91,43,.1), rgba(245,158,11,.1));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; margin-bottom: 1.25rem;
+}
+
+/* ── Highlight item ── */
+.highlight-item {
+  padding: 2.5rem 1.5rem; background: var(--surface-elevated);
+  border: 1px solid var(--surface-border); border-radius: var(--radius-lg);
+  text-align: center; transition: transform var(--transition), box-shadow var(--transition);
+}
+.highlight-item:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.highlight-number {
+  font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 800;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  line-height: 1.1; display: flex; align-items: baseline; justify-content: center; gap: 2px;
+}
+.highlight-label { font-size: 1rem; color: var(--text-secondary); margin-top: 0.5rem; font-weight: 500; }
+
+/* ── Contact link ── */
+.contact-link {
+  display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px;
+  background: var(--surface-elevated); border: 1px solid var(--surface-border);
+  border-radius: 50px; color: var(--text-primary); font-size: .95rem; font-weight: 500;
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+}
+.contact-link:hover { transform: translateY(-3px); box-shadow: 0 4px 16px rgba(0,0,0,.08); border-color: var(--brand-primary); }
+
+/* ── Footer ── */
+.site-footer {
+  text-align: center; padding: 2rem 1.5rem; font-size: .85rem;
+  color: var(--text-secondary); border-top: 1px solid var(--surface-border);
+}
+  </style>
+</head>
+<body data-preset="creator">
+
+<!-- ── HERO (editorial 2-column) ── -->
+<section class="section-gap">
+  <div class="section-inner">
+    <div class="hero-editorial">
+      <div class="hero-text-col">
+        <span class="section-label">PERSONAL BRAND</span>
+        <h1 style="font-size:var(--text-hero);font-weight:800;line-height:1.1;margin:0 0 1rem;">
+          <span class="hero-name-gradient">이지원 <span style="font-weight:400;font-size:0.5em;color:var(--text-secondary);">Jiwon Lee</span></span>
+        </h1>
+        <p style="font-size:1.25rem;color:var(--text-secondary);margin:0 0 2rem;">
+          콘텐츠로 세상을 연결하는 크리에이터<br/>
+          <span style="font-size:0.85em;color:var(--text-secondary);">Creator who connects the world through content</span>
+        </p>
+        <a href="#contact" class="cta-btn">Contact Me</a>
+      </div>
+      <div class="hero-img-col">
+        <div class="hero-image-wrapper">
+          <div class="hero-image-placeholder">JL</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ABOUT ── -->
+<section class="section-gap section-alt" id="about">
+  <div class="section-inner">
+    <span class="section-label">ABOUT</span>
+    <h2 style="font-size:var(--text-section);font-weight:700;margin:0 0 1.5rem;">
+      안녕하세요, 이지원입니다.
+    </h2>
+    <p style="font-size:var(--text-body);line-height:1.8;color:var(--text-secondary);max-width:680px;">
+      안녕하세요, 저는 이지원입니다. 5년째 디지털 콘텐츠를 만들며 브랜드와 사람 사이의 다리를 놓고 있어요.
+    </p>
+    <p style="font-size:var(--text-body);line-height:1.8;color:var(--text-secondary);max-width:680px;margin-top:1rem;font-style:italic;">
+      Hi, I'm Jiwon Lee. For the past five years I've been building bridges between brands and people through digital content.
+    </p>
+  </div>
+</section>
+
+<!-- ── VALUES (이모지 카드 3열) ── -->
+<section class="section-gap" id="values">
+  <div class="section-inner">
+    <span class="section-label">VALUES</span>
+    <h2 style="font-size:var(--text-section);font-weight:700;margin:0 0 2rem;">제가 믿는 것들</h2>
+    <div class="grid-3">
+      <div class="value-card">
+        <div class="value-icon">✦</div>
+        <h3 style="font-size:1.15rem;font-weight:600;margin:0 0 0.5rem;">진정성 <span style="font-size:.85rem;color:var(--text-secondary);font-weight:400;">Authenticity</span></h3>
+        <p style="font-size:.9rem;color:var(--text-secondary);margin:0;line-height:1.6;">광고처럼 느껴지지 않는 콘텐츠. 내가 직접 써봤거나 믿는 것만 이야기합니다.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">✦</div>
+        <h3 style="font-size:1.15rem;font-weight:600;margin:0 0 0.5rem;">일관성 <span style="font-size:.85rem;color:var(--text-secondary);font-weight:400;">Consistency</span></h3>
+        <p style="font-size:.9rem;color:var(--text-secondary);margin:0;line-height:1.6;">2019년부터 한 주도 거르지 않은 뉴스레터. 꾸준함이 신뢰를 만든다고 생각해요.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">✦</div>
+        <h3 style="font-size:1.15rem;font-weight:600;margin:0 0 0.5rem;">호기심 <span style="font-size:.85rem;color:var(--text-secondary);font-weight:400;">Curiosity</span></h3>
+        <p style="font-size:.9rem;color:var(--text-secondary);margin:0;line-height:1.6;">새로운 플랫폼, 새로운 포맷, 새로운 사람. 배움을 멈추지 않는 것이 제 원동력입니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HIGHLIGHTS (숫자 통계) ── -->
+<section class="section-gap section-alt" id="highlights">
+  <div class="section-inner">
+    <span class="section-label">HIGHLIGHTS</span>
+    <h2 style="font-size:var(--text-section);font-weight:700;margin:0 0 2rem;">숫자로 보는 여정</h2>
+    <div class="grid-3">
+      <div class="highlight-item">
+        <div class="highlight-number">84,000+</div>
+        <div class="highlight-label">구독자 합산</div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-number">120+</div>
+        <div class="highlight-label">협업 브랜드</div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-number">312주</div>
+        <div class="highlight-label">뉴스레터 연속 발행</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONTACT (이메일 + 소셜) ── -->
+<section class="section-gap section-alt" id="contact">
+  <div class="section-inner" style="text-align:center;">
+    <span class="section-label">CONTACT</span>
+    <h2 style="font-size:var(--text-section);font-weight:700;margin:0 0 1rem;">함께 이야기해요</h2>
+    <p style="font-size:1.1rem;color:var(--text-secondary);margin:0 0 2rem;">
+      <a href="mailto:hello@example.com" style="color:var(--brand-primary);text-decoration:underline;">hello@example.com</a>
+    </p>
+    <div style="display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;">
+      <a href="#" target="_blank" rel="noopener noreferrer" class="contact-link">Youtube</a>
+      <a href="#" target="_blank" rel="noopener noreferrer" class="contact-link">Instagram</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="site-footer">
+  &copy; 2025 이지원. Powered by Linkmap
+</footer>
+
+</body>
+</html>
