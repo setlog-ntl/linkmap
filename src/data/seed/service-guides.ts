@@ -395,6 +395,27 @@ const supabase = createClient(
   { global: { fetch: fetch.bind(globalThis) } }
 )`
       },
+      {
+        with_service_slug: 'kakao-login',
+        tip: 'Kakao is a native Supabase provider. Enable it in Authentication > Sign In / Providers with the Kakao REST API Key as Client ID and the Client Secret code as Client Secret. Enable "Allow users without an email" if email consent is not configured.',
+        tip_ko: '카카오는 Supabase 네이티브 Provider입니다. Authentication > Sign In / Providers에서 켜고 카카오 REST API 키를 Client ID로, Client Secret 코드를 Client Secret으로 입력합니다. 이메일 동의항목을 쓰지 않으면 "Allow users without an email"을 켭니다.',
+        code: `const { error } = await supabase.auth.signInWithOAuth({
+  provider: 'kakao',
+  options: { redirectTo: \`\${window.location.origin}/auth/callback\` },
+})`,
+      },
+      {
+        with_service_slug: 'google-oauth',
+        tip: 'Create a web OAuth client in Google Auth Platform and register the Supabase callback URL as the authorized redirect URI. To get a Google refresh token, pass access_type=offline and prompt=consent.',
+        tip_ko: 'Google Auth Platform에서 웹 OAuth 클라이언트를 만들고 Supabase 콜백 URL을 승인된 리디렉션 URI로 등록합니다. Google refresh token이 필요하면 access_type=offline과 prompt=consent를 전달합니다.',
+        code: `const { error } = await supabase.auth.signInWithOAuth({
+  provider: 'google',
+  options: {
+    redirectTo: \`\${window.location.origin}/auth/callback\`,
+    queryParams: { access_type: 'offline', prompt: 'consent' },
+  },
+})`,
+      },
     ],
     pros: [
       { text: 'All-in-one backend: Auth, PostgreSQL, Storage, Realtime, Edge Functions', text_ko: '올인원 백엔드: 인증·PostgreSQL·스토리지·실시간·엣지 함수 통합 제공' },
@@ -2536,87 +2557,191 @@ export function GamAdSlot({
   // ---------------------------------------------------------------------------
   {
     service_id: S.kakao_login,
-    quick_start: '카카오 개발자 콘솔에서 앱을 생성하고 REST API 키를 발급받아 Next.js 앱에 카카오 로그인을 추가할 수 있습니다. Supabase Custom OIDC Provider 방식(권장) 또는 직접 OAuth 구현이 가능합니다.',
-    quick_start_en: 'Create an app in Kakao Developers console and get a REST API key to add Kakao Login to your Next.js app. Use Supabase Custom OIDC Provider (recommended) or implement OAuth directly.',
+    quick_start: '카카오는 Supabase가 네이티브로 지원하는 OAuth Provider입니다. 카카오 개발자 콘솔에서 REST API 키와 Client Secret 코드를 발급받아 Supabase Dashboard > Authentication > Sign In / Providers에 등록하면 signInWithOAuth 한 줄로 카카오 로그인이 동작합니다. Next.js App Router에서는 @supabase/ssr 콜백 라우트(exchangeCodeForSession)로 세션을 완성합니다.',
+    quick_start_en: 'Kakao is a natively supported OAuth provider in Supabase. Get a REST API key and Client Secret code from the Kakao Developers console, register them in Supabase Dashboard > Authentication > Sign In / Providers, and Kakao Login works with a single signInWithOAuth call. In Next.js App Router, complete the session with an @supabase/ssr callback route (exchangeCodeForSession).',
     setup_steps: [
       {
         step: 1,
         title: 'Create Kakao App',
         title_ko: '카카오 앱 생성',
-        description: 'Go to developers.kakao.com > My Applications > Add Application. Enter app name and company name, then copy the REST API Key from the App Keys page.',
-        description_ko: 'developers.kakao.com > 내 애플리케이션 > 애플리케이션 추가하기. 앱 이름과 사업자명을 입력한 뒤 앱 키 페이지에서 REST API 키를 복사합니다.',
+        description: 'Go to developers.kakao.com > My Applications > Add Application. Enter the app name and company name — the app is created instantly with no review.',
+        description_ko: 'developers.kakao.com > 내 애플리케이션 > 애플리케이션 추가하기. 앱 이름과 회사명을 입력하면 심사 없이 즉시 생성됩니다.',
       },
       {
         step: 2,
-        title: 'Enable Kakao Login',
-        title_ko: '카카오 로그인 활성화',
-        description: 'In left menu > Kakao Login, toggle Activation to ON. Also enable OpenID Connect if using Supabase OIDC method.',
-        description_ko: '좌측 메뉴 > 카카오 로그인에서 활성화 설정을 ON으로 변경합니다. Supabase OIDC 방식 사용 시 OpenID Connect도 활성화합니다.',
+        title: 'Get REST API Key & Client Secret',
+        title_ko: 'REST API 키·Client Secret 발급 (플랫폼 키)',
+        description: 'In App Settings > App > Platform Keys, copy the REST API Key — this becomes the Supabase Client ID. Click the REST API Key to open its detail panel, then issue the Kakao Login Client Secret code and activate it — this becomes the Supabase Client Secret. (The 2025 console redesign moved all key settings under Platform Keys.)',
+        description_ko: '앱 설정 > 앱 > 플랫폼 키에서 REST API 키를 복사합니다 — 이 값이 Supabase의 Client ID입니다. REST API 키를 클릭해 상세 화면에서 카카오 로그인 Client Secret 코드를 발급하고 활성화합니다 — 이 값이 Supabase의 Client Secret입니다. (2025년 콘솔 개편으로 키 관련 설정이 모두 플랫폼 키 아래로 통합되었습니다.)',
       },
       {
         step: 3,
-        title: 'Configure Redirect URI',
-        title_ko: '리다이렉트 URI 등록',
-        description: 'In Kakao Login > Redirect URI, register your Supabase callback URL: https://<project-ref>.supabase.co/auth/v1/callback. For local development, also add http://localhost:54321/auth/v1/callback.',
-        description_ko: '카카오 로그인 > Redirect URI에 Supabase 콜백 URL을 등록합니다: https://<project-ref>.supabase.co/auth/v1/callback. 로컬 개발 시 http://localhost:54321/auth/v1/callback도 추가합니다.',
+        title: 'Enable Kakao Login',
+        title_ko: '카카오 로그인 활성화',
+        description: 'In Product Settings > Kakao Login > General, toggle the State to ON. Enabling OpenID Connect is optional — only needed for the ID-token flow.',
+        description_ko: '제품 설정 > 카카오 로그인 > 일반에서 상태를 ON으로 켭니다. OpenID Connect 활성화는 선택 사항 — ID 토큰 플로우를 쓸 때만 필요합니다.',
       },
       {
         step: 4,
-        title: 'Set Consent Items',
-        title_ko: '동의 항목 설정',
-        description: 'Go to Consent Items menu. Set Nickname to Required, Email to Required (may need Business App conversion), and Profile Image to Optional.',
-        description_ko: '동의항목 메뉴에서 닉네임을 필수, 이메일을 필수(비즈 앱 전환 필요할 수 있음), 프로필 사진을 선택으로 설정합니다.',
+        title: 'Register Redirect URI',
+        title_ko: 'Redirect URI 등록 (Supabase 콜백)',
+        description: 'In Platform Keys > REST API Key > Kakao Login Redirect URI, register your Supabase callback URL. For local Supabase CLI development, also add the 127.0.0.1 URL.',
+        description_ko: '플랫폼 키 > REST API 키 > 카카오 로그인 Redirect URI에 Supabase 콜백 URL을 등록합니다. 로컬 Supabase CLI 개발 시 127.0.0.1 주소도 추가합니다.',
+        code_snippet: 'https://<project-ref>.supabase.co/auth/v1/callback\nhttp://127.0.0.1:54321/auth/v1/callback  # 로컬 Supabase CLI 사용 시',
       },
       {
         step: 5,
-        title: 'Generate Client Secret',
-        title_ko: 'Client Secret 생성',
-        description: 'Go to Kakao Login > Security, click Generate Code, copy the secret, and set Activation Status to "Enabled".',
-        description_ko: '카카오 로그인 > 보안에서 코드 생성을 클릭하고, 시크릿을 복사한 뒤 활성화 상태를 "사용함"으로 설정합니다.',
+        title: 'Set Consent Items',
+        title_ko: '동의항목 설정',
+        description: 'In Product Settings > Kakao Login > Consent Items, configure Nickname and Profile Image. Requiring Email (account_email) needs Business App conversion (App Settings > App > General).',
+        description_ko: '제품 설정 > 카카오 로그인 > 동의항목에서 닉네임·프로필 사진을 설정합니다. 이메일(account_email)을 필수 동의로 받으려면 비즈 앱 전환이 필요합니다(앱 설정 > 앱 > 일반).',
       },
       {
         step: 6,
-        title: 'Register in Supabase',
-        title_ko: 'Supabase에 Provider 등록',
-        description: 'In Supabase Dashboard > Authentication > Providers, add Kakao as Custom OIDC Provider. Set Client ID (REST API Key), Client Secret, and Issuer URL (https://kauth.kakao.com). Configure Site URL and Redirect URLs.',
-        description_ko: 'Supabase Dashboard > Authentication > Providers에서 카카오를 Custom OIDC Provider로 추가합니다. Client ID(REST API 키), Client Secret, Issuer URL(https://kauth.kakao.com)을 설정하고, Site URL과 Redirect URLs를 구성합니다.',
+        title: 'Enable Kakao Provider in Supabase',
+        title_ko: 'Supabase Kakao Provider 등록',
+        description: 'In Supabase Dashboard > Authentication > Sign In / Providers > Kakao, toggle ON. Client ID = REST API Key, Client Secret = Client Secret code. If you do not collect email, also enable "Allow users without an email". No Custom OIDC setup is needed.',
+        description_ko: 'Supabase Dashboard > Authentication > Sign In / Providers > Kakao를 ON으로 켭니다. Client ID에 REST API 키, Client Secret에 Client Secret 코드를 입력합니다. 이메일을 수집하지 않는다면 "Allow users without an email"도 켭니다. Custom OIDC 설정은 필요 없습니다.',
+      },
+      {
+        step: 7,
+        title: 'Configure Supabase URLs',
+        title_ko: 'Supabase URL Configuration',
+        description: 'In Authentication > URL Configuration, set Site URL to your app domain and add local/production addresses to Redirect URLs (e.g. http://localhost:3000/** and https://yourdomain.com/**).',
+        description_ko: 'Authentication > URL Configuration에서 Site URL을 앱 도메인으로 설정하고, Redirect URLs에 로컬·프로덕션 주소를 추가합니다(예: http://localhost:3000/**, https://yourdomain.com/**).',
+      },
+      {
+        step: 8,
+        title: 'Add login button & callback route',
+        title_ko: 'Next.js 로그인 버튼 + 콜백 라우트',
+        description: 'Call signInWithOAuth from a client component, then exchange the auth code for a session in app/auth/callback/route.ts using @supabase/ssr.',
+        description_ko: '클라이언트 컴포넌트에서 signInWithOAuth를 호출하고, app/auth/callback/route.ts에서 @supabase/ssr로 인증 코드를 세션으로 교환합니다.',
+        code_snippet: "await supabase.auth.signInWithOAuth({\n  provider: 'kakao',\n  options: { redirectTo: `${window.location.origin}/auth/callback` },\n})",
+      },
+      {
+        step: 9,
+        title: 'Production checklist',
+        title_ko: '프로덕션 체크리스트',
+        description: 'Before launch: production Redirect URI registered in the Kakao console, Site URL switched from localhost to the real domain, Business App status if email consent is required, and re-register the secret in Supabase whenever you regenerate the Client Secret code.',
+        description_ko: '출시 전 확인: 카카오 콘솔에 프로덕션 Redirect URI 등록, Site URL을 localhost에서 실제 도메인으로 전환, 이메일 필수 수집 시 비즈 앱 상태 확인, Client Secret 코드 재발급 시 Supabase에도 다시 등록.',
       },
     ],
     code_examples: {
-      supabase_login: '// Supabase Custom OIDC Provider 방식 (권장)\nimport { createClient } from \'@supabase/supabase-js\';\n\nconst supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);\n\nasync function signInWithKakao() {\n  const { data, error } = await supabase.auth.signInWithOAuth({\n    provider: \'kakao\',\n    options: {\n      redirectTo: `${window.location.origin}/auth/callback`,\n      scopes: \'openid profile_nickname account_email\',\n    },\n  });\n}',
-      direct_oauth: '// 직접 OAuth 구현 방식 (대안)\nconst KAKAO_AUTH_URL = \'https://kauth.kakao.com/oauth/authorize\';\n\nfunction redirectToKakao() {\n  const params = new URLSearchParams({\n    client_id: process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID!,\n    redirect_uri: process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI!,\n    response_type: \'code\',\n    scope: \'openid profile_nickname account_email\',\n  });\n  window.location.href = `${KAKAO_AUTH_URL}?${params}`;\n}',
+      supabase_login: `// 카카오 로그인 버튼 (클라이언트 컴포넌트)
+'use client'
+import { createBrowserClient } from '@supabase/ssr'
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+async function signInWithKakao() {
+  // scopes는 지정하지 않음 — 카카오 콘솔의 동의항목 설정이 기준
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'kakao',
+    options: {
+      redirectTo: \`\${window.location.origin}/auth/callback\`,
+    },
+  })
+  if (error) throw error
+}`,
+      callback_route: `// app/auth/callback/route.ts — PKCE 코드 → 세션 교환 (필수)
+import { NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+export async function GET(request: Request) {
+  const { searchParams, origin } = new URL(request.url)
+  const code = searchParams.get('code')
+  const next = searchParams.get('next') ?? '/'
+
+  if (code) {
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => cookieStore.getAll(),
+          setAll: (cookiesToSet) =>
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            ),
+        },
+      }
+    )
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (!error) return NextResponse.redirect(\`\${origin}\${next}\`)
+  }
+  return NextResponse.redirect(\`\${origin}/login?error=auth\`)
+}`,
+      get_user_metadata: `// 서버 컴포넌트/API에서 카카오 프로필 읽기
+const { data: { user } } = await supabase.auth.getUser()
+
+const nickname = user?.user_metadata.name ?? user?.user_metadata.full_name
+const avatarUrl = user?.user_metadata.avatar_url
+// 비즈 앱 미전환 시 이메일이 없을 수 있음 — null 가드 필수
+const email = user?.user_metadata.email ?? null`,
     },
     common_pitfalls: [
       {
-        title: 'Redirect URI mismatch',
-        title_ko: '리다이렉트 URI 불일치',
-        problem: 'OAuth callback fails with KOE006 redirect_uri_mismatch error',
-        solution: 'Ensure the redirect URI in Kakao Developers matches your Supabase callback URL exactly, including protocol (http vs https) and no trailing slash',
+        title: 'KOE006: Redirect URI mismatch',
+        title_ko: 'KOE006 리다이렉트 URI 불일치',
+        problem: 'The Kakao consent screen fails with a KOE006 (redirect_uri mismatch) error',
+        solution: 'Register the exact Supabase callback URL in the Kakao console under App Settings > App > Platform Keys > REST API Key > Kakao Login Redirect URI: https://<project-ref>.supabase.co/auth/v1/callback — check the protocol (http vs https) and remove any trailing slash. The old "Kakao Login > Security" menu moved here in the 2025 console redesign',
       },
       {
         title: 'Email not received',
         title_ko: '이메일 정보 미수신',
         problem: 'User email is null after Kakao login even though email consent was configured',
-        solution: 'Convert to Business App (비즈 앱 전환) in Kakao console. Email required consent needs Business App status. Go to App Settings > Business > Convert to Personal Developer Business App',
+        solution: 'Requiring account_email needs Business App conversion in App Settings > App > General. Until converted, enable "Allow users without an email" in the Supabase Kakao provider settings so sign-in does not fail, and guard for null email in your app code',
       },
       {
-        title: 'OIDC token error',
-        title_ko: 'OpenID Connect 토큰 오류',
-        problem: 'Supabase returns OIDC-related error when using Custom Provider',
-        solution: 'Enable OpenID Connect in Kakao Developers > Kakao Login settings. Also enable "Skip nonce check" in Supabase Provider settings if nonce errors persist',
+        title: 'Following outdated Custom OIDC guides',
+        title_ko: '구버전 Custom OIDC 가이드를 따라 하다 막힘',
+        problem: 'Old blog posts tell you to register Kakao as a Supabase Custom OIDC provider with Issuer URL kauth.kakao.com, but those settings do not match the current Supabase dashboard',
+        solution: 'Kakao is now a native Supabase provider. Just enable Authentication > Sign In / Providers > Kakao and enter the REST API Key + Client Secret code — no Issuer URL or Custom OIDC configuration is needed',
+      },
+      {
+        title: 'KOE101: misconfigured app key',
+        title_ko: 'KOE101 잘못된 앱 키',
+        problem: 'Kakao returns KOE101 (misconfigured app) because a JavaScript key or Native app key was entered as the Client ID',
+        solution: 'Use the REST API Key from Platform Keys as the Supabase Client ID. JavaScript, Native, and Admin keys do not work for the server-side OAuth flow',
+      },
+      {
+        title: 'Redirected to localhost in production',
+        title_ko: '프로덕션에서 localhost로 리다이렉트',
+        problem: 'After deploying, Kakao login sends users back to http://localhost:3000',
+        solution: 'In Supabase > Authentication > URL Configuration, switch Site URL to the production domain and add production patterns to Redirect URLs (e.g. https://yourdomain.com/**). redirectTo only works for URLs on this allow list',
+      },
+      {
+        title: 'No session after login (missing callback route)',
+        title_ko: '로그인 후 세션이 안 생김 (콜백 라우트 누락)',
+        problem: 'Kakao login succeeds but the user comes back logged out, or you see flow_state_not_found / code verifier errors',
+        solution: 'With @supabase/ssr (PKCE flow) you must exchange the ?code= parameter for a session: create app/auth/callback/route.ts that calls supabase.auth.exchangeCodeForSession(code), and point redirectTo at /auth/callback',
       },
     ],
     integration_tips: [
       {
         with_service_slug: 'supabase',
-        tip: 'Use Supabase Custom OIDC Provider for Kakao Login. Set REST API Key as Client ID and Issuer URL as https://kauth.kakao.com',
-        tip_ko: 'Supabase Custom OIDC Provider로 카카오 로그인을 연동합니다. REST API 키를 Client ID로, Issuer URL은 https://kauth.kakao.com으로 설정합니다.',
+        tip: 'Kakao is a native Supabase provider — enable it in Authentication > Sign In / Providers, set Client ID to the REST API Key and Client Secret to the Client Secret code. Enable "Allow users without an email" if you do not collect emails.',
+        tip_ko: '카카오는 Supabase 네이티브 Provider입니다 — Authentication > Sign In / Providers에서 켜고 Client ID에 REST API 키, Client Secret에 Client Secret 코드를 입력합니다. 이메일을 수집하지 않으면 "Allow users without an email"을 켭니다.',
+        code: `const { error } = await supabase.auth.signInWithOAuth({
+  provider: 'kakao',
+  options: { redirectTo: \`\${window.location.origin}/auth/callback\` },
+})`,
+      },
+      {
+        with_service_slug: 'google-oauth',
+        tip: 'When offering both Kakao and Google login, Supabase automatically links accounts that share the same verified email. If Kakao email consent is not enabled, a separate account is created per provider — decide your account-linking policy before launch.',
+        tip_ko: '카카오·구글 로그인을 함께 제공하면 Supabase가 동일한(검증된) 이메일 계정을 자동으로 연결합니다. 카카오에서 이메일을 수집하지 않으면 프로바이더마다 별도 계정이 생기므로 출시 전에 계정 연결 정책을 정하세요.',
       },
     ],
     pros: [
       { text: 'Most popular login method in Korea', text_ko: '한국에서 가장 인기 있는 로그인 방식' },
-      { text: 'Completely free to use', text_ko: '완전 무료' },
-      { text: 'Works with Supabase Custom OIDC Provider', text_ko: 'Supabase Custom OIDC Provider로 연동 가능' },
+      { text: 'Completely free with no call or MAU limits', text_ko: '호출량·사용자 수 제한 없이 완전 무료' },
+      { text: 'Native Supabase provider — no Custom OIDC setup', text_ko: 'Supabase 네이티브 Provider — Custom OIDC 설정 불필요' },
     ],
     cons: [
       { text: 'Korea-only user base', text_ko: '한국 전용 사용자 기반' },
@@ -2625,69 +2750,327 @@ export function GamAdSlot({
     ],
     api_key_url: 'https://developers.kakao.com/console/app',
     api_key_url_label: 'Kakao Developers',
+    signup: {
+      url: 'https://developers.kakao.com',
+      steps: [
+        '카카오 계정으로 developers.kakao.com 로그인',
+        '최초 1회 개발자 등록 (이메일·전화번호 인증)',
+        '내 애플리케이션 > 애플리케이션 추가하기 — 앱 이름·회사명 입력',
+        '앱 설정 > 앱 > 플랫폼 키에서 REST API 키 확인',
+      ],
+      free_tier: '카카오 로그인 완전 무료 — 호출량·사용자 수 제한 없음',
+    },
+    features: [
+      {
+        id: 'kakao-provider',
+        name: '카카오 로그인 (Supabase 네이티브 Provider)',
+        description: 'Supabase Dashboard에 REST API 키와 Client Secret 코드만 등록하면 signInWithOAuth로 바로 동작하는 공식 지원 Provider입니다. Custom OIDC 설정이 필요 없습니다.',
+        tag: 'free',
+        api_key: {
+          env_var: 'REST API 키 + Client Secret 코드 (Supabase Dashboard에 등록 — .env 불필요)',
+          url: 'https://developers.kakao.com/console/app',
+          url_label: 'Kakao Developers 콘솔',
+          issue_steps: [
+            { step: 1, title: '카카오 개발자 콘솔 접속', description: 'developers.kakao.com > 내 애플리케이션에서 앱을 선택합니다 (없으면 애플리케이션 추가하기로 생성).' },
+            { step: 2, title: 'REST API 키 복사', description: '앱 설정 > 앱 > 플랫폼 키에서 REST API 키를 복사합니다. 이 값이 Supabase의 Client ID입니다 (JavaScript 키·네이티브 앱 키 아님).' },
+            { step: 3, title: 'Client Secret 코드 발급', description: '플랫폼 키에서 REST API 키를 클릭해 카카오 로그인 Client Secret 코드를 발급하고 활성화 상태를 "사용함"으로 켭니다.' },
+            { step: 4, title: 'Supabase에 등록', description: 'Supabase Dashboard > Authentication > Sign In / Providers > Kakao를 켜고 Client ID(REST API 키)와 Client Secret(Client Secret 코드)을 입력합니다.' },
+            { step: 5, title: 'Redirect URI 등록', description: 'Supabase Kakao 설정에 표시되는 Callback URL(https://<project-ref>.supabase.co/auth/v1/callback)을 카카오 콘솔의 카카오 로그인 Redirect URI에 등록합니다.' },
+          ],
+        },
+        setup_steps: [
+          {
+            step: 1,
+            title: 'Enable Kakao Login',
+            title_ko: '카카오 로그인 활성화',
+            description: 'In Product Settings > Kakao Login > General, toggle the State to ON.',
+            description_ko: '제품 설정 > 카카오 로그인 > 일반에서 상태를 ON으로 켭니다.',
+          },
+          {
+            step: 2,
+            title: 'Configure Supabase URLs',
+            title_ko: 'Supabase URL Configuration',
+            description: 'In Authentication > URL Configuration, set Site URL and add local/production Redirect URLs.',
+            description_ko: 'Authentication > URL Configuration에서 Site URL을 설정하고 로컬·프로덕션 Redirect URLs를 추가합니다.',
+          },
+          {
+            step: 3,
+            title: 'Call signInWithOAuth',
+            title_ko: 'signInWithOAuth 호출',
+            description: 'Call signInWithOAuth with provider kakao from a client component. Do not pass scopes — the Kakao console consent items are the source of truth.',
+            description_ko: '클라이언트 컴포넌트에서 provider를 kakao로 signInWithOAuth를 호출합니다. scopes는 지정하지 않습니다 — 카카오 콘솔의 동의항목 설정이 기준입니다.',
+          },
+        ],
+        code_example: `const { error } = await supabase.auth.signInWithOAuth({
+  provider: 'kakao',
+  options: { redirectTo: \`\${window.location.origin}/auth/callback\` },
+})`,
+      },
+      {
+        id: 'consent-email-bizapp',
+        name: '동의항목 · 비즈 앱 (이메일 수집)',
+        description: '닉네임·프로필 사진은 기본 설정으로 수집할 수 있지만, 이메일(account_email)을 필수 동의로 받으려면 비즈 앱 전환이 필요합니다. 미전환 시 이메일이 null일 수 있어 앱에서 대비해야 합니다.',
+        tag: 'free',
+        setup_steps: [
+          {
+            step: 1,
+            title: 'Set consent items',
+            title_ko: '동의항목 설정',
+            description: 'In Product Settings > Kakao Login > Consent Items, set the consent level for Nickname and Profile Image.',
+            description_ko: '제품 설정 > 카카오 로그인 > 동의항목에서 닉네임·프로필 사진의 동의 단계를 설정합니다.',
+          },
+          {
+            step: 2,
+            title: 'Convert to Business App',
+            title_ko: '비즈 앱 전환 (이메일 필수 수집 시)',
+            description: 'To require email consent, convert to a Business App in App Settings > App > General (business registration or personal developer business app).',
+            description_ko: '이메일을 필수 동의로 받으려면 앱 설정 > 앱 > 일반에서 비즈 앱으로 전환합니다(사업자 등록 또는 개인 개발자 비즈 앱).',
+          },
+          {
+            step: 3,
+            title: 'Handle missing email',
+            title_ko: '이메일 미수집 대응',
+            description: 'If you skip the Business App conversion, enable "Allow users without an email" in the Supabase Kakao provider settings and guard for null email in your app.',
+            description_ko: '비즈 앱 전환 없이 운영하려면 Supabase Kakao Provider 설정에서 "Allow users without an email"을 켜고, 앱 코드에서 이메일 null 케이스를 처리합니다.',
+          },
+        ],
+        code_example: `// 이메일이 없을 수 있는 카카오 사용자 처리
+const { data: { user } } = await supabase.auth.getUser()
+const email = user?.user_metadata.email ?? null
+
+if (!email) {
+  // 비즈 앱 미전환 또는 사용자가 이메일 동의 안 함
+  // → 온보딩에서 이메일을 별도로 입력받거나 닉네임 기반으로 운영
+}`,
+      },
+      {
+        id: 'nextjs-callback',
+        name: 'Next.js 콜백 라우트 (@supabase/ssr)',
+        description: 'signInWithOAuth의 redirectTo로 돌아온 인증 코드를 세션으로 교환하는 필수 라우트입니다. 이 라우트가 없으면 로그인에 성공해도 세션이 생성되지 않습니다.',
+        tag: 'free',
+        setup_steps: [
+          {
+            step: 1,
+            title: 'Install @supabase/ssr',
+            title_ko: '@supabase/ssr 설치',
+            description: 'Install supabase-js and the SSR helper for App Router cookie-based sessions.',
+            description_ko: 'App Router 쿠키 기반 세션을 위해 supabase-js와 SSR 헬퍼를 설치합니다.',
+            code_snippet: 'npm install @supabase/supabase-js @supabase/ssr',
+          },
+          {
+            step: 2,
+            title: 'Create callback route',
+            title_ko: '콜백 라우트 생성',
+            description: 'Create app/auth/callback/route.ts and exchange the PKCE code for a session with exchangeCodeForSession(code).',
+            description_ko: 'app/auth/callback/route.ts를 만들고 exchangeCodeForSession(code)으로 PKCE 코드를 세션으로 교환합니다.',
+          },
+        ],
+        code_example: `// app/auth/callback/route.ts
+import { NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+export async function GET(request: Request) {
+  const { searchParams, origin } = new URL(request.url)
+  const code = searchParams.get('code')
+
+  if (code) {
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => cookieStore.getAll(),
+          setAll: (cookiesToSet) =>
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            ),
+        },
+      }
+    )
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (!error) return NextResponse.redirect(\`\${origin}/\`)
+  }
+  return NextResponse.redirect(\`\${origin}/login?error=auth\`)
+}`,
+      },
+    ],
   },
   {
     service_id: S.google_oauth,
-    quick_start: 'Google Cloud Console에서 OAuth 2.0 클라이언트를 생성하고 Client ID/Secret을 Supabase에 등록하면 구글 로그인을 바로 사용할 수 있습니다.',
-    quick_start_en: 'Create an OAuth 2.0 client in Google Cloud Console and register Client ID/Secret in Supabase to enable Google Login.',
+    quick_start: 'Google Cloud의 Google Auth Platform(구 OAuth 동의 화면)에서 웹 OAuth 클라이언트를 만들고 Client ID/Secret을 Supabase Dashboard에 등록하면 구글 로그인이 바로 동작합니다. 브랜딩(Branding) → 대상(Audience) → 클라이언트(Clients) 순서로 설정한 뒤 signInWithOAuth로 호출합니다.',
+    quick_start_en: 'Create a web OAuth client in Google Auth Platform (formerly the OAuth consent screen) in Google Cloud, register the Client ID/Secret in the Supabase Dashboard, and Google login works right away. Configure Branding → Audience → Clients, then call signInWithOAuth with the google provider.',
     setup_steps: [
       {
         step: 1,
         title: 'Create Google Cloud Project',
         title_ko: 'Google Cloud 프로젝트 생성',
-        description: 'Go to console.cloud.google.com, create a new project or select an existing one. This is where your OAuth credentials will live.',
-        description_ko: 'console.cloud.google.com에서 새 프로젝트를 생성하거나 기존 프로젝트를 선택합니다. OAuth 인증 정보가 이 프로젝트에 생성됩니다.',
+        description: 'Go to console.cloud.google.com and create a new project or select an existing one. Using OAuth alone does not require a billing account (no credit card).',
+        description_ko: 'console.cloud.google.com에서 새 프로젝트를 생성하거나 기존 프로젝트를 선택합니다. OAuth만 사용할 경우 결제 계정(신용카드) 등록은 필요 없습니다.',
       },
       {
         step: 2,
-        title: 'Configure OAuth Consent Screen',
-        title_ko: 'OAuth 동의 화면 설정',
-        description: 'Go to APIs & Services > OAuth consent screen. Choose External user type. Fill in app name, support email. Add scopes: email, profile, openid. Save.',
-        description_ko: 'API 및 서비스 > OAuth 동의 화면으로 이동합니다. 외부(External) 사용자 유형을 선택하고, 앱 이름과 지원 이메일을 입력합니다. 범위에 email, profile, openid를 추가합니다.',
+        title: 'Set up Google Auth Platform (Branding)',
+        title_ko: 'Google Auth Platform 초기 설정 (브랜딩)',
+        description: 'Go to APIs & Services > Google Auth Platform (formerly OAuth consent screen) and click Get started. Enter the app name and support email in the Branding section. The 2024 redesign split the old single page into Branding / Audience / Clients / Data Access.',
+        description_ko: 'API 및 서비스 > Google Auth Platform(구 OAuth 동의 화면)에서 시작하기를 클릭합니다. Branding(브랜딩) 섹션에 앱 이름과 지원 이메일을 입력합니다. 2024년 개편으로 기존 단일 페이지가 Branding / Audience / Clients / Data Access 4개 메뉴로 분리되었습니다.',
       },
       {
         step: 3,
-        title: 'Create OAuth Client ID',
-        title_ko: 'OAuth 클라이언트 ID 생성',
-        description: 'Go to APIs & Services > Credentials > Create Credentials > OAuth client ID. Choose Web application. Add Authorized JavaScript origin (your domain) and Authorized redirect URI (Supabase callback: https://<ref>.supabase.co/auth/v1/callback). Copy Client ID and Client Secret.',
-        description_ko: 'API 및 서비스 > 사용자 인증 정보 > 사용자 인증 정보 만들기 > OAuth 클라이언트 ID. 웹 애플리케이션을 선택합니다. 승인된 JavaScript 원본(앱 도메인)과 승인된 리디렉션 URI(Supabase 콜백: https://<ref>.supabase.co/auth/v1/callback)를 추가합니다. Client ID와 Client Secret을 복사합니다.',
+        title: 'Configure Audience',
+        title_ko: '대상(Audience) 설정',
+        description: 'Choose External user type. While the publishing status is Testing, only up to 100 accounts registered under Test users can sign in — add your developer accounts there.',
+        description_ko: '외부(External) 사용자 유형을 선택합니다. 게시 상태가 Testing인 동안에는 Test users에 등록한 최대 100명만 로그인할 수 있으므로 개발자 계정을 테스트 사용자로 추가합니다.',
       },
       {
         step: 4,
-        title: 'Register in Supabase',
-        title_ko: 'Supabase에 등록',
-        description: 'In Supabase Dashboard > Authentication > Providers, enable Google. Paste Client ID and Client Secret. Configure Site URL and Redirect URLs in URL Configuration.',
-        description_ko: 'Supabase Dashboard > Authentication > Providers에서 Google을 활성화합니다. Client ID와 Client Secret을 붙여넣습니다. URL Configuration에서 Site URL과 Redirect URLs를 설정합니다.',
+        title: 'Configure Data Access (scopes)',
+        title_ko: '데이터 액세스(Scopes) 설정',
+        description: 'In Data Access, add the openid, .../auth/userinfo.email, and .../auth/userinfo.profile scopes. These are non-sensitive scopes and do not require verification.',
+        description_ko: 'Data Access에서 openid, .../auth/userinfo.email, .../auth/userinfo.profile 3개 범위를 추가합니다. 비민감 범위라 별도 심사가 필요 없습니다.',
+      },
+      {
+        step: 5,
+        title: 'Create OAuth client (Clients)',
+        title_ko: 'OAuth 클라이언트 생성 (Clients)',
+        description: 'In Clients > Create client, choose Web application. Add your app domain as an Authorized JavaScript origin and the Supabase callback as an Authorized redirect URI, then copy the Client ID and Client Secret.',
+        description_ko: 'Clients > Create client에서 웹 애플리케이션을 선택합니다. 승인된 JavaScript 원본에 앱 도메인, 승인된 리디렉션 URI에 Supabase 콜백 URL을 추가한 뒤 Client ID와 Client Secret을 복사합니다.',
+        code_snippet: '승인된 JavaScript 원본: https://yourdomain.com, http://localhost:3000\n승인된 리디렉션 URI: https://<project-ref>.supabase.co/auth/v1/callback',
+      },
+      {
+        step: 6,
+        title: 'Enable Google provider in Supabase',
+        title_ko: 'Supabase Google Provider 등록',
+        description: 'In Supabase Dashboard > Authentication > Sign In / Providers > Google, toggle ON and paste the Client ID and Client Secret.',
+        description_ko: 'Supabase Dashboard > Authentication > Sign In / Providers > Google을 ON으로 켜고 Client ID와 Client Secret을 붙여넣습니다.',
+      },
+      {
+        step: 7,
+        title: 'Configure URLs & add login code',
+        title_ko: 'URL Configuration + Next.js 로그인 코드',
+        description: 'In Authentication > URL Configuration, set Site URL and Redirect URLs. Then call signInWithOAuth from a client component and exchange the code for a session in app/auth/callback/route.ts.',
+        description_ko: 'Authentication > URL Configuration에서 Site URL과 Redirect URLs를 설정합니다. 이후 클라이언트 컴포넌트에서 signInWithOAuth를 호출하고 app/auth/callback/route.ts에서 코드를 세션으로 교환합니다.',
+        code_snippet: "await supabase.auth.signInWithOAuth({\n  provider: 'google',\n  options: { redirectTo: `${window.location.origin}/auth/callback` },\n})",
+      },
+      {
+        step: 8,
+        title: 'Publish to production',
+        title_ko: '프로덕션 게시 (Publish app)',
+        description: 'In Audience, click Publish app to lift the 100-user testing limit. Apps using only non-sensitive scopes (openid/email/profile) are published without verification; brand verification (logo etc.) is optional and takes a few days.',
+        description_ko: 'Audience에서 Publish app을 클릭해 테스트 100명 제한을 해제합니다. 비민감 범위(openid·email·profile)만 사용하면 별도 심사 없이 게시되며, 로고 등 브랜드 인증은 선택 사항(수일 소요)입니다.',
       },
     ],
     code_examples: {
-      supabase_login: '// Supabase Google OAuth 로그인\nimport { createClient } from \'@supabase/supabase-js\';\n\nconst supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);\n\nasync function signInWithGoogle() {\n  const { data, error } = await supabase.auth.signInWithOAuth({\n    provider: \'google\',\n    options: {\n      redirectTo: `${window.location.origin}/auth/callback`,\n      queryParams: {\n        access_type: \'offline\',\n        prompt: \'consent\',\n      },\n    },\n  });\n}',
+      supabase_login: `// 구글 로그인 버튼 (클라이언트 컴포넌트)
+'use client'
+import { createBrowserClient } from '@supabase/ssr'
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+async function signInWithGoogle() {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: \`\${window.location.origin}/auth/callback\`,
+      // Google API용 refresh token이 필요할 때만 아래 queryParams 추가
+      queryParams: {
+        access_type: 'offline',
+        prompt: 'consent',
+      },
+    },
+  })
+  if (error) throw error
+}`,
+      callback_route: `// app/auth/callback/route.ts — PKCE 코드 → 세션 교환 (필수)
+import { NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+export async function GET(request: Request) {
+  const { searchParams, origin } = new URL(request.url)
+  const code = searchParams.get('code')
+  const next = searchParams.get('next') ?? '/'
+
+  if (code) {
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => cookieStore.getAll(),
+          setAll: (cookiesToSet) =>
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            ),
+        },
+      }
+    )
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (!error) return NextResponse.redirect(\`\${origin}\${next}\`)
+  }
+  return NextResponse.redirect(\`\${origin}/login?error=auth\`)
+}`,
     },
     common_pitfalls: [
       {
         title: 'redirect_uri_mismatch error',
         title_ko: 'redirect_uri_mismatch 오류',
         problem: 'Google OAuth fails with Error 400: redirect_uri_mismatch',
-        solution: 'In Google Cloud Console > Credentials > your OAuth client, add the exact Supabase callback URL to Authorized redirect URIs: https://<ref>.supabase.co/auth/v1/callback. Check for trailing slashes and protocol (http vs https)',
+        solution: 'In Google Auth Platform > Clients > your OAuth client, add the exact Supabase callback URL to Authorized redirect URIs: https://<project-ref>.supabase.co/auth/v1/callback. Check for trailing slashes and protocol (http vs https)',
       },
       {
         title: 'Access blocked: app not verified',
         title_ko: '액세스 차단: 앱 미인증',
         problem: 'Users see "This app is blocked" or "Access blocked" warning screen',
-        solution: 'While in testing, add test users in OAuth consent screen > Test users. For production, submit for Google verification. During development, users can click "Advanced" > "Go to app (unsafe)" to proceed',
+        solution: 'While the publishing status is Testing, only accounts added under Audience > Test users (max 100) can sign in. For everyone else, click Publish app in Audience. During development, testers can proceed via "Advanced" > "Go to app (unsafe)"',
       },
       {
         title: 'Missing email scope',
         title_ko: '이메일 스코프 누락',
         problem: 'User profile is created but email is null',
-        solution: 'Ensure email and profile scopes are added in OAuth consent screen configuration. Also check that the scopes are not restricted in the client settings',
+        solution: 'Add the userinfo.email and userinfo.profile scopes in Google Auth Platform > Data Access (formerly the Scopes step of the consent screen). Also check that the scopes are not restricted in the client settings',
+      },
+      {
+        title: 'Google refresh token is null',
+        title_ko: 'Google refresh token이 null',
+        problem: 'session.provider_refresh_token is null, so server-side Google API calls stop working after ~1 hour',
+        solution: 'Pass queryParams { access_type: "offline", prompt: "consent" } to signInWithOAuth. Google issues a refresh token only on the first consent — to force re-issue, revoke the app at myaccount.google.com/permissions and sign in again',
+      },
+      {
+        title: 'Cannot find the OAuth consent screen menu',
+        title_ko: 'Google Auth Platform 메뉴를 못 찾음',
+        problem: 'Older guides reference "APIs & Services > OAuth consent screen", but that page no longer exists in the console',
+        solution: 'The 2024 redesign renamed it to Google Auth Platform and split it into Branding / Audience / Clients / Data Access. Consent screen text lives in Branding, test users and publishing in Audience, credentials in Clients, scopes in Data Access',
+      },
+      {
+        title: 'No session after login (missing callback route)',
+        title_ko: '로그인 후 세션이 안 생김 (콜백 라우트 누락)',
+        problem: 'Google login succeeds but the user comes back logged out, or you see flow_state_not_found / code verifier errors',
+        solution: 'With @supabase/ssr (PKCE flow) you must exchange the ?code= parameter for a session: create app/auth/callback/route.ts that calls supabase.auth.exchangeCodeForSession(code), and point redirectTo at /auth/callback',
       },
     ],
     integration_tips: [
       {
         with_service_slug: 'supabase',
-        tip: 'Enable Google provider in Supabase Dashboard > Authentication > Providers. Paste Client ID and Secret from Google Cloud Console. Users limited to 100 while in test mode.',
-        tip_ko: 'Supabase Dashboard > Authentication > Providers에서 Google을 활성화하고 Client ID/Secret을 붙여넣습니다. 테스트 모드에서는 최대 100명까지만 로그인 가능합니다.',
+        tip: 'Enable the Google provider in Supabase Dashboard > Authentication > Sign In / Providers and paste the Client ID/Secret from Google Auth Platform > Clients. Sign-ins are limited to 100 test users until you publish the app in Audience.',
+        tip_ko: 'Supabase Dashboard > Authentication > Sign In / Providers에서 Google을 활성화하고 Google Auth Platform > Clients의 Client ID/Secret을 붙여넣습니다. Audience에서 앱을 게시하기 전까지는 테스트 사용자 100명만 로그인할 수 있습니다.',
+        code: `const { error } = await supabase.auth.signInWithOAuth({
+  provider: 'google',
+  options: {
+    redirectTo: \`\${window.location.origin}/auth/callback\`,
+    queryParams: { access_type: 'offline', prompt: 'consent' },
+  },
+})`,
+      },
+      {
+        with_service_slug: 'kakao-login',
+        tip: 'When offering both Google and Kakao login, Supabase automatically links accounts that share the same verified email. If Kakao email consent is not enabled, a separate account is created per provider — decide your account-linking policy before launch.',
+        tip_ko: '구글·카카오 로그인을 함께 제공하면 Supabase가 동일한(검증된) 이메일 계정을 자동으로 연결합니다. 카카오에서 이메일을 수집하지 않으면 프로바이더마다 별도 계정이 생기므로 출시 전에 계정 연결 정책을 정하세요.',
       },
     ],
     pros: [
@@ -2697,10 +3080,107 @@ export function GamAdSlot({
     ],
     cons: [
       { text: 'Google Cloud Console can be complex', text_ko: 'Google Cloud Console이 복잡할 수 있음' },
-      { text: 'App verification required for production', text_ko: '프로덕션 배포 시 앱 인증 필요' },
+      { text: 'App verification required for sensitive scopes in production', text_ko: '민감 범위 사용 시 프로덕션 앱 심사 필요' },
+      { text: 'Console menus change often — the 2024 Google Auth Platform redesign differs from older docs', text_ko: '콘솔 메뉴가 자주 개편됨 — 2024년 Google Auth Platform 개편으로 구 문서와 메뉴가 다름' },
     ],
-    api_key_url: 'https://console.cloud.google.com/apis/credentials',
-    api_key_url_label: 'Google Cloud Console',
+    api_key_url: 'https://console.cloud.google.com/auth/clients',
+    api_key_url_label: 'Google Auth Platform',
+    signup: {
+      url: 'https://console.cloud.google.com',
+      steps: [
+        'Google 계정으로 console.cloud.google.com 접속',
+        '최초 1회 국가 선택·약관 동의 (OAuth만 사용 시 신용카드 불필요)',
+        '상단 프로젝트 선택 > 새 프로젝트 만들기',
+        'API 및 서비스 > Google Auth Platform에서 시작하기 클릭',
+      ],
+      free_tier: 'Google 로그인(OAuth 2.0) 완전 무료 — Cloud 결제 계정 없이 사용 가능',
+    },
+    features: [
+      {
+        id: 'oauth-client',
+        name: 'OAuth 클라이언트 (Client ID/Secret)',
+        description: 'Google Auth Platform의 Clients에서 웹 애플리케이션 클라이언트를 만들면 발급되는 자격 증명입니다. Supabase Dashboard에 등록하면 구글 로그인이 활성화됩니다.',
+        tag: 'free',
+        api_key: {
+          env_var: 'Client ID + Client Secret (Supabase Dashboard에 등록 — .env 불필요)',
+          url: 'https://console.cloud.google.com/auth/clients',
+          url_label: 'Google Auth Platform — Clients',
+          issue_steps: [
+            { step: 1, title: 'Google Auth Platform 초기 설정', description: 'console.cloud.google.com > API 및 서비스 > Google Auth Platform에서 시작하기 — 앱 이름·지원 이메일 입력(Branding).' },
+            { step: 2, title: '웹 클라이언트 생성', description: 'Clients > Create client에서 애플리케이션 유형을 웹 애플리케이션으로 선택합니다.' },
+            { step: 3, title: '리디렉션 URI 등록', description: '승인된 리디렉션 URI에 Supabase 콜백(https://<project-ref>.supabase.co/auth/v1/callback), 승인된 JavaScript 원본에 앱 도메인을 추가합니다.' },
+            { step: 4, title: 'Client ID/Secret 복사', description: '생성 직후 표시되는 Client ID와 Client Secret을 복사합니다 (Secret은 나중에 다시 볼 수 없으니 즉시 복사).' },
+            { step: 5, title: 'Supabase에 등록', description: 'Supabase Dashboard > Authentication > Sign In / Providers > Google을 켜고 Client ID/Secret을 붙여넣습니다.' },
+          ],
+        },
+        code_example: `const { error } = await supabase.auth.signInWithOAuth({
+  provider: 'google',
+  options: { redirectTo: \`\${window.location.origin}/auth/callback\` },
+})`,
+      },
+      {
+        id: 'consent-screen',
+        name: '동의 화면 · 테스트→프로덕션 (Audience)',
+        description: '게시 상태가 Testing이면 등록된 테스트 사용자 최대 100명만 로그인할 수 있습니다. 비민감 범위만 사용하는 앱은 Publish app 클릭만으로 심사 없이 프로덕션 전환됩니다.',
+        tag: 'free',
+        setup_steps: [
+          {
+            step: 1,
+            title: 'Configure Branding',
+            title_ko: '브랜딩 설정',
+            description: 'In Google Auth Platform > Branding, set the app name, support email, and optionally the logo shown on the consent screen.',
+            description_ko: 'Google Auth Platform > Branding에서 동의 화면에 표시될 앱 이름·지원 이메일·로고(선택)를 설정합니다.',
+          },
+          {
+            step: 2,
+            title: 'Add test users',
+            title_ko: '테스트 사용자 추가 (100명 한도)',
+            description: 'In Audience > Test users, add developer accounts. Only these accounts (max 100) can sign in while the status is Testing.',
+            description_ko: 'Audience > Test users에 개발자 계정을 추가합니다. Testing 상태에서는 이 계정들(최대 100명)만 로그인할 수 있습니다.',
+          },
+          {
+            step: 3,
+            title: 'Publish app',
+            title_ko: '프로덕션 게시',
+            description: 'Click Publish app in Audience. Apps using only non-sensitive scopes (openid/email/profile) go live without verification; brand verification is optional.',
+            description_ko: 'Audience에서 Publish app을 클릭합니다. 비민감 범위(openid·email·profile)만 쓰면 심사 없이 게시되며, 브랜드 인증은 선택 사항입니다.',
+          },
+        ],
+      },
+      {
+        id: 'nextjs-callback',
+        name: 'Next.js 콜백 라우트 + Google API 토큰',
+        description: 'PKCE 코드를 세션으로 교환하는 필수 콜백 라우트와, Google Calendar 등 Google API 호출에 쓰는 provider_token 활용법입니다.',
+        tag: 'free',
+        setup_steps: [
+          {
+            step: 1,
+            title: 'Create callback route',
+            title_ko: '콜백 라우트 생성',
+            description: 'Create app/auth/callback/route.ts and exchange the PKCE code for a session with exchangeCodeForSession(code).',
+            description_ko: 'app/auth/callback/route.ts를 만들고 exchangeCodeForSession(code)으로 PKCE 코드를 세션으로 교환합니다.',
+          },
+          {
+            step: 2,
+            title: 'Use provider tokens',
+            title_ko: 'provider_token 활용 (Google API 호출)',
+            description: 'After login, session.provider_token holds the Google access token. For long-lived access, request a refresh token with access_type=offline & prompt=consent and store it securely server-side.',
+            description_ko: '로그인 후 session.provider_token에 Google 액세스 토큰이 담깁니다. 장기 사용이 필요하면 access_type=offline과 prompt=consent로 refresh token을 받아 서버 측에 안전하게 보관합니다.',
+          },
+        ],
+        code_example: `// 로그인 직후 세션에서 Google API 토큰 꺼내기
+const { data: { session } } = await supabase.auth.getSession()
+
+const googleAccessToken = session?.provider_token          // Google API 호출용
+const googleRefreshToken = session?.provider_refresh_token // access_type=offline일 때만
+
+// 예: Google API 호출
+const res = await fetch(
+  'https://www.googleapis.com/oauth2/v3/userinfo',
+  { headers: { Authorization: \`Bearer \${googleAccessToken}\` } }
+)`,
+      },
+    ],
   },
   {
     service_id: S.naver_login,
