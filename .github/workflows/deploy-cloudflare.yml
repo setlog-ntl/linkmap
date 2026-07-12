@@ -1,5 +1,6 @@
 # Git 배포 적용: main 푸시 시 Cloudflare Workers로 자동 배포
 # 필수 GitHub Secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID,
+#   CLOUDFLARE_ZONE_ID (캐시 퍼지용 — API 토큰에 Zone > Cache Purge 권한 필요),
 #   NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY,
 #   NEXT_PUBLIC_POLAR_PRODUCT_PRO, NEXT_PUBLIC_POLAR_PRODUCT_PRO_YEARLY,
 #   NEXT_PUBLIC_POLAR_PRODUCT_TEAM, NEXT_PUBLIC_POLAR_PRODUCT_TEAM_YEARLY,
@@ -93,6 +94,26 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+      # 엣지 캐시 퍼지 — HTML이 s-maxage 장기 캐시라 퍼지 없이는 구 빌드(구 키·404 청크)가
+      # 배포 후에도 계속 서빙됨 (2026-07-12 키 로테이션 후 ~12시간 스테일 사고 재발 방지)
+      - name: Purge Cloudflare cache
+        continue-on-error: true
+        run: |
+          if [ -z "${{ secrets.CLOUDFLARE_ZONE_ID }}" ]; then
+            echo "::warning::CLOUDFLARE_ZONE_ID secret 미설정 — 캐시 퍼지 건너뜀 (스테일 HTML 잔존 위험)"
+            exit 0
+          fi
+          RESULT=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}')
+          echo "$RESULT"
+          if ! echo "$RESULT" | grep -q '"success":true'; then
+            echo "::warning::캐시 퍼지 실패 — API 토큰에 Zone > Cache Purge 권한이 있는지 확인 필요"
+            exit 1
+          fi
+          echo "✅ 엣지 캐시 퍼지 완료"
 
       - name: Warm ISR cache
         continue-on-error: true
