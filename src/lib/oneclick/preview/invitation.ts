@@ -9,45 +9,115 @@ import {
 import type { ModuleConfigState } from '@/lib/module-schema';
 
 // ── Preset CSS ───────────────────────────────────
+// INVITATION_PRESET_THEME(generator/invitation.ts)과 3중 동기화된 팔레트.
+// accentGlow/accentSoft는 accent 하나에서 파생시켜 프리셋별 오버라이드 누락(하드코딩 누수)을 원천 차단.
 
 interface InvPresetVars {
   bg: string; bgAlt: string; textPrimary: string; textSecondary: string;
-  accent: string; accentGlow: string; cardBg: string; cardBorder: string;
+  /** 테두리·아이콘·대형 비텍스트 전용 */
+  accent: string;
+  /** 흰 글자 버튼/배지용 고대비 (AA 4.5:1 검증 완료) */
+  accentSolid: string;
+  cardBg: string; cardBorder: string;
   isGlass?: boolean;
+  bgGrad?: string;
+  glassBg?: string;
+  glassBorder?: string;
+  glassShadow?: string;
 }
 
 const PRESET_VARS: Record<string, InvPresetVars> = {
   'elegant-gold': {
-    bg: '#fffdf7', bgAlt: '#fef9ee', textPrimary: '#1a1a1a', textSecondary: '#6b5c3e',
-    accent: '#b8860b', accentGlow: 'rgba(184,134,11,0.15)', cardBg: '#ffffff', cardBorder: '#e8dcc8',
+    bg: '#FBF7F0', bgAlt: '#F5EEDF', textPrimary: '#211A12', textSecondary: '#6B5A3E',
+    accent: '#B8860B', accentSolid: '#8B6B1F', cardBg: '#FFFFFF', cardBorder: '#E8DCC8',
   },
   'romantic-pink': {
-    bg: '#fff8fa', bgAlt: '#fef0f5', textPrimary: '#2d1f2b', textSecondary: '#8b6075',
-    accent: '#d4729a', accentGlow: 'rgba(212,114,154,0.15)', cardBg: '#ffffff', cardBorder: '#f0d4e0',
+    bg: '#FBF4F3', bgAlt: '#F5E7E6', textPrimary: '#2B1E22', textSecondary: '#7C5A61',
+    accent: '#C08497', accentSolid: '#7C2036', cardBg: '#FFFFFF', cardBorder: '#EAD3D3',
   },
   'modern-minimal': {
-    bg: '#fafafa', bgAlt: '#f5f5f5', textPrimary: '#111111', textSecondary: '#6b7280',
-    accent: '#333333', accentGlow: 'rgba(0,0,0,0.06)', cardBg: '#ffffff', cardBorder: '#e5e7eb',
+    bg: '#FAFAF9', bgAlt: '#F2F1EF', textPrimary: '#16171A', textSecondary: '#6B6B68',
+    accent: '#3A3A38', accentSolid: '#A8551F', cardBg: '#FFFFFF', cardBorder: '#E5E3DF',
   },
-  'festive': {
-    bg: '#fffbf0', bgAlt: '#fff5e6', textPrimary: '#1a1a1a', textSecondary: '#7c5e2d',
-    accent: '#ff6b6b', accentGlow: 'rgba(255,107,107,0.15)', cardBg: '#ffffff', cardBorder: '#ffe0b2',
+  festive: {
+    bg: '#FBF6EF', bgAlt: '#F6EBDD', textPrimary: '#2A1E18', textSecondary: '#7A5D4E',
+    accent: '#C8865C', accentSolid: '#8C3B2E', cardBg: '#FFFFFF', cardBorder: '#EAD9C6',
   },
   'natural-garden': {
-    bg: '#f8fdf6', bgAlt: '#f0f8ec', textPrimary: '#1a2e1a', textSecondary: '#4a6741',
-    accent: '#5c8a4d', accentGlow: 'rgba(92,138,77,0.15)', cardBg: '#ffffff', cardBorder: '#d4e8cb',
+    bg: '#F7FBF4', bgAlt: '#EEF6E8', textPrimary: '#1B2A1C', textSecondary: '#4A6741',
+    accent: '#5C8A4D', accentSolid: '#2D4A38', cardBg: '#FFFFFF', cardBorder: '#D8E8CE',
   },
   'minimal-glass': {
-    bg: '#f5f3ff', bgAlt: '#eef2ff', textPrimary: '#1f2430', textSecondary: '#6b7280',
-    accent: '#a78bfa', accentGlow: 'rgba(167,139,250,0.18)', cardBg: 'rgba(255,255,255,0.6)', cardBorder: 'rgba(255,255,255,0.7)',
+    bg: '#F5F3FF', bgAlt: '#FDF2F8', textPrimary: '#23283A', textSecondary: '#5B6474',
+    accent: '#A78BFA', accentSolid: '#6D4FC9', cardBg: '#FFFFFF', cardBorder: 'rgba(167,139,250,0.35)',
     isGlass: true,
+    bgGrad: 'linear-gradient(160deg,#F5F3FF,#FDF2F8,#EEF2FF)',
+    glassBg: 'rgba(255,255,255,0.55)',
+    glassBorder: 'rgba(255,255,255,0.7)',
+    glassShadow: '0 8px 32px rgba(31,38,135,0.12)',
   },
 };
+
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+/** 폰트 2종(Pretendard Variable / Nanum Myeongjo) 이내 — 본문은 항상 Pretendard 고정 */
+function resolveFontVars(fontFamily: string): { display: string; body: string } {
+  const body = `'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif`;
+  const display = fontFamily === 'Nanum Myeongjo' ? `'Nanum Myeongjo', 'Pretendard Variable', serif` : body;
+  return { display, body };
+}
 
 const EVENT_EMOJI: Record<string, string> = {
   gathering: '&#127881;', birthday: '&#127874;', wedding: '&#128141;',
   baby: '&#128118;', celebration: '&#127881;', corporate: '&#127970;', custom: '&#10024;',
 };
+
+const EVENT_EYEBROW: Record<string, string> = {
+  gathering: 'GATHERING', birthday: 'BIRTHDAY', wedding: 'WEDDING',
+  baby: 'FIRST BIRTHDAY', celebration: 'CELEBRATION', corporate: 'COMPANY EVENT', custom: 'INVITATION',
+};
+
+// ── 파생 헬퍼 (신규 필드 없이 기존 필드에서 파생) ──
+
+/** 호스트 이름 이니셜(최대 2인) → 없으면 타이틀 첫 글자로 폴백 */
+function deriveInitials(hostsItems: unknown[], title: string): string {
+  const names = hostsItems
+    .map((h) => String((h as Record<string, string>).name || '').trim())
+    .filter(Boolean)
+    .slice(0, 2);
+  if (names.length > 0) return names.map((n) => esc(n.charAt(0))).join(' &amp; ');
+  return esc(title.trim().charAt(0) || '✦');
+}
+
+/** eventDate(YYYY-MM-DD)로 해당 월 미니 캘린더 그리드 생성 */
+function buildMonthGridHtml(eventDate: string): string {
+  const d = new Date(`${eventDate}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return '';
+  const year = d.getFullYear();
+  const month = d.getMonth();
+  const eventDay = d.getDate();
+  const firstDow = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const dows = ['일', '월', '화', '수', '목', '금', '토'];
+  const dowRow = dows.map((dw) => `<div class="inv-cal-dow">${dw}</div>`).join('');
+  const cells: string[] = [];
+  for (let i = 0; i < firstDow; i++) cells.push('<div class="inv-cal-cell"></div>');
+  for (let day = 1; day <= daysInMonth; day++) {
+    const active = day === eventDay;
+    cells.push(`<div class="inv-cal-cell${active ? ' inv-cal-cell--active' : ''}">${day}</div>`);
+  }
+  return `
+    <div class="inv-cal">
+      <p class="inv-cal-head">${year}.${String(month + 1).padStart(2, '0')}</p>
+      <div class="inv-cal-grid">${dowRow}${cells.join('')}</div>
+    </div>`;
+}
 
 // ── Section Renderers ────────────────────────────
 
@@ -62,44 +132,72 @@ function renderHero(
   const eventType = getVal(state, 'hero', 'eventType', 'gathering');
   const heroImageUrl = getVal(state, 'hero', 'heroImageUrl', '');
   const gradientFrom = getVal(state, 'hero', 'gradientFrom', v.accent);
-  const gradientTo = getVal(state, 'hero', 'gradientTo', v.accent);
+  const gradientTo = getVal(state, 'hero', 'gradientTo', v.accentSolid);
+  const dateLabel = getVal(state, 'dday', 'eventDateLabel', '');
+  const hostsItems = getArr(state, 'hosts', 'items');
   const emoji = EVENT_EMOJI[eventType] || EVENT_EMOJI.custom;
+  const eyebrow = EVENT_EYEBROW[eventType] || EVENT_EYEBROW.custom;
+  const initials = deriveInitials(hostsItems, title);
 
   const imgSrc = resolveImageSrc(heroImageUrl, liveUrl, imageMap);
-  const bgStyle = imgSrc
-    ? `background-image:url('${esc(imgSrc)}');background-size:cover;background-position:center;`
-    : `background:linear-gradient(160deg,${esc(gradientFrom)},${esc(gradientTo)});`;
 
-  return `
-    <section class="inv-hero" style="${bgStyle}">
-      ${imgSrc ? '<div class="inv-hero-overlay"></div>' : ''}
-      <div class="inv-hero-vignette"></div>
+  if (imgSrc) {
+    // 이미지가 있으면 상단 아치형 프레임 + 솔리드 배경(다크 텍스트)
+    return `
+    <section class="inv-hero inv-hero--framed">
       <div class="inv-hero-content">
-        <div class="inv-hero-emoji-ring"><span class="inv-hero-emoji">${emoji}</span></div>
+        <p class="inv-eyebrow">${emoji} ${esc(eyebrow)}</p>
+        <div class="inv-hero-arch"><img src="${esc(imgSrc)}" loading="eager" alt="" /></div>
         <h1 class="inv-hero-title">${esc(title)}</h1>
         ${subtitle ? `<p class="inv-hero-subtitle">${esc(subtitle)}</p>` : ''}
-        <div class="inv-hero-divider"></div>
+        ${dateLabel ? `<p class="inv-hero-date">${esc(dateLabel)}</p>` : ''}
+        <div class="inv-headline-divider"><span class="inv-headline-divider-mark">&#10022;</span></div>
+      </div>
+    </section>`;
+  }
+
+  return `
+    <section class="inv-hero" style="background:radial-gradient(ellipse at 50% 20%, ${esc(gradientTo)} 0%, ${esc(gradientFrom)} 60%);">
+      <div class="inv-hero-noise"></div>
+      <div class="inv-hero-vignette"></div>
+      <div class="inv-hero-content">
+        <p class="inv-eyebrow inv-eyebrow--onphoto">${emoji} ${esc(eyebrow)}</p>
+        <div class="inv-hero-emoji-ring inv-monogram inv-monogram--onphoto">${initials}</div>
+        <h1 class="inv-hero-title inv-hero-title--onphoto">${esc(title)}</h1>
+        ${subtitle ? `<p class="inv-hero-subtitle">${esc(subtitle)}</p>` : ''}
+        ${dateLabel ? `<p class="inv-hero-date inv-hero-date--onphoto">${esc(dateLabel)}</p>` : ''}
+        <div class="inv-headline-divider inv-headline-divider--onphoto"><span class="inv-headline-divider-mark">&#10022;</span></div>
+      </div>
+      <div class="inv-hero-scroll-cue" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7" /></svg>
       </div>
     </section>`;
 }
 
-function renderDday(state: ModuleConfigState, v: InvPresetVars): string {
+function renderDday(state: ModuleConfigState): string {
+  const eventDate = getVal(state, 'dday', 'eventDate', '');
   const dateLabel = getVal(state, 'dday', 'eventDateLabel', '');
   const showCountdown = getVal(state, 'dday', 'showCountdown', 'true') !== 'false';
+  const countdownStyle = getVal(state, 'dday', 'countdownStyle', 'flip');
+  const calHtml = eventDate ? buildMonthGridHtml(eventDate) : '';
+
+  const counters = ['DAYS', 'HOURS', 'MIN', 'SEC'].map((label, i) => {
+    const val = i === 0 ? '00' : '00';
+    return countdownStyle === 'simple'
+      ? `<div class="inv-simple-counter"><span class="inv-simple-counter-num tabular-nums">${val}</span><span class="inv-counter-label">${label}</span></div>`
+      : `<div class="inv-flip-wrap"><div class="inv-card inv-dday-card"><span class="tabular-nums inv-flip-num">${val}</span></div><span class="inv-counter-label">${label}</span></div>`;
+  }).join('<div class="inv-colon-sep">:</div>');
 
   return `
-    <section class="inv-section" style="background:${esc(v.bgAlt)};">
-      ${showCountdown ? `
-        <div class="inv-countdown">
-          <div class="inv-countdown-card" style="background:${esc(v.cardBg)};border:1px solid ${esc(v.cardBorder)};">
-            <span class="inv-countdown-num" style="color:${esc(v.accent)};">D-Day</span>
-          </div>
-        </div>` : ''}
-      ${dateLabel ? `<p class="inv-date-label" style="color:${esc(v.textPrimary)};">${esc(dateLabel)}</p>` : ''}
+    <section class="inv-section-decorated" style="background:var(--inv-bg-alt);">
+      <p class="inv-eyebrow">COUNTDOWN</p>
+      ${calHtml}
+      ${showCountdown ? `<div class="inv-countdown">${counters}</div>` : ''}
+      ${dateLabel ? `<p class="inv-date-label">${esc(dateLabel)}</p>` : ''}
     </section>`;
 }
 
-function renderHosts(state: ModuleConfigState, v: InvPresetVars, liveUrl: string, imageMap: Record<string, string>): string {
+function renderHosts(state: ModuleConfigState, liveUrl: string, imageMap: Record<string, string>): string {
   const hostsTitle = getVal(state, 'hosts', 'hostsTitle', '초대하는 사람');
   const items = getArr(state, 'hosts', 'items');
   if (!items.length) return '';
@@ -108,25 +206,26 @@ function renderHosts(state: ModuleConfigState, v: InvPresetVars, liveUrl: string
     const h = item as Record<string, string>;
     const avatarSrc = resolveImageSrc(h.avatarUrl || '', liveUrl, imageMap);
     const avatar = avatarSrc
-      ? `<img class="inv-host-avatar" src="${esc(avatarSrc)}" alt="${esc(h.name || '')}" />`
-      : `<div class="inv-host-avatar inv-host-avatar--initial" style="background:linear-gradient(135deg,${esc(v.accent)},${esc(v.cardBorder)});color:#fff;">${esc((h.name || '?').charAt(0))}</div>`;
+      ? `<img class="inv-host-avatar" src="${esc(avatarSrc)}" alt="${esc(h.name || '')}" loading="lazy" />`
+      : `<div class="inv-host-avatar inv-host-avatar--initial">${esc((h.name || '?').charAt(0))}</div>`;
     return `
       <div class="inv-host">
         ${avatar}
-        <p class="inv-host-role" style="color:${esc(v.textSecondary)};">${esc(h.role || '')}</p>
-        <p class="inv-host-name" style="color:${esc(v.textPrimary)};">${esc(h.name || '')}</p>
-        ${h.phone ? `<a href="tel:${esc(h.phone)}" class="inv-host-phone" style="color:${esc(v.accent)};">${esc(h.phone)}</a>` : ''}
+        <p class="inv-host-role">${esc(h.role || '')}</p>
+        <p class="inv-host-name">${esc(h.name || '')}</p>
+        ${h.phone ? `<a href="tel:${esc(h.phone)}" class="inv-btn inv-btn-secondary inv-btn-sm">&#9742; ${esc(h.phone)}</a>` : ''}
       </div>`;
   }).join('');
 
   return `
-    <section class="inv-section">
-      <h2 class="inv-section-title" style="color:${esc(v.textPrimary)};">${esc(hostsTitle)}</h2>
+    <section class="inv-section-decorated">
+      <p class="inv-eyebrow">HOSTS</p>
+      <h2 class="inv-section-title">${esc(hostsTitle)}</h2>
       <div class="inv-hosts">${hostsHtml}</div>
     </section>`;
 }
 
-function renderLocation(state: ModuleConfigState, v: InvPresetVars): string {
+function renderLocation(state: ModuleConfigState): string {
   const venueName = getVal(state, 'location', 'venueName', '');
   const venueAddress = getVal(state, 'location', 'venueAddress', '');
   const kakaoMapUrl = getVal(state, 'location', 'kakaoMapUrl', '');
@@ -137,45 +236,54 @@ function renderLocation(state: ModuleConfigState, v: InvPresetVars): string {
   if (!venueName && !venueAddress) return '';
 
   const mapButtons = [
-    kakaoMapUrl ? `<a href="${esc(kakaoMapUrl)}" target="_blank" rel="noopener noreferrer" class="inv-map-btn" style="background:#FEE500;color:#191919;">카카오맵</a>` : '',
-    naverMapUrl ? `<a href="${esc(naverMapUrl)}" target="_blank" rel="noopener noreferrer" class="inv-map-btn" style="background:#03C75A;color:#fff;">네이버맵</a>` : '',
+    kakaoMapUrl ? `<a href="${esc(kakaoMapUrl)}" target="_blank" rel="noopener noreferrer" class="inv-btn inv-btn-kakao">카카오맵</a>` : '',
+    naverMapUrl ? `<a href="${esc(naverMapUrl)}" target="_blank" rel="noopener noreferrer" class="inv-btn inv-btn-naver">네이버맵</a>` : '',
   ].filter(Boolean).join('');
 
-  const infoLines = [
-    parkingInfo ? `<p class="inv-info-line" style="color:${esc(v.textSecondary)};">&#128663; ${esc(parkingInfo)}</p>` : '',
-    transitInfo ? `<p class="inv-info-line" style="color:${esc(v.textSecondary)};">&#128651; ${esc(transitInfo)}</p>` : '',
-  ].filter(Boolean).join('');
+  const detailsBlock = (parkingInfo || transitInfo)
+    ? `<details class="inv-details">
+        <summary>이용 안내</summary>
+        ${parkingInfo ? `<p class="inv-info-line">&#128663; ${esc(parkingInfo)}</p>` : ''}
+        ${transitInfo ? `<p class="inv-info-line">&#128651; ${esc(transitInfo)}</p>` : ''}
+      </details>`
+    : '';
 
   return `
-    <section class="inv-section">
-      <h2 class="inv-section-title" style="color:${esc(v.textPrimary)};">장소 안내</h2>
-      <div class="inv-card" style="background:${esc(v.cardBg)};border:1px solid ${esc(v.cardBorder)};">
-        ${venueName ? `<p class="inv-venue-name" style="color:${esc(v.textPrimary)};">${esc(venueName)}</p>` : ''}
-        ${venueAddress ? `<p class="inv-venue-addr" style="color:${esc(v.textSecondary)};">${esc(venueAddress)}</p>` : ''}
+    <section class="inv-section-decorated">
+      <p class="inv-eyebrow">LOCATION</p>
+      <h2 class="inv-section-title">장소 안내</h2>
+      <div class="inv-card" style="max-width:28rem;margin:0 auto;padding:1.5rem;">
+        ${venueName ? `<p class="inv-venue-name">${esc(venueName)}</p>` : ''}
+        ${venueAddress ? `<div class="inv-venue-addr-row"><p class="inv-venue-addr">${esc(venueAddress)}</p><button class="inv-btn-icon-sm" type="button" aria-label="주소 복사">&#128203;</button></div>` : ''}
         ${mapButtons ? `<div class="inv-map-buttons">${mapButtons}</div>` : ''}
-        ${infoLines ? `<div class="inv-info-block" style="border-top:1px solid ${esc(v.cardBorder)};">${infoLines}</div>` : ''}
+        ${detailsBlock}
       </div>
     </section>`;
 }
 
-function renderGallery(state: ModuleConfigState, v: InvPresetVars, liveUrl: string, imageMap: Record<string, string>): string {
+function renderGallery(state: ModuleConfigState, liveUrl: string, imageMap: Record<string, string>): string {
   const images = getArr(state, 'gallery', 'images');
-  const columns = getVal(state, 'gallery', 'columns', '3');
   if (!images.length) return '';
 
-  const imagesHtml = images.map((img) => {
-    const src = resolveImageSrc((img as Record<string, string>).url || '', liveUrl, imageMap);
-    return src ? `<div class="inv-gallery-item"><img src="${esc(src)}" loading="lazy" /></div>` : '';
-  }).filter(Boolean).join('');
+  const resolved = images
+    .map((img) => resolveImageSrc((img as Record<string, string>).url || '', liveUrl, imageMap))
+    .filter(Boolean);
+  if (!resolved.length) return '';
+
+  const itemsHtml = resolved.map((src, i) => {
+    const big = i === 0 ? ' inv-gallery-item--lg' : '';
+    return `<div class="inv-gallery-item${big}"><img src="${esc(src)}" loading="lazy" alt="" /></div>`;
+  }).join('');
 
   return `
-    <section class="inv-section">
-      <h2 class="inv-section-title" style="color:${esc(v.textPrimary)};">갤러리</h2>
-      <div class="inv-gallery" style="grid-template-columns:repeat(${esc(columns)},1fr);">${imagesHtml}</div>
+    <section class="inv-section-decorated">
+      <p class="inv-eyebrow">GALLERY</p>
+      <h2 class="inv-section-title">갤러리</h2>
+      <div class="inv-gallery">${itemsHtml}</div>
     </section>`;
 }
 
-function renderAccount(state: ModuleConfigState, v: InvPresetVars): string {
+function renderAccount(state: ModuleConfigState): string {
   const accountTitle = getVal(state, 'account', 'accountTitle', '마음 전하기');
   const kakaoPayUrl = getVal(state, 'account', 'kakaoPayUrl', '');
   const items = getArr(state, 'account', 'items');
@@ -185,112 +293,126 @@ function renderAccount(state: ModuleConfigState, v: InvPresetVars): string {
   const accountsHtml = items.map((item) => {
     const a = item as Record<string, string>;
     return `
-      <div class="inv-account-item" style="background:${esc(v.cardBg)};border:1px solid ${esc(v.cardBorder)};border-left:3px solid ${esc(v.accent)};">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.375rem;">
-          <span class="inv-account-badge" style="background:${esc(v.accentGlow)};color:${esc(v.accent)};">${esc(a.label || '')}</span>
-          <span style="font-size:0.8125rem;color:${esc(v.textSecondary)};">${esc(a.holder || '')}</span>
+      <details class="inv-details inv-account-item">
+        <summary>
+          <span class="inv-account-badge">${esc(a.label || '')}</span>
+          <span class="inv-account-holder">${esc(a.holder || '')}</span>
+        </summary>
+        <div class="inv-account-row">
+          <p class="inv-account-num"><span class="inv-account-bank">${esc(a.bankName || '')}</span> <span class="tabular-nums">${esc(a.accountNumber || '')}</span></p>
+          <button class="inv-btn inv-btn-secondary inv-btn-sm" type="button">복사</button>
         </div>
-        <p style="color:${esc(v.textPrimary)};font-weight:500;"><span style="color:${esc(v.textSecondary)};font-size:0.875rem;">${esc(a.bankName || '')}</span> ${esc(a.accountNumber || '')}</p>
-      </div>`;
+      </details>`;
   }).join('');
 
   const kakaoBtn = kakaoPayUrl
-    ? `<a href="${esc(kakaoPayUrl)}" target="_blank" rel="noopener noreferrer" class="inv-kakaopay-btn">카카오페이로 송금하기</a>`
+    ? `<a href="${esc(kakaoPayUrl)}" target="_blank" rel="noopener noreferrer" class="inv-btn inv-btn-kakao" style="width:100%;margin-top:0.5rem;">카카오페이로 송금하기</a>`
     : '';
 
   return `
-    <section class="inv-section" style="background:${esc(v.bgAlt)};">
-      <h2 class="inv-section-title" style="color:${esc(v.textPrimary)};">${esc(accountTitle)}</h2>
+    <section class="inv-section-decorated" style="background:var(--inv-bg-alt);">
+      <p class="inv-eyebrow">GIFT</p>
+      <h2 class="inv-section-title">${esc(accountTitle)}</h2>
       <div class="inv-accounts">${accountsHtml}</div>
       ${kakaoBtn}
     </section>`;
 }
 
-function renderContact(state: ModuleConfigState, v: InvPresetVars): string {
+function renderContact(state: ModuleConfigState): string {
   const items = getArr(state, 'contact', 'items');
   if (!items.length) return '';
 
   const contactsHtml = items.map((item) => {
     const c = item as Record<string, string>;
     return `
-      <div class="inv-contact-row" style="background:${esc(v.cardBg)};border:1px solid ${esc(v.cardBorder)};border-left:3px solid ${esc(v.accent)};">
-        <div style="display:flex;align-items:center;gap:0.5rem;">
-          ${c.role ? `<span class="inv-contact-role" style="background:${esc(v.accentGlow)};color:${esc(v.accent)};border:1px solid ${esc(v.accentGlow)};">${esc(c.role)}</span>` : ''}
-          <span style="color:${esc(v.textPrimary)};font-weight:600;">${esc(c.name || '')}</span>
+      <div class="inv-card-accent inv-contact-row">
+        <div class="inv-contact-name-row">
+          ${c.role ? `<span class="inv-contact-role">${esc(c.role)}</span>` : ''}
+          <span class="inv-contact-name">${esc(c.name || '')}</span>
         </div>
-        ${c.phone ? `<div style="display:flex;gap:0.5rem;">
-          <a href="tel:${esc(c.phone)}" class="inv-btn-preview" style="background:${esc(v.accent)};color:#fff;">&#9742; 전화</a>
-          <a href="sms:${esc(c.phone)}" class="inv-btn-preview" style="background:${esc(v.accentGlow)};color:${esc(v.accent)};">&#9993; 문자</a>
+        ${c.phone ? `<div class="inv-contact-actions">
+          <a href="tel:${esc(c.phone)}" class="inv-btn inv-btn-primary inv-btn-sm">&#9742; 전화</a>
+          <a href="sms:${esc(c.phone)}" class="inv-btn inv-btn-secondary inv-btn-sm">&#9993; 문자</a>
         </div>` : ''}
       </div>`;
   }).join('');
 
   return `
-    <section class="inv-section">
-      <h2 class="inv-section-title" style="color:${esc(v.textPrimary)};">연락처</h2>
+    <section class="inv-section-decorated">
+      <p class="inv-eyebrow">CONTACT</p>
+      <h2 class="inv-section-title">연락처</h2>
       <div class="inv-contacts">${contactsHtml}</div>
     </section>`;
 }
 
-function renderMessage(state: ModuleConfigState, v: InvPresetVars): string {
+function renderMessage(state: ModuleConfigState): string {
   const messageTitle = getVal(state, 'message', 'messageTitle', '인사말');
   const messageBody = getVal(state, 'message', 'messageBody', '');
   const align = getVal(state, 'message', 'align', 'center');
   if (!messageBody) return '';
   return `
-    <section class="inv-section">
-      <h2 class="inv-section-title" style="color:${esc(v.textPrimary)};">${esc(messageTitle)}</h2>
+    <section class="inv-section-decorated">
+      <p class="inv-eyebrow">GREETING</p>
+      <h2 class="inv-section-title">${esc(messageTitle)}</h2>
+      <div class="inv-headline-divider"><span class="inv-headline-divider-mark">&#10022;</span></div>
       <p class="inv-message-body" style="text-align:${esc(align)};">${esc(messageBody)}</p>
+      <div class="inv-headline-divider"><span class="inv-headline-divider-mark">&#10022;</span></div>
     </section>`;
 }
 
-function renderShare(state: ModuleConfigState, v: InvPresetVars): string {
+function renderShare(state: ModuleConfigState): string {
   const shareTitle = getVal(state, 'share', 'shareTitle', '초대장 공유하기');
   const enableKakao = getVal(state, 'share', 'enableKakao', 'true') !== 'false';
   const enableCopy = getVal(state, 'share', 'enableCopy', 'true') !== 'false';
   const enableQr = getVal(state, 'share', 'enableQr', 'false') === 'true';
   if (!enableKakao && !enableCopy && !enableQr) return '';
   const kakaoBtn = enableKakao
-    ? `<button class="inv-share-btn inv-share-kakao">&#128170; 카카오톡 공유</button>`
+    ? `<button class="inv-btn-icon inv-btn-icon-kakao" type="button" aria-label="카카오톡 공유">&#128172;</button>`
     : '';
   const copyBtn = enableCopy
-    ? `<button class="inv-share-btn inv-share-copy" style="background:${esc(v.accentGlow)};color:${esc(v.accent)};">&#128279; 링크 복사</button>`
+    ? `<button class="inv-btn-icon inv-btn-icon-secondary" type="button" aria-label="링크 복사">&#128279;</button>`
     : '';
   const qrBlock = enableQr
-    ? `<div class="inv-qr-placeholder">QR 코드</div>`
+    ? `<details class="inv-details" style="text-align:center;"><summary style="justify-content:center;">QR 코드 보기</summary><div class="inv-qr-placeholder">QR</div></details>`
     : '';
   return `
-    <section class="inv-section" style="background:${esc(v.bgAlt)};">
-      <h2 class="inv-section-title" style="color:${esc(v.textPrimary)};">${esc(shareTitle)}</h2>
-      <div style="display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:center;margin-bottom:${enableQr ? '1.25rem' : '0'};">
-        ${kakaoBtn}${copyBtn}
-      </div>
+    <section class="inv-section-decorated" style="background:var(--inv-bg-alt);text-align:center;">
+      <p class="inv-eyebrow">SHARE</p>
+      <h2 class="inv-section-title">${esc(shareTitle)}</h2>
+      <div class="inv-share-row">${kakaoBtn}${copyBtn}</div>
       ${qrBlock}
     </section>`;
 }
 
-function renderRsvp(state: ModuleConfigState, v: InvPresetVars): string {
+function renderRsvp(state: ModuleConfigState): string {
   const rsvpTitle = getVal(state, 'rsvp', 'rsvpTitle', '참석 여부 회신');
   const rsvpDescription = getVal(state, 'rsvp', 'rsvpDescription', '');
   const rsvpUrl = getVal(state, 'rsvp', 'rsvpUrl', '');
   const rsvpButtonLabel = getVal(state, 'rsvp', 'rsvpButtonLabel', '참석 여부 알리기');
   if (!rsvpUrl) return '';
   return `
-    <section class="inv-section">
-      <h2 class="inv-section-title" style="color:${esc(v.textPrimary)};">${esc(rsvpTitle)}</h2>
-      ${rsvpDescription ? `<p class="inv-rsvp-desc">${esc(rsvpDescription)}</p>` : ''}
-      <a href="${esc(rsvpUrl)}" target="_blank" rel="noopener noreferrer" class="inv-rsvp-btn" style="background:${esc(v.accent)};color:#fff;">${esc(rsvpButtonLabel)}</a>
+    <section class="inv-section-decorated" style="text-align:center;">
+      <p class="inv-eyebrow">RSVP</p>
+      <h2 class="inv-section-title">${esc(rsvpTitle)}</h2>
+      <div class="inv-card" style="max-width:28rem;margin:0 auto;padding:1.75rem 2rem;">
+        ${rsvpDescription ? `<p class="inv-rsvp-desc">${esc(rsvpDescription)}</p>` : ''}
+        <a href="${esc(rsvpUrl)}" target="_blank" rel="noopener noreferrer" class="inv-btn inv-btn-primary" style="width:100%;">${esc(rsvpButtonLabel)}</a>
+      </div>
     </section>`;
 }
 
 function renderFooter(state: ModuleConfigState): string {
   const closingMessage = getVal(state, 'footer', 'closingMessage', '');
   const showPoweredBy = getVal(state, 'footer', 'showPoweredBy', 'true') !== 'false';
+  const title = getVal(state, 'hero', 'title', '');
+  const hostsItems = getArr(state, 'hosts', 'items');
+  const initials = deriveInitials(hostsItems, title);
   const poweredBy = showPoweredBy
     ? `<a href="https://linkmap.pages.dev" target="_blank" rel="noopener noreferrer">Powered by Linkmap</a>`
     : '';
   return `
     <div class="inv-footer">
+      <div class="inv-monogram inv-monogram-sm">${initials}</div>
       ${closingMessage ? `<p class="inv-closing">${esc(closingMessage)}</p>` : ''}
       ${poweredBy}
     </div>`;
@@ -298,87 +420,167 @@ function renderFooter(state: ModuleConfigState): string {
 
 // ── CSS ──────────────────────────────────────────
 
-function buildInvitationCSS(v: InvPresetVars): string {
-  const bodyBg = v.isGlass
-    ? `linear-gradient(160deg,#f5f3ff,#fdf2f8,#eef2ff)`
-    : v.bg;
-  const glassCardCss = v.isGlass
+function buildInvitationCSS(v: InvPresetVars, fontFamily: string): string {
+  const accentGlow = hexToRgba(v.accent, 0.15);
+  const accentSoft = hexToRgba(v.accent, 0.07);
+  const { display, body } = resolveFontVars(fontFamily);
+  const bodyBg = v.isGlass ? (v.bgGrad ?? v.bg) : v.bg;
+
+  const glassCss = v.isGlass
     ? `
-    .inv-card,.inv-card-accent { background: rgba(255,255,255,0.55) !important; border-color: rgba(255,255,255,0.7) !important; box-shadow: 0 8px 32px rgba(31,38,135,0.12) !important; backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); }
-    @supports not (backdrop-filter:blur(1px)) { .inv-card,.inv-card-accent { background: rgba(255,255,255,0.92) !important; } }`
-    : '';
-  return `
-    body { background: ${bodyBg}; color: ${v.textPrimary}; margin: 0; font-family: 'Nanum Myeongjo', 'Pretendard Variable', serif; line-height: 1.7; -webkit-font-smoothing: antialiased; }
-    * { box-sizing: border-box; }
-
-    .inv-hero { position: relative; min-height: 65vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 6rem 1.5rem; }
-    .inv-hero-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.3); }
-    .inv-hero-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.25) 100%); }
-    .inv-hero-content { position: relative; z-index: 1; max-width: 24rem; margin: 0 auto; }
-    .inv-hero-emoji-ring { display: flex; align-items: center; justify-content: center; width: 96px; height: 96px; margin: 0 auto 2rem; border-radius: 50%; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); }
-    .inv-hero-emoji { font-size: 3rem; line-height: 1; }
-    .inv-hero-title { font-size: 1.875rem; font-weight: 700; color: #fff; line-height: 1.4; white-space: pre-line; text-shadow: 0 2px 16px rgba(0,0,0,0.3), 0 0 40px rgba(255,255,255,0.08); letter-spacing: -0.01em; }
-    .inv-hero-subtitle { margin-top: 1.25rem; font-size: 1rem; color: rgba(255,255,255,0.8); line-height: 1.6; letter-spacing: 0.04em; }
-    .inv-hero-divider { margin: 2rem auto 0; width: 4rem; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); }
-
-    .inv-section { padding: clamp(2.5rem, 6vw, 3.5rem) clamp(1.25rem, 5vw, 2rem); text-align: center; }
-    .inv-section + .inv-section::before { content: ''; display: block; width: 60px; height: 1px; margin: 0 auto 0; background: linear-gradient(90deg, transparent, ${v.accent}, transparent); opacity: 0.3; }
-    .inv-section-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; }
-
-    .inv-countdown { display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 1.5rem; }
-    .inv-countdown-card { width: 4rem; height: 5rem; display: flex; align-items: center; justify-content: center; border-radius: 0.75rem; text-align: center; background: ${v.cardBg}; border: 1px solid ${v.cardBorder}; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .inv-countdown-num { font-size: 1.75rem; font-weight: 700; }
-    .inv-date-label { font-size: 1rem; font-weight: 500; }
-
-    .inv-hosts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1.25rem; max-width: 28rem; margin: 0 auto; }
-    .inv-host { display: flex; flex-direction: column; align-items: center; text-align: center; background: ${v.cardBg}; border: 1px solid ${v.cardBorder}; border-radius: 1rem; padding: 1.5rem 1rem; position: relative; overflow: hidden; }
-    .inv-host::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, ${v.accent}, ${v.cardBorder}); }
-    .inv-host-avatar { width: 4.5rem; height: 4.5rem; border-radius: 50%; object-fit: cover; margin-bottom: 0.75rem; }
-    .inv-host-avatar--initial { display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
-    .inv-host-role { font-size: 0.8125rem; margin: 0; }
-    .inv-host-name { font-weight: 600; font-size: 1rem; margin: 0.125rem 0 0; }
-    .inv-host-phone { font-size: 0.8125rem; margin-top: 0.75rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1rem; border-radius: 999px; background: ${v.accentGlow}; color: ${v.accent}; }
-
-    .inv-card { max-width: 28rem; margin: 0 auto; border-radius: 1rem; padding: 1.5rem; position: relative; overflow: hidden; background: ${v.cardBg}; border: 1px solid ${v.cardBorder}; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .inv-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, ${v.accent}, ${v.cardBorder}); }
-    .inv-venue-name { font-size: 1.0625rem; font-weight: 600; margin: 0; }
-    .inv-venue-addr { font-size: 0.875rem; margin: 0.125rem 0 0; }
-    .inv-map-buttons { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
-    .inv-map-btn { flex: 1; text-align: center; padding: 0.75rem; border-radius: 999px; font-size: 0.875rem; font-weight: 500; text-decoration: none; min-height: 44px; display: flex; align-items: center; justify-content: center; }
-    .inv-info-block { margin-top: 1.25rem; padding-top: 1.25rem; padding-left: 0.75rem; border-left: 3px solid ${v.accentGlow}; }
-    .inv-info-line { font-size: 0.875rem; margin: 0.375rem 0; text-align: left; }
-
-    .inv-gallery { display: grid; gap: 0.5rem; max-width: 28rem; margin: 0 auto; }
-    .inv-gallery-item { aspect-ratio: 1; overflow: hidden; border-radius: 0.75rem; }
-    .inv-gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
-
-    .inv-accounts { max-width: 28rem; margin: 0 auto; display: flex; flex-direction: column; gap: 0.75rem; }
-    .inv-account-item { border-radius: 1rem; padding: 1.25rem; text-align: left; }
-    .inv-account-badge { font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 999px; }
-    .inv-kakaopay-btn { display: flex; align-items: center; justify-content: center; gap: 0.5rem; max-width: 28rem; margin: 0.75rem auto 0; text-align: center; padding: 0.75rem; border-radius: 999px; background: #FEE500; color: #191919; font-weight: 500; font-size: 0.875rem; text-decoration: none; min-height: 44px; }
-
-    .inv-contacts { max-width: 28rem; margin: 0 auto; display: flex; flex-direction: column; gap: 0.75rem; }
-    .inv-contact-row { display: flex; align-items: center; justify-content: space-between; border-radius: 1rem; padding: 1rem 1.25rem; }
-    .inv-contact-role { font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.625rem; border-radius: 999px; }
-    .inv-btn-preview { font-size: 0.8125rem; font-weight: 500; text-decoration: none; padding: 0.5rem 1rem; border-radius: 999px; display: inline-flex; align-items: center; gap: 0.375rem; min-height: 40px; }
-
-    .inv-footer { padding: 1.5rem; text-align: center; font-size: 0.75rem; background: ${v.bgAlt}; color: ${v.textSecondary}; }
-    .inv-footer a { opacity: 0.6; text-decoration: none; color: inherit; }
-
-    .inv-message-body { white-space: pre-line; font-size: 1rem; line-height: 1.8; color: ${v.textPrimary}; max-width: 28rem; margin: 0 auto; }
-    .inv-share-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 999px; font-size: 0.875rem; font-weight: 500; text-decoration: none; min-height: 44px; cursor: pointer; border: none; }
-    .inv-share-kakao { background: #FEE500; color: #191919; }
-    .inv-share-copy { background: ${v.accentGlow}; color: ${v.accent}; }
-    .inv-qr-placeholder { width: 160px; height: 160px; margin: 0 auto; background: ${v.cardBg}; border: 1px solid ${v.cardBorder}; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: ${v.textSecondary}; }
-    .inv-rsvp-desc { font-size: 0.9375rem; color: ${v.textSecondary}; margin-bottom: 1.25rem; }
-    .inv-rsvp-btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.75rem 2rem; border-radius: 999px; background: ${v.accent}; color: #fff; font-size: 0.9375rem; font-weight: 500; text-decoration: none; min-height: 44px; }
-    .inv-closing { white-space: pre-line; font-size: 0.9375rem; line-height: 1.8; color: ${v.textSecondary}; max-width: 24rem; margin: 0 auto 1.25rem; }
-
-    @media (max-width: 640px) {
-      .inv-hero-title { font-size: 1.5rem; }
-      .inv-section-title { font-size: 1.125rem; }
+    .inv-hero-emoji-ring, .inv-dday-card {
+      background: ${v.glassBg}; border-color: ${v.glassBorder}; box-shadow: ${v.glassShadow};
+      backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%);
     }
-    ${glassCardCss}
+    @supports not (backdrop-filter: blur(1px)) {
+      .inv-hero-emoji-ring, .inv-dday-card { background: rgba(255,255,255,0.92); }
+    }`
+    : '';
+
+  return `
+    :root {
+      --inv-bg: ${v.bg}; --inv-bg-alt: ${v.bgAlt};
+      --inv-text-primary: ${v.textPrimary}; --inv-text-secondary: ${v.textSecondary};
+      --inv-accent: ${v.accent}; --inv-accent-solid: ${v.accentSolid};
+      --inv-accent-glow: ${accentGlow}; --inv-accent-soft: ${accentSoft};
+      --inv-card-bg: ${v.cardBg}; --inv-card-border: ${v.cardBorder};
+      --inv-font-display: ${display}; --inv-font-body: ${body};
+      --inv-shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+      --inv-shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+      --inv-radius-lg: 16px;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { background: ${bodyBg}; color: var(--inv-text-primary); margin: 0; font-family: var(--inv-font-body); font-size: 15px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+
+    /* ── Eyebrow / Section title / Divider / Monogram ── */
+    .inv-eyebrow { display:block; font-size:11px; text-transform:uppercase; letter-spacing:.16em; font-weight:600; color:var(--inv-accent-solid); margin-bottom:.5rem; text-align:center; }
+    .inv-eyebrow--onphoto { color:rgba(255,255,255,0.85); }
+    .inv-section-title { position:relative; display:inline-block; font-family:var(--inv-font-display); font-size:1.25rem; font-weight:600; color:var(--inv-text-primary); padding-bottom:.75rem; margin:0 0 1.5rem; }
+    .inv-section-title::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:2rem; height:2px; background:linear-gradient(90deg,var(--inv-gradient-from,var(--inv-accent)),var(--inv-gradient-to,var(--inv-accent-solid))); }
+    .inv-headline-divider { display:flex; align-items:center; gap:.75rem; max-width:200px; margin:1.5rem auto; color:var(--inv-card-border); }
+    .inv-headline-divider::before, .inv-headline-divider::after { content:''; flex:1; height:1px; background:currentColor; opacity:.6; }
+    .inv-headline-divider--onphoto { color:rgba(255,255,255,0.4); }
+    .inv-headline-divider-mark { font-size:.7rem; color:var(--inv-accent); opacity:.7; }
+    .inv-monogram { width:60px; height:60px; border-radius:50%; border:1px solid var(--inv-accent); display:flex; align-items:center; justify-content:center; font-family:var(--inv-font-display); font-size:1.35rem; color:var(--inv-text-primary); margin:0 auto 1.25rem; }
+    .inv-monogram--onphoto { border-color:rgba(255,255,255,0.5); color:#fff; }
+    .inv-monogram-sm { width:30px; height:30px; font-size:.8rem; color:var(--inv-text-secondary); border-color:var(--inv-card-border); margin-bottom:.75rem; }
+
+    /* ── Section layout ── */
+    .inv-section-decorated { padding:2.75rem 1.5rem; text-align:center; }
+
+    /* ── Hero ── */
+    .inv-hero { position:relative; min-height:88vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:5rem 1.5rem; overflow:hidden; }
+    .inv-hero-noise { position:absolute; inset:0; opacity:.05; mix-blend-mode:overlay; pointer-events:none; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
+    .inv-hero-vignette { position:absolute; inset:0; background:radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.28) 100%); pointer-events:none; }
+    .inv-hero-content { position:relative; z-index:1; max-width:24rem; margin:0 auto; }
+    .inv-hero-title { font-family:var(--inv-font-display); font-size:clamp(26px,7vw,34px); font-weight:700; line-height:1.4; letter-spacing:-0.01em; white-space:pre-line; color:var(--inv-text-primary); margin:0; }
+    .inv-hero-title--onphoto { color:#fff; text-shadow:0 2px 16px rgba(0,0,0,0.3), 0 0 40px rgba(255,255,255,0.08); }
+    .inv-hero-subtitle { margin:1rem 0 0; font-size:1rem; color:var(--inv-text-secondary); line-height:1.6; }
+    .inv-hero--framed .inv-hero-subtitle { color:var(--inv-text-secondary); }
+    .inv-hero:not(.inv-hero--framed) .inv-hero-subtitle { color:rgba(255,255,255,0.82); }
+    .inv-hero-date { margin-top:.75rem; font-size:.75rem; text-transform:uppercase; letter-spacing:.12em; font-weight:600; color:var(--inv-text-secondary); }
+    .inv-hero-date--onphoto { color:rgba(255,255,255,0.75); }
+    .inv-hero-arch { width:min(66vw,260px); aspect-ratio:3/4; margin:0 auto 1.5rem; overflow:hidden; border-top-left-radius:100% clamp(48px,16vw,72px); border-top-right-radius:100% clamp(48px,16vw,72px); box-shadow:var(--inv-shadow-lg); }
+    .inv-hero-arch img { width:100%; height:100%; object-fit:cover; }
+    .inv-hero--framed { background:var(--inv-bg); min-height:auto; padding:4rem 1.5rem 3rem; }
+    .inv-hero-scroll-cue { position:absolute; bottom:1.5rem; left:50%; transform:translateX(-50%); opacity:.7; }
+
+    /* ── D-day / Calendar ── */
+    .inv-cal { max-width:220px; margin:0 auto 1.5rem; }
+    .inv-cal-head { font-size:.75rem; font-weight:600; letter-spacing:.06em; color:var(--inv-text-secondary); margin:0 0 .5rem; }
+    .inv-cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+    .inv-cal-dow { font-size:.625rem; color:var(--inv-text-secondary); opacity:.6; padding:2px 0; }
+    .inv-cal-cell { aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:.6875rem; color:var(--inv-text-secondary); border-radius:50%; }
+    .inv-cal-cell--active { background:var(--inv-accent-solid); color:#fff; font-weight:700; }
+    .inv-countdown { display:flex; justify-content:center; align-items:flex-end; gap:.5rem; margin:0 0 1rem; }
+    .inv-flip-wrap, .inv-simple-counter { display:flex; flex-direction:column; align-items:center; gap:.375rem; }
+    .inv-dday-card { width:56px; height:70px; display:flex; align-items:center; justify-content:center; }
+    .inv-flip-num { font-size:1.5rem; font-weight:700; color:var(--inv-accent-solid); }
+    .inv-simple-counter-num { font-size:1.75rem; font-weight:700; color:var(--inv-accent-solid); line-height:1.2; }
+    .inv-counter-label { font-size:.625rem; text-transform:uppercase; letter-spacing:.1em; font-weight:600; color:var(--inv-text-secondary); }
+    .inv-colon-sep { font-size:1.125rem; font-weight:300; color:var(--inv-text-secondary); padding-bottom:1.25rem; }
+    .inv-date-label { font-size:.9375rem; font-weight:500; color:var(--inv-text-primary); }
+
+    /* ── Card system ── */
+    .inv-card { position:relative; background:var(--inv-card-bg); border:1px solid var(--inv-card-border); border-radius:var(--inv-radius-lg); box-shadow:var(--inv-shadow-card); overflow:hidden; }
+    .inv-card-accent { background:var(--inv-card-bg); border:1px solid var(--inv-card-border); border-left:3px solid var(--inv-accent); border-radius:var(--inv-radius-lg); box-shadow:var(--inv-shadow-card); }
+
+    /* ── Button system ── */
+    .inv-btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; font-weight:500; border-radius:999px; min-height:44px; padding:.625rem 1.25rem; font-size:.875rem; text-decoration:none; border:none; cursor:pointer; }
+    .inv-btn-sm { min-height:44px; padding:.5rem 1rem; font-size:.8125rem; }
+    .inv-btn-primary { background:var(--inv-accent-solid); color:#fff; }
+    .inv-btn-secondary { background:var(--inv-accent-glow); color:var(--inv-accent-solid); }
+    .inv-btn-kakao { background:#FEE500; color:#191919; }
+    .inv-btn-naver { background:#03C75A; color:#fff; }
+    .inv-btn-icon, .inv-btn-icon-sm { border:none; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; }
+    .inv-btn-icon { width:48px; height:48px; font-size:1.25rem; }
+    .inv-btn-icon-kakao { background:#FEE500; color:#191919; }
+    .inv-btn-icon-secondary { background:var(--inv-accent-glow); color:var(--inv-accent-solid); }
+    .inv-btn-icon-sm { width:36px; height:36px; background:var(--inv-accent-glow); color:var(--inv-accent-solid); font-size:.875rem; flex-shrink:0; }
+    .inv-share-row { display:flex; gap:.75rem; justify-content:center; margin-bottom:1rem; }
+
+    /* ── Hosts ── */
+    .inv-hosts { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:1.25rem; max-width:28rem; margin:0 auto; }
+    .inv-host { display:flex; flex-direction:column; align-items:center; text-align:center; background:var(--inv-card-bg); border:1px solid var(--inv-card-border); border-radius:var(--inv-radius-lg); padding:1.5rem 1rem; }
+    .inv-host-avatar { width:4.5rem; height:4.5rem; border-radius:50%; object-fit:cover; margin-bottom:.75rem; }
+    .inv-host-avatar--initial { display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:700; background:linear-gradient(135deg,var(--inv-accent),var(--inv-accent-solid)); color:#fff; }
+    .inv-host-role { font-size:.75rem; text-transform:uppercase; letter-spacing:.08em; color:var(--inv-text-secondary); margin:0; }
+    .inv-host-name { font-family:var(--inv-font-display); font-weight:600; font-size:1.0625rem; color:var(--inv-text-primary); margin:.25rem 0 .75rem; }
+
+    /* ── Location ── */
+    .inv-venue-name { font-size:1.0625rem; font-weight:600; color:var(--inv-text-primary); margin:0; }
+    .inv-venue-addr-row { display:flex; align-items:center; justify-content:space-between; gap:.5rem; margin-top:.25rem; }
+    .inv-venue-addr { font-size:.875rem; color:var(--inv-text-secondary); margin:0; }
+    .inv-map-buttons { display:flex; gap:.75rem; margin-top:1.25rem; }
+    .inv-map-buttons .inv-btn { flex:1; }
+    .inv-info-line { font-size:.875rem; color:var(--inv-text-secondary); margin:.375rem 0; text-align:left; }
+
+    /* ── Details/Summary (native accordion) ── */
+    .inv-details { margin-top:1rem; padding-top:.75rem; border-top:1px solid var(--inv-card-border); text-align:left; }
+    .inv-details summary { cursor:pointer; list-style:none; display:flex; align-items:center; justify-content:space-between; gap:.375rem; font-size:.875rem; color:var(--inv-text-secondary); font-weight:500; }
+    .inv-details summary::-webkit-details-marker { display:none; }
+    .inv-details summary::after { content:'+'; font-weight:400; }
+    .inv-details[open] summary::after { content:'\\2212'; }
+
+    /* ── Gallery ── */
+    .inv-gallery { display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; max-width:28rem; margin:0 auto; }
+    .inv-gallery-item { aspect-ratio:1; overflow:hidden; border-radius:.75rem; }
+    .inv-gallery-item--lg { grid-column:span 2; grid-row:span 2; }
+    .inv-gallery-item img { width:100%; height:100%; object-fit:cover; }
+
+    /* ── Account ── */
+    .inv-accounts { max-width:28rem; margin:0 auto; display:flex; flex-direction:column; gap:.75rem; }
+    .inv-account-item summary { padding-bottom:0; border:none; }
+    .inv-account-badge { font-size:.75rem; font-weight:600; color:var(--inv-accent-solid); background:var(--inv-accent-glow); padding:.25rem .75rem; border-radius:999px; }
+    .inv-account-holder { font-size:.8125rem; color:var(--inv-text-secondary); }
+    .inv-account-row { display:flex; align-items:center; justify-content:space-between; margin-top:.75rem; }
+    .inv-account-num { color:var(--inv-text-primary); font-weight:500; margin:0; }
+    .inv-account-bank { font-size:.875rem; color:var(--inv-text-secondary); }
+
+    /* ── Contact ── */
+    .inv-contacts { max-width:28rem; margin:0 auto; display:flex; flex-direction:column; gap:.75rem; }
+    .inv-contact-row { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.25rem; }
+    .inv-contact-name-row { display:flex; align-items:center; gap:.5rem; }
+    .inv-contact-role { font-size:.75rem; font-weight:600; padding:.25rem .625rem; border-radius:999px; background:var(--inv-accent-glow); color:var(--inv-accent-solid); }
+    .inv-contact-name { font-weight:600; color:var(--inv-text-primary); }
+    .inv-contact-actions { display:flex; gap:.5rem; }
+
+    /* ── Message / RSVP ── */
+    .inv-message-body { white-space:pre-line; font-size:1rem; line-height:1.9; color:var(--inv-text-primary); max-width:26rem; margin:0 auto; }
+    .inv-rsvp-desc { font-size:.9375rem; color:var(--inv-text-secondary); line-height:1.7; margin:0 0 1.25rem; white-space:pre-line; }
+    .inv-qr-placeholder { width:120px; height:120px; margin:.75rem auto 0; background:var(--inv-card-bg); border:1px solid var(--inv-card-border); border-radius:.75rem; display:flex; align-items:center; justify-content:center; font-size:.75rem; color:var(--inv-text-secondary); }
+
+    /* ── Footer ── */
+    .inv-footer { padding:2.5rem 1.5rem; text-align:center; font-size:.75rem; background:var(--inv-bg-alt); color:var(--inv-text-secondary); padding-bottom:calc(2.5rem + env(safe-area-inset-bottom)); }
+    .inv-footer a { opacity:.6; text-decoration:none; color:inherit; }
+    .inv-closing { font-family:var(--inv-font-display); font-style:italic; white-space:pre-line; font-size:.9375rem; line-height:1.8; color:var(--inv-text-secondary); max-width:22rem; margin:0 auto 1.25rem; }
+
+    ${glassCss}
+
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:0.01ms !important; transition-duration:0.01ms !important; } }
+    *:focus-visible { outline:2px solid var(--inv-accent-solid); outline-offset:2px; }
   `;
 }
 
@@ -397,15 +599,15 @@ export function generateInvitationPreview(
 
   const sectionRenderers: Record<string, () => string> = {
     hero: () => renderHero(state, liveUrl, imageMap, v),
-    dday: () => renderDday(state, v),
-    hosts: () => renderHosts(state, v, liveUrl, imageMap),
-    location: () => renderLocation(state, v),
-    gallery: () => renderGallery(state, v, liveUrl, imageMap),
-    account: () => renderAccount(state, v),
-    contact: () => renderContact(state, v),
-    message: () => renderMessage(state, v),
-    share: () => renderShare(state, v),
-    rsvp: () => renderRsvp(state, v),
+    dday: () => renderDday(state),
+    hosts: () => renderHosts(state, liveUrl, imageMap),
+    location: () => renderLocation(state),
+    gallery: () => renderGallery(state, liveUrl, imageMap),
+    account: () => renderAccount(state),
+    contact: () => renderContact(state),
+    message: () => renderMessage(state),
+    share: () => renderShare(state),
+    rsvp: () => renderRsvp(state),
     footer: () => renderFooter(state),
   };
 
@@ -423,8 +625,13 @@ export function generateInvitationPreview(
     ? ''
     : `<div class="inv-footer"><a href="https://linkmap.pages.dev" target="_blank" rel="noopener noreferrer">Powered by Linkmap</a></div>`;
   const bodyContent = `${sections}${fallbackFooter}`;
-  const css = buildInvitationCSS(v);
-  const font = fontFamily !== 'Pretendard Variable' ? fontFamily : undefined;
 
-  return wrapInHtml(css, bodyContent, designPreset, font);
+  // fontFamily는 CSS 변수(--inv-font-display/body)로만 제어 — wrapInHtml의 body 전역 오버라이드는
+  // 본문까지 세리프로 바꿔버리므로(폰트 2종 제약 위반) 사용하지 않음. Nanum Myeongjo 웹폰트만 CSS @import로 보강.
+  const fontImport = fontFamily === 'Nanum Myeongjo'
+    ? `@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap');\n`
+    : '';
+  const css = fontImport + buildInvitationCSS(v, fontFamily);
+
+  return wrapInHtml(css, bodyContent, designPreset);
 }

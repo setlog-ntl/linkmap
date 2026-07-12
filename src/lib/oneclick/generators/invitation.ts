@@ -66,6 +66,18 @@ function buildContactsArray(items: unknown[]): string {
   return `[\n${entries.join(',\n')}\n]`;
 }
 
+// ─── 색상 유틸 ──────────────────────────────
+
+/** #rrggbb → rgba(r,g,b,alpha) — accentGlow/accentSoft를 accent 하나에서 파생시켜
+ *  프리셋별 오버라이드 누락(하드코딩 골드 누수 버그)을 구조적으로 방지 */
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 // ─── 프리셋 CSS ─────────────────────────────
 
 interface InvitationPresetVars {
@@ -73,87 +85,121 @@ interface InvitationPresetVars {
   bgAlt: string;
   textPrimary: string;
   textSecondary: string;
+  /** 테두리·아이콘·대형 비텍스트 전용 (소형 본문/흰글자 버튼에는 accentSolid 사용) */
   accent: string;
-  accentGlow: string;
+  /** 흰 글자 버튼/배지용 고대비 색 (AA 4.5:1 검증 완료) */
+  accentSolid: string;
   cardBg: string;
   cardBorder: string;
-  isDark?: boolean;
   isGlass?: boolean;
   bgGrad?: string;
   glassBg?: string;
   glassBorder?: string;
   glassShadow?: string;
-  accent2?: string;
 }
 
+// AA 대비 사전 검증 완료 팔레트 — 이 값 그대로 사용
 const INVITATION_PRESET_THEME: Record<string, InvitationPresetVars> = {
   'elegant-gold': {
-    bg: '#fffdf7', bgAlt: '#fef9ee', textPrimary: '#1a1a1a', textSecondary: '#6b5c3e',
-    accent: '#b8860b', accentGlow: 'rgba(184,134,11,0.15)', cardBg: '#ffffff', cardBorder: '#e8dcc8',
+    bg: '#FBF7F0', bgAlt: '#F5EEDF', textPrimary: '#211A12', textSecondary: '#6B5A3E',
+    accent: '#B8860B', accentSolid: '#8B6B1F', cardBg: '#FFFFFF', cardBorder: '#E8DCC8',
   },
   'romantic-pink': {
-    bg: '#fff8fa', bgAlt: '#fef0f5', textPrimary: '#2d1f2b', textSecondary: '#8b6075',
-    accent: '#d4729a', accentGlow: 'rgba(212,114,154,0.15)', cardBg: '#ffffff', cardBorder: '#f0d4e0',
+    bg: '#FBF4F3', bgAlt: '#F5E7E6', textPrimary: '#2B1E22', textSecondary: '#7C5A61',
+    accent: '#C08497', accentSolid: '#7C2036', cardBg: '#FFFFFF', cardBorder: '#EAD3D3',
   },
   'modern-minimal': {
-    bg: '#fafafa', bgAlt: '#f5f5f5', textPrimary: '#111111', textSecondary: '#6b7280',
-    accent: '#333333', accentGlow: 'rgba(0,0,0,0.06)', cardBg: '#ffffff', cardBorder: '#e5e7eb',
+    bg: '#FAFAF9', bgAlt: '#F2F1EF', textPrimary: '#16171A', textSecondary: '#6B6B68',
+    accent: '#3A3A38', accentSolid: '#A8551F', cardBg: '#FFFFFF', cardBorder: '#E5E3DF',
   },
-  'festive': {
-    bg: '#fffbf0', bgAlt: '#fff5e6', textPrimary: '#1a1a1a', textSecondary: '#7c5e2d',
-    accent: '#ff6b6b', accentGlow: 'rgba(255,107,107,0.15)', cardBg: '#ffffff', cardBorder: '#ffe0b2',
+  festive: {
+    bg: '#FBF6EF', bgAlt: '#F6EBDD', textPrimary: '#2A1E18', textSecondary: '#7A5D4E',
+    accent: '#C8865C', accentSolid: '#8C3B2E', cardBg: '#FFFFFF', cardBorder: '#EAD9C6',
   },
   'natural-garden': {
-    bg: '#f8fdf6', bgAlt: '#f0f8ec', textPrimary: '#1a2e1a', textSecondary: '#4a6741',
-    accent: '#5c8a4d', accentGlow: 'rgba(92,138,77,0.15)', cardBg: '#ffffff', cardBorder: '#d4e8cb',
+    bg: '#F7FBF4', bgAlt: '#EEF6E8', textPrimary: '#1B2A1C', textSecondary: '#4A6741',
+    accent: '#5C8A4D', accentSolid: '#2D4A38', cardBg: '#FFFFFF', cardBorder: '#D8E8CE',
   },
   'minimal-glass': {
-    bg: '#f5f3ff', bgAlt: '#eef2ff', textPrimary: '#1f2430', textSecondary: '#6b7280',
-    accent: '#a78bfa', accentGlow: 'rgba(167,139,250,0.18)', cardBg: 'rgba(255,255,255,0.55)', cardBorder: 'rgba(255,255,255,0.7)',
+    bg: '#F5F3FF', bgAlt: '#FDF2F8', textPrimary: '#23283A', textSecondary: '#5B6474',
+    accent: '#A78BFA', accentSolid: '#6D4FC9',
+    // 일반 카드(inv-card/inv-card-accent)는 항상 솔리드 — 글래스는 히어로 모노그램/D-day 카드 2곳 한정
+    cardBg: '#FFFFFF', cardBorder: 'rgba(167,139,250,0.35)',
     isGlass: true,
-    bgGrad: 'linear-gradient(160deg,#f5f3ff,#fdf2f8,#eef2ff)',
+    bgGrad: 'linear-gradient(160deg,#F5F3FF,#FDF2F8,#EEF2FF)',
     glassBg: 'rgba(255,255,255,0.55)',
     glassBorder: 'rgba(255,255,255,0.7)',
     glassShadow: '0 8px 32px rgba(31,38,135,0.12)',
-    accent2: '#f9a8d4',
   },
 };
+
+/** 폰트 2종(Pretendard Variable / Nanum Myeongjo) 이내로 제한 — 이미 layout.tsx에 로드된 CDN만 사용 */
+function resolveFontVars(fontFamily: string): { display: string; body: string } {
+  const body = `'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif`;
+  const display =
+    fontFamily === 'Nanum Myeongjo'
+      ? `'Nanum Myeongjo', 'Pretendard Variable', serif`
+      : body;
+  return { display, body };
+}
 
 function generateInvitationPresetCss(
   designPreset: string,
   gradientFrom: string,
   gradientTo: string,
+  fontFamily: string,
 ): string {
   const vars = INVITATION_PRESET_THEME[designPreset] ?? INVITATION_PRESET_THEME['elegant-gold'];
-  let css = `/* invitation preset: ${designPreset} — auto-generated */
+  const accentGlow = hexToRgba(vars.accent, 0.15);
+  const accentSoft = hexToRgba(vars.accent, 0.07);
+  const { display, body } = resolveFontVars(fontFamily);
+  const safeGradFrom = esc(gradientFrom || vars.accent);
+  const safeGradTo = esc(gradientTo || vars.accentSolid);
+
+  let css = `/* invitation preset: ${esc(designPreset)} — auto-generated */
 :root {
   --inv-bg: ${vars.bg};
   --inv-bg-alt: ${vars.bgAlt};
   --inv-text-primary: ${vars.textPrimary};
   --inv-text-secondary: ${vars.textSecondary};
   --inv-accent: ${vars.accent};
-  --inv-accent-glow: ${vars.accentGlow};
+  --inv-accent-solid: ${vars.accentSolid};
+  --inv-accent-glow: ${accentGlow};
+  --inv-accent-soft: ${accentSoft};
   --inv-card-bg: ${vars.cardBg};
   --inv-card-border: ${vars.cardBorder};
-  --inv-gradient-from: ${gradientFrom};
-  --inv-gradient-to: ${gradientTo};`;
+  --inv-gradient-from: ${safeGradFrom};
+  --inv-gradient-to: ${safeGradTo};
+  --inv-font-display: ${display};
+  --inv-font-body: ${body};`;
 
   if (vars.isGlass) {
     css += `
   --inv-bg-grad: ${vars.bgGrad ?? ''};
   --inv-glass-bg: ${vars.glassBg ?? ''};
   --inv-glass-border: ${vars.glassBorder ?? ''};
-  --inv-glass-shadow: ${vars.glassShadow ?? ''};
-  --inv-accent-2: ${vars.accent2 ?? ''};`;
+  --inv-glass-shadow: ${vars.glassShadow ?? ''};`;
   }
 
   css += `
 }`;
 
+  // 글래스모피즘은 minimal-glass 프리셋 한정, 히어로 모노그램 링 + D-day 카드 2곳에만 적용
+  // (섹션당 유리 1개, 중첩 블러 금지 — inv-card/inv-card-accent 등 일반 카드는 항상 솔리드 유지)
   if (vars.isGlass) {
     css += `
-.inv-card,.inv-card-accent{background:var(--inv-glass-bg);border-color:var(--inv-glass-border);box-shadow:var(--inv-glass-shadow);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);}
-@supports not (backdrop-filter:blur(1px)){.inv-card,.inv-card-accent{background:rgba(255,255,255,0.92);}}`;
+.inv-hero-emoji-ring, .inv-dday-card {
+  background: var(--inv-glass-bg);
+  border-color: var(--inv-glass-border);
+  box-shadow: var(--inv-glass-shadow);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .inv-hero-emoji-ring, .inv-dday-card {
+    background: rgba(255,255,255,0.92);
+  }
+}`;
   }
 
   return css;
@@ -306,8 +352,9 @@ export const siteConfig = {
   subtitle: process.env.NEXT_PUBLIC_SUBTITLE || '${esc(String(hero.subtitle ?? ''))}',
   subtitleEn: '${esc(String(hero.subtitleEn ?? ''))}',
   heroImageUrl: ${heroImage ? imagePathExpr(heroImage) : "''"},
-  gradientFrom: '${esc(String(hero.gradientFrom ?? '#b8860b'))}',
-  gradientTo: '${esc(String(hero.gradientTo ?? '#d4a853'))}',
+  gradientFrom: '${esc(String(hero.gradientFrom ?? '#B8860B'))}',
+  gradientTo: '${esc(String(hero.gradientTo ?? '#8B6B1F'))}',
+  fontFamily: '${esc(String(hero.fontFamily ?? 'Nanum Myeongjo'))}',
 
   // dday
   eventDate: '${esc(String(dday.eventDate ?? ''))}',
@@ -395,9 +442,10 @@ function generatePageTsx(state: ModuleConfigState): string {
 
   const hero = (state.values['hero'] ?? {}) as Record<string, unknown>;
   const designPreset = String(hero.designPreset ?? 'elegant-gold');
-  const gradientFrom = String(hero.gradientFrom ?? '#b8860b');
-  const gradientTo = String(hero.gradientTo ?? '#d4a853');
-  const presetCss = generateInvitationPresetCss(designPreset, gradientFrom, gradientTo);
+  const gradientFrom = String(hero.gradientFrom ?? '#B8860B');
+  const gradientTo = String(hero.gradientTo ?? '#8B6B1F');
+  const fontFamily = String(hero.fontFamily ?? 'Nanum Myeongjo');
+  const presetCss = generateInvitationPresetCss(designPreset, gradientFrom, gradientTo, fontFamily);
 
   return `import { siteConfig } from '@/lib/config';
 ${imports.join('\n')}
@@ -439,6 +487,7 @@ function parseConfigToState(
     heroVals.subtitleEn = ext.extractString('subtitleEn') ?? heroVals.subtitleEn;
     heroVals.gradientFrom = ext.extractString('gradientFrom') ?? heroVals.gradientFrom;
     heroVals.gradientTo = ext.extractString('gradientTo') ?? heroVals.gradientTo;
+    heroVals.fontFamily = ext.extractString('fontFamily') ?? heroVals.fontFamily;
 
     // dday
     const ddayVals = state.values['dday'] as Record<string, unknown>;
