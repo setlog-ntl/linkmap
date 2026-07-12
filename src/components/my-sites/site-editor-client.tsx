@@ -566,6 +566,9 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       setSelectedPath(path);
       setHasUnsavedChanges(false);
       setShowMobileFiles(false);
+      // 모듈 모드에서는 모듈 패널이 에디터를 가리므로 파일 선택 즉시 코드 화면으로 전환
+      setRightPanel((prev) => (prev === 'modules' ? 'preview' : prev));
+      setMobileTab('code');
     },
     [hasUnsavedChanges]
   );
@@ -575,6 +578,8 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
       setSelectedPath(pendingTabPath);
       setHasUnsavedChanges(false);
       setShowMobileFiles(false);
+      setRightPanel((prev) => (prev === 'modules' ? 'preview' : prev));
+      setMobileTab('code');
       setPendingTabPath(null);
     }
   }, [pendingTabPath]);
