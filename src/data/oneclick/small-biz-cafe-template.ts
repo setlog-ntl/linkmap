@@ -294,7 +294,7 @@ img { display: block; max-width: 100%; }
   inset: 0;
   background:
     url('https://linkmap.biz/img/templates/cafe-wrights-exterior.jpg')
-    center center / cover no-repeat;
+    center bottom / cover no-repeat;
   transform: scale(1.05);
   transition: transform 8s ease;
 }
@@ -949,42 +949,6 @@ img { display: block; max-width: 100%; }
   color: var(--text-light);
   margin-bottom: 1.25rem;
 }
-
-.map-placeholder {
-  width: 100%;
-  aspect-ratio: 16/10;
-  background: linear-gradient(135deg, #f5f0e6, #ede4d4);
-  border-radius: var(--radius-sm);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  color: var(--brand-primary);
-  font-size: 0.8125rem;
-  margin-bottom: 1rem;
-  border: 1px solid var(--bg-card-border);
-  position: relative;
-  overflow: hidden;
-}
-[data-theme="dark"] .map-placeholder {
-  background: linear-gradient(135deg, #2c2520, #231e18);
-}
-.map-placeholder::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 22px,
-    rgba(139,105,20,0.04) 22px,
-    rgba(139,105,20,0.04) 44px
-  );
-}
-.map-icon-big { font-size: 2.25rem; position: relative; z-index: 1; }
-.map-label { font-weight: 600; position: relative; z-index: 1; }
-.map-sub { color: var(--text-light); font-size: 0.75rem; position: relative; z-index: 1; }
 
 .map-buttons {
   display: flex;
@@ -2068,7 +2032,7 @@ export function InfoSection({ config }: Props) {
                 <p className="address-text-en">{config.addressEn}</p>
               )}
 
-              {config.kakaoMapId ? (
+              {config.kakaoMapId && (
                 <div style={{ marginBottom: '1rem', borderRadius: 'var(--radius-sm)', overflow: 'hidden', aspectRatio: '16/10' }}>
                   <iframe
                     src={\`https://map.kakao.com/?map_type=TYPE_MAP&itemId=\${config.kakaoMapId}\`}
@@ -2077,12 +2041,6 @@ export function InfoSection({ config }: Props) {
                     loading="lazy"
                     allowFullScreen
                   />
-                </div>
-              ) : (
-                <div className="map-placeholder">
-                  <span className="map-icon-big">🗺️</span>
-                  <span className="map-label">지도로 위치 확인</span>
-                  <span className="map-sub">아래 버튼으로 길찾기</span>
                 </div>
               )}
 
@@ -2546,7 +2504,7 @@ function parseJSON<T>(raw: string | undefined, fallback: T): T {
 
 export const siteConfig = {
   name: process.env.NEXT_PUBLIC_SITE_NAME || '카페 라이츠',
-  nameEn: process.env.NEXT_PUBLIC_SITE_NAME_EN || 'Cafe Wrights',
+  nameEn: process.env.NEXT_PUBLIC_SITE_NAME_EN || 'Kafe Wrights',
   description:
     process.env.NEXT_PUBLIC_DESCRIPTION ||
     '모던한 인테리어와 어우러진 감성 카페',

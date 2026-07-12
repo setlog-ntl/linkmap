@@ -28,7 +28,7 @@ export const smallBizCafeModuleSchema: TemplateModuleSchema = {
           type: 'text',
           label: '영문 이름',
           labelEn: 'English Name',
-          defaultValue: 'Cafe Wrights',
+          defaultValue: 'Kafe Wrights',
         },
         {
           key: 'description',

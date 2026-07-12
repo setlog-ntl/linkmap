@@ -149,7 +149,7 @@ function buildCafeCSS(primaryColor: string): string {
 .cafe-hero-bg-img {
   position: absolute;
   inset: 0;
-  background: url('https://linkmap.biz/img/templates/cafe-wrights-exterior.jpg') center center / cover no-repeat;
+  background: url('https://linkmap.biz/img/templates/cafe-wrights-exterior.jpg') center bottom / cover no-repeat;
 }
 .cafe-hero-overlay {
   position: absolute;

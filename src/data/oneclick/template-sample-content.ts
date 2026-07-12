@@ -1076,7 +1076,7 @@ export const linkHubSample: { ko: LinkHubContent; en: LinkHubContent } = {
 export const smallBizCafeSample: { ko: SmallBizContent; en: SmallBizContent } = {
   ko: {
     nameKo: '카페 라이츠',
-    nameEn: 'Cafe Wrights',
+    nameEn: 'Kafe Wrights',
     descriptionKo: '모던한 인테리어와 어우러진 감성 카페',
     descriptionEn: 'A cozy cafe with a modern interior',
     phone: '0507-1485-8892',

@@ -24,7 +24,7 @@
     "naverPlaceUrl": "https://map.naver.com/p/entry/place/2007976823",
     "collectedAt": "2026-07-12"
   },
-  "name": { "ko": "카페 라이츠", "en": "Cafe Wrights" },
+  "name": { "ko": "카페 라이츠", "en": "Kafe Wrights" },
   "tagline": "모던한 인테리어와 어우러진 감성 카페",
   "category": "카페, 디저트",
   "address": {
