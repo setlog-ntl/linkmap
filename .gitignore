@@ -85,6 +85,8 @@ docs/db-uploads/
 *.jpg
 # 단, 원클릭 템플릿 공개 이미지는 커밋 대상 (linkmap.biz 서빙)
 !public/img/templates/cafe-wrights-*.jpg
+# 카페 라이츠 원본 사진(로컬 보관용) — 압축본 cafe-wrights-*.jpg만 커밋 대상
+public/img/templates/카페라이츠*
 
 # packages 워크스페이스 산출물 (mcp-server 등)
 packages/*/node_modules/
