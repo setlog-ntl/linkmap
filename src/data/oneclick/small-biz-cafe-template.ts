@@ -2430,6 +2430,7 @@ const DEMO_MENU: MenuItem[] = [
     price: '변동',
     category: '시그니처',
     emoji: '🥪',
+    isPopular: true,
     isNew: true,
   },
   {

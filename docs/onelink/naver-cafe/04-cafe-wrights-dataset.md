@@ -1,6 +1,6 @@
 # 04. 카페 라이츠 수집 데이터 스냅샷
 
-> 수집일: 2026-07-12 · lastUpdated: 2026-07-12
+> 수집일: 2026-07-12 · lastUpdated: 2026-07-12 (당일 Playwright 재검증 — 전화·주소·영업시간·메뉴 14종 이름·가격 전부 일치 확인, 대표 뱃지·블로그 URL 2건 보정)
 > 출처: https://m.place.naver.com/restaurant/2007976823/home · https://m.place.naver.com/restaurant/2007976823/menu/list
 > 용도: [03-prompts.md](./03-prompts.md) P-1 프롬프트의 입출력 예시 겸 기준 스냅샷 (P-2 갱신 시 이 문서와 비교)
 
@@ -20,7 +20,7 @@
 | 교통 | 건대입구역 5번 출구 108m (자양역 방면 직진 → LGU+ 우회전) / 차량은 인근 공영주차장 |
 | 영업시간 | 매일 08:00–22:30 (22:00 라스트오더, 휴무 없음) |
 | 전화 | 0507-1485-8892 (스마트콜) |
-| SNS | https://www.instagram.com/kafe.wrights |
+| SNS | 인스타 https://www.instagram.com/kafe.wrights · 블로그 https://blog.naver.com/kafewrights_ · 유튜브 https://www.youtube.com/@kafe.wrights (유튜브는 sns 모듈에 필드 없음 — Phase 2 후보) |
 | 편의시설 | 단체 이용 가능, 포장, 무선 인터넷, 간편결제 |
 | 리뷰 수 | 939 (수집일 기준) |
 
@@ -30,7 +30,7 @@
 |---|---|---|---|---|---|
 | 시그니처 | 라이츠라떼 | Wrights Latte | ₩7,800 | 우유베이스+에스프레소, 사과크림·시나몬 | isPopular |
 | 시그니처 | 크랑떼 | Crangtte | ₩4,800 | 크루아상 결 페이스트리, 버터 풍미 | isPopular |
-| 시그니처 | MONTHLY PAIRING | Monthly Pairing | 변동 | 월간 페어링 (샌드위치+에이드 등) | isNew |
+| 시그니처 | MONTHLY PAIRING | Monthly Pairing | 변동 | 월간 페어링 (샌드위치+에이드 등) | isPopular·isNew |
 | 커피 | 플랫화이트 | Flat White | ₩6,300 | 크리미한 우유와 진한 에스프레소 | |
 | 티·라떼 | 썬셋피치 | Sunset Peach | ₩7,800 | 복숭아+아쌈 | |
 | 티·라떼 | 유자민트브리즈 | Yuzu Mint Breeze | ₩7,800 | 고흥 유자+페퍼민트 | |

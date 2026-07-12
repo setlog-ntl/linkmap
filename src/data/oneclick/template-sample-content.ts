@@ -1149,7 +1149,7 @@ export const smallBizCafeSample: { ko: SmallBizContent; en: SmallBizContent } = 
       { dayKo: '일요일', dayEn: 'Sunday', hoursKo: '08:00 - 22:30', hoursEn: '08:00 - 22:30' },
     ],
     instagramUrl: 'https://www.instagram.com/kafe.wrights',
-    naverBlogUrl: '',
+    naverBlogUrl: 'https://blog.naver.com/kafewrights_',
     kakaoChannelUrl: '',
   },
   en: {

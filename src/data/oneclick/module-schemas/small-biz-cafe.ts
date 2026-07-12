@@ -208,7 +208,7 @@ export const smallBizCafeModuleSchema: TemplateModuleSchema = {
           defaultValue: [
             { category: '시그니처', name: '라이츠라떼', nameEn: 'Wrights Latte', desc: '우유베이스에 진한 에스프레소, 사과크림과 시나몬', descEn: 'Espresso with milk, apple cream and cinnamon', price: '₩7,800', emoji: '☕', isPopular: true },
             { category: '시그니처', name: '크랑떼', nameEn: 'Crangtte', desc: '크루아상 결에 버터 풍미, 바삭한 페이스트리', descEn: 'Crispy croissant-layered pastry with rich butter', price: '₩4,800', emoji: '🥐', isPopular: true },
-            { category: '시그니처', name: 'MONTHLY PAIRING', nameEn: 'Monthly Pairing', desc: '샌드위치+에이드 등 매달 새로운 페어링', descEn: 'A new sandwich-and-ade pairing every month', price: '변동', emoji: '🥪', isNew: true },
+            { category: '시그니처', name: 'MONTHLY PAIRING', nameEn: 'Monthly Pairing', desc: '샌드위치+에이드 등 매달 새로운 페어링', descEn: 'A new sandwich-and-ade pairing every month', price: '변동', emoji: '🥪', isPopular: true, isNew: true },
             { category: '커피', name: '플랫화이트', nameEn: 'Flat White', desc: '크리미한 우유와 진한 에스프레소', descEn: 'Creamy milk with a bold espresso', price: '₩6,300', emoji: '☕' },
             { category: '티·라떼', name: '썬셋피치', nameEn: 'Sunset Peach', desc: '복숭아와 아쌈의 우아한 조화', descEn: 'Elegant blend of peach and Assam tea', price: '₩7,800', emoji: '🍑' },
             { category: '티·라떼', name: '유자민트브리즈', nameEn: 'Yuzu Mint Breeze', desc: '고흥 유자와 페퍼민트', descEn: 'Goheung yuzu with fresh peppermint', price: '₩7,800', emoji: '🍋' },
@@ -473,7 +473,7 @@ export const smallBizCafeModuleSchema: TemplateModuleSchema = {
           type: 'url',
           label: '네이버 블로그 URL',
           labelEn: 'Naver Blog URL',
-          defaultValue: '',
+          defaultValue: 'https://blog.naver.com/kafewrights_',
           placeholder: 'https://blog.naver.com/yourcafe',
         },
         {
