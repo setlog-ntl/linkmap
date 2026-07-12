@@ -483,6 +483,7 @@ export function createSmallBizGenerator(
     const address = (location.address as string) || defaults.address;
     const addressEn = (location.addressEn as string) || defaults.addressEn;
     const kakaoMapId = (location.kakaoMapId as string) || '';
+    const naverPlaceUrl = sanitizeUrl((location.naverPlaceUrl as string) || '');
 
     const menuItems = (menu.items as unknown[]) || [];
     const hoursItems = (hours.items as unknown[]) || [];
@@ -542,6 +543,7 @@ export const siteConfig = {
   address: process.env.NEXT_PUBLIC_ADDRESS || '${esc(address)}',
   addressEn: process.env.NEXT_PUBLIC_ADDRESS_EN || '${esc(addressEn)}',
   kakaoMapId: process.env.NEXT_PUBLIC_KAKAO_MAP_ID || ${kakaoMapId ? `'${esc(kakaoMapId)}'` : `''`},
+  naverPlaceUrl: process.env.NEXT_PUBLIC_NAVER_PLACE_URL || ${naverPlaceUrl ? `'${esc(naverPlaceUrl)}'` : `''`},
   menuItems: parseJSON<MenuItem[]>(process.env.NEXT_PUBLIC_MENU_ITEMS, DEMO_MENU),
   businessHours: parseJSON<BusinessHour[]>(process.env.NEXT_PUBLIC_BUSINESS_HOURS, DEMO_HOURS),
   galleryImages: parseJSON<string[]>(process.env.NEXT_PUBLIC_GALLERY_IMAGES, ${galleryArr}),
@@ -653,6 +655,8 @@ ${renders.join('\n')}
     if (addressEn !== null) state.values.location.addressEn = addressEn;
     const kakaoMapId = extractString('kakaoMapId');
     if (kakaoMapId !== null) state.values.location.kakaoMapId = kakaoMapId;
+    const naverPlaceUrl = extractString('naverPlaceUrl');
+    if (naverPlaceUrl !== null) state.values.location.naverPlaceUrl = naverPlaceUrl;
 
     // Menu items
     try {

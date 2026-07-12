@@ -221,11 +221,11 @@ export function TemplatePickerStep({
     }
   }, [selectedTemplate, siteName, siteNameTouched, templates, existingSiteNames, checkRepoAvailability]);
 
-  // Sort templates: link-card 상단 고정 → 나머지 원본 순서 유지
+  // Sort templates: small-biz-cafe 상단 고정 → 나머지 원본 순서 유지
   const sortedTemplates = useMemo(() => {
     return [...templates].sort((a, b) => {
-      if (a.slug === 'link-card') return -1;
-      if (b.slug === 'link-card') return 1;
+      if (a.slug === 'small-biz-cafe') return -1;
+      if (b.slug === 'small-biz-cafe') return 1;
       return 0;
     });
   }, [templates]);

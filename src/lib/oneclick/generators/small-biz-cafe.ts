@@ -7,14 +7,14 @@ import { createSmallBizGenerator } from './base-generator';
 export const smallBizCafeGenerator = createSmallBizGenerator(
   'small-biz-cafe',
   {
-    name: '온기 로스터리',
-    nameEn: 'Ongi Roastery',
-    description: '매일 아침, 직접 로스팅한 한 잔의 커피',
-    descriptionEn: 'A cup of freshly roasted coffee every morning',
-    phone: '02-338-1204',
+    name: '카페 라이츠',
+    nameEn: 'Cafe Wrights',
+    description: '모던한 인테리어와 어우러진 감성 카페',
+    descriptionEn: 'A cozy cafe with a modern interior',
+    phone: '0507-1485-8892',
     primaryColor: '#8b6914',
-    address: '서울 마포구 연남로 23길 8, 1층',
-    addressEn: '1F, 8, Yeonnam-ro 23-gil, Mapo-gu, Seoul',
+    address: '서울 광진구 동일로20길 114 1,2,3층',
+    addressEn: '114, Dongil-ro 20-gil, Gwangjin-gu, Seoul',
     defaultEmoji: '☕',
   },
   {
