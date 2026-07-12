@@ -293,7 +293,7 @@ img { display: block; max-width: 100%; }
   position: absolute;
   inset: 0;
   background:
-    url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1600&q=80&auto=format&fit=crop')
+    url('https://linkmap.biz/img/templates/cafe-wrights-exterior.jpg')
     center center / cover no-repeat;
   transform: scale(1.05);
   transition: transform 8s ease;
@@ -2410,7 +2410,7 @@ const DEMO_MENU: MenuItem[] = [
     price: '₩7,800',
     category: '시그니처',
     emoji: '☕',
-    imageUrl: 'https://images.unsplash.com/photo-1561882468-9110e03e0f78?w=120&h=120&q=80&auto=format&fit=crop',
+    imageUrl: 'https://linkmap.biz/img/templates/cafe-wrights-latte.jpg',
     isPopular: true,
   },
   {
@@ -2430,6 +2430,7 @@ const DEMO_MENU: MenuItem[] = [
     price: '변동',
     category: '시그니처',
     emoji: '🥪',
+    imageUrl: 'https://linkmap.biz/img/templates/cafe-wrights-pairing.jpg',
     isPopular: true,
     isNew: true,
   },
@@ -2567,16 +2568,16 @@ export const siteConfig = {
   menuItems: parseJSON<MenuItem[]>(process.env.NEXT_PUBLIC_MENU_ITEMS, DEMO_MENU),
   businessHours: parseJSON<BusinessHour[]>(process.env.NEXT_PUBLIC_BUSINESS_HOURS, DEMO_HOURS),
   galleryImages: parseJSON<string[]>(process.env.NEXT_PUBLIC_GALLERY_IMAGES, [
-    'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&h=600&q=80&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1561882468-9110e03e0f78?w=600&h=600&q=80&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1611854779393-1b2da9d400fe?w=600&h=600&q=80&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1567171466295-4afa63d45416?w=600&h=600&q=80&auto=format&fit=crop',
+    'https://linkmap.biz/img/templates/cafe-wrights-interior.jpg',
+    'https://linkmap.biz/img/templates/cafe-wrights-counter.jpg',
+    'https://linkmap.biz/img/templates/cafe-wrights-pairing.jpg',
+    'https://linkmap.biz/img/templates/cafe-wrights-latte.jpg',
   ]),
   galleryLabels: parseJSON<string[]>(process.env.NEXT_PUBLIC_GALLERY_LABELS, [
-    '카페 인테리어',
-    '베이커리 진열대',
-    '시그니처 음료',
-    '좌석 공간',
+    '매장 내부',
+    '카운터 & 바',
+    '월간 페어링',
+    '시그니처 라이츠라떼',
   ]),
   aboutStories: parseJSON<string[]>(process.env.NEXT_PUBLIC_ABOUT_STORIES, [
     '카페 라이츠는 건대입구역 인근 자양동에 자리한 1~3층 규모의 베이커리 카페입니다. 모던한 인테리어와 층마다 다른 분위기의 공간에서 커피와 디저트를 여유롭게 즐길 수 있습니다.',
