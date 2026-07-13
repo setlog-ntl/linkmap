@@ -125,7 +125,7 @@ function renderHero(
 ): string {
   const title = getVal(state, 'hero', 'title', '');
   const subtitle = getVal(state, 'hero', 'subtitle', '');
-  const eventType = getVal(state, 'hero', 'eventType', 'gathering');
+  const eventType = getVal(state, 'hero', 'eventType', 'wedding');
   const heroImageUrl = getVal(state, 'hero', 'heroImageUrl', '');
   const dateLabel = getVal(state, 'dday', 'eventDateLabel', '');
   const hostsItems = getArr(state, 'hosts', 'items');

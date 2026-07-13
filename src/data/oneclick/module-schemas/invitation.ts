@@ -35,7 +35,7 @@ export const invitationModuleSchema: TemplateModuleSchema = {
           type: 'select',
           label: '초대 유형',
           labelEn: 'Event Type',
-          defaultValue: 'gathering',
+          defaultValue: 'wedding',
           options: [
             { value: 'gathering', label: '모임/파티' },
             { value: 'birthday', label: '생일' },
@@ -51,7 +51,7 @@ export const invitationModuleSchema: TemplateModuleSchema = {
           type: 'text',
           label: '초대장 제목',
           labelEn: 'Invitation Title',
-          defaultValue: '함께해 주세요',
+          defaultValue: '저희, 결혼합니다',
           validation: { required: true, maxLength: 100 },
         },
         {
@@ -59,14 +59,14 @@ export const invitationModuleSchema: TemplateModuleSchema = {
           type: 'text',
           label: '영문 제목',
           labelEn: 'English Title',
-          defaultValue: "You're Invited",
+          defaultValue: "We're Getting Married",
         },
         {
           key: 'subtitle',
           type: 'text',
           label: '부제목',
           labelEn: 'Subtitle',
-          defaultValue: '소중한 자리에 초대합니다',
+          defaultValue: '여섯 번의 계절을 함께 걸어온 두 사람이 이제 같은 이름의 겨울을 맞이합니다',
           validation: { maxLength: 200 },
         },
         {
@@ -74,14 +74,14 @@ export const invitationModuleSchema: TemplateModuleSchema = {
           type: 'text',
           label: '영문 부제목',
           labelEn: 'English Subtitle',
-          defaultValue: 'We warmly invite you to join us',
+          defaultValue: 'Two people who have walked through six seasons together now welcome a winter under one shared name.',
         },
         {
           key: 'heroImageUrl',
           type: 'url',
           label: '메인 이미지 URL',
           labelEn: 'Hero Image URL',
-          defaultValue: '',
+          defaultValue: 'https://images.unsplash.com/photo-1517456363055-5d162a453d6d?auto=format&fit=crop&w=1080&q=80',
           helpText: '초대장 상단에 표시할 대표 이미지',
         },
         {
@@ -215,7 +215,22 @@ export const invitationModuleSchema: TemplateModuleSchema = {
           label: '주최자 목록',
           labelEn: 'Host List',
           defaultValue: [
-            { name: '홍길동', role: '주최', phone: '', avatarUrl: '' },
+            {
+              name: '김민준',
+              nameEn: 'Minjun Kim',
+              role: '신랑 · 김영호·박정숙의 장남',
+              roleEn: 'Groom · Son of Youngho Kim & Jeongsuk Park',
+              phone: '010-2345-6789',
+              avatarUrl: '',
+            },
+            {
+              name: '이서연',
+              nameEn: 'Seoyeon Lee',
+              role: '신부 · 이재현·최은주의 차녀',
+              roleEn: 'Bride · Second Daughter of Jaehyun Lee & Eunju Choi',
+              phone: '010-9876-5432',
+              avatarUrl: '',
+            },
           ],
           maxItems: 6,
           itemSchema: [
@@ -284,7 +299,7 @@ export const invitationModuleSchema: TemplateModuleSchema = {
           type: 'text',
           label: '장소명',
           labelEn: 'Venue Name',
-          defaultValue: '',
+          defaultValue: '라온제나 홀 3F 그랜드볼룸',
           validation: { maxLength: 100 },
         },
         {
@@ -292,14 +307,14 @@ export const invitationModuleSchema: TemplateModuleSchema = {
           type: 'text',
           label: '영문 장소명',
           labelEn: 'English Venue Name',
-          defaultValue: '',
+          defaultValue: 'Raonjena Hall, 3F Grand Ballroom',
         },
         {
           key: 'venueAddress',
           type: 'text',
           label: '주소',
           labelEn: 'Address',
-          defaultValue: '',
+          defaultValue: '서울 강남구 테헤란로 129',
           validation: { maxLength: 200 },
         },
         {
@@ -307,7 +322,7 @@ export const invitationModuleSchema: TemplateModuleSchema = {
           type: 'text',
           label: '영문 주소',
           labelEn: 'English Address',
-          defaultValue: '',
+          defaultValue: '129 Teheran-ro, Gangnam-gu, Seoul',
         },
         {
           key: 'kakaoMapUrl',
@@ -330,14 +345,14 @@ export const invitationModuleSchema: TemplateModuleSchema = {
           type: 'text',
           label: '주차 안내',
           labelEn: 'Parking Info',
-          defaultValue: '',
+          defaultValue: '건물 지하 2~4층, 2시간 무료(안내데스크 등록)',
         },
         {
           key: 'transitInfo',
           type: 'text',
           label: '대중교통 안내',
           labelEn: 'Transit Info',
-          defaultValue: '',
+          defaultValue: '지하철 2호선·신분당선 강남역 3번 출구 도보 5분 · 버스 강남역사거리 정류장 하차',
         },
       ],
       affectedFiles: ['src/lib/config.ts', 'src/components/location-section.tsx'],
@@ -351,14 +366,21 @@ export const invitationModuleSchema: TemplateModuleSchema = {
       descriptionEn: 'Display a photo gallery',
       category: 'content',
       required: false,
-      defaultEnabled: false,
+      defaultEnabled: true,
       fields: [
         {
           key: 'images',
           type: 'array',
           label: '사진 목록',
           labelEn: 'Photo List',
-          defaultValue: [],
+          defaultValue: [
+            { url: 'https://images.unsplash.com/photo-1571753217197-b28b8f889b7a?auto=format&fit=crop&w=800&q=75' },
+            { url: 'https://images.unsplash.com/photo-1541538670337-c53313ad7c00?auto=format&fit=crop&w=800&q=75' },
+            { url: 'https://images.unsplash.com/photo-1596457221755-b96bc3a6df18?auto=format&fit=crop&w=800&q=75' },
+            { url: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=75' },
+            { url: 'https://images.unsplash.com/photo-1591604442449-ecc9943efabf?auto=format&fit=crop&w=800&q=75' },
+            { url: 'https://images.unsplash.com/photo-1535185384036-28bbc8035f28?auto=format&fit=crop&w=800&q=75' },
+          ],
           maxItems: 12,
           itemSchema: [
             {
@@ -416,7 +438,10 @@ export const invitationModuleSchema: TemplateModuleSchema = {
           type: 'array',
           label: '계좌 목록',
           labelEn: 'Account List',
-          defaultValue: [],
+          defaultValue: [
+            { label: '신랑측', bankName: '국민은행', accountNumber: '123456-04-789012', holder: '김민준' },
+            { label: '신부측', bankName: '신한은행', accountNumber: '110-234-567890', holder: '이서연' },
+          ],
           maxItems: 4,
           itemSchema: [
             {
@@ -482,7 +507,8 @@ export const invitationModuleSchema: TemplateModuleSchema = {
           label: '연락처 목록',
           labelEn: 'Contact List',
           defaultValue: [
-            { name: '홍길동', phone: '010-1234-5678', role: '주최자' },
+            { name: '김민준', phone: '010-2345-6789', role: '신랑' },
+            { name: '이서연', phone: '010-9876-5432', role: '신부' },
           ],
           maxItems: 6,
           itemSchema: [
@@ -545,7 +571,7 @@ export const invitationModuleSchema: TemplateModuleSchema = {
           type: 'textarea',
           label: '인사말 내용',
           labelEn: 'Message Body',
-          defaultValue: '소중한 분들을 초대합니다.',
+          defaultValue: '차가운 계절에 만나\n서로의 온기가 된 두 사람이\n이제 하나의 이름으로 살아가려 합니다.\n\n귀한 걸음 하시어\n저희의 첫 시작을 축복해 주시면\n더없는 기쁨으로 간직하겠습니다.',
           validation: { maxLength: 1000 },
         },
         {
@@ -649,7 +675,7 @@ export const invitationModuleSchema: TemplateModuleSchema = {
           type: 'textarea',
           label: '안내 문구',
           labelEn: 'Description',
-          defaultValue: '참석 여부를 알려주시면 감사하겠습니다.',
+          defaultValue: '참석 여부를 미리 알려주시면 정성껏 준비하겠습니다',
         },
         {
           key: 'rsvpUrl',
@@ -685,14 +711,14 @@ export const invitationModuleSchema: TemplateModuleSchema = {
           type: 'textarea',
           label: '마무리 메시지',
           labelEn: 'Closing Message',
-          defaultValue: '참석해 주셔서 감사합니다.',
+          defaultValue: '저희 두 사람의 새로운 시작을 함께해 주셔서 감사합니다',
         },
         {
           key: 'closingMessageEn',
           type: 'textarea',
           label: '영문 마무리 메시지',
           labelEn: 'English Closing Message',
-          defaultValue: 'Thank you for joining us.',
+          defaultValue: 'Thank you for celebrating the beginning of our new journey together.',
         },
         {
           key: 'showPoweredBy',

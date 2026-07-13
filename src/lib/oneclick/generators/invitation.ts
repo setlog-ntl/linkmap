@@ -348,7 +348,7 @@ const DEMO_CONTACTS: ContactItem[] = ${contactsArr};
 
 export const siteConfig = {
   // hero
-  eventType: process.env.NEXT_PUBLIC_EVENT_TYPE || '${esc(String(hero.eventType ?? 'gathering'))}',
+  eventType: process.env.NEXT_PUBLIC_EVENT_TYPE || '${esc(String(hero.eventType ?? 'wedding'))}',
   designPreset: '${esc(String(hero.designPreset ?? 'elegant-gold'))}',
   title: process.env.NEXT_PUBLIC_TITLE || '${esc(String(hero.title ?? ''))}',
   titleEn: '${esc(String(hero.titleEn ?? ''))}',
@@ -398,7 +398,7 @@ export const siteConfig = {
   // message
   messageTitle: '${esc(String(message.messageTitle ?? '인사말'))}',
   messageTitleEn: '${esc(String(message.messageTitleEn ?? 'Greeting'))}',
-  messageBody: '${esc(String(message.messageBody ?? '소중한 분들을 초대합니다.'))}',
+  messageBody: '${esc(String(message.messageBody ?? '차가운 계절에 만나\n서로의 온기가 된 두 사람이\n이제 하나의 이름으로 살아가려 합니다.\n\n귀한 걸음 하시어\n저희의 첫 시작을 축복해 주시면\n더없는 기쁨으로 간직하겠습니다.'))}',
   messageAlign: '${esc(String(message.align ?? 'center'))}' as 'center' | 'left',
 
   // share
@@ -412,13 +412,13 @@ export const siteConfig = {
   // rsvp
   rsvpTitle: '${esc(String(rsvp.rsvpTitle ?? '참석 여부 회신'))}',
   rsvpTitleEn: '${esc(String(rsvp.rsvpTitleEn ?? 'RSVP'))}',
-  rsvpDescription: '${esc(String(rsvp.rsvpDescription ?? '참석 여부를 알려주시면 감사하겠습니다.'))}',
+  rsvpDescription: '${esc(String(rsvp.rsvpDescription ?? '참석 여부를 미리 알려주시면 정성껏 준비하겠습니다'))}',
   rsvpUrl: '${esc(sanitizeUrl(String(rsvp.rsvpUrl ?? '')))}',
   rsvpButtonLabel: '${esc(String(rsvp.rsvpButtonLabel ?? '참석 여부 알리기'))}',
 
   // footer
-  closingMessage: '${esc(String(footer.closingMessage ?? '참석해 주셔서 감사합니다.'))}',
-  closingMessageEn: '${esc(String(footer.closingMessageEn ?? 'Thank you for joining us.'))}',
+  closingMessage: '${esc(String(footer.closingMessage ?? '저희 두 사람의 새로운 시작을 함께해 주셔서 감사합니다'))}',
+  closingMessageEn: '${esc(String(footer.closingMessageEn ?? 'Thank you for celebrating the beginning of our new journey together.'))}',
   showPoweredBy: ${footer.showPoweredBy !== false},
 };
 `;
