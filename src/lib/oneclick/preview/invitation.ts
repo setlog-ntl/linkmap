@@ -26,29 +26,31 @@ interface InvPresetVars {
   glassShadow?: string;
 }
 
+// 2차 개편("라이트 & 에어리 럭셔리"): bgAlt를 bg에 더 가깝게(섹션 배경 교차를 은은하게).
+// generator(INVITATION_PRESET_THEME)와 3중 동기화 유지.
 const PRESET_VARS: Record<string, InvPresetVars> = {
   'elegant-gold': {
-    bg: '#FBF7F0', bgAlt: '#F5EEDF', textPrimary: '#211A12', textSecondary: '#6B5A3E',
+    bg: '#FBF7F0', bgAlt: '#F8F3E8', textPrimary: '#211A12', textSecondary: '#6B5A3E',
     accent: '#B8860B', accentSolid: '#8B6B1F', cardBg: '#FFFFFF', cardBorder: '#E8DCC8',
   },
   'romantic-pink': {
-    bg: '#FBF4F3', bgAlt: '#F5E7E6', textPrimary: '#2B1E22', textSecondary: '#7C5A61',
+    bg: '#FBF4F3', bgAlt: '#F8EEED', textPrimary: '#2B1E22', textSecondary: '#7C5A61',
     accent: '#C08497', accentSolid: '#7C2036', cardBg: '#FFFFFF', cardBorder: '#EAD3D3',
   },
   'modern-minimal': {
-    bg: '#FAFAF9', bgAlt: '#F2F1EF', textPrimary: '#16171A', textSecondary: '#6B6B68',
+    bg: '#FAFAF9', bgAlt: '#F6F6F4', textPrimary: '#16171A', textSecondary: '#6B6B68',
     accent: '#3A3A38', accentSolid: '#A8551F', cardBg: '#FFFFFF', cardBorder: '#E5E3DF',
   },
   festive: {
-    bg: '#FBF6EF', bgAlt: '#F6EBDD', textPrimary: '#2A1E18', textSecondary: '#7A5D4E',
+    bg: '#FBF6EF', bgAlt: '#F9F1E6', textPrimary: '#2A1E18', textSecondary: '#7A5D4E',
     accent: '#C8865C', accentSolid: '#8C3B2E', cardBg: '#FFFFFF', cardBorder: '#EAD9C6',
   },
   'natural-garden': {
-    bg: '#F7FBF4', bgAlt: '#EEF6E8', textPrimary: '#1B2A1C', textSecondary: '#4A6741',
+    bg: '#F7FBF4', bgAlt: '#F3F9EE', textPrimary: '#1B2A1C', textSecondary: '#4A6741',
     accent: '#5C8A4D', accentSolid: '#2D4A38', cardBg: '#FFFFFF', cardBorder: '#D8E8CE',
   },
   'minimal-glass': {
-    bg: '#F5F3FF', bgAlt: '#FDF2F8', textPrimary: '#23283A', textSecondary: '#5B6474',
+    bg: '#F5F3FF', bgAlt: '#F9F3FC', textPrimary: '#23283A', textSecondary: '#5B6474',
     accent: '#A78BFA', accentSolid: '#6D4FC9', cardBg: '#FFFFFF', cardBorder: 'rgba(167,139,250,0.35)',
     isGlass: true,
     bgGrad: 'linear-gradient(160deg,#F5F3FF,#FDF2F8,#EEF2FF)',
@@ -72,11 +74,6 @@ function resolveFontVars(fontFamily: string): { display: string; body: string } 
   const display = fontFamily === 'Nanum Myeongjo' ? `'Nanum Myeongjo', 'Pretendard Variable', serif` : body;
   return { display, body };
 }
-
-const EVENT_EMOJI: Record<string, string> = {
-  gathering: '&#127881;', birthday: '&#127874;', wedding: '&#128141;',
-  baby: '&#128118;', celebration: '&#127881;', corporate: '&#127970;', custom: '&#10024;',
-};
 
 const EVENT_EYEBROW: Record<string, string> = {
   gathering: 'GATHERING', birthday: 'BIRTHDAY', wedding: 'WEDDING',
@@ -125,17 +122,13 @@ function renderHero(
   state: ModuleConfigState,
   liveUrl: string,
   imageMap: Record<string, string>,
-  v: InvPresetVars,
 ): string {
   const title = getVal(state, 'hero', 'title', '');
   const subtitle = getVal(state, 'hero', 'subtitle', '');
   const eventType = getVal(state, 'hero', 'eventType', 'gathering');
   const heroImageUrl = getVal(state, 'hero', 'heroImageUrl', '');
-  const gradientFrom = getVal(state, 'hero', 'gradientFrom', v.accent);
-  const gradientTo = getVal(state, 'hero', 'gradientTo', v.accentSolid);
   const dateLabel = getVal(state, 'dday', 'eventDateLabel', '');
   const hostsItems = getArr(state, 'hosts', 'items');
-  const emoji = EVENT_EMOJI[eventType] || EVENT_EMOJI.custom;
   const eyebrow = EVENT_EYEBROW[eventType] || EVENT_EYEBROW.custom;
   const initials = deriveInitials(hostsItems, title);
 
@@ -146,7 +139,7 @@ function renderHero(
     return `
     <section class="inv-hero inv-hero--framed">
       <div class="inv-hero-content">
-        <p class="inv-eyebrow">${emoji} ${esc(eyebrow)}</p>
+        <p class="inv-eyebrow">${esc(eyebrow)}</p>
         <div class="inv-hero-arch"><img src="${esc(imgSrc)}" loading="eager" alt="" /></div>
         <h1 class="inv-hero-title">${esc(title)}</h1>
         ${subtitle ? `<p class="inv-hero-subtitle">${esc(subtitle)}</p>` : ''}
@@ -156,20 +149,23 @@ function renderHero(
     </section>`;
   }
 
+  // "라이트 & 에어리 럭셔리": 다크 풀블리드 그라디언트 대신 라이트 캔버스 위에
+  // 저투명도 포인트 글로우(.inv-hero:not(.inv-hero--framed) 배경 규칙)만 얹는다 — 배포와 동일 구조
   return `
-    <section class="inv-hero" style="background:radial-gradient(ellipse at 50% 20%, ${esc(gradientTo)} 0%, ${esc(gradientFrom)} 60%);">
+    <section class="inv-hero">
       <div class="inv-hero-noise"></div>
-      <div class="inv-hero-vignette"></div>
+      <div class="inv-hero-orb inv-hero-orb-a"></div>
+      <div class="inv-hero-orb inv-hero-orb-b"></div>
       <div class="inv-hero-content">
-        <p class="inv-eyebrow inv-eyebrow--onphoto">${emoji} ${esc(eyebrow)}</p>
-        <div class="inv-hero-emoji-ring inv-monogram inv-monogram--onphoto">${initials}</div>
-        <h1 class="inv-hero-title inv-hero-title--onphoto">${esc(title)}</h1>
+        <p class="inv-eyebrow">${esc(eyebrow)}</p>
+        <div class="inv-monogram inv-hero-emoji-ring">${initials}</div>
+        <h1 class="inv-hero-title">${esc(title)}</h1>
         ${subtitle ? `<p class="inv-hero-subtitle">${esc(subtitle)}</p>` : ''}
-        ${dateLabel ? `<p class="inv-hero-date inv-hero-date--onphoto">${esc(dateLabel)}</p>` : ''}
-        <div class="inv-headline-divider inv-headline-divider--onphoto"><span class="inv-headline-divider-mark">&#10022;</span></div>
+        ${dateLabel ? `<p class="inv-hero-date">${esc(dateLabel)}</p>` : ''}
+        <div class="inv-headline-divider"><span class="inv-headline-divider-mark">&#10022;</span></div>
       </div>
       <div class="inv-hero-scroll-cue" aria-hidden="true">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7" /></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--inv-text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7" /></svg>
       </div>
     </section>`;
 }
@@ -213,7 +209,7 @@ function renderHosts(state: ModuleConfigState, liveUrl: string, imageMap: Record
         ${avatar}
         <p class="inv-host-role">${esc(h.role || '')}</p>
         <p class="inv-host-name">${esc(h.name || '')}</p>
-        ${h.phone ? `<a href="tel:${esc(h.phone)}" class="inv-btn inv-btn-secondary inv-btn-sm">&#9742; ${esc(h.phone)}</a>` : ''}
+        ${h.phone ? `<a href="tel:${esc(h.phone)}" class="inv-btn inv-btn-secondary inv-btn-sm"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>${esc(h.phone)}</a>` : ''}
       </div>`;
   }).join('');
 
@@ -243,8 +239,10 @@ function renderLocation(state: ModuleConfigState): string {
   const detailsBlock = (parkingInfo || transitInfo)
     ? `<details class="inv-details">
         <summary>이용 안내</summary>
-        ${parkingInfo ? `<p class="inv-info-line">&#128663; ${esc(parkingInfo)}</p>` : ''}
-        ${transitInfo ? `<p class="inv-info-line">&#128651; ${esc(transitInfo)}</p>` : ''}
+        <div class="inv-details-body">
+        ${parkingInfo ? `<p class="inv-info-line"><strong>주차</strong> ${esc(parkingInfo)}</p>` : ''}
+        ${transitInfo ? `<p class="inv-info-line"><strong>교통</strong> ${esc(transitInfo)}</p>` : ''}
+        </div>
       </details>`
     : '';
 
@@ -254,7 +252,7 @@ function renderLocation(state: ModuleConfigState): string {
       <h2 class="inv-section-title">장소 안내</h2>
       <div class="inv-card" style="max-width:28rem;margin:0 auto;padding:1.5rem;">
         ${venueName ? `<p class="inv-venue-name">${esc(venueName)}</p>` : ''}
-        ${venueAddress ? `<div class="inv-venue-addr-row"><p class="inv-venue-addr">${esc(venueAddress)}</p><button class="inv-btn-icon-sm" type="button" aria-label="주소 복사">&#128203;</button></div>` : ''}
+        ${venueAddress ? `<div class="inv-venue-addr-row"><p class="inv-venue-addr">${esc(venueAddress)}</p><button class="inv-btn-icon-sm" type="button" aria-label="주소 복사"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>` : ''}
         ${mapButtons ? `<div class="inv-map-buttons">${mapButtons}</div>` : ''}
         ${detailsBlock}
       </div>
@@ -331,8 +329,8 @@ function renderContact(state: ModuleConfigState): string {
           <span class="inv-contact-name">${esc(c.name || '')}</span>
         </div>
         ${c.phone ? `<div class="inv-contact-actions">
-          <a href="tel:${esc(c.phone)}" class="inv-btn inv-btn-primary inv-btn-sm">&#9742; 전화</a>
-          <a href="sms:${esc(c.phone)}" class="inv-btn inv-btn-secondary inv-btn-sm">&#9993; 문자</a>
+          <a href="tel:${esc(c.phone)}" class="inv-btn inv-btn-secondary inv-btn-sm"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>전화</a>
+          <a href="sms:${esc(c.phone)}" class="inv-btn inv-btn-secondary inv-btn-sm"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>문자</a>
         </div>` : ''}
       </div>`;
   }).join('');
@@ -367,10 +365,10 @@ function renderShare(state: ModuleConfigState): string {
   const enableQr = getVal(state, 'share', 'enableQr', 'false') === 'true';
   if (!enableKakao && !enableCopy && !enableQr) return '';
   const kakaoBtn = enableKakao
-    ? `<button class="inv-btn-icon inv-btn-icon-kakao" type="button" aria-label="카카오톡 공유">&#128172;</button>`
+    ? `<button class="inv-btn-icon inv-btn-icon-kakao" type="button" aria-label="카카오톡 공유"><svg width="20" height="20" viewBox="0 0 24 24" fill="#191919"><path d="M12 3C6.48 3 2 6.58 2 10.9c0 2.78 1.8 5.22 4.5 6.6-.2.73-.72 2.65-.82 3.06-.13.5.18.49.38.36.16-.11 2.5-1.7 3.51-2.39.47.07.95.1 1.43.1 5.52 0 10-3.58 10-7.73C22 6.58 17.52 3 12 3z"/></svg></button>`
     : '';
   const copyBtn = enableCopy
-    ? `<button class="inv-btn-icon inv-btn-icon-secondary" type="button" aria-label="링크 복사">&#128279;</button>`
+    ? `<button class="inv-btn-icon inv-btn-icon-secondary" type="button" aria-label="링크 복사"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>`
     : '';
   const qrBlock = enableQr
     ? `<details class="inv-details" style="text-align:center;"><summary style="justify-content:center;">QR 코드 보기</summary><div class="inv-qr-placeholder">QR</div></details>`
@@ -420,7 +418,7 @@ function renderFooter(state: ModuleConfigState): string {
 
 // ── CSS ──────────────────────────────────────────
 
-function buildInvitationCSS(v: InvPresetVars, fontFamily: string): string {
+function buildInvitationCSS(v: InvPresetVars, fontFamily: string, gradientFrom: string, gradientTo: string): string {
   const accentGlow = hexToRgba(v.accent, 0.15);
   const accentSoft = hexToRgba(v.accent, 0.07);
   const { display, body } = resolveFontVars(fontFamily);
@@ -443,11 +441,13 @@ function buildInvitationCSS(v: InvPresetVars, fontFamily: string): string {
       --inv-text-primary: ${v.textPrimary}; --inv-text-secondary: ${v.textSecondary};
       --inv-accent: ${v.accent}; --inv-accent-solid: ${v.accentSolid};
       --inv-accent-glow: ${accentGlow}; --inv-accent-soft: ${accentSoft};
+      --inv-gradient-from: ${gradientFrom}; --inv-gradient-to: ${gradientTo};
       --inv-card-bg: ${v.cardBg}; --inv-card-border: ${v.cardBorder};
       --inv-font-display: ${display}; --inv-font-body: ${body};
       --inv-shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
       --inv-shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
       --inv-radius-lg: 16px;
+      --inv-section-py: clamp(3.5rem, 9vw, 5.5rem); --inv-section-px: clamp(1.25rem, 5vw, 2rem);
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { background: ${bodyBg}; color: var(--inv-text-primary); margin: 0; font-family: var(--inv-font-body); font-size: 15px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
@@ -456,50 +456,53 @@ function buildInvitationCSS(v: InvPresetVars, fontFamily: string): string {
 
     /* ── Eyebrow / Section title / Divider / Monogram ── */
     .inv-eyebrow { display:block; font-size:11px; text-transform:uppercase; letter-spacing:.16em; font-weight:600; color:var(--inv-accent-solid); margin-bottom:.5rem; text-align:center; }
-    .inv-eyebrow--onphoto { color:rgba(255,255,255,0.85); }
     .inv-section-title { position:relative; display:inline-block; font-family:var(--inv-font-display); font-size:1.25rem; font-weight:600; color:var(--inv-text-primary); padding-bottom:.75rem; margin:0 0 1.5rem; }
-    .inv-section-title::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:2rem; height:2px; background:linear-gradient(90deg,var(--inv-gradient-from,var(--inv-accent)),var(--inv-gradient-to,var(--inv-accent-solid))); }
+    .inv-section-title::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:2rem; height:2px; background:linear-gradient(90deg,var(--inv-accent),var(--inv-accent-solid)); }
     .inv-headline-divider { display:flex; align-items:center; gap:.75rem; max-width:200px; margin:1.5rem auto; color:var(--inv-card-border); }
-    .inv-headline-divider::before, .inv-headline-divider::after { content:''; flex:1; height:1px; background:currentColor; opacity:.6; }
-    .inv-headline-divider--onphoto { color:rgba(255,255,255,0.4); }
+    .inv-headline-divider::before, .inv-headline-divider::after { content:''; flex:1; height:1px; background:currentColor; opacity:.28; }
     .inv-headline-divider-mark { font-size:.7rem; color:var(--inv-accent); opacity:.7; }
     .inv-monogram { width:60px; height:60px; border-radius:50%; border:1px solid var(--inv-accent); display:flex; align-items:center; justify-content:center; font-family:var(--inv-font-display); font-size:1.35rem; color:var(--inv-text-primary); margin:0 auto 1.25rem; }
-    .inv-monogram--onphoto { border-color:rgba(255,255,255,0.5); color:#fff; }
     .inv-monogram-sm { width:30px; height:30px; font-size:.8rem; color:var(--inv-text-secondary); border-color:var(--inv-card-border); margin-bottom:.75rem; }
 
     /* ── Section layout ── */
-    .inv-section-decorated { padding:2.75rem 1.5rem; text-align:center; }
+    .inv-section-decorated { padding:var(--inv-section-py) var(--inv-section-px); text-align:center; }
 
     /* ── Hero ── */
-    .inv-hero { position:relative; min-height:88vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:5rem 1.5rem; overflow:hidden; }
-    .inv-hero-noise { position:absolute; inset:0; opacity:.05; mix-blend-mode:overlay; pointer-events:none; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
-    .inv-hero-vignette { position:absolute; inset:0; background:radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.28) 100%); pointer-events:none; }
+    .inv-hero { position:relative; min-height:88vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:5rem 1.5rem; overflow:hidden; background-color:var(--inv-bg); }
+    /* 사진이 없을 때만 상단/모서리에 은은한 포인트 글로우(저투명도 틴트) — 풀블리드 금지 */
+    .inv-hero:not(.inv-hero--framed) {
+      background-image:
+        radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--inv-gradient-from) 16%, transparent) 0%, transparent 60%),
+        radial-gradient(90% 55% at 88% 100%, color-mix(in srgb, var(--inv-gradient-to) 10%, transparent) 0%, transparent 65%);
+    }
+    .inv-hero-noise { position:absolute; inset:0; opacity:.025; mix-blend-mode:overlay; pointer-events:none; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
+    /* Floating ambient orbs — 저채도 accent-soft 글로우(패럴랙스 아닌 순수 transform 루프) */
+    .inv-hero-orb { position:absolute; border-radius:50%; pointer-events:none; background:radial-gradient(circle, var(--inv-accent-soft) 0%, transparent 70%); animation:float-slow 12s ease-in-out infinite; }
+    .inv-hero-orb-a { top:12%; left:6%; width:200px; height:200px; }
+    .inv-hero-orb-b { bottom:16%; right:4%; width:160px; height:160px; animation-delay:-6s; }
     .inv-hero-content { position:relative; z-index:1; max-width:24rem; margin:0 auto; }
     .inv-hero-title { font-family:var(--inv-font-display); font-size:clamp(26px,7vw,34px); font-weight:700; line-height:1.4; letter-spacing:-0.01em; white-space:pre-line; color:var(--inv-text-primary); margin:0; }
-    .inv-hero-title--onphoto { color:#fff; text-shadow:0 2px 16px rgba(0,0,0,0.3), 0 0 40px rgba(255,255,255,0.08); }
     .inv-hero-subtitle { margin:1rem 0 0; font-size:1rem; color:var(--inv-text-secondary); line-height:1.6; }
-    .inv-hero--framed .inv-hero-subtitle { color:var(--inv-text-secondary); }
-    .inv-hero:not(.inv-hero--framed) .inv-hero-subtitle { color:rgba(255,255,255,0.82); }
     .inv-hero-date { margin-top:.75rem; font-size:.75rem; text-transform:uppercase; letter-spacing:.12em; font-weight:600; color:var(--inv-text-secondary); }
-    .inv-hero-date--onphoto { color:rgba(255,255,255,0.75); }
     .inv-hero-arch { width:min(66vw,260px); aspect-ratio:3/4; margin:0 auto 1.5rem; overflow:hidden; border-top-left-radius:100% clamp(48px,16vw,72px); border-top-right-radius:100% clamp(48px,16vw,72px); box-shadow:var(--inv-shadow-lg); }
     .inv-hero-arch img { width:100%; height:100%; object-fit:cover; }
     .inv-hero--framed { background:var(--inv-bg); min-height:auto; padding:4rem 1.5rem 3rem; }
     .inv-hero-scroll-cue { position:absolute; bottom:1.5rem; left:50%; transform:translateX(-50%); opacity:.7; }
+    @keyframes float-slow { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(10px, -10px) scale(1.02); } 66% { transform: translate(-5px, 5px) scale(0.98); } }
 
     /* ── D-day / Calendar ── */
     .inv-cal { max-width:220px; margin:0 auto 1.5rem; }
     .inv-cal-head { font-size:.75rem; font-weight:600; letter-spacing:.06em; color:var(--inv-text-secondary); margin:0 0 .5rem; }
     .inv-cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
-    .inv-cal-dow { font-size:.625rem; color:var(--inv-text-secondary); opacity:.6; padding:2px 0; }
-    .inv-cal-cell { aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:.6875rem; color:var(--inv-text-secondary); border-radius:50%; }
+    .inv-cal-dow { font-size:.625rem; letter-spacing:0.05em; color:var(--inv-text-secondary); opacity:.6; padding:2px 0; }
+    .inv-cal-cell { aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:.6875rem; color:var(--inv-text-secondary); border-radius:50%; font-variant-numeric:tabular-nums; }
     .inv-cal-cell--active { background:var(--inv-accent-solid); color:#fff; font-weight:700; }
     .inv-countdown { display:flex; justify-content:center; align-items:flex-end; gap:.5rem; margin:0 0 1rem; }
     .inv-flip-wrap, .inv-simple-counter { display:flex; flex-direction:column; align-items:center; gap:.375rem; }
     .inv-dday-card { width:56px; height:70px; display:flex; align-items:center; justify-content:center; }
     .inv-flip-num { font-size:1.5rem; font-weight:700; color:var(--inv-accent-solid); }
     .inv-simple-counter-num { font-size:1.75rem; font-weight:700; color:var(--inv-accent-solid); line-height:1.2; }
-    .inv-counter-label { font-size:.625rem; text-transform:uppercase; letter-spacing:.1em; font-weight:600; color:var(--inv-text-secondary); }
+    .inv-counter-label { font-size:.625rem; text-transform:lowercase; letter-spacing:.1em; font-weight:600; color:var(--inv-text-secondary); }
     .inv-colon-sep { font-size:1.125rem; font-weight:300; color:var(--inv-text-secondary); padding-bottom:1.25rem; }
     .inv-date-label { font-size:.9375rem; font-weight:500; color:var(--inv-text-primary); }
 
@@ -525,7 +528,7 @@ function buildInvitationCSS(v: InvPresetVars, fontFamily: string): string {
     .inv-hosts { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:1.25rem; max-width:28rem; margin:0 auto; }
     .inv-host { display:flex; flex-direction:column; align-items:center; text-align:center; background:var(--inv-card-bg); border:1px solid var(--inv-card-border); border-radius:var(--inv-radius-lg); padding:1.5rem 1rem; }
     .inv-host-avatar { width:4.5rem; height:4.5rem; border-radius:50%; object-fit:cover; margin-bottom:.75rem; }
-    .inv-host-avatar--initial { display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:700; background:linear-gradient(135deg,var(--inv-accent),var(--inv-accent-solid)); color:#fff; }
+    .inv-host-avatar--initial { display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:700; background:var(--inv-accent-soft); border:1px solid var(--inv-accent); color:var(--inv-accent-solid); }
     .inv-host-role { font-size:.75rem; text-transform:uppercase; letter-spacing:.08em; color:var(--inv-text-secondary); margin:0; }
     .inv-host-name { font-family:var(--inv-font-display); font-weight:600; font-size:1.0625rem; color:var(--inv-text-primary); margin:.25rem 0 .75rem; }
 
@@ -594,11 +597,13 @@ export function generateInvitationPreview(
   const designPreset = getVal(state, 'hero', 'designPreset', 'elegant-gold');
   const fontFamily = getVal(state, 'hero', 'fontFamily', 'Nanum Myeongjo');
   const v = PRESET_VARS[designPreset] ?? PRESET_VARS['elegant-gold'];
+  const gradientFrom = getVal(state, 'hero', 'gradientFrom', v.accent);
+  const gradientTo = getVal(state, 'hero', 'gradientTo', v.accentSolid);
 
   const activeModules = getActiveModules(state);
 
   const sectionRenderers: Record<string, () => string> = {
-    hero: () => renderHero(state, liveUrl, imageMap, v),
+    hero: () => renderHero(state, liveUrl, imageMap),
     dday: () => renderDday(state),
     hosts: () => renderHosts(state, liveUrl, imageMap),
     location: () => renderLocation(state),
@@ -631,7 +636,7 @@ export function generateInvitationPreview(
   const fontImport = fontFamily === 'Nanum Myeongjo'
     ? `@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap');\n`
     : '';
-  const css = fontImport + buildInvitationCSS(v, fontFamily);
+  const css = fontImport + buildInvitationCSS(v, fontFamily, gradientFrom, gradientTo);
 
   return wrapInHtml(css, bodyContent, designPreset);
 }

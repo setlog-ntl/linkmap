@@ -99,29 +99,32 @@ interface InvitationPresetVars {
 }
 
 // AA 대비 사전 검증 완료 팔레트 — 이 값 그대로 사용
+// 2차 개편("라이트 & 에어리 럭셔리"): bgAlt를 bg에 더 가깝게 조정해 섹션 간 배경 교차를
+// 은은하게 만듦(1차 대비 색차 절반 축소). accent/accentSolid는 "면"이 아닌 "선·점"
+// 전용(헤어라인, 모노그램 링, 캘린더 하이라이트, 버튼 1개)으로만 사용.
 const INVITATION_PRESET_THEME: Record<string, InvitationPresetVars> = {
   'elegant-gold': {
-    bg: '#FBF7F0', bgAlt: '#F5EEDF', textPrimary: '#211A12', textSecondary: '#6B5A3E',
+    bg: '#FBF7F0', bgAlt: '#F8F3E8', textPrimary: '#211A12', textSecondary: '#6B5A3E',
     accent: '#B8860B', accentSolid: '#8B6B1F', cardBg: '#FFFFFF', cardBorder: '#E8DCC8',
   },
   'romantic-pink': {
-    bg: '#FBF4F3', bgAlt: '#F5E7E6', textPrimary: '#2B1E22', textSecondary: '#7C5A61',
+    bg: '#FBF4F3', bgAlt: '#F8EEED', textPrimary: '#2B1E22', textSecondary: '#7C5A61',
     accent: '#C08497', accentSolid: '#7C2036', cardBg: '#FFFFFF', cardBorder: '#EAD3D3',
   },
   'modern-minimal': {
-    bg: '#FAFAF9', bgAlt: '#F2F1EF', textPrimary: '#16171A', textSecondary: '#6B6B68',
+    bg: '#FAFAF9', bgAlt: '#F6F6F4', textPrimary: '#16171A', textSecondary: '#6B6B68',
     accent: '#3A3A38', accentSolid: '#A8551F', cardBg: '#FFFFFF', cardBorder: '#E5E3DF',
   },
   festive: {
-    bg: '#FBF6EF', bgAlt: '#F6EBDD', textPrimary: '#2A1E18', textSecondary: '#7A5D4E',
+    bg: '#FBF6EF', bgAlt: '#F9F1E6', textPrimary: '#2A1E18', textSecondary: '#7A5D4E',
     accent: '#C8865C', accentSolid: '#8C3B2E', cardBg: '#FFFFFF', cardBorder: '#EAD9C6',
   },
   'natural-garden': {
-    bg: '#F7FBF4', bgAlt: '#EEF6E8', textPrimary: '#1B2A1C', textSecondary: '#4A6741',
+    bg: '#F7FBF4', bgAlt: '#F3F9EE', textPrimary: '#1B2A1C', textSecondary: '#4A6741',
     accent: '#5C8A4D', accentSolid: '#2D4A38', cardBg: '#FFFFFF', cardBorder: '#D8E8CE',
   },
   'minimal-glass': {
-    bg: '#F5F3FF', bgAlt: '#FDF2F8', textPrimary: '#23283A', textSecondary: '#5B6474',
+    bg: '#F5F3FF', bgAlt: '#F9F3FC', textPrimary: '#23283A', textSecondary: '#5B6474',
     accent: '#A78BFA', accentSolid: '#6D4FC9',
     // 일반 카드(inv-card/inv-card-accent)는 항상 솔리드 — 글래스는 히어로 모노그램/D-day 카드 2곳 한정
     cardBg: '#FFFFFF', cardBorder: 'rgba(167,139,250,0.35)',
@@ -352,8 +355,8 @@ export const siteConfig = {
   subtitle: process.env.NEXT_PUBLIC_SUBTITLE || '${esc(String(hero.subtitle ?? ''))}',
   subtitleEn: '${esc(String(hero.subtitleEn ?? ''))}',
   heroImageUrl: ${heroImage ? imagePathExpr(heroImage) : "''"},
-  gradientFrom: '${esc(String(hero.gradientFrom ?? '#B8860B'))}',
-  gradientTo: '${esc(String(hero.gradientTo ?? '#8B6B1F'))}',
+  gradientFrom: '${esc(String(hero.gradientFrom ?? '#F3E8CF'))}',
+  gradientTo: '${esc(String(hero.gradientTo ?? '#FBF7F0'))}',
   fontFamily: '${esc(String(hero.fontFamily ?? 'Nanum Myeongjo'))}',
 
   // dday
@@ -442,8 +445,8 @@ function generatePageTsx(state: ModuleConfigState): string {
 
   const hero = (state.values['hero'] ?? {}) as Record<string, unknown>;
   const designPreset = String(hero.designPreset ?? 'elegant-gold');
-  const gradientFrom = String(hero.gradientFrom ?? '#B8860B');
-  const gradientTo = String(hero.gradientTo ?? '#8B6B1F');
+  const gradientFrom = String(hero.gradientFrom ?? '#F3E8CF');
+  const gradientTo = String(hero.gradientTo ?? '#FBF7F0');
   const fontFamily = String(hero.fontFamily ?? 'Nanum Myeongjo');
   const presetCss = generateInvitationPresetCss(designPreset, gradientFrom, gradientTo, fontFamily);
 

@@ -64,24 +64,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 const globalsCss = `@import 'tailwindcss';
 
 /* ══ Design Tokens ════════════════════════════
-   기본값은 elegant-gold 프리셋과 동일 — generator(INVITATION_PRESET_THEME) /
-   preview(PRESET_VARS)와 3중 동기화되어야 함 */
+   "라이트 & 에어리 럭셔리" — 기본값은 elegant-gold 프리셋과 동일 —
+   generator(INVITATION_PRESET_THEME) / preview(PRESET_VARS)와 3중 동기화되어야 함 */
 :root {
   /* Brand */
   --inv-bg: #FBF7F0;
-  --inv-bg-alt: #F5EEDF;
+  --inv-bg-alt: #F8F3E8;
   --inv-text-primary: #211A12;
   --inv-text-secondary: #6B5A3E;
-  /* accent: 테두리·아이콘·대형 비텍스트 전용 */
+  /* accent: 테두리·아이콘·모노그램 링·캘린더 하이라이트 등 "선·점" 전용 (면 채우기 금지) */
   --inv-accent: #B8860B;
-  /* accentSolid: 흰 글자 버튼/배지용 고대비 (AA 4.5:1) */
+  /* accentSolid: 흰 글자 버튼/배지용 고대비 (AA 4.5:1) — CTA 버튼 1개(RSVP) 한정 */
   --inv-accent-solid: #8B6B1F;
   --inv-accent-glow: rgba(184, 134, 11, 0.15);
   --inv-accent-soft: rgba(184, 134, 11, 0.07);
   --inv-card-bg: #FFFFFF;
   --inv-card-border: #E8DCC8;
-  --inv-gradient-from: #B8860B;
-  --inv-gradient-to: #8B6B1F;
+  /* gradientFrom/To: 풀블리드 배경이 아닌 히어로 상단/모서리의 저투명도 글로우 틴트 전용 값 */
+  --inv-gradient-from: #F3E8CF;
+  --inv-gradient-to: #FBF7F0;
 
   /* 폰트 2종 이내: 본문/UI/숫자 = Pretendard Variable, 디스플레이 = 선택에 따라 Nanum Myeongjo */
   --inv-font-body: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
@@ -106,8 +107,8 @@ const globalsCss = `@import 'tailwindcss';
   --inv-radius-lg: 16px;
   --inv-radius-xl: 24px;
 
-  /* Spacing */
-  --inv-section-py: clamp(2.75rem, 7vw, 4rem);
+  /* Spacing — 여백이 고급을 만든다: 1차 대비 세로 여백 +25~40% */
+  --inv-section-py: clamp(3.5rem, 9vw, 5.5rem);
   --inv-section-px: clamp(1.25rem, 5vw, 2rem);
 
   /* Transition */
@@ -164,10 +165,6 @@ h1, h2 { font-family: var(--inv-font-display); }
   70% { box-shadow: 0 0 0 16px transparent; }
   100% { box-shadow: 0 0 0 0 transparent; }
 }
-@keyframes celebrate-bounce {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
 @keyframes toast-in {
   from { opacity: 0; transform: translateX(-50%) translateY(16px); }
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -219,7 +216,6 @@ h1, h2 { font-family: var(--inv-font-display); }
   color: var(--inv-accent-solid);
   margin-bottom: 0.5rem;
 }
-.inv-eyebrow--onphoto { color: rgba(255,255,255,0.85); }
 
 /* ══ Section Title with Ornament ═════════════ */
 .inv-section-title {
@@ -238,7 +234,8 @@ h1, h2 { font-family: var(--inv-font-display); }
   bottom: 0; left: 50%;
   transform: translateX(-50%);
   width: 2rem; height: 2px;
-  background: linear-gradient(90deg, var(--inv-gradient-from), var(--inv-gradient-to));
+  /* "선·점" 전용 accent — gradientFrom/To(글로우 틴트)는 여기 쓰지 않음 */
+  background: linear-gradient(90deg, var(--inv-accent), var(--inv-accent-solid));
   border-radius: 1px;
 }
 
@@ -248,12 +245,11 @@ h1, h2 { font-family: var(--inv-font-display); }
   max-width: 200px; margin: 1.5rem auto; color: var(--inv-card-border);
 }
 .inv-headline-divider::before, .inv-headline-divider::after {
-  content: ''; flex: 1; height: 1px; background: currentColor; opacity: 0.6;
+  content: ''; flex: 1; height: 1px; background: currentColor; opacity: 0.28;
 }
-.inv-headline-divider--onphoto { color: rgba(255,255,255,0.4); }
 .inv-headline-divider-mark { font-size: 0.7rem; color: var(--inv-accent); opacity: 0.7; }
 
-/* ══ Monogram (히어로 56~64px / 푸터 28~32px 북엔드) ═ */
+/* ══ Monogram (히어로 56~64px / 푸터 28~32px 북엔드) — 라이트 배경 위 1px 링 + 잉크 이니셜 */
 .inv-monogram {
   width: 60px; height: 60px;
   border-radius: 50%;
@@ -264,7 +260,6 @@ h1, h2 { font-family: var(--inv-font-display); }
   color: var(--inv-text-primary);
   margin: 0 auto 1.25rem;
 }
-.inv-monogram--onphoto { border-color: rgba(255,255,255,0.55); color: #fff; }
 .inv-monogram-sm { width: 30px; height: 30px; font-size: 0.8rem; color: var(--inv-text-secondary); border-color: var(--inv-card-border); margin: 0 auto 0.75rem; }
 
 /* ══ Card System ═════════════════════════════
@@ -285,7 +280,7 @@ h1, h2 { font-family: var(--inv-font-display); }
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--inv-gradient-from), var(--inv-gradient-to));
+  background: linear-gradient(90deg, var(--inv-accent), var(--inv-accent-solid));
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.4s var(--inv-ease-out);
@@ -378,7 +373,9 @@ h1, h2 { font-family: var(--inv-font-display); }
 }
 .inv-toast[data-closing='true'] { animation: toast-out 0.25s ease both; }
 
-/* ══ Hero ═════════════════════════════════════ */
+/* ══ Hero ═════════════════════════════════════
+   "라이트 & 에어리 럭셔리": 다크 풀블리드 그라디언트 블록 대신 라이트 아이보리 캔버스
+   위에 저투명도 포인트 글로우만 얹는다. 텍스트는 항상 잉크 톤(--inv-text-primary/secondary). */
 .inv-hero {
   position: relative;
   min-height: 88vh;
@@ -386,25 +383,20 @@ h1, h2 { font-family: var(--inv-font-display); }
   text-align: center;
   padding: 5rem 1.5rem;
   overflow: hidden;
+  background-color: var(--inv-bg);
 }
-.inv-hero--framed { min-height: auto; background: var(--inv-bg); padding: 4rem 1.5rem 3rem; }
+/* 사진이 없을 때만 상단/모서리에 은은한 포인트 글로우(저투명도 틴트) — 풀블리드 금지 */
+.inv-hero:not(.inv-hero--framed) {
+  background-image:
+    radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--inv-gradient-from) 16%, transparent) 0%, transparent 60%),
+    radial-gradient(90% 55% at 88% 100%, color-mix(in srgb, var(--inv-gradient-to) 10%, transparent) 0%, transparent 65%);
+}
+.inv-hero--framed { min-height: auto; padding: 4rem 1.5rem 3rem; }
 .inv-hero-noise {
-  position: absolute; inset: 0; opacity: 0.05; mix-blend-mode: overlay; pointer-events: none;
+  position: absolute; inset: 0; opacity: 0.025; mix-blend-mode: overlay; pointer-events: none;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
-.inv-hero-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.28) 100%); pointer-events: none; }
 .inv-hero-content { position: relative; z-index: 1; max-width: 24rem; margin: 0 auto; }
-.inv-hero-emoji-ring {
-  width: 60px; height: 60px; margin: 0 auto 1.25rem;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.14);
-  border: 1px solid rgba(255,255,255,0.24);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--inv-font-display);
-  font-size: 1.35rem;
-  color: #fff;
-}
 .inv-hero-title {
   font-family: var(--inv-font-display);
   font-size: var(--inv-text-hero);
@@ -412,16 +404,11 @@ h1, h2 { font-family: var(--inv-font-display); }
   line-height: 1.4;
   letter-spacing: -0.01em;
   white-space: pre-line;
+  color: var(--inv-text-primary);
   margin: 0;
 }
-.inv-hero-title--onphoto { color: #fff; text-shadow: 0 2px 16px rgba(0,0,0,0.3), 0 0 40px rgba(255,255,255,0.08); }
-.inv-hero-title--onbg { color: var(--inv-text-primary); }
-.inv-hero-subtitle { margin: 1rem 0 0; font-size: 1rem; line-height: 1.6; }
-.inv-hero-subtitle--onphoto { color: rgba(255,255,255,0.82); }
-.inv-hero-subtitle--onbg { color: var(--inv-text-secondary); }
-.inv-hero-date { margin-top: 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; }
-.inv-hero-date--onphoto { color: rgba(255,255,255,0.75); }
-.inv-hero-date--onbg { color: var(--inv-text-secondary); }
+.inv-hero-subtitle { margin: 1rem 0 0; font-size: 1rem; line-height: 1.6; color: var(--inv-text-secondary); }
+.inv-hero-date { margin-top: 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; color: var(--inv-text-secondary); }
 .inv-hero-arch {
   width: min(66vw, 260px);
   aspect-ratio: 3 / 4;
@@ -438,22 +425,33 @@ h1, h2 { font-family: var(--inv-font-display); }
   opacity: 0.7;
 }
 
-/* Floating ambient orbs (배경 위치 애니메이션이 아닌 순수 transform 루프 — 패럴랙스 아님) */
-.inv-hero-orb { position: absolute; border-radius: 50%; pointer-events: none; animation: float-slow 12s ease-in-out infinite; }
+/* Floating ambient orbs — 저채도 accent-soft 글로우(패럴랙스 아닌 순수 transform 루프) */
+.inv-hero-orb {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, var(--inv-accent-soft) 0%, transparent 70%);
+  animation: float-slow 12s ease-in-out infinite;
+}
+.inv-hero-orb-a { top: 12%; left: 6%; width: 200px; height: 200px; }
+.inv-hero-orb-b { bottom: 16%; right: 4%; width: 160px; height: 160px; animation-delay: -6s; }
 
 /* ══ D-day / Mini Calendar ═══════════════════ */
 .inv-cal { max-width: 220px; margin: 0 auto 1.5rem; }
 .inv-cal-head { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; color: var(--inv-text-secondary); margin: 0 0 0.5rem; }
 .inv-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
-.inv-cal-dow { font-size: 0.625rem; color: var(--inv-text-secondary); opacity: 0.6; padding: 2px 0; }
+.inv-cal-dow { font-size: 11px; letter-spacing: 0.05em; color: var(--inv-text-secondary); opacity: 0.6; padding: 2px 0; }
 .inv-cal-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.6875rem; color: var(--inv-text-secondary); border-radius: 50%; font-variant-numeric: tabular-nums; }
 .inv-cal-cell--active { background: var(--inv-accent-solid); color: #fff; font-weight: 700; }
 
 .inv-countdown { display: flex; justify-content: center; align-items: flex-end; gap: 0.5rem; margin-bottom: 1rem; }
 .inv-dday-card { width: 56px; height: 70px; display: flex; align-items: center; justify-content: center; }
-.inv-counter-label { font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; color: var(--inv-text-secondary); }
+/* 라벨은 소문자 트래킹(uppercase 대신) — 절제된 에디토리얼 톤 */
+.inv-counter-label { font-size: 0.625rem; text-transform: lowercase; letter-spacing: 0.1em; font-weight: 600; color: var(--inv-text-secondary); }
 .inv-colon-sep { font-size: 1.125rem; font-weight: 300; color: var(--inv-text-secondary); padding-bottom: 1.25rem; }
 .inv-date-label { font-size: 0.9375rem; font-weight: 500; color: var(--inv-text-primary); }
+
+/* 행사 당일/종료 — 두꺼운 accent 보더·대형 이모지 대신 헤어라인 + 세리프 타이포 */
+.inv-dday-today { margin: 0 0 1.5rem; }
+.inv-dday-today-text { font-family: var(--inv-font-display); font-style: italic; font-size: 1.0625rem; color: var(--inv-text-primary); margin: 0.25rem 0; }
 
 /* ══ Hosts ════════════════════════════════════ */
 .inv-hosts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1.25rem; max-width: 28rem; margin: 0 auto; }
@@ -635,22 +633,13 @@ export function AnimatedReveal({ children, className = '', delay = 0, variant = 
 const heroSection = `interface Props {
   config: {
     title: string; titleEn?: string; subtitle: string; subtitleEn?: string;
-    heroImageUrl: string; gradientFrom: string; gradientTo: string; eventType: string;
+    heroImageUrl: string; eventType: string;
     eventDateLabel?: string;
     hosts?: { name: string }[];
   };
 }
 
-const EVENT_EMOJI: Record<string, string> = {
-  gathering: '\\u{1F389}',
-  birthday: '\\u{1F382}',
-  wedding: '\\u{1F48D}',
-  baby: '\\u{1F476}',
-  celebration: '\\u{1F389}',
-  corporate: '\\u{1F3E2}',
-  custom: '\\u{2728}',
-};
-
+// 장식용 이모지 대신 타이포 마크(EVENT_EYEBROW 텍스트만) 사용 — 프리미엄 신호
 const EVENT_EYEBROW: Record<string, string> = {
   gathering: 'GATHERING',
   birthday: 'BIRTHDAY',
@@ -669,62 +658,49 @@ function getInitials(hosts: { name?: string }[] | undefined, title: string): str
 }
 
 export function HeroSection({ config }: Props) {
-  const emoji = EVENT_EMOJI[config.eventType] || EVENT_EMOJI.custom;
   const eyebrow = EVENT_EYEBROW[config.eventType] || EVENT_EYEBROW.custom;
   const initials = getInitials(config.hosts, config.title);
   const framed = Boolean(config.heroImageUrl);
 
   return (
-    <section
-      className={\`inv-hero \${framed ? 'inv-hero--framed' : ''}\`}
-      style={framed ? undefined : { background: \`radial-gradient(ellipse at 50% 20%, \${config.gradientTo} 0%, \${config.gradientFrom} 60%)\` }}
-    >
+    <section className={\`inv-hero \${framed ? 'inv-hero--framed' : ''}\`}>
       {!framed && (
         <>
           <div className="inv-hero-noise" aria-hidden="true" />
-          <div className="inv-hero-vignette" aria-hidden="true" />
-          <div className="inv-hero-orb" aria-hidden="true" style={{ top: '14%', left: '8%', width: '180px', height: '180px', background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)' }} />
-          <div className="inv-hero-orb" aria-hidden="true" style={{ bottom: '18%', right: '6%', width: '140px', height: '140px', background: 'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)', animationDelay: '-6s' }} />
+          <div className="inv-hero-orb inv-hero-orb-a" aria-hidden="true" />
+          <div className="inv-hero-orb inv-hero-orb-b" aria-hidden="true" />
         </>
       )}
 
       <div className="inv-hero-content animate-fade-up">
-        <p className={\`inv-eyebrow \${framed ? '' : 'inv-eyebrow--onphoto'}\`}>
-          <span aria-hidden="true">{emoji}</span> {eyebrow}
-        </p>
+        <p className="inv-eyebrow">{eyebrow}</p>
 
         {framed ? (
           <div className="inv-hero-arch animate-fade-up-d1">
             <img src={config.heroImageUrl} alt="" loading="eager" />
           </div>
         ) : (
-          <div className="inv-hero-emoji-ring animate-fade-up-d1" aria-hidden="true">{initials}</div>
+          <div className="inv-monogram inv-hero-emoji-ring animate-fade-up-d1" aria-hidden="true">{initials}</div>
         )}
 
-        <h1 className={\`inv-hero-title animate-fade-up-d1 \${framed ? 'inv-hero-title--onbg' : 'inv-hero-title--onphoto'}\`}>
-          {config.title}
-        </h1>
+        <h1 className="inv-hero-title animate-fade-up-d1">{config.title}</h1>
 
         {config.subtitle && (
-          <p className={\`inv-hero-subtitle animate-fade-up-d1 \${framed ? 'inv-hero-subtitle--onbg' : 'inv-hero-subtitle--onphoto'}\`}>
-            {config.subtitle}
-          </p>
+          <p className="inv-hero-subtitle animate-fade-up-d1">{config.subtitle}</p>
         )}
 
         {config.eventDateLabel && (
-          <p className={\`inv-hero-date animate-fade-up-d1 \${framed ? 'inv-hero-date--onbg' : 'inv-hero-date--onphoto'}\`}>
-            {config.eventDateLabel}
-          </p>
+          <p className="inv-hero-date animate-fade-up-d1">{config.eventDateLabel}</p>
         )}
 
-        <div className={\`inv-headline-divider animate-fade-up-d1 \${framed ? '' : 'inv-headline-divider--onphoto'}\`}>
+        <div className="inv-headline-divider animate-fade-up-d1">
           <span className="inv-headline-divider-mark" aria-hidden="true">&#10022;</span>
         </div>
       </div>
 
       {!framed && (
         <div className="inv-hero-scroll-cue" aria-hidden="true">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ color: 'var(--inv-text-secondary)' }} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 5v14M19 12l-7 7-7-7" />
           </svg>
         </div>
@@ -827,7 +803,7 @@ function FlipCard({ value, label }: { value: number; label: string }) {
             transform: flipping ? 'rotateX(-15deg)' : 'rotateX(0deg)',
           }}
         >
-          <span className="tabular-nums" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--inv-accent-solid)' }}>
+          <span className="tabular-nums" style={{ fontFamily: 'var(--inv-font-display)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--inv-accent-solid)' }}>
             {String(display).padStart(2, '0')}
           </span>
         </div>
@@ -840,7 +816,7 @@ function FlipCard({ value, label }: { value: number; label: string }) {
 function SimpleCounter({ value, label }: { value: number; label: string }) {
   return (
     <div className="text-center px-2">
-      <div className="tabular-nums" style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--inv-accent-solid)', lineHeight: 1.2 }}>
+      <div className="tabular-nums" style={{ fontFamily: 'var(--inv-font-display)', fontSize: '1.75rem', fontWeight: 700, color: 'var(--inv-accent-solid)', lineHeight: 1.2 }}>
         {String(value).padStart(2, '0')}
       </div>
       <div className="inv-counter-label" style={{ marginTop: '0.375rem' }}>{label}</div>
@@ -886,12 +862,13 @@ export function CountdownSection({ config }: Props) {
           </div>
         )}
         {timeLeft?.expired && (
-          <div className="mb-6" style={{ animation: 'celebrate-bounce 2s ease-in-out infinite' }}>
-            <div className="mx-auto inv-card" style={{ maxWidth: '280px', padding: '1.5rem', borderTop: '3px solid var(--inv-accent)' }}>
-              <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.5rem' }}>{'\\u{1F389}'}</span>
-              <p style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--inv-accent-solid)' }}>
-                {'\\u{2728}'} {'\\uD589\\uC0AC\\uAC00 \\uC2DC\\uC791\\uB418\\uC5C8\\uC2B5\\uB2C8\\uB2E4!'} {'\\u{2728}'}
-              </p>
+          <div className="inv-dday-today">
+            <div className="inv-headline-divider" aria-hidden="true">
+              <span className="inv-headline-divider-mark">&#10022;</span>
+            </div>
+            <p className="inv-dday-today-text">{'\\uC624\\uB298, \\uC18C\\uC911\\uD55C \\uBD84\\uB4E4\\uACFC \\uD568\\uAED8\\uD569\\uB2C8\\uB2E4'}</p>
+            <div className="inv-headline-divider" aria-hidden="true">
+              <span className="inv-headline-divider-mark">&#10022;</span>
             </div>
           </div>
         )}
@@ -933,7 +910,7 @@ export function HostsSection({ config }: Props) {
               ) : (
                 <div
                   className="inv-host-avatar inv-host-avatar--initial"
-                  style={{ background: 'linear-gradient(135deg, var(--inv-gradient-from), var(--inv-gradient-to))', color: '#fff' }}
+                  style={{ background: 'var(--inv-accent-soft)', border: '1px solid var(--inv-accent)', color: 'var(--inv-accent-solid)' }}
                 >
                   {host.name.charAt(0)}
                 </div>
@@ -1042,10 +1019,10 @@ export function LocationSection({ config }: Props) {
               <summary>{'\\uC774\\uC6A9 \\uC548\\uB0B4'}</summary>
               <div className="inv-details-body">
                 {config.parkingInfo && (
-                  <p className="inv-info-line">{'\\u{1F17F}\\u{FE0F}'} {config.parkingInfo}</p>
+                  <p className="inv-info-line"><strong>{'\\uC8FC\\uCC28'}</strong> {config.parkingInfo}</p>
                 )}
                 {config.transitInfo && (
-                  <p className="inv-info-line">{'\\u{1F68C}'} {config.transitInfo}</p>
+                  <p className="inv-info-line"><strong>{'\\uAD50\\uD1B5'}</strong> {config.transitInfo}</p>
                 )}
               </div>
             </details>
@@ -1267,7 +1244,7 @@ export function ContactSection({ config }: Props) {
               </div>
               {c.phone && (
                 <div className="flex items-center gap-2">
-                  <a href={\`tel:\${c.phone}\`} className="inv-btn inv-btn-primary inv-btn-sm">
+                  <a href={\`tel:\${c.phone}\`} className="inv-btn inv-btn-secondary inv-btn-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                     {'\\uC804\\uD654'}
                   </a>
@@ -1513,10 +1490,10 @@ export const siteConfig = {
   gradientFrom: '#B8860B',
   gradientTo: '#8B6B1F',
   fontFamily: 'Nanum Myeongjo',
-  eventDate: '2026-06-15',
+  eventDate: '2026-12-19',
   eventTime: '14:00',
-  eventDateLabel: '2026년 6월 15일 토요일 오후 2시',
-  eventDateLabelEn: 'Saturday, June 15, 2026 at 2:00 PM',
+  eventDateLabel: '2026년 12월 19일 토요일 오후 2시',
+  eventDateLabelEn: 'Saturday, December 19, 2026 at 2:00 PM',
   showCountdown: true,
   countdownStyle: 'flip' as 'flip' | 'simple',
   hostsTitle: '초대하는 사람',
