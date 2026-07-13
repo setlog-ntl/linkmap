@@ -755,6 +755,7 @@ export interface SmallBizContent {
   hours: SmallBizHours[];
   instagramUrl: string;
   naverBlogUrl: string;
+  youtubeUrl: string;
   kakaoChannelUrl: string;
 }
 
@@ -835,6 +836,7 @@ export const smallBizSample: { ko: SmallBizContent; en: SmallBizContent } = {
     ],
     instagramUrl: 'https://instagram.com/yeonnam_yaen',
     naverBlogUrl: '',
+    youtubeUrl: '',
     kakaoChannelUrl: '',
   },
   en: {
@@ -914,6 +916,7 @@ export const smallBizSample: { ko: SmallBizContent; en: SmallBizContent } = {
     ],
     instagramUrl: 'https://instagram.com/fortuna_nyc',
     naverBlogUrl: '',
+    youtubeUrl: '',
     kakaoChannelUrl: '',
   },
 };
@@ -1150,6 +1153,7 @@ export const smallBizCafeSample: { ko: SmallBizContent; en: SmallBizContent } = 
     ],
     instagramUrl: 'https://www.instagram.com/kafe.wrights',
     naverBlogUrl: 'https://blog.naver.com/kafewrights_',
+    youtubeUrl: 'https://www.youtube.com/@kafe.wrights',
     kakaoChannelUrl: '',
   },
   en: {
@@ -1210,6 +1214,7 @@ export const smallBizCafeSample: { ko: SmallBizContent; en: SmallBizContent } = 
     ],
     instagramUrl: 'https://instagram.com/bloom_coffee_la',
     naverBlogUrl: '',
+    youtubeUrl: '',
     kakaoChannelUrl: '',
   },
 };

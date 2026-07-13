@@ -1079,7 +1079,7 @@ img { display: block; max-width: 100%; }
 
 .sns-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 1rem;
 }
 
@@ -1106,6 +1106,7 @@ img { display: block; max-width: 100%; }
 
 .sns-instagram:hover { border-color: #e1306c; }
 .sns-naver:hover     { border-color: #03c75a; }
+.sns-youtube:hover   { border-color: #ff0000; }
 .sns-kakao:hover     { border-color: #fee500; }
 
 .sns-icon-wrap {
@@ -1122,6 +1123,10 @@ img { display: block; max-width: 100%; }
 }
 .sns-naver .sns-icon-wrap {
   background: #03c75a;
+  color: #fff;
+}
+.sns-youtube .sns-icon-wrap {
+  background: #ff0000;
   color: #fff;
 }
 .sns-kakao .sns-icon-wrap {
@@ -2182,6 +2187,13 @@ const NaverIcon = () => (
   </svg>
 );
 
+const YouTubeIcon = () => (
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81z" fill="white"/>
+    <path d="M9.55 15.57V8.43L15.82 12l-6.27 3.57z" fill="#ff0000"/>
+  </svg>
+);
+
 const KakaoIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 3C7.03 3 3 6.36 3 10.5c0 2.65 1.6 4.97 4.01 6.33L6 21l4.5-2.5c.49.07.99.1 1.5.1 4.97 0 9-3.36 9-7.5S16.97 3 12 3z" fill="#3c1e1e"/>
@@ -2208,14 +2220,17 @@ export function SnsSection({ config }: Props) {
     return () => observer.disconnect();
   }, []);
 
-  const hasAnySns = config.instagramUrl || config.naverBlogUrl || config.kakaoChannelUrl;
+  const hasAnySns =
+    config.instagramUrl || config.naverBlogUrl || config.youtubeUrl || config.kakaoChannelUrl;
   if (!hasAnySns) return null;
 
   const getHandle = (url: string): string => {
     try {
       const u = new URL(url);
       const parts = u.pathname.split('/').filter(Boolean);
-      return parts[parts.length - 1] ? \`@\${parts[parts.length - 1]}\` : u.hostname;
+      const last = parts[parts.length - 1];
+      if (!last) return u.hostname;
+      return last.startsWith('@') ? last : \`@\${last}\`;
     } catch {
       return url;
     }
@@ -2255,9 +2270,25 @@ export function SnsSection({ config }: Props) {
               <div className="sns-icon-wrap">
                 <NaverIcon />
               </div>
-              <span className="sns-name">네이버 플레이스</span>
+              <span className="sns-name">네이버 블로그</span>
               <span className="sns-handle">{getHandle(config.naverBlogUrl)}</span>
-              <span className="sns-desc">리뷰 · 사진 · 예약</span>
+              <span className="sns-desc">매장 소식 · 신메뉴 이야기</span>
+            </a>
+          )}
+
+          {config.youtubeUrl && (
+            <a
+              href={config.youtubeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="sns-card sns-youtube"
+            >
+              <div className="sns-icon-wrap">
+                <YouTubeIcon />
+              </div>
+              <span className="sns-name">유튜브</span>
+              <span className="sns-handle">{getHandle(config.youtubeUrl)}</span>
+              <span className="sns-desc">매장 브이로그 · 베이킹 영상</span>
             </a>
           )}
 
@@ -2555,6 +2586,7 @@ export const siteConfig = {
   ]),
   instagramUrl: process.env.NEXT_PUBLIC_INSTAGRAM_URL || '',
   naverBlogUrl: process.env.NEXT_PUBLIC_NAVER_BLOG_URL || '',
+  youtubeUrl: process.env.NEXT_PUBLIC_YOUTUBE_URL || '',
   kakaoChannelUrl: process.env.NEXT_PUBLIC_KAKAO_CHANNEL_URL || '',
   primaryColor: process.env.NEXT_PUBLIC_PRIMARY_COLOR || '#8b6914',
   fontFamily: process.env.NEXT_PUBLIC_FONT_FAMILY || 'Nanum Myeongjo',
@@ -2591,7 +2623,8 @@ const translations: Record<Locale, Record<string, string>> = {
     'location.title': '오시는 길',
     'gallery.title': '갤러리',
     'sns.title': 'SNS',
-    'sns.naver': '네이버 플레이스',
+    'sns.naver': '네이버 블로그',
+    'sns.youtube': '유튜브',
     'sns.kakao': '카카오톡 채널',
     'theme.light': '라이트 모드로 전환',
     'theme.dark': '다크 모드로 전환',
@@ -2615,7 +2648,8 @@ const translations: Record<Locale, Record<string, string>> = {
     'location.title': 'Location',
     'gallery.title': 'Gallery',
     'sns.title': 'Follow Us',
-    'sns.naver': 'Naver Place',
+    'sns.naver': 'Naver Blog',
+    'sns.youtube': 'YouTube',
     'sns.kakao': 'KakaoTalk Channel',
     'theme.light': 'Switch to light mode',
     'theme.dark': 'Switch to dark mode',

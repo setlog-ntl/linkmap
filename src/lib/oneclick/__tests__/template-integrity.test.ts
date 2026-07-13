@@ -158,6 +158,40 @@ describe('템플릿 무결성 검증', () => {
     }
   });
 
+  describe('SNS 링크 무결성 (small-biz-cafe · 카페 라이츠)', () => {
+    // 실측 링크: docs/onelink/naver-cafe/04-cafe-wrights-dataset.md (2026-07-12 네이버 플레이스 재검증)
+    const CAFE_SNS = {
+      instagram: 'https://www.instagram.com/kafe.wrights',
+      naverBlog: 'https://blog.naver.com/kafewrights_',
+      youtube: 'https://www.youtube.com/@kafe.wrights',
+    };
+
+    it('default 상태 config.ts에 인스타그램·네이버 블로그·유튜브 실링크가 반영됨', () => {
+      const schema = getModuleSchema('small-biz-cafe');
+      expect(schema).not.toBeNull();
+      if (!schema) return;
+      const generator = getGenerator('small-biz-cafe');
+      const config = generator.generateConfigTs(buildInitialState(schema));
+      expect(config).toContain(CAFE_SNS.instagram);
+      expect(config).toContain(CAFE_SNS.naverBlog);
+      expect(config).toContain(CAFE_SNS.youtube);
+    });
+
+    it('sns-section.tsx가 유튜브 카드와 브랜드 로고 아이콘을 포함', () => {
+      const template = getTemplateBySlug('small-biz-cafe');
+      expect(template).toBeDefined();
+      if (!template) return;
+      const sns = template.files.find((f) => f.path === 'src/components/sns-section.tsx');
+      expect(sns).toBeDefined();
+      if (!sns) return;
+      expect(sns.content).toContain('YouTubeIcon');
+      expect(sns.content).toContain('config.youtubeUrl');
+      expect(sns.content).toContain('네이버 블로그');
+      // 블로그 링크 카드가 '네이버 플레이스'로 잘못 표기되던 회귀 방지
+      expect(sns.content).not.toContain('네이버 플레이스');
+    });
+  });
+
   describe('프리셋 검증', () => {
     for (const slug of TEMPLATE_SLUGS) {
       it(`[${slug}] 프리셋의 enabled/order → 스키마 모듈 ID 부분집합`, async () => {

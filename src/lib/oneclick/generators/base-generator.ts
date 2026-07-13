@@ -491,6 +491,7 @@ export function createSmallBizGenerator(
 
     const instagramUrl = (sns.instagramUrl as string) || '';
     const naverBlogUrl = (sns.naverBlogUrl as string) || '';
+    const youtubeUrl = (sns.youtubeUrl as string) || '';
     const kakaoChannelUrl = (sns.kakaoChannelUrl as string) || '';
 
     const galleryArr = buildGalleryArray(galleryImages);
@@ -549,6 +550,7 @@ export const siteConfig = {
   galleryImages: parseJSON<string[]>(process.env.NEXT_PUBLIC_GALLERY_IMAGES, ${galleryArr}),
   instagramUrl: process.env.NEXT_PUBLIC_INSTAGRAM_URL || ${instagramUrl ? `'${esc(instagramUrl)}'` : `''`},
   naverBlogUrl: process.env.NEXT_PUBLIC_NAVER_BLOG_URL || ${naverBlogUrl ? `'${esc(naverBlogUrl)}'` : `''`},
+  youtubeUrl: process.env.NEXT_PUBLIC_YOUTUBE_URL || ${youtubeUrl ? `'${esc(youtubeUrl)}'` : `''`},
   kakaoChannelUrl: process.env.NEXT_PUBLIC_KAKAO_CHANNEL_URL || ${kakaoChannelUrl ? `'${esc(kakaoChannelUrl)}'` : `''`},
   fontFamily: '${esc(fontFamily)}',
   designPreset: '${esc(designPreset)}',
@@ -681,6 +683,8 @@ ${renders.join('\n')}
     if (instagramUrl !== null) state.values.sns.instagramUrl = instagramUrl;
     const naverBlogUrl = extractString('naverBlogUrl');
     if (naverBlogUrl !== null) state.values.sns.naverBlogUrl = naverBlogUrl;
+    const youtubeUrl = extractString('youtubeUrl');
+    if (youtubeUrl !== null) state.values.sns.youtubeUrl = youtubeUrl;
     const kakaoChannelUrl = extractString('kakaoChannelUrl');
     if (kakaoChannelUrl !== null) state.values.sns.kakaoChannelUrl = kakaoChannelUrl;
 

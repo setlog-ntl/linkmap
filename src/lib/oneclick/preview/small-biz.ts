@@ -219,17 +219,27 @@ export function renderSmallBizSnsSection(
 ): string {
   const instagram = getVal(state, 'sns', 'instagramUrl', '');
   const naverBlog = getVal(state, 'sns', 'naverBlogUrl', '');
+  const youtube = getVal(state, 'sns', 'youtubeUrl', '');
   const kakaoChannel = getVal(state, 'sns', 'kakaoChannelUrl', '');
+
+  // 배포 산출물과 동일한 공식 브랜드 로고(인라인 SVG) — 신뢰성 있는 링크 표현
+  const instagramIco = `<span class="sb-sns-ico" style="background:linear-gradient(135deg,#405de6,#5851db,#833ab4,#c13584,#e1306c,#fd1d1d)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" stroke="white" stroke-width="2"/><circle cx="12" cy="12" r="4" stroke="white" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.2" fill="white"/></svg></span>`;
+  const naverIco = `<span class="sb-sns-ico" style="background:#03c75a"><svg width="11" height="11" viewBox="0 0 22 22" fill="none"><path d="M3 3h6.5l5.5 8V3H19v16h-6.5L7 11v8H3V3z" fill="white"/></svg></span>`;
+  const youtubeIco = `<span class="sb-sns-ico" style="background:#ff0000"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81z" fill="white"/><path d="M9.55 15.57V8.43L15.82 12l-6.27 3.57z" fill="#ff0000"/></svg></span>`;
+  const kakaoIco = `<span class="sb-sns-ico" style="background:#fee500"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 3C7.03 3 3 6.36 3 10.5c0 2.65 1.6 4.97 4.01 6.33L6 21l4.5-2.5c.49.07.99.1 1.5.1 4.97 0 9-3.36 9-7.5S16.97 3 12 3z" fill="#3c1e1e"/></svg></span>`;
 
   const links: string[] = [];
   if (instagram) {
-    links.push(`<a class="sb-sns-link" href="${esc(instagram)}" target="_blank" rel="noopener noreferrer" style="border-color:${esc(primaryColor)}">&#128247; Instagram</a>`);
+    links.push(`<a class="sb-sns-link" href="${esc(instagram)}" target="_blank" rel="noopener noreferrer" style="border-color:#e1306c">${instagramIco} 인스타그램</a>`);
   }
   if (naverBlog) {
-    links.push(`<a class="sb-sns-link" href="${esc(naverBlog)}" target="_blank" rel="noopener noreferrer" style="border-color:${esc(primaryColor)}">&#128221; 네이버 블로그</a>`);
+    links.push(`<a class="sb-sns-link" href="${esc(naverBlog)}" target="_blank" rel="noopener noreferrer" style="border-color:#03c75a">${naverIco} 네이버 블로그</a>`);
+  }
+  if (youtube) {
+    links.push(`<a class="sb-sns-link" href="${esc(youtube)}" target="_blank" rel="noopener noreferrer" style="border-color:#ff0000">${youtubeIco} 유튜브</a>`);
   }
   if (kakaoChannel) {
-    links.push(`<a class="sb-sns-link" href="${esc(kakaoChannel)}" target="_blank" rel="noopener noreferrer" style="border-color:${esc(primaryColor)}">&#128172; 카카오톡 채널</a>`);
+    links.push(`<a class="sb-sns-link" href="${esc(kakaoChannel)}" target="_blank" rel="noopener noreferrer" style="border-color:#fee500">${kakaoIco} 카카오톡 채널</a>`);
   }
 
   if (links.length === 0) return '';
@@ -559,6 +569,14 @@ export function buildSmallBizCSS(primaryColor: string): string {
 .sb-sns-link:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,.08);
+}
+.sb-sns-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 /* Footer */

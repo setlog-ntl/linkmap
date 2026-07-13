@@ -20,7 +20,7 @@
 | 교통 | 건대입구역 5번 출구 108m (자양역 방면 직진 → LGU+ 우회전) / 차량은 인근 공영주차장 |
 | 영업시간 | 매일 08:00–22:30 (22:00 라스트오더, 휴무 없음) |
 | 전화 | 0507-1485-8892 (스마트콜) |
-| SNS | 인스타 https://www.instagram.com/kafe.wrights · 블로그 https://blog.naver.com/kafewrights_ · 유튜브 https://www.youtube.com/@kafe.wrights (유튜브는 sns 모듈에 필드 없음 — Phase 2 후보) |
+| SNS | 인스타 https://www.instagram.com/kafe.wrights · 블로그 https://blog.naver.com/kafewrights_ · 유튜브 https://www.youtube.com/@kafe.wrights (2026-07-13 sns 모듈에 `youtubeUrl` 필드 추가 완료 — 3종 모두 템플릿 기본값 반영) |
 | 편의시설 | 단체 이용 가능, 포장, 무선 인터넷, 간편결제 |
 | 리뷰 수 | 939 (수집일 기준) |
 
