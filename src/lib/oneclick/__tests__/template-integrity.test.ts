@@ -177,6 +177,20 @@ describe('템플릿 무결성 검증', () => {
       expect(config).toContain(CAFE_SNS.youtube);
     });
 
+    it('배포 번들 src/lib/config.ts에 실링크가 기본 포함됨', () => {
+      // 배포 라우트(api/oneclick/deploy)는 모듈 상태를 거치지 않고 정적 번들 files를
+      // 그대로 푸시하므로, 스키마 defaultValue만으로는 배포 산출물에 링크가 실리지 않는다.
+      const template = getTemplateBySlug('small-biz-cafe');
+      expect(template).toBeDefined();
+      if (!template) return;
+      const config = template.files.find((f) => f.path === 'src/lib/config.ts');
+      expect(config).toBeDefined();
+      if (!config) return;
+      expect(config.content).toContain(CAFE_SNS.instagram);
+      expect(config.content).toContain(CAFE_SNS.naverBlog);
+      expect(config.content).toContain(CAFE_SNS.youtube);
+    });
+
     it('sns-section.tsx가 유튜브 카드와 브랜드 로고 아이콘을 포함', () => {
       const template = getTemplateBySlug('small-biz-cafe');
       expect(template).toBeDefined();
