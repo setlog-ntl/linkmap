@@ -12,6 +12,9 @@ export async function GET(request: Request) {
     ? rawNext
     : '/dashboard';
 
+  // 재시도 시 원래 목적지를 잃지 않도록 실패 리다이렉트에 next를 보존한다
+  const loginRetryQs = next !== '/dashboard' ? `&redirect=${encodeURIComponent(next)}` : '';
+
   // OAuth provider returned an error
   if (error_param) {
     console.error('[auth/callback] OAuth error from provider:', {
@@ -19,7 +22,7 @@ export async function GET(request: Request) {
       description: error_description,
     });
     return NextResponse.redirect(
-      `${origin}/login?error=${encodeURIComponent(error_description || error_param)}`
+      `${origin}/login?error=${encodeURIComponent(error_description || error_param)}${loginRetryQs}`
     );
   }
 
@@ -45,5 +48,5 @@ export async function GET(request: Request) {
     console.error('[auth/callback] No code parameter in callback URL');
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+  return NextResponse.redirect(`${origin}/login?error=auth_failed${loginRetryQs}`);
 }

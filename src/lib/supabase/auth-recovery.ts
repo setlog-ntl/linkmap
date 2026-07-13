@@ -55,6 +55,24 @@ export function isDefinitiveAuthFailure(error: unknown): boolean {
 }
 
 /**
+ * 만료된 액세스 토큰(JWT expired)으로 인한 실패인지 판별 — 세션이 죽은 게
+ * 아니라 갱신 시점을 놓쳤을 뿐인 **회복 가능한** 실패다.
+ *
+ * 탭이 절전/백그라운드로 잠들면 supabase-js 자동 갱신 타이머가 멈추고,
+ * 깨어날 때 데이터 리페치가 토큰 갱신보다 먼저 발사되어 PGRST301
+ * "JWT expired" 401이 표면화된다. 이를 확정 실패로 취급해 세션을 정리하면
+ * 멀쩡한 refresh token까지 버려져 강제 로그아웃이 된다(2026-07-13 재보고
+ * 사고) — 반드시 세션 갱신을 먼저 시도하고, 갱신이 거부될 때만 정리할 것.
+ */
+export function isExpiredJwtFailure(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const message = (error as { message?: unknown }).message;
+  if (typeof message !== 'string') return false;
+  // "JWT expired"(PostgREST) / "invalid JWT: ... token is expired by 2h"(GoTrue)
+  return /(jwt|token)[\s\S]{0,60}expired/i.test(message);
+}
+
+/**
  * 폐기된 API 키로 인한 실패인지 판별 — 브라우저가 구 번들(스테일 HTML/JS)을
  * 실행 중이라는 신호다. publishable 키는 JS에 인라인되므로 세션 정리로는
  * 복구할 수 없고, 문서를 다시 받아 새 번들을 로드해야 한다

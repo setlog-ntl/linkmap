@@ -40,6 +40,15 @@ export default function LoginPage() {
   const isExpiredLink = !!authErrorParam && /invalid|expired/i.test(authErrorParam);
   const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent'>('idle');
 
+  // 콜백 실패(auth_failed 등)가 배너 없이 삼켜져 "이유 없이 로그인이 안 되는"
+  // 경험을 유발했음(2026-07-13) — 만료 링크 외 오류도 반드시 화면에 표기한다
+  const callbackError =
+    authErrorParam && !isExpiredLink
+      ? authErrorParam === 'auth_failed'
+        ? '로그인 처리 중 문제가 발생했습니다. 아래에서 다시 시도해주세요. 반복되면 다른 탭의 로그인 화면을 닫은 뒤 이 탭에서만 시도해주세요.'
+        : authErrorParam
+      : null;
+
   const handleResendConfirmation = async () => {
     if (!email) {
       setError('재발송할 이메일 주소를 아래에 먼저 입력해주세요.');
@@ -120,6 +129,11 @@ export default function LoginPage() {
           <CardDescription>계정에 로그인하여 프로젝트를 관리하세요</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {callbackError && (
+            <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+              {callbackError}
+            </div>
+          )}
           {isExpiredLink && (
             <div className="rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-3 space-y-2">
               <div className="flex items-start gap-2">

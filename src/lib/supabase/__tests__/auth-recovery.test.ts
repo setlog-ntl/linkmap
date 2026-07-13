@@ -7,6 +7,7 @@ import {
 import {
   isAuthSessionCookie,
   isDefinitiveAuthFailure,
+  isExpiredJwtFailure,
   isStaleClientKeyFailure,
 } from '../auth-recovery';
 
@@ -73,6 +74,32 @@ describe('isDefinitiveAuthFailure', () => {
     expect(isDefinitiveAuthFailure(new Error('JWT expired'))).toBe(true);
     expect(isDefinitiveAuthFailure(new Error('invalid jwt signature'))).toBe(true);
     expect(isDefinitiveAuthFailure(new Error('일반 오류'))).toBe(false);
+  });
+});
+
+describe('isExpiredJwtFailure', () => {
+  it('만료 토큰 응답을 인식한다 (PostgREST·GoTrue 공통)', () => {
+    // PostgREST: PGRST301
+    expect(
+      isExpiredJwtFailure({ message: 'JWT expired', details: '', hint: '', code: 'PGRST301' })
+    ).toBe(true);
+    // GoTrue: bad_jwt에 만료 상세가 실림
+    expect(
+      isExpiredJwtFailure(
+        new AuthApiError('invalid JWT: unable to parse or verify signature, token is expired by 2h30m', 401, 'bad_jwt')
+      )
+    ).toBe(true);
+    expect(isExpiredJwtFailure(new Error('token is expired'))).toBe(true);
+  });
+
+  it('만료 외 인증 실패는 회복 가능으로 오인하지 않는다', () => {
+    expect(isExpiredJwtFailure(new AuthApiError('invalid JWT', 401, 'bad_jwt'))).toBe(false);
+    expect(
+      isExpiredJwtFailure(new AuthApiError('refresh token not found', 400, 'refresh_token_not_found'))
+    ).toBe(false);
+    expect(isExpiredJwtFailure({ message: 'Invalid API key', code: '' })).toBe(false);
+    expect(isExpiredJwtFailure(null)).toBe(false);
+    expect(isExpiredJwtFailure('JWT expired')).toBe(false);
   });
 });
 
