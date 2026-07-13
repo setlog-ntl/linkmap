@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { isStaleClientKeyFailure } from '@/lib/supabase/auth-recovery';
+import { reloadForFreshBundle } from '@/lib/stale-bundle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +13,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from '@/components/ui/separator';
 import { Github, Loader2, MailWarning } from 'lucide-react';
 import { GoogleIcon } from '@/components/icons/google-icon';
+
+// 구 번들(폐기 키)로 로그인 시도 시 자동 리로드가 가드에 걸렸을 때의 폴백 안내
+const STALE_BUNDLE_MESSAGE =
+  '앱이 이전 버전으로 실행되고 있습니다. 강력 새로고침(Ctrl+Shift+R) 후 다시 시도해주세요.';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -61,6 +67,14 @@ export default function LoginPage() {
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
+      // 폐기 키(구 번들) — 새 번들을 받아야 로그인 가능 (2026-07-12 키 로테이션 재발 방지)
+      if (isStaleClientKeyFailure(error)) {
+        if (!reloadForFreshBundle()) {
+          setError(STALE_BUNDLE_MESSAGE);
+          setLoading(false);
+        }
+        return;
+      }
       setError(error.message === 'Invalid login credentials'
         ? '이메일 또는 비밀번호가 올바르지 않습니다.'
         : error.message);
@@ -82,6 +96,13 @@ export default function LoginPage() {
       },
     });
     if (error) {
+      if (isStaleClientKeyFailure(error)) {
+        if (!reloadForFreshBundle()) {
+          setError(STALE_BUNDLE_MESSAGE);
+          setOauthLoading(null);
+        }
+        return;
+      }
       setError(error.message);
       setOauthLoading(null);
     }

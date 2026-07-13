@@ -7,7 +7,8 @@ import { ThemeProvider } from 'next-themes';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { CommandPalette } from '@/components/command-palette';
 import { createClient } from '@/lib/supabase/client';
-import { isDefinitiveAuthFailure } from '@/lib/supabase/auth-recovery';
+import { isDefinitiveAuthFailure, isStaleClientKeyFailure } from '@/lib/supabase/auth-recovery';
+import { installChunkFailureRecovery, reloadForFreshBundle } from '@/lib/stale-bundle';
 
 /** 인증이 필요한 경로 접두사 */
 const AUTH_REQUIRED_PREFIXES = ['/dashboard', '/project', '/settings', '/admin', '/my-sites', '/sites'];
@@ -41,6 +42,12 @@ function purgeDeadSession(): Promise<void> {
 
 /** 쿼리/뮤테이션의 확정적 인증 실패 → 세션 정리 + 보호 경로면 로그인으로 */
 function handleGlobalAuthError(error: unknown) {
+  // 폐기 키 401 = 구 번들 실행 중. 키가 JS에 인라인이라 세션 정리로는 복구
+  // 불가 — 새 문서를 받아야 하므로 확정 실패 분기보다 먼저 처리한다.
+  if (isStaleClientKeyFailure(error)) {
+    reloadForFreshBundle();
+    return;
+  }
   if (!isDefinitiveAuthFailure(error)) return;
   void purgeDeadSession().then(() => {
     if (isProtectedPath(window.location.pathname)) {
@@ -80,6 +87,11 @@ function useAuthStateListener() {
           error,
         } = await supabase.auth.getUser();
         if (cancelled) return;
+        if (!user && isStaleClientKeyFailure(error)) {
+          // 구 번들의 폐기 키 — 세션 정리·로그인 리다이렉트 대신 새 번들 로드
+          reloadForFreshBundle();
+          return;
+        }
         if (!user && isDefinitiveAuthFailure(error)) {
           wasSignedIn.current = false;
           await purgeDeadSession();
@@ -124,6 +136,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             staleTime: 5 * 60 * 1000,
             retry: (failureCount, error) => {
               // 인증 실패는 재시도해도 결과가 같음 — 즉시 복구 로직으로 위임
+              if (isStaleClientKeyFailure(error)) return false;
               if (isDefinitiveAuthFailure(error)) return false;
               if (error instanceof Error && error.message.includes('401')) return false;
               return failureCount < 1;
@@ -134,6 +147,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   useAuthStateListener();
+
+  // 배포 후 구 청크 404(스테일 HTML) — 새 문서 로드로 자가치유
+  useEffect(() => installChunkFailureRecovery(), []);
 
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>

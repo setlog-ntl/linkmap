@@ -4,7 +4,11 @@ import {
   AuthRetryableFetchError,
   AuthSessionMissingError,
 } from '@supabase/supabase-js';
-import { isAuthSessionCookie, isDefinitiveAuthFailure } from '../auth-recovery';
+import {
+  isAuthSessionCookie,
+  isDefinitiveAuthFailure,
+  isStaleClientKeyFailure,
+} from '../auth-recovery';
 
 describe('isAuthSessionCookie', () => {
   it('세션 쿠키(단일·청크)를 인식한다', () => {
@@ -69,5 +73,30 @@ describe('isDefinitiveAuthFailure', () => {
     expect(isDefinitiveAuthFailure(new Error('JWT expired'))).toBe(true);
     expect(isDefinitiveAuthFailure(new Error('invalid jwt signature'))).toBe(true);
     expect(isDefinitiveAuthFailure(new Error('일반 오류'))).toBe(false);
+  });
+});
+
+describe('isStaleClientKeyFailure', () => {
+  it('폐기된 publishable 키 응답을 인식한다 (REST·GoTrue 공통)', () => {
+    // PostgREST 게이트웨이 응답 (PostgrestError 형태, code 없음)
+    expect(
+      isStaleClientKeyFailure({ message: 'Invalid API key', details: '', hint: '', code: '' })
+    ).toBe(true);
+    // GoTrue 응답 (AuthApiError)
+    expect(isStaleClientKeyFailure(new AuthApiError('Invalid API key', 401, undefined))).toBe(true);
+  });
+
+  it('legacy 키 비활성화 응답을 인식한다', () => {
+    expect(isStaleClientKeyFailure(new Error('Legacy API keys are disabled'))).toBe(true);
+  });
+
+  it('세션 계열 인증 실패는 stale key로 오인하지 않는다', () => {
+    expect(isStaleClientKeyFailure(new AuthApiError('invalid JWT', 401, 'bad_jwt'))).toBe(false);
+    expect(
+      isStaleClientKeyFailure({ message: 'JWT expired', details: '', hint: '', code: 'PGRST301' })
+    ).toBe(false);
+    expect(isStaleClientKeyFailure(new Error('일반 오류'))).toBe(false);
+    expect(isStaleClientKeyFailure(null)).toBe(false);
+    expect(isStaleClientKeyFailure('Invalid API key')).toBe(false);
   });
 });

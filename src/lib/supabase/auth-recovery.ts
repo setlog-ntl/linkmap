@@ -53,3 +53,23 @@ export function isDefinitiveAuthFailure(error: unknown): boolean {
 
   return false;
 }
+
+/**
+ * 폐기된 API 키로 인한 실패인지 판별 — 브라우저가 구 번들(스테일 HTML/JS)을
+ * 실행 중이라는 신호다. publishable 키는 JS에 인라인되므로 세션 정리로는
+ * 복구할 수 없고, 문서를 다시 받아 새 번들을 로드해야 한다
+ * (`reloadForFreshBundle` — src/lib/stale-bundle.ts).
+ *
+ * - "Invalid API key": 키 로테이션으로 폐기된 publishable 키
+ * - "Legacy API keys are disabled": legacy anon JWT 비활성화 이후 구 키 사용
+ *
+ * 반드시 isDefinitiveAuthFailure보다 먼저 검사할 것 — GoTrue의
+ * "Invalid API key"는 401이라 확정 실패로도 분류되는데, 그 경로(세션 정리)로
+ * 빠지면 복구가 안 된 채 로그인 불가가 지속된다.
+ */
+export function isStaleClientKeyFailure(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const message = (error as { message?: unknown }).message;
+  if (typeof message !== 'string') return false;
+  return /invalid api key|legacy api keys/i.test(message);
+}
