@@ -1295,6 +1295,7 @@ export function ProfileCard({ config }: Props) {
   const nameSecondary = locale === 'ko' && config.nameEn ? config.nameEn : (locale === 'en' && config.name !== name ? config.name : null);
   const title = locale === 'en' && config.titleEn ? config.titleEn : config.title;
   const company = locale === 'en' && config.companyEn ? config.companyEn : config.company;
+  const tagline = locale === 'en' && config.taglineEn ? config.taglineEn : config.tagline;
   return (
     <div className="flex flex-col items-center text-center gap-1 py-8 px-6">
       {/* Avatar */}
@@ -1320,6 +1321,10 @@ export function ProfileCard({ config }: Props) {
       {/* Title */}
       {title && (
         <p style={{ fontSize: '0.9375rem', fontWeight: 600, color: config.accentColor }}>{title}</p>
+      )}
+      {/* Tagline */}
+      {tagline && (
+        <p style={{ fontSize: '0.8125rem', color: 'var(--card-sub)', marginTop: 6, lineHeight: 1.5 }}>{tagline}</p>
       )}
     </div>
   );
@@ -1359,7 +1364,10 @@ interface Props { config: SiteConfig; }
 export function SaveContactButton({ config }: Props) {
   const { t } = useLocale();
   const handleSave = () => {
-    const vcard = generateVCard({ name: config.name, title: config.title, company: config.company, email: config.email, phone: config.phone, address: config.address, website: config.website });
+    const avatarAbs = config.avatarUrl && !config.avatarUrl.startsWith('http')
+      ? window.location.origin + config.avatarUrl
+      : config.avatarUrl;
+    const vcard = generateVCard({ name: config.name, title: config.title, company: config.company, email: config.email, phone: config.phone, address: config.address, website: config.website, socials: config.socials, extraContacts: config.extraContacts, avatarUrl: avatarAbs });
     const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1398,6 +1406,60 @@ export function SaveContactButton({ config }: Props) {
     >
       <Download size={16} aria-hidden="true" />
       {t('save.contact')}
+    </button>
+  );
+}`;
+
+const namecardShareButton = `'use client';
+
+import { useState } from 'react';
+import { Share2, Check } from 'lucide-react';
+import { useLocale } from '@/lib/i18n';
+
+interface Props { name: string; accentColor: string; }
+
+export function ShareButton({ name, accentColor }: Props) {
+  const { t } = useLocale();
+  const [copied, setCopied] = useState(false);
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try { await navigator.share({ title: \`\${name} - 디지털 명함\`, url }); } catch { /* 사용자가 공유 시트 취소 — 무시 */ }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* 클립보드 미지원 브라우저 — 무시 */ }
+  };
+  return (
+    <button
+      onClick={handleShare}
+      style={{
+        width: '100%',
+        padding: '11px 0',
+        borderRadius: 12,
+        border: \`1.5px solid \${accentColor}\`,
+        background: 'transparent',
+        color: accentColor,
+        fontFamily: 'inherit',
+        fontSize: '0.875rem',
+        fontWeight: 700,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        cursor: 'pointer',
+        transition: 'opacity 0.2s, transform 0.15s',
+      }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.8'; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '1'; }}
+      onMouseDown={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(0.98)'; }}
+      onMouseUp={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'; }}
+    >
+      {copied ? <Check size={16} aria-hidden="true" /> : <Share2 size={16} aria-hidden="true" />}
+      {copied ? t('share.copied') : t('share.card')}
     </button>
   );
 }`;
@@ -1550,6 +1612,11 @@ function parsePreset(raw: string | undefined): DesignPreset {
   return valid.includes(raw as DesignPreset) ? (raw as DesignPreset) : 'pro';
 }
 
+function parseBool(raw: string | undefined, fallback: boolean): boolean {
+  if (raw === undefined) return fallback;
+  return raw !== 'false';
+}
+
 export const siteConfig = {
   name: process.env.NEXT_PUBLIC_SITE_NAME || '홍길동',
   nameEn: process.env.NEXT_PUBLIC_SITE_NAME_EN || 'Gildong Hong',
@@ -1557,6 +1624,8 @@ export const siteConfig = {
   titleEn: process.env.NEXT_PUBLIC_TITLE_EN || 'Freelance Developer',
   company: process.env.NEXT_PUBLIC_COMPANY || null,
   companyEn: process.env.NEXT_PUBLIC_COMPANY_EN || null,
+  tagline: process.env.NEXT_PUBLIC_TAGLINE || null,
+  taglineEn: process.env.NEXT_PUBLIC_TAGLINE_EN || null,
   email: process.env.NEXT_PUBLIC_EMAIL || 'hello@example.com',
   phone: process.env.NEXT_PUBLIC_PHONE || '010-1234-5678',
   address: process.env.NEXT_PUBLIC_ADDRESS || null,
@@ -1564,6 +1633,7 @@ export const siteConfig = {
   website: process.env.NEXT_PUBLIC_WEBSITE || null,
   socials: parseJSON<SocialItem[]>(process.env.NEXT_PUBLIC_SOCIALS, []),
   extraContacts: parseJSON<ExtraContactItem[]>(process.env.NEXT_PUBLIC_EXTRA_CONTACTS, []),
+  enableShare: parseBool(process.env.NEXT_PUBLIC_ENABLE_SHARE, true),
   avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || null,
   accentColor: process.env.NEXT_PUBLIC_ACCENT_COLOR || '#3b82f6',
   designPreset: parsePreset(process.env.NEXT_PUBLIC_DESIGN_PRESET || 'pro'),
@@ -1580,8 +1650,8 @@ import { useSyncExternalStore } from 'react';
 export type Locale = 'ko' | 'en';
 
 const translations: Record<Locale, Record<string, string>> = {
-  ko: { 'contact.call': '전화하기', 'contact.email': '이메일 보내기', 'contact.map': '지도에서 보기', 'contact.website': '웹사이트 방문', 'qr.hint': '명함 공유 QR', 'save.contact': '연락처에 저장', 'theme.light': '라이트 모드로 전환', 'theme.dark': '다크 모드로 전환', 'footer.powered': 'Powered by', 'lang.switchLabel': 'Switch to English', 'lang.toggle': 'EN', 'card.showProfile': '탭하여 앞면 보기', 'card.tapToFlip': '카드를 클릭하여 뒤집기' },
-  en: { 'contact.call': 'Call', 'contact.email': 'Send email', 'contact.map': 'View on map', 'contact.website': 'Visit website', 'qr.hint': 'Share QR', 'save.contact': 'Save Contact', 'theme.light': 'Switch to light mode', 'theme.dark': 'Switch to dark mode', 'footer.powered': 'Powered by', 'lang.switchLabel': '한국어로 전환', 'lang.toggle': '한국어', 'card.showProfile': 'Tap to see front', 'card.tapToFlip': 'Click to flip card' },
+  ko: { 'contact.call': '전화하기', 'contact.email': '이메일 보내기', 'contact.map': '지도에서 보기', 'contact.website': '웹사이트 방문', 'qr.hint': '명함 공유 QR', 'save.contact': '연락처에 저장', 'theme.light': '라이트 모드로 전환', 'theme.dark': '다크 모드로 전환', 'footer.powered': 'Powered by', 'lang.switchLabel': 'Switch to English', 'lang.toggle': 'EN', 'card.showProfile': '탭하여 앞면 보기', 'card.tapToFlip': '카드를 클릭하여 뒤집기', 'share.card': '명함 공유', 'share.copied': '링크 복사됨' },
+  en: { 'contact.call': 'Call', 'contact.email': 'Send email', 'contact.map': 'View on map', 'contact.website': 'Visit website', 'qr.hint': 'Share QR', 'save.contact': 'Save Contact', 'theme.light': 'Switch to light mode', 'theme.dark': 'Switch to dark mode', 'footer.powered': 'Powered by', 'lang.switchLabel': '한국어로 전환', 'lang.toggle': '한국어', 'card.showProfile': 'Tap to see front', 'card.tapToFlip': 'Click to flip card', 'share.card': 'Share Card', 'share.copied': 'Link Copied' },
 };
 
 let _locale: Locale = 'ko';
@@ -1607,16 +1677,45 @@ export function useLocale() {
   return { locale, setLocale, t };
 }`;
 
-const namecardVcard = `interface VCardData { name: string; title?: string | null; company?: string | null; email?: string | null; phone?: string | null; address?: string | null; website?: string | null; }
+const namecardVcard = `export interface VCardSocial { platform: string; url: string; }
+export interface VCardExtraContact { type: 'email' | 'phone' | 'link' | 'text'; label: string; value: string; }
+
+interface VCardData {
+  name: string;
+  title?: string | null;
+  company?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  website?: string | null;
+  socials?: VCardSocial[];
+  extraContacts?: VCardExtraContact[];
+  avatarUrl?: string | null;
+}
+
+/* vCard 3.0 텍스트 값 이스케이프 (백슬래시·개행·콤마·세미콜론) — URL 값에는 적용하지 않음 */
+function escText(value: string): string {
+  return value.replace(/\\\\/g, '\\\\\\\\').replace(/\\n/g, '\\\\n').replace(/,/g, '\\\\,').replace(/;/g, '\\\\;');
+}
 
 export function generateVCard(data: VCardData): string {
-  const lines: string[] = ['BEGIN:VCARD', 'VERSION:3.0', \`FN:\${data.name}\`, \`N:\${data.name};;;;\`];
-  if (data.title) lines.push(\`TITLE:\${data.title}\`);
-  if (data.company) lines.push(\`ORG:\${data.company}\`);
-  if (data.email) lines.push(\`EMAIL;TYPE=INTERNET:\${data.email}\`);
-  if (data.phone) lines.push(\`TEL;TYPE=CELL:\${data.phone}\`);
-  if (data.address) lines.push(\`ADR;TYPE=WORK:;;\${data.address};;;;\`);
+  const lines: string[] = ['BEGIN:VCARD', 'VERSION:3.0', \`FN:\${escText(data.name)}\`, \`N:\${escText(data.name)};;;;\`];
+  if (data.title) lines.push(\`TITLE:\${escText(data.title)}\`);
+  if (data.company) lines.push(\`ORG:\${escText(data.company)}\`);
+  if (data.email) lines.push(\`EMAIL;TYPE=INTERNET:\${escText(data.email)}\`);
+  if (data.phone) lines.push(\`TEL;TYPE=CELL:\${escText(data.phone)}\`);
+  if (data.address) lines.push(\`ADR;TYPE=WORK:;;\${escText(data.address)};;;;\`);
   if (data.website) lines.push(\`URL:\${data.website}\`);
+  for (const social of data.socials ?? []) {
+    lines.push(\`X-SOCIALPROFILE;TYPE=\${escText(social.platform)}:\${social.url}\`);
+  }
+  for (const extra of data.extraContacts ?? []) {
+    if (extra.type === 'email') lines.push(\`EMAIL;TYPE=INTERNET:\${escText(extra.value)}\`);
+    else if (extra.type === 'phone') lines.push(\`TEL;TYPE=WORK:\${escText(extra.value)}\`);
+    else if (extra.type === 'link') lines.push(\`URL:\${extra.value}\`);
+    else lines.push(\`NOTE:\${escText(extra.label + ': ' + extra.value)}\`);
+  }
+  if (data.avatarUrl) lines.push(\`PHOTO;VALUE=URI:\${data.avatarUrl}\`);
   lines.push('END:VCARD');
   return lines.join('\\r\\n');
 }
@@ -1632,6 +1731,7 @@ import { ContactInfo } from '@/components/contact-info';
 import { SocialLinks } from '@/components/social-links';
 import { QrCode } from '@/components/qr-code';
 import { SaveContactButton } from '@/components/save-contact-button';
+import { ShareButton } from '@/components/share-button';
 import { useLocale } from '@/lib/i18n';
 
 interface Props { config: SiteConfig; }
@@ -1717,6 +1817,13 @@ export function FlippableCard({ config }: Props) {
               <div onClick={(e) => e.stopPropagation()}>
                 <SaveContactButton config={config} />
               </div>
+
+              {/* Share */}
+              {config.enableShare && (
+                <div onClick={(e) => e.stopPropagation()}>
+                  <ShareButton name={config.name} accentColor={config.accentColor} />
+                </div>
+              )}
             </div>
           </div>
 
@@ -1823,6 +1930,7 @@ export const homepageTemplates: HomepageTemplateContent[] = [
       { path: 'src/components/profile-card.tsx', content: namecardProfileCard },
       { path: 'src/components/qr-code.tsx', content: namecardQrCode },
       { path: 'src/components/save-contact-button.tsx', content: namecardSaveContactButton },
+      { path: 'src/components/share-button.tsx', content: namecardShareButton },
       { path: 'src/components/social-links.tsx', content: namecardSocialLinks },
       { path: 'src/components/theme-toggle.tsx', content: namecardThemeToggle },
       { path: 'src/lib/config.ts', content: namecardConfig },

@@ -66,26 +66,43 @@ export function generateNamecardPresetCss(
   const theme = NAMECARD_PRESET_THEME[designPreset] || NAMECARD_PRESET_THEME.pro;
   const isDark = designPreset === 'minimal-dark';
 
-  let css = `/* ── Preset Override (auto-generated) ── */
-:root {
+  // --accent-color/--accent-glow는 라이트/다크 공통이므로 항상 :root에 둔다
+  const accentBlock = `:root {
   --accent-color: ${accentColor};
   --accent-glow: rgba(${hexToRgbStr(accentColor)}, 0.15);
+}
+`;
+
+  if (isDark) {
+    // minimal-dark는 항상 다크 룩이 의도이므로 :root 스코프 유지
+    return `/* ── Preset Override (auto-generated) ── */
+${accentBlock}:root {
   --page-bg: ${theme.pageBg};
   --page-text: ${theme.pageText};
   --card-bg: ${theme.cardBg};
   --card-border: ${theme.cardBorder};
   --text-secondary: ${theme.textSecondary};
-  --divider-color: ${theme.dividerColor};`;
-
-  if (isDark) {
-    css += `\n  color-scheme: dark;`;
-    css += `\n  --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);`;
-  } else {
-    css += `\n  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);`;
+  --divider-color: ${theme.dividerColor};
+  color-scheme: dark;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
+}
+`;
   }
 
-  css += `\n}\n`;
-  return css;
+  // 밝은 프리셋(pro/corporate/creative)은 :root:not(.dark)로 스코프하여
+  // globals.css의 .dark 블록(동일 특이도 0-1-0)을 나중에 로드되는 preset-override.css가
+  // 덮어쓰지 못하도록 방지 (다크모드 토글 케스케이드 버그 수정)
+  return `/* ── Preset Override (auto-generated) ── */
+${accentBlock}:root:not(.dark) {
+  --page-bg: ${theme.pageBg};
+  --page-text: ${theme.pageText};
+  --card-bg: ${theme.cardBg};
+  --card-border: ${theme.cardBorder};
+  --text-secondary: ${theme.textSecondary};
+  --divider-color: ${theme.dividerColor};
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+}
+`;
 }
 
 // ─── 모듈 컴포넌트 매핑 ─────────────────────
@@ -135,6 +152,8 @@ function generateConfigTs(state: ModuleConfigState): string {
   const titleEn = (profile.titleEn as string) || 'Freelance Developer';
   const company = (profile.company as string) || '';
   const companyEn = (profile.companyEn as string) || '';
+  const tagline = (profile.tagline as string) || '';
+  const taglineEn = (profile.taglineEn as string) || '';
   const avatarUrl = normalizeImagePath((profile.avatarUrl as string) || '');
   const email = (contact.email as string) || 'hello@example.com';
   const phone = contact.phone != null ? (contact.phone as string) : '';
@@ -142,6 +161,7 @@ function generateConfigTs(state: ModuleConfigState): string {
   const addressEn = (contact.addressEn as string) || '';
   const website = sanitizeUrl((contact.website as string) || '');
   const extraItems = (contact.extraItems as unknown[]) || [];
+  const enableShare = contact.enableShare !== false;
   const rawAccent = (theme.accentColor as string) || '';
   const accentColor = /^#[0-9a-fA-F]{6}$/.test(rawAccent) ? rawAccent : '#3b82f6';
   const socialItems = (socials.items as unknown[]) || [];
@@ -171,6 +191,11 @@ function parsePreset(raw: string | undefined): DesignPreset {
   return valid.includes(raw as DesignPreset) ? (raw as DesignPreset) : 'pro';
 }
 
+function parseBool(raw: string | undefined, fallback: boolean): boolean {
+  if (raw === undefined) return fallback;
+  return raw !== 'false';
+}
+
 export const siteConfig = {
   name: process.env.NEXT_PUBLIC_SITE_NAME || '${esc(name)}',
   nameEn: process.env.NEXT_PUBLIC_SITE_NAME_EN || '${esc(nameEn)}',
@@ -178,6 +203,8 @@ export const siteConfig = {
   titleEn: process.env.NEXT_PUBLIC_TITLE_EN || '${esc(titleEn)}',
   company: process.env.NEXT_PUBLIC_COMPANY || ${company ? `'${esc(company)}'` : 'null'},
   companyEn: process.env.NEXT_PUBLIC_COMPANY_EN || ${companyEn ? `'${esc(companyEn)}'` : 'null'},
+  tagline: process.env.NEXT_PUBLIC_TAGLINE || ${tagline ? `'${esc(tagline)}'` : 'null'},
+  taglineEn: process.env.NEXT_PUBLIC_TAGLINE_EN || ${taglineEn ? `'${esc(taglineEn)}'` : 'null'},
   email: process.env.NEXT_PUBLIC_EMAIL || '${esc(email)}',
   phone: process.env.NEXT_PUBLIC_PHONE || ${phone ? `'${esc(phone)}'` : 'null'},
   address: process.env.NEXT_PUBLIC_ADDRESS || ${address ? `'${esc(address)}'` : 'null'},
@@ -185,6 +212,7 @@ export const siteConfig = {
   website: process.env.NEXT_PUBLIC_WEBSITE || ${website ? `'${esc(website)}'` : 'null'},
   socials: parseJSON<SocialItem[]>(process.env.NEXT_PUBLIC_SOCIALS, ${buildSocialsArray(socialItems)}),
   extraContacts: parseJSON<ExtraContactItem[]>(process.env.NEXT_PUBLIC_EXTRA_CONTACTS, ${extraContactsArr}),
+  enableShare: parseBool(process.env.NEXT_PUBLIC_ENABLE_SHARE, ${enableShare}),
   avatarUrl: process.env.NEXT_PUBLIC_AVATAR_URL || ${avatarUrl ? imagePathExpr(avatarUrl) : 'null'},
   accentColor: process.env.NEXT_PUBLIC_ACCENT_COLOR || '${esc(accentColor)}',
   designPreset: parsePreset(process.env.NEXT_PUBLIC_DESIGN_PRESET || '${esc(designPreset)}'),
@@ -247,6 +275,10 @@ function parseConfigToState(
   if (company !== null) state.values.profile.company = company;
   const companyEn = extractNullable('companyEn');
   if (companyEn !== null) state.values.profile.companyEn = companyEn;
+  const tagline = extractNullable('tagline');
+  if (tagline !== null) state.values.profile.tagline = tagline;
+  const taglineEn = extractNullable('taglineEn');
+  if (taglineEn !== null) state.values.profile.taglineEn = taglineEn;
   const avatarUrl = extractNullable('avatarUrl');
   if (avatarUrl !== null) state.values.profile.avatarUrl = avatarUrl;
 
@@ -287,6 +319,14 @@ function parseConfigToState(
       if (items.length > 0) state.values.contact.extraItems = items;
     }
   } catch { /* 기본값 유지 */ }
+
+  // Share button
+  const enableShareMatch = siteBlock.match(
+    /enableShare:\s*parseBool\(\s*process\.env\.\w+,\s*(true|false)\)/
+  );
+  if (enableShareMatch) {
+    state.values.contact.enableShare = enableShareMatch[1] === 'true';
+  }
 
   // Socials
   try {
