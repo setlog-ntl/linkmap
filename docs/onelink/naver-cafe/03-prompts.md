@@ -38,7 +38,7 @@ small-biz-cafe 템플릿의 기본값을 이 카페 데이터로 교체해줘.
 규칙:
 - 메뉴 카테고리는 시그니처/커피/티·라떼/에이드 등으로 재분류, 대표 메뉴 isPopular, 시즌 메뉴 isNew
 - 매일 영업이면 7요일 전개, 라스트오더는 hoursNote에 병기
-- 공개 정보만 사용, businessNumber는 기존 가상값 유지, 네이버 이미지 사용 금지(galleryLabels만 수정)
+- 공개 정보만 사용, 네이버 이미지 사용 금지(galleryLabels만 수정)
 - 수집 데이터 스냅샷을 docs/onelink/naver-cafe/에 04 형식(04-{카페슬러그}-dataset.md)으로 저장
 
 검증:

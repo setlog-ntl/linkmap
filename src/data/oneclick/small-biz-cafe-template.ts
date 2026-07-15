@@ -2332,13 +2332,11 @@ export function Footer({ config }: Props) {
       {config.nameEn && (
         <p className="footer-logo-sub">{config.nameEn} · {config.footerTagline ?? 'Specialty Coffee'}</p>
       )}
-      {(config.address || config.phone || config.businessNumber) && (
+      {(config.address || config.phone) && (
         <p className="footer-info">
           {config.address && <>{config.address}<br /></>}
           {config.phone && <>📞 {config.phone}</>}
-          {config.phone && config.businessNumber && ' · '}
-          {config.businessNumber && <>사업자등록번호 {config.businessNumber}</>}
-          {(config.phone || config.businessNumber) && config.hoursNote && <><br />{config.hoursNote}</>}
+          {config.phone && config.hoursNote && <><br />{config.hoursNote}</>}
         </p>
       )}
       <div className="footer-divider" />
@@ -2552,7 +2550,6 @@ export const siteConfig = {
   kakaoMapId: process.env.NEXT_PUBLIC_KAKAO_MAP_ID || '',
   naverPlaceUrl: process.env.NEXT_PUBLIC_NAVER_PLACE_URL || 'https://map.naver.com/p/entry/place/2007976823',
   hoursNote: process.env.NEXT_PUBLIC_HOURS_NOTE || '라스트오더 22:00 · 연중무휴',
-  businessNumber: process.env.NEXT_PUBLIC_BUSINESS_NUMBER || '123-45-67890',
   footerTagline: process.env.NEXT_PUBLIC_FOOTER_TAGLINE || 'Bakery & Coffee',
   menuItems: parseJSON<MenuItem[]>(process.env.NEXT_PUBLIC_MENU_ITEMS, DEMO_MENU),
   businessHours: parseJSON<BusinessHour[]>(process.env.NEXT_PUBLIC_BUSINESS_HOURS, DEMO_HOURS),

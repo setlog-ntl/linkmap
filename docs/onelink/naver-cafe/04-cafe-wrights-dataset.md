@@ -57,7 +57,7 @@
 | transportBadges | 🚇 건대입구역 5번 출구 도보 2분(108m) / 🚗 인근 공영주차장 이용 |
 | galleryLabels | 카페 인테리어 / 베이커리 진열대 / 시그니처 음료 / 좌석 공간 |
 | location.naverPlaceUrl | https://map.naver.com/p/entry/place/2007976823 |
-| businessNumber | 가상값 유지 (`123-45-67890`) — 비공개 정보 미수집 원칙 |
+| businessNumber | 템플릿에서 제거됨 — 매핑 대상 아님 |
 | galleryImages | 템플릿 기본(Unsplash placeholder) 유지 — 네이버 이미지 사용 금지 |
 | primaryColor / fontFamily | 템플릿 기본 유지 — 디자인 토큰은 매핑 범위 밖 |
 
