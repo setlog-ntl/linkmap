@@ -8,6 +8,7 @@ import {
   isAuthSessionCookie,
   isDefinitiveAuthFailure,
   isExpiredJwtFailure,
+  isPkceVerifierCookie,
   isStaleClientKeyFailure,
 } from '../auth-recovery';
 
@@ -26,6 +27,29 @@ describe('isAuthSessionCookie', () => {
     expect(isAuthSessionCookie('theme')).toBe(false);
     expect(isAuthSessionCookie('sb-other-cookie')).toBe(false);
     expect(isAuthSessionCookie('my-auth-token')).toBe(false);
+  });
+});
+
+describe('isPkceVerifierCookie', () => {
+  it('PKCE code-verifier 쿠키를 인식한다', () => {
+    expect(isPkceVerifierCookie('sb-abc-auth-token-code-verifier')).toBe(true);
+  });
+
+  it('세션 쿠키·무관한 쿠키는 제외한다', () => {
+    expect(isPkceVerifierCookie('sb-abc-auth-token')).toBe(false);
+    expect(isPkceVerifierCookie('sb-abc-auth-token.0')).toBe(false);
+    expect(isPkceVerifierCookie('theme')).toBe(false);
+  });
+
+  it('세션 쿠키 판정과 상호 배타적이다 — 한 쿠키가 양쪽에 잡히면 안 된다', () => {
+    for (const name of [
+      'sb-abc-auth-token',
+      'sb-abc-auth-token.0',
+      'sb-abc-auth-token-code-verifier',
+      'theme',
+    ]) {
+      expect(isAuthSessionCookie(name) && isPkceVerifierCookie(name)).toBe(false);
+    }
   });
 });
 

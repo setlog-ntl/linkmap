@@ -18,6 +18,24 @@ import { GoogleIcon } from '@/components/icons/google-icon';
 const STALE_BUNDLE_MESSAGE =
   '앱이 이전 버전으로 실행되고 있습니다. 강력 새로고침(Ctrl+Shift+R) 후 다시 시도해주세요.';
 
+// /auth/callback이 내려보내는 실패 사유 코드 → 사용자가 취할 행동이 담긴 안내.
+// 사유를 뭉뚱그리면(구 `auth_failed`) 원인 추적이 불가능해 같은 장애가 반복됐다
+// (2026-07-13·07-15) — 사유별로 다음 행동이 달라지므로 반드시 구분해 표기한다.
+const CALLBACK_ERROR_MESSAGES: Record<string, string> = {
+  // 멀티탭에서 code_verifier가 덮어써진 경우 — 탭 정리가 실질적 해법
+  auth_verifier:
+    '다른 탭에서 로그인을 새로 시작해 이 시도가 무효가 됐습니다. 다른 로그인 탭을 모두 닫은 뒤 이 탭에서만 다시 시도해주세요.',
+  // 교환 자체가 거부됨 — 대개 코드 만료·재사용
+  auth_exchange:
+    '로그인 인증 코드가 만료되었거나 이미 사용되었습니다. 아래에서 다시 시도해주세요.',
+  // 콜백에 code가 없음 — 링크 직접 열람·잘못된 리다이렉트
+  auth_nocode:
+    '로그인 정보가 전달되지 않았습니다. 로그인 링크를 직접 열지 말고 아래에서 다시 시도해주세요.',
+  // 구 배포본이 내려보낸 코드 (하위 호환)
+  auth_failed:
+    '로그인 처리 중 문제가 발생했습니다. 아래에서 다시 시도해주세요. 반복되면 다른 탭의 로그인 화면을 닫은 뒤 이 탭에서만 시도해주세요.',
+};
+
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -42,11 +60,10 @@ export default function LoginPage() {
 
   // 콜백 실패(auth_failed 등)가 배너 없이 삼켜져 "이유 없이 로그인이 안 되는"
   // 경험을 유발했음(2026-07-13) — 만료 링크 외 오류도 반드시 화면에 표기한다
+  // 알려진 사유 코드는 안내 문구로, 그 외(프로바이더 error_description 등)는 원문 그대로
   const callbackError =
     authErrorParam && !isExpiredLink
-      ? authErrorParam === 'auth_failed'
-        ? '로그인 처리 중 문제가 발생했습니다. 아래에서 다시 시도해주세요. 반복되면 다른 탭의 로그인 화면을 닫은 뒤 이 탭에서만 시도해주세요.'
-        : authErrorParam
+      ? (CALLBACK_ERROR_MESSAGES[authErrorParam] ?? authErrorParam)
       : null;
 
   const handleResendConfirmation = async () => {

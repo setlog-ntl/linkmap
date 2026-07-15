@@ -11,10 +11,20 @@ import {
  */
 export function isAuthSessionCookie(name: string): boolean {
   return (
-    name.startsWith('sb-') &&
-    name.includes('-auth-token') &&
-    !name.includes('-code-verifier')
+    name.startsWith('sb-') && name.includes('-auth-token') && !isPkceVerifierCookie(name)
   );
+}
+
+/**
+ * PKCE code-verifier 쿠키(`sb-<ref>-auth-token-code-verifier`) 여부.
+ *
+ * 이 쿠키는 탭 간 공유되는 단일 쿠키라, 로그인 화면이 여러 탭에 열려 있으면
+ * 나중 탭의 signInWithOAuth가 앞 탭의 verifier를 덮어쓴다 → 앞 탭으로 돌아온
+ * code는 교환에 실패한다. 콜백에서 부재를 감지해 사용자에게 실제 원인을
+ * 알려주는 용도로 사용한다(`src/app/auth/callback/route.ts`).
+ */
+export function isPkceVerifierCookie(name: string): boolean {
+  return name.startsWith('sb-') && name.includes('-code-verifier');
 }
 
 /**

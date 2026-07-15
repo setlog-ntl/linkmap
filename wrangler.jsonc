@@ -12,6 +12,14 @@
     "binding": "ASSETS"
   },
 
+  // Workers Logs: 기본 비활성 — 켜지 않으면 console.error가 실시간 tail 중에만 보이고
+  // 지나간 장애는 사후 추적이 불가능하다. 2026-07-15 일회성 로그인 실패의 원인을
+  // 끝내 확정하지 못한 사례로 활성화 (대시보드 > Workers > Logs에서 검색)
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+
   // CPU 리밋: Paid Plan(최대 15분)에서 명시적으로 설정
   // 미설정 시 기본값이 Free 플랜 수준(10ms)으로 적용되어 1102 에러 발생
   // Next.js SSR 최대 CPU ~500ms 감안하여 30초로 설정 (충분한 여유)
