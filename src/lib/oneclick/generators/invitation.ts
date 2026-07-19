@@ -491,6 +491,8 @@ function parseConfigToState(
     heroVals.gradientFrom = ext.extractString('gradientFrom') ?? heroVals.gradientFrom;
     heroVals.gradientTo = ext.extractString('gradientTo') ?? heroVals.gradientTo;
     heroVals.fontFamily = ext.extractString('fontFamily') ?? heroVals.fontFamily;
+    const heroImg = ext.extractNullable('heroImageUrl');
+    if (heroImg !== null) heroVals.heroImageUrl = heroImg;
 
     // dday
     const ddayVals = state.values['dday'] as Record<string, unknown>;
@@ -498,30 +500,50 @@ function parseConfigToState(
     ddayVals.eventTime = ext.extractString('eventTime') ?? ddayVals.eventTime;
     ddayVals.eventDateLabel = ext.extractString('eventDateLabel') ?? ddayVals.eventDateLabel;
     ddayVals.eventDateLabelEn = ext.extractString('eventDateLabelEn') ?? ddayVals.eventDateLabelEn;
+    ddayVals.countdownStyle = ext.extractString('countdownStyle') ?? ddayVals.countdownStyle;
+    const showCountdownMatch = /showCountdown:\s*(true|false)/.exec(siteBlock);
+    if (showCountdownMatch) ddayVals.showCountdown = showCountdownMatch[1] !== 'false';
 
     // location
     const locVals = state.values['location'] as Record<string, unknown>;
     locVals.venueName = ext.extractString('venueName') ?? locVals.venueName;
+    locVals.venueNameEn = ext.extractString('venueNameEn') ?? locVals.venueNameEn;
     locVals.venueAddress = ext.extractString('venueAddress') ?? locVals.venueAddress;
+    locVals.venueAddressEn = ext.extractString('venueAddressEn') ?? locVals.venueAddressEn;
     locVals.kakaoMapUrl = ext.extractString('kakaoMapUrl') ?? locVals.kakaoMapUrl;
     locVals.naverMapUrl = ext.extractString('naverMapUrl') ?? locVals.naverMapUrl;
+    locVals.parkingInfo = ext.extractString('parkingInfo') ?? locVals.parkingInfo;
+    locVals.transitInfo = ext.extractString('transitInfo') ?? locVals.transitInfo;
 
     // hosts
+    const hostsVals = state.values['hosts'] as Record<string, unknown>;
+    hostsVals.hostsTitle = ext.extractString('hostsTitle') ?? hostsVals.hostsTitle;
+    hostsVals.hostsTitleEn = ext.extractString('hostsTitleEn') ?? hostsVals.hostsTitleEn;
     const hostsArr = parseArrayConstant(configContent, /const DEMO_HOSTS[\s\S]*?\n\];/, 'name');
     if (hostsArr.length > 0) {
-      (state.values['hosts'] as Record<string, unknown>).items = hostsArr;
+      hostsVals.items = hostsArr;
     }
 
     // gallery
+    // parseGalleryFromConfig는 이미 { url }[] 형태를 반환하므로 그대로 사용.
+    // (이전엔 .map((url) => ({ url }))로 이중 래핑되어 { url: { url } }가 되었고,
+    //  재적용 시 buildGalleryArray → normalizeImagePath(객체)에서 TypeError 발생)
+    const galleryVals = state.values['gallery'] as Record<string, unknown>;
     const galleryArr = parseGalleryFromConfig(configContent);
     if (galleryArr.length > 0) {
-      (state.values['gallery'] as Record<string, unknown>).images = galleryArr.map((url) => ({ url }));
+      galleryVals.images = galleryArr;
     }
+    const galleryColsMatch = /galleryColumns:\s*(\d+)/.exec(siteBlock);
+    if (galleryColsMatch) galleryVals.columns = galleryColsMatch[1];
 
     // accounts
+    const accountVals = state.values['account'] as Record<string, unknown>;
+    accountVals.accountTitle = ext.extractString('accountTitle') ?? accountVals.accountTitle;
+    accountVals.accountTitleEn = ext.extractString('accountTitleEn') ?? accountVals.accountTitleEn;
+    accountVals.kakaoPayUrl = ext.extractString('kakaoPayUrl') ?? accountVals.kakaoPayUrl;
     const accountsArr = parseArrayConstant(configContent, /const DEMO_ACCOUNTS[\s\S]*?\n\];/, 'label');
     if (accountsArr.length > 0) {
-      (state.values['account'] as Record<string, unknown>).items = accountsArr;
+      accountVals.items = accountsArr;
     }
 
     // contacts

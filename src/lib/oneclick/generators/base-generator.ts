@@ -24,14 +24,18 @@ export function esc(s: string): string {
     .replace(/\$\{/g, '\\${');
 }
 
-/** JS 문자열의 이스케이프 시퀀스를 실제 문자로 디코딩 */
+/** JS 문자열의 이스케이프 시퀀스를 실제 문자로 디코딩 (esc의 역함수) */
 export function unescapeString(s: string): string {
   // \uXXXX 유니코드 이스케이프 → 실제 문자
   let result = s.replace(/\\u([0-9A-Fa-f]{4})/g, (_, hex) =>
     String.fromCharCode(parseInt(hex, 16))
   );
-  // \' → ', \\ → \, etc.
-  result = result.replace(/\\(.)/g, '$1');
+  // \n → 줄바꿈, \r → CR, \t → 탭, 그 외 \x → x (\' → ', \\ → \ 등)
+  // (esc가 \n/\r을 이스케이프하므로 역변환도 제어문자로 복원해야 다행 텍스트가 보존됨.
+  //  이전엔 \n을 문자 'n'으로 만들어 줄바꿈이 소실되던 비대칭 버그가 있었음)
+  result = result.replace(/\\([nrt]|.)/g, (_, c) =>
+    c === 'n' ? '\n' : c === 'r' ? '\r' : c === 't' ? '\t' : c
+  );
   return result;
 }
 
@@ -124,16 +128,18 @@ export function buildGalleryArray(items: unknown[]): string {
 export function createExtractors(siteBlock: string) {
   // (?<!\w) : 단어 문자 바로 뒤가 아닌 위치에서만 매칭 (서브스트링 오매칭 방지)
   // 예: 'name:' 정규식이 'siteName:' 에 매칭되지 않도록 함
+  // `\(?\s*` : `(process.env.X || 'v') as CardStyle` 처럼 괄호+타입 캐스트로 감싼
+  // 값도 매칭 (link-card cardStyle/fontFamily). 괄호 없는 일반 필드는 0개 매칭으로 무영향.
   const extractString = (key: string): string | null => {
     // 작은따옴표 문자열 매칭
     const reSingle = new RegExp(
-      `(?<!\\w)${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'((?:[^'\\\\]|\\\\.)*)'`
+      `(?<!\\w)${key}:\\s*\\(?\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?'((?:[^'\\\\]|\\\\.)*)'`
     );
     const m = siteBlock.match(reSingle);
     if (m) return unescapeString(m[1]);
     // 큰따옴표 문자열 매칭 (storyEn 등 아포스트로피 포함 문자열)
     const reDouble = new RegExp(
-      `(?<!\\w)${key}:\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?"((?:[^"\\\\]|\\\\.)*)"`
+      `(?<!\\w)${key}:\\s*\\(?\\s*(?:process\\.env\\.[\\w]+\\s*\\|\\|\\s*)?"((?:[^"\\\\]|\\\\.)*)"`
     );
     const md = siteBlock.match(reDouble);
     return md ? unescapeString(md[1]) : null;
