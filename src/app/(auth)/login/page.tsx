@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { safeInternalPath } from '@/lib/utils/safe-redirect';
 import { isStaleClientKeyFailure } from '@/lib/supabase/auth-recovery';
 import { reloadForFreshBundle } from '@/lib/stale-bundle';
 import { Button } from '@/components/ui/button';
@@ -25,9 +26,10 @@ const CALLBACK_ERROR_MESSAGES: Record<string, string> = {
   // 멀티탭에서 code_verifier가 덮어써진 경우 — 탭 정리가 실질적 해법
   auth_verifier:
     '다른 탭에서 로그인을 새로 시작해 이 시도가 무효가 됐습니다. 다른 로그인 탭을 모두 닫은 뒤 이 탭에서만 다시 시도해주세요.',
-  // 교환 자체가 거부됨 — 대개 코드 만료·재사용
+  // 교환 자체가 거부됨 — 대개 코드 만료·재사용, 또는 로그인 버튼을 짧은 시간에
+  // 여러 번 누르거나 여러 탭에서 동시에 시도해 PKCE 검증값이 어긋난 경우
   auth_exchange:
-    '로그인 인증 코드가 만료되었거나 이미 사용되었습니다. 아래에서 다시 시도해주세요.',
+    '로그인이 완료되지 않았습니다. 로그인 버튼을 여러 번 누르거나 여러 탭·창에서 동시에 시도하면 발생할 수 있어요. 다른 로그인 탭·창을 모두 닫고 이 화면에서 한 번만 다시 시도해주세요.',
   // 콜백에 code가 없음 — 링크 직접 열람·잘못된 리다이렉트
   auth_nocode:
     '로그인 정보가 전달되지 않았습니다. 로그인 링크를 직접 열지 말고 아래에서 다시 시도해주세요.',
@@ -41,11 +43,8 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const supabase = createClient();
 
-  // Safe redirect: must start with / and not contain ://
-  const rawRedirect = searchParams.get('redirect');
-  const redirect = rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.includes('://')
-    ? rawRedirect
-    : '/dashboard';
+  // Open Redirect 방어는 safeInternalPath로 일원화 (프로토콜 상대 URL `//` 포함 차단)
+  const redirect = safeInternalPath(searchParams.get('redirect'));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
