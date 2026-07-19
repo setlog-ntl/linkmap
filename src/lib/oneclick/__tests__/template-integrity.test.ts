@@ -23,6 +23,59 @@ function syntaxErrors(code: string, fileName: string): string[] {
 }
 
 /**
+ * 컴포넌트 파일에서 지정 컴포넌트의 **필수 prop 이름**(Props 타입의 optional(?)이 아닌 멤버)을 AST로 추출한다.
+ * function 선언·const 화살표 + interface Props / type Props / 인라인 타입 리터럴 지원.
+ * 판별 불가(파라미터 타입 없음·extends 상속 등)면 빈 배열 → 미검사(less-strict, 오탐 방지).
+ */
+function requiredPropNames(fileContent: string, compName: string): string[] {
+  const sf = ts.createSourceFile('c.tsx', fileContent, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  let paramType: ts.TypeNode | undefined;
+  const findComp = (node: ts.Node) => {
+    if (paramType) return;
+    if (ts.isFunctionDeclaration(node) && node.name?.text === compName && node.parameters.length > 0) {
+      paramType = node.parameters[0].type;
+    } else if (ts.isVariableStatement(node)) {
+      for (const decl of node.declarationList.declarations) {
+        if (
+          ts.isIdentifier(decl.name) && decl.name.text === compName &&
+          decl.initializer && ts.isArrowFunction(decl.initializer) &&
+          decl.initializer.parameters.length > 0
+        ) {
+          paramType = decl.initializer.parameters[0].type;
+        }
+      }
+    }
+    ts.forEachChild(node, findComp);
+  };
+  findComp(sf);
+  if (!paramType) return [];
+
+  const requiredFrom = (members: ts.NodeArray<ts.TypeElement>): string[] =>
+    members
+      .filter((m) => ts.isPropertySignature(m) && !m.questionToken && !!m.name && ts.isIdentifier(m.name))
+      .map((m) => ((m as ts.PropertySignature).name as ts.Identifier).text);
+
+  if (ts.isTypeLiteralNode(paramType)) return requiredFrom(paramType.members);
+
+  if (ts.isTypeReferenceNode(paramType) && ts.isIdentifier(paramType.typeName)) {
+    const typeName = paramType.typeName.text;
+    let out: string[] = [];
+    const findType = (node: ts.Node) => {
+      // extends(heritageClauses)가 있으면 상속 멤버까지 못 봐 오탐 위험 → 건너뜀
+      if (ts.isInterfaceDeclaration(node) && node.name.text === typeName && !node.heritageClauses) {
+        out = requiredFrom(node.members);
+      } else if (ts.isTypeAliasDeclaration(node) && node.name.text === typeName && ts.isTypeLiteralNode(node.type)) {
+        out = requiredFrom(node.type.members);
+      }
+      ts.forEachChild(node, findType);
+    };
+    findType(sf);
+    return out;
+  }
+  return [];
+}
+
+/**
  * 템플릿 무결성 검증 — 제너레이터 ↔ 템플릿 파일 ↔ 스키마 일관성
  *
  * 빌드 실패의 근본 원인: 제너레이터의 MODULE_COMPONENTS가
@@ -143,14 +196,14 @@ describe('템플릿 무결성 검증', () => {
     }
   });
 
-  describe('생성 page.tsx ↔ 컴포넌트 config prop 계약', () => {
+  describe('생성 page.tsx ↔ 컴포넌트 필수 prop 계약', () => {
     // 배경(2026-07-19): base-generator.generatePageTsx가 <NavHeader/>·<Footer/>를 config 없이
-    // 렌더했으나 small-biz/cafe의 해당 컴포넌트는 config 필수 → 모듈 편집→적용으로 page.tsx가
-    // 재생성되는 순간 배포 빌드에서 "Property 'config' is missing" 타입 에러.
-    // transpileModule(구문 검사)로는 못 잡으므로, 생성 태그가 config를 요구하는 컴포넌트에
-    // 실제 config를 전달하는지 컴포넌트 시그니처와 직접 대조한다.
+    // 렌더했으나 small-biz/cafe의 두 컴포넌트는 config 필수 → 모듈 편집→적용으로 page.tsx가
+    // 재생성되는 순간 배포 빌드가 "Property 'config' is missing" 타입 에러로 깨졌다.
+    // transpileModule(구문 검사)로는 못 잡으므로, 생성된 각 컴포넌트 태그가 배포 번들 컴포넌트의
+    // **필수 prop을 모두 전달하는지** 타입 시그니처(AST)와 직접 대조한다.
     for (const slug of SLUGS_WITH_TEMPLATE_FILES) {
-      it(`[${slug}] config 필수 컴포넌트에 config={siteConfig} 전달`, () => {
+      it(`[${slug}] 렌더된 컴포넌트에 필수 prop 전부 전달`, () => {
         const schema = getModuleSchema(slug);
         const template = getTemplateBySlug(slug);
         if (!schema || !template) return;
@@ -169,7 +222,7 @@ describe('템플릿 무결성 검증', () => {
         }
         const fileByPath = new Map(template.files.map((f) => [f.path, f.content]));
 
-        // 렌더된 대문자 컴포넌트 태그 추출 → config 요구 시 전달 여부 확인
+        // 렌더된 대문자 컴포넌트 태그 추출 → 필수 prop 전량 전달 여부 확인
         const tagRe = /<([A-Z]\w+)\b([^>]*?)\/?>/g;
         const problems: string[] = [];
         const seen = new Set<string>();
@@ -181,12 +234,18 @@ describe('템플릿 무결성 검증', () => {
           const content = fileByPath.get(path);
           if (!content) continue;
           seen.add(comp);
-          // 컴포넌트가 config를 구조분해 파라미터로 필수 요구하는가
-          const requiresConfig = new RegExp(
-            `function\\s+${comp}\\s*\\(\\s*\\{[^}]*\\bconfig\\b`
-          ).test(content);
-          if (requiresConfig && !/config=\{siteConfig\}/.test(attrs)) {
-            problems.push(`<${comp}> (${path})가 config를 요구하나 생성 page.tsx가 config를 전달하지 않음`);
+
+          const required = requiredPropNames(content, comp);
+          if (required.length === 0) continue;
+          const passed = new Set<string>();
+          const propRe = /(\w+)\s*=/g;
+          let pm: RegExpExecArray | null;
+          while ((pm = propRe.exec(attrs)) !== null) passed.add(pm[1]);
+
+          for (const req of required) {
+            if (!passed.has(req)) {
+              problems.push(`<${comp}> (${path})가 필수 prop '${req}'를 요구하나 생성 page.tsx가 전달하지 않음`);
+            }
           }
         }
         expect(problems, problems.join('\n')).toEqual([]);
