@@ -81,6 +81,68 @@ export function generateValuesSection(
   return baseCode.replace(/md:grid-cols-\d/g, `md:grid-cols-${cols}`);
 }
 
+/**
+ * About 컴포넌트의 하드코딩된 인사말 제목을 config 구동 방식으로 치환합니다.
+ * 사용자가 소개 제목을 입력한 경우에만 패치하며, 이미 패치된 코드는 매칭되지 않아 no-op입니다.
+ * (기존 배포 사이트의 하드코딩 제목을 편집 가능하게 만들기 위함)
+ */
+export function generateAboutSection(
+  state: ModuleConfigState,
+  baseCode: string
+): string {
+  const about = state.values.about || {};
+  const title = (about.title as string) || '';
+  const titleEn = (about.titleEn as string) || '';
+  if (!title && !titleEn) return baseCode;
+
+  // 기존 하드코딩 표현식: {locale === 'en' ? `Hello, I'm ${name}.` : `안녕하세요, ${name}입니다.`}
+  const hardcoded = /\{locale === 'en' \? `Hello, I'm \$\{name\}\.` : `안녕하세요, \$\{name\}입니다\.`\}/;
+  // config 우선, 비어있으면 기존 기본 제목 폴백
+  const replacement =
+    "{(locale === 'en' ? config.storyTitleEn : config.storyTitle) || (locale === 'en' ? `Hello, I'm ${name}.` : `안녕하세요, ${name}입니다.`)}";
+  // 함수형 replace로 replacement 내 `$` 특수 처리 회피
+  return baseCode.replace(hardcoded, () => replacement);
+}
+
+/**
+ * dev-showcase About 컴포넌트의 하드코딩된 i18n 제목을 config 구동 방식으로 치환합니다.
+ * 사용자가 소개 제목을 입력한 경우에만 패치하며, 이미 패치됐으면 no-op입니다.
+ */
+export function generateDevShowcaseAboutSection(
+  state: ModuleConfigState,
+  baseCode: string
+): string {
+  const about = state.values.about || {};
+  const title = (about.title as string) || '';
+  const titleEn = (about.titleEn as string) || '';
+  if (!title && !titleEn) return baseCode;
+
+  // 기존 하드코딩: <div className="section-heading">{t('about.title')}</div>
+  const hardcoded = /<div className="section-heading">\{t\('about\.title'\)\}<\/div>/;
+  const replacement =
+    `<div className="section-heading">{(locale === 'en' ? config.aboutTitleEn : config.aboutTitle) || t('about.title')}</div>`;
+  return baseCode.replace(hardcoded, () => replacement);
+}
+
+/**
+ * small-biz-cafe About 컴포넌트의 하드코딩된 h2 제목을 config 구동 방식으로 치환합니다.
+ * 사용자가 소개 제목을 입력한 경우에만 패치하며, 이미 패치됐으면 no-op입니다.
+ */
+export function generateCafeAboutSection(
+  state: ModuleConfigState,
+  baseCode: string
+): string {
+  const about = state.values.about || {};
+  const title = (about.title as string) || '';
+  if (!title) return baseCode;
+
+  // 기존 하드코딩: <h2 className="section-title reveal">커피 한 잔에 담긴 철학</h2>
+  const hardcoded = /<h2 className="section-title reveal">커피 한 잔에 담긴 철학<\/h2>/;
+  const replacement =
+    `<h2 className="section-title reveal">{config.aboutTitle || '커피 한 잔에 담긴 철학'}</h2>`;
+  return baseCode.replace(hardcoded, () => replacement);
+}
+
 /** Gallery 컴포넌트의 컬럼 수 치환 */
 export function generateGallerySection(
   state: ModuleConfigState,
@@ -240,6 +302,21 @@ export function generateFiles(
     }
 
     if (!isFreelancer) {
+      // About: 소개 제목을 입력한 경우 하드코딩 제목을 config 구동으로 패치
+      const about = state.values.about || {};
+      if (about.title || about.titleEn) {
+        const aboutBase = currentFiles['src/components/about-section.tsx'];
+        if (aboutBase) {
+          const patched = generateAboutSection(state, aboutBase);
+          if (patched !== aboutBase) {
+            files.push({
+              path: 'src/components/about-section.tsx',
+              content: patched,
+            });
+          }
+        }
+      }
+
       const values = state.values.values || {};
       if (values.columns && values.columns !== '3') {
         const valuesBase = currentFiles['src/components/values-section.tsx'];
@@ -286,6 +363,23 @@ export function generateFiles(
     }
   }
 
+  // Phase 2: dev-showcase 컴포넌트 About 제목 패치 (기존 배포 사이트 하위호환)
+  if (currentFiles && isDevShowcase) {
+    const about = state.values.about || {};
+    if (about.title || about.titleEn) {
+      const aboutBase = currentFiles['src/components/about-section.tsx'];
+      if (aboutBase) {
+        const patched = generateDevShowcaseAboutSection(state, aboutBase);
+        if (patched !== aboutBase) {
+          files.push({
+            path: 'src/components/about-section.tsx',
+            content: patched,
+          });
+        }
+      }
+    }
+  }
+
   // Phase 2: digital-namecard fontFamily 처리
   if (currentFiles && isDigitalNamecard) {
     const theme = state.values.theme || {};
@@ -326,6 +420,23 @@ export function generateFiles(
           path: 'src/app/layout.tsx',
           content: generateLayoutTsx(state, layoutBase),
         });
+      }
+    }
+
+    // cafe: 소개 제목을 입력한 경우 하드코딩 h2를 config 구동으로 패치 (기존 배포 사이트 하위호환)
+    if (templateSlug === 'small-biz-cafe') {
+      const about = state.values.about || {};
+      if (about.title) {
+        const aboutBase = currentFiles['src/components/about-section.tsx'];
+        if (aboutBase) {
+          const patched = generateCafeAboutSection(state, aboutBase);
+          if (patched !== aboutBase) {
+            files.push({
+              path: 'src/components/about-section.tsx',
+              content: patched,
+            });
+          }
+        }
       }
     }
   }

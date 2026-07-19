@@ -256,6 +256,15 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
   const [previewViewport, setPreviewViewport] = useState<PreviewViewport>('desktop');
   const previewRef = useRef<HTMLIFrameElement>(null);
   const liveIframeRef = useRef<HTMLIFrameElement>(null);
+  const modulePreviewRef = useRef<HTMLIFrameElement>(null);
+
+  // 모듈(섹션) 선택 시 실시간 프리뷰를 해당 섹션으로 스크롤
+  const scrollPreviewToSection = useCallback((moduleId: string) => {
+    modulePreviewRef.current?.contentWindow?.postMessage(
+      { type: 'linkmap:scroll-to-section', moduleId },
+      '*'
+    );
+  }, []);
 
   const [fileCache, setFileCache] = useState<Record<string, string>>({});
 
@@ -939,6 +948,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
     if ((rightPanel === 'modules' || !showLiveAfterDeploy) && modulePreviewHtml) {
       return (
         <iframe
+          ref={modulePreviewRef}
           srcDoc={modulePreviewHtml}
           title="실시간 미리보기"
           className="h-full w-full bg-white border-0"
@@ -1406,6 +1416,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                 locale={locale}
                 deployId={deployId}
                 onImagePreview={handleImagePreview}
+                onSelectModule={scrollPreviewToSection}
               />
             </div>
           ) : (
@@ -1581,6 +1592,7 @@ export function SiteEditorClient({ deployId }: SiteEditorClientProps) {
                 locale={locale}
                 deployId={deployId}
                 onImagePreview={handleImagePreview}
+                onSelectModule={scrollPreviewToSection}
               />
             </div>
           )}

@@ -199,6 +199,8 @@ function generateConfigTs(state: ModuleConfigState): string {
   const taglineEn = (hero.taglineEn as string) || 'Full-Stack Developer | Open Source Contributor';
   const aboutText = (about.story as string) || '';
   const aboutEn = (about.storyEn as string) || '';
+  const aboutTitle = (about.title as string) || '';
+  const aboutTitleEn = (about.titleEn as string) || '';
   const githubUsername = (projects.githubUsername as string) || '';
   const typingWords = (hero.typingWords as string) || '';
   const maxReposRaw = (projects.maxRepos as string | number | undefined);
@@ -329,6 +331,8 @@ export const siteConfig = {
   aboutEn:
     process.env.NEXT_PUBLIC_ABOUT_EN ||
     '${esc(aboutEn)}',
+  aboutTitle: process.env.NEXT_PUBLIC_ABOUT_TITLE || '${esc(aboutTitle)}',
+  aboutTitleEn: process.env.NEXT_PUBLIC_ABOUT_TITLE_EN || '${esc(aboutTitleEn)}',
   skills: parseJSON<SkillItem[]>(process.env.NEXT_PUBLIC_SKILLS, DEMO_SKILLS),
   experience: parseJSON<ExperienceItem[]>(process.env.NEXT_PUBLIC_EXPERIENCE, DEMO_EXPERIENCE),
   projects: DEMO_PROJECTS,
@@ -433,6 +437,10 @@ function parseConfigToState(
   if (about !== null) state.values.about.story = about;
   const aboutEn = extractString('aboutEn');
   if (aboutEn !== null) state.values.about.storyEn = aboutEn;
+  const aboutTitle = extractString('aboutTitle');
+  if (aboutTitle !== null) state.values.about.title = aboutTitle;
+  const aboutTitleEn = extractString('aboutTitleEn');
+  if (aboutTitleEn !== null) state.values.about.titleEn = aboutTitleEn;
 
   // Skills
   try {

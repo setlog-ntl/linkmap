@@ -81,6 +81,26 @@ export const devShowcaseModuleSchema: TemplateModuleSchema = {
       defaultEnabled: true,
       fields: [
         {
+          key: 'title',
+          type: 'text',
+          label: '소개 제목',
+          labelEn: 'About Title',
+          defaultValue: '',
+          placeholder: '비워두면 «소개» 자동 표시',
+          helpText: '섹션 제목을 직접 입력하거나 비워두면 기본 제목이 표시됩니다',
+          helpTextEn: 'Enter a custom heading, or leave empty for the default title',
+          validation: { maxLength: 80 },
+        },
+        {
+          key: 'titleEn',
+          type: 'text',
+          label: '소개 제목 (영문)',
+          labelEn: 'About Title (English)',
+          defaultValue: '',
+          placeholder: "Leave empty for «About»",
+          validation: { maxLength: 80 },
+        },
+        {
           key: 'story',
           type: 'textarea',
           label: '자기소개',
@@ -125,7 +145,7 @@ export const devShowcaseModuleSchema: TemplateModuleSchema = {
           ],
         },
       ],
-      affectedFiles: ['src/lib/config.ts'],
+      affectedFiles: ['src/lib/config.ts', 'src/components/about-section.tsx'],
     },
     {
       id: 'projects',

@@ -6,6 +6,7 @@ import {
   getActiveModules,
   buildBaseCSS,
   wrapInHtml,
+  withSectionId,
   getSocialIconSvg,
   SOCIAL_ICON_MAP,
 } from './base';
@@ -259,7 +260,7 @@ export function generateDigitalNamecardPreview(
   const sections = activeModules
     .map((id) => {
       const render = sectionRenderers[id];
-      return render ? render() : '';
+      return render ? withSectionId(render(), id) : '';
     })
     .filter(Boolean)
     .join('');

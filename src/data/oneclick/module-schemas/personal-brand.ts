@@ -123,6 +123,26 @@ export const personalBrandModuleSchema: TemplateModuleSchema = {
       defaultEnabled: true,
       fields: [
         {
+          key: 'title',
+          type: 'text',
+          label: '소개 제목',
+          labelEn: 'About Title',
+          defaultValue: '',
+          placeholder: '비워두면 «안녕하세요, {이름}입니다.» 자동 표시',
+          helpText: '섹션 제목을 직접 입력하거나 비워두면 이름 기반 기본 제목이 표시됩니다',
+          helpTextEn: 'Enter a custom heading, or leave empty to auto-generate from your name',
+          validation: { maxLength: 80 },
+        },
+        {
+          key: 'titleEn',
+          type: 'text',
+          label: '소개 제목 (영문)',
+          labelEn: 'About Title (English)',
+          defaultValue: '',
+          placeholder: 'Leave empty for «Hello, I\'m {name}.»',
+          validation: { maxLength: 80 },
+        },
+        {
           key: 'story',
           type: 'textarea',
           label: '자기소개 (한국어)',
@@ -140,7 +160,7 @@ export const personalBrandModuleSchema: TemplateModuleSchema = {
             "Hi, I'm Jiwon Lee. For the past five years I've been building bridges between brands and people through digital content.",
         },
       ],
-      affectedFiles: ['src/lib/config.ts'],
+      affectedFiles: ['src/lib/config.ts', 'src/components/about-section.tsx'],
     },
     {
       id: 'values',

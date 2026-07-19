@@ -1000,7 +1000,7 @@ export function AboutSection({ config }: Props) {
             className="text-[clamp(1.8rem,4vw,2.75rem)] font-bold tracking-[-0.02em] mb-6"
             style={{ color: 'var(--text-primary)' }}
           >
-            {locale === 'en' ? \`Hello, I'm \${name}.\` : \`안녕하세요, \${name}입니다.\`}
+            {(locale === 'en' ? config.storyTitleEn : config.storyTitle) || (locale === 'en' ? \`Hello, I'm \${name}.\` : \`안녕하세요, \${name}입니다.\`)}
           </h2>
           <p
             className="text-[1.125rem] leading-[1.85] whitespace-pre-line max-w-2xl"
@@ -1530,6 +1530,8 @@ export const siteConfig = {
   storyEn:
     process.env.NEXT_PUBLIC_STORY_EN ||
     "Hi, I'm Jiwon Lee. For the past five years I've been building bridges between brands and people through digital content.",
+  storyTitle: process.env.NEXT_PUBLIC_STORY_TITLE || '',
+  storyTitleEn: process.env.NEXT_PUBLIC_STORY_TITLE_EN || '',
   values: parseJSON<ValueItem[]>(process.env.NEXT_PUBLIC_VALUES, DEMO_VALUES),
   highlights: parseJSON<HighlightItem[]>(process.env.NEXT_PUBLIC_HIGHLIGHTS, DEMO_HIGHLIGHTS),
   galleryImages: parseJSON<string[]>(process.env.NEXT_PUBLIC_GALLERY_IMAGES, [

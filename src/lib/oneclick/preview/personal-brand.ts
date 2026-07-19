@@ -12,6 +12,7 @@ import {
   getActiveModules,
   buildBaseCSS,
   wrapInHtml,
+  withSectionId,
 } from './base';
 
 // ─── 섹션 빌더 ────────────────────────────────
@@ -84,13 +85,16 @@ function buildAboutSection(state: ModuleConfigState): string {
   const name = esc(getVal(state, 'hero', 'name', ''));
   const story = esc(getVal(state, 'about', 'story', ''));
   const storyEn = esc(getVal(state, 'about', 'storyEn'));
+  // 사용자가 소개 제목을 직접 입력하면 우선 사용, 비어있으면 이름 기반 기본 제목
+  const titleOverride = esc(getVal(state, 'about', 'title', ''));
+  const title = titleOverride || `안녕하세요, ${name}입니다.`;
 
   return `
 <section class="section-gap section-alt" id="about">
   <div class="section-inner">
     <span class="section-label">ABOUT</span>
     <h2 style="font-size:var(--text-section);font-weight:700;margin:0 0 1.5rem;">
-      안녕하세요, ${name}입니다.
+      ${title}
     </h2>
     <p style="font-size:var(--text-body);line-height:1.8;color:var(--text-secondary);max-width:680px;">
       ${story}
@@ -281,7 +285,7 @@ export function generatePersonalBrandPreview(
     .map((id) => {
       const builder = SECTION_MAP[id];
       if (!builder) return '';
-      return builder(state, liveUrl, imageMap, preset);
+      return withSectionId(builder(state, liveUrl, imageMap, preset), id);
     })
     .filter(Boolean)
     .join('\n');

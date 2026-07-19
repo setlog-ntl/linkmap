@@ -104,6 +104,17 @@ export const smallBizCafeModuleSchema: TemplateModuleSchema = {
       defaultEnabled: true,
       fields: [
         {
+          key: 'title',
+          type: 'text',
+          label: '섹션 제목',
+          labelEn: 'Section Title',
+          defaultValue: '',
+          placeholder: '커피 한 잔에 담긴 철학',
+          helpText: '비워두면 «커피 한 잔에 담긴 철학»으로 표시됩니다',
+          helpTextEn: 'Defaults to the sample title if left empty',
+          validation: { maxLength: 80 },
+        },
+        {
           key: 'stories',
           type: 'array',
           label: '카페 스토리',
@@ -187,7 +198,7 @@ export const smallBizCafeModuleSchema: TemplateModuleSchema = {
           ],
         },
       ],
-      affectedFiles: ['src/lib/config.ts'],
+      affectedFiles: ['src/lib/config.ts', 'src/components/about-section.tsx'],
     },
     {
       id: 'menu',

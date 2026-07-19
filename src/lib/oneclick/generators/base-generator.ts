@@ -166,6 +166,23 @@ export function extractSiteBlock(configContent: string): string {
   return configContent.match(/export const siteConfig\s*=\s*\{([\s\S]*?)\n\};/)?.[1] ?? configContent;
 }
 
+/**
+ * `parseJSON<...>(process.env.ENV_KEY, [ ... ])` 형태에서 2번째 인자 배열 리터럴을 추출해 파싱합니다.
+ * JSON 형식(제너레이터가 emit한 더블쿼트)만 파싱되며, 정적 번들의 싱글쿼트 리터럴은 파싱 실패 → null(기본값 유지, graceful).
+ */
+export function parseJsonArrayArg(configContent: string, envKey: string): unknown[] | null {
+  // 배열 안에 중첩 배열이 없다고 가정(non-greedy로 첫 닫는 대괄호까지)
+  const re = new RegExp(`process\\.env\\.${envKey}\\s*,\\s*(\\[[\\s\\S]*?\\])\\s*\\)`);
+  const m = configContent.match(re);
+  if (!m) return null;
+  try {
+    const parsed = JSON.parse(m[1]);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 /** 배열 상수에서 오브젝트 배열 파싱 (정규식 기반) */
 export function parseArrayConstant(
   configContent: string,
@@ -447,6 +464,15 @@ interface SmallBizDefaults {
 interface SmallBizGeneratorOptions {
   extraModuleComponents?: Record<string, ComponentMapping>;
   extraImportMap?: Record<string, string | string[]>;
+  /** base가 다루지 않는 모듈(예: cafe about)의 config emit·parse 훅 */
+  extraConfig?: {
+    /** siteConfig 앞에 삽입할 추가 타입 선언 (선택) */
+    types?: () => string;
+    /** siteConfig 객체 내부에 삽입할 추가 필드 라인 (각 줄 2칸 들여쓰기 + 끝 콤마 포함) */
+    fields: (state: ModuleConfigState) => string;
+    /** 배포 config.ts → 에디터 state 역파싱 */
+    parse: (configContent: string, state: ModuleConfigState) => void;
+  };
 }
 
 /** Small-Biz 계열 제너레이터 팩토리 */
@@ -496,6 +522,9 @@ export function createSmallBizGenerator(
 
     const galleryArr = buildGalleryArray(galleryImages);
 
+    const extraTypes = options?.extraConfig?.types?.() ?? '';
+    const extraFields = options?.extraConfig?.fields?.(state) ?? '';
+
     return `export interface MenuItem {
   name: string;
   nameEn?: string;
@@ -518,7 +547,7 @@ export interface BusinessHour {
   hoursEn?: string;
   isHoliday?: boolean;
 }
-
+${extraTypes ? `\n${extraTypes}\n` : ''}
 const DEMO_MENU: MenuItem[] = ${buildMenuItemsArray(menuItems, defaults.defaultEmoji)};
 
 const DEMO_HOURS: BusinessHour[] = ${buildBusinessHoursArray(hoursItems)};
@@ -552,7 +581,7 @@ export const siteConfig = {
   naverBlogUrl: process.env.NEXT_PUBLIC_NAVER_BLOG_URL || ${naverBlogUrl ? `'${esc(naverBlogUrl)}'` : `''`},
   youtubeUrl: process.env.NEXT_PUBLIC_YOUTUBE_URL || ${youtubeUrl ? `'${esc(youtubeUrl)}'` : `''`},
   kakaoChannelUrl: process.env.NEXT_PUBLIC_KAKAO_CHANNEL_URL || ${kakaoChannelUrl ? `'${esc(kakaoChannelUrl)}'` : `''`},
-  fontFamily: '${esc(fontFamily)}',
+${extraFields ? `${extraFields}\n` : ''}  fontFamily: '${esc(fontFamily)}',
   designPreset: '${esc(designPreset)}',
   gaId: process.env.NEXT_PUBLIC_GA_ID || null,
 };
@@ -687,6 +716,9 @@ ${renders.join('\n')}
     if (youtubeUrl !== null) state.values.sns.youtubeUrl = youtubeUrl;
     const kakaoChannelUrl = extractString('kakaoChannelUrl');
     if (kakaoChannelUrl !== null) state.values.sns.kakaoChannelUrl = kakaoChannelUrl;
+
+    // 추가 모듈(about 등) 역파싱
+    options?.extraConfig?.parse?.(configContent, state);
 
     return state;
   }

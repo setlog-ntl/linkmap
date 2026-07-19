@@ -67,6 +67,18 @@ export function getActiveModules(state: ModuleConfigState): string[] {
   return state.order.filter((id) => state.enabled.includes(id));
 }
 
+/**
+ * 섹션 HTML의 최상위 여는 태그에 `data-lm-section` 앵커 속성을 주입합니다.
+ * 에디터에서 모듈(섹션)을 선택하면 이 앵커로 프리뷰가 스크롤됩니다.
+ * @param html 섹션 빌더가 반환한 HTML (비어있으면 그대로 반환)
+ * @param moduleId 모듈 식별자 (슬러그)
+ */
+export function withSectionId(html: string, moduleId: string): string {
+  if (!html || !html.trim()) return html;
+  // 첫 번째 여는 태그(<section, <div, <footer 등)에만 속성 주입 — HTML 주석(<!--)은 자동 스킵
+  return html.replace(/<([a-zA-Z][\w-]*)/, `<$1 data-lm-section="${moduleId}"`);
+}
+
 // ─── 소셜 플랫폼 아이콘 (Simple Icons SVG path) ───
 
 /** 소셜 플랫폼별 SVG path + 브랜드 색상 */
@@ -643,6 +655,21 @@ ${fontFamilyOverride}
 </head>
 <body data-preset="${esc(preset)}">
 ${bodyContent}
+<script>
+(function(){
+  window.addEventListener('message', function(e){
+    var d = e && e.data;
+    if(!d || d.type !== 'linkmap:scroll-to-section') return;
+    var el = document.querySelector('[data-lm-section="' + d.moduleId + '"]') || document.getElementById(d.moduleId);
+    if(!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    el.style.transition = 'outline-color .4s ease';
+    el.style.outlineOffset = '-3px';
+    el.style.outline = '2px solid var(--brand-primary, #6366f1)';
+    setTimeout(function(){ el.style.outline = '2px solid transparent'; }, 1100);
+  });
+})();
+</script>
 </body>
 </html>`;
 }

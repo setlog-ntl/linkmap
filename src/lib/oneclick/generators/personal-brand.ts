@@ -184,6 +184,8 @@ function generateConfigTs(state: ModuleConfigState): string {
   const parallaxEnabled = hero.parallaxEnabled !== undefined ? !!hero.parallaxEnabled : true;
   const fontFamily = (hero.fontFamily as string) || 'Pretendard';
   const designPreset = (hero.designPreset as string) || 'creator';
+  const storyTitle = (about.title as string) || '';
+  const storyTitleEn = (about.titleEn as string) || '';
   const story = (about.story as string) || '';
   const storyEn = (about.storyEn as string) || '';
   const email = (contact.email as string) || 'hello@example.com';
@@ -242,6 +244,8 @@ export const siteConfig = {
   storyEn:
     process.env.NEXT_PUBLIC_STORY_EN ||
     '${esc(storyEn)}',
+  storyTitle: process.env.NEXT_PUBLIC_STORY_TITLE || '${esc(storyTitle)}',
+  storyTitleEn: process.env.NEXT_PUBLIC_STORY_TITLE_EN || '${esc(storyTitleEn)}',
   values: parseJSON<ValueItem[]>(process.env.NEXT_PUBLIC_VALUES, DEMO_VALUES),
   highlights: parseJSON<HighlightItem[]>(process.env.NEXT_PUBLIC_HIGHLIGHTS, DEMO_HIGHLIGHTS),
   galleryImages: parseJSON<string[]>(process.env.NEXT_PUBLIC_GALLERY_IMAGES, ${buildGalleryArray(galleryImages)}),
@@ -346,6 +350,10 @@ function parseConfigToState(
   if (designPreset !== null) state.values.hero.designPreset = designPreset;
 
   // About
+  const storyTitle = extractString('storyTitle');
+  if (storyTitle !== null) state.values.about.title = storyTitle;
+  const storyTitleEn = extractString('storyTitleEn');
+  if (storyTitleEn !== null) state.values.about.titleEn = storyTitleEn;
   const story = extractString('story');
   if (story !== null) state.values.about.story = story;
   const storyEn = extractString('storyEn');

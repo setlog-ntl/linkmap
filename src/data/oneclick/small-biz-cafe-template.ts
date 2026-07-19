@@ -1684,7 +1684,7 @@ export function AboutSection({ config }: Props) {
     <section className="section about-section" id="about" ref={sectionRef}>
       <div className="section-inner">
         <p className="section-label reveal">우리 가게</p>
-        <h2 className="section-title reveal">커피 한 잔에 담긴 철학</h2>
+        <h2 className="section-title reveal">{config.aboutTitle || '커피 한 잔에 담긴 철학'}</h2>
 
         <div className="about-grid">
           <div className="reveal">
@@ -2565,6 +2565,7 @@ export const siteConfig = {
     '월간 페어링',
     '시그니처 라이츠라떼',
   ]),
+  aboutTitle: process.env.NEXT_PUBLIC_ABOUT_TITLE || '',
   aboutStories: parseJSON<string[]>(process.env.NEXT_PUBLIC_ABOUT_STORIES, [
     '카페 라이츠는 건대입구역 인근 자양동에 자리한 1~3층 규모의 베이커리 카페입니다. 모던한 인테리어와 층마다 다른 분위기의 공간에서 커피와 디저트를 여유롭게 즐길 수 있습니다.',
     '지하 베이커리 스튜디오에서 매일 직접 굽는 페스츄리가 자랑입니다. 크루아상 결의 크랑떼부터 사과크림을 올린 시그니처 라이츠라떼, 매달 새롭게 선보이는 월간 페어링까지 — 직접 만드는 맛으로 계절을 전합니다.',

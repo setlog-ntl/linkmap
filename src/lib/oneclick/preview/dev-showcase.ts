@@ -11,6 +11,7 @@ import {
   getActiveModules,
   buildBaseCSS,
   wrapInHtml,
+  withSectionId,
 } from './base';
 
 // ─── 섹션 빌더 ────────────────────────────────
@@ -77,6 +78,8 @@ function buildAboutSection(state: ModuleConfigState): string {
   if (!isEnabled(state, 'about')) return '';
   const story = esc(getVal(state, 'about', 'story', ''));
   const storyEn = esc(getVal(state, 'about', 'storyEn'));
+  const titleOverride = esc(getVal(state, 'about', 'title', ''));
+  const title = titleOverride || '소개';
   const skills = getArr(state, 'about', 'skills');
 
   const skillBars = skills
@@ -102,7 +105,7 @@ function buildAboutSection(state: ModuleConfigState): string {
 <section class="section-gap section-alt" id="about">
   <div class="section-inner">
     <span class="section-label">ABOUT</span>
-    <h2 style="font-size:var(--text-section);font-weight:700;margin:0 0 1.5rem;">소개</h2>
+    <h2 style="font-size:var(--text-section);font-weight:700;margin:0 0 1.5rem;">${title}</h2>
     <p style="font-size:var(--text-body);line-height:1.8;color:var(--text-secondary);max-width:680px;margin-bottom:2rem;">
       ${story}
     </p>
@@ -285,7 +288,7 @@ export function generateDevShowcasePreview(
     .map((id) => {
       const builder = SECTION_MAP[id];
       if (!builder) return '';
-      return builder(state, preset);
+      return withSectionId(builder(state, preset), id);
     })
     .filter(Boolean)
     .join('\n');

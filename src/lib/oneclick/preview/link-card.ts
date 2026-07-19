@@ -6,6 +6,7 @@ import {
   getActiveModules,
   buildBaseCSS,
   wrapInHtml,
+  withSectionId,
   getSocialIconSvg,
 } from './base';
 import type { ModuleConfigState } from '@/lib/module-schema';
@@ -381,7 +382,7 @@ export function generateLinkCardPreview(
   const sections = activeModules
     .map((id) => {
       const render = sectionRenderers[id];
-      return render ? render() : '';
+      return render ? withSectionId(render(), id) : '';
     })
     .filter(Boolean)
     .join('');

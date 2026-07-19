@@ -1141,7 +1141,7 @@ export function AboutSection({ config }: Props) {
     <section id="about" className="px-4 sm:px-6" style={{ paddingTop: 'var(--section-gap)', paddingBottom: 'var(--section-gap)' }}>
       <div className="max-w-4xl mx-auto">
         <AnimatedReveal>
-          <div className="section-heading">{t('about.title')}</div>
+          <div className="section-heading">{(locale === 'en' ? config.aboutTitleEn : config.aboutTitle) || t('about.title')}</div>
         </AnimatedReveal>
 
         <div className="grid md:grid-cols-2 gap-12">
@@ -1777,6 +1777,8 @@ export const siteConfig = {
   aboutEn:
     process.env.NEXT_PUBLIC_ABOUT_EN ||
     "Hi! I'm a full-stack developer passionate about web technologies. I primarily work with React and Next.js, and love contributing to open source projects. I focus on improving user experience and writing clean code.",
+  aboutTitle: process.env.NEXT_PUBLIC_ABOUT_TITLE || '',
+  aboutTitleEn: process.env.NEXT_PUBLIC_ABOUT_TITLE_EN || '',
   skills: parseJSON<SkillItem[]>(process.env.NEXT_PUBLIC_SKILLS, DEMO_SKILLS),
   experience: parseJSON<ExperienceItem[]>(process.env.NEXT_PUBLIC_EXPERIENCE, DEMO_EXPERIENCE),
   projects: DEMO_PROJECTS,

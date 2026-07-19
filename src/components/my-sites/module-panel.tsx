@@ -284,6 +284,8 @@ interface ModulePanelProps {
   locale: Locale;
   deployId?: string;
   onImagePreview?: (path: string, dataUrl: string) => void;
+  /** 모듈(섹션) 선택 시 호출 — 프리뷰를 해당 섹션으로 스크롤하는 데 사용 */
+  onSelectModule?: (moduleId: string) => void;
 }
 
 export function ModulePanel({
@@ -297,11 +299,21 @@ export function ModulePanel({
   locale,
   deployId,
   onImagePreview,
+  onSelectModule,
 }: ModulePanelProps) {
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(
     schema.modules[0]?.id ?? null
   );
   const [activeId, setActiveId] = useState<string | null>(null);
+
+  // 모듈 선택 + 프리뷰 스크롤 트리거
+  const handleSelectModule = useCallback(
+    (moduleId: string) => {
+      setSelectedModuleId(moduleId);
+      onSelectModule?.(moduleId);
+    },
+    [onSelectModule]
+  );
 
   const selectedModule = useMemo(
     () => schema.modules.find((m) => m.id === selectedModuleId) ?? null,
@@ -445,11 +457,11 @@ export function ModulePanel({
     if (!result.valid) {
       const first = result.errors[0];
       toast.error(`${first.moduleName}: ${first.message}${result.errors.length > 1 ? ` 외 ${result.errors.length - 1}건` : ''}`);
-      setSelectedModuleId(first.moduleId);
+      handleSelectModule(first.moduleId);
       return false;
     }
     return true;
-  }, [state, schema]);
+  }, [state, schema, handleSelectModule]);
 
   const handleValidatedSaveOnly = useCallback(() => {
     if (runValidation()) onSaveOnly();
@@ -561,7 +573,7 @@ export function ModulePanel({
                       isEnabled={true}
                       isSelected={selectedModuleId === moduleId}
                       locale={locale}
-                      onSelect={setSelectedModuleId}
+                      onSelect={handleSelectModule}
                       onToggle={handleToggleModule}
                       onMoveUp={handleMoveUp}
                       onMoveDown={handleMoveDown}

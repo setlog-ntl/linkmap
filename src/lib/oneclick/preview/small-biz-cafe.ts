@@ -10,6 +10,7 @@ import {
   getActiveModules,
   buildBaseCSS,
   wrapInHtml,
+  withSectionId,
 } from './base';
 import {
   renderSmallBizHoursSection,
@@ -76,12 +77,13 @@ function renderCafeAboutSection(
   const stories = getArr(state, 'about', 'stories') as unknown as StoryItem[];
   const tags = getArr(state, 'about', 'tags') as unknown as TagItem[];
   const values = getArr(state, 'about', 'values') as unknown as ValueItem[];
+  const title = getVal(state, 'about', 'title', '') || '커피 한 잔에 담긴 철학';
 
   if (stories.length === 0 && tags.length === 0 && values.length === 0) return '';
 
   let html = `<section class="cafe-about section-gap"><div class="section-inner">`;
   html += `<span class="section-label" style="color:${esc(primaryColor)}">ABOUT</span>`;
-  html += `<h2 class="sb-section-title">소개</h2>`;
+  html += `<h2 class="sb-section-title">${esc(title)}</h2>`;
 
   // Stories
   if (stories.length > 0) {
@@ -360,7 +362,7 @@ export function generateSmallBizCafePreview(
   const sections = activeModules
     .map((id) => {
       const render = sectionRenderers[id];
-      return render ? render() : '';
+      return render ? withSectionId(render(), id) : '';
     })
     .filter(Boolean)
     .join('');

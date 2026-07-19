@@ -5,6 +5,7 @@ import {
   getArr,
   getActiveModules,
   wrapInHtml,
+  withSectionId,
 } from './base';
 import type { ModuleConfigState } from '@/lib/module-schema';
 
@@ -619,7 +620,7 @@ export function generateInvitationPreview(
   const sections = activeModules
     .map((id) => {
       const render = sectionRenderers[id];
-      return render ? render() : '';
+      return render ? withSectionId(render(), id) : '';
     })
     .filter(Boolean)
     .join('');

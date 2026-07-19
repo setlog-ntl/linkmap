@@ -6,6 +6,7 @@ import {
   getActiveModules,
   buildBaseCSS,
   wrapInHtml,
+  withSectionId,
 } from './base';
 import type { ModuleConfigState } from '@/lib/module-schema';
 
@@ -552,7 +553,7 @@ export function generateFreelancerPagePreview(
   const sections = activeModules
     .map((id) => {
       const render = sectionRenderers[id];
-      return render ? render() : '';
+      return render ? withSectionId(render(), id) : '';
     })
     .filter(Boolean)
     .join('');
