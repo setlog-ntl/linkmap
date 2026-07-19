@@ -143,6 +143,57 @@ describe('템플릿 무결성 검증', () => {
     }
   });
 
+  describe('생성 page.tsx ↔ 컴포넌트 config prop 계약', () => {
+    // 배경(2026-07-19): base-generator.generatePageTsx가 <NavHeader/>·<Footer/>를 config 없이
+    // 렌더했으나 small-biz/cafe의 해당 컴포넌트는 config 필수 → 모듈 편집→적용으로 page.tsx가
+    // 재생성되는 순간 배포 빌드에서 "Property 'config' is missing" 타입 에러.
+    // transpileModule(구문 검사)로는 못 잡으므로, 생성 태그가 config를 요구하는 컴포넌트에
+    // 실제 config를 전달하는지 컴포넌트 시그니처와 직접 대조한다.
+    for (const slug of SLUGS_WITH_TEMPLATE_FILES) {
+      it(`[${slug}] config 필수 컴포넌트에 config={siteConfig} 전달`, () => {
+        const schema = getModuleSchema(slug);
+        const template = getTemplateBySlug(slug);
+        if (!schema || !template) return;
+        const generator = getGenerator(slug);
+        const genPage = generator.generatePageTsx(buildInitialState(schema));
+
+        // 생성 page.tsx의 컴포넌트 import: 이름 → 번들 파일 경로
+        const importMap = new Map<string, string>();
+        const importRe = /import\s*\{\s*([\w,\s]+)\s*\}\s*from\s*'(@\/components\/[\w-]+)'/g;
+        let im: RegExpExecArray | null;
+        while ((im = importRe.exec(genPage)) !== null) {
+          const path = im[2].replace('@/', 'src/') + '.tsx';
+          for (const n of im[1].split(',').map((s) => s.trim()).filter(Boolean)) {
+            importMap.set(n, path);
+          }
+        }
+        const fileByPath = new Map(template.files.map((f) => [f.path, f.content]));
+
+        // 렌더된 대문자 컴포넌트 태그 추출 → config 요구 시 전달 여부 확인
+        const tagRe = /<([A-Z]\w+)\b([^>]*?)\/?>/g;
+        const problems: string[] = [];
+        const seen = new Set<string>();
+        let tg: RegExpExecArray | null;
+        while ((tg = tagRe.exec(genPage)) !== null) {
+          const [, comp, attrs] = tg;
+          const path = importMap.get(comp);
+          if (!path || seen.has(comp)) continue;
+          const content = fileByPath.get(path);
+          if (!content) continue;
+          seen.add(comp);
+          // 컴포넌트가 config를 구조분해 파라미터로 필수 요구하는가
+          const requiresConfig = new RegExp(
+            `function\\s+${comp}\\s*\\(\\s*\\{[^}]*\\bconfig\\b`
+          ).test(content);
+          if (requiresConfig && !/config=\{siteConfig\}/.test(attrs)) {
+            problems.push(`<${comp}> (${path})가 config를 요구하나 생성 page.tsx가 config를 전달하지 않음`);
+          }
+        }
+        expect(problems, problems.join('\n')).toEqual([]);
+      });
+    }
+  });
+
   describe('default 상태 검증 안전성', () => {
     // 새 형식/범위 검증(min/max/url/email/maxItems)이 실제 배포되는 default 값을
     // 잘못 막지 않는지 보장. default에서 발생 가능한 건 '필수(빈 값)' 오류뿐이어야 함.

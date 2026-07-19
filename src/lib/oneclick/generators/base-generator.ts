@@ -648,11 +648,11 @@ export default function Home() {
   return (
     <>
       <PresetSync />
-      <NavHeader />
+      <NavHeader config={siteConfig} />
       <main id="main">
 ${renders.join('\n')}
       </main>
-      <Footer />
+      <Footer config={siteConfig} />
     </>
   );
 }
