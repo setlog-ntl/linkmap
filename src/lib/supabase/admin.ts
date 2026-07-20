@@ -3,6 +3,8 @@
  * Use ONLY for: audit log inserts, or other minimal admin tasks documented here.
  * Never expose this client or SUPABASE_SERVICE_ROLE_KEY to the client bundle.
  */
+// 클라이언트 번들 유입을 컴파일 타임에 차단 (2026-07-16 레드팀 F-13).
+import 'server-only';
 import { createClient } from '@supabase/supabase-js';
 
 export function createAdminClient() {

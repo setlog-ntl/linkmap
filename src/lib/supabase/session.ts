@@ -69,6 +69,10 @@ export async function updateSession(request: NextRequest) {
     if (!user && isProtectedPath) {
       const redirectUrl = request.nextUrl.clone();
       redirectUrl.pathname = '/login';
+      // 로그인 후 원래 목적지로 복귀할 수 있도록 의도한 경로를 보존한다
+      // (미보존 시 원클릭 등 유입 경로에서 로그인 후 /dashboard로 튕겨 이탈 발생)
+      const intended = request.nextUrl.pathname + request.nextUrl.search;
+      redirectUrl.search = `?redirect=${encodeURIComponent(intended)}`;
       const redirectResponse = NextResponse.redirect(redirectUrl);
       copyResponseCookies(supabaseResponse, redirectResponse);
       if (isDeadSession) {

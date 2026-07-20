@@ -65,7 +65,8 @@ describe('updateSession — 죽은 세션 자가치유', () => {
     const response = await updateSession(request);
 
     expect(response.status).toBe(307);
-    expect(response.headers.get('location')).toBe('http://localhost:3000/login');
+    // 로그인 후 원래 목적지 복귀를 위해 의도 경로를 보존한다 (레드팀 F-4)
+    expect(response.headers.get('location')).toBe('http://localhost:3000/login?redirect=%2Fdashboard');
     expect(response.cookies.get('sb-abc-auth-token')?.value).toBe('');
     expect(response.cookies.get('sb-abc-auth-token')?.maxAge).toBe(0);
   });
@@ -111,7 +112,8 @@ describe('updateSession — 리다이렉트', () => {
     const response = await updateSession(request);
 
     expect(response.status).toBe(307);
-    expect(response.headers.get('location')).toBe('http://localhost:3000/login');
+    // 로그인 후 원래 목적지 복귀를 위해 의도 경로를 보존한다 (레드팀 F-4)
+    expect(response.headers.get('location')).toBe('http://localhost:3000/login?redirect=%2Fdashboard');
   });
 
   it('로그인 사용자가 /login 접근 시 /dashboard로 리다이렉트', async () => {

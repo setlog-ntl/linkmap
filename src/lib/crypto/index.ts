@@ -2,6 +2,9 @@
 // This runs on the server side only (API routes)
 // Cloudflare Workers: nodejs_compat 플래그로 crypto 모듈 지원
 
+// 클라이언트 번들 유입을 컴파일 타임에 차단 (2026-07-16 레드팀 F-13).
+// 'use client' 경계에서 import 시 빌드 실패로 조기 검출된다.
+import 'server-only';
 import { randomBytes, createCipheriv, createDecipheriv } from 'crypto';
 
 const ALGORITHM = 'aes-256-gcm';

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { decrypt, encrypt } from '@/lib/crypto';
 import { unauthorizedError, notFoundError, apiError } from '@/lib/api/errors';
+import { requireMfa } from '@/lib/api/mfa-guard';
 import { logAudit } from '@/lib/audit';
 import { envKeyNameSchema } from '@/lib/validations/env';
 import { z } from 'zod';
@@ -28,6 +29,10 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
+
+  // 평문 시크릿을 반환하므로 decrypt/download와 동일한 MFA 게이트 적용
+  const mfaResponse = await requireMfa(supabase);
+  if (mfaResponse) return mfaResponse;
 
   const { searchParams } = new URL(request.url);
   const serviceIdParam = searchParams.get('service_id');
@@ -93,6 +98,10 @@ export async function PUT(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
+
+  // 평문 시크릿을 다루므로 GET과 동일하게 MFA 게이트 적용
+  const mfaResponse = await requireMfa(supabase);
+  if (mfaResponse) return mfaResponse;
 
   let body: unknown;
   try {
