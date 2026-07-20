@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { serverError } from '@/lib/api/errors';
+import { hashIp, SHOWCASE_VIEW_IP_SALT } from '@/lib/utils/hash-ip';
 
 // POST: 조회수 기록
 export async function POST(
@@ -16,13 +17,9 @@ export async function POST(
   const forwarded = req.headers.get('x-forwarded-for');
   const ip = forwarded?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || 'unknown';
 
-  // SHA-256 해시 (Web Crypto API — Workers 호환)
-  const encoder = new TextEncoder();
-  const data = encoder.encode(ip + '_showcase_view_salt');
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const ipHash = Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+  // SHA-256 해시 (Web Crypto API — Workers 호환). 솔트는 기존 값 유지 — 이미 저장된
+  // viewer_ip_hash와 대조가 깨지지 않아야 30분 중복 조회 판별이 유지된다.
+  const ipHash = await hashIp(ip, SHOWCASE_VIEW_IP_SALT);
 
   // showcase_source 결정: deploy 또는 project
   const { data: deployCheck } = await supabase
