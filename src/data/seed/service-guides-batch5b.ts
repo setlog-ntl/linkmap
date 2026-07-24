@@ -159,8 +159,9 @@ const flag = await client.variation('flag', ctx, false)`,
         code_snippet: `import { Client } from '@notionhq/client'
 
 const notion = new Client({ auth: process.env.NOTION_API_KEY })
-const response = await notion.databases.query({
-  database_id: process.env.NOTION_DATABASE_ID!,
+const db = await notion.databases.retrieve({ database_id: process.env.NOTION_DATABASE_ID! })
+const response = await notion.dataSources.query({
+  data_source_id: db.data_sources[0].id,
 })`,
       },
     ],
@@ -169,9 +170,10 @@ const response = await notion.databases.query({
 
 const notion = new Client({ auth: process.env.NOTION_API_KEY })
 
-// 데이터베이스 조회
-const pages = await notion.databases.query({
-  database_id: process.env.NOTION_DATABASE_ID!,
+// 데이터베이스 조회 (2025-09-03+ API 버전부터 데이터 소스 기반 조회 필요)
+const db = await notion.databases.retrieve({ database_id: process.env.NOTION_DATABASE_ID! })
+const pages = await notion.dataSources.query({
+  data_source_id: db.data_sources[0].id,
   filter: { property: 'Status', select: { equals: 'Published' } },
   sorts: [{ property: 'Created', direction: 'descending' }],
 })
@@ -208,6 +210,15 @@ properties: {
   Name: { title: [{ text: { content: 'My Title' } }] }
 }`,
       },
+      {
+        title: 'databases.query() deprecated as of API version 2025-09-03',
+        title_ko: 'databases.query()가 API 버전 2025-09-03부터 사용 중단',
+        problem: 'Notion API version 2025-09-03 (current default for new integrations) introduced multi-source databases; the legacy databases.query({ database_id }) endpoint is deprecated and can fail',
+        solution: 'Call databases.retrieve() to get the data_sources array, then query with dataSources.query({ data_source_id })',
+        code: `const db = await notion.databases.retrieve({ database_id })
+const dataSourceId = db.data_sources[0].id
+const results = await notion.dataSources.query({ data_source_id: dataSourceId })`,
+      },
     ],
     integration_tips: [
       {
@@ -225,7 +236,7 @@ properties: {
       { text: 'API rate limit: 3 requests/second per integration', text_ko: 'API 속도 제한: 통합당 초당 3회' },
       { text: 'No real-time webhooks for database changes (polling required)', text_ko: 'DB 변경 실시간 웹훅 없음 (폴링 필요)' },
     ],
-    api_key_url: 'https://www.notion.so/my-integrations',
+    api_key_url: 'https://www.notion.com/my-integrations',
     api_key_url_label: 'Notion Integrations',
   },
 
@@ -422,7 +433,7 @@ export default function Map() {
       { text: 'Costs scale with map loads, geocoding, and direction requests', text_ko: '지도 로드·지오코딩·길찾기 요청에 따라 비용 증가' },
       { text: 'Larger bundle size than simpler alternatives like Leaflet', text_ko: 'Leaflet 등 간단한 대안보다 큰 번들 사이즈' },
     ],
-    api_key_url: 'https://account.mapbox.com/access-tokens/',
+    api_key_url: 'https://console.mapbox.com/account/access-tokens/',
     api_key_url_label: 'Mapbox Access Tokens',
   },
 
@@ -779,8 +790,8 @@ vi.fn().mockResolvedValue(data)`,
   // ──────────────────────────────────────────────────────────────────────────
   {
     service_id: S.storybook,
-    quick_start: 'npx storybook@latest init 한 줄로 컴포넌트 주도 개발 환경을 구성하고 UI 컴포넌트를 독립적으로 개발·문서화할 수 있습니다.',
-    quick_start_en: 'Set up component-driven development with a single command npx storybook@latest init and develop or document UI components in isolation.',
+    quick_start: 'npm create storybook@latest 한 줄로 컴포넌트 주도 개발 환경을 구성하고 UI 컴포넌트를 독립적으로 개발·문서화할 수 있습니다.',
+    quick_start_en: 'Set up component-driven development with a single command npm create storybook@latest and develop or document UI components in isolation.',
     setup_steps: [
       {
         step: 1,
@@ -788,7 +799,7 @@ vi.fn().mockResolvedValue(data)`,
         title_ko: 'Storybook 초기화',
         description: 'Auto-detect your framework and scaffold Storybook configuration',
         description_ko: '프레임워크 자동 감지 후 Storybook 설정 스캐폴드',
-        code_snippet: 'npx storybook@latest init',
+        code_snippet: 'npm create storybook@latest',
       },
       {
         step: 2,
@@ -822,7 +833,7 @@ export const Disabled: Story = { args: { disabled: true } }`,
     code_examples: {
       typescript: `// Card.stories.tsx
 import type { Meta, StoryObj } from '@storybook/react'
-import { within, userEvent, expect } from '@storybook/test'
+import { within, userEvent, expect } from 'storybook/test'
 import { Card } from './Card'
 
 const meta: Meta<typeof Card> = {
@@ -872,8 +883,8 @@ export default { staticDirs: ['../public'] }`,
     integration_tips: [
       {
         with_service_slug: 'vitest',
-        tip: 'Use Storybook\'s Vitest plugin (storybook/experimental-addon-test) to run story interaction tests with vitest --watch for instant feedback.',
-        tip_ko: 'Storybook Vitest 플러그인(storybook/experimental-addon-test)으로 스토리 인터랙션 테스트를 vitest --watch로 즉각 실행합니다.',
+        tip: 'Use Storybook\'s Vitest addon (@storybook/addon-vitest) to run story interaction tests with vitest --watch for instant feedback.',
+        tip_ko: 'Storybook Vitest 애드온(@storybook/addon-vitest)으로 스토리 인터랙션 테스트를 vitest --watch로 즉각 실행합니다.',
       },
     ],
     pros: [
@@ -894,16 +905,16 @@ export default { staticDirs: ['../public'] }`,
   // ──────────────────────────────────────────────────────────────────────────
   {
     service_id: S.trigger_dev,
-    quick_start: 'Trigger.dev v3 SDK를 설치하면 타임아웃 없는 장시간 백그라운드 작업을 TypeScript 함수 형태로 정의하고 안정적으로 실행할 수 있습니다.',
-    quick_start_en: 'Install the Trigger.dev v3 SDK to define long-running background jobs as TypeScript functions with no timeouts and reliable execution.',
+    quick_start: 'Trigger.dev SDK를 설치하면 타임아웃 없는 장시간 백그라운드 작업을 TypeScript 함수 형태로 정의하고 안정적으로 실행할 수 있습니다.',
+    quick_start_en: 'Install the Trigger.dev SDK to define long-running background jobs as TypeScript functions with no timeouts and reliable execution.',
     setup_steps: [
       {
         step: 1,
         title: 'Install Trigger.dev SDK',
         title_ko: 'Trigger.dev SDK 설치',
-        description: 'Install the v3 SDK package',
-        description_ko: 'v3 SDK 패키지 설치',
-        code_snippet: 'npm install @trigger.dev/sdk@v3',
+        description: 'Install the SDK package',
+        description_ko: 'SDK 패키지 설치',
+        code_snippet: 'npm install @trigger.dev/sdk@latest',
       },
       {
         step: 2,
@@ -912,7 +923,7 @@ export default { staticDirs: ['../public'] }`,
         description: 'Create a task file in trigger/ directory',
         description_ko: 'trigger/ 디렉토리에 태스크 파일 생성',
         code_snippet: `// trigger/send-welcome-email.ts
-import { task } from '@trigger.dev/sdk/v3'
+import { task } from '@trigger.dev/sdk'
 
 export const sendWelcomeEmail = task({
   id: 'send-welcome-email',
@@ -940,7 +951,7 @@ const handle = await sendWelcomeEmail.trigger({
     ],
     code_examples: {
       typescript: `// trigger/process-video.ts
-import { task, logger, wait } from '@trigger.dev/sdk/v3'
+import { task, logger, wait } from '@trigger.dev/sdk'
 
 export const processVideo = task({
   id: 'process-video',
@@ -996,7 +1007,7 @@ export const processVideo = task({
       { text: 'Requires separate Trigger.dev account and project setup', text_ko: '별도 Trigger.dev 계정 및 프로젝트 설정 필요' },
       { text: 'Self-hosting is complex compared to cloud option', text_ko: '클라우드 옵션 대비 셀프 호스팅이 복잡' },
     ],
-    api_key_url: 'https://cloud.trigger.dev/orgs',
+    api_key_url: 'https://cloud.trigger.dev',
     api_key_url_label: 'Trigger.dev Dashboard',
   },
 
@@ -1274,7 +1285,7 @@ worker.on('failed', (job, err) => {
 
 const client = createStorefrontApiClient({
   storeDomain: process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN!,
-  apiVersion: '2025-01',
+  apiVersion: '2026-07',
   publicAccessToken: process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN!,
 })`,
       },
@@ -1302,7 +1313,7 @@ const client = createStorefrontApiClient({
 
 const client = createStorefrontApiClient({
   storeDomain: process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN!,
-  apiVersion: '2025-01',
+  apiVersion: '2026-07',
   publicAccessToken: process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN!,
 })
 

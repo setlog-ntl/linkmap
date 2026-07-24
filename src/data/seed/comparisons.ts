@@ -86,7 +86,7 @@ export const comparisons: ComparisonSeed[] = [
     comparison_data: {
       criteria: [
         { name: 'Database Type', name_ko: '데이터베이스 타입', values: { supabase: 'PostgreSQL', firebase: 'NoSQL (Firestore)', planetscale: 'MySQL (Vitess)', neon: 'PostgreSQL' } },
-        { name: 'Free Tier', name_ko: '무료 티어', values: { supabase: '500MB, 50K MAU', firebase: 'Spark plan (generous)', planetscale: '5GB, 1B reads', neon: '512MB, 3GB storage' } },
+        { name: 'Free Tier', name_ko: '무료 티어', values: { supabase: '500MB, 50K MAU', firebase: 'Spark plan (generous)', planetscale: '없음 (2024년 Hobby 폐지)', neon: '512MB, 100 CU-시간' } },
         { name: 'Realtime', name_ko: '실시간', values: { supabase: 'Built-in (WebSocket)', firebase: 'Built-in (native)', planetscale: 'Not built-in', neon: 'Not built-in' } },
         { name: 'Auth Included', name_ko: '인증 포함', values: { supabase: 'Yes', firebase: 'Yes', planetscale: 'No', neon: 'No' } },
         { name: 'Open Source', name_ko: '오픈소스', values: { supabase: 'Yes', firebase: 'No', planetscale: 'Vitess is OSS', neon: 'Yes' } },
@@ -112,10 +112,10 @@ export const comparisons: ComparisonSeed[] = [
     comparison_data: {
       criteria: [
         { name: 'Best For', name_ko: '최적 용도', values: { vercel: 'Next.js / React', netlify: 'JAMstack / Static', railway: 'Full-stack / Docker', fly_io: 'Edge / Containers', render: 'All-in-one hosting' } },
-        { name: 'Free Tier', name_ko: '무료 티어', values: { vercel: 'Hobby (generous)', netlify: '100GB bandwidth', railway: '$5 credit/mo', fly_io: '3 shared VMs', render: 'Static sites free' } },
+        { name: 'Free Tier', name_ko: '무료 티어', values: { vercel: 'Hobby (generous)', netlify: '100GB bandwidth', railway: '없음 ($5 1회성 체험 크레딧)', fly_io: '없음 (종량제)', render: 'Static sites free' } },
         { name: 'Edge Functions', name_ko: '엣지 함수', values: { vercel: 'Yes (Middleware)', netlify: 'Yes (Edge Functions)', railway: 'No', fly_io: 'Yes (core feature)', render: 'No' } },
         { name: 'Docker Support', name_ko: 'Docker 지원', values: { vercel: 'Limited', netlify: 'No', railway: 'Yes (native)', fly_io: 'Yes (native)', render: 'Yes' } },
-        { name: 'Database Hosting', name_ko: 'DB 호스팅', values: { vercel: 'Postgres (add-on)', netlify: 'No', railway: 'Postgres, Redis, MySQL', fly_io: 'Postgres (Fly Postgres)', render: 'Postgres (managed)' } },
+        { name: 'Database Hosting', name_ko: 'DB 호스팅', values: { vercel: 'Marketplace 연동 (자체 제공 종료)', netlify: 'No', railway: 'Postgres, Redis, MySQL', fly_io: 'Postgres (Fly Postgres)', render: 'Postgres (managed)' } },
         { name: 'Preview Deploys', name_ko: '프리뷰 배포', values: { vercel: 'Yes (PR-based)', netlify: 'Yes (PR-based)', railway: 'Yes', fly_io: 'Yes (machines)', render: 'Yes' } },
         { name: 'DX Score', name_ko: 'DX 점수', values: { vercel: '9.5', netlify: '8.8', railway: '9.0', fly_io: '8.2', render: '8.5' } },
       ],
@@ -288,18 +288,18 @@ export const comparisons: ComparisonSeed[] = [
     comparison_data: {
       criteria: [
         { name: 'Type', name_ko: '타입', values: { 'github-copilot': 'IDE 플러그인', cursor: 'AI 네이티브 IDE', windsurf: '에이전틱 IDE' } },
-        { name: 'Free Tier', name_ko: '무료 티어', values: { 'github-copilot': '없음', cursor: '제한적 무료', windsurf: '무제한 무료 (기본)' } },
-        { name: 'Price', name_ko: '가격', values: { 'github-copilot': '$10/월', cursor: '$20/월', windsurf: '$15/월' } },
+        { name: 'Free Tier', name_ko: '무료 티어', values: { 'github-copilot': '월 2,000회 완성 + 50회 채팅', cursor: 'Hobby (제한적)', windsurf: '무제한 Tab + 제한적 Cascade' } },
+        { name: 'Price', name_ko: '가격', values: { 'github-copilot': '$10/월 (Pro)', cursor: '$20/월 (Individual, 연간 $16)', windsurf: '$20/월 (Pro)' } },
         { name: 'Multi-Model', name_ko: '멀티 모델', values: { 'github-copilot': 'GPT-4o, Claude, Gemini', cursor: 'GPT-4, Claude', windsurf: '자체 모델' } },
         { name: 'Agent Mode', name_ko: '에이전트 모드', values: { 'github-copilot': 'Copilot Workspace', cursor: 'Composer', windsurf: 'Cascade' } },
-        { name: 'IDE Support', name_ko: 'IDE 지원', values: { 'github-copilot': 'VS Code, JetBrains 등', cursor: 'Cursor (자체 IDE)', windsurf: 'Windsurf (자체 IDE)' } },
+        { name: 'IDE Support', name_ko: 'IDE 지원', values: { 'github-copilot': 'VS Code, JetBrains 등', cursor: 'Cursor (자체 IDE)', windsurf: 'Devin Desktop (구 Windsurf, 자체 IDE)' } },
         { name: 'DX Score', name_ko: 'DX 점수', values: { 'github-copilot': '8.5', cursor: '9.2', windsurf: '8.8' } },
       ],
     },
     recommendation: {
       existing_ide: { need: '기존 IDE를 유지하고 싶을 때', choose: 'GitHub Copilot', because: 'VS Code, JetBrains 등 다양한 IDE에서 사용 가능' },
       best_dx: { need: '최고의 AI 코딩 경험이 필요할 때', choose: 'Cursor', because: '전체 코드베이스 인식 + Composer 에이전트' },
-      free_option: { need: '무료로 시작하고 싶을 때', choose: 'Windsurf', because: '무제한 무료 코드 완성 제공' },
+      free_option: { need: '무료로 시작하고 싶을 때', choose: 'Windsurf (현 Devin Desktop)', because: 'Free 플랜에서 Tab 자동완성이 무제한' },
     },
   },
 

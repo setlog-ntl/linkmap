@@ -393,107 +393,109 @@ await client.dns.records.create({
       },
       {
         step: 3,
-        title: 'Create API key',
-        title_ko: 'API 키 생성',
-        description: 'Go to developer.godaddy.com → Keys to create an API key and secret. Use the OTE environment for testing before going live.',
-        description_ko: 'developer.godaddy.com → Keys에서 API 키와 시크릿을 생성합니다. 실제 운영 전 OTE 테스트 환경을 사용하세요.',
+        title: 'Create a Personal Access Token (PAT)',
+        title_ko: 'Personal Access Token(PAT) 생성',
+        description: 'Go to developer.godaddy.com → Keys to create a Personal Access Token. GoDaddy has migrated its Domains API from API Key/Secret to PAT-based Bearer token authentication. Use the OTE environment for testing before going live.',
+        description_ko: 'developer.godaddy.com → Keys에서 Personal Access Token(PAT)을 생성합니다. GoDaddy는 Domains API 인증 방식을 기존 API Key/Secret에서 PAT 기반 Bearer 토큰으로 전환했습니다. 실제 운영 전 OTE 테스트 환경을 사용하세요.',
         code_snippet: `# .env
-GODADDY_API_KEY=your_api_key
-GODADDY_API_SECRET=your_api_secret
+GODADDY_PAT=your_personal_access_token
 
-# 프로덕션: https://api.godaddy.com
-# 테스트(OTE): https://api.ote-godaddy.com`,
+# 프로덕션: https://api.godaddy.com/v3/domains
+# 테스트(OTE): https://api.ote-godaddy.com/v3/domains`,
       },
       {
         step: 4,
         title: 'Manage DNS via API',
         title_ko: 'API로 DNS 관리',
-        description: 'Use the GoDaddy Domains API to check availability, purchase domains, and manage DNS records.',
-        description_ko: 'GoDaddy Domains API로 도메인 가용성 확인, 구매, DNS 레코드 관리를 자동화합니다.',
-        code_snippet: `// DNS 레코드 조회
+        description: 'Use the GoDaddy Domains v3 API with Bearer PAT authentication to check availability, register domains, and manage DNS records.',
+        description_ko: 'Bearer PAT 인증을 사용하는 GoDaddy Domains v3 API로 도메인 가용성 확인, 등록, DNS 레코드 관리를 자동화합니다.',
+        code_snippet: `// DNS 레코드 조회 (v3 API)
 const res = await fetch(
-  'https://api.godaddy.com/v1/domains/example.com/records',
+  'https://api.godaddy.com/v3/domains/zones/example.com/dns-records?type=A&name=@',
   {
     headers: {
-      Authorization: \`sso-key \${API_KEY}:\${API_SECRET}\`,
+      Authorization: \`Bearer \${GODADDY_PAT}\`,
     },
   }
 );`,
       },
     ],
     code_examples: {
-      typescript: `// GoDaddy Domains API - TypeScript
-const GODADDY_API_BASE = 'https://api.godaddy.com';
+      typescript: `// GoDaddy Domains v3 API - TypeScript (PAT 기반 Bearer 인증)
+const GODADDY_API_BASE = 'https://api.godaddy.com/v3/domains';
 
-function getHeaders(apiKey: string, apiSecret: string) {
+function getHeaders(pat: string) {
   return {
-    Authorization: \`sso-key \${apiKey}:\${apiSecret}\`,
+    Authorization: \`Bearer \${pat}\`,
     'Content-Type': 'application/json',
     Accept: 'application/json',
   };
 }
 
-const headers = getHeaders(
-  process.env.GODADDY_API_KEY!,
-  process.env.GODADDY_API_SECRET!
-);
+const headers = getHeaders(process.env.GODADDY_PAT!);
 
 // 도메인 가용성 확인
 async function checkDomainAvailability(domain: string) {
   const res = await fetch(
-    \`\${GODADDY_API_BASE}/v1/domains/available?domain=\${domain}\`,
+    \`\${GODADDY_API_BASE}/check-availability?domain=\${domain}\`,
     { headers }
   );
-  return res.json() as Promise<{ available: boolean; price: number; currency: string }>;
+  return res.json() as Promise<{ domain: string; available: boolean; definitive: boolean }>;
 }
 
-// DNS 레코드 조회
-async function getDnsRecords(domain: string, type?: string, name?: string) {
-  const path = type && name
-    ? \`/v1/domains/\${domain}/records/\${type}/\${name}\`
-    : \`/v1/domains/\${domain}/records\`;
-  const res = await fetch(\`\${GODADDY_API_BASE}\${path}\`, { headers });
+// DNS 레코드 조회 (type/name 쿼리 파라미터로 필터링 가능)
+async function getDnsRecords(zone: string, type?: string, name?: string) {
+  const params = new URLSearchParams();
+  if (type) params.set('type', type);
+  if (name) params.set('name', name);
+  const query = params.toString() ? \`?\${params}\` : '';
+  const res = await fetch(\`\${GODADDY_API_BASE}/zones/\${zone}/dns-records\${query}\`, { headers });
   return res.json();
 }
 
-// DNS 레코드 추가/수정 (PUT은 동일 type+name 레코드 전체 교체)
-async function setDnsRecords(
-  domain: string,
-  type: string,
-  name: string,
-  records: Array<{ data: string; ttl?: number }>
+// DNS 레코드 생성 (POST는 레코드 1건씩 생성 — 배열 아닌 단일 객체)
+async function createDnsRecord(
+  zone: string,
+  record: { name: string; type: string; data: string; ttl?: number }
 ) {
-  const res = await fetch(
-    \`\${GODADDY_API_BASE}/v1/domains/\${domain}/records/\${type}/\${name}\`,
-    {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(
-        records.map(r => ({ data: r.data, ttl: r.ttl ?? 3600, name, type }))
-      ),
-    }
-  );
+  const res = await fetch(\`\${GODADDY_API_BASE}/zones/\${zone}/dns-records\`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ ttl: 3600, ...record }), // ttl 허용 범위: 600~86400
+  });
   if (!res.ok) throw new Error(\`GoDaddy API error: \${res.status}\`);
+  return res.json(); // 201 Created — 생성된 DNSRecord 객체 반환
 }
 
 // 사용 예시
 const avail = await checkDomainAvailability('myapp.com');
-console.log(avail.available, avail.price);
+console.log(avail.available);
 
-// Vercel을 위한 A 레코드 설정
-await setDnsRecords('myapp.com', 'A', '@', [{ data: '76.76.21.21', ttl: 600 }]);`,
+// Vercel을 위한 A 레코드 생성
+await createDnsRecord('myapp.com', { name: '@', type: 'A', data: '76.76.21.21', ttl: 600 });`,
     },
     common_pitfalls: [
       {
+        title: 'Legacy sso-key authentication no longer works',
+        title_ko: '레거시 sso-key 인증 방식 더 이상 동작하지 않음',
+        problem: 'GoDaddy migrated the Domains API from the v1 `Authorization: sso-key API_KEY:API_SECRET` header to the v3 API\'s Bearer PAT (Personal Access Token) scheme. Older tutorials and code samples using sso-key will fail.',
+        solution: 'Create a Personal Access Token at developer.godaddy.com → Keys and send `Authorization: Bearer <PAT>` on every v3 endpoint call (check-availability, DNS records, etc.).',
+        code: `// 변경 전 (더 이상 동작하지 않음)
+// Authorization: sso-key API_KEY:API_SECRET
+
+// 변경 후
+headers: { Authorization: \`Bearer \${process.env.GODADDY_PAT}\` }`,
+      },
+      {
         title: 'OTE vs Production environment confusion',
         title_ko: 'OTE(테스트)와 프로덕션 환경 혼동',
-        problem: 'API keys created in the OTE (test) environment only work against api.ote-godaddy.com, not the production API.',
-        solution: 'Create separate API keys: one for OTE testing (api.ote-godaddy.com) and another for production (api.godaddy.com). Store both in environment variables with clear naming.',
+        problem: 'PATs created in the OTE (test) environment only work against api.ote-godaddy.com, not the production API.',
+        solution: 'Create separate PATs: one for OTE testing (api.ote-godaddy.com) and another for production (api.godaddy.com). Store both in environment variables with clear naming.',
         code: `# .env
-GODADDY_API_BASE_OTE=https://api.ote-godaddy.com
-GODADDY_API_BASE_PROD=https://api.godaddy.com
-GODADDY_OTE_API_KEY=...
-GODADDY_PROD_API_KEY=...`,
+GODADDY_API_BASE_OTE=https://api.ote-godaddy.com/v3/domains
+GODADDY_API_BASE_PROD=https://api.godaddy.com/v3/domains
+GODADDY_OTE_PAT=...
+GODADDY_PROD_PAT=...`,
       },
       {
         title: 'DNS propagation after API update',
@@ -540,8 +542,8 @@ GODADDY_PROD_API_KEY=...`,
       { text: 'WHOIS privacy is a paid add-on (~$10/year)', text_ko: 'WHOIS 프라이버시가 유료 추가 옵션 (~$10/년)' },
       { text: 'Aggressive upselling during checkout process', text_ko: '결제 과정에서 강압적인 추가 서비스 권유' },
     ],
-    api_key_url: 'https://developer.godaddy.com/keys',
-    api_key_url_label: 'GoDaddy Developer Keys',
+    api_key_url: 'https://developer.godaddy.com/en/personal-access-token',
+    api_key_url_label: 'GoDaddy Personal Access Token',
   },
 
   // -------------------------------------------------------------------------
@@ -1086,7 +1088,7 @@ dig A  mydomain.co.kr @1.1.1.1        # Cloudflare DNS`,
       { text: 'Smaller service with less international TLD variety', text_ko: '소규모 서비스로 국제 TLD 다양성이 낮음' },
       { text: 'Limited developer tools and documentation compared to global registrars', text_ko: '글로벌 레지스트라 대비 개발자 도구 및 문서 부족' },
     ],
-    api_key_url: 'https://www.dotname.co.kr/member/login',
+    api_key_url: 'https://sso.dotname.co.kr',
     api_key_url_label: '닷네임 로그인',
   },
 ];

@@ -189,4 +189,10 @@ export const subcategories: SubcategorySeed[] = [
   { id: 'social-media', category: 'sns', name: 'Social Media', name_ko: '소셜 미디어', description: 'Social media platform APIs', description_ko: '소셜 미디어 플랫폼 API' },
   { id: 'video-platform', category: 'sns', name: 'Video Platform', name_ko: '영상 플랫폼', description: 'Video sharing platform APIs', description_ko: '영상 공유 플랫폼 API' },
   { id: 'professional-sns', category: 'sns', name: 'Professional SNS', name_ko: '비즈니스 SNS', description: 'Professional networking platform APIs', description_ko: '비즈니스 네트워킹 플랫폼 API' },
+
+  // --- analytics (추가) ---
+  { id: 'behavior-analytics', category: 'analytics', name: 'Behavior Analytics', name_ko: '행동 분석', description: 'Heatmaps, session recordings, and user behavior insights', description_ko: '히트맵, 세션 녹화, 사용자 행동 분석' },
+
+  // --- automation (추가) ---
+  { id: 'workflow_automation', category: 'automation', name: 'Workflow Automation', name_ko: '워크플로우 자동화', description: 'Visual workflow automation and integration platforms', description_ko: '비주얼 워크플로우 자동화 및 통합 플랫폼' },
 ];

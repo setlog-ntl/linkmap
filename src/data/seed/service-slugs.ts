@@ -1,4 +1,8 @@
-// All service slugs for sitemap generation (extracted from services.ts + services-v2.ts)
+// 서비스 상세 페이지 slug — sitemap 생성용
+// ⚠️ 수동 목록: services.ts / services-v2.ts 와 반드시 일치해야 한다.
+//    카탈로그를 직접 import 하지 않는 이유는 sitemap 라우트에 470KB 카탈로그가
+//    번들되는 것을 피하기 위함이다 (Workers 번들 크기 제약).
+//    드리프트는 service-slugs.test.ts 가 검출한다.
 export const SERVICE_SLUGS: string[] = [
   // services.ts
   'supabase',
@@ -61,7 +65,7 @@ export const SERVICE_SLUGS: string[] = [
   'cafe24',
   'inames',
   'namecheap',
-  // services-v2.ts (deduplicated)
+  // services-v2.ts (중복 제외)
   'github-actions',
   'twilio',
   'onesignal',
@@ -127,11 +131,54 @@ export const SERVICE_SLUGS: string[] = [
   'fireworks-ai',
   'modal',
   'wandb',
-  // Vibe Coding / App Builder - Batch 2
+  'instagram-api',
+  'youtube-api',
+  'x-api',
+  'tiktok-api',
+  'linkedin-api',
+  'threads-api',
+  'polar',
+  'gwanggo',
+  'linkmap',
+  'clarity',
+  'google-antigravity',
+  'n8n',
+  'google-stitch',
+  'bolt-new',
+  'lovable',
+  'v0',
+  'replit',
+  'cline',
+  'openrouter',
+  'paddle',
+  'payload-cms',
+  'axiom',
+  'betterstack',
+  'novu',
   'manus',
   'devin',
   'base44',
   'rork',
   'a0-dev',
   'tempo-labs',
+  'zed',
+  'kiro',
+  'google-jules',
+  'trae',
+  'warp',
+  'aider',
+  'openai-codex',
+  'cerebras',
+  'sambanova',
+  'vercel-ai-sdk',
+  'langgraph',
+  'llamaindex',
+  'mastra',
+  'composio',
+  'same-new',
+  'zilliz-cloud',
+  'langfuse',
+  'helicone',
+  'portkey',
+  'litellm',
 ];
