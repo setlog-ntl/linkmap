@@ -195,4 +195,8 @@ export const subcategories: SubcategorySeed[] = [
 
   // --- automation (추가) ---
   { id: 'workflow_automation', category: 'automation', name: 'Workflow Automation', name_ko: '워크플로우 자동화', description: 'Visual workflow automation and integration platforms', description_ko: '비주얼 워크플로우 자동화 및 통합 플랫폼' },
+
+  // --- other (추가) ---
+  { id: 'productivity_api', category: 'other', name: 'Productivity API', name_ko: '생산성 도구 API', description: 'Spreadsheet, document, and calendar APIs from productivity suites', description_ko: '스프레드시트·문서·캘린더 등 오피스 도구 API' },
+  { id: 'cloud_drive', category: 'storage', name: 'Cloud Drive', name_ko: '클라우드 드라이브', description: 'Consumer/business cloud drive storage with file sync APIs', description_ko: '파일 동기화 API를 제공하는 클라우드 드라이브 스토리지' },
 ];

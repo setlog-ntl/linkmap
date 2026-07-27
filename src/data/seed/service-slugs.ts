@@ -181,4 +181,9 @@ export const SERVICE_SLUGS: string[] = [
   'helicone',
   'portkey',
   'litellm',
+  'google-drive',
+  'google-sheets-api',
+  'google-calendar-api',
+  'google-cloud-storage',
+  'google-maps-platform',
 ];

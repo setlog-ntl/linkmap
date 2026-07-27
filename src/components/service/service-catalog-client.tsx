@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Search, ExternalLink, ArrowRight, LayoutGrid, Settings2, X, List, Sparkles, KeyRound, Plus } from 'lucide-react';
-import { matchKorean } from '@/lib/utils/korean-search';
+import { matchKorean, matchFuzzy } from '@/lib/utils/korean-search';
 import { CreateCustomServiceDialog } from '@/components/service/create-custom-service-dialog';
 import { ServiceIcon } from '@/components/ui/service-icon';
 import { domainLabels, domainIcons, allCategoryLabels, allCategoryEmojis, domainCategoryMap } from '@/lib/constants/service-filters';
@@ -165,8 +165,8 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
       .slice(0, 3);
   }, [search, services]);
 
-  const filteredServices = useMemo(() => {
-    const result = services.filter((s) => {
+  const { filteredServices, isFuzzyResult } = useMemo(() => {
+    const passesFilters = (s: (typeof services)[number]) => {
       // Easy mode category filter
       if (viewMode === 'easy' && selectedEasyCategory) {
         const cats = easyCategoryToServiceCategories[selectedEasyCategory];
@@ -182,22 +182,42 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
       // Free tier filter (both modes)
       if (freeTierFilter !== 'all' && s.free_tier_quality !== freeTierFilter) return false;
 
-      // Search (both modes) — 한글 초성/음역 매칭 포함
-      if (search) {
-        const q = search.toLowerCase();
-        const tagMatch = s.tags?.some((t) => matchKorean(q, t));
-        return (
-          s.name.toLowerCase().includes(q) ||
-          matchKorean(q, s.name) ||
-          s.description?.toLowerCase().includes(q) ||
-          s.description_ko?.toLowerCase().includes(q) ||
-          matchKorean(q, s.description_ko || '') ||
-          s.slug.toLowerCase().includes(q) ||
-          tagMatch
-        );
-      }
       return true;
-    });
+    };
+
+    const base = services.filter(passesFilters);
+
+    // Search (both modes) — 한글 초성/음역 매칭 포함
+    const q = search.toLowerCase();
+    let fuzzy = false;
+    let result = !search
+      ? base
+      : base.filter((s) => {
+          const tagMatch = s.tags?.some((t) => matchKorean(q, t));
+          return (
+            s.name.toLowerCase().includes(q) ||
+            matchKorean(q, s.name) ||
+            s.description?.toLowerCase().includes(q) ||
+            s.description_ko?.toLowerCase().includes(q) ||
+            matchKorean(q, s.description_ko || '') ||
+            s.slug.toLowerCase().includes(q) ||
+            tagMatch
+          );
+        });
+
+    // 정확 매칭 0건이면 오타 허용 검색으로 폴백 (예: "gogle" → Google OAuth)
+    if (search && result.length === 0) {
+      const relaxed = base.filter(
+        (s) =>
+          matchFuzzy(q, s.name) ||
+          matchFuzzy(q, s.slug) ||
+          (s.tags?.some((t) => matchFuzzy(q, t)) ?? false)
+      );
+      if (relaxed.length > 0) {
+        result = relaxed;
+        fuzzy = true;
+      }
+    }
 
     // Sort
     result.sort((a, b) => {
@@ -216,7 +236,7 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
       }
     });
 
-    return result;
+    return { filteredServices: result, isFuzzyResult: fuzzy };
   }, [services, viewMode, selectedEasyCategory, selectedDomain, selectedCategory, freeTierFilter, search, sortBy]);
 
   // Whether to show the service grid (not just category cards)
@@ -521,6 +541,11 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
                     </button>
                   </Badge>
                 )}
+                {isFuzzyResult && (
+                  <span className="text-xs text-muted-foreground">
+                    정확히 일치하는 결과가 없어 비슷한 이름으로 찾았습니다
+                  </span>
+                )}
                 <Button variant="ghost" size="sm" onClick={clearAllFilters} className="ml-auto h-7 text-xs">
                   <X className="mr-1 h-3 w-3" />
                   모두 초기화
@@ -755,6 +780,11 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
               <X className="h-3 w-3" />
             </button>
           </Badge>
+          {isFuzzyResult && (
+            <span className="text-xs text-muted-foreground">
+              정확히 일치하는 결과가 없어 비슷한 이름으로 찾았습니다
+            </span>
+          )}
         </div>
       )}
 
@@ -856,6 +886,11 @@ export function ServiceCatalogClient({ services, domains, usedServiceIds = [], g
                 <X className="h-3 w-3" />
               </button>
             </Badge>
+          )}
+          {isFuzzyResult && (
+            <span className="text-xs text-muted-foreground">
+              정확히 일치하는 결과가 없어 비슷한 이름으로 찾았습니다
+            </span>
           )}
           <Button variant="ghost" size="sm" onClick={clearAllFilters} className="ml-auto h-7 text-xs">
             <X className="mr-1 h-3 w-3" />

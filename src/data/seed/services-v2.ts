@@ -184,6 +184,12 @@ export const SERVICE_IDS_V2 = {
   helicone: '10000000-0000-4000-a000-000000000182',
   portkey: '10000000-0000-4000-a000-000000000183',
   litellm: '10000000-0000-4000-a000-000000000184',
+  // Google Workspace / Cloud services
+  google_drive: '10000000-0000-4000-a000-000000000185',
+  google_sheets_api: '10000000-0000-4000-a000-000000000186',
+  google_calendar_api: '10000000-0000-4000-a000-000000000187',
+  google_cloud_storage: '10000000-0000-4000-a000-000000000188',
+  google_maps_platform: '10000000-0000-4000-a000-000000000189',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -7012,5 +7018,319 @@ export const servicesV2: ServiceSeedV2[] = [
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 20,
     monthly_cost_estimate: { starter: '$0', growth: '$20-500/월(인프라)', enterprise: '$250/월~' },
+  },
+
+  // -----------------------------------------------------------------------
+  // Google Drive (Workspace 파일 스토리지 + Drive API)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.google_drive,
+    name: 'Google Drive',
+    slug: 'google-drive',
+    category: 'storage',
+    description:
+      'Google의 클라우드 드라이브로, Drive API를 통해 파일 업로드·조회·공유 권한 관리를 앱에서 처리할 수 있습니다. API 호출 자체는 무료이며 비용은 저장 용량(개인 Google One / 조직 Workspace)에서 발생합니다.',
+    description_ko:
+      'Google의 클라우드 드라이브로, Drive API를 통해 파일 업로드·조회·공유 권한 관리를 앱에서 처리할 수 있습니다. API 호출 자체는 무료이며 비용은 저장 용량(개인 Google One / 조직 Workspace)에서 발생합니다. 2026년 5월부터 신규 프로젝트는 요청 수 대신 쿼터 유닛 풀(프로젝트 100만 유닛/분, 사용자 32.5만 유닛/분) 방식으로 전환되었습니다.',
+    icon_url: null,
+    website_url: 'https://workspace.google.com/products/drive/',
+    docs_url: 'https://developers.google.com/workspace/drive/api/guides/about-sdk',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details:
+        'Drive API 사용은 전액 무료(쿼터 초과 시에도 추가 과금 없음). 개인 Google 계정은 Gmail·Photos 합산 15GB 무료.',
+      plans: [
+        { name: '개인 무료', price: '$0 (15GB 공유 용량)' },
+        { name: 'Workspace Business Starter', price: '$7/사용자/월(연간 약정) — 사용자당 30GB 풀 용량' },
+        { name: 'Workspace Business Standard', price: '$14/사용자/월(연간 약정) — 사용자당 2TB 풀 용량' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'GOOGLE_CLIENT_ID',
+        public: false,
+        description: 'Google Cloud Console OAuth client ID for Drive scopes',
+        description_ko: 'Drive 스코프용 OAuth 클라이언트 ID (Google Cloud Console 발급)',
+      },
+      {
+        name: 'GOOGLE_CLIENT_SECRET',
+        public: false,
+        description: 'Google OAuth client secret',
+        description_ko: 'Google OAuth 클라이언트 시크릿',
+      },
+      {
+        name: 'GOOGLE_SERVICE_ACCOUNT_KEY',
+        public: false,
+        optional: true,
+        description: 'Service account JSON key for server-to-server Drive access',
+        description_ko: '서버 간 Drive 접근용 서비스 계정 JSON 키 (선택)',
+      },
+    ],
+    domain: 'backend',
+    subcategory: 'cloud_drive',
+    popularity_score: 90,
+    difficulty_level: 'beginner',
+    tags: ['storage', 'file', 'drive', 'google', 'workspace', 'oauth', 'file-sync', 'sharing', '구글 드라이브', '파일 저장', '클라우드 드라이브'],
+    alternatives: ['aws-s3', 'google-cloud-storage', 'uploadthing', 'cloudinary'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'vue', 'flutter', 'react-native'],
+      language: ['typescript', 'javascript', 'python', 'java', 'go', 'php'],
+    },
+    official_sdks: {
+      npm: 'https://www.npmjs.com/package/googleapis',
+      python: 'https://pypi.org/project/google-api-python-client/',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 20,
+    monthly_cost_estimate: { starter: '$0(15GB 내)', growth: '$7-14/사용자/월(Workspace)', enterprise: '협의' },
+  },
+
+  // -----------------------------------------------------------------------
+  // Google Sheets API
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.google_sheets_api,
+    name: 'Google Sheets API',
+    slug: 'google-sheets-api',
+    category: 'other',
+    description:
+      '스프레드시트를 읽고 쓰는 REST API로, 노코드 백오피스·간이 DB·리포트 자동화에 자주 쓰입니다. 표준 사용은 무료이며 프로젝트당 읽기 300요청/분, 사용자당 60요청/분 쿼터가 적용됩니다.',
+    description_ko:
+      '스프레드시트를 읽고 쓰는 REST API로, 노코드 백오피스·간이 DB·리포트 자동화에 자주 쓰입니다. 표준 사용은 무료이며 프로젝트당 읽기 300요청/분, 사용자당 60요청/분 쿼터가 적용됩니다. 2026년 하반기부터 쿼터 초과분에 대한 과금이 예고되어 있습니다.',
+    icon_url: null,
+    website_url: 'https://developers.google.com/workspace/sheets',
+    docs_url: 'https://developers.google.com/workspace/sheets/api/limits',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details:
+        '표준 사용 전액 무료. 읽기 300요청/분/프로젝트, 60요청/분/사용자. 쿼터 초과 시 429 반환(현재 과금 없음).',
+      plans: [{ name: 'Standard', price: '$0' }],
+    },
+    required_env_vars: [
+      {
+        name: 'GOOGLE_SERVICE_ACCOUNT_EMAIL',
+        public: false,
+        description: 'Service account email granted access to the spreadsheet',
+        description_ko: '스프레드시트 공유 권한을 부여한 서비스 계정 이메일',
+      },
+      {
+        name: 'GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY',
+        public: false,
+        description: 'Service account private key (PEM)',
+        description_ko: '서비스 계정 비공개 키 (PEM)',
+      },
+      {
+        name: 'GOOGLE_SHEET_ID',
+        public: false,
+        description: 'Target spreadsheet ID from the sheet URL',
+        description_ko: '대상 스프레드시트 ID (시트 URL에서 확인)',
+      },
+    ],
+    domain: 'business',
+    subcategory: 'productivity_api',
+    popularity_score: 82,
+    difficulty_level: 'beginner',
+    tags: ['spreadsheet', 'sheets', 'google', 'workspace', 'no-code', 'backoffice', 'automation', '구글 시트', '스프레드시트', '엑셀'],
+    alternatives: ['airtable', 'notion-api'],
+    compatibility: {
+      framework: ['nextjs', 'express', 'fastapi'],
+      language: ['typescript', 'javascript', 'python', 'go', 'java'],
+    },
+    official_sdks: {
+      npm: 'https://www.npmjs.com/package/googleapis',
+      python: 'https://pypi.org/project/google-api-python-client/',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 20,
+    monthly_cost_estimate: { starter: '$0', growth: '$0', enterprise: '$0' },
+  },
+
+  // -----------------------------------------------------------------------
+  // Google Calendar API
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.google_calendar_api,
+    name: 'Google Calendar API',
+    slug: 'google-calendar-api',
+    category: 'other',
+    description:
+      '일정 조회·생성·초대·알림을 처리하는 캘린더 REST API로, 예약 시스템이나 초대장 서비스의 일정 연동에 사용됩니다. 표준 사용은 무료입니다.',
+    description_ko:
+      '일정 조회·생성·초대·알림을 처리하는 캘린더 REST API로, 예약 시스템이나 초대장 서비스의 일정 연동에 사용됩니다. 표준 사용은 무료이며, 2026년 5월 이후 생성된 프로젝트는 프로젝트당 10,000요청/분, 사용자당 600요청/분 쿼터와 하루 100만 요청의 과금 임계값이 적용됩니다(현재 임계값 이하 무료).',
+    icon_url: null,
+    website_url: 'https://developers.google.com/workspace/calendar',
+    docs_url: 'https://developers.google.com/workspace/calendar/api/guides/quota',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details:
+        '표준 사용 무료. 프로젝트당 10,000요청/분, 사용자당 600요청/분(2026-05-01 이후 생성 프로젝트 기준). 일 100만 요청 과금 임계값 이하 무료.',
+      plans: [{ name: 'Standard', price: '$0' }],
+    },
+    required_env_vars: [
+      {
+        name: 'GOOGLE_CLIENT_ID',
+        public: false,
+        description: 'OAuth client ID with calendar scopes',
+        description_ko: 'Calendar 스코프가 포함된 OAuth 클라이언트 ID',
+      },
+      {
+        name: 'GOOGLE_CLIENT_SECRET',
+        public: false,
+        description: 'OAuth client secret',
+        description_ko: 'OAuth 클라이언트 시크릿',
+      },
+      {
+        name: 'GOOGLE_CALENDAR_ID',
+        public: false,
+        optional: true,
+        description: 'Target calendar ID (defaults to primary)',
+        description_ko: '대상 캘린더 ID (미지정 시 primary)',
+      },
+    ],
+    domain: 'business',
+    subcategory: 'productivity_api',
+    popularity_score: 78,
+    difficulty_level: 'beginner',
+    tags: ['calendar', 'schedule', 'booking', 'google', 'workspace', 'event', 'reminder', '구글 캘린더', '일정', '예약'],
+    alternatives: ['cal-com', 'nylas'],
+    compatibility: {
+      framework: ['nextjs', 'express', 'fastapi'],
+      language: ['typescript', 'javascript', 'python', 'go', 'java'],
+    },
+    official_sdks: {
+      npm: 'https://www.npmjs.com/package/googleapis',
+      python: 'https://pypi.org/project/google-api-python-client/',
+    },
+    free_tier_quality: 'excellent',
+    vendor_lock_in_risk: 'low',
+    setup_time_minutes: 25,
+    monthly_cost_estimate: { starter: '$0', growth: '$0', enterprise: '$0' },
+  },
+
+  // -----------------------------------------------------------------------
+  // Google Cloud Storage (GCS)
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.google_cloud_storage,
+    name: 'Google Cloud Storage',
+    slug: 'google-cloud-storage',
+    category: 'storage',
+    description:
+      'GCP의 오브젝트 스토리지로, Standard·Nearline·Coldline·Archive 4단 스토리지 클래스와 종량제 과금을 제공합니다. AWS S3의 GCP 대응 서비스입니다.',
+    description_ko:
+      'GCP의 오브젝트 스토리지로, Standard·Nearline·Coldline·Archive 4단 스토리지 클래스와 종량제 과금을 제공합니다. AWS S3의 GCP 대응 서비스이며, US 리전 Standard 기준 $0.020/GB·월(2026-07 확인)입니다. 스토리지 요금 외에 오퍼레이션·이그레스가 별도 과금되는 점에 주의해야 합니다.',
+    icon_url: null,
+    website_url: 'https://cloud.google.com/storage',
+    docs_url: 'https://cloud.google.com/storage/pricing',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details:
+        'Always Free: 미국 리전 5GB·월 저장, Class A 5,000회/월, Class B 50,000회/월, 북미 이그레스 100GB/월.',
+      plans: [
+        { name: 'Standard (US 리전)', price: '$0.020/GB·월' },
+        { name: 'Nearline / Coldline / Archive', price: '접근 빈도가 낮을수록 저렴(대신 최소 보관기간·검색 요금 발생)' },
+        { name: '인터넷 이그레스', price: '종량제(리전·목적지별 상이)' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'GOOGLE_CLOUD_PROJECT',
+        public: false,
+        description: 'GCP project ID',
+        description_ko: 'GCP 프로젝트 ID',
+      },
+      {
+        name: 'GCS_BUCKET_NAME',
+        public: false,
+        description: 'Target Cloud Storage bucket name',
+        description_ko: '대상 Cloud Storage 버킷 이름',
+      },
+      {
+        name: 'GOOGLE_APPLICATION_CREDENTIALS',
+        public: false,
+        description: 'Path or JSON of the service account key',
+        description_ko: '서비스 계정 키 경로 또는 JSON 문자열',
+      },
+    ],
+    domain: 'infrastructure',
+    subcategory: 'object_storage',
+    popularity_score: 86,
+    difficulty_level: 'intermediate',
+    tags: ['object-storage', 'gcs', 'gcp', 'google', 'bucket', 'cdn-origin', 'backup', '구글 클라우드 스토리지', '오브젝트 스토리지', '버킷'],
+    alternatives: ['aws-s3', 'cloudflare-r2', 'google-drive'],
+    compatibility: {
+      framework: ['nextjs', 'express', 'fastapi', 'django'],
+      language: ['typescript', 'javascript', 'python', 'go', 'java', 'php'],
+    },
+    official_sdks: {
+      npm: 'https://www.npmjs.com/package/@google-cloud/storage',
+      python: 'https://pypi.org/project/google-cloud-storage/',
+    },
+    free_tier_quality: 'good',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 30,
+    monthly_cost_estimate: { starter: '$0(무료 한도 내)', growth: '$5-50/월', enterprise: '약정 할인 협의' },
+  },
+
+  // -----------------------------------------------------------------------
+  // Google Maps Platform
+  // -----------------------------------------------------------------------
+  {
+    id: SERVICE_IDS_V2.google_maps_platform,
+    name: 'Google Maps Platform',
+    slug: 'google-maps-platform',
+    category: 'other',
+    description:
+      '지도·장소 검색·지오코딩·경로 안내 API 묶음입니다. 2025년 3월 1일부로 월 $200 크레딧이 폐지되고 SKU 등급별 무료 한도(Essentials 10,000 / Pro 5,000 / Enterprise 1,000 호출·월)로 전환되었습니다.',
+    description_ko:
+      '지도·장소 검색·지오코딩·경로 안내 API 묶음입니다. 2025년 3월 1일부로 월 $200 크레딧이 폐지되고 SKU 등급별 무료 한도(Essentials 10,000 / Pro 5,000 / Enterprise 1,000 호출·월, Map Tiles는 100,000)로 전환되었습니다. 무료 한도가 SKU별로 분리되어 합산되지 않는 점에 주의해야 합니다(2026-07 확인).',
+    icon_url: null,
+    website_url: 'https://mapsplatform.google.com',
+    docs_url: 'https://developers.google.com/maps/billing-and-pricing/overview',
+    pricing_info: {
+      free_tier: true,
+      free_tier_details:
+        'SKU 등급별 월 무료 호출: Essentials 10,000 / Pro 5,000 / Enterprise 1,000. Map Tiles API는 100,000 이벤트. 한도는 SKU별 개별 적용(풀링 없음).',
+      plans: [
+        { name: '종량제(Pay as you go)', price: 'SKU별 단가 — 무료 한도 초과분만 과금' },
+        { name: '구독 Starter', price: '$100/월' },
+        { name: '구독 Essentials', price: '$275/월' },
+      ],
+    },
+    required_env_vars: [
+      {
+        name: 'NEXT_PUBLIC_GOOGLE_MAPS_API_KEY',
+        public: true,
+        description: 'Browser-restricted Maps JavaScript API key',
+        description_ko: '브라우저용 Maps JavaScript API 키 (HTTP 리퍼러 제한 필수)',
+      },
+      {
+        name: 'GOOGLE_MAPS_SERVER_API_KEY',
+        public: false,
+        optional: true,
+        description: 'Server-side key for Geocoding/Places (IP restricted)',
+        description_ko: '서버용 Geocoding·Places API 키 (IP 제한, 선택)',
+      },
+    ],
+    domain: 'business',
+    subcategory: 'maps-location',
+    popularity_score: 88,
+    difficulty_level: 'intermediate',
+    tags: ['maps', 'geocoding', 'places', 'directions', 'location', 'google', 'street-view', '구글 지도', '지도', '길찾기', '위치'],
+    alternatives: ['mapbox', 'naver-maps', 'kakao-maps'],
+    compatibility: {
+      framework: ['nextjs', 'react', 'vue', 'angular', 'flutter', 'react-native'],
+      language: ['typescript', 'javascript', 'python', 'java', 'kotlin', 'swift', 'go'],
+    },
+    official_sdks: {
+      npm: 'https://www.npmjs.com/package/@googlemaps/js-api-loader',
+      python: 'https://pypi.org/project/googlemaps/',
+    },
+    free_tier_quality: 'limited',
+    vendor_lock_in_risk: 'medium',
+    setup_time_minutes: 25,
+    monthly_cost_estimate: { starter: '$0(SKU 무료 한도 내)', growth: '종량제(SKU별 단가)', enterprise: '$100-275/월 구독 또는 협의' },
   },
 ];
