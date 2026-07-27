@@ -5,7 +5,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Rocket, Check, LayoutDashboard } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
@@ -18,6 +18,7 @@ const InteractiveHeroFlow = dynamic(
 
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
   const { locale } = useLocaleStore();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   useEffect(() => {
@@ -39,15 +40,21 @@ export function HeroSection() {
         {/* Soft radial glow behind the content */}
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-brand-blue/[0.04] dark:bg-brand-blue/[0.06] rounded-full blur-[120px] -z-10 pointer-events-none" />
 
+        {/*
+          핵심 카피(H1·CTA)는 이 래퍼의 직접 자식이므로 래퍼가 opacity:0이면
+          하이드레이션 전/청크 로드 실패 시 첫 화면이 통째로 블랭크가 된다
+          (2026-07-16 레드팀 F-6). opacity 대신 transform만 사용해 JS가 없어도
+          텍스트가 즉시 보이도록 하고, 진입 애니메이션은 점진적 향상으로 둔다.
+        */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={shouldReduceMotion ? false : { y: 20 }}
+          animate={{ y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="flex flex-col items-center justify-center text-center max-w-7xl mx-auto"
         >
           {/* Badge */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mb-8 flex justify-center"
@@ -111,7 +118,7 @@ export function HeroSection() {
 
           {/* Trust Badges - more refined spacing and style */}
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:gap-x-8 sm:gap-y-3 text-xs sm:text-sm text-muted-foreground"

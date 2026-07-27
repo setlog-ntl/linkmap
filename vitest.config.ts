@@ -18,6 +18,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // RSC 경계 마커를 테스트 환경에서 no-op 처리 (레드팀 F-13 server-only 가드 대응)
+      'server-only': path.resolve(__dirname, './src/test/empty-module.ts'),
+      'client-only': path.resolve(__dirname, './src/test/empty-module.ts'),
     },
   },
 });

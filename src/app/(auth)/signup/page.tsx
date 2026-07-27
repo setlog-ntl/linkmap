@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { safeInternalPath } from '@/lib/utils/safe-redirect';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,11 +17,8 @@ export default function SignupPage() {
   const searchParams = useSearchParams();
   const supabase = createClient();
 
-  // Safe redirect: must start with / and not contain ://
-  const rawRedirect = searchParams.get('redirect');
-  const redirect = rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.includes('://')
-    ? rawRedirect
-    : '/dashboard';
+  // Open Redirect 방어는 safeInternalPath로 일원화 (프로토콜 상대 URL `//` 포함 차단)
+  const redirect = safeInternalPath(searchParams.get('redirect'));
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

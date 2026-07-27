@@ -53,7 +53,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
       - run: npm ci
       - run: npm test`,
@@ -84,7 +84,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
       - run: npm ci
       - run: npm run build
@@ -510,18 +510,20 @@ export async function getAuthToken() {
         title_ko: '데이터 인덱싱',
         description: 'Push records to Algolia index using the Admin API key (server-side only)',
         description_ko: 'Admin API 키로 레코드를 Algolia 인덱스에 서버사이드 업로드',
-        code_snippet: `import algoliasearch from 'algoliasearch'
+        code_snippet: `import { algoliasearch } from 'algoliasearch'
 
 const client = algoliasearch(
   process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
   process.env.ALGOLIA_ADMIN_API_KEY!  // 서버사이드 전용
 )
-const index = client.initIndex('products')
 
-await index.saveObjects([
-  { objectID: '1', name: 'iPhone 15', category: 'phones' },
-  { objectID: '2', name: 'MacBook Pro', category: 'laptops' },
-])`,
+await client.saveObjects({
+  indexName: 'products',
+  objects: [
+    { objectID: '1', name: 'iPhone 15', category: 'phones' },
+    { objectID: '2', name: 'MacBook Pro', category: 'laptops' },
+  ],
+})`,
       },
       {
         step: 3,
@@ -530,7 +532,7 @@ await index.saveObjects([
         description: 'Use React InstantSearch components for the search interface',
         description_ko: 'React InstantSearch 컴포넌트로 검색 인터페이스 구성',
         code_snippet: `import { InstantSearch, SearchBox, Hits } from 'react-instantsearch'
-import algoliasearch from 'algoliasearch/lite'
+import { liteClient as algoliasearch } from 'algoliasearch/lite'
 
 const searchClient = algoliasearch(
   process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
@@ -549,7 +551,7 @@ export function Search() {
     ],
     code_examples: {
       typescript: `// 서버사이드 인덱싱 (API route)
-import algoliasearch from 'algoliasearch'
+import { algoliasearch } from 'algoliasearch'
 
 const adminClient = algoliasearch(
   process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
@@ -557,14 +559,12 @@ const adminClient = algoliasearch(
 )
 
 export async function syncProductsToAlgolia(products: Product[]) {
-  const index = adminClient.initIndex('products')
   const records = products.map((p) => ({ ...p, objectID: p.id }))
-  await index.saveObjects(records)
+  await adminClient.saveObjects({ indexName: 'products', objects: records })
 }
 
 export async function deleteFromAlgolia(productId: string) {
-  const index = adminClient.initIndex('products')
-  await index.deleteObject(productId)
+  await adminClient.deleteObject({ indexName: 'products', objectID: productId })
 }`,
     },
     common_pitfalls: [
@@ -998,9 +998,9 @@ const rendered = documentToReactComponents(entry.fields.body)`,
         title_ko: 'Strapi 프로젝트 생성',
         description: 'Bootstrap a new Strapi project with the interactive CLI',
         description_ko: 'CLI로 새 Strapi 프로젝트 생성',
-        code_snippet: `npx create-strapi-app@latest my-cms --quickstart
-# 또는 커스텀 설정
-npx create-strapi-app@latest my-cms`,
+        code_snippet: `npx create-strapi@latest my-cms --non-interactive
+# 또는 커스텀 설정 (대화형)
+npx create-strapi@latest my-cms`,
       },
       {
         step: 2,

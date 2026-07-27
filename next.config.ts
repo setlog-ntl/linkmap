@@ -57,18 +57,28 @@ const nextConfig: NextConfig = {
   },
 
   async headers() {
-    // CSP: report-only 모드로 시작 — 위반 시 콘솔 로그만 출력, 차단하지 않음
+    // CSP 위반 리포트 수집 엔드포인트 (레드팀 F-5 Stage 1).
+    // report-only인데 수집처가 없어 무의미했던 것을 실효화 — 위반이 /api/csp-report로 전송된다.
+    const cspReportPath = '/api/csp-report';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+    const cspReportUrl = appUrl ? `${appUrl}${cspReportPath}` : cspReportPath;
+
+    // CSP: report-only 모드 — 위반을 수집만 하고 차단하지 않음.
+    // enforce 전환 전, 프로덕션에서 실제 걸리는 리소스를 관찰한다.
     const cspDirectives = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com https://static.cloudflareinsights.com https://www.clarity.ms https://scripts.clarity.ms",
       "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com",
       "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https://*.supabase.co https://avatars.githubusercontent.com https://lh3.googleusercontent.com https://www.google-analytics.com https://www.googletagmanager.com https://*.google.com https://*.google.co.kr https://cdn.jsdelivr.net https://c.clarity.ms https://c.bing.com https://images.unsplash.com https://plus.unsplash.com",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://stats.g.doubleclick.net https://cloudflareinsights.com https://j.clarity.ms https://c.clarity.ms https://v.clarity.ms https://c.bing.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://stats.g.doubleclick.net https://cloudflareinsights.com https://*.clarity.ms https://c.bing.com",
       "frame-src https://js.stripe.com https://*.supabase.co https://*.github.io",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
+      // 위반 리포트 전송처 — report-uri(레거시·광범위 지원) + report-to(Reporting API)
+      `report-uri ${cspReportPath}`,
+      "report-to csp-endpoint",
     ].join('; ');
 
     return [
@@ -78,6 +88,11 @@ const nextConfig: NextConfig = {
           {
             key: 'Content-Security-Policy-Report-Only',
             value: cspDirectives,
+          },
+          {
+            // Reporting API: report-to 그룹 'csp-endpoint'의 실제 수신 URL 정의
+            key: 'Reporting-Endpoints',
+            value: `csp-endpoint="${cspReportUrl}"`,
           },
           {
             key: 'X-Frame-Options',

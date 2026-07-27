@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { QueryCache, MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
+import { MotionConfig } from 'framer-motion';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { CommandPalette } from '@/components/command-palette';
 import { createClient } from '@/lib/supabase/client';
@@ -229,12 +230,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider delayDuration={400} skipDelayDuration={200}>
-          {children}
-          <CommandPalette />
-        </TooltipProvider>
-      </QueryClientProvider>
+      <MotionConfig reducedMotion="user">
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider delayDuration={400} skipDelayDuration={200}>
+            {children}
+            <CommandPalette />
+          </TooltipProvider>
+        </QueryClientProvider>
+      </MotionConfig>
     </ThemeProvider>
   );
 }

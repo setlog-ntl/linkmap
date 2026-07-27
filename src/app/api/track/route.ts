@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
+import { hashIp, VISITOR_LOG_IP_SALT } from '@/lib/utils/hash-ip';
 
 const trackSchema = z.object({
   session_id: z.string().uuid(),
@@ -33,19 +34,29 @@ export async function POST(request: NextRequest) {
     }
 
     const { session_id, page_path, referrer, user_agent } = parsed.data;
-    const ip_address = getClientIp(request);
+    // 평문 IP는 저장하지 않는다 — 단방향 해시로만 기록해 중복 방문 판별 용도만 남긴다
+    // (보존기간·파기 절차 없이 개인정보가 누적되던 문제, 2026-07-16 레드팀 F-7)
+    const clientIp = getClientIp(request);
+    const ip_hash = clientIp ? await hashIp(clientIp, VISITOR_LOG_IP_SALT) : null;
 
     const supabase = await createClient();
-    await supabase.from('visitor_logs').insert({
+    const { error } = await supabase.from('visitor_logs').insert({
       session_id,
       page_path,
       referrer: referrer ?? null,
       user_agent: user_agent ?? null,
-      ip_address: ip_address ?? null,
+      ip_address: ip_hash,
     });
 
+    // 트래킹 실패는 UX를 막지 않지만(항상 ok:true), 원인 추적을 위해 계량한다
+    // — silent catch 금지 규칙. 삽입 오류를 조용히 삼키지 않는다.
+    if (error) {
+      console.error('[track] visitor_logs insert failed:', error.message);
+    }
+
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (err) {
+    console.error('[track] unexpected error:', err instanceof Error ? err.message : err);
     return NextResponse.json({ ok: true });
   }
 }

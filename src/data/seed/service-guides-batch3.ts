@@ -152,8 +152,8 @@ const model = new ChatAnthropic({ model: 'claude-opus-4-5' });`,
       { text: 'Higher cost per token compared to some competitors', text_ko: '일부 경쟁 서비스 대비 토큰당 비용이 높음' },
       { text: 'No free tier — requires credit card even for evaluation', text_ko: '무료 플랜 없음 — 평가 단계에서도 결제 수단 필요' },
     ],
-    api_key_url: 'https://console.anthropic.com/settings/keys',
-    api_key_url_label: 'Anthropic Console',
+    api_key_url: 'https://platform.claude.com/settings/keys',
+    api_key_url_label: 'Claude Platform Console',
   },
 
   // -------------------------------------------------------------------------
@@ -259,10 +259,10 @@ import { GoogleGenAI } from '@google/genai';`,
       },
       {
         title: 'Using deprecated gemini-2.0-flash model',
-        title_ko: '폐기 예정 gemini-2.0-flash 모델 사용',
-        problem: 'gemini-2.0-flash and gemini-2.0-flash-lite are deprecated and will shut down on June 1, 2026',
-        solution: 'Migrate to gemini-2.5-flash (stable) or gemini-3-flash-preview for new projects.',
-        code: `// Deprecated — shuts down 2026-06-01
+        title_ko: '폐기된 gemini-2.0-flash 모델 사용',
+        problem: 'gemini-2.0-flash and gemini-2.0-flash-lite were deprecated and have been shut down since June 1, 2026',
+        solution: 'Migrate to gemini-2.5-flash (stable) or the GA gemini-3.5-flash for new projects.',
+        code: `// Deprecated — shut down 2026-06-01
 model: 'gemini-2.0-flash'
 // Recommended replacement
 model: 'gemini-2.5-flash'`,
@@ -306,7 +306,7 @@ const vector = embeddingResult.embeddings[0].values;`,
       { text: 'Pay-as-you-go pricing can escalate quickly with high token usage', text_ko: '높은 토큰 사용량 시 종량제 비용이 빠르게 증가' },
       { text: 'API surface and model lifecycle change frequently — monitor changelog', text_ko: 'API 인터페이스와 모델 수명주기가 자주 변경 — changelog 모니터링 필수' },
       { text: 'Free tier data may be used to improve Google products', text_ko: '무료 티어 데이터가 Google 제품 개선에 사용될 수 있음' },
-      { text: 'Gemini 3 series still in Preview — not recommended for production', text_ko: 'Gemini 3 시리즈 아직 Preview — 프로덕션 사용 시 주의' },
+      { text: 'Some Gemini 3 series models (e.g., Gemini 3.1 Pro, Gemini 3 Flash) remain in Preview — verify GA status before production use', text_ko: '일부 Gemini 3 시리즈 모델(예: Gemini 3.1 Pro, Gemini 3 Flash)은 아직 Preview 상태 — 프로덕션 적용 전 GA 여부 확인 필요' },
     ],
     api_key_url: 'https://aistudio.google.com/app/apikey',
     api_key_url_label: 'Google AI Studio',
@@ -425,8 +425,8 @@ claude --no-interactive -p "Write unit tests for src/utils/format.ts"`,
       { text: 'Consumes Anthropic API tokens — can be costly for large codebases', text_ko: 'Anthropic API 토큰 소비 — 대형 코드베이스에서 비용이 증가할 수 있음' },
       { text: 'Autonomous file edits require careful review to avoid unintended changes', text_ko: '자율 파일 편집 시 의도치 않은 변경을 방지하기 위한 세심한 검토 필요' },
     ],
-    api_key_url: 'https://console.anthropic.com/settings/keys',
-    api_key_url_label: 'Anthropic Console',
+    api_key_url: 'https://platform.claude.com/settings/keys',
+    api_key_url_label: 'Claude Platform Console',
   },
 
   // -------------------------------------------------------------------------
@@ -1464,9 +1464,13 @@ brew install --cask cursor`,
         step: 3,
         title: 'Configure AI model and rules',
         title_ko: 'AI 모델 및 규칙 설정',
-        description: 'Choose your AI model (Claude, GPT-4, etc.) in Settings and add project-level rules in .cursorrules',
-        description_ko: '설정에서 AI 모델 선택 (Claude, GPT-4 등) 및 .cursorrules에 프로젝트 수준 규칙 추가',
-        code_snippet: `# .cursorrules (project root)
+        description: 'Choose your AI model (Claude, GPT-4, etc.) in Settings and add project-level rules as .mdc files in .cursor/rules/',
+        description_ko: '설정에서 AI 모델 선택 (Claude, GPT-4 등) 및 .cursor/rules/ 디렉토리에 .mdc 파일로 프로젝트 수준 규칙 추가',
+        code_snippet: `# .cursor/rules/typescript.mdc (project root)
+---
+alwaysApply: true
+---
+
 You are an expert TypeScript engineer.
 Always use strict null checks.
 Prefer functional patterns over classes.
@@ -1482,8 +1486,12 @@ When writing tests, use vitest and @testing-library/react.`,
 // - API Key: your ANTHROPIC_API_KEY
 // This routes Cursor's completions through your own billing account.
 
-// .cursorrules example for a Next.js project:
+// .cursor/rules/nextjs.mdc example for a Next.js project:
 /*
+---
+alwaysApply: true
+---
+
 You are an expert full-stack engineer specializing in Next.js 15, TypeScript, and Supabase.
 
 Key rules:
@@ -1503,10 +1511,10 @@ cursor src/app/page.tsx  # Open specific file
     },
     common_pitfalls: [
       {
-        title: 'Not setting .cursorrules for project context',
-        title_ko: '.cursorrules 미설정으로 프로젝트 컨텍스트 부재',
-        problem: 'Without .cursorrules, Cursor uses generic context and may suggest patterns that conflict with your project conventions',
-        solution: 'Add a .cursorrules file at the project root with your stack, coding standards, and patterns. This significantly improves suggestion quality.',
+        title: 'Not setting .cursor/rules for project context',
+        title_ko: '.cursor/rules 미설정으로 프로젝트 컨텍스트 부재',
+        problem: 'Without project rules, Cursor uses generic context and may suggest patterns that conflict with your project conventions. The legacy single .cursorrules file is no longer documented — Cursor now uses .mdc rule files under .cursor/rules/',
+        solution: 'Add .mdc rule files under .cursor/rules/ with your stack, coding standards, and patterns (or use AGENTS.md as an alternative). This significantly improves suggestion quality.',
       },
       {
         title: 'Using Cursor for secrets management inadvertently',

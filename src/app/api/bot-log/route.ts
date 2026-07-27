@@ -1,5 +1,14 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { z } from 'zod';
+
+// 무인증 service_role 쓰기 경로이므로 대용량 행 삽입을 막기 위해 길이 상한을 강제한다
+// (2026-07-16 레드팀 F-9). bot_name은 아래 화이트리스트로만 채워진다.
+const botLogSchema = z.object({
+  path: z.string().min(1).max(2048),
+  userAgent: z.string().min(1).max(1024),
+  ip: z.string().max(64).nullable().optional(),
+});
 
 const AI_BOTS: Array<{ pattern: RegExp; name: string }> = [
   { pattern: /GPTBot/i, name: 'GPTBot' },
@@ -32,17 +41,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false }, { status: 500 });
   }
 
-  let body: { path?: string; userAgent?: string; ip?: string | null };
+  let rawBody: unknown;
   try {
-    body = await request.json() as { path?: string; userAgent?: string; ip?: string | null };
+    rawBody = await request.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { path, userAgent, ip } = body;
-  if (!path || !userAgent) {
-    return NextResponse.json({ error: 'Missing path or userAgent' }, { status: 400 });
+  const parsed = botLogSchema.safeParse(rawBody);
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
   }
+  const { path, userAgent, ip } = parsed.data;
 
   const botName = detectAiBot(userAgent);
   if (!botName) {

@@ -39,15 +39,16 @@ export async function POST(request: NextRequest) {
 
   const body = await request.text();
 
-  // 시크릿이 설정된 경우에만 서명 검증 (없으면 경고 후 계속 처리)
-  if (webhookSecret) {
-    const authHeader = request.headers.get('authorization') ?? '';
-    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
-    if (!verifySecret(token, webhookSecret)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-  } else {
-    console.warn('[auth/webhook] SUPABASE_WEBHOOK_SECRET not set — running without verification');
+  // Fail-closed: 시크릿 미설정 시 검증 없이 처리하면 임의 welcome 메일 발송·감사로그
+  // 위조가 가능하므로(2026-07-16 레드팀 F-10) 거부한다. 설정 상태에서만 검증 통과.
+  if (!webhookSecret) {
+    console.error('[auth/webhook] SUPABASE_WEBHOOK_SECRET not set — rejecting request');
+    return NextResponse.json({ error: 'Webhook not configured' }, { status: 503 });
+  }
+  const authHeader = request.headers.get('authorization') ?? '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
+  if (!verifySecret(token, webhookSecret)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   let parsed: unknown;

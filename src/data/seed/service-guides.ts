@@ -1059,7 +1059,7 @@ const openai = new OpenAI()
 
 // Chat completion
 const completion = await openai.chat.completions.create({
-  model: 'gpt-4o',
+  model: 'gpt-5.6-terra',
   messages: [{ role: 'user', content: 'Hello!' }]
 })
 
@@ -1067,7 +1067,7 @@ console.log(completion.choices[0].message.content)
 
 // Streaming
 const stream = await openai.chat.completions.create({
-  model: 'gpt-4o',
+  model: 'gpt-5.6-terra',
   messages: [{ role: 'user', content: '긴 응답을 스트리밍으로 받기' }],
   stream: true,
 })
@@ -1080,7 +1080,7 @@ client = OpenAI()  # OPENAI_API_KEY 환경변수 자동 인식
 
 # Chat completion
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-5.6-terra",
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "Hello!"}
@@ -1108,7 +1108,7 @@ vector = embed.data[0].embedding`
         problem: 'Long wait times for responses',
         solution: 'Use stream: true for real-time token streaming',
         code: `const stream = await openai.chat.completions.create({
-  model: 'gpt-4o', messages, stream: true
+  model: 'gpt-5.6-terra', messages, stream: true
 })`
       },
       {
@@ -1131,7 +1131,7 @@ export async function POST(req: Request) {
         problem: 'Unexpected large responses cause cost spikes',
         solution: 'Always set max_tokens to control cost and response length',
         code: `const completion = await openai.chat.completions.create({
-  model: 'gpt-4o',
+  model: 'gpt-5.6-terra',
   messages,
   max_tokens: 1024, // 반드시 설정
 })`
@@ -1142,9 +1142,11 @@ export async function POST(req: Request) {
         with_service_slug: 'vercel',
         tip: 'Use Vercel AI SDK for easy streaming and React hooks',
         tip_ko: 'Vercel AI SDK로 스트리밍 및 React 훅 간편 사용',
-        code: `import { OpenAIStream, StreamingTextResponse } from 'ai'
-const stream = OpenAIStream(response)
-return new StreamingTextResponse(stream)`
+        code: `import { streamText } from 'ai'
+import { openai } from '@ai-sdk/openai'
+
+const result = streamText({ model: openai('gpt-5.6-terra'), messages })
+return result.toTextStreamResponse()`
       },
       {
         with_service_slug: 'supabase',
@@ -1163,7 +1165,7 @@ await supabase.from('documents').insert({
       { text: 'State-of-the-art language models', text_ko: '최첨단 언어 모델' },
       { text: 'Simple and well-documented API', text_ko: '간단하고 잘 문서화된 API' },
       { text: 'Function calling and structured outputs', text_ko: '함수 호출 및 구조화된 출력' },
-      { text: 'Broad model selection (GPT-4o, o1, DALL-E, Whisper)', text_ko: '다양한 모델 선택 (GPT-4o, o1, DALL-E, Whisper)' }
+      { text: 'Broad model selection (GPT-5.6, o3, GPT Image, Whisper)', text_ko: '다양한 모델 선택 (GPT-5.6, o3, GPT Image, Whisper)' }
     ],
     cons: [
       { text: 'Can be expensive at scale', text_ko: '대규모 사용 시 비용 부담' },
@@ -1206,19 +1208,22 @@ Sentry.captureException(new Error('Something went wrong'))
 Sentry.setUser({ id: '123', email: 'user@example.com' })
 
 // Performance monitoring
-const transaction = Sentry.startTransaction({ name: 'API Call' })
-// ... do work
-transaction.finish()`
+await Sentry.startSpan({ name: 'API Call' }, async () => {
+  // ... do work
+})`
     },
     common_pitfalls: [
       {
         title: 'Source maps not uploaded',
         title_ko: '소스맵 미업로드',
         problem: 'Stack traces show minified code',
-        solution: 'Enable source map upload in next.config.js',
-        code: `module.exports = {
-  sentry: { hideSourceMaps: false }
-}`
+        solution: 'Wrap next.config with withSentryConfig and set SENTRY_AUTH_TOKEN to enable source map uploads',
+        code: `// next.config.ts
+export default withSentryConfig(nextConfig, {
+  org: 'your-org-slug',
+  project: 'your-project-slug',
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+})`
       }
     ],
     integration_tips: [
@@ -1603,7 +1608,7 @@ export function AdUnit({
       { text: 'Limited control over which ads appear — advertisers selected by Google', text_ko: '게재 광고 제어 제한 — Google이 광고주 선택' },
       { text: 'Low RPM for low-traffic or niche sites', text_ko: '저트래픽·틈새 사이트의 경우 낮은 RPM' },
     ],
-    api_key_url: 'https://www.google.com/adsense',
+    api_key_url: 'https://adsense.google.com/adsense/',
     api_key_url_label: 'Google AdSense',
   },
   {
@@ -3367,7 +3372,7 @@ railway up`,
     code_examples: {
       typescript: `// railway.json (선택 사항 - 빌드/시작 커맨드 오버라이드)
 // {
-//   "$schema": "https://railway.app/railway.schema.json",
+//   "$schema": "https://railway.com/railway.schema.json",
 //   "build": { "builder": "NIXPACKS" },
 //   "deploy": { "startCommand": "node dist/index.js", "restartPolicyType": "ON_FAILURE" }
 // }
@@ -3427,7 +3432,7 @@ app.listen(Number(process.env.PORT) || 3000)`,
       { text: 'No built-in CDN — static asset delivery requires a separate CDN layer', text_ko: '내장 CDN 없음 — 정적 에셋 전달에 별도 CDN 레이어 필요' },
       { text: 'Limited observability — advanced logging/tracing requires external tools', text_ko: '제한된 관측 가능성 — 고급 로깅/트레이싱은 외부 도구 필요' },
     ],
-    api_key_url: 'https://railway.app/account/tokens',
+    api_key_url: 'https://railway.com/account/tokens',
     api_key_url_label: 'Railway API Tokens',
   },
 
@@ -4824,7 +4829,7 @@ datasource db {
     ],
     cons: [
       { text: 'No native foreign key constraints — requires ORM-level emulation', text_ko: '네이티브 외래 키 제약 없음 — ORM 레벨 에뮬레이션 필요' },
-      { text: 'MySQL-only — no PostgreSQL support', text_ko: 'MySQL 전용 — PostgreSQL 미지원' },
+      { text: 'This guide covers the original MySQL/Vitess database — PostgreSQL is now offered as a separate "PlanetScale for Postgres" product line', text_ko: '이 가이드는 기존 MySQL/Vitess 기반 데이터베이스 기준 — PostgreSQL은 별도 제품인 "PlanetScale for Postgres"로 제공됨' },
       { text: 'Hobby plan discontinued — paid plan required for production', text_ko: '무료 Hobby 플랜 종료됨 — 프로덕션에 유료 플랜 필요' },
     ],
     api_key_url: 'https://app.planetscale.com/',
@@ -5485,7 +5490,7 @@ await db.execute({ sql: 'SELECT * FROM users WHERE email = ?', args: [userInput]
     ],
     pros: [
       { text: 'SQLite at the edge — low latency in 35+ regions', text_ko: 'SQLite 엣지 배포 — 35개 이상 지역에서 낮은 지연 시간' },
-      { text: 'Generous free tier: 500 databases, 1B row reads/month', text_ko: '넉넉한 무료 플랜: 500개 DB, 월 10억 행 읽기' },
+      { text: 'Generous free tier: unlimited databases, 500M row reads/month', text_ko: '넉넉한 무료 플랜: 무제한 DB, 월 5억 행 읽기' },
       { text: 'SQLite compatible — familiar syntax with zero migration learning curve', text_ko: 'SQLite 호환 — 익숙한 문법으로 마이그레이션 학습 비용 없음' },
     ],
     cons: [
@@ -5643,94 +5648,100 @@ redis.on('error', (err) => console.error('Redis Client Error:', err))`,
   {
     service_id: S.vercel_kv,
     quick_start:
-      'Vercel 대시보드에서 KV 데이터베이스를 생성하고 프로젝트에 연결하면 @vercel/kv SDK로 엣지와 서버리스 환경에서 Redis 호환 키-값 저장소를 즉시 사용할 수 있습니다.',
+      '⚠️ Vercel KV는 단종되었습니다(2024년 12월, 기존 스토어는 Upstash Redis로 자동 이전). 신규 프로젝트는 Vercel 대시보드의 Marketplace 탭에서 Redis 통합(Upstash 등)을 추가하고 @upstash/redis SDK로 Redis 호환 키-값 저장소를 사용하세요.',
     quick_start_en:
-      'Create a KV database in the Vercel dashboard, connect it to your project, and use the @vercel/kv SDK for Redis-compatible key-value storage in edge and serverless environments.',
+      '⚠️ Vercel KV has been discontinued (December 2024; existing stores were automatically migrated to Upstash Redis). For new projects, add a Redis integration (e.g., Upstash) from the Marketplace tab in the Vercel dashboard and use the @upstash/redis SDK for Redis-compatible key-value storage.',
     setup_steps: [
       {
         step: 1,
-        title: 'Create KV database in Vercel',
-        title_ko: 'Vercel에서 KV 데이터베이스 생성',
+        title: 'Add a Redis integration from the Vercel Marketplace',
+        title_ko: 'Vercel 마켓플레이스에서 Redis 통합 추가',
         description:
-          'In the Vercel dashboard, go to Storage > Create > KV. Select a region and database name.',
+          'Vercel KV is discontinued. In the Vercel dashboard, go to the Marketplace tab, search for a Redis provider (e.g. Upstash), and add the integration to your project.',
         description_ko:
-          'Vercel 대시보드에서 Storage > Create > KV로 이동합니다. 지역과 데이터베이스 이름을 선택합니다.',
+          'Vercel KV는 단종되었습니다. Vercel 대시보드에서 Marketplace 탭으로 이동해 Redis 제공업체(예: Upstash)를 검색하고 프로젝트에 통합을 추가합니다.',
       },
       {
         step: 2,
         title: 'Connect to project',
         title_ko: '프로젝트 연결',
         description:
-          'Connect the KV database to your project. Vercel automatically injects KV_URL, KV_REST_API_URL, KV_REST_API_TOKEN.',
+          'Connect the Redis integration to your project. Vercel automatically injects UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.',
         description_ko:
-          'KV 데이터베이스를 프로젝트에 연결합니다. Vercel이 KV_URL 등 환경변수를 자동 주입합니다.',
+          'Redis 통합을 프로젝트에 연결합니다. Vercel이 UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN 환경변수를 자동 주입합니다.',
       },
       {
         step: 3,
-        title: 'Install @vercel/kv',
-        title_ko: '@vercel/kv 설치',
-        description: 'Install the @vercel/kv package and pull environment variables locally.',
-        description_ko: '@vercel/kv 패키지를 설치하고 환경변수를 로컬로 가져옵니다.',
-        code_snippet: `npm install @vercel/kv
+        title: 'Install @upstash/redis',
+        title_ko: '@upstash/redis 설치',
+        description: 'Install the @upstash/redis package and pull environment variables locally.',
+        description_ko: '@upstash/redis 패키지를 설치하고 환경변수를 로컬로 가져옵니다.',
+        code_snippet: `npm install @upstash/redis
 npx vercel env pull .env.development.local`,
       },
       {
         step: 4,
         title: 'Use in API routes',
         title_ko: 'API 라우트에서 사용',
-        description: 'Import kv from @vercel/kv and use Redis-compatible commands.',
-        description_ko: '@vercel/kv에서 kv를 가져와 Redis 호환 명령어를 사용합니다.',
-        code_snippet: `import { kv } from '@vercel/kv'
+        description: 'Import Redis from @upstash/redis and use Redis.fromEnv() to read the injected environment variables.',
+        description_ko: '@upstash/redis에서 Redis를 가져와 Redis.fromEnv()로 주입된 환경변수를 읽어 사용합니다.',
+        code_snippet: `import { Redis } from '@upstash/redis'
+
+const redis = Redis.fromEnv()
 
 export async function GET() {
-  const views = await kv.incr('page:views')
+  const views = await redis.incr('page:views')
   return Response.json({ views })
 }`,
       },
     ],
     code_examples: {
-      typescript: `import { kv } from '@vercel/kv'
+      typescript: `import { Redis } from '@upstash/redis'
+
+const redis = Redis.fromEnv()
 
 // set/get (자동 직렬화)
-await kv.set('user:1', { name: '홍길동', email: 'hong@example.com' })
-const user = await kv.get<{ name: string; email: string }>('user:1')
+await redis.set('user:1', { name: '홍길동', email: 'hong@example.com' })
+const user = await redis.get<{ name: string; email: string }>('user:1')
 
 // TTL 설정
-await kv.set('session:abc', { userId: 1 }, { ex: 3600 })
+await redis.set('session:abc', { userId: 1 }, { ex: 3600 })
 
 // 카운터
-const count = await kv.incr('visits')
+const count = await redis.incr('visits')
 
 // Hash
-await kv.hset('cart:user1', { 'item:1': '2', 'item:2': '1' })
-const cart = await kv.hgetall('cart:user1')
+await redis.hset('cart:user1', { 'item:1': '2', 'item:2': '1' })
+const cart = await redis.hgetall('cart:user1')
 
 // Pipeline (배치 요청)
-const pipeline = kv.pipeline()
+const pipeline = redis.pipeline()
 pipeline.set('key1', 'value1')
 pipeline.set('key2', 'value2')
 pipeline.incr('counter')
 const results = await pipeline.exec()
 
 // Rate limiting in Route Handler
-import { kv } from '@vercel/kv'
+import { Redis } from '@upstash/redis'
 import { NextRequest, NextResponse } from 'next/server'
+
+const redisClient = Redis.fromEnv()
 
 export async function POST(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1'
   const key = \`ratelimit:\${ip}\`
-  const requests = await kv.incr(key)
-  if (requests === 1) await kv.expire(key, 60)
+  const requests = await redisClient.incr(key)
+  if (requests === 1) await redisClient.expire(key, 60)
   if (requests > 10) return NextResponse.json({ error: '요청 한도 초과' }, { status: 429 })
   return NextResponse.json({ ok: true })
 }`,
     },
     common_pitfalls: [
       {
-        title: 'KV env vars not available locally',
-        title_ko: '로컬에서 KV 환경변수 없음',
+        title: 'Redis env vars not available locally',
+        title_ko: '로컬에서 Redis 환경변수 없음',
         problem:
-          'Vercel KV environment variables are not available locally without explicit setup.',
+          'Vercel Marketplace Redis integration environment variables are not available locally without explicit setup.',
         solution:
           'Run "npx vercel env pull" to sync environment variables to your local .env file.',
         code: 'npx vercel env pull .env.development.local',
@@ -5739,9 +5750,9 @@ export async function POST(request: NextRequest) {
         title: 'Not using pipeline for bulk operations',
         title_ko: '대량 작업에서 pipeline 미사용',
         problem:
-          'Performing many individual KV operations in a loop causes N HTTP requests, degrading performance.',
-        solution: 'Use kv.pipeline() to batch multiple operations into a single HTTP request.',
-        code: `const pipeline = kv.pipeline()
+          'Performing many individual Redis operations in a loop causes N HTTP requests, degrading performance.',
+        solution: 'Use redis.pipeline() to batch multiple operations into a single HTTP request.',
+        code: `const pipeline = redis.pipeline()
 for (const item of items) pipeline.set(item.key, item.value)
 await pipeline.exec()`,
       },
@@ -5749,24 +5760,24 @@ await pipeline.exec()`,
     integration_tips: [
       {
         with_service_slug: 'vercel',
-        tip: 'Vercel KV is natively integrated with Vercel deployments. KV_URL, KV_REST_API_URL, and KV_REST_API_TOKEN are automatically injected when you connect the store to a project.',
+        tip: 'Vercel KV is discontinued. Add a Redis integration (e.g. Upstash) from the Vercel Marketplace instead — UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are automatically injected once connected to a project.',
         tip_ko:
-          'Vercel KV는 Vercel 배포에 완전 통합됩니다. KV 스토어를 프로젝트에 연결하면 환경변수가 자동 주입됩니다.',
+          'Vercel KV는 단종되었습니다. 대신 Vercel Marketplace에서 Redis 통합(예: Upstash)을 추가하세요. 프로젝트에 연결하면 UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN 환경변수가 자동 주입됩니다.',
       },
       {
         with_service_slug: 'upstash-redis',
-        tip: 'Vercel KV is powered by Upstash Redis under the hood. For more control or lower cost at scale, connect directly to Upstash using @upstash/redis — the API is nearly identical.',
+        tip: 'Vercel KV was powered by Upstash Redis under the hood and is now fully replaced by the Upstash Marketplace integration. You can also sign up directly at upstash.com and connect via UPSTASH_REDIS_REST_URL/TOKEN — the SDK (@upstash/redis) is identical either way.',
         tip_ko:
-          'Vercel KV는 내부적으로 Upstash Redis 기반입니다. 더 많은 제어나 비용 최적화가 필요하다면 @upstash/redis로 직접 연결하세요. API는 거의 동일합니다.',
+          'Vercel KV는 내부적으로 Upstash Redis 기반이었으며, 이제는 Upstash 마켓플레이스 통합으로 완전히 대체되었습니다. upstash.com에서 직접 가입 후 UPSTASH_REDIS_REST_URL/TOKEN으로 연결할 수도 있으며, 어느 경로든 SDK(@upstash/redis)는 동일합니다.',
       },
     ],
     pros: [
-      { text: 'Zero-config integration with Vercel — env vars injected automatically', text_ko: 'Vercel과 제로 설정 통합 — 환경변수 자동 주입' },
+      { text: 'Zero-config integration with Vercel — env vars injected automatically once the Marketplace Redis integration is connected', text_ko: 'Vercel과 제로 설정 통합 — Marketplace Redis 통합 연결 시 환경변수 자동 주입' },
       { text: 'HTTP REST API — works in Edge Runtime without TCP connections', text_ko: 'HTTP REST API — TCP 연결 없이 Edge Runtime에서 동작' },
       { text: 'Auto-serialization of JavaScript objects — no manual JSON.stringify needed', text_ko: 'JavaScript 객체 자동 직렬화 — JSON.stringify 불필요' },
     ],
     cons: [
-      { text: 'Vendor lock-in to Vercel ecosystem — not portable to other platforms', text_ko: 'Vercel 생태계 종속 — 다른 플랫폼으로 이식 불가' },
+      { text: 'Vercel KV as a native product is discontinued — now depends on a third-party Marketplace integration (e.g. Upstash) rather than a Vercel-native service', text_ko: 'Vercel 네이티브 KV 상품은 단종됨 — Vercel 자체 서비스가 아닌 서드파티 Marketplace 통합(예: Upstash)에 의존' },
       { text: 'More expensive than direct Upstash Redis at scale', text_ko: '규모 확장 시 직접 Upstash Redis보다 비용이 높음' },
     ],
     api_key_url: 'https://vercel.com/dashboard/stores',
@@ -5911,19 +5922,19 @@ export const { handlers, auth } = NextAuth({
       },
       {
         with_service_slug: 'vercel-kv',
-        tip: 'Vercel KV is built on Upstash Redis. If you need more control or lower cost, use @upstash/redis directly — the API is nearly identical.',
+        tip: 'Vercel KV is discontinued (December 2024) — Vercel KV was built on Upstash Redis, and it is now fully replaced by the Upstash integration in the Vercel Marketplace. Use @upstash/redis directly for the same API.',
         tip_ko:
-          'Vercel KV는 Upstash Redis 기반입니다. 더 많은 제어나 낮은 비용이 필요하다면 @upstash/redis를 직접 사용하세요. API는 거의 동일합니다.',
+          'Vercel KV는 단종되었습니다(2024년 12월) — Vercel KV는 원래 Upstash Redis 기반이었으며, 이제 Vercel Marketplace의 Upstash 통합으로 완전히 대체되었습니다. 동일한 API를 사용하려면 @upstash/redis를 직접 사용하세요.',
       },
     ],
     pros: [
       { text: 'HTTP REST API — compatible with Edge Runtime, Cloudflare Workers, Deno', text_ko: 'HTTP REST API — Edge Runtime, Cloudflare Workers, Deno 모두 호환' },
-      { text: 'Generous free tier: 10,000 commands/day, 256MB storage', text_ko: '넉넉한 무료 플랜: 일 10,000 커맨드, 256MB 스토리지' },
+      { text: 'Generous free tier: 500K commands/month, 256MB storage', text_ko: '넉넉한 무료 플랜: 월 50만 커맨드, 256MB 스토리지' },
       { text: 'Global replication option for low-latency reads worldwide', text_ko: '글로벌 복제 옵션으로 전 세계 낮은 지연 시간 읽기' },
     ],
     cons: [
       { text: 'HTTP overhead per command — higher latency than TCP Redis for high-throughput scenarios', text_ko: '커맨드당 HTTP 오버헤드 — 고처리량 시나리오에서 TCP Redis보다 높은 지연' },
-      { text: 'Free tier daily limit resets at midnight UTC — not suited for consistent high traffic', text_ko: '무료 플랜 일일 한도 UTC 자정 초기화 — 일관된 높은 트래픽에 부적합' },
+      { text: 'Free tier monthly limit (500K commands) can be restrictive for consistent high traffic', text_ko: '무료 플랜 월 50만 커맨드 한도 — 지속적인 높은 트래픽에는 부적합' },
     ],
     api_key_url: 'https://console.upstash.com/',
     api_key_url_label: 'Upstash Console',

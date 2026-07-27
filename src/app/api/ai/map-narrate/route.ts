@@ -1,10 +1,21 @@
 import { NextRequest } from 'next/server';
+import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { resolveOpenAIKey, AIKeyNotConfiguredError } from '@/lib/ai/resolve-key';
 import { callOpenAIStream } from '@/lib/ai/openai';
 import { logAudit } from '@/lib/audit';
 import { proRequiredError } from '@/lib/api/errors';
 import { isProOrAbove } from '@/lib/quota';
+
+// 클라이언트가 보내는 맵 데이터를 프롬프트에 직렬화하므로, 무제한 배열은
+// 정액 요금으로 무한정 LLM 입력 토큰을 유발한다 (2026-07-16 레드팀 F-11).
+// 배열 길이 상한을 강제하고 project_id 형식을 검증한다.
+const narrateSchema = z.object({
+  project_id: z.string().uuid(),
+  nodes: z.array(z.unknown()).min(1).max(300),
+  edges: z.array(z.unknown()).max(600).optional(),
+  health: z.array(z.unknown()).max(300).optional(),
+});
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -17,9 +28,28 @@ export async function POST(request: NextRequest) {
   if (!await isProOrAbove(user.id)) return proRequiredError('AI 맵 분석');
 
   try {
-    const { project_id, nodes, edges, health } = await request.json();
-    if (!project_id || !nodes) {
+    let rawBody: unknown;
+    try {
+      rawBody = await request.json();
+    } catch {
+      return new Response(JSON.stringify({ error: '유효하지 않은 요청 형식입니다' }), { status: 400 });
+    }
+
+    const parsed = narrateSchema.safeParse(rawBody);
+    if (!parsed.success) {
       return new Response(JSON.stringify({ error: '프로젝트 ID와 노드 정보가 필요합니다' }), { status: 400 });
+    }
+    const { project_id, nodes, edges, health } = parsed.data;
+
+    // 소유권 확인: 타 프로젝트 ID로 감사 로그를 오염시키는 것을 차단
+    const { data: project } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('id', project_id)
+      .eq('user_id', user.id)
+      .single();
+    if (!project) {
+      return new Response(JSON.stringify({ error: '프로젝트를 찾을 수 없습니다' }), { status: 404 });
     }
 
     const { apiKey, baseUrl } = await resolveOpenAIKey();

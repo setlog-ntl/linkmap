@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { unauthorizedError, validationError, serverError, apiError } from '@/lib/api/errors';
+import { isAdmin } from '@/lib/admin';
 
 const actionSchema = z.object({
   showcaseId: z.string().uuid(),
@@ -20,14 +21,8 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
 
-  // 2. 관리자 확인
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('is_admin')
-    .eq('id', user.id)
-    .maybeSingle();
-
-  if (!profile?.is_admin) {
+  // 2. 관리자 확인 — service_role로 검증 (RLS 우회, self-modify 불가) — 타 admin 라우트와 통일
+  if (!(await isAdmin(user.id))) {
     return apiError('관리자 권한이 필요합니다', 403);
   }
 
@@ -96,13 +91,8 @@ export async function GET(_req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return unauthorizedError();
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('is_admin')
-    .eq('id', user.id)
-    .maybeSingle();
-
-  if (!profile?.is_admin) {
+  // 관리자 확인은 service_role로 검증 (RLS 우회, self-modify 불가) — 타 admin 라우트와 통일
+  if (!(await isAdmin(user.id))) {
     return apiError('관리자 권한이 필요합니다', 403);
   }
 

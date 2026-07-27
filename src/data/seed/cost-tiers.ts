@@ -86,6 +86,28 @@ const S: Record<string, string> = {
   together_ai: '10000000-0000-4000-a000-000000000124',
   modal: '10000000-0000-4000-a000-000000000126',
   wandb: '10000000-0000-4000-a000-000000000127',
+
+  // --- 2026-07 신규 서비스 ---
+  zed: '10000000-0000-4000-a000-000000000165',
+  kiro: '10000000-0000-4000-a000-000000000166',
+  google_jules: '10000000-0000-4000-a000-000000000167',
+  trae: '10000000-0000-4000-a000-000000000168',
+  warp: '10000000-0000-4000-a000-000000000169',
+  aider: '10000000-0000-4000-a000-000000000170',
+  openai_codex: '10000000-0000-4000-a000-000000000171',
+  cerebras: '10000000-0000-4000-a000-000000000172',
+  sambanova: '10000000-0000-4000-a000-000000000173',
+  vercel_ai_sdk: '10000000-0000-4000-a000-000000000174',
+  langgraph: '10000000-0000-4000-a000-000000000175',
+  llamaindex: '10000000-0000-4000-a000-000000000176',
+  mastra: '10000000-0000-4000-a000-000000000177',
+  composio: '10000000-0000-4000-a000-000000000178',
+  same_new: '10000000-0000-4000-a000-000000000179',
+  zilliz_cloud: '10000000-0000-4000-a000-000000000180',
+  langfuse: '10000000-0000-4000-a000-000000000181',
+  helicone: '10000000-0000-4000-a000-000000000182',
+  portkey: '10000000-0000-4000-a000-000000000183',
+  litellm: '10000000-0000-4000-a000-000000000184',
 };
 
 // Helper function to create tier
@@ -176,7 +198,7 @@ export const costTiers: CostTierSeed[] = [
     ['Community support', '커뮤니티 지원', true],
   ], { bandwidth: '100GB/mo', builds: '300 min/mo', forms: '100/mo' }, '개인 프로젝트', 0),
 
-  t(S.netlify, 'pro', '프로', '$19', '$228', [
+  t(S.netlify, 'pro', '프로', '$20', '$240', [
     ['1TB bandwidth', '1TB 전송량', true],
     ['25K build minutes', '25000분 빌드', true],
     ['Email support', '이메일 지원', true],
@@ -241,11 +263,12 @@ export const costTiers: CostTierSeed[] = [
   ], { emails: '50K/mo', domains: 'Unlimited', api: 'Unlimited' }, '스타트업', 1),
 
   // SendGrid (2 tiers)
-  t(S.sendgrid, 'free', '무료', '$0', '$0', [
-    ['100 emails/day', '일 100통', true],
+  // 영구 무료(일 100통)는 폐지되고 60일 체험으로 대체됨. 기존 선택 이력 보존을 위해 행은 유지한다.
+  t(S.sendgrid, 'free', '무료 체험 (60일)', '$0', '$0', [
+    ['100 emails/day (60-day trial)', '일 100통 (60일 체험)', true],
     ['Basic features', '기본 기능', true],
     ['Email support', '이메일 지원', true],
-  ], { emails: '100/day', contacts: '2K', api: 'Standard' }, '개인 프로젝트', 0),
+  ], { emails: '100/day', contacts: '2K', api: 'Standard' }, '체험용 — 이후 유료 전환 필요', 0),
 
   t(S.sendgrid, 'essentials', '에센셜', '$19.95', '$239.40', [
     ['50K emails/month', '월 5만통', true],
@@ -312,11 +335,12 @@ export const costTiers: CostTierSeed[] = [
   ], { events: '50K/mo', projects: 'Unlimited', retention: '90 days' }, '팀', 1),
 
   // PlanetScale (2 tiers)
-  t(S.planetscale, 'hobby', '취미', '$0', '$0', [
-    ['5GB storage', '5GB 스토리지', true],
-    ['1B rows read/mo', '월 10억 행 읽기', true],
-    ['Community support', '커뮤니티 지원', true],
-  ], { storage: '5GB', reads: '1B/mo', writes: '10M/mo' }, '개인 프로젝트', 0),
+  // Hobby(무료)는 2024-04-08 폐지 — 신규 가입 불가. 기존 선택 이력 보존을 위해 행은 유지한다.
+  t(S.planetscale, 'hobby', '취미 (2024년 폐지)', 'Discontinued', 'Discontinued', [
+    ['5GB storage', '5GB 스토리지', false],
+    ['1B rows read/mo', '월 10억 행 읽기', false],
+    ['Community support', '커뮤니티 지원', false],
+  ], { storage: '-', reads: '-', writes: '-' }, '신규 가입 불가 — PS-5 이상으로 이전 필요', 0),
 
   t(S.planetscale, 'scaler', '스케일러', '$29', '$348', [
     ['10GB storage', '10GB 스토리지', true],
@@ -594,7 +618,7 @@ export const costTiers: CostTierSeed[] = [
     ['Basic features', '기본 기능', true],
   ], { runs: '100K/mo', concurrency: '10', retention: '30 days' }, '개인 프로젝트', 0),
 
-  t(S.trigger_dev, 'pro', '프로', '$20', '$240', [
+  t(S.trigger_dev, 'pro', '프로', '$50', '$600', [
     ['1M runs/month', '월 100만 실행', true],
     ['Email support', '이메일 지원', true],
     ['Advanced features', '고급 기능', true],
@@ -699,7 +723,7 @@ export const costTiers: CostTierSeed[] = [
     ['Community support', '커뮤니티 지원', true],
   ], { characters: '10K/mo', voices: '3', quality: 'Standard' }, '개인 프로젝트', 0),
 
-  t(S.elevenlabs, 'starter', '스타터', '$5', '$60', [
+  t(S.elevenlabs, 'starter', '스타터', '$6', '$72', [
     ['30K characters/month', '월 3만 글자', true],
     ['10 voices', '10개 음성', true],
     ['Email support', '이메일 지원', true],
@@ -712,7 +736,7 @@ export const costTiers: CostTierSeed[] = [
     ['Basic features', '기본 기능', true],
   ], { runs: '25K/mo', concurrency: '10', retention: '7 days' }, '개인 프로젝트', 0),
 
-  t(S.inngest, 'pro', '프로', '$20', '$240', [
+  t(S.inngest, 'pro', '프로', '$99', '$1188', [
     ['500K runs/month', '월 50만 실행', true],
     ['Email support', '이메일 지원', true],
     ['Advanced features', '고급 기능', true],
@@ -726,7 +750,7 @@ export const costTiers: CostTierSeed[] = [
   ], { users: 'Unlimited', content: 'Unlimited', cost: 'Infrastructure only' }, '모든 규모', 0),
 
   // Plausible (2 tiers)
-  t(S.plausible, 'growth', '그로스', '$9', '$108', [
+  t(S.plausible, 'growth', '그로스', '$14', '$168', [
     ['10K pageviews/month', '월 1만 페이지뷰', true],
     ['Privacy-focused', '프라이버시 중심', true],
     ['Email support', '이메일 지원', true],
@@ -753,7 +777,7 @@ export const costTiers: CostTierSeed[] = [
   ], { jobs: 'Unlimited', queues: 'Unlimited', cost: 'Redis hosting only' }, '모든 규모', 0),
 
   // Shopify API (2 tiers)
-  t(S.shopify_api, 'basic', '베이직', '$39', '$468', [
+  t(S.shopify_api, 'basic', '베이직', '$25', '$228', [
     ['API access', 'API 액세스', true],
     ['2 staff accounts', '2명 직원', true],
     ['Email support', '이메일 지원', true],
@@ -962,7 +986,7 @@ export const costTiers: CostTierSeed[] = [
     ['Basic chat', '기본 채팅', true],
     ['Community support', '커뮤니티 지원', true],
   ], { autocomplete: 'Unlimited' }, '개인 개발자', 0),
-  t(S.windsurf, 'pro', '프로', '$15', '$144', [
+  t(S.windsurf, 'pro', '프로', '$20', '$240', [
     ['Advanced agent mode', '고급 에이전트 모드', true],
     ['All features', '모든 기능', true],
     ['Priority support', '우선 지원', true],
@@ -1059,4 +1083,113 @@ export const costTiers: CostTierSeed[] = [
     ['SSO/SAML', 'SSO/SAML', true],
     ['Dedicated support', '전담 지원', true],
   ], { storage: 'Custom', support: 'Dedicated' }, '대기업', 2),
+
+  // ---------------------------------------------------------------------------
+  // 2026-07 신규 등록 서비스 요금제 (공식 가격 페이지 기준)
+  // ---------------------------------------------------------------------------
+  // Zed (3 tiers)
+  t(S.zed, 'personal', 'Personal', '$0', '$0', [['Personal: $0/월', 'Personal: $0/월', true]], {}, '무료 시작', 0),
+  t(S.zed, 'pro', 'Pro', '$10', '$120', [['Pro: $10/월', 'Pro: $10/월', true]], {}, '', 1),
+  t(S.zed, 'business', 'Business', '$30', '$360', [['Business: $30/좌석/월', 'Business: $30/좌석/월', true]], {}, '', 2),
+
+  // Kiro (5 tiers)
+  t(S.kiro, 'free', 'Free', '$0', '$0', [['Free: $0', 'Free: $0', true]], {}, '무료 시작', 0),
+  t(S.kiro, 'pro', 'Pro', '$20', '$240', [['Pro: $20/월 (1,000 크레딧)', 'Pro: $20/월 (1,000 크레딧)', true]], {}, '', 1),
+  t(S.kiro, 'pro_plus', 'Pro+', '$40', '$480', [['Pro+: $40/월 (2,000 크레딧)', 'Pro+: $40/월 (2,000 크레딧)', true]], {}, '', 2),
+  t(S.kiro, 'pro_max', 'Pro Max', '$100', '$1,200', [['Pro Max: $100/월 (5,000 크레딧)', 'Pro Max: $100/월 (5,000 크레딧)', true]], {}, '', 3),
+  t(S.kiro, 'power', 'Power', '$200', '$2,400', [['Power: $200/월 (10,000 크레딧)', 'Power: $200/월 (10,000 크레딧)', true]], {}, '', 4),
+
+  // Google Jules (3 tiers)
+  t(S.google_jules, 'free', 'Free', '$0', '$0', [['Free: $0', 'Free: $0', true]], {}, '무료 시작', 0),
+  t(S.google_jules, 'google_ai_pro', 'Google AI Pro', '$19.99', '$239.88', [['Google AI Pro: $19.99/월 (5배 한도)', 'Google AI Pro: $19.99/월 (5배 한도)', true]], {}, '', 1),
+  t(S.google_jules, 'google_ai_ultra', 'Google AI Ultra', '$124.99', '$1,499.88', [['Google AI Ultra: $124.99/월 (20배 한도)', 'Google AI Ultra: $124.99/월 (20배 한도)', true]], {}, '', 2),
+
+  // Trae (5 tiers)
+  t(S.trae, 'free', 'Free', '$0', '$0', [['Free: $0', 'Free: $0', true]], {}, '무료 시작', 0),
+  t(S.trae, 'lite', 'Lite', '$3', '$36', [['Lite: $3/월', 'Lite: $3/월', true]], {}, '', 1),
+  t(S.trae, 'pro', 'Pro', '$10', '$120', [['Pro: $10/월', 'Pro: $10/월', true]], {}, '', 2),
+  t(S.trae, 'pro_plus', 'Pro+', '$30', '$360', [['Pro+: $30/월', 'Pro+: $30/월', true]], {}, '', 3),
+  t(S.trae, 'ultra', 'Ultra', '$100', '$1,200', [['Ultra: $100/월', 'Ultra: $100/월', true]], {}, '', 4),
+
+  // Warp (4 tiers)
+  t(S.warp, 'free', 'Free', '$0', '$0', [['Free: $0', 'Free: $0', true]], {}, '무료 시작', 0),
+  t(S.warp, 'build', 'Build', '$20', '$240', [['Build: $20/월', 'Build: $20/월', true]], {}, '', 1),
+  t(S.warp, 'max', 'Max', '$200', '$2,400', [['Max: $200/월', 'Max: $200/월', true]], {}, '', 2),
+  t(S.warp, 'business', 'Business', '$50', '$600', [['Business: $50/사용자/월', 'Business: $50/사용자/월', true]], {}, '', 3),
+
+  // Aider (1 tiers)
+  t(S.aider, 'open_source', 'Open Source', '$0', '$0', [['Open Source: $0', 'Open Source: $0', true]], {}, '무료 시작', 0),
+
+  // OpenAI Codex (4 tiers)
+  t(S.openai_codex, 'go', 'Go', '$8', '$96', [['Go: $8/월', 'Go: $8/월', true]], {}, '', 0),
+  t(S.openai_codex, 'plus', 'Plus', '$20', '$240', [['Plus: $20/월', 'Plus: $20/월', true]], {}, '', 1),
+  t(S.openai_codex, 'pro', 'Pro', '$100', '$1,200', [['Pro: $100-200/월', 'Pro: $100-200/월', true]], {}, '', 2),
+  t(S.openai_codex, 'business', 'Business', '$20', '$240', [['Business: $20-25/사용자/월', 'Business: $20-25/사용자/월', true]], {}, '', 3),
+
+  // Cerebras Inference (4 tiers)
+  t(S.cerebras, 'free', 'Free', '$0', '$0', [['Free: $0', 'Free: $0', true]], {}, '무료 시작', 0),
+  t(S.cerebras, 'pay_as_you_go', 'Pay-as-you-go', '$0.50', '$6', [['Pay-as-you-go: $0.50-1.50/백만 토큰', 'Pay-as-you-go: $0.50-1.50/백만 토큰', true]], {}, '', 1),
+  t(S.cerebras, 'code_pro', 'Code Pro', '$50', '$600', [['Code Pro: $50/월', 'Code Pro: $50/월', true]], {}, '', 2),
+  t(S.cerebras, 'code_max', 'Code Max', '$200', '$2,400', [['Code Max: $200/월', 'Code Max: $200/월', true]], {}, '', 3),
+
+  // SambaNova Cloud (2 tiers)
+  t(S.sambanova, 'free_developer', 'Free/Developer', '$0', '$0', [['Free/Developer: $0', 'Free/Developer: $0', true]], {}, '무료 시작', 0),
+  t(S.sambanova, 'pay_as_you_go', 'Pay-as-you-go', '모델별 백만 토큰당 $0.10~', '모델별 백만 토큰당 $0.10~', [['Pay-as-you-go: 모델별 백만 토큰당 $0.10~', 'Pay-as-you-go: 모델별 백만 토큰당 $0.10~', true]], {}, '공식 문의', 1),
+
+  // Vercel AI SDK (1 tiers)
+  t(S.vercel_ai_sdk, 'open_source', 'Open Source', '$0', '$0', [['Open Source: $0', 'Open Source: $0', true]], {}, '무료 시작', 0),
+
+  // LangGraph (3 tiers)
+  t(S.langgraph, 'developer', 'Developer', '$0', '$0', [['Developer: $0', 'Developer: $0', true]], {}, '무료 시작', 0),
+  t(S.langgraph, 'plus', 'Plus', '$39', '$468', [['Plus: $39/월~', 'Plus: $39/월~', true]], {}, '', 1),
+  t(S.langgraph, 'enterprise', 'Enterprise', '협의', '협의', [['Enterprise: 협의', 'Enterprise: 협의', true]], {}, '공식 문의', 2),
+
+  // LlamaIndex (4 tiers)
+  t(S.llamaindex, 'free', 'Free', '$0', '$0', [['Free: $0', 'Free: $0', true]], {}, '무료 시작', 0),
+  t(S.llamaindex, 'starter', 'Starter', '$50', '$600', [['Starter: $50/월', 'Starter: $50/월', true]], {}, '', 1),
+  t(S.llamaindex, 'pro', 'Pro', '$500', '$6,000', [['Pro: $500/월', 'Pro: $500/월', true]], {}, '', 2),
+  t(S.llamaindex, 'enterprise', 'Enterprise', '협의', '협의', [['Enterprise: 협의', 'Enterprise: 협의', true]], {}, '공식 문의', 3),
+
+  // Mastra (3 tiers)
+  t(S.mastra, 'starter_platform', 'Starter Platform', '$0', '$0', [['Starter Platform: $0', 'Starter Platform: $0', true]], {}, '무료 시작', 0),
+  t(S.mastra, 'teams_platform', 'Teams Platform', '$250', '$3,000', [['Teams Platform: $250/월', 'Teams Platform: $250/월', true]], {}, '', 1),
+  t(S.mastra, 'enterprise', 'Enterprise', '협의', '협의', [['Enterprise: 협의', 'Enterprise: 협의', true]], {}, '공식 문의', 2),
+
+  // Composio (4 tiers)
+  t(S.composio, 'free', 'Free', '$0', '$0', [['Free: $0', 'Free: $0', true]], {}, '무료 시작', 0),
+  t(S.composio, 'starter', 'Starter', '$29', '$348', [['Starter: $29/월', 'Starter: $29/월', true]], {}, '', 1),
+  t(S.composio, 'growth', 'Growth', '$229', '$2,748', [['Growth: $229/월', 'Growth: $229/월', true]], {}, '', 2),
+  t(S.composio, 'enterprise', 'Enterprise', '협의', '협의', [['Enterprise: 협의', 'Enterprise: 협의', true]], {}, '공식 문의', 3),
+
+  // Same.new (4 tiers)
+  t(S.same_new, 'basic', 'Basic', '$10', '$120', [['Basic: $10/월 (200만 토큰)', 'Basic: $10/월 (200만 토큰)', true]], {}, '', 0),
+  t(S.same_new, 'pro', 'Pro', '$25', '$300', [['Pro: $25/월 (500만 토큰)', 'Pro: $25/월 (500만 토큰)', true]], {}, '', 1),
+  t(S.same_new, 'max', 'Max', '$50', '$600', [['Max: $50/월 (1,000만 토큰)', 'Max: $50/월 (1,000만 토큰)', true]], {}, '', 2),
+  t(S.same_new, 'ultra', 'Ultra', '$100', '$1,200', [['Ultra: $100/월 (2,000만 토큰)', 'Ultra: $100/월 (2,000만 토큰)', true]], {}, '', 3),
+
+  // Zilliz Cloud (3 tiers)
+  t(S.zilliz_cloud, 'serverless', 'Serverless', '$4', '$48', [['Serverless: $4/백만 vCU', 'Serverless: $4/백만 vCU', true]], {}, '', 0),
+  t(S.zilliz_cloud, 'dedicated', 'Dedicated', '$99', '$1,188', [['Dedicated: $99/월~', 'Dedicated: $99/월~', true]], {}, '', 1),
+  t(S.zilliz_cloud, 'enterprise', 'Enterprise', '협의', '협의', [['Enterprise: 협의', 'Enterprise: 협의', true]], {}, '공식 문의', 2),
+
+  // Langfuse (3 tiers)
+  t(S.langfuse, 'free', 'Free', '$0', '$0', [['Free: $0', 'Free: $0', true]], {}, '무료 시작', 0),
+  t(S.langfuse, 'pro', 'Pro', '사용량 기반($8/10만 유닛)', '사용량 기반($8/10만 유닛)', [['Pro: 사용량 기반($8/10만 유닛)', 'Pro: 사용량 기반($8/10만 유닛)', true]], {}, '공식 문의', 1),
+  t(S.langfuse, 'enterprise', 'Enterprise', '협의', '협의', [['Enterprise: 협의', 'Enterprise: 협의', true]], {}, '공식 문의', 2),
+
+  // Helicone (4 tiers)
+  t(S.helicone, 'hobby', 'Hobby', '$0', '$0', [['Hobby: $0', 'Hobby: $0', true]], {}, '무료 시작', 0),
+  t(S.helicone, 'pro', 'Pro', '$79', '$948', [['Pro: $79/월', 'Pro: $79/월', true]], {}, '', 1),
+  t(S.helicone, 'team', 'Team', '$799', '$9,588', [['Team: $799/월', 'Team: $799/월', true]], {}, '', 2),
+  t(S.helicone, 'enterprise', 'Enterprise', '협의', '협의', [['Enterprise: 협의', 'Enterprise: 협의', true]], {}, '공식 문의', 3),
+
+  // Portkey (4 tiers)
+  t(S.portkey, 'open_source', 'Open Source', '$0', '$0', [['Open Source: $0', 'Open Source: $0', true]], {}, '무료 시작', 0),
+  t(S.portkey, 'developer', 'Developer', '$0', '$0', [['Developer: $0', 'Developer: $0', true]], {}, '무료 시작', 1),
+  t(S.portkey, 'production', 'Production', '$49', '$588', [['Production: $49/월', 'Production: $49/월', true]], {}, '', 2),
+  t(S.portkey, 'enterprise', 'Enterprise', '협의', '협의', [['Enterprise: 협의', 'Enterprise: 협의', true]], {}, '공식 문의', 3),
+
+  // LiteLLM (2 tiers)
+  t(S.litellm, 'open_source', 'Open Source', '$0', '$0', [['Open Source: $0', 'Open Source: $0', true]], {}, '무료 시작', 0),
+  t(S.litellm, 'enterprise', 'Enterprise', '$250', '$3,000', [['Enterprise: $250/월~', 'Enterprise: $250/월~', true]], {}, '', 1),
 ];

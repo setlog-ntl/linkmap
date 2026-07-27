@@ -73,7 +73,7 @@ export const ENV_MANAGEMENT_COMPARISON: ServiceComparison = {
   id: 'env-management-tools',
   title: '환경변수/시크릿 관리 도구 비교',
   description: 'Doppler, Infisical, Linkmap의 기능, 가격, 사용성을 비교합니다.',
-  lastUpdated: '2026-03-19',
+  lastUpdated: '2026-07-24',
   services: [
     {
       name: 'Doppler',
@@ -90,7 +90,7 @@ export const ENV_MANAGEMENT_COMPARISON: ServiceComparison = {
           name: 'Team',
           price: '$21/사용자',
           period: '월',
-          highlights: ['무제한 프로젝트', '감사 로그', '팀 권한 관리'],
+          highlights: ['프로젝트 250개', '감사 로그', '팀 권한 관리'],
         },
         {
           name: 'Enterprise',
@@ -126,26 +126,26 @@ export const ENV_MANAGEMENT_COMPARISON: ServiceComparison = {
         },
         {
           name: 'Pro',
-          price: '$9/사용자',
+          price: '$18/Identity',
           period: '월',
-          highlights: ['고급 시크릿 로테이션', 'PKI 인증서 관리', 'RBAC'],
+          highlights: ['시크릿 로테이션', 'RBAC', 'SAML SSO'],
         },
         {
           name: 'Enterprise',
           price: '문의',
-          highlights: ['SSO/SAML', 'SCIM', '전용 인프라'],
+          highlights: ['PKI 인증서 관리', 'Dynamic Secrets', 'SCIM', '전용 인프라'],
         },
       ],
       prosCons: {
         pros: [
           '오픈소스(MIT) — 코드 투명성',
           '셀프호스팅으로 데이터 완전 통제',
-          '동적 시크릿 생성, PKI 인증서 관리 등 고급 기능',
+          '동적 시크릿 생성, PKI 인증서 관리 등 고급 기능 (Enterprise)',
           'GitHub Star 12,700개 이상의 커뮤니티',
         ],
         cons: [
           '셀프호스팅 시 인프라 운영 부담',
-          '클라우드 유료 플랜 API 요청 제한',
+          'Pro 요금 인상 ($9→$18/Identity)',
           '한국어 지원 없음',
           '초기 설정 복잡도 높음',
         ],
@@ -172,7 +172,7 @@ export const ENV_MANAGEMENT_COMPARISON: ServiceComparison = {
         pros: [
           'AES-256-GCM 암호화',
           '서비스맵 시각화 — 연결 구조를 한눈에 파악',
-          '128개 서비스 카탈로그 (한국어 가이드 포함)',
+          '175개 서비스 카탈로그 (한국어 가이드 포함)',
           '원클릭 배포 템플릿 6종',
           'GitHub Secrets 1클릭 자동화',
           '바이브코더/1인 개발자 친화적',
@@ -217,11 +217,11 @@ export const ENV_MANAGEMENT_COMPARISON: ServiceComparison = {
     },
     {
       feature: 'PKI 인증서 관리',
-      values: { Doppler: '미지원', Infisical: '지원', Linkmap: '미지원' },
+      values: { Doppler: '미지원', Infisical: '지원 (Enterprise)', Linkmap: '미지원' },
     },
     {
       feature: '서비스 카탈로그',
-      values: { Doppler: '없음', Infisical: '없음', Linkmap: '128개 (한국어)' },
+      values: { Doppler: '없음', Infisical: '없음', Linkmap: '175개 (한국어)' },
     },
     {
       feature: '원클릭 배포 템플릿',
@@ -321,7 +321,7 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
   title: 'AI 코딩 도구 비교',
   description:
     'ChatGPT, Claude Code, Cursor, Gemini Code Assist, GitHub Copilot, Windsurf 등 주요 AI 코딩 도구 6종의 기능, 가격, 보안을 객관적으로 비교합니다.',
-  lastUpdated: '2026-03-19',
+  lastUpdated: '2026-07-24',
   services: [
     {
       name: 'Claude Code',
@@ -465,23 +465,29 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
           name: 'Free',
           price: '$0',
           period: '월',
-          highlights: ['코드 완성 2,000회/월', '프리미엄 요청 50회/월'],
+          highlights: ['코드 완성 2,000회/월', '채팅 요청 50회/월'],
         },
         {
           name: 'Pro',
           price: '$10',
           period: '월',
-          highlights: ['프리미엄 요청 300회/월', '모든 에디터 지원'],
+          highlights: ['AI 크레딧 $15/월 상당 포함', '모든 에디터 지원'],
         },
         {
           name: 'Pro+',
           price: '$39',
           period: '월',
           highlights: [
-            '프리미엄 요청 1,500회/월',
-            'Claude Opus 4, o3 접근',
+            'AI 크레딧 $70/월 상당 포함',
+            'Claude Opus, o3 등 프리미엄 모델 접근',
             '고급 모델 선택',
           ],
+        },
+        {
+          name: 'Max (개인)',
+          price: '$100',
+          period: '월',
+          highlights: ['AI 크레딧 $200/월 상당 포함'],
         },
         {
           name: 'Business',
@@ -505,6 +511,7 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
           '교사, 오픈소스 메인테이너 무료',
         ],
         cons: [
+          '2026-06-01부로 프리미엄 요청 카운트 → GitHub AI Credits 사용량제로 전환 (채팅·에이전트·코드 리뷰·CLI만 차감)',
           '에이전트 모드 자율성이 상대적으로 낮음',
           'Pro+가 아니면 모델 선택 제한',
           '독립 IDE가 아닌 플러그인 형태',
@@ -515,13 +522,12 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     {
       name: 'Gemini Code Assist',
       url: 'https://cloud.google.com/gemini/docs/codeassist/overview',
-      tagline: 'Google의 AI 코딩 어시스턴트 — IDE 플러그인 + Gemini 2.5',
+      tagline: 'Google의 조직 대상 AI 코딩 어시스턴트 — IDE 플러그인 + Gemini 2.5 (개인 무료는 Antigravity로 이전)',
       pricing: [
         {
-          name: 'Free (개인)',
-          price: '$0',
-          period: '월',
-          highlights: ['개인 개발자 무료', 'Gemini 2.5 Flash', 'IDE 플러그인'],
+          name: '개인용 (폐지)',
+          price: '해당 없음',
+          highlights: ['2026-06-18부로 개인/Google AI Pro·Ultra 티어 폐지', 'Google Antigravity(무료 에이전트 개발 플랫폼)로 이전'],
         },
         {
           name: 'Standard',
@@ -540,61 +546,64 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
         pros: [
           'Gemini 2.5 Pro — 100만 토큰 컨텍스트 창',
           'VS Code, JetBrains, Android Studio 플러그인 지원',
-          '개인 개발자 무료',
           'Google Cloud 서비스 깊은 통합',
           '코드 변환, 테스트 생성, 문서화 자동화',
+          '조직 단위 보안 정책·전체 코드베이스 인덱싱 지원',
         ],
         cons: [
+          '2026-06-18부로 개인용 무료 플랜 폐지 -- Gemini Code Assist 자체는 조직(Standard/Enterprise) 전용, 개인은 Google Antigravity로 이전',
           'Google Cloud 생태계 외 통합 제한적',
           '에이전트 모드 자율성이 Claude Code·Cursor 대비 발전 중',
-          'IDE 플러그인 안정성 개선 중',
           '커뮤니티 규모가 Copilot·Cursor 대비 성장 중',
-          'Android Studio 외 모바일 개발 지원 제한',
         ],
       },
     },
     {
       name: 'Windsurf',
-      url: 'https://windsurf.com',
-      tagline: '엔터프라이즈 보안 특화 AI IDE',
+      url: 'https://devin.ai/desktop',
+      tagline: '엔터프라이즈 보안 특화 AI IDE -- 2026-06 Cognition에 인수 후 "Devin Desktop"으로 리브랜딩',
       pricing: [
         {
           name: 'Free',
           price: '$0',
           period: '월',
-          highlights: ['프롬프트 크레딧 25회/월', '무제한 Tab 완성', '무제한 인라인 수정'],
+          highlights: ['무제한 Tab 완성', '무제한 인라인 수정', '제한적 에이전트(Cascade) 사용량'],
         },
         {
           name: 'Pro',
-          price: '$15',
+          price: '$20',
           period: '월',
-          highlights: ['프롬프트 크레딧 500회/월', '모든 프리미엄 모델', '학생 50% 할인'],
+          highlights: ['확장된 에이전트 사용량', '모든 프리미엄 모델'],
+        },
+        {
+          name: 'Max',
+          price: '$200',
+          period: '월',
+          highlights: ['대용량 에이전트 사용량'],
         },
         {
           name: 'Teams',
-          price: '$30/사용자',
+          price: '$80 + $40/사용자',
           period: '월',
-          highlights: ['사용자당 500 크레딧', '관리 대시보드', '200명까지'],
+          highlights: ['관리 대시보드', '팀 단위 청구'],
         },
         {
           name: 'Enterprise',
-          price: '$60/사용자',
-          period: '월',
-          highlights: ['사용자당 1,000 크레딧', 'SOC 2', 'SSO', '데이터 레지던시'],
+          price: '문의',
+          highlights: ['SOC 2', 'SSO', '데이터 레지던시'],
         },
       ],
       prosCons: {
         pros: [
-          '가장 저렴한 유료 IDE ($15/월)',
           'SOC 2 준수, SSO, 데이터 레지던시',
-          '학생 50% 할인',
           'Cascade 에이전트 경험',
           '무료 플랜에도 무제한 Tab/인라인 수정',
+          'Cognition(Devin 개발사)의 에이전트 제품군과 통합',
         ],
         cons: [
+          '2026-06 Windsurf → "Devin Desktop"으로 리브랜딩되어 브랜드 혼란',
           '커뮤니티 규모가 Cursor 대비 작음',
           '.env 처리 방식은 다른 IDE와 기본 동일',
-          '프롬프트 크레딧 제한이 빡빡할 수 있음',
           '엔터프라이즈 가격이 상대적으로 높음',
         ],
       },
@@ -631,7 +640,7 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
         Cursor: '$20/월',
         'Gemini Code Assist': '$19/사용자/월',
         'GitHub Copilot': '$10/월',
-        Windsurf: '$15/월',
+        Windsurf: '$20/월',
       },
     },
     {
@@ -731,7 +740,7 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
         ChatGPT: 'best',
         'Claude Code': 'limited',
         Cursor: 'good',
-        'Gemini Code Assist': 'good',
+        'Gemini Code Assist': 'limited',
         'GitHub Copilot': 'good',
         Windsurf: 'good',
       },
@@ -775,7 +784,7 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
         ChatGPT: 'good',
         'Claude Code': 'none',
         Cursor: 'limited',
-        'Gemini Code Assist': 'best',
+        'Gemini Code Assist': 'limited',
         'GitHub Copilot': 'best',
         Windsurf: 'good',
       },
@@ -814,7 +823,7 @@ export const AI_CODING_TOOLS_COMPARISON: ServiceComparison = {
     },
   ],
   verdict:
-    '대화형 코드 생성과 입문은 ChatGPT, 대규모 코드베이스 이해·수정은 Claude Code, VS Code 사용자 전환은 Cursor, Google Cloud 생태계와 무료 IDE 플러그인은 Gemini Code Assist, 넓은 에디터 지원과 무료 플랜은 GitHub Copilot, 엔터프라이즈 보안은 Windsurf. 대부분의 개발자는 2-3개를 조합해 사용합니다.',
+    '대화형 코드 생성과 입문은 ChatGPT, 대규모 코드베이스 이해·수정은 Claude Code, VS Code 사용자 전환은 Cursor, Google Cloud 생태계와 조직 단위 코드 커스터마이징은 Gemini Code Assist(단, 개인용 무료 플랜은 2026-06-18 폐지되어 Google Antigravity로 이전됨), 넓은 에디터 지원과 무료 플랜은 GitHub Copilot, 엔터프라이즈 보안은 Windsurf(현 Devin Desktop). 대부분의 개발자는 2-3개를 조합해 사용합니다.',
 };
 
 // ---------------------------------------------------------------------------
@@ -826,7 +835,7 @@ export const DEPLOY_PLATFORMS_COMPARISON: ServiceComparison = {
   title: '배포 플랫폼 비교',
   description:
     'Vercel, Cloudflare Workers/Pages, Netlify의 무료 플랜, 성능, 프레임워크 지원을 비교합니다.',
-  lastUpdated: '2026-03-19',
+  lastUpdated: '2026-07-24',
   services: [
     {
       name: 'Vercel',
@@ -840,7 +849,7 @@ export const DEPLOY_PLATFORMS_COMPARISON: ServiceComparison = {
           highlights: [
             '대역폭 100GB/월',
             'Serverless 함수 100만 호출',
-            'CPU 4시간/월',
+            'Active CPU 4시간 (Fluid Compute)',
             '비상업적 사용만',
           ],
         },
@@ -848,7 +857,7 @@ export const DEPLOY_PLATFORMS_COMPARISON: ServiceComparison = {
           name: 'Pro',
           price: '$20/사용자',
           period: '월',
-          highlights: ['대역폭 1TB', '상업적 사용 가능', '프리뷰 배포'],
+          highlights: ['대역폭 1TB', '상업적 사용 가능', '프리뷰 배포', '월 $20 사용 크레딧 포함 (초과분 종량제)'],
         },
         {
           name: 'Enterprise',
@@ -863,6 +872,7 @@ export const DEPLOY_PLATFORMS_COMPARISON: ServiceComparison = {
           '직관적인 대시보드 UI',
           '환경변수 관리 내장',
           '가장 큰 프론트엔드 배포 생태계',
+          'Fluid Compute(Active CPU 과금) -- 코드가 실제 실행되는 시간만 과금, I/O 대기 시간은 비과금',
         ],
         cons: [
           'Hobby 플랜은 비상업적 사용만 허용',
@@ -933,15 +943,15 @@ export const DEPLOY_PLATFORMS_COMPARISON: ServiceComparison = {
           highlights: [
             '월 300 크레딧 (신규 계정)',
             '배포당 15 크레딧',
-            '대역폭 GB당 10 크레딧',
+            '대역폭 GB당 20 크레딧',
             '한도 초과 시 사이트 일시 중지',
           ],
         },
         {
           name: 'Pro',
-          price: '$19',
+          price: '$20',
           period: '월',
-          highlights: ['크레딧 대폭 증가', '상업적 사용', '폼 처리'],
+          highlights: ['월 3,000 크레딧 포함', '팀원 무제한 (좌석 과금 폐지)', '상업적 사용', '폼 처리'],
         },
         {
           name: 'Enterprise',
@@ -955,9 +965,10 @@ export const DEPLOY_PLATFORMS_COMPARISON: ServiceComparison = {
           '정적 사이트에 오랜 신뢰',
           'Netlify Forms 내장 (서버리스 폼 처리)',
           'Edge Functions 지원',
+          '2026-04-14부로 Pro 좌석 과금 폐지 -- 팀원 무제한 정액제 $20/월로 단순화',
         ],
         cons: [
-          '2025년 크레딧 기반 과금 전환 -- 복잡해짐',
+          '크레딧 소비 방식(배포/대역폭/컴퓨트별 차등)이 다소 복잡함',
           '무료 크레딧 소진 시 사이트 일시 중지',
           'Next.js App Router 지원이 Vercel 대비 느림',
           '서버리스 함수 실행 시간 제한',
@@ -972,7 +983,7 @@ export const DEPLOY_PLATFORMS_COMPARISON: ServiceComparison = {
     },
     {
       feature: '유료 시작가',
-      values: { Vercel: '$20/사용자/월', 'Cloudflare Workers/Pages': '$5/월', Netlify: '$19/월' },
+      values: { Vercel: '$20/사용자/월', 'Cloudflare Workers/Pages': '$5/월', Netlify: '$20/월' },
     },
     {
       feature: 'Next.js 지원',
@@ -1000,7 +1011,7 @@ export const DEPLOY_PLATFORMS_COMPARISON: ServiceComparison = {
     },
     {
       feature: 'Serverless/Edge Functions',
-      values: { Vercel: '지원', 'Cloudflare Workers/Pages': 'Workers (V8)', Netlify: '지원' },
+      values: { Vercel: 'Fluid Compute (Active CPU)', 'Cloudflare Workers/Pages': 'Workers (V8)', Netlify: '지원' },
     },
     {
       feature: 'Bolt.new 연동',
@@ -1064,7 +1075,7 @@ export const BAAS_COMPARISON: ServiceComparison = {
   title: 'BaaS(Backend as a Service) 비교',
   description:
     'Supabase, Firebase, PlanetScale의 기능, 가격, 바이브코더 친화도를 비교합니다.',
-  lastUpdated: '2026-03-19',
+  lastUpdated: '2026-07-24',
   services: [
     {
       name: 'Supabase',
@@ -1154,6 +1165,7 @@ export const BAAS_COMPARISON: ServiceComparison = {
           '프로프라이어터리 -- 벤더 종속',
           'RLS 같은 세밀한 보안 정책 설정이 복잡',
           'Spark 한도 초과 시 앱 차단',
+          '2026-02-03부로 Cloud Storage 사용 시 결제 계정(Blaze) 연결 필수로 변경',
         ],
       },
     },
@@ -1163,16 +1175,10 @@ export const BAAS_COMPARISON: ServiceComparison = {
       tagline: 'Vitess 기반 서버리스 MySQL + 신규 Postgres 지원',
       pricing: [
         {
-          name: 'Developer (Free)',
-          price: '$0',
-          period: '월',
-          highlights: ['10GB 저장', '1,000만 쓰기', '10억 읽기'],
-        },
-        {
-          name: '$5 단일 노드',
+          name: 'Postgres PS-5 (최소)',
           price: '$5',
           period: '월',
-          highlights: ['개발/저트래픽 워크로드', '단일 노드'],
+          highlights: ['1/16 vCPU, 512MiB RAM', '단일 노드', '무료 플랜 없음 (2024-04-08 Hobby 폐지)'],
         },
         {
           name: 'Scaler',
@@ -1191,13 +1197,13 @@ export const BAAS_COMPARISON: ServiceComparison = {
           'DB 브랜칭 -- Git처럼 스키마 변경 관리',
           '자동 스케일링 (Vitess)',
           'Query Insights -- 느린 쿼리 분석',
-          '무료 플랜 넉넉 (10GB, 10억 읽기)',
+          '진입 장벽 낮은 저가 요금제 (PS-5 $5/월부터)',
           'MySQL + Postgres 지원',
         ],
         cons: [
           '데이터베이스 전용 -- Auth, Storage 없음',
           '풀스택 BaaS가 아님 (직접 구성 필요)',
-          '이전에 무료 플랜 삭제 후 재도입 -- 신뢰 이슈',
+          '2024-04-08 무료(Hobby) 플랜 완전 폐지 -- 현재 무료 티어 없음, 최소 $5/월부터',
           '한국 리전 없음',
           'Firebase/Supabase 대비 올인원 기능 부족',
         ],
@@ -1247,7 +1253,7 @@ export const BAAS_COMPARISON: ServiceComparison = {
     },
     {
       feature: '무료 DB 저장소',
-      values: { Supabase: '500MB', Firebase: '1GB (Firestore)', PlanetScale: '10GB' },
+      values: { Supabase: '500MB', Firebase: '1GB (Firestore)', PlanetScale: '없음 (무료 플랜 폐지)' },
     },
     {
       feature: '미활동 시 일시중지',

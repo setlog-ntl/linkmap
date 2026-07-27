@@ -77,7 +77,9 @@ npm run dev / build / typecheck / lint / test / test:coverage
 - 단, 사용자가 대화 중 명시적으로 "MCP 연결됨" 또는 직접 MCP 관련 작업을 요청한 경우에는 바로 실행해도 됨
 
 ## Database Rules
-- 스키마: `docs/db-schema.md` | 마이그레이션: `supabase/migrations/NNN_*.sql` (현재 101)
+- 스키마: `docs/db-schema.md` | 마이그레이션: `supabase/migrations/NNN_*.sql` (현재 108)
+- **마이그레이션 작성 ≠ 라이브 반영**: 보안 마이그레이션은 적용 후 `get_advisors(security)`로 실제 반영을 검증할 것 (M102가 1개월간 미적용 방치된 이력)
+- **함수 권한은 `FROM PUBLIC` 회수 필수**: 함수는 생성 시 EXECUTE가 PUBLIC에 기본 부여되므로 `REVOKE ... FROM anon, authenticated`만으로는 회수되지 않는다. 검증은 `has_function_privilege('anon', oid, 'EXECUTE')`로. 신규 RPC는 `GRANT EXECUTE ... TO` 명시 필요 (M108의 default privileges 설정)
 - **마이그레이션 후 3-step**: ① `src/types/` 동기화 → ② `src/lib/queries/` 반영 → ③ `docs/db-schema.md` 업데이트
 - 새 테이블: RLS + 정책 + created_at 필수
 - 타입 매핑: core(profiles/subscriptions/tokens), service(services/catalog), project(projects/bindings), env(env_vars/health), connection(user_connections), service-account, credential, feedback, team, ai(ai_*), dashboard(view models)

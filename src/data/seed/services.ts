@@ -163,20 +163,20 @@ export const services: ServiceSeed[] = [
     dashboard_layer: 'backend',
     dashboard_subcategory: 'database',
     description:
-      'Postgres 데이터베이스, 인증, 즉시 API, 엣지 함수, 실시간 구독 및 스토리지를 제공하는 오픈소스 Firebase 대안 플랫폼입니다.',
+      'Postgres 기반 오픈소스 Firebase 대안으로, 인증·스토리지·엣지 함수·리얼타임을 통합 제공하는 백엔드 플랫폼입니다. Free 플랜은 비활성 1주일 경과 시 프로젝트가 일시정지되는 정책이 있습니다.',
     description_ko:
-      'Postgres 데이터베이스, 인증, 즉시 API, 엣지 함수, 실시간 구독 및 스토리지를 제공하는 오픈소스 Firebase 대안 플랫폼입니다.',
+      'Postgres 기반 오픈소스 Firebase 대안으로, 인증·스토리지·엣지 함수·리얼타임을 통합 제공하는 백엔드 플랫폼입니다. Free 플랜은 비활성 1주일 경과 시 프로젝트가 일시정지되는 정책이 있습니다.',
     icon_url: null,
     website_url: 'https://supabase.com',
     docs_url: 'https://supabase.com/docs',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '500 MB 데이터베이스, 1 GB 스토리지, 50,000 월간 활성 사용자',
+      free_tier_details: 'DB 500MB, 파일 저장 1GB, Egress 5GB, MAU 50,000명, Edge Function 호출 500,000회, 동시 Realtime 연결 200개, 활성 프로젝트 최대 2개. 비활성 1주 경과 시 자동 일시정지.',
       plans: [
         { name: 'Free', price: '$0/월' },
-        { name: 'Pro', price: '$25/월' },
-        { name: 'Team', price: '$599/월' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'Pro', price: '$25/월~ (DB 8GB, MAU 10만 포함, 초과 종량)' },
+        { name: 'Team', price: '$599/월~ (Pro 사양 + SOC2/ISO27001, 백업 14일)' },
+        { name: 'Enterprise', price: '맞춤 견적' },
       ],
     },
     required_env_vars: [
@@ -206,7 +206,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 92,
     difficulty_level: 'beginner',
     tags: ['postgres', 'realtime', 'auth', 'storage', 'open-source', 'baas', '수파베이스', '데이터베이스'],
-    alternatives: ['firebase', 'neon', 'planetscale'],
+    alternatives: ['firebase', 'neon', 'convex', 'planetscale'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'svelte', 'flutter'],
       language: ['typescript', 'javascript', 'python', 'dart'],
@@ -215,7 +215,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'excellent',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 10,
-    monthly_cost_estimate: { starter: '$0', growth: '$25-50', enterprise: '$599+' },
+    monthly_cost_estimate: { starter: '$0', growth: '$25-599', enterprise: '맞춤 견적' },
   },
 
   // -----------------------------------------------------------------------
@@ -229,18 +229,18 @@ export const services: ServiceSeed[] = [
     dashboard_layer: 'backend',
     dashboard_subcategory: 'database',
     description:
-      'Google이 지원하는 플랫폼으로 NoSQL 클라우드 데이터베이스(Firestore), 인증, 호스팅, 클라우드 함수 및 분석 기능을 제공합니다.',
+      'Google의 모바일/웹 앱 개발 플랫폼으로, Firestore·Auth·Hosting·Cloud Functions 등을 Spark(무료)/Blaze(종량제) 2단 체계로 제공합니다. 2026년 2월부터 Cloud Storage 사용 시 결제 계정(Blaze) 연결이 필수로 변경되었습니다.',
     description_ko:
-      'Google이 지원하는 플랫폼으로 NoSQL 클라우드 데이터베이스(Firestore), 인증, 호스팅, 클라우드 함수 및 분석 기능을 제공합니다.',
+      'Google의 모바일/웹 앱 개발 플랫폼으로, Firestore·Auth·Hosting·Cloud Functions 등을 Spark(무료)/Blaze(종량제) 2단 체계로 제공합니다. 2026년 2월부터 Cloud Storage 사용 시 결제 계정(Blaze) 연결이 필수로 변경되었습니다.',
     icon_url: null,
     website_url: 'https://firebase.google.com',
     docs_url: 'https://firebase.google.com/docs',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'Spark 플랜: 1 GiB Firestore 저장소, 10 GB 호스팅 저장소',
+      free_tier_details: 'Spark 플랜: Firestore 읽기 5만/일·쓰기 2만/일·삭제 2만/일, 저장 1GiB; Realtime DB 동시연결 100·저장 1GB; Cloud Functions 2M 호출/월; Cloud Storage 저장 5GB. 단, 2026-02-03부터 Cloud Storage는 Blaze(결제계정 연결) 필수.',
       plans: [
-        { name: 'Spark (무료)', price: '$0/월' },
-        { name: 'Blaze (종량제)', price: '사용량 기반' },
+        { name: 'Spark (무료)', price: '$0' },
+        { name: 'Blaze (종량제)', price: '사용량 기반 (Firestore 10만 읽기당 $0.06 등)' },
       ],
     },
     required_env_vars: [
@@ -290,7 +290,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 90,
     difficulty_level: 'beginner',
     tags: ['nosql', 'firestore', 'realtime', 'auth', 'google', 'baas', 'mobile', '파이어베이스', '데이터베이스'],
-    alternatives: ['supabase'],
+    alternatives: ['supabase', 'convex'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'flutter'],
       language: ['typescript', 'javascript', 'python', 'java', 'swift', 'kotlin'],
@@ -313,19 +313,19 @@ export const services: ServiceSeed[] = [
     dashboard_layer: 'frontend',
     dashboard_subcategory: 'deploy',
     description:
-      'Next.js, React 및 기타 웹 프레임워크를 자동 CI/CD, 서버리스 함수, 엣지 네트워크와 함께 배포할 수 있는 프론트엔드 클라우드 플랫폼입니다.',
+      'Next.js 개발사가 운영하는 프론트엔드/풀스택 배포 플랫폼. Fluid Compute 기반 Active CPU 과금(코드가 실제로 실행되는 시간에만 CPU 과금, I/O 대기 시간은 과금 제외)이 Hobby/Pro/신규 Enterprise 팀에 기본 적용되며, Blob 스토리지는 자체 상품으로 유지되나 Postgres/KV는 종료되어 Marketplace(Neon, Upstash 등) 통합으로 대체됨.',
     description_ko:
-      'Next.js, React 및 기타 웹 프레임워크를 자동 CI/CD, 서버리스 함수, 엣지 네트워크와 함께 배포할 수 있는 프론트엔드 클라우드 플랫폼입니다.',
+      'Next.js 개발사가 운영하는 프론트엔드/풀스택 배포 플랫폼. Fluid Compute 기반 Active CPU 과금(코드가 실제로 실행되는 시간에만 CPU 과금, I/O 대기 시간은 과금 제외)이 Hobby/Pro/신규 Enterprise 팀에 기본 적용되며, Blob 스토리지는 자체 상품으로 유지되나 Postgres/KV는 종료되어 Marketplace(Neon, Upstash 등) 통합으로 대체됨.',
     icon_url: null,
     website_url: 'https://vercel.com',
     docs_url: 'https://vercel.com/docs',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'Hobby: 무제한 배포, 100 GB 대역폭, 서버리스 함수 포함',
+      free_tier_details: 'Hobby 플랜: Active CPU 4시간, Provisioned Memory 360 GB-hr, Function 호출 100만 건/월 포함. 상업적 사용은 약관상 금지.',
       plans: [
-        { name: 'Hobby', price: '$0/월' },
-        { name: 'Pro', price: '$20/월/멤버' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'Hobby', price: '$0' },
+        { name: 'Pro', price: '$20/사용자/월 (월 $20 사용 크레딧 포함, 초과분 종량제)' },
+        { name: 'Enterprise', price: '맞춤형(협의)' },
       ],
     },
     required_env_vars: [
@@ -355,7 +355,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 95,
     difficulty_level: 'beginner',
     tags: ['nextjs', 'hosting', 'serverless', 'edge', 'preview-deploys', 'cdn', '버셀', '배포'],
-    alternatives: ['netlify', 'railway', 'fly-io', 'render'],
+    alternatives: ['netlify', 'railway', 'render', 'flyio'],
     compatibility: {
       framework: ['nextjs', 'react', 'svelte', 'nuxt', 'astro'],
       language: ['typescript', 'javascript', 'python', 'go', 'ruby'],
@@ -364,7 +364,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'excellent',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 5,
-    monthly_cost_estimate: { starter: '$0', growth: '$20', enterprise: '$Custom' },
+    monthly_cost_estimate: { starter: '$0', growth: '$20/seat + 종량제', enterprise: '협의' },
   },
 
   // -----------------------------------------------------------------------
@@ -378,19 +378,20 @@ export const services: ServiceSeed[] = [
     dashboard_layer: 'frontend',
     dashboard_subcategory: 'deploy',
     description:
-      '지속적 배포, 서버리스 함수, 폼 처리 및 ID 관리를 제공하는 현대적인 웹 개발 플랫폼입니다.',
+      '정적 사이트/Jamstack 및 AI 빌드 도구를 지원하는 배포 플랫폼. 2026년 4월 요금 개편으로 좌석(seat) 기반 과금을 폐지하고 크레딧 기반 정액제로 전환됨.',
     description_ko:
-      '지속적 배포, 서버리스 함수, 폼 처리 및 ID 관리를 제공하는 현대적인 웹 개발 플랫폼입니다.',
+      '정적 사이트/Jamstack 및 AI 빌드 도구를 지원하는 배포 플랫폼. 2026년 4월 요금 개편으로 좌석(seat) 기반 과금을 폐지하고 크레딧 기반 정액제로 전환됨.',
     icon_url: null,
     website_url: 'https://www.netlify.com',
     docs_url: 'https://docs.netlify.com',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'Starter: 100 GB 대역폭, 300 빌드 분/월, 125K 서버리스 함수 호출',
+      free_tier_details: 'Free 플랜: 월 300 크레딧 포함, Git/AI/API 배포, 무제한 배포 프리뷰, 커스텀 도메인+SSL, Functions 포함.',
       plans: [
-        { name: 'Starter', price: '$0/월' },
-        { name: 'Pro', price: '$19/월/멤버' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'Free', price: '$0 (월 300 크레딧)' },
+        { name: 'Personal', price: '$9/월 (월 1,000 크레딧)' },
+        { name: 'Pro', price: '$20/월, 팀원 무제한 (월 3,000 크레딧)' },
+        { name: 'Enterprise', price: '맞춤형 (무제한 크레딧, SLA 99.99%)' },
       ],
     },
     required_env_vars: [
@@ -413,7 +414,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 82,
     difficulty_level: 'beginner',
     tags: ['jamstack', 'static', 'hosting', 'serverless', 'forms', 'edge', '넷리파이', '배포'],
-    alternatives: ['vercel', 'render'],
+    alternatives: ['vercel', 'railway', 'render'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'gatsby', 'hugo', 'astro'],
       language: ['typescript', 'javascript'],
@@ -422,7 +423,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'excellent',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 5,
-    monthly_cost_estimate: { starter: '$0', growth: '$19', enterprise: '$Custom' },
+    monthly_cost_estimate: { starter: '$0-9', growth: '$20+ (크레딧 소진 시 종량제)', enterprise: '협의' },
   },
 
   // -----------------------------------------------------------------------
@@ -435,19 +436,19 @@ export const services: ServiceSeed[] = [
     category: 'payment',
     dashboard_layer: 'backend',
     dashboard_subcategory: 'payment',
-    description:
-      '구독, 일회성 결제, 인보이스 및 글로벌 결제 수단을 지원하는 인터넷 비즈니스용 결제 처리 플랫폼입니다.',
-    description_ko:
-      '구독, 일회성 결제, 인보이스 및 글로벌 결제 수단을 지원하는 인터넷 비즈니스용 결제 처리 플랫폼입니다.',
+    description: '카드결제·구독 청구·마켓플레이스(Connect)·사기 방지까지 지원하는 글로벌 결제 처리 플랫폼입니다. API 중심 설계로 개발자 경험이 뛰어납니다.',
+    description_ko: '카드결제·구독 청구·마켓플레이스(Connect)·사기 방지까지 지원하는 글로벌 결제 처리 플랫폼입니다. API 중심 설계로 개발자 경험이 뛰어납니다.',
     icon_url: null,
     website_url: 'https://stripe.com',
-    docs_url: 'https://stripe.com/docs',
+    docs_url: 'https://docs.stripe.com/',
     pricing_info: {
       free_tier: false,
-      free_tier_details: '테스트 모드 무료, 거래 수수료: 2.9% + 30 센트 (미국 카드)',
+      free_tier_details: '가입비·월 사용료 없음. 거래 성사 시에만 수수료 부과.',
       plans: [
-        { name: 'Standard', price: '거래당 2.9% + 30¢' },
-        { name: 'Custom', price: '문의' },
+        { name: '온라인 카드결제(국내 카드)', price: '2.9% + $0.30/건' },
+        { name: '국제 카드 추가수수료', price: '+1.5%' },
+        { name: '통화 변환 추가수수료', price: '+1%' },
+        { name: 'Stripe Billing(구독 관리)', price: '종량제 0.7%(빌링 볼륨) 또는 $620~/월(연 계약)' },
       ],
     },
     required_env_vars: [
@@ -477,7 +478,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 96,
     difficulty_level: 'intermediate',
     tags: ['payment', 'subscription', 'billing', 'invoicing', 'marketplace', '스트라이프', '결제'],
-    alternatives: ['lemonsqueezy', 'polar'],
+    alternatives: ['lemon-squeezy', 'polar', 'paddle'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'ruby-on-rails'],
       language: ['typescript', 'javascript', 'python', 'ruby', 'go', 'java', 'php'],
@@ -486,7 +487,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 30,
-    monthly_cost_estimate: { starter: '2.9%+30\u00A2/tx', growth: '2.9%+30\u00A2/tx', enterprise: 'Custom' },
+    monthly_cost_estimate: { starter: '$0(거래별 수수료만)', growth: '거래액 × 2.9%+$0.30', enterprise: '협의(Billing 등 옵션 별도)' },
   },
 
   // -----------------------------------------------------------------------
@@ -500,19 +501,20 @@ export const services: ServiceSeed[] = [
     dashboard_layer: 'frontend',
     dashboard_subcategory: 'auth',
     description:
-      '사전 구축된 UI 컴포넌트, 소셜 로그인, MFA 및 조직 관리를 갖춘 즉시 사용 가능한 인증 및 사용자 관리 솔루션입니다.',
+      'React/Next.js 친화적인 사용자 관리·인증 플랫폼으로, 로그인 UI 컴포넌트와 세션 관리를 함께 제공합니다. 2026년부터 MAU 대신 MRU(월간 유지 사용자) 기준으로 과금합니다.',
     description_ko:
-      '사전 구축된 UI 컴포넌트, 소셜 로그인, MFA 및 조직 관리를 갖춘 즉시 사용 가능한 인증 및 사용자 관리 솔루션입니다.',
+      'React/Next.js 친화적인 사용자 관리·인증 플랫폼으로, 로그인 UI 컴포넌트와 세션 관리를 함께 제공합니다. 2026년부터 MAU 대신 MRU(월간 유지 사용자) 기준으로 과금합니다.',
     icon_url: null,
     website_url: 'https://clerk.com',
     docs_url: 'https://clerk.com/docs',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'Free: 10,000 월간 활성 사용자, 소셜 로그인, 사전 구축 컴포넌트',
+      free_tier_details: 'Hobby 플랜: 최대 50,000 MRU/앱, 신용카드 불필요, 무제한 애플리케이션 수.',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Pro', price: '$25/월 + MAU당 $0.02' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'Hobby (무료)', price: '$0' },
+        { name: 'Pro', price: '$25/월 (연간 결제 시 $20/월), 50,000 MRU 포함' },
+        { name: 'Business', price: '$300/월 (연간 결제 시 $250/월)' },
+        { name: 'Enterprise', price: '맞춤 견적 (연간 계약만)' },
       ],
     },
     required_env_vars: [
@@ -549,7 +551,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 85,
     difficulty_level: 'beginner',
     tags: ['auth', 'oauth', 'social-login', 'user-management', 'mfa', 'pre-built-ui', '클럭', '인증'],
-    alternatives: ['nextauth', 'supabase'],
+    alternatives: ['auth0', 'nextauth'],
     compatibility: {
       framework: ['nextjs', 'react', 'remix', 'gatsby'],
       language: ['typescript', 'javascript'],
@@ -558,7 +560,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'excellent',
     vendor_lock_in_risk: 'high',
     setup_time_minutes: 10,
-    monthly_cost_estimate: { starter: '$0', growth: '$25', enterprise: '$99+' },
+    monthly_cost_estimate: { starter: '$0', growth: '$20-25', enterprise: '$250-300' },
   },
 
   // -----------------------------------------------------------------------
@@ -572,16 +574,18 @@ export const services: ServiceSeed[] = [
     dashboard_layer: 'frontend',
     dashboard_subcategory: 'auth',
     description:
-      'OAuth 프로바이더, 이메일/비밀번호, 매직 링크 및 데이터베이스 세션 전략을 지원하는 Next.js용 오픈소스 인증 라이브러리입니다.',
+      'Next.js 등 프레임워크용 무료 오픈소스 인증 라이브러리입니다. 2025년 9월부터 Better Auth 팀이 유지보수를 맡아 보안 패치 위주로 관리되며, 공식적으로 신규 프로젝트에는 Better Auth 사용을 권장하고 있습니다.',
     description_ko:
-      'OAuth 프로바이더, 이메일/비밀번호, 매직 링크 및 데이터베이스 세션 전략을 지원하는 Next.js용 오픈소스 인증 라이브러리입니다.',
+      'Next.js 등 프레임워크용 무료 오픈소스 인증 라이브러리입니다. 2025년 9월부터 Better Auth 팀이 유지보수를 맡아 보안 패치 위주로 관리되며, 공식적으로 신규 프로젝트에는 Better Auth 사용을 권장하고 있습니다.',
     icon_url: null,
     website_url: 'https://authjs.dev',
     docs_url: 'https://authjs.dev/getting-started',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '완전 무료 오픈소스 라이브러리',
-      plans: [{ name: 'Open Source', price: '무료' }],
+      free_tier_details: '완전 무료 오픈소스 라이브러리 (유료 플랜 없음).',
+      plans: [
+        { name: '오픈소스', price: '$0' },
+      ],
     },
     required_env_vars: [
       {
@@ -631,7 +635,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 80,
     difficulty_level: 'intermediate',
     tags: ['auth', 'oauth', 'open-source', 'self-hosted', 'nextjs', '넥스트오스', '인증'],
-    alternatives: ['clerk', 'supabase'],
+    alternatives: ['clerk', 'auth0'],
     compatibility: {
       framework: ['nextjs', 'sveltekit'],
       language: ['typescript', 'javascript'],
@@ -654,19 +658,19 @@ export const services: ServiceSeed[] = [
     dashboard_layer: 'backend',
     dashboard_subcategory: 'email',
     description:
-      '신뢰성을 위해 구축된 개발자용 현대적 이메일 API입니다. React Email 템플릿, 트랜잭션 이메일 및 상세 분석을 지원합니다.',
+      '개발자 친화적인 트랜잭셔널 이메일 API로, React Email 컴포넌트 기반 템플릿 작성과 SMTP/API 발송을 지원합니다. Free/Pro/Scale/Enterprise 요금제로 운영되며 발송량 기준으로 과금됩니다.',
     description_ko:
-      '신뢰성을 위해 구축된 개발자용 현대적 이메일 API입니다. React Email 템플릿, 트랜잭션 이메일 및 상세 분석을 지원합니다.',
+      '개발자 친화적인 트랜잭셔널 이메일 API로, React Email 컴포넌트 기반 템플릿 작성과 SMTP/API 발송을 지원합니다. Free/Pro/Scale/Enterprise 요금제로 운영되며 발송량 기준으로 과금됩니다.',
     icon_url: null,
     website_url: 'https://resend.com',
     docs_url: 'https://resend.com/docs',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'Free: 일 100통, 월 3,000통, 1개 도메인',
+      free_tier_details: '월 3,000건, 일일 100건 발송 제한. 1개 도메인, 30일 데이터 보관, AI 크레딧 월 5건 포함.',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Pro', price: '$20/월' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'Pro', price: '$20/월(5만 건)~$35/월(10만 건)' },
+        { name: 'Scale', price: '$90/월(10만 건)~$1,150/월(250만 건)' },
+        { name: 'Enterprise', price: '맞춤 견적(월 300만 건 이상)' },
       ],
     },
     required_env_vars: [
@@ -692,7 +696,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 10,
-    monthly_cost_estimate: { starter: '$0', growth: '$20', enterprise: '$Custom' },
+    monthly_cost_estimate: { starter: '$0', growth: '$20-90', enterprise: '협의' },
   },
 
   // -----------------------------------------------------------------------
@@ -700,26 +704,25 @@ export const services: ServiceSeed[] = [
   // -----------------------------------------------------------------------
   {
     id: SERVICE_IDS.sendgrid,
-    name: 'SendGrid',
+    name: 'SendGrid (Twilio SendGrid)',
     slug: 'sendgrid',
     category: 'email',
     dashboard_layer: 'backend',
     dashboard_subcategory: 'email',
     description:
-      'Twilio이 소유한 이메일 전송 서비스로 트랜잭션 및 마케팅 이메일의 전송률 최적화와 분석 기능을 제공합니다.',
+      'Twilio가 운영하는 트랜잭셔널·마케팅 이메일 플랫폼으로, 2026년 2월 sendgrid.com 도메인이 twilio.com으로 통합되었습니다. Essentials/Pro/Premier 요금제로 월 발송량 기준 과금되며, 영구 무료 플랜은 폐지되고 60일 무료 체험(일 100건)만 제공됩니다.',
     description_ko:
-      'Twilio이 소유한 이메일 전송 서비스로 트랜잭션 및 마케팅 이메일의 전송률 최적화와 분석 기능을 제공합니다.',
+      'Twilio가 운영하는 트랜잭셔널·마케팅 이메일 플랫폼으로, 2026년 2월 sendgrid.com 도메인이 twilio.com으로 통합되었습니다. Essentials/Pro/Premier 요금제로 월 발송량 기준 과금되며, 영구 무료 플랜은 폐지되고 60일 무료 체험(일 100건)만 제공됩니다.',
     icon_url: null,
-    website_url: 'https://sendgrid.com',
-    docs_url: 'https://docs.sendgrid.com',
+    website_url: 'https://www.twilio.com/en-us/sendgrid',
+    docs_url: 'https://www.twilio.com/docs/sendgrid/',
     pricing_info: {
-      free_tier: true,
-      free_tier_details: 'Free: 일 100통',
+      free_tier: false,
+      free_tier_details: '영구 무료 플랜 없음. 신용카드 없이 60일 무료 체험 가능(일일 100건 발송 한도).',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Essentials', price: '$19.95/월' },
-        { name: 'Pro', price: '$89.95/월' },
-        { name: 'Premier', price: '문의' },
+        { name: 'Essentials', price: '$19.95/월부터 (월 5만~10만 건)' },
+        { name: 'Pro', price: '$89.95/월부터 (월 10만~250만 건)' },
+        { name: 'Premier', price: '맞춤 견적 (월 250만~500만 건 이상)' },
       ],
     },
     required_env_vars: [
@@ -751,7 +754,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 15,
-    monthly_cost_estimate: { starter: '$0', growth: '$19.95', enterprise: '$89.95+' },
+    monthly_cost_estimate: { starter: '60일 무료 체험', growth: '$19.95-89.95', enterprise: '협의' },
   },
 
   // -----------------------------------------------------------------------
@@ -765,16 +768,27 @@ export const services: ServiceSeed[] = [
     dashboard_layer: 'devtools',
     dashboard_subcategory: 'ai',
     description:
-      'GPT 모델, DALL-E 이미지 생성, Whisper 음성-텍스트 변환 및 임베딩을 REST API로 제공하는 AI 플랫폼입니다.',
+      'GPT 계열 LLM(GPT-5.6/5.5/5.4 등)과 ChatGPT, Sora 비디오 생성 모델을 API·구독형 제품으로 제공하는 AI 연구/제품 기업입니다.',
     description_ko:
-      'GPT 모델, DALL-E 이미지 생성, Whisper 음성-텍스트 변환 및 임베딩을 REST API로 제공하는 AI 플랫폼입니다.',
+      'GPT 계열 LLM(GPT-5.6/5.5/5.4 등)과 ChatGPT, Sora 비디오 생성 모델을 API·구독형 제품으로 제공하는 AI 연구/제품 기업입니다.',
     icon_url: null,
     website_url: 'https://openai.com',
     docs_url: 'https://platform.openai.com/docs',
     pricing_info: {
-      free_tier: false,
-      free_tier_details: '무료 크레딧 제공 (신규 계정), 이후 종량제',
-      plans: [{ name: '종량제', price: '토큰당 과금 (모델별 상이)' }],
+      free_tier: true,
+      free_tier_details: 'ChatGPT Free 플랜 제공(제한된 GPT 모델 접근). API 자체에는 상시 무료 티어가 없으며 신규 가입 시 소액 크레딧만 제공.',
+      plans: [
+        { name: 'ChatGPT Free', price: '$0/월' },
+        { name: 'ChatGPT Go', price: '$8/월 (미국 기준)' },
+        { name: 'ChatGPT Plus', price: '$20/월' },
+        { name: 'ChatGPT Pro (Codex)', price: '$100/월' },
+        { name: 'ChatGPT Pro (Max)', price: '$200/월' },
+        { name: 'ChatGPT Business', price: '$20/좌석/월(연간) 또는 $25/월' },
+        { name: 'ChatGPT Enterprise', price: '맞춤 견적' },
+        { name: 'API GPT-5.6 Sol', price: '입력 $5.00 / 출력 $30.00 (1M 토큰)' },
+        { name: 'API GPT-5.6 Terra', price: '입력 $2.50 / 출력 $15.00 (1M 토큰)' },
+        { name: 'API GPT-5.6 Luna', price: '입력 $1.00 / 출력 $6.00 (1M 토큰)' },
+      ],
     },
     required_env_vars: [
       {
@@ -797,7 +811,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 98,
     difficulty_level: 'beginner',
     tags: ['llm', 'gpt', 'chatgpt', 'dall-e', 'whisper', 'embeddings', 'ai', '오픈에이아이'],
-    alternatives: ['anthropic', 'groq'],
+    alternatives: ['anthropic', 'google-gemini', 'mistral-ai', 'deepseek', 'grok'],
     compatibility: {
       framework: ['nextjs', 'react', 'express', 'fastapi'],
       language: ['typescript', 'javascript', 'python', 'go', 'ruby', 'java', 'c#'],
@@ -806,7 +820,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'limited',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 5,
-    monthly_cost_estimate: { starter: '$5-20', growth: '$50-200', enterprise: '$500+' },
+    monthly_cost_estimate: { starter: '$0-20', growth: '$20-200', enterprise: '맞춤 견적 (Business $20~/좌석)' },
   },
 
   // -----------------------------------------------------------------------
@@ -819,17 +833,26 @@ export const services: ServiceSeed[] = [
     category: 'ai',
     dashboard_layer: 'devtools',
     dashboard_subcategory: 'ai',
-    description:
-      'Claude 모델을 API로 제공하여 텍스트 생성, 분석, 코드 지원 및 멀티모달 이해를 가능하게 하는 AI 안전 기업입니다.',
-    description_ko:
-      'Claude 모델을 API로 제공하여 텍스트 생성, 분석, 코드 지원 및 멀티모달 이해를 가능하게 하는 AI 안전 기업입니다.',
+    description: 'Claude Opus/Sonnet/Haiku 및 신규 Fable 5 라인업을 API와 Claude.ai로 제공하는 AI 안전성 중심 기업입니다.',
+    description_ko: 'Claude Opus/Sonnet/Haiku 및 신규 Fable 5 라인업을 API와 Claude.ai로 제공하는 AI 안전성 중심 기업입니다.',
     icon_url: null,
     website_url: 'https://www.anthropic.com',
-    docs_url: 'https://docs.anthropic.com',
+    docs_url: 'https://platform.claude.com/docs',
     pricing_info: {
-      free_tier: false,
-      free_tier_details: '무료 체험 크레딧 제공, 이후 종량제',
-      plans: [{ name: '종량제', price: '토큰당 과금 (모델별 상이)' }],
+      free_tier: true,
+      free_tier_details: 'Claude.ai Free 플랜 제공(기본 기능, Claude Code 미포함). API는 신규 가입 시 소액 무료 크레딧만 제공.',
+      plans: [
+        { name: 'Free', price: '$0/월' },
+        { name: 'Pro', price: '$17/월(연간) 또는 $20/월' },
+        { name: 'Max', price: '$100~$200/월' },
+        { name: 'Team (Standard 좌석)', price: '$20/좌석/월(연간)' },
+        { name: 'Team (Premium 좌석, Claude Code 포함)', price: '$100~$125/좌석/월' },
+        { name: 'Enterprise', price: '$20/좌석 + API 사용료' },
+        { name: 'API Claude Opus 4.8', price: '입력 $5 / 출력 $25 (1M 토큰)' },
+        { name: 'API Claude Sonnet 5 (~2026-08-31까지 도입가)', price: '입력 $2 / 출력 $10 (1M 토큰), 이후 $3/$15' },
+        { name: 'API Claude Haiku 4.5', price: '입력 $1 / 출력 $5 (1M 토큰)' },
+        { name: 'API Claude Fable 5', price: '입력 $10 / 출력 $50 (1M 토큰)' },
+      ],
     },
     required_env_vars: [
       {
@@ -845,7 +868,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 95,
     difficulty_level: 'beginner',
     tags: ['llm', 'claude', 'ai', 'safety', 'long-context', '앤트로픽', '클로드'],
-    alternatives: ['openai', 'groq'],
+    alternatives: ['openai', 'google-gemini', 'mistral-ai'],
     compatibility: {
       framework: ['nextjs', 'react', 'express', 'fastapi'],
       language: ['typescript', 'javascript', 'python'],
@@ -854,7 +877,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'limited',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 5,
-    monthly_cost_estimate: { starter: '$5-20', growth: '$50-200', enterprise: '$500+' },
+    monthly_cost_estimate: { starter: '$0-20', growth: '$20-200', enterprise: '$20/좌석~ + API 종량제' },
   },
 
   // -----------------------------------------------------------------------
@@ -867,21 +890,18 @@ export const services: ServiceSeed[] = [
     category: 'storage',
     dashboard_layer: 'backend',
     dashboard_subcategory: 'storage',
-    description:
-      '실시간 변환, 최적화, CDN 전송 및 AI 기반 태깅을 지원하는 클라우드 기반 이미지 및 비디오 관리 서비스입니다.',
-    description_ko:
-      '실시간 변환, 최적화, CDN 전송 및 AI 기반 태깅을 지원하는 클라우드 기반 이미지 및 비디오 관리 서비스입니다.',
+    description: '이미지·비디오의 업로드, 변환, 최적화, CDN 전송을 API/SDK로 제공하는 미디어 관리 플랫폼입니다.',
+    description_ko: '이미지·비디오의 업로드, 변환, 최적화, CDN 전송을 API/SDK로 제공하는 미디어 관리 플랫폼입니다.',
     icon_url: null,
     website_url: 'https://cloudinary.com',
     docs_url: 'https://cloudinary.com/documentation',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'Free: 25 크레딧/월, 25K 변환, 25 GB 저장소/대역폭',
+      free_tier_details: '영구 무료: 월 25 크레딧, 사용자 3명, 계정 1개.',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Plus', price: '$89/월' },
-        { name: 'Advanced', price: '$224/월' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'Plus', price: '$99/월(연간 $89/월), 월 225 크레딧, 사용자 3명' },
+        { name: 'Advanced', price: '$249/월(연간 $224/월), 월 600 크레딧, 사용자 5명' },
+        { name: 'Enterprise', price: '맞춤 견적' },
       ],
     },
     required_env_vars: [
@@ -919,7 +939,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 10,
-    monthly_cost_estimate: { starter: '$0', growth: '$89', enterprise: '$224+' },
+    monthly_cost_estimate: { starter: '$0', growth: '$99~249/월', enterprise: '협의' },
   },
 
   // -----------------------------------------------------------------------
@@ -933,20 +953,19 @@ export const services: ServiceSeed[] = [
     dashboard_layer: 'devtools',
     dashboard_subcategory: 'monitoring',
     description:
-      '실시간 알림, 성능 모니터링, 세션 리플레이 및 릴리스 상태 추적을 제공하는 애플리케이션 모니터링 및 오류 추적 플랫폼입니다.',
+      '에러 트래킹, 성능 모니터링(트레이싱), 세션 리플레이, 로그를 통합 제공하는 개발자 옵저버빌리티 플랫폼입니다. Developer(무료)/Team/Business/Enterprise 요금제로 운영되며 에러 이벤트 수를 중심으로 과금됩니다.',
     description_ko:
-      '실시간 알림, 성능 모니터링, 세션 리플레이 및 릴리스 상태 추적을 제공하는 애플리케이션 모니터링 및 오류 추적 플랫폼입니다.',
+      '에러 트래킹, 성능 모니터링(트레이싱), 세션 리플레이, 로그를 통합 제공하는 개발자 옵저버빌리티 플랫폼입니다. Developer(무료)/Team/Business/Enterprise 요금제로 운영되며 에러 이벤트 수를 중심으로 과금됩니다.',
     icon_url: null,
     website_url: 'https://sentry.io',
     docs_url: 'https://docs.sentry.io',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'Developer: 5K 에러 이벤트, 10K 트랜잭션, 1 GB 첨부파일',
+      free_tier_details: '1인 사용자 한정, 에러 5,000건, 로그 5GB, 애플리케이션 메트릭 5GB, 트레이싱 500만 span, 세션 리플레이 50건, 대시보드 10개.',
       plans: [
-        { name: 'Developer', price: '$0/월' },
-        { name: 'Team', price: '$26/월' },
-        { name: 'Business', price: '$80/월' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'Team', price: '$26/월 (에러 5만 건, 무제한 사용자, 대시보드 20개)' },
+        { name: 'Business', price: '$80/월 (에러 5만 건 + 고급 기능, 초과 로그/메트릭 GB당 $0.50)' },
+        { name: 'Enterprise', price: '맞춤 견적' },
       ],
     },
     required_env_vars: [
@@ -984,7 +1003,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 90,
     difficulty_level: 'beginner',
     tags: ['error-tracking', 'monitoring', 'performance', 'debugging', 'open-source', '센트리', '모니터링'],
-    alternatives: [],
+    alternatives: ['logrocket', 'betterstack'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'svelte', 'django', 'rails', 'flask'],
       language: ['typescript', 'javascript', 'python', 'ruby', 'go', 'java', 'php', 'c#', 'rust'],
@@ -993,7 +1012,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 10,
-    monthly_cost_estimate: { starter: '$0', growth: '$26', enterprise: '$80+' },
+    monthly_cost_estimate: { starter: '$0', growth: '$26-80', enterprise: '협의(연 중앙값 약 $23,301, Vendr 추정)' },
   },
 
   // -----------------------------------------------------------------------
@@ -1007,20 +1026,18 @@ export const services: ServiceSeed[] = [
     dashboard_layer: 'backend',
     dashboard_subcategory: 'database',
     description:
-      'Vitess 기반의 브랜칭, 논블로킹 스키마 변경 및 수평 확장을 지원하는 서버리스 MySQL 호환 데이터베이스 플랫폼입니다.',
+      'Vitess 기반 MySQL 호환 서버리스 데이터베이스로 시작했으며, 현재는 PlanetScale Postgres도 함께 제공하는 관계형 DB 플랫폼입니다. 2024년 무료 플랜이 폐지되어 모든 요금제가 유료입니다.',
     description_ko:
-      'Vitess 기반의 브랜칭, 논블로킹 스키마 변경 및 수평 확장을 지원하는 서버리스 MySQL 호환 데이터베이스 플랫폼입니다.',
+      'Vitess 기반 MySQL 호환 서버리스 데이터베이스로 시작했으며, 현재는 PlanetScale Postgres도 함께 제공하는 관계형 DB 플랫폼입니다. 2024년 무료 플랜이 폐지되어 모든 요금제가 유료입니다.',
     icon_url: null,
     website_url: 'https://planetscale.com',
     docs_url: 'https://planetscale.com/docs',
     pricing_info: {
-      free_tier: true,
-      free_tier_details: 'Hobby: 5 GB 저장소, 1B 행 읽기/월, 10M 행 쓰기/월',
+      free_tier: false,
+      free_tier_details: '무료 티어 없음 (2024-04-08 Hobby 플랜 폐지).',
       plans: [
-        { name: 'Hobby', price: '$0/월' },
-        { name: 'Scaler', price: '$29/월' },
-        { name: 'Scaler Pro', price: '$39/월~' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'Postgres PS-5 (최소)', price: '$5/월 (1/16 vCPU, 512MiB RAM, 단일 노드)' },
+        { name: 'Postgres HA / Vitess 등', price: '$15/월~ (구성별 상이)' },
       ],
     },
     required_env_vars: [
@@ -1060,20 +1077,19 @@ export const services: ServiceSeed[] = [
     dashboard_layer: 'backend',
     dashboard_subcategory: 'database',
     description:
-      '자동 확장, 브랜칭 및 넉넉한 무료 티어를 제공하는 서버리스 Postgres입니다. 제로까지 축소되는 컴퓨팅과 즉시 데이터베이스 브랜칭을 지원합니다.',
+      '서버리스 Postgres로, 컴퓨트 자동 스케일-투-제로와 브랜칭 기능이 특징입니다. Databricks 인수(2025) 이후 무료 티어가 월 50 CU-hour에서 100 CU-hour로 2배 확대되었고 스토리지 단가도 인하되었습니다.',
     description_ko:
-      '자동 확장, 브랜칭 및 넉넉한 무료 티어를 제공하는 서버리스 Postgres입니다. 제로까지 축소되는 컴퓨팅과 즉시 데이터베이스 브랜칭을 지원합니다.',
+      '서버리스 Postgres로, 컴퓨트 자동 스케일-투-제로와 브랜칭 기능이 특징입니다. Databricks 인수(2025) 이후 무료 티어가 월 50 CU-hour에서 100 CU-hour로 2배 확대되었고 스토리지 단가도 인하되었습니다.',
     icon_url: null,
     website_url: 'https://neon.tech',
     docs_url: 'https://neon.tech/docs',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'Free: 0.5 GiB 저장소, 자동 일시 중지, 브랜칭',
+      free_tier_details: '프로젝트당 100 CU-hours/월, 0.5GB 스토리지, 5GB 공개 네트워크 전송, 최대 60,000 MAU.',
       plans: [
         { name: 'Free', price: '$0/월' },
-        { name: 'Launch', price: '$19/월' },
-        { name: 'Scale', price: '$69/월' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'Launch', price: '종량제 (Compute $0.106/CU-hour, Storage $0.35/GB-월)' },
+        { name: 'Scale', price: '종량제 (Compute $0.222/CU-hour)' },
       ],
     },
     required_env_vars: [
@@ -1097,7 +1113,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 82,
     difficulty_level: 'beginner',
     tags: ['postgres', 'serverless', 'branching', 'auto-scaling', 'open-source', '니온', '데이터베이스'],
-    alternatives: ['supabase', 'planetscale'],
+    alternatives: ['planetscale', 'supabase'],
     compatibility: {
       framework: ['nextjs', 'react', 'express', 'django', 'rails'],
       language: ['typescript', 'javascript', 'python', 'ruby', 'go', 'java'],
@@ -1106,7 +1122,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'excellent',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 5,
-    monthly_cost_estimate: { starter: '$0', growth: '$19', enterprise: '$Custom' },
+    monthly_cost_estimate: { starter: '$0', growth: '종량제 ($0.106/CU-hr~)', enterprise: '종량제 ($0.222/CU-hr~)' },
   },
 
   // -----------------------------------------------------------------------
@@ -1120,20 +1136,20 @@ export const services: ServiceSeed[] = [
     dashboard_layer: 'backend',
     dashboard_subcategory: 'hosting',
     description:
-      '데이터베이스, 크론 작업 및 자동 확장을 갖춘 풀스택 애플리케이션 배포를 위한 인프라 플랫폼입니다. GitHub에서 설정 없이 배포할 수 있습니다.',
+      '사용량 기반 종량제 PaaS. 상시 무료 플랜은 없고 신규 가입 시 1회성 $5 체험 크레딧(Free Trial)만 제공되며, 지속 이용을 위해서는 Hobby($5/월) 또는 Pro($20/월, 시트당) 구독이 필요함.',
     description_ko:
-      '데이터베이스, 크론 작업 및 자동 확장을 갖춘 풀스택 애플리케이션 배포를 위한 인프라 플랫폼입니다. GitHub에서 설정 없이 배포할 수 있습니다.',
+      '사용량 기반 종량제 PaaS. 상시 무료 플랜은 없고 신규 가입 시 1회성 $5 체험 크레딧(Free Trial)만 제공되며, 지속 이용을 위해서는 Hobby($5/월) 또는 Pro($20/월, 시트당) 구독이 필요함.',
     icon_url: null,
-    website_url: 'https://railway.app',
-    docs_url: 'https://docs.railway.app',
+    website_url: 'https://railway.com',
+    docs_url: 'https://docs.railway.com',
     pricing_info: {
-      free_tier: true,
-      free_tier_details: 'Trial: $5 크레딧 또는 500시간 실행, 512 MB RAM',
+      free_tier: false,
+      free_tier_details: '상시 무료 플랜 없음. 신규 가입 시 카드 등록 없이 $5 1회성 크레딧(Free Trial)만 제공, 소진 후 Hobby로 업그레이드 필요.',
       plans: [
-        { name: 'Trial', price: '$0 (제한적)' },
-        { name: 'Hobby', price: '$5/월' },
-        { name: 'Pro', price: '$20/월/멤버' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'Free Trial', price: '$5 1회성 크레딧' },
+        { name: 'Hobby', price: '$5/월 (월 $5 사용량 포함)' },
+        { name: 'Pro', price: '$20/월/시트 (월 $20 사용량 포함)' },
+        { name: 'Enterprise', price: '맞춤형' },
       ],
     },
     required_env_vars: [
@@ -1150,7 +1166,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 80,
     difficulty_level: 'beginner',
     tags: ['hosting', 'docker', 'databases', 'paas', 'deploy', 'full-stack', '레일웨이', '배포'],
-    alternatives: ['vercel', 'render', 'fly-io'],
+    alternatives: ['render', 'flyio', 'vercel', 'netlify'],
     compatibility: {
       framework: ['nextjs', 'react', 'express', 'django', 'rails', 'flask'],
       language: ['typescript', 'javascript', 'python', 'ruby', 'go', 'java', 'rust', 'elixir'],
@@ -1159,7 +1175,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'limited',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 5,
-    monthly_cost_estimate: { starter: '$5', growth: '$20-50', enterprise: '$Custom' },
+    monthly_cost_estimate: { starter: '$5', growth: '$20+/seat + 종량제', enterprise: '협의' },
   },
 
   // -----------------------------------------------------------------------
@@ -1172,17 +1188,20 @@ export const services: ServiceSeed[] = [
     category: 'payment',
     dashboard_layer: 'backend',
     dashboard_subcategory: 'payment',
-    description:
-      '디지털 제품 및 SaaS 판매를 위한 올인원 플랫폼으로 결제, 구독, 세금 준수 및 사기 방지를 판매 대행(MoR)으로 처리합니다.',
-    description_ko:
-      '디지털 제품 및 SaaS 판매를 위한 올인원 플랫폼으로 결제, 구독, 세금 준수 및 사기 방지를 판매 대행(MoR)으로 처리합니다.',
+    description: '글로벌 세금 신고·정산까지 대행하는 Merchant of Record형 결제 플랫폼으로, 단일 거래 수수료 구조가 특징입니다.',
+    description_ko: '글로벌 세금 신고·정산까지 대행하는 Merchant of Record형 결제 플랫폼으로, 단일 거래 수수료 구조가 특징입니다.',
     icon_url: null,
     website_url: 'https://www.lemonsqueezy.com',
     docs_url: 'https://docs.lemonsqueezy.com',
     pricing_info: {
-      free_tier: true,
-      free_tier_details: '플랫폼 무료, 거래 수수료: 5% + 50¢',
-      plans: [{ name: 'Standard', price: '거래당 5% + 50¢' }],
+      free_tier: false,
+      free_tier_details: '월 요금 없음, 거래 시에만 수수료 부과(무료 플랜 개념 자체가 없는 종량제 단일 요금).',
+      plans: [
+        { name: '기본 거래 수수료', price: '5% + $0.50/건' },
+        { name: '국제 거래 추가', price: '+1.5%' },
+        { name: 'PayPal 결제 추가', price: '+1.5%' },
+        { name: '구독 결제 추가', price: '+0.5%' },
+      ],
     },
     required_env_vars: [
       {
@@ -1211,7 +1230,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 70,
     difficulty_level: 'beginner',
     tags: ['payment', 'subscription', 'digital-products', 'merchant-of-record', 'tax', '레몬스퀴지', '결제'],
-    alternatives: ['stripe', 'polar'],
+    alternatives: ['stripe', 'polar', 'paddle'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue'],
       language: ['typescript', 'javascript', 'python', 'ruby', 'php'],
@@ -1220,7 +1239,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 15,
-    monthly_cost_estimate: { starter: '5%+50\u00A2/tx', growth: '5%+50\u00A2/tx', enterprise: '3.5%+50\u00A2/tx' },
+    monthly_cost_estimate: { starter: '$0(거래별 수수료만)', growth: '거래액 × 5%+$0.50', enterprise: '동일 구조(별도 엔터프라이즈 등급 없음)' },
   },
 
   // -----------------------------------------------------------------------
@@ -1233,20 +1252,18 @@ export const services: ServiceSeed[] = [
     category: 'storage',
     dashboard_layer: 'backend',
     dashboard_subcategory: 'storage',
-    description:
-      '타입 안전 API, 내장 UI 컴포넌트 및 S3 호환 스토리지를 갖춘 풀스택 TypeScript 애플리케이션용 파일 업로드 솔루션입니다.',
-    description_ko:
-      '타입 안전 API, 내장 UI 컴포넌트 및 S3 호환 스토리지를 갖춘 풀스택 TypeScript 애플리케이션용 파일 업로드 솔루션입니다.',
+    description: 'TypeScript 풀스택 앱을 위한 파일 업로드 서비스로, 프레임워크별 백엔드 어댑터와 React 컴포넌트를 제공합니다.',
+    description_ko: 'TypeScript 풀스택 앱을 위한 파일 업로드 서비스로, 프레임워크별 백엔드 어댑터와 React 컴포넌트를 제공합니다.',
     icon_url: null,
     website_url: 'https://uploadthing.com',
     docs_url: 'https://docs.uploadthing.com',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'Free: 2 GB 저장소, 무제한 업로드',
+      free_tier_details: '2GB 저장용량(전체 앱 공유), 업로드/다운로드 무제한, 감사 로그 7일 보관.',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Pro', price: '$10/월' },
-        { name: 'Enterprise', price: '문의' },
+        { name: '2GB App (무료)', price: '$0' },
+        { name: '100GB App', price: '$10/월' },
+        { name: 'Usage Based', price: '$25/월~ (250GB 포함, 초과 GB당 $0.08)' },
       ],
     },
     required_env_vars: [
@@ -1269,7 +1286,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 72,
     difficulty_level: 'beginner',
     tags: ['file-upload', 'storage', 'nextjs', 'react', 'typesafe', '업로드씽', '파일업로드'],
-    alternatives: ['cloudinary', 'aws-s3'],
+    alternatives: ['imagekit', 'r2'],
     compatibility: {
       framework: ['nextjs', 'react', 'solid', 'svelte', 'vue', 'express'],
       language: ['typescript', 'javascript'],
@@ -1292,18 +1309,19 @@ export const services: ServiceSeed[] = [
     dashboard_layer: 'frontend',
     dashboard_subcategory: 'analytics',
     description:
-      '이벤트 추적, 세션 녹화, 기능 플래그, A/B 테스트 및 사용자 설문조사를 제공하는 오픈소스 제품 분석 플랫폼입니다.',
+      '제품 분석, 세션 리플레이, 피처 플래그, 설문, 오류 추적을 하나로 묶은 올인원 제품 분석 플랫폼입니다. 넉넉한 월 무료 한도 이후에는 제품별 사용량(이벤트·녹화·요청 수 등) 기준의 종량제로 전환됩니다.',
     description_ko:
-      '이벤트 추적, 세션 녹화, 기능 플래그, A/B 테스트 및 사용자 설문조사를 제공하는 오픈소스 제품 분석 플랫폼입니다.',
+      '제품 분석, 세션 리플레이, 피처 플래그, 설문, 오류 추적을 하나로 묶은 올인원 제품 분석 플랫폼입니다. 넉넉한 월 무료 한도 이후에는 제품별 사용량(이벤트·녹화·요청 수 등) 기준의 종량제로 전환됩니다.',
     icon_url: null,
     website_url: 'https://posthog.com',
     docs_url: 'https://posthog.com/docs',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'Free: 월 1M 이벤트, 5K 세션 녹화, 1M 기능 플래그 요청',
+      free_tier_details: '월 Product Analytics 100만 이벤트, Session Replay 5,000건(모바일 2,500건), Feature Flags 100만 요청, Surveys 1,500 응답, Error Tracking 10만 예외, Managed Warehouse 100만 행, PostHog AI 500 크레딧.',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Pay-as-you-go', price: '이벤트당 $0.00031~' },
+        { name: 'Pay-as-you-go (Product Analytics)', price: '$0.00005/이벤트부터 (구간별 체감, 250M+ 시 $0.000009)' },
+        { name: 'Pay-as-you-go (Session Replay)', price: '$0.005/녹화부터 (구간별 체감, 500K+ 시 $0.0015)' },
+        { name: 'Pay-as-you-go (Feature Flags)', price: '$0.0001/요청부터 (구간별 체감, 50M+ 시 $0.00001)' },
       ],
     },
     required_env_vars: [
@@ -1326,7 +1344,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 82,
     difficulty_level: 'beginner',
     tags: ['analytics', 'session-replay', 'feature-flags', 'open-source', 'a-b-testing', 'product-analytics', '포스트호그', '분석'],
-    alternatives: ['ga4', 'mixpanel', 'plausible'],
+    alternatives: ['logrocket', 'launchdarkly'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'svelte', 'django', 'rails', 'flask'],
       language: ['typescript', 'javascript', 'python', 'ruby', 'go', 'java', 'php'],
@@ -1335,7 +1353,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'excellent',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 5,
-    monthly_cost_estimate: { starter: '$0', growth: '$0-450', enterprise: '$Custom' },
+    monthly_cost_estimate: { starter: '$0', growth: '사용량 기반(수십~수백 달러)', enterprise: '사용량 기반(협의 가능)' },
   },
 
   // -----------------------------------------------------------------------
@@ -1349,15 +1367,15 @@ export const services: ServiceSeed[] = [
     dashboard_layer: 'backend',
     dashboard_subcategory: 'storage',
     description:
-      '세밀한 액세스 제어, 버전 관리, 수명 주기 관리 및 CloudFront를 통한 CDN 통합을 제공하는 확장 가능한 객체 스토리지 서비스입니다.',
+      'Amazon의 객체 스토리지 서비스. 스토리지 클래스별 계층 가격 체계를 유지하며, 2025년 7월 AWS 전체 프리티어 정책이 신규 계정 대상 크레딧 지급 방식(최대 $200, 6개월)으로 개편됨에 따라 S3의 무료 이용 조건도 함께 변경됨.',
     description_ko:
-      '세밀한 액세스 제어, 버전 관리, 수명 주기 관리 및 CloudFront를 통한 CDN 통합을 제공하는 확장 가능한 객체 스토리지 서비스입니다.',
+      'Amazon의 객체 스토리지 서비스. 스토리지 클래스별 계층 가격 체계를 유지하며, 2025년 7월 AWS 전체 프리티어 정책이 신규 계정 대상 크레딧 지급 방식(최대 $200, 6개월)으로 개편됨에 따라 S3의 무료 이용 조건도 함께 변경됨.',
     icon_url: null,
     website_url: 'https://aws.amazon.com/s3',
     docs_url: 'https://docs.aws.amazon.com/s3',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'Free Tier (12개월): 5 GB 스토리지, 20,000 GET, 2,000 PUT 요청',
+      free_tier_details: '2025-07-15 이후 신규 계정: Free Plan(최대 $200 크레딧, 6개월) 또는 Paid Plan 중 선택. 이와 별개로 \'Always Free\' 30여개 서비스 한도가 있으나 S3 전용 수치는 공식 페이지의 동적 렌더링 테이블에서 자동조회로 확인하지 못함(2025-07-15 이전 개설된 레거시 계정은 기존 12개월 무료 티어 유지).',
       plans: [
         { name: 'S3 Standard', price: 'GB당 $0.023/월 (첫 50 TB)' },
         { name: 'S3 Intelligent-Tiering', price: '자동 계층화' },
@@ -1422,17 +1440,17 @@ export const services: ServiceSeed[] = [
     description:
       'Git-based source code hosting with pull requests, Actions CI/CD, issue tracking, and the world\'s largest developer community.',
     description_ko:
-      'Git 기반 소스 코드 호스팅으로 풀 리퀘스트, Actions CI/CD, 이슈 트래킹, 세계 최대 개발자 커뮤니티를 제공합니다.',
+      '세계 최대 규모의 소스 코드 호스팅·협업 플랫폼으로, Git 저장소 관리와 이슈 트래킹, 코드 리뷰, GitHub Actions CI/CD를 하나로 통합 제공합니다.',
     icon_url: null,
     website_url: 'https://github.com',
     docs_url: 'https://docs.github.com',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'Free: 무제한 퍼블릭 리포, 프라이빗 리포, Actions 2,000분/월',
+      free_tier_details: '무제한 공개/비공개 저장소, 월 2,000분 Actions, 500MB 패키지 저장소 무료 제공',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Team', price: '$4/사용자/월' },
-        { name: 'Enterprise', price: '$21/사용자/월' },
+        { name: 'Free', price: '$0' },
+        { name: 'Team', price: '$4/user/월 (최초 12개월 기준, 공식 페이지 표기)' },
+        { name: 'Enterprise', price: '$21/user/월 (최초 12개월 기준, 공식 페이지 표기)' },
       ],
     },
     required_env_vars: [
@@ -1472,7 +1490,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'excellent',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 5,
-    monthly_cost_estimate: { starter: '$0', growth: '$4/사용자', enterprise: '$21/사용자' },
+    monthly_cost_estimate: { starter: '$0', growth: '$4/user', enterprise: '$21/user' },
   },
 
   // -----------------------------------------------------------------------
@@ -1488,16 +1506,18 @@ export const services: ServiceSeed[] = [
     description:
       'Anthropic\'s agentic coding tool for CLI. Understands codebases, edits files, runs commands, and assists with complex software engineering tasks.',
     description_ko:
-      'Anthropic의 에이전트형 코딩 도구로, CLI에서 코드베이스를 이해하고 파일 편집, 명령 실행, 복잡한 소프트웨어 엔지니어링 작업을 지원합니다.',
+      'Anthropic이 제공하는 터미널/IDE 기반 에이전틱 코딩 도구로, Claude Pro/Max/Team(Premium)/Enterprise 구독에 포함되어 제공됩니다.',
     icon_url: null,
     website_url: 'https://claude.ai/claude-code',
-    docs_url: 'https://docs.anthropic.com/en/docs/claude-code',
+    docs_url: 'https://platform.claude.com/docs/en/docs/claude-code',
     pricing_info: {
       free_tier: false,
-      free_tier_details: 'Anthropic API 사용량 기반 과금',
+      free_tier_details: '별도 무료 플랜 없음 — Claude Pro($17~20/월) 이상 구독 또는 API 종량제 필요.',
       plans: [
-        { name: 'API 기반', price: '사용량 기반' },
-        { name: 'Max 플랜', price: '$100/월~' },
+        { name: 'Pro 구독 포함', price: '$17/월(연간) 또는 $20/월' },
+        { name: 'Max 구독 포함', price: '$100~$200/월' },
+        { name: 'Team Premium 좌석', price: '$100/좌석/월(연간) 또는 $125/월, 최소 5석' },
+        { name: 'Enterprise', price: '좌석당 $20 + API 사용료' },
       ],
     },
     required_env_vars: [
@@ -1513,7 +1533,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 88,
     difficulty_level: 'beginner',
     tags: ['ai', 'coding-assistant', 'cli', 'agent', 'anthropic', 'claude', '클로드 코드'],
-    alternatives: ['github-copilot', 'cursor'],
+    alternatives: ['github-copilot', 'cursor', 'windsurf', 'cline'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'svelte', 'express', 'django', 'rails'],
       language: ['typescript', 'javascript', 'python', 'go', 'rust', 'java', 'ruby', 'c#'],
@@ -1522,7 +1542,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'none',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 5,
-    monthly_cost_estimate: { starter: '$20', growth: '$100', enterprise: '$200+' },
+    monthly_cost_estimate: { starter: '$17-20', growth: '$100-200', enterprise: '$20/좌석~ + API 종량제' },
   },
 
   // -----------------------------------------------------------------------
@@ -1538,16 +1558,21 @@ export const services: ServiceSeed[] = [
     description:
       'Google\'s multimodal AI platform supporting text, image, audio, video understanding and generation (Imagen 4, Veo 3.1, TTS) with generous free tier, grounding, and competitive pricing.',
     description_ko:
-      'Google의 멀티모달 AI 플랫폼으로, 텍스트·이미지·오디오·비디오 이해 및 생성(Imagen 4, Veo 3.1, TTS)을 지원하며 넉넉한 무료 티어, 그라운딩, 경쟁력 있는 가격을 제공합니다.',
+      'Google의 멀티모달 LLM 패밀리로, Gemini API(개발자용)와 Gemini 앱/Google AI Plus·Pro·Ultra 구독(소비자용)으로 제공됩니다.',
     icon_url: null,
     website_url: 'https://ai.google.dev',
-    docs_url: 'https://ai.google.dev/docs',
+    docs_url: 'https://ai.google.dev/gemini-api/docs/pricing',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'Free: 모든 모델 무료 티어 제공 (RPM 제한), 결제 수단 불필요, 최대 1M 토큰 컨텍스트',
+      free_tier_details: 'Gemini 2.5/3.x Flash-Lite 등 일부 모델은 무료 티어로 제한된 접근 가능. Google Search 그라운딩 월 5,000 프롬프트 무료.',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Pay-as-you-go', price: '사용량 기반' },
+        { name: 'Free (Gemini 앱)', price: '$0/월' },
+        { name: 'Google AI Plus', price: '$4.99/월(추정, 서드파티 교차검증)' },
+        { name: 'Google AI Pro', price: '$19.99/월' },
+        { name: 'Google AI Ultra (5x)', price: '$99.99/월' },
+        { name: 'Google AI Ultra (20x)', price: '$199.99/월' },
+        { name: 'API Gemini 2.5 Flash-Lite', price: '입력 $0.10 / 출력 $0.40 (1M 토큰)' },
+        { name: 'API Gemini 3.6 Flash', price: '입력 $1.50 / 출력 $7.50 (1M 토큰)' },
       ],
     },
     required_env_vars: [
@@ -1563,7 +1588,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 85,
     difficulty_level: 'beginner',
     tags: ['ai', 'multimodal', 'google', 'llm', 'vision', 'gemini', '제미나이', 'image-gen', 'video-gen', 'tts', 'grounding'],
-    alternatives: ['openai', 'anthropic'],
+    alternatives: ['openai', 'anthropic', 'mistral-ai'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'express', 'flask', 'django'],
       language: ['typescript', 'javascript', 'python', 'go', 'java', 'kotlin', 'swift'],
@@ -1572,7 +1597,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'excellent',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 5,
-    monthly_cost_estimate: { starter: '$0', growth: '$10-50', enterprise: '$100+' },
+    monthly_cost_estimate: { starter: '$0-20', growth: '$20-100', enterprise: '$200+ (Ultra) / 맞춤 API 볼륨' },
   },
 
   // -----------------------------------------------------------------------
@@ -1588,14 +1613,16 @@ export const services: ServiceSeed[] = [
     description:
       'Kakao social login SDK for integrating KakaoTalk-based authentication into web and mobile applications.',
     description_ko:
-      '카카오톡 기반 소셜 로그인을 웹/모바일 앱에 연동할 수 있는 카카오 로그인 SDK입니다. 한국 사용자 대부분이 보유한 카카오 계정으로 간편 로그인을 제공합니다.',
+      '카카오계정으로 로그인하는 국내 대표 소셜 로그인 서비스입니다. 로그인 API 자체는 무료이며, 카카오 오픈API 전체 계정 기준 월 3,000,000회 호출 한도를 공유합니다.',
     icon_url: null,
     website_url: 'https://developers.kakao.com',
     docs_url: 'https://developers.kakao.com/docs/latest/ko/kakaologin/common',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '완전 무료, 월 30만 요청까지 기본 제공',
-      plans: [{ name: 'Free', price: '무료' }],
+      free_tier_details: 'Kakao Login은 유료 API 목록에 포함되지 않는 무료 API. 계정 전체 Open API 월 300만 호출 한도 공유. Access Token 발급은 10분당 20회, Refresh Token은 60분당 30회로 속도 제한.',
+      plans: [
+        { name: '무료', price: '$0' },
+      ],
     },
     required_env_vars: [
       {
@@ -1627,7 +1654,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 92,
     difficulty_level: 'beginner',
     tags: ['social-login', 'kakao', 'kakaotalk', 'oauth', 'korea', '한국', '소셜로그인', '카카오 로그인'],
-    alternatives: ['naver-login', 'google-oauth', 'apple-login'],
+    alternatives: ['google-oauth', 'naver-login', 'apple-login', 'github-oauth'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'flutter', 'react-native'],
       language: ['typescript', 'javascript', 'kotlin', 'swift', 'java'],
@@ -1652,14 +1679,16 @@ export const services: ServiceSeed[] = [
     description:
       'Google Identity Services for integrating Google Sign-In with OAuth 2.0 and OpenID Connect.',
     description_ko:
-      'Google Identity Services를 활용한 구글 로그인 연동입니다. OAuth 2.0 / OpenID Connect 기반으로 전 세계 사용자에게 익숙한 구글 계정 인증을 제공합니다.',
+      'Google 계정으로 로그인하는 OAuth 2.0 기반 소셜 로그인으로, Google Cloud Console에서 클라이언트 ID/시크릿을 발급받아 사용합니다. 기본 OAuth 2.0 사용 자체는 무료입니다 (유료 Identity Platform과는 별개 제품).',
     icon_url: null,
     website_url: 'https://console.cloud.google.com',
     docs_url: 'https://developers.google.com/identity/protocols/oauth2',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '완전 무료, Google Cloud Console에서 OAuth 클라이언트 생성',
-      plans: [{ name: 'Free', price: '무료' }],
+      free_tier_details: '표준 OAuth 2.0 로그인 연동 자체는 무료. 공식 문서에 별도 비용 언급 없음.',
+      plans: [
+        { name: '무료', price: '$0' },
+      ],
     },
     required_env_vars: [
       {
@@ -1685,7 +1714,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 95,
     difficulty_level: 'beginner',
     tags: ['social-login', 'google', 'oauth', 'openid-connect', 'gmail', '소셜로그인', '구글 로그인'],
-    alternatives: ['kakao-login', 'naver-login', 'apple-login'],
+    alternatives: ['kakao-login', 'naver-login', 'apple-login', 'github-oauth'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'flutter', 'react-native'],
       language: ['typescript', 'javascript', 'python', 'java', 'kotlin', 'swift', 'go'],
@@ -1709,14 +1738,13 @@ export const services: ServiceSeed[] = [
     dashboard_subcategory: 'social_login',
     description:
       'Naver social login SDK for integrating Naver account-based authentication into web and mobile apps.',
-    description_ko:
-      '네이버 아이디로 로그인을 웹/모바일 앱에 연동할 수 있는 네이버 로그인 SDK입니다. 한국 최대 포털 네이버 계정으로 간편 로그인을 제공합니다.',
+    description_ko: '네이버 계정으로 로그인하는 국내 소셜 로그인 서비스입니다. 별도 이용 요금 없이 무료로 제공되는 것으로 파악됩니다.',
     icon_url: null,
     website_url: 'https://developers.naver.com',
     docs_url: 'https://developers.naver.com/docs/login/overview/overview.md',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '완전 무료, 네이버 개발자 센터에서 앱 등록',
+      free_tier_details: '확인된 공식 가격 정책 없음 — 국내 소셜 로그인 API 관행상 무료로 판단되나 이번 세션에서 developers.naver.com 페이지를 직접 열람하지 못해 확정 불가.',
       plans: [{ name: 'Free', price: '무료' }],
     },
     required_env_vars: [
@@ -1743,7 +1771,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 88,
     difficulty_level: 'beginner',
     tags: ['social-login', 'naver', 'oauth', 'korea', '한국', '소셜로그인', '네이버', '네이버 로그인'],
-    alternatives: ['kakao-login', 'google-oauth', 'apple-login'],
+    alternatives: ['kakao-login', 'google-oauth', 'apple-login', 'github-oauth'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'flutter', 'react-native'],
       language: ['typescript', 'javascript', 'java', 'kotlin', 'swift'],
@@ -1768,15 +1796,14 @@ export const services: ServiceSeed[] = [
     description:
       'Sign in with Apple for secure, privacy-focused authentication using Apple ID across web and mobile apps.',
     description_ko:
-      'Apple ID를 활용한 소셜 로그인입니다. 개인정보 보호를 강화한 인증 방식으로, iOS/macOS 앱 출시 시 필수 연동 항목입니다.',
+      'Apple ID로 로그인하는 Sign in with Apple 기능입니다. 기능 자체 추가 요금은 없으나, 사용하려면 연 $99의 Apple Developer Program 유료 가입이 필수입니다.',
     icon_url: null,
     website_url: 'https://developer.apple.com',
     docs_url: 'https://developer.apple.com/sign-in-with-apple/',
     pricing_info: {
-      free_tier: true,
-      free_tier_details: 'Apple Developer Program 가입 필요 ($99/년), 로그인 API는 무료',
+      free_tier: false,
+      free_tier_details: '무료 Apple ID만으로는 Sign in with Apple 활성화 불가 — Apple Developer Program($99/년) 가입이 전제조건.',
       plans: [
-        { name: 'Free (API)', price: '무료' },
         { name: 'Apple Developer Program', price: '$99/년' },
       ],
     },
@@ -1816,7 +1843,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 82,
     difficulty_level: 'intermediate',
     tags: ['social-login', 'apple', 'oauth', 'ios', 'privacy', '소셜로그인', '애플 로그인'],
-    alternatives: ['google-oauth', 'kakao-login', 'naver-login'],
+    alternatives: ['kakao-login', 'google-oauth', 'naver-login', 'github-oauth'],
     compatibility: {
       framework: ['nextjs', 'react', 'flutter', 'react-native', 'swift-ui'],
       language: ['typescript', 'javascript', 'swift', 'kotlin', 'java'],
@@ -1841,14 +1868,16 @@ export const services: ServiceSeed[] = [
     description:
       'GitHub OAuth Apps for developer-focused authentication using GitHub accounts.',
     description_ko:
-      'GitHub 계정을 활용한 소셜 로그인입니다. 개발자 타겟 서비스에 적합하며, GitHub OAuth App을 통해 간편하게 인증을 제공합니다.',
+      'GitHub 계정으로 로그인하는 OAuth App 연동 기능입니다. 계정당 최대 100개의 OAuth App을 등록할 수 있으며, 사용 자체는 무료입니다. GitHub는 세분화된 권한 제어를 위해 OAuth App 대신 GitHub App 사용을 권장하는 추세입니다.',
     icon_url: null,
     website_url: 'https://github.com/settings/developers',
     docs_url: 'https://docs.github.com/en/apps/oauth-apps',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '완전 무료, GitHub 계정으로 OAuth App 생성',
-      plans: [{ name: 'Free', price: '무료' }],
+      free_tier_details: 'GitHub OAuth App 등록/사용은 무료. 계정/조직당 최대 100개 OAuth App 등록 가능.',
+      plans: [
+        { name: '무료', price: '$0' },
+      ],
     },
     required_env_vars: [
       {
@@ -1874,7 +1903,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 85,
     difficulty_level: 'beginner',
     tags: ['social-login', 'github', 'oauth', 'developer', '소셜로그인', '개발자', '깃허브 로그인'],
-    alternatives: ['google-oauth', 'kakao-login'],
+    alternatives: ['kakao-login', 'google-oauth', 'naver-login', 'apple-login'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'express', 'fastify'],
       language: ['typescript', 'javascript', 'python', 'go', 'ruby'],
@@ -1901,18 +1930,20 @@ export const services: ServiceSeed[] = [
     description:
       'Enterprise-grade identity platform with SSO, MFA, and social login support.',
     description_ko:
-      '기업용 SSO, MFA, 소셜 로그인을 지원하는 인증 플랫폼입니다.',
+      'Okta 산하의 엔터프라이즈급 인증·아이덴티티 플랫폼입니다. 무료 플랜은 최대 25,000 MAU까지 이용 가능하며, 2026년부터 B2C/B2B 요금제가 분리되었습니다.',
     icon_url: null,
     website_url: 'https://auth0.com',
     docs_url: 'https://auth0.com/docs',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '7,500 MAU, 소셜 로그인 무제한',
+      free_tier_details: '최대 25,000 MAU까지 무료(신용카드 불필요). MFA·RBAC·프리미엄 지원 등 고급 기능은 미포함.',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Essential', price: '$35/월' },
-        { name: 'Professional', price: '$240/월' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'Free', price: '$0 (~25,000 MAU)' },
+        { name: 'Essentials (B2C)', price: '$35/월 (500 MAU 기준)' },
+        { name: 'Essentials (B2B)', price: '$150/월 (500 MAU 기준)' },
+        { name: 'Professional (B2C)', price: '$240/월 (500 MAU 기준)' },
+        { name: 'Professional (B2B)', price: '$800/월 (500 MAU 기준)' },
+        { name: 'Enterprise', price: '맞춤 견적' },
       ],
     },
     required_env_vars: [
@@ -1951,7 +1982,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 88,
     difficulty_level: 'intermediate',
     tags: ['auth', 'sso', 'mfa', 'oauth', 'identity', '오스제로', '인증'],
-    alternatives: ['clerk', 'supabase-auth', 'firebase-auth'],
+    alternatives: ['clerk', 'nextauth'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'express'],
       language: ['typescript', 'javascript', 'python', 'java', 'go'],
@@ -1960,7 +1991,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 25,
-    monthly_cost_estimate: { starter: '$0', growth: '$35', enterprise: '$240' },
+    monthly_cost_estimate: { starter: '$0', growth: '$35-240', enterprise: '$150-800+' },
   },
 
   // 60. Convex
@@ -1973,18 +2004,17 @@ export const services: ServiceSeed[] = [
     dashboard_subcategory: 'database',
     description:
       'Reactive backend-as-a-service with real-time sync, serverless functions, and built-in database.',
-    description_ko:
-      '실시간 동기화, 서버리스 함수, 내장 데이터베이스를 제공하는 반응형 BaaS 플랫폼입니다.',
+    description_ko: 'TypeScript 함수와 리액티브 쿼리를 결합한 백엔드 플랫폼으로, DB·파일 저장·벡터 검색·인증을 하나의 런타임에서 제공합니다.',
     icon_url: null,
     website_url: 'https://convex.dev',
     docs_url: 'https://docs.convex.dev',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '1M 함수 호출, 1 GB 저장소',
+      free_tier_details: '함수 호출 월 100만 회, DB 저장 0.5GB, 파일 저장 1GB 포함.',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Pro', price: '$25/월' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'Free & Starter', price: '$0' },
+        { name: 'Professional', price: '$25/개발자/월 (25M 함수 호출 포함, 1~20명)' },
+        { name: 'Business & Enterprise', price: '$2,500/월~ (최소 요금, 50명+)' },
       ],
     },
     required_env_vars: [
@@ -2008,10 +2038,10 @@ export const services: ServiceSeed[] = [
       },
     ],
     domain: 'backend',
-    popularity_score: 78,
+    popularity_score: 75,
     difficulty_level: 'beginner',
     tags: ['database', 'realtime', 'serverless', 'baas', 'reactive', '컨벡스', '데이터베이스'],
-    alternatives: ['supabase', 'firebase', 'neon'],
+    alternatives: ['supabase', 'firebase'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'svelte'],
       language: ['typescript', 'javascript'],
@@ -2020,7 +2050,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'high',
     setup_time_minutes: 10,
-    monthly_cost_estimate: { starter: '$0', growth: '$25', enterprise: '문의' },
+    monthly_cost_estimate: { starter: '$0', growth: '$25/개발자', enterprise: '$2,500+' },
   },
 
   // 61. Drizzle ORM
@@ -2034,14 +2064,16 @@ export const services: ServiceSeed[] = [
     description:
       'Lightweight TypeScript ORM with SQL-like syntax and zero dependencies.',
     description_ko:
-      'SQL과 유사한 문법을 제공하는 경량 TypeScript ORM입니다. 의존성이 없어 번들 크기가 작습니다.',
+      'SQL에 가까운 문법을 가진 헤드리스 TypeScript ORM으로, PostgreSQL·MySQL·SQLite·MSSQL 등을 지원합니다. 핵심 라이브러리는 Apache 2.0 라이선스의 완전 무료 오픈소스입니다.',
     icon_url: null,
     website_url: 'https://orm.drizzle.team',
     docs_url: 'https://orm.drizzle.team/docs/overview',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '오픈소스, 완전 무료',
-      plans: [{ name: 'Free', price: '무료' }],
+      free_tier_details: 'ORM 코어는 완전 무료 오픈소스. 부가 유료 서비스로 Drizzle Studio, OneDollarStats($1/월) 등 별도 제품이 존재.',
+      plans: [
+        { name: '오픈소스 코어', price: '$0' },
+      ],
     },
     required_env_vars: [
       {
@@ -2061,7 +2093,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 85,
     difficulty_level: 'intermediate',
     tags: ['orm', 'typescript', 'sql', 'postgres', 'mysql', 'sqlite', '드리즐', 'ORM'],
-    alternatives: ['prisma', 'typeorm', 'kysely'],
+    alternatives: ['prisma'],
     compatibility: {
       framework: ['nextjs', 'react', 'express', 'fastify', 'hono'],
       language: ['typescript', 'javascript'],
@@ -2084,17 +2116,19 @@ export const services: ServiceSeed[] = [
     description:
       'Next-generation TypeScript ORM with auto-generated client, migrations, and a visual database browser.',
     description_ko:
-      '자동 생성 클라이언트, 마이그레이션, 시각적 DB 브라우저를 제공하는 차세대 TypeScript ORM입니다.',
+      '타입 세이프 쿼리를 지원하는 오픈소스 ORM(Prisma ORM)과, 이를 기반으로 한 관리형 서버리스 Postgres(Prisma Postgres)를 함께 제공합니다.',
     icon_url: null,
     website_url: 'https://www.prisma.io',
     docs_url: 'https://www.prisma.io/docs',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '오픈소스 ORM 무료, Prisma Accelerate 유료',
+      free_tier_details: 'Prisma ORM은 항상 무료. Prisma Postgres 무료 플랜: 오퍼레이션 10만/월, 저장 500MB, DB 50개, 카드 등록 불필요.',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Pro', price: '$49/월' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'Prisma ORM (오픈소스)', price: '$0' },
+        { name: 'Prisma Postgres Free', price: '$0' },
+        { name: 'Starter', price: '$10/월 (100만 오퍼레이션, 10GB)' },
+        { name: 'Pro', price: '$49/월 (1000만 오퍼레이션, 50GB)' },
+        { name: 'Business', price: '$129/월 (5000만 오퍼레이션, 100GB)' },
       ],
     },
     required_env_vars: [
@@ -2121,7 +2155,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 90,
     difficulty_level: 'beginner',
     tags: ['orm', 'typescript', 'postgres', 'mysql', 'sqlite', 'migrations', '프리즈마', 'ORM'],
-    alternatives: ['drizzle', 'typeorm', 'kysely'],
+    alternatives: ['drizzle'],
     compatibility: {
       framework: ['nextjs', 'react', 'express', 'fastify', 'nestjs'],
       language: ['typescript', 'javascript'],
@@ -2130,7 +2164,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'excellent',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 15,
-    monthly_cost_estimate: { starter: '$0', growth: '$49', enterprise: '문의' },
+    monthly_cost_estimate: { starter: '$0', growth: '$10-49', enterprise: '$129+' },
   },
 
   // 63. Turso
@@ -2144,17 +2178,19 @@ export const services: ServiceSeed[] = [
     description:
       'Edge-hosted SQLite database built on libSQL with global replication and embedded replicas.',
     description_ko:
-      'libSQL 기반의 엣지 호스팅 SQLite 데이터베이스입니다. 전역 복제와 임베디드 레플리카를 지원합니다.',
+      'SQLite 기반 libSQL 엔진을 사용하는 엣지 데이터베이스 서비스로, 전 세계에 분산 복제되는 서버리스 DB를 제공합니다. Free/Developer/Scaler/Pro/Enterprise 5단계 요금제를 운영합니다.',
     icon_url: null,
     website_url: 'https://turso.tech',
-    docs_url: 'https://docs.turso.tech',
+    docs_url: 'https://docs.turso.tech/',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '9 GB 저장소, 500개 데이터베이스, 월 25B 행 읽기',
+      free_tier_details: '5GB 스토리지, 데이터베이스 100개, 월간 행 읽기 5억, 월간 행 쓰기 1,000만, 월간 동기화 3GB, PITR 1일',
       plans: [
-        { name: 'Starter', price: '$0/월' },
-        { name: 'Scaler', price: '$29/월' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'Free', price: '$0/월' },
+        { name: 'Developer', price: '$4.99/월' },
+        { name: 'Scaler', price: '$24.92/월' },
+        { name: 'Pro', price: '$416.58/월' },
+        { name: 'Enterprise', price: '맞춤형(문의)' },
       ],
     },
     required_env_vars: [
@@ -2175,7 +2211,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 76,
     difficulty_level: 'beginner',
     tags: ['sqlite', 'edge', 'database', 'libsql', 'replication', '투르소', '데이터베이스'],
-    alternatives: ['planetscale', 'neon', 'supabase'],
+    alternatives: ['neon', 'planetscale'],
     compatibility: {
       framework: ['nextjs', 'react', 'svelte', 'astro', 'hono'],
       language: ['typescript', 'javascript', 'rust', 'python', 'go'],
@@ -2184,7 +2220,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'excellent',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 10,
-    monthly_cost_estimate: { starter: '$0', growth: '$29', enterprise: '문의' },
+    monthly_cost_estimate: { starter: '$0', growth: '$4.99-24.92', enterprise: '$416.58+' },
   },
 
   // 64. Redis Cloud
@@ -2198,17 +2234,18 @@ export const services: ServiceSeed[] = [
     description:
       'Fully managed Redis service with auto-scaling, multi-zone replication, and enterprise security.',
     description_ko:
-      '자동 스케일링, 다중 가용영역 복제, 기업용 보안을 제공하는 완전관리형 Redis 서비스입니다.',
+      'Redis Inc가 제공하는 완전관리형 Redis 클라우드 서비스로, 무료 Free 플랜(30MB)과 Essentials·Pro 구독 플랜, 연간 계약 기반 Enterprise 플랜을 운영합니다.',
     icon_url: null,
     website_url: 'https://redis.io/cloud',
     docs_url: 'https://redis.io/docs',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '30 MB 메모리, 30 연결',
+      free_tier_details: '항상 무료(Free Plan), 최대 30MB, 단일 데이터베이스, Best-effort SLA, 커뮤니티 지원만 제공',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Essentials', price: '$5/월부터' },
-        { name: 'Pro', price: '문의' },
+        { name: 'Free', price: '$0' },
+        { name: 'Essentials', price: '$0.007/시간(월 최소 $5)' },
+        { name: 'Pro', price: '$0.014/시간(월 최소 $200, 첫 $200 무료)' },
+        { name: 'Enterprise', price: '연간 계약, 맞춤형(문의)' },
       ],
     },
     required_env_vars: [
@@ -2229,7 +2266,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 86,
     difficulty_level: 'intermediate',
     tags: ['cache', 'redis', 'key-value', 'session', 'pub-sub', '레디스', '캐시'],
-    alternatives: ['upstash', 'vercel-kv', 'memcached'],
+    alternatives: ['upstash-redis'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'nestjs', 'django'],
       language: ['typescript', 'javascript', 'python', 'go', 'java'],
@@ -2238,7 +2275,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'limited',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 15,
-    monthly_cost_estimate: { starter: '$0', growth: '$5', enterprise: '문의' },
+    monthly_cost_estimate: { starter: '$0(30MB)', growth: '$5-200+', enterprise: '맞춤형(연간 계약)' },
   },
 
   // 65. Vercel KV
@@ -2252,16 +2289,15 @@ export const services: ServiceSeed[] = [
     description:
       'Serverless Redis-compatible key-value store by Vercel, powered by Upstash.',
     description_ko:
-      'Upstash 기반의 Vercel 서버리스 Redis 호환 키-밸류 저장소입니다.',
+      'Vercel의 자체 KV(Key-Value) 스토리지 제품은 단종되었으며, 현재는 Vercel Marketplace를 통해 Upstash Redis 등 서드파티 Redis 공급자를 연결하는 방식으로 완전히 대체되었습니다.',
     icon_url: null,
     website_url: 'https://vercel.com/storage/kv',
-    docs_url: 'https://vercel.com/docs/storage/vercel-kv',
+    docs_url: 'https://vercel.com/docs/redis',
     pricing_info: {
-      free_tier: true,
-      free_tier_details: '3,000 요청/일, 256 MB 저장소',
+      free_tier: false,
+      free_tier_details: '제품 단종 — Vercel 자체 요금제 없음. 요금은 Marketplace에서 선택한 Redis 공급자(Upstash 등) 정책을 따른다.',
       plans: [
-        { name: 'Hobby', price: '$0/월' },
-        { name: 'Pro', price: '$1/100K 요청' },
+        { name: '단종 (2024-12 Upstash 이관)', price: '해당 없음' },
       ],
     },
     required_env_vars: [
@@ -2294,7 +2330,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 72,
     difficulty_level: 'beginner',
     tags: ['cache', 'redis', 'key-value', 'serverless', 'vercel', '버셀 KV', '캐시'],
-    alternatives: ['upstash', 'redis-cloud', 'cloudflare-kv'],
+    alternatives: ['upstash-redis', 'redis-cloud'],
     compatibility: {
       framework: ['nextjs', 'react', 'svelte'],
       language: ['typescript', 'javascript'],
@@ -2317,17 +2353,18 @@ export const services: ServiceSeed[] = [
     description:
       'Managed vector database for building high-performance AI applications with similarity search.',
     description_ko:
-      '유사도 검색을 활용한 고성능 AI 애플리케이션을 위한 관리형 벡터 데이터베이스입니다.',
+      '완전관리형 벡터 데이터베이스로 RAG·시맨틱 검색 등 AI 애플리케이션에 사용됩니다. 무료 Starter, 신설된 Builder($20/월), 종량제 기반 Standard(최소 $50/월)·Enterprise(최소 $500/월) 플랜을 제공합니다.',
     icon_url: null,
     website_url: 'https://www.pinecone.io',
     docs_url: 'https://docs.pinecone.io',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '1개 인덱스, 100K 벡터, 무제한 읽기',
+      free_tier_details: '스토리지 2GB, 쓰기 월 200만 유닛, 읽기 월 100만 유닛, 이그레스 월 1GB, 최대 인덱스 5개',
       plans: [
-        { name: 'Starter', price: '$0/월' },
-        { name: 'Standard', price: '$70/월부터' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'Starter', price: '$0' },
+        { name: 'Builder', price: '$20/월' },
+        { name: 'Standard', price: '최소 $50/월 + 종량제' },
+        { name: 'Enterprise', price: '최소 $500/월 + 종량제' },
       ],
     },
     required_env_vars: [
@@ -2354,7 +2391,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 82,
     difficulty_level: 'intermediate',
     tags: ['vector-db', 'ai', 'embeddings', 'similarity-search', 'rag', '파인콘', '벡터DB'],
-    alternatives: ['weaviate', 'qdrant', 'chromadb'],
+    alternatives: ['weaviate', 'qdrant', 'chroma'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'django', 'flask'],
       language: ['typescript', 'javascript', 'python', 'go', 'java'],
@@ -2363,7 +2400,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 15,
-    monthly_cost_estimate: { starter: '$0', growth: '$70', enterprise: '문의' },
+    monthly_cost_estimate: { starter: '$0', growth: '$20-50+', enterprise: '$500+' },
   },
 
   // 67. LangChain
@@ -2377,17 +2414,18 @@ export const services: ServiceSeed[] = [
     description:
       'Framework for building LLM-powered applications with chains, agents, and retrieval-augmented generation.',
     description_ko:
-      '체인, 에이전트, RAG를 활용한 LLM 기반 애플리케이션 구축 프레임워크입니다.',
+      '오픈소스 LLM 애플리케이션 개발 프레임워크로 그 자체는 무료입니다. 관측성·평가·배포 플랫폼인 LangSmith는 Developer(무료)·Plus($39/좌석/월)·Enterprise(맞춤형) 플랜으로 별도 과금됩니다.',
     icon_url: null,
     website_url: 'https://www.langchain.com',
-    docs_url: 'https://js.langchain.com/docs',
+    docs_url: 'https://docs.langchain.com/oss/javascript/langchain/overview',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '오픈소스 프레임워크 무료, LangSmith 유료',
+      free_tier_details: 'LangChain 프레임워크 자체는 완전 무료(오픈소스). LangSmith Developer 플랜: 월 5,000 트레이스, 14일 보관, 1인 사용자',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Plus (LangSmith)', price: '$39/월' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'LangChain(오픈소스)', price: '$0' },
+        { name: 'LangSmith Developer', price: '$0/월(종량제 오버리지)' },
+        { name: 'LangSmith Plus', price: '$39/좌석/월(10,000 트레이스 포함, 초과 1,000건당 $2.50)' },
+        { name: 'LangSmith Enterprise', price: '맞춤형(문의)' },
       ],
     },
     required_env_vars: [
@@ -2423,7 +2461,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'excellent',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 20,
-    monthly_cost_estimate: { starter: '$0', growth: '$39', enterprise: '문의' },
+    monthly_cost_estimate: { starter: '$0(오픈소스)', growth: '$39/seat', enterprise: '맞춤형' },
   },
 
   // 68. Replicate
@@ -2437,14 +2475,19 @@ export const services: ServiceSeed[] = [
     description:
       'Cloud platform for running open-source AI models with a simple API.',
     description_ko:
-      '오픈소스 AI 모델을 간단한 API로 실행할 수 있는 클라우드 플랫폼입니다.',
+      '다양한 오픈소스/커스텀 AI 모델을 API로 배포·실행할 수 있는 모델 호스팅 플랫폼으로, 2025년 11월 Cloudflare에 인수되었으나 독립 브랜드로 운영 중입니다.',
     icon_url: null,
     website_url: 'https://replicate.com',
     docs_url: 'https://replicate.com/docs',
     pricing_info: {
       free_tier: false,
-      free_tier_details: '사용량 기반 과금',
-      plans: [{ name: 'Pay-as-you-go', price: '모델별 가격' }],
+      free_tier_details: '상시 무료 티어 없음. 신규 계정은 선불 크레딧 구매(1년 유효) 방식이며, 퍼블릭 모델은 실제 처리 시간만 과금(콜드스타트 무료).',
+      plans: [
+        { name: 'CPU 예측', price: '$0.000025/초' },
+        { name: 'Nvidia T4', price: '$0.000225/초' },
+        { name: 'Nvidia A100 (80GB)', price: '$0.001400/초 ($5.04/시간)' },
+        { name: 'Nvidia H100', price: '$0.001525/초' },
+      ],
     },
     required_env_vars: [
       {
@@ -2458,7 +2501,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 80,
     difficulty_level: 'beginner',
     tags: ['ai', 'ml', 'model-hosting', 'inference', 'open-source', '레플리케이트'],
-    alternatives: ['huggingface', 'aws-sagemaker', 'google-vertex-ai'],
+    alternatives: ['huggingface', 'modal', 'together-ai', 'fireworks-ai'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'django', 'flask'],
       language: ['typescript', 'javascript', 'python', 'go', 'swift'],
@@ -2467,7 +2510,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'none',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 5,
-    monthly_cost_estimate: { starter: '$5', growth: '$50', enterprise: '$500+' },
+    monthly_cost_estimate: { starter: '$5-50 (종량제)', growth: '$50-500', enterprise: '맞춤 견적' },
   },
 
   // 69. Hugging Face
@@ -2480,18 +2523,18 @@ export const services: ServiceSeed[] = [
     dashboard_subcategory: 'ai',
     description:
       'Open-source AI model hub with Inference API, Spaces, and thousands of pre-trained models.',
-    description_ko:
-      'Inference API, Spaces, 수천 개의 사전 학습 모델을 제공하는 오픈소스 AI 모델 허브입니다.',
+    description_ko: '200만 개 이상의 공개 모델·데이터셋을 호스팅하는 ML 커뮤니티 허브로, Spaces·Inference·추론 크레딧 등 개발자용 유료 플랜을 제공합니다.',
     icon_url: null,
     website_url: 'https://huggingface.co',
     docs_url: 'https://huggingface.co/docs',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '무료 Inference API (rate-limited), 무료 Spaces',
+      free_tier_details: '공개 모델/데이터셋 무제한 열람, 100GB 프라이빗 스토리지, 소량 ZeroGPU 쿼터 무료 제공.',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Pro', price: '$9/월' },
-        { name: 'Enterprise', price: '$20/사용자/월' },
+        { name: 'Free', price: '$0' },
+        { name: 'PRO', price: '$9/월' },
+        { name: 'Team', price: '$20/사용자/월' },
+        { name: 'Enterprise', price: '$50/사용자/월~' },
       ],
     },
     required_env_vars: [
@@ -2509,10 +2552,10 @@ export const services: ServiceSeed[] = [
       },
     ],
     domain: 'backend',
-    popularity_score: 90,
+    popularity_score: 92,
     difficulty_level: 'intermediate',
     tags: ['ai', 'ml', 'models', 'inference', 'nlp', 'open-source', '허깅페이스'],
-    alternatives: ['replicate', 'openai', 'anthropic'],
+    alternatives: ['replicate', 'modal', 'wandb'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'django', 'flask'],
       language: ['typescript', 'javascript', 'python', 'rust'],
@@ -2521,7 +2564,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 10,
-    monthly_cost_estimate: { starter: '$0', growth: '$9', enterprise: '$20+' },
+    monthly_cost_estimate: { starter: '$0-9', growth: '$20-50/사용자', enterprise: '$50+/사용자' },
   },
 
   // 70. Stability AI
@@ -2535,17 +2578,17 @@ export const services: ServiceSeed[] = [
     description:
       'AI image generation platform powering Stable Diffusion and SDXL models via REST API.',
     description_ko:
-      'Stable Diffusion, SDXL 모델을 REST API로 제공하는 AI 이미지 생성 플랫폼입니다.',
+      'Stable Diffusion 등 생성형 이미지·오디오·3D AI 모델을 API로 제공하며, 크레딧 기반 종량제(1크레딧=$0.01)로 과금됩니다. 별도로 자체 호스팅 모델 사용을 위한 Professional 멤버십($20/월) 라이선스도 운영합니다.',
     icon_url: null,
     website_url: 'https://stability.ai',
     docs_url: 'https://platform.stability.ai/docs',
     pricing_info: {
-      free_tier: true,
-      free_tier_details: '25 무료 크레딧',
+      free_tier: false,
+      free_tier_details: '신규 가입 시 25 크레딧을 1회성으로 제공, 이후 지속되는 월간 무료 한도는 없음',
       plans: [
-        { name: 'Free', price: '25 크레딧' },
-        { name: 'Pay-as-you-go', price: '크레딧 기반' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'API 종량제(Pay-as-you-go)', price: '크레딧 기반, 1크레딧=$0.01' },
+        { name: 'Professional Membership(자체 호스팅 라이선스)', price: '$20/월' },
+        { name: 'Enterprise', price: '맞춤형(문의)' },
       ],
     },
     required_env_vars: [
@@ -2560,7 +2603,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 78,
     difficulty_level: 'beginner',
     tags: ['ai', 'image-generation', 'stable-diffusion', 'sdxl', 'generative', '스태빌리티', '이미지생성'],
-    alternatives: ['dall-e', 'midjourney', 'replicate'],
+    alternatives: ['openai', 'midjourney', 'replicate'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'django'],
       language: ['typescript', 'javascript', 'python', 'go'],
@@ -2569,7 +2612,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'limited',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 10,
-    monthly_cost_estimate: { starter: '$0', growth: '$10', enterprise: '문의' },
+    monthly_cost_estimate: { starter: '$0(가입 크레딧 소진 후 종량제)', growth: '$20/월~', enterprise: '맞춤형' },
   },
 
   // 71. Notion API
@@ -2583,17 +2626,18 @@ export const services: ServiceSeed[] = [
     description:
       'Official Notion API for building integrations, managing databases, and automating workflows.',
     description_ko:
-      '통합 구축, 데이터베이스 관리, 워크플로우 자동화를 위한 Notion 공식 API입니다.',
+      'Notion 워크스페이스와 연동하는 공식 REST API로, 내부/공개 통합과 웹훅을 지원합니다. Notion 자체는 Free/Plus/Business/Enterprise 요금제로 운영됩니다.',
     icon_url: null,
-    website_url: 'https://www.notion.so',
+    website_url: 'https://www.notion.com',
     docs_url: 'https://developers.notion.com',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'API 무료 (Notion 플랜에 따라 기능 제한)',
+      free_tier_details: '공식 가격 페이지(notion.com/pricing)와 개발자 문서 간 설명이 상충됨 — 아래 notes 참조',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Plus', price: '$10/월' },
-        { name: 'Business', price: '$18/월' },
+        { name: 'Free', price: '₩0/월' },
+        { name: 'Plus', price: '₩14,000/월(인당)' },
+        { name: 'Business', price: '₩30,000/월(인당)' },
+        { name: 'Enterprise', price: '맞춤형(문의)' },
       ],
     },
     required_env_vars: [
@@ -2623,7 +2667,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 10,
-    monthly_cost_estimate: { starter: '$0', growth: '$10', enterprise: '$18' },
+    monthly_cost_estimate: { starter: '₩0', growth: '₩14,000-30,000/인', enterprise: '맞춤형' },
   },
 
   // 72. Linear API
@@ -2636,18 +2680,18 @@ export const services: ServiceSeed[] = [
     dashboard_subcategory: 'cicd',
     description:
       'Issue tracking and project management tool with a powerful GraphQL API for developer workflows.',
-    description_ko:
-      '개발자 워크플로우에 최적화된 강력한 GraphQL API를 제공하는 이슈 트래커 및 프로젝트 관리 도구입니다.',
+    description_ko: '이슈 트래킹·프로젝트 관리 툴 Linear의 GraphQL API로, Free 플랜을 포함한 모든 요금제에서 API 및 웹훅 접근이 제공됩니다.',
     icon_url: null,
     website_url: 'https://linear.app',
-    docs_url: 'https://developers.linear.app/docs',
+    docs_url: 'https://linear.app/developers',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '250개 이슈, 무제한 멤버',
+      free_tier_details: '무제한 인원, 최대 250개 미보관 이슈, 2개 팀, 파일 업로드 10MB 제한. 모든 플랜에서 API/웹훅 접근 가능',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Standard', price: '$8/사용자/월' },
-        { name: 'Plus', price: '$14/사용자/월' },
+        { name: 'Free', price: '$0' },
+        { name: 'Basic', price: '$10/user/월(연간 결제)' },
+        { name: 'Business', price: '$16/user/월(연간 결제)' },
+        { name: 'Enterprise', price: '맞춤형(문의)' },
       ],
     },
     required_env_vars: [
@@ -2677,7 +2721,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 10,
-    monthly_cost_estimate: { starter: '$0', growth: '$8', enterprise: '$14' },
+    monthly_cost_estimate: { starter: '$0', growth: '$10-16/user', enterprise: '맞춤형' },
   },
 
   // 73. Toss Payments (토스페이먼츠)
@@ -2690,15 +2734,20 @@ export const services: ServiceSeed[] = [
     dashboard_subcategory: 'payment',
     description:
       'Korean payment gateway by Toss supporting card, bank transfer, virtual account, and mobile payments.',
-    description_ko:
-      '카드, 계좌이체, 가상계좌, 휴대폰 결제를 지원하는 토스 결제 게이트웨이입니다.',
+    description_ko: '국내 대표 PG(결제대행)사로 카드·간편결제·가상계좌 등 다양한 결제수단을 지원하며, 가맹점 등급(영세~일반)에 따라 차등 수수료율을 적용합니다.',
     icon_url: null,
     website_url: 'https://www.tosspayments.com',
     docs_url: 'https://docs.tosspayments.com',
     pricing_info: {
       free_tier: false,
-      free_tier_details: '테스트 모드 무료, 결제당 수수료',
-      plans: [{ name: '수수료 기반', price: '결제금액의 2.5%~3.5%' }],
+      free_tier_details: '결제대행 서비스 특성상 \'무료 티어\' 개념이 아닌 거래건당 수수료 구조. 연회비·가입비는 무료',
+      plans: [
+        { name: '일반 가맹점(온라인)', price: '3.00%(부가세 별도)' },
+        { name: '중소3', price: '2.40%' },
+        { name: '중소2', price: '2.15%' },
+        { name: '중소1', price: '1.90%' },
+        { name: '영세', price: '1.60%' },
+      ],
     },
     required_env_vars: [
       {
@@ -2724,7 +2773,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 85,
     difficulty_level: 'intermediate',
     tags: ['payment', 'korean', 'toss', 'pg', 'fintech', '결제', '토스페이먼츠', '토스'],
-    alternatives: ['iamport', 'nice-payments', 'kakaopay'],
+    alternatives: ['paypal'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'express'],
       language: ['typescript', 'javascript', 'java', 'python', 'php'],
@@ -2747,14 +2796,20 @@ export const services: ServiceSeed[] = [
     description:
       'Global payment platform supporting checkout, subscriptions, and payouts in 200+ countries.',
     description_ko:
-      '200개국 이상에서 결제, 구독, 정산을 지원하는 글로벌 결제 플랫폼입니다.',
+      '글로벌 결제 플랫폼으로 PayPal Checkout, 카드결제, Venmo, Pay Later 등을 지원하며, 거래 유형·국내외 여부에 따라 수수료율이 다르게 적용됩니다.',
     icon_url: null,
     website_url: 'https://www.paypal.com',
     docs_url: 'https://developer.paypal.com/docs',
     pricing_info: {
       free_tier: false,
-      free_tier_details: 'Sandbox 테스트 무료, 트랜잭션당 수수료',
-      plans: [{ name: '수수료 기반', price: '2.9% + $0.30/건' }],
+      free_tier_details: '결제대행 서비스 특성상 \'무료 티어\' 개념이 아닌 거래건당 수수료 구조',
+      plans: [
+        { name: 'PayPal Checkout(국내)', price: '3.49% + $0.49' },
+        { name: '카드결제(Standard)', price: '2.99% + $0.49' },
+        { name: 'QR코드(Zettle 등 대면결제)', price: '2.29% + $0.49' },
+        { name: 'PayPal Pay Later', price: '4.99% + $0.49' },
+        { name: '해외거래 추가수수료', price: '국내 수수료 + 1.50%' },
+      ],
     },
     required_env_vars: [
       {
@@ -2780,7 +2835,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 88,
     difficulty_level: 'intermediate',
     tags: ['payment', 'global', 'checkout', 'subscriptions', 'payouts', '페이팔', '결제'],
-    alternatives: ['stripe', 'toss-payments', 'adyen'],
+    alternatives: ['toss-payments'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'express'],
       language: ['typescript', 'javascript', 'python', 'java', 'php'],
@@ -2803,16 +2858,17 @@ export const services: ServiceSeed[] = [
     description:
       'Scalable email sending service by AWS for transactional and marketing emails.',
     description_ko:
-      '트랜잭션 및 마케팅 이메일을 위한 AWS의 확장 가능한 이메일 발송 서비스입니다.',
+      'AWS의 대량 이메일 발송 서비스(SMTP/API)로, 발신 이메일 1,000건당 과금되며 Essentials/Pro/Enterprise 3단계 요금제로 구분됩니다.',
     icon_url: null,
     website_url: 'https://aws.amazon.com/ses',
     docs_url: 'https://docs.aws.amazon.com/ses',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'EC2에서 월 62,000건 무료',
+      free_tier_details: '신규 AWS 계정 대상 가입 후 6개월간 이용 가능한 프리티어 및 최대 $200 크레딧 제공(AWS 계정 전체 공통 혜택, SES 전용 영구 무료 한도와는 별개일 수 있어 재검증 필요)',
       plans: [
-        { name: 'Free Tier', price: '$0 (EC2)' },
-        { name: 'Pay-as-you-go', price: '$0.10/1,000건' },
+        { name: 'Essentials', price: '1,000건당 $0.11-$0.16(구간별)' },
+        { name: 'Pro', price: '기본료 $105/월 + 1,000건당 $0.12-$0.22(구간별)' },
+        { name: 'Enterprise', price: '기본료 $500/월 + 1,000건당 $0.13-$0.23(구간별)' },
       ],
     },
     required_env_vars: [
@@ -2845,7 +2901,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 82,
     difficulty_level: 'intermediate',
     tags: ['email', 'aws', 'transactional', 'marketing', 'smtp', '아마존', '이메일'],
-    alternatives: ['sendgrid', 'resend', 'mailchimp'],
+    alternatives: ['mailchimp'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'nestjs', 'django'],
       language: ['typescript', 'javascript', 'python', 'go', 'java'],
@@ -2854,7 +2910,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 30,
-    monthly_cost_estimate: { starter: '$0', growth: '$10', enterprise: '$100+' },
+    monthly_cost_estimate: { starter: '종량제($0.11-0.16/1000건)', growth: '$105/월~', enterprise: '$500/월~' },
   },
 
   // 76. Mailchimp
@@ -2868,18 +2924,18 @@ export const services: ServiceSeed[] = [
     description:
       'All-in-one email marketing platform with automation, templates, and audience management.',
     description_ko:
-      '자동화, 템플릿, 구독자 관리를 제공하는 올인원 이메일 마케팅 플랫폼입니다.',
+      '이메일 마케팅·마케팅 자동화 플랫폼으로 Free/Essentials/Standard/Premium 4단계 요금제를 운영하며, 연락처 수와 발송량에 따라 가격이 스케일링됩니다.',
     icon_url: null,
     website_url: 'https://mailchimp.com',
     docs_url: 'https://mailchimp.com/developer',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '500 구독자, 월 1,000건 발송',
+      free_tier_details: '연락처 최대 250개, 월 발송 최대 500건(일 250건), 사용자 1명',
       plans: [
         { name: 'Free', price: '$0/월' },
-        { name: 'Essentials', price: '$13/월' },
-        { name: 'Standard', price: '$20/월' },
-        { name: 'Premium', price: '$350/월' },
+        { name: 'Essentials', price: '$13/월~(14일 무료체험)' },
+        { name: 'Standard', price: '$20/월~(월 최대 6,000건 발송, 14일 무료체험)' },
+        { name: 'Premium', price: '$350/월~(월 최대 150,000건 발송)' },
       ],
     },
     required_env_vars: [
@@ -2906,7 +2962,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 84,
     difficulty_level: 'beginner',
     tags: ['email', 'marketing', 'automation', 'newsletter', 'crm', '메일침프', '이메일마케팅'],
-    alternatives: ['sendgrid', 'resend', 'aws-ses', 'convertkit'],
+    alternatives: ['aws-ses'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'django'],
       language: ['typescript', 'javascript', 'python', 'php', 'ruby'],
@@ -2915,7 +2971,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 15,
-    monthly_cost_estimate: { starter: '$0', growth: '$13', enterprise: '$350' },
+    monthly_cost_estimate: { starter: '$0', growth: '$13-20', enterprise: '$350+' },
   },
 
   // 77. ImageKit
@@ -2929,17 +2985,18 @@ export const services: ServiceSeed[] = [
     description:
       'Real-time image and video optimization, transformation, and CDN delivery platform.',
     description_ko:
-      '실시간 이미지/영상 최적화, 변환, CDN 전송을 제공하는 미디어 관리 플랫폼입니다.',
+      '이미지·비디오 실시간 최적화 및 CDN 전송에 특화된 미디어 관리 플랫폼으로, 미디어처리+DAM 통합 플랜과 DAM(디지털 자산관리) 전용 플랜을 별도로 제공합니다.',
     icon_url: null,
     website_url: 'https://imagekit.io',
-    docs_url: 'https://docs.imagekit.io',
+    docs_url: 'https://imagekit.io/docs/',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '20 GB 전송, 20 GB 저장소',
+      free_tier_details: '월 20GB 대역폭, 3GB DAM 스토리지, 비디오 유닛 500/확장 유닛 650, 최대 사용자 2명',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Pro', price: '$49/월' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'Forever Free', price: '$0/월' },
+        { name: 'Lite', price: '$9/월~(대역폭 초과 $0.5/GB)' },
+        { name: 'Pro', price: '$89/월~(대역폭 초과 $0.45/GB)' },
+        { name: 'Enterprise', price: '맞춤형(문의)' },
       ],
     },
     required_env_vars: [
@@ -2966,7 +3023,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 74,
     difficulty_level: 'beginner',
     tags: ['image', 'cdn', 'optimization', 'video', 'media', 'storage', '이미지킷', '이미지'],
-    alternatives: ['cloudinary', 'imgix', 'bunny-cdn'],
+    alternatives: ['r2'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'svelte'],
       language: ['typescript', 'javascript', 'python', 'go', 'java'],
@@ -2975,7 +3032,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 10,
-    monthly_cost_estimate: { starter: '$0', growth: '$49', enterprise: '문의' },
+    monthly_cost_estimate: { starter: '$0', growth: '$9-89', enterprise: '맞춤형' },
   },
 
   // 78. Cloudflare R2
@@ -2988,17 +3045,16 @@ export const services: ServiceSeed[] = [
     dashboard_subcategory: 'storage',
     description:
       'S3-compatible object storage by Cloudflare with zero egress fees and global distribution.',
-    description_ko:
-      'S3 호환, 이그레스 비용 없음, 전역 분배를 제공하는 Cloudflare 오브젝트 스토리지입니다.',
+    description_ko: 'S3 호환 오브젝트 스토리지로 이그레스(데이터 전송) 비용이 없는 것이 핵심 특징이며, 스토리지 용량 및 Class A/B 작업 단위로 과금됩니다.',
     icon_url: null,
     website_url: 'https://www.cloudflare.com/r2',
     docs_url: 'https://developers.cloudflare.com/r2',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '10 GB 저장소, 1M 클래스 A 요청, 10M 클래스 B 요청',
+      free_tier_details: 'Standard 스토리지 기준 월 10GB 무료, Class A(쓰기) 월 100만 요청 무료, Class B(읽기) 월 1,000만 요청 무료',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Pay-as-you-go', price: '$0.015/GB' },
+        { name: 'Standard 스토리지', price: '$0.015/GB/월' },
+        { name: 'Infrequent Access 스토리지', price: '$0.01/GB/월' },
       ],
     },
     required_env_vars: [
@@ -3031,7 +3087,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 80,
     difficulty_level: 'intermediate',
     tags: ['storage', 's3-compatible', 'cloudflare', 'object-storage', 'cdn', '클라우드플레어', '스토리지'],
-    alternatives: ['aws-s3', 'backblaze-b2', 'wasabi'],
+    alternatives: ['imagekit'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'hono', 'django'],
       language: ['typescript', 'javascript', 'python', 'go', 'rust'],
@@ -3040,7 +3096,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'excellent',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 15,
-    monthly_cost_estimate: { starter: '$0', growth: '$5', enterprise: '$50+' },
+    monthly_cost_estimate: { starter: '$0(10GB 무료)', growth: '사용량 기반($0.015/GB~)', enterprise: '사용량 기반(대량 할인 문의)' },
   },
 
   // 79. Grafana
@@ -3054,17 +3110,17 @@ export const services: ServiceSeed[] = [
     description:
       'Open-source observability platform for metrics, logs, and traces visualization with dashboards.',
     description_ko:
-      '메트릭, 로그, 트레이스 시각화를 제공하는 오픈소스 관찰 가능성 플랫폼입니다.',
+      '메트릭·로그·트레이스를 하나의 대시보드에서 시각화하는 오픈소스 관측성(Observability) 플랫폼이며, 매니지드 서비스인 Grafana Cloud도 함께 제공합니다.',
     icon_url: null,
     website_url: 'https://grafana.com',
     docs_url: 'https://grafana.com/docs',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'Grafana Cloud Free: 10K 메트릭, 50 GB 로그, 50 GB 트레이스',
+      free_tier_details: '영구 무료(신용카드 불필요) — 메트릭 1만 시리즈/월, 로그 50GB/월, 14일 보관',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Pro', price: '$29/월' },
-        { name: 'Enterprise', price: '문의' },
+        { name: 'Free', price: '$0' },
+        { name: 'Pro', price: '$19/월 기본료 + 종량제 (메트릭 1,000시리즈당 $6.50 등)' },
+        { name: 'Enterprise', price: '연 최소 $25,000 커밋' },
       ],
     },
     required_env_vars: [
@@ -3088,10 +3144,10 @@ export const services: ServiceSeed[] = [
       },
     ],
     domain: 'devtools',
-    popularity_score: 88,
+    popularity_score: 82,
     difficulty_level: 'intermediate',
     tags: ['monitoring', 'observability', 'metrics', 'logs', 'dashboards', 'open-source', '그라파나', '모니터링'],
-    alternatives: ['datadog', 'new-relic', 'prometheus'],
+    alternatives: ['new-relic'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'nestjs', 'django'],
       language: ['typescript', 'javascript', 'python', 'go', 'java'],
@@ -3100,7 +3156,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 20,
-    monthly_cost_estimate: { starter: '$0', growth: '$29', enterprise: '문의' },
+    monthly_cost_estimate: { starter: '$0', growth: '$19+ (종량제)', enterprise: '$25,000/year~' },
   },
 
   // 80. New Relic
@@ -3113,18 +3169,18 @@ export const services: ServiceSeed[] = [
     dashboard_subcategory: 'monitoring',
     description:
       'Full-stack observability platform with APM, infrastructure monitoring, and real user monitoring.',
-    description_ko:
-      'APM, 인프라 모니터링, 실제 사용자 모니터링을 제공하는 풀스택 관찰 가능성 플랫폼입니다.',
+    description_ko: 'APM, 인프라 모니터링, 로그, 브라우저/모바일 모니터링을 통합 제공하는 풀스택 관측성 SaaS 플랫폼입니다.',
     icon_url: null,
     website_url: 'https://newrelic.com',
     docs_url: 'https://docs.newrelic.com',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '100 GB/월 데이터 수집, 1 전체 사용자',
+      free_tier_details: '매월 데이터 인제스트 100GB 무료 + Basic 유저 무제한 무료 + Full Platform 유저 1명 무료 포함',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Standard', price: '$99/사용자/월' },
-        { name: 'Pro', price: '$349/사용자/월' },
+        { name: 'Free', price: '$0' },
+        { name: 'Standard', price: 'Full Platform 첫 유저 $10, 추가 유저 $99(최대 5명), Core 유저 $49' },
+        { name: 'Pro', price: 'Full Platform 유저 연 $349(무제한 유저), Core 유저 $49' },
+        { name: 'Enterprise', price: '맞춤 견적 (영업 문의)' },
       ],
     },
     required_env_vars: [
@@ -3151,7 +3207,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 84,
     difficulty_level: 'intermediate',
     tags: ['monitoring', 'apm', 'observability', 'rum', 'infrastructure', '뉴렐릭', '모니터링'],
-    alternatives: ['datadog', 'grafana', 'dynatrace'],
+    alternatives: ['grafana'],
     compatibility: {
       framework: ['nextjs', 'express', 'fastify', 'nestjs', 'django'],
       language: ['typescript', 'javascript', 'python', 'go', 'java', '.net'],
@@ -3160,7 +3216,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'excellent',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 20,
-    monthly_cost_estimate: { starter: '$0', growth: '$99', enterprise: '$349+' },
+    monthly_cost_estimate: { starter: '$0', growth: '$10~$99/user', enterprise: '맞춤 견적' },
   },
 
   // 81. GitHub Copilot
@@ -3173,17 +3229,18 @@ export const services: ServiceSeed[] = [
     dashboard_subcategory: 'ide',
     description:
       'AI pair programmer by GitHub that suggests code completions and generates functions from comments.',
-    description_ko:
-      '코드 자동 완성과 코멘트 기반 함수 생성을 제공하는 GitHub AI 페어 프로그래머입니다.',
+    description_ko: 'GitHub의 AI 코딩 어시스턴트로, 2026년 6월부터 프리미엄 요청 대신 \'GitHub AI Credits\' 기반 사용량제 청구로 전환되었습니다.',
     icon_url: null,
     website_url: 'https://github.com/features/copilot',
     docs_url: 'https://docs.github.com/en/copilot',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '오픈소스 프로젝트 무료, 학생 무료',
+      free_tier_details: 'Free 플랜: 월 2,000회 코드 완성 + 50회 채팅 요청, 기본 모델 접근.',
       plans: [
-        { name: 'Free (OSS)', price: '$0/월' },
-        { name: 'Individual', price: '$10/월' },
+        { name: 'Free', price: '$0' },
+        { name: 'Pro', price: '$10/월 (AI 크레딧 $15/월 포함)' },
+        { name: 'Pro+', price: '$39/월 (AI 크레딧 $70/월 포함, Opus 등 프리미엄 모델)' },
+        { name: 'Max (개인)', price: '$100/월 (AI 크레딧 $200/월 포함)' },
         { name: 'Business', price: '$19/사용자/월' },
         { name: 'Enterprise', price: '$39/사용자/월' },
       ],
@@ -3197,10 +3254,10 @@ export const services: ServiceSeed[] = [
       },
     ],
     domain: 'devtools',
-    popularity_score: 92,
+    popularity_score: 97,
     difficulty_level: 'beginner',
     tags: ['ai', 'code-completion', 'github', 'ide', 'pair-programming', '깃허브 코파일럿'],
-    alternatives: ['cursor', 'codeium', 'tabnine'],
+    alternatives: ['cursor', 'windsurf', 'tabnine', 'cline'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'svelte'],
       language: ['typescript', 'javascript', 'python', 'go', 'java', 'rust', 'c++'],
@@ -3209,7 +3266,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 5,
-    monthly_cost_estimate: { starter: '$0', growth: '$10', enterprise: '$39' },
+    monthly_cost_estimate: { starter: '$0-10', growth: '$19-39/사용자', enterprise: '$39+/사용자' },
   },
 
   // 82. Cursor
@@ -3222,18 +3279,18 @@ export const services: ServiceSeed[] = [
     dashboard_subcategory: 'ide',
     description:
       'AI-first code editor built on VS Code with inline editing, chat, and multi-file generation.',
-    description_ko:
-      'VS Code 기반의 AI 코드 에디터입니다. 인라인 편집, 채팅, 다중 파일 생성을 지원합니다.',
+    description_ko: 'AI 네이티브 코드 에디터로, 크레딧 기반 사용량제(월 정액 크레딧 풀)로 운영되며 Hobby(무료)부터 Enterprise까지 제공합니다.',
     icon_url: null,
     website_url: 'https://cursor.com',
     docs_url: 'https://docs.cursor.com',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'Hobby 플랜: 2,000 자동 완성, 50 프리미엄 요청',
+      free_tier_details: 'Hobby 플랜: 신용카드 불필요, 제한된 Agent 요청 및 탭 완성.',
       plans: [
-        { name: 'Hobby', price: '$0/월' },
-        { name: 'Pro', price: '$20/월' },
-        { name: 'Business', price: '$40/사용자/월' },
+        { name: 'Hobby', price: '$0' },
+        { name: 'Pro/Pro+/Ultra 통합 Individual', price: '$16~$20/월(연간 $16, 월간 $20), Ultra는 $200/월까지' },
+        { name: 'Teams', price: '$32~$40/사용자/월' },
+        { name: 'Enterprise', price: '맞춤 견적' },
       ],
     },
     required_env_vars: [
@@ -3246,10 +3303,10 @@ export const services: ServiceSeed[] = [
       },
     ],
     domain: 'devtools',
-    popularity_score: 88,
+    popularity_score: 95,
     difficulty_level: 'beginner',
     tags: ['ai', 'ide', 'code-editor', 'vscode', 'pair-programming', '커서'],
-    alternatives: ['github-copilot', 'codeium', 'windsurf'],
+    alternatives: ['github-copilot', 'windsurf', 'cline', 'devin'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'angular', 'svelte'],
       language: ['typescript', 'javascript', 'python', 'go', 'java', 'rust'],
@@ -3258,7 +3315,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'medium',
     setup_time_minutes: 5,
-    monthly_cost_estimate: { starter: '$0', growth: '$20', enterprise: '$40' },
+    monthly_cost_estimate: { starter: '$0-20', growth: '$32-40/사용자', enterprise: '맞춤 견적' },
   },
 
   // 83. Vitest
@@ -3271,15 +3328,16 @@ export const services: ServiceSeed[] = [
     dashboard_subcategory: 'cicd',
     description:
       'Blazing fast Vite-native unit test framework with Jest-compatible API and built-in code coverage.',
-    description_ko:
-      'Vite 네이티브 유닛 테스트 프레임워크입니다. Jest 호환 API와 내장 코드 커버리지를 제공합니다.',
+    description_ko: 'Vite 기반의 차세대 자바스크립트/타입스크립트 테스트 프레임워크로, Jest 호환 API와 빠른 HMR 워치 모드를 제공하는 오픈소스 프로젝트입니다.',
     icon_url: null,
     website_url: 'https://vitest.dev',
     docs_url: 'https://vitest.dev/guide',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '오픈소스, 완전 무료',
-      plans: [{ name: 'Free', price: '무료' }],
+      free_tier_details: '완전 오픈소스 무료 (MIT 라이선스)',
+      plans: [
+        { name: '오픈소스', price: '$0' },
+      ],
     },
     required_env_vars: [
       {
@@ -3296,7 +3354,7 @@ export const services: ServiceSeed[] = [
       },
     ],
     domain: 'devtools',
-    popularity_score: 86,
+    popularity_score: 68,
     difficulty_level: 'beginner',
     tags: ['testing', 'unit-test', 'vite', 'jest', 'coverage', 'open-source', '바이테스트', '테스트'],
     alternatives: ['jest', 'mocha', 'ava'],
@@ -3322,16 +3380,15 @@ export const services: ServiceSeed[] = [
     description:
       'UI component workshop for building, testing, and documenting components in isolation.',
     description_ko:
-      '컴포넌트를 독립적으로 개발, 테스트, 문서화하는 UI 컴포넌트 워크숍입니다.',
+      'UI 컴포넌트를 독립된 환경에서 개발·문서화·테스트할 수 있는 프론트엔드 워크숍 도구로, React/Vue/Angular/Svelte 등 주요 프레임워크를 지원하는 오픈소스 프로젝트입니다.',
     icon_url: null,
     website_url: 'https://storybook.js.org',
     docs_url: 'https://storybook.js.org/docs',
     pricing_info: {
       free_tier: true,
-      free_tier_details: '오픈소스 무료, Chromatic 유료',
+      free_tier_details: '오픈소스 무료(MIT 라이선스). 비주얼 테스트 SaaS인 Chromatic은 별도 유료 상품',
       plans: [
-        { name: 'Free', price: '$0/월' },
-        { name: 'Chromatic', price: '$149/월부터' },
+        { name: '오픈소스', price: '$0' },
       ],
     },
     required_env_vars: [
@@ -3361,7 +3418,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'excellent',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 15,
-    monthly_cost_estimate: { starter: '$0', growth: '$149', enterprise: '문의' },
+    monthly_cost_estimate: { starter: '$0', growth: '$0', enterprise: '$0' },
   },
 
   // 85. Docker
@@ -3375,18 +3432,18 @@ export const services: ServiceSeed[] = [
     description:
       'Container platform for building, shipping, and running applications in isolated environments.',
     description_ko:
-      '애플리케이션을 격리된 환경에서 빌드, 배포, 실행하는 컨테이너 플랫폼입니다.',
+      '애플리케이션을 컨테이너로 패키징·배포하는 표준 컨테이너 플랫폼으로, Docker Engine은 오픈소스이며 Docker Desktop·Hub·Build Cloud 등 부가 기능은 유료 구독 상품입니다.',
     icon_url: null,
     website_url: 'https://www.docker.com',
     docs_url: 'https://docs.docker.com',
     pricing_info: {
       free_tier: true,
-      free_tier_details: 'Docker Desktop 개인 무료, Docker Hub 1 비공개 레포',
+      free_tier_details: 'Docker Personal 무료 — 개인/비영리/소규모기업(250인 미만, 매출 $1,000만 미만) 대상',
       plans: [
-        { name: 'Personal', price: '$0/월' },
-        { name: 'Pro', price: '$5/월' },
-        { name: 'Team', price: '$9/사용자/월' },
-        { name: 'Business', price: '$24/사용자/월' },
+        { name: 'Personal', price: '$0' },
+        { name: 'Pro', price: '$9/월(연간) · $11/월(월간)' },
+        { name: 'Team', price: '$15/user/월(연간) · $16/user/월(월간)' },
+        { name: 'Business', price: '$24/user/월' },
       ],
     },
     required_env_vars: [
@@ -3410,7 +3467,7 @@ export const services: ServiceSeed[] = [
       },
     ],
     domain: 'devtools',
-    popularity_score: 94,
+    popularity_score: 90,
     difficulty_level: 'intermediate',
     tags: ['container', 'devops', 'deploy', 'docker', 'cicd', 'infrastructure', '도커', '컨테이너'],
     alternatives: ['podman', 'containerd', 'lxc'],
@@ -3422,7 +3479,7 @@ export const services: ServiceSeed[] = [
     free_tier_quality: 'good',
     vendor_lock_in_risk: 'low',
     setup_time_minutes: 20,
-    monthly_cost_estimate: { starter: '$0', growth: '$5', enterprise: '$24' },
+    monthly_cost_estimate: { starter: '$0', growth: '$9~$15/user', enterprise: '$24/user' },
   },
 
   // -----------------------------------------------------------------------
@@ -3430,7 +3487,7 @@ export const services: ServiceSeed[] = [
   // -----------------------------------------------------------------------
   {
     id: SERVICE_IDS.gabia,
-    name: '가비아',
+    name: 'Gabia',
     slug: 'gabia',
     category: 'domain',
     dashboard_layer: 'devtools',
@@ -3438,17 +3495,15 @@ export const services: ServiceSeed[] = [
     description:
       'Gabia is South Korea\'s largest domain registrar and web hosting provider offering domain registration, DNS management, SSL certificates, and cloud hosting.',
     description_ko:
-      '국내 최대 도메인 등록 및 웹 호스팅 서비스. 도메인 등록, DNS 관리, SSL 인증서, 클라우드 호스팅을 제공합니다.',
+      '국내 점유율 1위 도메인/호스팅 등록대행업체. 도메인 검색, 신규등록, 연장, 관리 기능을 제공하며 이벤트성 할인가로 첫 해 등록비를 낮게 책정하는 방식을 사용.',
     icon_url: null,
-    website_url: 'https://www.gabia.com',
-    docs_url: 'https://api.gabia.com/docs',
+    website_url: 'https://domain.gabia.com',
+    docs_url: 'https://customer.gabia.com/?tab=manual',
     pricing_info: {
       free_tier: false,
       plans: [
-        { name: '.com 도메인', price: '연 13,200원~' },
-        { name: '.co.kr 도메인', price: '연 22,000원~' },
-        { name: '웹호스팅', price: '월 2,200원~' },
-        { name: 'SSL 인증서', price: '연 11,000원~' },
+        { name: '.com 신규등록 (이벤트가)', price: '19,800원/년' },
+        { name: '.com 정상가', price: '26,400원/년' },
       ],
     },
     required_env_vars: [
@@ -3470,7 +3525,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 88,
     difficulty_level: 'beginner',
     tags: ['domain', 'dns', 'hosting', 'ssl', 'korea', 'registrar', '가비아', '도메인'],
-    alternatives: ['whois', 'cafe24', 'inames', 'namecheap'],
+    alternatives: ['whois', 'cafe24', 'inames', 'namecheap', 'cloudflare-registrar', 'godaddy', 'hosting-kr', 'dotname'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'wordpress'],
       language: ['php', 'javascript', 'python'],
@@ -3495,7 +3550,7 @@ export const services: ServiceSeed[] = [
     description:
       'Whois is one of Korea\'s leading domain registrars specializing in domain registration, WHOIS lookup, DNS hosting, and domain transfer services.',
     description_ko:
-      '국내 대표 도메인 등록 전문 서비스. 도메인 등록, WHOIS 조회, DNS 호스팅, 도메인 이전 서비스를 제공합니다.',
+      '국내 도메인·호스팅·비즈니스 솔루션 기업(후이즈). 도메인 신규등록, 연장, 기관이전 서비스를 제공하나, 실제 가격 조회/구매 페이지는 로그인 후 장바구니 방식으로만 노출됨.',
     icon_url: null,
     website_url: 'https://www.whois.co.kr',
     docs_url: 'https://www.whois.co.kr/api',
@@ -3527,7 +3582,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 78,
     difficulty_level: 'beginner',
     tags: ['domain', 'dns', 'whois', 'ssl', 'korea', 'registrar', '후이즈', '도메인'],
-    alternatives: ['gabia', 'cafe24', 'inames', 'namecheap'],
+    alternatives: ['gabia', 'cafe24', 'inames', 'hosting-kr', 'dotname', 'namecheap', 'godaddy', 'cloudflare-registrar'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'wordpress'],
       language: ['php', 'javascript', 'python'],
@@ -3552,7 +3607,7 @@ export const services: ServiceSeed[] = [
     description:
       'Cafe24 is a major Korean web hosting and domain service provider offering domain registration, web hosting, shopping mall solutions, and cloud services.',
     description_ko:
-      '국내 주요 웹호스팅·도메인 종합 서비스. 도메인 등록, 웹호스팅, 쇼핑몰 솔루션, 클라우드 서비스를 제공합니다.',
+      '국내 이커머스 호스팅 점유율 1위 플랫폼. 웹호스팅·서버호스팅·코로케이션과 함께 최근 AI 코드 배포(ChatGPT/Claude/Cursor 생성 코드 10~30초 배포), 오픈소스 AI 에이전트 프레임워크 탑재 VPS 등 신규 서비스를 확장 중.',
     icon_url: null,
     website_url: 'https://www.cafe24.com',
     docs_url: 'https://developers.cafe24.com',
@@ -3590,7 +3645,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 83,
     difficulty_level: 'beginner',
     tags: ['domain', 'hosting', 'ecommerce', 'korea', 'shopping-mall', 'cloud', '카페24', '도메인', '쇼핑몰'],
-    alternatives: ['gabia', 'whois', 'inames', 'namecheap'],
+    alternatives: ['gabia', 'whois', 'inames', 'hosting-kr', 'dotname'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'wordpress', 'php'],
       language: ['php', 'javascript', 'python'],
@@ -3614,11 +3669,10 @@ export const services: ServiceSeed[] = [
     dashboard_subcategory: 'hosting',
     description:
       'iNames is a Korean domain registrar offering domain registration, DNS management, and domain transfer services at competitive pricing.',
-    description_ko:
-      '국내 도메인 전문 등록 서비스. 경쟁력 있는 가격으로 도메인 등록, DNS 관리, 도메인 이전 서비스를 제공합니다.',
+    description_ko: '국내 도메인 등록대행업체. 도메인 신규등록/연장/이전 서비스를 제공하며, 실시간 가격은 장바구니 담기 시에만 노출되는 방식.',
     icon_url: null,
     website_url: 'https://www.inames.co.kr',
-    docs_url: 'https://www.inames.co.kr/domain/api',
+    docs_url: 'https://dom.inames.co.kr/regists',
     pricing_info: {
       free_tier: false,
       plans: [
@@ -3647,7 +3701,7 @@ export const services: ServiceSeed[] = [
     popularity_score: 68,
     difficulty_level: 'beginner',
     tags: ['domain', 'dns', 'korea', 'registrar', 'affordable', '아이네임즈', '도메인'],
-    alternatives: ['gabia', 'whois', 'cafe24', 'namecheap'],
+    alternatives: ['gabia', 'whois', 'cafe24', 'hosting-kr', 'dotname'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'wordpress'],
       language: ['php', 'javascript', 'python'],
@@ -3672,10 +3726,10 @@ export const services: ServiceSeed[] = [
     description:
       'Namecheap is a leading global domain registrar offering affordable domain registration, free WHOIS privacy, SSL certificates, shared hosting, and VPS.',
     description_ko:
-      '글로벌 주요 도메인 등록 서비스. 저렴한 도메인 등록, 무료 WHOIS 개인정보 보호, SSL 인증서, 공유 호스팅, VPS를 제공합니다.',
+      '미국 기반 도메인 등록대행업체. 도메인 등록/이전, EasyWP 호스팅, PremiumDNS, SSL 등을 제공하나, 자동화된 조회 도구에 대한 봇 차단이 강하게 적용되어 있어 가격 페이지를 직접 확인하지 못함.',
     icon_url: null,
     website_url: 'https://www.namecheap.com',
-    docs_url: 'https://www.namecheap.com/support/api/intro/',
+    docs_url: 'https://www.namecheap.com/support/knowledgebase',
     pricing_info: {
       free_tier: false,
       plans: [
@@ -3707,10 +3761,10 @@ export const services: ServiceSeed[] = [
     ],
     domain: 'infrastructure',
     subcategory: 'domain_registrar',
-    popularity_score: 85,
+    popularity_score: 82,
     difficulty_level: 'beginner',
     tags: ['domain', 'dns', 'ssl', 'hosting', 'whois-privacy', 'global', 'registrar', '네임칩', '도메인'],
-    alternatives: ['gabia', 'whois', 'cafe24', 'inames'],
+    alternatives: ['godaddy', 'cloudflare-registrar', 'gabia'],
     compatibility: {
       framework: ['nextjs', 'react', 'vue', 'wordpress', 'php'],
       language: ['php', 'javascript', 'python', 'go'],
