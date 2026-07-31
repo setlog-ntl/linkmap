@@ -486,7 +486,7 @@ function buildInvitationCSS(v: InvPresetVars, fontFamily: string, gradientFrom: 
     .inv-hero-subtitle { margin:1rem 0 0; font-size:1rem; color:var(--inv-text-secondary); line-height:1.6; }
     .inv-hero-date { margin-top:.75rem; font-size:.75rem; text-transform:uppercase; letter-spacing:.12em; font-weight:600; color:var(--inv-text-secondary); }
     .inv-hero-arch { width:min(66vw,260px); aspect-ratio:3/4; margin:0 auto 1.5rem; overflow:hidden; border-top-left-radius:100% clamp(48px,16vw,72px); border-top-right-radius:100% clamp(48px,16vw,72px); box-shadow:var(--inv-shadow-lg); }
-    .inv-hero-arch img { width:100%; height:100%; object-fit:cover; }
+    .inv-hero-arch img { width:100%; height:100%; object-fit:contain; background:rgba(127,127,127,0.08); }
     .inv-hero--framed { background:var(--inv-bg); min-height:auto; padding:4rem 1.5rem 3rem; }
     .inv-hero-scroll-cue { position:absolute; bottom:1.5rem; left:50%; transform:translateX(-50%); opacity:.7; }
     @keyframes float-slow { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(10px, -10px) scale(1.02); } 66% { transform: translate(-5px, 5px) scale(0.98); } }
@@ -552,7 +552,7 @@ function buildInvitationCSS(v: InvPresetVars, fontFamily: string, gradientFrom: 
     .inv-gallery { display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; max-width:28rem; margin:0 auto; }
     .inv-gallery-item { aspect-ratio:1; overflow:hidden; border-radius:.75rem; }
     .inv-gallery-item--lg { grid-column:span 2; grid-row:span 2; }
-    .inv-gallery-item img { width:100%; height:100%; object-fit:cover; }
+    .inv-gallery-item img { width:100%; height:100%; object-fit:contain; background:rgba(127,127,127,0.08); }
 
     /* ── Account ── */
     .inv-accounts { max-width:28rem; margin:0 auto; display:flex; flex-direction:column; gap:.75rem; }

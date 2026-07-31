@@ -75,7 +75,8 @@ export const digitalNamecardModuleSchema: TemplateModuleSchema = {
         },
         {
           key: 'avatarUrl',
-          type: 'url',
+          type: 'image',
+          imageAspect: '1/1',
           label: '프로필 이미지 URL',
           labelEn: 'Avatar URL',
           defaultValue: '',

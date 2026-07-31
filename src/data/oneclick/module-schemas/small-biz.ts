@@ -196,7 +196,8 @@ export const smallBizModuleSchema: TemplateModuleSchema = {
             },
             {
               key: 'imageUrl',
-              type: 'url',
+              type: 'image',
+              imageAspect: '1/1',
               label: '메뉴 이미지 URL',
               labelEn: 'Menu Image URL',
               defaultValue: '',
@@ -348,7 +349,8 @@ export const smallBizModuleSchema: TemplateModuleSchema = {
           itemSchema: [
             {
               key: 'url',
-              type: 'url',
+              type: 'image',
+              imageAspect: '4/3',
               label: '이미지 URL',
               labelEn: 'Image URL',
               defaultValue: '',

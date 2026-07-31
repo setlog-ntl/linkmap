@@ -13,10 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Trash2, Upload, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Upload, Loader2, Crop } from 'lucide-react';
 import { toast } from 'sonner';
 import { t, type Locale } from '@/lib/i18n';
 import type { ModuleFieldDef } from '@/lib/module-schema';
+import { ImageCropDialog } from './image-crop-dialog';
 
 interface ModuleFormProps {
   fields: ModuleFieldDef[];
@@ -120,7 +121,29 @@ function FieldRenderer({ field, value, onChange, locale, deployId, onImagePrevie
       );
     }
 
-    case 'url':
+    case 'url': {
+      const urlVal = (value as string) ?? '';
+      const showUrlEmpty = isRequired && !urlVal.trim();
+      return (
+        <div className="space-y-1.5">
+          {labelNode}
+          <PlainUrlInput
+            value={urlVal}
+            onChange={onChange}
+            placeholder={field.placeholder}
+            invalid={!!showUrlEmpty}
+          />
+          {showUrlEmpty && (
+            <p className="text-[11px] text-destructive">필수 입력 항목입니다</p>
+          )}
+          {helpText && !showUrlEmpty && (
+            <p className="text-[11px] text-muted-foreground">{helpText}</p>
+          )}
+        </div>
+      );
+    }
+
+    case 'image':
       return (
         <ImageUrlField
           label={label}
@@ -132,6 +155,7 @@ function FieldRenderer({ field, value, onChange, locale, deployId, onImagePrevie
           onImagePreview={onImagePreview}
           required={isRequired}
           helpText={helpText}
+          slotAspect={field.imageAspect}
         />
       );
 
@@ -260,6 +284,7 @@ function FieldRenderer({ field, value, onChange, locale, deployId, onImagePrevie
           onChange={onChange}
           locale={locale}
           deployId={deployId}
+          onImagePreview={onImagePreview}
         />
       );
 
@@ -278,6 +303,7 @@ interface ArrayFieldRendererProps {
   onChange: (value: unknown) => void;
   locale: string;
   deployId?: string;
+  onImagePreview?: (path: string, dataUrl: string) => void;
 }
 
 function ArrayFieldRenderer({
@@ -286,6 +312,7 @@ function ArrayFieldRenderer({
   onChange,
   locale,
   deployId,
+  onImagePreview,
 }: ArrayFieldRendererProps) {
   // defaultValue에서 로드된 아이템에 _id가 없으면 자동 부여 (React key 안정화)
   const items = useMemo(() => {
@@ -382,6 +409,7 @@ function ArrayFieldRenderer({
                   onChange={(val) => handleItemChange(index, subField.key, val)}
                   locale={locale}
                   deployId={deployId}
+                  onImagePreview={onImagePreview}
                 />
               );
             })}
@@ -416,38 +444,82 @@ function ArrayFieldRenderer({
 
 const MAX_IMAGE_DIMENSION = 1200;
 
-function resizeImage(file: File): Promise<string> {
+function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => {
-      const img = new window.Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let { width, height } = img;
-
-        if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
-          const ratio = Math.min(MAX_IMAGE_DIMENSION / width, MAX_IMAGE_DIMENSION / height);
-          width = Math.round(width * ratio);
-          height = Math.round(height * ratio);
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return reject(new Error('Canvas not supported'));
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Output as webp for smaller size, fallback to original type
-        const dataUrl = canvas.toDataURL('image/webp', 0.85);
-        const base64 = dataUrl.split(',')[1];
-        resolve(base64);
-      };
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = reader.result as string;
-    };
+    reader.onload = () => resolve(reader.result as string);
     reader.onerror = () => reject(new Error('Failed to read file'));
     reader.readAsDataURL(file);
   });
+}
+
+/** 이미지를 비율 유지 축소(장변 1200px)하여 WebP base64로 변환 (크롭하지 않음) */
+function resizeToBase64(src: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new window.Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let { width, height } = img;
+
+      if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+        const ratio = Math.min(MAX_IMAGE_DIMENSION / width, MAX_IMAGE_DIMENSION / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return reject(new Error('Canvas not supported'));
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Output as webp for smaller size, fallback to original type
+      const dataUrl = canvas.toDataURL('image/webp', 0.85);
+      const base64 = dataUrl.split(',')[1];
+      resolve(base64);
+    };
+    img.onerror = () => reject(new Error('Failed to load image'));
+    img.src = src;
+  });
+}
+
+// ──────────────────────────────────────────────
+// 일반 URL 입력 (업로드 없음 — 지도·SNS 링크 등)
+// ──────────────────────────────────────────────
+
+interface PlainUrlInputProps {
+  value: string;
+  onChange: (value: unknown) => void;
+  placeholder?: string;
+  invalid?: boolean;
+}
+
+function PlainUrlInput({ value, onChange, placeholder, invalid }: PlainUrlInputProps) {
+  const handleBlur = useCallback(() => {
+    if (!value) return;
+    // 위험 프로토콜 차단
+    if (/^(javascript|data|vbscript):/i.test(value.trim())) {
+      onChange('');
+      toast.error('허용되지 않는 URL 형식입니다');
+      return;
+    }
+    // https:// 자동 추가 (로컬 경로 제외)
+    if (value.trim() && !value.startsWith('http') && !value.startsWith('/')) {
+      onChange(`https://${value.trim()}`);
+    }
+  }, [value, onChange]);
+
+  return (
+    <Input
+      type="url"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      onBlur={handleBlur}
+      placeholder={placeholder}
+      className={`h-8 text-sm ${invalid ? 'border-destructive' : ''}`}
+    />
+  );
 }
 
 interface ImageUrlFieldProps {
@@ -460,6 +532,8 @@ interface ImageUrlFieldProps {
   onImagePreview?: (path: string, dataUrl: string) => void;
   required?: boolean;
   helpText?: string;
+  /** 배포 슬롯 표시 비율 (크롭 프리셋 기본값) */
+  slotAspect?: string;
 }
 
 /** /public/images/... → /images/... 경로 보정 */
@@ -470,23 +544,23 @@ function fixPublicPath(path: string): string {
   return path;
 }
 
-function ImageUrlField({ label, value, onChange, placeholder, deployId, locale, onImagePreview, required, helpText }: ImageUrlFieldProps) {
+function ImageUrlField({ label, value, onChange, placeholder, deployId, locale, onImagePreview, required, helpText, slotAspect }: ImageUrlFieldProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  // 크롭 다이얼로그 상태
+  const [cropOpen, setCropOpen] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  // 이 세션에서 마지막으로 업로드한 이미지의 data URL (재크롭 소스)
+  const [lastUploadedSrc, setLastUploadedSrc] = useState<string | null>(null);
 
-  const processFile = useCallback(async (file: File) => {
+  /** 리사이즈(비율 유지) → WebP 변환 → 업로드. 크롭 여부와 무관한 공통 파이프라인 */
+  const uploadFromSrc = useCallback(async (src: string) => {
     if (!deployId) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error(t(locale as Locale, 'moduleForm.maxSizeError'));
-      return;
-    }
-
     try {
       setUploading(true);
-      // resizeImage()는 항상 WebP로 변환하므로 mimeType/filename을 WebP로 고정
-      const base64 = await resizeImage(file);
+      // resizeToBase64()는 항상 WebP로 변환하므로 mimeType/filename을 WebP로 고정
+      const base64 = await resizeToBase64(src);
       const previewDataUrl = `data:image/webp;base64,${base64}`;
 
       const res = await fetch(`/api/oneclick/deployments/${deployId}/upload`, {
@@ -508,6 +582,7 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale, 
       const fixedPath = fixPublicPath(path);
       onChange(fixedPath);
       onImagePreview?.(fixedPath, previewDataUrl);
+      setLastUploadedSrc(previewDataUrl);
       toast.success(t(locale as Locale, 'moduleForm.imageUploaded'));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Upload failed');
@@ -516,6 +591,37 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale, 
       if (fileRef.current) fileRef.current.value = '';
     }
   }, [deployId, locale, onChange, onImagePreview]);
+
+  /** 파일 선택/드롭 → 크롭 다이얼로그 오픈 (원본을 바로 쓸지, 자를지는 다이얼로그에서 선택) */
+  const processFile = useCallback(async (file: File) => {
+    if (!deployId) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(t(locale as Locale, 'moduleForm.maxSizeError'));
+      return;
+    }
+
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      setCropSrc(dataUrl);
+      setCropOpen(true);
+    } catch {
+      toast.error('이미지를 읽을 수 없습니다');
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  }, [deployId, locale]);
+
+  /** 기존 이미지 재크롭 — 세션 내 업로드본 우선, 없으면 외부 URL 시도 */
+  const handleRecrop = useCallback(() => {
+    const src = lastUploadedSrc
+      ?? (value.startsWith('http') ? value : null);
+    if (!src) {
+      toast.error('배포된 이미지는 다시 불러올 수 없습니다. 파일을 다시 업로드해주세요');
+      return;
+    }
+    setCropSrc(src);
+    setCropOpen(true);
+  }, [lastUploadedSrc, value]);
 
   const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -645,6 +751,19 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale, 
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <span className="text-white text-xs">클릭 또는 드래그하여 교체</span>
               </div>
+              {/* 재크롭 버튼 — 부모 클릭(파일 선택)과 분리 */}
+              <Button
+                variant="secondary"
+                size="icon"
+                className="absolute top-1.5 right-1.5 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                title="이미지 자르기"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRecrop();
+                }}
+              >
+                <Crop className="h-3 w-3" />
+              </Button>
             </div>
           ) : (
             <div
@@ -675,6 +794,21 @@ function ImageUrlField({ label, value, onChange, placeholder, deployId, locale, 
       )}
       {helpText && (
         <p className="text-[11px] text-muted-foreground">{helpText}</p>
+      )}
+      {/* 크롭 다이얼로그 — 업로드 직후/재크롭 공용 */}
+      {cropSrc && (
+        <ImageCropDialog
+          key={cropSrc}
+          open={cropOpen}
+          onOpenChange={(open) => {
+            setCropOpen(open);
+            if (!open && fileRef.current) fileRef.current.value = '';
+          }}
+          imageSrc={cropSrc}
+          slotAspect={slotAspect}
+          onApply={uploadFromSrc}
+          onUseOriginal={() => uploadFromSrc(cropSrc)}
+        />
       )}
     </div>
   );

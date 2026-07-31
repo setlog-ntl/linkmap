@@ -78,7 +78,8 @@ export const invitationModuleSchema: TemplateModuleSchema = {
         },
         {
           key: 'heroImageUrl',
-          type: 'url',
+          type: 'image',
+          imageAspect: '3/4',
           label: '메인 이미지 URL',
           labelEn: 'Hero Image URL',
           defaultValue: 'https://images.unsplash.com/photo-1517456363055-5d162a453d6d?auto=format&fit=crop&w=1080&q=80',
@@ -273,7 +274,8 @@ export const invitationModuleSchema: TemplateModuleSchema = {
             },
             {
               key: 'avatarUrl',
-              type: 'url',
+              type: 'image',
+              imageAspect: '1/1',
               label: '프로필 이미지',
               labelEn: 'Avatar URL',
               defaultValue: '',
@@ -385,7 +387,8 @@ export const invitationModuleSchema: TemplateModuleSchema = {
           itemSchema: [
             {
               key: 'url',
-              type: 'url',
+              type: 'image',
+              imageAspect: '1/1',
               label: '이미지 URL',
               labelEn: 'Image URL',
               defaultValue: '',

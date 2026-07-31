@@ -64,7 +64,8 @@ export const personalBrandModuleSchema: TemplateModuleSchema = {
         },
         {
           key: 'heroImageUrl',
-          type: 'url',
+          type: 'image',
+          imageAspect: '4/5',
           label: '배경 이미지 URL',
           labelEn: 'Hero Image URL',
           placeholder: 'https://example.com/hero.jpg',
@@ -350,7 +351,7 @@ export const personalBrandModuleSchema: TemplateModuleSchema = {
           itemSchema: [
             {
               key: 'url',
-              type: 'url',
+              type: 'image',
               label: '이미지 URL',
               labelEn: 'Image URL',
               defaultValue: '',

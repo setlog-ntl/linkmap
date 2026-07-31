@@ -68,7 +68,7 @@ function validateScalarField(
   }
 
   // URL 형식 — 관대하게: 공백 포함 또는 점(.) 없음만 거부 (바른 도메인/상대경로 허용)
-  if ((field.type === 'url' || v?.inputType === 'url') && (/\s/.test(strVal) || (!strVal.includes('.') && !strVal.startsWith('/')))) {
+  if ((field.type === 'url' || field.type === 'image' || v?.inputType === 'url') && (/\s/.test(strVal) || (!strVal.includes('.') && !strVal.startsWith('/')))) {
     push(`${field.label} URL 형식을 확인하세요`);
   }
 

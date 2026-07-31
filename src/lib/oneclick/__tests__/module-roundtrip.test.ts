@@ -79,7 +79,8 @@ function mutateField(field: ModuleFieldDef, vals: Record<string, unknown>) {
       }
       break;
     }
-    case 'url': {
+    case 'url':
+    case 'image': {
       vals[field.key] = 'https://edited-9137.example.com/path';
       break;
     }

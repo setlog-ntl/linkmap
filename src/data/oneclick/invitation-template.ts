@@ -417,8 +417,9 @@ h1, h2 { font-family: var(--inv-font-display); }
   border-top-left-radius: 100% clamp(48px, 16vw, 72px);
   border-top-right-radius: 100% clamp(48px, 16vw, 72px);
   box-shadow: var(--inv-shadow-lg);
+  background: rgba(127, 127, 127, 0.08);
 }
-.inv-hero-arch img { width: 100%; height: 100%; object-fit: cover; }
+.inv-hero-arch img { width: 100%; height: 100%; object-fit: contain; }
 .inv-hero-scroll-cue {
   position: absolute; bottom: 1.5rem; left: 50%;
   animation: scroll-cue-bob 2.4s ease-in-out infinite;
@@ -483,9 +484,9 @@ h1, h2 { font-family: var(--inv-font-display); }
 
 /* ══ Gallery (편집적 비대칭 레이아웃) ════════ */
 .inv-gallery-bento { max-width: 28rem; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
-.inv-gallery-item { overflow: hidden; border-radius: 0.75rem; aspect-ratio: 1; }
+.inv-gallery-item { overflow: hidden; border-radius: 0.75rem; aspect-ratio: 1; background: rgba(127, 127, 127, 0.08); }
 .inv-gallery-item--lg { grid-column: span 2; grid-row: span 2; }
-.inv-gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+.inv-gallery-item img { width: 100%; height: 100%; object-fit: contain; transition: transform 0.5s ease; }
 .inv-gallery-item:hover img { transform: scale(1.05); }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -1088,8 +1089,8 @@ function Carousel({ images }: { images: string[] }) {
     <div className="max-w-lg mx-auto">
       <div ref={scrollRef} className="overflow-x-auto scrollbar-hide snap-x snap-mandatory flex gap-3 pb-2" style={{ scrollPaddingInline: '1.5rem' }}>
         {images.map((url, i) => (
-          <div key={i} className="snap-center flex-shrink-0 overflow-hidden rounded-xl" style={{ width: 'min(75vw, 320px)', aspectRatio: '3/4' }}>
-            <img src={url} alt={\`Photo \${i + 1}\`} className="w-full h-full object-cover" loading="lazy" />
+          <div key={i} className="snap-center flex-shrink-0 overflow-hidden rounded-xl bg-black/5" style={{ width: 'min(75vw, 320px)', aspectRatio: '3/4' }}>
+            <img src={url} alt={\`Photo \${i + 1}\`} className="w-full h-full object-contain" loading="lazy" />
           </div>
         ))}
       </div>

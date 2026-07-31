@@ -541,7 +541,8 @@ export function buildSmallBizCSS(primaryColor: string): string {
 .sb-gallery-item img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: rgba(127,127,127,0.08);
   transition: transform .4s cubic-bezier(.4,0,.2,1);
 }
 .sb-gallery-item:hover img { transform: scale(1.05); }

@@ -423,7 +423,7 @@ function buildFreelancerCSS(gradientFrom: string, gradientTo: string): string {
       transform: translateY(-3px);
       box-shadow: 0 6px 20px rgba(0,0,0,.1);
     }
-    .fp-portfolio-img img { width: 100%; height: 200px; object-fit: cover; display: block; }
+    .fp-portfolio-img img { width: 100%; height: 200px; object-fit: contain; display: block; background: rgba(127,127,127,0.08); }
     .fp-portfolio-body { padding: 16px 20px; }
     .fp-portfolio-cat {
       display: inline-block;

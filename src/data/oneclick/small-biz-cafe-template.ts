@@ -1024,7 +1024,7 @@ img { display: block; max-width: 100%; }
 }
 .gallery-item img {
   width: 100%; height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.5s ease;
 }
 .gallery-item:hover img { transform: scale(1.08); }

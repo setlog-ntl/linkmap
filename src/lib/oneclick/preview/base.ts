@@ -491,7 +491,7 @@ img { max-width: 100%; height: auto; }
   .hero-image-wrapper { aspect-ratio: 4/5; max-height: none; }
 }
 .hero-image-wrapper img {
-  width: 100%; height: 100%; object-fit: cover;
+  width: 100%; height: 100%; object-fit: contain; background: rgba(127,127,127,0.08);
 }
 .hero-image-wrapper::after {
   content: '';

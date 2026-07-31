@@ -46,7 +46,8 @@ export const linkCardModuleSchema: TemplateModuleSchema = {
         },
         {
           key: 'avatarUrl',
-          type: 'url',
+          type: 'image',
+          imageAspect: '1/1',
           label: '프로필 이미지 URL',
           labelEn: 'Avatar URL',
           defaultValue: 'https://plus.unsplash.com/premium_photo-1664475228198-ffce9c2b6a41?w=200&q=85&auto=format&fit=crop&crop=faces&facepad=2',

@@ -61,7 +61,8 @@ export const freelancerPageModuleSchema: TemplateModuleSchema = {
         },
         {
           key: 'avatarUrl',
-          type: 'url',
+          type: 'image',
+          imageAspect: '1/1',
           label: '프로필 이미지 URL',
           labelEn: 'Avatar Image URL',
           placeholder: 'https://example.com/avatar.jpg',
@@ -330,7 +331,8 @@ export const freelancerPageModuleSchema: TemplateModuleSchema = {
             },
             {
               key: 'imageUrl',
-              type: 'url',
+              type: 'image',
+              imageAspect: '4/5',
               label: '이미지 URL',
               labelEn: 'Image URL',
               defaultValue: '',

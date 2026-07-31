@@ -180,8 +180,8 @@ html {
   .bento-grid { grid-template-columns: repeat(3, 1fr); }
   .bento-grid > *:first-child { grid-row: span 2; grid-column: span 2; }
 }
-.bento-grid > * { position: relative; overflow: hidden; border-radius: var(--radius-lg, 16px); }
-.bento-grid > * img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+.bento-grid > * { position: relative; overflow: hidden; border-radius: var(--radius-lg, 16px); background: rgba(127, 127, 127, 0.08); }
+.bento-grid > * img { width: 100%; height: 100%; object-fit: contain; transition: transform 0.5s ease; }
 .bento-grid > *:hover img { transform: scale(1.05); }
 
 /* Timeline (horizontal on desktop) */
@@ -319,6 +319,7 @@ dialog.lightbox img {
   aspect-ratio: 4 / 5;
   cursor: pointer;
   transition: transform 0.4s ease, box-shadow 0.4s ease;
+  background: rgba(127, 127, 127, 0.08);
 }
 .portfolio-card:hover {
   transform: translateY(-6px);
@@ -327,7 +328,7 @@ dialog.lightbox img {
 .portfolio-card img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.6s ease;
   display: block;
 }

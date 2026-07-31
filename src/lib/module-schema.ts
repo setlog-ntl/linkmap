@@ -13,6 +13,7 @@ export interface ModuleFieldDef {
     | 'boolean'
     | 'select'
     | 'url'
+    | 'image'
     | 'array';
   label: string;
   labelEn?: string;
@@ -39,6 +40,8 @@ export interface ModuleFieldDef {
   maxItems?: number;
   /** select 타입 전용 */
   options?: Array<{ value: string; label: string }>;
+  /** image 타입 전용 — 배포 슬롯의 표시 비율 (예: '3/4', '1/1'). 크롭 프리셋 기본값으로 사용 */
+  imageAspect?: string;
 }
 
 /** 모듈 하나의 정의 */

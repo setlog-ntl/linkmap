@@ -463,11 +463,12 @@ html {
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-lg, 16px);
+  background: rgba(127, 127, 127, 0.08);
 }
 .bento-grid > * img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.5s ease;
 }
 .bento-grid > *:hover img {
@@ -583,6 +584,7 @@ html {
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-lg);
+  background: rgba(127, 127, 127, 0.08);
 }
 @media (min-width: 768px) {
   .hero-image-wrapper {
@@ -591,7 +593,7 @@ html {
   }
 }
 .hero-image-wrapper img {
-  width: 100%; height: 100%; object-fit: cover;
+  width: 100%; height: 100%; object-fit: contain;
 }
 .hero-image-wrapper::after {
   content: '';
@@ -869,7 +871,7 @@ function HeroCentered({ config, name, tagline, parallaxY, fadeOpacity, t }: {
           className="absolute inset-0 z-0"
           style={{ transform: config.parallaxEnabled ? \`translateY(\${parallaxY})\` : undefined }}
         >
-          <img src={config.heroImageUrl} alt="" className="w-full h-full object-cover" />
+          <img src={config.heroImageUrl} alt="" className="w-full h-full object-contain" />
           <div className="absolute inset-0 bg-black/55" />
         </div>
       )}
