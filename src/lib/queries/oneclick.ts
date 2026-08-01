@@ -130,6 +130,107 @@ export function useDeployUpload() {
   });
 }
 
+// ---------- 내 GitHub repo 연결 (트랙 B) ----------
+
+export interface OneclickRepo {
+  full_name: string;
+  owner: string;
+  name: string;
+  private: boolean;
+  description: string | null;
+  language: string | null;
+  default_branch: string;
+  updated_at: string;
+  html_url: string;
+}
+
+export interface RepoAnalysis {
+  owner: string;
+  repo: string;
+  full_name: string;
+  default_branch: string;
+  is_private: boolean;
+  is_fork: boolean;
+  size_kb: number;
+  deployable: boolean;
+  block_reason: string | null;
+  publish_dir: string;
+  publish_dir_candidates: string[];
+  pages_enabled: boolean;
+  needs_build_type_switch: boolean;
+  can_link_only: boolean;
+  warnings: string[];
+}
+
+export interface RepoAnalyzeResult {
+  analysis: RepoAnalysis;
+  message: string | null;
+  workflow: { path: string; content: string; commit_message: string } | null;
+}
+
+export function useOneclickRepos(page: number, accountId?: string | null) {
+  return useQuery({
+    queryKey: ['oneclick', 'repos', page, accountId ?? null],
+    queryFn: async (): Promise<{ repos: OneclickRepo[]; page: number; has_next: boolean }> => {
+      const params = new URLSearchParams({ page: String(page) });
+      if (accountId) params.set('github_service_account_id', accountId);
+      const res = await fetch(`/api/oneclick/repos?${params}`);
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '저장소 목록을 불러오지 못했습니다');
+      }
+      return res.json();
+    },
+    staleTime: 60_000,
+  });
+}
+
+export function useAnalyzeRepo() {
+  return useMutation({
+    mutationFn: async (input: {
+      owner: string;
+      repo: string;
+      github_service_account_id?: string;
+    }): Promise<RepoAnalyzeResult> => {
+      const res = await fetch('/api/oneclick/repo-analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '저장소를 확인하지 못했습니다');
+      }
+      return res.json();
+    },
+  });
+}
+
+export function useDeployRepo() {
+  return useMutation({
+    mutationFn: async (input: {
+      owner: string;
+      repo: string;
+      publish_dir?: string;
+      link_only?: boolean;
+      github_service_account_id?: string;
+    }): Promise<DeployPagesResult & { workflow_committed?: boolean; link_only?: boolean }> => {
+      const res = await fetch('/api/oneclick/deploy-repo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        const err = new Error(data.error || '배포 실패');
+        (err as Error & { code?: string }).code = data.code;
+        throw err;
+      }
+      return res.json();
+    },
+  });
+}
+
 export interface HomepageDeploy {
   id: string;
   site_name: string;

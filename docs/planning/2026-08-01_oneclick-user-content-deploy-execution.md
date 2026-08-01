@@ -76,10 +76,38 @@
 
 **미조치(보고만)**: sanitizer의 `hasControlChar`가 C1(0x80~0x9F) 미검사 — 확장자 allowlist·도트 규칙이 남아 악용 불가한 미관 문제. `config_data` 업데이트 실패 은닉(Promise.all) — 배포 자체엔 영향 없음. 대용량 base64 메모리 증폭.
 
-### Phase 1B — 트랙 B: repo 연결 (선행: 1A)
+### Phase 1B — 트랙 B: repo 연결 (선행: 1A) — ✅ 구현 완료 (2026-08-01)
 
-- repos/repo-analyze/deploy-repo API(B9) + 동의 다이얼로그 + **deleteRepo 가드(B6)** + redeploy workflow_file 확장 + 멀티계정 P1 부분 수정(B10)
-- 검증: 배포 후 트리 diff=linkmap-pages.yml 1개뿐 / Pages 실패 주입→파일 삭제 커밋 / import DELETE→repo 존재 유지 / 빈 repo→배포 불가
+| 항목 | 산출물 | 상태 |
+|---|---|---|
+| **삭제 가드(B6)** | `deployments/[id]/route.ts` — `source_type==='import'`면 `deleteRepo` 스킵, 응답에 `repo_kept` | ✅ **재현 테스트로 위험 실증 후 수정** (3건) |
+| repo 목록 | `GET /api/oneclick/repos` — 페이지네이션, `affiliation=owner`(admin 권한 필요하므로 collaborator 제외) | ✅ |
+| repo 분석 | `src/lib/oneclick/repo-analyzer.ts` + `POST /api/oneclick/repo-analyze` — admin 권한·정적 판별(`/`→`docs`→`dist`→`build`→`public`→`out`)·빈/fork/private/legacy Pages·link-only 판정 | ✅ |
+| 배포 | `POST /api/oneclick/deploy-repo` — 서버에서 **분석 재실행**(클라 결과 불신) → 워크플로우 1파일 커밋 → Pages 활성화/전환 → `p_source_type:'import'` | ✅ |
+| 워크플로우 | `linkmap-pages.yml` (템플릿·업로드의 `deploy.yml`과 분리해 충돌 원천 차단). `buildImportWorkflowYml`은 `isSafeWorkflowValue` 통과 값만 보간 — 실패 시 이스케이프가 아니라 **거부** | ✅ 테스트 24건 |
+| 롤백 | "우리가 만든 것만 지운다" — Pages 실패 시 `deleteFileContent`로 워크플로우 파일만 삭제, 실패 시 잔존 안내. **저장소·기존 파일 무수정** | ✅ |
+| 재배포 | `redeploy`가 `config_data.workflow_file`·`source_branch` 사용. **import는 레거시 package.json 자동 패치 스킵**(사용자 저장소 수정 금지) | ✅ |
+| UI | `repo-import-step.tsx` — 저장소 목록·검색 + 동의 화면(커밋될 YAML **전문** + 불변 보증 체크리스트 + "1개 파일 커밋하고 배포") | ✅ |
+| 공용 헬퍼 | `github-account.ts` — 5개 라우트가 쓰던 계정·토큰 해석을 단일화(중복 제거) | ✅ |
+
+- 검증 결과: **typecheck 클린 · vitest 491/491 · lint 에러 0**
+- 잔여: 실제 repo 대상 e2e(트리 diff=1 확인)는 라이브 GitHub 계정 필요 — 수동 확인 대상
+
+#### Phase 1B 적대적 리뷰(3렌즈) 반영 — 수정 완료 7건
+
+리뷰의 핵심 지적: **트랙 B가 "브랜치=main / 워크플로우=deploy.yml / 저장소=Linkmap 소유"라는 기존 3대 암묵 전제를 모두 깼는데, 공용 경로들은 여전히 그 전제 위에서 동작한다.** 개별 패치가 아니라 `source_type`을 모르는 공용 라우트 전수 점검으로 대응했다.
+
+| # | 결함 | 심각도 | 조치 |
+|---|---|---|---|
+| R-9 | **자동 재시도가 사용자의 `deploy.yml`을 실행** — `resolveDeployStatus`가 `triggerWorkflowDispatch`를 기본 인자로 호출. `deploy.yml`은 실사용 저장소에서 가장 흔한 이름이라 프로덕션 배포·npm publish 등이 무단 발사될 수 있었다. 게다가 `getLatestWorkflowRun`이 `branch=main` 고정·워크플로우 무필터라 **남의 CI 실패를 우리 배포 실패로 오독**해 트리거 조건까지 헐거웠다 | **치명** | `workflowOptionsFromDeploy` 헬퍼 신설 — 워크플로우 파일·브랜치를 배포별로 전달하고 **import는 자동 재시도 자체를 금지**(수동 재배포만). `getLatestWorkflowRun`에 워크플로우·브랜치 한정 추가 |
+| R-10 | **편집기가 사용자 저장소의 기존 파일을 덮어씀** — files PUT·batch-update·upload가 `source_type` 미확인. `pushFilesAtomically`는 `heads/main` 고정이라 기본 브랜치가 다르면 **고아 main 브랜치까지 생성** | 높음 | 세 라우트 모두 import면 403 + 카드에서 편집 버튼 숨김 |
+| R-11 | 동명 파일 무단 덮어쓰기 — 사용자가 직접 만든 `linkmap-pages.yml`을 소유 확인 없이 대체하고, 롤백에서 그 파일을 삭제 | 높음 | `IMPORT_WORKFLOW_MARKER`로 소유 확인 → 남의 파일이면 409로 안내. 롤백은 **이번에 새로 만든 파일만** 삭제(sha 없으면 거짓 성공 대신 실패 보고) |
+| R-12 | 동의 화면과 실제 동작 불일치 — 폴더를 바꿔도 미리보기 YAML은 기본값 고정, link_only인데 fork 항목 표시, 폴더 선택이 무의미한데 노출 | 중간 | 미리보기를 선택값으로 갱신, link_only 분기 정리 |
+| R-13 | **가장 결과가 큰 행위가 동의 목록에 없음** — GitHub Pages 활성화(=저장소 내용의 전 세계 공개)와 최종 URL 미표시 | 중간 | 공개 사실·URL을 동의 목록 최상단에 명시 |
+| R-14 | 삭제 다이얼로그가 실제 동작과 반대 — 템플릿·업로드는 저장소가 삭제되는데 "유지됩니다"로 승인받음 | 중간 | `source_type`별 문구 분기(import는 "연결만 해제, 사이트는 계속 공개") |
+| R-15 | 분석 경쟁 조건 — A→뒤로→B 시 A의 분석이 B 화면에 붙어 **승인 화면과 다른 저장소에 커밋** 가능 | 중간 | 요청 시퀀스 가드로 마지막 응답만 반영 |
+
+**미조치(보고만)**: `redeploy`의 레거시 package.json 패치가 `createOrUpdateFileContent` 인자 순서를 잘못 넘김(sha↔message) — 기존 결함이고 try/catch로 삼켜져 무해, import는 이미 스킵. 조직 저장소의 admin 협업자가 "본인 소유 저장소" 안내와 달리 통과하는 문구 불일치.
 
 ### Phase 2 — 빌드형 확장 · Phase 3 — 퍼널 브릿지
 
@@ -95,4 +123,6 @@
 - 2026-08-01: **마이그레이션 109 라이브 적용 완료** (Supabase MCP). 적용 전 실측으로 M101이 이미 라이브임을 확인해 109 본문 기준이 옳았음을 검증. 적용 후 7-인자 단일 시그니처·CHECK 프로브 4종·6-인자 레거시 호출 해석·advisor `anon` 제외까지 확인.
 - 2026-08-01: **Phase 1A 구현 완료** — sanitizer·정적 워크플로우·deploy-upload API·클라 해제(fflate 0.8.3)·위저드 업로드 스텝·my-sites 소스 표시.
 - 2026-08-01: **Phase 1A 적대적 리뷰(3렌즈) 반영** — 결함 8건 수정(위 표). 특히 R-1은 트랙 A의 보안 경계를 무너뜨리는 기존 결함이라 함께 처리. 최종 typecheck 클린 · **vitest 459/459** · lint 에러 0.
-- **다음**: Phase 1B(트랙 B — 내 GitHub repo 연결). 착수 전 선결: `deployments/[id]/route.ts`의 `deleteRepo`를 `source_type==='import'` 가드로 감싸는 것(B6/R3 — 사용자 원본 repo 삭제 방지).
+- 2026-08-01: **Phase 0 + 1A 라이브 배포 완료** (`1f59ec4c` → CI 통과 → Cloudflare Workers 성공).
+- 2026-08-01: **Phase 1B 구현 + 적대적 리뷰 반영 완료.** 삭제 가드는 재현 테스트로 위험을 실증한 뒤 수정. 리뷰가 찾은 치명 결함(자동 재시도가 사용자 워크플로우 실행)을 포함해 7건 수정. 최종 typecheck 클린 · **vitest 491/491** · lint 에러 0.
+- **다음**: 라이브에서 트랙 A 수동 검증 → Phase 1B 배포 → Phase 2(빌드형 확장).

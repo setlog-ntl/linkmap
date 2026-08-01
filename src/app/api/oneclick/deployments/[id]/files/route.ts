@@ -26,7 +26,7 @@ async function getDeployWithToken(supabase: Awaited<ReturnType<typeof createClie
   // Get the deploy record + verify ownership
   const { data: deploy } = await supabase
     .from('homepage_deploys')
-    .select('id, site_name, forked_repo_full_name, user_id, project_id')
+    .select('id, site_name, forked_repo_full_name, user_id, project_id, source_type')
     .eq('id', deployId)
     .eq('user_id', userId)
     .single();
@@ -146,6 +146,15 @@ export async function PUT(
   if (!result) return notFoundError('배포');
 
   const { deploy, token, owner, repo } = result;
+
+  // 가져온 저장소(트랙 B)는 사용자 자산이다. Linkmap 편집기로 기존 파일을 덮어쓰면
+  // "우리는 워크플로우 1개만 추가한다"는 약속이 깨진다 — GitHub에서 직접 편집하도록 안내한다.
+  if (deploy.source_type === 'import') {
+    return apiError(
+      '가져온 저장소는 Linkmap에서 편집할 수 없습니다. GitHub에서 직접 수정해주세요.',
+      403,
+    );
+  }
 
   try {
     const defaultMessage = isNewFile

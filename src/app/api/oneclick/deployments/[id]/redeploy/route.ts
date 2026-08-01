@@ -17,7 +17,7 @@ export async function POST(
   // Verify ownership
   const { data: deploy } = await supabase
     .from('homepage_deploys')
-    .select('id, deploy_status, forked_repo_full_name, site_name')
+    .select('id, deploy_status, forked_repo_full_name, site_name, source_type, config_data')
     .eq('id', id)
     .eq('user_id', user.id)
     .single();
@@ -41,11 +41,22 @@ export async function POST(
 
   const [owner, repo] = deploy.forked_repo_full_name.split('/');
 
+  // 가져온 저장소는 사용자 자산이다 — 워크플로우 파일명·브랜치가 다르고,
+  // 아래 레거시 package.json 패치도 적용해서는 안 된다.
+  const isImported = deploy.source_type === 'import';
+  const config = (deploy.config_data ?? {}) as {
+    workflow_file?: string;
+    source_branch?: string;
+  };
+  const workflowFile = typeof config.workflow_file === 'string' ? config.workflow_file : 'deploy.yml';
+  const workflowRef = typeof config.source_branch === 'string' ? config.source_branch : 'main';
+
   // 레거시 레포(package-lock.json 없이 `npm install` 사용)의 알려진 버전 문제 자동 패치.
   // 신규 배포는 package-lock.json + `npm ci`로 고정된 정식 버전(typescript 5.7.2, tailwindcss 4.0.17)을
   // 쓰므로 아래 조건(=== '5.7.0' / '4.0.0')에 매칭되지 않는다 → 패치 미발생, lockfile 비동기화 위험 없음.
   // (즉 이 패치는 lockfile 도입 이전에 생성된 레포에만 작동한다.)
   try {
+    if (isImported) throw new Error('skip: imported repo is user-owned');
     const file = await getFileContent(githubToken, owner, repo, 'package.json');
     const content = Buffer.from(file.content, 'base64').toString('utf-8');
     const pkg = JSON.parse(content);
@@ -82,7 +93,7 @@ export async function POST(
 
   // Trigger workflow dispatch
   try {
-    await triggerWorkflowDispatch(githubToken, owner, repo);
+    await triggerWorkflowDispatch(githubToken, owner, repo, workflowFile, workflowRef);
   } catch {
     return apiError('워크플로우 재실행에 실패했습니다. GitHub 레포지토리를 확인해주세요.', 500);
   }

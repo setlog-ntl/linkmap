@@ -11,11 +11,22 @@ export interface GitHubRepo {
   default_branch: string;
   updated_at: string;
   language: string | null;
+  /** getRepo에만 포함 — 목록 응답에도 오지만 신뢰하지 않는다 */
+  permissions?: { admin: boolean; push: boolean; pull: boolean };
+  fork?: boolean;
+  /** KB 단위 */
+  size?: number;
 }
 
-export async function listUserRepos(token: string): Promise<GitHubRepo[]> {
+export async function listUserRepos(
+  token: string,
+  options?: { page?: number; perPage?: number; affiliation?: string }
+): Promise<GitHubRepo[]> {
+  const page = options?.page ?? 1;
+  const perPage = options?.perPage ?? 50;
+  const affiliation = options?.affiliation ?? 'owner,collaborator';
   return githubFetch<GitHubRepo[]>(
-    '/user/repos?sort=updated&per_page=50&affiliation=owner,collaborator',
+    `/user/repos?sort=updated&per_page=${perPage}&page=${page}&affiliation=${affiliation}`,
     { token }
   );
 }

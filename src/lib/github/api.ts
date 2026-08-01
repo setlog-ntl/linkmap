@@ -11,10 +11,10 @@ export type { GitHubRepo } from './repos';
 export { listRepoSecrets, getRepoPublicKey, createOrUpdateSecret, deleteSecret } from './secrets';
 export type { GitHubSecret, GitHubPublicKey } from './secrets';
 
-export { enableGitHubPages, enableGitHubPagesWithActions, getGitHubPagesStatus, triggerWorkflowDispatch, getLatestWorkflowRun, getLatestPagesDeployment } from './pages';
+export { enableGitHubPages, enableGitHubPagesWithActions, updatePagesBuildType, getGitHubPagesStatus, triggerWorkflowDispatch, getLatestWorkflowRun, getLatestPagesDeployment } from './pages';
 export type { GitHubPagesResult, WorkflowRun, PagesDeployment } from './pages';
 
-export { listRepoContents, getFileContent, createOrUpdateFileContent } from './content';
+export { listRepoContents, getFileContent, createOrUpdateFileContent, deleteFileContent } from './content';
 export type { GitHubContentItem, GitHubFileContentResponse, GitHubFileContentResult } from './content';
 
 export { createBlob, createTree, createCommit, createRef, getRef, updateRef, pushFilesAtomically, getGitTreeRecursive } from './git-data';

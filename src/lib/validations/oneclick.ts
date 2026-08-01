@@ -71,6 +71,34 @@ function decodePathForCheck(value: string): string | null {
   }
 }
 
+// GitHub 소유자·저장소 명명 규칙 (영숫자·하이픈·언더스코어·점)
+const ownerRegex = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
+const repoNameRegex = /^[A-Za-z0-9._-]{1,100}$/;
+
+export const reposQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).max(20).optional(),
+  github_service_account_id: z.string().uuid().optional(),
+});
+
+export const repoAnalyzeRequestSchema = z.object({
+  owner: z.string().regex(ownerRegex, '유효하지 않은 GitHub 사용자명'),
+  repo: z.string().regex(repoNameRegex, '유효하지 않은 저장소 이름'),
+  github_service_account_id: z.string().uuid().optional(),
+});
+
+/**
+ * 트랙 B(내 GitHub repo 연결).
+ * publish_dir·branch는 서버가 분석을 다시 돌려 실제 존재하는 값인지 확인하므로
+ * 여기서는 형태만 본다 (YAML 보간 안전성은 static-workflow의 isSafeWorkflowValue가 최종 확인).
+ */
+export const deployRepoRequestSchema = z.object({
+  owner: z.string().regex(ownerRegex, '유효하지 않은 GitHub 사용자명'),
+  repo: z.string().regex(repoNameRegex, '유효하지 않은 저장소 이름'),
+  publish_dir: z.string().max(100).optional(),
+  link_only: z.boolean().optional(),
+  github_service_account_id: z.string().uuid().optional(),
+});
+
 export const fileUpdateSchema = z.object({
   path: z
     .string()
@@ -96,3 +124,5 @@ export type FileUpdateInput = z.infer<typeof fileUpdateSchema>;
 export type StatusQueryInput = z.infer<typeof statusQuerySchema>;
 export type DeployPagesRequestInput = z.infer<typeof deployPagesRequestSchema>;
 export type DeployUploadRequestInput = z.infer<typeof deployUploadRequestSchema>;
+export type DeployRepoRequestInput = z.infer<typeof deployRepoRequestSchema>;
+export type RepoAnalyzeRequestInput = z.infer<typeof repoAnalyzeRequestSchema>;

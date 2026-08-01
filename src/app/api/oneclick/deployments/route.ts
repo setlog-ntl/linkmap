@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError } from '@/lib/api/errors';
 import { resolveUserGitHubToken } from '@/lib/github/token';
-import { resolveDeployStatus } from '@/lib/oneclick/deploy-status';
+import { resolveDeployStatus, workflowOptionsFromDeploy } from '@/lib/oneclick/deploy-status';
 
 export async function GET() {
   const supabase = await createClient();
@@ -88,6 +88,10 @@ async function refreshDeployStatus(
         createdAt: deploy.created_at as string,
         updatedAt: deploy.updated_at as string,
         retryCount: (deploy.retry_count as number) ?? 0,
+        ...workflowOptionsFromDeploy({
+          source_type: deploy.source_type as string | null,
+          config_data: deploy.config_data,
+        }),
       }
     );
 

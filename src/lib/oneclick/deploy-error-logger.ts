@@ -18,6 +18,7 @@ export type DeployErrorCategory =
   | 'network'
   | 'quota'
   | 'upload_validation'
+  | 'repo_not_deployable'
   | 'unknown';
 
 interface LogDeployErrorParams {

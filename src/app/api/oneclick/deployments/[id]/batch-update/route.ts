@@ -53,12 +53,18 @@ export async function POST(
   // Get deploy record + verify ownership
   const { data: deploy } = await supabase
     .from('homepage_deploys')
-    .select('id, site_name, forked_repo_full_name, user_id, project_id')
+    .select('id, site_name, forked_repo_full_name, user_id, project_id, source_type')
     .eq('id', id)
     .eq('user_id', user.id)
     .single();
 
   if (!deploy) return notFoundError('배포');
+
+  // 가져온 저장소(트랙 B)는 사용자 자산 — 다중 파일 덮어쓰기를 허용하지 않는다.
+  // (pushFilesAtomically는 heads/main 고정이라 기본 브랜치가 다르면 고아 브랜치까지 만든다)
+  if (deploy.source_type === 'import') {
+    return apiError('가져온 저장소는 Linkmap에서 편집할 수 없습니다. GitHub에서 직접 수정해주세요.', 403);
+  }
 
   // Get GitHub token
   const { data: githubService } = await supabase

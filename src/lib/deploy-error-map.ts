@@ -30,6 +30,7 @@ type DeployErrorCategory =
   | 'network'
   | 'quota'
   | 'upload_validation'
+  | 'repo_not_deployable'
   | 'unknown';
 
 /** 카테고리 → 사용자 친화 cause/solution. 'unknown'은 null(기본 메시지로 폴백). */
@@ -76,6 +77,12 @@ function detailsForCategory(
       return {
         cause: '올린 파일을 그대로 배포할 수 없었습니다.',
         solution: '위 안내에 따라 파일을 고친 뒤 다시 올려주세요. 웹페이지 파일(index.html)이 반드시 있어야 합니다.',
+        failedStep,
+      };
+    case 'repo_not_deployable':
+      return {
+        cause: '이 저장소는 지금 바로 배포할 수 없습니다.',
+        solution: '위 안내를 확인해주세요. 저장소 루트나 docs·dist·build 폴더에 index.html이 있고, 본인이 관리자인 저장소여야 합니다.',
         failedStep,
       };
     case 'unknown':

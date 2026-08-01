@@ -96,12 +96,17 @@ export async function POST(
   // 3. Ownership
   const { data: deploy } = await supabase
     .from('homepage_deploys')
-    .select('id, site_name, forked_repo_full_name, user_id')
+    .select('id, site_name, forked_repo_full_name, user_id, source_type')
     .eq('id', id)
     .eq('user_id', user.id)
     .single();
 
   if (!deploy) return notFoundError('배포');
+
+  // 가져온 저장소(트랙 B)에는 파일을 추가하지 않는다 — 사용자 자산이다
+  if (deploy.source_type === 'import') {
+    return apiError('가져온 저장소에는 Linkmap에서 파일을 올릴 수 없습니다.', 403);
+  }
 
   // 4. GitHub token
   const { data: githubService } = await supabase

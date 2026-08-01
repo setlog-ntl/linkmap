@@ -114,6 +114,8 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
   // 첫 로드 전에만 스피너 overlay — 재시도 중엔 이전 iframe 화면이 그대로 유지됨
   const showOverlay = refreshCount === 0 && !iframeLoaded && !iframeError && !isDeploying;
 
+  const isImported = deploy.source_type === 'import';
+
   // 템플릿 배포는 템플릿명을, 사용자 소스 배포는 출처를 표시한다 (M109 source_type)
   const sourceLabel = deploy.homepage_templates
     ? `${t(locale, 'mySites.template')}: ${locale === 'ko' ? deploy.homepage_templates.name_ko : deploy.homepage_templates.name}`
@@ -374,7 +376,8 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
               </a>
             </Button>
           )}
-          {deploy.deploy_status === 'ready' && (
+          {/* 가져온 저장소는 사용자 자산이라 Linkmap 편집기로 열지 않는다 (서버도 403으로 막는다) */}
+          {deploy.deploy_status === 'ready' && !isImported && (
             <Button size="sm" variant="outline" asChild>
               <Link prefetch={false} href={`/my-sites/${deploy.id}/edit`}>
                 <Pencil className="mr-1 h-3 w-3" />
@@ -441,7 +444,14 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
                   {t(locale, 'mySites.deleteConfirm')}
                 </AlertDialogTitle>
                 <AlertDialogDescription>
-                  {t(locale, 'mySites.deleteDesc')}
+                  {/* 실제 동작이 소스마다 다르다 — 저장소가 지워지는지 아닌지를 정확히 알린다 */}
+                  {isImported
+                    ? locale === 'ko'
+                      ? 'Linkmap에서 연결만 해제됩니다. GitHub 저장소는 그대로 남고, 이미 공개된 사이트도 계속 열립니다.'
+                      : 'This only disconnects the site from Linkmap. Your GitHub repository stays, and the published site remains online.'
+                    : locale === 'ko'
+                      ? '이 사이트와 Linkmap이 만든 GitHub 저장소가 함께 삭제됩니다. 되돌릴 수 없습니다.'
+                      : 'This deletes the site and the GitHub repository Linkmap created for it. This cannot be undone.'}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useReducer, useCallback, useEffect } from 'react';
-import { useDeployToGitHubPages, useDeployUpload, useDeployStatus } from '@/lib/queries/oneclick';
+import { useDeployToGitHubPages, useDeployUpload, useDeployRepo, useDeployStatus } from '@/lib/queries/oneclick';
 import type { PreparedFile } from '@/lib/oneclick/client-upload';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -185,6 +185,10 @@ function deployReducer(state: DeployState, action: DeployAction): DeployState {
  * 진행/성공 화면이 템플릿 없는 배포로 자연스럽게 렌더된다.
  */
 export const UPLOAD_SOURCE = 'upload';
+export const IMPORT_SOURCE = 'import';
+
+/** 템플릿 id(UUID)와 겹치지 않는 소스 표식들 — 템플릿 조회 시 null로 떨어진다 */
+export const NON_TEMPLATE_SOURCES: readonly string[] = [UPLOAD_SOURCE, IMPORT_SOURCE];
 
 // ── Pending Deploy (localStorage) ──
 
@@ -235,6 +239,7 @@ export function useDeployMachine({ isAuthenticated }: UseDeployMachineOptions) {
 
   const deployMutation = useDeployToGitHubPages();
   const uploadMutation = useDeployUpload();
+  const repoMutation = useDeployRepo();
 
   // Preflight check: GitHub connection + quota
   const { data: preflightData, isLoading: githubLoading } = useQuery({
@@ -393,22 +398,60 @@ export function useDeployMachine({ isAuthenticated }: UseDeployMachineOptions) {
     }
   }, [uploadMutation, isAuthenticated, isGitHubConnected]);
 
+  /**
+   * 내 GitHub repo 연결 배포 (트랙 B).
+   * 업로드 트랙과 마찬가지로 인증·연결이 끝난 뒤에만 진입한다.
+   */
+  const handleRepoDeploy = useCallback(async (
+    input: { owner: string; repo: string; publishDir: string; linkOnly: boolean },
+    accountId?: string,
+  ) => {
+    if (!isAuthenticated || !isGitHubConnected) {
+      toast.error('로그인과 GitHub 연결을 먼저 확인해주세요.');
+      return;
+    }
+
+    dispatch({ type: 'START_DEPLOY', template: IMPORT_SOURCE, siteName: input.repo });
+    try {
+      const result = await repoMutation.mutateAsync({
+        owner: input.owner,
+        repo: input.repo,
+        publish_dir: input.publishDir,
+        link_only: input.linkOnly,
+        ...(accountId ? { github_service_account_id: accountId } : {}),
+      });
+      dispatch({
+        type: 'DEPLOY_SUCCESS',
+        deployId: result.deploy_id,
+        projectId: result.project_id,
+        template: IMPORT_SOURCE,
+      });
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('배포 중 오류가 발생했습니다');
+      toast.error(error.message);
+      dispatch({ type: 'DEPLOY_ERROR', error });
+    }
+  }, [repoMutation, isAuthenticated, isGitHubConnected]);
+
   const handleRetry = useCallback(() => {
     deployMutation.reset();
     uploadMutation.reset();
+    repoMutation.reset();
     dispatch({ type: 'RETRY' });
-  }, [deployMutation, uploadMutation]);
+  }, [deployMutation, uploadMutation, repoMutation]);
 
   return {
     state,
     dispatch,
     handleDeploy,
     handleUploadDeploy,
+    handleRepoDeploy,
     handleGitHubConnected,
     handleRetry,
     deployStatus,
     deployMutation,
     uploadMutation,
+    repoMutation,
     githubAccount,
     githubLoading,
     isGitHubConnected,

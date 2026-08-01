@@ -26,6 +26,15 @@ export interface ResolveDeployOptions {
   updatedAt?: string;
   /** Current retry count from DB (0 = no retries yet) */
   retryCount?: number;
+  /**
+   * 이 배포가 실제로 사용하는 워크플로우 파일·브랜치 (config_data 기록값).
+   * 트랙 B(가져온 저장소)는 `linkmap-pages.yml`·사용자 기본 브랜치를 쓰므로 기본값을 쓰면
+   * 사용자 저장소의 `deploy.yml`(대개 프로덕션 배포 파이프라인)을 실행시키게 된다.
+   */
+  workflowFile?: string;
+  workflowBranch?: string;
+  /** 가져온 저장소는 우리 소유가 아니므로 자동 재시도를 하지 않는다 */
+  allowAutoRetry?: boolean;
 }
 
 /** 타임아웃: 마지막 활동(updated_at: 배포 시작/재배포/편집) 기준 15분 무진전 시 에러 (GitHub Actions 평균 3-5분, 최악 8분 + CDN 2분 + 여유 5분) */
@@ -55,6 +64,26 @@ async function isPagesUrlAccessible(pagesUrl: string): Promise<boolean> {
  * Resolve the current deploy status by checking GitHub Pages API and Actions workflow.
  * Used by both status/route.ts (single deploy polling) and deployments/route.ts (batch refresh).
  */
+/**
+ * 배포 행에서 워크플로우 관련 옵션을 뽑는다.
+ *
+ * 트랙 B(import)는 워크플로우 파일명·브랜치가 템플릿과 다르고 저장소가 사용자 자산이므로,
+ * 이 값을 넘기지 않으면 상태 판정이 남의 워크플로우 실행을 읽고 자동 재시도가
+ * 사용자의 `deploy.yml`을 실행시킨다.
+ */
+export function workflowOptionsFromDeploy(deploy: {
+  source_type?: string | null;
+  config_data?: unknown;
+}): Pick<ResolveDeployOptions, 'workflowFile' | 'workflowBranch' | 'allowAutoRetry'> {
+  const isImported = deploy.source_type === 'import';
+  const config = (deploy.config_data ?? {}) as { workflow_file?: unknown; source_branch?: unknown };
+  return {
+    workflowFile: typeof config.workflow_file === 'string' ? config.workflow_file : undefined,
+    workflowBranch: typeof config.source_branch === 'string' ? config.source_branch : 'main',
+    allowAutoRetry: !isImported,
+  };
+}
+
 export async function resolveDeployStatus(
   githubToken: string,
   repoFullName: string,
@@ -65,6 +94,9 @@ export async function resolveDeployStatus(
 ): Promise<DeployStatusResult> {
   const [owner, repo] = repoFullName.split('/');
   const retryCount = options?.retryCount ?? 0;
+  const workflowFile = options?.workflowFile;
+  const workflowBranch = options?.workflowBranch ?? 'main';
+  const allowAutoRetry = options?.allowAutoRetry ?? true;
 
   // Timeout: 마지막 활동(updated_at) 기준 15분 무진전 시 에러.
   // updated_at은 redeploy/batch-update가 갱신하므로 오래된 배포의 재배포도 그 시점부터 새 윈도우를 받는다.
@@ -112,7 +144,7 @@ export async function resolveDeployStatus(
       // build_type: 'workflow' — Pages API always returns status: null.
       // Must check Actions workflow run to determine actual deploy state.
       try {
-        const run = await getLatestWorkflowRun(githubToken, owner, repo);
+        const run = await getLatestWorkflowRun(githubToken, owner, repo, workflowFile, workflowBranch);
         if (run?.status === 'completed' && run.conclusion === 'success') {
           // Actions 완료 후 Pages CDN 전파 완료 여부 추가 확인.
           const pagesDeploy = await getLatestPagesDeployment(githubToken, owner, repo);
@@ -132,10 +164,10 @@ export async function resolveDeployStatus(
             }
           }
         } else if (run?.status === 'completed' && run.conclusion === 'failure') {
-          // Auto-retry once on workflow failure
-          if (retryCount < 1) {
+          // Auto-retry once on workflow failure (가져온 저장소는 자동 재시도 금지 — 수동 재배포만)
+          if (allowAutoRetry && retryCount < 1) {
             try {
-              await triggerWorkflowDispatch(githubToken, owner, repo);
+              await triggerWorkflowDispatch(githubToken, owner, repo, workflowFile, workflowBranch);
               retryTriggered = true;
               newDeployStatus = 'building';
               newPagesStatus = 'building';

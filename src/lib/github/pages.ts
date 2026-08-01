@@ -42,6 +42,22 @@ export async function enableGitHubPagesWithActions(
   );
 }
 
+/**
+ * 이미 Pages가 켜진 저장소의 빌드 방식을 Actions 워크플로우로 전환한다.
+ * 브랜치 빌드(legacy)로 켜져 있으면 워크플로우를 커밋해도 실행되지 않으므로 필요하다.
+ */
+export async function updatePagesBuildType(
+  token: string,
+  owner: string,
+  repo: string
+): Promise<void> {
+  await githubFetch(`/repos/${owner}/${repo}/pages`, {
+    token,
+    method: 'PUT',
+    body: { build_type: 'workflow' },
+  });
+}
+
 export async function getGitHubPagesStatus(
   token: string,
   owner: string,
@@ -136,13 +152,25 @@ export interface WorkflowRun {
   created_at: string;
 }
 
+/**
+ * 배포 상태 판정에 쓸 최신 워크플로우 실행을 가져온다.
+ *
+ * workflowFile을 주면 해당 워크플로우의 실행만 조회한다. 가져온 사용자 저장소에는
+ * 우리와 무관한 CI(lint/test 등)가 함께 돌기 때문에, 파일을 한정하지 않으면
+ * 남의 실행 결과를 우리 배포 상태로 오독한다.
+ */
 export async function getLatestWorkflowRun(
   token: string,
   owner: string,
-  repo: string
+  repo: string,
+  workflowFile?: string,
+  branch: string = 'main'
 ): Promise<WorkflowRun | null> {
+  const scope = workflowFile
+    ? `/repos/${owner}/${repo}/actions/workflows/${workflowFile}/runs`
+    : `/repos/${owner}/${repo}/actions/runs`;
   const result = await githubFetch<{ workflow_runs: WorkflowRun[] }>(
-    `/repos/${owner}/${repo}/actions/runs?per_page=1&branch=main`,
+    `${scope}?per_page=1&branch=${encodeURIComponent(branch)}`,
     { token }
   );
   return result.workflow_runs[0] ?? null;

@@ -27,6 +27,7 @@ export type AuditAction =
   | 'github.auto_sync'
   | 'oneclick.deploy_pages'
   | 'oneclick.deploy_upload'
+  | 'oneclick.deploy_repo'
   | 'oneclick.deploy_success'
   | 'oneclick.deploy_error'
   | 'oneclick.redeploy'

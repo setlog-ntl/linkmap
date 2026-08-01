@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { unauthorizedError, apiError, notFoundError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 import { safeDecryptToken } from '@/lib/github/token';
-import { resolveDeployStatus, buildDeploySteps } from '@/lib/oneclick/deploy-status';
+import { resolveDeployStatus, buildDeploySteps, workflowOptionsFromDeploy } from '@/lib/oneclick/deploy-status';
 import { logDeployError } from '@/lib/oneclick/deploy-error-logger';
 
 export async function GET(request: NextRequest) {
@@ -79,6 +79,7 @@ export async function GET(request: NextRequest) {
               createdAt: deploy.created_at,
               updatedAt: deploy.updated_at,
               retryCount: deploy.retry_count ?? 0,
+              ...workflowOptionsFromDeploy(deploy),
             }
           );
 

@@ -79,12 +79,16 @@ export async function DELETE(
   // Verify ownership
   const { data: deploy } = await supabase
     .from('homepage_deploys')
-    .select('id, site_name, forked_repo_full_name, project_id')
+    .select('id, site_name, forked_repo_full_name, project_id, source_type')
     .eq('id', id)
     .eq('user_id', user.id)
     .single();
 
   if (!deploy) return notFoundError('배포');
+
+  // source_type='import'는 사용자가 원래 갖고 있던 저장소를 연결한 것이다.
+  // Linkmap이 만든 레포(template/upload)만 삭제하고, 가져온 저장소는 연결만 해제한다.
+  const ownsRepo = deploy.source_type !== 'import';
 
   // Delete the deploy record
   const { error } = await supabase
@@ -97,9 +101,12 @@ export async function DELETE(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Best-effort: GitHub 저장소 삭제 (삭제 후 동일 이름 재배포 가능하도록)
-  let githubRepoDeletion: 'deleted' | 'skipped' | 'failed' = 'skipped';
-  if (deploy.forked_repo_full_name && deploy.project_id) {
+  // Best-effort: GitHub 저장소 삭제 (삭제 후 동일 이름 재배포 가능하도록).
+  // 가져온 저장소(import)는 사용자 자산이므로 건드리지 않는다.
+  let githubRepoDeletion: 'deleted' | 'skipped' | 'failed' | 'not_owned' = 'skipped';
+  if (!ownsRepo) {
+    githubRepoDeletion = 'not_owned';
+  } else if (deploy.forked_repo_full_name && deploy.project_id) {
     try {
       const { data: repoRecord } = await supabase
         .from('project_github_repos')
@@ -167,5 +174,10 @@ export async function DELETE(
     },
   });
 
-  return NextResponse.json({ success: true, deleted_project_id: deletedProjectId });
+  return NextResponse.json({
+    success: true,
+    deleted_project_id: deletedProjectId,
+    // 가져온 저장소는 그대로 남는다는 사실을 UI가 사용자에게 알릴 수 있게 반환한다
+    repo_kept: !ownsRepo,
+  });
 }
