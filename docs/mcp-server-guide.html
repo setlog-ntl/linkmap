@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linkmap MCP 서버 — 설정 · 적용 · 기능 정리</title>
+<style>
+  :root {
+    --bg: #f7f9fb; --card: #ffffff; --fg: #101828; --muted: #667085;
+    --line: #e4e7ec; --blue: #1570ef; --blue-soft: #eff8ff;
+    --green: #12a67a; --green-soft: #e9f8f3;
+    --amber: #b54708; --amber-soft: #fffaeb;
+    --red: #b42318; --red-soft: #fef3f2;
+    --code-bg: #0d1117; --code-fg: #d1d9e0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b0f16; --card: #141a23; --fg: #e6edf3; --muted: #93a1b3;
+      --line: #232c39; --blue: #5aabff; --blue-soft: #10243c;
+      --green: #3ddba4; --green-soft: #0d2a22;
+      --amber: #f0a441; --amber-soft: #2b2010;
+      --red: #ff8a80; --red-soft: #2c1513;
+      --code-bg: #05080d; --code-fg: #cdd7e2;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b0f16; --card: #141a23; --fg: #e6edf3; --muted: #93a1b3;
+    --line: #232c39; --blue: #5aabff; --blue-soft: #10243c;
+    --green: #3ddba4; --green-soft: #0d2a22;
+    --amber: #f0a441; --amber-soft: #2b2010;
+    --red: #ff8a80; --red-soft: #2c1513;
+    --code-bg: #05080d; --code-fg: #cdd7e2;
+  }
+  :root[data-theme="light"] {
+    --bg: #f7f9fb; --card: #ffffff; --fg: #101828; --muted: #667085;
+    --line: #e4e7ec; --blue: #1570ef; --blue-soft: #eff8ff;
+    --green: #12a67a; --green-soft: #e9f8f3;
+    --amber: #b54708; --amber-soft: #fffaeb;
+    --red: #b42318; --red-soft: #fef3f2;
+    --code-bg: #0d1117; --code-fg: #d1d9e0;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font-family: "Pretendard Variable", Pretendard, -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+    line-height: 1.65; font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 40px 20px 96px; }
+
+  header.hero {
+    border: 1px solid var(--line); background: var(--card);
+    border-radius: 14px; padding: 28px 28px 24px; margin-bottom: 28px;
+  }
+  .eyebrow { color: var(--blue); font-weight: 700; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 8px; }
+  h1 { font-size: clamp(24px, 4vw, 32px); margin: 0 0 10px; letter-spacing: -.02em; }
+  .sub { color: var(--muted); margin: 0; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .chip { font-size: 12px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; color: var(--muted); background: var(--bg); }
+
+  h2 { font-size: 20px; margin: 44px 0 4px; letter-spacing: -.01em; scroll-margin-top: 16px; }
+  h2 .num { color: var(--blue); font-variant-numeric: tabular-nums; margin-right: 8px; }
+  h2 + .lede { color: var(--muted); margin: 0 0 16px; }
+  h3 { font-size: 15px; margin: 26px 0 8px; }
+
+  .card { border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 20px; margin: 14px 0; }
+
+  pre {
+    background: var(--code-bg); color: var(--code-fg); border-radius: 10px;
+    padding: 16px; overflow-x: auto; font-size: 13px; line-height: 1.6;
+    font-family: "Geist Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+    margin: 12px 0;
+  }
+  code { font-family: "Geist Mono", ui-monospace, Consolas, monospace; font-size: .9em; }
+  :not(pre) > code { background: var(--blue-soft); color: var(--blue); padding: 1px 6px; border-radius: 5px; }
+
+  .scroll { overflow-x: auto; margin: 12px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 620px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: 0; }
+
+  .badge { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 6px; white-space: nowrap; }
+  .ok { background: var(--green-soft); color: var(--green); }
+  .warn { background: var(--amber-soft); color: var(--amber); }
+  .bad { background: var(--red-soft); color: var(--red); }
+
+  .note { border-left: 3px solid var(--blue); background: var(--blue-soft); padding: 14px 16px; border-radius: 0 10px 10px 0; margin: 16px 0; }
+  .note.alert { border-left-color: var(--red); background: var(--red-soft); }
+  .note.caution { border-left-color: var(--amber); background: var(--amber-soft); }
+  .note p:first-child { margin-top: 0; } .note p:last-child { margin-bottom: 0; }
+  .note strong { color: inherit; }
+
+  ol.steps { padding-left: 0; list-style: none; counter-reset: s; margin: 16px 0; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 0 0 20px 40px; border-left: 1px dashed var(--line); margin-left: 13px; }
+  ol.steps > li:last-child { border-left-color: transparent; padding-bottom: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: -13px; top: 0;
+    width: 26px; height: 26px; border-radius: 50%; background: var(--blue); color: #fff;
+    display: grid; place-items: center; font-size: 12.5px; font-weight: 700;
+  }
+  ol.steps h3 { margin: 2px 0 6px; }
+
+  .flow { display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; margin: 16px 0; }
+  .flow .box { flex: 1 1 150px; border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: var(--bg); }
+  .flow .box b { display: block; font-size: 13px; margin-bottom: 3px; }
+  .flow .box span { font-size: 12px; color: var(--muted); }
+  .flow .arrow { display: grid; place-items: center; color: var(--muted); font-size: 18px; }
+
+  .kv { display: grid; grid-template-columns: minmax(140px, 200px) 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin: 12px 0; }
+  .kv > div { background: var(--card); padding: 10px 14px; font-size: 13.5px; }
+  .kv > div:nth-child(odd) { color: var(--muted); font-weight: 600; }
+
+  footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12.5px; }
+  a { color: var(--blue); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <p class="eyebrow">Linkmap Internal Docs</p>
+  <h1>Linkmap MCP 서버 — 설정 · 적용 방법 · 가능한 기능</h1>
+  <p class="sub">Claude Code / Cursor 안에서 코드베이스를 읽어 사용 중인 외부 서비스를 자동 인식하고, Linkmap 프로젝트에 동기화하는 stdio MCP 서버.</p>
+  <div class="meta">
+    <span class="chip">패키지 <code>@linkmap/mcp-server</code></span>
+    <span class="chip">v0.3.0</span>
+    <span class="chip">MCP SDK ^1.12</span>
+    <span class="chip">전송 stdio</span>
+    <span class="chip">소스 <code>packages/mcp-server/</code></span>
+    <span class="chip">작성 2026-07-28</span>
+  </div>
+</header>
+
+<!-- 1 -->
+<h2 id="overview"><span class="num">01</span>한눈에 보기</h2>
+<p class="lede">MCP 서버는 로컬 파일을 직접 읽지 않는다. 파일 탐색은 Claude Code가 하고, 서버는 <b>해석과 저장</b>만 담당한다.</p>
+
+<div class="card">
+  <div class="flow">
+    <div class="box"><b>Claude Code</b><span>package.json · .env 키 · 설정 파일명을 읽어 "힌트"로 전달</span></div>
+    <div class="arrow">→</div>
+    <div class="box"><b>MCP 서버 (로컬)</b><span>npm/설정파일 정적 매핑 테이블로 1차 해석</span></div>
+    <div class="arrow">→</div>
+    <div class="box"><b>Linkmap API</b><span>미매칭 건 2차 해석 + 프로젝트에 서비스 저장</span></div>
+    <div class="arrow">→</div>
+    <div class="box"><b>Supabase</b><span>project_services 반영 · 감사 로그 기록</span></div>
+  </div>
+  <div class="kv">
+    <div>실행 명령</div><div><code>npx tsx packages/mcp-server/src/index.ts</code></div>
+    <div>진입점</div><div><code>packages/mcp-server/src/index.ts</code></div>
+    <div>매핑 테이블</div><div><code>detection/npm-map.ts</code> (npm 약 120종) · <code>detection/config-map.ts</code> (설정 파일 약 39종)</div>
+    <div>API 클라이언트</div><div><code>lib/api-client.ts</code> — Bearer 토큰 고정 헤더</div>
+    <div>서버 측 라우트</div><div><code>/api/mcp/detect</code> · <code>/api/mcp/sync</code> · <code>/api/mcp/detect-map</code></div>
+  </div>
+</div>
+
+<div class="note">
+  <p><strong>설계상의 보안 경계</strong> — <code>.env</code>의 <b>값</b>은 절대 전송되지 않는다. 전송되는 것은 키 <b>이름</b>뿐이며(<code>STRIPE_SECRET_KEY</code> 같은 문자열), 이는 <code>sync-guide</code> 프롬프트에도 명시되어 있다.</p>
+</div>
+
+<!-- 2 -->
+<h2 id="config"><span class="num">02</span>설정</h2>
+<p class="lede">프로젝트 루트 <code>.mcp.json</code> + 환경변수 2개가 전부다.</p>
+
+<h3>현재 리포지터리에 들어 있는 설정</h3>
+<pre>// C:\Dev\linkmap\.mcp.json  (발췌)
+{
+  "mcpServers": {
+    "linkmap": {
+      "command": "npx",
+      "args": ["tsx", "packages/mcp-server/src/index.ts"],
+      "env": {
+        "LINKMAP_API_URL": "https://www.linkmap.biz"
+      }
+    }
+  }
+}</pre>
+
+<div class="note caution">
+  <p><strong>토큰이 비어 있다.</strong> 현재 설정에는 <code>LINKMAP_API_TOKEN</code> 이 없다. 이 상태에서는 서버 API를 호출하는 모든 도구가 <b>401</b>로 실패하고, <code>detect_services</code> 만 로컬 매핑 테이블 결과로 동작한다. 다만 토큰을 <code>.mcp.json</code>에 직접 적으면 <b>커밋되는 파일에 시크릿이 들어가므로 금지</b>다 — 아래 3-② 방식을 쓴다.</p>
+</div>
+
+<h3>환경변수</h3>
+<div class="scroll">
+<table>
+  <thead><tr><th>변수</th><th>기본값</th><th>필수</th><th>역할</th></tr></thead>
+  <tbody>
+    <tr><td><code>LINKMAP_API_URL</code></td><td><code>https://www.linkmap.biz</code></td><td>아니오</td><td>호출 대상. 로컬 개발 시 <code>http://localhost:3000</code></td></tr>
+    <tr><td><code>LINKMAP_API_TOKEN</code></td><td>(없음)</td><td><b>예</b></td><td><code>stl_</code> 접두사 개인 액세스 토큰. 없으면 서버 연동 전부 401</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>토큰의 정체</h3>
+<p><code>/api/tokens</code> 가 발급하는 개인 액세스 토큰이다. 구현상 특징:</p>
+<ul>
+  <li>형식 <code>stl_</code> + 랜덤 32바이트 hex — <b>발급 직후 1회만</b> 원문이 노출된다.</li>
+  <li>DB에는 SHA-256 해시(<code>api_tokens.token_hash</code>)만 저장된다. 분실 시 복구 불가, 재발급만 가능.</li>
+  <li>스코프: <code>read</code> / <code>write</code> / <code>admin</code>. 미지정 시 <code>['read','write']</code>.</li>
+  <li>만료: 1~365일 지정 가능, 미지정 시 무기한.</li>
+  <li>발급에 <b>MFA 통과가 강제</b>된다(<code>requireMfa</code>). 2FA를 켜지 않았다면 먼저 설정해야 한다.</li>
+</ul>
+<div class="scroll">
+<table>
+  <thead><tr><th>도구</th><th>필요 스코프</th></tr></thead>
+  <tbody>
+    <tr><td><code>detect_services</code> (서버 2차 해석)</td><td><code>read</code></td></tr>
+    <tr><td><code>sync_project_services</code></td><td><code>write</code></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- 3 -->
+<h2 id="apply"><span class="num">03</span>적용 방법</h2>
+<p class="lede">토큰 발급 → 환경변수 주입 → 세션 재시작 → 연결 확인 순서.</p>
+
+<ol class="steps">
+  <li>
+    <h3>개인 액세스 토큰 발급</h3>
+    <p><a href="https://www.linkmap.biz/settings/developer">linkmap.biz/settings/developer</a> → API 토큰 → 새 토큰. 이름은 용도로 (<code>claude-code-local</code>), 스코프는 <code>read</code> + <code>write</code>, 만료는 90일 권장. 표시된 <code>stl_…</code> 값을 이때 복사한다 — 다시 볼 수 없다.</p>
+  </li>
+  <li>
+    <h3>토큰을 셸 환경변수로 주입 (파일에 쓰지 않는다)</h3>
+    <p><code>.mcp.json</code> 은 git에 커밋되므로 토큰을 넣지 않는다. Claude Code를 띄우는 셸 세션에 넣는다.</p>
+<pre># PowerShell — 현재 세션
+$env:LINKMAP_API_TOKEN = "stl_...."
+
+# PowerShell — 사용자 계정에 영구 등록 (한 번만)
+[Environment]::SetEnvironmentVariable("LINKMAP_API_TOKEN", "stl_....", "User")</pre>
+    <p><code>.mcp.json</code> 의 <code>env</code> 블록에 없는 변수도 자식 프로세스가 부모 셸 환경을 상속하므로 그대로 전달된다.</p>
+  </li>
+  <li>
+    <h3>Claude Code 재시작 후 연결 확인</h3>
+    <p><code>/mcp</code> 를 실행해 <code>linkmap</code> 이 connected 로 뜨는지 본다. 도구는 <code>mcp__linkmap__*</code> 이름으로 노출된다. 서버 부팅 로그는 stderr로 <code>Linkmap MCP Server v0.3.0 started</code>.</p>
+  </li>
+  <li>
+    <h3>대상 프로젝트 UUID 확보</h3>
+    <p>동기화 계열 도구는 전부 <code>project_id</code>(UUID)를 요구한다. Linkmap 웹의 프로젝트 상세 URL <code>/project/&lt;uuid&gt;</code> 에서 복사한다.</p>
+  </li>
+  <li>
+    <h3>실행</h3>
+    <p>Claude Code에 자연어로 지시하면 된다. 내장 <code>sync-guide</code> 프롬프트가 절차를 안내한다.</p>
+<pre>"이 프로젝트에서 쓰는 외부 서비스를 찾아서
+ Linkmap 프로젝트 &lt;uuid&gt; 에 동기화해줘"</pre>
+  </li>
+</ol>
+
+<h3>다른 클라이언트 (Cursor 등) · 전역 설치</h3>
+<pre>{
+  "mcpServers": {
+    "linkmap": {
+      "command": "npx",
+      "args": ["tsx", "C:/Dev/linkmap/packages/mcp-server/src/index.ts"],
+      "env": { "LINKMAP_API_URL": "https://www.linkmap.biz" }
+    }
+  }
+}</pre>
+<p><code>package.json</code> 에 <code>bin: linkmap-mcp → dist/index.js</code> 가 선언되어 있으므로, <code>npm run build</code> 후에는 빌드 산출물을 직접 실행하는 형태로도 등록할 수 있다(현재 npm 레지스트리에 배포되어 있지는 않다).</p>
+
+<!-- 4 -->
+<h2 id="features"><span class="num">04</span>연결되면 가능해지는 것</h2>
+<p class="lede">도구 8개 · 리소스 2개 · 프롬프트 1개가 노출된다. 다만 <b>실제로 동작하는 것은 이 중 일부다</b> — 05장 참조.</p>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>도구</th><th>하는 일</th><th>호출 대상</th><th>상태</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>detect_services</code></td>
+      <td>패키지명·환경변수 키·설정 파일명을 서비스 slug로 변환. 로컬 테이블 1차 → 미매칭만 서버 2차. 신뢰도(high/medium/none)와 출처를 함께 반환</td>
+      <td>로컬 + <code>POST /api/mcp/detect</code></td>
+      <td><span class="badge ok">동작</span></td>
+    </tr>
+    <tr>
+      <td><code>sync_project_services</code></td>
+      <td>매핑된 slug를 프로젝트에 반영. 기존 연결과 비교해 <b>차분만 INSERT</b>, 카탈로그에 없는 slug는 옵션에 따라 커스텀 서비스로 자동 생성. 결과를 added / already_exists / not_found / custom_created 로 분류</td>
+      <td><code>POST /api/mcp/sync</code></td>
+      <td><span class="badge ok">동작</span></td>
+    </tr>
+    <tr>
+      <td><code>list_services</code></td>
+      <td>서비스 카탈로그 전체 조회 (카테고리 필터)</td>
+      <td><code>GET /api/services</code></td>
+      <td><span class="badge bad">라우트 없음</span></td>
+    </tr>
+    <tr>
+      <td><code>get_project_services</code></td>
+      <td>프로젝트에 연결된 서비스 목록 조회</td>
+      <td><code>GET /api/projects/[id]/services</code></td>
+      <td><span class="badge bad">라우트 없음</span></td>
+    </tr>
+    <tr>
+      <td><code>get_env_vars</code></td>
+      <td>환경변수 <b>이름만</b> 조회 (값 제외)</td>
+      <td><code>GET /api/projects/[id]/env</code></td>
+      <td><span class="badge bad">경로 불일치</span></td>
+    </tr>
+    <tr>
+      <td><code>search_packages</code></td>
+      <td>서비스 패키지 레지스트리 검색</td>
+      <td><code>GET /api/packages</code></td>
+      <td><span class="badge bad">미구현</span></td>
+    </tr>
+    <tr>
+      <td><code>install_package</code></td>
+      <td>패키지 설치 — 포함 서비스 일괄 추가 + 환경변수 템플릿 생성</td>
+      <td><code>POST /api/packages/install</code></td>
+      <td><span class="badge bad">미구현</span></td>
+    </tr>
+    <tr>
+      <td><code>export_package</code></td>
+      <td>프로젝트 구성을 <code>linkmap.json</code> 으로 내보내기</td>
+      <td><code>POST /api/packages/export</code></td>
+      <td><span class="badge bad">미구현</span></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>리소스 / 프롬프트</th><th>내용</th><th>상태</th></tr></thead>
+  <tbody>
+    <tr><td><code>linkmap://detection/npm-map</code></td><td>npm 패키지 → slug 매핑 테이블 전문 (약 120개 항목, 로컬 상수)</td><td><span class="badge ok">동작</span></td></tr>
+    <tr><td><code>linkmap://catalog/services</code></td><td>전체 서비스 카탈로그</td><td><span class="badge bad">라우트 없음</span></td></tr>
+    <tr><td><code>sync-guide</code> (프롬프트)</td><td>탐색 → 매핑 → 동기화 3단계 안내. "값은 전송 금지, 키 이름만" 규칙 포함</td><td><span class="badge ok">동작</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>탐지 커버리지</h3>
+<p>로컬 테이블만으로 즉시 인식되는 범위:</p>
+<div class="scroll">
+<table>
+  <thead><tr><th>분류</th><th>예시</th></tr></thead>
+  <tbody>
+    <tr><td>DB / ORM</td><td>supabase · firebase · prisma · drizzle · neon · planetscale · turso · mongodb · convex · upstash-redis</td></tr>
+    <tr><td>결제</td><td>stripe · paddle · lemon-squeezy · polar · toss-payments · paypal</td></tr>
+    <tr><td>AI</td><td>openai · anthropic · google-gemini · mistral-ai · groq · replicate · langchain · pinecone · qdrant · weaviate</td></tr>
+    <tr><td>인증</td><td>clerk · auth0 · nextauth</td></tr>
+    <tr><td>배포 (설정 파일)</td><td><code>vercel.json</code> · <code>wrangler.jsonc</code> · <code>netlify.toml</code> · <code>fly.toml</code> · <code>railway.json</code> · <code>render.yaml</code> · <code>Dockerfile</code></td></tr>
+    <tr><td>기타 설정 파일</td><td><code>sanity.config.ts</code> · <code>playwright.config.ts</code> · <code>drizzle.config.ts</code> · <code>prisma/schema.prisma</code> · <code>sentry.properties</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>서버 2차 해석은 여기에 더해 카탈로그의 <code>official_sdks</code>(npm URL 파싱)와 <code>required_env_vars</code>를 사용한다. 환경변수는 <b>정확 일치</b> 후 <code>NEXT_PUBLIC_</code>·<code>VITE_</code> 등 접두사를 벗겨낸 <b>첫 세그먼트 매칭</b>으로 폴백한다 — 이 경우 신뢰도가 <code>medium</code>으로 낮아진다.</p>
+
+<!-- 5 -->
+<h2 id="gap"><span class="num">05</span>현재 상태 점검 — 실제로 쓸 수 있는 범위</h2>
+
+<div class="note alert">
+  <p><strong>선언된 도구 8개 중 6개가 존재하지 않는 API 엔드포인트를 호출한다.</strong> 호출 시 <code>Linkmap API error 404</code> 로 실패한다. 소스 기준 확인 결과:</p>
+  <ul>
+    <li><code>src/app/api/services/route.ts</code> — 없음 (<code>services/custom/</code> 만 존재)</li>
+    <li><code>src/app/api/projects/[id]/services/route.ts</code> — 없음 (하위 <code>[psId]/cost</code>, <code>[psId]/usage</code> 만 존재)</li>
+    <li><code>src/app/api/projects/[id]/env/route.ts</code> — 없음. 환경변수 API는 <code>/api/env</code> 로 별도 구성되어 있어 <b>MCP 서버가 잘못된 경로를 호출</b>한다</li>
+    <li><code>src/app/api/packages/**</code> — 디렉터리 자체가 없음 (search / install / export 3종 전부)</li>
+  </ul>
+  <p>즉 현재 실사용 가능한 기능은 <b>「서비스 탐지 → 프로젝트 동기화」 한 줄기</b>다. 이것이 MCP 서버의 핵심 가치이므로 실용성은 있지만, 나머지 도구는 모델에게 노출된 채 실패하므로 <b>오작동으로 인식될 수 있다.</b></p>
+</div>
+
+<div class="note caution">
+  <p><strong>부수적으로 확인된 사항 2건</strong></p>
+  <p>① <code>detect_services</code> 의 서버 폴백 병합은 요청과 응답의 <b>배열 순서가 동일하다고 가정</b>하고 인덱스로 짝을 맞춘다. 서버가 순서를 바꾸거나 항목을 누락하면 slug가 엉뚱한 힌트에 붙는다.</p>
+  <p>② <code>sync_project_services</code> 의 <code>create_custom_for_unmatched: true</code> 는 <b>오타난 slug까지 커스텀 서비스로 만들어</b> 카탈로그를 오염시킨다. 기본값 <code>false</code> 를 유지하고, 켤 때는 <code>not_found</code> 목록을 먼저 확인하는 편이 안전하다.</p>
+</div>
+
+<h3>권장 조치 (선택지)</h3>
+<div class="scroll">
+<table>
+  <thead><tr><th>방향</th><th>내용</th><th>비용</th></tr></thead>
+  <tbody>
+    <tr><td>A. 도구 축소</td><td>깨진 6개를 <code>index.ts</code> 에서 제거하고 v0.4로 릴리스. 모델에게 실패하는 도구를 노출하지 않는 것이 가장 확실하다</td><td>낮음</td></tr>
+    <tr><td>B. 경로 교정</td><td><code>get_env_vars</code> 를 실제 존재하는 <code>/api/env</code> 계약에 맞춰 수정. 나머지는 A와 동일 처리</td><td>낮음~중간</td></tr>
+    <tr><td>C. 백엔드 구현</td><td><code>/api/services</code>, <code>/api/projects/[id]/services</code>, <code>/api/packages/*</code> 를 토큰 인증 기반으로 신규 구현</td><td>높음</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- 6 -->
+<h2 id="security"><span class="num">06</span>보안 모델</h2>
+<div class="card">
+  <div class="kv">
+    <div>인증</div><div>Bearer <code>stl_</code> 토큰 → SHA-256 해시 대조. 만료 검사 후 <code>last_used_at</code> 갱신</div>
+    <div>인가</div><div>스코프 검사(<code>hasScope</code>) + <b>프로젝트 소유권 검사</b>(<code>project.user_id !== auth.userId</code> → 403)</div>
+    <div>DB 접근</div><div>서버 라우트는 <code>createAdminClient()</code> 사용 — RLS를 우회하므로 위 소유권 검사가 유일한 방어선</div>
+    <div>감사 로그</div><div><code>mcp.detect</code> / <code>mcp.sync_services</code> 를 <code>logAudit</code> 로 기록 (힌트 수·매칭 수·slug 목록)</div>
+    <div>비밀 정보</div><div>환경변수 <b>값</b>은 전송·저장 대상이 아니다. 키 이름만 오간다</div>
+  </div>
+  <p style="margin-bottom:0"><b>운영 시 지킬 것</b> — 토큰은 <code>.mcp.json</code>·<code>.env</code> 커밋 대상 파일이 아닌 셸 환경변수에 둔다 · 만료를 반드시 설정한다 · 유출 의심 시 <code>/settings/developer</code> 에서 즉시 폐기 후 재발급한다.</p>
+</div>
+
+<!-- 7 -->
+<h2 id="troubleshoot"><span class="num">07</span>문제 해결</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>증상</th><th>원인</th><th>조치</th></tr></thead>
+  <tbody>
+    <tr><td><code>API error 401</code></td><td><code>LINKMAP_API_TOKEN</code> 미설정 / 만료 / 폐기</td><td>셸 환경변수 확인 후 재발급. 설정 변경 뒤에는 Claude Code 재시작 필요</td></tr>
+    <tr><td><code>API error 403</code></td><td>스코프 부족(sync는 <code>write</code>) 또는 남의 프로젝트 UUID</td><td>토큰 스코프와 project_id 소유자 확인</td></tr>
+    <tr><td><code>API error 404</code></td><td>05장의 미구현 엔드포인트</td><td>해당 도구는 현재 사용 불가</td></tr>
+    <tr><td>탐지되는 서비스가 없음</td><td>힌트를 안 준 상태로 호출</td><td>Claude Code가 <code>package.json</code>·<code>.env</code> 키를 먼저 읽도록 지시</td></tr>
+    <tr><td>토큰 발급 자체가 막힘</td><td><code>requireMfa</code> — 2FA 미설정</td><td>설정에서 TOTP 2FA를 먼저 등록</td></tr>
+    <tr><td>서버가 안 뜸</td><td><code>tsx</code> 미설치 / 상대경로 기준 디렉터리 불일치</td><td>리포지터리 루트에서 실행되는지 확인, 필요 시 절대경로로 등록</td></tr>
+  </tbody>
+</table>
+</div>
+
+<footer>
+  근거 소스 — <code>packages/mcp-server/src/index.ts</code> · <code>src/lib/api/token-auth.ts</code> · <code>src/app/api/mcp/{detect,sync,detect-map}/route.ts</code> · <code>src/app/api/tokens/route.ts</code> · <code>.mcp.json</code>. 라우트 존재 여부는 파일시스템 확인 결과 기준이며, 코드 변경 시 05장을 재검증할 것.
+</footer>
+
+</div>
+</body>
+</html>

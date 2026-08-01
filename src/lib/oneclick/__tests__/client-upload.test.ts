@@ -62,6 +62,26 @@ describe('prepareUpload — ZIP', () => {
     expect(paths(result)).toEqual(['app.js', 'index.html']);
   });
 
+  // 요약 카드가 "실제로 배포될 파일"을 보여줘야 한다.
+  // 서버만 걸러내면 사용자는 목록에서 본 파일이 조용히 사라지는 경험을 하게 된다.
+  it('drops what the server would reject and reports why', async () => {
+    const result = await prepareUpload([
+      zipFile({
+        'index.html': '<h1>hi</h1>',
+        'style.css': 'body{}',
+        '.github/workflows/evil.yml': 'run: pwned',
+        '.env': 'SECRET=1',
+        'run.sh': '#!/bin/sh',
+      }),
+    ]);
+
+    expect(paths(result)).toEqual(['index.html', 'style.css']);
+    const dropped = Object.fromEntries(result.skipped.map((s) => [s.path, s.reason]));
+    expect(dropped['.github/workflows/evil.yml']).toContain('Linkmap이 직접');
+    expect(dropped['.env']).toContain('숨김 파일');
+    expect(dropped['run.sh']).toContain('지원하지 않는');
+  });
+
   it('drops archive junk entries', async () => {
     const result = await prepareUpload([
       zipFile({

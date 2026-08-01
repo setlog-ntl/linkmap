@@ -53,6 +53,39 @@ const JUNK_PATTERNS = [
   /(^|\/)\.git\//,
 ];
 
+/**
+ * 배포에 포함되는 확장자 — 서버(upload-sanitizer)의 허용 목록과 같은 값으로 유지한다.
+ * 여기서 걸러야 요약 카드가 "실제로 배포될 파일"과 일치한다. 서버만 걸러내면
+ * 사용자는 목록에서 본 파일이 조용히 사라지는 경험을 하게 된다.
+ */
+const ALLOWED_EXTENSIONS = new Set([
+  'html', 'htm', 'css', 'js', 'mjs', 'json', 'txt', 'md', 'xml', 'webmanifest', 'map', 'csv',
+  'svg', 'ico', 'png', 'jpg', 'jpeg', 'webp', 'gif', 'avif', 'bmp',
+  'woff', 'woff2', 'ttf', 'otf', 'eot',
+  'mp4', 'webm', 'mp3', 'wav', 'ogg',
+  'pdf',
+]);
+
+/**
+ * 서버가 드랍할 파일을 미리 걸러 사유를 돌려준다 (null이면 포함).
+ * 규칙은 upload-sanitizer의 pathRejectionReason·확장자 정책과 대응된다.
+ */
+function dropReason(path: string): string | null {
+  const segments = path.split('/');
+  // 숨김 파일·디렉토리 — .github/ 워크플로우 인젝션도 여기서 걸린다
+  if (segments.some((s) => s.startsWith('.'))) {
+    return path.startsWith('.github/') || path.includes('/.github/')
+      ? '배포 설정은 Linkmap이 직접 넣어요'
+      : '숨김 파일은 배포에 포함되지 않아요';
+  }
+  if (segments.some((s) => s === '..' || s === '')) return '잘못된 경로예요';
+  const ext = extensionOf(path);
+  if (!ALLOWED_EXTENSIONS.has(ext)) {
+    return `지원하지 않는 형식이에요 (.${ext || '확장자 없음'})`;
+  }
+  return null;
+}
+
 export class UploadPrepareError extends Error {
   constructor(message: string) {
     super(message);
@@ -149,6 +182,12 @@ function finalize(
 ): PreparedUpload {
   const withinLimit: typeof entries = [];
   for (const entry of entries) {
+    const reason = dropReason(entry.path);
+    if (reason) {
+      skipped.push({ path: entry.path, reason });
+      continue;
+    }
+
     const isText = TEXT_EXTENSIONS.has(extensionOf(entry.path));
     const limit = isText ? CLIENT_MAX_TEXT_BYTES : CLIENT_MAX_BINARY_BYTES;
     if (entry.bytes.length > limit) {

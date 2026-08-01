@@ -31,6 +31,7 @@ type DeployErrorCategory =
   | 'quota'
   | 'upload_validation'
   | 'repo_not_deployable'
+  | 'auth_required'
   | 'unknown';
 
 /** 카테고리 → 사용자 친화 cause/solution. 'unknown'은 null(기본 메시지로 폴백). */
@@ -79,6 +80,13 @@ function detailsForCategory(
         solution: '위 안내에 따라 파일을 고친 뒤 다시 올려주세요. 웹페이지 파일(index.html)이 반드시 있어야 합니다.',
         failedStep,
       };
+    case 'auth_required':
+      // 세션 만료를 "일시적 오류"로 안내하면 사용자가 원인을 모른 채 재시도만 반복하게 된다
+      return {
+        cause: '로그인이 풀렸습니다.',
+        solution: '페이지를 새로고침해 다시 로그인한 뒤 배포해주세요. 올린 파일은 다시 선택해야 합니다.',
+        failedStep,
+      };
     case 'repo_not_deployable':
       return {
         cause: '이 저장소는 지금 바로 배포할 수 없습니다.',
@@ -93,6 +101,8 @@ function detailsForCategory(
 
 /** 에러 메시지 substring → 카테고리 (서버 code가 없을 때의 폴백 분류) */
 function classifyMessage(msg: string, failedStep: string | null): DeployErrorCategory {
+  // 세션 만료(unauthorizedError)는 GitHub 토큰 문제와 구분해야 한다 — 조치가 다르다
+  if (msg.includes('인증이 필요') || msg.includes('unauthorized')) return 'auth_required';
   if (msg.includes('이미 존재') || msg.includes('already exists') || msg.includes('422') || msg.includes('409')) return 'repo_conflict';
   if ((msg.includes('템플릿') && msg.includes('찾을 수 없')) || (msg.includes('template') && msg.includes('not found'))) return 'template_not_found';
   if (msg.includes('파일 업로드') || msg.includes('file upload') || msg.includes('push')) return 'file_upload';

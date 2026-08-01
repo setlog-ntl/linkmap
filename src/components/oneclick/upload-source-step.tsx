@@ -82,9 +82,6 @@ export function UploadSourceStep({
       if (!result.hasIndex && result.htmlCandidates.length === 0) {
         toast.error("웹페이지 파일(html)이 없어요. AI에게 'HTML 파일로 저장해줘'라고 요청해보세요.");
       }
-      if (result.skipped.length > 0) {
-        toast.info(`${result.skipped.length}개 파일은 제외했어요.`);
-      }
     } catch (err) {
       setUpload(null);
       setPickedFiles(null);
@@ -264,6 +261,24 @@ export function UploadSourceStep({
             ))}
             {upload.files.length > 12 && <li>… 외 {upload.files.length - 12}개</li>}
           </ul>
+
+          {/* 제외된 파일을 배포 전에 밝힌다 — 목록에 없는 파일이 조용히 사라지면 원인을 알 수 없다 */}
+          {upload.skipped.length > 0 && (
+            <div className="pt-2 border-t border-border/60 space-y-1">
+              <p className="text-xs text-muted-foreground">
+                다음 {upload.skipped.length}개는 배포에서 제외돼요
+              </p>
+              <ul className="text-xs text-muted-foreground/80 space-y-0.5 max-h-24 overflow-y-auto">
+                {upload.skipped.slice(0, 8).map((s) => (
+                  <li key={s.path} className="flex items-center justify-between gap-3">
+                    <span className="truncate font-mono">{s.path}</span>
+                    <span className="shrink-0">{s.reason}</span>
+                  </li>
+                ))}
+                {upload.skipped.length > 8 && <li>… 외 {upload.skipped.length - 8}개</li>}
+              </ul>
+            </div>
+          )}
         </Card>
       )}
 
