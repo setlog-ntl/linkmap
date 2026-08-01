@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { apiError } from '@/lib/api/errors';
 import { encrypt } from '@/lib/crypto';
 import { logAudit } from '@/lib/audit';
+import { safeInternalPath } from '@/lib/utils/safe-redirect';
 
 const OAUTH_TOKEN_CONFIGS: Record<string, {
   token_url: string;
@@ -31,8 +33,7 @@ export async function GET(
   const state = request.nextUrl.searchParams.get('state');
   if (!code || !state) return apiError('code와 state가 필요합니다', 400);
 
-  // OAuth callback은 외부 redirect로 인증 쿠키가 유실될 수 있음
-  // state_token으로 사용자를 식별 (32바이트 랜덤 = 추측 불가)
+  // state_token으로 발급 컨텍스트를 조회하고, 아래에서 콜백 세션 사용자와 대조한다
   const adminClient = createAdminClient();
   const { data: oauthState, error: stateError } = await adminClient
     .from('oauth_states')
@@ -48,6 +49,8 @@ export async function GET(
   }
 
   const userId = oauthState.user_id;
+  // state 행은 사용자가 직접 INSERT할 수 있으므로 redirect_url도 신뢰하지 않는다 (Open Redirect 방어)
+  const stateRedirect = safeInternalPath(oauthState.redirect_url, '/dashboard');
 
   // Check expiry
   if (new Date(oauthState.expires_at) < new Date()) {
@@ -55,8 +58,86 @@ export async function GET(
     return NextResponse.redirect(new URL('/dashboard?error=state_expired', request.nextUrl.origin));
   }
 
-  // Delete used state
-  await adminClient.from('oauth_states').delete().eq('id', oauthState.id);
+  // P0 (2026-07-12 감사): state_token 단독 식별 금지 — 콜백 세션 사용자를 state 발급자와 대조.
+  // 공격자가 자신의 state로 피해자의 GitHub 인가를 유도하면 피해자 토큰이 공격자 계정에
+  // 바인딩되므로, 세션이 없거나 발급자와 다르면 토큰 교환 전에 state를 소각하고 거부한다.
+  // (OAuth redirect는 same-browser top-level GET이라 Lax 세션 쿠키가 유지됨 — 세션 부재는 비정상 경로)
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  // 인증 서비스 장애는 공격 시도와 구분한다 — state를 소각하지 않아 재시도를 허용
+  if (authError && !user) {
+    console.error('OAuth callback auth check failed:', authError.message);
+    await logAudit(userId, {
+      action: 'service_account.oauth_callback_rejected',
+      resourceType: 'service_account',
+      details: { provider, reason: 'auth_check_failed', state_id: oauthState.id },
+    });
+    return NextResponse.redirect(
+      new URL('/dashboard?error=oauth_auth_unavailable', request.nextUrl.origin)
+    );
+  }
+
+  if (!user || user.id !== userId) {
+    await adminClient.from('oauth_states').delete().eq('id', oauthState.id);
+    await logAudit(userId, {
+      action: 'service_account.oauth_callback_rejected',
+      resourceType: 'service_account',
+      // 유인당한 세션 주체를 남겨야 사고 시 피해 범위를 산정할 수 있다 (식별자만, 토큰 아님)
+      details: {
+        provider,
+        reason: user ? 'session_user_mismatch' : 'no_session',
+        session_user_id: user?.id ?? null,
+        state_id: oauthState.id,
+      },
+    });
+    return NextResponse.redirect(
+      new URL('/dashboard?error=oauth_session_mismatch', request.nextUrl.origin)
+    );
+  }
+
+  // oauth_states RLS는 user_id만 강제하므로(012) 사용자가 PostgREST로 타인 project_id를 담은
+  // state를 직접 INSERT할 수 있다. adminClient upsert는 RLS를 우회하므로 여기서 소유권을 재확인하지
+  // 않으면 타 사용자 프로젝트의 GitHub 연결이 덮어써진다. authorize의 검증만으로는 부족하다.
+  if (oauthState.project_id) {
+    const { data: ownedProject } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('id', oauthState.project_id)
+      .eq('user_id', user.id)
+      .single();
+
+    if (!ownedProject) {
+      await adminClient.from('oauth_states').delete().eq('id', oauthState.id);
+      await logAudit(user.id, {
+        action: 'service_account.oauth_callback_rejected',
+        resourceType: 'service_account',
+        details: {
+          provider,
+          reason: 'project_not_owned',
+          project_id: oauthState.project_id,
+          state_id: oauthState.id,
+        },
+      });
+      return NextResponse.redirect(
+        new URL('/dashboard?error=oauth_project_forbidden', request.nextUrl.origin)
+      );
+    }
+  }
+
+  // state 단일 사용을 원자적으로 확정 — 삭제된 행이 없으면 이미 소비된 state다
+  const { data: claimedState } = await adminClient
+    .from('oauth_states')
+    .delete()
+    .eq('id', oauthState.id)
+    .select('id')
+    .single();
+
+  if (!claimedState) {
+    return NextResponse.redirect(
+      new URL('/dashboard?error=oauth_state_invalid', request.nextUrl.origin)
+    );
+  }
 
   const clientId = process.env[config.client_id_env];
   const clientSecret = process.env[config.client_secret_env];
@@ -88,7 +169,7 @@ export async function GET(
     if (tokenData.error || !tokenData.access_token) {
       console.error('OAuth token exchange failed:', tokenData.error ?? 'no access_token');
       return NextResponse.redirect(
-        new URL(`${oauthState.redirect_url}?error=token_exchange_failed`, request.nextUrl.origin)
+        new URL(`${stateRedirect}?error=token_exchange_failed`, request.nextUrl.origin)
       );
     }
 
@@ -131,7 +212,7 @@ export async function GET(
 
     if (!service) {
       return NextResponse.redirect(
-        new URL(`${oauthState.redirect_url}?error=service_not_found`, request.nextUrl.origin)
+        new URL(`${stateRedirect}?error=service_not_found`, request.nextUrl.origin)
       );
     }
 
@@ -217,7 +298,7 @@ export async function GET(
 
     if (error) {
       return NextResponse.redirect(
-        new URL(`${oauthState.redirect_url}?error=save_failed`, request.nextUrl.origin)
+        new URL(`${stateRedirect}?error=save_failed`, request.nextUrl.origin)
       );
     }
 
@@ -239,10 +320,10 @@ export async function GET(
       redirectUrl = `/settings/github?oauth_success=${provider}`;
     } else if (oauthState.flow_context === 'oneclick') {
       redirectUrl = `/sites/new?oauth_success=${provider}`;
-    } else if (oauthState.redirect_url.includes('/service-map')) {
-      redirectUrl = `${oauthState.redirect_url}?oauth_success=${provider}&show_repo_selector=true`;
+    } else if (stateRedirect.includes('/service-map')) {
+      redirectUrl = `${stateRedirect}?oauth_success=${provider}&show_repo_selector=true`;
     } else {
-      redirectUrl = `${oauthState.redirect_url}?oauth_success=${provider}`;
+      redirectUrl = `${stateRedirect}?oauth_success=${provider}`;
     }
     return NextResponse.redirect(
       new URL(redirectUrl, request.nextUrl.origin)
@@ -252,7 +333,7 @@ export async function GET(
     console.error('OAuth callback error:', isTimeout ? 'External API request timed out' : err);
     const errorCode = isTimeout ? 'timeout' : 'callback_failed';
     return NextResponse.redirect(
-      new URL(`${oauthState.redirect_url}?error=${errorCode}`, request.nextUrl.origin)
+      new URL(`${stateRedirect}?error=${errorCode}`, request.nextUrl.origin)
     );
   }
 }

@@ -4,17 +4,21 @@ import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
-import { ChevronDown, Globe, GitBranch, Rocket } from 'lucide-react';
+import { ChevronDown, Globe, GitBranch, Rocket, FileUp } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 import { TemplatePickerStep } from './template-picker-step';
+import { UploadSourceStep } from './upload-source-step';
+import type { PreparedUpload } from '@/lib/oneclick/client-upload';
 import { DeployStep } from './deploy-step';
 import { DeploySuccess } from './deploy-success';
 import { AuthModal } from './auth-modal';
 import { GitHubConnectModal } from './github-connect-modal';
 import { useHomepageTemplates, useMyDeployments } from '@/lib/queries/oneclick';
 import { useGitHubConnections } from '@/lib/queries/github-connections';
-import { useDeployMachine } from '@/hooks/use-deploy-machine';
+import { useDeployMachine, UPLOAD_SOURCE } from '@/hooks/use-deploy-machine';
 import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
+import { toast } from 'sonner';
 
 interface OneclickWizardClientProps {
   isAuthenticated: boolean;
@@ -40,14 +44,20 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
   const {
     state,
     handleDeploy,
+    handleUploadDeploy,
     handleGitHubConnected,
     handleRetry,
     deployStatus,
     deployMutation,
+    uploadMutation,
     githubAccount,
     githubLoading,
     isGitHubConnected,
   } = useDeployMachine({ isAuthenticated });
+
+  // 업로드 트랙은 파일을 localStorage에 보존할 수 없어 OAuth 왕복을 견디지 못한다.
+  // 그래서 인증·GitHub 연결을 먼저 끝낸 뒤에만 파일 선택 화면으로 들어간다.
+  const [showUploadTrack, setShowUploadTrack] = useState(false);
 
   // Load all GitHub connections for account selector
   const { data: accounts = [] } = useGitHubConnections();
@@ -67,6 +77,28 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
   const onDeployClick = useCallback((data: { templateId: string; siteName: string; accountId?: string }) => {
     handleDeploy(data.templateId, data.siteName, data.accountId);
   }, [handleDeploy]);
+
+  // 업로드 트랙 진입 — 파일을 고르기 전에 인증·GitHub 연결을 먼저 끝낸다
+  const handleUploadTrackOpen = useCallback(() => {
+    if (!isAuthenticated) {
+      toast.info('먼저 로그인하면 내 파일을 배포할 수 있어요.');
+      return;
+    }
+    // 연결 확인이 끝나기 전에는 판단하지 않는다 (미연결로 오탐하면 정상 사용자가 막힌다)
+    if (githubLoading) {
+      toast.info('GitHub 연결을 확인하는 중이에요. 잠시만 기다려주세요.');
+      return;
+    }
+    if (!isGitHubConnected) {
+      toast.info('먼저 GitHub를 연결하면 내 파일을 배포할 수 있어요.');
+      return;
+    }
+    setShowUploadTrack(true);
+  }, [isAuthenticated, isGitHubConnected, githubLoading]);
+
+  const onUploadDeploy = useCallback((upload: PreparedUpload, siteName: string) => {
+    handleUploadDeploy(upload.files, siteName, selectedAccountId ?? undefined);
+  }, [handleUploadDeploy, selectedAccountId]);
 
   // Determine what to show
   const isStep1 = state.phase === 'selecting';
@@ -184,8 +216,45 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
         ))}
       </div>
 
+      {/* Step 1 — 내 파일 올리기 트랙 */}
+      {isStep1 && showUploadTrack && (
+        <UploadSourceStep
+          githubUsername={isGitHubConnected ? githubAccount?.provider_account_id : undefined}
+          existingSiteNames={existingSiteNames}
+          isDeploying={uploadMutation.isPending}
+          onBack={() => setShowUploadTrack(false)}
+          onDeploy={onUploadDeploy}
+        />
+      )}
+
+      {/* Step 1 — 템플릿 트랙 진입 카드 */}
+      {isStep1 && !showUploadTrack && (
+        <Card
+          role="button"
+          tabIndex={0}
+          onClick={handleUploadTrackOpen}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleUploadTrackOpen();
+            }
+          }}
+          className="p-4 flex items-center gap-3 cursor-pointer hover:border-brand-blue/50 transition-colors"
+        >
+          <div className="h-9 w-9 rounded-lg bg-brand-blue/10 flex items-center justify-center shrink-0">
+            <FileUp className="h-4.5 w-4.5 text-brand-blue" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-medium">이미 만들어둔 파일이 있나요?</p>
+            <p className="text-xs text-muted-foreground">
+              ChatGPT·Claude가 만들어준 HTML이나 ZIP을 그대로 올려서 배포할 수 있어요
+            </p>
+          </div>
+        </Card>
+      )}
+
       {/* Step 1: Template + site name selection */}
-      {isStep1 && (
+      {isStep1 && !showUploadTrack && (
         <TemplatePickerStep
           templates={templates}
           isLoading={templatesLoading}
@@ -195,7 +264,11 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
           isGitHubLoading={githubLoading}
           isAuthenticated={isAuthenticated}
           defaultSiteName={state.siteName}
-          defaultTemplate={defaultTemplateFromUrl ?? state.template}
+          // 업로드 트랙에서 실패해 RETRY로 돌아오면 state.template이 센티넬('upload')이다.
+          // 그대로 넘기면 "선택된 템플릿이 없는데 배포 버튼은 활성" 상태가 되므로 걸러낸다.
+          defaultTemplate={
+            defaultTemplateFromUrl ?? (state.template === UPLOAD_SOURCE ? null : state.template)
+          }
           accounts={accounts}
           selectedAccountId={selectedAccountId}
           onAccountChange={setSelectedAccountId}

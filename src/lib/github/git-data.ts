@@ -145,6 +145,9 @@ export async function getGitTreeRecursive(
     }));
 }
 
+// GitHub 콘텐츠 생성 secondary rate limit(≈80 req/min) 완화 — blob 생성을 전량 병렬 대신 청크 순차로
+const BLOB_CONCURRENCY = 8;
+
 /**
  * Push multiple files to a repo as a single atomic commit.
  * Handles both empty repos (no prior commits) and non-empty repos (auto_init: true).
@@ -153,7 +156,7 @@ export async function pushFilesAtomically(
   token: string,
   owner: string,
   repo: string,
-  files: { path: string; content: string }[],
+  files: { path: string; content: string; encoding?: 'utf-8' | 'base64' }[],
   message: string
 ): Promise<{ commitSha: string }> {
   // 0. Check if repo already has a main branch (non-empty repo)
@@ -170,10 +173,15 @@ export async function pushFilesAtomically(
     baseTreeSha = parentCommit.tree.sha;
   }
 
-  // 1. Create blobs for all files in parallel
-  const blobResults = await Promise.all(
-    files.map((file) => createBlob(token, owner, repo, file.content, 'utf-8'))
-  );
+  // 1. Create blobs in chunks (order preserved)
+  const blobResults: GitBlob[] = [];
+  for (let i = 0; i < files.length; i += BLOB_CONCURRENCY) {
+    const chunk = files.slice(i, i + BLOB_CONCURRENCY);
+    const results = await Promise.all(
+      chunk.map((file) => createBlob(token, owner, repo, file.content, file.encoding ?? 'utf-8'))
+    );
+    blobResults.push(...results);
+  }
 
   // 2. Build tree items
   const treeItems = files.map((file, i) => ({

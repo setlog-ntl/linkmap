@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>원클릭 × 개인 Supabase 연결 — 타당성 검토 v2</title>
+<style>
+  :root {
+    --blue: #2563eb; --green: #059669; --bg: #f8fafc; --card: #ffffff;
+    --text: #0f172a; --muted: #64748b; --border: #e2e8f0;
+    --red: #dc2626; --amber: #d97706;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard Variable', Pretendard, -apple-system, 'Segoe UI', 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.65; padding: 40px 20px; }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  header { margin-bottom: 32px; }
+  .badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; margin-right: 6px; }
+  .badge.plan { background: #dbeafe; color: var(--blue); }
+  .badge.date { background: #e2e8f0; color: var(--muted); }
+  .badge.v2 { background: #ecfdf5; color: var(--green); }
+  h1 { font-size: 26px; margin: 12px 0 6px; letter-spacing: -0.5px; }
+  .sub { color: var(--muted); font-size: 15px; }
+  h2 { font-size: 19px; margin: 40px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--border); letter-spacing: -0.3px; }
+  h2 .num { color: var(--blue); margin-right: 6px; }
+  h3 { font-size: 15px; margin: 20px 0 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-bottom: 14px; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+  .tablewrap { overflow-x: auto; margin-bottom: 14px; }
+  th { background: #f1f5f9; text-align: left; padding: 10px 14px; font-size: 13px; color: #334155; white-space: nowrap; }
+  td { padding: 10px 14px; border-top: 1px solid var(--border); vertical-align: top; }
+  .yes { color: var(--green); font-weight: 700; }
+  .no { color: var(--red); font-weight: 700; }
+  .cond { color: var(--amber); font-weight: 700; }
+  .verdict { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .verdict .card { margin: 0; }
+  .verdict h3 { font-size: 14px; color: var(--muted); font-weight: 600; margin: 0 0 6px; }
+  .verdict p { font-size: 15px; }
+  .principle { background: linear-gradient(90deg, #eff6ff, #ecfdf5); border: 1px solid #bfdbfe; border-radius: 12px; padding: 18px 24px; margin: 18px 0; font-size: 16px; font-weight: 700; text-align: center; }
+  .diagram { background: #0f172a; color: #e2e8f0; border-radius: 12px; padding: 20px 24px; font-family: 'Geist Mono', Consolas, monospace; font-size: 13px; line-height: 1.8; overflow-x: auto; white-space: pre; margin-bottom: 14px; }
+  .diagram .hl-b { color: #60a5fa; } .diagram .hl-g { color: #34d399; } .diagram .hl-m { color: #94a3b8; }
+  .risk-high { background: #fef2f2; color: var(--red); font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 12px; white-space: nowrap; }
+  .risk-mid { background: #fffbeb; color: var(--amber); font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 12px; white-space: nowrap; }
+  .risk-low { background: #f0fdf4; color: var(--green); font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 12px; white-space: nowrap; }
+  .phase { display: flex; gap: 14px; margin-bottom: 12px; }
+  .phase-no { flex-shrink: 0; width: 74px; text-align: center; background: var(--blue); color: #fff; border-radius: 10px; font-weight: 800; font-size: 13px; padding: 8px 0; height: fit-content; }
+  .phase.p0 .phase-no { background: var(--red); }
+  .phase-body { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; }
+  .phase-body b { display: block; margin-bottom: 4px; }
+  .check { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .check::before { content: "✓ 검증: "; color: var(--green); font-weight: 700; }
+  ul, ol { padding-left: 20px; } li { margin-bottom: 6px; }
+  code { background: #f1f5f9; padding: 1px 6px; border-radius: 5px; font-family: 'Geist Mono', Consolas, monospace; font-size: 12.5px; color: #be185d; }
+  .note { font-size: 13px; color: var(--muted); margin-top: 20px; }
+  a { color: var(--blue); }
+  .strategy { border-left: 4px solid var(--blue); }
+  .strategy.rec { border-left-color: var(--green); }
+  .strategy.fallback { border-left-color: #94a3b8; }
+  .tag { display:inline-block; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; margin-left: 6px; vertical-align: middle; }
+  .tag.rec { background: #ecfdf5; color: var(--green); }
+  .tag.fb { background: #f1f5f9; color: var(--muted); }
+  .clickflow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0 4px; }
+  .clickflow span { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 999px; }
+  .clickflow .arrow { background: none; border: none; color: var(--muted); padding: 0; font-weight: 400; }
+  .clickflow .auto { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+  .best td:first-child { font-weight: 700; }
+  .hlrow { background: #f0fdf4; }
+  @media (max-width: 640px) { body { padding: 20px 12px; } h1 { font-size: 21px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="badge plan">기획 검토</span><span class="badge date">2026-07-31</span><span class="badge v2">v2 — 수동 연결 제거 전략 상세화</span>
+  <h1>원클릭 배포 × 사용자 개인 Supabase 연결 + 동적 페이지</h1>
+  <p class="sub">가능 여부 · <b>수동 과정 제거 전략</b> · 사전작업 · 방향성 · 고려사항 — 구현 착수 전 타당성 검토 문서</p>
+</header>
+
+<h2><span class="num">1</span>결론 요약</h2>
+<div class="verdict">
+  <div class="card"><h3>기술적으로 가능한가?</h3><p><span class="yes">가능</span> — GitHub Pages 정적 export 모델을 <b>그대로 유지한 채</b> 가능 (supabase-js CSR + anon key + RLS).</p></div>
+  <div class="card"><h3>수동 과정을 없앨 수 있는가?</h3><p><span class="yes">가능</span> — 기본값은 <b>관리형 위젯(1클릭)</b>, "내 DB로 승격"은 <b>OAuth 완전 자동(복붙 0회)</b>. 수동 SQL 복붙은 폴백으로만 존재.</p></div>
+  <div class="card"><h3>심플함에 걸림돌인가?</h3><p><span class="yes">아니오 (v2 설계 기준)</span> — 사용자 최소 경험은 "위젯 켜기" 1클릭. 배포 위저드는 무변경.</p></div>
+  <div class="card"><h3>방향성과 충돌하는가?</h3><p><span class="yes">오히려 부합</span> — 관리형(1층, 즉시 가치) → 내 DB 승격(2층, 학습 이벤트)이 퍼널 그 자체.</p></div>
+</div>
+<div class="principle">핵심 원칙 (v2) — "위젯은 1클릭으로 즉시 작동(관리형), '내 Supabase로 승격'은 원할 때 자동으로(OAuth), 복붙은 어디에도 없다"</div>
+
+<h2><span class="num">2</span>기술 구조 — 왜 가능한가</h2>
+<div class="card">
+  <b>현재 구조 (2026-07-31 코드 조사)</b>
+  <ul style="margin-top:8px">
+    <li>템플릿 = Next.js 15 소스 번들 → 사용자 GitHub 레포 push → Actions 빌드(<code>output: 'export'</code>) → GitHub Pages 정적 호스팅</li>
+    <li>사용자 데이터는 전부 <code>src/lib/config.ts</code>에 빌드 타임 상수로 emit — <b>런타임 데이터 소스 없음</b>, 외부 연동은 GA 스니펫뿐</li>
+    <li>GitHub 토큰은 <code>service_accounts</code>에 AES-256-GCM 암호화 저장 — 동일 패턴을 Supabase 토큰에 재사용 가능</li>
+  </ul>
+</div>
+<div class="diagram"><span class="hl-m">[방문자 브라우저]</span>
+  GitHub Pages 정적 사이트 <span class="hl-m">(지금과 100% 동일)</span>
+      │
+      └─ <span class="hl-g">동적 모듈</span> (방명록 · 문의폼 · RSVP)
+             ├─ <span class="hl-b">[관리형]</span>  fetch → Linkmap API (Workers) → Linkmap DB   <span class="hl-m">← 기본값</span>
+             └─ <span class="hl-g">[승격 후]</span> supabase-js → 사용자 개인 Supabase (anon key + RLS)</div>
+
+<h2><span class="num">3</span>수동 과정 제거 전략 <span style="font-size:13px;color:var(--green)">(v2 핵심)</span></h2>
+
+<h3>3.1 수동 연결의 마찰 해부 — 약 14단계</h3>
+<div class="tablewrap"><table>
+  <tr><th>구간</th><th>단계</th><th>내용</th><th>이탈 위험</th></tr>
+  <tr><td>Supabase 가입</td><td>~5</td><td>사이트 이동 · 가입 · 이메일 인증 · 로그인</td><td><span class="risk-high">높음</span> 외부 이탈 + 인증 대기</td></tr>
+  <tr><td>프로젝트 생성</td><td>~4</td><td>조직/이름/리전 선택 · <b>DB 비밀번호 결정</b> · 프로비저닝 ~2분</td><td><span class="risk-high">높음</span> 리전·비밀번호는 초보에게 낯선 결정</td></tr>
+  <tr><td>테이블 생성</td><td>~3</td><td>SQL 복사 · SQL Editor 이동 · Run</td><td><span class="risk-mid">중간</span> SQL 자체가 공포 요소</td></tr>
+  <tr><td>키 입력</td><td>~2</td><td>URL·anon key 복사 → Linkmap 입력</td><td><span class="risk-mid">중간</span> service_role 오입력 사고 위험</td></tr>
+</table></div>
+<p style="font-size:14px;color:var(--muted);margin-bottom:14px">원클릭 컨셉과 정면 충돌 → 아래 3개 전략으로 구간별 제거.</p>
+
+<div class="card strategy rec">
+  <b>전략 A — Linkmap 관리형 위젯 <span class="tag rec">기본값 · 진짜 1클릭</span></b>
+  <div class="clickflow"><span>방명록 모듈 토글 ON</span><span class="arrow">→</span><span class="auto">재배포 (자동)</span><span class="arrow">→</span><span class="auto">끝 — 0/14단계</span></div>
+  <ul style="margin-top:8px">
+    <li>Supabase 계정·가입·복붙 <b>전부 불필요</b>. Linkmap DB에 위젯 테이블(<code>deploy_id</code> 스코프 + RLS) + 공개 위젯 API <code>GET/POST /api/oneclick/widget/[deployId]/entries</code> (해당 라우트만 CORS 개방)</li>
+    <li>config emit은 endpoint URL만 — <b>키 노출 자체가 없음</b></li>
+    <li><b>스팸 통제가 오히려 강해짐</b> — 3안 중 유일하게 서버 경유라 Cloudflare Rate Limiting으로 통제 가능 (BYO 직결에선 불가능)</li>
+    <li>플랜별 쿼터(엔트리·위젯 수)로 비용 통제 — <code>quota.ts</code> 패턴 재사용, 유료 전환 포인트</li>
+    <li>트레이드오프: 데이터가 Linkmap에(→ 승격으로 해소, "언제든 가져가기"가 신뢰 포인트) · Workers 부하(리스크 §6-9) · 신규 마이그레이션</li>
+  </ul>
+</div>
+
+<div class="card strategy">
+  <b>전략 B — Supabase OAuth 완전 자동 프로비저닝 <span class="tag rec">"내 DB로 승격" · 복붙 0회</span></b>
+  <div class="clickflow"><span>[내 Supabase로 승격]</span><span class="arrow">→</span><span>GitHub로 가입/로그인</span><span class="arrow">→</span><span>동의 1클릭</span><span class="arrow">→</span><span class="auto">이하 전자동 + 진행바</span></div>
+  <div class="tablewrap" style="margin-top:10px"><table>
+    <tr><th>#</th><th>자동화 단계</th><th>방법</th><th>제거되는 수동</th></tr>
+    <tr><td>1</td><td>가입/로그인</td><td>OAuth 진입 시 Supabase가 처리 — <b>GitHub 소셜 로그인 유도</b> (원클릭 사용자는 GitHub 보유 전제 → 이메일 인증 대기 없음)</td><td>가입 5단계 → 클릭 1~2회</td></tr>
+    <tr><td>2</td><td>동의</td><td>OAuth2 authorize (Linkmap = Supabase OAuth App)</td><td>—</td></tr>
+    <tr><td>3</td><td>조직/프로젝트 확인</td><td><code>GET /v1/organizations</code> · <code>GET /v1/projects</code> — 기존 있으면 선택지, 없으면 신규</td><td>조직 결정</td></tr>
+    <tr><td>4</td><td>프로젝트 생성</td><td><code>POST /v1/projects</code> — 이름 자동(사이트명 기반) · 리전 자동(<code>ap-northeast-2</code>) · <b>DB 비밀번호 자동 생성 + 1회 표시</b></td><td>프로젝트 생성 4단계</td></tr>
+    <tr><td>5</td><td>프로비저닝 대기</td><td>~2분 폴링 — 기존 <code>deploy-status.ts</code> 폴링 UX 재사용</td><td>대기 이탈 방지</td></tr>
+    <tr><td>6</td><td>테이블+RLS 생성</td><td><code>POST /v1/projects/{ref}/database/query</code> → <code>pg_policies</code>로 활성 기계 검증</td><td>SQL 복붙 3단계</td></tr>
+    <tr><td>7</td><td>anon key 회수</td><td><code>GET /v1/projects/{ref}/api-keys</code></td><td>키 복붙 2단계</td></tr>
+    <tr><td>8</td><td>데이터 이전</td><td>관리형 엔트리 → 새 테이블 insert (건수 대조)</td><td>—</td></tr>
+    <tr><td>9</td><td>config emit → 재배포</td><td>기존 batch-update 파이프라인 그대로</td><td>—</td></tr>
+    <tr><td>10</td><td>토큰 파기</td><td>기본: 완료 즉시 파기. Health Check 동의 시에만 암호화 보관</td><td>상시 강권한 회피</td></tr>
+  </table></div>
+  <p style="font-size:14px;margin-top:4px">남는 수동은 <b>"동의" 클릭뿐</b> — 계정 권한 위임이므로 제거가 불가능하고 제거해서도 안 되는 단계.</p>
+</div>
+
+<div class="card strategy fallback">
+  <b>전략 C — 반자동 폴백 <span class="tag fb">폴백 전용 · 기본 경로 아님</span></b>
+  <ul style="margin-top:8px">
+    <li>대상: OAuth 거부/실패 사용자, 이미 자기 프로젝트를 쓰는 고급 사용자</li>
+    <li>SQL 복붙 → <b>SQL Editor 프리필 딥링크</b>(<code>supabase.com/dashboard/project/_/sql/new</code>, 공식 quickstart 패턴)로 "클릭 → Run 1클릭" 축소 (프리필 파라미터 사양은 구현 시 검증)</li>
+    <li>키 입력 → anon key 위치 딥링크 안내 + <b>service_role 오입력 감지·거부</b>(prefix 검사) 필수</li>
+    <li>14단계 → 약 6단계</li>
+  </ul>
+</div>
+
+<h3>3.5 전략 비교와 권장 조합</h3>
+<div class="tablewrap"><table class="best">
+  <tr><th></th><th>사용자 클릭</th><th>복붙</th><th>Supabase 계정</th><th>스팸 통제</th><th>데이터 소유</th><th>구현 난이도</th></tr>
+  <tr><td>수동 (v1안, 폐기)</td><td>~14단계</td><td>3회</td><td>필요</td><td>불가</td><td>사용자</td><td>하</td></tr>
+  <tr class="hlrow"><td>A 관리형 (기본)</td><td><b>1클릭</b></td><td>0회</td><td><b>불필요</b></td><td><b>강함 (CF rate limit)</b></td><td>Linkmap (이전 가능)</td><td>중</td></tr>
+  <tr class="hlrow"><td>B OAuth 승격</td><td>3~4클릭</td><td><b>0회</b></td><td>필요 (GitHub로 즉시)</td><td>DB 제약만</td><td><b>사용자</b></td><td>중상</td></tr>
+  <tr><td>C 반자동 폴백</td><td>~6단계</td><td>1~2회</td><td>필요</td><td>DB 제약만</td><td>사용자</td><td>하</td></tr>
+</table></div>
+<div class="principle" style="font-size:15px">권장 조합 — A를 1층 기본값(원클릭 유지) + B를 "내 Supabase로 승격" 버튼(2층 학습 이벤트) + C는 B의 폴백.<br>수동 복붙은 어떤 기본 경로에도 등장하지 않는다.</div>
+
+<h2><span class="num">4</span>현재 방향성과의 차이</h2>
+<div class="tablewrap"><table>
+  <tr><th>항목</th><th>현재</th><th>확장 후 (v2)</th></tr>
+  <tr><td>필요 외부 계정</td><td>GitHub 1개</td><td>GitHub 1개 (관리형) / +Supabase (승격 선택 시)</td></tr>
+  <tr><td>사이트 성격</td><td>순수 정적</td><td>정적 + 동적 위젯 (방명록·문의·RSVP)</td></tr>
+  <tr><td>데이터 위치</td><td>레포 config.ts</td><td>+ Linkmap DB(관리형) 또는 사용자 DB(승격)</td></tr>
+  <tr><td>반영 속도</td><td>편집 → 재빌드 수 분</td><td>동적 데이터는 즉시</td></tr>
+  <tr><td>위젯 활성화 비용</td><td>—</td><td><b>1클릭 (모듈 토글)</b></td></tr>
+</table></div>
+<div class="card">
+  <p><b>퍼널 관점</b> — 관리형→승격 구조가 코어 컨셉("배우다 보니 관리가 되어 있는")과 정확히 일치. 1층에서 마찰 0으로 방명록이 작동하고, "내 DB로 가져가기"가 바이브코더의 <b>첫 자발적 인프라 학습 이벤트</b>가 된다. 승격 시 서비스맵 노드·환경변수·Health Check 자연 활성화.</p>
+  <p style="margin-top:8px"><b>온보딩 마찰</b> — 기본 경로에서 Supabase 가입이 완전히 사라져 1층 진입률 영향 없음. 배포 위저드(3단계)는 여전히 <span class="no">무변경.</span></p>
+</div>
+
+<h2><span class="num">5</span>사전작업</h2>
+<div class="card">
+  <b style="color:var(--red)">보안 선결 (P0 — 이 기능 이전에 반드시)</b>
+  <ul style="margin-top:8px">
+    <li><b>OAuth 콜백 크로스계정 CSRF 수정</b> (07-12 감사 P0, 미수정) — Supabase provider가 같은 콜백을 타므로 수정 없이는 공격 표면 확대</li>
+    <li>GitHub Secrets 경로 nacl 논스 버그 — 본 기획은 anon key 평문 emit + endpoint emit이라 Secrets 경로 회피 가능</li>
+  </ul>
+</div>
+<div class="card">
+  <b>전략 A (관리형) 사전작업</b>
+  <ul style="margin-top:8px">
+    <li>위젯 데이터 테이블 마이그레이션 (RLS + 정책 + created_at + deploy_id FK) + 플랜별 쿼터 (<code>quota.ts</code> 패턴)</li>
+    <li>공개 위젯 API (5단계 규칙, 익명 POST는 Zod + honeypot + 글자수 제한) + 해당 라우트만 CORS 개방</li>
+    <li>Cloudflare Rate Limiting Rule 추가 (앱 코드 아님 — 기존 정책 준수)</li>
+    <li>동적 모듈 1종: invitation 방명록/RSVP — 스키마·제너레이터·프리뷰 3중 구조 + <code>module-roundtrip.test.ts</code> 확장</li>
+  </ul>
+</div>
+<div class="card">
+  <b>전략 B (OAuth 승격) 사전작업</b>
+  <ul style="margin-top:8px">
+    <li>Supabase 조직 설정에서 OAuth App 등록 (redirect URI · 스코프)</li>
+    <li><code>service_accounts</code>에 <code>supabase</code> provider 추가 (AES-256-GCM 재사용) + 사용 후 파기 플로우</li>
+    <li>RLS 표준 SQL 템플릿 — 방명록: 공개 read + 익명 insert / 문의폼: insert만·read owner 한정(<b>공개 read 금지</b>) / RSVP: insert + 확인 코드 조회 — <code>pg_policies</code> 기계 검증</li>
+    <li>프로비저닝 폴링 UX (deploy-status 패턴 재사용) · 관리형→승격 데이터 이전 로직</li>
+    <li>supabase-js 고정 버전 + lockfile 규칙 (<code>npm view</code> 검증), 또는 CDN 방식 검토</li>
+  </ul>
+</div>
+
+<h2><span class="num">6</span>고려사항 / 리스크</h2>
+<div class="tablewrap"><table>
+  <tr><th>리스크</th><th>수준</th><th>대응</th></tr>
+  <tr><td>RLS 없는 테이블 + anon key = DB 전체 공개</td><td><span class="risk-high">높음</span></td><td>RLS 포함 SQL만 자동 실행 + <code>pg_policies</code> 기계 검증. 임의 테이블 연결 기능 없음</td></tr>
+  <tr><td>Management API 토큰 = 계정 전체 제어 권한</td><td><span class="risk-high">높음 (B)</span></td><td>기본: 프로비저닝 완료 즉시 파기. Health Check 동의 시에만 암호화 보관</td></tr>
+  <tr><td>익명 insert 스팸</td><td><span class="risk-mid">중간</span></td><td><b>관리형: CF rate limit (강함)</b> / 승격 후: 글자수·honeypot·DB 제약. Edge Function은 비목표</td></tr>
+  <tr><td>무료 티어 프로젝트 자동 일시정지 → 위젯 깨짐</td><td><span class="risk-mid">중간</span></td><td>위젯 우아한 실패(섹션 숨김) + Health Check 감지·알림 (2층 셀링 포인트)</td></tr>
+  <tr><td><b>무료 조직 활성 프로젝트 2개 제한</b></td><td><span class="risk-mid">중간 (B)</span></td><td>프로비저닝 전 <code>GET /v1/projects</code> 확인 → 기존 프로젝트 선택지 제시 · 한도 초과 안내</td></tr>
+  <tr><td><b>DB 비밀번호 자동 생성의 전달 문제</b></td><td><span class="risk-mid">중간 (B)</span></td><td>생성 직후 1회 표시 + "대시보드에서 재설정 가능" 안내. Linkmap은 저장하지 않음</td></tr>
+  <tr><td>사용자가 자기 DB에서 테이블 삭제·변경</td><td><span class="risk-mid">중간</span></td><td>조용한 폴백 + "연결 재설정"(재프로비저닝) 버튼 — OAuth 재동의로 원클릭 복구</td></tr>
+  <tr><td>기존 편집·재배포 P1 결함 위 적층</td><td><span class="risk-mid">중간</span></td><td>편집 경로 P1(멀티계정 토큰 오참조 등) 선정리 권장</td></tr>
+  <tr><td><b>관리형 위젯 API의 Workers 부하</b> (Free plan 503 이력)</td><td><span class="risk-mid">중간 (A)</span></td><td>위젯 라우트 경량화 + GET 캐싱 + rate limit + 쿼터. <code>cpu_ms</code> 설정 확인</td></tr>
+  <tr><td>관리형→승격 데이터 이전 무결성</td><td><span class="risk-low">낮음</span></td><td>이전 후 건수 대조 · 원본 soft 보관 후 지연 삭제</td></tr>
+  <tr><td>문의폼 개인정보 책임 경계</td><td><span class="risk-low">낮음</span></td><td>관리형: 보관정책 명시 / 승격 후: 사용자 소유·사용자 DB 명시</td></tr>
+</table></div>
+
+<h2><span class="num">7</span>단계별 로드맵 (v2, 검증 기준 포함)</h2>
+<div class="phase p0"><div class="phase-no">Phase 0</div><div class="phase-body"><b>보안 선결</b>OAuth 콜백 P0 수정 + 편집 경로 P1 정리<div class="check">감사 항목 재현 테스트 통과</div></div></div>
+<div class="phase"><div class="phase-no">Phase 1</div><div class="phase-body"><b>관리형 위젯 (전략 A)</b>invitation 방명록/RSVP 모듈 + Linkmap 위젯 API + 쿼터 + CF rate limit<div class="check">위젯 토글 → 재배포만으로 방명록 작동 (Supabase 계정 없이, 1클릭) · rate limit 동작 · 기본 배포 플로우 무변경(기존 E2E 통과)</div></div></div>
+<div class="phase"><div class="phase-no">Phase 2</div><div class="phase-body"><b>OAuth 자동 승격 (전략 B) + 반자동 폴백 (전략 C)</b>"내 Supabase로 승격" 버튼 — 프로젝트 생성·테이블·RLS·anon key 회수·데이터 이전 전자동<div class="check">승격 클릭 4회 이내 · 복붙 0회 · RLS를 <code>pg_policies</code>로 기계 검증 · 데이터 이전 건수 일치 · 토큰 파기 확인</div></div></div>
+<div class="phase"><div class="phase-no">Phase 3</div><div class="phase-body"><b>2층 퍼널 브릿지</b>승격 시 서비스맵 노드·환경변수·Health Check 자동 연동<div class="check">supabase 노드 자동 생성 · 일시정지 감지 알림 작동</div></div></div>
+<p style="font-size:14px;color:var(--muted)">각 Phase는 독립 출시 가능. <b>Phase 1만으로 "원클릭 동적 위젯"이라는 사용자 가치가 완성</b>되고, Phase 2부터 소유권·학습 가치가 추가된다.</p>
+
+<h2><span class="num">8</span>비목표 (이번 범위에서 하지 않는 것)</h2>
+<div class="card"><ul>
+  <li>배포 위저드(3단계) 변경 — 위젯은 편집기(배포 후) 진입점에서만</li>
+  <li>수동 SQL 복붙을 기본 경로에 두는 것 (폴백으로만 존재)</li>
+  <li>사용자 Supabase에 Edge Function/서버 코드 배포</li>
+  <li>임의 테이블 연결 기능 — RLS 통제 불가</li>
+  <li>호스팅형(<code>/s/[slug]</code>) 발행 모델 전환 — 별도 설계 트랙(2026-06-18) 유지</li>
+  <li>사용자 사이트 자체의 회원제/로그인 — 복잡도 급증, 추후 별도 검토</li>
+</ul></div>
+
+<p class="note">근거: 2026-07-31 코드베이스 구조 조사(oneclick API · generators · shared-template-files · github lib) · 2026-07-12 원클릭 감사 · Supabase 공식 문서 (<a href="https://supabase.com/docs/guides/integrations/build-a-supabase-oauth-integration">OAuth2 Integration</a> · <a href="https://supabase.com/docs/reference/api/introduction">Management API</a> · <a href="https://supabase.com/docs/guides/getting-started/quickstarts/reactjs">quickstart SQL 프리필 딥링크</a>)<br>
+쌍둥이 문서: <code>docs/planning/2026-07-31_oneclick-user-supabase-dynamic.md</code></p>
+
+</div>
+</body>
+</html>

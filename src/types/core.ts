@@ -175,11 +175,15 @@ export interface HomepageTemplate {
   updated_at: string;
 }
 
+// M109 CHECK와 동기화: template 소스만 template_id를 가진다
+export type HomepageDeploySourceType = 'template' | 'upload' | 'import';
+
 export interface HomepageDeploy {
   id: string;
   user_id: string;
   project_id: string | null;
-  template_id: string;
+  template_id: string | null;
+  source_type: HomepageDeploySourceType;
   forked_repo_full_name: string | null;
   forked_repo_url: string | null;
   fork_status: string;

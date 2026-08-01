@@ -17,6 +17,7 @@ export type DeployErrorCategory =
   | 'pages_error'
   | 'network'
   | 'quota'
+  | 'upload_validation'
   | 'unknown';
 
 interface LogDeployErrorParams {

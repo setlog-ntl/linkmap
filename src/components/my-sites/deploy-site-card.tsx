@@ -114,9 +114,14 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
   // 첫 로드 전에만 스피너 overlay — 재시도 중엔 이전 iframe 화면이 그대로 유지됨
   const showOverlay = refreshCount === 0 && !iframeLoaded && !iframeError && !isDeploying;
 
-  const templateName = deploy.homepage_templates
-    ? (locale === 'ko' ? deploy.homepage_templates.name_ko : deploy.homepage_templates.name)
-    : null;
+  // 템플릿 배포는 템플릿명을, 사용자 소스 배포는 출처를 표시한다 (M109 source_type)
+  const sourceLabel = deploy.homepage_templates
+    ? `${t(locale, 'mySites.template')}: ${locale === 'ko' ? deploy.homepage_templates.name_ko : deploy.homepage_templates.name}`
+    : deploy.source_type === 'upload'
+      ? (locale === 'ko' ? '내가 올린 파일' : 'My uploaded files')
+      : deploy.source_type === 'import'
+        ? (locale === 'ko' ? '내 GitHub 저장소' : 'My GitHub repository')
+        : null;
 
   const handleDelete = async () => {
     try {
@@ -330,10 +335,8 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <h3 className="font-semibold truncate">{deploy.site_name}</h3>
-            {templateName && (
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {t(locale, 'mySites.template')}: {templateName}
-              </p>
+            {sourceLabel && (
+              <p className="text-xs text-muted-foreground mt-0.5">{sourceLabel}</p>
             )}
           </div>
           <p className="text-xs text-muted-foreground flex-shrink-0 pt-0.5">

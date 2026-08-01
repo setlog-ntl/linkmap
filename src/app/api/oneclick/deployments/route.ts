@@ -28,6 +28,7 @@ export async function GET() {
       created_at,
       deployed_at,
       template_id,
+      source_type,
       project_id,
       homepage_templates (
         id,

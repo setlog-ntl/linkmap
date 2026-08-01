@@ -29,6 +29,7 @@ type DeployErrorCategory =
   | 'pages_error'
   | 'network'
   | 'quota'
+  | 'upload_validation'
   | 'unknown';
 
 /** 카테고리 → 사용자 친화 cause/solution. 'unknown'은 null(기본 메시지로 폴백). */
@@ -70,6 +71,13 @@ function detailsForCategory(
       return { cause: t(loc, 'deployError.network.cause'), solution: t(loc, 'deployError.network.solution'), failedStep };
     case 'quota':
       return { cause: t(loc, 'deployError.quota.cause'), solution: t(loc, 'deployError.quota.solution'), failedStep };
+    case 'upload_validation':
+      // 서버 메시지 자체가 무엇을 고쳐야 하는지 알려주므로(예: index.html 부재) cause로 그대로 쓴다
+      return {
+        cause: '올린 파일을 그대로 배포할 수 없었습니다.',
+        solution: '위 안내에 따라 파일을 고친 뒤 다시 올려주세요. 웹페이지 파일(index.html)이 반드시 있어야 합니다.',
+        failedStep,
+      };
     case 'unknown':
     default:
       return null;

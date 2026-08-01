@@ -103,6 +103,33 @@ export function useDeployToGitHubPages() {
 
 // ---------- Types: Deployment List ----------
 
+/**
+ * 내 파일 업로드 배포 (트랙 A).
+ * 서버는 항상 파일 배열만 받는다 — 단일 HTML·ZIP·폴더는 클라이언트에서 이 형태로 정규화된다.
+ */
+export function useDeployUpload() {
+  return useMutation({
+    mutationFn: async (input: {
+      site_name: string;
+      files: { path: string; content: string; encoding: 'utf-8' | 'base64' }[];
+      github_service_account_id?: string;
+    }): Promise<DeployPagesResult & { file_count?: number; skipped_files?: { path: string; reason: string }[] }> => {
+      const res = await fetch('/api/oneclick/deploy-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        const err = new Error(data.error || '배포 실패');
+        (err as Error & { code?: string }).code = data.code;
+        throw err;
+      }
+      return res.json();
+    },
+  });
+}
+
 export interface HomepageDeploy {
   id: string;
   site_name: string;
@@ -122,7 +149,9 @@ export interface HomepageDeploy {
   showcase_category?: string | null;
   created_at: string;
   deployed_at: string | null;
-  template_id: string;
+  template_id: string | null;
+  /** M109: 배포 소스 — upload/import는 template_id가 null이다 */
+  source_type: 'template' | 'upload' | 'import';
   project_id: string | null;
   homepage_templates: {
     id: string;

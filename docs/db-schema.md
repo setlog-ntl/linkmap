@@ -543,7 +543,7 @@
 | id | UUID PK | NO | gen_random_uuid() |
 | user_id | UUID FK | NO | → auth.users(id) |
 | project_id | UUID FK | YES | → projects(id) |
-| template_id | UUID FK | NO | → homepage_templates(id) |
+| template_id | UUID FK | YES | → homepage_templates(id) | M109: NULL 허용 (upload/import 소스) |
 | forked_repo_full_name | TEXT | YES | NULL |
 | forked_repo_url | TEXT | YES | NULL |
 | fork_status | TEXT | NO | 'pending' |
@@ -562,6 +562,7 @@
 | showcase_category | TEXT | YES | NULL | M073. CHECK: portfolio,business,blog,landing,community,ecommerce,other |
 | showcase_image_url | TEXT | YES | NULL | M076 |
 | display_order | INTEGER | NO | 0 | M086 |
+| source_type | TEXT | NO | 'template' | M109. CHECK: template,upload,import + 정합성 CHECK `(source_type='template') = (template_id IS NOT NULL)` |
 | created_at | TIMESTAMPTZ | NO | now() |
 | updated_at | TIMESTAMPTZ | NO | now() |
 | deployed_at | TIMESTAMPTZ | YES | NULL |
@@ -942,8 +943,8 @@ CREATE TYPE team_role AS ENUM ('admin', 'editor', 'viewer');
 supabase/migrations/NNN_description.sql
 ```
 - NNN: 3자리 숫자 (001~100)
-- 다음 마이그레이션: **109**
-- 최근: 099 `fix_quota_enum_cast` — 052·098 함수의 `plan_quotas.plan`(enum) vs TEXT 비교 오류(`42883`)에 `::subscription_plan` 캐스트 적용 (프로덕션 배포 500 핫픽스, 2026-06-12 E2E에서 발견) / 100 `admin_quota_bypass_rpc` — `create_homepage_deploy_atomic`에 `profiles.is_admin` 무제한 바이패스 추가 (quota.ts 정책과 일치화) / 101~103 quota RPC·secure_notes / **104** `profiles_public_read_hardening` — M075 `USING(true)` 정책 제거 (레드팀 F-1, 라이브 미적용이었음) / **105** `showcase_counter_delta_clamp` — `increment_showcase_counter` delta를 ±1로 클램프 (레드팀 F-8) / **106** `visitor_logs_ip_hash` — 평문 IP 파기 + 해시 저장 전환 (레드팀 F-7) / **107** `rpc_exposure_hardening` — 미사용 SECURITY DEFINER RPC 6종 anon/authenticated EXECUTE 회수 + `auto_pick_monthly_showcase` 호출자 기간 입력 제거 / **108** `function_public_execute_revoke` — 함수 EXECUTE의 **PUBLIC 기본 권한** 회수 (102·107의 REVOKE가 실효 없던 근본 원인)
+- 다음 마이그레이션: **110**
+- 최근: 099 `fix_quota_enum_cast` — 052·098 함수의 `plan_quotas.plan`(enum) vs TEXT 비교 오류(`42883`)에 `::subscription_plan` 캐스트 적용 (프로덕션 배포 500 핫픽스, 2026-06-12 E2E에서 발견) / 100 `admin_quota_bypass_rpc` — `create_homepage_deploy_atomic`에 `profiles.is_admin` 무제한 바이패스 추가 (quota.ts 정책과 일치화) / 101~103 quota RPC·secure_notes / **104** `profiles_public_read_hardening` — M075 `USING(true)` 정책 제거 (레드팀 F-1, 라이브 미적용이었음) / **105** `showcase_counter_delta_clamp` — `increment_showcase_counter` delta를 ±1로 클램프 (레드팀 F-8) / **106** `visitor_logs_ip_hash` — 평문 IP 파기 + 해시 저장 전환 (레드팀 F-7) / **107** `rpc_exposure_hardening` — 미사용 SECURITY DEFINER RPC 6종 anon/authenticated EXECUTE 회수 + `auto_pick_monthly_showcase` 호출자 기간 입력 제거 / **108** `function_public_execute_revoke` — 함수 EXECUTE의 **PUBLIC 기본 권한** 회수 (102·107의 REVOKE가 실효 없던 근본 원인) / **109** `user_source_deploys` — `homepage_deploys.template_id` NULL 허용 + `source_type`(template/upload/import) + 정합성 CHECK, `create_homepage_deploy_atomic`을 7-인자로 재생성(구 6-인자 DROP — DEFAULT 인자 오버로드 모호성 방지, **본문은 M100 최신본 기반**: admin 바이패스·enum 캐스트 유지)
 
 > 🔴 **함수 권한 필수 규칙**: PostgreSQL은 함수 생성 시 EXECUTE를 **PUBLIC에 기본 부여**한다(ACL `=X/owner`). `REVOKE ... FROM anon, authenticated`는 두 롤의 *직접* GRANT만 지우므로 **PUBLIC 경유 권한이 남아 회수가 무의미**하다. 반드시 `REVOKE ... FROM PUBLIC` 후 필요한 롤에만 GRANT할 것. 검증은 `has_function_privilege('anon', oid, 'EXECUTE')`로 한다(`information_schema.routine_privileges` 조회는 PUBLIC을 놓친다). M108이 `ALTER DEFAULT PRIVILEGES ... REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC`을 걸어 두었으므로, **신규 RPC는 GRANT를 명시하지 않으면 anon/authenticated가 호출할 수 없다.**
 >

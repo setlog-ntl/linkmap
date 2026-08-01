@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>원클릭 "내 자료 배포" — 실행 설계</title>
+<style>
+  :root {
+    --blue: #2563eb; --green: #059669; --bg: #f8fafc; --card: #ffffff;
+    --text: #0f172a; --muted: #64748b; --border: #e2e8f0;
+    --red: #dc2626; --amber: #d97706;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard Variable', Pretendard, -apple-system, 'Segoe UI', 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.65; padding: 40px 20px; }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  header { margin-bottom: 32px; }
+  .badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; margin-right: 6px; }
+  .badge.plan { background: #dbeafe; color: var(--blue); }
+  .badge.date { background: #e2e8f0; color: var(--muted); }
+  .badge.v2 { background: #ecfdf5; color: var(--green); }
+  h1 { font-size: 26px; margin: 12px 0 6px; letter-spacing: -0.5px; }
+  .sub { color: var(--muted); font-size: 15px; }
+  h2 { font-size: 19px; margin: 40px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--border); letter-spacing: -0.3px; }
+  h2 .num { color: var(--blue); margin-right: 6px; }
+  h3 { font-size: 15px; margin: 20px 0 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-bottom: 14px; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+  .tablewrap { overflow-x: auto; margin-bottom: 14px; }
+  th { background: #f1f5f9; text-align: left; padding: 10px 14px; font-size: 13px; color: #334155; white-space: nowrap; }
+  td { padding: 10px 14px; border-top: 1px solid var(--border); vertical-align: top; }
+  .yes { color: var(--green); font-weight: 700; }
+  .no { color: var(--red); font-weight: 700; }
+  .cond { color: var(--amber); font-weight: 700; }
+  .verdict { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .verdict .card { margin: 0; }
+  .verdict h3 { font-size: 14px; color: var(--muted); font-weight: 600; margin: 0 0 6px; }
+  .verdict p { font-size: 15px; }
+  .principle { background: linear-gradient(90deg, #eff6ff, #ecfdf5); border: 1px solid #bfdbfe; border-radius: 12px; padding: 18px 24px; margin: 18px 0; font-size: 16px; font-weight: 700; text-align: center; }
+  .diagram { background: #0f172a; color: #e2e8f0; border-radius: 12px; padding: 20px 24px; font-family: 'Geist Mono', Consolas, monospace; font-size: 13px; line-height: 1.8; overflow-x: auto; white-space: pre; margin-bottom: 14px; }
+  .diagram .hl-b { color: #60a5fa; } .diagram .hl-g { color: #34d399; } .diagram .hl-m { color: #94a3b8; }
+  .risk-high { background: #fef2f2; color: var(--red); font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 12px; white-space: nowrap; }
+  .risk-mid { background: #fffbeb; color: var(--amber); font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 12px; white-space: nowrap; }
+  .risk-low { background: #f0fdf4; color: var(--green); font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 12px; white-space: nowrap; }
+  .risk-crit { background: #7f1d1d; color: #fff; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 12px; white-space: nowrap; }
+  .phase { display: flex; gap: 14px; margin-bottom: 12px; }
+  .phase-no { flex-shrink: 0; width: 74px; text-align: center; background: var(--blue); color: #fff; border-radius: 10px; font-weight: 800; font-size: 13px; padding: 8px 0; height: fit-content; }
+  .phase.p0 .phase-no { background: var(--red); }
+  .phase-body { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; }
+  .phase-body b { display: block; margin-bottom: 4px; }
+  .check { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .check::before { content: "✓ 검증: "; color: var(--green); font-weight: 700; }
+  ul, ol { padding-left: 20px; } li { margin-bottom: 6px; }
+  code { background: #f1f5f9; padding: 1px 6px; border-radius: 5px; font-family: 'Geist Mono', Consolas, monospace; font-size: 12.5px; color: #be185d; }
+  .note { font-size: 13px; color: var(--muted); margin-top: 20px; }
+  a { color: var(--blue); }
+  .strategy { border-left: 4px solid var(--blue); }
+  .strategy.rec { border-left-color: var(--green); }
+  .strategy.warn { border-left-color: var(--red); }
+  .tag { display:inline-block; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; margin-left: 6px; vertical-align: middle; }
+  .tag.rec { background: #ecfdf5; color: var(--green); }
+  .tag.fb { background: #f1f5f9; color: var(--muted); }
+  .tag.crit { background: #fef2f2; color: var(--red); }
+  .clickflow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0 4px; }
+  .clickflow span { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 999px; }
+  .clickflow .arrow { background: none; border: none; color: var(--muted); padding: 0; font-weight: 400; }
+  .clickflow .auto { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+  .hlrow { background: #f0fdf4; }
+  @media (max-width: 640px) { body { padding: 20px 12px; } h1 { font-size: 21px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="badge plan">기획 확정 · 실행 설계</span><span class="badge date">2026-08-01</span><span class="badge v2">07-31 Supabase 위젯 기획과 독립 병행</span>
+  <h1>원클릭 "내 자료 배포" — 파일 업로드 · 내 GitHub repo 자동 배포</h1>
+  <p class="sub">템플릿이 아닌 <b>사용자가 만든 자료</b>(AI 생성 HTML/ZIP)와 <b>기존 GitHub 저장소</b>를 원클릭으로 배포 — 구현 착수 전 실행 설계 문서</p>
+</header>
+
+<h2><span class="num">0</span>제품 결정 (대화로 확정 — 변경 불가)</h2>
+<div class="tablewrap"><table>
+  <tr><th>#</th><th>결정</th><th>내용</th></tr>
+  <tr><td>1</td><td>입력 방식</td><td><b>파일 업로드(트랙 A) + 내 GitHub repo 연결(트랙 B)</b> 둘 다</td></tr>
+  <tr><td>2</td><td>프로젝트 유형</td><td>정적 우선(Phase 1) → 빌드형 확장(Phase 2)</td></tr>
+  <tr><td>3</td><td>타겟</td><td>바이브코더 1순위 — UX 극단적 단순화 (결정을 요구하지 않는다)</td></tr>
+  <tr><td>4</td><td>쿼터</td><td>기존 '사이트 보유 수' 쿼터 합산 (Free 3 / Pro 10 / Team 50, <code>create_homepage_deploy_atomic</code> 재사용)</td></tr>
+  <tr><td>5</td><td>repo 개입</td><td>동의 후 표준 워크플로우 <b>1파일만 커밋</b> — 기존 파일 무수정, 기존 repo 삭제 절대 금지</td></tr>
+  <tr><td>6</td><td>UI 진입점</td><td><code>/sites/new</code> 템플릿 피커에 카드 2장 통합 (단일 퍼널)</td></tr>
+  <tr><td>7</td><td>원본 보관</td><td><b>즉시 폐기</b> — 서버는 ZIP을 수신조차 하지 않음(클라이언트 해제), repo가 유일한 진실 원천</td></tr>
+</table></div>
+
+<h2><span class="num">1</span>결론 요약</h2>
+<div class="verdict">
+  <div class="card"><h3>기술적으로 가능한가?</h3><p><span class="yes">가능</span> — 배포 엔진(repo 생성→원자 push→Pages 활성화→폴링→쿼터→에러 분류→showcase)을 <b>전면 재사용</b>. 신규는 업로드 검증·repo 분석·스키마 확장뿐.</p></div>
+  <div class="card"><h3>원클릭 컨셉과 충돌하는가?</h3><p><span class="yes">아니오, 오히려 확장</span> — 템플릿 앞단에 새 진입로. 바이브코더 최빈 시나리오("AI가 준 파일이 손에 있다")가 퍼널 안으로.</p></div>
+  <div class="card"><h3>가장 큰 위험은?</h3><p><span class="no">기존 repo 파손</span> — 현재 삭제 API가 GitHub repo를 삭제(<code>deployments/[id]/route.ts:127</code>). <b>source_type 가드가 최우선 안전 요건.</b></p></div>
+  <div class="card"><h3>선결 조건은?</h3><p><span class="cond">P0 수정</span> — OAuth 콜백 크로스계정 CSRF(07-12 감사 미수정). 신규 트랙이 노출면을 확대하므로 <b>출시 게이트</b>.</p></div>
+</div>
+<div class="principle">핵심 원칙 — "서버는 원본을 만지지 않고(클라이언트 해제·즉시 폐기), 사용자 repo는 파일 1개 추가 외 절대 건드리지 않는다"</div>
+
+<h2><span class="num">2</span>기술 구조 — 재사용 지도</h2>
+<div class="tablewrap"><table>
+  <tr><th>단계</th><th>현재 구현</th><th>트랙 A (업로드)</th><th>트랙 B (repo 연결)</th></tr>
+  <tr><td>인증·쿼터</td><td><code>getUser()</code> + <code>checkHomepageDeployQuota</code></td><td class="yes">재사용</td><td class="yes">재사용</td></tr>
+  <tr><td>토큰 해석</td><td><code>safeDecryptToken</code> + workflow 스코프 검증</td><td class="yes">재사용</td><td class="yes">재사용</td></tr>
+  <tr><td>파일 소스</td><td>템플릿 정적 번들</td><td class="cond">신규: 클라 해제 → files[] JSON</td><td>해당 없음 (repo가 소스)</td></tr>
+  <tr><td>repo 생성</td><td><code>createRepo</code> 충돌 자동채번</td><td class="yes">재사용</td><td>불사용 — 기존 repo</td></tr>
+  <tr><td>Pages 활성화</td><td><code>enableGitHubPagesWithActions</code></td><td class="yes">재사용</td><td class="cond">재사용 + legacy→workflow 전환 신규</td></tr>
+  <tr><td>파일 push</td><td><code>pushFilesAtomically</code> 원자 커밋</td><td class="cond">재사용 (인코딩·청크 확장)</td><td>불사용 — <code>createOrUpdateFileContent</code> 1파일</td></tr>
+  <tr><td>배포 레코드</td><td><code>create_homepage_deploy_atomic</code> RPC</td><td class="cond">재사용 (source_type 인자 추가)</td><td class="cond">재사용 (동일)</td></tr>
+  <tr><td>상태 추적</td><td><code>resolveDeployStatus</code> + 15분 타임아웃</td><td class="yes">재사용 (무수정)</td><td class="cond">workflow 파일명만 config 참조</td></tr>
+  <tr><td>실패 정리</td><td><code>cleanupResources</code> (신규 repo 삭제)</td><td class="yes">재사용</td><td class="no">재설계 — repo 삭제 절대 금지</td></tr>
+  <tr><td>2층 브릿지</td><td>projects + 서비스맵 링크 자동 생성</td><td class="yes">재사용 (추가 작업 0)</td><td class="yes">재사용 (추가 작업 0)</td></tr>
+</table></div>
+<div class="diagram"><span class="hl-b">[트랙 A: 파일 업로드]</span>
+  브라우저: 단일 HTML / ZIP / 폴더
+      │  <span class="hl-g">fflate 해제 · 정규화 · index.html 판정 · 상한 검사</span>   <span class="hl-m">← 전부 클라이언트 (원본 서버 미전송)</span>
+      ▼
+  POST /api/oneclick/deploy-upload  { files[]: {path, content, encoding} }
+      │  <span class="hl-g">upload-sanitizer 재검증 → 표준 정적 deploy.yml 주입</span>
+      ▼
+  createRepo → enablePages → pushFilesAtomically → RPC(source_type='upload') → <span class="hl-m">기존 폴링·my-sites·showcase</span>
+
+<span class="hl-g">[트랙 B: 내 repo 연결]</span>
+  GET /api/oneclick/repos <span class="hl-m">(목록)</span> → POST /api/oneclick/repo-analyze <span class="hl-m">(판정)</span>
+      │  <span class="hl-g">동의 화면: 커밋될 YAML 전문 + 불변 보증</span>
+      ▼
+  POST /api/oneclick/deploy-repo — <span class="hl-b">.github/workflows/linkmap-pages.yml 1파일 커밋</span> <span class="hl-m">(기존 파일 무수정)</span>
+      ▼
+  Pages 활성화/전환 → RPC(source_type='import') → project_github_repos(sync_branch/sync_directory)</div>
+
+<h2><span class="num">3</span>트랙 A — 파일 업로드 설계</h2>
+
+<div class="card strategy rec">
+  <b>3.1 ZIP 해제 위치 — 클라이언트(브라우저) 확정 <span class="tag rec">채택</span></b>
+  <ul style="margin-top:8px">
+    <li><b>Workers CPU(cpu_ms 30000) 영향 없음</b> — 해제·검증·인코딩 전부 브라우저 부담. zip bomb 폭발도 사용자 본인 브라우저에 국한</li>
+    <li><b>"원본 즉시 폐기"의 구조적 보장</b> — 서버가 ZIP을 수신조차 하지 않음. 서버 API는 항상 <b>파일 배열 JSON만</b> 수신 (단일 HTML/ZIP/폴더가 하나로 수렴 → 검증 코드 단일화)</li>
+    <li><code>fflate</code> 1개 추가 (unzip 코어 ~8KB gz, <b>클라 번들 한정 dynamic import</b> — 서버 번들 오염 금지 규칙 준수). 유틸: <code>src/lib/oneclick/client-zip.ts</code></li>
+    <li>정규화: <code>__MACOSX/</code>·<code>.DS_Store</code>·<code>.git/</code> 폐기 → 단일 최상위 폴더 unwrap(AI 도구의 폴더째 압축 관행) → 확장자·경로 필터 → 텍스트/바이너리 판별·base64</li>
+  </ul>
+</div>
+
+<h3>3.2 상한</h3>
+<div class="tablewrap"><table>
+  <tr><th>항목</th><th>상한</th><th>근거</th></tr>
+  <tr><td>파일 개수</td><td><b>60개</b></td><td>GitHub 콘텐츠 생성 secondary rate limit ≈80 req/min — createBlob 파일당 1회이므로 단일 배포 안전 수렴. batch-update 50개 선례</td></tr>
+  <tr><td>blob 동시성</td><td><b>8개 청크</b></td><td>현재 전량 병렬은 burst 위험 → 청크 순차 (8×~300ms ≈ 3초)</td></tr>
+  <tr><td>텍스트 / 바이너리 개별</td><td>2MB / 5MB</td><td>기존 이미지 업로드 2MB 선례 통일 · 히어로 이미지·폰트 커버</td></tr>
+  <tr><td>요청 총량</td><td><b>25MB</b> (base64 후)</td><td>Workers 바디 한계 대비 1/4 · JSON.parse 메모리 고려 (원본 약 18MB)</td></tr>
+  <tr><td>서버 재검증</td><td>Zod superRefine 3중</td><td>클라 상한은 UX용 — 서버가 전량 재검증</td></tr>
+</table></div>
+<p style="font-size:14px;margin-bottom:14px">텍스트/바이너리 혼재: 파일 항목에 <code>encoding: 'utf-8' | 'base64'</code> 추가, <code>pushFilesAtomically</code> 시그니처 확장 (기존 호출부는 기본값으로 무변경).</p>
+
+<div class="card strategy warn">
+  <b>3.3 보안 게이트 — <code>upload-sanitizer.ts</code> (서버, 전량 재검증)</b>
+  <ol style="margin-top:8px">
+    <li><b>경로 무결성</b>: <code>..</code>·선행 <code>/</code>·백슬래시·제어문자·256자 초과 거부. dot 파일은 조용히 드랍 + <code>skipped_files[]</code> 보고</li>
+    <li><b>심볼릭 링크 구조적 무해화</b>: tree 모드 전부 <code>100644</code> 고정 — symlink(120000)·실행(100755) 생성 경로 자체가 없음</li>
+    <li><b><code>.github/</code> 완전 차단 + 표준 워크플로우 주입</b>: 사용자 <code>.github/</code> 전량 드랍 후 Linkmap 표준 정적 deploy.yml만 주입 (<code>static-workflow.ts</code> 신규 — npm 없는 upload-pages-artifact 방식, <b>사용자 입력이 YAML에 보간되는 지점 0</b>). 파일명 deploy.yml 유지 → 기존 redeploy·상태 추적 무수정 동작</li>
+    <li><b>확장자 허용 목록</b>: 정적 자산 전반(html/css/js/json/md/svg/이미지/폰트/미디어/pdf). exe/sh/php 등 불허(드랍+보고) — 실행 불가라 실질 위험 낮지만 남용 인상·스캐너 오탐 감소</li>
+    <li><b>매직바이트는 이미지만</b> — HTML/JS 콘텐츠 검사는 하지 않음</li>
+  </ol>
+  <p style="margin-top:8px;font-size:14px"><b>책임 분계 원칙</b>: 본질이 "사용자 임의 HTML을 사용자 본인 계정·도메인에 게시"이므로 콘텐츠 검사는 무의미. 경계선은 ① 워크플로우 인젝션 차단 ② 경로 무결성 ③ Linkmap 도메인 비렌더링. 콘텐츠 적법성은 ToS + GitHub AUP로 사용자 책임 (R1).</p>
+</div>
+
+<h3>3.4 index.html 판정 6단계 (결정을 요구하지 않는다)</h3>
+<div class="clickflow"><span>① 루트에 있음 → 통과</span><span class="arrow">→</span><span>② 폴더 안 → 자동 unwrap</span><span class="arrow">→</span><span>③ 단일 HTML 다른 이름 → 자동 rename+고지</span><span class="arrow">→</span><span>④ ZIP 내 HTML 1개 → index.html 복제 추가(링크 보존)</span><span class="arrow">→</span><span>⑤ 여러 개 → "첫 화면 고르기" 선택 UI</span><span class="arrow">→</span><span class="auto">⑥ 0개 → 차단 + 바이브코더 눈높이 안내</span></div>
+
+<h3>3.5 미리보기 — Phase 1 제외, "파일 요약 카드"로 대체</h3>
+<ul>
+  <li>Linkmap 도메인에서 임의 HTML 렌더링 = 유일한 자사 도메인 XSS 벡터 (site-editor iframe P1 선례) — 원천 제거</li>
+  <li>다중 파일 사이트는 srcdoc에서 상대경로 자산이 깨져 <b>깨진 미리보기 = 신뢰 하락</b>. 사용자는 로컬에서 이미 봤고 배포는 무료·수 분·재시도 가능</li>
+  <li>대체: 요약 카드(파일 수·용량·트리·"첫 화면"·드랍 목록) → 곧장 배포. Phase 2에서 단일 HTML 한정 sandbox 미리보기 재검토</li>
+</ul>
+
+<h2><span class="num">4</span>트랙 B — 내 GitHub repo 연결 설계</h2>
+
+<div class="card">
+  <b>4.1 repo 선택 — 신규 <code>GET /api/oneclick/repos</code></b>
+  <ul style="margin-top:8px">
+    <li>기존 <code>/api/github/repos</code>는 project_id 필수·페이지네이션 없음 → 신설 (기존 라우트 무수정, 회귀 위험 0)</li>
+    <li><code>listUserRepos</code> 확장: page/per_page(기본 30)/<b>affiliation=owner</b> (Pages 활성화 = admin 권한 필수 — collaborator는 Phase 1 제외) + <code>has_next</code></li>
+    <li>검색: 로드된 페이지 클라 필터 + "더 보기" (바이브코더 repo 수 대부분 &lt;60 — Search API는 Phase 2 백로그)</li>
+  </ul>
+</div>
+
+<div class="card">
+  <b>4.2 repo 분석 — 신규 <code>POST /api/oneclick/repo-analyze</code></b>
+  <ul style="margin-top:8px">
+    <li><code>getRepo</code>: <b>permissions.admin</b> 필수 · fork/private/size/default_branch 확보</li>
+    <li><code>getGitTreeRecursive</code>: 빈 repo → 차단+트랙 A 안내 / truncated(거대) → 정밀 분석 생략+경고 / size &gt; 1GB → Pages 소프트 리밋 경고</li>
+    <li><b>정적 판별</b>: index.html을 <code>/ → docs/ → dist/ → build/ → public/ → out/</code> 순 탐색 = publish_dir 기본값. 미발견+package.json → 빌드형 판정(Phase 1 차단, "곧 지원됩니다" Phase 2 훅)</li>
+    <li><b>Pages 기존 상태</b>: 자체 workflow 있으면 <b>"연결만 하기(link-only)"</b>(커밋 0) / legacy(브랜치 빌드)면 workflow 전환 고지(<code>updatePagesBuildType</code> 신규)</li>
+    <li><b>워크플로우 파일명 항상 <code>.github/workflows/linkmap-pages.yml</code></b> — deploy.yml 충돌 원천 차단 + 소유권 자명 + 롤백 대상 명확. <code>config_data.workflow_file</code> 기록</li>
+    <li>fork → Actions 기본 비활성 → <code>PUT .../actions/permissions</code> 선행 + 고지 / private → GitHub Free는 Pages 불가 경고 + 전용 에러 매핑</li>
+  </ul>
+</div>
+
+<div class="card strategy rec">
+  <b>4.3 동의 화면 — "무엇이 일어나는지" 전문(全文) 공개</b>
+  <ul style="margin-top:8px">
+    <li>헤더: "<code>owner/repo</code>에 딱 1개의 파일을 추가합니다" + 접이식 <b>YAML 전문</b> (추가 1·수정 0이므로 diff = 파일 전문)</li>
+    <li>불변 보증 체크리스트: "기존 파일 무수정 / 저장소 삭제 안 함 / 커밋 메시지 명시"</li>
+    <li>조건부 고지: legacy 전환 · fork Actions 활성화 · link-only("아무것도 커밋하지 않습니다")</li>
+    <li>CTA: <b>"1개 파일 커밋하고 배포"</b> — 행동 서술형 ('동의' 같은 추상 버튼 금지)</li>
+  </ul>
+</div>
+
+<h3>4.4 실패 롤백 — "우리가 만든 것만, 우리가 지운다"</h3>
+<div class="tablewrap"><table>
+  <tr><th>실패 지점</th><th>조치</th></tr>
+  <tr><td>워크플로우 커밋 실패</td><td>조치 없음 (repo 무변경) — 에러 반환</td></tr>
+  <tr><td>커밋 성공 → Pages 활성화 실패</td><td><b>linkmap-pages.yml만 삭제 커밋</b>(<code>deleteFileContent</code> 신규) — 사용자의 다른 커밋과 간섭 불가한 최소 연산. 실패 시 잔존 안내</td></tr>
+  <tr><td>빌드 실패</td><td>리소스 유지 + error 상태 + Actions 탭 안내 (기존 자동 재시도 1회)</td></tr>
+  <tr><td>DB 단계 실패</td><td>GitHub 조치 없음 + projects/SA만 정리 — cleanupResources의 repo 삭제를 source별 게이트</td></tr>
+  <tr class="hlrow"><td>사이트 삭제 (사용자)</td><td>기본 = <b>DB 연결 해제만</b> + 선택 "워크플로우 파일도 제거". <span class="tag crit">최우선 안전 요건</span> <code>deployments/[id]/route.ts:127</code>의 <code>deleteRepo</code>를 <code>source_type !== 'import'</code> 가드로 — <b>이 기능 전체에서 가장 중요한 한 줄</b></td></tr>
+</table></div>
+
+<h2><span class="num">5</span>공통 설계</h2>
+
+<div class="card">
+  <b>5.1 DB — 마이그레이션 <code>109_user_source_deploys.sql</code></b>
+  <ul style="margin-top:8px">
+    <li><b>채택: template_id nullable + source_type 컬럼</b> (CHECK: template/upload/import + 정합성 CHECK <code>(source_type='template') = (template_id IS NOT NULL)</code>). sentinel 템플릿 기각 — 카탈로그·showcase·통계 오염 + UI 분기 이중화</li>
+    <li><b>deploy_method='github_pages' 유지</b> — 호스팅 방식은 세 소스 모두 동일. 상태 추적·queries 리터럴 전부 무수정. 소스 구분은 source_type 전담</li>
+    <li><b>RPC 교체</b>: p_source_type 추가 시 구 6-인자 함수와 오버로드 충돌 → <code>DROP FUNCTION</code> 후 재생성 + M108 정책대로 <code>REVOKE FROM PUBLIC</code>·<code>GRANT TO authenticated</code> 재적용, <code>has_function_privilege</code> 검증</li>
+    <li>config_data: A <code>{file_count, total_bytes, skipped_files}</code> / B <code>{workflow_file, publish_dir, source_branch, pages_was_enabled, prior_build_type, link_only}</code>. 유휴 컬럼 <code>project_github_repos.sync_branch/sync_directory</code> 재활용</li>
+    <li>마이그레이션 후 3-step: types 동기화 → queries 반영 → db-schema.md 갱신</li>
+  </ul>
+</div>
+
+<div class="card">
+  <b>5.2 API 4종 (5단계 패턴 준수)</b>
+  <ul style="margin-top:8px">
+    <li><code>POST /api/oneclick/deploy-upload</code> — 기존 deploy 골격 복제 + sanitizer + 워크플로우 주입 + RPC(source_type='upload')</li>
+    <li><code>POST /api/oneclick/deploy-repo</code> — <b>서버에서 분석 재실행</b>(클라 결과 신뢰 금지) → 1파일 커밋 → Pages → RPC(source_type='import'). <b>실패 시 repo 삭제 절대 금지</b></li>
+    <li><code>GET /api/oneclick/repos</code> · <code>POST /api/oneclick/repo-analyze</code> — §4.1/4.2</li>
+    <li>Zod 스키마 4종 (validations/oneclick.ts) · 에러 카테고리 2종 추가(<code>upload_validation</code>·<code>repo_not_deployable</code>) — 서버·클라·DB 3곳 동기화</li>
+  </ul>
+</div>
+
+<div class="card">
+  <b>5.3 위저드 — phase 무변경, payload 일반화</b>
+  <ul style="margin-top:8px">
+    <li><code>DeploySource</code> 판별 유니온 (template/upload/import) — deploying에서 kind별 mutation 3종 분기</li>
+    <li><b>OAuth 리다이렉트 제약</b>: 파일 payload는 localStorage에 못 넣음 → 업로드/임포트 트랙은 <b>인증 완료 후 입력 진입</b> (템플릿 트랙의 선입력·후인증 순서를 이 두 트랙만 역전). pending에는 track 표식만 저장</li>
+    <li>클라 전처리(해제·정규화·index 판정)는 selecting 내부 컴포넌트 로컬 상태 — 머신 단순성 유지</li>
+  </ul>
+</div>
+
+<div class="card">
+  <b>5.4 my-sites 통합 · 5.5 2층 퍼널 브릿지</b>
+  <ul style="margin-top:8px">
+    <li>소스 뱃지 3종(템플릿명/내 파일/내 repo) + template null 시 generic 프리뷰 fallback</li>
+    <li>모듈 패널은 <code>source_type==='template'</code>만 렌더. upload는 파일 에디터 허용(무수정 동작), import는 Phase 1 에디터 비활성("GitHub에서 편집" 링크)</li>
+    <li>재배포: import는 <code>config_data.workflow_file</code>·<code>sync_branch</code>를 workflow dispatch에 전달</li>
+    <li>멀티계정 P1(첫 active 계정 토큰 오참조)이 import private repo에서 표면화 → 1B에서 <code>project_github_repos.service_account_id</code> 우선 해석으로 부분 수정</li>
+    <li><b>2층 브릿지 = 추가 작업 0</b>: 기존 파이프라인 재사용으로 projects+서비스맵 GitHub 노드 자동 생성. Phase 3: 업로드 HTML SDK 시그니처 스캔 → 서비스맵 자동 제안 (바이브코더→관리자 전환 이벤트)</li>
+  </ul>
+</div>
+
+<h2><span class="num">6</span>고려사항 / 리스크</h2>
+<div class="tablewrap"><table>
+  <tr><th>#</th><th>리스크</th><th>심각도</th><th>대응</th></tr>
+  <tr><td>R1</td><td>악성 콘텐츠 호스팅 — 사용자 계정 정지 + Linkmap OAuth 앱 플래그</td><td><span class="risk-high">높음</span></td><td>책임 분계(커밋=사용자 본인 토큰·계정) ToS 명문화 + 1줄 고지 · logAudit 전체 추적 · abuse 대응 창구 · 남용 계정 기능 차단 정책</td></tr>
+  <tr><td>R2</td><td>워크플로우 인젝션 (.github/ 경유 임의 Actions)</td><td><span class="risk-high">높음</span></td><td>사용자 .github/ 전량 드랍 + 서버 재검증 · 워크플로우는 서버 상수만, 사용자 입력 보간 지점 0</td></tr>
+  <tr class="hlrow"><td>R3</td><td><b>트랙 B 기존 repo 파손/삭제</b></td><td><span class="risk-crit">치명</span></td><td>deleteRepo source_type 가드 + 파일 삭제형 롤백만 + 단일 파일 커밋(트리 재작성 없음) + "트리 diff=1" 기계 검증</td></tr>
+  <tr><td>R4</td><td>zip bomb / 대용량 부하</td><td><span class="risk-mid">중간</span></td><td>클라 해제(서버 무접촉) + 누적 상한 즉시 중단 + 서버 25MB/60파일 재검증</td></tr>
+  <tr><td>R5</td><td>GitHub secondary rate limit</td><td><span class="risk-mid">중간</span></td><td>60개 상한 + blob 8청크 + 기존 rate_limit 카테고리</td></tr>
+  <tr><td>R6</td><td>Pages 소프트 리밋 (1GB/100GB월/10빌드시)</td><td><span class="risk-low">낮음~중</span></td><td>총량 상한 여유 · 분석서 1GB 경고 · FAQ</td></tr>
+  <tr><td>R7</td><td>쿼터 우회 (동시 호출)</td><td><span class="risk-mid">중간</span></td><td>advisory lock RPC 공통 통과 — count 기반 자동 합산 + 교체 회귀 테스트</td></tr>
+  <tr><td>R8</td><td>업로드 남용 (봇 반복 배포)</td><td><span class="risk-mid">중간</span></td><td><b>Cloudflare Rate Limiting Rules</b>(앱 코드 금지 원칙): 배포 POST IP당 10회/10분 예시 + 보유 수 쿼터가 총량 상한</td></tr>
+  <tr><td>R9</td><td>OAuth 콜백 P0 노출면 확대</td><td><span class="risk-high">높음</span></td><td><b>Phase 0 선결 — 출시 게이트</b></td></tr>
+  <tr><td>R10</td><td>멀티계정 토큰 오참조 (기존 P1)</td><td><span class="risk-mid">중간</span></td><td>1B에서 project_github_repos.service_account_id 우선 해석</td></tr>
+  <tr><td>R11</td><td>Linkmap 도메인 XSS (미리보기)</td><td><span class="risk-mid">중간</span></td><td>Phase 1 미리보기 제외로 원천 제거 · Phase 2 도입 시 별도 보안 리뷰</td></tr>
+  <tr><td>R12</td><td>fork repo 워크플로우 미실행 → "영원히 building"</td><td><span class="risk-low">낮음</span></td><td>fork 감지 + Actions enable 선행 + 15분 타임아웃 안전망</td></tr>
+</table></div>
+
+<h2><span class="num">7</span>단계별 로드맵</h2>
+<div class="phase p0"><div class="phase-no">Phase 0<br>선결</div><div class="phase-body">
+  <b>OAuth 콜백 세션 바인딩 수정 + pushFilesAtomically 인코딩·청크 + 마이그레이션 109·RPC 교체</b>
+  <div class="check">타 세션 state 콜백 → 403 + service_accounts 미변경 · source_type CHECK 위반 INSERT 실패 · base64 push 후 blob 일치</div>
+</div></div>
+<div class="phase"><div class="phase-no">Phase 1A<br>트랙 A</div><div class="phase-body">
+  <b>파일 업로드 MVP — deploy-upload + sanitizer + static-workflow + 클라 해제 + 위저드 카드 + my-sites 게이트</b>
+  <div class="check">단일 HTML 업로드 → pages_url 200 (15분 내) · .github/evil.yml 포함 zip → 커밋 트리에 부재 · ../ 경로 → 400 · 쿼터 초과 → 403 · 61개 파일 → 400</div>
+</div></div>
+<div class="phase"><div class="phase-no">Phase 1B<br>트랙 B</div><div class="phase-body">
+  <b>repo 연결 — repos/analyze/deploy-repo + 동의 다이얼로그 + 삭제 가드 + 멀티계정 P1 부분 수정</b>
+  <div class="check">배포 후 트리 diff = linkmap-pages.yml 1개뿐 · Pages 실패 주입 → 파일 삭제 커밋 발생 · import DELETE → repo 존재 유지 · 빈 repo → 배포 불가 응답</div>
+</div></div>
+<div class="phase"><div class="phase-no">Phase 2</div><div class="phase-body">
+  <b>빌드형 — 프레임워크 감지 → 빌드 워크플로우 변형 주입 (+GitHub Secrets) + import 에디터 재검토 + 단일 HTML 미리보기</b>
+  <div class="check">Vite fixture repo → 빌드 성공 → 200 · 감지 매트릭스(vite/next/cra/plain) 스냅샷</div>
+</div></div>
+<div class="phase"><div class="phase-no">Phase 3</div><div class="phase-body">
+  <b>퍼널 브릿지 — 서비스 시그니처 스캔 → 서비스맵 자동 제안 + showcase 소스 뱃지</b>
+  <div class="check">Supabase SDK 포함 fixture → 서비스 후보에 supabase · 업로드 사이트가 showcase 쿼리에 등장</div>
+</div></div>
+<p style="font-size:14px;color:var(--muted)"><b>A 선행 근거</b>: ① A는 신규 격리 repo — 리스크 낮음, B는 사용자 실자산이라 가드 성숙 후가 안전 ② 바이브코더 최빈 시나리오가 A ③ B는 A의 공통 인프라를 증분으로 받음. <b>Phase 1A만으로 "AI가 준 파일을 3분 만에 사이트로" 가치 완성.</b></p>
+
+<h2><span class="num">8</span>비목표</h2>
+<ul>
+  <li>서버사이드 배포 타겟 (PMO 제약 "GitHub Pages 정적만" 유지)</li>
+  <li>Linkmap 도메인에서 사용자 콘텐츠 미리보기 렌더링 (Phase 1)</li>
+  <li>업로드 원본(ZIP) 보관 — 서버는 수신조차 하지 않음</li>
+  <li>콘텐츠 사전 심의/검열 — 책임 분계는 ToS + GitHub AUP</li>
+  <li>호스팅형 <code>/s/[slug]</code> 발행 모델 전환 — 별도 트랙(2026-06-18) 유지</li>
+  <li>collaborator repo 배포 (Phase 1은 owner만) · 커밋/README 워터마크 주입 (사용자 자산 존중)</li>
+</ul>
+
+<h2><span class="num">부록</span></h2>
+<div class="card">
+  <b>07-31 Supabase 위젯 기획과의 관계</b> — <span class="yes">독립 트랙, 충돌 없음</span>. 07-31은 "템플릿 사이트에 동적 데이터"(편집기 진입점), 본 기획은 "템플릿이 아닌 소스의 배포"(위저드 진입점). Phase 3 서비스맵 브릿지에서 자연 합류. <b>OAuth 콜백 P0는 두 트랙 공유 게이트 — 한 번 수정으로 둘 다 통과.</b>
+</div>
+<div class="card">
+  <b>기능 명칭 후보 (구현 시 확정)</b> — 권장: 트랙 A <b>"내 파일 올리기"</b> / 트랙 B <b>"내 GitHub 가져오기"</b> (+ 부제 "ChatGPT·Claude가 만들어준 HTML도 OK"). 바이브코더에게 'repo'·'배포'보다 행동 그대로의 언어.
+</div>
+
+<p class="note">근거: 2026-08-01 코드베이스 조사 3건(배포 파이프라인 · 재사용 인프라 · 제품 맥락) + 상세 설계 검토 1건(16개 설계 항목), 2026-07-12 원클릭 감사 메모리(P0/P1), GitHub REST API 공식 문서, docs/onelink/PMO.md 제약. 상세 수정 파일 목록은 md 문서 부록 A 참조.</p>
+
+</div>
+</body>
+</html>

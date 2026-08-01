@@ -1,7 +1,8 @@
 'use client';
 
 import { useReducer, useCallback, useEffect } from 'react';
-import { useDeployToGitHubPages, useDeployStatus } from '@/lib/queries/oneclick';
+import { useDeployToGitHubPages, useDeployUpload, useDeployStatus } from '@/lib/queries/oneclick';
+import type { PreparedFile } from '@/lib/oneclick/client-upload';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -178,6 +179,13 @@ function deployReducer(state: DeployState, action: DeployAction): DeployState {
   }
 }
 
+/**
+ * 업로드 트랙의 소스 표식. 상태의 `template`은 템플릿 메타 조회 키로만 쓰이므로,
+ * 어떤 템플릿 id와도 겹치지 않는 이 값을 넣으면 조회 결과가 null이 되어
+ * 진행/성공 화면이 템플릿 없는 배포로 자연스럽게 렌더된다.
+ */
+export const UPLOAD_SOURCE = 'upload';
+
 // ── Pending Deploy (localStorage) ──
 
 const PENDING_KEY = 'linkmap-pending-deploy';
@@ -226,6 +234,7 @@ export function useDeployMachine({ isAuthenticated }: UseDeployMachineOptions) {
   });
 
   const deployMutation = useDeployToGitHubPages();
+  const uploadMutation = useDeployUpload();
 
   // Preflight check: GitHub connection + quota
   const { data: preflightData, isLoading: githubLoading } = useQuery({
@@ -340,19 +349,66 @@ export function useDeployMachine({ isAuthenticated }: UseDeployMachineOptions) {
     }
   }, [state, executeDeploy]);
 
+  /**
+   * 내 파일 업로드 배포 (트랙 A).
+   *
+   * 파일 payload는 localStorage(pending-deploy)에 담을 수 없어 OAuth 왕복을 견디지 못한다.
+   * 그래서 이 트랙은 인증·GitHub 연결이 끝난 뒤에만 입력 화면에 들어오도록 UI가 게이팅하고,
+   * 여기서는 준비된 파일을 그대로 배포한다. (템플릿 트랙의 "선입력 후인증" 순서를 역전)
+   */
+  const handleUploadDeploy = useCallback(async (
+    files: PreparedFile[],
+    siteName: string,
+    accountId?: string,
+  ) => {
+    // 파일을 다 보낸 뒤 401을 받으면 준비한 파일이 통째로 날아간다 — 보내기 전에 확인한다
+    if (!isAuthenticated || !isGitHubConnected) {
+      toast.error('로그인과 GitHub 연결을 먼저 확인해주세요.');
+      return;
+    }
+
+    dispatch({ type: 'START_DEPLOY', template: UPLOAD_SOURCE, siteName });
+    try {
+      const result = await uploadMutation.mutateAsync({
+        site_name: siteName,
+        files: files.map((f) => ({ path: f.path, content: f.content, encoding: f.encoding })),
+        ...(accountId ? { github_service_account_id: accountId } : {}),
+      });
+      if (result.site_name && result.site_name !== siteName) {
+        toast.info(`주소가 '${result.site_name}'(으)로 자동 변경되었습니다.`);
+      }
+      if (result.skipped_files && result.skipped_files.length > 0) {
+        toast.info(`${result.skipped_files.length}개 파일은 배포에 포함되지 않았습니다.`);
+      }
+      dispatch({
+        type: 'DEPLOY_SUCCESS',
+        deployId: result.deploy_id,
+        projectId: result.project_id,
+        template: UPLOAD_SOURCE,
+      });
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('배포 중 오류가 발생했습니다');
+      toast.error(error.message);
+      dispatch({ type: 'DEPLOY_ERROR', error });
+    }
+  }, [uploadMutation, isAuthenticated, isGitHubConnected]);
+
   const handleRetry = useCallback(() => {
     deployMutation.reset();
+    uploadMutation.reset();
     dispatch({ type: 'RETRY' });
-  }, [deployMutation]);
+  }, [deployMutation, uploadMutation]);
 
   return {
     state,
     dispatch,
     handleDeploy,
+    handleUploadDeploy,
     handleGitHubConnected,
     handleRetry,
     deployStatus,
     deployMutation,
+    uploadMutation,
     githubAccount,
     githubLoading,
     isGitHubConnected,
