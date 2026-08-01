@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { unauthorizedError, validationError, serverError, apiError, apiErrorWithCode, notFoundError, quotaExceededError } from '@/lib/api/errors';
+import { unauthorizedError, validationError, serverError, apiError, apiErrorWithCode, quotaExceededError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
 import { createRepo, pushFilesAtomically, deleteRepo, enableGitHubPagesWithActions, GitHubApiError } from '@/lib/github/api';
 import { safeDecryptToken } from '@/lib/github/token';

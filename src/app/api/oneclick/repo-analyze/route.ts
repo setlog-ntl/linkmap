@@ -4,7 +4,11 @@ import { unauthorizedError, validationError, serverError, apiError, notFoundErro
 import { GitHubApiError } from '@/lib/github/api';
 import { repoAnalyzeRequestSchema } from '@/lib/validations/oneclick';
 import { analyzeRepo, blockReasonMessage } from '@/lib/oneclick/repo-analyzer';
-import { buildImportWorkflowYml, IMPORT_WORKFLOW_PATH } from '@/lib/oneclick/static-workflow';
+import {
+  buildImportWorkflowYml,
+  buildBuildWorkflowYml,
+  IMPORT_WORKFLOW_PATH,
+} from '@/lib/oneclick/static-workflow';
 import {
   resolveOneclickGitHubAccount,
   isGitHubAccountFailure,
@@ -50,7 +54,16 @@ export async function POST(request: NextRequest) {
       // 동의 화면이 그대로 보여줄 커밋 내용
       workflow: {
         path: IMPORT_WORKFLOW_PATH,
-        content: buildImportWorkflowYml(analysis.publish_dir, analysis.default_branch),
+        content:
+          analysis.deploy_mode === 'build' && analysis.build
+            ? buildBuildWorkflowYml({
+                outDir: analysis.publish_dir,
+                branch: analysis.default_branch,
+                installCommand: analysis.build.installCommand,
+                buildCommand: analysis.build.buildCommand,
+                repoName: analysis.repo,
+              })
+            : buildImportWorkflowYml(analysis.publish_dir, analysis.default_branch),
         commit_message: 'Linkmap: add GitHub Pages deploy workflow',
       },
     });

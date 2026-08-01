@@ -4,21 +4,26 @@
  * 판정 결과는 동의 화면이 "무엇이 일어나는지"를 정확히 보여주는 근거가 되고,
  * 배포 라우트가 서버에서 같은 판정을 다시 수행한다(클라이언트 결과를 신뢰하지 않는다).
  */
-import { getRepo, getGitTreeRecursive, getGitHubPagesStatus, GitHubApiError } from '@/lib/github/api';
+import { getRepo, getGitTreeRecursive, getGitHubPagesStatus, getFileContent, GitHubApiError } from '@/lib/github/api';
 import { isSafeWorkflowValue, IMPORT_WORKFLOW_PATH } from './static-workflow';
+import {
+  detectFramework,
+  looksLikeBuildProject,
+  type BuildDetection,
+  type PackageJsonLike,
+} from './framework-detect';
 
 /** index.html을 찾을 후보 디렉토리 — 앞쪽이 우선한다 */
 const PUBLISH_DIR_CANDIDATES = ['', 'docs', 'dist', 'build', 'public', 'out'];
 
-/** 빌드가 필요한 프로젝트임을 알려주는 표식 (Phase 1에서는 배포 불가로 안내) */
-const BUILD_MARKERS = ['package.json', 'vite.config.js', 'vite.config.ts', 'next.config.js', 'next.config.ts'];
-
 export type RepoBlockReason =
   | 'not_admin'
   | 'empty_repo'
-  | 'needs_build'
   | 'no_html'
   | 'unsafe_path';
+
+/** 배포 방식 — 완성된 정적 파일을 그대로 올릴지, 빌드해서 올릴지 */
+export type DeployMode = 'static' | 'build';
 
 export interface RepoAnalysis {
   owner: string;
@@ -42,6 +47,10 @@ export interface RepoAnalysis {
   needs_build_type_switch: boolean;
   /** 이미 Linkmap 워크플로우가 있으면 커밋 없이 연결만 한다 */
   can_link_only: boolean;
+  /** 완성된 파일을 그대로 올릴지, 빌드해서 올릴지 */
+  deploy_mode: DeployMode;
+  /** deploy_mode가 'build'일 때만 채워진다 */
+  build: BuildDetection | null;
   warnings: string[];
 }
 
@@ -78,6 +87,8 @@ export async function analyzeRepo(
     pages_enabled: false,
     needs_build_type_switch: false,
     can_link_only: false,
+    deploy_mode: 'static' as DeployMode,
+    build: null as BuildDetection | null,
     warnings,
   };
 
@@ -99,13 +110,18 @@ export async function analyzeRepo(
   const paths = new Set(tree.map((t) => t.path));
   const publishDirs = findPublishDirs(paths);
 
+  // 완성된 index.html이 없으면 빌드해서 만들어낼 수 있는지 본다 (Phase 2).
+  // 빌드 산출물은 저장소에 없는 것이 정상이므로 여기서 차단하면 대부분의 실제 프로젝트를 막게 된다.
+  let buildDetection: BuildDetection | null = null;
   if (publishDirs.length === 0) {
-    const needsBuild = BUILD_MARKERS.some((marker) => paths.has(marker));
-    return {
-      ...base,
-      deployable: false,
-      block_reason: needsBuild ? 'needs_build' : 'no_html',
-    };
+    if (!looksLikeBuildProject(paths)) {
+      return { ...base, deployable: false, block_reason: 'no_html' };
+    }
+    const pkg = await readPackageJson(token, owner, repo);
+    buildDetection = detectFramework(paths, pkg, repoInfo.name);
+    if (!isSafeWorkflowValue(buildDetection.outDir)) {
+      return { ...base, deployable: false, block_reason: 'unsafe_path' };
+    }
   }
 
   if (repoInfo.size && repoInfo.size > 1_000_000) {
@@ -134,17 +150,38 @@ export async function analyzeRepo(
   // 우리가 넣을 워크플로우가 이미 있으면 커밋 없이 연결만 한다
   const canLinkOnly = pagesEnabled && !needsSwitch && paths.has(IMPORT_WORKFLOW_PATH);
 
+  if (buildDetection) warnings.push(...buildDetection.warnings);
+
   return {
     ...base,
     deployable: true,
     block_reason: null,
-    publish_dir: toArtifactPath(publishDirs[0]),
-    publish_dir_candidates: publishDirs.map(toArtifactPath),
+    publish_dir: buildDetection ? buildDetection.outDir : toArtifactPath(publishDirs[0]),
+    publish_dir_candidates: buildDetection
+      ? buildDetection.outDirCandidates
+      : publishDirs.map(toArtifactPath),
     pages_enabled: pagesEnabled,
     needs_build_type_switch: needsSwitch,
     can_link_only: canLinkOnly,
+    deploy_mode: buildDetection ? 'build' : 'static',
+    build: buildDetection,
     warnings,
   };
+}
+
+/** package.json을 읽어온다 — 없거나 깨져 있으면 null (감지는 파일 목록만으로도 동작한다) */
+async function readPackageJson(
+  token: string,
+  owner: string,
+  repo: string,
+): Promise<PackageJsonLike | null> {
+  try {
+    const file = await getFileContent(token, owner, repo, 'package.json');
+    const text = Buffer.from(file.content ?? '', 'base64').toString('utf-8');
+    return JSON.parse(text) as PackageJsonLike;
+  } catch {
+    return null;
+  }
 }
 
 /** 배포 불가 사유를 바이브코더 눈높이 안내로 바꾼다 */
@@ -154,10 +191,8 @@ export function blockReasonMessage(reason: RepoBlockReason): string {
       return '이 저장소의 관리자 권한이 없어 GitHub Pages를 켤 수 없어요. 본인 소유 저장소를 선택해주세요.';
     case 'empty_repo':
       return '저장소가 비어 있어요. 파일을 먼저 올린 뒤에 다시 시도해주세요.';
-    case 'needs_build':
-      return '빌드가 필요한 프로젝트예요. 지금은 완성된 HTML 파일이 있는 저장소만 배포할 수 있어요.';
     case 'no_html':
-      return 'index.html을 찾지 못했어요. 저장소 루트나 docs·dist·build 폴더에 index.html이 있어야 해요.';
+      return 'index.html을 찾지 못했어요. 저장소 루트나 docs·dist·build 폴더에 index.html이 있거나, 빌드로 만들어내는 프로젝트여야 해요.';
     case 'unsafe_path':
       return '저장소의 기본 브랜치 이름을 사용할 수 없어요.';
   }

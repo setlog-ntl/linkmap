@@ -17,6 +17,7 @@ import {
   ChevronDown,
   GitBranch,
   Globe,
+  Hammer,
   Loader2,
   Lock,
   Rocket,
@@ -233,6 +234,21 @@ export function RepoImportStep({ accountId, isDeploying, onBack, onDeploy }: Rep
                 : `${selected.full_name}에 딱 1개의 파일을 추가합니다`}
             </p>
 
+            {/* 빌드형이면 무엇으로 만들었고 어떻게 빌드할지 먼저 보여준다 */}
+            {analysis.deploy_mode === 'build' && analysis.build && (
+              <div className="flex items-start gap-2 text-xs bg-muted/50 rounded-lg p-2.5">
+                <Hammer className="h-3.5 w-3.5 text-brand-blue shrink-0 mt-0.5" />
+                <div className="space-y-0.5 min-w-0">
+                  <p className="text-foreground">
+                    <b>{analysis.build.label}</b> 프로젝트로 보여요 — GitHub에서 빌드한 뒤 게시합니다
+                  </p>
+                  <p className="text-muted-foreground font-mono truncate">
+                    {analysis.build.installCommand} → {analysis.build.buildCommand} → {publishDir}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {!analysis.can_link_only && result.workflow && (
               <Collapsible>
                 <CollapsibleTrigger className="group flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
@@ -254,7 +270,13 @@ export function RepoImportStep({ accountId, isDeploying, onBack, onDeploy }: Rep
                 <li className="flex items-start gap-1.5">
                   <Globe className="h-3.5 w-3.5 text-brand-blue shrink-0 mt-0.5" />
                   <span>
-                    GitHub Pages를 켭니다 — <b>{analysis.publish_dir === '.' ? '저장소' : analysis.publish_dir} 내용이 누구나 볼 수 있게 공개</b>돼요
+                    GitHub Pages를 켭니다 —{' '}
+                    <b>
+                      {analysis.deploy_mode === 'build'
+                        ? '빌드 결과물이 누구나 볼 수 있게 공개'
+                        : `${publishDir === '.' ? '저장소' : publishDir} 내용이 누구나 볼 수 있게 공개`}
+                    </b>
+                    돼요
                     <br />
                     <code className="font-mono">https://{analysis.owner}.github.io/{analysis.repo}</code>
                   </span>

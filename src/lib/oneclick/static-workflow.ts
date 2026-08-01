@@ -82,6 +82,83 @@ export function isSafeWorkflowValue(value: string): boolean {
   return /^[A-Za-z0-9._\-/]+$/.test(value) && !value.includes('..');
 }
 
+/**
+ * 워크플로우에 넣을 수 있는 명령인지 검사한다.
+ *
+ * 명령은 우리가 만든 값(framework-detect)만 오지만, 저장소 이름이 `--base=/name/`처럼
+ * 섞여 들어오므로 한 번 더 확인한다. 셸 메타문자를 배제해 명령 연결·치환을 원천 차단한다.
+ */
+export function isSafeWorkflowCommand(value: string): boolean {
+  if (!value || value.length > 200) return false;
+  return /^[A-Za-z0-9 ._\-/=]+$/.test(value) && !value.includes('..');
+}
+
+/** Actions 러너의 Node 버전 — 최신 LTS 계열로 고정 */
+const BUILD_NODE_VERSION = '20';
+
+/**
+ * 빌드가 필요한 프로젝트용 워크플로우 (Phase 2).
+ *
+ * 정적 워크플로우와의 차이는 install·build 두 단계뿐이다. 사용자의 설정 파일은 읽지도
+ * 고치지도 않고, 저장소에 이미 있는 스크립트를 그대로 실행한다.
+ *
+ * 하위 경로(`/<repo>/`) 문제를 위해 널리 통용되는 환경변수를 함께 넘긴다.
+ * 존중 여부는 프레임워크마다 다르므로(CRA의 PUBLIC_URL 등) 이것만으로 해결됐다고
+ * 보지 않고, 위험도는 동의 화면에서 따로 알린다.
+ */
+export function buildBuildWorkflowYml(opts: {
+  outDir: string;
+  branch: string;
+  installCommand: string;
+  buildCommand: string;
+  repoName: string;
+}): string {
+  const { outDir, branch, installCommand, buildCommand, repoName } = opts;
+  if (!isSafeWorkflowValue(outDir) || !isSafeWorkflowValue(branch) || !isSafeWorkflowValue(repoName)) {
+    throw new Error('워크플로우에 사용할 수 없는 경로·브랜치입니다');
+  }
+  if (!isSafeWorkflowCommand(installCommand) || !isSafeWorkflowCommand(buildCommand)) {
+    throw new Error('워크플로우에 사용할 수 없는 명령입니다');
+  }
+
+  return `name: Deploy to GitHub Pages (Linkmap)
+on:
+  push:
+    branches: [${branch}]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: \${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '${BUILD_NODE_VERSION}'
+      - run: ${installCommand}
+      - run: ${buildCommand}
+        env:
+          PUBLIC_URL: /${repoName}
+          BASE_PATH: /${repoName}
+          BASE_URL: /${repoName}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${outDir}
+      - id: deployment
+        uses: actions/deploy-pages@v4
+`;
+}
+
 export const staticDeployYml = `name: Deploy static site to GitHub Pages
 on:
   push:

@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>원클릭 "내 자료 배포" — 실행·검증 기록</title>
+<style>
+  :root {
+    --blue: #2563eb;
+    --blue-soft: #dbeafe;
+    --green: #059669;
+    --green-soft: #ecfdf5;
+    --amber: #b45309;
+    --amber-soft: #fffbeb;
+    --red: #dc2626;
+    --red-soft: #fef2f2;
+    --crit: #7f1d1d;
+
+    --bg: #f6f8fb;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #5a6b83;
+    --border: #dfe6ef;
+    --code-bg: #eef2f7;
+    --code-fg: #b8306e;
+    --diagram-bg: #0f172a;
+    --diagram-fg: #dbe4f0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --blue: #7aa7ff;
+      --blue-soft: #16233c;
+      --green: #47c79a;
+      --green-soft: #10261f;
+      --amber: #e0a548;
+      --amber-soft: #2a2013;
+      --red: #f4756d;
+      --red-soft: #2c1618;
+      --crit: #f4756d;
+
+      --bg: #0a1120;
+      --card: #111a2b;
+      --text: #dde5f0;
+      --muted: #93a4bd;
+      --border: #22304a;
+      --code-bg: #172135;
+      --code-fg: #f2a5c8;
+      --diagram-bg: #060c17;
+      --diagram-fg: #c6d4e6;
+    }
+  }
+  :root[data-theme="light"] {
+    --blue: #2563eb; --blue-soft: #dbeafe; --green: #059669; --green-soft: #ecfdf5;
+    --amber: #b45309; --amber-soft: #fffbeb; --red: #dc2626; --red-soft: #fef2f2; --crit: #7f1d1d;
+    --bg: #f6f8fb; --card: #ffffff; --text: #0f172a; --muted: #5a6b83; --border: #dfe6ef;
+    --code-bg: #eef2f7; --code-fg: #b8306e; --diagram-bg: #0f172a; --diagram-fg: #dbe4f0;
+  }
+  :root[data-theme="dark"] {
+    --blue: #7aa7ff; --blue-soft: #16233c; --green: #47c79a; --green-soft: #10261f;
+    --amber: #e0a548; --amber-soft: #2a2013; --red: #f4756d; --red-soft: #2c1618; --crit: #f4756d;
+    --bg: #0a1120; --card: #111a2b; --text: #dde5f0; --muted: #93a4bd; --border: #22304a;
+    --code-bg: #172135; --code-fg: #f2a5c8; --diagram-bg: #060c17; --diagram-fg: #c6d4e6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+                 'Segoe UI', 'Malgun Gothic', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 48px 20px 96px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+
+  code, .mono {
+    font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 0.88em;
+  }
+  code {
+    background: var(--code-bg); color: var(--code-fg);
+    padding: 1px 6px; border-radius: 5px;
+  }
+
+  /* ── header ── */
+  header { display: flex; flex-direction: column; gap: 10px; }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; }
+  .badge {
+    font-size: 12px; font-weight: 700; letter-spacing: .02em;
+    padding: 3px 10px; border-radius: 999px;
+    background: var(--blue-soft); color: var(--blue);
+  }
+  .badge.done { background: var(--green-soft); color: var(--green); }
+  .badge.neutral { background: var(--code-bg); color: var(--muted); }
+  h1 {
+    font-size: clamp(26px, 4vw, 34px); line-height: 1.25;
+    letter-spacing: -0.02em; text-wrap: balance;
+  }
+  .lede { color: var(--muted); font-size: 16px; max-width: 62ch; }
+
+  /* ── sections ── */
+  section { display: flex; flex-direction: column; gap: 16px; }
+  h2 {
+    font-size: 19px; letter-spacing: -0.01em;
+    padding-bottom: 9px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  h2 .n {
+    font-size: 12px; font-weight: 800; color: var(--blue);
+    font-family: 'Geist Mono', Consolas, monospace;
+  }
+  h3 { font-size: 15px; letter-spacing: -0.01em; }
+  p { max-width: 68ch; }
+  .muted { color: var(--muted); }
+  .small { font-size: 14px; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 22px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+
+  .principle {
+    background: var(--card); border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    border-radius: 12px; padding: 18px 22px;
+    font-size: 16px; font-weight: 600; text-wrap: balance;
+  }
+
+  /* ── tables ── */
+  .tablewrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--card); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th {
+    text-align: left; padding: 11px 14px; white-space: nowrap;
+    font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--muted); border-bottom: 1px solid var(--border);
+  }
+  td { padding: 11px 14px; border-top: 1px solid var(--border); vertical-align: top; }
+  tbody tr:first-child td { border-top: none; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .pill {
+    display: inline-block; font-size: 11.5px; font-weight: 700;
+    padding: 2px 9px; border-radius: 999px; white-space: nowrap;
+  }
+  .pill.ok { background: var(--green-soft); color: var(--green); }
+  .pill.warn { background: var(--amber-soft); color: var(--amber); }
+  .pill.bad { background: var(--red-soft); color: var(--red); }
+  .pill.crit { background: var(--crit); color: #fff; }
+  .pill.info { background: var(--blue-soft); color: var(--blue); }
+
+  /* ── phase rail: 0 → 1A → 1B → 2 는 실제 선후 관계라 번호가 정보를 담는다 ── */
+  .rail { display: flex; flex-direction: column; gap: 0; }
+  .phase { display: grid; grid-template-columns: 92px 1fr; gap: 18px; }
+  .phase .mark { position: relative; display: flex; flex-direction: column; align-items: center; }
+  .phase .dot {
+    width: 100%; text-align: center; font-family: 'Geist Mono', Consolas, monospace;
+    font-size: 12px; font-weight: 800; padding: 5px 0; border-radius: 8px;
+    background: var(--blue); color: #fff;
+  }
+  .phase.gate .dot { background: var(--red); }
+  .phase .line { flex: 1; width: 2px; background: var(--border); margin: 6px 0; }
+  .phase:last-child .line { display: none; }
+  .phase .body { padding-bottom: 22px; display: flex; flex-direction: column; gap: 8px; }
+  .phase:last-child .body { padding-bottom: 0; }
+  .phase .body b { font-size: 15px; }
+  .check { font-size: 13.5px; color: var(--muted); }
+  .check::before { content: "검증 "; color: var(--green); font-weight: 700; }
+
+  /* ── diagram ── */
+  .diagram {
+    background: var(--diagram-bg); color: var(--diagram-fg);
+    border-radius: 12px; padding: 20px 22px;
+    font-family: 'Geist Mono', Consolas, monospace; font-size: 12.5px; line-height: 1.85;
+    overflow-x: auto; white-space: pre;
+  }
+  .diagram .b { color: #7aa7ff; }
+  .diagram .g { color: #47c79a; }
+  .diagram .m { color: #7d8ea6; }
+
+  ul { padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+  li { max-width: 66ch; }
+  li::marker { color: var(--muted); }
+
+  footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 18px; }
+  a { color: var(--blue); }
+  a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+  @media (max-width: 640px) {
+    body { padding: 28px 14px 60px; }
+    .phase { grid-template-columns: 62px 1fr; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="badges">
+    <span class="badge done">Phase 0 · 1A · 1B · 2 구현 완료</span>
+    <span class="badge">라이브 검증 완료</span>
+    <span class="badge neutral">2026-08-01</span>
+  </div>
+  <h1>원클릭 &ldquo;내 자료 배포&rdquo; — 실행·검증 기록</h1>
+  <p class="lede">
+    템플릿이 아니라 <b>사용자가 만든 자료</b>와 <b>사용자의 GitHub 저장소</b>를 배포하는 두 트랙을
+    추가했다. AI가 만들어준 HTML은 손에 있는데 배포를 못 하던 사람이 퍼널 밖에 있었다.
+  </p>
+</header>
+
+<section>
+  <h2><span class="n">01</span>무엇을 만들었나</h2>
+  <div class="diagram"><span class="b">트랙 A — 내 파일 올리기</span>
+  브라우저: 단일 HTML · ZIP · 폴더
+      │  <span class="g">해제 · 정규화 · 첫 화면 판정 · 상한 검사</span>   <span class="m">← 전부 브라우저 (원본은 서버로 가지 않는다)</span>
+      ▼
+  POST /api/oneclick/deploy-upload   <span class="m">{ files[]: path · content · encoding }</span>
+      ▼
+  저장소 생성 → Pages 활성화 → <span class="g">원자 커밋</span> → 상태 폴링
+
+<span class="g">트랙 B — 내 GitHub 가져오기</span>
+  저장소 목록 → 분석(정적/빌드 · 권한 · Pages 상태)
+      │  <span class="g">동의 화면: 커밋될 YAML 전문 + 불변 보증</span>
+      ▼
+  <span class="b">.github/workflows/linkmap-pages.yml 1개만 커밋</span>  <span class="m">(기존 파일 무수정)</span>
+      ▼
+  Pages 활성화 → 상태 폴링</div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>트랙 A — 내 파일 올리기</h3>
+      <p class="small muted">
+        ZIP 해제를 서버가 아니라 브라우저에서 한다. Workers CPU 예산을 배포가 온전히 쓰고,
+        zip bomb이 터져도 사용자 탭에서 끝나며, &ldquo;업로드 원본을 보관하지 않는다&rdquo;는 원칙이
+        구조적으로 보장된다 — 서버는 아카이브를 <b>수신조차 하지 않는다</b>.
+      </p>
+    </div>
+    <div class="card">
+      <h3>트랙 B — 내 GitHub 가져오기</h3>
+      <p class="small muted">
+        저장소는 <b>사용자 자산</b>이다. 그래서 기능보다 &ldquo;무엇을 하지 않는가&rdquo;를 먼저 고정했다.
+        워크플로우 파일 1개만 추가하고, 기존 파일을 수정하지 않으며, 저장소를 삭제하지 않는다.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">02</span>보안 경계는 셋으로 좁혔다</h2>
+  <p>
+    이 기능의 본질은 &ldquo;사용자가 만든 임의의 HTML·JS를 <b>사용자 본인 계정과 도메인</b>에 게시&rdquo;하는
+    것이다. <code>index.html</code> 자체가 임의 스크립트인데 일부만 검사하는 것은 의미가 없다. 그래서
+    콘텐츠는 검사하지 않고, 대신 &ldquo;Linkmap 인프라와 다른 사용자에게 해가 되는가&rdquo;만 막는다.
+  </p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>경계</th><th>지키는 방법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>워크플로우 인젝션 차단</b></td>
+        <td>사용자 <code>.github/</code>는 전량 드랍하고 서버 상수 워크플로우만 주입한다.
+            사용자 입력이 YAML에 보간되는 지점은 <b>0</b>이며, 경로·브랜치·빌드 명령은 화이트리스트를
+            통과해야 한다 — 이스케이프가 아니라 <b>거부</b>한다.</td>
+      </tr>
+      <tr>
+        <td><b>경로 무결성</b></td>
+        <td>상위 경로 참조·절대 경로·제어문자·숨김 파일을 거부한다. 편집 경로는
+            퍼센트 인코딩(<code>%2Egithub/…</code>)까지 디코딩한 뒤 검사한다.</td>
+      </tr>
+      <tr>
+        <td><b>파일 모드 고정</b></td>
+        <td>tree 항목을 전부 <code>100644</code>로 만든다. symlink·실행 파일은 코드 경로상
+            <b>생성 자체가 불가능</b>하다.</td>
+      </tr>
+    </tbody>
+  </table></div>
+  <p class="small muted">
+    콘텐츠 자체의 적법성은 ToS와 GitHub AUP로 사용자 책임이다. 커밋은 사용자 본인 토큰으로,
+    본인 계정에 이뤄진다.
+  </p>
+</section>
+
+<section>
+  <h2><span class="n">03</span>진행 순서</h2>
+  <div class="rail">
+
+    <div class="phase gate">
+      <div class="mark"><div class="dot">0</div><div class="line"></div></div>
+      <div class="body">
+        <b>보안 선결 + 공통 기반</b>
+        <p class="small muted">
+          OAuth 콜백이 <code>state_token</code>만으로 사용자를 식별하고 있었다. 공격자의 state로 피해자의
+          인가를 유도하면 피해자 토큰이 공격자 계정에 묶인다. 재현 테스트로 먼저 실증한 뒤 세션 대조를 넣었다.
+          이어서 <code>oauth_states</code> RLS가 <code>user_id</code>만 강제해 타인 <code>project_id</code>를
+          담은 state를 직접 만들 수 있던 문제(크로스테넌트 GitHub 연결 탈취)도 함께 막았다.
+        </p>
+        <div class="check">타 세션 state → 403 · 토큰 교환 미발생 · service_accounts 미변경</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="mark"><div class="dot">1A</div><div class="line"></div></div>
+      <div class="body">
+        <b>트랙 A — 파일 업로드</b>
+        <p class="small muted">
+          단일 HTML·ZIP·폴더가 모두 하나의 파일 배열로 수렴하도록 만들어 서버 검증을 단일화했다.
+          래퍼 폴더 자동 벗기기, 첫 화면 판정, 상한(60개 · 25MB)까지 브라우저에서 끝낸다.
+        </p>
+        <div class="check">단일 HTML → 사이트 200 · <code>.github/evil.yml</code> 포함 ZIP → 커밋 트리에 부재 · 61개 파일 → 400</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="mark"><div class="dot">1B</div><div class="line"></div></div>
+      <div class="body">
+        <b>트랙 B — 내 GitHub 저장소 연결</b>
+        <p class="small muted">
+          가장 먼저 한 일은 기능 추가가 아니라 <b>삭제 가드</b>였다. 기존 삭제 API가 GitHub 저장소를
+          지우고 있어서, 가져온 저장소에 그대로 적용됐다면 사용자의 원본이 사라진다. 재현 테스트로
+          위험을 실증한 뒤 막았다.
+        </p>
+        <div class="check">배포 후 트리 diff = 워크플로우 1개 추가뿐 · import 삭제 → 저장소 존재 유지</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="mark"><div class="dot">2</div><div class="line"></div></div>
+      <div class="body">
+        <b>빌드형 프로젝트 지원</b>
+        <p class="small muted">
+          1B까지는 완성된 <code>index.html</code>이 저장소에 있어야 했다. 실제 프로젝트는 빌드 산출물을
+          저장소에 넣지 않는 것이 정상이라 이 제약은 대부분의 진짜 저장소를 막는다. 프레임워크를 감지해
+          빌드 워크플로우를 주입하도록 바꿨다.
+        </p>
+        <div class="check">프레임워크 감지 21건 · 셸 메타문자 포함 명령 거부 · 산출물 경로 화이트리스트</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">04</span>라이브 검증</h2>
+  <p>실제 <code>linkmap.biz</code>에서 두 트랙을 끝까지 배포해 확인했다. 테스트 자원은 검증 후 전부 삭제했다.</p>
+  <div class="tablewrap"><table>
+    <thead>
+      <tr><th>검증 항목</th><th>트랙 A — 내 파일 올리기</th><th>트랙 B — 내 GitHub 가져오기</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>첫 화면 처리</td>
+        <td><code>my-portfolio.html</code> → <code>index.html</code> 자동 변환</td>
+        <td>루트에 없음 → <b><code>docs/</code> 자동 감지</b></td>
+      </tr>
+      <tr>
+        <td>저장소 변경</td>
+        <td><code>deploy.yml</code> + <code>index.html</code>만</td>
+        <td><b><code>linkmap-pages.yml</code> 1개만 추가</b></td>
+      </tr>
+      <tr>
+        <td>기존 파일</td>
+        <td>업로드 원본과 배포본 <b>바이트 일치</b></td>
+        <td><code>docs/index.html</code>·<code>README.md</code> 각각 최초 커밋 1개뿐 = <b>무수정 실증</b></td>
+      </tr>
+      <tr>
+        <td>파일 모드</td>
+        <td colspan="2">전부 <code>100644</code> — symlink·실행 파일 없음</td>
+      </tr>
+      <tr>
+        <td>실제 사이트</td>
+        <td>HTTP 200, 렌더링 정상</td>
+        <td>HTTP 200, <code>docs/</code> 내용 게시</td>
+      </tr>
+      <tr>
+        <td>내 사이트 표시</td>
+        <td>&ldquo;내가 올린 파일&rdquo; · 편집 버튼 <b>있음</b></td>
+        <td>&ldquo;내 GitHub 저장소&rdquo; · 편집 버튼 <b>없음</b> (사용자 자산 보호)</td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <div class="card">
+    <h3>ZIP 엣지 케이스</h3>
+    <ul class="small">
+      <li>래퍼 폴더(<code>my-site/</code>) 자동 벗기기 · 이중 래핑도 처리</li>
+      <li><code>__MACOSX</code>·<code>.DS_Store</code> 등 아카이브 부산물 제거</li>
+      <li>index 없이 HTML 여러 개 → 선택 UI를 띄우고 <b>선택 전에는 배포 버튼을 잠근다</b></li>
+      <li>선택 시 원본을 지우지 않고 <code>index.html</code>을 <b>복제 추가</b> — 상대경로 링크가 깨지지 않는다</li>
+      <li><code>.github/workflows/evil.yml</code>·<code>.env</code>·<code>run.sh</code> → 제외하고 <b>사유까지 표시</b></li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">05</span>검증 과정에서 찾아 고친 것</h2>
+  <p>
+    적대적 리뷰와 라이브 테스트에서 나온 결함들이다. 특히 아래 셋은 단위 테스트로는 잡히지 않는
+    종류였다 — 탭 전환, 미리보기와 실제의 괴리, 만료된 세션에서의 안내 문구.
+  </p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>심각도</th><th>결함</th><th>조치</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="pill crit">치명</span></td>
+        <td><b>자동 재시도가 사용자의 <code>deploy.yml</code>을 실행</b> — 상태 판정이 워크플로우를 기본
+            인자로 dispatch했다. <code>deploy.yml</code>은 실사용 저장소에서 가장 흔한 이름이고 대개
+            프로덕션 배포를 수행한다. 게다가 상태 조회가 브랜치 <code>main</code> 고정·워크플로우
+            무필터라 <b>남의 CI 실패를 우리 배포 실패로 오독</b>해 트리거 조건까지 헐거웠다.</td>
+        <td>배포별로 워크플로우 파일·브랜치를 전달하고, 가져온 저장소는 자동 재시도를 금지</td>
+      </tr>
+      <tr>
+        <td><span class="pill bad">높음</span></td>
+        <td><b>사용자 원본 저장소 삭제</b> — 사이트 삭제가 GitHub 저장소를 함께 지웠다</td>
+        <td><code>source_type === 'import'</code> 가드 + 재현 테스트</td>
+      </tr>
+      <tr>
+        <td><span class="pill bad">높음</span></td>
+        <td><b>워크플로우 인젝션 우회</b> — 편집 경로의 금지 패턴이 리터럴만 검사해
+            <code>%2Egithub/workflows/x.yml</code>이 통과했고, Contents API URL에서 GitHub이 디코딩하면
+            <code>.github/</code>로 복원됐다</td>
+        <td>검사 전에 (이중까지) 디코딩 · 회귀 테스트 7건</td>
+      </tr>
+      <tr>
+        <td><span class="pill bad">높음</span></td>
+        <td><b>편집기가 사용자 저장소를 덮어씀</b> — 파일 편집·일괄 수정·업로드 라우트가
+            <code>source_type</code>을 몰랐다</td>
+        <td>세 라우트 403 + 편집 진입 숨김</td>
+      </tr>
+      <tr>
+        <td><span class="pill warn">중간</span></td>
+        <td><b>배포 진행이 다른 탭으로 옮기면 멈춤</b> — &ldquo;페이지를 닫지 마세요&rdquo;라고 안내하는
+            화면인데 폴링이 중단됐다. 6분간 &ldquo;설정 중&rdquo;인 동안 사이트는 이미 떠 있었다</td>
+        <td>백그라운드에서도 폴링 유지</td>
+      </tr>
+      <tr>
+        <td><span class="pill warn">중간</span></td>
+        <td><b>미리보기가 실제와 불일치</b> — 차단 규칙이 서버에만 있어 요약 카드에
+            <code>.github/evil.yml</code>이 그대로 표시됐다. 보안 경계는 무사했지만 사용자에겐
+            본 파일이 조용히 사라지는 경험</td>
+        <td>클라이언트에도 같은 규칙 적용 + 제외 사유를 배포 전에 표시</td>
+      </tr>
+      <tr>
+        <td><span class="pill warn">중간</span></td>
+        <td><b>동의 화면과 실제 동작 불일치</b> — 폴더를 바꿔도 미리보기 YAML은 기본값 고정,
+            가장 결과가 큰 행위인 <b>Pages 공개</b>가 목록에 없었다</td>
+        <td>미리보기를 선택값으로 갱신 · 공개 사실과 URL을 최상단에 명시</td>
+      </tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="n">06</span>빌드형 지원과 그 한계</h2>
+  <p>
+    프레임워크를 감지해 <code>npm ci → npm run build → 산출물 업로드</code> 워크플로우를 주입한다.
+    설정 파일은 읽지도 고치지도 않고, 저장소에 이미 있는 스크립트를 그대로 실행한다.
+  </p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>감지</th><th>산출물</th><th>하위 경로 위험</th><th>대응</th></tr></thead>
+    <tbody>
+      <tr><td>Next.js</td><td class="mono">out</td><td><span class="pill bad">확실</span></td><td>설정 파일에만 지정 가능 → 명시 경고</td></tr>
+      <tr><td>Gatsby</td><td class="mono">public</td><td><span class="pill bad">확실</span></td><td>동일</td></tr>
+      <tr><td>Nuxt</td><td class="mono">.output/public</td><td><span class="pill bad">확실</span></td><td>동일</td></tr>
+      <tr><td>Vite</td><td class="mono">dist</td><td><span class="pill warn">가능</span></td><td>빌드 스크립트가 순수 <code>vite build</code>일 때만 <code>--base</code> 주입</td></tr>
+      <tr><td>Astro · SvelteKit</td><td class="mono">dist · build</td><td><span class="pill warn">가능</span></td><td>경고</td></tr>
+      <tr><td>Create React App</td><td class="mono">build</td><td><span class="pill ok">없음</span></td><td><code>PUBLIC_URL</code>을 존중하므로 우리가 넘겨주면 해결</td></tr>
+    </tbody>
+  </table></div>
+  <div class="principle">
+    GitHub Pages는 <code>/&lt;저장소이름&gt;/</code> 하위에 서비스한다. 우리는 사용자 설정 파일을
+    고치지 않으므로 고칠 수 없는 경우가 있고, 그때는 숨기지 않고 배포 전에 알린다.
+  </div>
+  <p class="small muted">
+    빌드 명령에도 화이트리스트를 적용한다. <code>&amp;&amp;</code>·<code>;</code>·<code>$()</code>·<code>|</code> 같은
+    셸 메타문자가 있으면 이스케이프하지 않고 거부한다.
+  </p>
+</section>
+
+<section>
+  <h2><span class="n">07</span>데이터베이스 변경</h2>
+  <div class="card">
+    <h3>마이그레이션 109 — <span class="mono">user_source_deploys</span></h3>
+    <ul class="small">
+      <li><code>template_id</code>를 NULL 허용으로 바꾸고 <code>source_type</code>(<code>template</code> ·
+          <code>upload</code> · <code>import</code>)을 추가했다.</li>
+      <li>정합성 제약: <code>(source_type = 'template') = (template_id IS NOT NULL)</code> —
+          가짜 템플릿 행으로 때우는 대신 DB가 직접 강제한다.</li>
+      <li>RPC는 기본값 인자로 인한 오버로드 모호성 때문에 <b>DROP 후 7-인자로 재생성</b>했다.</li>
+    </ul>
+    <p class="small muted">
+      재생성 기준은 <b>M101</b>이었다. M100 기준으로 썼다면 trial 중인 Pro·Team 사용자가 무료 한도로
+      차단되는, 이미 고쳐진 사고가 재발했을 것이다 — 리뷰에서 잡아 적용 전에 정정했다.
+    </p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">08</span>남은 것</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>다음 단계</h3>
+      <ul class="small">
+        <li>빌드형 저장소 라이브 e2e (Vite 실제 프로젝트)</li>
+        <li>Phase 3 — 배포한 사이트가 쓰는 서비스를 감지해 서비스맵에 제안</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>보고만 하고 두는 것</h3>
+      <ul class="small">
+        <li>재배포의 레거시 <code>package.json</code> 패치가 인자 순서를 잘못 넘김 — 기존 결함이고
+            예외로 삼켜져 무해하며, 가져온 저장소는 이미 건너뛴다</li>
+        <li>조직 저장소의 admin 협업자가 &ldquo;본인 소유 저장소&rdquo; 안내와 달리 통과 — 문구 불일치</li>
+      </ul>
+    </div>
+  </div>
+  <p class="small muted">
+    테스트 중 로그인이 반복해서 끊겼는데, 원인은 세션이 아니라 <b>앞글자가 잘린 anon 키가 배포
+    번들에 인라인</b>된 것이었다. 별도 트랙에서 배포 전 키 검증 게이트가 추가돼 봉인됐다.
+  </p>
+</section>
+
+<footer>
+  근거: 2026-08-01 코드베이스 조사 3건 · 적대적 리뷰 3라운드(9렌즈) · 라이브 브라우저 검증.
+  상세는 <span class="mono">docs/planning/2026-08-01_oneclick-user-content-deploy-execution.md</span>,
+  기획 원안은 <span class="mono">…_oneclick-user-content-deploy.md</span>.
+  최종 검증: typecheck 클린 · 테스트 512건 통과 · lint 에러 0.
+</footer>
+
+</div>
+</body>
+</html>

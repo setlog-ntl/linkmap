@@ -17,6 +17,7 @@ import { checkHomepageDeployQuota } from '@/lib/quota';
 import { analyzeRepo, blockReasonMessage } from '@/lib/oneclick/repo-analyzer';
 import {
   buildImportWorkflowYml,
+  buildBuildWorkflowYml,
   isLinkmapWorkflow,
   IMPORT_WORKFLOW_PATH,
   IMPORT_WORKFLOW_FILE,
@@ -170,12 +171,24 @@ export async function POST(request: NextRequest) {
       workflowPreexisted = overwritingOwnFile;
 
       try {
+        // 빌드형이면 install·build 단계가 포함된 워크플로우를 넣는다 (Phase 2)
+        const workflowYml =
+          analysis.deploy_mode === 'build' && analysis.build
+            ? buildBuildWorkflowYml({
+                outDir: publishDir,
+                branch,
+                installCommand: analysis.build.installCommand,
+                buildCommand: analysis.build.buildCommand,
+                repoName: repo,
+              })
+            : buildImportWorkflowYml(publishDir, branch);
+
         const result = await createOrUpdateFileContent(
           githubToken,
           owner,
           repo,
           IMPORT_WORKFLOW_PATH,
-          buildImportWorkflowYml(publishDir, branch),
+          workflowYml,
           'Linkmap: add GitHub Pages deploy workflow',
           existingSha,
           branch,
@@ -305,6 +318,8 @@ export async function POST(request: NextRequest) {
       source_branch: branch,
       pages_was_enabled: analysis.pages_enabled,
       link_only: linkOnly,
+      deploy_mode: analysis.deploy_mode,
+      framework: analysis.build?.framework ?? null,
     };
 
     await Promise.all([

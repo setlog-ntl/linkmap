@@ -113,7 +113,7 @@ describe('workflowOptionsFromDeploy — 남의 워크플로우를 실행·오독
 });
 
 describe('blockReasonMessage', () => {
-  it.each(['not_admin', 'empty_repo', 'needs_build', 'no_html', 'unsafe_path'] as const)(
+  it.each(['not_admin', 'empty_repo', 'no_html', 'unsafe_path'] as const)(
     'returns actionable guidance for %s',
     (reason) => {
       const message = blockReasonMessage(reason);

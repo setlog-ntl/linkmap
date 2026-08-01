@@ -159,6 +159,17 @@ export interface RepoAnalysis {
   pages_enabled: boolean;
   needs_build_type_switch: boolean;
   can_link_only: boolean;
+  deploy_mode: 'static' | 'build';
+  build: {
+    framework: string;
+    label: string;
+    outDir: string;
+    outDirCandidates: string[];
+    installCommand: string;
+    buildCommand: string;
+    basePathRisk: 'none' | 'likely' | 'certain';
+    warnings: string[];
+  } | null;
   warnings: string[];
 }
 
