@@ -38,6 +38,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # 잘못된 anon 키(잘림·레거시·비활성)가 번들에 인라인되는 것을 배포 전에 차단
+      # — 2026-08-01 비활성 레거시 키·앞글자 잘린 Secret이 그대로 빌드되어 전면 401 두 차례 발생
+      - name: Validate Supabase anon key
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          case "$SUPABASE_ANON_KEY" in
+            sb_publishable_*) ;;
+            *)
+              echo "::error::NEXT_PUBLIC_SUPABASE_ANON_KEY가 sb_publishable_ 접두사가 아님 — Secret 값 잘림/레거시 키 의심"
+              exit 1;;
+          esac
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$SUPABASE_URL/auth/v1/health" -H "apikey: $SUPABASE_ANON_KEY")
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::Supabase가 anon 키를 거부함 (auth health HTTP $STATUS) — 폐기/비활성 키로 배포 중단"
+            exit 1
+          fi
+          echo "✅ anon 키 검증 통과"
+
       - name: Build for Cloudflare
         run: npm run build:cf
         env:
