@@ -39,6 +39,7 @@ import {
   Heart,
   Coffee,
   PartyPopper,
+  Table2,
   type LucideIcon,
 } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
@@ -68,6 +69,7 @@ const TEMPLATE_DEFAULT_NAMES: Record<string, string> = {
   'event-page': 'myevent',
   'nonprofit-page': 'myorg',
   'invitation': 'myinvite',
+  'excel-merge': 'excelmerge',
 };
 
 // 템플릿 slug → 대표 아이콘 (lucide-react)
@@ -89,6 +91,7 @@ const TEMPLATE_ICONS: Record<string, LucideIcon> = {
   'event-page': Calendar,
   'nonprofit-page': Heart,
   'invitation': PartyPopper,
+  'excel-merge': Table2,
 };
 
 function resolveDefaultSiteName(

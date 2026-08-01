@@ -10,6 +10,7 @@ import { generateDevShowcasePresetCss } from './generators/dev-showcase';
 import { generateNamecardPresetCss } from './generators/digital-namecard';
 import { generateLinkCardPresetCss } from './generators/link-card';
 import { generateFreelancerPresetCss } from './generators/freelancer-page';
+import { generateExcelMergePresetCss } from './generators/excel-merge';
 import { generateSmallBizPresetCss } from './generators/base-generator';
 
 // ─── 공개 API: 개별 config 생성 (하위 호환) ──
@@ -221,6 +222,7 @@ export function generateFiles(
   const isFreelancer = templateSlug === 'freelancer-page';
   const isLinkCard = templateSlug === 'link-card';
   const isSmallBiz = templateSlug === 'small-biz' || templateSlug === 'small-biz-cafe';
+  const isExcelMerge = templateSlug === 'excel-merge';
 
   const files: GeneratedFile[] = [
     { path: 'src/lib/config.ts', content: generator.generateConfigTs(state) },
@@ -229,7 +231,8 @@ export function generateFiles(
 
   // 모든 템플릿: 항상 프리셋 CSS override 파일 생성
   // (미리보기는 동적으로 CSS를 생성하지만, 배포 코드에는 프리셋 CSS가 없거나 불완전할 수 있음)
-  const isPersonalBrand = !isDevShowcase && !isDigitalNamecard && !isLinkCard && !isSmallBiz && !isFreelancer;
+  const isPersonalBrand =
+    !isDevShowcase && !isDigitalNamecard && !isLinkCard && !isSmallBiz && !isFreelancer && !isExcelMerge;
   const hero = state.values.hero || {};
 
   if (isPersonalBrand) {
@@ -269,6 +272,13 @@ export function generateFiles(
       path: 'src/app/preset-override.css',
       content: generateSmallBizPresetCss(designPreset, primaryColor),
     });
+  } else if (isExcelMerge) {
+    const theme = state.values.theme || {};
+    const accent = (theme.accent as string) || '#0f766e';
+    files.push({
+      path: 'src/app/preset-override.css',
+      content: generateExcelMergePresetCss(accent),
+    });
   } else if (isFreelancer) {
     const designPreset = (hero.designPreset as string) || 'default';
     const gradientFrom = (hero.gradientFrom as string) || '#5b13ec';
@@ -280,7 +290,7 @@ export function generateFiles(
   }
 
   // Phase 2: 컴포넌트 파일 변경 (personal-brand + freelancer-page)
-  if (currentFiles && !isDevShowcase && !isDigitalNamecard && !isLinkCard && !isSmallBiz) {
+  if (currentFiles && !isDevShowcase && !isDigitalNamecard && !isLinkCard && !isSmallBiz && !isExcelMerge) {
     const defaultFrom = isFreelancer ? '#5b13ec' : '#ee5b2b';
     const defaultTo = isFreelancer ? '#06b6d4' : '#f59e0b';
     if (hero.gradientFrom && hero.gradientFrom !== defaultFrom ||
@@ -475,7 +485,12 @@ export function parsePageToEnabledModules(
   }
 
   // theme 모듈은 컴포넌트가 없으므로 항상 enabled
-  if ((templateSlug === 'digital-namecard' || templateSlug === 'link-card') && !enabled.includes('theme')) {
+  if (
+    (templateSlug === 'digital-namecard' ||
+      templateSlug === 'link-card' ||
+      templateSlug === 'excel-merge') &&
+    !enabled.includes('theme')
+  ) {
     enabled.push('theme');
   }
 

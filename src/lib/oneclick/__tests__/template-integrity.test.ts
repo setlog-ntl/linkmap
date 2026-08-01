@@ -5,6 +5,7 @@ import { buildInitialState } from '../generators/base-generator';
 import { validateModuleState } from '../validate-module-state';
 import { getModuleSchema } from '@/data/oneclick/module-schemas';
 import { getTemplateBySlug } from '@/data/oneclick/homepage-template-content';
+import { homepageTemplateSeedData } from '@/data/oneclick/homepage-templates';
 
 /** TypeScript transpileModule로 구문 오류만 검출 (타입 체크 없음). 구문 에러 진단 배열 반환. */
 function syntaxErrors(code: string, fileName: string): string[] {
@@ -92,6 +93,7 @@ const TEMPLATE_SLUGS = [
   'digital-namecard',
   'link-card',
   'invitation',
+  'excel-merge',
 ] as const;
 
 // 템플릿 파일 번들이 있는 슬러그 (digital-namecard, link-card는 템플릿 없음)
@@ -102,6 +104,7 @@ const SLUGS_WITH_TEMPLATE_FILES = [
   'small-biz',
   'small-biz-cafe',
   'invitation',
+  'excel-merge',
 ] as const;
 
 describe('템플릿 무결성 검증', () => {
@@ -350,6 +353,32 @@ describe('템플릿 무결성 검증', () => {
           }
         }
       });
+    }
+  });
+});
+
+// ── 시드 데이터 키 무결성 ──
+// 배포 API는 homepage_templates를 id로 조회하고, 시드 SQL은 slug를 ON CONFLICT 키로 쓴다.
+// id가 중복되면 배포가 다른 템플릿 row를 조회하고, SQL은 PK 충돌로 실패한다.
+// (2026-08-01 excel-merge가 nonprofit-page의 UUID를 복제해 실제 발생한 결함의 회귀 가드)
+describe('홈페이지 템플릿 시드 키 무결성', () => {
+  it('id(UUID)가 전부 유일해야 함', () => {
+    const seen = new Map<string, string>();
+    for (const seed of homepageTemplateSeedData) {
+      const prev = seen.get(seed.id);
+      expect(
+        prev,
+        `UUID 중복: "${seed.slug}"와 "${prev}"가 id ${seed.id}를 공유 — 배포 API가 잘못된 템플릿을 조회함`
+      ).toBeUndefined();
+      seen.set(seed.id, seed.slug);
+    }
+  });
+
+  it('slug가 전부 유일해야 함', () => {
+    const seen = new Set<string>();
+    for (const seed of homepageTemplateSeedData) {
+      expect(seen.has(seed.slug), `slug 중복: ${seed.slug}`).toBe(false);
+      seen.add(seed.slug);
     }
   });
 });

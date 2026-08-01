@@ -60,7 +60,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     tags: ['link-card', 'social', 'creator', 'animated', 'themes', 'nextjs'],
     is_premium: false,
     is_active: true,
-    display_order: 7,
+    display_order: 8,
     deploy_target: 'github_pages',
   },
   {
@@ -93,7 +93,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     tags: ['namecard', 'vcard', 'qr-code', 'business', 'contact', 'nextjs'],
     is_premium: false,
     is_active: true,
-    display_order: 2,
+    display_order: 3,
 
     deploy_target: 'github_pages',
   },
@@ -127,7 +127,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     tags: ['developer', 'portfolio', 'github', 'showcase', 'dark-theme', 'nextjs'],
     is_premium: false,
     is_active: true,
-    display_order: 3,
+    display_order: 4,
 
     deploy_target: 'github_pages',
   },
@@ -167,7 +167,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     tags: ['small-business', 'restaurant', 'izakaya', 'shop', 'kakao-map', 'mobile', 'nextjs'],
     is_premium: false,
     is_active: true,
-    display_order: 5,
+    display_order: 6,
     deploy_target: 'github_pages',
   },
   {
@@ -202,7 +202,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     tags: ['small-business', 'cafe', 'coffee', 'bakery', 'kakao-map', 'mobile', 'nextjs'],
     is_premium: false,
     is_active: true,
-    display_order: 6,
+    display_order: 7,
     deploy_target: 'github_pages',
   },
   {
@@ -375,7 +375,7 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     tags: ['freelancer', 'services', 'portfolio', 'testimonials', 'business', 'nextjs'],
     is_premium: false,
     is_active: true,
-    display_order: 4,
+    display_order: 5,
     deploy_target: 'github_pages',
   },
   {
@@ -619,7 +619,37 @@ export const homepageTemplateSeedData: HomepageTemplateSeed[] = [
     tags: ['invitation', 'event', 'gathering', 'birthday', 'celebration', 'mobile', 'nextjs'],
     is_premium: false,
     is_active: true,
-    display_order: 8,
+    display_order: 9,
+    deploy_target: 'github_pages',
+  },
+  {
+    id: 'b2c3d4e5-0021-4000-9000-000000000021',
+    slug: 'excel-merge',
+    name: 'My Excel Automation',
+    name_ko: '나만의 엑셀자동화',
+    description:
+      "A browser-only tool page that merges many Excel files into one. Files never leave the visitor's browser — no upload, no server, no install.",
+    description_ko:
+      '여러 엑셀 파일을 하나로 합쳐 바로 내려받는 도구 페이지. 파일은 방문자의 브라우저를 떠나지 않습니다 — 업로드도, 서버도, 설치도 없습니다.',
+    preview_image_url: null,
+    github_owner: 'linkmap-templates',
+    github_repo: 'excel-merge',
+    default_branch: 'main',
+    framework: 'nextjs',
+    required_env_vars: [
+      { key: 'NEXT_PUBLIC_TITLE', description: '도구 제목', required: true },
+      { key: 'NEXT_PUBLIC_SUBTITLE', description: '한 줄 설명', required: false },
+      { key: 'NEXT_PUBLIC_BADGE', description: '상단 배지 문구', required: false },
+      { key: 'NEXT_PUBLIC_ACCENT', description: '강조색 (hex)', required: false },
+      { key: 'NEXT_PUBLIC_BG_STYLE', description: '밝기 (light/dark)', required: false },
+      { key: 'NEXT_PUBLIC_FILENAME_COLUMN', description: '출처 파일명을 담을 열 이름', required: false },
+      { key: 'NEXT_PUBLIC_DOWNLOAD_NAME', description: '내려받을 파일 이름', required: false },
+      { key: 'NEXT_PUBLIC_GA_ID', description: 'Google Analytics 4 ID', required: false },
+    ],
+    tags: ['tool', 'excel', 'spreadsheet', 'merge', 'office', 'client-side', 'nextjs'],
+    is_premium: false,
+    is_active: true,
+    display_order: 2,
     deploy_target: 'github_pages',
   },
 ];

@@ -7,6 +7,7 @@ import { linkCardPresets } from './link-card';
 import { smallBizPresets } from './small-biz';
 import { smallBizCafePresets } from './small-biz-cafe';
 import { invitationPresets } from './invitation';
+import { excelMergePresets } from './excel-merge';
 
 const PRESET_MAP: Record<string, ModulePreset[]> = {
   'personal-brand': personalBrandPresets,
@@ -17,6 +18,7 @@ const PRESET_MAP: Record<string, ModulePreset[]> = {
   'small-biz': smallBizPresets,
   'small-biz-cafe': smallBizCafePresets,
   'invitation': invitationPresets,
+  'excel-merge': excelMergePresets,
 };
 
 export function getModulePresets(templateSlug: string): ModulePreset[] {

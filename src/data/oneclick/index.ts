@@ -5,3 +5,4 @@ export { personalBrandTemplate } from './personal-brand-template';
 export { freelancerPageTemplate } from './freelancer-page-template';
 export { smallBizTemplate } from './small-biz-template';
 export { smallBizCafeTemplate } from './small-biz-cafe-template';
+export { excelMergeTemplate } from './excel-merge-template';

@@ -104,3 +104,6 @@ public/Untitled
 result.txt
 template-build-results.txt
 docs/promo/vcdemo-access-report.html
+
+# 요청 백로그 (로컬 전용 — 커밋 금지)
+.backlog/

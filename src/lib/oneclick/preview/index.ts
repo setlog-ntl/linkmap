@@ -11,6 +11,7 @@ import { generateLinkCardPreview } from './link-card';
 import { generateSmallBizPreview } from './small-biz';
 import { generateSmallBizCafePreview } from './small-biz-cafe';
 import { generateInvitationPreview } from './invitation';
+import { generateExcelMergePreview } from './excel-merge';
 
 type PreviewGenerator = (
   state: ModuleConfigState,
@@ -27,6 +28,7 @@ const GENERATORS: Record<string, PreviewGenerator> = {
   'small-biz': generateSmallBizPreview,
   'small-biz-cafe': generateSmallBizCafePreview,
   'invitation': generateInvitationPreview,
+  'excel-merge': generateExcelMergePreview,
 };
 
 export function generatePreviewHtml(

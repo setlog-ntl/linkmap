@@ -52,6 +52,33 @@ export function WireframeSVG({ slug }: { slug: string }) {
         </svg>
       );
 
+    // 파일 3개 → 병합 화살표 → 결과 표 + 내려받기 버튼
+    case 'excel-merge':
+      return (
+        <svg viewBox="0 0 200 120" className={common} fill="currentColor" opacity={0.18}>
+          <rect x="15" y="8" width="46" height="30" rx="4" fill="none" stroke="currentColor" strokeWidth="1.5" opacity={0.35} />
+          <rect x="20" y="14" width="16" height="4" rx="2" />
+          <rect x="20" y="22" width="36" height="3" rx="1.5" opacity={0.6} />
+          <rect x="20" y="29" width="36" height="3" rx="1.5" opacity={0.6} />
+          <rect x="77" y="8" width="46" height="30" rx="4" fill="none" stroke="currentColor" strokeWidth="1.5" opacity={0.35} />
+          <rect x="82" y="14" width="16" height="4" rx="2" />
+          <rect x="82" y="22" width="36" height="3" rx="1.5" opacity={0.6} />
+          <rect x="82" y="29" width="36" height="3" rx="1.5" opacity={0.6} />
+          <rect x="139" y="8" width="46" height="30" rx="4" fill="none" stroke="currentColor" strokeWidth="1.5" opacity={0.35} />
+          <rect x="144" y="14" width="16" height="4" rx="2" />
+          <rect x="144" y="22" width="36" height="3" rx="1.5" opacity={0.6} />
+          <rect x="144" y="29" width="36" height="3" rx="1.5" opacity={0.6} />
+          <path d="M100 44 L100 54 M95 49 L100 54 L105 49" stroke="currentColor" strokeWidth="2" fill="none" />
+          <rect x="40" y="60" width="120" height="36" rx="4" fill="none" stroke="currentColor" strokeWidth="1.5" opacity={0.35} />
+          <rect x="40" y="60" width="120" height="10" rx="4" />
+          <rect x="47" y="76" width="48" height="3" rx="1.5" opacity={0.6} />
+          <rect x="105" y="76" width="48" height="3" rx="1.5" opacity={0.6} />
+          <rect x="47" y="85" width="48" height="3" rx="1.5" opacity={0.6} />
+          <rect x="105" y="85" width="48" height="3" rx="1.5" opacity={0.6} />
+          <rect x="70" y="103" width="60" height="12" rx="6" />
+        </svg>
+      );
+
     // 터미널 점 3개 + 코드 라인 + 프로젝트 카드 2열
     case 'dev-showcase':
       return (

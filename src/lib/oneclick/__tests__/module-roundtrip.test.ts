@@ -41,6 +41,7 @@ const TEMPLATE_SLUGS = [
   'digital-namecard',
   'link-card',
   'invitation',
+  'excel-merge',
 ] as const;
 
 const EDIT_MARKER = ' ✎E9137';
@@ -181,6 +182,7 @@ describe('모듈 라운드트립 정합성 (편집 → 적용 → 재편집)', (
     'small-biz',
     'small-biz-cafe',
     'invitation',
+    'excel-merge',
   ] as const;
   describe('배포 번들 config.ts 라운드트립 안정성', () => {
     for (const slug of SLUGS_WITH_BUNDLE) {
@@ -206,6 +208,26 @@ describe('모듈 라운드트립 정합성 (편집 → 적용 → 재편집)', (
         ).toBe(genA);
       });
     }
+  });
+
+  // ── 4.6 자유 텍스트 속 설정 토큰 오염 방지 ──
+  // extractBoolean/extractNumber가 줄 앵커 없이 첫 매칭을 취하면, 사용자 문구 속
+  // "allSheets: true" 같은 토큰이 실제 설정 라인보다 먼저 매칭되어 도구 설정이 변조된다.
+  describe('텍스트 필드 내 설정 토큰 오염 방지', () => {
+    it('[excel-merge] subtitle에 "allSheets: true"·"headerRow: 7"이 있어도 설정 보존', () => {
+      const slug = 'excel-merge';
+      const schema = getModuleSchema(slug);
+      if (!schema) return;
+      const generator = getGenerator(slug);
+      const state = buildInitialState(schema);
+      const attack = '팁: allSheets: true, headerRow: 7 처럼 적힌 문서도 그대로 합쳐집니다.';
+      state.values.hero.subtitle = attack;
+      const config = generator.generateConfigTs(state);
+      const parsed = parseConfigToState(config, schema);
+      expect(parsed.values.hero.subtitle).toBe(attack);
+      expect(parsed.values.tool.allSheets, 'subtitle 문구가 allSheets 설정을 오염').toBe(false);
+      expect(parsed.values.tool.headerRow, 'subtitle 문구가 headerRow 설정을 오염').toBe(1);
+    });
   });
 
   // ── 5. page.tsx 활성 모듈 라운드트립 ──

@@ -10,6 +10,7 @@ import { freelancerPageTemplate } from './freelancer-page-template';
 import { smallBizTemplate } from './small-biz-template';
 import { smallBizCafeTemplate } from './small-biz-cafe-template';
 import { invitationTemplate } from './invitation-template';
+import { excelMergeTemplate } from './excel-merge-template';
 import {
   sharedDeployYml as deployWorkflow,
   sharedTsconfigJson as sharedTsConfig,
@@ -1944,4 +1945,5 @@ export const homepageTemplates: HomepageTemplateContent[] = [
   smallBizTemplate,
   smallBizCafeTemplate,
   invitationTemplate,
+  excelMergeTemplate,
 ];

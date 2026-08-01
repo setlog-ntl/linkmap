@@ -23,6 +23,7 @@ const ALL_SLUGS = [
   'invitation',
   'digital-namecard',
   'link-card',
+  'excel-merge',
 ] as const;
 
 interface PackageJson {

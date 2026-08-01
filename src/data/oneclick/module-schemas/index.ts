@@ -7,6 +7,7 @@ import { freelancerPageModuleSchema } from './freelancer-page';
 import { smallBizModuleSchema } from './small-biz';
 import { smallBizCafeModuleSchema } from './small-biz-cafe';
 import { invitationModuleSchema } from './invitation';
+import { excelMergeModuleSchema } from './excel-merge';
 
 const schemaMap: Record<string, TemplateModuleSchema> = {
   'personal-brand': personalBrandModuleSchema,
@@ -17,6 +18,7 @@ const schemaMap: Record<string, TemplateModuleSchema> = {
   'small-biz': smallBizModuleSchema,
   'small-biz-cafe': smallBizCafeModuleSchema,
   'invitation': invitationModuleSchema,
+  'excel-merge': excelMergeModuleSchema,
 };
 
 /** 템플릿 slug로 모듈 스키마 조회 (없으면 null) */

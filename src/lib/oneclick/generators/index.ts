@@ -29,6 +29,7 @@ import { freelancerPageGenerator } from './freelancer-page';
 import { smallBizGenerator } from './small-biz';
 import { smallBizCafeGenerator } from './small-biz-cafe';
 import { invitationGenerator } from './invitation';
+import { excelMergeGenerator } from './excel-merge';
 import type { TemplateGenerator } from './base-generator';
 
 /** 모든 등록된 generator */
@@ -41,6 +42,7 @@ const generators: TemplateGenerator[] = [
   smallBizGenerator,
   smallBizCafeGenerator,
   invitationGenerator,
+  excelMergeGenerator,
 ];
 
 /** slug → generator 매핑 (O(1) 조회) */
@@ -63,3 +65,4 @@ export { freelancerPageGenerator } from './freelancer-page';
 export { smallBizGenerator } from './small-biz';
 export { smallBizCafeGenerator } from './small-biz-cafe';
 export { invitationGenerator } from './invitation';
+export { excelMergeGenerator } from './excel-merge';

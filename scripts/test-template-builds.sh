@@ -4,7 +4,7 @@
 # 배포되는 정적 사이트가 모든 템플릿에서 실제로 빌드되는지(범용성)를 확정한다.
 set -u
 
-SLUGS="link-card digital-namecard personal-brand dev-showcase freelancer-page small-biz small-biz-cafe invitation"
+SLUGS="link-card digital-namecard personal-brand dev-showcase freelancer-page small-biz small-biz-cafe invitation excel-merge"
 ROOT="$(pwd)"
 RESULTS="$ROOT/template-build-results.txt"
 : > "$RESULTS"

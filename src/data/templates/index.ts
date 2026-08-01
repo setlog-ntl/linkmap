@@ -27,7 +27,7 @@ export interface Template {
 }
 
 // Recommended templates
-const RECOMMENDED_SLUGS = new Set(['personal-brand', 'digital-namecard']);
+const RECOMMENDED_SLUGS = new Set(['personal-brand', 'digital-namecard', 'excel-merge']);
 
 /**
  * Build the template catalog from seed data.
