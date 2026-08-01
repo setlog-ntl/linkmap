@@ -6,6 +6,7 @@ import {
   type PackageJsonLike,
 } from '../framework-detect';
 import { buildBuildWorkflowYml, isSafeWorkflowCommand } from '../static-workflow';
+import { decideDeployMode } from '../repo-analyzer';
 
 const paths = (...files: string[]) => new Set(files);
 
@@ -91,6 +92,43 @@ describe('basePath 경고 — 하위 경로 배포에서 자산이 깨지는 문
       'my-repo',
     );
     expect(d.buildCommand).toBe('npm run build');
+  });
+});
+
+describe('decideDeployMode — 루트 index.html은 결과물일 수도, 빌드 입력일 수도 있다', () => {
+  const viteRepo = paths('index.html', 'package.json', 'vite.config.ts', 'src/main.js');
+
+  // Vite·CRA는 저장소 루트에 index.html을 두는데 그건 완성된 페이지가 아니라 빌드 입력이다.
+  // 그대로 올리면 /src/main.js를 참조하는 원본이 배포돼 빈 화면이 된다.
+  it('builds a Vite project even though index.html sits at the repo root', () => {
+    expect(decideDeployMode([''], viteRepo, 'vite')).toEqual({ mode: 'build' });
+  });
+
+  it('publishes as-is when a build output is already committed', () => {
+    // docs/에 결과물을 커밋해 둔 저장소는 프레임워크가 있어도 재빌드하지 않는다
+    const withDocs = paths('index.html', 'docs/index.html', 'package.json', 'vite.config.ts');
+    expect(decideDeployMode(['', 'docs'], withDocs, 'vite')).toEqual({
+      mode: 'static',
+      publishDirs: ['', 'docs'],
+    });
+  });
+
+  it('treats a plain HTML site with a package.json as static', () => {
+    // 린터용 package.json만 있는 순수 정적 사이트를 빌드로 오해하면 안 된다
+    const plain = paths('index.html', 'style.css', 'package.json');
+    expect(decideDeployMode([''], plain, 'generic')).toEqual({ mode: 'static', publishDirs: [''] });
+  });
+
+  it('builds when there is no html at all but a build project exists', () => {
+    const noHtml = paths('package.json', 'src/main.tsx', 'vite.config.ts');
+    expect(decideDeployMode([], noHtml, 'vite')).toEqual({ mode: 'build' });
+  });
+
+  it('blocks when there is neither html nor a build project', () => {
+    expect(decideDeployMode([], paths('README.md'), null)).toEqual({
+      mode: 'blocked',
+      reason: 'no_html',
+    });
   });
 });
 

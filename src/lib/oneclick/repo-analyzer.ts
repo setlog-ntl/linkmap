@@ -10,6 +10,7 @@ import {
   detectFramework,
   looksLikeBuildProject,
   type BuildDetection,
+  type FrameworkId,
   type PackageJsonLike,
 } from './framework-detect';
 
@@ -66,6 +67,43 @@ export function toArtifactPath(dir: string): string {
   return dir === '' ? '.' : dir;
 }
 
+export type ModeDecision =
+  | { mode: 'static'; publishDirs: string[] }
+  | { mode: 'build' }
+  | { mode: 'blocked'; reason: 'no_html' };
+
+/**
+ * 그대로 올릴지 빌드할지 정한다.
+ *
+ * 까다로운 지점: Vite·CRA 같은 프로젝트는 **저장소 루트에 index.html이 있다**. 그건 완성된
+ * 페이지가 아니라 빌드 입력 템플릿이라(`/src/main.js`를 참조) 그대로 올리면 빈 화면이 된다.
+ * 그래서 "루트에만 index.html이 있고 프레임워크가 감지되면" 빌드로 본다.
+ *
+ * 반대로 `docs/`·`dist/` 같은 게시 폴더에 index.html이 있으면 그건 사용자가 커밋해 둔
+ * 빌드 결과물이므로 그대로 올린다 — 프레임워크가 감지되더라도 재빌드하지 않는다.
+ */
+export function decideDeployMode(
+  publishDirs: string[],
+  paths: Set<string>,
+  framework: FrameworkId | null,
+): ModeDecision {
+  const hasOnlyRootIndex = publishDirs.length === 1 && publishDirs[0] === '';
+  const buildable = looksLikeBuildProject(paths);
+
+  // 게시 폴더에 이미 결과물이 있으면 그것을 쓴다
+  if (publishDirs.length > 0 && !hasOnlyRootIndex) {
+    return { mode: 'static', publishDirs };
+  }
+
+  // 루트 index.html뿐 — 프레임워크가 확실하면 그건 템플릿이다
+  if (hasOnlyRootIndex) {
+    const isRealFramework = framework !== null && framework !== 'generic';
+    return isRealFramework ? { mode: 'build' } : { mode: 'static', publishDirs };
+  }
+
+  return buildable ? { mode: 'build' } : { mode: 'blocked', reason: 'no_html' };
+}
+
 export async function analyzeRepo(
   token: string,
   owner: string,
@@ -110,18 +148,28 @@ export async function analyzeRepo(
   const paths = new Set(tree.map((t) => t.path));
   const publishDirs = findPublishDirs(paths);
 
-  // 완성된 index.html이 없으면 빌드해서 만들어낼 수 있는지 본다 (Phase 2).
-  // 빌드 산출물은 저장소에 없는 것이 정상이므로 여기서 차단하면 대부분의 실제 프로젝트를 막게 된다.
-  let buildDetection: BuildDetection | null = null;
-  if (publishDirs.length === 0) {
-    if (!looksLikeBuildProject(paths)) {
-      return { ...base, deployable: false, block_reason: 'no_html' };
-    }
+  // 빌드가 필요한지 판정한다 (Phase 2). 빌드 산출물은 저장소에 없는 것이 정상이므로
+  // "완성된 index.html이 없다"는 이유로 차단하면 대부분의 실제 프로젝트를 막게 된다.
+  // package.json은 프레임워크 추정에 필요할 때만 읽는다.
+  let candidate: BuildDetection | null = null;
+  const needsFrameworkCheck =
+    publishDirs.length === 0 || (publishDirs.length === 1 && publishDirs[0] === '');
+  if (needsFrameworkCheck && looksLikeBuildProject(paths)) {
     const pkg = await readPackageJson(token, owner, repo);
-    buildDetection = detectFramework(paths, pkg, repoInfo.name);
-    if (!isSafeWorkflowValue(buildDetection.outDir)) {
-      return { ...base, deployable: false, block_reason: 'unsafe_path' };
-    }
+    candidate = detectFramework(paths, pkg, repoInfo.name);
+  }
+
+  const decision = decideDeployMode(publishDirs, paths, candidate?.framework ?? null);
+  if (decision.mode === 'blocked') {
+    return { ...base, deployable: false, block_reason: decision.reason };
+  }
+
+  const buildDetection = decision.mode === 'build' ? candidate : null;
+  if (decision.mode === 'build' && !buildDetection) {
+    return { ...base, deployable: false, block_reason: 'no_html' };
+  }
+  if (buildDetection && !isSafeWorkflowValue(buildDetection.outDir)) {
+    return { ...base, deployable: false, block_reason: 'unsafe_path' };
   }
 
   if (repoInfo.size && repoInfo.size > 1_000_000) {
@@ -156,10 +204,12 @@ export async function analyzeRepo(
     ...base,
     deployable: true,
     block_reason: null,
-    publish_dir: buildDetection ? buildDetection.outDir : toArtifactPath(publishDirs[0]),
+    publish_dir: buildDetection
+      ? buildDetection.outDir
+      : toArtifactPath(decision.mode === 'static' ? decision.publishDirs[0] : ''),
     publish_dir_candidates: buildDetection
       ? buildDetection.outDirCandidates
-      : publishDirs.map(toArtifactPath),
+      : (decision.mode === 'static' ? decision.publishDirs : []).map(toArtifactPath),
     pages_enabled: pagesEnabled,
     needs_build_type_switch: needsSwitch,
     can_link_only: canLinkOnly,
