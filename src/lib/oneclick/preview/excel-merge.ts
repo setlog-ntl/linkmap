@@ -32,6 +32,12 @@ body { margin:0; background:${bg}; color:${ink};
 .em-drop b { display:block; font-size:16px; }
 .em-drop span { display:block; margin-top:6px; font-size:13px; opacity:.7; }
 .em-note { margin-top:12px; text-align:center; font-size:12px; opacity:.7; }
+.em-save { margin-top:16px; border:1px solid ${line}; border-radius:12px;
+  padding:16px; text-align:center; }
+.em-save .b { display:inline-flex; align-items:center; gap:6px; border-radius:12px;
+  border:1px solid ${accent}; color:${accent}; padding:8px 16px;
+  font-size:13px; font-weight:700; }
+.em-save p { margin:8px 0 0; font-size:12px; opacity:.7; }
 .em-rows { margin-top:22px; border:1px solid ${line}; border-radius:12px; overflow:hidden; }
 .em-row { display:flex; gap:10px; align-items:center; padding:10px 14px; font-size:13px;
   border-top:1px solid ${line}; }
@@ -94,6 +100,10 @@ export function generateExcelMergePreview(
     <span>.xlsx · .xls · .csv — 여러 개를 한 번에 올릴 수 있습니다</span>
   </div>
   <p class="em-note">🛡 파일은 이 브라우저 안에서만 처리됩니다. 어디에도 올라가지 않습니다.</p>
+  <div class="em-save">
+    <span class="b">💾 이 도구를 내 컴퓨터에 저장</span>
+    <p>파일 하나로 저장됩니다. 인터넷이 없어도, 외부 연결이 막힌 회사 PC에서도 열립니다.</p>
+  </div>
   <div class="em-rows">
     <div class="em-row">📄 <span>1월_영업1팀.xlsx</span><span class="n">128행</span></div>
     <div class="em-row">📄 <span>1월_영업2팀.xlsx</span><span class="n">96행</span></div>
