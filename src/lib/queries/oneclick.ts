@@ -565,6 +565,9 @@ export function useDeployStatus(deployId: string | null, enabled: boolean = true
       return res.json();
     },
     enabled: !!deployId && enabled,
+    // 배포 화면은 "페이지를 닫지 마세요"라고 안내하는 곳이다. 사용자가 기다리는 동안 다른 탭을
+    // 잠깐 보는 것은 자연스러운데, 기본값(false)이면 그 순간 폴링이 멈춰 진행이 얼어붙는다.
+    refetchIntervalInBackground: true,
     refetchInterval: (query) => {
       // 연속 네트워크 실패 누적 시 폴링 중단 (오프라인/서버 다운에서 무한 재시도 방지)
       if (query.state.fetchFailureCount >= MAX_CONSECUTIVE_FAILURES) return false;
