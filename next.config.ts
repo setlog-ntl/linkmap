@@ -1,5 +1,18 @@
 import type { NextConfig } from "next";
 
+// 잘린/레거시 anon 키로는 빌드 자체를 중단한다 — 어떤 빌드 파이프라인(GitHub Actions,
+// Cloudflare Workers Builds, 로컬)을 타든 오염 번들이 배포되는 것을 원천 차단.
+// 2026-08-01~02: CF Workers Builds의 빌드 변수에 앞글자 잘린 키(b_publishable_…)가
+// 저장되어 매 push마다 오염 배포가 라이브를 덮어쓰던 사고의 재발 방지.
+// (키 부재는 허용 — 배포 외 목적의 빌드를 막지 않는다. CI 테스트 빌드는 placeholder-key 사용)
+const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+if (anonKey && anonKey !== 'placeholder-key' && !anonKey.startsWith('sb_publishable_')) {
+  throw new Error(
+    `NEXT_PUBLIC_SUPABASE_ANON_KEY 형식 오류(접두사 "${anonKey.slice(0, 8)}…") — ` +
+    'sb_publishable_ 키가 아니므로 빌드를 중단합니다. 빌드 환경변수를 확인하세요.'
+  );
+}
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
 
