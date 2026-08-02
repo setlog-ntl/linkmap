@@ -8,6 +8,7 @@ import { safeDecryptToken } from '@/lib/github/token';
 import { deployPagesRequestSchema } from '@/lib/validations/oneclick';
 import { logDeployError, classifyErrorCategory } from '@/lib/oneclick/deploy-error-logger';
 import { checkHomepageDeployQuota } from '@/lib/quota';
+import { scanFilesForServices } from '@/lib/oneclick/service-signatures';
 
 function humanizeSlug(slug: string): string {
   return slug
@@ -436,8 +437,18 @@ export async function POST(request: NextRequest) {
     }
     const deployId = deployResult.deploy_id;
 
+    // 템플릿 사이트도 GA4 같은 서비스를 담고 있다 (Phase 3 — 퍼널 브릿지).
+    // 번들 파일이 이미 메모리에 있으므로 추가 비용이 없다.
+    const detectedServices = scanFilesForServices(
+      templateContent.files.map((f) => ({ path: f.path, content: f.content })),
+    );
+
     // Parallel: link repo + add project_services + audit log
     await Promise.all([
+      supabase
+        .from('homepage_deploys')
+        .update({ config_data: { detected_services: detectedServices } })
+        .eq('id', deployId),
       supabase.from('project_github_repos').insert({
         project_id: project.id,
         service_account_id: projectServiceAccountId,

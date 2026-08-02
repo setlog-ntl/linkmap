@@ -28,6 +28,7 @@ export type AuditAction =
   | 'oneclick.deploy_pages'
   | 'oneclick.deploy_upload'
   | 'oneclick.deploy_repo'
+  | 'oneclick.services_linked'
   | 'oneclick.deploy_success'
   | 'oneclick.deploy_error'
   | 'oneclick.redeploy'

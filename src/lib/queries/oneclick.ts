@@ -242,6 +242,40 @@ export function useDeployRepo() {
   });
 }
 
+export interface DetectedService {
+  slug: string;
+  label: string;
+  foundIn: string[];
+}
+
+/**
+ * 감지된 서비스를 프로젝트(서비스맵)에 담는다.
+ * 감지 목록에 있는 것만 서버가 받아들이므로, 사용자가 고른 것만 전달한다.
+ */
+export function useLinkDetectedServices(deployId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (
+      slugs: string[],
+    ): Promise<{ added: { slug: string; name: string }[]; already_linked: string[]; project_id: string }> => {
+      const res = await fetch(`/api/oneclick/deployments/${deployId}/services`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slugs }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '서비스맵에 추가하지 못했습니다');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.oneclick.deployments });
+    },
+  });
+}
+
 export interface HomepageDeploy {
   id: string;
   site_name: string;
@@ -264,6 +298,7 @@ export interface HomepageDeploy {
   template_id: string | null;
   /** M109: 배포 소스 — upload/import는 template_id가 null이다 */
   source_type: 'template' | 'upload' | 'import';
+  config_data?: { detected_services?: DetectedService[]; linked_services?: string[] } | null;
   project_id: string | null;
   homepage_templates: {
     id: string;

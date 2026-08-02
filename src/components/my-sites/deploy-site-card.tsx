@@ -19,6 +19,7 @@ import { useLocaleStore } from '@/stores/locale-store';
 import { t } from '@/lib/i18n';
 import { useDeleteDeployment, useRedeployDeployment, type HomepageDeploy } from '@/lib/queries/oneclick';
 import { useRegisterShowcase, useUnregisterShowcase } from '@/lib/queries/showcase';
+import { DetectedServices } from './detected-services';
 import { ShowcaseRegisterDialog } from '@/components/showcase/showcase-register-dialog';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -115,6 +116,8 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
   const showOverlay = refreshCount === 0 && !iframeLoaded && !iframeError && !isDeploying;
 
   const isImported = deploy.source_type === 'import';
+  // 배포 시점에 감지해 config_data에 넣어둔 결과 (Phase 3)
+  const detectedServices = deploy.config_data?.detected_services ?? [];
 
   // 템플릿 배포는 템플릿명을, 사용자 소스 배포는 출처를 표시한다 (M109 source_type)
   const sourceLabel = deploy.homepage_templates
@@ -345,6 +348,16 @@ export function DeploySiteCard({ deploy }: DeploySiteCardProps) {
             {deployDate}
           </p>
         </div>
+
+        {/* 배포한 사이트가 쓰는 서비스 → 서비스맵으로 잇는 지점 (Phase 3 퍼널 브릿지) */}
+        {deploy.deploy_status === 'ready' && detectedServices.length > 0 && (
+          <DetectedServices
+            deployId={deploy.id}
+            projectId={deploy.project_id}
+            services={detectedServices}
+            alreadyLinked={deploy.config_data?.linked_services ?? []}
+          />
+        )}
 
         {/* URL */}
         {liveUrl && (

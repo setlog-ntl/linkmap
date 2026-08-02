@@ -337,6 +337,24 @@
       </div>
     </div>
 
+    <div class="phase">
+      <div class="mark"><div class="dot">3</div><div class="line"></div></div>
+      <div class="body">
+        <b>퍼널 브릿지 — 배포에서 관리로</b>
+        <p class="small muted">
+          배포로 끝나면 1층에서 멈춘다. 배포한 사이트의 콘텐츠에서 Supabase·GA4 같은 서비스 사용
+          흔적을 찾아 서비스맵에 담을 수 있게 했다. 기존 감지는 npm 패키지명을 매핑하는데, AI에게
+          받아 올리는 페이지는 빌드 도구 없이 CDN 태그를 쓰기 때문에 <b>배포된 콘텐츠 자체</b>를
+          보지 않으면 알아보지 못한다.
+        </p>
+        <p class="small muted">
+          <b>자동으로 담지 않는다.</b> 서비스맵은 사용자가 자기 구조를 스스로 그리는 곳이라 추측으로
+          채우면 신뢰를 잃는다. &ldquo;이런 걸 쓰고 계시네요&rdquo;까지만 하고 선택은 맡긴다.
+        </p>
+        <div class="check">오탐 방지 4건(<code>supabase.com</code> 링크·주문번호·동명 함수) · 감지 목록 밖 서비스 거부 · 프로젝트 소유권 확인</div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -527,7 +545,7 @@
     <div class="card">
       <h3>다음 단계</h3>
       <ul class="small">
-        <li>Phase 3 — 배포한 사이트가 쓰는 서비스를 감지해 서비스맵에 제안</li>
+        <li>Phase 3 라이브 검증 (서비스 감지 → 서비스맵 담기)</li>
         <li>Next·Gatsby처럼 설정 파일에만 기준 경로를 지정할 수 있는 프레임워크의 안내 개선</li>
       </ul>
     </div>

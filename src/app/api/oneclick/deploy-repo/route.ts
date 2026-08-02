@@ -320,6 +320,7 @@ export async function POST(request: NextRequest) {
       link_only: linkOnly,
       deploy_mode: analysis.deploy_mode,
       framework: analysis.build?.framework ?? null,
+      detected_services: analysis.detected_services,
     };
 
     await Promise.all([

@@ -13,6 +13,12 @@ import {
   type FrameworkId,
   type PackageJsonLike,
 } from './framework-detect';
+import {
+  scanFilesForServices,
+  scanPackagesForServices,
+  mergeDetections,
+  type DetectedService,
+} from './service-signatures';
 
 /** index.html을 찾을 후보 디렉토리 — 앞쪽이 우선한다 */
 const PUBLISH_DIR_CANDIDATES = ['', 'docs', 'dist', 'build', 'public', 'out'];
@@ -52,6 +58,8 @@ export interface RepoAnalysis {
   deploy_mode: DeployMode;
   /** deploy_mode가 'build'일 때만 채워진다 */
   build: BuildDetection | null;
+  /** 이 사이트가 쓰는 것으로 보이는 서비스 (Phase 3 — 서비스맵 제안용) */
+  detected_services: DetectedService[];
   warnings: string[];
 }
 
@@ -127,6 +135,7 @@ export async function analyzeRepo(
     can_link_only: false,
     deploy_mode: 'static' as DeployMode,
     build: null as BuildDetection | null,
+    detected_services: [] as DetectedService[],
     warnings,
   };
 
@@ -152,10 +161,11 @@ export async function analyzeRepo(
   // "완성된 index.html이 없다"는 이유로 차단하면 대부분의 실제 프로젝트를 막게 된다.
   // package.json은 프레임워크 추정에 필요할 때만 읽는다.
   let candidate: BuildDetection | null = null;
+  let pkg: PackageJsonLike | null = null;
   const needsFrameworkCheck =
     publishDirs.length === 0 || (publishDirs.length === 1 && publishDirs[0] === '');
   if (needsFrameworkCheck && looksLikeBuildProject(paths)) {
-    const pkg = await readPackageJson(token, owner, repo);
+    pkg = await readPackageJson(token, owner, repo);
     candidate = detectFramework(paths, pkg, repoInfo.name);
   }
 
@@ -200,6 +210,22 @@ export async function analyzeRepo(
 
   if (buildDetection) warnings.push(...buildDetection.warnings);
 
+  // 이 사이트가 쓰는 서비스를 알아둔다 (Phase 3). 빌드형은 이미 읽은 package.json을 쓰고,
+  // 정적이면 게시될 index.html 하나만 더 읽는다 — 저장소 전체를 훑지 않는다.
+  const detected: DetectedService[][] = [];
+  const pkgRecord = pkg as { dependencies?: Record<string, unknown>; devDependencies?: Record<string, unknown> } | null;
+  if (pkgRecord) {
+    detected.push(scanPackagesForServices(pkgRecord.dependencies, pkgRecord.devDependencies));
+  }
+  const entryPath =
+    decision.mode === 'static'
+      ? (decision.publishDirs[0] === '' ? 'index.html' : `${decision.publishDirs[0]}/index.html`)
+      : null;
+  if (entryPath) {
+    const html = await readTextFile(token, owner, repo, entryPath);
+    if (html) detected.push(scanFilesForServices([{ path: entryPath, content: html }]));
+  }
+
   return {
     ...base,
     deployable: true,
@@ -215,8 +241,24 @@ export async function analyzeRepo(
     can_link_only: canLinkOnly,
     deploy_mode: buildDetection ? 'build' : 'static',
     build: buildDetection,
+    detected_services: mergeDetections(...detected),
     warnings,
   };
+}
+
+/** 텍스트 파일 하나를 읽어온다 — 없거나 읽을 수 없으면 null */
+async function readTextFile(
+  token: string,
+  owner: string,
+  repo: string,
+  path: string,
+): Promise<string | null> {
+  try {
+    const file = await getFileContent(token, owner, repo, path);
+    return Buffer.from(file.content ?? '', 'base64').toString('utf-8');
+  } catch {
+    return null;
+  }
 }
 
 /** package.json을 읽어온다 — 없거나 깨져 있으면 null (감지는 파일 목록만으로도 동작한다) */

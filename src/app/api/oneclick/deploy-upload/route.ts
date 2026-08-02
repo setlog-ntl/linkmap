@@ -8,6 +8,7 @@ import { deployUploadRequestSchema } from '@/lib/validations/oneclick';
 import { logDeployError, classifyErrorCategory } from '@/lib/oneclick/deploy-error-logger';
 import { checkHomepageDeployQuota } from '@/lib/quota';
 import { sanitizeUploadFiles, summarizeUpload, UploadValidationError } from '@/lib/oneclick/upload-sanitizer';
+import { scanFilesForServices } from '@/lib/oneclick/service-signatures';
 import { STATIC_WORKFLOW_PATH, staticDeployYml } from '@/lib/oneclick/static-workflow';
 
 function humanizeSlug(slug: string): string {
@@ -395,8 +396,19 @@ export async function POST(request: NextRequest) {
 
     const uploadSummary = summarizeUpload(sanitized);
 
+    // 이 사이트가 어떤 서비스를 쓰는지 알아둔다 (Phase 3 — 서비스맵 제안용).
+    // 파일이 이미 메모리에 있으므로 추가 비용이 없다. 자동 등록이 아니라 제안이다.
+    const detectedServices = scanFilesForServices(
+      sanitized.files
+        .filter((f) => f.encoding === 'utf-8')
+        .map((f) => ({ path: f.path, content: f.content })),
+    );
+
     await Promise.all([
-      supabase.from('homepage_deploys').update({ config_data: uploadSummary }).eq('id', deployId),
+      supabase
+        .from('homepage_deploys')
+        .update({ config_data: { ...uploadSummary, detected_services: detectedServices } })
+        .eq('id', deployId),
       supabase.from('project_github_repos').insert({
         project_id: project.id,
         service_account_id: projectServiceAccountId,
@@ -422,6 +434,7 @@ export async function POST(request: NextRequest) {
           file_count: uploadSummary.file_count,
           total_bytes: uploadSummary.total_bytes,
           skipped_count: uploadSummary.skipped_files.length,
+          detected_services: detectedServices.map((s) => s.slug),
         },
       }),
     ]);
