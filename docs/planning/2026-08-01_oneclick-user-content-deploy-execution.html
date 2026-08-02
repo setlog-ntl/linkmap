@@ -446,6 +446,14 @@
             가장 결과가 큰 행위인 <b>Pages 공개</b>가 목록에 없었다</td>
         <td>미리보기를 선택값으로 갱신 · 공개 사실과 URL을 최상단에 명시</td>
       </tr>
+      <tr>
+        <td><span class="pill bad">높음</span></td>
+        <td><b>Vite 프로젝트가 빌드 없이 원본째 배포</b> — Vite·CRA는 저장소 루트에
+            <code>index.html</code>을 두는데 그건 완성된 페이지가 아니라 <code>/src/main.js</code>를
+            참조하는 빌드 입력 템플릿이다. &ldquo;루트에 index.html이 있으면 정적&rdquo;으로 판정해
+            빌드를 건너뛰었다 — 배포는 성공하고 화면만 비는 실패</td>
+        <td>판정을 순수 함수로 분리하고 게시 폴더 / 루트 템플릿 / 순수 정적을 구분</td>
+      </tr>
     </tbody>
   </table></div>
 </section>
@@ -470,6 +478,24 @@
   <div class="principle">
     GitHub Pages는 <code>/&lt;저장소이름&gt;/</code> 하위에 서비스한다. 우리는 사용자 설정 파일을
     고치지 않으므로 고칠 수 없는 경우가 있고, 그때는 숨기지 않고 배포 전에 알린다.
+  </div>
+
+  <div class="card">
+    <h3>실제 Vite 저장소로 확인한 것 <span class="pill ok">2026-08-02</span></h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>항목</th><th>결과</th></tr></thead>
+      <tbody>
+        <tr><td>프레임워크 감지</td><td><code>vite.config</code>가 없어도 <b>의존성으로 감지</b></td></tr>
+        <tr><td>동의 화면</td><td><span class="mono">npm install → npx vite build --base=/vite-test-0802/ → dist</span></td></tr>
+        <tr><td>저장소 변경</td><td>워크플로우 1개만 추가 · 기존 4개 파일 <b>전부 무수정</b></td></tr>
+        <tr><td>자산 경로</td><td><span class="mono">/vite-test-0802/assets/…</span> — JS·CSS 모두 <b>HTTP 200</b></td></tr>
+        <tr><td>화면</td><td>색·여백 정상 = CSS 번들이 실제로 로드됨</td></tr>
+      </tbody>
+    </table></div>
+    <p class="small muted">
+      주입이 없었다면 자산 경로가 <code>/assets/…</code>가 되어 하위 경로 배포에서 404가 났을 것이다.
+      이 검증이 <code>--base</code> 주입의 실효를 직접 확인한 지점이다.
+    </p>
   </div>
   <p class="small muted">
     빌드 명령에도 화이트리스트를 적용한다. <code>&amp;&amp;</code>·<code>;</code>·<code>$()</code>·<code>|</code> 같은
@@ -501,8 +527,8 @@
     <div class="card">
       <h3>다음 단계</h3>
       <ul class="small">
-        <li>빌드형 저장소 라이브 e2e (Vite 실제 프로젝트)</li>
         <li>Phase 3 — 배포한 사이트가 쓰는 서비스를 감지해 서비스맵에 제안</li>
+        <li>Next·Gatsby처럼 설정 파일에만 기준 경로를 지정할 수 있는 프레임워크의 안내 개선</li>
       </ul>
     </div>
     <div class="card">
