@@ -7,4 +7,4 @@
 | 2026-04-06 | 결제취소/환불 기능 | 확정 | 조건부추진 (3.5) | [2026-04-06_payment-refund-cancellation.md](./2026-04-06_payment-refund-cancellation.md) |
 | 2026-07-31 | 원클릭 × 사용자 개인 Supabase 연결 (동적 위젯) | 검토완료 | 추진 — 관리형 A 기본 + OAuth 승격 B (P0 선결) | [2026-07-31_oneclick-user-supabase-dynamic.md](./2026-07-31_oneclick-user-supabase-dynamic.md) |
 | 2026-08-01 | 원클릭 "내 자료 배포" (파일 업로드·내 GitHub repo) | 확정 | 추진 — Phase 0 선결 → 1A(업로드) → 1B(repo 연결) | [2026-08-01_oneclick-user-content-deploy.md](./2026-08-01_oneclick-user-content-deploy.md) |
-| 2026-08-01 | └ 실행·검증 기록 (Phase 0·1A·1B·2 완료, 라이브 검증) | 완료 | 구현·배포 완료, 빌드형 e2e 잔여 | [실행 문서](./2026-08-01_oneclick-user-content-deploy-execution.md) · [HTML](./2026-08-01_oneclick-user-content-deploy-execution.html) |
+| 2026-08-01 | └ 실행·검증 기록 (Phase 0~3 전 구간) | 완료 | 구현·배포·라이브 검증 완료 | [실행 문서](./2026-08-01_oneclick-user-content-deploy-execution.md) · [HTML](./2026-08-01_oneclick-user-content-deploy-execution.html) |
