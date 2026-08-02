@@ -43,7 +43,9 @@ export function CommandPalette() {
   const { setTheme } = useTheme();
   const { commandOpen, setCommandOpen } = useUIStore();
   const { locale, setLocale } = useLocaleStore();
-  const { data: catalogServices } = useCatalogServices();
+  // 팔레트가 열릴 때만 조회 — 전역 마운트라 로그인 페이지에서도 마운트되는데,
+  // 죽은 세션 잔재 토큰이 있으면 이 조회가 401 소음을 만든다 (2026-08-01 사고 잔흔)
+  const { data: catalogServices } = useCatalogServices(commandOpen);
   const sortedCatalogServices = catalogServices
     ? [...catalogServices].sort((a, b) => (b.popularity_score || 0) - (a.popularity_score || 0))
     : [];

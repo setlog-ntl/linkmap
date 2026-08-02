@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/client';
 import { queryKeys } from './keys';
 import type { ProjectService, Service } from '@/types';
 
-export function useCatalogServices() {
+export function useCatalogServices(enabled = true) {
   return useQuery({
     queryKey: queryKeys.catalog.all,
     queryFn: async (): Promise<Service[]> => {
@@ -17,6 +17,7 @@ export function useCatalogServices() {
       return (data as Service[]) || [];
     },
     staleTime: 5 * 60 * 1000, // 5분 캐시
+    enabled,
   });
 }
 
