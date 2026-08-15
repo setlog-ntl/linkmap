@@ -283,24 +283,6 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
         />
       )}
 
-      {/* Step 1 — 내 것으로 배포하는 두 트랙 진입 카드 */}
-      {isStep1 && !sourceTrack && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <SourceTrackCard
-            icon={<FileUp className="h-4.5 w-4.5 text-brand-blue" />}
-            title="내 파일 올리기"
-            description="ChatGPT·Claude가 만들어준 HTML이나 ZIP을 그대로"
-            onOpen={() => openSourceTrack('upload')}
-          />
-          <SourceTrackCard
-            icon={<Github className="h-4.5 w-4.5 text-brand-blue" />}
-            title="내 GitHub 가져오기"
-            description="이미 만들어둔 저장소를 골라서 공개하기"
-            onOpen={() => openSourceTrack('import')}
-          />
-        </div>
-      )}
-
       {/* Step 1: Template + site name selection */}
       {isStep1 && !sourceTrack && (
         <TemplatePickerStep
@@ -323,6 +305,24 @@ export function OneclickWizardClient({ isAuthenticated }: OneclickWizardClientPr
           onAccountChange={setSelectedAccountId}
           existingSiteNames={existingSiteNames}
         />
+      )}
+
+      {/* Step 1 — 내 것으로 배포하는 두 트랙 진입 카드 (템플릿 선택 아래) */}
+      {isStep1 && !sourceTrack && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <SourceTrackCard
+            icon={<FileUp className="h-4.5 w-4.5 text-brand-blue" />}
+            title="내 파일 올리기"
+            description="ChatGPT·Claude가 만들어준 HTML이나 ZIP을 그대로"
+            onOpen={() => openSourceTrack('upload')}
+          />
+          <SourceTrackCard
+            icon={<Github className="h-4.5 w-4.5 text-brand-blue" />}
+            title="내 GitHub 가져오기"
+            description="이미 만들어둔 저장소를 골라서 공개하기"
+            onOpen={() => openSourceTrack('import')}
+          />
+        </div>
       )}
 
       {/* Step 2: Deploy progress / error */}
