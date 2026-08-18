@@ -69,6 +69,7 @@ npm run dev / build / typecheck / lint / test / test:coverage
 - **Workers CPU limits 필수 설정**: `wrangler.jsonc`에 `"limits": { "cpu_ms": 30000 }` 명시 필수. 미설정 시 Paid Plan에서도 Free 수준(10ms)이 적용되어 1102 에러 발생. 공개 페이지는 `revalidate = false` 기본, 동적 데이터 필수인 경우만 ISR, `force-dynamic`은 인증 페이지만 허용
 - **배포 후 캐시 워밍업 필수**: CI 자동 실행. 수동 배포 시 `npm run deploy:workers` (wrangler deploy + warm-cache 원샷 실행)
 - **서버 번들 대형 라이브러리 금지**: dynamic import + ssr:false 또는 optimizePackageImports
+- **`public/` 정적 파일이 동명 라우트를 가림**: Workers는 정적 자산을 라우트보다 먼저 매칭하고 `.html`을 확장자 없이도 서빙한다. `public/foo/bar.html`은 Next 라우트 `/foo/bar`를 통째로 가려 헤더·푸터 없는 정적본이 정식 URL에 뜬다. **로컬 `next dev`에서는 재현되지 않아 배포 후에야 드러난다.** 다운로드용 정적 HTML은 라우트와 겹치지 않는 네임스페이스(`public/downloads/`)에 격리할 것 (2026-08-19 실측)
 
 ## MCP Supabase 사용 규칙
 - DB 마이그레이션(`apply_migration`), SQL 실행(`execute_sql`), 스키마 조회 등 **Supabase MCP 툴이 필요한 시점**에는 즉시 실행하지 말고 먼저 아래 메시지로 확인을 요청할 것:

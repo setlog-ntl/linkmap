@@ -4,7 +4,7 @@
 // 목적: Linkmap 홍보용 무료 배포 자료를 서비스 안에 항목으로 제공한다.
 // 이 파일이 자료 1건의 단일 진실 원천(SSOT)이며, 아래 4곳이 여기서 파생된다.
 //   ① /resources 허브 카드   ② /resources/[slug] 상세
-//   ③ sitemap.ts 엔트리      ④ public/resources/*.html 배포본의 역링크
+//   ③ sitemap.ts 엔트리      ④ public/downloads/*.html 배포본의 역링크
 //
 // ── 유튜브 상호연결 규약 ────────────────────────────────────────────────
 // 영상 발행 전에는 `youtube.videoId = null`로 두고, 발행 직후 videoId 한 줄만
@@ -76,7 +76,12 @@ export interface FreeResource {
   prompts: ResourcePromptBlock[];
   /** 함께 제공되는 바로가기 */
   links: ResourceLink[];
-  /** 오프라인 배포용 단일 HTML 파일 경로 (public/) */
+  /**
+   * 오프라인 배포용 단일 HTML 파일 경로 (public/).
+   * 반드시 `/resources/` 밖에 둘 것 — Workers는 정적 자산을 라우트보다 먼저
+   * 매칭하고 `.html`을 확장자 없이도 서빙하므로, public/resources/<slug>.html은
+   * Next 라우트 /resources/<slug>를 가려버린다.
+   */
   downloadHref: string;
   /** 상세 하단 마무리 문구 */
   closing: string;
@@ -168,7 +173,7 @@ export const FREE_RESOURCES: FreeResource[] = [
         external: true,
       },
     ],
-    downloadHref: '/resources/excel-merger-prompt.html',
+    downloadHref: '/downloads/excel-merger-prompt.html',
     closing:
       '다 만들었다면 Linkmap에 올려 URL 하나로 어디서든 여세요. 파일 처리는 똑같이 브라우저 안에서만 됩니다.',
   },

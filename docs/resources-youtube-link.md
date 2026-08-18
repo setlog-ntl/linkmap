@@ -14,7 +14,7 @@ src/data/resources/free-resources.ts   ← 단일 진실 원천(SSOT)
    ├─ /resources                       허브 카드 — 우측에 유튜브 버튼 / 영상 준비 중 칩
    ├─ /resources/[slug]                상세 — 지시문·CTA (영상 노출 안 함)
    ├─ sitemap.ts · llms.txt            검색·LLM 노출
-   └─ public/resources/<slug>.html     오프라인 배포본 (역링크만 보유)
+   └─ public/downloads/<slug>.html     오프라인 배포본 (역링크만 보유)
 ```
 
 핵심은 **영상 상태를 데이터 한 곳만 들고 있다**는 것. 오프라인 HTML과
@@ -38,7 +38,7 @@ src/data/resources/free-resources.ts   ← 단일 진실 원천(SSOT)
 ### ① 유튜브 쪽 — 발행 전에 넣는다
 
 영상 설명란 또는 고정댓글에 **자료 페이지 정식 URL**을 넣는다.
-오프라인 HTML 파일 주소(`.../resources/<slug>.html`)를 직접 걸지 말 것 —
+오프라인 HTML 파일 주소(`.../downloads/<slug>.html`)를 직접 걸지 말 것 —
 그 파일은 헤더·푸터도 다른 자료로 가는 길도 없는 배포 산출물이고,
 sitemap에도 없어 유입이 서비스로 이어지지 않는다.
 
@@ -72,7 +72,8 @@ youtube: {
 ## 3. 자료를 새로 추가할 때
 
 1. `FREE_RESOURCES`에 항목 추가 — `order`는 배포자료 번호(허브 정렬 기준)
-2. 오프라인 배포본이 있으면 `public/resources/<slug>.html`에 두고 `downloadHref` 지정
+2. 오프라인 배포본이 있으면 **`public/downloads/<slug>.html`**에 두고 `downloadHref` 지정
+   — `public/resources/` 아래에 두면 안 된다 (§4의 라우트 가림 함정)
 3. `scripts/warm-cache.sh`의 `PAGES`에 `/resources/<slug>` 추가
    (공개 페이지 워밍업 누락 시 첫 방문이 느려짐)
 
@@ -82,8 +83,14 @@ youtube: {
 
 ## 4. 오프라인 배포본 규칙
 
-`public/resources/<slug>.html`은 **외부 요청 0건**이어야 한다 —
+`public/downloads/<slug>.html`은 **외부 요청 0건**이어야 한다 —
 인터넷이 막힌 회사 PC에서 열리는 것이 이 파일의 존재 이유다.
+
+> 🚨 **`public/resources/` 아래에 두지 말 것.** Workers는 정적 자산을 라우트보다
+> 먼저 매칭하고 `.html`을 확장자 없이도 서빙한다. `public/resources/<slug>.html`은
+> Next 라우트 `/resources/<slug>`를 통째로 가려, 정식 URL이 헤더·푸터도 없는
+> 배포본을 서빙하게 된다. 로컬 `next dev`에서는 재현되지 않아 배포 후에야 드러난다
+> (2026-08-18 실측). 배포본은 `/downloads/` 네임스페이스에 격리한다.
 
 - 로고는 data URI 배경(`.mark`)으로 **1벌만** 둔다.
   SVG를 두 번 인라인하면 `paint*_linear` gradient id가 충돌한다.
@@ -91,6 +98,8 @@ youtube: {
   토큰이 바뀌면 이 파일도 손으로 맞춰야 한다.
 - 폰트 CDN·아이콘 CDN 금지. 시스템 폰트 스택 + 인라인 SVG만.
 - 영상 링크를 직접 넣지 말고 자료 페이지 역링크만 둔다 (§1 참조).
+- 역링크 카드는 **본문(지시문) 아래, 푸터 직전**에 둔다. 이 파일을 여는 사람은
+  자료를 쓰러 온 것이므로 본문이 먼저 와야 한다.
 
 ---
 
