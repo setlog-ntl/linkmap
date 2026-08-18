@@ -11,19 +11,24 @@
 ```
 src/data/resources/free-resources.ts   ← 단일 진실 원천(SSOT)
    │
-   ├─ /resources                       허브 카드 (영상 연결됨 / 영상 준비 중 배지)
-   ├─ /resources/[slug]                상세 — 영상 카드·지시문·CTA
+   ├─ /resources                       허브 카드 — 우측에 유튜브 버튼 / 영상 준비 중 칩
+   ├─ /resources/[slug]                상세 — 지시문·CTA (영상 노출 안 함)
    ├─ sitemap.ts · llms.txt            검색·LLM 노출
    └─ public/resources/<slug>.html     오프라인 배포본 (역링크만 보유)
 ```
 
-핵심은 **영상 상태를 자료 페이지 한 곳만 들고 있다**는 것. 오프라인 HTML과
+핵심은 **영상 상태를 데이터 한 곳만 들고 있다**는 것. 오프라인 HTML과
 유튜브 고정댓글은 자료 페이지의 정식 URL만 가리키므로, 영상이 붙거나 자료가
 갱신돼도 배포된 파일·댓글을 다시 고칠 일이 없다.
 
+**영상 진입점은 허브 카드 하나뿐이다.** 상세 페이지는 자료 본문(지시문·CTA)만
+다루고 영상을 노출하지 않는다 — 자료를 쓰러 온 사람의 흐름을 영상으로
+끊지 않기 위함. 같은 이유로 상세에 `VideoObject` JSON-LD도 붙이지 않는다
+(화면에 없는 영상을 구조화 데이터로 선언하면 실제 콘텐츠와 어긋난다).
+
 | 방향 | 수단 | 갱신 지점 |
 |---|---|---|
-| Linkmap → 유튜브 | 상세 페이지 영상 카드 + `VideoObject` JSON-LD | `free-resources.ts` 한 곳 |
+| Linkmap → 유튜브 | 허브 카드 우측 유튜브 버튼 | `free-resources.ts` 한 곳 |
 | 유튜브 → Linkmap | 영상 설명란·고정댓글의 정식 URL | 최초 1회, 이후 불변 |
 
 ---
@@ -34,7 +39,8 @@ src/data/resources/free-resources.ts   ← 단일 진실 원천(SSOT)
 
 영상 설명란 또는 고정댓글에 **자료 페이지 정식 URL**을 넣는다.
 오프라인 HTML 파일 주소(`.../resources/<slug>.html`)를 직접 걸지 말 것 —
-그 파일에는 영상 카드가 없어 상호연결이 한쪽만 성립한다.
+그 파일은 헤더·푸터도 다른 자료로 가는 길도 없는 배포 산출물이고,
+sitemap에도 없어 유입이 서비스로 이어지지 않는다.
 
 ```
 https://www.linkmap.biz/resources/<slug>
@@ -44,24 +50,20 @@ https://www.linkmap.biz/resources/<slug>
 > 기록하므로 `visitor_logs.referrer`에 youtube.com이 남는다.
 > UTM·쿼리스트링을 붙이지 말 것 — `page_path`는 pathname만 저장한다.
 
-### ② Linkmap 쪽 — 발행 직후 두 줄
+### ② Linkmap 쪽 — 발행 직후 한 줄
 
-`src/data/resources/free-resources.ts`에서 해당 자료의 `youtube`를 채운다.
+`src/data/resources/free-resources.ts`에서 해당 자료의 `videoId`를 채운다.
+영상 URL이 `https://www.youtube.com/watch?v=AbC123dEfGh`라면 `v=` 뒤가 ID다.
 
 ```ts
 youtube: {
-  videoId: 'AbC123dEfGh',        // ← null에서 실제 ID로
+  videoId: 'AbC123dEfGh',   // ← null에서 실제 ID로
   title: '클로드 엑셀 — 매달 하던 파일 취합, 클릭 한 번으로 끝냈습니다',
-  publishedAt: '2026-08-25',     // ← 추가 (VideoObject JSON-LD 조건)
-  series: '바이브코딩 치트키 · 키/실전',
 },
 ```
 
-이걸로 아래가 한꺼번에 바뀐다.
-
-- 상세 페이지: "영상 준비 중" 점선 카드 → 재생 카드 (유튜브 아웃링크)
-- 허브 카드: "영상 준비 중" → "영상 연결됨"
-- JSON-LD: `VideoObject` 추가 (`videoId` + `publishedAt`이 **둘 다** 있을 때만)
+허브 카드 우측의 회색 "영상 준비 중" 칩이 빨간 유튜브 버튼(「영상 보기」,
+새 탭)으로 바뀐다. `title`은 버튼의 툴팁·스크린리더 라벨로 쓰인다.
 
 정적 페이지(`revalidate = false`)이므로 **배포해야 반영된다.**
 

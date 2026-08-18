@@ -7,7 +7,6 @@ import {
   getFreeResource,
   getFreeResourceSlugs,
   getResourceCanonicalUrl,
-  getYoutubeWatchUrl,
 } from '@/data/resources/free-resources';
 
 // 완전 정적: generateStaticParams가 모든 자료를 프리렌더, 그 외 slug는 notFound()
@@ -76,28 +75,13 @@ export default async function ResourceDetailPage({
     publisher: { '@type': 'Organization', name: 'Linkmap' },
   };
 
-  // 영상이 발행된 뒤에만 VideoObject를 붙인다 — 자료 페이지와 영상이
-  // 검색엔진 수준에서도 한 쌍으로 인식되게 하는 상호연결의 마지막 고리
-  const watchUrl = getYoutubeWatchUrl(resource.youtube);
-  const videoJsonLd =
-    watchUrl && resource.youtube.videoId && resource.youtube.publishedAt
-      ? {
-          '@context': 'https://schema.org',
-          '@type': 'VideoObject',
-          name: resource.youtube.title,
-          description: resource.description,
-          uploadDate: resource.youtube.publishedAt,
-          thumbnailUrl: `https://i.ytimg.com/vi/${resource.youtube.videoId}/maxresdefault.jpg`,
-          contentUrl: watchUrl,
-          embedUrl: `https://www.youtube.com/embed/${resource.youtube.videoId}`,
-        }
-      : null;
-
+  // VideoObject는 붙이지 않는다 — 이 페이지는 자료 본문만 다루고 영상을 노출하지
+  // 않으므로, 영상이 있다고 선언하면 구조화 데이터가 실제 화면과 어긋난다.
+  // 영상 진입점은 허브(/resources) 카드의 유튜브 버튼이 담당한다.
   return (
     <>
       <JsonLdScript data={breadcrumb} />
       <JsonLdScript data={articleJsonLd} />
-      {videoJsonLd && <JsonLdScript data={videoJsonLd} />}
       <ResourceDetail resource={resource} />
     </>
   );

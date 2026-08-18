@@ -8,7 +8,8 @@
 //
 // ── 유튜브 상호연결 규약 ────────────────────────────────────────────────
 // 영상 발행 전에는 `youtube.videoId = null`로 두고, 발행 직후 videoId 한 줄만
-// 채운다. 그 순간 상세 페이지의 "영상 준비 중" 카드가 재생 카드로 자동 전환된다.
+// 채운다. 그 순간 허브(/resources) 카드의 "영상 준비 중" 칩이 유튜브 버튼으로
+// 자동 전환된다. (상세 페이지는 자료 본문만 다루고 영상을 노출하지 않는다)
 // 반대 방향(유튜브 → Linkmap)은 영상 설명란·고정댓글에 아래 URL을 넣는다.
 //   https://www.linkmap.biz/resources/<slug>
 // 절차 상세: docs/resources-youtube-link.md
@@ -28,16 +29,12 @@ export const RESOURCE_CATEGORIES: Record<
 
 /**
  * 유튜브 연결 정보.
- * videoId가 null이면 "영상 준비 중" 상태로 렌더된다 — 발행 후 ID만 채우면 된다.
+ * videoId가 null이면 "영상 준비 중" 칩으로 렌더된다 — 발행 후 ID만 채우면 된다.
  */
 export interface ResourceYoutube {
   videoId: string | null;
-  /** 영상 제목(예정 포함). 준비 중 상태에서도 무엇이 올라올지 보여준다 */
+  /** 영상 제목(예정 포함) — 버튼의 스크린리더 라벨·툴팁에 쓰인다 */
   title: string;
-  /** 영상 공개일 — videoId와 함께 기입 */
-  publishedAt?: string;
-  /** 시리즈 회차 표기 (예: '바이브코딩 치트키 · 키/실전') */
-  series?: string;
 }
 
 /** 자료에 딸린 외부/내부 바로가기 */
@@ -136,9 +133,8 @@ export const FREE_RESOURCES: FreeResource[] = [
       sub: '나만의 도구를 배포합니다',
     },
     youtube: {
-      videoId: null, // 영상 발행 후 여기만 채우면 상세 페이지에 재생 카드가 뜬다
+      videoId: null, // 영상 발행 후 여기만 채우면 허브 카드에 유튜브 버튼이 뜬다
       title: '클로드 엑셀 — 매달 하던 파일 취합, 클릭 한 번으로 끝냈습니다',
-      series: '바이브코딩 치트키 · 키/실전',
     },
     prompts: [
       {

@@ -11,7 +11,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PromptCopyBlock } from '@/components/resources/prompt-copy-block';
-import { ResourceVideoCard } from '@/components/resources/resource-video-card';
 import {
   RESOURCE_CATEGORIES,
   type FreeResource,
@@ -62,11 +61,6 @@ export function ResourceDetail({ resource }: { resource: FreeResource }) {
           {formatDateKR(resource.updatedAt ?? resource.publishedAt)} 공개
         </p>
       </header>
-
-      {/* 유튜브 상호연결 */}
-      <div className="mb-8">
-        <ResourceVideoCard youtube={resource.youtube} />
-      </div>
 
       {/* Linkmap 히어로 CTA */}
       <section className="mb-8 rounded-xl border border-brand-blue/20 bg-brand-blue/5 p-6 text-center md:p-8">
