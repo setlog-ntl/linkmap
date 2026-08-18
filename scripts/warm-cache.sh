@@ -37,6 +37,8 @@ PAGES=(
   "/glossary"
   "/feedback"
   "/oneclick"
+  "/resources"
+  "/resources/excel-merger-prompt"
 
   # ── 데모 ──
   "/demo"

@@ -3,6 +3,7 @@ import { GUIDE_DATA, SUB_GUIDE_DATA } from '@/data/ui/guide-data';
 import { SERVICE_SLUGS } from '@/data/seed/service-slugs';
 import { getBlogSitemapEntries } from '@/data/blog/posts';
 import { GLOSSARY_ENTRIES } from '@/data/seo/glossary-terms';
+import { getFreeResourceSitemapEntries } from '@/data/resources/free-resources';
 
 const BASE_URL = 'https://www.linkmap.biz';
 
@@ -22,6 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/glossary`, lastModified: BUILD_DATE, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${BASE_URL}/oneclick`, lastModified: BUILD_DATE, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${BASE_URL}/showcase`, lastModified: BUILD_DATE, changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/resources`, lastModified: BUILD_DATE, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${BASE_URL}/privacy`, lastModified: BUILD_DATE, changeFrequency: 'yearly', priority: 0.2 },
     { url: `${BASE_URL}/terms`, lastModified: BUILD_DATE, changeFrequency: 'yearly', priority: 0.2 },
   ];
@@ -64,6 +66,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
+  const resourcePages: MetadataRoute.Sitemap = getFreeResourceSitemapEntries().map((entry) => ({
+    url: `${BASE_URL}/resources/${entry.slug}`,
+    lastModified: entry.updatedAt ?? entry.publishedAt,
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
   return [
     ...staticPages,
     ...guidePages,
@@ -71,5 +80,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...blogPages,
     ...servicePages,
     ...glossaryPages,
+    ...resourcePages,
   ];
 }

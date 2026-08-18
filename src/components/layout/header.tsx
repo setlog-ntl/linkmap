@@ -18,7 +18,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { IconTooltip } from '@/components/ui/icon-tooltip';
-import { Menu, Globe, Search, BookOpen, PenLine, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench, ArrowRight, Rocket, BarChart3, Trophy, Code, Palette, Workflow, Library } from 'lucide-react';
+import { Menu, Globe, Search, BookOpen, PenLine, ChevronDown, Settings, LogOut, Bot, User, GitBranch, Wrench, ArrowRight, Rocket, BarChart3, Trophy, Code, Palette, Workflow, Library, Gift } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { GUIDE_CATEGORIES_DATA, LEARNING_STAGES_DATA, GUIDE_DATA, getGuideDataByCategory } from '@/data/ui/guide-data';
 
@@ -83,6 +83,15 @@ export function Header({ profile: profileProp }: HeaderProps) {
       >
         <Rocket className="h-3.5 w-3.5" />
         원클릭 배포
+      </Link>
+      <Link
+        href="/resources"
+        prefetch={false}
+        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+        onClick={() => setSidebarOpen(false)}
+      >
+        <Gift className="h-3.5 w-3.5" />
+        무료배포 자료
       </Link>
       {!profile && (
         <Link
@@ -386,6 +395,15 @@ export function Header({ profile: profileProp }: HeaderProps) {
                 >
                   <Rocket className="h-4 w-4" />
                   원클릭 배포
+                </Link>
+                <Link
+                  href="/resources"
+                  prefetch={false}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 flex items-center gap-2"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <Gift className="h-4 w-4" />
+                  무료배포 자료
                 </Link>
                 {!profile && (
                   <Link

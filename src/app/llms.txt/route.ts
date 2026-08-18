@@ -1,5 +1,6 @@
 import { GUIDE_DATA } from '@/data/ui/guide-data';
 import { getPublishedPostsMeta } from '@/data/blog/posts';
+import { getFreeResources } from '@/data/resources/free-resources';
 
 const SITE_URL = 'https://www.linkmap.biz';
 
@@ -16,6 +17,10 @@ export function GET() {
         (p) => `- ${p.title}: ${p.description} → ${SITE_URL}/blog/${p.slug}`
       ).join('\n')
     : '- 곧 발행 예정';
+
+  const resourceLines = getFreeResources()
+    .map((r) => `- ${r.title}: ${r.description} → ${SITE_URL}/resources/${r.slug}`)
+    .join('\n');
 
   const body = `# Linkmap
 > 바이브 코딩 플랫폼 — 서비스 연결 시각화, API 키 암호화 관리, 환경변수 자동 설정, 원클릭 배포
@@ -55,6 +60,9 @@ ${guideLines}
 ## 블로그
 ${blogLines}
 
+## 무료배포 자료 (가입 없이 열람·복사 가능)
+${resourceLines}
+
 ## 기술 스택
 Next.js (App Router) + Supabase + TypeScript + Tailwind CSS + shadcn/ui
 배포: Cloudflare Workers (@opennextjs/cloudflare)
@@ -67,6 +75,7 @@ Next.js (App Router) + Supabase + TypeScript + Tailwind CSS + shadcn/ui
 - FAQ: ${SITE_URL}/faq
 - 블로그: ${SITE_URL}/blog
 - 용어집: ${SITE_URL}/glossary
+- 무료배포 자료: ${SITE_URL}/resources
 `;
 
   return new Response(body, {

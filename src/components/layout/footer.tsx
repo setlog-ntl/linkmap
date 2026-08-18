@@ -76,6 +76,7 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-sm mb-3 text-white">콘텐츠</h4>
             <ul className="space-y-2 text-sm">
+              <li><Link href="/resources" prefetch={false} className="hover:text-white transition-colors">무료배포 자료</Link></li>
               <li><Link href="/blog" prefetch={false} className="hover:text-white transition-colors">블로그</Link></li>
               <li><Link href="/faq" prefetch={false} className="hover:text-white transition-colors">FAQ</Link></li>
               <li><Link href="/glossary" prefetch={false} className="hover:text-white transition-colors">용어집</Link></li>

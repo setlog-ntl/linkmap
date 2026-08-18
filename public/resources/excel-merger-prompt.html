@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>엑셀 취합기 — 클로드 지시문 전문 | Linkmap 무료배포 자료 1번</title>
+<meta name="description" content="부서별 엑셀 파일을 하나로 합치는 도구를 코드 없이 만드는 지시문 전문. 클로드에 그대로 붙여넣고 파일 이름과 열 이름만 바꾸면 됩니다.">
+<!--
+  Linkmap 무료배포 자료 1번 — 오프라인 배포본
+  · 이 파일은 외부 요청 0건인 단일 HTML입니다. 인터넷이 막힌 PC에서도 그대로 열립니다.
+  · 최신본·영상 연결은 https://www.linkmap.biz/resources/excel-merger-prompt 이 담당합니다.
+    (영상 발행 상태가 바뀌어도 이 파일은 고칠 필요가 없도록 역링크만 둡니다)
+  · 원천: src/data/resources/free-resources.ts — 문구 변경 시 그쪽을 먼저 고칠 것
+-->
+<style>
+/* Linkmap Circuit Blue-Green v2 — src/app/globals.css 토큰과 동일 값 */
+:root{
+  --radius:.75rem;
+  --background:oklch(0.97 0.005 250);
+  --foreground:oklch(0.20 0.03 250);
+  --card:oklch(1.0 0 0);
+  --muted-foreground:oklch(0.55 0.02 250);
+  --muted:oklch(0.96 0.005 250);
+  --border:oklch(0.92 0.005 250);
+  --brand-blue:oklch(0.42 0.12 255);
+  --brand-green:oklch(0.80 0.19 160);
+  --brand-blue-light:oklch(0.95 0.02 255);
+  --brand-green-light:oklch(0.95 0.04 160);
+  --primary-foreground:oklch(0.98 0 0);
+  --code-bg:oklch(0.16 0.025 250);
+  --code-fg:oklch(0.93 0.005 250);
+  --wordmark:#38bdf8;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --background:oklch(0.16 0.025 250);
+    --foreground:oklch(0.93 0.005 250);
+    --card:oklch(0.20 0.025 250);
+    --muted-foreground:oklch(0.65 0.015 250);
+    --muted:oklch(0.24 0.02 250);
+    --border:oklch(0.30 0.02 250);
+    --brand-blue:oklch(0.70 0.12 255);
+    --brand-green:oklch(0.75 0.17 160);
+    --brand-blue-light:oklch(0.25 0.05 255);
+    --brand-green-light:oklch(0.25 0.05 160);
+    --primary-foreground:oklch(0.15 0.03 250);
+    --code-bg:oklch(0.13 0.02 250);
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;overflow-x:hidden}
+body{
+  background:var(--background); color:var(--foreground); line-height:1.65;
+  font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,Roboto,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+  -webkit-tap-highlight-color:transparent;
+}
+a{color:var(--brand-blue)}
+.wrap{max-width:768px;margin:0 auto;padding:0 16px 64px}
+
+/* ── 상단 바 (linkmap.biz 헤더와 동일 구성) ── */
+.topbar{border-bottom:1px solid var(--border);background:var(--background)}
+.topbar .inner{max-width:768px;margin:0 auto;height:56px;padding:0 16px;display:flex;align-items:center;gap:8px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:20px;text-decoration:none;color:inherit}
+.brand .mark{width:32px;height:32px;display:block;flex-shrink:0}
+.mark{background:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMTQzIiB2aWV3Qm94PSI1IDUgMTkyIDEzMyIgZmlsbD0ibm9uZSI+CjxwYXRoIGQ9Ik0gMTk1LjA2LDU3LjY0IEMgMTk1LjA2LDQ3Ljc4IDE4OC44MywzOS42OCAxNzkuNTQsMzguMDYgViAyNy43OCBDIDE3OS41NCwyMS42NiAxNzUuMjcsMTcuMjggMTY5LjcyLDE3LjI4IEggMTQ1LjMgQyAxNDIuNDIsMTAuMDYgMTM2LjY4LDcgMTI5LjEyLDcgQyAxMjEuMTEsNyAxMTQuOTEsMTEuNzkgMTEyLjYyLDE3LjI4IEggMjkuMjIgQyAyMi44OSwxNy4yOCAxOS4yOCwyMy4wOCAxOS4yOCwyNy45NiBWIDc2LjEzIEMgMTEuNjgsNzkuMzYgOC4wNSw4Ny43NyA4LjA1LDk0LjM5IEMgOC4wNSwxMDIuMjggMTIuMjYsMTA5LjIxIDE5LjE4LDExMi45MyBWIDEyMC4wNSBDIDE5LjE4LDEyNi4xNyAyMy45OSwxMzAuMTEgMjguNzIsMTMwLjExIEggNzkuNzkgTCA4Ni42OSwxMzMuNDcgQyA5Mi4wOSwxMzUuNzkgOTcuNzEsMTM1LjE4IDEwMS43OCwxMzMuMTEgTCAxMDguODksMTMwLjExIEggMTY5LjkyIEMgMTc2LjI1LDEzMC4xMSAxNzkuMzgsMTI0LjQ3IDE3OS4zOCwxMjAuMDUgViA3Ni44NyBDIDE4OC42MSw3NC42MyAxOTUuMDYsNjYuNzYgMTk1LjA2LDU3LjY0IFoiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcl8xXzIyNDgpIi8+CjxwYXRoIGQ9Ik0gMTc2Ljc2LDI3Ljg2IFYgMzcuNzMgTCAxNzQuMjksMzcuNDcgViAyNy4yNSBDIDE3NC4yOSwyMy40MiAxNzEuNjEsMjEuMDkgMTY4LjgxLDIxLjA5IEggMTQ1LjIgTCAxNDQuMjgsMTkuMDggSCAxNjkuNjIgQyAxNzQuMjksMTkuMDggMTc2Ljc2LDIzLjY4IDE3Ni43NiwyNy44NiBaIiBmaWxsPSJ1cmwoI3BhaW50MV9saW5lYXJfMV8yMjQ4KSIvPgo8cGF0aCBkPSJNIDE3NS42NSwyMi40MSBMIDE1My4xMSwzNi45MiBDIDE1MS42MSwzNS42OSAxNDkuOTYsMzUuODEgMTQ4LjY5LDM3LjA4IEMgMTQ3LjQyLDM4LjM1IDE0Ny4zOSwzOS40OCAxNDcuOTMsNDAuOTIgTCAxMTguOTYsNjMuODkgTCAxMTguOTIsNjQuOTcgTCAxMTkuNzgsNjQuODYgTCAxNDkuMzcsNDEuMjYgQyAxNTAuODgsNDIuMjEgMTUyLjc0LDQyLjA0IDE1My43OSw0MC41IEMgMTU0LjU4LDM5LjMyIDE1NC41OSwzOC4xMyAxNTMuODgsMzcuMDEgTCAxNzMuNzgsMjEuNTcgTCAxNzUuNjUsMjIuNDEgWiIgZmlsbD0idXJsKCNwYWludDJfbGluZWFyXzFfMjI0OCkiLz4KPHBhdGggZD0iTSAxNzYuNjYsODIuMjMgViA4MS4wMSBMIDE1Ni4yNCw4MS41NCBDIDE1NS44MSw3OS4xMSAxNTQuMjIsNzguNzkgMTUzLjExLDc4Ljc5IEMgMTUxLjUxLDc4Ljc5IDE1MC43Niw3OS44MSAxNTAuMTIsODEuMzggTCAxMjMuNjIsODEuOTEgViA4Mi45MSBMIDEzNy45MSw4My4yMyBWIDkyLjE3IEwgMTM5LjEzLDkyLjY2IFYgODMuMTEgTCAxNTAuMjgsODIuOTEgQyAxNTAuODEsODQuNzYgMTUxLjg3LDg1LjQ2IDE1My4zMSw4NS40NiBDIDE1NS4wNiw4NS40NiAxNTUuOTEsODQuMzYgMTU2LjMyLDgyLjgzIEwgMTc2LjY2LDgyLjIzIFoiIGZpbGw9InVybCgjcGFpbnQzX2xpbmVhcl8xXzIyNDgpIi8+CjxwYXRoIGQ9Ik0gMTM4LjExLDExMC45OCBWIDEyNy4xMiBMIDEzOS4zMywxMjcuMDQgViAxMTMuODYgTCAxMzguMTEsMTEwLjk4IFoiIGZpbGw9InVybCgjcGFpbnQ0X2xpbmVhcl8xXzIyNDgpIi8+CjxwYXRoIGQ9Ik0gMTEzLjA2LDE5LjA4IEwgMTEyLjM3LDIxLjA5IEwgODYuNzEsMjAuNTEgTCA4OC43MiwzMy44MSBDIDkwLjIzLDMzLjkyIDkxLjE2LDM0Ljg4IDkxLjU4LDM1LjMgTCAxMTEuOTQsMjguNTcgTCAxMTIuMzcsMjkuNSBMIDkxLjI3LDM2LjY2IEMgOTEuNjksMzguMjggOTEuMDYsMzkuNjEgODkuOTEsNDAuMjQgTCA5MS40OCw1MS4xMSBMIDkwLjAyLDUxLjMyIEwgODguMjksMzkuOTMgQyA4Ny4xNCwzOS44MiA4Ni4zLDM4Ljg5IDg1Ljk5LDM4LjA2IEwgNjYuMDQsNDUuMzEgTCA2NS42Miw0NC4wOSBMIDg1Ljk5LDM2LjM0IEMgODYuMTksMzQuODMgODcuMDMsMzMuOTkgODguMjksMzMuNjggTCA4NS42NywyMC4xIEwgMjkuMTIsMjAuNTEgQyAyNC45NywyMC41MSAyMi41MSwyNC42MyAyMi41MSwyOC4xNiBWIDYzLjkxIEwgNDYuOTcsNjkuMjEgQyA0Ny45MSw2Ny42OSA0OC45NSw2Ny40OSA0OS43OSw2Ny40OSBDIDUxLjc0LDY3LjQ5IDUyLjY4LDY5LjExIDUyLjc5LDcwLjA0IEwgNjcuMDgsNzIuODIgViA3My45NSBMIDUyLjI2LDcyLjAxIEMgNTEuNjMsNzIuNzMgNTAuOSw3My4yNCA1MC4xNiw3My4zNCBMIDQ5LjYzLDgzLjQzIEwgNDguNzksODMuNjQgTCA0OC45LDczLjM0IEMgNDcuMjgsNzIuODIgNDYuNjUsNzEuNTkgNDYuNzYsNzAuNDYgTCAyMi41MSw2NS4wNiBWIDc1LjkzIEwgMjAuNSw3Ni41NiBWIDI3Ljg2IEMgMjAuNSwyMi45NCAyNC4yMiwxNy45MSAyOS4wMSwxNy45MSBMIDExMy4wNiwxNy43IFYgMTkuMDggWiIgZmlsbD0idXJsKCNwYWludDVfbGluZWFyXzFfMjI0OCkiLz4KPHBhdGggZD0iTSA0OS42MywxMDkuNzQgTCA0OS45NSwxMDkuNjMgTCA1MC4yNiw5Ny4xNyBMIDQ5LjMyLDk3LjI3IEwgNDcuNiwxMDkuNjMgQyA0NS43NSwxMDkuOTUgNDQuOTEsMTExLjE4IDQ0LjgsMTEzLjEzIEwgMjkuMTIsMTI2LjkxIEwgMzAuMDYsMTI3LjQ0IEwgNDYuMzQsMTE1LjQ3IEMgNDcuMjgsMTE2LjIgNDguMTIsMTE2LjMgNDkuMTYsMTE2LjA5IEMgNTEuMjEsMTE1LjY4IDUxLjYzLDExMy43NCA1MC44OSwxMTEuMjggQyA1MC42OCwxMTAuNTYgNTAuMjYsMTEwLjA0IDQ5LjYzLDEwOS43NCBaIiBmaWxsPSJ1cmwoI3BhaW50Nl9saW5lYXJfMV8yMjQ4KSIvPgo8cGF0aCBkPSJNIDEzMS4xNiwxMDYuOTEgTCAxMTYuNjEsOTkuNzEgQyAxMTUuNjIsOTkuMjEgMTE0LjcyLDk5Ljk5IDExNC43Miw5OS45OSBDIDEwOC43MiwxMDcuMDkgMTAyLjk3LDExMC4xOCA5NC43MiwxMTAuMTggQyA4Ni40NywxMTAuMTggNzkuOTEsMTA3LjA5IDc0Ljg5LDEwMC4zNCBDIDc0LjI2LDk5LjY2IDczLjIxLDk5Ljg3IDczLjIxLDk5Ljg3IEwgNTcuOTEsMTA2LjkxIEMgNTUuMDEsMTA4Ljc1IDU1LjU0LDExMi41MSA1OC4xMSwxMTMuODYgTCA4Ny45OCwxMjguODIgQyA5MS42OSwxMzAuNTcgOTUuNjEsMTMwLjMxIDk4LjkzLDEyOC42MSBMIDEzMC44NCwxMTMuODYgQyAxMzMuOTUsMTEyLjMgMTM0LjI2LDEwOC41NCAxMzEuMTYsMTA2LjkxIFoiIGZpbGw9InVybCgjcGFpbnQ3X2xpbmVhcl8xXzIyNDgpIiBzdHJva2U9IiMyQTM2NDEiIHN0cm9rZS13aWR0aD0iMS4yMDI5IiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTSA5NC43MiwxMDMuNjcgQyAxMDYuOTksMTAzLjY3IDExNy4yOCw5Mi4zOCAxMTcuMjgsNzkuOTEgQyAxMTcuMjgsNjcuNDUgMTA2LjY2LDU1Ljk1IDk0LjcyLDU1Ljk1IEMgODIuMTYsNTUuOTUgNzIuMTQsNjYuNzYgNzIuMTQsNzkuOTEgQyA3Mi4xNCw5Mi4zOCA4Mi4xNiwxMDMuNjcgOTQuNzIsMTAzLjY3IFoiIGZpbGw9InVybCgjcGFpbnQ4X3JhZGlhbF8xXzIyNDgpIiBzdHJva2U9InVybCgjcGFpbnQ5X2xpbmVhcl8xXzIyNDgpIiBzdHJva2Utd2lkdGg9IjEuMDYxMSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik0gMTc1Ljg0LDQzLjA3IEMgMTY3LjE4LDQzLjU1IDE2Mi4wOCw1MC45MSAxNjIuMjksNTguMjcgTCAxMjAuOTcsNzAuMjUgTCAxMjIuNDMsNzUuOTMgTCAxNjQuMDQsNjQuNzUgQyAxNjcuMTgsNzAuMDQgMTcxLjUsNzEuOSAxNzYuMTQsNzEuNjkgQyAxODQuNDksNzEuMzEgMTg5Ljc5LDYzLjg5IDE4OS43OSw1Ny40NCBDIDE4OS43OSw0OS42MSAxODMuNjYsNDIuNjYgMTc1Ljg0LDQzLjA3IFoiIGZpbGw9InVybCgjcGFpbnQxMF9yYWRpYWxfMV8yMjQ4KSIgc3Ryb2tlPSJ1cmwoI3BhaW50MTFfbGluZWFyXzFfMjI0OCkiIHN0cm9rZS13aWR0aD0iMS4wNjExIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTSAxMjguNzksMTEuODEgQyAxMjEuMjMsMTEuNDEgMTE2LjYxLDE4LjM2IDExNi44MiwyMy43NiBDIDExNi45MiwyNy45NiAxMTguNjUsMzAuOTQgMTIwLjIxLDMyLjg5IEwgMTA3LjY1LDUzLjUyIEwgMTEyLjM3LDU2LjI5IEwgMTI0LjcyLDM1LjkyIEMgMTI2LjY4LDM2LjY2IDEyNy44NCwzNi43NiAxMjkuNDEsMzYuNjYgQyAxMzYuMTUsMzYuMjQgMTQwLjQ3LDI5LjE5IDE0MC4yNiwyNC42OCBDIDEzOS45NSwxOC4wMiAxMzUuNjMsMTIuMTcgMTI4Ljc5LDExLjgxIFoiIGZpbGw9InVybCgjcGFpbnQxMl9yYWRpYWxfMV8yMjQ4KSIgc3Ryb2tlPSJ1cmwoI3BhaW50MTNfbGluZWFyXzFfMjI0OCkiIHN0cm9rZS13aWR0aD0iMS4wNjExIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTSA0OC45NSwzNS44MSBDIDQxLjgxLDM2LjEzIDM3Ljk5LDQyLjg3IDM4LjIsNDcuNDggQyAzOC41MSw1NC4yMyA0NC4wMSw1OC4yNyA0OS4wMSw1OC4yNyBDIDUyLjI2LDU4LjI3IDU0LjMxLDU3LjMzIDU1Ljk4LDU1Ljc4IEwgNjkuMzQsNjYuMzQgTCA3Mi4zNCw2MC45NCBMIDU5LjQ2LDUxLjUzIEMgNjAuMyw1MC4wOCA2MC4zLDQ4LjAyIDYwLjE5LDQ2LjE3IEMgNTkuNjcsNDAuMTQgNTQuOTUsMzUuNTEgNDguOTUsMzUuODEgWiIgZmlsbD0idXJsKCNwYWludDE0X3JhZGlhbF8xXzIyNDgpIiBzdHJva2U9InVybCgjcGFpbnQxNV9saW5lYXJfMV8yMjQ4KSIgc3Ryb2tlLXdpZHRoPSIxLjA2MTEiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIvPgo8cGF0aCBkPSJNIDE1Ni45OCw5My4yMyBDIDE1MS4zNCw5My4yMyAxNDguMTUsOTYuMTEgMTQ1Ljc4LDk4Ljk5IEwgMTIxLjkxLDg4LjggTCAxMjAuMDYsOTQuMzkgTCAxNDQuNDIsMTA0Ljk2IEMgMTQzLjksMTEyLjkyIDE0OS43LDExOS43NyAxNTYuMzMsMTE5LjU2IEMgMTY0LjA0LDExOS4zNSAxNjkuNDQsMTEyLjEgMTY5LjM0LDEwNi44MSBDIDE2OS4xMywxMDAuMTggMTYzLjkzLDkzLjIzIDE1Ni45OCw5My4yMyBaIiBmaWxsPSJ1cmwoI3BhaW50MTZfcmFkaWFsXzFfMjI0OCkiIHN0cm9rZT0idXJsKCNwYWludDE3X2xpbmVhcl8xXzIyNDgpIiBzdHJva2Utd2lkdGg9IjEuMDYxMSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik0gMjcuMjcsODAuMDIgQyAxOC4yOSw4MC41NCAxMy4xOSw4OC4wNiAxMy4xOSw5NC41IEMgMTMuMTksMTAyLjY0IDIwLjAzLDEwOS4yNyAyNi43NywxMDkuMDYgQyAzNS4xMiwxMDguNzUgNDEuMDIsMTAyLjIyIDQxLjU0LDk1LjY4IEwgNjcuMDgsODguNjMgTCA2Ni4wNCw4Mi44IEwgNDAuNzEsODguOTQgQyAzNy43OCw4My4xMSAzMi44OCw3OS43MSAyNy4yNyw4MC4wMiBaIiBmaWxsPSJ1cmwoI3BhaW50MThfcmFkaWFsXzFfMjI0OCkiIHN0cm9rZT0idXJsKCNwYWludDE5X2xpbmVhcl8xXzIyNDgpIiBzdHJva2Utd2lkdGg9IjEuMDYxMSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MF9saW5lYXJfMV8yMjQ4IiB4MT0iMTAxLjU1NiIgeTE9IjcuMDAxOTUiIHgyPSIxMDEuNTU2IiB5Mj0iMTM1LjA5MiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjMjEyODMxIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzJBMzY0MSIvPgo8L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MV9saW5lYXJfMV8yMjQ4IiB4MT0iMTYxLjMzIiB5MT0iMTcuMjc3MyIgeDI9IjE2MS4zMyIgeTI9IjM3LjczMzEiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzM3NDE0RCIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNzQxNEQiIHN0b3Atb3BhY2l0eT0iMC41MiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50Ml9saW5lYXJfMV8yMjQ4IiB4MT0iMTQ3LjI4NCIgeTE9IjIwLjQ1OSIgeDI9IjE0Ny4yODQiIHkyPSI2NS43MTcxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiMzNzQxNEQiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMzc0MTREIiBzdG9wLW9wYWNpdHk9IjAuNTIiLz4KPC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDNfbGluZWFyXzFfMjI0OCIgeDE9IjE1MC4xMzgiIHkxPSI3OC43ODYxIiB4Mj0iMTUwLjEzOCIgeTI9IjkyLjY1NjIiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzM3NDE0RCIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNzQxNEQiIHN0b3Atb3BhY2l0eT0iMC41MiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50NF9saW5lYXJfMV8yMjQ4IiB4MT0iMTM4LjcxOCIgeTE9IjExMC45OCIgeDI9IjEzOC43MTgiIHkyPSIxMjcuMTE3IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiMzNzQxNEQiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMzc0MTREIiBzdG9wLW9wYWNpdHk9IjAuNTIiLz4KPC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDVfbGluZWFyXzFfMjI0OCIgeDE9IjY4LjQzNDYiIHkxPSIxNy43MDEyIiB4Mj0iNjguNDM0NiIgeTI9IjgzLjYzNjciIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzM3NDE0RCIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNzQxNEQiIHN0b3Atb3BhY2l0eT0iMC41MiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50Nl9saW5lYXJfMV8yMjQ4IiB4MT0iMzkuNTM1NyIgeTE9Ijk3LjE3MTkiIHgyPSIzOS41MzU3IiB5Mj0iMTI3LjQzNyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjMzc0MTREIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzM3NDE0RCIgc3RvcC1vcGFjaXR5PSIwLjUyIi8+CjwvbGluZWFyR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQ3X2xpbmVhcl8xXzIyNDgiIHgxPSI5NC43MjAxIiB5MT0iOTkuNDEyMSIgeDI9Ijk0LjcyMDEiIHkyPSIxMjkuNzkyIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiMzRTRCNUEiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjM0U0QjVBIiBzdG9wLW9wYWNpdHk9IjAuNzQiLz4KPC9saW5lYXJHcmFkaWVudD4KPHJhZGlhbEdyYWRpZW50IGlkPSJwYWludDhfcmFkaWFsXzFfMjI0OCIgY3g9IjAiIGN5PSIwIiByPSIxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSg5NC43MTg5IDc5LjgxMzMpIHNjYWxlKDIxLjI3NjQgMjIuMDE5MikiPgo8c3RvcCBzdG9wLWNvbG9yPSIjNTlGMUZGIi8+CjxzdG9wIG9mZnNldD0iMC40MSIgc3RvcC1jb2xvcj0iIzQzQzZGRiIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM2MTUyRUEiLz4KPC9yYWRpYWxHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDlfbGluZWFyXzFfMjI0OCIgeDE9Ijk0LjcxODkiIHkxPSI1NS40MjA5IiB4Mj0iOTQuNzE4OSIgeTI9IjEwNC4yMDEiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzk4RjdGRiIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM1QTY0Q0MiLz4KPC9saW5lYXJHcmFkaWVudD4KPHJhZGlhbEdyYWRpZW50IGlkPSJwYWludDEwX3JhZGlhbF8xXzIyNDgiIGN4PSIwIiBjeT0iMCIgcj0iMSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTc1LjE0NiA1Ny4zODA3KSBzY2FsZSgxMy45MjYxIDEzLjkyNjEpIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzkzRjJFNiIvPgo8c3RvcCBvZmZzZXQ9IjAuNDEiIHN0b3AtY29sb3I9IiM0QUYzRjAiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNDhEMEYzIi8+CjwvcmFkaWFsR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQxMV9saW5lYXJfMV8yMjQ4IiB4MT0iMTU1LjM3OCIgeTE9IjQyLjUzNjEiIHgyPSIxNTUuMzc4IiB5Mj0iNzIuMjI4NSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjNTlGMUU5Ii8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzQ4QTZFNiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8cmFkaWFsR3JhZGllbnQgaWQ9InBhaW50MTJfcmFkaWFsXzFfMjI0OCIgY3g9IjAiIGN5PSIwIiByPSIxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgxMjguNTMzIDIzLjkxMjEpIHNjYWxlKDExLjAzODYgMTEuNjYxNikiPgo8c3RvcCBzdG9wLWNvbG9yPSIjQ0ZGMUZGIi8+CjxzdG9wIG9mZnNldD0iMC40MSIgc3RvcC1jb2xvcj0iI0IwOUVFQSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM1NkM5RjQiLz4KPC9yYWRpYWxHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDEzX2xpbmVhcl8xXzIyNDgiIHgxPSIxMjMuOTU0IiB5MT0iMTEuMjY0NiIgeDI9IjEyMy45NTQiIHkyPSI1Ni44MTgxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiM1OUYxRTkiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNDhBNkU2Ii8+CjwvbGluZWFyR3JhZGllbnQ+CjxyYWRpYWxHcmFkaWVudCBpZD0icGFpbnQxNF9yYWRpYWxfMV8yMjQ4IiBjeD0iMCIgY3k9IjAiIHI9IjEiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiBncmFkaWVudFRyYW5zZm9ybT0idHJhbnNsYXRlKDQ4Ljg2ODEgNDYuNzYzMSkgc2NhbGUoOS4zMTA1MyA5LjMxMDUzKSI+CjxzdG9wIHN0b3AtY29sb3I9IiM1OUYxRkYiLz4KPHN0b3Agb2Zmc2V0PSIwLjQxIiBzdG9wLWNvbG9yPSIjNDM5MEZGIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzgyNDRFNiIvPgo8L3JhZGlhbEdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MTVfbGluZWFyXzFfMjI0OCIgeDE9IjQ4Ljk1NDEiIHkxPSIzNS4yNzgzIiB4Mj0iNDguOTU0MSIgeTI9IjY2LjMzOTgiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzU5RjFFOSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM0OEE2RTYiLz4KPC9saW5lYXJHcmFkaWVudD4KPHJhZGlhbEdyYWRpZW50IGlkPSJwYWludDE2X3JhZGlhbF8xXzIyNDgiIGN4PSIwIiBjeT0iMCIgcj0iMSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTU2LjY5NCAxMDYuMzk2KSBzY2FsZSgxMS44MDQxIDEyLjQ1MTIpIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzAwOTRGRiIvPgo8c3RvcCBvZmZzZXQ9IjAuNDEiIHN0b3AtY29sb3I9IiMyNDg2RkUiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNTY1OEVBIi8+CjwvcmFkaWFsR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQxN19saW5lYXJfMV8yMjQ4IiB4MT0iMTU0LjY5OSIgeTE9IjkyLjY4MDciIHgyPSIxNTQuNjk5IiB5Mj0iMTIwLjEwOSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjNTlGMUU5Ii8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzQ4QTZFNiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8cmFkaWFsR3JhZGllbnQgaWQ9InBhaW50MThfcmFkaWFsXzFfMjI0OCIgY3g9IjAiIGN5PSIwIiByPSIxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgyNy40Mjg5IDk0LjIyMDIpIHNjYWxlKDEzLjcwNTggMTMuNzA1OCkiPgo8c3RvcCBzdG9wLWNvbG9yPSIjMjY0MkIyIi8+CjxzdG9wIG9mZnNldD0iMC40MSIgc3RvcC1jb2xvcj0iIzM5MzlDMSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM4MjQ0RTYiLz4KPC9yYWRpYWxHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDE5X2xpbmVhcl8xXzIyNDgiIHgxPSI0MC4xMzUxIiB5MT0iNzkuNDYwOSIgeDI9IjQwLjEzNTEiIHkyPSIxMDkuNjA5IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiM1OUYxRTkiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNDhBNkU2Ii8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPC9zdmc+") center/contain no-repeat}
+.brand .l1{color:var(--wordmark)} .brand .l2{color:var(--foreground)}
+.topbar .pill{margin-left:auto;font-size:12px;font-weight:600;color:var(--brand-green);
+  background:color-mix(in oklab,var(--brand-green) 15%,transparent);border-radius:999px;padding:4px 11px;white-space:nowrap}
+
+/* ── 히어로 ── */
+.hero{text-align:center;padding:44px 4px 32px}
+.hero .eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--brand-green);
+  background:color-mix(in oklab,var(--brand-green) 12%,transparent);border-radius:999px;padding:5px 13px}
+.hero h1{font-size:clamp(23px,4.4vw,31px);letter-spacing:-.6px;margin-top:16px;word-break:keep-all;line-height:1.4}
+.hero h1 em{font-style:normal;color:var(--brand-blue)}
+.hero p{color:var(--muted-foreground);margin-top:12px;font-size:15px;word-break:keep-all}
+.cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:7px;text-decoration:none;border-radius:calc(var(--radius) - 2px);
+  min-height:44px;padding:0 22px;font-size:15px;font-weight:600;border:1px solid transparent;transition:opacity .15s}
+.btn:hover{opacity:.9}
+.btn.primary{background:var(--brand-blue);color:var(--primary-foreground)}
+.btn.outline{background:var(--card);color:var(--foreground);border-color:var(--border)}
+.hero .free{margin-top:14px;font-size:13px;color:var(--muted-foreground)}
+.hero .free b{color:var(--brand-green)}
+
+/* ── 카드 ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:22px 20px;margin-top:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card h2{font-size:17px;letter-spacing:-.3px}
+.card .desc{color:var(--muted-foreground);font-size:14px;margin-top:5px;margin-bottom:14px;word-break:keep-all}
+.note{font-size:13.5px;color:var(--muted-foreground);margin-top:12px;word-break:keep-all}
+.note b{color:var(--foreground)}
+
+/* ── 최신본·영상 역링크 카드 ── */
+.linkback{display:flex;gap:14px;align-items:flex-start;background:var(--brand-blue-light);
+  border:1px solid color-mix(in oklab,var(--brand-blue) 22%,transparent)}
+.linkback .ico{width:40px;height:40px;flex-shrink:0;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  background:color-mix(in oklab,var(--brand-blue) 15%,transparent)}
+.linkback .ico svg{width:20px;height:20px;stroke:var(--brand-blue);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.linkback .label{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--brand-blue)}
+
+/* ── 코드 박스 ── */
+.codebox{position:relative}
+.codebox pre{background:var(--code-bg);color:var(--code-fg);border-radius:calc(var(--radius) - 2px);
+  padding:18px 78px 18px 16px;font-size:13px;line-height:1.7;overflow-x:auto;white-space:pre-wrap;
+  word-break:break-word;font-family:ui-monospace,"Geist Mono",Consolas,"Malgun Gothic",monospace}
+.copy{position:absolute;top:10px;right:10px;min-height:36px;display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.25);
+  border-radius:8px;padding:0 12px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.copy:hover{background:rgba(255,255,255,.2)}
+.copy.done{background:var(--brand-green);border-color:var(--brand-green);color:oklch(0.20 0.03 250)}
+
+footer{text-align:center;color:var(--muted-foreground);font-size:13.5px;margin-top:40px;line-height:2}
+footer b{color:var(--foreground)}
+footer .lm{display:inline-flex;align-items:center;gap:5px;font-weight:700;vertical-align:middle}
+footer .lm .mark{width:18px;height:18px}
+footer .lm .l1{color:var(--wordmark)} footer .lm .l2{color:var(--foreground)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="inner">
+    <a class="brand" href="https://www.linkmap.biz/" target="_blank" rel="noopener">
+      <span class="mark" role="img" aria-label="Linkmap"></span>
+      <span><span class="l1">Link</span><span class="l2">map</span></span>
+    </a>
+    <span class="pill">무료배포 자료 1번</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <span class="eyebrow">엑셀 취합기 — 클로드 지시문 전문</span>
+    <h1>코드 몰라도, <em>3분 만에</em><br>나만의 도구를 배포합니다</h1>
+    <p>이 자료의 엑셀 취합기도 Linkmap으로 만들어 배포했습니다.<br>
+    「나만의 엑셀자동화」 템플릿을 고르면, 클릭 한 번으로 내 도구에 URL이 생깁니다.</p>
+    <div class="cta">
+      <a class="btn primary" href="https://www.linkmap.biz/sites/new?template=excel-merge" target="_blank" rel="noopener">무료로 시작하기 →</a>
+      <a class="btn outline" href="https://setlog-ntl.github.io/myexceltool/" target="_blank" rel="noopener">완성본 먼저 써 보기</a>
+    </div>
+    <p class="free"><b>무료 플랜</b> · Google 계정만 있으면 OK · 무료 3개까지 배포</p>
+  </div>
+
+  <!-- 상호연결: 영상 상태는 자료 페이지가 들고 있고, 이 파일은 역링크만 둔다 -->
+  <div class="card linkback">
+    <div class="ico">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="10 8 16 12 10 16 10 8"/><rect x="2" y="4" width="20" height="16" rx="3"/></svg>
+    </div>
+    <div>
+      <p class="label">영상·최신본 확인</p>
+      <h2 style="margin-top:4px">이 자료의 원본 영상과 최신본</h2>
+      <p class="desc" style="margin-bottom:10px">영상이 공개되면 자료 페이지에서 바로 연결됩니다. 자료가 갱신돼도 아래 주소는 그대로입니다.</p>
+      <a href="https://www.linkmap.biz/resources/excel-merger-prompt" target="_blank" rel="noopener">linkmap.biz/resources/excel-merger-prompt →</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>직접 만들고 싶다면 — 복사용 지시문</h2>
+    <p class="desc">클로드에 아래를 그대로 붙여넣으세요. 어떤 파일이 오는지 · 어떤 결과를 원하는지 · 결과물의 형태, 세 가지가 전부 들어 있습니다.</p>
+    <div class="codebox">
+      <button class="copy" type="button" data-copy>복사</button>
+<pre>엑셀 여러 개를 하나로 합치는 도구를 만들어 줘. 개발자가 아니어도 쓸 수 있어야 해.
+
+[어떤 파일이 오는지]
+- 매달 부서별로 엑셀 파일을 받아. .xlsx, .xls, .csv가 섞여 있어.
+- 부서마다 열 이름과 머리글 위치가 조금씩 달라.
+  어떤 파일은 맨 위에 제목이 두 줄 있어서, 머리글이 서너 번째 줄에서 시작해.
+- 같은 뜻인데 표기가 조금 다른 열이 있어. 예: "품목코드"와 "품목 코드".
+- 숫자가 글자로 저장된 칸이 있어. 예: 수량 칸의 "1,200".
+- 시트가 두 개 이상인 파일도 있어.
+
+[어떤 결과를 원하는지]
+1. 파일 여러 개를 한꺼번에 끌어다 놓으면, 전부 한 표로 합쳐 줘.
+2. 어느 파일에서 온 줄인지 알 수 있게 "출처파일" 열을 자동으로 붙여 줘.
+3. 머리글이 첫 줄이 아니면 자동으로 찾아 줘.
+4. 표기만 조금 다른 열은 같은 열로 합쳐 줘.
+5. 글자로 저장된 숫자는 숫자로 바꿔 줘. 합계가 되도록.
+6. 시트가 여러 개면 기본은 첫 시트만 쓰고, "모든 시트 합치기" 옵션도 넣어 줘.
+7. 합치기 전에 미리보기로 행 수와 열이 맞는지 확인하게 해 주고,
+   "엑셀로 내려받기" 버튼으로 저장하게 해 줘.
+8. 제일 중요한 것 — 도구가 알아서 처리한 건 전부 "확인이 필요한 것" 목록으로
+   화면에 보여 줘. (머리글을 몇 번째 줄로 봤는지 / 어떤 열들을 하나로 합쳤는지 /
+   숫자로 바꾼 칸이 몇 개인지 / 안 쓴 시트가 있는지 / 이름 없는 열이 있는지)
+
+[결과물의 형태]
+- 인터넷 페이지처럼 보이는 HTML 파일 "하나"로 만들어 줘. 더블클릭하면 바로 열리게.
+- 파일은 절대 서버로 보내지 마. 모든 처리는 브라우저 안에서만 끝나야 해.
+- 회사 PC처럼 외부 연결이 막힌 곳에서도 돌아가야 해. 필요한 라이브러리는
+  파일 안에 넣거나, "내 컴퓨터에 저장" 버튼으로 오프라인용 파일을
+  따로 저장할 수 있게 해 줘.</pre>
+    </div>
+    <p class="note">잠시 기다리면 HTML 파일이 하나 나옵니다. 내려받아서 더블클릭하면 끝. <b>파일 이름과 열 이름만 여러분 업무에 맞게 바꾸면 됩니다.</b></p>
+  </div>
+
+  <div class="card">
+    <h2>한 번에 안 되면 — 이렇게 다듬으세요</h2>
+    <p class="desc">여러분만 아는 함정을 한 줄씩 말해 주면 됩니다. 필요한 줄만 복사해서 쓰세요.</p>
+    <div class="codebox">
+      <button class="copy" type="button" data-copy>복사</button>
+<pre>우리 자재팀 파일은 머리글이 4번째 줄이야. 자동 감지가 놓치면 4번째 줄부터 읽게 해 줘.
+수량, 금액, 단가 열은 무조건 숫자로 취급해 줘. 글자가 섞여 있으면 알려 줘.
+"거래처"와 "거래처명"도 같은 열로 합쳐 줘.
+합친 결과에서 빈 줄과 소계 줄은 빼 줘. 몇 줄을 뺐는지 알려 줘.</pre>
+    </div>
+    <p class="note">다 만들었다면 — <a href="https://www.linkmap.biz/sites/new?template=excel-merge" target="_blank" rel="noopener">Linkmap</a>에 올려 URL 하나로 어디서든 여세요. 파일 처리는 똑같이 브라우저 안에서만 됩니다.</p>
+  </div>
+
+  <footer>
+    <b>시작한 만큼 만들어집니다.</b> — 바이브코딩 치트키 🔑<br>
+    Built with
+    <span class="lm">
+      <span class="mark" role="img" aria-label="Linkmap"></span>
+      <span><span class="l1">Link</span><span class="l2">map</span></span>
+    </span>
+  </footer>
+
+</div>
+
+<script>
+document.querySelectorAll('[data-copy]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var pre = btn.parentElement.querySelector('pre');
+    var text = pre.innerText;
+    function done(){
+      btn.textContent = '복사됨 ✓'; btn.classList.add('done');
+      setTimeout(function(){ btn.textContent = '복사'; btn.classList.remove('done'); }, 1800);
+    }
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { btn.textContent = '복사 실패'; }
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else { fallback(); }
+  });
+});
+</script>
+</body>
+</html>
