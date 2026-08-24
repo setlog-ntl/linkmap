@@ -58,6 +58,16 @@ function formatDateTime(dateStr: string) {
   return d.toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
+/**
+ * 방문자 식별용 표시명.
+ * visitor_logs.ip_address는 SHA-256 해시(M106)라 64자 그대로는 읽히지 않으므로
+ * 앞 8자만 방문자 번호로 쓴다 — 같은 방문자를 눈으로 묶어보기 위한 용도.
+ */
+function formatVisitorId(ip: string | null) {
+  if (!ip || ip === '(알 수 없음)') return '방문자 미상';
+  return `방문자 #${ip.slice(0, 8)}`;
+}
+
 function KpiSkeleton() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -451,6 +461,7 @@ function VisitorsTab() {
   const kpis = data?.kpis;
   const dailyTrend = data?.dailyTrend ?? [];
   const topPages = data?.topPages ?? [];
+  const topMenus = data?.topMenus ?? [];
   const recentSessions = data?.recentSessions ?? [];
   const visitorsByIp = data?.visitorsByIp ?? [];
   const trendWithLabel = dailyTrend.map((t) => ({ ...t, label: formatDate(t.date) }));
@@ -506,7 +517,7 @@ function VisitorsTab() {
             <CardContent className="pt-6">
               <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
                 <Network className="h-4 w-4 text-purple-500" />
-                고유 IP
+                고유 방문자
               </div>
               <p className="text-3xl font-bold">{(kpis?.uniqueIps ?? 0).toLocaleString()}</p>
             </CardContent>
@@ -586,14 +597,36 @@ function VisitorsTab() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">상위 방문 페이지 (상위 10개)</CardTitle>
+              <CardTitle className="text-base">많이 본 메뉴 (상위 10개 페이지)</CardTitle>
+              {topMenus.length > 0 && (
+                <div className="flex items-center gap-1 flex-wrap pt-1">
+                  {topMenus.slice(0, 6).map((m) => (
+                    <Badge key={m.menu} variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal">
+                      {m.menu} {m.views.toLocaleString()}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
                 {topPages.map((page) => (
-                  <li key={page.path} className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-mono truncate flex-1">{page.path}</span>
-                    <Badge variant="secondary">{page.views.toLocaleString()}</Badge>
+                  <li
+                    key={page.path}
+                    className="flex items-center justify-between gap-2"
+                    title={page.path}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm truncate">{page.menu}</p>
+                      {page.detail && (
+                        <p className="text-[10px] text-muted-foreground font-mono truncate">
+                          {page.detail}
+                        </p>
+                      )}
+                    </div>
+                    <Badge variant="secondary" className="shrink-0">
+                      {page.views.toLocaleString()}
+                    </Badge>
                   </li>
                 ))}
                 {topPages.length === 0 && (
@@ -607,7 +640,10 @@ function VisitorsTab() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">최근 세션 (최근 20개)</CardTitle>
+              <CardTitle className="text-base">최근 방문 (최근 20세션)</CardTitle>
+              <p className="text-xs text-muted-foreground">
+                로그인하지 않은 방문자만 기록됩니다. 방문자 번호는 IP 해시 앞자리입니다.
+              </p>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3">
@@ -615,12 +651,29 @@ function VisitorsTab() {
                   <li key={s.sessionId} className="flex items-start gap-3">
                     <MonitorSmartphone className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-mono truncate">{s.firstPage}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-sm font-medium truncate">
+                          {formatVisitorId(s.ip)}
+                        </span>
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 font-normal">
+                          {s.firstMenu} 진입
+                        </Badge>
+                      </div>
+                      {s.menus.length > 0 && (
+                        <div className="flex items-center gap-1 flex-wrap mt-1" title={s.firstPage}>
+                          {s.menus.map((m) => (
+                            <Badge
+                              key={m.menu}
+                              variant="outline"
+                              className="text-[10px] px-1.5 py-0 h-4 font-normal"
+                            >
+                              {m.menu} {m.count}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {formatDateTime(s.firstSeen)} · {s.pageCount}페이지
-                        {s.ip && (
-                          <span className="ml-1 text-purple-500 font-mono">· {s.ip}</span>
-                        )}
                       </p>
                     </div>
                   </li>
@@ -642,20 +695,20 @@ function VisitorsTab() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Network className="h-4 w-4 text-purple-500" />
-              <CardTitle className="text-base">IP별 방문자 (상위 100개, 페이지뷰 기준)</CardTitle>
+              <CardTitle className="text-base">방문자별 활동 (상위 100명, 페이지뷰 기준)</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             {visitorsByIp.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">IP 데이터가 없습니다.</p>
+              <p className="text-sm text-muted-foreground text-center py-4">방문자 데이터가 없습니다.</p>
             ) : (
               <Accordion type="single" collapsible className="w-full">
                 {visitorsByIp.map((v: VisitorByIp) => (
                   <AccordionItem key={v.ip} value={v.ip}>
                     <AccordionTrigger className="hover:no-underline">
                       <div className="flex items-center gap-3 w-full pr-2">
-                        <span className="font-mono text-sm text-purple-600 dark:text-purple-400 w-36 shrink-0 text-left">
-                          {v.ip}
+                        <span className="text-sm font-medium text-purple-600 dark:text-purple-400 w-32 shrink-0 text-left">
+                          {formatVisitorId(v.ip)}
                         </span>
                         <div className="flex items-center gap-2 flex-1 flex-wrap">
                           <Badge variant="secondary" className="gap-1">
@@ -666,9 +719,15 @@ function VisitorsTab() {
                             <Globe className="h-3 w-3" />
                             {v.pageViews}PV
                           </Badge>
-                          <span className="text-xs text-muted-foreground hidden md:inline">
-                            {formatDateTime(v.firstSeen)} ~ {formatDateTime(v.lastSeen)}
-                          </span>
+                          {v.topMenus.map((m) => (
+                            <Badge
+                              key={m.menu}
+                              variant="secondary"
+                              className="text-[10px] px-1.5 py-0 h-4 font-normal"
+                            >
+                              {m.menu} {m.count}
+                            </Badge>
+                          ))}
                         </div>
                         <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200" />
                       </div>
@@ -684,11 +743,22 @@ function VisitorsTab() {
                           </p>
                         )}
                         <div>
-                          <p className="text-xs font-medium mb-1.5">주요 방문 페이지</p>
+                          <p className="text-xs font-medium mb-1.5">주요 방문 메뉴</p>
                           <ul className="space-y-1">
                             {v.topPaths.map((p) => (
-                              <li key={p.path} className="flex items-center justify-between gap-2">
-                                <span className="text-xs font-mono truncate flex-1 text-muted-foreground">{p.path}</span>
+                              <li
+                                key={p.path}
+                                className="flex items-center justify-between gap-2"
+                                title={p.path}
+                              >
+                                <span className="text-xs truncate flex-1 text-muted-foreground">
+                                  {p.menu}
+                                  {p.detail && (
+                                    <span className="ml-1 font-mono text-[10px] opacity-70">
+                                      {p.detail}
+                                    </span>
+                                  )}
+                                </span>
                                 <Badge variant="secondary" className="text-xs shrink-0">{p.count}</Badge>
                               </li>
                             ))}

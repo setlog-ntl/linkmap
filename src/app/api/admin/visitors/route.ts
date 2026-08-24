@@ -4,6 +4,19 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { isAdmin } from '@/lib/admin';
 import { unauthorizedError, apiError, serverError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
+import { getPageMenuInfo } from '@/lib/constants/page-menus';
+
+/** 세션·방문자별로 노출할 메뉴 개수 */
+const TOP_MENU_COUNT = 4;
+
+export interface VisitorPage {
+  path: string;
+  count: number;
+  /** 경로에 대응하는 실제 메뉴명 */
+  menu: string;
+  /** 메뉴 안의 세부 대상(슬러그·ID) */
+  detail: string | null;
+}
 
 export interface VisitorByIp {
   ip: string;
@@ -11,7 +24,9 @@ export interface VisitorByIp {
   pageViews: number;
   firstSeen: string;
   lastSeen: string;
-  topPaths: Array<{ path: string; count: number }>;
+  topPaths: VisitorPage[];
+  /** 이 방문자가 많이 본 메뉴 */
+  topMenus: Array<{ menu: string; count: number }>;
   userAgent: string | null;
 }
 
@@ -25,17 +40,38 @@ export interface AdminVisitorStats {
     uniqueIps: number;
   };
   dailyTrend: Array<{ date: string; sessions: number; pageViews: number }>;
-  topPages: Array<{ path: string; views: number }>;
+  topPages: Array<{ path: string; views: number; menu: string; detail: string | null }>;
+  topMenus: Array<{ menu: string; views: number }>;
   recentSessions: Array<{
     sessionId: string;
     firstPage: string;
+    /** 세션이 처음 들어온 메뉴 */
+    firstMenu: string;
     pageCount: number;
+    /** 세션에서 둘러본 메뉴 흐름 */
+    menus: Array<{ menu: string; count: number }>;
     firstSeen: string;
     lastSeen: string;
     userAgent: string | null;
     ip: string | null;
   }>;
   visitorsByIp: VisitorByIp[];
+}
+
+/** 경로별 횟수를 메뉴 단위로 합산해 많이 본 순으로 정렬 */
+function toMenuCounts(
+  pathCounts: Iterable<[string, number]>,
+  limit: number
+): Array<{ menu: string; count: number }> {
+  const menuCounts = new Map<string, number>();
+  for (const [path, count] of pathCounts) {
+    const { menu } = getPageMenuInfo(path);
+    menuCounts.set(menu, (menuCounts.get(menu) ?? 0) + count);
+  }
+  return Array.from(menuCounts.entries())
+    .map(([menu, count]) => ({ menu, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
 }
 
 export async function GET() {
@@ -141,21 +177,40 @@ export async function GET() {
   const topPages = Array.from(pageCountMap.entries())
     .sort(([, a], [, b]) => b - a)
     .slice(0, 10)
-    .map(([path, views]) => ({ path, views }));
+    .map(([path, views]) => {
+      const { menu, detail } = getPageMenuInfo(path);
+      return { path, views, menu, detail };
+    });
+
+  // 상위 10개 메뉴 (경로가 아니라 메뉴 단위로 합산)
+  const topMenus = toMenuCounts(pageCountMap.entries(), 10).map(({ menu, count }) => ({
+    menu,
+    views: count,
+  }));
 
   // 최근 20 세션 (IP 포함)
   const recentSessions = Array.from(sessionMap.entries())
     .sort(([, a], [, b]) => new Date(b.firstSeen).getTime() - new Date(a.firstSeen).getTime())
     .slice(0, 20)
-    .map(([sessionId, s]) => ({
-      sessionId,
-      firstPage: s.pages[0] ?? '/',
-      pageCount: s.pages.length,
-      firstSeen: s.firstSeen,
-      lastSeen: s.lastSeen,
-      userAgent: s.userAgent,
-      ip: s.ip,
-    }));
+    .map(([sessionId, s]) => {
+      const firstPage = s.pages[0] ?? '/';
+      const sessionPathCounts = new Map<string, number>();
+      for (const page of s.pages) {
+        sessionPathCounts.set(page, (sessionPathCounts.get(page) ?? 0) + 1);
+      }
+
+      return {
+        sessionId,
+        firstPage,
+        firstMenu: getPageMenuInfo(firstPage).menu,
+        pageCount: s.pages.length,
+        menus: toMenuCounts(sessionPathCounts.entries(), TOP_MENU_COUNT),
+        firstSeen: s.firstSeen,
+        lastSeen: s.lastSeen,
+        userAgent: s.userAgent,
+        ip: s.ip,
+      };
+    });
 
   // IP별 방문자 집계
   const ipMap = new Map<string, {
@@ -206,7 +261,11 @@ export async function GET() {
       topPaths: Array.from(v.pathCounts.entries())
         .sort(([, a], [, b]) => b - a)
         .slice(0, 5)
-        .map(([path, count]) => ({ path, count })),
+        .map(([path, count]) => {
+          const { menu, detail } = getPageMenuInfo(path);
+          return { path, count, menu, detail };
+        }),
+      topMenus: toMenuCounts(v.pathCounts.entries(), TOP_MENU_COUNT),
       userAgent: v.userAgent,
     }));
 
@@ -226,6 +285,7 @@ export async function GET() {
     },
     dailyTrend,
     topPages,
+    topMenus,
     recentSessions,
     visitorsByIp,
   };
