@@ -4,6 +4,13 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { isAdmin } from '@/lib/admin';
 import { unauthorizedError, apiError, serverError } from '@/lib/api/errors';
 import { logAudit } from '@/lib/audit';
+import { getAuditMenuName } from '@/lib/constants/audit-menus';
+
+/** 사용자당 "최근 사용 메뉴" 산출에 사용할 감사 로그 스캔 건수 */
+const RECENT_ACTIVITY_SCAN = 200;
+
+/** 사용자 행에 노출할 메뉴 개수 */
+const TOP_MENU_COUNT = 3;
 
 export interface AdminUserRow {
   id: string;
@@ -16,6 +23,12 @@ export interface AdminUserRow {
   deployCount: number;
   createdAt: string;
   lastSignInAt: string | null;
+  /** 전체 감사 로그 건수 */
+  activityCount: number;
+  /** 마지막 활동 시각 */
+  lastActiveAt: string | null;
+  /** 최근 활동에서 많이 쓴 메뉴 (메뉴명 기준) */
+  topMenus: Array<{ menu: string; count: number }>;
 }
 
 export interface AdminUserStats {
@@ -243,6 +256,9 @@ export async function GET(request: NextRequest) {
       deployCount: deployCountMap.get(p.id) ?? 0,
       createdAt: p.created_at,
       lastSignInAt: meta?.lastSignInAt ?? null,
+      activityCount: 0,
+      lastActiveAt: null,
+      topMenus: [],
     };
   });
 
@@ -266,6 +282,40 @@ export async function GET(request: NextRequest) {
   const total = allUserRows.length;
   const offset = (page - 1) * limit;
   const paginatedUsers = allUserRows.slice(offset, offset + limit);
+
+  // 현재 페이지 사용자만 감사 로그를 읽어 "사용한 메뉴"를 집계한다.
+  // 전체 사용자 로그를 한 번에 읽으면 목록 응답이 감사 테이블 크기에 끌려가므로
+  // 페이지당 20건 × (user_id, created_at DESC) 인덱스 조회로 제한한다.
+  await Promise.all(
+    paginatedUsers.map(async (row) => {
+      const { data: logs, count: totalCount, error: auditError } = await adminSupabase
+        .from('audit_logs')
+        .select('action, created_at', { count: 'exact' })
+        .eq('user_id', row.id)
+        .order('created_at', { ascending: false })
+        .limit(RECENT_ACTIVITY_SCAN);
+
+      if (auditError) {
+        console.error('Audit logs fetch error:', auditError.message);
+        return;
+      }
+
+      const recentLogs = logs ?? [];
+      row.activityCount = totalCount ?? recentLogs.length;
+      row.lastActiveAt = recentLogs[0]?.created_at ?? null;
+
+      const menuCounts = new Map<string, number>();
+      for (const log of recentLogs) {
+        const menu = getAuditMenuName(log.action);
+        menuCounts.set(menu, (menuCounts.get(menu) ?? 0) + 1);
+      }
+
+      row.topMenus = Array.from(menuCounts.entries())
+        .map(([menu, menuCount]) => ({ menu, count: menuCount }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, TOP_MENU_COUNT);
+    })
+  );
 
   await logAudit(user.id, {
     action: 'admin.users_stats_view',

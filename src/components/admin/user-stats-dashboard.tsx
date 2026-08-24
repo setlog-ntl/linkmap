@@ -4,7 +4,7 @@ import { useState, useDeferredValue } from 'react';
 import {
   Users, UserPlus, TrendingUp, Calendar, RefreshCw, MonitorSmartphone,
   Globe, Network, ChevronDown, MessageSquarePlus, Search, ChevronLeft,
-  ChevronRight, FolderOpen, Rocket,
+  ChevronRight, FolderOpen, Rocket, Mail, Fingerprint, Activity,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +24,7 @@ import { useAdminVisitorStats } from '@/lib/queries/admin-visitors';
 import { useFeedbackList } from '@/lib/queries/feedback';
 import type { VisitorByIp } from '@/app/api/admin/visitors/route';
 import type { AdminUserRow } from '@/app/api/admin/users/route';
+import { getProviderLabel } from '@/lib/constants/auth-providers';
 import UserDetailSheet from './user-detail-sheet';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -238,7 +239,12 @@ function UsersTab() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <CardTitle className="text-base">전체 사용자 ({total}명)</CardTitle>
+            <div>
+              <CardTitle className="text-base">전체 사용자 ({total}명)</CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                사용 메뉴는 사용자별 최근 활동 200건 기준입니다. 행을 누르면 메뉴별 상세를 볼 수 있습니다.
+              </p>
+            </div>
             <div className="flex items-center gap-2">
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -337,58 +343,94 @@ function UserRow({ user, onClick }: { user: AdminUserRow; onClick: (id: string) 
     <button
       type="button"
       onClick={() => onClick(user.id)}
-      className="w-full flex items-center gap-3 py-2.5 px-3 rounded-md hover:bg-muted/50 transition-colors text-left"
+      className="w-full flex items-start gap-3 py-3 px-3 rounded-md hover:bg-muted/50 transition-colors text-left"
     >
-      <Avatar className="h-8 w-8 shrink-0">
+      <Avatar className="h-9 w-9 shrink-0 mt-0.5">
         {user.avatarUrl ? (
           <img src={user.avatarUrl} alt="" className="h-full w-full rounded-full object-cover" />
         ) : (
           <AvatarFallback className="text-xs">{initials}</AvatarFallback>
         )}
       </Avatar>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
+
+      {/* 아이디 정보 — 이름 / 이메일(로그인 계정) / 사용자 ID */}
+      <div className="flex-1 min-w-0 space-y-1">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <p className="text-sm font-medium truncate">{user.name ?? user.email}</p>
-          {user.provider && (
-            <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 shrink-0">
-              {user.provider}
-            </Badge>
+          <Badge
+            variant={badgeVariant}
+            className={
+              user.plan === 'pro'
+                ? 'bg-blue-500 hover:bg-blue-600 text-white text-[10px] px-1.5 py-0 h-4'
+                : user.plan === 'team'
+                  ? 'border-purple-500 text-purple-600 text-[10px] px-1.5 py-0 h-4'
+                  : 'text-[10px] px-1.5 py-0 h-4'
+            }
+          >
+            {user.plan}
+          </Badge>
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 shrink-0">
+            {getProviderLabel(user.provider)}
+          </Badge>
+        </div>
+        <p className="text-xs text-muted-foreground truncate flex items-center gap-1">
+          <Mail className="h-3 w-3 shrink-0" />
+          {user.email}
+        </p>
+        <p className="text-[10px] text-muted-foreground font-mono truncate flex items-center gap-1">
+          <Fingerprint className="h-3 w-3 shrink-0" />
+          {user.id}
+        </p>
+
+        {/* 사용한 메뉴 — action 코드 대신 실제 메뉴명으로 표시 */}
+        <div className="flex items-center gap-1 flex-wrap pt-0.5">
+          <span className="text-[10px] text-muted-foreground shrink-0">사용 메뉴</span>
+          {user.topMenus.length === 0 ? (
+            <span className="text-[10px] text-muted-foreground">아직 활동 없음</span>
+          ) : (
+            user.topMenus.map((m) => (
+              <Badge
+                key={m.menu}
+                variant="secondary"
+                className="text-[10px] px-1.5 py-0 h-4 font-normal"
+              >
+                {m.menu} {m.count}
+              </Badge>
+            ))
           )}
         </div>
-        <p className="text-xs text-muted-foreground truncate">
-          {user.email}
-          {user.lastSignInAt && (
-            <span className="ml-2 text-green-600 dark:text-green-400">
-              로그인: {formatDateTime(user.lastSignInAt)}
-            </span>
-          )}
+      </div>
+
+      {/* 활동 지표 */}
+      <div className="shrink-0 text-right space-y-1">
+        <div className="flex items-center justify-end gap-2">
+          <span className="text-xs text-muted-foreground flex items-center gap-0.5" title="프로젝트">
+            <FolderOpen className="h-3 w-3" />
+            {user.projectCount}
+          </span>
+          <span className="text-xs text-muted-foreground flex items-center gap-0.5" title="배포">
+            <Rocket className="h-3 w-3" />
+            {user.deployCount}
+          </span>
+          <span className="text-xs text-muted-foreground flex items-center gap-0.5" title="총 활동">
+            <Activity className="h-3 w-3" />
+            {user.activityCount}
+          </span>
+        </div>
+        <p className="text-[10px] text-muted-foreground hidden md:block">
+          가입 {formatFullDate(user.createdAt)}
         </p>
+        {user.lastSignInAt && (
+          <p className="text-[10px] text-green-600 dark:text-green-400 hidden md:block">
+            로그인 {formatDateTime(user.lastSignInAt)}
+          </p>
+        )}
+        {user.lastActiveAt && (
+          <p className="text-[10px] text-muted-foreground hidden md:block">
+            최근 활동 {formatDateTime(user.lastActiveAt)}
+          </p>
+        )}
       </div>
-      <Badge
-        variant={badgeVariant}
-        className={
-          user.plan === 'pro'
-            ? 'bg-blue-500 hover:bg-blue-600 text-white'
-            : user.plan === 'team'
-              ? 'border-purple-500 text-purple-600'
-              : ''
-        }
-      >
-        {user.plan}
-      </Badge>
-      <div className="flex items-center gap-2 shrink-0">
-        <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-          <FolderOpen className="h-3 w-3" />
-          {user.projectCount}
-        </span>
-        <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-          <Rocket className="h-3 w-3" />
-          {user.deployCount}
-        </span>
-      </div>
-      <span className="text-xs text-muted-foreground shrink-0 hidden md:inline">
-        {formatFullDate(user.createdAt)}
-      </span>
     </button>
   );
 }

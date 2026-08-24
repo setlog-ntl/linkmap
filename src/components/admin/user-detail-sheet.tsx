@@ -1,7 +1,9 @@
 'use client';
 
+import { useMemo } from 'react';
+import { toast } from 'sonner';
 import {
-  ExternalLink, FolderOpen, Globe, Rocket, Activity, Clock,
+  ExternalLink, FolderOpen, Globe, Rocket, Activity, Clock, Copy, Mail, Fingerprint,
 } from 'lucide-react';
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
@@ -11,7 +13,13 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+} from '@/components/ui/accordion';
 import { useAdminUserDetail } from '@/lib/queries/admin-users';
+import { getAuditActionMeta } from '@/lib/constants/audit-menus';
+import { getProviderLabel } from '@/lib/constants/auth-providers';
+import type { AdminUserDetailActivitySummary } from '@/app/api/admin/users/[userId]/route';
 
 const PLAN_BADGE_VARIANT: Record<string, 'secondary' | 'default' | 'outline'> = {
   free: 'secondary',
@@ -26,47 +34,48 @@ const DEPLOY_STATUS_COLOR: Record<string, string> = {
   failed: 'text-red-600 bg-red-100 dark:bg-red-900/30',
 };
 
-// action을 한국어 라벨로 변환
-const ACTION_LABELS: Record<string, string> = {
-  'project.create': '프로젝트 생성',
-  'project.update': '프로젝트 수정',
-  'project.delete': '프로젝트 삭제',
-  'env_var.create': '환경변수 추가',
-  'env_var.update': '환경변수 수정',
-  'env_var.delete': '환경변수 삭제',
-  'env_var.decrypt': '환경변수 복호화',
-  'env_var.bulk_create': '환경변수 일괄 추가',
-  'connection.create': '연결 생성',
-  'connection.update': '연결 수정',
-  'connection.delete': '연결 삭제',
-  'oneclick.deploy_pages': '원클릭 배포',
-  'oneclick.deploy_success': '배포 성공',
-  'oneclick.deploy_error': '배포 오류',
-  'oneclick.redeploy': '재배포',
-  'oneclick.file_edit': '파일 편집',
-  'oneclick.file_create': '파일 생성',
-  'oneclick.batch_update': '일괄 업데이트',
-  'oneclick.deploy_rename': '배포 이름 변경',
-  'oneclick.image_upload': '이미지 업로드',
-  'ai.chat': 'AI 채팅',
-  'ai.stack_recommend': 'AI 스택 추천',
-  'ai.env_doctor': 'AI 환경변수 진단',
-  'ai.compare_services': 'AI 서비스 비교',
-  'ai.cost_report': 'AI 비용 리포트',
-  'github.repo_link': 'GitHub 저장소 연결',
-  'github.secrets_push': 'GitHub 시크릿 푸시',
-  'profile.update': '프로필 수정',
-  'feedback.create': '피드백 작성',
-  'credential.create': '비밀키 추가',
-  'credential.update': '비밀키 수정',
-  'credential.delete': '비밀키 삭제',
-  'credential.decrypt': '비밀키 복호화',
-  'service_cost.update': '비용 업데이트',
-  'project.budget_update': '예산 업데이트',
-  'project.toggle_favorite': '즐겨찾기 토글',
-  'project.set_icon': '아이콘 설정',
-  'project.share_toggle': '공유 토글',
-};
+interface MenuUsage {
+  menu: string;
+  count: number;
+  lastUsedAt: string;
+  actions: Array<{ action: string; label: string; count: number; lastUsedAt: string }>;
+}
+
+/** action 단위 사용 이력을 메뉴명 기준으로 묶는다 */
+function groupByMenu(summary: AdminUserDetailActivitySummary[]): MenuUsage[] {
+  const grouped = new Map<string, MenuUsage>();
+
+  for (const item of summary) {
+    const { menu, label } = getAuditActionMeta(item.action);
+    const entry = grouped.get(menu);
+    const actionEntry = {
+      action: item.action,
+      label,
+      count: item.count,
+      lastUsedAt: item.lastUsedAt,
+    };
+
+    if (entry) {
+      entry.count += item.count;
+      entry.actions.push(actionEntry);
+      if (item.lastUsedAt > entry.lastUsedAt) entry.lastUsedAt = item.lastUsedAt;
+    } else {
+      grouped.set(menu, {
+        menu,
+        count: item.count,
+        lastUsedAt: item.lastUsedAt,
+        actions: [actionEntry],
+      });
+    }
+  }
+
+  return Array.from(grouped.values())
+    .map((entry) => ({
+      ...entry,
+      actions: entry.actions.sort((a, b) => b.count - a.count),
+    }))
+    .sort((a, b) => b.count - a.count);
+}
 
 function formatDateTime(dateStr: string) {
   const d = new Date(dateStr);
@@ -80,10 +89,6 @@ function formatFullDate(dateStr: string) {
   return d.toLocaleDateString('ko-KR', {
     year: 'numeric', month: 'short', day: 'numeric',
   });
-}
-
-function getActionLabel(action: string): string {
-  return ACTION_LABELS[action] ?? action;
 }
 
 function DetailSkeleton() {
@@ -108,8 +113,18 @@ export default function UserDetailSheet({ userId, open, onOpenChange }: UserDeta
   const user = data?.user;
   const projects = data?.projects ?? [];
   const deploys = data?.deploys ?? [];
-  const activitySummary = data?.activitySummary ?? [];
+  const activitySummary = useMemo(() => data?.activitySummary ?? [], [data]);
   const recentActivities = data?.recentActivities ?? [];
+  const menuUsage = useMemo(() => groupByMenu(activitySummary), [activitySummary]);
+
+  const copyUserId = async (id: string) => {
+    try {
+      await navigator.clipboard.writeText(id);
+      toast.success('사용자 ID를 복사했습니다');
+    } catch {
+      toast.error('복사에 실패했습니다');
+    }
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -150,11 +165,27 @@ export default function UserDetailSheet({ userId, open, onOpenChange }: UserDeta
                   >
                     {user.plan}
                   </Badge>
-                  {user.provider && (
-                    <Badge variant="outline" className="text-xs">{user.provider}</Badge>
-                  )}
+                  <Badge variant="outline" className="text-xs">
+                    {getProviderLabel(user.provider)}
+                  </Badge>
                 </div>
-                <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                <p className="text-sm text-muted-foreground truncate flex items-center gap-1">
+                  <Mail className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{user.email}</span>
+                </p>
+                <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                  <Fingerprint className="h-3.5 w-3.5 shrink-0" />
+                  <code className="font-mono text-[10px] truncate">{user.id}</code>
+                  <button
+                    type="button"
+                    onClick={() => void copyUserId(user.id)}
+                    className="shrink-0 hover:text-foreground transition-colors"
+                    title="사용자 ID 복사"
+                    aria-label="사용자 ID 복사"
+                  >
+                    <Copy className="h-3 w-3" />
+                  </button>
+                </div>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   가입: {formatFullDate(user.createdAt)}
                   {user.lastSignInAt && (
@@ -344,37 +375,59 @@ export default function UserDetailSheet({ userId, open, onOpenChange }: UserDeta
                 {/* 활동 요약 테이블 */}
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">기능별 사용 횟수</CardTitle>
+                    <CardTitle className="text-sm">메뉴별 사용 현황</CardTitle>
+                    <p className="text-xs text-muted-foreground">
+                      메뉴를 펼치면 그 안에서 수행한 동작을 볼 수 있습니다.
+                    </p>
                   </CardHeader>
                   <CardContent>
-                    {activitySummary.length === 0 ? (
+                    {menuUsage.length === 0 ? (
                       <p className="text-sm text-muted-foreground text-center py-4">
                         활동 기록이 없습니다.
                       </p>
                     ) : (
-                      <div className="space-y-1.5 max-h-64 overflow-y-auto">
-                        {activitySummary.map((item) => (
-                          <div
-                            key={item.action}
-                            className="flex items-center justify-between gap-2 py-1 border-b border-border/50 last:border-0"
-                          >
-                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                              <span className="text-sm truncate">{getActionLabel(item.action)}</span>
-                              <span className="text-[10px] text-muted-foreground font-mono shrink-0">
-                                {item.action}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <Badge variant="secondary" className="font-mono">
-                                {item.count}회
-                              </Badge>
-                              <span className="text-[10px] text-muted-foreground">
-                                {formatDateTime(item.lastUsedAt)}
-                              </span>
-                            </div>
-                          </div>
+                      <Accordion type="single" collapsible className="w-full">
+                        {menuUsage.map((entry) => (
+                          <AccordionItem key={entry.menu} value={entry.menu}>
+                            <AccordionTrigger className="hover:no-underline py-2">
+                              <div className="flex items-center gap-2 w-full pr-2">
+                                <span className="text-sm font-medium text-left truncate flex-1">
+                                  {entry.menu}
+                                </span>
+                                <Badge variant="secondary" className="font-mono shrink-0">
+                                  {entry.count}회
+                                </Badge>
+                                <span className="text-[10px] text-muted-foreground shrink-0 hidden sm:inline">
+                                  {formatDateTime(entry.lastUsedAt)}
+                                </span>
+                              </div>
+                            </AccordionTrigger>
+                            <AccordionContent>
+                              <div className="pl-3 space-y-1">
+                                {entry.actions.map((act) => (
+                                  <div
+                                    key={act.action}
+                                    className="flex items-center justify-between gap-2 py-1 border-b border-border/50 last:border-0"
+                                    title={act.action}
+                                  >
+                                    <span className="text-xs text-muted-foreground truncate flex-1">
+                                      {act.label}
+                                    </span>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                                        {act.count}회
+                                      </Badge>
+                                      <span className="text-[10px] text-muted-foreground">
+                                        {formatDateTime(act.lastUsedAt)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
                         ))}
-                      </div>
+                      </Accordion>
                     )}
                   </CardContent>
                 </Card>
@@ -398,9 +451,12 @@ export default function UserDetailSheet({ userId, open, onOpenChange }: UserDeta
                           >
                             <Clock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
                             <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-sm font-medium">
-                                  {getActionLabel(act.action)}
+                              <div className="flex items-center gap-1.5" title={act.action}>
+                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0">
+                                  {getAuditActionMeta(act.action).menu}
+                                </Badge>
+                                <span className="text-sm font-medium truncate">
+                                  {getAuditActionMeta(act.action).label}
                                 </span>
                                 {act.resourceId && (
                                   <span className="text-[10px] font-mono text-muted-foreground truncate max-w-32">
