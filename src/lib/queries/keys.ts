@@ -123,6 +123,8 @@ export const queryKeys = {
     userDetail: (userId: string) => ['admin', 'user-detail', userId] as const,
     visitors: ['admin', 'visitors'] as const,
     usageStats: ['admin', 'usage-stats'] as const,
+    resources: ['admin', 'resources'] as const,
+    resource: (id: string) => ['admin', 'resources', id] as const,
   },
   feedback: {
     list: (params?: Record<string, unknown>) => ['feedback', 'list', params ?? {}] as const,

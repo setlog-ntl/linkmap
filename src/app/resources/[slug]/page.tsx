@@ -3,18 +3,19 @@ import { notFound } from 'next/navigation';
 import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { generateBreadcrumbJsonLd } from '@/lib/seo/json-ld';
 import { ResourceDetail } from '@/components/resources/resource-detail';
-import {
-  getFreeResource,
-  getFreeResourceSlugs,
-  getResourceCanonicalUrl,
-} from '@/data/resources/free-resources';
+import { getResourceCanonicalUrl } from '@/data/resources/free-resources';
+import { getPublishedResource, getPublishedResources } from '@/lib/resources/queries';
 
-// 완전 정적: generateStaticParams가 모든 자료를 프리렌더, 그 외 slug는 notFound()
-// (blog/[slug]·glossary/[slug]와 동일한 Workers-safe 패턴)
-export const revalidate = false;
+// ISR: 빌드 시점에 발행된 slug를 프리렌더하고, 이후 관리자가 추가한 slug는 첫 요청 시
+// 렌더한 뒤 60초 캐시한다(dynamicParams 기본 true). 미발행·없는 slug는 notFound().
+export const revalidate = 60;
 
-export function generateStaticParams() {
-  return getFreeResourceSlugs();
+// generateStaticParams가 없으면 Next가 이 라우트를 요청마다 렌더하는 완전 동적(ƒ)으로
+// 취급해 ISR 캐시를 타지 않는다 — 빈 배열이라도 반드시 둔다. 빌드 중 DB 조회 실패는
+// getPublishedResources()가 빈 목록으로 폴백하므로 빌드가 깨지지 않는다.
+export async function generateStaticParams() {
+  const resources = await getPublishedResources();
+  return resources.map(({ slug }) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -23,7 +24,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const resource = getFreeResource(slug);
+  const resource = await getPublishedResource(slug);
   if (!resource) return {};
 
   const canonical = getResourceCanonicalUrl(resource.slug);
@@ -50,7 +51,7 @@ export default async function ResourceDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const resource = getFreeResource(slug);
+  const resource = await getPublishedResource(slug);
   if (!resource) notFound();
 
   const canonical = getResourceCanonicalUrl(resource.slug);

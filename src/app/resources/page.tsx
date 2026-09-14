@@ -5,7 +5,7 @@ import {
   generateBreadcrumbJsonLd,
   generateItemListJsonLd,
 } from '@/lib/seo/json-ld';
-import { getFreeResources } from '@/data/resources/free-resources';
+import { getPublishedResources } from '@/lib/resources/queries';
 
 export const metadata: Metadata = {
   title: '무료배포 자료 — 복사해서 바로 쓰는 지시문·도구 | Linkmap',
@@ -31,10 +31,13 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = false; // 완전 정적: 코드 하드코딩 데이터 → 배포 시에만 변경
+// ISR: 자료는 DB(free_resources)에서 읽는다 — 관리자가 /admin/resources 에서 추가·발행한
+// 내용이 1분 내 공개 페이지에 반영된다. revalidatePath는 OpenNext tagCache 미설정으로
+// 동작하지 않으므로 시간 기반 재검증만 쓴다.
+export const revalidate = 60;
 
-export default function ResourcesPage() {
-  const resources = getFreeResources();
+export default async function ResourcesPage() {
+  const resources = await getPublishedResources();
 
   const breadcrumb = generateBreadcrumbJsonLd([
     { name: '홈', href: '/' },

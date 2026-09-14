@@ -895,6 +895,43 @@ CREATE TYPE team_role AS ENUM ('admin', 'editor', 'viewer');
 
 ---
 
+## 11-C. 무료배포 자료 (M110)
+
+### free_resources — 무료배포 자료
+> `/resources` 허브·상세의 단일 진실 원천. 코드 하드코딩(`src/data/resources/free-resources.ts` 배열)에서 이관됨.
+> 관리자가 `/admin/resources`에서 CRUD, 공개 페이지는 ISR(60s)로 anon 읽기. 발행 스위치(`is_published`)가 노출 여부를 결정한다.
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | UUID | NO | gen_random_uuid() | PK |
+| slug | TEXT | NO | | UNIQUE, CHECK `^[a-z0-9]+(-[a-z0-9]+)*$` ≤80 — URL 경로 `/resources/<slug>` |
+| sort_order | INTEGER | NO | 1 | CHECK 1~9999. "자료 N번" 표기 겸 허브 정렬 |
+| title | TEXT | NO | | CHECK 1~120자 |
+| description | TEXT | NO | | CHECK 1~500자 — 카드·메타 공용 |
+| category | TEXT | NO | | CHECK IN ('prompt','tool','checklist') → `ResourceCategory` |
+| published_at | DATE | NO | CURRENT_DATE | |
+| tags | TEXT[] | NO | '{}' | |
+| hero | JSONB | NO | `{"headline":"","highlight":"","sub":""}` | CHECK object → `ResourceHero` |
+| youtube_video_id | TEXT | YES | NULL | CHECK 11자 `[A-Za-z0-9_-]`. NULL이면 허브 카드 "영상 준비 중" |
+| youtube_title | TEXT | NO | '' | 버튼 툴팁·썸네일 alt |
+| prompts | JSONB | NO | '[]' | CHECK array → `ResourcePromptBlock[]` (id/title/description/body/note?) |
+| links | JSONB | NO | '[]' | CHECK array → `ResourceLink[]` (label/description/href/external/primary?) |
+| download_href | TEXT | YES | NULL | 오프라인 배포본 경로 — `/downloads/` 아래 또는 URL만 (Zod 강제). `/resources/` 아래 정적 파일은 라우트를 가림 |
+| closing | TEXT | NO | '' | 상세 하단 마무리 문구 |
+| is_published | BOOLEAN | NO | false | false면 공개 페이지·sitemap·llms.txt 어디에도 미노출 (RLS) |
+| created_by | UUID | YES | | FK → auth.users ON DELETE SET NULL |
+| created_at | TIMESTAMPTZ | NO | now() | |
+| updated_at | TIMESTAMPTZ | NO | now() | 트리거 `trg_free_resources_updated_at` → `update_updated_at_column()` (M065 재사용) |
+
+**Index**: `idx_free_resources_published_order` (is_published, sort_order)
+**RLS**: `public_read_published` — anon/authenticated SELECT (is_published = true) / `admin_full_access` — profiles.is_admin ALL (USING + WITH CHECK)
+**TS Type**: `FreeResourceRow` (`src/types/resource.ts`) → 화면용 `FreeResource`로 변환은 `src/lib/mappers/free-resource.ts`
+**서버 읽기**: `src/lib/resources/queries.ts` (쿠키 없는 anon 클라이언트 `src/lib/supabase/public.ts`, React `cache()`)
+**API**: `/api/admin/resources`, `/api/admin/resources/[id]` — 쓰기는 user-scoped 클라이언트(RLS가 실효 방어선), 감사 `admin.resource_{create,update,delete}`
+**Seed**: 자료 1번 `excel-merger-prompt` — `ON CONFLICT (slug) DO NOTHING` (재실행해도 관리자 편집분을 덮지 않음)
+
+---
+
 ## 12. RLS Policy Summary
 
 | 패턴 | 적용 테이블 | 설명 |
@@ -905,6 +942,7 @@ CREATE TYPE team_role AS ENUM ('admin', 'editor', 'viewer');
 | **admin 전용** | ai_providers, ai_guardrails, ai_usage_logs | profiles.is_admin = true |
 | **인증된 읽기** | services, service_domains, plan_quotas, ai_personas(active) | authenticated role |
 | **공개 읽기** | homepage_templates (active) | anon + authenticated |
+| **공개 읽기(발행분) + admin CRUD** | free_resources (is_published) | anon + authenticated SELECT / profiles.is_admin ALL (M110) |
 | **service_role** | audit_logs INSERT, health_checks INSERT, subscriptions CRUD, ai_bot_logs INSERT/SELECT | service_role only |
 
 ### RLS 주의사항
@@ -943,8 +981,8 @@ CREATE TYPE team_role AS ENUM ('admin', 'editor', 'viewer');
 supabase/migrations/NNN_description.sql
 ```
 - NNN: 3자리 숫자 (001~100)
-- 다음 마이그레이션: **110**
-- 최근: 099 `fix_quota_enum_cast` — 052·098 함수의 `plan_quotas.plan`(enum) vs TEXT 비교 오류(`42883`)에 `::subscription_plan` 캐스트 적용 (프로덕션 배포 500 핫픽스, 2026-06-12 E2E에서 발견) / 100 `admin_quota_bypass_rpc` — `create_homepage_deploy_atomic`에 `profiles.is_admin` 무제한 바이패스 추가 (quota.ts 정책과 일치화) / 101~103 quota RPC·secure_notes / **104** `profiles_public_read_hardening` — M075 `USING(true)` 정책 제거 (레드팀 F-1, 라이브 미적용이었음) / **105** `showcase_counter_delta_clamp` — `increment_showcase_counter` delta를 ±1로 클램프 (레드팀 F-8) / **106** `visitor_logs_ip_hash` — 평문 IP 파기 + 해시 저장 전환 (레드팀 F-7) / **107** `rpc_exposure_hardening` — 미사용 SECURITY DEFINER RPC 6종 anon/authenticated EXECUTE 회수 + `auto_pick_monthly_showcase` 호출자 기간 입력 제거 / **108** `function_public_execute_revoke` — 함수 EXECUTE의 **PUBLIC 기본 권한** 회수 (102·107의 REVOKE가 실효 없던 근본 원인) / **109** `user_source_deploys` — `homepage_deploys.template_id` NULL 허용 + `source_type`(template/upload/import) + 정합성 CHECK, `create_homepage_deploy_atomic`을 7-인자로 재생성(구 6-인자 DROP — DEFAULT 인자 오버로드 모호성 방지, **본문은 M100 최신본 기반**: admin 바이패스·enum 캐스트 유지)
+- 다음 마이그레이션: **111**
+- 최근: 099 `fix_quota_enum_cast` — 052·098 함수의 `plan_quotas.plan`(enum) vs TEXT 비교 오류(`42883`)에 `::subscription_plan` 캐스트 적용 (프로덕션 배포 500 핫픽스, 2026-06-12 E2E에서 발견) / 100 `admin_quota_bypass_rpc` — `create_homepage_deploy_atomic`에 `profiles.is_admin` 무제한 바이패스 추가 (quota.ts 정책과 일치화) / 101~103 quota RPC·secure_notes / **104** `profiles_public_read_hardening` — M075 `USING(true)` 정책 제거 (레드팀 F-1, 라이브 미적용이었음) / **105** `showcase_counter_delta_clamp` — `increment_showcase_counter` delta를 ±1로 클램프 (레드팀 F-8) / **106** `visitor_logs_ip_hash` — 평문 IP 파기 + 해시 저장 전환 (레드팀 F-7) / **107** `rpc_exposure_hardening` — 미사용 SECURITY DEFINER RPC 6종 anon/authenticated EXECUTE 회수 + `auto_pick_monthly_showcase` 호출자 기간 입력 제거 / **108** `function_public_execute_revoke` — 함수 EXECUTE의 **PUBLIC 기본 권한** 회수 (102·107의 REVOKE가 실효 없던 근본 원인) / **109** `user_source_deploys` — `homepage_deploys.template_id` NULL 허용 + `source_type`(template/upload/import) + 정합성 CHECK, `create_homepage_deploy_atomic`을 7-인자로 재생성(구 6-인자 DROP — DEFAULT 인자 오버로드 모호성 방지, **본문은 M100 최신본 기반**: admin 바이패스·enum 캐스트 유지) / **110** `free_resources` — 무료배포 자료 테이블 신설(코드 하드코딩 → DB 이관), 발행분 anon SELECT + admin CRUD RLS, updated_at 트리거(M065 함수 재사용), 자료 1번 시드 (§11-C)
 
 > 🔴 **함수 권한 필수 규칙**: PostgreSQL은 함수 생성 시 EXECUTE를 **PUBLIC에 기본 부여**한다(ACL `=X/owner`). `REVOKE ... FROM anon, authenticated`는 두 롤의 *직접* GRANT만 지우므로 **PUBLIC 경유 권한이 남아 회수가 무의미**하다. 반드시 `REVOKE ... FROM PUBLIC` 후 필요한 롤에만 GRANT할 것. 검증은 `has_function_privilege('anon', oid, 'EXECUTE')`로 한다(`information_schema.routine_privileges` 조회는 PUBLIC을 놓친다). M108이 `ALTER DEFAULT PRIVILEGES ... REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC`을 걸어 두었으므로, **신규 RPC는 GRANT를 명시하지 않으면 anon/authenticated가 호출할 수 없다.**
 >
@@ -1017,6 +1055,7 @@ supabase/migrations/NNN_description.sql
 | ai_usage_logs | `AiUsageLog` | ai.ts | ✅ |
 | ai_feature_personas | `AiFeaturePersona` | ai.ts | ✅ |
 | ai_feature_qna | `AiFeatureQna` | ai.ts | ✅ |
+| free_resources | `FreeResourceRow` | resource.ts | ✅ |
 
 ### 타입 동기화 체크리스트
 

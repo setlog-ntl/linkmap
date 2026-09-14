@@ -11,6 +11,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PromptCopyBlock } from '@/components/resources/prompt-copy-block';
+import { ResourcesAdminBar } from '@/components/resources/resources-admin-bar';
 import {
   RESOURCE_CATEGORIES,
   type FreeResource,
@@ -40,6 +41,9 @@ export function ResourceDetail({ resource }: { resource: FreeResource }) {
         <span>/</span>
         <span className="font-medium text-foreground">자료 {resource.order}번</span>
       </nav>
+
+      {/* 관리자에게만 보이는 편집 진입점 (클라이언트에서 판정 — ISR 캐시에 섞이지 않음) */}
+      <ResourcesAdminBar editHref={`/admin/resources/${resource.id}`} />
 
       {/* Header */}
       <header className="mb-8">
@@ -102,21 +106,23 @@ export function ResourceDetail({ resource }: { resource: FreeResource }) {
         ))}
       </div>
 
-      {/* 오프라인 배포본 */}
-      <section className="mt-8 flex flex-col gap-4 rounded-xl border border-border bg-card p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <h2 className="font-bold tracking-tight">HTML 파일로 내려받기</h2>
-          <p className="mt-1 text-sm text-muted-foreground break-keep">
-            인터넷이 막힌 회사 PC에서도 열리는 단일 HTML 파일입니다. 동료에게 파일 하나로 전달하세요.
-          </p>
-        </div>
-        <Button asChild variant="outline" className="shrink-0">
-          <a href={resource.downloadHref} download>
-            <Download className="mr-2 h-4 w-4" />
-            내려받기
-          </a>
-        </Button>
-      </section>
+      {/* 오프라인 배포본 — 파일이 등록된 자료만 */}
+      {resource.downloadHref && (
+        <section className="mt-8 flex flex-col gap-4 rounded-xl border border-border bg-card p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h2 className="font-bold tracking-tight">HTML 파일로 내려받기</h2>
+            <p className="mt-1 text-sm text-muted-foreground break-keep">
+              인터넷이 막힌 회사 PC에서도 열리는 단일 HTML 파일입니다. 동료에게 파일 하나로 전달하세요.
+            </p>
+          </div>
+          <Button asChild variant="outline" className="shrink-0">
+            <a href={resource.downloadHref} download>
+              <Download className="mr-2 h-4 w-4" />
+              내려받기
+            </a>
+          </Button>
+        </section>
+      )}
 
       {/* 마무리 */}
       <section className="mt-8 rounded-xl border border-border bg-muted/40 p-6 text-center">

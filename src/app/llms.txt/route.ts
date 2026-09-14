@@ -1,12 +1,13 @@
 import { GUIDE_DATA } from '@/data/ui/guide-data';
 import { getPublishedPostsMeta } from '@/data/blog/posts';
-import { getFreeResources } from '@/data/resources/free-resources';
+import { getPublishedResources } from '@/lib/resources/queries';
 
 const SITE_URL = 'https://www.linkmap.biz';
 
-export const revalidate = false; // 완전 정적: 배포 시에만 변경 (Workers CPU 제한 대응)
+// 무료배포 자료(free_resources)는 DB에서 읽으므로 1시간 ISR — 요청마다 렌더하지 않는다 (Workers CPU 제한 대응)
+export const revalidate = 3600;
 
-export function GET() {
+export async function GET() {
   const guideLines = GUIDE_DATA.map(
     (g) => `- ${g.title}: ${g.description} → ${SITE_URL}${g.href}`
   ).join('\n');
@@ -18,9 +19,16 @@ export function GET() {
       ).join('\n')
     : '- 곧 발행 예정';
 
-  const resourceLines = getFreeResources()
-    .map((r) => `- ${r.title}: ${r.description} → ${SITE_URL}/resources/${r.slug}`)
-    .join('\n');
+  // DB 조회 실패가 llms.txt 전체를 500으로 만들지 않도록 허브 링크로 대체한다
+  let resourceLines: string;
+  try {
+    resourceLines = (await getPublishedResources())
+      .map((r) => `- ${r.title}: ${r.description} → ${SITE_URL}/resources/${r.slug}`)
+      .join('\n');
+  } catch (error) {
+    console.error('[llms.txt] 무료배포 자료 조회 실패 — 허브 링크로 대체:', error);
+    resourceLines = `- 전체 목록: ${SITE_URL}/resources`;
+  }
 
   const body = `# Linkmap
 > 바이브 코딩 플랫폼 — 서비스 연결 시각화, API 키 암호화 관리, 환경변수 자동 설정, 원클릭 배포

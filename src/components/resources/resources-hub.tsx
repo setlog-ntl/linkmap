@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowRight, Clapperboard, Gift, Play, Youtube } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { ResourcesAdminBar } from '@/components/resources/resources-admin-bar';
 import {
   RESOURCE_CATEGORIES,
   getYoutubeThumbnailUrl,
@@ -107,6 +108,9 @@ function ResourceCard({ resource }: { resource: FreeResource }) {
 export function ResourcesHub({ resources }: { resources: FreeResource[] }) {
   return (
     <div className="py-8">
+      {/* 관리자에게만 보이는 추가·관리 진입점 (클라이언트에서 판정 — ISR 캐시에 섞이지 않음) */}
+      <ResourcesAdminBar />
+
       {/* Header */}
       <div className="mb-10 text-center">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-brand-green/10 px-3 py-1 text-sm font-medium text-brand-green">
