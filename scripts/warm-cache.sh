@@ -39,6 +39,7 @@ PAGES=(
   "/oneclick"
   "/resources"
   "/resources/excel-merger-prompt"
+  "/resources/dual-monitor-setup"
 
   # ── 데모 ──
   "/demo"
