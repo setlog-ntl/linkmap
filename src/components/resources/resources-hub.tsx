@@ -1,9 +1,10 @@
 import Link from 'next/link';
-import { ArrowRight, Clapperboard, Gift, Youtube } from 'lucide-react';
+import { ArrowRight, Clapperboard, Gift, Play, Youtube } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import {
   RESOURCE_CATEGORIES,
+  getYoutubeThumbnailUrl,
   getYoutubeWatchUrl,
   type FreeResource,
 } from '@/data/resources/free-resources';
@@ -11,6 +12,7 @@ import {
 function ResourceCard({ resource }: { resource: FreeResource }) {
   const category = RESOURCE_CATEGORIES[resource.category];
   const watchUrl = getYoutubeWatchUrl(resource.youtube);
+  const thumbnailUrl = getYoutubeThumbnailUrl(resource.youtube);
 
   // 카드 전체를 상세로 연결하되 유튜브 버튼은 위로 띄운다.
   // (카드를 통째로 <Link>로 감싸면 버튼이 a 중첩이 되어 유효하지 않은 마크업이 된다)
@@ -22,6 +24,32 @@ function ResourceCard({ resource }: { resource: FreeResource }) {
         aria-label={`${resource.title} 자료 보기`}
         className="absolute inset-0 rounded-xl"
       />
+
+      {/* 영상이 발행된 자료만 상단에 썸네일 — 클릭하면 유튜브(새 탭) */}
+      {watchUrl && thumbnailUrl && (
+        <a
+          href={watchUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={resource.youtube.title}
+          className="group/thumb relative z-10 block aspect-video overflow-hidden rounded-lg bg-muted"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={thumbnailUrl}
+            alt={resource.youtube.title}
+            width={480}
+            height={270}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover/thumb:scale-[1.03]"
+          />
+          <span className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors group-hover/thumb:bg-black/30">
+            <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-red-600 text-white shadow-md">
+              <Play className="ml-0.5 h-5 w-5 fill-current" />
+            </span>
+          </span>
+        </a>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         <Badge className="bg-brand-green/15 text-brand-green">

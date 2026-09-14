@@ -11,7 +11,7 @@
 ```
 src/data/resources/free-resources.ts   ← 단일 진실 원천(SSOT)
    │
-   ├─ /resources                       허브 카드 — 우측에 유튜브 버튼 / 영상 준비 중 칩
+   ├─ /resources                       허브 카드 — 상단 썸네일 + 우측 유튜브 버튼 / 영상 준비 중 칩
    ├─ /resources/[slug]                상세 — 지시문·CTA (영상 노출 안 함)
    ├─ sitemap.ts · llms.txt            검색·LLM 노출
    └─ public/downloads/<slug>.html     오프라인 배포본 (역링크만 보유)
@@ -28,7 +28,7 @@ src/data/resources/free-resources.ts   ← 단일 진실 원천(SSOT)
 
 | 방향 | 수단 | 갱신 지점 |
 |---|---|---|
-| Linkmap → 유튜브 | 허브 카드 우측 유튜브 버튼 | `free-resources.ts` 한 곳 |
+| Linkmap → 유튜브 | 허브 카드 상단 썸네일 · 우측 유튜브 버튼 | `free-resources.ts` 한 곳 |
 | 유튜브 → Linkmap | 영상 설명란·고정댓글의 정식 URL | 최초 1회, 이후 불변 |
 
 ---
@@ -63,7 +63,14 @@ youtube: {
 ```
 
 허브 카드 우측의 회색 "영상 준비 중" 칩이 빨간 유튜브 버튼(「영상 보기」,
-새 탭)으로 바뀐다. `title`은 버튼의 툴팁·스크린리더 라벨로 쓰인다.
+새 탭)으로 바뀌고, 카드 상단에 영상 썸네일이 붙는다(클릭 시 유튜브 새 탭).
+`title`은 버튼 툴팁·썸네일 alt·스크린리더 라벨로 쓰인다.
+
+썸네일은 `https://i.ytimg.com/vi/<videoId>/hqdefault.jpg`를 그대로 쓴다 —
+별도 이미지 파일을 저장하지 않으므로 유튜브에서 썸네일을 바꾸면 그대로 따라온다.
+`hqdefault`는 모든 영상에 항상 있고(`maxresdefault`는 없는 영상이 있다), 4:3 프레임의
+상하 검은 띠는 카드가 16:9로 잘라 감춘다. 이 도메인은 `next.config.ts` CSP
+`img-src`에 허용돼 있으니 지우지 말 것.
 
 정적 페이지(`revalidate = false`)이므로 **배포해야 반영된다.**
 
