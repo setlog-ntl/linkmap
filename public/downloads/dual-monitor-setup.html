@@ -3,16 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>듀얼모니터 간편설정 — 버튼 한 번으로 여는 설정 안내서 | Linkmap 무료배포 자료 2번</title>
-<meta name="description" content="모니터 두 대를 연결한 뒤 확장·배치·배율·작업 표시줄까지, 버튼을 누르면 Windows 설정 화면이 바로 열리는 따라하기 안내서. 자주 겪는 문제 해결과 단축키까지 한 페이지에 담았습니다.">
+<title>듀얼모니터 간편설정 — 화면 보고 따라하는 3단계 | Linkmap 무료배포 자료 2번</title>
+<meta name="description" content="모니터 두 대를 연결한 뒤 확장·배치·주 모니터·배율·재생 빈도까지, 실제 설정 화면 그림을 보며 버튼 한 번으로 따라 하는 3단계 안내서.">
 <!--
-  Linkmap 무료배포 자료 2번 — 오프라인 배포본
-  · 이 파일은 외부 요청 0건인 단일 HTML입니다. 인터넷이 막힌 PC에서도 그대로 열립니다.
-  · 「설정 열기」 버튼은 Windows의 ms-settings: 링크(공식 URI 스킴)와 macOS의
-    x-apple.systempreferences: 링크를 씁니다. 브라우저가 "설정을 열까요?" 확인창을 띄우며,
-    이 페이지를 iframe 안에 넣으면 동작하지 않습니다(최상위 문서로만 열 것).
+  Linkmap 무료배포 자료 2번 — 오프라인 배포본 (v2 · 매뉴얼형 단순화)
+  · 이 파일은 외부 요청 0건인 단일 HTML입니다. 설정 화면 캡처도 JPEG data URI로 안에 들어 있습니다.
+  · 「설정 열기」 버튼은 Windows의 ms-settings: 링크(공식 URI 스킴)를 씁니다.
+    브라우저가 "설정을 열까요?" 확인창을 띄우며, 이 페이지를 iframe 안에 넣으면 동작하지 않습니다.
   · 최신본·영상 연결은 https://www.linkmap.biz/resources/dual-monitor-setup 이 담당합니다.
-    (영상 발행 상태가 바뀌어도 이 파일은 고칠 필요가 없도록 역링크만 둡니다)
   · 원천: DB free_resources (관리자 화면 /admin/resources) — 문구 변경 시 그쪽을 먼저 고칠 것
 -->
 <style>
@@ -30,8 +28,7 @@
   --brand-blue-light:oklch(0.95 0.02 255);
   --brand-green-light:oklch(0.95 0.04 160);
   --primary-foreground:oklch(0.98 0 0);
-  --code-bg:oklch(0.16 0.025 250);
-  --code-fg:oklch(0.93 0.005 250);
+  --pin:oklch(0.55 0.22 25);
   --wordmark:#38bdf8;
   --warn:#d97706;
 }
@@ -48,24 +45,24 @@
     --brand-blue-light:oklch(0.25 0.05 255);
     --brand-green-light:oklch(0.25 0.05 160);
     --primary-foreground:oklch(0.15 0.03 250);
-    --code-bg:oklch(0.13 0.02 250);
+    --pin:oklch(0.68 0.20 25);
     --warn:#fbbf24;
   }
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%;overflow-x:hidden;scroll-behavior:smooth}
 body{
-  background:var(--background); color:var(--foreground); line-height:1.65;
+  background:var(--background); color:var(--foreground); line-height:1.6;
   font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,Roboto,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
   -webkit-tap-highlight-color:transparent;
 }
 a{color:var(--brand-blue)}
 :focus-visible{outline:2px solid var(--brand-blue);outline-offset:2px}
-.wrap{max-width:768px;margin:0 auto;padding:0 16px 64px}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px 64px}
 
-/* ── 상단 바 (linkmap.biz 헤더와 동일 구성) ── */
+/* ── 상단 바 ── */
 .topbar{border-bottom:1px solid var(--border);background:var(--background)}
-.topbar .inner{max-width:768px;margin:0 auto;height:56px;padding:0 16px;display:flex;align-items:center;gap:8px}
+.topbar .inner{max-width:720px;margin:0 auto;height:56px;padding:0 16px;display:flex;align-items:center;gap:8px}
 .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:20px;text-decoration:none;color:inherit}
 .brand .mark{width:32px;height:32px;display:block;flex-shrink:0}
 .mark{background:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMTQzIiB2aWV3Qm94PSI1IDUgMTkyIDEzMyIgZmlsbD0ibm9uZSI+CjxwYXRoIGQ9Ik0gMTk1LjA2LDU3LjY0IEMgMTk1LjA2LDQ3Ljc4IDE4OC44MywzOS42OCAxNzkuNTQsMzguMDYgViAyNy43OCBDIDE3OS41NCwyMS42NiAxNzUuMjcsMTcuMjggMTY5LjcyLDE3LjI4IEggMTQ1LjMgQyAxNDIuNDIsMTAuMDYgMTM2LjY4LDcgMTI5LjEyLDcgQyAxMjEuMTEsNyAxMTQuOTEsMTEuNzkgMTEyLjYyLDE3LjI4IEggMjkuMjIgQyAyMi44OSwxNy4yOCAxOS4yOCwyMy4wOCAxOS4yOCwyNy45NiBWIDc2LjEzIEMgMTEuNjgsNzkuMzYgOC4wNSw4Ny43NyA4LjA1LDk0LjM5IEMgOC4wNSwxMDIuMjggMTIuMjYsMTA5LjIxIDE5LjE4LDExMi45MyBWIDEyMC4wNSBDIDE5LjE4LDEyNi4xNyAyMy45OSwxMzAuMTEgMjguNzIsMTMwLjExIEggNzkuNzkgTCA4Ni42OSwxMzMuNDcgQyA5Mi4wOSwxMzUuNzkgOTcuNzEsMTM1LjE4IDEwMS43OCwxMzMuMTEgTCAxMDguODksMTMwLjExIEggMTY5LjkyIEMgMTc2LjI1LDEzMC4xMSAxNzkuMzgsMTI0LjQ3IDE3OS4zOCwxMjAuMDUgViA3Ni44NyBDIDE4OC42MSw3NC42MyAxOTUuMDYsNjYuNzYgMTk1LjA2LDU3LjY0IFoiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcl8xXzIyNDgpIi8+CjxwYXRoIGQ9Ik0gMTc2Ljc2LDI3Ljg2IFYgMzcuNzMgTCAxNzQuMjksMzcuNDcgViAyNy4yNSBDIDE3NC4yOSwyMy40MiAxNzEuNjEsMjEuMDkgMTY4LjgxLDIxLjA5IEggMTQ1LjIgTCAxNDQuMjgsMTkuMDggSCAxNjkuNjIgQyAxNzQuMjksMTkuMDggMTc2Ljc2LDIzLjY4IDE3Ni43NiwyNy44NiBaIiBmaWxsPSJ1cmwoI3BhaW50MV9saW5lYXJfMV8yMjQ4KSIvPgo8cGF0aCBkPSJNIDE3NS42NSwyMi40MSBMIDE1My4xMSwzNi45MiBDIDE1MS42MSwzNS42OSAxNDkuOTYsMzUuODEgMTQ4LjY5LDM3LjA4IEMgMTQ3LjQyLDM4LjM1IDE0Ny4zOSwzOS40OCAxNDcuOTMsNDAuOTIgTCAxMTguOTYsNjMuODkgTCAxMTguOTIsNjQuOTcgTCAxMTkuNzgsNjQuODYgTCAxNDkuMzcsNDEuMjYgQyAxNTAuODgsNDIuMjEgMTUyLjc0LDQyLjA0IDE1My43OSw0MC41IEMgMTU0LjU4LDM5LjMyIDE1NC41OSwzOC4xMyAxNTMuODgsMzcuMDEgTCAxNzMuNzgsMjEuNTcgTCAxNzUuNjUsMjIuNDEgWiIgZmlsbD0idXJsKCNwYWludDJfbGluZWFyXzFfMjI0OCkiLz4KPHBhdGggZD0iTSAxNzYuNjYsODIuMjMgViA4MS4wMSBMIDE1Ni4yNCw4MS41NCBDIDE1NS44MSw3OS4xMSAxNTQuMjIsNzguNzkgMTUzLjExLDc4Ljc5IEMgMTUxLjUxLDc4Ljc5IDE1MC43Niw3OS44MSAxNTAuMTIsODEuMzggTCAxMjMuNjIsODEuOTEgViA4Mi45MSBMIDEzNy45MSw4My4yMyBWIDkyLjE3IEwgMTM5LjEzLDkyLjY2IFYgODMuMTEgTCAxNTAuMjgsODIuOTEgQyAxNTAuODEsODQuNzYgMTUxLjg3LDg1LjQ2IDE1My4zMSw4NS40NiBDIDE1NS4wNiw4NS40NiAxNTUuOTEsODQuMzYgMTU2LjMyLDgyLjgzIEwgMTc2LjY2LDgyLjIzIFoiIGZpbGw9InVybCgjcGFpbnQzX2xpbmVhcl8xXzIyNDgpIi8+CjxwYXRoIGQ9Ik0gMTM4LjExLDExMC45OCBWIDEyNy4xMiBMIDEzOS4zMywxMjcuMDQgViAxMTMuODYgTCAxMzguMTEsMTEwLjk4IFoiIGZpbGw9InVybCgjcGFpbnQ0X2xpbmVhcl8xXzIyNDgpIi8+CjxwYXRoIGQ9Ik0gMTEzLjA2LDE5LjA4IEwgMTEyLjM3LDIxLjA5IEwgODYuNzEsMjAuNTEgTCA4OC43MiwzMy44MSBDIDkwLjIzLDMzLjkyIDkxLjE2LDM0Ljg4IDkxLjU4LDM1LjMgTCAxMTEuOTQsMjguNTcgTCAxMTIuMzcsMjkuNSBMIDkxLjI3LDM2LjY2IEMgOTEuNjksMzguMjggOTEuMDYsMzkuNjEgODkuOTEsNDAuMjQgTCA5MS40OCw1MS4xMSBMIDkwLjAyLDUxLjMyIEwgODguMjksMzkuOTMgQyA4Ny4xNCwzOS44MiA4Ni4zLDM4Ljg5IDg1Ljk5LDM4LjA2IEwgNjYuMDQsNDUuMzEgTCA2NS42Miw0NC4wOSBMIDg1Ljk5LDM2LjM0IEMgODYuMTksMzQuODMgODcuMDMsMzMuOTkgODguMjksMzMuNjggTCA4NS42NywyMC4xIEwgMjkuMTIsMjAuNTEgQyAyNC45NywyMC41MSAyMi41MSwyNC42MyAyMi41MSwyOC4xNiBWIDYzLjkxIEwgNDYuOTcsNjkuMjEgQyA0Ny45MSw2Ny42OSA0OC45NSw2Ny40OSA0OS43OSw2Ny40OSBDIDUxLjc0LDY3LjQ5IDUyLjY4LDY5LjExIDUyLjc5LDcwLjA0IEwgNjcuMDgsNzIuODIgViA3My45NSBMIDUyLjI2LDcyLjAxIEMgNTEuNjMsNzIuNzMgNTAuOSw3My4yNCA1MC4xNiw3My4zNCBMIDQ5LjYzLDgzLjQzIEwgNDguNzksODMuNjQgTCA0OC45LDczLjM0IEMgNDcuMjgsNzIuODIgNDYuNjUsNzEuNTkgNDYuNzYsNzAuNDYgTCAyMi41MSw2NS4wNiBWIDc1LjkzIEwgMjAuNSw3Ni41NiBWIDI3Ljg2IEMgMjAuNSwyMi45NCAyNC4yMiwxNy45MSAyOS4wMSwxNy45MSBMIDExMy4wNiwxNy43IFYgMTkuMDggWiIgZmlsbD0idXJsKCNwYWludDVfbGluZWFyXzFfMjI0OCkiLz4KPHBhdGggZD0iTSA0OS42MywxMDkuNzQgTCA0OS45NSwxMDkuNjMgTCA1MC4yNiw5Ny4xNyBMIDQ5LjMyLDk3LjI3IEwgNDcuNiwxMDkuNjMgQyA0NS43NSwxMDkuOTUgNDQuOTEsMTExLjE4IDQ0LjgsMTEzLjEzIEwgMjkuMTIsMTI2LjkxIEwgMzAuMDYsMTI3LjQ0IEwgNDYuMzQsMTE1LjQ3IEMgNDcuMjgsMTE2LjIgNDguMTIsMTE2LjMgNDkuMTYsMTE2LjA5IEMgNTEuMjEsMTE1LjY4IDUxLjYzLDExMy43NCA1MC44OSwxMTEuMjggQyA1MC42OCwxMTAuNTYgNTAuMjYsMTEwLjA0IDQ5LjYzLDEwOS43NCBaIiBmaWxsPSJ1cmwoI3BhaW50Nl9saW5lYXJfMV8yMjQ4KSIvPgo8cGF0aCBkPSJNIDEzMS4xNiwxMDYuOTEgTCAxMTYuNjEsOTkuNzEgQyAxMTUuNjIsOTkuMjEgMTE0LjcyLDk5Ljk5IDExNC43Miw5OS45OSBDIDEwOC43MiwxMDcuMDkgMTAyLjk3LDExMC4xOCA5NC43MiwxMTAuMTggQyA4Ni40NywxMTAuMTggNzkuOTEsMTA3LjA5IDc0Ljg5LDEwMC4zNCBDIDc0LjI2LDk5LjY2IDczLjIxLDk5Ljg3IDczLjIxLDk5Ljg3IEwgNTcuOTEsMTA2LjkxIEMgNTUuMDEsMTA4Ljc1IDU1LjU0LDExMi41MSA1OC4xMSwxMTMuODYgTCA4Ny45OCwxMjguODIgQyA5MS42OSwxMzAuNTcgOTUuNjEsMTMwLjMxIDk4LjkzLDEyOC42MSBMIDEzMC44NCwxMTMuODYgQyAxMzMuOTUsMTEyLjMgMTM0LjI2LDEwOC41NCAxMzEuMTYsMTA2LjkxIFoiIGZpbGw9InVybCgjcGFpbnQ3X2xpbmVhcl8xXzIyNDgpIiBzdHJva2U9IiMyQTM2NDEiIHN0cm9rZS13aWR0aD0iMS4yMDI5IiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTSA5NC43MiwxMDMuNjcgQyAxMDYuOTksMTAzLjY3IDExNy4yOCw5Mi4zOCAxMTcuMjgsNzkuOTEgQyAxMTcuMjgsNjcuNDUgMTA2LjY2LDU1Ljk1IDk0LjcyLDU1Ljk1IEMgODIuMTYsNTUuOTUgNzIuMTQsNjYuNzYgNzIuMTQsNzkuOTEgQyA3Mi4xNCw5Mi4zOCA4Mi4xNiwxMDMuNjcgOTQuNzIsMTAzLjY3IFoiIGZpbGw9InVybCgjcGFpbnQ4X3JhZGlhbF8xXzIyNDgpIiBzdHJva2U9InVybCgjcGFpbnQ5X2xpbmVhcl8xXzIyNDgpIiBzdHJva2Utd2lkdGg9IjEuMDYxMSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik0gMTc1Ljg0LDQzLjA3IEMgMTY3LjE4LDQzLjU1IDE2Mi4wOCw1MC45MSAxNjIuMjksNTguMjcgTCAxMjAuOTcsNzAuMjUgTCAxMjIuNDMsNzUuOTMgTCAxNjQuMDQsNjQuNzUgQyAxNjcuMTgsNzAuMDQgMTcxLjUsNzEuOSAxNzYuMTQsNzEuNjkgQyAxODQuNDksNzEuMzEgMTg5Ljc5LDYzLjg5IDE4OS43OSw1Ny40NCBDIDE4OS43OSw0OS42MSAxODMuNjYsNDIuNjYgMTc1Ljg0LDQzLjA3IFoiIGZpbGw9InVybCgjcGFpbnQxMF9yYWRpYWxfMV8yMjQ4KSIgc3Ryb2tlPSJ1cmwoI3BhaW50MTFfbGluZWFyXzFfMjI0OCkiIHN0cm9rZS13aWR0aD0iMS4wNjExIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTSAxMjguNzksMTEuODEgQyAxMjEuMjMsMTEuNDEgMTE2LjYxLDE4LjM2IDExNi44MiwyMy43NiBDIDExNi45MiwyNy45NiAxMTguNjUsMzAuOTQgMTIwLjIxLDMyLjg5IEwgMTA3LjY1LDUzLjUyIEwgMTEyLjM3LDU2LjI5IEwgMTI0LjcyLDM1LjkyIEMgMTI2LjY4LDM2LjY2IDEyNy44NCwzNi43NiAxMjkuNDEsMzYuNjYgQyAxMzYuMTUsMzYuMjQgMTQwLjQ3LDI5LjE5IDE0MC4yNiwyNC42OCBDIDEzOS45NSwxOC4wMiAxMzUuNjMsMTIuMTcgMTI4Ljc5LDExLjgxIFoiIGZpbGw9InVybCgjcGFpbnQxMl9yYWRpYWxfMV8yMjQ4KSIgc3Ryb2tlPSJ1cmwoI3BhaW50MTNfbGluZWFyXzFfMjI0OCkiIHN0cm9rZS13aWR0aD0iMS4wNjExIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTSA0OC45NSwzNS44MSBDIDQxLjgxLDM2LjEzIDM3Ljk5LDQyLjg3IDM4LjIsNDcuNDggQyAzOC41MSw1NC4yMyA0NC4wMSw1OC4yNyA0OS4wMSw1OC4yNyBDIDUyLjI2LDU4LjI3IDU0LjMxLDU3LjMzIDU1Ljk4LDU1Ljc4IEwgNjkuMzQsNjYuMzQgTCA3Mi4zNCw2MC45NCBMIDU5LjQ2LDUxLjUzIEMgNjAuMyw1MC4wOCA2MC4zLDQ4LjAyIDYwLjE5LDQ2LjE3IEMgNTkuNjcsNDAuMTQgNTQuOTUsMzUuNTEgNDguOTUsMzUuODEgWiIgZmlsbD0idXJsKCNwYWludDE0X3JhZGlhbF8xXzIyNDgpIiBzdHJva2U9InVybCgjcGFpbnQxNV9saW5lYXJfMV8yMjQ4KSIgc3Ryb2tlLXdpZHRoPSIxLjA2MTEiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIvPgo8cGF0aCBkPSJNIDE1Ni45OCw5My4yMyBDIDE1MS4zNCw5My4yMyAxNDguMTUsOTYuMTEgMTQ1Ljc4LDk4Ljk5IEwgMTIxLjkxLDg4LjggTCAxMjAuMDYsOTQuMzkgTCAxNDQuNDIsMTA0Ljk2IEMgMTQzLjksMTEyLjkyIDE0OS43LDExOS43NyAxNTYuMzMsMTE5LjU2IEMgMTY0LjA0LDExOS4zNSAxNjkuNDQsMTEyLjEgMTY5LjM0LDEwNi44MSBDIDE2OS4xMywxMDAuMTggMTYzLjkzLDkzLjIzIDE1Ni45OCw5My4yMyBaIiBmaWxsPSJ1cmwoI3BhaW50MTZfcmFkaWFsXzFfMjI0OCkiIHN0cm9rZT0idXJsKCNwYWludDE3X2xpbmVhcl8xXzIyNDgpIiBzdHJva2Utd2lkdGg9IjEuMDYxMSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik0gMjcuMjcsODAuMDIgQyAxOC4yOSw4MC41NCAxMy4xOSw4OC4wNiAxMy4xOSw5NC41IEMgMTMuMTksMTAyLjY0IDIwLjAzLDEwOS4yNyAyNi43NywxMDkuMDYgQyAzNS4xMiwxMDguNzUgNDEuMDIsMTAyLjIyIDQxLjU0LDk1LjY4IEwgNjcuMDgsODguNjMgTCA2Ni4wNCw4Mi44IEwgNDAuNzEsODguOTQgQyAzNy43OCw4My4xMSAzMi44OCw3OS43MSAyNy4yNyw4MC4wMiBaIiBmaWxsPSJ1cmwoI3BhaW50MThfcmFkaWFsXzFfMjI0OCkiIHN0cm9rZT0idXJsKCNwYWludDE5X2xpbmVhcl8xXzIyNDgpIiBzdHJva2Utd2lkdGg9IjEuMDYxMSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MF9saW5lYXJfMV8yMjQ4IiB4MT0iMTAxLjU1NiIgeTE9IjcuMDAxOTUiIHgyPSIxMDEuNTU2IiB5Mj0iMTM1LjA5MiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjMjEyODMxIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzJBMzY0MSIvPgo8L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MV9saW5lYXJfMV8yMjQ4IiB4MT0iMTYxLjMzIiB5MT0iMTcuMjc3MyIgeDI9IjE2MS4zMyIgeTI9IjM3LjczMzEiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzM3NDE0RCIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNzQxNEQiIHN0b3Atb3BhY2l0eT0iMC41MiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50Ml9saW5lYXJfMV8yMjQ4IiB4MT0iMTQ3LjI4NCIgeTE9IjIwLjQ1OSIgeDI9IjE0Ny4yODQiIHkyPSI2NS43MTcxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiMzNzQxNEQiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMzc0MTREIiBzdG9wLW9wYWNpdHk9IjAuNTIiLz4KPC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDNfbGluZWFyXzFfMjI0OCIgeDE9IjE1MC4xMzgiIHkxPSI3OC43ODYxIiB4Mj0iMTUwLjEzOCIgeTI9IjkyLjY1NjIiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzM3NDE0RCIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNzQxNEQiIHN0b3Atb3BhY2l0eT0iMC41MiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50NF9saW5lYXJfMV8yMjQ4IiB4MT0iMTM4LjcxOCIgeTE9IjExMC45OCIgeDI9IjEzOC43MTgiIHkyPSIxMjcuMTE3IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiMzNzQxNEQiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMzc0MTREIiBzdG9wLW9wYWNpdHk9IjAuNTIiLz4KPC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDVfbGluZWFyXzFfMjI0OCIgeDE9IjY4LjQzNDYiIHkxPSIxNy43MDEyIiB4Mj0iNjguNDM0NiIgeTI9IjgzLjYzNjciIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzM3NDE0RCIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNzQxNEQiIHN0b3Atb3BhY2l0eT0iMC41MiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50Nl9saW5lYXJfMV8yMjQ4IiB4MT0iMzkuNTM1NyIgeTE9Ijk3LjE3MTkiIHgyPSIzOS41MzU3IiB5Mj0iMTI3LjQzNyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjMzc0MTREIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzM3NDE0RCIgc3RvcC1vcGFjaXR5PSIwLjUyIi8+CjwvbGluZWFyR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQ3X2xpbmVhcl8xXzIyNDgiIHgxPSI5NC43MjAxIiB5MT0iOTkuNDEyMSIgeDI9Ijk0LjcyMDEiIHkyPSIxMjkuNzkyIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiMzRTRCNUEiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjM0U0QjVBIiBzdG9wLW9wYWNpdHk9IjAuNzQiLz4KPC9saW5lYXJHcmFkaWVudD4KPHJhZGlhbEdyYWRpZW50IGlkPSJwYWludDhfcmFkaWFsXzFfMjI0OCIgY3g9IjAiIGN5PSIwIiByPSIxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSg5NC43MTg5IDc5LjgxMzMpIHNjYWxlKDIxLjI3NjQgMjIuMDE5MikiPgo8c3RvcCBzdG9wLWNvbG9yPSIjNTlGMUZGIi8+CjxzdG9wIG9mZnNldD0iMC40MSIgc3RvcC1jb2xvcj0iIzQzQzZGRiIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM2MTUyRUEiLz4KPC9yYWRpYWxHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDlfbGluZWFyXzFfMjI0OCIgeDE9Ijk0LjcxODkiIHkxPSI1NS40MjA5IiB4Mj0iOTQuNzE4OSIgeTI9IjEwNC4yMDEiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzk4RjdGRiIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM1QTY0Q0MiLz4KPC9saW5lYXJHcmFkaWVudD4KPHJhZGlhbEdyYWRpZW50IGlkPSJwYWludDEwX3JhZGlhbF8xXzIyNDgiIGN4PSIwIiBjeT0iMCIgcj0iMSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTc1LjE0NiA1Ny4zODA3KSBzY2FsZSgxMy45MjYxIDEzLjkyNjEpIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzkzRjJFNiIvPgo8c3RvcCBvZmZzZXQ9IjAuNDEiIHN0b3AtY29sb3I9IiM0QUYzRjAiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNDhEMEYzIi8+CjwvcmFkaWFsR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQxMV9saW5lYXJfMV8yMjQ4IiB4MT0iMTU1LjM3OCIgeTE9IjQyLjUzNjEiIHgyPSIxNTUuMzc4IiB5Mj0iNzIuMjI4NSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjNTlGMUU5Ii8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzQ4QTZFNiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8cmFkaWFsR3JhZGllbnQgaWQ9InBhaW50MTJfcmFkaWFsXzFfMjI0OCIgY3g9IjAiIGN5PSIwIiByPSIxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgxMjguNTMzIDIzLjkxMjEpIHNjYWxlKDExLjAzODYgMTEuNjYxNikiPgo8c3RvcCBzdG9wLWNvbG9yPSIjQ0ZGMUZGIi8+CjxzdG9wIG9mZnNldD0iMC40MSIgc3RvcC1jb2xvcj0iI0IwOUVFQSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM1NkM5RjQiLz4KPC9yYWRpYWxHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDEzX2xpbmVhcl8xXzIyNDgiIHgxPSIxMjMuOTU0IiB5MT0iMTEuMjY0NiIgeDI9IjEyMy45NTQiIHkyPSI1Ni44MTgxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiM1OUYxRTkiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNDhBNkU2Ii8+CjwvbGluZWFyR3JhZGllbnQ+CjxyYWRpYWxHcmFkaWVudCBpZD0icGFpbnQxNF9yYWRpYWxfMV8yMjQ4IiBjeD0iMCIgY3k9IjAiIHI9IjEiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiBncmFkaWVudFRyYW5zZm9ybT0idHJhbnNsYXRlKDQ4Ljg2ODEgNDYuNzYzMSkgc2NhbGUoOS4zMTA1MyA5LjMxMDUzKSI+CjxzdG9wIHN0b3AtY29sb3I9IiM1OUYxRkYiLz4KPHN0b3Agb2Zmc2V0PSIwLjQxIiBzdG9wLWNvbG9yPSIjNDM5MEZGIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzgyNDRFNiIvPgo8L3JhZGlhbEdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MTVfbGluZWFyXzFfMjI0OCIgeDE9IjQ4Ljk1NDEiIHkxPSIzNS4yNzgzIiB4Mj0iNDguOTU0MSIgeTI9IjY2LjMzOTgiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzU5RjFFOSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM0OEE2RTYiLz4KPC9saW5lYXJHcmFkaWVudD4KPHJhZGlhbEdyYWRpZW50IGlkPSJwYWludDE2X3JhZGlhbF8xXzIyNDgiIGN4PSIwIiBjeT0iMCIgcj0iMSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTU2LjY5NCAxMDYuMzk2KSBzY2FsZSgxMS44MDQxIDEyLjQ1MTIpIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzAwOTRGRiIvPgo8c3RvcCBvZmZzZXQ9IjAuNDEiIHN0b3AtY29sb3I9IiMyNDg2RkUiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNTY1OEVBIi8+CjwvcmFkaWFsR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQxN19saW5lYXJfMV8yMjQ4IiB4MT0iMTU0LjY5OSIgeTE9IjkyLjY4MDciIHgyPSIxNTQuNjk5IiB5Mj0iMTIwLjEwOSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjNTlGMUU5Ii8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzQ4QTZFNiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8cmFkaWFsR3JhZGllbnQgaWQ9InBhaW50MThfcmFkaWFsXzFfMjI0OCIgY3g9IjAiIGN5PSIwIiByPSIxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgyNy40Mjg5IDk0LjIyMDIpIHNjYWxlKDEzLjcwNTggMTMuNzA1OCkiPgo8c3RvcCBzdG9wLWNvbG9yPSIjMjY0MkIyIi8+CjxzdG9wIG9mZnNldD0iMC40MSIgc3RvcC1jb2xvcj0iIzM5MzlDMSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM4MjQ0RTYiLz4KPC9yYWRpYWxHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDE5X2xpbmVhcl8xXzIyNDgiIHgxPSI0MC4xMzUxIiB5MT0iNzkuNDYwOSIgeDI9IjQwLjEzNTEiIHkyPSIxMDkuNjA5IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiM1OUYxRTkiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNDhBNkU2Ii8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPC9zdmc+") center/contain no-repeat}
@@ -74,21 +71,20 @@ a{color:var(--brand-blue)}
   background:color-mix(in oklab,var(--brand-green) 15%,transparent);border-radius:999px;padding:4px 11px;white-space:nowrap}
 
 /* ── 히어로 ── */
-.hero{text-align:center;padding:44px 4px 32px}
+.hero{text-align:center;padding:40px 4px 28px}
 .hero .eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--brand-green);
   background:color-mix(in oklab,var(--brand-green) 12%,transparent);border-radius:999px;padding:5px 13px}
-.hero h1{font-size:clamp(23px,4.4vw,31px);letter-spacing:-.6px;margin-top:16px;word-break:keep-all;line-height:1.4}
+.hero h1{font-size:clamp(24px,4.6vw,32px);letter-spacing:-.6px;margin-top:16px;word-break:keep-all;line-height:1.35}
 .hero h1 em{font-style:normal;color:var(--brand-blue)}
 .hero p{color:var(--muted-foreground);margin-top:12px;font-size:15px;word-break:keep-all}
-.cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}
 .btn{display:inline-flex;align-items:center;gap:7px;text-decoration:none;border-radius:calc(var(--radius) - 2px);
   min-height:44px;padding:0 22px;font-size:15px;font-weight:600;border:1px solid transparent;transition:opacity .15s;cursor:pointer;font-family:inherit}
 .btn:hover{opacity:.9}
 .btn.primary{background:var(--brand-blue);color:var(--primary-foreground)}
 .btn.outline{background:var(--card);color:var(--foreground);border-color:var(--border)}
 .btn.sm{min-height:38px;padding:0 14px;font-size:13.5px}
-.hero .free{margin-top:14px;font-size:13px;color:var(--muted-foreground)}
-.hero .free b{color:var(--brand-green)}
+.hero .free{margin-top:12px;font-size:13px;color:var(--muted-foreground)}
+.hero .free b{color:var(--foreground)}
 
 /* ── 환경 배지·힌트 ── */
 .env{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-size:13px;font-weight:600;border-radius:999px;padding:6px 14px;
@@ -99,79 +95,57 @@ a{color:var(--brand-blue)}
 .hint.show{display:block}
 .launchwrap{margin-top:14px}
 body:not(.os-win) a.launch[href^="ms-settings:"]{opacity:.55}
-body:not(.os-mac) a.launch[href^="x-apple"]{opacity:.55}
 
 /* ── 카드 ── */
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
   padding:22px 20px;margin-top:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
 .card h2{font-size:17px;letter-spacing:-.3px}
-.card .desc{color:var(--muted-foreground);font-size:14px;margin-top:5px;margin-bottom:14px;word-break:keep-all}
+.card .desc{color:var(--muted-foreground);font-size:14px;margin-top:5px;word-break:keep-all}
 .note{font-size:13.5px;color:var(--muted-foreground);margin-top:12px;word-break:keep-all}
 .note b{color:var(--foreground)}
 .card .head{display:flex;align-items:flex-start;gap:14px}
 .card .head .ico{width:40px;height:40px;flex-shrink:0;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--brand-blue-light)}
 .card .head .ico svg{width:20px;height:20px;stroke:var(--brand-blue);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .card .head .ttl{flex:1;min-width:0}
-.card .head .ttl .desc{margin-bottom:0}
 .card .head .btn{flex-shrink:0;margin-top:2px}
 .crumb{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:12.5px;color:var(--muted-foreground);margin-top:12px;word-break:keep-all}
 .crumb b{color:var(--foreground);font-weight:600}
 .crumb .sep{opacity:.5}
-ol.steps{margin:14px 0 0 0;padding:0;list-style:none;counter-reset:s}
-ol.steps li{position:relative;padding-left:34px;margin-top:10px;font-size:14.5px;word-break:keep-all;counter-increment:s}
-ol.steps li::before{content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;background:var(--brand-blue);color:var(--primary-foreground);
-  font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
-ol.steps b{color:var(--foreground)}
-ul.sub{margin:6px 0 0 18px;font-size:13.5px;color:var(--muted-foreground)}
-ul.sub li{margin-top:3px}
 .kbd{display:inline-block;font-family:ui-monospace,"Geist Mono",Consolas,monospace;font-size:12.5px;line-height:1.5;padding:1px 7px;border:1px solid var(--border);
   border-bottom-width:2px;border-radius:6px;background:var(--muted);white-space:nowrap;color:var(--foreground)}
-details{margin-top:12px;border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);background:var(--muted)}
-details summary{cursor:pointer;padding:11px 14px;font-size:14px;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px;word-break:keep-all}
-details summary::-webkit-details-marker{display:none}
-details summary::before{content:"▸";font-size:12px;color:var(--brand-blue);transition:transform .15s;flex-shrink:0}
-details[open] summary::before{transform:rotate(90deg)}
-details .body{padding:0 14px 14px;font-size:14px;color:var(--muted-foreground);word-break:keep-all}
-details .body b{color:var(--foreground)}
-details .body ol,details .body ul{margin:8px 0 0 18px}
-details .body li{margin-top:4px}
-details .body .launchwrap{margin-top:10px}
 
-/* ── 빠른 시작 체크리스트 ── */
-.check{list-style:none;margin-top:12px}
+/* ── 화면 캡처 + 번호 핀 ── */
+.shot{position:relative;margin-top:14px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--muted)}
+.shot img{display:block;width:100%;height:auto}
+.pin{position:absolute;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;background:var(--pin);color:#fff;
+  font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px rgba(255,255,255,.9),0 2px 6px rgba(0,0,0,.35)}
+.shot .cap{position:absolute;right:10px;top:10px;font-size:11.5px;font-weight:600;color:#fff;background:rgba(0,0,0,.55);border-radius:999px;padding:3px 10px}
+.legend{list-style:none;margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+.legend li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;word-break:keep-all}
+.legend .pin{position:static;transform:none;width:26px;height:26px;font-size:13px;flex-shrink:0;box-shadow:none}
+.legend b{color:var(--foreground)}
+.legend small{display:block;color:var(--muted-foreground);font-size:13px}
+
+/* ── 3단계 체크 ── */
+.check{list-style:none;margin-top:10px}
 .check li{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--border)}
 .check li:first-child{border-top:0;padding-top:4px}
 .check input{width:22px;height:22px;margin-top:3px;flex-shrink:0;accent-color:var(--brand-blue)}
-.check label{flex:1;font-size:14px;color:var(--muted-foreground);word-break:keep-all;cursor:pointer}
-.check label b{display:block;font-size:15px;color:var(--foreground);margin-bottom:2px}
-.progress{font-size:13px;color:var(--brand-green);font-weight:600;margin-top:4px}
+.check label{flex:1;font-size:14.5px;color:var(--muted-foreground);word-break:keep-all;cursor:pointer}
+.check label b{display:block;font-size:15.5px;color:var(--foreground);margin-bottom:2px}
+.check .pin{display:inline-flex;position:static;transform:none;width:22px;height:22px;font-size:12px;vertical-align:-5px;margin:0 2px;box-shadow:none}
+.progress{font-size:13px;color:var(--brand-green);font-weight:600;margin-top:6px}
 
-/* ── 표 ── */
-.tblwrap{overflow-x:auto;margin-top:12px}
-.tbl{width:100%;border-collapse:collapse;font-size:14px}
-.tbl th,.tbl td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--border);vertical-align:top;word-break:keep-all}
-.tbl th{font-size:12.5px;color:var(--muted-foreground);font-weight:600;white-space:nowrap}
-.tbl td.k{white-space:nowrap}
-.tbl code{font-family:ui-monospace,"Geist Mono",Consolas,monospace;font-size:13px;color:var(--brand-blue);white-space:nowrap}
-.copy2{min-height:32px;padding:0 10px;font-size:12px;font-weight:600;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--foreground);
-  cursor:pointer;font-family:inherit;white-space:nowrap}
-.copy2:hover{background:var(--muted)}
-.copy2.done{background:var(--brand-green);border-color:var(--brand-green);color:oklch(0.20 0.03 250)}
-
-/* ── 섹션 제목 ── */
-.sec{margin-top:40px}
-.sec h2.big{font-size:20px;letter-spacing:-.4px}
-.sec .lead{color:var(--muted-foreground);font-size:14px;margin-top:4px;word-break:keep-all}
-
-/* ── 링크 목록 ── */
-.links{list-style:none;margin-top:8px}
-.links li{padding:8px 0;border-top:1px solid var(--border);font-size:14px;word-break:keep-all}
-.links li:first-child{border-top:0}
-.links small{display:block;color:var(--muted-foreground);font-size:12.5px}
+/* ── 2줄 단계 ── */
+ol.steps{margin:12px 0 0 0;padding:0;list-style:none;counter-reset:s}
+ol.steps li{position:relative;padding-left:34px;margin-top:8px;font-size:14.5px;word-break:keep-all;counter-increment:s}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;background:var(--brand-blue);color:var(--primary-foreground);
+  font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+ol.steps b{color:var(--foreground)}
 
 /* ── 최신본·영상 역링크 카드 ── */
 .linkback{display:flex;gap:14px;align-items:flex-start;background:var(--brand-blue-light);
-  border:1px solid color-mix(in oklab,var(--brand-blue) 22%,transparent)}
+  border:1px solid color-mix(in oklab,var(--brand-blue) 22%,transparent);margin-top:36px}
 .linkback .ico{width:40px;height:40px;flex-shrink:0;border-radius:10px;display:flex;align-items:center;justify-content:center;
   background:color-mix(in oklab,var(--brand-blue) 15%,transparent)}
 .linkback .ico svg{width:20px;height:20px;stroke:var(--brand-blue);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -186,11 +160,12 @@ footer .lm .l1{color:var(--wordmark)} footer .lm .l2{color:var(--foreground)}
 @media (max-width:520px){
   .card .head{flex-wrap:wrap}
   .card .head .btn{width:100%;justify-content:center;margin-top:6px}
+  .legend{grid-template-columns:1fr}
+  .pin{width:24px;height:24px;font-size:12px}
 }
 @media print{
-  .topbar .pill,.btn,.copy2,.hint,.env,.cta{display:none!important}
+  .topbar .pill,.btn,.hint,.env{display:none!important}
   .card{break-inside:avoid;box-shadow:none}
-  details{border:0;background:transparent}
   .crumb{font-weight:600;color:var(--foreground)}
 }
 </style>
@@ -211,494 +186,106 @@ footer .lm .l1{color:var(--wordmark)} footer .lm .l2{color:var(--foreground)}
 
   <div class="hero">
     <span class="eyebrow">듀얼모니터 간편설정</span>
-    <h1>모니터 두 대, <em>버튼 한 번으로</em><br>설정 화면이 바로 열립니다</h1>
-    <p>필요한 설정 화면을 버튼으로 바로 열고, 옆의 순서대로 따라 하면 끝납니다.<br>
-    Windows 11 기준이며, Windows 10과 macOS의 차이도 함께 담았습니다.</p>
+    <h1>모니터 두 대, <em>3단계</em>로 끝</h1>
+    <p>아래 화면 그림을 보고 그대로 따라 하세요.<br>버튼을 누르면 그 설정 화면이 바로 열립니다.</p>
     <div id="env" class="env" aria-live="polite">환경 확인 중…</div>
-    <div class="cta">
-      <a class="btn primary" href="#quick">빠른 시작 3단계 ↓</a>
-      <a class="btn outline" href="#trouble">문제 해결 ↓</a>
+    <div class="launchwrap">
+      <a class="btn primary launch" href="ms-settings:display">디스플레이 설정 열기</a>
+      <p class="hint"></p>
     </div>
-    <p class="free"><b>사용법</b> · 「설정 열기」를 누르면 브라우저가 "설정을 열까요?" 확인창을 띄웁니다 → <b>[열기]</b>.<br>
-    Edge는 "항상 허용"을 체크하면 다음부터 바로 열립니다.</p>
+    <p class="free">「설정을 열까요?」 확인창이 뜨면 <b>[열기]</b>. 버튼이 안 되면 바탕 화면 오른쪽 클릭 → <b>디스플레이 설정</b>.</p>
   </div>
 
-  <!-- ── 빠른 시작 ── -->
+  <!-- ── 1. 이 화면이 열립니다 (캡처 + 번호 핀) ── -->
+  <div class="card">
+    <div class="head">
+      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+      <div class="ttl">
+        <h2>이 화면이 열립니다</h2>
+        <p class="desc">번호 순서대로 누르면 끝입니다.</p>
+      </div>
+    </div>
+    <figure class="shot">
+      <img src="data:image/jpeg;base64,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+zFx2bi1atWrVq1atWrVq1atWrVq1atWrVq1atWrVq1atWrVq1atWrVq1atWrVq1atWrVq1atWrVq1atWrVq1atWrVq1atWrVq1atWrVq1atWrVq1atWrVq1atWrVq1atWr7vx2Hj7aXHYePbkzDjw/54VjdZjmmRZWOL6xRGwk2TE5xm0gnkRAbTA7erhqWaOJRSBKMk8UTtKBH62DU5iwRyBIxZMAuLsTerx/LFIMoSZEUZeeOxzsco3dmb1MGmScQQTgZfSi47Dx7evf86LFOQW8fq32TzPEnZxjI9eTE0sZdP/jSxuUmLFJCBlGYdQcwyOluRNkuZph05gajknbaGnyZMgmlxNLYztJ6vposONlRzeeAijOQZYcAn0tOJFjzAVYcTRZn0ouOw8e3qOO+Vif4vNZYnScn1HK8MaEWFnAXJADA0mPHIccYgIYsYNJAEhxg0bLQPkbEiZPGBJoo2XhjQiwtJjxmQAIC7M7iAiUgDICMWMFoHyfSn47Dx9tfjs3G63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W63W6fjsPH20uOw8e3qeQWNh/5HLWH1LKHIXqZXHz2pJHGaLJKSbGkeWKXJMVBMcwlnmLTZBicM3kmy5ThaCUykPMOKR8kmxcbIeSTKnKI4s2UjyZHihDNPxG7sA58pYuTM0EDyN4Hz5Wi+mFx2Hj29e/50Xp9AylLlvsxwyPL4iONwl9Q2MbLBHRj5HjHLgiieMTlOKbHMjgDRlZIN6npsb6284xZgg+P0+L/AGMmB5i9IceVli7wAN5M46o8mGf02X5LBnqbGmHEAWAfpZcdh49s8ITxf4KFY3SIIZfspcdh4+2lx2bilSpUqVKlSpUqVKlSpUqVKlSpUqVKlSpUqVKlSpUqVKlSpUqVKlSpUqVKlSpUqVKlSpUqVKlSpUqVKlSpUqVKlSpUqVKlSpUqVKlSpUqVKlSpUqVKlSpUqVKlSpUqVKk7bdh493q8ZRzwyP8AZS47Dx7euO7dOpRgWPmLp7HJDhyOOBjFMLZE35wy/wCo5TeSYi0437uUPmlxnL1me8rF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" width="900" height="588" alt="Windows 11 설정 › 시스템 › 디스플레이 화면. 위쪽에 모니터 1·2 미리보기, 오른쪽 아래에 [식별] 버튼과 [디스플레이 확장] 드롭다운, 그 아래 「여러 디스플레이」 옵션과 「이 디스플레이를 주 모니터로 만들기」 체크박스가 있다.">
+      <span class="pin" style="left:65.5%;top:51.6%" aria-hidden="true">1</span>
+      <span class="pin" style="left:80.3%;top:51.6%" aria-hidden="true">2</span>
+      <span class="pin" style="left:41.4%;top:16.5%" aria-hidden="true">3</span>
+      <span class="pin" style="left:6.9%;top:72%" aria-hidden="true">4</span>
+      <figcaption class="cap">설정 › 시스템 › 디스플레이 (Windows 11)</figcaption>
+    </figure>
+    <ul class="legend">
+      <li><span class="pin">1</span><div><b>식별</b><small>화면에 뜨는 큰 숫자로 어느 모니터가 1·2인지 확인</small></div></li>
+      <li><span class="pin">2</span><div><b>디스플레이 확장</b><small>이 값이 아니면 눌러서 「확장」으로</small></div></li>
+      <li><span class="pin">3</span><div><b>1·2 상자 끌기</b><small>실제 놓인 위치대로 놓고 [적용]</small></div></li>
+      <li><span class="pin">4</span><div><b>주 모니터로 만들기</b><small>주로 보는 화면을 클릭한 뒤 체크</small></div></li>
+    </ul>
+    <p class="note">Windows 10은 같은 화면의 <b>「디스플레이 다시 정렬」</b> 영역에 같은 버튼이 있습니다.</p>
+  </div>
+
+  <!-- ── 2. 3단계 체크 ── -->
   <div class="card" id="quick">
     <div class="head">
       <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
       <div class="ttl">
-        <h2>빠른 시작 3단계</h2>
-        <p class="desc">처음 연결이라면 이 세 가지만 하면 됩니다. 체크 표시는 이 브라우저에 저장됩니다.</p>
+        <h2>3단계 따라 하기</h2>
+        <p class="desc">체크 표시는 이 브라우저에 저장됩니다.</p>
       </div>
     </div>
     <ul class="check">
       <li>
         <input type="checkbox" id="q1" data-check="cable">
-        <label for="q1"><b>① 케이블을 꽂고 모니터 전원을 켭니다</b>
-        HDMI · DisplayPort · USB-C 중 노트북과 모니터에 <b style="display:inline">둘 다 있는</b> 단자로 연결합니다. 노트북은 전원 어댑터도 꽂아 두세요 — 절전 때문에 화면이 꺼지는 일을 막습니다.</label>
+        <label for="q1"><b>1 · 연결</b>
+        케이블을 꽂고 <span class="kbd">Win</span> + <span class="kbd">P</span> → <b style="display:inline">확장</b></label>
       </li>
       <li>
-        <input type="checkbox" id="q2" data-check="extend">
-        <label for="q2"><b>② <span class="kbd">Win</span> + <span class="kbd">P</span> 를 누르고 「확장」을 고릅니다</b>
-        두 화면을 하나의 넓은 책상처럼 씁니다. 「복제」는 같은 화면을 둘 다에 띄우는 발표용, 「두 번째 화면만」은 노트북 화면을 끄는 모드입니다.</label>
+        <input type="checkbox" id="q2" data-check="arrange">
+        <label for="q2"><b>2 · 배치</b>
+        위 버튼으로 설정을 열고 <span class="pin">1</span> 식별 → <span class="pin">3</span> 상자를 실제 위치대로 끌기 → [적용]</label>
       </li>
       <li>
-        <input type="checkbox" id="q3" data-check="arrange">
-        <label for="q3"><b>③ 디스플레이 설정에서 배치와 주 모니터를 정합니다</b>
-        아래 버튼으로 열고, 미리보기의 1·2 상자를 실제로 놓인 위치대로 끌어다 놓은 뒤 <b style="display:inline">[적용]</b>. 주로 보는 화면을 클릭하고 「이 디스플레이를 주 모니터로 만들기」를 체크합니다.</label>
+        <input type="checkbox" id="q3" data-check="primary">
+        <label for="q3"><b>3 · 주 모니터</b>
+        주로 보는 화면을 클릭 → <span class="pin">4</span> 「이 디스플레이를 주 모니터로 만들기」 체크</label>
       </li>
     </ul>
     <p class="progress" id="progress">3단계 중 0단계 완료</p>
-    <div class="launchwrap">
-      <a class="btn primary launch" href="ms-settings:display">디스플레이 설정 열기</a>
-      <p class="hint"></p>
-    </div>
-    <p class="crumb">수동 경로: <b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>디스플레이</b> <span>(또는 바탕 화면 오른쪽 클릭 → 디스플레이 설정)</span></p>
   </div>
 
-  <!-- ── 설정 항목별 안내 ── -->
-  <div class="sec">
-    <h2 class="big">설정 항목별 안내</h2>
-    <p class="lead">필요한 항목만 골라 여세요. 각 카드의 버튼은 그 설정 화면을 바로 엽니다. 버튼이 반응하지 않으면 카드 아래 수동 경로로 가면 됩니다.</p>
-  </div>
-
-  <!-- a. 화면 모드·배치·주 모니터 -->
-  <div class="card">
-    <div class="head">
-      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
-      <div class="ttl">
-        <h2>화면 모드 · 배치 · 주 모니터</h2>
-        <p class="desc">확장으로 바꾸고, 실제 놓인 위치대로 배치하고, 주로 보는 화면을 정합니다.</p>
-      </div>
-      <a class="btn primary sm launch" href="ms-settings:display">설정 열기</a>
-    </div>
-    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
-    <p class="crumb"><b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>디스플레이</b></p>
-    <ol class="steps">
-      <li><b>[식별]</b>을 누르면 각 화면에 큰 숫자 1·2가 잠깐 뜹니다. 어느 모니터가 몇 번인지 확인하세요.</li>
-      <li>미리보기 옆 드롭다운에서 <b>디스플레이 확장</b>을 고릅니다. (「디스플레이 복제」 「1에만 표시」 「2에만 표시」도 여기)</li>
-      <li>미리보기의 <b>1·2 상자를 실제로 놓인 위치대로</b> 끌어다 놓고 <b>[적용]</b>. 위·아래 배치도 됩니다. 두 상자의 모서리 높이를 맞춰 두면 마우스가 경계에 걸리지 않습니다.</li>
-      <li>주로 보는 화면을 클릭한 뒤 <b>여러 디스플레이</b>를 펼쳐 <b>이 디스플레이를 주 모니터로 만들기</b>를 체크합니다. 시계·알림·새로 여는 창이 이 화면에 뜹니다.</li>
-    </ol>
-    <p class="note">모니터가 하나만 보이면 <b>여러 디스플레이 › [감지]</b>를 누르세요. 그래도 안 나오면 아래 「문제 해결」 첫 항목으로.</p>
-    <details>
-      <summary>Windows 10은 이렇게</summary>
-      <div class="body">페이지 맨 위 <b>디스플레이 다시 정렬</b>에 [식별]·[감지]와 배치 미리보기가 있고, 아래쪽 <b>여러 디스플레이</b> 드롭다운에서 확장/복제를 고릅니다. 그 밑에 <b>이 디스플레이를 주 모니터로 만들기</b> 체크박스가 있습니다.</div>
-    </details>
-  </div>
-
-  <!-- b. 배율·해상도·방향 -->
+  <!-- ── 3. 배율·해상도 ── -->
   <div class="card">
     <div class="head">
       <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></div>
       <div class="ttl">
-        <h2>배율 · 해상도 · 방향</h2>
-        <p class="desc">글자 크기와 선명도를 정합니다. 모니터마다 따로 설정합니다.</p>
+        <h2>글자가 흐리면 — 배율 · 해상도</h2>
+        <p class="desc">모니터마다 따로 정합니다.</p>
       </div>
       <a class="btn primary sm launch" href="ms-settings:display">설정 열기</a>
     </div>
     <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
-    <p class="crumb"><b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>디스플레이</b><span class="sep">›</span><b>배율 및 레이아웃</b></p>
     <ol class="steps">
-      <li>미리보기에서 바꿀 모니터를 <b>먼저 클릭</b>합니다. 아래 값들은 선택한 모니터에만 적용됩니다.</li>
-      <li><b>배율</b> — 「(권장)」이 붙은 값을 고릅니다. 노트북은 125~150%, 큰 모니터는 100%처럼 서로 달라도 정상입니다.</li>
-      <li><b>디스플레이 해상도</b> — 역시 「(권장)」 값. 모니터의 원래 해상도라 글자가 가장 또렷합니다.</li>
-      <li>세로로 세운 모니터는 <b>디스플레이 방향</b>을 <b>세로</b>로 바꿉니다.</li>
+      <li>미리보기에서 바꿀 모니터를 <b>먼저 클릭</b></li>
+      <li><b>배율</b>과 <b>디스플레이 해상도</b> 모두 <b>「(권장)」</b> 값으로</li>
     </ol>
-    <p class="note"><b>「사용자 지정 배율」은 권하지 않습니다.</b> 되돌리기 번거롭고 일부 앱이 흐려집니다. 글자만 키우고 싶으면 아래 버튼으로 <b>접근성 › 텍스트 크기</b>를 조절하세요 — 화면 배치는 그대로 두고 글자만 커집니다.</p>
-    <div class="launchwrap">
-      <a class="btn outline sm launch" href="ms-settings:easeofaccess-display">글자 크기만 키우기</a>
-      <p class="hint"></p>
-    </div>
-    <details>
-      <summary>Windows 10은 이렇게</summary>
-      <div class="body">「배율 및 레이아웃」의 <b>텍스트, 앱 및 기타 항목의 크기 변경</b>이 배율, <b>디스플레이 해상도</b>·<b>방향</b>은 이름이 같습니다. 접근성 글자 크기는 「접근성 › 디스플레이 › 텍스트 크게」.</div>
-    </details>
+    <p class="crumb"><b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>디스플레이</b><span class="sep">›</span><b>배율 및 레이아웃</b></p>
   </div>
 
-  <!-- c. 재생 빈도 -->
+  <!-- ── 4. 재생 빈도 ── -->
   <div class="card">
     <div class="head">
       <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
       <div class="ttl">
-        <h2>재생 빈도(주사율)</h2>
-        <p class="desc">모니터가 120Hz·144Hz를 지원하는데 60Hz로 잡혀 있으면 마우스와 스크롤이 뚝뚝 끊깁니다.</p>
+        <h2>마우스가 뚝뚝 끊기면 — 재생 빈도</h2>
+        <p class="desc">120Hz·144Hz 모니터가 60Hz로 잡혀 있을 때.</p>
       </div>
       <a class="btn primary sm launch" href="ms-settings:display-advanced">설정 열기</a>
     </div>
     <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
+    <ol class="steps">
+      <li>디스플레이 화면 아래로 내려 <b>고급 디스플레이</b></li>
+      <li><b>새로 고침 빈도 선택</b>에서 <b>가장 높은 값</b></li>
+    </ol>
+    <p class="note">높은 값이 목록에 없으면 케이블 한계입니다. <b>DisplayPort</b> 또는 <b>HDMI 2.0 이상</b> 케이블로.</p>
     <p class="crumb"><b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>디스플레이</b><span class="sep">›</span><b>고급 디스플레이</b></p>
-    <ol class="steps">
-      <li>Windows 11에서는 디스플레이 페이지가 열립니다. <b>아래로 내려 「관련 설정 › 고급 디스플레이」</b>를 누르세요. (Windows 10은 고급 페이지가 바로 열립니다)</li>
-      <li>상단 드롭다운에서 모니터를 고르고 <b>새로 고침 빈도 선택</b>에서 가장 높은 값을 고릅니다. (60 → 120 · 144Hz)</li>
-      <li>화면이 검게 되거나 깜빡이면 15초 안에 자동으로 되돌아갑니다. 그럴 땐 한 단계 낮은 값으로.</li>
-    </ol>
-    <p class="note">높은 값이 목록에 <b>없으면</b> 케이블·단자 한계인 경우가 대부분입니다. 예: 오래된 HDMI 케이블은 4K에서 30Hz까지만. <b>DisplayPort</b> 또는 <b>HDMI 2.0 이상</b> 케이블로 바꿔 보세요.</p>
-  </div>
-
-  <!-- d. 창 위치·커서 옵션 -->
-  <div class="card">
-    <div class="head">
-      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/></svg></div>
-      <div class="ttl">
-        <h2>창 위치 기억 · 커서 이동</h2>
-        <p class="desc">모니터를 뺐다 꽂아도 창이 제자리로 오게, 마우스가 경계에서 걸리지 않게.</p>
-      </div>
-      <a class="btn primary sm launch" href="ms-settings:display">설정 열기</a>
-    </div>
-    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
-    <p class="crumb"><b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>디스플레이</b><span class="sep">›</span><b>여러 디스플레이</b></p>
-    <ol class="steps">
-      <li><b>여러 디스플레이</b>를 펼칩니다.</li>
-      <li><b>모니터 연결을 기반으로 창 위치 기억</b> ✓ — 모니터를 뺐다 다시 꽂으면 창이 원래 화면·위치로 돌아옵니다.</li>
-      <li><b>모니터 연결이 끊어지면 창을 최소화합니다</b> ✓ — 노트북만 들고 나갔을 때 창이 보이지 않는 화면에 남지 않습니다.</li>
-      <li><b>디스플레이 간 커서 이동 쉽게 만들기</b> ✓ (22H2 이상) — 두 화면 해상도가 달라도 마우스가 모서리에 걸리지 않습니다.</li>
-    </ol>
-    <details>
-      <summary>Windows 10은 이렇게</summary>
-      <div class="body">이 세 옵션은 Windows 11에만 있습니다. 창이 보이지 않는 화면에 남았다면, 작업 표시줄에서 그 창을 클릭한 뒤 <span class="kbd">Win</span> + <span class="kbd">Shift</span> + <span class="kbd">←</span>/<span class="kbd">→</span> 로 끌어오세요.</div>
-    </details>
-  </div>
-
-  <!-- e. 작업 표시줄 -->
-  <div class="card">
-    <div class="head">
-      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="15" x2="21" y2="15"/></svg></div>
-      <div class="ttl">
-        <h2>작업 표시줄을 두 화면에</h2>
-        <p class="desc">두 번째 모니터에도 작업 표시줄을 두고, 어느 화면에 어떤 앱 아이콘을 보일지 정합니다.</p>
-      </div>
-      <a class="btn primary sm launch" href="ms-settings:taskbar">설정 열기</a>
-    </div>
-    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
-    <p class="crumb"><b>설정</b><span class="sep">›</span><b>개인 설정</b><span class="sep">›</span><b>작업 표시줄</b><span class="sep">›</span><b>작업 표시줄 동작</b></p>
-    <ol class="steps">
-      <li>맨 아래 <b>작업 표시줄 동작</b>을 펼칩니다.</li>
-      <li><b>모든 디스플레이에 내 작업 표시줄 표시</b> ✓ — 두 번째 모니터에도 작업 표시줄이 생깁니다.</li>
-      <li><b>여러 디스플레이를 사용하는 경우 다음에서 작업 표시줄 앱을 표시합니다</b> — 셋 중 하나:
-        <ul class="sub">
-          <li><b>모든 작업 표시줄</b> — 어느 화면에서든 모든 앱 아이콘이 보입니다.</li>
-          <li><b>주 작업 표시줄 및 창이 열려 있는 작업 표시줄</b> — 주 화면엔 전부, 다른 화면엔 그 화면의 창만. <b>가장 무난한 선택</b>입니다.</li>
-          <li><b>창이 열려 있는 작업 표시줄</b> — 각 화면에 그 화면의 창만.</li>
-        </ul>
-      </li>
-    </ol>
-    <details>
-      <summary>Windows 10은 이렇게</summary>
-      <div class="body">작업 표시줄 설정의 <b>여러 디스플레이</b> 섹션에 같은 항목이 있습니다 — <b>모든 디스플레이에 작업 표시줄 표시</b>, <b>작업 표시줄 단추 표시 위치</b>.</div>
-    </details>
-  </div>
-
-  <!-- f. 배경 화면 -->
-  <div class="card">
-    <div class="head">
-      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
-      <div class="ttl">
-        <h2>배경 화면 — 이어 붙이기 · 화면마다 다르게</h2>
-        <p class="desc">파노라마 한 장을 두 화면에 걸치거나, 화면마다 다른 사진을 둡니다.</p>
-      </div>
-      <a class="btn primary sm launch" href="ms-settings:personalization-background">설정 열기</a>
-    </div>
-    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
-    <p class="crumb"><b>설정</b><span class="sep">›</span><b>개인 설정</b><span class="sep">›</span><b>배경</b></p>
-    <ol class="steps">
-      <li><b>배경 개인 설정</b>을 「사진」으로 두고 사진을 고릅니다.</li>
-      <li>한 장을 두 화면에 <b>이어 붙이려면</b> 「데스크톱 이미지에 맞게 선택」 드롭다운에서 <b>스팬</b>(범위)을 고릅니다. 가로로 긴 파노라마 사진이 잘 맞습니다.</li>
-      <li>화면마다 <b>다른 사진</b>을 두려면 「최근 이미지」의 사진을 <b>마우스 오른쪽 클릭 → 모니터 1에 설정 / 모니터 2에 설정</b>.</li>
-    </ol>
-    <p class="note">「사진 찾아보기」로 고른 사진도 최근 이미지에 들어가므로, 같은 방법으로 화면별 지정이 됩니다. 몇 번 모니터인지는 디스플레이 설정의 [식별]로 확인하세요.</p>
-    <details>
-      <summary>Windows 10은 이렇게</summary>
-      <div class="body">같은 위치입니다. 「맞춤 선택」 드롭다운에서 <b>스팬</b>, 최근 이미지 오른쪽 클릭으로 모니터별 지정.</div>
-    </details>
-  </div>
-
-  <!-- g. 창 스냅·이동 -->
-  <div class="card">
-    <div class="head">
-      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
-      <div class="ttl">
-        <h2>창 나누기 · 옆 모니터로 옮기기</h2>
-        <p class="desc">마우스로 끌지 않아도 키 하나로 창을 붙이고 옮깁니다. 듀얼모니터에서 가장 자주 쓰는 기능입니다.</p>
-      </div>
-      <a class="btn primary sm launch" href="ms-settings:multitasking">설정 열기</a>
-    </div>
-    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
-    <p class="crumb"><b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>멀티태스킹</b><span class="sep">›</span><b>창 스냅</b></p>
-    <ol class="steps">
-      <li><b>창 스냅</b>이 켜져 있는지 확인합니다. (기본은 켜짐)</li>
-      <li><span class="kbd">Win</span> + <span class="kbd">Shift</span> + <span class="kbd">←</span>/<span class="kbd">→</span> — 지금 보는 창을 <b>옆 모니터로 통째로</b> 옮깁니다. 이 키 하나만 외워도 됩니다.</li>
-      <li><span class="kbd">Win</span> + <span class="kbd">←</span>/<span class="kbd">→</span> — 창을 화면 왼쪽/오른쪽 절반에 붙입니다. 창 제목을 화면 가장자리로 끌어도 됩니다.</li>
-      <li><span class="kbd">Win</span> + <span class="kbd">Z</span> — 2분할·3분할 <b>스냅 레이아웃</b>을 고릅니다. 창의 최대화 버튼 위에 마우스를 올려도 나옵니다.</li>
-    </ol>
-    <details>
-      <summary>Windows 10은 이렇게</summary>
-      <div class="body">스냅 레이아웃(<span class="kbd">Win</span> + <span class="kbd">Z</span>)은 없습니다. 반 화면 붙이기와 옆 모니터로 옮기기 키는 같습니다.</div>
-    </details>
-  </div>
-
-  <!-- h. 야간 모드 -->
-  <div class="card">
-    <div class="head">
-      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
-      <div class="ttl">
-        <h2>야간 모드 (눈 편하게)</h2>
-        <p class="desc">저녁에 두 화면 모두 따뜻한 색으로 바꿔 눈부심을 줄입니다.</p>
-      </div>
-      <a class="btn primary sm launch" href="ms-settings:nightlight">설정 열기</a>
-    </div>
-    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
-    <p class="crumb"><b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>디스플레이</b><span class="sep">›</span><b>야간 모드</b></p>
-    <ol class="steps">
-      <li><b>야간 모드</b> 스위치를 켭니다. 두 화면에 함께 적용되며, 「강도」 슬라이더로 조절합니다.</li>
-      <li><b>야간 모드 예약</b>을 켜고 「일몰~일출」 또는 시간을 정해 두면 자동으로 켜지고 꺼집니다.</li>
-    </ol>
-    <p class="note">HDR 모니터라면 디스플레이 페이지의 <b>HDR</b> 항목에서 「HDR 사용」을 켤 수 있습니다. 모니터마다 따로 켭니다. 일반 문서 작업에는 꺼 두는 편이 색이 자연스럽습니다.</p>
-  </div>
-
-  <!-- i. 노트북 덮개 -->
-  <div class="card">
-    <div class="head">
-      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/></svg></div>
-      <div class="ttl">
-        <h2>노트북 덮개를 닫아도 계속 쓰기</h2>
-        <p class="desc">외부 모니터만 보고 일할 때, 노트북을 덮어도 꺼지지 않게 합니다.</p>
-      </div>
-      <a class="btn primary sm launch" href="ms-settings:powersleep">설정 열기</a>
-    </div>
-    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
-    <p class="crumb"><b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>전원 및 배터리</b><span class="sep">›</span><b>덮개, 전원 및 절전 단추 컨트롤</b></p>
-    <ol class="steps">
-      <li><b>Windows 11 24H2 이상</b>: <b>덮개, 전원 및 절전 단추 컨트롤</b>을 펼치고 <b>덮개를 닫으면</b>을 「전원 연결 시」와 「배터리 사용 시」 각각 <b>아무 작업 안 함</b>으로 바꿉니다.</li>
-      <li><b>23H2 이하 · Windows 10</b>: 아래 명령을 복사해 <span class="kbd">Win</span> + <span class="kbd">R</span> 에 붙여넣고 Enter → 왼쪽 <b>덮개를 닫으면 수행되는 작업 선택</b> → 「아무 것도 안 함」 → <b>변경 내용 저장</b>.
-        <div class="tblwrap"><table class="tbl"><tbody><tr><td class="k"><code>powercfg.cpl</code></td><td>제어판 전원 옵션</td><td class="k"><button class="copy2" type="button" data-copy-text="powercfg.cpl">복사</button></td></tr></tbody></table></div>
-      </li>
-    </ol>
-    <p class="note">덮어 두면 노트북 열이 잘 빠지지 않습니다. <b>거치대에 세워 두고</b> 외부 키보드·마우스를 쓰는 편이 안전합니다.</p>
-  </div>
-
-  <!-- j. 소리 -->
-  <div class="card">
-    <div class="head">
-      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div>
-      <div class="ttl">
-        <h2>소리가 갑자기 모니터로 나갈 때</h2>
-        <p class="desc">HDMI·DisplayPort로 꽂으면 소리가 모니터 스피커로 넘어가 작게 들릴 수 있습니다.</p>
-      </div>
-      <a class="btn primary sm launch" href="ms-settings:sound">설정 열기</a>
-    </div>
-    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
-    <p class="crumb"><b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>소리</b><span class="sep">›</span><b>출력</b></p>
-    <ol class="steps">
-      <li><b>출력 › 소리를 재생할 위치 선택</b>에서 원래 쓰던 스피커나 헤드셋을 고릅니다.</li>
-      <li>영상 회의 앱은 자체 설정에 출력 장치가 따로 있으니, 거기서도 한 번 확인합니다.</li>
-    </ol>
-    <p class="note">작업 표시줄 오른쪽 스피커 아이콘을 누르고 슬라이더 옆 <b>〉</b>를 누르면 출력 장치를 바로 바꿀 수도 있습니다.</p>
-  </div>
-
-  <!-- ── 단축키 ── -->
-  <div class="sec">
-    <h2 class="big">듀얼모니터 단축키</h2>
-    <p class="lead">마우스로 창을 끌고 다니는 시간을 줄여 줍니다. 위 두 줄만 외워도 충분합니다.</p>
-  </div>
-  <div class="card">
-    <div class="head">
-      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg></div>
-      <div class="ttl"><h2>키 조합</h2><p class="desc">Windows 11·10 공통. (Win = 키보드의 창 모양 키)</p></div>
-    </div>
-    <div class="tblwrap">
-      <table class="tbl">
-        <thead><tr><th>키</th><th>하는 일</th></tr></thead>
-        <tbody>
-          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">Shift</span> + <span class="kbd">←</span>/<span class="kbd">→</span></td><td><b>지금 보는 창을 옆 모니터로</b> 옮깁니다</td></tr>
-          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">P</span></td><td>화면 모드 선택 — PC 화면만 / 복제 / <b>확장</b> / 두 번째 화면만</td></tr>
-          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">←</span>/<span class="kbd">→</span></td><td>창을 화면 왼쪽/오른쪽 절반에 붙입니다</td></tr>
-          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">↑</span>/<span class="kbd">↓</span></td><td>창 최대화 / 최소화</td></tr>
-          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">Z</span></td><td>스냅 레이아웃(2·3분할) 열기 — Windows 11</td></tr>
-          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">D</span></td><td>바탕 화면 보기 / 되돌리기</td></tr>
-          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">Home</span></td><td>지금 보는 창만 남기고 모두 최소화</td></tr>
-          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">Tab</span></td><td>작업 보기 — 열린 창과 가상 데스크톱을 한눈에</td></tr>
-          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">Ctrl</span> + <span class="kbd">←</span>/<span class="kbd">→</span></td><td>가상 데스크톱 전환</td></tr>
-          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">K</span></td><td>무선 디스플레이(캐스트)에 연결</td></tr>
-          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">I</span></td><td>설정 열기</td></tr>
-          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span class="kbd">B</span></td><td>화면이 검게 멈췄을 때 그래픽 드라이버 다시 시작 (삑 소리가 납니다)</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- ── 문제 해결 ── -->
-  <div class="sec" id="trouble">
-    <h2 class="big">문제 해결</h2>
-    <p class="lead">증상을 누르면 해결 순서가 나옵니다. 각 항목의 버튼은 관련 설정 화면을 엽니다.</p>
-  </div>
-  <div class="card">
-    <div class="head">
-      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
-      <div class="ttl"><h2>자주 겪는 8가지</h2><p class="desc">위에서부터 순서대로 해 보세요. 대부분 두 번째 단계 안에서 해결됩니다.</p></div>
-    </div>
-
-    <details>
-      <summary>두 번째 모니터가 아예 안 잡혀요 (신호 없음)</summary>
-      <div class="body">
-        <ol>
-          <li>케이블을 <b>양쪽 다</b> 뺐다가 다시 꽂고, 모니터 자체 메뉴의 <b>입력 소스</b>(HDMI 1 · DP 등)가 꽂은 단자와 같은지 확인합니다.</li>
-          <li>디스플레이 설정 › <b>여러 디스플레이 › [감지]</b>.</li>
-          <li><span class="kbd">Win</span> + <span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span class="kbd">B</span> — 그래픽 드라이버를 다시 시작합니다.</li>
-          <li>다른 단자·다른 케이블로 바꿔 봅니다. USB-C는 <b>영상 출력(DP Alt) 지원 단자</b>여야 합니다 — 충전 전용 단자도 있습니다.</li>
-          <li>그래픽 드라이버를 업데이트합니다(노트북 제조사 사이트 또는 인텔·엔비디아·AMD).</li>
-        </ol>
-        <div class="launchwrap"><a class="btn outline sm launch" href="ms-settings:display">디스플레이 설정 열기</a><p class="hint"></p></div>
-      </div>
-    </details>
-
-    <details>
-      <summary>글자가 흐리거나, 노트북과 모니터 글자 크기가 달라요</summary>
-      <div class="body">
-        <ol>
-          <li>디스플레이 설정에서 <b>각 모니터를 따로 선택</b>해 배율을 「(권장)」 값으로 맞춥니다.</li>
-          <li>「사용자 지정 배율」을 썼다면 해제하고 로그아웃 → 다시 로그인합니다.</li>
-          <li>특정 앱만 흐리면 그 앱 실행 파일 오른쪽 클릭 → 속성 → 호환성 → <b>높은 DPI 설정 변경</b>에서 「높은 DPI 조정 동작 재정의」를 「응용 프로그램」으로.</li>
-        </ol>
-        <div class="launchwrap"><a class="btn outline sm launch" href="ms-settings:display">디스플레이 설정 열기</a><p class="hint"></p></div>
-      </div>
-    </details>
-
-    <details>
-      <summary>1번·2번이 실제 위치와 반대예요</summary>
-      <div class="body">
-        번호는 그래픽 단자 순서라 바꿀 수 없고, <b>바꿀 필요도 없습니다.</b> 미리보기의 상자를 실제 위치대로 끌어 놓고 [적용]한 뒤, 주로 보는 화면에만 「이 디스플레이를 주 모니터로 만들기」를 체크하면 끝입니다.
-        <div class="launchwrap"><a class="btn outline sm launch" href="ms-settings:display">디스플레이 설정 열기</a><p class="hint"></p></div>
-      </div>
-    </details>
-
-    <details>
-      <summary>마우스가 엉뚱한 쪽으로 넘어가거나 경계에서 걸려요</summary>
-      <div class="body">
-        <ol>
-          <li>미리보기에서 두 상자의 <b>위아래 높이를 맞춥니다</b>. 상자가 어긋난 만큼 경계에 「벽」이 생깁니다.</li>
-          <li>여러 디스플레이 › <b>디스플레이 간 커서 이동 쉽게 만들기</b>를 체크합니다(22H2 이상).</li>
-        </ol>
-        <div class="launchwrap"><a class="btn outline sm launch" href="ms-settings:display">디스플레이 설정 열기</a><p class="hint"></p></div>
-      </div>
-    </details>
-
-    <details>
-      <summary>앱이 매번 다른 모니터에 열려요</summary>
-      <div class="body">
-        <ol>
-          <li>주로 보는 화면을 <b>주 모니터</b>로 지정합니다. 새 창은 기본적으로 주 모니터에 뜹니다.</li>
-          <li>여러 디스플레이 › <b>모니터 연결을 기반으로 창 위치 기억</b>을 체크합니다.</li>
-          <li>앱은 <b>마지막으로 닫은 위치</b>를 기억합니다. 원하는 화면으로 옮긴 뒤 한 번 닫았다 여세요.</li>
-        </ol>
-        <div class="launchwrap"><a class="btn outline sm launch" href="ms-settings:display">디스플레이 설정 열기</a><p class="hint"></p></div>
-      </div>
-    </details>
-
-    <details>
-      <summary>해상도나 주사율이 목록에 없어요</summary>
-      <div class="body">
-        <ol>
-          <li>케이블·단자의 대역폭 한계가 대부분입니다. <b>DisplayPort</b> 또는 <b>HDMI 2.0 이상</b> 케이블로 바꿉니다.</li>
-          <li>도킹 스테이션·젠더를 빼고 <b>직접</b> 연결해 봅니다. 저가 젠더는 1080p 60Hz까지만 되는 것이 많습니다.</li>
-          <li>그래픽 드라이버를 업데이트합니다.</li>
-        </ol>
-        <div class="launchwrap"><a class="btn outline sm launch" href="ms-settings:display-advanced">고급 디스플레이 열기</a><p class="hint"></p></div>
-      </div>
-    </details>
-
-    <details>
-      <summary>모니터를 꽂으면 노트북 화면이 꺼져요</summary>
-      <div class="body">
-        화면 모드가 「두 번째 화면만」입니다. <span class="kbd">Win</span> + <span class="kbd">P</span> 를 눌러 <b>확장</b>을 고르세요. 키보드가 안 먹으면 아래 명령을 <span class="kbd">Win</span> + <span class="kbd">R</span> 에 붙여넣습니다.
-        <div class="tblwrap"><table class="tbl"><tbody><tr><td class="k"><code>displayswitch /extend</code></td><td>화면 모드를 「확장」으로 즉시 전환</td><td class="k"><button class="copy2" type="button" data-copy-text="displayswitch /extend">복사</button></td></tr></tbody></table></div>
-      </div>
-    </details>
-
-    <details>
-      <summary>확장을 골랐는데 두 화면이 똑같이 나와요</summary>
-      <div class="body">
-        <ol>
-          <li><span class="kbd">Win</span> + <span class="kbd">P</span> 를 다시 눌러 「확장」이 선택돼 있는지, 디스플레이 설정 드롭다운도 「디스플레이 확장」인지 확인합니다.</li>
-          <li>그래픽 제어판(인텔 그래픽 명령 센터 · NVIDIA 제어판 · AMD 소프트웨어)에서 <b>복제(클론)</b> 설정이 켜져 있으면 끕니다.</li>
-        </ol>
-        <div class="launchwrap"><a class="btn outline sm launch" href="ms-settings:display">디스플레이 설정 열기</a><p class="hint"></p></div>
-      </div>
-    </details>
-  </div>
-
-  <!-- ── Win+R 명령 모음 ── -->
-  <div class="sec">
-    <h2 class="big">버튼이 안 열리면 — 실행창(Win+R) 명령 모음</h2>
-    <p class="lead">사내 정책 등으로 버튼이 막힌 PC에서는 <span class="kbd">Win</span> + <span class="kbd">R</span> 을 누르고 명령을 붙여넣으세요. 메모장에 저장해 두면 언제든 씁니다.</p>
-  </div>
-  <div class="card">
-    <div class="head">
-      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div>
-      <div class="ttl"><h2>설정 화면 바로 열기 명령</h2><p class="desc">Windows 11·10 공통. 「복사」 → Win+R → 붙여넣기 → Enter.</p></div>
-    </div>
-    <div class="tblwrap">
-      <table class="tbl">
-        <thead><tr><th>명령</th><th>여는 곳</th><th></th></tr></thead>
-        <tbody>
-          <tr><td class="k"><code>ms-settings:display</code></td><td>디스플레이 — 모드·배치·주 모니터·배율·해상도·방향·여러 디스플레이 옵션</td><td class="k"><button class="copy2" type="button" data-copy-text="ms-settings:display">복사</button></td></tr>
-          <tr><td class="k"><code>ms-settings:display-advanced</code></td><td>고급 디스플레이 — 재생 빈도 (Win11은 디스플레이 페이지로 열림 → 아래로 내려 「고급 디스플레이」)</td><td class="k"><button class="copy2" type="button" data-copy-text="ms-settings:display-advanced">복사</button></td></tr>
-          <tr><td class="k"><code>ms-settings:taskbar</code></td><td>작업 표시줄 — 모든 디스플레이에 표시·앱 표시 위치</td><td class="k"><button class="copy2" type="button" data-copy-text="ms-settings:taskbar">복사</button></td></tr>
-          <tr><td class="k"><code>ms-settings:personalization-background</code></td><td>배경 — 스팬·모니터별 다른 배경</td><td class="k"><button class="copy2" type="button" data-copy-text="ms-settings:personalization-background">복사</button></td></tr>
-          <tr><td class="k"><code>ms-settings:multitasking</code></td><td>멀티태스킹 — 창 스냅</td><td class="k"><button class="copy2" type="button" data-copy-text="ms-settings:multitasking">복사</button></td></tr>
-          <tr><td class="k"><code>ms-settings:nightlight</code></td><td>야간 모드</td><td class="k"><button class="copy2" type="button" data-copy-text="ms-settings:nightlight">복사</button></td></tr>
-          <tr><td class="k"><code>ms-settings:powersleep</code></td><td>전원 및 배터리 — 노트북 덮개 설정 (24H2 이상)</td><td class="k"><button class="copy2" type="button" data-copy-text="ms-settings:powersleep">복사</button></td></tr>
-          <tr><td class="k"><code>ms-settings:sound</code></td><td>소리 — 출력 장치</td><td class="k"><button class="copy2" type="button" data-copy-text="ms-settings:sound">복사</button></td></tr>
-          <tr><td class="k"><code>powercfg.cpl</code></td><td>제어판 전원 옵션 — 덮개 설정 (23H2 이하 · Windows 10)</td><td class="k"><button class="copy2" type="button" data-copy-text="powercfg.cpl">복사</button></td></tr>
-          <tr><td class="k"><code>displayswitch /extend</code></td><td>화면 모드를 「확장」으로 즉시 전환 (Win+P와 같음)</td><td class="k"><button class="copy2" type="button" data-copy-text="displayswitch /extend">복사</button></td></tr>
-          <tr><td class="k"><code>displayswitch /clone</code></td><td>화면 모드를 「복제」로 즉시 전환</td><td class="k"><button class="copy2" type="button" data-copy-text="displayswitch /clone">복사</button></td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="note">Edge·Chrome 주소창에 <b>ms-settings:display</b>를 직접 입력해도 열립니다.</p>
-  </div>
-
-  <!-- ── macOS ── -->
-  <div class="sec">
-    <h2 class="big">macOS에서는</h2>
-    <p class="lead">Mac은 시스템 설정 › 디스플레이 한 곳에서 거의 다 끝납니다. 아래 버튼은 macOS 13(Ventura) 이상에서 동작합니다.</p>
-  </div>
-  <div class="card">
-    <details id="mac">
-      <summary>macOS 설정 순서 펼치기</summary>
-      <div class="body">
-        <div class="cta" style="justify-content:flex-start;margin-top:6px">
-          <a class="btn primary sm launch" href="x-apple.systempreferences:com.apple.Displays-Settings.extension">디스플레이 설정 열기</a>
-          <a class="btn outline sm launch" href="x-apple.systempreferences:com.apple.Desktop-Settings.extension">데스크탑 및 Dock 열기</a>
-          <a class="btn outline sm launch" href="x-apple.systempreferences:com.apple.Wallpaper-Settings.extension">배경화면 열기</a>
-        </div>
-        <p class="hint"></p>
-        <ol class="steps">
-          <li>Apple 메뉴 › <b>시스템 설정</b> › <b>디스플레이</b>. 연결된 모니터가 위쪽에 나란히 보입니다.</li>
-          <li>외부 모니터를 클릭하고 <b>다음으로 사용</b>에서 <b>확장된 디스플레이</b>(넓게 쓰기) / <b>주 디스플레이</b> / <b>미러링</b> 중 고릅니다.</li>
-          <li><b>정렬…</b>을 눌러 화면 상자를 실제 위치대로 끌어 놓습니다. 위쪽의 <b>흰 막대(메뉴 막대)</b>를 다른 상자로 끌면 주 디스플레이가 바뀝니다.</li>
-          <li><b>데스크탑 및 Dock</b> › 맨 아래 <b>Mission Control</b> › <b>디스플레이별로 공간 분리</b> — 켜면 모니터마다 메뉴 막대와 전체 화면 앱이 따로 생깁니다(바꾼 뒤 로그아웃 필요).</li>
-          <li><b>배경화면</b>에서 모니터별로 다른 사진을 고릅니다.</li>
-        </ol>
-        <p class="note">Safari에서 버튼이 반응하지 않으면 위 경로대로 직접 여세요. 창을 옆 모니터로 옮기는 단축키는 macOS에 기본으로 없습니다 — 창 제목을 끌어 옮기거나 Mission Control(<span class="kbd">Ctrl</span> + <span class="kbd">↑</span>)에서 옮깁니다.</p>
-      </div>
-    </details>
-  </div>
-
-  <!-- ── 더 알아보기 ── -->
-  <div class="card">
-    <div class="head">
-      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
-      <div class="ttl"><h2>더 알아보기</h2><p class="desc">이 안내서가 참고한 공식 문서입니다. 인터넷이 되는 곳에서 열립니다.</p></div>
-    </div>
-    <ul class="links">
-      <li><a href="https://support.microsoft.com/ko-kr/windows/329c6962-5a4d-b481-7baa-bec9671f728a" target="_blank" rel="noopener">Windows에서 여러 모니터를 사용하는 방법</a><small>Microsoft 지원 — Windows 11 · 10 탭 구분</small></li>
-      <li><a href="https://support.microsoft.com/ko-kr/windows/5b46f4a4-9634-06bb-7622-f960facdfd49" target="_blank" rel="noopener">Windows에서 외부 모니터 연결 문제 해결</a><small>Microsoft 지원 — 감지 안 됨·검은 화면</small></li>
-      <li><a href="https://support.microsoft.com/ko-kr/windows/dcc61a57-8ff0-cffe-9796-cb9706c75eec" target="_blank" rel="noopener">Windows의 키보드 바로 가기</a><small>Microsoft 지원 — 전체 단축키 목록</small></li>
-      <li><a href="https://www.dell.com/support/kbdoc/ko-kr/000024883/" target="_blank" rel="noopener">Windows 11 및 10 다중 모니터 설정</a><small>Dell 지식 문서 — 단자·케이블 규격 설명</small></li>
-      <li><a href="https://support.apple.com/ko-kr/guide/mac-help/mh40768/mac" target="_blank" rel="noopener">Mac에서 디스플레이 설정 변경하기</a><small>Apple 지원</small></li>
-    </ul>
   </div>
 
   <!-- 상호연결: 영상 상태는 자료 페이지가 들고 있고, 이 파일은 역링크만 둔다 -->
@@ -727,35 +314,31 @@ footer .lm .l1{color:var(--wordmark)} footer .lm .l2{color:var(--foreground)}
 
 <script>
 (function(){
-  /* ── 1. 환경 감지 → 배지·본문 분기 ── */
+  /* ── 1. 환경 감지 → 배지 ── */
   var ua = navigator.userAgent || '';
   var uad = navigator.userAgentData;
   var platform = (uad && uad.platform) || navigator.platform || '';
   var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
   var isWin = /Win/i.test(platform) || /Windows NT/i.test(ua);
-  var isMac = !isWin && !isMobile && (/Mac/i.test(platform) || /Macintosh/.test(ua));
-  var os = isWin ? 'win' : (isMac ? 'mac' : 'other');
+  var os = isWin && !isMobile ? 'win' : 'other';
   document.body.classList.add('os-' + os);
 
   var badge = document.getElementById('env');
   function setBadge(text, warn){ badge.textContent = text; badge.className = 'env' + (warn ? ' warn' : ''); }
   if (os === 'win') {
-    setBadge('감지된 환경: Windows · 「설정 열기」 버튼을 쓸 수 있습니다');
+    setBadge('Windows · 「설정 열기」 버튼을 쓸 수 있습니다');
     if (uad && uad.getHighEntropyValues) {
       uad.getHighEntropyValues(['platformVersion']).then(function(v){
         var major = parseInt(String(v.platformVersion || '0').split('.')[0], 10);
-        if (major >= 13) setBadge('감지된 환경: Windows 11 · 「설정 열기」 버튼을 쓸 수 있습니다');
-        else if (major > 0) setBadge('감지된 환경: Windows 10 · 버튼은 동작하며, 각 카드의 「Windows 10은 이렇게」를 함께 보세요');
+        if (major >= 13) setBadge('Windows 11 · 「설정 열기」 버튼을 쓸 수 있습니다');
+        else if (major > 0) setBadge('Windows 10 · 버튼은 동작하며 화면 이름이 조금 다릅니다');
       }).catch(function(){});
     }
-  } else if (os === 'mac') {
-    setBadge('감지된 환경: macOS · 아래 「macOS에서는」 섹션의 버튼을 쓰세요');
-    var mac = document.getElementById('mac'); if (mac) mac.open = true;
   } else {
-    setBadge('이 기기에서는 「설정 열기」 버튼이 동작하지 않습니다 — 각 카드의 수동 경로를 따라가세요 (PC에서 열면 버튼이 동작합니다)', true);
+    setBadge('이 기기에서는 「설정 열기」 버튼이 동작하지 않습니다 — Windows PC에서 열어 주세요', true);
   }
 
-  /* ── 2. 설정 열기 버튼: 확인창 힌트 / 비대상 OS 차단 ── */
+  /* ── 2. 설정 열기 버튼: 확인창 힌트 / 비대상 OS 차단 (findHint 순서: launchwrap → .body → .card) ── */
   var hintTimer = {};
   function findHint(a){
     var wrap = a.closest('.launchwrap'); if (wrap && wrap.querySelector('.hint')) return wrap.querySelector('.hint');
@@ -771,41 +354,16 @@ footer .lm .l1{color:var(--wordmark)} footer .lm .l2{color:var(--foreground)}
   }
   document.querySelectorAll('a.launch').forEach(function(a){
     a.addEventListener('click', function(e){
-      var href = a.getAttribute('href') || '';
-      var wantWin = href.indexOf('ms-settings:') === 0;
-      var wantMac = href.indexOf('x-apple.') === 0;
-      var ok = (wantWin && os === 'win') || (wantMac && os === 'mac');
-      if (!ok) {
+      if (os !== 'win') {
         e.preventDefault();
-        showHint(a, '이 버튼은 ' + (wantWin ? 'Windows' : 'macOS') + ' PC에서만 동작합니다. 위의 수동 경로를 따라가세요.');
+        showHint(a, '이 버튼은 Windows PC에서만 동작합니다. 설정 › 시스템 › 디스플레이로 직접 여세요.');
         return;
       }
-      showHint(a, '브라우저 확인창이 뜨면 [열기]를 누르세요. 아무 반응이 없으면 수동 경로로 여세요.');
+      showHint(a, '브라우저 확인창이 뜨면 [열기]를 누르세요. 반응이 없으면 바탕 화면 오른쪽 클릭 → 디스플레이 설정.');
     });
   });
 
-  /* ── 3. 복사 버튼 (행별) ── */
-  function copyText(text, btn, label){
-    function done(){
-      btn.textContent = '복사됨 ✓'; btn.classList.add('done');
-      setTimeout(function(){ btn.textContent = label; btn.classList.remove('done'); }, 1800);
-    }
-    function fallback(){
-      var ta = document.createElement('textarea');
-      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-      document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); done(); } catch (err) { btn.textContent = '복사 실패'; }
-      document.body.removeChild(ta);
-    }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(done, fallback);
-    } else { fallback(); }
-  }
-  document.querySelectorAll('[data-copy-text]').forEach(function(btn){
-    btn.addEventListener('click', function(){ copyText(btn.getAttribute('data-copy-text'), btn, '복사'); });
-  });
-
-  /* ── 4. 빠른 시작 체크 상태 저장 (이 브라우저에만) ── */
+  /* ── 3. 3단계 체크 상태 저장 (이 브라우저에만) ── */
   var KEY = 'lm-dual-monitor-quickstart';
   var boxes = Array.prototype.slice.call(document.querySelectorAll('input[data-check]'));
   var progress = document.getElementById('progress');
@@ -828,16 +386,6 @@ footer .lm .l1{color:var(--wordmark)} footer .lm .l2{color:var(--foreground)}
     });
   });
   render();
-
-  /* ── 5. 인쇄 시 접힌 항목 모두 펼치기 ── */
-  var opened = [];
-  window.addEventListener('beforeprint', function(){
-    opened = [];
-    document.querySelectorAll('details:not([open])').forEach(function(d){ d.open = true; opened.push(d); });
-  });
-  window.addEventListener('afterprint', function(){
-    opened.forEach(function(d){ d.open = false; }); opened = [];
-  });
 })();
 </script>
 </body>
