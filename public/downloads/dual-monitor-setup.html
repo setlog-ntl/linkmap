@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>듀얼모니터 간편설정 — 버튼 한 번으로 여는 설정 안내서 | Linkmap 무료배포 자료 2번</title>
+<meta name="description" content="모니터 두 대를 연결한 뒤 확장·배치·배율·작업 표시줄까지, 버튼을 누르면 Windows 설정 화면이 바로 열리는 따라하기 안내서. 자주 겪는 문제 해결과 단축키까지 한 페이지에 담았습니다.">
+<!--
+  Linkmap 무료배포 자료 2번 — 오프라인 배포본
+  · 이 파일은 외부 요청 0건인 단일 HTML입니다. 인터넷이 막힌 PC에서도 그대로 열립니다.
+  · 「설정 열기」 버튼은 Windows의 ms-settings: 링크(공식 URI 스킴)와 macOS의
+    x-apple.systempreferences: 링크를 씁니다. 브라우저가 "설정을 열까요?" 확인창을 띄우며,
+    이 페이지를 iframe 안에 넣으면 동작하지 않습니다(최상위 문서로만 열 것).
+  · 최신본·영상 연결은 https://www.linkmap.biz/resources/dual-monitor-setup 이 담당합니다.
+    (영상 발행 상태가 바뀌어도 이 파일은 고칠 필요가 없도록 역링크만 둡니다)
+  · 원천: DB free_resources (관리자 화면 /admin/resources) — 문구 변경 시 그쪽을 먼저 고칠 것
+-->
+<style>
+/* Linkmap Circuit Blue-Green v2 — src/app/globals.css 토큰과 동일 값 */
+:root{
+  --radius:.75rem;
+  --background:oklch(0.97 0.005 250);
+  --foreground:oklch(0.20 0.03 250);
+  --card:oklch(1.0 0 0);
+  --muted-foreground:oklch(0.55 0.02 250);
+  --muted:oklch(0.96 0.005 250);
+  --border:oklch(0.92 0.005 250);
+  --brand-blue:oklch(0.42 0.12 255);
+  --brand-green:oklch(0.80 0.19 160);
+  --brand-blue-light:oklch(0.95 0.02 255);
+  --brand-green-light:oklch(0.95 0.04 160);
+  --primary-foreground:oklch(0.98 0 0);
+  --code-bg:oklch(0.16 0.025 250);
+  --code-fg:oklch(0.93 0.005 250);
+  --wordmark:#38bdf8;
+  --warn:#d97706;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --background:oklch(0.16 0.025 250);
+    --foreground:oklch(0.93 0.005 250);
+    --card:oklch(0.20 0.025 250);
+    --muted-foreground:oklch(0.65 0.015 250);
+    --muted:oklch(0.24 0.02 250);
+    --border:oklch(0.30 0.02 250);
+    --brand-blue:oklch(0.70 0.12 255);
+    --brand-green:oklch(0.75 0.17 160);
+    --brand-blue-light:oklch(0.25 0.05 255);
+    --brand-green-light:oklch(0.25 0.05 160);
+    --primary-foreground:oklch(0.15 0.03 250);
+    --code-bg:oklch(0.13 0.02 250);
+    --warn:#fbbf24;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;overflow-x:hidden;scroll-behavior:smooth}
+body{
+  background:var(--background); color:var(--foreground); line-height:1.65;
+  font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,Roboto,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+  -webkit-tap-highlight-color:transparent;
+}
+a{color:var(--brand-blue)}
+:focus-visible{outline:2px solid var(--brand-blue);outline-offset:2px}
+.wrap{max-width:768px;margin:0 auto;padding:0 16px 64px}
+
+/* ── 상단 바 (linkmap.biz 헤더와 동일 구성) ── */
+.topbar{border-bottom:1px solid var(--border);background:var(--background)}
+.topbar .inner{max-width:768px;margin:0 auto;height:56px;padding:0 16px;display:flex;align-items:center;gap:8px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:20px;text-decoration:none;color:inherit}
+.brand .mark{width:32px;height:32px;display:block;flex-shrink:0}
+.mark{background:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMTQzIiB2aWV3Qm94PSI1IDUgMTkyIDEzMyIgZmlsbD0ibm9uZSI+CjxwYXRoIGQ9Ik0gMTk1LjA2LDU3LjY0IEMgMTk1LjA2LDQ3Ljc4IDE4OC44MywzOS42OCAxNzkuNTQsMzguMDYgViAyNy43OCBDIDE3OS41NCwyMS42NiAxNzUuMjcsMTcuMjggMTY5LjcyLDE3LjI4IEggMTQ1LjMgQyAxNDIuNDIsMTAuMDYgMTM2LjY4LDcgMTI5LjEyLDcgQyAxMjEuMTEsNyAxMTQuOTEsMTEuNzkgMTEyLjYyLDE3LjI4IEggMjkuMjIgQyAyMi44OSwxNy4yOCAxOS4yOCwyMy4wOCAxOS4yOCwyNy45NiBWIDc2LjEzIEMgMTEuNjgsNzkuMzYgOC4wNSw4Ny43NyA4LjA1LDk0LjM5IEMgOC4wNSwxMDIuMjggMTIuMjYsMTA5LjIxIDE5LjE4LDExMi45MyBWIDEyMC4wNSBDIDE5LjE4LDEyNi4xNyAyMy45OSwxMzAuMTEgMjguNzIsMTMwLjExIEggNzkuNzkgTCA4Ni42OSwxMzMuNDcgQyA5Mi4wOSwxMzUuNzkgOTcuNzEsMTM1LjE4IDEwMS43OCwxMzMuMTEgTCAxMDguODksMTMwLjExIEggMTY5LjkyIEMgMTc2LjI1LDEzMC4xMSAxNzkuMzgsMTI0LjQ3IDE3OS4zOCwxMjAuMDUgViA3Ni44NyBDIDE4OC42MSw3NC42MyAxOTUuMDYsNjYuNzYgMTk1LjA2LDU3LjY0IFoiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcl8xXzIyNDgpIi8+CjxwYXRoIGQ9Ik0gMTc2Ljc2LDI3Ljg2IFYgMzcuNzMgTCAxNzQuMjksMzcuNDcgViAyNy4yNSBDIDE3NC4yOSwyMy40MiAxNzEuNjEsMjEuMDkgMTY4LjgxLDIxLjA5IEggMTQ1LjIgTCAxNDQuMjgsMTkuMDggSCAxNjkuNjIgQyAxNzQuMjksMTkuMDggMTc2Ljc2LDIzLjY4IDE3Ni43NiwyNy44NiBaIiBmaWxsPSJ1cmwoI3BhaW50MV9saW5lYXJfMV8yMjQ4KSIvPgo8cGF0aCBkPSJNIDE3NS42NSwyMi40MSBMIDE1My4xMSwzNi45MiBDIDE1MS42MSwzNS42OSAxNDkuOTYsMzUuODEgMTQ4LjY5LDM3LjA4IEMgMTQ3LjQyLDM4LjM1IDE0Ny4zOSwzOS40OCAxNDcuOTMsNDAuOTIgTCAxMTguOTYsNjMuODkgTCAxMTguOTIsNjQuOTcgTCAxMTkuNzgsNjQuODYgTCAxNDkuMzcsNDEuMjYgQyAxNTAuODgsNDIuMjEgMTUyLjc0LDQyLjA0IDE1My43OSw0MC41IEMgMTU0LjU4LDM5LjMyIDE1NC41OSwzOC4xMyAxNTMuODgsMzcuMDEgTCAxNzMuNzgsMjEuNTcgTCAxNzUuNjUsMjIuNDEgWiIgZmlsbD0idXJsKCNwYWludDJfbGluZWFyXzFfMjI0OCkiLz4KPHBhdGggZD0iTSAxNzYuNjYsODIuMjMgViA4MS4wMSBMIDE1Ni4yNCw4MS41NCBDIDE1NS44MSw3OS4xMSAxNTQuMjIsNzguNzkgMTUzLjExLDc4Ljc5IEMgMTUxLjUxLDc4Ljc5IDE1MC43Niw3OS44MSAxNTAuMTIsODEuMzggTCAxMjMuNjIsODEuOTEgViA4Mi45MSBMIDEzNy45MSw4My4yMyBWIDkyLjE3IEwgMTM5LjEzLDkyLjY2IFYgODMuMTEgTCAxNTAuMjgsODIuOTEgQyAxNTAuODEsODQuNzYgMTUxLjg3LDg1LjQ2IDE1My4zMSw4NS40NiBDIDE1NS4wNiw4NS40NiAxNTUuOTEsODQuMzYgMTU2LjMyLDgyLjgzIEwgMTc2LjY2LDgyLjIzIFoiIGZpbGw9InVybCgjcGFpbnQzX2xpbmVhcl8xXzIyNDgpIi8+CjxwYXRoIGQ9Ik0gMTM4LjExLDExMC45OCBWIDEyNy4xMiBMIDEzOS4zMywxMjcuMDQgViAxMTMuODYgTCAxMzguMTEsMTEwLjk4IFoiIGZpbGw9InVybCgjcGFpbnQ0X2xpbmVhcl8xXzIyNDgpIi8+CjxwYXRoIGQ9Ik0gMTEzLjA2LDE5LjA4IEwgMTEyLjM3LDIxLjA5IEwgODYuNzEsMjAuNTEgTCA4OC43MiwzMy44MSBDIDkwLjIzLDMzLjkyIDkxLjE2LDM0Ljg4IDkxLjU4LDM1LjMgTCAxMTEuOTQsMjguNTcgTCAxMTIuMzcsMjkuNSBMIDkxLjI3LDM2LjY2IEMgOTEuNjksMzguMjggOTEuMDYsMzkuNjEgODkuOTEsNDAuMjQgTCA5MS40OCw1MS4xMSBMIDkwLjAyLDUxLjMyIEwgODguMjksMzkuOTMgQyA4Ny4xNCwzOS44MiA4Ni4zLDM4Ljg5IDg1Ljk5LDM4LjA2IEwgNjYuMDQsNDUuMzEgTCA2NS42Miw0NC4wOSBMIDg1Ljk5LDM2LjM0IEMgODYuMTksMzQuODMgODcuMDMsMzMuOTkgODguMjksMzMuNjggTCA4NS42NywyMC4xIEwgMjkuMTIsMjAuNTEgQyAyNC45NywyMC41MSAyMi41MSwyNC42MyAyMi41MSwyOC4xNiBWIDYzLjkxIEwgNDYuOTcsNjkuMjEgQyA0Ny45MSw2Ny42OSA0OC45NSw2Ny40OSA0OS43OSw2Ny40OSBDIDUxLjc0LDY3LjQ5IDUyLjY4LDY5LjExIDUyLjc5LDcwLjA0IEwgNjcuMDgsNzIuODIgViA3My45NSBMIDUyLjI2LDcyLjAxIEMgNTEuNjMsNzIuNzMgNTAuOSw3My4yNCA1MC4xNiw3My4zNCBMIDQ5LjYzLDgzLjQzIEwgNDguNzksODMuNjQgTCA0OC45LDczLjM0IEMgNDcuMjgsNzIuODIgNDYuNjUsNzEuNTkgNDYuNzYsNzAuNDYgTCAyMi41MSw2NS4wNiBWIDc1LjkzIEwgMjAuNSw3Ni41NiBWIDI3Ljg2IEMgMjAuNSwyMi45NCAyNC4yMiwxNy45MSAyOS4wMSwxNy45MSBMIDExMy4wNiwxNy43IFYgMTkuMDggWiIgZmlsbD0idXJsKCNwYWludDVfbGluZWFyXzFfMjI0OCkiLz4KPHBhdGggZD0iTSA0OS42MywxMDkuNzQgTCA0OS45NSwxMDkuNjMgTCA1MC4yNiw5Ny4xNyBMIDQ5LjMyLDk3LjI3IEwgNDcuNiwxMDkuNjMgQyA0NS43NSwxMDkuOTUgNDQuOTEsMTExLjE4IDQ0LjgsMTEzLjEzIEwgMjkuMTIsMTI2LjkxIEwgMzAuMDYsMTI3LjQ0IEwgNDYuMzQsMTE1LjQ3IEMgNDcuMjgsMTE2LjIgNDguMTIsMTE2LjMgNDkuMTYsMTE2LjA5IEMgNTEuMjEsMTE1LjY4IDUxLjYzLDExMy43NCA1MC44OSwxMTEuMjggQyA1MC42OCwxMTAuNTYgNTAuMjYsMTEwLjA0IDQ5LjYzLDEwOS43NCBaIiBmaWxsPSJ1cmwoI3BhaW50Nl9saW5lYXJfMV8yMjQ4KSIvPgo8cGF0aCBkPSJNIDEzMS4xNiwxMDYuOTEgTCAxMTYuNjEsOTkuNzEgQyAxMTUuNjIsOTkuMjEgMTE0LjcyLDk5Ljk5IDExNC43Miw5OS45OSBDIDEwOC43MiwxMDcuMDkgMTAyLjk3LDExMC4xOCA5NC43MiwxMTAuMTggQyA4Ni40NywxMTAuMTggNzkuOTEsMTA3LjA5IDc0Ljg5LDEwMC4zNCBDIDc0LjI2LDk5LjY2IDczLjIxLDk5Ljg3IDczLjIxLDk5Ljg3IEwgNTcuOTEsMTA2LjkxIEMgNTUuMDEsMTA4Ljc1IDU1LjU0LDExMi41MSA1OC4xMSwxMTMuODYgTCA4Ny45OCwxMjguODIgQyA5MS42OSwxMzAuNTcgOTUuNjEsMTMwLjMxIDk4LjkzLDEyOC42MSBMIDEzMC44NCwxMTMuODYgQyAxMzMuOTUsMTEyLjMgMTM0LjI2LDEwOC41NCAxMzEuMTYsMTA2LjkxIFoiIGZpbGw9InVybCgjcGFpbnQ3X2xpbmVhcl8xXzIyNDgpIiBzdHJva2U9IiMyQTM2NDEiIHN0cm9rZS13aWR0aD0iMS4yMDI5IiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTSA5NC43MiwxMDMuNjcgQyAxMDYuOTksMTAzLjY3IDExNy4yOCw5Mi4zOCAxMTcuMjgsNzkuOTEgQyAxMTcuMjgsNjcuNDUgMTA2LjY2LDU1Ljk1IDk0LjcyLDU1Ljk1IEMgODIuMTYsNTUuOTUgNzIuMTQsNjYuNzYgNzIuMTQsNzkuOTEgQyA3Mi4xNCw5Mi4zOCA4Mi4xNiwxMDMuNjcgOTQuNzIsMTAzLjY3IFoiIGZpbGw9InVybCgjcGFpbnQ4X3JhZGlhbF8xXzIyNDgpIiBzdHJva2U9InVybCgjcGFpbnQ5X2xpbmVhcl8xXzIyNDgpIiBzdHJva2Utd2lkdGg9IjEuMDYxMSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik0gMTc1Ljg0LDQzLjA3IEMgMTY3LjE4LDQzLjU1IDE2Mi4wOCw1MC45MSAxNjIuMjksNTguMjcgTCAxMjAuOTcsNzAuMjUgTCAxMjIuNDMsNzUuOTMgTCAxNjQuMDQsNjQuNzUgQyAxNjcuMTgsNzAuMDQgMTcxLjUsNzEuOSAxNzYuMTQsNzEuNjkgQyAxODQuNDksNzEuMzEgMTg5Ljc5LDYzLjg5IDE4OS43OSw1Ny40NCBDIDE4OS43OSw0OS42MSAxODMuNjYsNDIuNjYgMTc1Ljg0LDQzLjA3IFoiIGZpbGw9InVybCgjcGFpbnQxMF9yYWRpYWxfMV8yMjQ4KSIgc3Ryb2tlPSJ1cmwoI3BhaW50MTFfbGluZWFyXzFfMjI0OCkiIHN0cm9rZS13aWR0aD0iMS4wNjExIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTSAxMjguNzksMTEuODEgQyAxMjEuMjMsMTEuNDEgMTE2LjYxLDE4LjM2IDExNi44MiwyMy43NiBDIDExNi45MiwyNy45NiAxMTguNjUsMzAuOTQgMTIwLjIxLDMyLjg5IEwgMTA3LjY1LDUzLjUyIEwgMTEyLjM3LDU2LjI5IEwgMTI0LjcyLDM1LjkyIEMgMTI2LjY4LDM2LjY2IDEyNy44NCwzNi43NiAxMjkuNDEsMzYuNjYgQyAxMzYuMTUsMzYuMjQgMTQwLjQ3LDI5LjE5IDE0MC4yNiwyNC42OCBDIDEzOS45NSwxOC4wMiAxMzUuNjMsMTIuMTcgMTI4Ljc5LDExLjgxIFoiIGZpbGw9InVybCgjcGFpbnQxMl9yYWRpYWxfMV8yMjQ4KSIgc3Ryb2tlPSJ1cmwoI3BhaW50MTNfbGluZWFyXzFfMjI0OCkiIHN0cm9rZS13aWR0aD0iMS4wNjExIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTSA0OC45NSwzNS44MSBDIDQxLjgxLDM2LjEzIDM3Ljk5LDQyLjg3IDM4LjIsNDcuNDggQyAzOC41MSw1NC4yMyA0NC4wMSw1OC4yNyA0OS4wMSw1OC4yNyBDIDUyLjI2LDU4LjI3IDU0LjMxLDU3LjMzIDU1Ljk4LDU1Ljc4IEwgNjkuMzQsNjYuMzQgTCA3Mi4zNCw2MC45NCBMIDU5LjQ2LDUxLjUzIEMgNjAuMyw1MC4wOCA2MC4zLDQ4LjAyIDYwLjE5LDQ2LjE3IEMgNTkuNjcsNDAuMTQgNTQuOTUsMzUuNTEgNDguOTUsMzUuODEgWiIgZmlsbD0idXJsKCNwYWludDE0X3JhZGlhbF8xXzIyNDgpIiBzdHJva2U9InVybCgjcGFpbnQxNV9saW5lYXJfMV8yMjQ4KSIgc3Ryb2tlLXdpZHRoPSIxLjA2MTEiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIvPgo8cGF0aCBkPSJNIDE1Ni45OCw5My4yMyBDIDE1MS4zNCw5My4yMyAxNDguMTUsOTYuMTEgMTQ1Ljc4LDk4Ljk5IEwgMTIxLjkxLDg4LjggTCAxMjAuMDYsOTQuMzkgTCAxNDQuNDIsMTA0Ljk2IEMgMTQzLjksMTEyLjkyIDE0OS43LDExOS43NyAxNTYuMzMsMTE5LjU2IEMgMTY0LjA0LDExOS4zNSAxNjkuNDQsMTEyLjEgMTY5LjM0LDEwNi44MSBDIDE2OS4xMywxMDAuMTggMTYzLjkzLDkzLjIzIDE1Ni45OCw5My4yMyBaIiBmaWxsPSJ1cmwoI3BhaW50MTZfcmFkaWFsXzFfMjI0OCkiIHN0cm9rZT0idXJsKCNwYWludDE3X2xpbmVhcl8xXzIyNDgpIiBzdHJva2Utd2lkdGg9IjEuMDYxMSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik0gMjcuMjcsODAuMDIgQyAxOC4yOSw4MC41NCAxMy4xOSw4OC4wNiAxMy4xOSw5NC41IEMgMTMuMTksMTAyLjY0IDIwLjAzLDEwOS4yNyAyNi43NywxMDkuMDYgQyAzNS4xMiwxMDguNzUgNDEuMDIsMTAyLjIyIDQxLjU0LDk1LjY4IEwgNjcuMDgsODguNjMgTCA2Ni4wNCw4Mi44IEwgNDAuNzEsODguOTQgQyAzNy43OCw4My4xMSAzMi44OCw3OS43MSAyNy4yNyw4MC4wMiBaIiBmaWxsPSJ1cmwoI3BhaW50MThfcmFkaWFsXzFfMjI0OCkiIHN0cm9rZT0idXJsKCNwYWludDE5X2xpbmVhcl8xXzIyNDgpIiBzdHJva2Utd2lkdGg9IjEuMDYxMSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MF9saW5lYXJfMV8yMjQ4IiB4MT0iMTAxLjU1NiIgeTE9IjcuMDAxOTUiIHgyPSIxMDEuNTU2IiB5Mj0iMTM1LjA5MiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjMjEyODMxIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzJBMzY0MSIvPgo8L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MV9saW5lYXJfMV8yMjQ4IiB4MT0iMTYxLjMzIiB5MT0iMTcuMjc3MyIgeDI9IjE2MS4zMyIgeTI9IjM3LjczMzEiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzM3NDE0RCIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNzQxNEQiIHN0b3Atb3BhY2l0eT0iMC41MiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50Ml9saW5lYXJfMV8yMjQ4IiB4MT0iMTQ3LjI4NCIgeTE9IjIwLjQ1OSIgeDI9IjE0Ny4yODQiIHkyPSI2NS43MTcxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiMzNzQxNEQiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMzc0MTREIiBzdG9wLW9wYWNpdHk9IjAuNTIiLz4KPC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDNfbGluZWFyXzFfMjI0OCIgeDE9IjE1MC4xMzgiIHkxPSI3OC43ODYxIiB4Mj0iMTUwLjEzOCIgeTI9IjkyLjY1NjIiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzM3NDE0RCIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNzQxNEQiIHN0b3Atb3BhY2l0eT0iMC41MiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50NF9saW5lYXJfMV8yMjQ4IiB4MT0iMTM4LjcxOCIgeTE9IjExMC45OCIgeDI9IjEzOC43MTgiIHkyPSIxMjcuMTE3IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiMzNzQxNEQiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMzc0MTREIiBzdG9wLW9wYWNpdHk9IjAuNTIiLz4KPC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDVfbGluZWFyXzFfMjI0OCIgeDE9IjY4LjQzNDYiIHkxPSIxNy43MDEyIiB4Mj0iNjguNDM0NiIgeTI9IjgzLjYzNjciIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzM3NDE0RCIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNzQxNEQiIHN0b3Atb3BhY2l0eT0iMC41MiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50Nl9saW5lYXJfMV8yMjQ4IiB4MT0iMzkuNTM1NyIgeTE9Ijk3LjE3MTkiIHgyPSIzOS41MzU3IiB5Mj0iMTI3LjQzNyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjMzc0MTREIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzM3NDE0RCIgc3RvcC1vcGFjaXR5PSIwLjUyIi8+CjwvbGluZWFyR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQ3X2xpbmVhcl8xXzIyNDgiIHgxPSI5NC43MjAxIiB5MT0iOTkuNDEyMSIgeDI9Ijk0LjcyMDEiIHkyPSIxMjkuNzkyIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiMzRTRCNUEiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjM0U0QjVBIiBzdG9wLW9wYWNpdHk9IjAuNzQiLz4KPC9saW5lYXJHcmFkaWVudD4KPHJhZGlhbEdyYWRpZW50IGlkPSJwYWludDhfcmFkaWFsXzFfMjI0OCIgY3g9IjAiIGN5PSIwIiByPSIxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSg5NC43MTg5IDc5LjgxMzMpIHNjYWxlKDIxLjI3NjQgMjIuMDE5MikiPgo8c3RvcCBzdG9wLWNvbG9yPSIjNTlGMUZGIi8+CjxzdG9wIG9mZnNldD0iMC40MSIgc3RvcC1jb2xvcj0iIzQzQzZGRiIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM2MTUyRUEiLz4KPC9yYWRpYWxHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDlfbGluZWFyXzFfMjI0OCIgeDE9Ijk0LjcxODkiIHkxPSI1NS40MjA5IiB4Mj0iOTQuNzE4OSIgeTI9IjEwNC4yMDEiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzk4RjdGRiIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM1QTY0Q0MiLz4KPC9saW5lYXJHcmFkaWVudD4KPHJhZGlhbEdyYWRpZW50IGlkPSJwYWludDEwX3JhZGlhbF8xXzIyNDgiIGN4PSIwIiBjeT0iMCIgcj0iMSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTc1LjE0NiA1Ny4zODA3KSBzY2FsZSgxMy45MjYxIDEzLjkyNjEpIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzkzRjJFNiIvPgo8c3RvcCBvZmZzZXQ9IjAuNDEiIHN0b3AtY29sb3I9IiM0QUYzRjAiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNDhEMEYzIi8+CjwvcmFkaWFsR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQxMV9saW5lYXJfMV8yMjQ4IiB4MT0iMTU1LjM3OCIgeTE9IjQyLjUzNjEiIHgyPSIxNTUuMzc4IiB5Mj0iNzIuMjI4NSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjNTlGMUU5Ii8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzQ4QTZFNiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8cmFkaWFsR3JhZGllbnQgaWQ9InBhaW50MTJfcmFkaWFsXzFfMjI0OCIgY3g9IjAiIGN5PSIwIiByPSIxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgxMjguNTMzIDIzLjkxMjEpIHNjYWxlKDExLjAzODYgMTEuNjYxNikiPgo8c3RvcCBzdG9wLWNvbG9yPSIjQ0ZGMUZGIi8+CjxzdG9wIG9mZnNldD0iMC40MSIgc3RvcC1jb2xvcj0iI0IwOUVFQSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM1NkM5RjQiLz4KPC9yYWRpYWxHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDEzX2xpbmVhcl8xXzIyNDgiIHgxPSIxMjMuOTU0IiB5MT0iMTEuMjY0NiIgeDI9IjEyMy45NTQiIHkyPSI1Ni44MTgxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiM1OUYxRTkiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNDhBNkU2Ii8+CjwvbGluZWFyR3JhZGllbnQ+CjxyYWRpYWxHcmFkaWVudCBpZD0icGFpbnQxNF9yYWRpYWxfMV8yMjQ4IiBjeD0iMCIgY3k9IjAiIHI9IjEiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiBncmFkaWVudFRyYW5zZm9ybT0idHJhbnNsYXRlKDQ4Ljg2ODEgNDYuNzYzMSkgc2NhbGUoOS4zMTA1MyA5LjMxMDUzKSI+CjxzdG9wIHN0b3AtY29sb3I9IiM1OUYxRkYiLz4KPHN0b3Agb2Zmc2V0PSIwLjQxIiBzdG9wLWNvbG9yPSIjNDM5MEZGIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzgyNDRFNiIvPgo8L3JhZGlhbEdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MTVfbGluZWFyXzFfMjI0OCIgeDE9IjQ4Ljk1NDEiIHkxPSIzNS4yNzgzIiB4Mj0iNDguOTU0MSIgeTI9IjY2LjMzOTgiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzU5RjFFOSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM0OEE2RTYiLz4KPC9saW5lYXJHcmFkaWVudD4KPHJhZGlhbEdyYWRpZW50IGlkPSJwYWludDE2X3JhZGlhbF8xXzIyNDgiIGN4PSIwIiBjeT0iMCIgcj0iMSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTU2LjY5NCAxMDYuMzk2KSBzY2FsZSgxMS44MDQxIDEyLjQ1MTIpIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzAwOTRGRiIvPgo8c3RvcCBvZmZzZXQ9IjAuNDEiIHN0b3AtY29sb3I9IiMyNDg2RkUiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNTY1OEVBIi8+CjwvcmFkaWFsR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQxN19saW5lYXJfMV8yMjQ4IiB4MT0iMTU0LjY5OSIgeTE9IjkyLjY4MDciIHgyPSIxNTQuNjk5IiB5Mj0iMTIwLjEwOSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjNTlGMUU5Ii8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzQ4QTZFNiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8cmFkaWFsR3JhZGllbnQgaWQ9InBhaW50MThfcmFkaWFsXzFfMjI0OCIgY3g9IjAiIGN5PSIwIiByPSIxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgyNy40Mjg5IDk0LjIyMDIpIHNjYWxlKDEzLjcwNTggMTMuNzA1OCkiPgo8c3RvcCBzdG9wLWNvbG9yPSIjMjY0MkIyIi8+CjxzdG9wIG9mZnNldD0iMC40MSIgc3RvcC1jb2xvcj0iIzM5MzlDMSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM4MjQ0RTYiLz4KPC9yYWRpYWxHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDE5X2xpbmVhcl8xXzIyNDgiIHgxPSI0MC4xMzUxIiB5MT0iNzkuNDYwOSIgeDI9IjQwLjEzNTEiIHkyPSIxMDkuNjA5IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiM1OUYxRTkiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNDhBNkU2Ii8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPC9zdmc+") center/contain no-repeat}
+.brand .l1{color:var(--wordmark)} .brand .l2{color:var(--foreground)}
+.topbar .pill{margin-left:auto;font-size:12px;font-weight:600;color:var(--brand-green);
+  background:color-mix(in oklab,var(--brand-green) 15%,transparent);border-radius:999px;padding:4px 11px;white-space:nowrap}
+
+/* ── 히어로 ── */
+.hero{text-align:center;padding:44px 4px 32px}
+.hero .eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--brand-green);
+  background:color-mix(in oklab,var(--brand-green) 12%,transparent);border-radius:999px;padding:5px 13px}
+.hero h1{font-size:clamp(23px,4.4vw,31px);letter-spacing:-.6px;margin-top:16px;word-break:keep-all;line-height:1.4}
+.hero h1 em{font-style:normal;color:var(--brand-blue)}
+.hero p{color:var(--muted-foreground);margin-top:12px;font-size:15px;word-break:keep-all}
+.cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:7px;text-decoration:none;border-radius:calc(var(--radius) - 2px);
+  min-height:44px;padding:0 22px;font-size:15px;font-weight:600;border:1px solid transparent;transition:opacity .15s;cursor:pointer;font-family:inherit}
+.btn:hover{opacity:.9}
+.btn.primary{background:var(--brand-blue);color:var(--primary-foreground)}
+.btn.outline{background:var(--card);color:var(--foreground);border-color:var(--border)}
+.btn.sm{min-height:38px;padding:0 14px;font-size:13.5px}
+.hero .free{margin-top:14px;font-size:13px;color:var(--muted-foreground)}
+.hero .free b{color:var(--brand-green)}
+
+/* ── 환경 배지·힌트 ── */
+.env{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-size:13px;font-weight:600;border-radius:999px;padding:6px 14px;
+  background:var(--brand-green-light);color:var(--foreground);word-break:keep-all;text-align:left}
+.env::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--brand-green);flex-shrink:0}
+.env.warn{background:color-mix(in oklab,var(--warn) 18%,transparent)} .env.warn::before{background:var(--warn)}
+.hint{display:none;font-size:13px;color:var(--brand-blue);margin-top:8px;word-break:keep-all}
+.hint.show{display:block}
+.launchwrap{margin-top:14px}
+body:not(.os-win) a.launch[href^="ms-settings:"]{opacity:.55}
+body:not(.os-mac) a.launch[href^="x-apple"]{opacity:.55}
+
+/* ── 카드 ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:22px 20px;margin-top:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card h2{font-size:17px;letter-spacing:-.3px}
+.card .desc{color:var(--muted-foreground);font-size:14px;margin-top:5px;margin-bottom:14px;word-break:keep-all}
+.note{font-size:13.5px;color:var(--muted-foreground);margin-top:12px;word-break:keep-all}
+.note b{color:var(--foreground)}
+.card .head{display:flex;align-items:flex-start;gap:14px}
+.card .head .ico{width:40px;height:40px;flex-shrink:0;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--brand-blue-light)}
+.card .head .ico svg{width:20px;height:20px;stroke:var(--brand-blue);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.card .head .ttl{flex:1;min-width:0}
+.card .head .ttl .desc{margin-bottom:0}
+.card .head .btn{flex-shrink:0;margin-top:2px}
+.crumb{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:12.5px;color:var(--muted-foreground);margin-top:12px;word-break:keep-all}
+.crumb b{color:var(--foreground);font-weight:600}
+.crumb .sep{opacity:.5}
+ol.steps{margin:14px 0 0 0;padding:0;list-style:none;counter-reset:s}
+ol.steps li{position:relative;padding-left:34px;margin-top:10px;font-size:14.5px;word-break:keep-all;counter-increment:s}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;background:var(--brand-blue);color:var(--primary-foreground);
+  font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+ol.steps b{color:var(--foreground)}
+ul.sub{margin:6px 0 0 18px;font-size:13.5px;color:var(--muted-foreground)}
+ul.sub li{margin-top:3px}
+.kbd{display:inline-block;font-family:ui-monospace,"Geist Mono",Consolas,monospace;font-size:12.5px;line-height:1.5;padding:1px 7px;border:1px solid var(--border);
+  border-bottom-width:2px;border-radius:6px;background:var(--muted);white-space:nowrap;color:var(--foreground)}
+details{margin-top:12px;border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);background:var(--muted)}
+details summary{cursor:pointer;padding:11px 14px;font-size:14px;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px;word-break:keep-all}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"▸";font-size:12px;color:var(--brand-blue);transition:transform .15s;flex-shrink:0}
+details[open] summary::before{transform:rotate(90deg)}
+details .body{padding:0 14px 14px;font-size:14px;color:var(--muted-foreground);word-break:keep-all}
+details .body b{color:var(--foreground)}
+details .body ol,details .body ul{margin:8px 0 0 18px}
+details .body li{margin-top:4px}
+details .body .launchwrap{margin-top:10px}
+
+/* ── 빠른 시작 체크리스트 ── */
+.check{list-style:none;margin-top:12px}
+.check li{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--border)}
+.check li:first-child{border-top:0;padding-top:4px}
+.check input{width:22px;height:22px;margin-top:3px;flex-shrink:0;accent-color:var(--brand-blue)}
+.check label{flex:1;font-size:14px;color:var(--muted-foreground);word-break:keep-all;cursor:pointer}
+.check label b{display:block;font-size:15px;color:var(--foreground);margin-bottom:2px}
+.progress{font-size:13px;color:var(--brand-green);font-weight:600;margin-top:4px}
+
+/* ── 표 ── */
+.tblwrap{overflow-x:auto;margin-top:12px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th,.tbl td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--border);vertical-align:top;word-break:keep-all}
+.tbl th{font-size:12.5px;color:var(--muted-foreground);font-weight:600;white-space:nowrap}
+.tbl td.k{white-space:nowrap}
+.tbl code{font-family:ui-monospace,"Geist Mono",Consolas,monospace;font-size:13px;color:var(--brand-blue);white-space:nowrap}
+.copy2{min-height:32px;padding:0 10px;font-size:12px;font-weight:600;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--foreground);
+  cursor:pointer;font-family:inherit;white-space:nowrap}
+.copy2:hover{background:var(--muted)}
+.copy2.done{background:var(--brand-green);border-color:var(--brand-green);color:oklch(0.20 0.03 250)}
+
+/* ── 섹션 제목 ── */
+.sec{margin-top:40px}
+.sec h2.big{font-size:20px;letter-spacing:-.4px}
+.sec .lead{color:var(--muted-foreground);font-size:14px;margin-top:4px;word-break:keep-all}
+
+/* ── 링크 목록 ── */
+.links{list-style:none;margin-top:8px}
+.links li{padding:8px 0;border-top:1px solid var(--border);font-size:14px;word-break:keep-all}
+.links li:first-child{border-top:0}
+.links small{display:block;color:var(--muted-foreground);font-size:12.5px}
+
+/* ── 최신본·영상 역링크 카드 ── */
+.linkback{display:flex;gap:14px;align-items:flex-start;background:var(--brand-blue-light);
+  border:1px solid color-mix(in oklab,var(--brand-blue) 22%,transparent)}
+.linkback .ico{width:40px;height:40px;flex-shrink:0;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  background:color-mix(in oklab,var(--brand-blue) 15%,transparent)}
+.linkback .ico svg{width:20px;height:20px;stroke:var(--brand-blue);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.linkback .label{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--brand-blue)}
+
+footer{text-align:center;color:var(--muted-foreground);font-size:13.5px;margin-top:40px;line-height:2}
+footer b{color:var(--foreground)}
+footer .lm{display:inline-flex;align-items:center;gap:5px;font-weight:700;vertical-align:middle}
+footer .lm .mark{width:18px;height:18px}
+footer .lm .l1{color:var(--wordmark)} footer .lm .l2{color:var(--foreground)}
+
+@media (max-width:520px){
+  .card .head{flex-wrap:wrap}
+  .card .head .btn{width:100%;justify-content:center;margin-top:6px}
+}
+@media print{
+  .topbar .pill,.btn,.copy2,.hint,.env,.cta{display:none!important}
+  .card{break-inside:avoid;box-shadow:none}
+  details{border:0;background:transparent}
+  .crumb{font-weight:600;color:var(--foreground)}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="inner">
+    <a class="brand" href="https://www.linkmap.biz/" target="_blank" rel="noopener">
+      <span class="mark" role="img" aria-label="Linkmap"></span>
+      <span><span class="l1">Link</span><span class="l2">map</span></span>
+    </a>
+    <span class="pill">무료배포 자료 2번</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <span class="eyebrow">듀얼모니터 간편설정</span>
+    <h1>모니터 두 대, <em>버튼 한 번으로</em><br>설정 화면이 바로 열립니다</h1>
+    <p>필요한 설정 화면을 버튼으로 바로 열고, 옆의 순서대로 따라 하면 끝납니다.<br>
+    Windows 11 기준이며, Windows 10과 macOS의 차이도 함께 담았습니다.</p>
+    <div id="env" class="env" aria-live="polite">환경 확인 중…</div>
+    <div class="cta">
+      <a class="btn primary" href="#quick">빠른 시작 3단계 ↓</a>
+      <a class="btn outline" href="#trouble">문제 해결 ↓</a>
+    </div>
+    <p class="free"><b>사용법</b> · 「설정 열기」를 누르면 브라우저가 "설정을 열까요?" 확인창을 띄웁니다 → <b>[열기]</b>.<br>
+    Edge는 "항상 허용"을 체크하면 다음부터 바로 열립니다.</p>
+  </div>
+
+  <!-- ── 빠른 시작 ── -->
+  <div class="card" id="quick">
+    <div class="head">
+      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+      <div class="ttl">
+        <h2>빠른 시작 3단계</h2>
+        <p class="desc">처음 연결이라면 이 세 가지만 하면 됩니다. 체크 표시는 이 브라우저에 저장됩니다.</p>
+      </div>
+    </div>
+    <ul class="check">
+      <li>
+        <input type="checkbox" id="q1" data-check="cable">
+        <label for="q1"><b>① 케이블을 꽂고 모니터 전원을 켭니다</b>
+        HDMI · DisplayPort · USB-C 중 노트북과 모니터에 <b style="display:inline">둘 다 있는</b> 단자로 연결합니다. 노트북은 전원 어댑터도 꽂아 두세요 — 절전 때문에 화면이 꺼지는 일을 막습니다.</label>
+      </li>
+      <li>
+        <input type="checkbox" id="q2" data-check="extend">
+        <label for="q2"><b>② <span class="kbd">Win</span> + <span class="kbd">P</span> 를 누르고 「확장」을 고릅니다</b>
+        두 화면을 하나의 넓은 책상처럼 씁니다. 「복제」는 같은 화면을 둘 다에 띄우는 발표용, 「두 번째 화면만」은 노트북 화면을 끄는 모드입니다.</label>
+      </li>
+      <li>
+        <input type="checkbox" id="q3" data-check="arrange">
+        <label for="q3"><b>③ 디스플레이 설정에서 배치와 주 모니터를 정합니다</b>
+        아래 버튼으로 열고, 미리보기의 1·2 상자를 실제로 놓인 위치대로 끌어다 놓은 뒤 <b style="display:inline">[적용]</b>. 주로 보는 화면을 클릭하고 「이 디스플레이를 주 모니터로 만들기」를 체크합니다.</label>
+      </li>
+    </ul>
+    <p class="progress" id="progress">3단계 중 0단계 완료</p>
+    <div class="launchwrap">
+      <a class="btn primary launch" href="ms-settings:display">디스플레이 설정 열기</a>
+      <p class="hint"></p>
+    </div>
+    <p class="crumb">수동 경로: <b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>디스플레이</b> <span>(또는 바탕 화면 오른쪽 클릭 → 디스플레이 설정)</span></p>
+  </div>
+
+  <!-- ── 설정 항목별 안내 ── -->
+  <div class="sec">
+    <h2 class="big">설정 항목별 안내</h2>
+    <p class="lead">필요한 항목만 골라 여세요. 각 카드의 버튼은 그 설정 화면을 바로 엽니다. 버튼이 반응하지 않으면 카드 아래 수동 경로로 가면 됩니다.</p>
+  </div>
+
+  <!-- a. 화면 모드·배치·주 모니터 -->
+  <div class="card">
+    <div class="head">
+      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+      <div class="ttl">
+        <h2>화면 모드 · 배치 · 주 모니터</h2>
+        <p class="desc">확장으로 바꾸고, 실제 놓인 위치대로 배치하고, 주로 보는 화면을 정합니다.</p>
+      </div>
+      <a class="btn primary sm launch" href="ms-settings:display">설정 열기</a>
+    </div>
+    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
+    <p class="crumb"><b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>디스플레이</b></p>
+    <ol class="steps">
+      <li><b>[식별]</b>을 누르면 각 화면에 큰 숫자 1·2가 잠깐 뜹니다. 어느 모니터가 몇 번인지 확인하세요.</li>
+      <li>미리보기 옆 드롭다운에서 <b>디스플레이 확장</b>을 고릅니다. (「디스플레이 복제」 「1에만 표시」 「2에만 표시」도 여기)</li>
+      <li>미리보기의 <b>1·2 상자를 실제로 놓인 위치대로</b> 끌어다 놓고 <b>[적용]</b>. 위·아래 배치도 됩니다. 두 상자의 모서리 높이를 맞춰 두면 마우스가 경계에 걸리지 않습니다.</li>
+      <li>주로 보는 화면을 클릭한 뒤 <b>여러 디스플레이</b>를 펼쳐 <b>이 디스플레이를 주 모니터로 만들기</b>를 체크합니다. 시계·알림·새로 여는 창이 이 화면에 뜹니다.</li>
+    </ol>
+    <p class="note">모니터가 하나만 보이면 <b>여러 디스플레이 › [감지]</b>를 누르세요. 그래도 안 나오면 아래 「문제 해결」 첫 항목으로.</p>
+    <details>
+      <summary>Windows 10은 이렇게</summary>
+      <div class="body">페이지 맨 위 <b>디스플레이 다시 정렬</b>에 [식별]·[감지]와 배치 미리보기가 있고, 아래쪽 <b>여러 디스플레이</b> 드롭다운에서 확장/복제를 고릅니다. 그 밑에 <b>이 디스플레이를 주 모니터로 만들기</b> 체크박스가 있습니다.</div>
+    </details>
+  </div>
+
+  <!-- b. 배율·해상도·방향 -->
+  <div class="card">
+    <div class="head">
+      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></div>
+      <div class="ttl">
+        <h2>배율 · 해상도 · 방향</h2>
+        <p class="desc">글자 크기와 선명도를 정합니다. 모니터마다 따로 설정합니다.</p>
+      </div>
+      <a class="btn primary sm launch" href="ms-settings:display">설정 열기</a>
+    </div>
+    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
+    <p class="crumb"><b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>디스플레이</b><span class="sep">›</span><b>배율 및 레이아웃</b></p>
+    <ol class="steps">
+      <li>미리보기에서 바꿀 모니터를 <b>먼저 클릭</b>합니다. 아래 값들은 선택한 모니터에만 적용됩니다.</li>
+      <li><b>배율</b> — 「(권장)」이 붙은 값을 고릅니다. 노트북은 125~150%, 큰 모니터는 100%처럼 서로 달라도 정상입니다.</li>
+      <li><b>디스플레이 해상도</b> — 역시 「(권장)」 값. 모니터의 원래 해상도라 글자가 가장 또렷합니다.</li>
+      <li>세로로 세운 모니터는 <b>디스플레이 방향</b>을 <b>세로</b>로 바꿉니다.</li>
+    </ol>
+    <p class="note"><b>「사용자 지정 배율」은 권하지 않습니다.</b> 되돌리기 번거롭고 일부 앱이 흐려집니다. 글자만 키우고 싶으면 아래 버튼으로 <b>접근성 › 텍스트 크기</b>를 조절하세요 — 화면 배치는 그대로 두고 글자만 커집니다.</p>
+    <div class="launchwrap">
+      <a class="btn outline sm launch" href="ms-settings:easeofaccess-display">글자 크기만 키우기</a>
+      <p class="hint"></p>
+    </div>
+    <details>
+      <summary>Windows 10은 이렇게</summary>
+      <div class="body">「배율 및 레이아웃」의 <b>텍스트, 앱 및 기타 항목의 크기 변경</b>이 배율, <b>디스플레이 해상도</b>·<b>방향</b>은 이름이 같습니다. 접근성 글자 크기는 「접근성 › 디스플레이 › 텍스트 크게」.</div>
+    </details>
+  </div>
+
+  <!-- c. 재생 빈도 -->
+  <div class="card">
+    <div class="head">
+      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
+      <div class="ttl">
+        <h2>재생 빈도(주사율)</h2>
+        <p class="desc">모니터가 120Hz·144Hz를 지원하는데 60Hz로 잡혀 있으면 마우스와 스크롤이 뚝뚝 끊깁니다.</p>
+      </div>
+      <a class="btn primary sm launch" href="ms-settings:display-advanced">설정 열기</a>
+    </div>
+    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
+    <p class="crumb"><b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>디스플레이</b><span class="sep">›</span><b>고급 디스플레이</b></p>
+    <ol class="steps">
+      <li>Windows 11에서는 디스플레이 페이지가 열립니다. <b>아래로 내려 「관련 설정 › 고급 디스플레이」</b>를 누르세요. (Windows 10은 고급 페이지가 바로 열립니다)</li>
+      <li>상단 드롭다운에서 모니터를 고르고 <b>새로 고침 빈도 선택</b>에서 가장 높은 값을 고릅니다. (60 → 120 · 144Hz)</li>
+      <li>화면이 검게 되거나 깜빡이면 15초 안에 자동으로 되돌아갑니다. 그럴 땐 한 단계 낮은 값으로.</li>
+    </ol>
+    <p class="note">높은 값이 목록에 <b>없으면</b> 케이블·단자 한계인 경우가 대부분입니다. 예: 오래된 HDMI 케이블은 4K에서 30Hz까지만. <b>DisplayPort</b> 또는 <b>HDMI 2.0 이상</b> 케이블로 바꿔 보세요.</p>
+  </div>
+
+  <!-- d. 창 위치·커서 옵션 -->
+  <div class="card">
+    <div class="head">
+      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/></svg></div>
+      <div class="ttl">
+        <h2>창 위치 기억 · 커서 이동</h2>
+        <p class="desc">모니터를 뺐다 꽂아도 창이 제자리로 오게, 마우스가 경계에서 걸리지 않게.</p>
+      </div>
+      <a class="btn primary sm launch" href="ms-settings:display">설정 열기</a>
+    </div>
+    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
+    <p class="crumb"><b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>디스플레이</b><span class="sep">›</span><b>여러 디스플레이</b></p>
+    <ol class="steps">
+      <li><b>여러 디스플레이</b>를 펼칩니다.</li>
+      <li><b>모니터 연결을 기반으로 창 위치 기억</b> ✓ — 모니터를 뺐다 다시 꽂으면 창이 원래 화면·위치로 돌아옵니다.</li>
+      <li><b>모니터 연결이 끊어지면 창을 최소화합니다</b> ✓ — 노트북만 들고 나갔을 때 창이 보이지 않는 화면에 남지 않습니다.</li>
+      <li><b>디스플레이 간 커서 이동 쉽게 만들기</b> ✓ (22H2 이상) — 두 화면 해상도가 달라도 마우스가 모서리에 걸리지 않습니다.</li>
+    </ol>
+    <details>
+      <summary>Windows 10은 이렇게</summary>
+      <div class="body">이 세 옵션은 Windows 11에만 있습니다. 창이 보이지 않는 화면에 남았다면, 작업 표시줄에서 그 창을 클릭한 뒤 <span class="kbd">Win</span> + <span class="kbd">Shift</span> + <span class="kbd">←</span>/<span class="kbd">→</span> 로 끌어오세요.</div>
+    </details>
+  </div>
+
+  <!-- e. 작업 표시줄 -->
+  <div class="card">
+    <div class="head">
+      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="15" x2="21" y2="15"/></svg></div>
+      <div class="ttl">
+        <h2>작업 표시줄을 두 화면에</h2>
+        <p class="desc">두 번째 모니터에도 작업 표시줄을 두고, 어느 화면에 어떤 앱 아이콘을 보일지 정합니다.</p>
+      </div>
+      <a class="btn primary sm launch" href="ms-settings:taskbar">설정 열기</a>
+    </div>
+    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
+    <p class="crumb"><b>설정</b><span class="sep">›</span><b>개인 설정</b><span class="sep">›</span><b>작업 표시줄</b><span class="sep">›</span><b>작업 표시줄 동작</b></p>
+    <ol class="steps">
+      <li>맨 아래 <b>작업 표시줄 동작</b>을 펼칩니다.</li>
+      <li><b>모든 디스플레이에 내 작업 표시줄 표시</b> ✓ — 두 번째 모니터에도 작업 표시줄이 생깁니다.</li>
+      <li><b>여러 디스플레이를 사용하는 경우 다음에서 작업 표시줄 앱을 표시합니다</b> — 셋 중 하나:
+        <ul class="sub">
+          <li><b>모든 작업 표시줄</b> — 어느 화면에서든 모든 앱 아이콘이 보입니다.</li>
+          <li><b>주 작업 표시줄 및 창이 열려 있는 작업 표시줄</b> — 주 화면엔 전부, 다른 화면엔 그 화면의 창만. <b>가장 무난한 선택</b>입니다.</li>
+          <li><b>창이 열려 있는 작업 표시줄</b> — 각 화면에 그 화면의 창만.</li>
+        </ul>
+      </li>
+    </ol>
+    <details>
+      <summary>Windows 10은 이렇게</summary>
+      <div class="body">작업 표시줄 설정의 <b>여러 디스플레이</b> 섹션에 같은 항목이 있습니다 — <b>모든 디스플레이에 작업 표시줄 표시</b>, <b>작업 표시줄 단추 표시 위치</b>.</div>
+    </details>
+  </div>
+
+  <!-- f. 배경 화면 -->
+  <div class="card">
+    <div class="head">
+      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+      <div class="ttl">
+        <h2>배경 화면 — 이어 붙이기 · 화면마다 다르게</h2>
+        <p class="desc">파노라마 한 장을 두 화면에 걸치거나, 화면마다 다른 사진을 둡니다.</p>
+      </div>
+      <a class="btn primary sm launch" href="ms-settings:personalization-background">설정 열기</a>
+    </div>
+    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
+    <p class="crumb"><b>설정</b><span class="sep">›</span><b>개인 설정</b><span class="sep">›</span><b>배경</b></p>
+    <ol class="steps">
+      <li><b>배경 개인 설정</b>을 「사진」으로 두고 사진을 고릅니다.</li>
+      <li>한 장을 두 화면에 <b>이어 붙이려면</b> 「데스크톱 이미지에 맞게 선택」 드롭다운에서 <b>스팬</b>(범위)을 고릅니다. 가로로 긴 파노라마 사진이 잘 맞습니다.</li>
+      <li>화면마다 <b>다른 사진</b>을 두려면 「최근 이미지」의 사진을 <b>마우스 오른쪽 클릭 → 모니터 1에 설정 / 모니터 2에 설정</b>.</li>
+    </ol>
+    <p class="note">「사진 찾아보기」로 고른 사진도 최근 이미지에 들어가므로, 같은 방법으로 화면별 지정이 됩니다. 몇 번 모니터인지는 디스플레이 설정의 [식별]로 확인하세요.</p>
+    <details>
+      <summary>Windows 10은 이렇게</summary>
+      <div class="body">같은 위치입니다. 「맞춤 선택」 드롭다운에서 <b>스팬</b>, 최근 이미지 오른쪽 클릭으로 모니터별 지정.</div>
+    </details>
+  </div>
+
+  <!-- g. 창 스냅·이동 -->
+  <div class="card">
+    <div class="head">
+      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+      <div class="ttl">
+        <h2>창 나누기 · 옆 모니터로 옮기기</h2>
+        <p class="desc">마우스로 끌지 않아도 키 하나로 창을 붙이고 옮깁니다. 듀얼모니터에서 가장 자주 쓰는 기능입니다.</p>
+      </div>
+      <a class="btn primary sm launch" href="ms-settings:multitasking">설정 열기</a>
+    </div>
+    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
+    <p class="crumb"><b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>멀티태스킹</b><span class="sep">›</span><b>창 스냅</b></p>
+    <ol class="steps">
+      <li><b>창 스냅</b>이 켜져 있는지 확인합니다. (기본은 켜짐)</li>
+      <li><span class="kbd">Win</span> + <span class="kbd">Shift</span> + <span class="kbd">←</span>/<span class="kbd">→</span> — 지금 보는 창을 <b>옆 모니터로 통째로</b> 옮깁니다. 이 키 하나만 외워도 됩니다.</li>
+      <li><span class="kbd">Win</span> + <span class="kbd">←</span>/<span class="kbd">→</span> — 창을 화면 왼쪽/오른쪽 절반에 붙입니다. 창 제목을 화면 가장자리로 끌어도 됩니다.</li>
+      <li><span class="kbd">Win</span> + <span class="kbd">Z</span> — 2분할·3분할 <b>스냅 레이아웃</b>을 고릅니다. 창의 최대화 버튼 위에 마우스를 올려도 나옵니다.</li>
+    </ol>
+    <details>
+      <summary>Windows 10은 이렇게</summary>
+      <div class="body">스냅 레이아웃(<span class="kbd">Win</span> + <span class="kbd">Z</span>)은 없습니다. 반 화면 붙이기와 옆 모니터로 옮기기 키는 같습니다.</div>
+    </details>
+  </div>
+
+  <!-- h. 야간 모드 -->
+  <div class="card">
+    <div class="head">
+      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
+      <div class="ttl">
+        <h2>야간 모드 (눈 편하게)</h2>
+        <p class="desc">저녁에 두 화면 모두 따뜻한 색으로 바꿔 눈부심을 줄입니다.</p>
+      </div>
+      <a class="btn primary sm launch" href="ms-settings:nightlight">설정 열기</a>
+    </div>
+    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
+    <p class="crumb"><b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>디스플레이</b><span class="sep">›</span><b>야간 모드</b></p>
+    <ol class="steps">
+      <li><b>야간 모드</b> 스위치를 켭니다. 두 화면에 함께 적용되며, 「강도」 슬라이더로 조절합니다.</li>
+      <li><b>야간 모드 예약</b>을 켜고 「일몰~일출」 또는 시간을 정해 두면 자동으로 켜지고 꺼집니다.</li>
+    </ol>
+    <p class="note">HDR 모니터라면 디스플레이 페이지의 <b>HDR</b> 항목에서 「HDR 사용」을 켤 수 있습니다. 모니터마다 따로 켭니다. 일반 문서 작업에는 꺼 두는 편이 색이 자연스럽습니다.</p>
+  </div>
+
+  <!-- i. 노트북 덮개 -->
+  <div class="card">
+    <div class="head">
+      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/></svg></div>
+      <div class="ttl">
+        <h2>노트북 덮개를 닫아도 계속 쓰기</h2>
+        <p class="desc">외부 모니터만 보고 일할 때, 노트북을 덮어도 꺼지지 않게 합니다.</p>
+      </div>
+      <a class="btn primary sm launch" href="ms-settings:powersleep">설정 열기</a>
+    </div>
+    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
+    <p class="crumb"><b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>전원 및 배터리</b><span class="sep">›</span><b>덮개, 전원 및 절전 단추 컨트롤</b></p>
+    <ol class="steps">
+      <li><b>Windows 11 24H2 이상</b>: <b>덮개, 전원 및 절전 단추 컨트롤</b>을 펼치고 <b>덮개를 닫으면</b>을 「전원 연결 시」와 「배터리 사용 시」 각각 <b>아무 작업 안 함</b>으로 바꿉니다.</li>
+      <li><b>23H2 이하 · Windows 10</b>: 아래 명령을 복사해 <span class="kbd">Win</span> + <span class="kbd">R</span> 에 붙여넣고 Enter → 왼쪽 <b>덮개를 닫으면 수행되는 작업 선택</b> → 「아무 것도 안 함」 → <b>변경 내용 저장</b>.
+        <div class="tblwrap"><table class="tbl"><tbody><tr><td class="k"><code>powercfg.cpl</code></td><td>제어판 전원 옵션</td><td class="k"><button class="copy2" type="button" data-copy-text="powercfg.cpl">복사</button></td></tr></tbody></table></div>
+      </li>
+    </ol>
+    <p class="note">덮어 두면 노트북 열이 잘 빠지지 않습니다. <b>거치대에 세워 두고</b> 외부 키보드·마우스를 쓰는 편이 안전합니다.</p>
+  </div>
+
+  <!-- j. 소리 -->
+  <div class="card">
+    <div class="head">
+      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div>
+      <div class="ttl">
+        <h2>소리가 갑자기 모니터로 나갈 때</h2>
+        <p class="desc">HDMI·DisplayPort로 꽂으면 소리가 모니터 스피커로 넘어가 작게 들릴 수 있습니다.</p>
+      </div>
+      <a class="btn primary sm launch" href="ms-settings:sound">설정 열기</a>
+    </div>
+    <div class="launchwrap" style="margin-top:0"><p class="hint"></p></div>
+    <p class="crumb"><b>설정</b><span class="sep">›</span><b>시스템</b><span class="sep">›</span><b>소리</b><span class="sep">›</span><b>출력</b></p>
+    <ol class="steps">
+      <li><b>출력 › 소리를 재생할 위치 선택</b>에서 원래 쓰던 스피커나 헤드셋을 고릅니다.</li>
+      <li>영상 회의 앱은 자체 설정에 출력 장치가 따로 있으니, 거기서도 한 번 확인합니다.</li>
+    </ol>
+    <p class="note">작업 표시줄 오른쪽 스피커 아이콘을 누르고 슬라이더 옆 <b>〉</b>를 누르면 출력 장치를 바로 바꿀 수도 있습니다.</p>
+  </div>
+
+  <!-- ── 단축키 ── -->
+  <div class="sec">
+    <h2 class="big">듀얼모니터 단축키</h2>
+    <p class="lead">마우스로 창을 끌고 다니는 시간을 줄여 줍니다. 위 두 줄만 외워도 충분합니다.</p>
+  </div>
+  <div class="card">
+    <div class="head">
+      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg></div>
+      <div class="ttl"><h2>키 조합</h2><p class="desc">Windows 11·10 공통. (Win = 키보드의 창 모양 키)</p></div>
+    </div>
+    <div class="tblwrap">
+      <table class="tbl">
+        <thead><tr><th>키</th><th>하는 일</th></tr></thead>
+        <tbody>
+          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">Shift</span> + <span class="kbd">←</span>/<span class="kbd">→</span></td><td><b>지금 보는 창을 옆 모니터로</b> 옮깁니다</td></tr>
+          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">P</span></td><td>화면 모드 선택 — PC 화면만 / 복제 / <b>확장</b> / 두 번째 화면만</td></tr>
+          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">←</span>/<span class="kbd">→</span></td><td>창을 화면 왼쪽/오른쪽 절반에 붙입니다</td></tr>
+          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">↑</span>/<span class="kbd">↓</span></td><td>창 최대화 / 최소화</td></tr>
+          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">Z</span></td><td>스냅 레이아웃(2·3분할) 열기 — Windows 11</td></tr>
+          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">D</span></td><td>바탕 화면 보기 / 되돌리기</td></tr>
+          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">Home</span></td><td>지금 보는 창만 남기고 모두 최소화</td></tr>
+          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">Tab</span></td><td>작업 보기 — 열린 창과 가상 데스크톱을 한눈에</td></tr>
+          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">Ctrl</span> + <span class="kbd">←</span>/<span class="kbd">→</span></td><td>가상 데스크톱 전환</td></tr>
+          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">K</span></td><td>무선 디스플레이(캐스트)에 연결</td></tr>
+          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">I</span></td><td>설정 열기</td></tr>
+          <tr><td class="k"><span class="kbd">Win</span> + <span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span class="kbd">B</span></td><td>화면이 검게 멈췄을 때 그래픽 드라이버 다시 시작 (삑 소리가 납니다)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── 문제 해결 ── -->
+  <div class="sec" id="trouble">
+    <h2 class="big">문제 해결</h2>
+    <p class="lead">증상을 누르면 해결 순서가 나옵니다. 각 항목의 버튼은 관련 설정 화면을 엽니다.</p>
+  </div>
+  <div class="card">
+    <div class="head">
+      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+      <div class="ttl"><h2>자주 겪는 8가지</h2><p class="desc">위에서부터 순서대로 해 보세요. 대부분 두 번째 단계 안에서 해결됩니다.</p></div>
+    </div>
+
+    <details>
+      <summary>두 번째 모니터가 아예 안 잡혀요 (신호 없음)</summary>
+      <div class="body">
+        <ol>
+          <li>케이블을 <b>양쪽 다</b> 뺐다가 다시 꽂고, 모니터 자체 메뉴의 <b>입력 소스</b>(HDMI 1 · DP 등)가 꽂은 단자와 같은지 확인합니다.</li>
+          <li>디스플레이 설정 › <b>여러 디스플레이 › [감지]</b>.</li>
+          <li><span class="kbd">Win</span> + <span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span class="kbd">B</span> — 그래픽 드라이버를 다시 시작합니다.</li>
+          <li>다른 단자·다른 케이블로 바꿔 봅니다. USB-C는 <b>영상 출력(DP Alt) 지원 단자</b>여야 합니다 — 충전 전용 단자도 있습니다.</li>
+          <li>그래픽 드라이버를 업데이트합니다(노트북 제조사 사이트 또는 인텔·엔비디아·AMD).</li>
+        </ol>
+        <div class="launchwrap"><a class="btn outline sm launch" href="ms-settings:display">디스플레이 설정 열기</a><p class="hint"></p></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>글자가 흐리거나, 노트북과 모니터 글자 크기가 달라요</summary>
+      <div class="body">
+        <ol>
+          <li>디스플레이 설정에서 <b>각 모니터를 따로 선택</b>해 배율을 「(권장)」 값으로 맞춥니다.</li>
+          <li>「사용자 지정 배율」을 썼다면 해제하고 로그아웃 → 다시 로그인합니다.</li>
+          <li>특정 앱만 흐리면 그 앱 실행 파일 오른쪽 클릭 → 속성 → 호환성 → <b>높은 DPI 설정 변경</b>에서 「높은 DPI 조정 동작 재정의」를 「응용 프로그램」으로.</li>
+        </ol>
+        <div class="launchwrap"><a class="btn outline sm launch" href="ms-settings:display">디스플레이 설정 열기</a><p class="hint"></p></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>1번·2번이 실제 위치와 반대예요</summary>
+      <div class="body">
+        번호는 그래픽 단자 순서라 바꿀 수 없고, <b>바꿀 필요도 없습니다.</b> 미리보기의 상자를 실제 위치대로 끌어 놓고 [적용]한 뒤, 주로 보는 화면에만 「이 디스플레이를 주 모니터로 만들기」를 체크하면 끝입니다.
+        <div class="launchwrap"><a class="btn outline sm launch" href="ms-settings:display">디스플레이 설정 열기</a><p class="hint"></p></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>마우스가 엉뚱한 쪽으로 넘어가거나 경계에서 걸려요</summary>
+      <div class="body">
+        <ol>
+          <li>미리보기에서 두 상자의 <b>위아래 높이를 맞춥니다</b>. 상자가 어긋난 만큼 경계에 「벽」이 생깁니다.</li>
+          <li>여러 디스플레이 › <b>디스플레이 간 커서 이동 쉽게 만들기</b>를 체크합니다(22H2 이상).</li>
+        </ol>
+        <div class="launchwrap"><a class="btn outline sm launch" href="ms-settings:display">디스플레이 설정 열기</a><p class="hint"></p></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>앱이 매번 다른 모니터에 열려요</summary>
+      <div class="body">
+        <ol>
+          <li>주로 보는 화면을 <b>주 모니터</b>로 지정합니다. 새 창은 기본적으로 주 모니터에 뜹니다.</li>
+          <li>여러 디스플레이 › <b>모니터 연결을 기반으로 창 위치 기억</b>을 체크합니다.</li>
+          <li>앱은 <b>마지막으로 닫은 위치</b>를 기억합니다. 원하는 화면으로 옮긴 뒤 한 번 닫았다 여세요.</li>
+        </ol>
+        <div class="launchwrap"><a class="btn outline sm launch" href="ms-settings:display">디스플레이 설정 열기</a><p class="hint"></p></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>해상도나 주사율이 목록에 없어요</summary>
+      <div class="body">
+        <ol>
+          <li>케이블·단자의 대역폭 한계가 대부분입니다. <b>DisplayPort</b> 또는 <b>HDMI 2.0 이상</b> 케이블로 바꿉니다.</li>
+          <li>도킹 스테이션·젠더를 빼고 <b>직접</b> 연결해 봅니다. 저가 젠더는 1080p 60Hz까지만 되는 것이 많습니다.</li>
+          <li>그래픽 드라이버를 업데이트합니다.</li>
+        </ol>
+        <div class="launchwrap"><a class="btn outline sm launch" href="ms-settings:display-advanced">고급 디스플레이 열기</a><p class="hint"></p></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>모니터를 꽂으면 노트북 화면이 꺼져요</summary>
+      <div class="body">
+        화면 모드가 「두 번째 화면만」입니다. <span class="kbd">Win</span> + <span class="kbd">P</span> 를 눌러 <b>확장</b>을 고르세요. 키보드가 안 먹으면 아래 명령을 <span class="kbd">Win</span> + <span class="kbd">R</span> 에 붙여넣습니다.
+        <div class="tblwrap"><table class="tbl"><tbody><tr><td class="k"><code>displayswitch /extend</code></td><td>화면 모드를 「확장」으로 즉시 전환</td><td class="k"><button class="copy2" type="button" data-copy-text="displayswitch /extend">복사</button></td></tr></tbody></table></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>확장을 골랐는데 두 화면이 똑같이 나와요</summary>
+      <div class="body">
+        <ol>
+          <li><span class="kbd">Win</span> + <span class="kbd">P</span> 를 다시 눌러 「확장」이 선택돼 있는지, 디스플레이 설정 드롭다운도 「디스플레이 확장」인지 확인합니다.</li>
+          <li>그래픽 제어판(인텔 그래픽 명령 센터 · NVIDIA 제어판 · AMD 소프트웨어)에서 <b>복제(클론)</b> 설정이 켜져 있으면 끕니다.</li>
+        </ol>
+        <div class="launchwrap"><a class="btn outline sm launch" href="ms-settings:display">디스플레이 설정 열기</a><p class="hint"></p></div>
+      </div>
+    </details>
+  </div>
+
+  <!-- ── Win+R 명령 모음 ── -->
+  <div class="sec">
+    <h2 class="big">버튼이 안 열리면 — 실행창(Win+R) 명령 모음</h2>
+    <p class="lead">사내 정책 등으로 버튼이 막힌 PC에서는 <span class="kbd">Win</span> + <span class="kbd">R</span> 을 누르고 명령을 붙여넣으세요. 메모장에 저장해 두면 언제든 씁니다.</p>
+  </div>
+  <div class="card">
+    <div class="head">
+      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div>
+      <div class="ttl"><h2>설정 화면 바로 열기 명령</h2><p class="desc">Windows 11·10 공통. 「복사」 → Win+R → 붙여넣기 → Enter.</p></div>
+    </div>
+    <div class="tblwrap">
+      <table class="tbl">
+        <thead><tr><th>명령</th><th>여는 곳</th><th></th></tr></thead>
+        <tbody>
+          <tr><td class="k"><code>ms-settings:display</code></td><td>디스플레이 — 모드·배치·주 모니터·배율·해상도·방향·여러 디스플레이 옵션</td><td class="k"><button class="copy2" type="button" data-copy-text="ms-settings:display">복사</button></td></tr>
+          <tr><td class="k"><code>ms-settings:display-advanced</code></td><td>고급 디스플레이 — 재생 빈도 (Win11은 디스플레이 페이지로 열림 → 아래로 내려 「고급 디스플레이」)</td><td class="k"><button class="copy2" type="button" data-copy-text="ms-settings:display-advanced">복사</button></td></tr>
+          <tr><td class="k"><code>ms-settings:taskbar</code></td><td>작업 표시줄 — 모든 디스플레이에 표시·앱 표시 위치</td><td class="k"><button class="copy2" type="button" data-copy-text="ms-settings:taskbar">복사</button></td></tr>
+          <tr><td class="k"><code>ms-settings:personalization-background</code></td><td>배경 — 스팬·모니터별 다른 배경</td><td class="k"><button class="copy2" type="button" data-copy-text="ms-settings:personalization-background">복사</button></td></tr>
+          <tr><td class="k"><code>ms-settings:multitasking</code></td><td>멀티태스킹 — 창 스냅</td><td class="k"><button class="copy2" type="button" data-copy-text="ms-settings:multitasking">복사</button></td></tr>
+          <tr><td class="k"><code>ms-settings:nightlight</code></td><td>야간 모드</td><td class="k"><button class="copy2" type="button" data-copy-text="ms-settings:nightlight">복사</button></td></tr>
+          <tr><td class="k"><code>ms-settings:powersleep</code></td><td>전원 및 배터리 — 노트북 덮개 설정 (24H2 이상)</td><td class="k"><button class="copy2" type="button" data-copy-text="ms-settings:powersleep">복사</button></td></tr>
+          <tr><td class="k"><code>ms-settings:sound</code></td><td>소리 — 출력 장치</td><td class="k"><button class="copy2" type="button" data-copy-text="ms-settings:sound">복사</button></td></tr>
+          <tr><td class="k"><code>powercfg.cpl</code></td><td>제어판 전원 옵션 — 덮개 설정 (23H2 이하 · Windows 10)</td><td class="k"><button class="copy2" type="button" data-copy-text="powercfg.cpl">복사</button></td></tr>
+          <tr><td class="k"><code>displayswitch /extend</code></td><td>화면 모드를 「확장」으로 즉시 전환 (Win+P와 같음)</td><td class="k"><button class="copy2" type="button" data-copy-text="displayswitch /extend">복사</button></td></tr>
+          <tr><td class="k"><code>displayswitch /clone</code></td><td>화면 모드를 「복제」로 즉시 전환</td><td class="k"><button class="copy2" type="button" data-copy-text="displayswitch /clone">복사</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Edge·Chrome 주소창에 <b>ms-settings:display</b>를 직접 입력해도 열립니다.</p>
+  </div>
+
+  <!-- ── macOS ── -->
+  <div class="sec">
+    <h2 class="big">macOS에서는</h2>
+    <p class="lead">Mac은 시스템 설정 › 디스플레이 한 곳에서 거의 다 끝납니다. 아래 버튼은 macOS 13(Ventura) 이상에서 동작합니다.</p>
+  </div>
+  <div class="card">
+    <details id="mac">
+      <summary>macOS 설정 순서 펼치기</summary>
+      <div class="body">
+        <div class="cta" style="justify-content:flex-start;margin-top:6px">
+          <a class="btn primary sm launch" href="x-apple.systempreferences:com.apple.Displays-Settings.extension">디스플레이 설정 열기</a>
+          <a class="btn outline sm launch" href="x-apple.systempreferences:com.apple.Desktop-Settings.extension">데스크탑 및 Dock 열기</a>
+          <a class="btn outline sm launch" href="x-apple.systempreferences:com.apple.Wallpaper-Settings.extension">배경화면 열기</a>
+        </div>
+        <p class="hint"></p>
+        <ol class="steps">
+          <li>Apple 메뉴 › <b>시스템 설정</b> › <b>디스플레이</b>. 연결된 모니터가 위쪽에 나란히 보입니다.</li>
+          <li>외부 모니터를 클릭하고 <b>다음으로 사용</b>에서 <b>확장된 디스플레이</b>(넓게 쓰기) / <b>주 디스플레이</b> / <b>미러링</b> 중 고릅니다.</li>
+          <li><b>정렬…</b>을 눌러 화면 상자를 실제 위치대로 끌어 놓습니다. 위쪽의 <b>흰 막대(메뉴 막대)</b>를 다른 상자로 끌면 주 디스플레이가 바뀝니다.</li>
+          <li><b>데스크탑 및 Dock</b> › 맨 아래 <b>Mission Control</b> › <b>디스플레이별로 공간 분리</b> — 켜면 모니터마다 메뉴 막대와 전체 화면 앱이 따로 생깁니다(바꾼 뒤 로그아웃 필요).</li>
+          <li><b>배경화면</b>에서 모니터별로 다른 사진을 고릅니다.</li>
+        </ol>
+        <p class="note">Safari에서 버튼이 반응하지 않으면 위 경로대로 직접 여세요. 창을 옆 모니터로 옮기는 단축키는 macOS에 기본으로 없습니다 — 창 제목을 끌어 옮기거나 Mission Control(<span class="kbd">Ctrl</span> + <span class="kbd">↑</span>)에서 옮깁니다.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- ── 더 알아보기 ── -->
+  <div class="card">
+    <div class="head">
+      <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+      <div class="ttl"><h2>더 알아보기</h2><p class="desc">이 안내서가 참고한 공식 문서입니다. 인터넷이 되는 곳에서 열립니다.</p></div>
+    </div>
+    <ul class="links">
+      <li><a href="https://support.microsoft.com/ko-kr/windows/329c6962-5a4d-b481-7baa-bec9671f728a" target="_blank" rel="noopener">Windows에서 여러 모니터를 사용하는 방법</a><small>Microsoft 지원 — Windows 11 · 10 탭 구분</small></li>
+      <li><a href="https://support.microsoft.com/ko-kr/windows/5b46f4a4-9634-06bb-7622-f960facdfd49" target="_blank" rel="noopener">Windows에서 외부 모니터 연결 문제 해결</a><small>Microsoft 지원 — 감지 안 됨·검은 화면</small></li>
+      <li><a href="https://support.microsoft.com/ko-kr/windows/dcc61a57-8ff0-cffe-9796-cb9706c75eec" target="_blank" rel="noopener">Windows의 키보드 바로 가기</a><small>Microsoft 지원 — 전체 단축키 목록</small></li>
+      <li><a href="https://www.dell.com/support/kbdoc/ko-kr/000024883/" target="_blank" rel="noopener">Windows 11 및 10 다중 모니터 설정</a><small>Dell 지식 문서 — 단자·케이블 규격 설명</small></li>
+      <li><a href="https://support.apple.com/ko-kr/guide/mac-help/mh40768/mac" target="_blank" rel="noopener">Mac에서 디스플레이 설정 변경하기</a><small>Apple 지원</small></li>
+    </ul>
+  </div>
+
+  <!-- 상호연결: 영상 상태는 자료 페이지가 들고 있고, 이 파일은 역링크만 둔다 -->
+  <div class="card linkback">
+    <div class="ico">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="10 8 16 12 10 16 10 8"/><rect x="2" y="4" width="20" height="16" rx="3"/></svg>
+    </div>
+    <div>
+      <p class="label">영상·최신본 확인</p>
+      <h2 style="margin-top:4px">이 자료의 원본 영상과 최신본</h2>
+      <p class="desc" style="margin-bottom:10px">영상이 공개되면 자료 페이지에서 바로 연결됩니다. 자료가 갱신돼도 아래 주소는 그대로입니다.</p>
+      <a href="https://www.linkmap.biz/resources/dual-monitor-setup" target="_blank" rel="noopener">linkmap.biz/resources/dual-monitor-setup →</a>
+    </div>
+  </div>
+
+  <footer>
+    <b>시작한 만큼 만들어집니다.</b> — 바이브코딩 치트키 🔑<br>
+    Built with
+    <span class="lm">
+      <span class="mark" role="img" aria-label="Linkmap"></span>
+      <span><span class="l1">Link</span><span class="l2">map</span></span>
+    </span>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  /* ── 1. 환경 감지 → 배지·본문 분기 ── */
+  var ua = navigator.userAgent || '';
+  var uad = navigator.userAgentData;
+  var platform = (uad && uad.platform) || navigator.platform || '';
+  var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+  var isWin = /Win/i.test(platform) || /Windows NT/i.test(ua);
+  var isMac = !isWin && !isMobile && (/Mac/i.test(platform) || /Macintosh/.test(ua));
+  var os = isWin ? 'win' : (isMac ? 'mac' : 'other');
+  document.body.classList.add('os-' + os);
+
+  var badge = document.getElementById('env');
+  function setBadge(text, warn){ badge.textContent = text; badge.className = 'env' + (warn ? ' warn' : ''); }
+  if (os === 'win') {
+    setBadge('감지된 환경: Windows · 「설정 열기」 버튼을 쓸 수 있습니다');
+    if (uad && uad.getHighEntropyValues) {
+      uad.getHighEntropyValues(['platformVersion']).then(function(v){
+        var major = parseInt(String(v.platformVersion || '0').split('.')[0], 10);
+        if (major >= 13) setBadge('감지된 환경: Windows 11 · 「설정 열기」 버튼을 쓸 수 있습니다');
+        else if (major > 0) setBadge('감지된 환경: Windows 10 · 버튼은 동작하며, 각 카드의 「Windows 10은 이렇게」를 함께 보세요');
+      }).catch(function(){});
+    }
+  } else if (os === 'mac') {
+    setBadge('감지된 환경: macOS · 아래 「macOS에서는」 섹션의 버튼을 쓰세요');
+    var mac = document.getElementById('mac'); if (mac) mac.open = true;
+  } else {
+    setBadge('이 기기에서는 「설정 열기」 버튼이 동작하지 않습니다 — 각 카드의 수동 경로를 따라가세요 (PC에서 열면 버튼이 동작합니다)', true);
+  }
+
+  /* ── 2. 설정 열기 버튼: 확인창 힌트 / 비대상 OS 차단 ── */
+  var hintTimer = {};
+  function findHint(a){
+    var wrap = a.closest('.launchwrap'); if (wrap && wrap.querySelector('.hint')) return wrap.querySelector('.hint');
+    var body = a.closest('.body'); if (body && body.querySelector('.hint')) return body.querySelector('.hint');
+    var card = a.closest('.card'); return card ? card.querySelector('.hint') : null;
+  }
+  function showHint(a, text){
+    var hint = findHint(a);
+    if (!hint) return;
+    hint.textContent = text; hint.classList.add('show');
+    var key = a.href; if (hintTimer[key]) clearTimeout(hintTimer[key]);
+    hintTimer[key] = setTimeout(function(){ hint.classList.remove('show'); }, 6000);
+  }
+  document.querySelectorAll('a.launch').forEach(function(a){
+    a.addEventListener('click', function(e){
+      var href = a.getAttribute('href') || '';
+      var wantWin = href.indexOf('ms-settings:') === 0;
+      var wantMac = href.indexOf('x-apple.') === 0;
+      var ok = (wantWin && os === 'win') || (wantMac && os === 'mac');
+      if (!ok) {
+        e.preventDefault();
+        showHint(a, '이 버튼은 ' + (wantWin ? 'Windows' : 'macOS') + ' PC에서만 동작합니다. 위의 수동 경로를 따라가세요.');
+        return;
+      }
+      showHint(a, '브라우저 확인창이 뜨면 [열기]를 누르세요. 아무 반응이 없으면 수동 경로로 여세요.');
+    });
+  });
+
+  /* ── 3. 복사 버튼 (행별) ── */
+  function copyText(text, btn, label){
+    function done(){
+      btn.textContent = '복사됨 ✓'; btn.classList.add('done');
+      setTimeout(function(){ btn.textContent = label; btn.classList.remove('done'); }, 1800);
+    }
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (err) { btn.textContent = '복사 실패'; }
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else { fallback(); }
+  }
+  document.querySelectorAll('[data-copy-text]').forEach(function(btn){
+    btn.addEventListener('click', function(){ copyText(btn.getAttribute('data-copy-text'), btn, '복사'); });
+  });
+
+  /* ── 4. 빠른 시작 체크 상태 저장 (이 브라우저에만) ── */
+  var KEY = 'lm-dual-monitor-quickstart';
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('input[data-check]'));
+  var progress = document.getElementById('progress');
+  function render(){
+    var n = boxes.filter(function(b){ return b.checked; }).length;
+    progress.textContent = n === boxes.length ? '3단계 완료 — 기본 설정이 끝났습니다 🎉' : '3단계 중 ' + n + '단계 완료';
+  }
+  try {
+    var saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+    boxes.forEach(function(b){ if (saved[b.getAttribute('data-check')]) b.checked = true; });
+  } catch (err) { /* 저장소를 못 쓰는 환경 — 체크는 되지만 유지되지 않음 */ }
+  boxes.forEach(function(b){
+    b.addEventListener('change', function(){
+      render();
+      try {
+        var state = {};
+        boxes.forEach(function(x){ state[x.getAttribute('data-check')] = x.checked; });
+        localStorage.setItem(KEY, JSON.stringify(state));
+      } catch (err) { /* 동일 */ }
+    });
+  });
+  render();
+
+  /* ── 5. 인쇄 시 접힌 항목 모두 펼치기 ── */
+  var opened = [];
+  window.addEventListener('beforeprint', function(){
+    opened = [];
+    document.querySelectorAll('details:not([open])').forEach(function(d){ d.open = true; opened.push(d); });
+  });
+  window.addEventListener('afterprint', function(){
+    opened.forEach(function(d){ d.open = false; }); opened = [];
+  });
+})();
+</script>
+</body>
+</html>
